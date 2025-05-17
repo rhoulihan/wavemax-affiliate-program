@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WaveMAX Laundry - Order Confirmation</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <style>
+        .wavemax-blue {
+            background-color: #1e3a8a;
+        }
+        .wavemax-light-blue {
+            background-color: #3b82f6;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 font-sans">
+    <!-- Navigation -->
+    <nav class="wavemax-blue text-white p-4">
+        <div class="container mx-auto flex justify-between items-center">
+            <div class="flex items-center">
+                <a href="index.html" class="text-2xl font-bold">WaveMAX Laundry</a>
+            </div>
+            <div class="hidden md:flex space-x-6">
+                <a href="index.html" class="hover:text-blue-200">Home</a>
+                <a href="#" class="hover:text-blue-200">Services</a>
+                <a href="#" class="hover:text-blue-200">Locations</a>
+                <a href="#" class="hover:text-blue-200">About</a>
+                <a href="#" class="hover:text-blue-200">Contact</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Order Confirmation Content -->
+    <div class="py-12">
+        <div class="container mx-auto px-4">
+            <div class="max-w-3xl mx-auto bg-white rounded-lg shadow-md overflow-hidden">
+                <div class="wavemax-blue text-white p-6">
+                    <h2 class="text-2xl font-bold">Order Confirmation</h2>
+                    <p class="mt-2">Your laundry pickup has been scheduled successfully!</p>
+                </div>
+                
+                <div class="p-6 space-y-6">
+                    <div class="bg-green-50 border border-green-200 text-green-800 rounded-lg p-4 mb-6">
+                        <h3 class="font-bold text-lg">Thank you for your order!</h3>
+                        <p>Your pickup has been confirmed and your affiliate partner has been notified.</p>
+                    </div>
+                    
+                    <!-- Order Details -->
+                    <div>
+                        <h3 class="text-xl font-bold mb-4">Order Information</h3>
+                        <div class="bg-gray-50 p-4 rounded-lg">
+                            <div class="mb-3">
+                                <span class="font-bold">Order ID:</span>
+                                <span id="orderId">Loading...</span>
+                            </div>
+                            <div class="mb-3">
+                                <span class="font-bold">Order Date:</span>
+                                <span id="orderDate">Loading...</span>
+                            </div>
+                            <div class="mb-3">
+                                <span class="font-bold">Status:</span>
+                                <span id="orderStatus" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">Scheduled</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Pickup & Delivery Details -->
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div>
+                            <h3 class="text-xl font-bold mb-4">Pickup Details</h3>
+                            <div class="bg-gray-50 p-4 rounded-lg">
+                                <div class="mb-2">
+                                    <span class="font-bold">Date:</span>
+                                    <span id="pickupDate">Loading...</span>
+                                </div>
+                                <div class="mb-2">
+                                    <span class="font-bold">Time:</span>
+                                    <span id="pickupTime">Loading...</span>
+                                </div>
+                                <div>
+                                    <span class="font-bold">Special Instructions:</span>
+                                    <span id="pickupInstructions">None provided</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <h3 class="text-xl font-bold mb-4">Delivery Details</h3>
+                            <div class="bg-gray-50 p-4 rounded-lg">
+                                <div class="mb-2">
+                                    <span class="font-bold">Date:</span>
+                                    <span id="deliveryDate">Loading...</span>
+                                </div>
+                                <div class="mb-2">
+                                    <span class="font-bold">Time:</span>
+                                    <span id="deliveryTime">Loading...</span>
+                                </div>
+                                <div>
+                                    <span class="font-bold">Special Instructions:</span>
+                                    <span id="deliveryInstructions">None provided</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Affiliate Information -->
+                    <div>
+                        <h3 class="text-xl font-bold mb-4">Your Service Provider</h3>
+                        <div class="bg-gray-50 p-4 rounded-lg">
+                            <div id="affiliateInfo">
+                                <div class="mb-2">
+                                    <span class="font-bold">Affiliate:</span>
+                                    <span id="affiliateName">Loading...</span>
+                                </div>
+                                <div class="mb-2">
+                                    <span class="font-bold">Contact:</span>
+                                    <span id="affiliateContact">Loading...</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Order Summary -->
+                    <div>
+                        <h3 class="text-xl font-bold mb-4">Order Summary</h3>
+                        <div class="bg-gray-50 p-4 rounded-lg">
+                            <div class="divide-y divide-gray-200">
+                                <div class="pb-3">
+                                    <div class="flex justify-between">
+                                        <span>Estimated Laundry Size:</span>
+                                        <span id="estimatedSize">Loading...</span>
+                                    </div>
+                                </div>
+                                <div class="py-3">
+                                    <div class="flex justify-between">
+                                        <span>Wash, Dry, Fold Service:</span>
+                                        <span>$1.89 per pound</span>
+                                    </div>
+                                </div>
+                                <div class="py-3">
+                                    <div class="flex justify-between">
+                                        <span>Delivery Fee:</span>
+                                        <span id="deliveryFee">$0.00</span>
+                                    </div>
+                                </div>
+                                <div class="pt-3">
+                                    <div class="flex justify-between font-bold">
+                                        <span>Estimated Total:</span>
+                                        <span id="estimatedTotal">Calculated on completion</span>
+                                    </div>
+                                    <p class="text-sm text-gray-500 mt-1">Final cost will depend on the actual weight of your laundry.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Next Steps -->
+                    <div class="border-t pt-6">
+                        <h3 class="text-xl font-bold mb-4">Next Steps</h3>
+                        <ol class="list-decimal pl-6 space-y-2">
+                            <li>Prepare your laundry for pickup on the scheduled date and time.</li>
+                            <li>Your affiliate partner will contact you before pickup.</li>
+                            <li>You'll receive an email notification when your laundry has been processed.</li>
+                            <li>Your clean laundry will be delivered on the scheduled delivery date.</li>
+                        </ol>
+                    </div>
+                    
+                    <!-- Actions -->
+                    <div class="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-4 pt-4">
+                        <a href="#" id="scheduleAnotherBtn" class="bg-blue-600 text-white text-center font-bold py-3 px-4 rounded-lg hover:bg-blue-700 transition">Schedule Another Pickup</a>
+                        <a href="#" id="viewOrdersBtn" class="border border-blue-600 text-blue-600 text-center font-bold py-3 px-4 rounded-lg hover:bg-blue-50 transition">View My Orders</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white py-8 mt-12">
+        <div class="container mx-auto px-4 text-center">
+            <p>&copy; 2025 WaveMAX Laundry. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Extract order ID from URL query parameter
+            const urlParams = new URLSearchParams(window.location.search);
+            const orderId = urlParams.get('id');
+            
+            if (!orderId) {
+                alert('No order ID provided. Redirecting to homepage.');
+                window.location.href = 'index.html';
+                return;
+            }
+            
+            // Set order ID in the page
+            document.getElementById('orderId').textContent = orderId;
+            
+            // Get order details from localStorage (in a real implementation, this would come from the server)
+            const storedOrders = JSON.parse(localStorage.getItem('wavemax_orders')) || {};
+            const order = storedOrders[orderId];
+            
+            if (order) {
+                // Set order date
+                const orderDate = new Date(order.createdAt || Date.now());
+                document.getElementById('orderDate').textContent = orderDate.toLocaleDateString() + ' ' + orderDate.toLocaleTimeString();
+                
+                // Set pickup details
+                const pickupDate = new Date(order.pickupDate);
+                document.getElementById('pickupDate').textContent = pickupDate.toLocaleDateString();
+                
+                let pickupTimeText = 'Not specified';
+                if (order.pickupTime === 'morning') {
+                    pickupTimeText = 'Morning (8am - 12pm)';
+                } else if (order.pickupTime === 'afternoon') {
+                    pickupTimeText = 'Afternoon (12pm - 5pm)';
+                } else if (order.pickupTime === 'evening') {
+                    pickupTimeText = 'Evening (5pm - 8pm)';
+                }
+                document.getElementById('pickupTime').textContent = pickupTimeText;
+                
+                document.getElementById('pickupInstructions').textContent = order.specialPickupInstructions || 'None provided';
+                
+                // Set delivery details
+                const deliveryDate = new Date(order.deliveryDate);
+                document.getElementById('deliveryDate').textContent = deliveryDate.toLocaleDateString();
+                
+                let deliveryTimeText = 'Not specified';
+                if (order.deliveryTime === 'morning') {
+                    deliveryTimeText = 'Morning (8am - 12pm)';
+                } else if (order.deliveryTime === 'afternoon') {
+                    deliveryTimeText = 'Afternoon (12pm - 5pm)';
+                } else if (order.deliveryTime === 'evening') {
+                    deliveryTimeText = 'Evening (5pm - 8pm)';
+                }
+                document.getElementById('deliveryTime').textContent = deliveryTimeText;
+                
+                document.getElementById('deliveryInstructions').textContent = order.specialDeliveryInstructions || 'None provided';
+                
+                // Set estimated size
+                let sizeText = 'Not specified';
+                if (order.estimatedSize === 'small') {
+                    sizeText = 'Small (1-2 bags, approx. 10-15 lbs)';
+                } else if (order.estimatedSize === 'medium') {
+                    sizeText = 'Medium (3-4 bags, approx. 16-30 lbs)';
+                } else if (order.estimatedSize === 'large') {
+                    sizeText = 'Large (5+ bags, approx. 31+ lbs)';
+                }
+                document.getElementById('estimatedSize').textContent = sizeText;
+                
+                // Set affiliate information
+                const affiliateId = order.affiliateId;
+                const storedAffiliates = JSON.parse(localStorage.getItem('wavemax_affiliates')) || {};
+                const affiliate = storedAffiliates[affiliateId];
+                
+                if (affiliate) {
+                    document.getElementById('affiliateName').textContent = `${affiliate.firstName} ${affiliate.lastName}`;
+                    document.getElementById('affiliateContact').textContent = `${affiliate.email} | ${affiliate.phone}`;
+                    document.getElementById('deliveryFee').textContent = `$${parseFloat(affiliate.deliveryFee || 5.99).toFixed(2)}`;
+                    
+                    // Update order link with affiliate ID
+                    document.getElementById('scheduleAnotherBtn').href = `schedule-pickup.html?affiliate=${affiliateId}`;
+                } else {
+                    document.getElementById('affiliateName').textContent = 'Your WaveMAX Affiliate';
+                    document.getElementById('affiliateContact').textContent = 'Contact information will be provided soon';
+                    document.getElementById('deliveryFee').textContent = '$5.99';
+                    
+                    // Generic order link
+                    document.getElementById('scheduleAnotherBtn').href = 'schedule-pickup.html';
+                }
+                
+                // Set view orders link with customer ID
+                const customerId = order.customerId;
+                if (customerId) {
+                    document.getElementById('viewOrdersBtn').href = `customer-orders.html?id=${customerId}`;
+                } else {
+                    document.getElementById('viewOrdersBtn').href = '#';
+                }
+                
+                // Calculate estimated total based on size
+                let estimatedWeight = 0;
+                if (order.estimatedSize === 'small') {
+                    estimatedWeight = 12.5; // average of 10-15 lbs
+                } else if (order.estimatedSize === 'medium') {
+                    estimatedWeight = 23; // average of 16-30 lbs
+                } else if (order.estimatedSize === 'large') {
+                    estimatedWeight = 35; // approximate for 31+ lbs
+                }
+                
+                const wdfRate = 1.89; // per pound
+                const deliveryFee = parseFloat(affiliate?.deliveryFee || 5.99);
+                const estimatedTotal = (estimatedWeight * wdfRate + deliveryFee).toFixed(2);
+                
+                document.getElementById('estimatedTotal').textContent = `$${estimatedTotal} (estimated)`;
+            } else {
+                // Fallback if order not found
+                alert('Order details not found. Demo data will be displayed.');
+                
+                // Set demo data
+                document.getElementById('orderDate').textContent = new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString();
+                
+                const tomorrow = new Date();
+                tomorrow.setDate(tomorrow.getDate() + 1);
+                document.getElementById('pickupDate').textContent = tomorrow.toLocaleDateString();
+                document.getElementById('pickupTime').textContent = 'Morning (8am - 12pm)';
+                
+                const dayAfterTomorrow = new Date();
+                dayAfterTomorrow.setDate(dayAfterTomorrow.getDate() + 3);
+                document.getElementById('deliveryDate').textContent = dayAfterTomorrow.toLocaleDateString();
+                document.getElementById('deliveryTime').textContent = 'Afternoon (12pm - 5pm)';
+                
+                document.getElementById('estimatedSize').textContent = 'Medium (3-4 bags, approx. 16-30 lbs)';
+                document.getElementById('affiliateName').textContent = 'Demo Affiliate';
+                document.getElementById('affiliateContact').textContent = 'demo@example.com | (555) 123-4567';
+                document.getElementById('deliveryFee').textContent = '$5.99';
+                document.getElementById('estimatedTotal').textContent = '$49.46 (estimated)';
+                
+                // Generic links
+                document.getElementById('scheduleAnotherBtn').href = 'schedule-pickup.html';
+                document.getElementById('viewOrdersBtn').href = '#';
+            }
+        });
+    </script>
+</body>
+</html>

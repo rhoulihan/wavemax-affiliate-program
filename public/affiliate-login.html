@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WaveMAX Laundry - Affiliate Login</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <style>
+        .wavemax-blue {
+            background-color: #1e3a8a;
+        }
+        .wavemax-light-blue {
+            background-color: #3b82f6;
+        }
+        .header-wave {
+            background-image: url('https://www.wavemaxlaundry.com/wp-content/themes/wavemax-laundry/assets/img/wave-header.svg');
+            background-size: cover;
+            background-position: center bottom;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 font-sans">
+    <!-- Navigation -->
+    <nav class="wavemax-blue text-white p-4">
+        <div class="container mx-auto flex justify-between items-center">
+            <div class="flex items-center">
+                <a href="index.html" class="text-2xl font-bold">WaveMAX Laundry</a>
+            </div>
+            <div class="hidden md:flex space-x-6">
+                <a href="index.html" class="hover:text-blue-200">Home</a>
+                <a href="affiliate-register.html" class="hover:text-blue-200">Register</a>
+                <a href="#" class="hover:text-blue-200">About</a>
+                <a href="#" class="hover:text-blue-200">Contact</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Login Form -->
+    <div class="py-12">
+        <div class="container mx-auto px-4">
+            <div class="max-w-md mx-auto bg-white rounded-lg shadow-md overflow-hidden">
+                <div class="wavemax-blue text-white p-6">
+                    <h2 class="text-2xl font-bold">Affiliate Login</h2>
+                    <p class="mt-2">Sign in to access your affiliate dashboard</p>
+                </div>
+                
+                <form id="affiliateLoginForm" class="p-6 space-y-6">
+                    <div class="mb-4">
+                        <label for="username" class="block text-gray-700 mb-2">Username</label>
+                        <input type="text" id="username" name="username" required class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label for="password" class="block text-gray-700 mb-2">Password</label>
+                        <input type="password" id="password" name="password" required class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center">
+                            <input type="checkbox" id="remember" name="remember" class="h-4 w-4 text-blue-600">
+                            <label for="remember" class="ml-2 text-sm text-gray-700">Remember me</label>
+                        </div>
+                        <a href="#" class="text-sm text-blue-600 hover:underline">Forgot password?</a>
+                    </div>
+                    
+                    <div>
+                        <button type="submit" class="w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-blue-700 transition">Sign In</button>
+                    </div>
+                </form>
+                
+                <div class="bg-gray-50 p-6 border-t">
+                    <p class="text-sm text-gray-700 text-center">
+                        Don't have an affiliate account? 
+                        <a href="affiliate-register.html" class="text-blue-600 hover:underline">Register now</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white py-8 mt-12">
+        <div class="container mx-auto px-4 text-center">
+            <p>&copy; 2025 WaveMAX Laundry. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Form submission
+            const form = document.getElementById('affiliateLoginForm');
+            
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                // Collect form data
+                const username = document.getElementById('username').value;
+                const password = document.getElementById('password').value;
+                
+                // In a real implementation, this would be an API call to the server
+                console.log('Login request:', { username, password });
+                
+                // Mock API request
+                fetch('/api/auth/affiliate/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ username, password })
+                })
+                .then(response => {
+                    // For demo purposes
+                    if (!response.ok) {
+                        throw new Error('Login failed');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    // Store token in localStorage
+                    localStorage.setItem('token', data.token);
+                    localStorage.setItem('currentAffiliate', JSON.stringify(data.affiliate));
+                    
+                    // Redirect to dashboard
+                    window.location.href = `affiliate-dashboard.html?id=${data.affiliate.affiliateId}`;
+                })
+                .catch(error => {
+                    // For demo purposes, simulate successful login
+                    console.error('Error:', error);
+                    
+                    // Create mock affiliate data
+                    const mockAffiliate = {
+                        affiliateId: 'AFF123456',
+                        firstName: 'Demo',
+                        lastName: 'Affiliate',
+                        email: 'demo@example.com'
+                    };
+                    
+                    localStorage.setItem('currentAffiliate', JSON.stringify(mockAffiliate));
+                    
+                    // Redirect to dashboard
+                    window.location.href = `affiliate-dashboard.html?id=${mockAffiliate.affiliateId}`;
+                });
+            });
+        });
+    </script>
+</body>
+</html>

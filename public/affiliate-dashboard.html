@@ -1,0 +1,1119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WaveMAX Laundry - Affiliate Dashboard</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <style>
+        .wavemax-blue {
+            background-color: #1e3a8a;
+        }
+        .wavemax-light-blue {
+            background-color: #3b82f6;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 font-sans">
+    <!-- Navigation -->
+    <nav class="wavemax-blue text-white p-4">
+        <div class="container mx-auto flex justify-between items-center">
+            <div class="flex items-center">
+                <a href="index.html" class="text-2xl font-bold">WaveMAX Laundry</a>
+            </div>
+            <div class="hidden md:flex space-x-6">
+                <a href="#" id="logoutBtn" class="hover:text-blue-200">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Dashboard Header -->
+    <div class="bg-white border-b">
+        <div class="container mx-auto px-4 py-6">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center">
+                <div>
+                    <h1 class="text-2xl font-bold" id="welcomeMessage">Affiliate Dashboard</h1>
+                    <p class="text-gray-600" id="affiliateId">Loading affiliate information...</p>
+                </div>
+                <div class="mt-4 md:mt-0">
+                    <a href="#" id="registerCustomerBtn" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition">Register New Customer</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dashboard Content -->
+    <div class="container mx-auto px-4 py-8">
+        <!-- Stats Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h3 class="text-lg font-bold text-gray-600 mb-2">Total Customers</h3>
+                <p class="text-3xl font-bold" id="totalCustomers">0</p>
+            </div>
+            
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h3 class="text-lg font-bold text-gray-600 mb-2">Active Orders</h3>
+                <p class="text-3xl font-bold" id="activeOrders">0</p>
+            </div>
+            
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h3 class="text-lg font-bold text-gray-600 mb-2">Total Earnings</h3>
+                <p class="text-3xl font-bold" id="totalEarnings">$0.00</p>
+            </div>
+        </div>
+        
+        <!-- Dashboard Tabs -->
+        <div class="mb-6 border-b">
+            <div class="flex overflow-x-auto">
+                <button class="tab-btn px-6 py-3 font-bold border-b-2 border-blue-600 text-blue-600" data-tab="pickups">Pickups & Deliveries</button>
+                <button class="tab-btn px-6 py-3 font-bold border-b-2 border-transparent hover:text-blue-600" data-tab="customers">Customers</button>
+                <button class="tab-btn px-6 py-3 font-bold border-b-2 border-transparent hover:text-blue-600" data-tab="earnings">Earnings</button>
+                <button class="tab-btn px-6 py-3 font-bold border-b-2 border-transparent hover:text-blue-600" data-tab="settings">Settings</button>
+            </div>
+        </div>
+        
+        <!-- Tab Content -->
+        <div class="tab-content active" id="pickups-tab">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-xl font-bold">Upcoming Pickups & Deliveries</h2>
+                <a href="#" id="schedulePickupBtn" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition">Schedule New Pickup</a>
+            </div>
+            
+            <!-- Filters & Search -->
+            <div class="bg-white rounded-lg shadow-md p-4 mb-6">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                        <label for="orderStatusFilter" class="block text-gray-700 mb-2">Filter by Status</label>
+                        <select id="orderStatusFilter" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="all">All Orders</option>
+                            <option value="scheduled" selected>Scheduled</option>
+                            <option value="picked_up">Picked Up</option>
+                            <option value="processing">Processing</option>
+                            <option value="ready_for_delivery">Ready for Delivery</option>
+                            <option value="delivered">Delivered</option>
+                            <option value="cancelled">Cancelled</option>
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <label for="dateFilter" class="block text-gray-700 mb-2">Filter by Date</label>
+                        <select id="dateFilter" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="all">All Dates</option>
+                            <option value="today" selected>Today</option>
+                            <option value="tomorrow">Tomorrow</option>
+                            <option value="week">This Week</option>
+                            <option value="month">This Month</option>
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <label for="orderSearch" class="block text-gray-700 mb-2">Search Orders</label>
+                        <input type="text" id="orderSearch" placeholder="Search by customer name or order ID" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Orders Table -->
+            <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Order ID</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Address</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date & Time</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ordersTableBody" class="divide-y divide-gray-200">
+                            <!-- Orders will be inserted here dynamically -->
+                            <tr class="text-center">
+                                <td colspan="7" class="px-6 py-4 text-gray-500">Loading orders...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div id="ordersPagination" class="px-6 py-3 flex justify-between items-center bg-gray-50">
+                    <p class="text-sm text-gray-700">Showing <span id="ordersShowing">0</span> of <span id="ordersTotal">0</span> orders</p>
+                    <div class="flex space-x-2">
+                        <button id="prevOrdersPage" class="px-3 py-1 border rounded text-sm disabled:opacity-50">Previous</button>
+                        <button id="nextOrdersPage" class="px-3 py-1 border rounded text-sm disabled:opacity-50">Next</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="tab-content" id="customers-tab">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-xl font-bold">Customer Management</h2>
+                <a href="#" id="registerCustomerBtn2" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition">Register New Customer</a>
+            </div>
+            
+            <!-- Customer Search -->
+            <div class="bg-white rounded-lg shadow-md p-4 mb-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label for="customerSearch" class="block text-gray-700 mb-2">Search Customers</label>
+                        <input type="text" id="customerSearch" placeholder="Search by name, email, or phone" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    
+                    <div>
+                        <label for="customerSort" class="block text-gray-700 mb-2">Sort By</label>
+                        <select id="customerSort" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="name_asc">Name (A-Z)</option>
+                            <option value="name_desc">Name (Z-A)</option>
+                            <option value="recent">Most Recent</option>
+                            <option value="orders">Most Orders</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Customers Table -->
+            <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer ID</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Contact Info</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Address</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Registration Date</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Orders</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="customersTableBody" class="divide-y divide-gray-200">
+                            <!-- Customers will be inserted here dynamically -->
+                            <tr class="text-center">
+                                <td colspan="7" class="px-6 py-4 text-gray-500">Loading customers...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div id="customersPagination" class="px-6 py-3 flex justify-between items-center bg-gray-50">
+                    <p class="text-sm text-gray-700">Showing <span id="customersShowing">0</span> of <span id="customersTotal">0</span> customers</p>
+                    <div class="flex space-x-2">
+                        <button id="prevCustomersPage" class="px-3 py-1 border rounded text-sm disabled:opacity-50">Previous</button>
+                        <button id="nextCustomersPage" class="px-3 py-1 border rounded text-sm disabled:opacity-50">Next</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="tab-content" id="earnings-tab">
+            <h2 class="text-xl font-bold mb-6">Earnings & Commission</h2>
+            
+            <!-- Earnings Summary Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h3 class="text-lg font-bold text-gray-600 mb-2">This Month</h3>
+                    <p class="text-3xl font-bold" id="monthEarnings">$0.00</p>
+                    <p class="text-sm text-gray-500 mt-1">From <span id="monthOrderCount">0</span> orders</p>
+                </div>
+                
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h3 class="text-lg font-bold text-gray-600 mb-2">This Week</h3>
+                    <p class="text-3xl font-bold" id="weekEarnings">$0.00</p>
+                    <p class="text-sm text-gray-500 mt-1">From <span id="weekOrderCount">0</span> orders</p>
+                </div>
+                
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h3 class="text-lg font-bold text-gray-600 mb-2">Pending Payment</h3>
+                    <p class="text-3xl font-bold" id="pendingEarnings">$0.00</p>
+                    <p class="text-sm text-gray-500 mt-1">Next payout: <span id="nextPayoutDate">--</span></p>
+                </div>
+            </div>
+            
+            <!-- Earnings Chart -->
+            <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+                <h3 class="text-lg font-bold mb-4">Earnings History</h3>
+                <div class="h-64" id="earningsChart">
+                    <!-- Chart would go here - simplified for this example -->
+                    <div class="w-full h-full flex items-center justify-center">
+                        <p class="text-gray-500">Earnings chart will be displayed here</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Recent Transactions -->
+            <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                <div class="px-6 py-4 border-b">
+                    <h3 class="text-lg font-bold">Recent Transactions</h3>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Order ID</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Service</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Order Total</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Your Commission</th>
+                            </tr>
+                        </thead>
+                        <tbody id="transactionsTableBody" class="divide-y divide-gray-200">
+                            <!-- Transactions will be inserted here dynamically -->
+                            <tr class="text-center">
+                                <td colspan="6" class="px-6 py-4 text-gray-500">Loading transactions...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div id="transactionsPagination" class="px-6 py-3 flex justify-between items-center bg-gray-50">
+                    <p class="text-sm text-gray-700">Showing <span id="transactionsShowing">0</span> of <span id="transactionsTotal">0</span> transactions</p>
+                    <div class="flex space-x-2">
+                        <button id="prevTransactionsPage" class="px-3 py-1 border rounded text-sm disabled:opacity-50">Previous</button>
+                        <button id="nextTransactionsPage" class="px-3 py-1 border rounded text-sm disabled:opacity-50">Next</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="tab-content" id="settings-tab">
+            <h2 class="text-xl font-bold mb-6">Account Settings</h2>
+            
+            <!-- Settings Form -->
+            <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                <div class="p-6">
+                    <form id="settingsForm">
+                        <div class="mb-6">
+                            <h3 class="text-lg font-bold mb-4">Personal Information</h3>
+                            <div class="grid md:grid-cols-2 gap-4">
+                                <div>
+                                    <label for="settingsFirstName" class="block text-gray-700 mb-2">First Name</label>
+                                    <input type="text" id="settingsFirstName" name="firstName" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                </div>
+                                
+                                <div>
+                                    <label for="settingsLastName" class="block text-gray-700 mb-2">Last Name</label>
+                                    <input type="text" id="settingsLastName" name="lastName" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                </div>
+                                
+                                <div>
+                                    <label for="settingsEmail" class="block text-gray-700 mb-2">Email Address</label>
+                                    <input type="email" id="settingsEmail" name="email" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                </div>
+                                
+                                <div>
+                                    <label for="settingsPhone" class="block text-gray-700 mb-2">Phone Number</label>
+                                    <input type="tel" id="settingsPhone" name="phone" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                </div>
+                                
+                                <div class="md:col-span-2">
+                                    <label for="settingsAddress" class="block text-gray-700 mb-2">Address</label>
+                                    <input type="text" id="settingsAddress" name="address" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                </div>
+                                
+                                <div>
+                                    <label for="settingsCity" class="block text-gray-700 mb-2">City</label>
+                                    <input type="text" id="settingsCity" name="city" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                </div>
+                                
+                                <div>
+                                    <label for="settingsState" class="block text-gray-700 mb-2">State</label>
+                                    <input type="text" id="settingsState" name="state" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                </div>
+                                
+                                <div>
+                                    <label for="settingsZipCode" class="block text-gray-700 mb-2">ZIP Code</label>
+                                    <input type="text" id="settingsZipCode" name="zipCode" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-6">
+                            <h3 class="text-lg font-bold mb-4">Service Settings</h3>
+                            <div class="grid md:grid-cols-2 gap-4">
+                                <div class="md:col-span-2">
+                                    <label for="settingsServiceArea" class="block text-gray-700 mb-2">Service Area (Neighborhoods/ZIP Codes)</label>
+                                    <textarea id="settingsServiceArea" name="serviceArea" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" rows="3"></textarea>
+                                </div>
+                                
+                                <div>
+                                    <label for="settingsDeliveryFee" class="block text-gray-700 mb-2">Pickup/Delivery Fee ($)</label>
+                                    <input type="number" id="settingsDeliveryFee" name="deliveryFee" min="0" step="0.01" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <p class="text-sm text-gray-500 mt-1">This is the fee you charge customers for each pickup/delivery.</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-6">
+                            <h3 class="text-lg font-bold mb-4">Payment Information</h3>
+                            <div class="grid md:grid-cols-2 gap-4">
+                                <div class="md:col-span-2">
+                                    <label for="settingsPaymentMethod" class="block text-gray-700 mb-2">Preferred Payment Method</label>
+                                    <select id="settingsPaymentMethod" name="paymentMethod" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                        <option value="directDeposit">Direct Deposit</option>
+                                        <option value="check">Check</option>
+                                        <option value="paypal">PayPal</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="md:col-span-2" id="settingsBankInfoContainer" style="display: none;">
+                                    <label for="settingsAccountNumber" class="block text-gray-700 mb-2">Account Number</label>
+                                    <input type="text" id="settingsAccountNumber" name="accountNumber" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    
+                                    <label for="settingsRoutingNumber" class="block text-gray-700 mt-4 mb-2">Routing Number</label>
+                                    <input type="text" id="settingsRoutingNumber" name="routingNumber" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                </div>
+                                
+                                <div class="md:col-span-2" id="settingsPaypalInfoContainer" style="display: none;">
+                                    <label for="settingsPaypalEmail" class="block text-gray-700 mb-2">PayPal Email</label>
+                                    <input type="email" id="settingsPaypalEmail" name="paypalEmail" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-6">
+                            <h3 class="text-lg font-bold mb-4">Change Password</h3>
+                            <div class="grid md:grid-cols-2 gap-4">
+                                <div>
+                                    <label for="settingsCurrentPassword" class="block text-gray-700 mb-2">Current Password</label>
+                                    <input type="password" id="settingsCurrentPassword" name="currentPassword" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                </div>
+                                
+                                <div class="md:col-span-2">
+                                    <label for="settingsNewPassword" class="block text-gray-700 mb-2">New Password</label>
+                                    <input type="password" id="settingsNewPassword" name="newPassword" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                </div>
+                                
+                                <div class="md:col-span-2">
+                                    <label for="settingsConfirmPassword" class="block text-gray-700 mb-2">Confirm New Password</label>
+                                    <input type="password" id="settingsConfirmPassword" name="confirmPassword" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <button type="submit" class="bg-blue-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-blue-700 transition">Save Changes</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white py-8 mt-12">
+        <div class="container mx-auto px-4 text-center">
+            <p>&copy; 2025 WaveMAX Laundry. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Get affiliate ID from URL or localStorage
+            const urlParams = new URLSearchParams(window.location.search);
+            const affiliateId = urlParams.get('id') || JSON.parse(localStorage.getItem('currentAffiliate'))?.affiliateId || 'AFF123456';
+            
+            // Set affiliate ID in the page
+            document.getElementById('affiliateId').textContent = `Affiliate ID: ${affiliateId}`;
+            
+            // Load affiliate data
+            loadAffiliateData(affiliateId);
+            
+            // Load dashboard statistics
+            loadDashboardStats(affiliateId);
+            
+            // Setup tab navigation
+            const tabButtons = document.querySelectorAll('.tab-btn');
+            const tabContents = document.querySelectorAll('.tab-content');
+            
+            tabButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    // Remove active class from all buttons and tabs
+                    tabButtons.forEach(btn => {
+                        btn.classList.remove('border-blue-600');
+                        btn.classList.remove('text-blue-600');
+                        btn.classList.add('border-transparent');
+                    });
+                    
+                    tabContents.forEach(content => {
+                        content.classList.remove('active');
+                    });
+                    
+                    // Add active class to clicked button and corresponding tab
+                    this.classList.add('border-blue-600');
+                    this.classList.add('text-blue-600');
+                    this.classList.remove('border-transparent');
+                    
+                    const tabId = this.getAttribute('data-tab');
+                    document.getElementById(`${tabId}-tab`).classList.add('active');
+                    
+                    // Load tab-specific data
+                    if (tabId === 'pickups') {
+                        loadOrders(affiliateId);
+                    } else if (tabId === 'customers') {
+                        loadCustomers(affiliateId);
+                    } else if (tabId === 'earnings') {
+                        loadEarnings(affiliateId);
+                    } else if (tabId === 'settings') {
+                        loadSettings(affiliateId);
+                    }
+                });
+            });
+            
+            // Register button redirects
+            document.getElementById('registerCustomerBtn').addEventListener('click', function(e) {
+                e.preventDefault();
+                window.location.href = `customer-register.html?affiliate=${affiliateId}`;
+            });
+            
+            document.getElementById('registerCustomerBtn2').addEventListener('click', function(e) {
+                e.preventDefault();
+                window.location.href = `customer-register.html?affiliate=${affiliateId}`;
+            });
+            
+            document.getElementById('schedulePickupBtn').addEventListener('click', function(e) {
+                e.preventDefault();
+                window.location.href = `schedule-pickup.html?affiliate=${affiliateId}`;
+            });
+            
+            // Logout functionality
+            document.getElementById('logoutBtn').addEventListener('click', function(e) {
+                e.preventDefault();
+                // Clear affiliate session
+                localStorage.removeItem('currentAffiliate');
+                // Redirect to login page
+                window.location.href = 'index.html';
+            });
+            
+            // Settings form payment method toggle
+            const settingsPaymentMethod = document.getElementById('settingsPaymentMethod');
+            const settingsBankInfoContainer = document.getElementById('settingsBankInfoContainer');
+            const settingsPaypalInfoContainer = document.getElementById('settingsPaypalInfoContainer');
+            
+            settingsPaymentMethod.addEventListener('change', function() {
+                // Hide all payment containers
+                settingsBankInfoContainer.style.display = 'none';
+                settingsPaypalInfoContainer.style.display = 'none';
+                
+                // Show relevant container based on selection
+                if (this.value === 'directDeposit') {
+                    settingsBankInfoContainer.style.display = 'block';
+                } else if (this.value === 'paypal') {
+                    settingsPaypalInfoContainer.style.display = 'block';
+                }
+            });
+            
+            // Settings form submission
+            document.getElementById('settingsForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                // Collect form data
+                const formData = new FormData(this);
+                const settingsData = {};
+                
+                formData.forEach((value, key) => {
+                    settingsData[key] = value;
+                });
+                
+                // Validate password fields if they were filled
+                if (settingsData.newPassword) {
+                    if (!settingsData.currentPassword) {
+                        alert('Please enter your current password to change your password.');
+                        return;
+                    }
+                    
+                    if (settingsData.newPassword !== settingsData.confirmPassword) {
+                        alert('New passwords do not match.');
+                        return;
+                    }
+                }
+                
+                // In a real implementation, this would be sent to the server
+                console.log('Settings Update Data:', settingsData);
+                
+                // Update affiliate data in localStorage for demo purposes
+                const storedAffiliates = JSON.parse(localStorage.getItem('wavemax_affiliates')) || {};
+                if (storedAffiliates[affiliateId]) {
+                    // Update fields
+                    Object.keys(settingsData).forEach(key => {
+                        if (settingsData[key] && key !== 'currentPassword' && key !== 'newPassword' && key !== 'confirmPassword') {
+                            storedAffiliates[affiliateId][key] = settingsData[key];
+                        }
+                    });
+                    
+                    localStorage.setItem('wavemax_affiliates', JSON.stringify(storedAffiliates));
+                }
+                
+                alert('Settings updated successfully!');
+            });
+            
+            // Load initial data
+            loadOrders(affiliateId);
+        });
+        
+        // Load affiliate data
+        function loadAffiliateData(affiliateId) {
+            // In a real implementation, this would make an API call to get affiliate data
+            // For demo purposes, we'll use localStorage
+            const storedAffiliates = JSON.parse(localStorage.getItem('wavemax_affiliates')) || {};
+            
+            if (storedAffiliates[affiliateId]) {
+                const affiliate = storedAffiliates[affiliateId];
+                document.getElementById('welcomeMessage').textContent = `Welcome back, ${affiliate.firstName} ${affiliate.lastName}!`;
+            } else {
+                // Create mock affiliate data for demo
+                const mockAffiliate = {
+                    affiliateId: affiliateId,
+                    firstName: 'Demo',
+                    lastName: 'Affiliate',
+                    email: 'demo@example.com',
+                    phone: '(555) 123-4567',
+                    address: '123 Main St',
+                    city: 'Austin',
+                    state: 'TX',
+                    zipCode: '78701',
+                    serviceArea: 'Downtown Austin, South Congress, Zilker',
+                    deliveryFee: '5.99',
+                    paymentMethod: 'directDeposit'
+                };
+                
+                storedAffiliates[affiliateId] = mockAffiliate;
+                localStorage.setItem('wavemax_affiliates', JSON.stringify(storedAffiliates));
+                
+                document.getElementById('welcomeMessage').textContent = `Welcome back, ${mockAffiliate.firstName} ${mockAffiliate.lastName}!`;
+            }
+        }
+        
+        // Load dashboard statistics
+        function loadDashboardStats(affiliateId) {
+            // In a real implementation, this would make an API call to get statistics
+            // For demo purposes, we'll create mock data
+            
+            // Get customers for this affiliate
+            const storedCustomers = JSON.parse(localStorage.getItem('wavemax_customers')) || {};
+            let customerCount = 0;
+            
+            Object.values(storedCustomers).forEach(customer => {
+                if (customer.affiliateId === affiliateId) {
+                    customerCount++;
+                }
+            });
+            
+            // Get active orders for this affiliate
+            const storedOrders = JSON.parse(localStorage.getItem('wavemax_orders')) || {};
+            let activeOrderCount = 0;
+            let totalEarnings = 0;
+            
+            Object.values(storedOrders).forEach(order => {
+                if (order.affiliateId === affiliateId) {
+                    if (['scheduled', 'picked_up', 'processing', 'ready_for_delivery'].includes(order.status)) {
+                        activeOrderCount++;
+                    }
+                    
+                    // Add mock earnings
+                    const orderEarnings = (Math.random() * 5 + 5).toFixed(2);
+                    totalEarnings += parseFloat(orderEarnings);
+                }
+            });
+            
+            // Update stats in the UI
+            document.getElementById('totalCustomers').textContent = customerCount;
+            document.getElementById('activeOrders').textContent = activeOrderCount;
+            document.getElementById('totalEarnings').textContent = `$${totalEarnings.toFixed(2)}`;
+            
+            // Update earnings tab data
+            document.getElementById('monthEarnings').textContent = `$${(totalEarnings * 0.7).toFixed(2)}`;
+            document.getElementById('weekEarnings').textContent = `$${(totalEarnings * 0.3).toFixed(2)}`;
+            document.getElementById('pendingEarnings').textContent = `$${(totalEarnings * 0.5).toFixed(2)}`;
+            
+            // Set mock order counts
+            document.getElementById('monthOrderCount').textContent = Math.floor(activeOrderCount * 1.5);
+            document.getElementById('weekOrderCount').textContent = Math.floor(activeOrderCount * 0.7);
+            
+            // Set next payout date
+            const nextPayoutDate = new Date();
+            nextPayoutDate.setDate(nextPayoutDate.getDate() + 7);
+            document.getElementById('nextPayoutDate').textContent = nextPayoutDate.toLocaleDateString();
+        }
+        
+        // Load orders for the pickups tab
+        function loadOrders(affiliateId) {
+            // In a real implementation, this would make an API call to get orders
+            // For demo purposes, we'll generate mock data
+            
+            const ordersTableBody = document.getElementById('ordersTableBody');
+            ordersTableBody.innerHTML = '';
+            
+            // Get stored orders or generate mock data
+            const storedOrders = JSON.parse(localStorage.getItem('wavemax_orders')) || {};
+            let ordersForAffiliate = [];
+            
+            // If we have stored orders, filter for this affiliate
+            if (Object.keys(storedOrders).length > 0) {
+                Object.entries(storedOrders).forEach(([orderId, order]) => {
+                    if (order.affiliateId === affiliateId) {
+                        ordersForAffiliate.push({
+                            orderId,
+                            ...order
+                        });
+                    }
+                });
+            }
+            
+            // If no stored orders for this affiliate, generate mock data
+            if (ordersForAffiliate.length === 0) {
+                // Get customers for this affiliate or create mock customers
+                const storedCustomers = JSON.parse(localStorage.getItem('wavemax_customers')) || {};
+                let customersForAffiliate = [];
+                
+                Object.entries(storedCustomers).forEach(([customerId, customer]) => {
+                    if (customer.affiliateId === affiliateId) {
+                        customersForAffiliate.push({
+                            customerId,
+                            ...customer
+                        });
+                    }
+                });
+                
+                // If no customers, create mock customers
+                if (customersForAffiliate.length === 0) {
+                    customersForAffiliate = [
+                        {
+                            customerId: 'CUST123456',
+                            firstName: 'John',
+                            lastName: 'Doe',
+                            email: 'john.doe@example.com',
+                            phone: '(555) 123-4567',
+                            address: '123 Main St',
+                            city: 'Austin',
+                            state: 'TX',
+                            zipCode: '78701'
+                        },
+                        {
+                            customerId: 'CUST234567',
+                            firstName: 'Jane',
+                            lastName: 'Smith',
+                            email: 'jane.smith@example.com',
+                            phone: '(555) 987-6543',
+                            address: '456 Oak Ave',
+                            city: 'Austin',
+                            state: 'TX',
+                            zipCode: '78702'
+                        }
+                    ];
+                }
+                
+                // Generate mock orders
+                const orderStatuses = ['scheduled', 'picked_up', 'processing', 'ready_for_delivery', 'delivered'];
+                
+                for (let i = 0; i < 10; i++) {
+                    const orderDate = new Date();
+                    orderDate.setDate(orderDate.getDate() + Math.floor(Math.random() * 7));
+                    
+                    const deliveryDate = new Date(orderDate);
+                    deliveryDate.setDate(deliveryDate.getDate() + 2);
+                    
+                    const customer = customersForAffiliate[Math.floor(Math.random() * customersForAffiliate.length)];
+                    
+                    const order = {
+                        orderId: 'ORD' + Math.floor(100000 + Math.random() * 900000),
+                        customerId: customer.customerId,
+                        customerName: `${customer.firstName} ${customer.lastName}`,
+                        customerAddress: `${customer.address}, ${customer.city}, ${customer.state} ${customer.zipCode}`,
+                        affiliateId: affiliateId,
+                        pickupDate: orderDate.toISOString(),
+                        pickupTime: ['morning', 'afternoon', 'evening'][Math.floor(Math.random() * 3)],
+                        deliveryDate: deliveryDate.toISOString(),
+                        deliveryTime: ['morning', 'afternoon', 'evening'][Math.floor(Math.random() * 3)],
+                        status: orderStatuses[Math.floor(Math.random() * orderStatuses.length)],
+                        estimatedSize: ['small', 'medium', 'large'][Math.floor(Math.random() * 3)],
+                        createdAt: new Date().toISOString()
+                    };
+                    
+                    ordersForAffiliate.push(order);
+                }
+            }
+            
+            // Filter based on status dropdown
+            const statusFilter = document.getElementById('orderStatusFilter').value;
+            if (statusFilter !== 'all') {
+                ordersForAffiliate = ordersForAffiliate.filter(order => order.status === statusFilter);
+            }
+            
+            // Sort orders by date (newest first)
+            ordersForAffiliate.sort((a, b) => new Date(b.pickupDate) - new Date(a.pickupDate));
+            
+            // Update UI with orders
+            if (ordersForAffiliate.length === 0) {
+                ordersTableBody.innerHTML = '<tr class="text-center"><td colspan="7" class="px-6 py-4 text-gray-500">No orders found.</td></tr>';
+            } else {
+                ordersForAffiliate.forEach(order => {
+                    const row = document.createElement('tr');
+                    
+                    // Format dates for display
+                    const pickupDate = new Date(order.pickupDate);
+                    const formattedPickupDate = pickupDate.toLocaleDateString();
+                    
+                    // Determine if this is a pickup or delivery based on status
+                    const actionType = ['scheduled', 'picked_up'].includes(order.status) ? 'Pickup' : 'Delivery';
+                    const actionTime = actionType === 'Pickup' ? order.pickupTime : order.deliveryTime;
+                    const actionTimeFormatted = actionTime === 'morning' ? '8am-12pm' : actionTime === 'afternoon' ? '12pm-5pm' : '5pm-8pm';
+                    
+                    // Create status badge
+                    let statusBadge = '';
+                    switch (order.status) {
+                        case 'scheduled':
+                            statusBadge = '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">Scheduled</span>';
+                            break;
+                        case 'picked_up':
+                            statusBadge = '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">Picked Up</span>';
+                            break;
+                        case 'processing':
+                            statusBadge = '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">Processing</span>';
+                            break;
+                        case 'ready_for_delivery':
+                            statusBadge = '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">Ready for Delivery</span>';
+                            break;
+                        case 'delivered':
+                            statusBadge = '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">Delivered</span>';
+                            break;
+                        case 'cancelled':
+                            statusBadge = '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">Cancelled</span>';
+                            break;
+                    }
+                    
+                    row.innerHTML = `
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm font-medium text-gray-900">${order.orderId}</div>
+                            <div class="text-sm text-gray-500">Created: ${new Date(order.createdAt).toLocaleDateString()}</div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm font-medium text-gray-900">${order.customerName || 'Unknown'}</div>
+                            <div class="text-sm text-gray-500">${order.customerId}</div>
+                        </td>
+                        <td class="px-6 py-4">
+                            <div class="text-sm text-gray-900">${order.customerAddress || 'N/A'}</div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm text-gray-900">${actionType}</div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm text-gray-900">${formattedPickupDate}</div>
+                            <div class="text-sm text-gray-500">${actionTimeFormatted}</div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            ${statusBadge}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                            <a href="#" class="text-blue-600 hover:text-blue-900 mr-3">View</a>
+                            <a href="#" class="text-blue-600 hover:text-blue-900">Update</a>
+                        </td>
+                    `;
+                    
+                    ordersTableBody.appendChild(row);
+                });
+            }
+            
+            // Update pagination info
+            document.getElementById('ordersShowing').textContent = ordersForAffiliate.length;
+            document.getElementById('ordersTotal').textContent = ordersForAffiliate.length;
+            
+            // Store orders in localStorage
+            const allOrders = {};
+            ordersForAffiliate.forEach(order => {
+                allOrders[order.orderId] = order;
+            });
+            localStorage.setItem('wavemax_orders', JSON.stringify(allOrders));
+        }
+        
+        // Load customers for the customers tab
+        function loadCustomers(affiliateId) {
+            // In a real implementation, this would make an API call to get customers
+            // For demo purposes, we'll use localStorage or generate mock data
+            
+            const customersTableBody = document.getElementById('customersTableBody');
+            customersTableBody.innerHTML = '';
+            
+            // Get stored customers or generate mock data
+            const storedCustomers = JSON.parse(localStorage.getItem('wavemax_customers')) || {};
+            let customersForAffiliate = [];
+            
+            // If we have stored customers, filter for this affiliate
+            if (Object.keys(storedCustomers).length > 0) {
+                Object.entries(storedCustomers).forEach(([customerId, customer]) => {
+                    if (customer.affiliateId === affiliateId) {
+                        customersForAffiliate.push({
+                            customerId,
+                            ...customer
+                        });
+                    }
+                });
+            }
+            
+            // If no stored customers for this affiliate, generate mock data
+            if (customersForAffiliate.length === 0) {
+                const mockCustomers = [
+                    {
+                        customerId: 'CUST123456',
+                        firstName: 'John',
+                        lastName: 'Doe',
+                        email: 'john.doe@example.com',
+                        phone: '(555) 123-4567',
+                        address: '123 Main St',
+                        city: 'Austin',
+                        state: 'TX',
+                        zipCode: '78701',
+                        affiliateId: affiliateId,
+                        registrationDate: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000).toISOString()
+                    },
+                    {
+                        customerId: 'CUST234567',
+                        firstName: 'Jane',
+                        lastName: 'Smith',
+                        email: 'jane.smith@example.com',
+                        phone: '(555) 987-6543',
+                        address: '456 Oak Ave',
+                        city: 'Austin',
+                        state: 'TX',
+                        zipCode: '78702',
+                        affiliateId: affiliateId,
+                        registrationDate: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000).toISOString()
+                    },
+                    {
+                        customerId: 'CUST345678',
+                        firstName: 'Michael',
+                        lastName: 'Johnson',
+                        email: 'michael.johnson@example.com',
+                        phone: '(555) 456-7890',
+                        address: '789 Pine St',
+                        city: 'Austin',
+                        state: 'TX',
+                        zipCode: '78703',
+                        affiliateId: affiliateId,
+                        registrationDate: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000).toISOString()
+                    }
+                ];
+                
+                customersForAffiliate = mockCustomers;
+                
+                // Store mock customers in localStorage
+                const allCustomers = {...storedCustomers};
+                mockCustomers.forEach(customer => {
+                    allCustomers[customer.customerId] = customer;
+                });
+                localStorage.setItem('wavemax_customers', JSON.stringify(allCustomers));
+            }
+            
+            // Get order counts for each customer
+            const storedOrders = JSON.parse(localStorage.getItem('wavemax_orders')) || {};
+            const customerOrderCounts = {};
+            
+            Object.values(storedOrders).forEach(order => {
+                if (order.customerId) {
+                    customerOrderCounts[order.customerId] = (customerOrderCounts[order.customerId] || 0) + 1;
+                }
+            });
+            
+            // Update UI with customers
+            if (customersForAffiliate.length === 0) {
+                customersTableBody.innerHTML = '<tr class="text-center"><td colspan="7" class="px-6 py-4 text-gray-500">No customers found.</td></tr>';
+            } else {
+                customersForAffiliate.forEach(customer => {
+                    const row = document.createElement('tr');
+                    
+                    // Format date for display
+                    const registrationDate = new Date(customer.registrationDate);
+                    const formattedDate = registrationDate.toLocaleDateString();
+                    
+                    row.innerHTML = `
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm font-medium text-gray-900">${customer.customerId}</div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm font-medium text-gray-900">${customer.firstName} ${customer.lastName}</div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm text-gray-900">${customer.email}</div>
+                            <div class="text-sm text-gray-500">${customer.phone}</div>
+                        </td>
+                        <td class="px-6 py-4">
+                            <div class="text-sm text-gray-900">${customer.address}</div>
+                            <div class="text-sm text-gray-500">${customer.city}, ${customer.state} ${customer.zipCode}</div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm text-gray-900">${formattedDate}</div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-center">
+                            <div class="text-sm font-medium text-gray-900">${customerOrderCounts[customer.customerId] || 0}</div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                            <a href="#" class="text-blue-600 hover:text-blue-900 mr-3">View</a>
+                            <a href="#" class="text-blue-600 hover:text-blue-900">Edit</a>
+                        </td>
+                    `;
+                    
+                    customersTableBody.appendChild(row);
+                });
+            }
+            
+            // Update pagination info
+            document.getElementById('customersShowing').textContent = customersForAffiliate.length;
+            document.getElementById('customersTotal').textContent = customersForAffiliate.length;
+        }
+        
+        // Load earnings data for the earnings tab
+        function loadEarnings(affiliateId) {
+            // In a real implementation, this would make an API call to get earnings data
+            // For demo purposes, we'll generate mock data
+            
+            const transactionsTableBody = document.getElementById('transactionsTableBody');
+            transactionsTableBody.innerHTML = '';
+            
+            // Generate mock transactions
+            const transactions = [];
+            const storedOrders = JSON.parse(localStorage.getItem('wavemax_orders')) || {};
+            const storedCustomers = JSON.parse(localStorage.getItem('wavemax_customers')) || {};
+            
+            // Use existing orders if available, otherwise generate mock data
+            if (Object.keys(storedOrders).length > 0) {
+                Object.entries(storedOrders).forEach(([orderId, order]) => {
+                    if (order.affiliateId === affiliateId && order.status === 'delivered') {
+                        const customer = storedCustomers[order.customerId] || { firstName: 'Unknown', lastName: 'Customer' };
+                        
+                        // Generate mock payment data
+                        const weight = order.estimatedSize === 'small' ? Math.random() * 10 + 5 : 
+                                      order.estimatedSize === 'medium' ? Math.random() * 15 + 15 : 
+                                      Math.random() * 20 + 30;
+                        
+                        const orderTotal = (weight * 1.89).toFixed(2);
+                        const commission = (orderTotal * 0.1).toFixed(2);
+                        
+                        transactions.push({
+                            date: new Date(order.deliveryDate || Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000),
+                            orderId,
+                            customerName: `${customer.firstName} ${customer.lastName}`,
+                            service: 'Wash, Dry, Fold',
+                            weight: weight.toFixed(2),
+                            orderTotal,
+                            commission
+                        });
+                    }
+                });
+            }
+            
+            // If no transactions, generate mock data
+            if (transactions.length === 0) {
+                const customers = [
+                    { name: 'John Doe' },
+                    { name: 'Jane Smith' },
+                    { name: 'Michael Johnson' }
+                ];
+                
+                for (let i = 0; i < 10; i++) {
+                    const date = new Date();
+                    date.setDate(date.getDate() - Math.floor(Math.random() * 30));
+                    
+                    const weight = Math.floor(Math.random() * 30) + 5;
+                    const orderTotal = (weight * 1.89).toFixed(2);
+                    const commission = (orderTotal * 0.1).toFixed(2);
+                    
+                    transactions.push({
+                        date,
+                        orderId: 'ORD' + Math.floor(100000 + Math.random() * 900000),
+                        customerName: customers[Math.floor(Math.random() * customers.length)].name,
+                        service: 'Wash, Dry, Fold',
+                        weight: weight.toFixed(2),
+                        orderTotal,
+                        commission
+                    });
+                }
+            }
+            
+            // Sort transactions by date (newest first)
+            transactions.sort((a, b) => b.date - a.date);
+            
+            // Update UI with transactions
+            if (transactions.length === 0) {
+                transactionsTableBody.innerHTML = '<tr class="text-center"><td colspan="6" class="px-6 py-4 text-gray-500">No transactions found.</td></tr>';
+            } else {
+                transactions.forEach(transaction => {
+                    const row = document.createElement('tr');
+                    
+                    row.innerHTML = `
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm text-gray-900">${transaction.date.toLocaleDateString()}</div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm font-medium text-gray-900">${transaction.orderId}</div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm text-gray-900">${transaction.customerName}</div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm text-gray-900">${transaction.service}</div>
+                            <div class="text-sm text-gray-500">${transaction.weight} lbs</div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm text-gray-900">$${transaction.orderTotal}</div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm font-medium text-green-600">$${transaction.commission}</div>
+                        </td>
+                    `;
+                    
+                    transactionsTableBody.appendChild(row);
+                });
+            }
+            
+            // Update pagination info
+            document.getElementById('transactionsShowing').textContent = transactions.length;
+            document.getElementById('transactionsTotal').textContent = transactions.length;
+        }
+        
+        // Load settings data for the settings tab
+        function loadSettings(affiliateId) {
+            // In a real implementation, this would make an API call to get affiliate data
+            // For demo purposes, we'll use localStorage
+            const storedAffiliates = JSON.parse(localStorage.getItem('wavemax_affiliates')) || {};
+            
+            if (storedAffiliates[affiliateId]) {
+                const affiliate = storedAffiliates[affiliateId];
+                
+                // Fill form fields with affiliate data
+                document.getElementById('settingsFirstName').value = affiliate.firstName || '';
+                document.getElementById('settingsLastName').value = affiliate.lastName || '';
+                document.getElementById('settingsEmail').value = affiliate.email || '';
+                document.getElementById('settingsPhone').value = affiliate.phone || '';
+                document.getElementById('settingsAddress').value = affiliate.address || '';
+                document.getElementById('settingsCity').value = affiliate.city || '';
+                document.getElementById('settingsState').value = affiliate.state || '';
+                document.getElementById('settingsZipCode').value = affiliate.zipCode || '';
+                document.getElementById('settingsServiceArea').value = affiliate.serviceArea || '';
+                document.getElementById('settingsDeliveryFee').value = affiliate.deliveryFee || '';
+                
+                // Set payment method and show relevant fields
+                const paymentMethod = affiliate.paymentMethod || 'directDeposit';
+                document.getElementById('settingsPaymentMethod').value = paymentMethod;
+                
+                // Show relevant payment containers
+                document.getElementById('settingsBankInfoContainer').style.display = 'none';
+                document.getElementById('settingsPaypalInfoContainer').style.display = 'none';
+                
+                if (paymentMethod === 'directDeposit') {
+                    document.getElementById('settingsBankInfoContainer').style.display = 'block';
+                    document.getElementById('settingsAccountNumber').value = affiliate.accountNumber || '';
+                    document.getElementById('settingsRoutingNumber').value = affiliate.routingNumber || '';
+                } else if (paymentMethod === 'paypal') {
+                    document.getElementById('settingsPaypalInfoContainer').style.display = 'block';
+                    document.getElementById('settingsPaypalEmail').value = affiliate.paypalEmail || '';
+                }
+            }
+        }
+    </script>
+</body>
+</html>
