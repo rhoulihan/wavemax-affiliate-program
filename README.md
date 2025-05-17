@@ -16,6 +16,18 @@ The WaveMAX Affiliate Program enables individuals to register as affiliates, onb
 - **Dashboard Analytics**: Comprehensive metrics for both affiliates and customers
 - **Email Notifications**: Automated emails for all important events in the lifecycle
 
+## New Improvements
+
+Recent updates to the project include:
+
+- **Enhanced Security**: Removed hardcoded credentials and implemented rate limiting for authentication
+- **Updated Dependencies**: Upgraded to Node.js 20 and MongoDB 7.0
+- **Better Error Handling**: Improved error propagation and logging throughout the application
+- **Robust Testing**: Added testing infrastructure with MongoDB memory server
+- **API Documentation**: Added Swagger UI for interactive API documentation
+- **Environment Configuration**: Better separation of development/production environments
+- **Secure Deployment**: Comprehensive deployment guide for Ubuntu servers
+
 ## Project Structure
 
 This repository is organized as follows:
@@ -35,7 +47,8 @@ wavemax-affiliate-program/
 │   ├── customer-success.html              # Customer registration success
 │   ├── customer-dashboard.html            # Customer dashboard
 │   ├── schedule-pickup.html               # Pickup scheduling form
-│   └── order-confirmation.html            # Order confirmation page
+│   ├── order-confirmation.html            # Order confirmation page
+│   └── api-docs.html                      # API documentation (Swagger UI)
 │
 ├── server/                                # Server-side code
 │   ├── controllers/                       # API controllers
@@ -71,6 +84,11 @@ wavemax-affiliate-program/
 │       ├── emailService.js                # Email sending service
 │       └── encryption.js                  # Data encryption utilities
 │
+├── tests/                                 # Test files
+│   ├── setup.js                           # Test setup configuration
+│   ├── affiliate.test.js                  # Affiliate API tests
+│   └── auth.test.js                       # Authentication tests
+│
 ├── scripts/                               # Utility scripts
 │
 ├── .env.example                           # Environment variables template
@@ -83,61 +101,26 @@ wavemax-affiliate-program/
 └── server.js                              # Main application entry point
 ```
 
-## Included Components
-
-### Frontend Pages
-
-1. **Landing Page** (`index.html`): Program overview and affiliate registration CTA
-2. **Affiliate Registration** (`affiliate-register.html`): Form to sign up new affiliates
-3. **Affiliate Login** (`affiliate-login.html`): Authentication for affiliates
-4. **Affiliate Success** (`affiliate-success.html`): Registration confirmation with next steps
-5. **Affiliate Dashboard** (`affiliate-dashboard.html`): Complete management console
-6. **Customer Registration** (`customer-register.html`): Form for affiliates to register customers
-7. **Customer Login** (`customer-login.html`): Authentication for customers
-8. **Customer Success** (`customer-success.html`): Registration confirmation for customers
-9. **Customer Dashboard** (`customer-dashboard.html`): Customer portal for orders
-10. **Schedule Pickup** (`schedule-pickup.html`): Form to schedule laundry pickups
-11. **Order Confirmation** (`order-confirmation.html`): Details of scheduled pickup
-
-### Backend Components
-
-1. **API Controllers**: Business logic for all operations
-2. **MongoDB Models**: Data schemas and relationships
-3. **API Routes**: RESTful endpoint definitions
-4. **Authentication**: JWT-based security
-5. **Email Service**: Notification system using templates
-6. **Encryption**: Secure handling of sensitive data
-
-### Visualization Components
-
-1. **Affiliate Metrics Dashboard**: React component for affiliates analytics
-2. **Customer Dashboard Analytics**: React component for customer analytics
-
-### Configuration & Deployment
-
-1. **Docker Configuration**: Container setup for development and production
-2. **MongoDB Initialization**: Database setup script
-3. **Environment Configuration**: Security and connection settings
-
 ## Technologies Used
 
 - **Frontend**: HTML, CSS (Tailwind CSS), JavaScript
-- **Backend**: Node.js, Express.js
-- **Database**: MongoDB (with MongoDB Atlas)
+- **Backend**: Node.js 20, Express.js
+- **Database**: MongoDB 7.0 (with MongoDB Atlas)
 - **Visualization**: React, Recharts
-- **Security**: JWT, AES-256-GCM encryption
+- **Security**: JWT, Rate limiting, AES-256-GCM encryption
 - **Deployment**: Docker, Nginx
 - **Email**: Nodemailer
+- **Testing**: Jest, Supertest, MongoDB Memory Server
 
-## Setup & Installation
+## Local Development Setup
 
 ### Prerequisites
 
-- Node.js v16+
-- MongoDB
+- Node.js v20+
+- MongoDB 7.0+
 - npm or yarn
 
-### Local Development
+### Installation Steps
 
 1. Clone the repository:
    ```
@@ -156,12 +139,23 @@ wavemax-affiliate-program/
    # Edit .env with your settings
    ```
 
-4. Start the development server:
+4. Generate secure keys:
+   ```
+   # Generate ENCRYPTION_KEY
+   node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+   
+   # Generate JWT_SECRET
+   node -e "console.log(require('crypto').randomBytes(64).toString('hex'))"
+   ```
+
+5. Add the generated keys to your `.env` file.
+
+6. Start the development server:
    ```
    npm run dev
    ```
 
-5. Access the application at `http://localhost:3000`
+7. Access the application at `http://localhost:3000`
 
 ### Docker Development
 
@@ -172,13 +166,399 @@ wavemax-affiliate-program/
 
 2. Access the application at `http://localhost:3000`
 
-## Deployment
+## Testing
 
-See the detailed [Deployment Guide](docs/deployment/README.md) for instructions on deploying to:
+Run the test suite:
 
-- Traditional web servers
-- Docker environments
-- Cloud platforms (AWS, Azure, GCP)
+```
+npm test
+```
+
+## Production Deployment
+
+See the [Deployment Guide](#deployment-guide) for detailed instructions on deploying to production.
+
+## Deployment Guide
+
+### System Requirements
+
+- Ubuntu 20.04 LTS or newer
+- 2GB RAM minimum (4GB recommended)
+- 20GB storage (minimum)
+- Non-root user with sudo privileges
+
+### Server Setup
+
+1. **Update System**
+
+   ```bash
+   sudo apt update && sudo apt upgrade -y
+   sudo apt install -y curl git build-essential
+   ```
+
+2. **Install Node.js 20.x**
+
+   ```bash
+   curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+   sudo apt install -y nodejs
+   
+   # Verify installation
+   node -v  # Should show v20.x.x
+   npm -v   # Should show 9.x.x or newer
+   ```
+
+3. **Install MongoDB 7.0**
+
+   ```bash
+   # Import MongoDB public key
+   curl -fsSL https://pgp.mongodb.com/server-7.0.asc | \
+     sudo gpg -o /usr/share/keyrings/mongodb-server-7.0.gpg \
+     --dearmor
+   
+   # Create MongoDB repository list file
+   echo "deb [ arch=amd64,arm64 signed-by=/usr/share/keyrings/mongodb-server-7.0.gpg ] https://repo.mongodb.org/apt/ubuntu focal/mongodb-org/7.0 multiverse" | \
+     sudo tee /etc/apt/sources.list.d/mongodb-org-7.0.list
+   
+   # Update package list and install MongoDB
+   sudo apt update
+   sudo apt install -y mongodb-org
+   
+   # Start and enable MongoDB service
+   sudo systemctl start mongod
+   sudo systemctl enable mongod
+   
+   # Verify MongoDB is running
+   sudo systemctl status mongod
+   ```
+
+4. **Install Nginx**
+
+   ```bash
+   sudo apt install -y nginx
+   
+   # Enable and start Nginx
+   sudo systemctl enable nginx
+   sudo systemctl start nginx
+   
+   # Configure firewall (if enabled)
+   sudo ufw allow 'Nginx Full'
+   ```
+
+### Application Deployment
+
+1. **Create Application Directory**
+
+   ```bash
+   sudo mkdir -p /var/www/wavemax
+   sudo chown -R $USER:$USER /var/www/wavemax
+   ```
+
+2. **Clone the Repository**
+
+   ```bash
+   cd /var/www/wavemax
+   git clone https://github.com/yourusername/wavemax-affiliate-program.git .
+   ```
+
+3. **Set Up Environment Variables**
+
+   ```bash
+   cp .env.example .env
+   ```
+
+   Edit the `.env` file with your production settings:
+
+   ```bash
+   # Generate secure encryption key
+   ENCRYPTION_KEY=$(node -e "console.log(require('crypto').randomBytes(32).toString('hex'))")
+   
+   # Generate secure JWT secret
+   JWT_SECRET=$(node -e "console.log(require('crypto').randomBytes(64).toString('hex'))")
+   
+   # Edit .env file with secure keys and production settings
+   sed -i "s/^ENCRYPTION_KEY=.*/ENCRYPTION_KEY=$ENCRYPTION_KEY/" .env
+   sed -i "s/^JWT_SECRET=.*/JWT_SECRET=$JWT_SECRET/" .env
+   sed -i "s/^NODE_ENV=.*/NODE_ENV=production/" .env
+   
+   # Set MongoDB URI (change as needed for your setup)
+   sed -i "s|^MONGODB_URI=.*|MONGODB_URI=mongodb://localhost:27017/wavemax|" .env
+   
+   # Set additional environment variables manually
+   nano .env
+   ```
+
+4. **Install Dependencies and Build**
+
+   ```bash
+   npm ci --production
+   ```
+
+5. **Initialize MongoDB (Optional)**
+
+   ```bash
+   mongosh < init-mongo.js
+   ```
+
+6. **Configure Nginx**
+
+   Create a new Nginx configuration file:
+
+   ```bash
+   sudo nano /etc/nginx/sites-available/wavemax
+   ```
+
+   Add the following configuration:
+
+   ```nginx
+   server {
+       listen 80;
+       server_name yourdomain.com www.yourdomain.com;
+       
+       location / {
+           proxy_pass http://localhost:3000;
+           proxy_http_version 1.1;
+           proxy_set_header Upgrade $http_upgrade;
+           proxy_set_header Connection 'upgrade';
+           proxy_set_header Host $host;
+           proxy_set_header X-Real-IP $remote_addr;
+           proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+           proxy_set_header X-Forwarded-Proto $scheme;
+           proxy_cache_bypass $http_upgrade;
+       }
+   }
+   ```
+
+   Enable the configuration:
+
+   ```bash
+   sudo ln -s /etc/nginx/sites-available/wavemax /etc/nginx/sites-enabled/
+   sudo nginx -t  # Test configuration
+   sudo systemctl restart nginx
+   ```
+
+7. **Set Up SSL with Let's Encrypt (Recommended)**
+
+   ```bash
+   sudo apt install -y certbot python3-certbot-nginx
+   sudo certbot --nginx -d yourdomain.com -d www.yourdomain.com
+   ```
+
+### Process Management with PM2
+
+1. **Install PM2**
+
+   ```bash
+   sudo npm install -g pm2
+   ```
+
+2. **Create PM2 Configuration**
+
+   Create an ecosystem file:
+
+   ```bash
+   nano ecosystem.config.js
+   ```
+
+   Add the following content:
+
+   ```javascript
+   module.exports = {
+     apps: [{
+       name: 'wavemax',
+       script: 'server.js',
+       instances: 'max',
+       exec_mode: 'cluster',
+       autorestart: true,
+       watch: false,
+       max_memory_restart: '1G',
+       env: {
+         NODE_ENV: 'production'
+       }
+     }]
+   };
+   ```
+
+3. **Start the Application**
+
+   ```bash
+   pm2 start ecosystem.config.js
+   
+   # Save PM2 configuration to start on system boot
+   pm2 startup
+   pm2 save
+   ```
+
+4. **Monitor the Application**
+
+   ```bash
+   pm2 status
+   pm2 logs
+   pm2 monit  # Interactive monitoring
+   ```
+
+### Database Backup Configuration
+
+Set up automated MongoDB backups:
+
+1. **Create Backup Script**
+
+   ```bash
+   mkdir -p /var/www/wavemax/scripts/backup
+   nano /var/www/wavemax/scripts/backup/mongodb-backup.sh
+   ```
+
+   Add the following content:
+
+   ```bash
+   #!/bin/bash
+   
+   # Set variables
+   BACKUP_DIR="/var/www/wavemax/backups"
+   TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+   BACKUP_FILE="$BACKUP_DIR/wavemax_$TIMESTAMP.gz"
+   
+   # Create backup directory if it doesn't exist
+   mkdir -p $BACKUP_DIR
+   
+   # Create backup
+   mongodump --db wavemax --gzip --archive=$BACKUP_FILE
+   
+   # Delete backups older than 14 days
+   find $BACKUP_DIR -type f -name "wavemax_*.gz" -mtime +14 -delete
+   ```
+
+2. **Make the Script Executable**
+
+   ```bash
+   chmod +x /var/www/wavemax/scripts/backup/mongodb-backup.sh
+   ```
+
+3. **Set Up Cron Job**
+
+   ```bash
+   crontab -e
+   ```
+
+   Add the following line to run the backup daily at 2 AM:
+
+   ```
+   0 2 * * * /var/www/wavemax/scripts/backup/mongodb-backup.sh
+   ```
+
+### Security Considerations
+
+1. **Set Up a Firewall**
+
+   ```bash
+   sudo ufw enable
+   sudo ufw allow ssh
+   sudo ufw allow 'Nginx Full'
+   sudo ufw status
+   ```
+
+2. **Secure MongoDB**
+
+   Create a MongoDB admin user:
+
+   ```javascript
+   use admin
+   db.createUser({
+     user: "adminUser",
+     pwd: "securePassword",
+     roles: [ { role: "userAdminAnyDatabase", db: "admin" } ]
+   })
+   ```
+
+   Edit MongoDB configuration:
+
+   ```bash
+   sudo nano /etc/mongod.conf
+   ```
+
+   Add security settings:
+
+   ```yaml
+   security:
+     authorization: enabled
+   ```
+
+   Restart MongoDB:
+
+   ```bash
+   sudo systemctl restart mongod
+   ```
+
+3. **Regular Updates**
+
+   Set up automated security updates:
+
+   ```bash
+   sudo apt install -y unattended-upgrades
+   sudo dpkg-reconfigure -plow unattended-upgrades
+   ```
+
+### Monitoring and Logging
+
+1. **Set Up Application Monitoring**
+
+   ```bash
+   pm2 install pm2-server-monit  # Monitor server metrics
+   ```
+
+2. **Set Up Log Rotation**
+
+   ```bash
+   sudo nano /etc/logrotate.d/wavemax
+   ```
+
+   Add configuration:
+
+   ```
+   /var/www/wavemax/logs/*.log {
+       daily
+       missingok
+       rotate 14
+       compress
+       delaycompress
+       notifempty
+       create 0640 www-data www-data
+       sharedscripts
+       postrotate
+           pm2 reload all
+       endscript
+   }
+   ```
+
+## Maintenance
+
+1. **Application Updates**
+
+   ```bash
+   # Pull latest changes
+   cd /var/www/wavemax
+   git pull
+   
+   # Install dependencies
+   npm ci --production
+   
+   # Restart application
+   pm2 reload all
+   ```
+
+2. **Database Maintenance**
+
+   ```bash
+   # Create database backup before maintenance
+   /var/www/wavemax/scripts/backup/mongodb-backup.sh
+   
+   # Connect to MongoDB
+   mongosh
+   
+   # Run database operations
+   use wavemax
+   db.getCollectionNames()
+   db.orders.createIndex({ "status": 1, "createdAt": 1 })
+   ```
 
 ## License
 
