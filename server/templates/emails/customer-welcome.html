@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Welcome to WaveMAX Laundry Service</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      line-height: 1.6;
+      color: #333333;
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    .header {
+      background-color: #1e3a8a;
+      color: white;
+      padding: 20px;
+      text-align: center;
+    }
+    .logo {
+      max-width: 180px;
+      margin-bottom: 10px;
+    }
+    .content {
+      padding: 20px;
+      background-color: #ffffff;
+    }
+    .section {
+      margin-bottom: 20px;
+    }
+    .button {
+      display: inline-block;
+      background-color: #1e3a8a;
+      color: white;
+      padding: 12px 20px;
+      text-decoration: none;
+      border-radius: 4px;
+      font-weight: bold;
+    }
+    .footer {
+      background-color: #f5f5f5;
+      padding: 20px;
+      text-align: center;
+      font-size: 12px;
+      color: #666666;
+    }
+    .service-box {
+      border: 1px solid #e0e0e0;
+      border-radius: 4px;
+      padding: 15px;
+      margin: 20px 0;
+      background-color: #f9f9f9;
+    }
+    .highlight {
+      background-color: #f0f7ff;
+      border-left: 4px solid #1e3a8a;
+      padding: 15px;
+      margin: 20px 0;
+    }
+    .steps {
+      padding: 0;
+    }
+    .step {
+      display: flex;
+      margin-bottom: 15px;
+      align-items: flex-start;
+    }
+    .step-number {
+      background-color: #1e3a8a;
+      color: white;
+      width: 25px;
+      height: 25px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      margin-right: 10px;
+      flex-shrink: 0;
+    }
+    .step-content {
+      flex: 1;
+    }
+    .divider {
+      height: 1px;
+      background-color: #e0e0e0;
+      margin: 20px 0;
+    }
+    @media (max-width: 480px) {
+      .container {
+        padding: 10px;
+      }
+      .content {
+        padding: 15px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <img src="https://www.wavemaxlaundry.com/wp-content/themes/wavemax-laundry/assets/img/logo-white.png" alt="WaveMAX Laundry" class="logo">
+      <h1>Welcome to WaveMAX Laundry!</h1>
+    </div>
+    
+    <div class="content">
+      <div class="section">
+        <h2>Hi [FIRST_NAME],</h2>
+        <p>Thank you for signing up for WaveMAX Laundry's premium wash, dry, fold service with convenient pickup and delivery! We're excited to make laundry day a breeze for you.</p>
+      </div>
+      
+      <div class="highlight">
+        <h3>Your Account Information</h3>
+        <p><strong>Customer ID:</strong> [CUSTOMER_ID]</p>
+        <p><strong>Service Provider:</strong> [AFFILIATE_NAME]</p>
+        <p>Your service provider will be delivering a laundry bag with a unique barcode shortly. Please use this bag for all your laundry pickups.</p>
+        <p><strong>Bag Barcode:</strong> [BAG_BARCODE]</p>
+      </div>
+      
+      <div class="service-box">
+        <h3>How It Works</h3>
+        <div class="steps">
+          <div class="step">
+            <div class="step-number">1</div>
+            <div class="step-content">
+              <strong>Schedule a Pickup</strong>
+              <p>Use our online portal to schedule a pickup at your convenience, or establish a regular pickup schedule.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-number">2</div>
+            <div class="step-content">
+              <strong>Prepare Your Laundry</strong>
+              <p>Place your laundry in the provided bag on the scheduled pickup date.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-number">3</div>
+            <div class="step-content">
+              <strong>Professional Cleaning</strong>
+              <p>Your laundry will be professionally washed, dried, and neatly folded at our facility.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-number">4</div>
+            <div class="step-content">
+              <strong>Delivery</strong>
+              <p>Your clean laundry will be delivered back to you on the scheduled delivery date.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="divider"></div>
+      
+      <div class="section">
+        <h3>Ready to Schedule Your First Pickup?</h3>
+        <p>Click the button below to schedule your first laundry pickup:</p>
+        <div style="text-align: center; margin: 20px 0;">
+          <a href="[SCHEDULE_URL]" class="button">Schedule Pickup</a>
+        </div>
+      </div>
+      
+      <div class="section">
+        <h3>Questions or Special Instructions?</h3>
+        <p>If you have any questions or special requests for your laundry service, please contact your service provider:</p>
+        <p><strong>Name:</strong> [AFFILIATE_NAME]<br>
+        <strong>Phone:</strong> [AFFILIATE_PHONE]<br>
+        <strong>Email:</strong> [AFFILIATE_EMAIL]</p>
+      </div>
+      
+      <div class="section" style="text-align: center;">
+        <p>You can also manage your account, track orders, and schedule pickups through your customer dashboard.</p>
+        <a href="[LOGIN_URL]" class="button" style="background-color: #3b82f6;">Go to Dashboard</a>
+      </div>
+    </div>
+    
+    <div class="footer">
+      <p>If you have any questions, please contact our support team at support@wavemaxlaundry.com</p>
+      <p>&copy; [CURRENT_YEAR] WaveMAX Laundry. All rights reserved.</p>
+      <p>123 Main Street, Austin, TX 78701</p>
+    </div>
+  </div>
+</body>
+</html>
