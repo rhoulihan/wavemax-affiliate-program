@@ -3,20 +3,21 @@
 const express = require('express');
 const router = express.Router();
 const authController = require('../controllers/authController');
+const { authLimiter } = require('../middleware/auth');
 
 /**
  * @route   POST /api/auth/affiliate/login
  * @desc    Login affiliate
  * @access  Public
  */
-router.post('/affiliate/login', authController.affiliateLogin);
+router.post('/affiliate/login', authLimiter, authController.affiliateLogin);
 
 /**
  * @route   POST /api/auth/customer/login
  * @desc    Login customer
  * @access  Public
  */
-router.post('/customer/login', authController.customerLogin);
+router.post('/customer/login', authLimiter, authController.customerLogin);
 
 /**
  * @route   POST /api/auth/forgot-password

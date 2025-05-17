@@ -77,7 +77,10 @@ exports.registerAffiliate = async (req, res) => {
     await newAffiliate.save();
     
     // Send welcome email
-    await emailService.sendAffiliateWelcomeEmail(newAffiliate);
+    const emailResult = await emailService.sendAffiliateWelcomeEmail(newAffiliate);
+    if (!emailResult.success) {
+      console.warn('Welcome email could not be sent:', emailResult.error);
+    }
     
     res.status(201).json({
       success: true,

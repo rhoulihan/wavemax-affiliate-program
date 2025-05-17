@@ -4,6 +4,15 @@ const jwt = require('jsonwebtoken');
 const Affiliate = require('../models/Affiliate');
 const Customer = require('../models/Customer');
 
+const rateLimit = require('express-rate-limit');
+
+// Rate limiter for authentication
+exports.authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 5, // 5 attempts per IP
+  message: { success: false, message: 'Too many login attempts, please try again later' }
+});
+
 /**
  * Middleware to authenticate requests using JWT
  */
