@@ -1,0 +1,54 @@
+version: '3.8'
+
+services:
+  # Web application service
+  app:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - PORT=3000
+      - MONGODB_URI=mongodb://mongo:27017/wavemax
+      - ENCRYPTION_KEY=32ByteSecretKeyForEncryptionofData
+      - JWT_SECRET=SecretKeyForJWTTokenGeneration
+      - EMAIL_USER=noreply@wavemaxlaundry.com
+      - EMAIL_PASS=email_password_here
+      - EMAIL_HOST=smtp.example.com
+      - EMAIL_PORT=587
+      - CORS_ORIGIN=http://localhost:3000
+    volumes:
+      - ./:/usr/src/app
+      - /usr/src/app/node_modules
+    depends_on:
+      - mongo
+    command: npm run dev
+    restart: unless-stopped
+
+  # MongoDB service for local development
+  mongo:
+    image: mongo:5.0
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+      - ./init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js:ro
+    environment:
+      - MONGO_INITDB_DATABASE=wavemax
+    restart: unless-stopped
+
+  # MongoDB Express web-based admin interface
+  mongo-express:
+    image: mongo-express:latest
+    ports:
+      - "8081:8081"
+    environment:
+      - ME_CONFIG_MONGODB_SERVER=mongo
+      - ME_CONFIG_BASICAUTH_USERNAME=admin
+      - ME_CONFIG_BASICAUTH_PASSWORD=password
+    depends_on:
+      - mongo
+    restart: unless-stopped
+
+volumes:
+  mongo-data:
