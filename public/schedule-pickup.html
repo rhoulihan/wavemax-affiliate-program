@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WaveMAX Laundry - Schedule Pickup</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <style>
+        .wavemax-blue {
+            background-color: #1e3a8a;
+        }
+        .wavemax-light-blue {
+            background-color: #3b82f6;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 font-sans">
+    <!-- Navigation -->
+    <nav class="wavemax-blue text-white p-4">
+        <div class="container mx-auto flex justify-between items-center">
+            <div class="flex items-center">
+                <a href="index.html" class="text-2xl font-bold">WaveMAX Laundry</a>
+            </div>
+            <div class="hidden md:flex space-x-6">
+                <a href="index.html" class="hover:text-blue-200">Home</a>
+                <a href="#" class="hover:text-blue-200">Services</a>
+                <a href="#" class="hover:text-blue-200">Locations</a>
+                <a href="#" class="hover:text-blue-200">About</a>
+                <a href="#" class="hover:text-blue-200">Contact</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Pickup Scheduling Form -->
+    <div class="py-12">
+        <div class="container mx-auto px-4">
+            <div class="max-w-3xl mx-auto bg-white rounded-lg shadow-md overflow-hidden">
+                <div class="wavemax-blue text-white p-6">
+                    <h2 class="text-2xl font-bold">Schedule a Laundry Pickup</h2>
+                    <p class="mt-2" id="affiliateIntro">Use this form to schedule a pickup for your laundry.</p>
+                </div>
+                
+                <form id="pickupScheduleForm" class="p-6 space-y-6">
+                    <!-- Login Section -->
+                    <div id="loginSection">
+                        <h3 class="text-xl font-bold mb-4">Customer Login</h3>
+                        <p class="mb-4">Please login to schedule a pickup. If you don't have an account, please contact your affiliate partner.</p>
+                        
+                        <div class="grid md:grid-cols-2 gap-4">
+                            <div>
+                                <label for="loginUsername" class="block text-gray-700 mb-2">Username *</label>
+                                <input type="text" id="loginUsername" name="loginUsername" required class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            </div>
+                            
+                            <div>
+                                <label for="loginPassword" class="block text-gray-700 mb-2">Password *</label>
+                                <input type="password" id="loginPassword" name="loginPassword" required class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            </div>
+                        </div>
+                        
+                        <div class="mt-4">
+                            <button type="button" id="loginBtn" class="w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-blue-700 transition">Login</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Pickup Details Section (initially hidden) -->
+                    <div id="pickupDetailsSection" style="display: none;">
+                        <!-- Hidden fields for customer and affiliate data -->
+                        <input type="hidden" id="customerId" name="customerId">
+                        <input type="hidden" id="affiliateId" name="affiliateId">
+                        
+                        <!-- Customer Information Display (non-editable) -->
+                        <div class="mb-6">
+                            <h3 class="text-xl font-bold mb-4">Customer Information</h3>
+                            <div class="bg-gray-50 p-4 rounded-lg">
+                                <div class="grid md:grid-cols-2 gap-2">
+                                    <div>
+                                        <span class="font-bold">Name:</span>
+                                        <span id="customerName">-</span>
+                                    </div>
+                                    <div>
+                                        <span class="font-bold">Phone:</span>
+                                        <span id="customerPhone">-</span>
+                                    </div>
+                                    <div class="md:col-span-2">
+                                        <span class="font-bold">Address:</span>
+                                        <span id="customerAddress">-</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Pickup Details -->
+                        <div>
+                            <h3 class="text-xl font-bold mb-4">Pickup Details</h3>
+                            <div class="grid md:grid-cols-2 gap-4">
+                                <div>
+                                    <label for="pickupDate" class="block text-gray-700 mb-2">Pickup Date *</label>
+                                    <input type="date" id="pickupDate" name="pickupDate" required class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                </div>
+                                
+                                <div>
+                                    <label for="pickupTime" class="block text-gray-700 mb-2">Preferred Time *</label>
+                                    <select id="pickupTime" name="pickupTime" required class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                        <option value="">Select a time</option>
+                                        <option value="morning">Morning (8am - 12pm)</option>
+                                        <option value="afternoon">Afternoon (12pm - 5pm)</option>
+                                        <option value="evening">Evening (5pm - 8pm)</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="md:col-span-2">
+                                    <label for="specialPickupInstructions" class="block text-gray-700 mb-2">Special Pickup Instructions (Optional)</label>
+                                    <textarea id="specialPickupInstructions" name="specialPickupInstructions" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" rows="2" placeholder="Ring doorbell, leave at front door, etc."></textarea>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Estimated Order Size -->
+                        <div>
+                            <h3 class="text-xl font-bold mb-4">Estimated Order Size</h3>
+                            <div class="grid md:grid-cols-2 gap-4">
+                                <div class="md:col-span-2">
+                                    <label for="estimatedSize" class="block text-gray-700 mb-2">Estimated Laundry Size *</label>
+                                    <select id="estimatedSize" name="estimatedSize" required class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                        <option value="">Select an option</option>
+                                        <option value="small">Small (1-2 bags, approx. 10-15 lbs)</option>
+                                        <option value="medium">Medium (3-4 bags, approx. 16-30 lbs)</option>
+                                        <option value="large">Large (5+ bags, approx. 31+ lbs)</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="md:col-span-2">
+                                    <label for="serviceNotes" class="block text-gray-700 mb-2">Service Notes (Optional)</label>
+                                    <textarea id="serviceNotes" name="serviceNotes" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" rows="2" placeholder="Any special handling requests, sorting preferences, etc."></textarea>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Delivery Options -->
+                        <div>
+                            <h3 class="text-xl font-bold mb-4">Delivery Options</h3>
+                            <div class="grid md:grid-cols-2 gap-4">
+                                <div>
+                                    <label for="deliveryDate" class="block text-gray-700 mb-2">Preferred Delivery Date *</label>
+                                    <input type="date" id="deliveryDate" name="deliveryDate" required class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                </div>
+                                
+                                <div>
+                                    <label for="deliveryTime" class="block text-gray-700 mb-2">Preferred Time *</label>
+                                    <select id="deliveryTime" name="deliveryTime" required class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                        <option value="">Select a time</option>
+                                        <option value="morning">Morning (8am - 12pm)</option>
+                                        <option value="afternoon">Afternoon (12pm - 5pm)</option>
+                                        <option value="evening">Evening (5pm - 8pm)</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="md:col-span-2">
+                                    <label for="specialDeliveryInstructions" class="block text-gray-700 mb-2">Special Delivery Instructions (Optional)</label>
+                                    <textarea id="specialDeliveryInstructions" name="specialDeliveryInstructions" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" rows="2" placeholder="Leave on porch, text upon arrival, etc."></textarea>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Service and Pricing Summary -->
+                        <div class="border-t pt-6">
+                            <h3 class="text-xl font-bold mb-4">Order Summary</h3>
+                            <div class="bg-gray-50 p-4 rounded-lg">
+                                <div class="mb-2">
+                                    <span class="font-bold">Delivery Fee:</span>
+                                    <span id="deliveryFee">$0.00</span> per pickup/delivery
+                                </div>
+                                <div>
+                                    <span class="font-bold">Wash, Dry, Fold Service:</span>
+                                    <span>$1.89 per pound</span>
+                                </div>
+                                <p class="text-sm text-gray-500 mt-2">Final cost will depend on the weight of your laundry.</p>
+                            </div>
+                        </div>
+                        
+                        <!-- Submit Button -->
+                        <div class="mt-6">
+                            <button type="submit" class="w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-blue-700 transition">Schedule Pickup</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white py-8 mt-12">
+        <div class="container mx-auto px-4 text-center">
+            <p>&copy; 2025 WaveMAX Laundry. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Extract affiliate ID from URL query parameter
+            const urlParams = new URLSearchParams(window.location.search);
+            const affiliateId = urlParams.get('affiliate');
+            
+            // Login form handling
+            const loginBtn = document.getElementById('loginBtn');
+            const loginSection = document.getElementById('loginSection');
+            const pickupDetailsSection = document.getElementById('pickupDetailsSection');
+            
+            loginBtn.addEventListener('click', function() {
+                const username = document.getElementById('loginUsername').value;
+                const password = document.getElementById('loginPassword').value;
+                
+                if (!username || !password) {
+                    alert('Please enter both username and password.');
+                    return;
+                }
+                
+                // In a real implementation, this would validate credentials against the database
+                // For demo purposes, we'll check localStorage and use mock data
+                const storedCustomers = JSON.parse(localStorage.getItem('wavemax_customers')) || {};
+                
+                // Find customer by username (this is a simplified example)
+                let loggedInCustomer = null;
+                let customerId = null;
+                
+                // Simple mock login for demo purposes
+                for (const id in storedCustomers) {
+                    if (storedCustomers[id].username === username) {
+                        // In a real implementation, we would verify the password hash
+                        loggedInCustomer = storedCustomers[id];
+                        customerId = id;
+                        break;
+                    }
+                }
+                
+                if (loggedInCustomer) {
+                    // Set customer data fields
+                    document.getElementById('customerId').value = customerId;
+                    document.getElementById('customerName').textContent = `${loggedInCustomer.firstName} ${loggedInCustomer.lastName}`;
+                    document.getElementById('customerPhone').textContent = loggedInCustomer.phone;
+                    document.getElementById('customerAddress').textContent = `${loggedInCustomer.address}, ${loggedInCustomer.city}, ${loggedInCustomer.state} ${loggedInCustomer.zipCode}`;
+                    
+                    // Set affiliate ID
+                    document.getElementById('affiliateId').value = loggedInCustomer.affiliateId || affiliateId;
+                    
+                    // Get affiliate information for pricing
+                    const storedAffiliates = JSON.parse(localStorage.getItem('wavemax_affiliates')) || {};
+                    const customerAffiliateId = loggedInCustomer.affiliateId || affiliateId;
+                    
+                    if (storedAffiliates[customerAffiliateId]) {
+                        const affiliate = storedAffiliates[customerAffiliateId];
+                        document.getElementById('deliveryFee').textContent = `$${parseFloat(affiliate.deliveryFee).toFixed(2)}`;
+                    } else {
+                        // Fallback price if affiliate not found
+                        document.getElementById('deliveryFee').textContent = '$5.99';
+                    }
+                    
+                    // Show pickup details form
+                    loginSection.style.display = 'none';
+                    pickupDetailsSection.style.display = 'block';
+                    
+                    // Set minimum dates
+                    const today = new Date();
+                    const tomorrow = new Date(today);
+                    tomorrow.setDate(tomorrow.getDate() + 1);
+                    
+                    const pickupDateInput = document.getElementById('pickupDate');
+                    const deliveryDateInput = document.getElementById('deliveryDate');
+                    
+                    // Format dates as YYYY-MM-DD for input fields
+                    const formatDate = (date) => {
+                        const year = date.getFullYear();
+                        const month = String(date.getMonth() + 1).padStart(2, '0');
+                        const day = String(date.getDate()).padStart(2, '0');
+                        return `${year}-${month}-${day}`;
+                    };
+                    
+                    pickupDateInput.min = formatDate(today);
+                    deliveryDateInput.min = formatDate(tomorrow);
+                    
+                    // Set default pickup date to today
+                    pickupDateInput.value = formatDate(today);
+                    
+                    // Set default delivery date to day after tomorrow
+                    const dayAfterTomorrow = new Date(today);
+                    dayAfterTomorrow.setDate(dayAfterTomorrow.getDate() + 2);
+                    deliveryDateInput.value = formatDate(dayAfterTomorrow);
+                    
+                    // Update delivery date when pickup date changes
+                    pickupDateInput.addEventListener('change', function() {
+                        const pickupDate = new Date(this.value);
+                        const minDeliveryDate = new Date(pickupDate);
+                        minDeliveryDate.setDate(minDeliveryDate.getDate() + 1);
+                        
+                        deliveryDateInput.min = formatDate(minDeliveryDate);
+                        
+                        // If current delivery date is before new minimum, update it
+                        if (new Date(deliveryDateInput.value) < minDeliveryDate) {
+                            deliveryDateInput.value = formatDate(minDeliveryDate);
+                        }
+                    });
+                } else {
+                    alert('Invalid username or password. Please try again.');
+                }
+            });
+            
+            // Form submission
+            const form = document.getElementById('pickupScheduleForm');
+            
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                // Only process if the pickup details section is visible
+                if (pickupDetailsSection.style.display === 'none') {
+                    return;
+                }
+                
+                // Collect form data
+                const formData = new FormData(form);
+                const pickupData = {};
+                
+                formData.forEach((value, key) => {
+                    if (key !== 'loginUsername' && key !== 'loginPassword') {
+                        pickupData[key] = value;
+                    }
+                });
+                
+                // Generate a unique order ID
+                const orderId = 'ORD' + Math.floor(100000 + Math.random() * 900000);
+                pickupData.orderId = orderId;
+                
+                // This would normally be sent to the server for processing
+                console.log('Pickup Order Data:', pickupData);
+                
+                // Store order data in localStorage (for demo purposes only)
+                // In a real implementation, this would be stored in MongoDB
+                const storedOrders = JSON.parse(localStorage.getItem('wavemax_orders')) || {};
+                storedOrders[orderId] = {
+                    ...pickupData,
+                    status: 'scheduled',
+                    createdAt: new Date().toISOString()
+                };
+                localStorage.setItem('wavemax_orders', JSON.stringify(storedOrders));
+                
+                // Show confirmation and notify affiliate
+                alert(`Pickup successfully scheduled! Order ID: ${orderId}\n\nYour affiliate partner has been notified.`);
+                
+                // Redirect to order confirmation page
+                window.location.href = 'order-confirmation.html?id=' + orderId;
+            });
+        });
+
+        // Server-side code (for illustration purposes only)
+        /*
+        // Node.js with Express and MongoDB example
+        
+        const express = require('express');
+        const app = express();
+        const mongoose = require('mongoose');
+        const nodemailer = require('nodemailer');
+        
+        // MongoDB connection
+        mongoose.connect('mongodb+srv://<username>:<password>@cluster0.mongodb.net/wavemax', {
+            useNewUrlParser: true,
+            useUnifiedTopology: true,
+            ssl: true
+        });
+        
+        // Order schema
+        const orderSchema = new mongoose.Schema({
+            orderId: { type: String, unique: true },
+            customerId: { type: String, required: true, index: true },
+            affiliateId: { type: String, required: true, index: true },
+            pickupDate: { type: Date, required: true },
+            pickupTime: { type: String, required: true },
+            specialPickupInstructions: String,
+            estimatedSize: { type: String, required: true },
+            serviceNotes: String,
+            deliveryDate: { type: Date, required: true },
+            deliveryTime: { type: String, required: true },
+            specialDeliveryInstructions: String,
+            status: { 
+                type: String, 
+                enum: ['scheduled', 'picked_up', 'processing', 'ready_for_delivery', 'delivered', 'cancelled'],
+                default: 'scheduled'
+            },
+            actualWeight: Number,
+            actualCost: Number,
+            paymentStatus: { type: String, default: 'pending' },
+            createdAt: { type: Date, default: Date.now },
+            updatedAt: { type: Date, default: Date.now }
+        });
+        
+        orderSchema.pre('save', function(next) {
+            this.updatedAt = Date.now();
+            next();
+        });
+        
+        const Order = mongoose.model('Order', orderSchema);
+        
+        // Create a new order
+        app.post('/api/orders', async (req, res) => {
+            try {
+                const orderData = req.body;
+                
+                // Generate a unique order ID
+                const orderId = 'ORD' + Math.floor(100000 + Math.random() * 900000);
+                
+                // Create new order
+                const newOrder = new Order({
+                    ...orderData,
+                    orderId,
+                    status: 'scheduled'
+                });
+                
+                await newOrder.save();
+                
+                // Fetch affiliate and customer data for notifications
+                const affiliate = await Affiliate.findOne({ affiliateId: orderData.affiliateId });
+                const customer = await Customer.findOne({ customerId: orderData.customerId });
+                
+                // Notify affiliate via email
+                const transporter = nodemailer.createTransport({
+                    // Email service configuration
+                });
+                
+                await transporter.sendMail({
+                    from: 'noreply@wavemaxlaundry.com',
+                    to: affiliate.email,
+                    subject: 'New Laundry Pickup Scheduled',
+                    html: `
+                        <h2>New Pickup Request</h2>
+                        <p>A new pickup has been scheduled:</p>
+                        <ul>
+                            <li>Order ID: ${orderId}</li>
+                            <li>Customer: ${customer.firstName} ${customer.lastName}</li>
+                            <li>Pickup Date: ${new Date(orderData.pickupDate).toLocaleDateString()}</li>
+                            <li>Pickup Time: ${orderData.pickupTime}</li>
+                            <li>Address: ${customer.address}, ${customer.city}, ${customer.state} ${customer.zipCode}</li>
+                        </ul>
+                        <p>Please login to your affiliate dashboard for more details.</p>
+                    `
+                });
+                
+                // Notify customer via email
+                await transporter.sendMail({
+                    from: 'noreply@wavemaxlaundry.com',
+                    to: customer.email,
+                    subject: 'Your Laundry Pickup Confirmation',
+                    html: `
+                        <h2>Pickup Confirmation</h2>
+                        <p>Your laundry pickup has been scheduled:</p>
+                        <ul>
+                            <li>Order ID: ${orderId}</li>
+                            <li>Pickup Date: ${new Date(orderData.pickupDate).toLocaleDateString()}</li>
+                            <li>Pickup Time: ${orderData.pickupTime}</li>
+                            <li>Delivery Date: ${new Date(orderData.deliveryDate).toLocaleDateString()}</li>
+                            <li>Delivery Time: ${orderData.deliveryTime}</li>
+                        </ul>
+                        <p>Your affiliate partner will be in touch regarding your pickup.</p>
+                    `
+                });
+                
+                res.status(201).json({
+                    success: true,
+                    orderId,
+                    message: 'Pickup scheduled successfully!'
+                });
+            } catch (error) {
+                res.status(400).json({
+                    success: false,
+                    message: error.message
+                });
+            }
+        });
+        
+        app.listen(3000, () => {
+            console.log('Server running on port 3000');
+        });
+        */
+    </script>
+</body>
+</html>

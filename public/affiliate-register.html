@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WaveMAX Laundry - Affiliate Registration</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <style>
+        .wavemax-blue {
+            background-color: #1e3a8a;
+        }
+        .wavemax-light-blue {
+            background-color: #3b82f6;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 font-sans">
+    <!-- Navigation -->
+    <nav class="wavemax-blue text-white p-4">
+        <div class="container mx-auto flex justify-between items-center">
+            <div class="flex items-center">
+                <a href="index.html" class="text-2xl font-bold">WaveMAX Laundry</a>
+            </div>
+            <div class="hidden md:flex space-x-6">
+                <a href="index.html" class="hover:text-blue-200">Home</a>
+                <a href="#" class="hover:text-blue-200">Services</a>
+                <a href="#" class="hover:text-blue-200">Locations</a>
+                <a href="#" class="hover:text-blue-200">About</a>
+                <a href="#" class="hover:text-blue-200">Contact</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Registration Form -->
+    <div class="py-12">
+        <div class="container mx-auto px-4">
+            <div class="max-w-3xl mx-auto bg-white rounded-lg shadow-md overflow-hidden">
+                <div class="wavemax-blue text-white p-6">
+                    <h2 class="text-2xl font-bold">Affiliate Registration</h2>
+                    <p class="mt-2">Fill out the form below to register as a WaveMAX Laundry affiliate partner.</p>
+                </div>
+                
+                <form id="affiliateRegistrationForm" class="p-6 space-y-6">
+                    <!-- Personal Information -->
+                    <div>
+                        <h3 class="text-xl font-bold mb-4">Personal Information</h3>
+                        <div class="grid md:grid-cols-2 gap-4">
+                            <div>
+                                <label for="firstName" class="block text-gray-700 mb-2">First Name *</label>
+                                <input type="text" id="firstName" name="firstName" required class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            </div>
+                            
+                            <div>
+                                <label for="lastName" class="block text-gray-700 mb-2">Last Name *</label>
+                                <input type="text" id="lastName" name="lastName" required class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            </div>
+                            
+                            <div>
+                                <label for="email" class="block text-gray-700 mb-2">Email Address *</label>
+                                <input type="email" id="email" name="email" required class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            </div>
+                            
+                            <div>
+                                <label for="phone" class="block text-gray-700 mb-2">Phone Number *</label>
+                                <input type="tel" id="phone" name="phone" required class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Business Information -->
+                    <div>
+                        <h3 class="text-xl font-bold mb-4">Business Information</h3>
+                        <div class="grid md:grid-cols-2 gap-4">
+                            <div class="md:col-span-2">
+                                <label for="businessName" class="block text-gray-700 mb-2">Business Name (if applicable)</label>
+                                <input type="text" id="businessName" name="businessName" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            </div>
+                            
+                            <div class="md:col-span-2">
+                                <label for="address" class="block text-gray-700 mb-2">Address *</label>
+                                <input type="text" id="address" name="address" required class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            </div>
+                            
+                            <div>
+                                <label for="city" class="block text-gray-700 mb-2">City *</label>
+                                <input type="text" id="city" name="city" required class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            </div>
+                            
+                            <div>
+                                <label for="state" class="block text-gray-700 mb-2">State *</label>
+                                <input type="text" id="state" name="state" required class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            </div>
+                            
+                            <div>
+                                <label for="zipCode" class="block text-gray-700 mb-2">ZIP Code *</label>
+                                <input type="text" id="zipCode" name="zipCode" required class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Service Information -->
+                    <div>
+                        <h3 class="text-xl font-bold mb-4">Service Information</h3>
+                        <div class="grid md:grid-cols-2 gap-4">
+                            <div class="md:col-span-2">
+                                <label class="block text-gray-700 mb-2">Service Area (Neighborhoods/ZIP Codes) *</label>
+                                <textarea id="serviceArea" name="serviceArea" required class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" rows="3"></textarea>
+                            </div>
+                            
+                            <div class="md:col-span-2">
+                                <label for="deliveryFee" class="block text-gray-700 mb-2">Your Pickup/Delivery Fee ($) *</label>
+                                <input type="number" id="deliveryFee" name="deliveryFee" min="0" step="0.01" required class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <p class="text-sm text-gray-500 mt-1">This is the fee you'll charge customers for each pickup/delivery. You keep 100% of this fee.</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Account Setup -->
+                    <div>
+                        <h3 class="text-xl font-bold mb-4">Account Setup</h3>
+                        <div class="grid md:grid-cols-2 gap-4">
+                            <div>
+                                <label for="username" class="block text-gray-700 mb-2">Username *</label>
+                                <input type="text" id="username" name="username" required class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            </div>
+                            
+                            <div>
+                                <label for="password" class="block text-gray-700 mb-2">Password *</label>
+                                <input type="password" id="password" name="password" required class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            </div>
+                            
+                            <div>
+                                <label for="confirmPassword" class="block text-gray-700 mb-2">Confirm Password *</label>
+                                <input type="password" id="confirmPassword" name="confirmPassword" required class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Payment Information -->
+                    <div>
+                        <h3 class="text-xl font-bold mb-4">Payment Information</h3>
+                        <div class="grid md:grid-cols-2 gap-4">
+                            <div class="md:col-span-2">
+                                <label for="paymentMethod" class="block text-gray-700 mb-2">Preferred Payment Method *</label>
+                                <select id="paymentMethod" name="paymentMethod" required class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <option value="">Select an option</option>
+                                    <option value="directDeposit">Direct Deposit</option>
+                                    <option value="check">Check</option>
+                                    <option value="paypal">PayPal</option>
+                                </select>
+                            </div>
+                            
+                            <div class="md:col-span-2" id="bankInfoContainer" style="display: none;">
+                                <label for="accountNumber" class="block text-gray-700 mb-2">Account Number *</label>
+                                <input type="text" id="accountNumber" name="accountNumber" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                
+                                <label for="routingNumber" class="block text-gray-700 mt-4 mb-2">Routing Number *</label>
+                                <input type="text" id="routingNumber" name="routingNumber" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            </div>
+                            
+                            <div class="md:col-span-2" id="paypalInfoContainer" style="display: none;">
+                                <label for="paypalEmail" class="block text-gray-700 mb-2">PayPal Email *</label>
+                                <input type="email" id="paypalEmail" name="paypalEmail" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Terms and Conditions -->
+                    <div>
+                        <div class="flex items-start">
+                            <input type="checkbox" id="termsAgreement" name="termsAgreement" required class="mt-1 mr-2">
+                            <label for="termsAgreement" class="text-gray-700">I agree to the <a href="#" class="text-blue-600 hover:underline">Terms and Conditions</a> and <a href="#" class="text-blue-600 hover:underline">Privacy Policy</a> *</label>
+                        </div>
+                    </div>
+                    
+                    <!-- Submit Button -->
+                    <div>
+                        <button type="submit" class="w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-blue-700 transition">Register as an Affiliate</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white py-8 mt-12">
+        <div class="container mx-auto px-4 text-center">
+            <p>&copy; 2025 WaveMAX Laundry. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Show/hide payment method fields based on selection
+            const paymentMethodSelect = document.getElementById('paymentMethod');
+            const bankInfoContainer = document.getElementById('bankInfoContainer');
+            const paypalInfoContainer = document.getElementById('paypalInfoContainer');
+            const accountNumberInput = document.getElementById('accountNumber');
+            const routingNumberInput = document.getElementById('routingNumber');
+            const paypalEmailInput = document.getElementById('paypalEmail');
+            
+            paymentMethodSelect.addEventListener('change', function() {
+                // Reset required fields
+                accountNumberInput.required = false;
+                routingNumberInput.required = false;
+                paypalEmailInput.required = false;
+                
+                // Hide all containers first
+                bankInfoContainer.style.display = 'none';
+                paypalInfoContainer.style.display = 'none';
+                
+                // Show relevant container based on selection
+                if (this.value === 'directDeposit') {
+                    bankInfoContainer.style.display = 'block';
+                    accountNumberInput.required = true;
+                    routingNumberInput.required = true;
+                } else if (this.value === 'paypal') {
+                    paypalInfoContainer.style.display = 'block';
+                    paypalEmailInput.required = true;
+                }
+            });
+            
+            // Form validation and submission
+            const form = document.getElementById('affiliateRegistrationForm');
+            
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                // Check if passwords match
+                const password = document.getElementById('password').value;
+                const confirmPassword = document.getElementById('confirmPassword').value;
+                
+                if (password !== confirmPassword) {
+                    alert('Passwords do not match!');
+                    return;
+                }
+                
+                // Collect form data
+                const formData = new FormData(form);
+                const affiliateData = {};
+                
+                formData.forEach((value, key) => {
+                    affiliateData[key] = value;
+                });
+                
+                // Generate a unique affiliate ID (would normally be done server-side)
+                const affiliateId = 'AFF' + Math.floor(100000 + Math.random() * 900000);
+                affiliateData.affiliateId = affiliateId;
+                
+                // This would normally be sent to the server for processing
+                console.log('Affiliate Registration Data:', affiliateData);
+                
+                // In a real implementation, this would be an API call to the server
+                // For demonstration, we'll show a success message and redirect
+                alert(`Registration successful! Your affiliate ID is: ${affiliateId}`);
+                
+                // Store the affiliate data in localStorage for demo purposes
+                // In a real implementation, this would be stored in MongoDB
+                localStorage.setItem('currentAffiliate', JSON.stringify(affiliateData));
+                
+                // Redirect to the affiliate dashboard
+                window.location.href = 'affiliate-success.html';
+            });
+        });
+
+        // Server-side code (for illustration purposes only)
+        /*
+        // Node.js with Express and MongoDB example
+        
+        const express = require('express');
+        const app = express();
+        const mongoose = require('mongoose');
+        const crypto = require('crypto');
+        
+        // MongoDB connection
+        mongoose.connect('mongodb+srv://<username>:<password>@cluster0.mongodb.net/wavemax', {
+            useNewUrlParser: true,
+            useUnifiedTopology: true
+        });
+        
+        // Affiliate schema
+        const affiliateSchema = new mongoose.Schema({
+            affiliateId: { type: String, unique: true },
+            firstName: String,
+            lastName: String,
+            email: { type: String, unique: true },
+            phone: String,
+            businessName: String,
+            address: String,
+            city: String,
+            state: String,
+            zipCode: String,
+            serviceArea: String,
+            deliveryFee: Number,
+            username: { type: String, unique: true },
+            passwordHash: String,
+            passwordSalt: String,
+            paymentMethod: String,
+            accountNumber: { type: String, encrypt: true },
+            routingNumber: { type: String, encrypt: true },
+            paypalEmail: String,
+            dateRegistered: { type: Date, default: Date.now }
+        });
+        
+        // Encryption methods for sensitive data
+        affiliateSchema.pre('save', function(next) {
+            if (this.isModified('accountNumber')) {
+                const cipher = crypto.createCipher('aes-256-cbc', process.env.ENCRYPTION_KEY);
+                this.accountNumber = cipher.update(this.accountNumber, 'utf8', 'hex') + cipher.final('hex');
+            }
+            
+            if (this.isModified('routingNumber')) {
+                const cipher = crypto.createCipher('aes-256-cbc', process.env.ENCRYPTION_KEY);
+                this.routingNumber = cipher.update(this.routingNumber, 'utf8', 'hex') + cipher.final('hex');
+            }
+            
+            next();
+        });
+        
+        const Affiliate = mongoose.model('Affiliate', affiliateSchema);
+        
+        // Register a new affiliate
+        app.post('/api/affiliates/register', async (req, res) => {
+            try {
+                const { password, ...affiliateData } = req.body;
+                
+                // Generate a unique affiliate ID
+                const affiliateId = 'AFF' + Math.floor(100000 + Math.random() * 900000);
+                
+                // Generate salt and hash for password
+                const salt = crypto.randomBytes(16).toString('hex');
+                const hash = crypto.pbkdf2Sync(password, salt, 1000, 64, 'sha512').toString('hex');
+                
+                // Create new affiliate
+                const newAffiliate = new Affiliate({
+                    ...affiliateData,
+                    affiliateId,
+                    passwordSalt: salt,
+                    passwordHash: hash
+                });
+                
+                await newAffiliate.save();
+                
+                res.status(201).json({
+                    success: true,
+                    affiliateId,
+                    message: 'Affiliate registered successfully!'
+                });
+            } catch (error) {
+                res.status(400).json({
+                    success: false,
+                    message: error.message
+                });
+            }
+        });
+        
+        app.listen(3000, () => {
+            console.log('Server running on port 3000');
+        });
+        */
+    </script>
+</body>
+</html>
