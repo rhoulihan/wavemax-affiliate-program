@@ -10,8 +10,8 @@ services:
       - NODE_ENV=development
       - PORT=3000
       - MONGODB_URI=mongodb://mongo:27017/wavemax
-      - ENCRYPTION_KEY=32ByteSecretKeyForEncryptionofData
-      - JWT_SECRET=SecretKeyForJWTTokenGeneration
+      - ENCRYPTION_KEY=${ENCRYPTION_KEY}
+      - JWT_SECRET=${JWT_SECRET}
       - EMAIL_USER=noreply@wavemaxlaundry.com
       - EMAIL_PASS=email_password_here
       - EMAIL_HOST=smtp.example.com
@@ -27,7 +27,7 @@ services:
 
   # MongoDB service for local development
   mongo:
-    image: mongo:5.0
+    image: mongo:7.0
     ports:
       - "27017:27017"
     volumes:

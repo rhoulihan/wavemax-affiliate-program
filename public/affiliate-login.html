@@ -126,19 +126,7 @@
                 .catch(error => {
                     // For demo purposes, simulate successful login
                     console.error('Error:', error);
-                    
-                    // Create mock affiliate data
-                    const mockAffiliate = {
-                        affiliateId: 'AFF123456',
-                        firstName: 'Demo',
-                        lastName: 'Affiliate',
-                        email: 'demo@example.com'
-                    };
-                    
-                    localStorage.setItem('currentAffiliate', JSON.stringify(mockAffiliate));
-                    
-                    // Redirect to dashboard
-                    window.location.href = `affiliate-dashboard.html?id=${mockAffiliate.affiliateId}`;
+                    alert('Login failed. Please check your credentials and try again.');
                 });
             });
         });

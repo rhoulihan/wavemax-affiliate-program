@@ -69,9 +69,9 @@ db.affiliates.insertOne({
     "serviceArea": "Downtown Austin, South Congress, Zilker",
     "deliveryFee": 5.99,
     "username": "demoaffiliate",
-    // Password: password123
-    "passwordSalt": "f844b09ff50c61d8e1b17f5e9fdfb53d",
-    "passwordHash": "7faa96b2b554e25893e785ee973290a53996ef8bbac0535a0acbbdbea8a1dd8bd7683d9a3f8431d84d16a036fc70ed8dde3b73bbf2632f94c4db3d621f3c5a3b",
+    // Secure password hash will be generated on first run
+    "passwordSalt": "",
+    "passwordHash": "",
     "paymentMethod": "directDeposit",
     "isActive": true,
     "dateRegistered": new Date(),
