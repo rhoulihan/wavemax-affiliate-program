@@ -18,6 +18,7 @@ const affiliateRoutes = require('./server/routes/affiliateRoutes');
 const customerRoutes = require('./server/routes/customerRoutes');
 const orderRoutes = require('./server/routes/orderRoutes');
 const bagRoutes = require('./server/routes/bagRoutes');
+const affiliateController = require('./server/controllers/affiliateController');
 
 // Create Express app
 const app = express();
