@@ -28,18 +28,6 @@ const logger = require('./server/utils/logger');
 
 const MongoStore = require('connect-mongo');
 
-app.use(session({
-  secret: process.env.SESSION_SECRET || process.env.JWT_SECRET,
-  resave: false,
-  saveUninitialized: false,
-  store: MongoStore.create({ mongoUrl: process.env.MONGODB_URI }),
-  cookie: {
-    secure: process.env.NODE_ENV === 'production',
-    httpOnly: true,
-    maxAge: 24 * 60 * 60 * 1000
-  }
-}));
-
 app.set('trust proxy', true);
 
 // Update logging statements
@@ -128,15 +116,15 @@ app.use('/api/', apiLimiter);
 // Setup session middleware - add this after other middleware like helmet, cors, etc.
 const session = require('express-session');
 
-// Configure session
 app.use(session({
-  secret: process.env.SESSION_SECRET || process.env.JWT_SECRET, // Use a dedicated SESSION_SECRET env var
+  secret: process.env.SESSION_SECRET || process.env.JWT_SECRET,
   resave: false,
   saveUninitialized: false,
+  store: MongoStore.create({ mongoUrl: process.env.MONGODB_URI }),
   cookie: {
-    secure: process.env.NODE_ENV === 'production', // Only use secure cookies in production
-    httpOnly: true, // Prevents client-side JS from reading the cookie
-    maxAge: 24 * 60 * 60 * 1000 // 1 day in milliseconds
+    secure: process.env.NODE_ENV === 'production',
+    httpOnly: true,
+    maxAge: 24 * 60 * 60 * 1000
   }
 }));
 
