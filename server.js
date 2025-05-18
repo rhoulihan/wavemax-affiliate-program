@@ -23,33 +23,6 @@ const bagRoutes = require('./server/routes/bagRoutes');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Setup session middleware - add this after other middleware like helmet, cors, etc.
-const session = require('express-session');
-
-// Configure session
-app.use(session({
-  secret: process.env.SESSION_SECRET || process.env.JWT_SECRET, // Use a dedicated SESSION_SECRET env var
-  resave: false,
-  saveUninitialized: false,
-  cookie: {
-    secure: process.env.NODE_ENV === 'production', // Only use secure cookies in production
-    httpOnly: true, // Prevents client-side JS from reading the cookie
-    maxAge: 24 * 60 * 60 * 1000 // 1 day in milliseconds
-  }
-}));
-
-// Then add CSRF protection after session setup
-const csrf = require('csurf');
-const csrfProtection = csrf({ cookie: true });
-app.use(csrfProtection);
-
-// Add middleware to include CSRF token in all templates
-app.use((req, res, next) => {
-  res.locals.csrfToken = req.csrfToken();
-  next();
-});
-
-
 const logger = require('./server/utils/logger');
 
 // Update logging statements
@@ -63,20 +36,23 @@ app.use((req, res, next) => {
   next();
 });
 
-// Connect to MongoDB
-mongoose.connect(process.env.MONGODB_URI, {
-  ssl: true,
-  // Modern MongoDB driver handles TLS/SSL differently
-  tls: process.env.NODE_ENV === 'production',
-  tlsAllowInvalidCertificates: process.env.NODE_ENV === 'development'
-})
-.then(() => {
-  logger.info('Connected to MongoDB');
-})
-.catch(err => {
-  logger.error('MongoDB connection error:', { error: err.message });
-  process.exit(1);
-});
+// Define MongoDB connection options
+const mongoOptions = {
+  // Use the modern tls option instead of ssl
+  tls: true,
+  // Only allow invalid certificates in non-production environments
+  tlsAllowInvalidCertificates: process.env.NODE_ENV !== 'production'
+};
+
+// Connect to MongoDB with consistent options
+mongoose.connect(process.env.MONGODB_URI, mongoOptions)
+  .then(() => {
+    logger.info('Connected to MongoDB');
+  })
+  .catch(err => {
+    logger.error('MongoDB connection error:', { error: err.message });
+    process.exit(1);
+  });
 
 // Middleware
 // Security headers
@@ -132,15 +108,41 @@ const apiLimiter = rateLimit({
 });
 app.use('/api/', apiLimiter);
 
+// Setup session middleware - add this after other middleware like helmet, cors, etc.
+const session = require('express-session');
+
+// Configure session
+app.use(session({
+  secret: process.env.SESSION_SECRET || process.env.JWT_SECRET, // Use a dedicated SESSION_SECRET env var
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    secure: process.env.NODE_ENV === 'production', // Only use secure cookies in production
+    httpOnly: true, // Prevents client-side JS from reading the cookie
+    maxAge: 24 * 60 * 60 * 1000 // 1 day in milliseconds
+  }
+}));
+
 // Serve static files in all environments
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Routes
-app.use('/api/auth', authRoutes);
-app.use('/api/affiliates', affiliateRoutes);
-app.use('/api/customers', customerRoutes);
-app.use('/api/orders', orderRoutes);
-app.use('/api/bags', bagRoutes);
+// Set up CSRF protection
+const csrf = require('csurf');
+const csrfProtection = csrf({ cookie: true });
+
+// Create API routes that need CSRF protection
+app.use('/api/auth', csrfProtection, authRoutes);
+app.use('/api/affiliates', csrfProtection, affiliateRoutes);
+app.use('/api/customers', csrfProtection, customerRoutes);
+app.use('/api/orders', csrfProtection, orderRoutes);
+app.use('/api/bags', csrfProtection, bagRoutes);
+
+// For routes that render templates and need CSRF tokens, use csrfProtection middleware
+app.get('/admin/*', csrfProtection, (req, res, next) => {
+  // Set CSRF token for templates
+  res.locals.csrfToken = req.csrfToken();
+  next();
+});
 
 // Health check endpoint
 app.get('/health', (req, res) => {
