@@ -12,11 +12,11 @@ const rateLimit = require('express-rate-limit');
 const compression = require('compression');
 
 // Import routes
-const authRoutes = require('./routes/authRoutes');
-const affiliateRoutes = require('./routes/affiliateRoutes');
-const customerRoutes = require('./routes/customerRoutes');
-const orderRoutes = require('./routes/orderRoutes');
-const bagRoutes = require('./routes/bagRoutes');
+const authRoutes = require('./server/routes/authRoutes');
+const affiliateRoutes = require('./server/routes/affiliateRoutes');
+const customerRoutes = require('./server/routes/customerRoutes');
+const orderRoutes = require('./server/routes/orderRoutes');
+const bagRoutes = require('./server/routes/bagRoutes');
 
 // Create Express app
 const app = express();
