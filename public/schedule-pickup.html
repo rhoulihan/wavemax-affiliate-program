@@ -41,6 +41,9 @@
                 </div>
                 
                 <form id="pickupScheduleForm" class="p-6 space-y-6">
+                    <!-- Hidden CSRF token -->
+                    <input type="hidden" name="_csrf" value="{{csrfToken}}">
+                    
                     <!-- Login Section -->
                     <div id="loginSection">
                         <h3 class="text-xl font-bold mb-4">Customer Login</h3>

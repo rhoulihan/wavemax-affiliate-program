@@ -40,4 +40,6 @@ router.post('/reset-password', authController.resetPassword);
  */
 router.get('/verify', authController.verifyToken);
 
+router.post('/refresh-token', authController.refreshToken);
+
 module.exports = router;
