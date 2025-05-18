@@ -1,63 +1,4 @@
-## Environment Variable Configuration Guide
-
-Below is a detailed guide for configuring each setting in your `.env` file:
-
-### Basic Configuration
-
-| Variable | Description | How to Generate/Configure |
-|----------|-------------|---------------------------|
-| `NODE_ENV` | Environment mode | Set to `development`, `test`, or `production` |
-| `PORT` | Server port | Set to `3000` or your preferred port |
-
-### MongoDB Configuration
-
-| Variable | Description | How to Generate/Configure |
-|----------|-------------|---------------------------|
-| `MONGODB_URI` | MongoDB connection string | For local development: `mongodb://localhost:27017/wavemax`<br>For MongoDB Atlas: `mongodb+srv://<username>:<password>@cluster0.mongodb.net/wavemax?retryWrites=true&w=majority` |
-
-### Security Keys
-
-| Variable | Description | How to Generate/Configure |
-|----------|-------------|---------------------------|
-| `ENCRYPTION_KEY` | 32-byte key for data encryption | Generate using:<br>`node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"` |
-| `JWT_SECRET` | Secret for JWT token signing | Generate using:<br>`node -e "console.log(require('crypto').randomBytes(64).toString('hex'))"` |
-
-### Email Configuration
-
-| Variable | Description | How to Generate/Configure |
-|----------|-------------|---------------------------|
-| `EMAIL_USER` | Email account username | Use your SMTP provider username<br>For Gmail: `your.email@gmail.com` |
-| `EMAIL_PASS` | Email account password | For Gmail, create an app password:<br>1. Enable 2FA in your Google account<br>2. Go to App Passwords in security settings<br>3. Generate a new app password for "Mail" |
-| `EMAIL_HOST` | SMTP host server | For Gmail: `smtp.gmail.com`<br>For Outlook: `smtp-mail.outlook.com` |
-| `EMAIL_PORT` | SMTP port | For most providers with TLS: `587`<br>For SSL: `465` |
-
-### CORS Configuration
-
-| Variable | Description | How to Generate/Configure |
-|----------|-------------|---------------------------|
-| `CORS_ORIGIN` | Allowed origins for CORS | For development: `http://localhost:3000`<br>For production: `https://yourdomain.com,https://www.yourdomain.com`<br>Multiple domains separated by commas |
-
-### Payment Processing (Optional)
-
-| Variable | Description | How to Generate/Configure |
-|----------|-------------|---------------------------|
-| `STRIPE_SECRET_KEY` | Stripe secret API key | 1. Create a Stripe account<br>2. Go to Developers > API keys<br>3. Copy the Secret key<br>Format: `sk_test_...` or `sk_live_...` |
-| `STRIPE_PUBLISHABLE_KEY` | Stripe publishable API key | Copy from the same Stripe dashboard<br>Format: `pk_test_...` or `pk_live_...` |
-
-### File Storage (Optional for Bag Barcodes)
-
-| Variable | Description | How to Generate/Configure |
-|----------|-------------|---------------------------|
-| `AWS_S3_BUCKET` | AWS S3 bucket name | Create in AWS S3 console: `wavemax-laundry-barcodes` |
-| `AWS_ACCESS_KEY_ID` | AWS access key | Generate in AWS IAM console:<br>1. Create a new IAM user<br>2. Attach S3 access policies<br>3. Generate access keys |
-| `AWS_SECRET_ACCESS_KEY` | AWS secret key | Generated with the access key ID above |
-| `AWS_REGION` | AWS region for the bucket | Example: `us-east-1` |
-
-### Frontend URL Configuration
-
-| Variable | Description | How to Generate/Configure |
-|----------|-------------|---------------------------|
-| `FRONTEND_URL` | Base URL for frontend links | Development: `http://localhost:3000`<br>Production: `https://yourdomain.com` |# WaveMAX Laundry Affiliate Program
+# WaveMAX Laundry Affiliate Program
 
 This repository contains a complete solution for the WaveMAX Laundry affiliate program, allowing individuals to register as affiliates and provide pickup/delivery services for WaveMAX's wash, dry, fold laundry services.
 
@@ -118,13 +59,15 @@ wavemax-affiliate-program/
 │   │   └── orderController.js             # Order endpoints
 │   │
 │   ├── middleware/                        # Express middleware
-│   │   └── auth.js                        # Authentication middleware
+│   │   ├── auth.js                        # Authentication middleware
+│   │   └── errorHandler.js                # Central error handling middleware
 │   │
 │   ├── models/                            # Mongoose models
 │   │   ├── Affiliate.js                   # Affiliate model
 │   │   ├── Customer.js                    # Customer model
 │   │   ├── Order.js                       # Order model
 │   │   ├── Bag.js                         # Bag model
+│   │   ├── RefreshToken.js                # Refresh token model
 │   │   └── Transaction.js                 # Transaction model
 │   │
 │   ├── routes/                            # Express routes
@@ -141,12 +84,17 @@ wavemax-affiliate-program/
 │   │
 │   └── utils/                             # Utility functions
 │       ├── emailService.js                # Email sending service
-│       └── encryption.js                  # Data encryption utilities
+│       ├── encryption.js                  # Data encryption utilities
+│       ├── logger.js                      # Logging service
+│       └── paginationMiddleware.js        # Pagination utility
 │
 ├── tests/                                 # Test files
 │   ├── setup.js                           # Test setup configuration
-│   ├── affiliate.test.js                  # Affiliate API tests
-│   └── auth.test.js                       # Authentication tests
+│   ├── integration/                       # Integration tests
+│   │   └── affiliate.test.js              # Affiliate API tests
+│   └── unit/                              # Unit tests
+│       ├── emailService.test.js           # Email service tests
+│       └── encryption.test.js             # Encryption utility tests
 │
 ├── scripts/                               # Utility scripts
 │
@@ -170,6 +118,7 @@ wavemax-affiliate-program/
 - **Deployment**: Docker, Nginx
 - **Email**: Nodemailer
 - **Testing**: Jest, Supertest, MongoDB Memory Server
+- **Logging**: Winston
 
 ## Local Development Setup
 
@@ -228,6 +177,7 @@ Below is a detailed guide for configuring each setting in your `.env` file:
 |----------|-------------|---------------------------|
 | `ENCRYPTION_KEY` | 32-byte key for data encryption | Generate using:<br>`node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"` |
 | `JWT_SECRET` | Secret for JWT token signing | Generate using:<br>`node -e "console.log(require('crypto').randomBytes(64).toString('hex'))"` |
+| `SESSION_SECRET` | Secret for Express sessions | Generate using:<br>`node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"` |
 
 #### Email Configuration
 
@@ -266,6 +216,13 @@ Below is a detailed guide for configuring each setting in your `.env` file:
 |----------|-------------|---------------------------|
 | `FRONTEND_URL` | Base URL for frontend links | Development: `http://localhost:3000`<br>Production: `https://yourdomain.com` |
 
+#### Logging Configuration
+
+| Variable | Description | How to Generate/Configure |
+|----------|-------------|---------------------------|
+| `LOG_LEVEL` | Logging verbosity level | Set to `error`, `warn`, `info`, `verbose`, `debug`, or `silly`. Default: `info` |
+| `LOG_DIR` | Directory for log files | Default: `logs` directory in project root. Make sure this directory exists |
+
 6. Start the development server:
    ```
    npm run dev
@@ -282,6 +239,8 @@ Below is a detailed guide for configuring each setting in your `.env` file:
 
 2. Access the application at `http://localhost:3000`
 
+When using Docker, ensure your environment variables in the docker-compose.yml file are properly set.
+
 ## Testing
 
 Run the test suite:
@@ -289,6 +248,8 @@ Run the test suite:
 ```
 npm test
 ```
+
+The project uses Jest with MongoDB Memory Server for testing, allowing database tests to run without affecting your local MongoDB instance.
 
 ## Production Deployment
 
@@ -391,9 +352,13 @@ See the [Deployment Guide](#deployment-guide) for detailed instructions on deplo
    # Generate secure JWT secret
    JWT_SECRET=$(node -e "console.log(require('crypto').randomBytes(64).toString('hex'))")
    
+   # Generate secure session secret
+   SESSION_SECRET=$(node -e "console.log(require('crypto').randomBytes(32).toString('hex'))")
+   
    # Edit .env file with secure keys and production settings
    sed -i "s/^ENCRYPTION_KEY=.*/ENCRYPTION_KEY=$ENCRYPTION_KEY/" .env
    sed -i "s/^JWT_SECRET=.*/JWT_SECRET=$JWT_SECRET/" .env
+   sed -i "s/^SESSION_SECRET=.*/SESSION_SECRET=$SESSION_SECRET/" .env
    sed -i "s/^NODE_ENV=.*/NODE_ENV=production/" .env
    
    # Set MongoDB URI (change as needed for your setup)
@@ -646,6 +611,13 @@ Set up automated MongoDB backups:
            pm2 reload all
        endscript
    }
+   ```
+
+3. **Create Logs Directory**
+
+   ```bash
+   mkdir -p /var/www/wavemax/logs
+   chmod 755 /var/www/wavemax/logs
    ```
 
 ## Maintenance
