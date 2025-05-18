@@ -341,7 +341,8 @@ exports.getAffiliateEarnings = async (req, res) => {
 exports.getAffiliateCustomers = async (req, res) => {
   try {
     const { affiliateId } = req.params;
-    const { search, sort, page = 1, limit = 10 } = req.query;
+    const { search, sort } = req.query;
+    const { page, limit, skip } = req.pagination; // Use values from middleware
     
     // Check authorization (admin or self)
     if (req.user.role !== 'admin' && req.user.affiliateId !== affiliateId) {
@@ -392,8 +393,8 @@ exports.getAffiliateCustomers = async (req, res) => {
     // Get paginated customers
     const customers = await Customer.find(query)
       .sort(sortOptions)
-      .skip((page - 1) * limit)
-      .limit(parseInt(limit));
+      .skip(skip)
+      .limit(limit);
       
     // Get order counts for each customer
     const customerIds = customers.map(customer => customer.customerId);

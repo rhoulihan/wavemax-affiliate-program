@@ -43,6 +43,9 @@
                 <form id="customerRegistrationForm" class="p-6 space-y-6">
                     <!-- Hidden Affiliate ID field -->
                     <input type="hidden" id="affiliateId" name="affiliateId">
+
+                    <!-- Hidden CSRF token -->
+                    <input type="hidden" name="_csrf" value="{{csrfToken}}">
                     
                     <!-- Personal Information -->
                     <div>

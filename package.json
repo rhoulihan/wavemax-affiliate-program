@@ -24,6 +24,9 @@
   "author": "WaveMAX Laundry",
   "license": "MIT",
   "dependencies": {
+    "winston": "^3.10.0",
+    "express-session": "1.17.3",
+    "csurf": "^1.11.0",
     "express-validator": "^7.0.1",
     "crypto-js": "^4.2.0",
     "compression": "1.7.4",

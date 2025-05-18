@@ -41,6 +41,8 @@
                 </div>
                 
                 <form id="affiliateRegistrationForm" class="p-6 space-y-6">
+                    <!-- Hidden CSRF token -->
+                    <input type="hidden" name="_csrf" value="{{csrfToken}}">
                     <!-- Personal Information -->
                     <div>
                         <h3 class="text-xl font-bold mb-4">Personal Information</h3>
@@ -223,141 +225,53 @@
             // Form validation and submission
             const form = document.getElementById('affiliateRegistrationForm');
             
-            form.addEventListener('submit', function(e) {
+            form.addEventListener('submit', async function(e) {
                 e.preventDefault();
                 
-                // Check if passwords match
-                const password = document.getElementById('password').value;
-                const confirmPassword = document.getElementById('confirmPassword').value;
-                
-                if (password !== confirmPassword) {
-                    alert('Passwords do not match!');
+                try {
+                    // Check if passwords match
+                    const password = document.getElementById('password').value;
+                    const confirmPassword = document.getElementById('confirmPassword').value;
+                    
+                    if (password !== confirmPassword) {
+                    window.ErrorHandler.showError('Passwords do not match!');
                     return;
-                }
-                
-                // Collect form data
-                const formData = new FormData(form);
-                const affiliateData = {};
-                
-                formData.forEach((value, key) => {
+                    }
+                    
+                    // Collect form data
+                    const formData = new FormData(form);
+                    const affiliateData = {};
+                    
+                    formData.forEach((value, key) => {
                     affiliateData[key] = value;
-                });
-                
-                // Generate a unique affiliate ID (would normally be done server-side)
-                const affiliateId = 'AFF' + Math.floor(100000 + Math.random() * 900000);
-                affiliateData.affiliateId = affiliateId;
-                
-                // This would normally be sent to the server for processing
-                console.log('Affiliate Registration Data:', affiliateData);
-                
-                // In a real implementation, this would be an API call to the server
-                // For demonstration, we'll show a success message and redirect
-                alert(`Registration successful! Your affiliate ID is: ${affiliateId}`);
-                
-                // Store the affiliate data in localStorage for demo purposes
-                // In a real implementation, this would be stored in MongoDB
-                localStorage.setItem('currentAffiliate', JSON.stringify(affiliateData));
-                
-                // Redirect to the affiliate dashboard
-                window.location.href = 'affiliate-success.html';
+                    });
+                    
+                    // In a real implementation, this would be an API call to the server
+                    const response = await fetch('/api/affiliates/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(affiliateData)
+                    });
+                    
+                    await window.ErrorHandler.handleFetchError(response);
+                    const data = await response.json();
+                    
+                    // Store the affiliate data and redirect
+                    localStorage.setItem('currentAffiliate', JSON.stringify({
+                    ...affiliateData,
+                    affiliateId: data.affiliateId
+                    }));
+                    
+                    // Redirect to success page
+                    window.location.href = 'affiliate-success.html';
+                } catch (error) {
+                    console.error('Registration error:', error);
+                }
             });
         });
-
-        // Server-side code (for illustration purposes only)
-        /*
-        // Node.js with Express and MongoDB example
-        
-        const express = require('express');
-        const app = express();
-        const mongoose = require('mongoose');
-        const crypto = require('crypto');
-        
-        // MongoDB connection
-        mongoose.connect('mongodb+srv://<username>:<password>@cluster0.mongodb.net/wavemax', {
-            useNewUrlParser: true,
-            useUnifiedTopology: true
-        });
-        
-        // Affiliate schema
-        const affiliateSchema = new mongoose.Schema({
-            affiliateId: { type: String, unique: true },
-            firstName: String,
-            lastName: String,
-            email: { type: String, unique: true },
-            phone: String,
-            businessName: String,
-            address: String,
-            city: String,
-            state: String,
-            zipCode: String,
-            serviceArea: String,
-            deliveryFee: Number,
-            username: { type: String, unique: true },
-            passwordHash: String,
-            passwordSalt: String,
-            paymentMethod: String,
-            accountNumber: { type: String, encrypt: true },
-            routingNumber: { type: String, encrypt: true },
-            paypalEmail: String,
-            dateRegistered: { type: Date, default: Date.now }
-        });
-        
-        // Encryption methods for sensitive data
-        affiliateSchema.pre('save', function(next) {
-            if (this.isModified('accountNumber')) {
-                const cipher = crypto.createCipher('aes-256-cbc', process.env.ENCRYPTION_KEY);
-                this.accountNumber = cipher.update(this.accountNumber, 'utf8', 'hex') + cipher.final('hex');
-            }
-            
-            if (this.isModified('routingNumber')) {
-                const cipher = crypto.createCipher('aes-256-cbc', process.env.ENCRYPTION_KEY);
-                this.routingNumber = cipher.update(this.routingNumber, 'utf8', 'hex') + cipher.final('hex');
-            }
-            
-            next();
-        });
-        
-        const Affiliate = mongoose.model('Affiliate', affiliateSchema);
-        
-        // Register a new affiliate
-        app.post('/api/affiliates/register', async (req, res) => {
-            try {
-                const { password, ...affiliateData } = req.body;
-                
-                // Generate a unique affiliate ID
-                const affiliateId = 'AFF' + Math.floor(100000 + Math.random() * 900000);
-                
-                // Generate salt and hash for password
-                const salt = crypto.randomBytes(16).toString('hex');
-                const hash = crypto.pbkdf2Sync(password, salt, 1000, 64, 'sha512').toString('hex');
-                
-                // Create new affiliate
-                const newAffiliate = new Affiliate({
-                    ...affiliateData,
-                    affiliateId,
-                    passwordSalt: salt,
-                    passwordHash: hash
-                });
-                
-                await newAffiliate.save();
-                
-                res.status(201).json({
-                    success: true,
-                    affiliateId,
-                    message: 'Affiliate registered successfully!'
-                });
-            } catch (error) {
-                res.status(400).json({
-                    success: false,
-                    message: error.message
-                });
-            }
-        });
-        
-        app.listen(3000, () => {
-            console.log('Server running on port 3000');
-        });
-        */
     </script>
+    <script src="/assets/js/errorHandler.js"></script>
 </body>
 </html>

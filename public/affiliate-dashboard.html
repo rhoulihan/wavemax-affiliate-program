@@ -288,6 +288,9 @@
             <div class="bg-white rounded-lg shadow-md overflow-hidden">
                 <div class="p-6">
                     <form id="settingsForm">
+                        <!-- Hidden CSRF token -->
+                        <input type="hidden" name="_csrf" value="{{csrfToken}}">
+
                         <div class="mb-6">
                             <h3 class="text-lg font-bold mb-4">Personal Information</h3>
                             <div class="grid md:grid-cols-2 gap-4">

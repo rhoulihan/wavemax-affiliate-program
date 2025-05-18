@@ -2,6 +2,7 @@
 // Main Server Entry Point
 
 require('dotenv').config();
+const { errorHandler } = require('./server/middleware/errorHandler');
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
@@ -22,13 +23,43 @@ const bagRoutes = require('./server/routes/bagRoutes');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Setup session middleware - add this after other middleware like helmet, cors, etc.
+const session = require('express-session');
+
+// Configure session
+app.use(session({
+  secret: process.env.SESSION_SECRET || process.env.JWT_SECRET, // Use a dedicated SESSION_SECRET env var
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    secure: process.env.NODE_ENV === 'production', // Only use secure cookies in production
+    httpOnly: true, // Prevents client-side JS from reading the cookie
+    maxAge: 24 * 60 * 60 * 1000 // 1 day in milliseconds
+  }
+}));
+
+// Then add CSRF protection after session setup
+const csrf = require('csurf');
+const csrfProtection = csrf({ cookie: true });
+app.use(csrfProtection);
+
+// Add middleware to include CSRF token in all templates
+app.use((req, res, next) => {
+  res.locals.csrfToken = req.csrfToken();
+  next();
+});
+
+
+const logger = require('./server/utils/logger');
+
+// Update logging statements
 process.on('uncaughtException', (err) => {
-  console.error('UNCAUGHT EXCEPTION:', err);
-  console.error(err.stack);
+  logger.error('UNCAUGHT EXCEPTION:', { error: err.message, stack: err.stack });
+  process.exit(1);
 });
 
 app.use((req, res, next) => {
-  console.log(`${req.method} ${req.url}`);
+  logger.debug(`${req.method} ${req.url}`);
   next();
 });
 
@@ -40,16 +71,33 @@ mongoose.connect(process.env.MONGODB_URI, {
   tlsAllowInvalidCertificates: process.env.NODE_ENV === 'development'
 })
 .then(() => {
-  console.log('Connected to MongoDB');
+  logger.info('Connected to MongoDB');
 })
 .catch(err => {
-  console.error('MongoDB connection error:', err);
+  logger.error('MongoDB connection error:', { error: err.message });
   process.exit(1);
 });
 
 // Middleware
 // Security headers
-app.use(helmet());
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", "https://cdnjs.cloudflare.com"],
+      styleSrc: ["'self'", "https://cdnjs.cloudflare.com", "'unsafe-inline'"],
+      imgSrc: ["'self'", "data:", "https://www.wavemaxlaundry.com"],
+      connectSrc: ["'self'"],
+      fontSrc: ["'self'", "https://cdnjs.cloudflare.com"],
+      objectSrc: ["'none'"],
+      mediaSrc: ["'self'"],
+      frameSrc: ["'none'"]
+    }
+  },
+  xssFilter: true,
+  noSniff: true,
+  referrerPolicy: { policy: 'same-origin' }
+}));
 
 // CORS setup
 const corsOptions = {
@@ -115,6 +163,8 @@ if (process.env.NODE_ENV === 'production') {
   });
 }
 
+app.use(errorHandler);
+
 // Error handling middleware
 app.use((err, req, res, next) => {
   console.error(err.stack);
@@ -133,7 +183,7 @@ app.use((err, req, res, next) => {
 
 // Start server
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT} in ${process.env.NODE_ENV || 'development'} mode`);
+  logger.info(`Server running on port ${PORT} in ${process.env.NODE_ENV || 'development'} mode`);
 });
 
 // Handle unhandled promise rejections

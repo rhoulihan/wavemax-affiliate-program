@@ -167,6 +167,9 @@
                     <h4 class="text-lg font-bold mb-4">Schedule for <span id="selectedDate">January 1, 2025</span></h4>
                     
                     <form id="schedulePickupForm" class="space-y-4">
+                        <!-- Hidden CSRF token -->
+                        <input type="hidden" name="_csrf" value="{{csrfToken}}">
+                        
                         <input type="hidden" id="pickupDate" name="pickupDate">
                         
                         <div>
@@ -244,6 +247,9 @@
             <div class="bg-white rounded-lg shadow-md overflow-hidden">
                 <div class="p-6">
                     <form id="profileForm" class="space-y-6">
+                        <!-- Hidden CSRF token -->
+                        <input type="hidden" name="_csrf" value="{{csrfToken}}">
+                        
                         <div>
                             <h3 class="text-lg font-bold mb-4">Personal Information</h3>
                             <div class="grid md:grid-cols-2 gap-4">

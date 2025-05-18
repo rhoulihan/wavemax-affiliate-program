@@ -1,5 +1,6 @@
 // Authentication Controller for WaveMAX Laundry Affiliate Program
 
+const RefreshToken = require('../models/RefreshToken');
 const Affiliate = require('../models/Affiliate');
 const Customer = require('../models/Customer');
 const encryptionUtil = require('../utils/encryption');
@@ -17,6 +18,28 @@ const generateToken = (data, expiresIn = '7d') => {
     { expiresIn }
   );
 };
+
+const generateRefreshToken = async (userId, userType, ip) => {
+  // Create a refresh token that expires in 7 days
+  const expiryDate = new Date();
+  expiryDate.setDate(expiryDate.getDate() + 7);
+  
+  // Generate a secure random token
+  const token = crypto.randomBytes(40).toString('hex');
+  
+  // Save token to database
+  const refreshToken = new RefreshToken({
+    token,
+    userId,
+    userType,
+    expiryDate,
+    createdByIp: ip
+  });
+  
+  await refreshToken.save();
+  
+  return token;
+}
 
 /**
  * Affiliate login controller
@@ -60,9 +83,17 @@ exports.affiliateLogin = async (req, res) => {
       role: 'affiliate'
     });
     
+    // Generate refresh token
+    const refreshToken = await generateRefreshToken(
+      affiliate._id,
+      'affiliate',
+      req.ip
+    );
+
     res.status(200).json({
       success: true,
-      token,
+      token, // Access token
+      refreshToken,
       affiliate: {
         affiliateId: affiliate.affiliateId,
         firstName: affiliate.firstName,
@@ -75,6 +106,79 @@ exports.affiliateLogin = async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'An error occurred during login'
+    });
+  }
+};
+
+exports.refreshToken = async (req, res) => {
+  try {
+    const { refreshToken } = req.body;
+    
+    if (!refreshToken) {
+      return res.status(400).json({
+        success: false,
+        message: 'Refresh token is required'
+      });
+    }
+    
+    // Find the token in the database
+    const storedToken = await RefreshToken.findOne({ 
+      token: refreshToken,
+      isRevoked: false,
+      expiryDate: { $gt: new Date() }
+    });
+    
+    if (!storedToken) {
+      return res.status(401).json({
+        success: false,
+        message: 'Invalid or expired refresh token'
+      });
+    }
+    
+    // Find the user based on the token
+    let user;
+    if (storedToken.userType === 'affiliate') {
+      user = await Affiliate.findById(storedToken.userId);
+    } else if (storedToken.userType === 'customer') {
+      user = await Customer.findById(storedToken.userId);
+    }
+    
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+    
+    // Generate new access token
+    const accessToken = generateToken({
+      id: user._id,
+      ...(storedToken.userType === 'affiliate' && { affiliateId: user.affiliateId }),
+      ...(storedToken.userType === 'customer' && { customerId: user.customerId }),
+      role: storedToken.userType
+    });
+    
+    // Generate new refresh token
+    const newRefreshToken = await generateRefreshToken(
+      user._id,
+      storedToken.userType,
+      req.ip
+    );
+    
+    // Revoke the old refresh token
+    storedToken.isRevoked = true;
+    await storedToken.save();
+    
+    res.status(200).json({
+      success: true,
+      token: accessToken,
+      refreshToken: newRefreshToken
+    });
+  } catch (error) {
+    console.error('Refresh token error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'An error occurred during token refresh'
     });
   }
 };
