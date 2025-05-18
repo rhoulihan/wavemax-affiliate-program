@@ -26,6 +26,22 @@ const PORT = process.env.PORT || 3000;
 
 const logger = require('./server/utils/logger');
 
+const MongoStore = require('connect-mongo');
+
+app.use(session({
+  secret: process.env.SESSION_SECRET || process.env.JWT_SECRET,
+  resave: false,
+  saveUninitialized: false,
+  store: MongoStore.create({ mongoUrl: process.env.MONGODB_URI }),
+  cookie: {
+    secure: process.env.NODE_ENV === 'production',
+    httpOnly: true,
+    maxAge: 24 * 60 * 60 * 1000
+  }
+}));
+
+app.set('trust proxy', true);
+
 // Update logging statements
 process.on('uncaughtException', (err) => {
   logger.error('UNCAUGHT EXCEPTION:', { error: err.message, stack: err.stack });
