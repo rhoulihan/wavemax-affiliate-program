@@ -132,6 +132,7 @@ const csrfProtection = csrf({ cookie: true });
 
 // Create API routes that need CSRF protection
 app.use('/api/auth', csrfProtection, authRoutes);
+app.post('/api/affiliates/register', affiliateController.registerAffiliate);
 app.use('/api/affiliates', csrfProtection, affiliateRoutes);
 app.use('/api/customers', csrfProtection, customerRoutes);
 app.use('/api/orders', csrfProtection, orderRoutes);
