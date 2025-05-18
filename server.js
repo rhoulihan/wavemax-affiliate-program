@@ -22,12 +22,22 @@ const bagRoutes = require('./server/routes/bagRoutes');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+process.on('uncaughtException', (err) => {
+  console.error('UNCAUGHT EXCEPTION:', err);
+  console.error(err.stack);
+});
+
+app.use((req, res, next) => {
+  console.log(`${req.method} ${req.url}`);
+  next();
+});
+
 // Connect to MongoDB
 mongoose.connect(process.env.MONGODB_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-  ssl: process.env.NODE_ENV === 'production',
-  sslValidate: process.env.NODE_ENV === 'production'
+  ssl: true,
+  // Modern MongoDB driver handles TLS/SSL differently
+  tls: process.env.NODE_ENV === 'production',
+  tlsAllowInvalidCertificates: process.env.NODE_ENV === 'development'
 })
 .then(() => {
   console.log('Connected to MongoDB');
@@ -74,10 +84,8 @@ const apiLimiter = rateLimit({
 });
 app.use('/api/', apiLimiter);
 
-// Serve static files in production
-if (process.env.NODE_ENV === 'production') {
-  app.use(express.static(path.join(__dirname, 'public')));
-}
+// Serve static files in all environments
+app.use(express.static(path.join(__dirname, 'public')));
 
 // Routes
 app.use('/api/auth', authRoutes);
