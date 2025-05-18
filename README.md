@@ -1,4 +1,63 @@
-# WaveMAX Laundry Affiliate Program
+## Environment Variable Configuration Guide
+
+Below is a detailed guide for configuring each setting in your `.env` file:
+
+### Basic Configuration
+
+| Variable | Description | How to Generate/Configure |
+|----------|-------------|---------------------------|
+| `NODE_ENV` | Environment mode | Set to `development`, `test`, or `production` |
+| `PORT` | Server port | Set to `3000` or your preferred port |
+
+### MongoDB Configuration
+
+| Variable | Description | How to Generate/Configure |
+|----------|-------------|---------------------------|
+| `MONGODB_URI` | MongoDB connection string | For local development: `mongodb://localhost:27017/wavemax`<br>For MongoDB Atlas: `mongodb+srv://<username>:<password>@cluster0.mongodb.net/wavemax?retryWrites=true&w=majority` |
+
+### Security Keys
+
+| Variable | Description | How to Generate/Configure |
+|----------|-------------|---------------------------|
+| `ENCRYPTION_KEY` | 32-byte key for data encryption | Generate using:<br>`node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"` |
+| `JWT_SECRET` | Secret for JWT token signing | Generate using:<br>`node -e "console.log(require('crypto').randomBytes(64).toString('hex'))"` |
+
+### Email Configuration
+
+| Variable | Description | How to Generate/Configure |
+|----------|-------------|---------------------------|
+| `EMAIL_USER` | Email account username | Use your SMTP provider username<br>For Gmail: `your.email@gmail.com` |
+| `EMAIL_PASS` | Email account password | For Gmail, create an app password:<br>1. Enable 2FA in your Google account<br>2. Go to App Passwords in security settings<br>3. Generate a new app password for "Mail" |
+| `EMAIL_HOST` | SMTP host server | For Gmail: `smtp.gmail.com`<br>For Outlook: `smtp-mail.outlook.com` |
+| `EMAIL_PORT` | SMTP port | For most providers with TLS: `587`<br>For SSL: `465` |
+
+### CORS Configuration
+
+| Variable | Description | How to Generate/Configure |
+|----------|-------------|---------------------------|
+| `CORS_ORIGIN` | Allowed origins for CORS | For development: `http://localhost:3000`<br>For production: `https://yourdomain.com,https://www.yourdomain.com`<br>Multiple domains separated by commas |
+
+### Payment Processing (Optional)
+
+| Variable | Description | How to Generate/Configure |
+|----------|-------------|---------------------------|
+| `STRIPE_SECRET_KEY` | Stripe secret API key | 1. Create a Stripe account<br>2. Go to Developers > API keys<br>3. Copy the Secret key<br>Format: `sk_test_...` or `sk_live_...` |
+| `STRIPE_PUBLISHABLE_KEY` | Stripe publishable API key | Copy from the same Stripe dashboard<br>Format: `pk_test_...` or `pk_live_...` |
+
+### File Storage (Optional for Bag Barcodes)
+
+| Variable | Description | How to Generate/Configure |
+|----------|-------------|---------------------------|
+| `AWS_S3_BUCKET` | AWS S3 bucket name | Create in AWS S3 console: `wavemax-laundry-barcodes` |
+| `AWS_ACCESS_KEY_ID` | AWS access key | Generate in AWS IAM console:<br>1. Create a new IAM user<br>2. Attach S3 access policies<br>3. Generate access keys |
+| `AWS_SECRET_ACCESS_KEY` | AWS secret key | Generated with the access key ID above |
+| `AWS_REGION` | AWS region for the bucket | Example: `us-east-1` |
+
+### Frontend URL Configuration
+
+| Variable | Description | How to Generate/Configure |
+|----------|-------------|---------------------------|
+| `FRONTEND_URL` | Base URL for frontend links | Development: `http://localhost:3000`<br>Production: `https://yourdomain.com` |# WaveMAX Laundry Affiliate Program
 
 This repository contains a complete solution for the WaveMAX Laundry affiliate program, allowing individuals to register as affiliates and provide pickup/delivery services for WaveMAX's wash, dry, fold laundry services.
 
@@ -139,16 +198,73 @@ wavemax-affiliate-program/
    # Edit .env with your settings
    ```
 
-4. Generate secure keys:
-   ```
-   # Generate ENCRYPTION_KEY
-   node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
-   
-   # Generate JWT_SECRET
-   node -e "console.log(require('crypto').randomBytes(64).toString('hex'))"
+4. Generate secure keys and configure all required settings:
+
+   ```bash
+   # Open the .env file in your editor
+   nano .env
    ```
 
-5. Add the generated keys to your `.env` file.
+### Environment Variable Configuration Guide
+
+Below is a detailed guide for configuring each setting in your `.env` file:
+
+#### Basic Configuration
+
+| Variable | Description | How to Generate/Configure |
+|----------|-------------|---------------------------|
+| `NODE_ENV` | Environment mode | Set to `development`, `test`, or `production` |
+| `PORT` | Server port | Set to `3000` or your preferred port |
+
+#### MongoDB Configuration
+
+| Variable | Description | How to Generate/Configure |
+|----------|-------------|---------------------------|
+| `MONGODB_URI` | MongoDB connection string | For local development: `mongodb://localhost:27017/wavemax`<br>For MongoDB Atlas: `mongodb+srv://<username>:<password>@cluster0.mongodb.net/wavemax?retryWrites=true&w=majority` |
+
+#### Security Keys
+
+| Variable | Description | How to Generate/Configure |
+|----------|-------------|---------------------------|
+| `ENCRYPTION_KEY` | 32-byte key for data encryption | Generate using:<br>`node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"` |
+| `JWT_SECRET` | Secret for JWT token signing | Generate using:<br>`node -e "console.log(require('crypto').randomBytes(64).toString('hex'))"` |
+
+#### Email Configuration
+
+| Variable | Description | How to Generate/Configure |
+|----------|-------------|---------------------------|
+| `EMAIL_USER` | Email account username | Use your SMTP provider username<br>For Gmail: `your.email@gmail.com` |
+| `EMAIL_PASS` | Email account password | For Gmail, create an app password:<br>1. Enable 2FA in your Google account<br>2. Go to App Passwords in security settings<br>3. Generate a new app password for "Mail" |
+| `EMAIL_HOST` | SMTP host server | For Gmail: `smtp.gmail.com`<br>For Outlook: `smtp-mail.outlook.com` |
+| `EMAIL_PORT` | SMTP port | For most providers with TLS: `587`<br>For SSL: `465` |
+
+#### CORS Configuration
+
+| Variable | Description | How to Generate/Configure |
+|----------|-------------|---------------------------|
+| `CORS_ORIGIN` | Allowed origins for CORS | For development: `http://localhost:3000`<br>For production: `https://yourdomain.com,https://www.yourdomain.com`<br>Multiple domains separated by commas |
+
+#### Payment Processing (Optional)
+
+| Variable | Description | How to Generate/Configure |
+|----------|-------------|---------------------------|
+| `STRIPE_SECRET_KEY` | Stripe secret API key | 1. Create a Stripe account<br>2. Go to Developers > API keys<br>3. Copy the Secret key<br>Format: `sk_test_...` or `sk_live_...` |
+| `STRIPE_PUBLISHABLE_KEY` | Stripe publishable API key | Copy from the same Stripe dashboard<br>Format: `pk_test_...` or `pk_live_...` |
+
+#### File Storage (Optional for Bag Barcodes)
+
+| Variable | Description | How to Generate/Configure |
+|----------|-------------|---------------------------|
+| `AWS_S3_BUCKET` | AWS S3 bucket name | Create in AWS S3 console: `wavemax-laundry-barcodes` |
+| `AWS_ACCESS_KEY_ID` | AWS access key | Generate in AWS IAM console:<br>1. Create a new IAM user<br>2. Attach S3 access policies<br>3. Generate access keys |
+| `AWS_SECRET_ACCESS_KEY` | AWS secret key | Generated with the access key ID above |
+| `AWS_REGION` | AWS region for the bucket | Example: `us-east-1` |
+
+#### Frontend URL Configuration
+
+| Variable | Description | How to Generate/Configure |
+|----------|-------------|---------------------------|
+| `FRONTEND_URL` | Base URL for frontend links | Development: `http://localhost:3000`<br>Production: `https://yourdomain.com` |
 
 6. Start the development server:
    ```
@@ -286,6 +402,9 @@ See the [Deployment Guide](#deployment-guide) for detailed instructions on deplo
    # Set additional environment variables manually
    nano .env
    ```
+   
+   Refer to the [Environment Variable Configuration Guide](#environment-variable-configuration-guide) for details on configuring each setting.
+
 
 4. **Install Dependencies and Build**
 
