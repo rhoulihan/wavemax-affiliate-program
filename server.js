@@ -28,7 +28,7 @@ const logger = require('./server/utils/logger');
 
 const MongoStore = require('connect-mongo');
 
-app.set('trust proxy', true);
+app.set('trust proxy', 1);
 
 // Update logging statements
 process.on('uncaughtException', (err) => {
