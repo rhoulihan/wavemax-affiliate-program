@@ -6,18 +6,36 @@ const fs = require('fs');
 const path = require('path');
 const { promisify } = require('util');
 const readFile = promisify(fs.readFile);
+const nodemailer = require('nodemailer');
+const AWS = require('aws-sdk');
 
 // Create email transport
 const createTransport = () => {
-  return nodemailer.createTransport({
-    host: process.env.EMAIL_HOST,
-    port: process.env.EMAIL_PORT,
-    secure: process.env.EMAIL_PORT === '465',
-    auth: {
-      user: process.env.EMAIL_USER,
-      pass: process.env.EMAIL_PASS
-    }
-  });
+  // Check if using Amazon SES
+  if (process.env.EMAIL_PROVIDER === 'ses') {
+    // Configure AWS SDK
+    AWS.config.update({
+      accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+      secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+      region: process.env.AWS_REGION
+    });
+    
+    // Create SES transporter
+    return nodemailer.createTransport({
+      SES: new AWS.SES({ apiVersion: '2010-12-01' })
+    });
+  } else {
+    // Use standard SMTP transport for non-SES configuration
+    return nodemailer.createTransport({
+      host: process.env.EMAIL_HOST,
+      port: process.env.EMAIL_PORT,
+      secure: process.env.EMAIL_PORT === '465',
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS
+      }
+    });
+  }
 };
 
 // Load email template
@@ -76,8 +94,12 @@ const sendEmail = async (to, subject, html) => {
   try {
     const transporter = createTransport();
     
+    const from = process.env.EMAIL_PROVIDER === 'ses' 
+      ? process.env.SES_FROM_EMAIL
+      : `"WaveMAX Laundry" <${process.env.EMAIL_USER}>`;
+    
     const info = await transporter.sendMail({
-      from: `"WaveMAX Laundry" <${process.env.EMAIL_USER}>`,
+      from,
       to,
       subject,
       html

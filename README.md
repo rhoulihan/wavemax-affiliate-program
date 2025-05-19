@@ -21,6 +21,7 @@ The WaveMAX Affiliate Program enables individuals to register as affiliates, onb
 Recent updates to the project include:
 
 - **Enhanced Security**: Removed hardcoded credentials and implemented rate limiting for authentication
+- **Amazon SES Integration**: Added support for scalable email notifications using Amazon SES
 - **Updated Dependencies**: Upgraded to Node.js 20 and MongoDB 7.0
 - **Better Error Handling**: Improved error propagation and logging throughout the application
 - **Robust Testing**: Added testing infrastructure with MongoDB memory server
@@ -116,7 +117,7 @@ wavemax-affiliate-program/
 - **Visualization**: React, Recharts
 - **Security**: JWT, Rate limiting, AES-256-GCM encryption
 - **Deployment**: Docker, Nginx, PM2
-- **Email**: Nodemailer
+- **Email**: Amazon SES, Nodemailer
 - **Testing**: Jest, Supertest, MongoDB Memory Server
 - **Logging**: Winston
 
@@ -179,14 +180,15 @@ Below is a detailed guide for configuring each setting in your `.env` file:
 | `JWT_SECRET` | Secret for JWT token signing | Generate using:<br>`node -e "console.log(require('crypto').randomBytes(64).toString('hex'))"` |
 | `SESSION_SECRET` | Secret for Express sessions | Generate using:<br>`node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"` |
 
-#### Email Configuration
+#### Email Configuration with Amazon SES
 
 | Variable | Description | How to Generate/Configure |
 |----------|-------------|---------------------------|
-| `EMAIL_USER` | Email account username | Use your SMTP provider username<br>For Gmail: `your.email@gmail.com` |
-| `EMAIL_PASS` | Email account password | For Gmail, create an app password:<br>1. Enable 2FA in your Google account<br>2. Go to App Passwords in security settings<br>3. Generate a new app password for "Mail" |
-| `EMAIL_HOST` | SMTP host server | For Gmail: `smtp.gmail.com`<br>For Outlook: `smtp-mail.outlook.com`<br>For local testing: `localhost` |
-| `EMAIL_PORT` | SMTP port | For most providers with TLS: `587`<br>For SSL: `465`<br>For local testing: `1025` |
+| `EMAIL_PROVIDER` | Email service to use | Set to `ses` to use Amazon SES |
+| `AWS_REGION` | AWS region for SES | Example: `us-east-1` |
+| `AWS_ACCESS_KEY_ID` | AWS IAM access key | From your IAM user with SES permissions |
+| `AWS_SECRET_ACCESS_KEY` | AWS IAM secret key | From your IAM user with SES permissions |
+| `SES_FROM_EMAIL` | Verified sender email | Email verified in SES, e.g., `noreply@yourdomain.com` |
 
 #### CORS Configuration
 
@@ -206,8 +208,6 @@ Below is a detailed guide for configuring each setting in your `.env` file:
 | Variable | Description | How to Generate/Configure |
 |----------|-------------|---------------------------|
 | `AWS_S3_BUCKET` | AWS S3 bucket name | Create in AWS S3 console: `wavemax-laundry-barcodes` |
-| `AWS_ACCESS_KEY_ID` | AWS access key | Generate in AWS IAM console:<br>1. Create a new IAM user<br>2. Attach S3 access policies<br>3. Generate access keys |
-| `AWS_SECRET_ACCESS_KEY` | AWS secret key | Generated with the access key ID above |
 | `AWS_REGION` | AWS region for the bucket | Example: `us-east-1` |
 
 #### Frontend URL Configuration
@@ -230,112 +230,90 @@ Below is a detailed guide for configuring each setting in your `.env` file:
 
 6. Access the application at `http://localhost:3000`
 
-### Setting up a Local SMTP Server for Email Testing
+### Using Amazon SES for Email Notifications
 
-For testing email functionality in a development environment on Ubuntu, you can use MailHog, a simple SMTP server with a web interface to view emails.
+The WaveMAX Laundry Affiliate Program uses Amazon Simple Email Service (SES) for sending emails to affiliates and customers. Follow these steps to configure Amazon SES:
 
-1. **Install MailHog**:
-   
-   First, install Go (if not already installed):
-   ```bash
-   sudo apt update
-   sudo apt install golang-go
-   ```
+#### 1. Set Up Your AWS Account
 
-   Install MailHog using Go:
-   ```bash
-   go install github.com/mailhog/MailHog@latest
-   ```
+If you don't already have an AWS account, create one at [aws.amazon.com](https://aws.amazon.com/).
 
-   Make sure the Go binaries directory is in your PATH:
-   ```bash
-   echo 'export PATH=$PATH:~/go/bin' >> ~/.bashrc
-   source ~/.bashrc
-   ```
+#### 2. Verify Email Addresses or Domains in SES
 
-2. **Run MailHog**:
-   ```bash
-   MailHog
-   ```
+1. Navigate to the Amazon SES console
+2. Select "Verified Identities" from the left sidebar
+3. Click "Create identity"
+4. Choose between verifying an email address or an entire domain
+   - For email addresses: Enter the email and click "Create identity"
+   - For domains: Follow the DNS verification instructions provided
+5. Complete the verification process by following the instructions sent to your email or by adding the required DNS records
 
-3. **Configure your .env**:
-   ```
-   EMAIL_HOST=localhost
-   EMAIL_PORT=1025
-   EMAIL_USER=
-   EMAIL_PASS=
-   ```
+#### 3. Create an IAM User with SES Permissions
 
-4. **Access MailHog Web Interface**:
-   Open your browser and go to `http://localhost:8025` to see the web interface where all sent emails will be displayed.
+1. Navigate to the IAM console
+2. Select "Users" from the left sidebar
+3. Click "Add users"
+4. Enter a username (e.g., `wavemax-ses-user`)
+5. Select "Access key - Programmatic access" as the access type
+6. Click "Next: Permissions"
+7. Click "Attach existing policies directly"
+8. Create a new policy with the following JSON:
 
-5. **Run as a Service** (Optional):
-   
-   Create a systemd service file:
-   ```bash
-   sudo nano /etc/systemd/system/mailhog.service
-   ```
+```json
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": [
+                "ses:SendEmail",
+                "ses:SendRawEmail",
+                "ses:SendTemplatedEmail"
+            ],
+            "Resource": "*"
+        }
+    ]
+}
+```
 
-   Add the following content:
-   ```
-   [Unit]
-   Description=MailHog Email Catcher
-   After=network.target
+9. Name the policy (e.g., `WaveMAXSESPolicy`), provide a description, and create it
+10. Attach the newly created policy to your user
+11. Complete the user creation process
+12. Save the Access Key ID and Secret Access Key displayed at the end
 
-   [Service]
-   ExecStart=/home/your_username/go/bin/MailHog
-   User=your_username
-   Group=your_username
-   Restart=always
+#### 4. Configure Your Application
 
-   [Install]
-   WantedBy=multi-user.target
-   ```
+Update your `.env` file with the SES configuration:
 
-   Enable and start the service:
-   ```bash
-   sudo systemctl enable mailhog
-   sudo systemctl start mailhog
-   ```
+```
+EMAIL_PROVIDER=ses
+AWS_REGION=us-east-1
+AWS_ACCESS_KEY_ID=your_access_key_id
+AWS_SECRET_ACCESS_KEY=your_secret_access_key
+SES_FROM_EMAIL=noreply@yourdomain.com
+```
 
-### Alternative: Postfix for a More Production-like Environment
+#### 5. Move from SES Sandbox to Production (Optional)
 
-If you need a more production-like SMTP server:
+By default, new AWS accounts have SES in sandbox mode, which only allows sending to verified email addresses. To move to production:
 
-1. **Install Postfix**:
-   ```bash
-   sudo apt update
-   sudo apt install postfix
-   ```
-   
-   During installation, select "Internet Site" and enter your system domain name.
+1. Navigate to the SES console
+2. Select "Account dashboard" from the left sidebar
+3. Find the "Production access" section
+4. Click "Request production access"
+5. Fill out the request form with your use case details
+6. Submit the request and wait for AWS approval
 
-2. **Configure Postfix for local mail delivery**:
-   ```bash
-   sudo nano /etc/postfix/main.cf
-   ```
+#### 6. Set Up Bounce and Complaint Handling
 
-   Add or modify these lines:
-   ```
-   inet_interfaces = loopback-only
-   mydestination = localhost.localdomain, localhost
-   ```
+To maintain a good sender reputation:
 
-3. **Restart Postfix**:
-   ```bash
-   sudo systemctl restart postfix
-   ```
-
-4. **Configure your .env**:
-   ```
-   EMAIL_HOST=localhost
-   EMAIL_PORT=25
-   EMAIL_USER=
-   EMAIL_PASS=
-   ```
-
-5. **View sent emails**:
-   Emails sent locally can be viewed in `/var/mail/<username>` or using a mail client like `mutt` or `mailx`.
+1. Navigate to the SES console
+2. Select "Configuration sets" from the left sidebar
+3. Create a new configuration set
+4. Add an SNS event destination for bounce and complaint notifications
+5. Create an SNS topic to receive these notifications
+6. Implement a handler for these notifications in your application or set up email forwarding
 
 ### Docker Development
 
