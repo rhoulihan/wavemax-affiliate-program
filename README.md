@@ -115,7 +115,7 @@ wavemax-affiliate-program/
 - **Database**: MongoDB 7.0 (with MongoDB Atlas)
 - **Visualization**: React, Recharts
 - **Security**: JWT, Rate limiting, AES-256-GCM encryption
-- **Deployment**: Docker, Nginx
+- **Deployment**: Docker, Nginx, PM2
 - **Email**: Nodemailer
 - **Testing**: Jest, Supertest, MongoDB Memory Server
 - **Logging**: Winston
@@ -185,8 +185,8 @@ Below is a detailed guide for configuring each setting in your `.env` file:
 |----------|-------------|---------------------------|
 | `EMAIL_USER` | Email account username | Use your SMTP provider username<br>For Gmail: `your.email@gmail.com` |
 | `EMAIL_PASS` | Email account password | For Gmail, create an app password:<br>1. Enable 2FA in your Google account<br>2. Go to App Passwords in security settings<br>3. Generate a new app password for "Mail" |
-| `EMAIL_HOST` | SMTP host server | For Gmail: `smtp.gmail.com`<br>For Outlook: `smtp-mail.outlook.com` |
-| `EMAIL_PORT` | SMTP port | For most providers with TLS: `587`<br>For SSL: `465` |
+| `EMAIL_HOST` | SMTP host server | For Gmail: `smtp.gmail.com`<br>For Outlook: `smtp-mail.outlook.com`<br>For local testing: `localhost` |
+| `EMAIL_PORT` | SMTP port | For most providers with TLS: `587`<br>For SSL: `465`<br>For local testing: `1025` |
 
 #### CORS Configuration
 
@@ -223,12 +223,119 @@ Below is a detailed guide for configuring each setting in your `.env` file:
 | `LOG_LEVEL` | Logging verbosity level | Set to `error`, `warn`, `info`, `verbose`, `debug`, or `silly`. Default: `info` |
 | `LOG_DIR` | Directory for log files | Default: `logs` directory in project root. Make sure this directory exists |
 
-6. Start the development server:
+5. Start the development server:
    ```
    npm run dev
    ```
 
-7. Access the application at `http://localhost:3000`
+6. Access the application at `http://localhost:3000`
+
+### Setting up a Local SMTP Server for Email Testing
+
+For testing email functionality in a development environment on Ubuntu, you can use MailHog, a simple SMTP server with a web interface to view emails.
+
+1. **Install MailHog**:
+   
+   First, install Go (if not already installed):
+   ```bash
+   sudo apt update
+   sudo apt install golang-go
+   ```
+
+   Install MailHog using Go:
+   ```bash
+   go install github.com/mailhog/MailHog@latest
+   ```
+
+   Make sure the Go binaries directory is in your PATH:
+   ```bash
+   echo 'export PATH=$PATH:~/go/bin' >> ~/.bashrc
+   source ~/.bashrc
+   ```
+
+2. **Run MailHog**:
+   ```bash
+   MailHog
+   ```
+
+3. **Configure your .env**:
+   ```
+   EMAIL_HOST=localhost
+   EMAIL_PORT=1025
+   EMAIL_USER=
+   EMAIL_PASS=
+   ```
+
+4. **Access MailHog Web Interface**:
+   Open your browser and go to `http://localhost:8025` to see the web interface where all sent emails will be displayed.
+
+5. **Run as a Service** (Optional):
+   
+   Create a systemd service file:
+   ```bash
+   sudo nano /etc/systemd/system/mailhog.service
+   ```
+
+   Add the following content:
+   ```
+   [Unit]
+   Description=MailHog Email Catcher
+   After=network.target
+
+   [Service]
+   ExecStart=/home/your_username/go/bin/MailHog
+   User=your_username
+   Group=your_username
+   Restart=always
+
+   [Install]
+   WantedBy=multi-user.target
+   ```
+
+   Enable and start the service:
+   ```bash
+   sudo systemctl enable mailhog
+   sudo systemctl start mailhog
+   ```
+
+### Alternative: Postfix for a More Production-like Environment
+
+If you need a more production-like SMTP server:
+
+1. **Install Postfix**:
+   ```bash
+   sudo apt update
+   sudo apt install postfix
+   ```
+   
+   During installation, select "Internet Site" and enter your system domain name.
+
+2. **Configure Postfix for local mail delivery**:
+   ```bash
+   sudo nano /etc/postfix/main.cf
+   ```
+
+   Add or modify these lines:
+   ```
+   inet_interfaces = loopback-only
+   mydestination = localhost.localdomain, localhost
+   ```
+
+3. **Restart Postfix**:
+   ```bash
+   sudo systemctl restart postfix
+   ```
+
+4. **Configure your .env**:
+   ```
+   EMAIL_HOST=localhost
+   EMAIL_PORT=25
+   EMAIL_USER=
+   EMAIL_PASS=
+   ```
+
+5. **View sent emails**:
+   Emails sent locally can be viewed in `/var/mail/<username>` or using a mail client like `mutt` or `mailx`.
 
 ### Docker Development
 
@@ -240,6 +347,60 @@ Below is a detailed guide for configuring each setting in your `.env` file:
 2. Access the application at `http://localhost:3000`
 
 When using Docker, ensure your environment variables in the docker-compose.yml file are properly set.
+
+## Known Issues and Troubleshooting
+
+### CSRF Protection
+
+The application uses CSRF protection for all API routes. When testing API endpoints:
+
+1. Make sure the CSRF token is included in all forms via a hidden input:
+   ```html
+   <input type="hidden" name="_csrf" value="{{csrfToken}}">
+   ```
+
+2. For frontend JavaScript, include the CSRF token in the fetch headers:
+   ```javascript
+   fetch('/api/endpoint', {
+     method: 'POST',
+     headers: {
+       'Content-Type': 'application/json',
+       'CSRF-Token': document.querySelector('[name="_csrf"]').value
+     },
+     credentials: 'same-origin',
+     body: JSON.stringify(data)
+   });
+   ```
+
+3. For public endpoints (like registration), you may need to exclude them from CSRF protection in `server.js`.
+
+### Rate Limiting
+
+The application uses express-rate-limit for security. When deploying behind a proxy:
+
+1. Ensure proper proxy configuration in `server.js`:
+   ```javascript
+   // Add this near the beginning of server.js
+   app.set('trust proxy', 1);  // Trust first proxy
+   ```
+
+2. If experiencing rate limit issues, check the IP identification configuration in auth.js.
+
+### Data Encryption
+
+Sensitive data like payment information is encrypted using AES-256-GCM:
+
+1. Ensure `ENCRYPTION_KEY` is properly set in `.env`
+2. For model fields that need encryption, they should be defined as objects in the schema:
+   ```javascript
+   fieldName: {
+     iv: String,
+     encryptedData: String,
+     authTag: String
+   }
+   ```
+
+3. The encryption/decryption is handled by middleware in the model definition.
 
 ## Testing
 
