@@ -6,7 +6,6 @@ const fs = require('fs');
 const path = require('path');
 const { promisify } = require('util');
 const readFile = promisify(fs.readFile);
-const nodemailer = require('nodemailer');
 const AWS = require('aws-sdk');
 
 // Create email transport
