@@ -71,13 +71,8 @@ exports.registerAffiliate = async (req, res) => {
       newAffiliate.accountNumber = accountNumber;
       newAffiliate.routingNumber = routingNumber;
     } else if (paymentMethod === 'paypal' && paypalEmail) {
-      // Create the structure directly with dummy values 
-      // that will be replaced by the encryption middleware
-      newAffiliate.paypalEmail = {
-        iv: 'temp',
-        encryptedData: paypalEmail,
-        authTag: 'temp'
-      };
+      newAffiliate.paypalEmail = paypalEmail;
+      // The encryption middleware will handle this automatically
     }
     
     await newAffiliate.save();

@@ -124,13 +124,18 @@ exports.registerCustomer = async (req, res) => {
     await newCustomer.save();
     
     // Send welcome emails
-    await emailService.sendCustomerWelcomeEmail(newCustomer, bagBarcode, affiliate);
-    await emailService.sendAffiliateNewCustomerEmail(affiliate, newCustomer, bagBarcode);
+    try {
+      await emailService.sendCustomerWelcomeEmail(newCustomer, bagBarcode, affiliate);
+      await emailService.sendAffiliateNewCustomerEmail(affiliate, newCustomer, bagBarcode);
+      // Email sent successfully - no need to check result
+    } catch (emailError) {
+      console.warn('Welcome email(s) could not be sent:', emailError);
+      // Continue with registration process even if email fails
+    }
     
     res.status(201).json({
       success: true,
       customerId: newCustomer.customerId,
-      bagBarcode,
       message: 'Customer registered successfully!'
     });
   } catch (error) {
