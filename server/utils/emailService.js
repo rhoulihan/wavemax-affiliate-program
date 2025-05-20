@@ -119,14 +119,14 @@ const sendEmail = async (to, subject, html) => {
 exports.sendAffiliateWelcomeEmail = async (affiliate) => {
   try {
     const template = await loadTemplate('affiliate-welcome');
-    const registrationUrl = `${process.env.FRONTEND_URL || 'https://wavemaxlaundry.com'}/customer-register.html?affiliate=${affiliate.affiliateId}`;
+    const registrationUrl = `${process.env.FRONTEND_URL || 'https://wavemax.promo'}/customer-register.html?affiliate=${affiliate.affiliateId}`;
     
     const data = {
       first_name: affiliate.firstName,
       last_name: affiliate.lastName,
       affiliate_id: affiliate.affiliateId,
       registration_url: registrationUrl,
-      login_url: `${process.env.FRONTEND_URL || 'https://wavemaxlaundry.com'}/affiliate-login.html`,
+      login_url: `${process.env.FRONTEND_URL || 'https://wavemax.promo'}/affiliate-login.html`,
       current_year: new Date().getFullYear()
     };
     
