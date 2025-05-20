@@ -78,14 +78,11 @@ const loadTemplate = async (templateName) => {
 
 // Fill template with data
 const fillTemplate = (template, data) => {
-  let filledTemplate = template;
-  
-  Object.keys(data).forEach(key => {
-    const placeholder = `[${key.toUpperCase()}]`;
-    filledTemplate = filledTemplate.replace(new RegExp(placeholder, 'g'), data[key]);
+  // Use a regex to find all placeholders and replace them in one operation
+  return template.replace(/\[([A-Z_]+)\]/g, (match, placeholder) => {
+    const key = placeholder.toLowerCase();
+    return data[key] !== undefined ? data[key] : match;
   });
-  
-  return filledTemplate;
 };
 
 // Send email
