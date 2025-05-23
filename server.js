@@ -137,7 +137,8 @@ const csrf = require('csurf');
 const csrfProtection = csrf({ cookie: true });
 
 // Create API routes that need CSRF protection
-app.use('/api/auth', csrfProtection, authRoutes);
+// Auth routes don't need CSRF for login endpoints
+app.use('/api/auth', authRoutes);
 app.post('/api/affiliates/register', affiliateController.registerAffiliate);
 // Add public affiliate info route without CSRF protection
 app.get('/api/affiliates/:affiliateId/public', affiliateController.getPublicAffiliateInfo);

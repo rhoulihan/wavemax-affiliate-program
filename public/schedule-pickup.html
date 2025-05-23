@@ -259,6 +259,11 @@
                         // Set affiliate ID
                         document.getElementById('affiliateId').value = customer.affiliateId || affiliateId;
                         
+                        // Display affiliate delivery fee from login response if available
+                        if (customer.affiliate && customer.affiliate.deliveryFee) {
+                            document.getElementById('deliveryFee').textContent = `$${parseFloat(customer.affiliate.deliveryFee).toFixed(2)}`;
+                        }
+                        
                         // Fetch full customer profile to get address and affiliate details
                         const profileResponse = await fetch(`/api/customers/${customer.customerId}/profile`, {
                             headers: {

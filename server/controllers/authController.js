@@ -237,6 +237,7 @@ exports.customerLogin = async (req, res) => {
         firstName: customer.firstName,
         lastName: customer.lastName,
         email: customer.email,
+        affiliateId: customer.affiliateId,
         affiliate: affiliate ? {
           affiliateId: affiliate.affiliateId,
           name: `${affiliate.firstName} ${affiliate.lastName}`,
