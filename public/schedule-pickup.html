@@ -201,16 +201,28 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Extract affiliate ID from URL query parameter
+            // Extract parameters from URL
             const urlParams = new URLSearchParams(window.location.search);
             const affiliateId = urlParams.get('affiliate');
+            const customerId = urlParams.get('customer');
+            
+            // If customer ID is provided, try to auto-login
+            if (customerId) {
+                // This would typically require a session token
+                // For now, show a message
+                const loginSection = document.getElementById('loginSection');
+                const message = document.createElement('div');
+                message.className = 'bg-blue-50 border border-blue-200 text-blue-700 px-4 py-3 rounded mb-4';
+                message.textContent = 'Please login to continue with your pickup scheduling.';
+                loginSection.insertBefore(message, loginSection.firstChild);
+            }
             
             // Login form handling
             const loginBtn = document.getElementById('loginBtn');
             const loginSection = document.getElementById('loginSection');
             const pickupDetailsSection = document.getElementById('pickupDetailsSection');
             
-            loginBtn.addEventListener('click', function() {
+            loginBtn.addEventListener('click', async function() {
                 const username = document.getElementById('loginUsername').value;
                 const password = document.getElementById('loginPassword').value;
                 
@@ -219,112 +231,116 @@
                     return;
                 }
                 
-                // In a real implementation, this would validate credentials against the database
-                // For demo purposes, we'll check localStorage and use mock data
-                const storedCustomers = JSON.parse(localStorage.getItem('wavemax_customers')) || {};
-                
-                // Find customer by username (this is a simplified example)
-                let loggedInCustomer = null;
-                let customerId = null;
-                
-                // Simple mock login for demo purposes
-                for (const id in storedCustomers) {
-                    if (storedCustomers[id].username === username) {
-                        // In a real implementation, we would verify the password hash
-                        loggedInCustomer = storedCustomers[id];
-                        customerId = id;
-                        break;
-                    }
-                }
-                
-                if (loggedInCustomer) {
-                    // Set customer data fields
-                    document.getElementById('customerId').value = customerId;
-                    document.getElementById('customerName').textContent = `${loggedInCustomer.firstName} ${loggedInCustomer.lastName}`;
-                    document.getElementById('customerPhone').textContent = loggedInCustomer.phone;
-                    document.getElementById('customerAddress').textContent = `${loggedInCustomer.address}, ${loggedInCustomer.city}, ${loggedInCustomer.state} ${loggedInCustomer.zipCode}`;
-                    
-                    // Set affiliate ID
-                    document.getElementById('affiliateId').value = loggedInCustomer.affiliateId || affiliateId;
-                    
-                    // Get affiliate information for pricing
-                    const customerAffiliateId = loggedInCustomer.affiliateId || affiliateId;
-                    
-                    if (customerAffiliateId) {
-                        // Fetch affiliate info from the server
-                        fetch(`/api/affiliates/${customerAffiliateId}/public`)
-                            .then(response => response.json())
-                            .then(data => {
-                                if (data.success && data.affiliate) {
-                                    document.getElementById('deliveryFee').textContent = `$${parseFloat(data.affiliate.deliveryFee).toFixed(2)}`;
-                                } else {
-                                    // Fallback price if affiliate not found
-                                    document.getElementById('deliveryFee').textContent = '$5.99';
-                                }
-                            })
-                            .catch(error => {
-                                console.error('Error fetching affiliate info:', error);
-                                // Fallback price on error
-                                document.getElementById('deliveryFee').textContent = '$5.99';
-                            });
-                    } else {
-                        // Fallback price if no affiliate ID
-                        document.getElementById('deliveryFee').textContent = '$5.99';
-                    }
-                    
-                    // Show pickup details form
-                    loginSection.style.display = 'none';
-                    pickupDetailsSection.style.display = 'block';
-                    
-                    // Set minimum dates
-                    const today = new Date();
-                    const tomorrow = new Date(today);
-                    tomorrow.setDate(tomorrow.getDate() + 1);
-                    
-                    const pickupDateInput = document.getElementById('pickupDate');
-                    const deliveryDateInput = document.getElementById('deliveryDate');
-                    
-                    // Format dates as YYYY-MM-DD for input fields
-                    const formatDate = (date) => {
-                        const year = date.getFullYear();
-                        const month = String(date.getMonth() + 1).padStart(2, '0');
-                        const day = String(date.getDate()).padStart(2, '0');
-                        return `${year}-${month}-${day}`;
-                    };
-                    
-                    pickupDateInput.min = formatDate(today);
-                    deliveryDateInput.min = formatDate(tomorrow);
-                    
-                    // Set default pickup date to today
-                    pickupDateInput.value = formatDate(today);
-                    
-                    // Set default delivery date to day after tomorrow
-                    const dayAfterTomorrow = new Date(today);
-                    dayAfterTomorrow.setDate(dayAfterTomorrow.getDate() + 2);
-                    deliveryDateInput.value = formatDate(dayAfterTomorrow);
-                    
-                    // Update delivery date when pickup date changes
-                    pickupDateInput.addEventListener('change', function() {
-                        const pickupDate = new Date(this.value);
-                        const minDeliveryDate = new Date(pickupDate);
-                        minDeliveryDate.setDate(minDeliveryDate.getDate() + 1);
-                        
-                        deliveryDateInput.min = formatDate(minDeliveryDate);
-                        
-                        // If current delivery date is before new minimum, update it
-                        if (new Date(deliveryDateInput.value) < minDeliveryDate) {
-                            deliveryDateInput.value = formatDate(minDeliveryDate);
-                        }
+                try {
+                    // Login using the actual API
+                    const loginResponse = await fetch('/api/auth/customer/login', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ username, password })
                     });
-                } else {
-                    alert('Invalid username or password. Please try again.');
+                    
+                    const loginData = await loginResponse.json();
+                    
+                    if (loginData.success) {
+                        const customer = loginData.customer;
+                        const token = loginData.token;
+                        
+                        // Store token for future API calls
+                        localStorage.setItem('customerToken', token);
+                        
+                        // Set customer data fields
+                        document.getElementById('customerId').value = customer.customerId;
+                        document.getElementById('customerName').textContent = `${customer.firstName} ${customer.lastName}`;
+                        document.getElementById('customerPhone').textContent = customer.email; // Using email instead of phone if phone not available
+                        document.getElementById('customerAddress').textContent = 'Address will be loaded from profile';
+                        
+                        // Set affiliate ID
+                        document.getElementById('affiliateId').value = customer.affiliateId || affiliateId;
+                        
+                        // Fetch full customer profile to get address and affiliate details
+                        const profileResponse = await fetch(`/api/customers/${customer.customerId}/profile`, {
+                            headers: {
+                                'Authorization': `Bearer ${token}`
+                            }
+                        });
+                        
+                        const profileData = await profileResponse.json();
+                        
+                        if (profileData.success && profileData.customer) {
+                            const fullCustomer = profileData.customer;
+                            
+                            // Update customer information with full details
+                            document.getElementById('customerPhone').textContent = fullCustomer.phone;
+                            document.getElementById('customerAddress').textContent = `${fullCustomer.address}, ${fullCustomer.city}, ${fullCustomer.state} ${fullCustomer.zipCode}`;
+                            
+                            // Display affiliate delivery fee
+                            if (fullCustomer.affiliate && fullCustomer.affiliate.deliveryFee) {
+                                document.getElementById('deliveryFee').textContent = `$${parseFloat(fullCustomer.affiliate.deliveryFee).toFixed(2)}`;
+                            } else {
+                                // Fallback price if affiliate not found
+                                document.getElementById('deliveryFee').textContent = '$5.99';
+                            }
+                        }
+                        
+                        // Show pickup details form
+                        loginSection.style.display = 'none';
+                        pickupDetailsSection.style.display = 'block';
+                        
+                        // Set minimum dates
+                        const today = new Date();
+                        const tomorrow = new Date(today);
+                        tomorrow.setDate(tomorrow.getDate() + 1);
+                        
+                        const pickupDateInput = document.getElementById('pickupDate');
+                        const deliveryDateInput = document.getElementById('deliveryDate');
+                        
+                        // Format dates as YYYY-MM-DD for input fields
+                        const formatDate = (date) => {
+                            const year = date.getFullYear();
+                            const month = String(date.getMonth() + 1).padStart(2, '0');
+                            const day = String(date.getDate()).padStart(2, '0');
+                            return `${year}-${month}-${day}`;
+                        };
+                        
+                        pickupDateInput.min = formatDate(today);
+                        deliveryDateInput.min = formatDate(tomorrow);
+                        
+                        // Set default pickup date to today
+                        pickupDateInput.value = formatDate(today);
+                        
+                        // Set default delivery date to day after tomorrow
+                        const dayAfterTomorrow = new Date(today);
+                        dayAfterTomorrow.setDate(dayAfterTomorrow.getDate() + 2);
+                        deliveryDateInput.value = formatDate(dayAfterTomorrow);
+                        
+                        // Update delivery date when pickup date changes
+                        pickupDateInput.addEventListener('change', function() {
+                            const pickupDate = new Date(this.value);
+                            const minDeliveryDate = new Date(pickupDate);
+                            minDeliveryDate.setDate(minDeliveryDate.getDate() + 1);
+                            
+                            deliveryDateInput.min = formatDate(minDeliveryDate);
+                            
+                            // If current delivery date is before new minimum, update it
+                            if (new Date(deliveryDateInput.value) < minDeliveryDate) {
+                                deliveryDateInput.value = formatDate(minDeliveryDate);
+                            }
+                        });
+                    } else {
+                        alert(loginData.message || 'Invalid username or password. Please try again.');
+                    }
+                } catch (error) {
+                    console.error('Login error:', error);
+                    alert('An error occurred during login. Please try again.');
                 }
             });
             
             // Form submission
             const form = document.getElementById('pickupScheduleForm');
             
-            form.addEventListener('submit', function(e) {
+            form.addEventListener('submit', async function(e) {
                 e.preventDefault();
                 
                 // Only process if the pickup details section is visible
@@ -337,33 +353,49 @@
                 const pickupData = {};
                 
                 formData.forEach((value, key) => {
-                    if (key !== 'loginUsername' && key !== 'loginPassword') {
+                    if (key !== 'loginUsername' && key !== 'loginPassword' && key !== '_csrf') {
                         pickupData[key] = value;
                     }
                 });
                 
-                // Generate a unique order ID
-                const orderId = 'ORD' + Math.floor(100000 + Math.random() * 900000);
-                pickupData.orderId = orderId;
-                
-                // This would normally be sent to the server for processing
-                console.log('Pickup Order Data:', pickupData);
-                
-                // Store order data in localStorage (for demo purposes only)
-                // In a real implementation, this would be stored in MongoDB
-                const storedOrders = JSON.parse(localStorage.getItem('wavemax_orders')) || {};
-                storedOrders[orderId] = {
-                    ...pickupData,
-                    status: 'scheduled',
-                    createdAt: new Date().toISOString()
-                };
-                localStorage.setItem('wavemax_orders', JSON.stringify(storedOrders));
-                
-                // Show confirmation and notify affiliate
-                alert(`Pickup successfully scheduled! Order ID: ${orderId}\n\nYour affiliate partner has been notified.`);
-                
-                // Redirect to order confirmation page
-                window.location.href = 'order-confirmation.html?id=' + orderId;
+                try {
+                    // Get the stored token
+                    const token = localStorage.getItem('customerToken');
+                    
+                    if (!token) {
+                        alert('Session expired. Please login again.');
+                        location.reload();
+                        return;
+                    }
+                    
+                    // Submit order to the server
+                    const response = await fetch('/api/orders', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: JSON.stringify(pickupData)
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        // Show confirmation and notify affiliate
+                        alert(`Pickup successfully scheduled! Order ID: ${data.orderId}\n\nYour affiliate partner has been notified.`);
+                        
+                        // Clear the stored token
+                        localStorage.removeItem('customerToken');
+                        
+                        // Redirect to order confirmation page
+                        window.location.href = 'order-confirmation.html?id=' + data.orderId;
+                    } else {
+                        alert(data.message || 'Failed to schedule pickup. Please try again.');
+                    }
+                } catch (error) {
+                    console.error('Order submission error:', error);
+                    alert('An error occurred while scheduling your pickup. Please try again.');
+                }
             });
         });
 
@@ -442,7 +474,7 @@
                 });
                 
                 await transporter.sendMail({
-                    from: 'noreply@wavemaxlaundry.com',
+                    from: 'noreply@wavemax.promo',
                     to: affiliate.email,
                     subject: 'New Laundry Pickup Scheduled',
                     html: `
@@ -461,7 +493,7 @@
                 
                 // Notify customer via email
                 await transporter.sendMail({
-                    from: 'noreply@wavemaxlaundry.com',
+                    from: 'noreply@wavemax.promo',
                     to: customer.email,
                     subject: 'Your Laundry Pickup Confirmation',
                     html: `

@@ -356,8 +356,20 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        // Redirect to success page without alert
-                        window.location.href = `customer-success.html?id=${data.customerId}&barcode=${data.bagBarcode}`;
+                        // Store customer data in sessionStorage for success page
+                        sessionStorage.setItem('registrationData', JSON.stringify({
+                            customerId: data.customerId,
+                            bagBarcode: data.bagBarcode,
+                            firstName: data.customerData.firstName,
+                            lastName: data.customerData.lastName,
+                            email: data.customerData.email,
+                            affiliateId: data.customerData.affiliateId,
+                            affiliateName: data.customerData.affiliateName,
+                            deliveryFee: data.customerData.deliveryFee
+                        }));
+                        
+                        // Redirect to success page
+                        window.location.href = 'customer-success.html';
                     } else {
                         alert(data.message || 'Registration failed. Please try again.');
                     }
