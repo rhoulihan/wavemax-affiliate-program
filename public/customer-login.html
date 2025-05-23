@@ -88,6 +88,7 @@
         </div>
     </footer>
 
+    <script src="assets/js/errorHandler.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             // Extract affiliate ID from URL query parameter (if any)
@@ -104,57 +105,50 @@
             // Form submission
             const form = document.getElementById('customerLoginForm');
             
-            form.addEventListener('submit', function(e) {
+            form.addEventListener('submit', async function(e) {
                 e.preventDefault();
                 
                 // Collect form data
                 const username = document.getElementById('username').value;
                 const password = document.getElementById('password').value;
                 
-                // In a real implementation, this would be an API call to the server
-                console.log('Login request:', { username, password });
+                // Disable submit button to prevent multiple submissions
+                const submitButton = form.querySelector('button[type="submit"]');
+                submitButton.disabled = true;
+                submitButton.textContent = 'Signing in...';
                 
-                // Mock API request
-                fetch('/api/auth/customer/login', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ username, password })
-                })
-                .then(response => {
-                    // For demo purposes
+                try {
+                    // API request
+                    const response = await fetch('/api/auth/customer/login', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ username, password })
+                    });
+                    
+                    const data = await response.json();
+                    
                     if (!response.ok) {
-                        throw new Error('Login failed');
+                        throw new Error(data.message || 'Login failed');
                     }
-                    return response.json();
-                })
-                .then(data => {
+                    
                     // Store token in localStorage
                     localStorage.setItem('token', data.token);
                     localStorage.setItem('currentCustomer', JSON.stringify(data.customer));
                     
                     // Redirect to dashboard
                     window.location.href = `customer-dashboard.html?id=${data.customer.customerId}`;
-                })
-                .catch(error => {
-                    // For demo purposes, simulate successful login
-                    console.error('Error:', error);
+                } catch (error) {
+                    console.error('Login error:', error);
                     
-                    // Create mock customer data
-                    const mockCustomer = {
-                        customerId: 'CUST123456',
-                        firstName: 'Demo',
-                        lastName: 'Customer',
-                        email: 'demo@example.com',
-                        affiliateId: affiliateId || 'AFF123456'
-                    };
+                    // Show error message
+                    alert(error.message || 'Invalid username or password');
                     
-                    localStorage.setItem('currentCustomer', JSON.stringify(mockCustomer));
-                    
-                    // Redirect to dashboard
-                    window.location.href = `customer-dashboard.html?id=${mockCustomer.customerId}`;
-                });
+                    // Re-enable submit button
+                    submitButton.disabled = false;
+                    submitButton.textContent = 'Sign In';
+                }
             });
         });
     </script>
