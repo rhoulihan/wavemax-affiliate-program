@@ -732,6 +732,7 @@
                 if (currentCustomer && currentCustomer.customerId === customerId) {
                     document.getElementById('welcomeMessage').textContent = `Welcome, ${currentCustomer.firstName} ${currentCustomer.lastName}!`;
                     document.getElementById('schedulePickupBtn').href = `schedule-pickup.html?affiliate=${currentCustomer.affiliateId}&customer=${customerId}`;
+                }
             }
         }
         
@@ -1258,7 +1259,7 @@
                     });
                 });
             }
-        }
+        });
     </script>
 </body>
 </html>
