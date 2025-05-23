@@ -80,8 +80,19 @@ const loadTemplate = async (templateName) => {
 const fillTemplate = (template, data) => {
   // Use a regex to find all placeholders and replace them in one operation
   return template.replace(/\[([A-Z_]+)\]/g, (match, placeholder) => {
-    const key = placeholder.toLowerCase();
-    return data[key] !== undefined ? data[key] : match;
+    // First try the exact placeholder (uppercase), then try lowercase
+    const upperKey = placeholder;
+    const lowerKey = placeholder.toLowerCase();
+    
+    if (data[upperKey] !== undefined) {
+      return data[upperKey];
+    } else if (data[lowerKey] !== undefined) {
+      return data[lowerKey];
+    } else {
+      // If not found, return empty string for cleaner emails
+      console.warn(`Email template placeholder [${placeholder}] not found in data`);
+      return '';
+    }
   });
 };
 

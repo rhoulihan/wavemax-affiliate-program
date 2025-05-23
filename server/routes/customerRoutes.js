@@ -27,6 +27,13 @@ router.post('/register', [
 ], customerController.registerCustomer);
 
 /**
+ * @route   GET /api/customers/:customerId/profile
+ * @desc    Get customer profile (public for success page)
+ * @access  Public (temporary for registration success)
+ */
+router.get('/:customerId/profile', customerController.getCustomerProfile);
+
+/**
  * @route   GET /api/customers/:customerId
  * @desc    Get customer profile
  * @access  Private (self, affiliated affiliate, or admin)
