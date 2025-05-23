@@ -136,7 +136,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 const csrf = require('csurf');
 const csrfProtection = csrf({ cookie: true });
 
-// Create API routes that need CSRF protection
+// Create API routes - API routes use JWT authentication instead of CSRF
 // Auth routes don't need CSRF for login endpoints
 app.use('/api/auth', authRoutes);
 app.post('/api/affiliates/register', affiliateController.registerAffiliate);
@@ -144,10 +144,11 @@ app.post('/api/affiliates/register', affiliateController.registerAffiliate);
 app.get('/api/affiliates/:affiliateId/public', affiliateController.getPublicAffiliateInfo);
 // Customer registration needs to work without CSRF for now
 app.post('/api/customers/register', customerController.registerCustomer);
-app.use('/api/affiliates', csrfProtection, affiliateRoutes);
-app.use('/api/customers', csrfProtection, customerRoutes);
-app.use('/api/orders', csrfProtection, orderRoutes);
-app.use('/api/bags', csrfProtection, bagRoutes);
+// API routes use JWT authentication, not CSRF
+app.use('/api/affiliates', affiliateRoutes);
+app.use('/api/customers', customerRoutes);
+app.use('/api/orders', orderRoutes);
+app.use('/api/bags', bagRoutes);
 
 // For routes that render templates and need CSRF tokens, use csrfProtection middleware
 app.get('/admin/*', csrfProtection, (req, res, next) => {

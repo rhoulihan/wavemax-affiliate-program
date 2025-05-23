@@ -198,7 +198,7 @@
             // Set order ID in the page
             document.getElementById('orderId').textContent = orderId;
             
-            // Get order details from localStorage (in a real implementation, this would come from the server)
+            // Get order details from localStorage
             const storedOrders = JSON.parse(localStorage.getItem('wavemax_orders')) || {};
             const order = storedOrders[orderId];
             
@@ -252,24 +252,17 @@
                 
                 // Set affiliate information
                 const affiliateId = order.affiliateId;
-                const storedAffiliates = JSON.parse(localStorage.getItem('wavemax_affiliates')) || {};
-                const affiliate = storedAffiliates[affiliateId];
+                // For now, we'll use placeholder affiliate info
+                // In a real app, this would come from the order data or a separate API call
+                document.getElementById('affiliateName').textContent = 'Your WaveMAX Affiliate';
+                document.getElementById('affiliateContact').textContent = 'Contact information will be provided soon';
                 
-                if (affiliate) {
-                    document.getElementById('affiliateName').textContent = `${affiliate.firstName} ${affiliate.lastName}`;
-                    document.getElementById('affiliateContact').textContent = `${affiliate.email} | ${affiliate.phone}`;
-                    document.getElementById('deliveryFee').textContent = `$${parseFloat(affiliate.deliveryFee || 5.99).toFixed(2)}`;
-                    
-                    // Update order link with affiliate ID
-                    document.getElementById('scheduleAnotherBtn').href = `schedule-pickup.html?affiliate=${affiliateId}`;
-                } else {
-                    document.getElementById('affiliateName').textContent = 'Your WaveMAX Affiliate';
-                    document.getElementById('affiliateContact').textContent = 'Contact information will be provided soon';
-                    document.getElementById('deliveryFee').textContent = '$5.99';
-                    
-                    // Generic order link
-                    document.getElementById('scheduleAnotherBtn').href = 'schedule-pickup.html';
-                }
+                // Use the delivery fee from the order data
+                const deliveryFee = order.deliveryFee || 5.99;
+                document.getElementById('deliveryFee').textContent = `$${parseFloat(deliveryFee).toFixed(2)}`;
+                
+                // Update order link with affiliate ID
+                document.getElementById('scheduleAnotherBtn').href = `schedule-pickup.html?affiliate=${affiliateId}`;
                 
                 // Set view orders link with customer ID
                 const customerId = order.customerId;
@@ -279,21 +272,25 @@
                     document.getElementById('viewOrdersBtn').href = '#';
                 }
                 
-                // Calculate estimated total based on size
-                let estimatedWeight = 0;
-                if (order.estimatedSize === 'small') {
-                    estimatedWeight = 12.5; // average of 10-15 lbs
-                } else if (order.estimatedSize === 'medium') {
-                    estimatedWeight = 23; // average of 16-30 lbs
-                } else if (order.estimatedSize === 'large') {
-                    estimatedWeight = 35; // approximate for 31+ lbs
+                // Use the estimated total from the order data if available
+                if (order.estimatedTotal) {
+                    document.getElementById('estimatedTotal').textContent = `$${parseFloat(order.estimatedTotal).toFixed(2)} (estimated)`;
+                } else {
+                    // Calculate estimated total based on size
+                    let estimatedWeight = 0;
+                    if (order.estimatedSize === 'small') {
+                        estimatedWeight = 12.5; // average of 10-15 lbs
+                    } else if (order.estimatedSize === 'medium') {
+                        estimatedWeight = 23; // average of 16-30 lbs
+                    } else if (order.estimatedSize === 'large') {
+                        estimatedWeight = 35; // approximate for 31+ lbs
+                    }
+                    
+                    const wdfRate = 1.89; // per pound
+                    const estimatedTotal = (estimatedWeight * wdfRate + deliveryFee).toFixed(2);
+                    
+                    document.getElementById('estimatedTotal').textContent = `$${estimatedTotal} (estimated)`;
                 }
-                
-                const wdfRate = 1.89; // per pound
-                const deliveryFee = parseFloat(affiliate?.deliveryFee || 5.99);
-                const estimatedTotal = (estimatedWeight * wdfRate + deliveryFee).toFixed(2);
-                
-                document.getElementById('estimatedTotal').textContent = `$${estimatedTotal} (estimated)`;
             } else {
                 // Fallback if order not found
                 alert('Order details not found. Demo data will be displayed.');
@@ -320,6 +317,7 @@
                 // Generic links
                 document.getElementById('scheduleAnotherBtn').href = 'schedule-pickup.html';
                 document.getElementById('viewOrdersBtn').href = '#';
+                }
             }
         });
     </script>
