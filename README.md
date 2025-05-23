@@ -16,18 +16,20 @@ The WaveMAX Affiliate Program enables individuals to register as affiliates, onb
 - **Dashboard Analytics**: Comprehensive metrics for both affiliates and customers
 - **Email Notifications**: Automated emails for all important events in the lifecycle
 
-## New Improvements
+## Recent Improvements
 
-Recent updates to the project include:
+Latest updates to the project include:
 
-- **Enhanced Security**: Removed hardcoded credentials and implemented rate limiting for authentication
-- **Amazon SES Integration**: Added support for scalable email notifications using Amazon SES
-- **Updated Dependencies**: Upgraded to Node.js 20 and MongoDB 7.0
-- **Better Error Handling**: Improved error propagation and logging throughout the application
-- **Robust Testing**: Added testing infrastructure with MongoDB memory server
-- **API Documentation**: Added Swagger UI for interactive API documentation
-- **Environment Configuration**: Better separation of development/production environments
-- **Secure Deployment**: Comprehensive deployment guide for Ubuntu servers
+- **Complete Authentication System**: Implemented affiliate and customer login with JWT tokens
+- **Real-time Dashboard Integration**: Affiliate dashboards now fetch live data from API endpoints
+- **Enhanced Security**: JWT-based authentication, rate limiting, and removed CSRF from API routes
+- **Comprehensive Test Suite**: 80%+ code coverage with unit and integration tests including Jest, MongoDB Memory Server
+- **Complete Email Template System**: Professional HTML email templates for all user notifications
+- **Amazon SES Integration**: Scalable email notifications with professional templates and error handling
+- **Order Management**: Complete pickup scheduling and order tracking system with localStorage integration
+- **Error Handling**: Graceful email failure handling and improved error propagation to prevent order blocking
+- **Production Ready**: Robust deployment configuration with PM2 and Nginx
+- **Updated Dependencies**: Node.js 20, MongoDB 7.0, and modern testing infrastructure
 
 ## Project Structure
 
@@ -80,8 +82,16 @@ wavemax-affiliate-program/
 │   │
 │   ├── templates/                         # Email templates
 │   │   └── emails/                        # Email HTML templates
-│   │       ├── affiliate-welcome.html     # Affiliate welcome email
-│   │       └── customer-welcome.html      # Customer welcome email
+│   │       ├── affiliate-welcome.html           # Affiliate welcome email
+│   │       ├── affiliate-new-customer.html      # New customer notification
+│   │       ├── affiliate-new-order.html         # New order notification
+│   │       ├── affiliate-commission.html        # Commission earned
+│   │       ├── affiliate-order-cancelled.html   # Order cancellation
+│   │       ├── affiliate-lost-bag.html          # Lost bag report
+│   │       ├── customer-welcome.html            # Customer welcome email
+│   │       ├── customer-order-confirmation.html # Order confirmation
+│   │       ├── customer-order-status.html       # Order status updates
+│   │       └── customer-order-cancelled.html    # Order cancellation
 │   │
 │   └── utils/                             # Utility functions
 │       ├── emailService.js                # Email sending service
@@ -91,20 +101,31 @@ wavemax-affiliate-program/
 │
 ├── tests/                                 # Test files
 │   ├── setup.js                           # Test setup configuration
+│   ├── README.md                          # Test documentation
+│   ├── runAllTests.sh                     # Complete test suite script
 │   ├── integration/                       # Integration tests
-│   │   └── affiliate.test.js              # Affiliate API tests
+│   │   ├── affiliate.test.js              # Affiliate API tests
+│   │   ├── auth.test.js                   # Authentication flow tests
+│   │   ├── customer.test.js               # Customer API tests
+│   │   └── order.test.js                  # Order management tests
 │   └── unit/                              # Unit tests
+│       ├── authController.test.js         # Authentication controller tests
+│       ├── authMiddleware.test.js         # Auth middleware tests
+│       ├── customerController.test.js     # Customer controller tests
 │       ├── emailService.test.js           # Email service tests
-│       └── encryption.test.js             # Encryption utility tests
+│       ├── encryption.test.js             # Encryption utility tests
+│       ├── models.test.js                 # Database model tests
+│       ├── orderController.test.js        # Order controller tests
+│       └── paginationMiddleware.test.js   # Pagination tests
 │
 ├── scripts/                               # Utility scripts
 │
 ├── .env.example                           # Environment variables template
 ├── Dockerfile                             # Docker configuration
 ├── docker-compose.yml                     # Docker Compose config
-├── docker-compose.prod.yml                # Production Docker Compose
+├── ecosystem.config.js                    # PM2 process configuration
 ├── init-mongo.js                          # MongoDB initialization script
-├── nginx.conf                             # Nginx configuration
+├── jest.config.js                         # Jest test configuration
 ├── package.json                           # NPM dependencies
 └── server.js                              # Main application entry point
 ```
@@ -328,29 +349,30 @@ When using Docker, ensure your environment variables in the docker-compose.yml f
 
 ## Known Issues and Troubleshooting
 
-### CSRF Protection
+### Authentication
 
-The application uses CSRF protection for all API routes. When testing API endpoints:
+The application uses JWT-based authentication for API endpoints:
 
-1. Make sure the CSRF token is included in all forms via a hidden input:
-   ```html
-   <input type="hidden" name="_csrf" value="{{csrfToken}}">
-   ```
-
-2. For frontend JavaScript, include the CSRF token in the fetch headers:
+1. **API Authentication**: All API routes use JWT tokens in Authorization headers:
    ```javascript
    fetch('/api/endpoint', {
      method: 'POST',
      headers: {
        'Content-Type': 'application/json',
-       'CSRF-Token': document.querySelector('[name="_csrf"]').value
+       'Authorization': `Bearer ${token}`
      },
-     credentials: 'same-origin',
      body: JSON.stringify(data)
    });
    ```
 
-3. For public endpoints (like registration), you may need to exclude them from CSRF protection in `server.js`.
+2. **Login Flow**: 
+   - Affiliates login at `/api/auth/affiliate/login`
+   - Customers login at `/api/auth/customer/login`
+   - Tokens are stored in localStorage and used for subsequent requests
+
+3. **Protected Routes**: Dashboard pages redirect to login if no valid token is found
+
+4. **Token Refresh**: Automatic token refresh using refresh tokens for extended sessions
 
 ### Rate Limiting
 
@@ -382,13 +404,47 @@ Sensitive data like payment information is encrypted using AES-256-GCM:
 
 ## Testing
 
-Run the test suite:
+The project includes a comprehensive test suite with 80%+ code coverage:
 
-```
+### Running Tests
+
+```bash
+# Run all tests
 npm test
+
+# Run unit tests only
+npm run test:unit
+
+# Run integration tests only
+npm run test:integration
+
+# Run tests with coverage report
+npm run test:coverage
+
+# Run tests in watch mode (development)
+npm run test:watch
+
+# Run complete test suite with linting
+npm run test:all
 ```
 
-The project uses Jest with MongoDB Memory Server for testing, allowing database tests to run without affecting your local MongoDB instance.
+### Test Coverage
+
+The test suite covers:
+- **Controllers**: All API controllers with mock dependencies
+- **Models**: Database models with validation and business logic
+- **Middleware**: Authentication, authorization, and pagination
+- **Integration**: Complete API endpoint testing
+- **Utilities**: Email service, encryption, and helper functions
+
+### Test Infrastructure
+
+- **Jest**: Test framework with coverage reporting
+- **MongoDB Memory Server**: In-memory database for integration tests
+- **Supertest**: HTTP assertion testing for API endpoints
+- **Coverage Thresholds**: 80% minimum coverage for branches, functions, lines, and statements
+
+See `tests/README.md` for detailed testing documentation.
 
 ## Production Deployment
 
@@ -508,7 +564,6 @@ See the [Deployment Guide](#deployment-guide) for detailed instructions on deplo
    ```
    
    Refer to the [Environment Variable Configuration Guide](#environment-variable-configuration-guide) for details on configuring each setting.
-
 
 4. **Install Dependencies and Build**
 
@@ -711,7 +766,15 @@ Set up automated MongoDB backups:
    sudo systemctl restart mongod
    ```
 
-3. **Regular Updates**
+3. **Application Security**
+
+   - JWT tokens for API authentication
+   - Rate limiting on authentication endpoints
+   - Input validation and sanitization
+   - Encrypted sensitive data storage
+   - Secure session management
+
+4. **Regular Updates**
 
    Set up automated security updates:
 
