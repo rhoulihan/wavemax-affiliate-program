@@ -128,10 +128,11 @@
     </footer>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Extract customer ID from URL query parameter
+        document.addEventListener('DOMContentLoaded', async function() {
+            // Extract customer ID and barcode from URL query parameters
             const urlParams = new URLSearchParams(window.location.search);
             const customerId = urlParams.get('id');
+            const bagBarcode = urlParams.get('barcode');
             
             if (!customerId) {
                 alert('No customer ID provided. Redirecting to homepage.');
@@ -139,58 +140,54 @@
                 return;
             }
             
-            // Get customer data from localStorage (in a real implementation, this would come from the server)
-            const storedCustomers = JSON.parse(localStorage.getItem('wavemax_customers')) || {};
-            const customer = storedCustomers[customerId];
-            
-            if (customer) {
-                // Set customer information
-                document.getElementById('customerId').textContent = customerId;
-                document.getElementById('customerName').textContent = `${customer.firstName} ${customer.lastName}`;
-                document.getElementById('customerEmail').textContent = customer.email;
+            try {
+                // Fetch customer data from the server
+                const response = await fetch(`/api/customers/${customerId}/profile`);
+                const data = await response.json();
                 
-                // Set affiliate information
-                const affiliateId = customer.affiliateId;
-                const storedAffiliates = JSON.parse(localStorage.getItem('wavemax_affiliates')) || {};
-                const affiliate = storedAffiliates[affiliateId];
-                
-                if (affiliate) {
-                    document.getElementById('affiliateName').textContent = `${affiliate.firstName} ${affiliate.lastName}`;
-                    document.getElementById('serviceArea').textContent = affiliate.serviceArea || 'Austin, TX area';
-                    document.getElementById('deliveryFee').textContent = `$${parseFloat(affiliate.deliveryFee).toFixed(2)} per pickup/delivery`;
+                if (data.success && data.customer) {
+                    const customer = data.customer;
                     
-                    // Update button links with customer and affiliate IDs
-                    document.getElementById('schedulePickupBtn').href = `schedule-pickup.html?affiliate=${affiliateId}&customer=${customerId}`;
-                    document.getElementById('customerDashboardBtn').href = `customer-dashboard.html?id=${customerId}`;
+                    // Set customer information
+                    document.getElementById('customerId').textContent = customer.customerId;
+                    document.getElementById('customerName').textContent = `${customer.firstName} ${customer.lastName}`;
+                    document.getElementById('customerEmail').textContent = customer.email;
+                    
+                    // Set affiliate information
+                    if (customer.affiliate) {
+                        document.getElementById('affiliateName').textContent = customer.affiliate.name;
+                        document.getElementById('serviceArea').textContent = 'Austin, TX area';
+                        document.getElementById('deliveryFee').textContent = `$${parseFloat(customer.affiliate.deliveryFee).toFixed(2)} per pickup/delivery`;
+                        
+                        // Update button links with customer and affiliate IDs
+                        document.getElementById('schedulePickupBtn').href = `schedule-pickup.html?affiliate=${customer.affiliateId}&customer=${customer.customerId}`;
+                        document.getElementById('customerDashboardBtn').href = `customer-dashboard.html?id=${customer.customerId}`;
+                    } else {
+                        document.getElementById('affiliateName').textContent = 'WaveMAX Affiliate Partner';
+                        document.getElementById('serviceArea').textContent = 'Austin, TX area';
+                        document.getElementById('deliveryFee').textContent = '$5.99 per pickup/delivery';
+                        
+                        // Generic links
+                        document.getElementById('schedulePickupBtn').href = 'schedule-pickup.html';
+                        document.getElementById('customerDashboardBtn').href = `customer-dashboard.html?id=${customer.customerId}`;
+                    }
+                    
+                    // Set bag barcode from URL parameter or from bags array
+                    if (bagBarcode) {
+                        document.getElementById('bagBarcode').textContent = bagBarcode;
+                    } else if (customer.bags && customer.bags.length > 0) {
+                        document.getElementById('bagBarcode').textContent = customer.bags[0].barcode;
+                    }
                 } else {
-                    document.getElementById('affiliateName').textContent = 'WaveMAX Affiliate Partner';
-                    document.getElementById('serviceArea').textContent = 'Austin, TX area';
-                    document.getElementById('deliveryFee').textContent = '$5.99 per pickup/delivery';
-                    
-                    // Generic links
-                    document.getElementById('schedulePickupBtn').href = 'schedule-pickup.html';
-                    document.getElementById('customerDashboardBtn').href = `customer-dashboard.html?id=${customerId}`;
+                    // If API call fails or customer not found, show error
+                    console.error('Failed to load customer data:', data.message);
+                    alert('Unable to load customer information. Please try logging in.');
+                    window.location.href = 'customer-login.html';
                 }
-                
-                // Set bag barcode if available
-                if (customer.bagBarcode) {
-                    document.getElementById('bagBarcode').textContent = customer.bagBarcode;
-                }
-            } else {
-                // Fallback if customer not found
-                alert('Customer details not found. Demo data will be displayed.');
-                
-                // Set demo data
-                document.getElementById('customerId').textContent = customerId;
-                document.getElementById('customerName').textContent = 'Demo Customer';
-                document.getElementById('customerEmail').textContent = 'demo@example.com';
-                document.getElementById('affiliateName').textContent = 'Demo Affiliate';
-                document.getElementById('serviceArea').textContent = 'Austin, TX area';
-                document.getElementById('deliveryFee').textContent = '$5.99 per pickup/delivery';
-                
-                // Generic links
-                document.getElementById('schedulePickupBtn').href = 'schedule-pickup.html';
-                document.getElementById('customerDashboardBtn').href = `customer-dashboard.html?id=${customerId}`;
+            } catch (error) {
+                console.error('Error fetching customer data:', error);
+                alert('An error occurred while loading customer information.');
+                window.location.href = 'customer-login.html';
             }
         });
     </script>

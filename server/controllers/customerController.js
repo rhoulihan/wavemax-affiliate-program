@@ -159,17 +159,19 @@ exports.getCustomerProfile = async (req, res) => {
       });
     }
     
-    // Check authorization (admin, affiliate, or self)
-    const isAuthorized = 
-      req.user.role === 'admin' || 
-      req.user.customerId === customerId || 
-      (req.user.role === 'affiliate' && req.user.affiliateId === customer.affiliateId);
-    
-    if (!isAuthorized) {
-      return res.status(403).json({
-        success: false,
-        message: 'Unauthorized'
-      });
+    // Check authorization (admin, affiliate, or self) - skip for public profile endpoint
+    if (req.user) {
+      const isAuthorized = 
+        req.user.role === 'admin' || 
+        req.user.customerId === customerId || 
+        (req.user.role === 'affiliate' && req.user.affiliateId === customer.affiliateId);
+      
+      if (!isAuthorized) {
+        return res.status(403).json({
+          success: false,
+          message: 'Unauthorized'
+        });
+      }
     }
     
     // Get affiliate details
