@@ -624,13 +624,13 @@
                     const stats = data.stats;
                     
                     // Update stats in the UI
-                    document.getElementById('totalCustomers').textContent = stats.totalCustomers || 0;
-                    document.getElementById('activeOrders').textContent = stats.activeOrders || 0;
+                    document.getElementById('totalCustomers').textContent = stats.customerCount || 0;
+                    document.getElementById('activeOrders').textContent = stats.activeOrderCount || 0;
                     document.getElementById('totalEarnings').textContent = `$${(stats.totalEarnings || 0).toFixed(2)}`;
                     
                     // Update earnings tab data
-                    document.getElementById('monthEarnings').textContent = `$${(stats.monthlyEarnings || 0).toFixed(2)}`;
-                    document.getElementById('weekEarnings').textContent = `$${(stats.weeklyEarnings || 0).toFixed(2)}`;
+                    document.getElementById('monthEarnings').textContent = `$${(stats.monthEarnings || 0).toFixed(2)}`;
+                    document.getElementById('weekEarnings').textContent = `$${(stats.weekEarnings || 0).toFixed(2)}`;
                     document.getElementById('pendingEarnings').textContent = `$${(stats.pendingEarnings || 0).toFixed(2)}`;
                     
                     // Set order counts
@@ -693,8 +693,8 @@
                     ordersForAffiliate = ordersForAffiliate.map(order => {
                         // Add customer name and address if not present
                         if (!order.customerName && order.customer) {
-                            order.customerName = `${order.customer.firstName} ${order.customer.lastName}`;
-                            order.customerAddress = `${order.customer.address}, ${order.customer.city}, ${order.customer.state} ${order.customer.zipCode}`;
+                            order.customerName = order.customer.name;
+                            order.customerAddress = order.customer.address;
                         }
                         return order;
                     });

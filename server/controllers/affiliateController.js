@@ -434,6 +434,7 @@ exports.getAffiliateCustomers = async (req, res) => {
     res.status(200).json({
       success: true,
       customers: customersData,
+      totalItems: totalCustomers,
       pagination: {
         total: totalCustomers,
         page,
@@ -568,6 +569,7 @@ exports.getAffiliateOrders = async (req, res) => {
     res.status(200).json({
       success: true,
       orders: ordersData,
+      totalItems: totalOrders,
       pagination: {
         total: totalOrders,
         page,
@@ -722,6 +724,8 @@ exports.getAffiliateDashboardStats = async (req, res) => {
         monthEarnings,
         weekEarnings,
         pendingEarnings,
+        monthlyOrders: monthOrders.length,
+        weeklyOrders: weekOrders.length,
         nextPayoutDate
       }
     });
