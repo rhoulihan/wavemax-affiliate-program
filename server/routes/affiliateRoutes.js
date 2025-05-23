@@ -29,6 +29,13 @@ router.post('/register', [
 ], affiliateController.registerAffiliate);
 
 /**
+ * @route   GET /api/affiliates/:affiliateId/public
+ * @desc    Get public affiliate information (for customer registration)
+ * @access  Public
+ */
+router.get('/:affiliateId/public', affiliateController.getPublicAffiliateInfo);
+
+/**
  * @route   GET /api/affiliates/:affiliateId
  * @desc    Get affiliate profile
  * @access  Private (self or admin)

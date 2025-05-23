@@ -19,6 +19,7 @@ const customerRoutes = require('./server/routes/customerRoutes');
 const orderRoutes = require('./server/routes/orderRoutes');
 const bagRoutes = require('./server/routes/bagRoutes');
 const affiliateController = require('./server/controllers/affiliateController');
+const customerController = require('./server/controllers/customerController');
 
 // Create Express app
 const app = express();
@@ -138,6 +139,10 @@ const csrfProtection = csrf({ cookie: true });
 // Create API routes that need CSRF protection
 app.use('/api/auth', csrfProtection, authRoutes);
 app.post('/api/affiliates/register', affiliateController.registerAffiliate);
+// Add public affiliate info route without CSRF protection
+app.get('/api/affiliates/:affiliateId/public', affiliateController.getPublicAffiliateInfo);
+// Customer registration needs to work without CSRF for now
+app.post('/api/customers/register', customerController.registerCustomer);
 app.use('/api/affiliates', csrfProtection, affiliateRoutes);
 app.use('/api/customers', csrfProtection, customerRoutes);
 app.use('/api/orders', csrfProtection, orderRoutes);
