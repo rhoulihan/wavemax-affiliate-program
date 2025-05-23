@@ -48,8 +48,18 @@
         </div>
     </div>
 
+    <!-- Loading Spinner -->
+    <div class="container mx-auto px-4 py-8" id="loadingSpinner">
+        <div class="flex items-center justify-center h-64">
+            <div class="text-center">
+                <div class="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                <p class="text-gray-600">Loading dashboard...</p>
+            </div>
+        </div>
+    </div>
+    
     <!-- Dashboard Content -->
-    <div class="container mx-auto px-4 py-8">
+    <div class="container mx-auto px-4 py-8" id="dashboardContent" style="display: none;">
         <!-- Stats Cards -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
             <div class="bg-white rounded-lg shadow-md p-6">
@@ -452,10 +462,10 @@
     </footer>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Check authentication
+        // Check authentication immediately
+        (function() {
             const token = localStorage.getItem('customerToken');
-            const currentCustomer = JSON.parse(localStorage.getItem('currentCustomer'));
+            const currentCustomer = localStorage.getItem('currentCustomer');
             
             if (!token || !currentCustomer) {
                 // Store the intended destination
@@ -464,6 +474,17 @@
                 localStorage.setItem('redirectAfterLogin', redirectUrl);
                 
                 // Redirect to login if not authenticated
+                window.location.href = 'customer-login.html';
+                return;
+            }
+        })();
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            // Re-check authentication and parse customer data
+            const token = localStorage.getItem('customerToken');
+            const currentCustomer = JSON.parse(localStorage.getItem('currentCustomer'));
+            
+            if (!token || !currentCustomer) {
                 window.location.href = 'customer-login.html';
                 return;
             }
@@ -488,6 +509,10 @@
             
             // Load dashboard statistics
             loadDashboardStats(customerId);
+            
+            // Hide loading spinner and show dashboard content
+            document.getElementById('loadingSpinner').style.display = 'none';
+            document.getElementById('dashboardContent').style.display = 'block';
             
             // Setup tab navigation
             const tabButtons = document.querySelectorAll('.tab-btn');
