@@ -134,11 +134,22 @@
                     }
                     
                     // Store token in localStorage
-                    localStorage.setItem('token', data.token);
+                    localStorage.setItem('customerToken', data.token);
                     localStorage.setItem('currentCustomer', JSON.stringify(data.customer));
                     
-                    // Redirect to dashboard
-                    window.location.href = `customer-dashboard.html?id=${data.customer.customerId}`;
+                    // Check for redirect URL
+                    const redirectUrl = localStorage.getItem('redirectAfterLogin');
+                    
+                    if (redirectUrl) {
+                        // Clear the redirect URL
+                        localStorage.removeItem('redirectAfterLogin');
+                        
+                        // Redirect to the intended destination
+                        window.location.href = redirectUrl;
+                    } else {
+                        // Default redirect to dashboard
+                        window.location.href = `customer-dashboard.html?id=${data.customer.customerId}`;
+                    }
                 } catch (error) {
                     console.error('Login error:', error);
                     
