@@ -364,7 +364,7 @@ exports.sendCustomerOrderConfirmationEmail = async (customer, order, affiliate) 
       affiliate_name: `${affiliate.firstName} ${affiliate.lastName}`,
       affiliate_phone: affiliate.phone,
       affiliate_email: affiliate.email,
-      dashboard_url: `${process.env.FRONTEND_URL || 'https://wavemax.promo'}/customer-dashboard.html?id=${customer.customerId}`,
+      login_url: `${process.env.FRONTEND_URL || 'https://wavemax.promo'}/customer-login.html`,
       current_year: new Date().getFullYear()
     };
     

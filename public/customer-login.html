@@ -91,6 +91,16 @@
     <script src="assets/js/errorHandler.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // Check if already logged in
+            const token = localStorage.getItem('customerToken');
+            const currentCustomer = JSON.parse(localStorage.getItem('currentCustomer'));
+            
+            if (token && currentCustomer) {
+                // User is already logged in, redirect to dashboard
+                window.location.href = `customer-dashboard.html?id=${currentCustomer.customerId}`;
+                return;
+            }
+            
             // Extract affiliate ID from URL query parameter (if any)
             const urlParams = new URLSearchParams(window.location.search);
             const affiliateId = urlParams.get('affiliate');
