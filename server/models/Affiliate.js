@@ -32,19 +32,16 @@ const affiliateSchema = new mongoose.Schema({
     enum: ['directDeposit', 'check', 'paypal']
   },
   accountNumber: {
-    iv: String,
-    encryptedData: String,
-    authTag: String
+    type: mongoose.Schema.Types.Mixed,
+    default: undefined
   },
   routingNumber: {
-    iv: String,
-    encryptedData: String,
-    authTag: String
+    type: mongoose.Schema.Types.Mixed,
+    default: undefined
   },
   paypalEmail: {
-    iv: String,
-    encryptedData: String,
-    authTag: String
+    type: mongoose.Schema.Types.Mixed,
+    default: undefined
   },
   isActive: { type: Boolean, default: true },
   dateRegistered: { type: Date, default: Date.now },

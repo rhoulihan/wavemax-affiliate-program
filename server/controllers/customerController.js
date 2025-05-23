@@ -136,6 +136,15 @@ exports.registerCustomer = async (req, res) => {
     res.status(201).json({
       success: true,
       customerId: newCustomer.customerId,
+      bagBarcode: bagBarcode,
+      customerData: {
+        firstName: newCustomer.firstName,
+        lastName: newCustomer.lastName,
+        email: newCustomer.email,
+        affiliateId: newCustomer.affiliateId,
+        affiliateName: affiliate.businessName || `${affiliate.firstName} ${affiliate.lastName}`,
+        deliveryFee: affiliate.deliveryFee
+      },
       message: 'Customer registered successfully!'
     });
   } catch (error) {

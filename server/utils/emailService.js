@@ -162,14 +162,17 @@ exports.sendAffiliateNewCustomerEmail = async (affiliate, customer, bagBarcode) 
     
     const data = {
       affiliate_first_name: affiliate.firstName,
+      affiliate_name: affiliate.businessName || `${affiliate.firstName} ${affiliate.lastName}`,
       customer_first_name: customer.firstName,
       customer_last_name: customer.lastName,
+      customer_name: `${customer.firstName} ${customer.lastName}`,
       customer_id: customer.customerId,
       customer_email: customer.email,
       customer_phone: customer.phone,
       customer_address: `${customer.address}, ${customer.city}, ${customer.state} ${customer.zipCode}`,
+      service_frequency: customer.serviceFrequency,
       bag_barcode: bagBarcode,
-      dashboard_url: `${process.env.FRONTEND_URL || 'https://wavemaxlaundry.com'}/affiliate-dashboard.html?id=${affiliate.affiliateId}`,
+      dashboard_url: `${process.env.FRONTEND_URL || 'https://wavemax.promo'}/affiliate-dashboard.html?id=${affiliate.affiliateId}`,
       current_year: new Date().getFullYear()
     };
     
@@ -202,7 +205,7 @@ exports.sendAffiliateNewOrderEmail = async (affiliate, customer, order) => {
       pickup_time: formatTimeSlot(order.pickupTime),
       estimated_size: formatSize(order.estimatedSize),
       special_instructions: order.specialPickupInstructions || 'None',
-      dashboard_url: `${process.env.FRONTEND_URL || 'https://wavemaxlaundry.com'}/affiliate-dashboard.html?id=${affiliate.affiliateId}`,
+      dashboard_url: `${process.env.FRONTEND_URL || 'https://wavemax.promo'}/affiliate-dashboard.html?id=${affiliate.affiliateId}`,
       current_year: new Date().getFullYear()
     };
     
@@ -231,7 +234,7 @@ exports.sendAffiliateCommissionEmail = async (affiliate, order, customer) => {
       customer_name: `${customer.firstName} ${customer.lastName}`,
       order_total: order.actualTotal ? `$${order.actualTotal.toFixed(2)}` : 'N/A',
       commission_amount: order.affiliateCommission ? `$${order.affiliateCommission.toFixed(2)}` : 'N/A',
-      dashboard_url: `${process.env.FRONTEND_URL || 'https://wavemaxlaundry.com'}/affiliate-dashboard.html?id=${affiliate.affiliateId}`,
+      dashboard_url: `${process.env.FRONTEND_URL || 'https://wavemax.promo'}/affiliate-dashboard.html?id=${affiliate.affiliateId}`,
       current_year: new Date().getFullYear()
     };
     
@@ -261,7 +264,7 @@ exports.sendAffiliateLostBagEmail = async (affiliate, customer, bagBarcode) => {
       customer_email: customer.email,
       customer_phone: customer.phone,
       bag_barcode: bagBarcode,
-      dashboard_url: `${process.env.FRONTEND_URL || 'https://wavemaxlaundry.com'}/affiliate-dashboard.html?id=${affiliate.affiliateId}`,
+      dashboard_url: `${process.env.FRONTEND_URL || 'https://wavemax.promo'}/affiliate-dashboard.html?id=${affiliate.affiliateId}`,
       current_year: new Date().getFullYear()
     };
     
@@ -291,7 +294,7 @@ exports.sendAffiliateOrderCancellationEmail = async (affiliate, order, customer)
       pickup_date: new Date(order.pickupDate).toLocaleDateString(),
       pickup_time: formatTimeSlot(order.pickupTime),
       cancellation_time: new Date().toLocaleTimeString(),
-      dashboard_url: `${process.env.FRONTEND_URL || 'https://wavemaxlaundry.com'}/affiliate-dashboard.html?id=${affiliate.affiliateId}`,
+      dashboard_url: `${process.env.FRONTEND_URL || 'https://wavemax.promo'}/affiliate-dashboard.html?id=${affiliate.affiliateId}`,
       current_year: new Date().getFullYear()
     };
     
@@ -326,8 +329,8 @@ exports.sendCustomerWelcomeEmail = async (customer, bagBarcode, affiliate) => {
       affiliate_phone: affiliate.phone,
       affiliate_email: affiliate.email,
       bag_barcode: bagBarcode,
-      login_url: `${process.env.FRONTEND_URL || 'https://wavemaxlaundry.com'}/customer-login.html`,
-      schedule_url: `${process.env.FRONTEND_URL || 'https://wavemaxlaundry.com'}/schedule-pickup.html?affiliate=${affiliate.affiliateId}&customer=${customer.customerId}`,
+      login_url: `${process.env.FRONTEND_URL || 'https://wavemax.promo'}/customer-login.html`,
+      schedule_url: `${process.env.FRONTEND_URL || 'https://wavemax.promo'}/schedule-pickup.html?affiliate=${affiliate.affiliateId}&customer=${customer.customerId}`,
       current_year: new Date().getFullYear()
     };
     
@@ -361,7 +364,7 @@ exports.sendCustomerOrderConfirmationEmail = async (customer, order, affiliate) 
       affiliate_name: `${affiliate.firstName} ${affiliate.lastName}`,
       affiliate_phone: affiliate.phone,
       affiliate_email: affiliate.email,
-      dashboard_url: `${process.env.FRONTEND_URL || 'https://wavemaxlaundry.com'}/customer-dashboard.html?id=${customer.customerId}`,
+      dashboard_url: `${process.env.FRONTEND_URL || 'https://wavemax.promo'}/customer-dashboard.html?id=${customer.customerId}`,
       current_year: new Date().getFullYear()
     };
     
@@ -404,7 +407,7 @@ exports.sendOrderStatusUpdateEmail = async (customer, order, status) => {
       status_message: statusMessages[status],
       weight_info: order.actualWeight ? `Your laundry weighs ${order.actualWeight} lbs.` : '',
       total_info: order.actualTotal ? `Final total: $${order.actualTotal.toFixed(2)}` : '',
-      dashboard_url: `${process.env.FRONTEND_URL || 'https://wavemaxlaundry.com'}/customer-dashboard.html?id=${customer.customerId}`,
+      dashboard_url: `${process.env.FRONTEND_URL || 'https://wavemax.promo'}/customer-dashboard.html?id=${customer.customerId}`,
       current_year: new Date().getFullYear()
     };
     
@@ -432,8 +435,8 @@ exports.sendOrderCancellationEmail = async (customer, order) => {
       order_id: order.orderId,
       pickup_date: new Date(order.pickupDate).toLocaleDateString(),
       cancellation_time: new Date().toLocaleTimeString(),
-      dashboard_url: `${process.env.FRONTEND_URL || 'https://wavemaxlaundry.com'}/customer-dashboard.html?id=${customer.customerId}`,
-      schedule_url: `${process.env.FRONTEND_URL || 'https://wavemaxlaundry.com'}/schedule-pickup.html?customer=${customer.customerId}`,
+      dashboard_url: `${process.env.FRONTEND_URL || 'https://wavemax.promo'}/customer-dashboard.html?id=${customer.customerId}`,
+      schedule_url: `${process.env.FRONTEND_URL || 'https://wavemax.promo'}/schedule-pickup.html?customer=${customer.customerId}`,
       current_year: new Date().getFullYear()
     };
     

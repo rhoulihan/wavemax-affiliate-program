@@ -12,7 +12,7 @@ services:
       - MONGODB_URI=mongodb://mongo:27017/wavemax
       - ENCRYPTION_KEY=${ENCRYPTION_KEY}
       - JWT_SECRET=${JWT_SECRET}
-      - EMAIL_USER=noreply@wavemaxlaundry.com
+      - EMAIL_USER=noreply@wavemax.promo
       - EMAIL_PASS=email_password_here
       - EMAIL_HOST=smtp.example.com
       - EMAIL_PORT=587
