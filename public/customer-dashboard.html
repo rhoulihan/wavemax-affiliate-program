@@ -672,104 +672,77 @@
         });
         
         // Load customer data
-        function loadCustomerData(customerId) {
-            // In a real implementation, this would make an API call to get customer data
-            // For demo purposes, we'll use localStorage
-            const storedCustomers = JSON.parse(localStorage.getItem('wavemax_customers')) || {};
-            
-            if (storedCustomers[customerId]) {
-                const customer = storedCustomers[customerId];
-                document.getElementById('welcomeMessage').textContent = `Welcome, ${customer.firstName} ${customer.lastName}!`;
+        async function loadCustomerData(customerId) {
+            try {
+                const token = localStorage.getItem('customerToken');
+                const response = await fetch(`/api/customers/${customerId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
                 
-                // Load affiliate information
-                const affiliateId = customer.affiliateId;
-                const storedAffiliates = JSON.parse(localStorage.getItem('wavemax_affiliates')) || {};
+                if (!response.ok) {
+                    throw new Error('Failed to fetch customer data');
+                }
                 
-                if (storedAffiliates[affiliateId]) {
-                    const affiliate = storedAffiliates[affiliateId];
+                const data = await response.json();
+                
+                if (data.success && data.customer) {
+                    const customer = data.customer;
+                    document.getElementById('welcomeMessage').textContent = `Welcome, ${customer.firstName} ${customer.lastName}!`;
                     
                     // Set schedule pickup button with affiliate ID
+                    const affiliateId = customer.affiliateId;
                     document.getElementById('schedulePickupBtn').href = `schedule-pickup.html?affiliate=${affiliateId}&customer=${customerId}`;
+                    
+                    // Store customer data for other functions if needed
+                    window.currentCustomerData = customer;
+                } else {
+                    throw new Error('Invalid response');
                 }
-            } else {
-                // Create mock customer data for demo
-                const mockCustomer = {
-                    customerId: customerId,
-                    firstName: 'Demo',
-                    lastName: 'Customer',
-                    email: 'demo@example.com',
-                    phone: '(555) 123-4567',
-                    address: '123 Main St',
-                    city: 'Austin',
-                    state: 'TX',
-                    zipCode: '78701',
-                    deliveryInstructions: 'Leave at front door',
-                    serviceFrequency: 'weekly',
-                    preferredDay: 'monday',
-                    preferredTime: 'morning',
-                    specialInstructions: 'Separate colors and whites',
-                    affiliateId: 'AFF123456'
-                };
-                
-                storedCustomers[customerId] = mockCustomer;
-                localStorage.setItem('wavemax_customers', JSON.stringify(storedCustomers));
-                
-                document.getElementById('welcomeMessage').textContent = `Welcome, ${mockCustomer.firstName} ${mockCustomer.lastName}!`;
-                
-                // Set schedule pickup button with affiliate ID
-                document.getElementById('schedulePickupBtn').href = `schedule-pickup.html?affiliate=${mockCustomer.affiliateId}&customer=${customerId}`;
+            } catch (error) {
+                console.error('Error loading customer data:', error);
+                // Use data from localStorage as fallback
+                const currentCustomer = JSON.parse(localStorage.getItem('currentCustomer'));
+                if (currentCustomer && currentCustomer.customerId === customerId) {
+                    document.getElementById('welcomeMessage').textContent = `Welcome, ${currentCustomer.firstName} ${currentCustomer.lastName}!`;
+                    document.getElementById('schedulePickupBtn').href = `schedule-pickup.html?affiliate=${currentCustomer.affiliateId}&customer=${customerId}`;
             }
         }
         
         // Load dashboard statistics
-        function loadDashboardStats(customerId) {
-            // In a real implementation, this would make an API call to get statistics
-            // For demo purposes, we'll create mock data
-            
-            // Get orders for this customer
-            const storedOrders = JSON.parse(localStorage.getItem('wavemax_orders')) || {};
-            let activeOrderCount = 0;
-            let completedOrderCount = 0;
-            let totalSpent = 0;
-            
-            Object.values(storedOrders).forEach(order => {
-                if (order.customerId === customerId) {
-                    if (['scheduled', 'picked_up', 'processing', 'ready_for_delivery'].includes(order.status)) {
-                        activeOrderCount++;
-                    } else if (order.status === 'delivered') {
-                        completedOrderCount++;
-                        
-                        // Add to total spent
-                        // In a real implementation, this would use actual order totals
-                        let orderTotal = 0;
-                        
-                        if (order.actualTotal) {
-                            orderTotal = order.actualTotal;
-                        } else {
-                            // Estimate based on size
-                            let estimatedWeight = 0;
-                            if (order.estimatedSize === 'small') {
-                                estimatedWeight = 12.5; // average of 10-15 lbs
-                            } else if (order.estimatedSize === 'medium') {
-                                estimatedWeight = 23; // average of 16-30 lbs
-                            } else if (order.estimatedSize === 'large') {
-                                estimatedWeight = 35; // approximate for 31+ lbs
-                            }
-                            
-                            const wdfRate = 1.89; // per pound
-                            const deliveryFee = 5.99; // default if not specified
-                            orderTotal = (estimatedWeight * wdfRate + deliveryFee);
-                        }
-                        
-                        totalSpent += orderTotal;
+        async function loadDashboardStats(customerId) {
+            try {
+                const token = localStorage.getItem('customerToken');
+                const response = await fetch(`/api/customers/${customerId}/dashboard`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
                     }
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Failed to fetch dashboard stats');
                 }
-            });
-            
-            // Update stats in the UI
-            document.getElementById('activeOrders').textContent = activeOrderCount;
-            document.getElementById('completedOrders').textContent = completedOrderCount;
-            document.getElementById('totalSpent').textContent = `$${totalSpent.toFixed(2)}`;
+                
+                const data = await response.json();
+                
+                if (data.success && data.stats) {
+                    const stats = data.stats;
+                    
+                    // Update stats in the UI
+                    document.getElementById('activeOrders').textContent = stats.activeOrders || 0;
+                    document.getElementById('completedOrders').textContent = stats.completedOrders || 0;
+                    document.getElementById('totalSpent').textContent = `$${(stats.totalSpent || 0).toFixed(2)}`;
+                } else {
+                    throw new Error('Invalid response');
+                }
+            } catch (error) {
+                console.error('Error loading dashboard stats:', error);
+                // Set default values on error
+                document.getElementById('activeOrders').textContent = '0';
+                document.getElementById('completedOrders').textContent = '0';
+                document.getElementById('totalSpent').textContent = '$0.00';
+            }
         }
         
         // Load orders for the orders tab
