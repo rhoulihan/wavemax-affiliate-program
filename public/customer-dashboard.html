@@ -453,13 +453,30 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Extract customer ID from URL query parameter
-            const urlParams = new URLSearchParams(window.location.search);
-            const customerId = urlParams.get('id');
+            // Check authentication
+            const token = localStorage.getItem('customerToken');
+            const currentCustomer = JSON.parse(localStorage.getItem('currentCustomer'));
             
-            if (!customerId) {
-                alert('No customer ID provided. Redirecting to homepage.');
-                window.location.href = 'index.html';
+            if (!token || !currentCustomer) {
+                // Store the intended destination
+                const urlParams = new URLSearchParams(window.location.search);
+                const redirectUrl = window.location.pathname + window.location.search;
+                localStorage.setItem('redirectAfterLogin', redirectUrl);
+                
+                // Redirect to login if not authenticated
+                window.location.href = 'customer-login.html';
+                return;
+            }
+            
+            // Extract customer ID from URL query parameter or use logged in customer
+            const urlParams = new URLSearchParams(window.location.search);
+            const requestedCustomerId = urlParams.get('id');
+            const customerId = requestedCustomerId || currentCustomer.customerId;
+            
+            // Verify the requested customer ID matches the logged in customer
+            if (requestedCustomerId && requestedCustomerId !== currentCustomer.customerId) {
+                alert('You can only view your own dashboard.');
+                window.location.href = `customer-dashboard.html?id=${currentCustomer.customerId}`;
                 return;
             }
             
@@ -628,8 +645,10 @@
                 e.preventDefault();
                 // Clear customer session
                 localStorage.removeItem('currentCustomer');
+                localStorage.removeItem('customerToken');
+                localStorage.removeItem('token');
                 // Redirect to login page
-                window.location.href = 'index.html';
+                window.location.href = 'customer-login.html';
             });
             
             // Request new bag button
