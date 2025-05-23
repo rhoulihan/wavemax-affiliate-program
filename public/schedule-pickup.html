@@ -404,13 +404,10 @@
                         storedOrders[data.orderId] = orderData;
                         localStorage.setItem('wavemax_orders', JSON.stringify(storedOrders));
                         
-                        // Show confirmation and notify affiliate
-                        alert(`Pickup successfully scheduled! Order ID: ${data.orderId}\n\nYour affiliate partner has been notified.`);
-                        
                         // Clear the stored token
                         localStorage.removeItem('customerToken');
                         
-                        // Redirect to order confirmation page
+                        // Redirect directly to order confirmation page
                         window.location.href = 'order-confirmation.html?id=' + data.orderId;
                     } else {
                         alert(data.message || 'Failed to schedule pickup. Please try again.');
