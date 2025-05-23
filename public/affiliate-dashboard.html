@@ -1052,7 +1052,10 @@
                         // The API should return masked versions if needed
                     } else if (paymentMethod === 'paypal') {
                         document.getElementById('settingsPaypalInfoContainer').style.display = 'block';
-                        // PayPal email might be returned by the API if appropriate
+                        // Display PayPal email if available
+                        if (affiliate.paypalEmail) {
+                            document.getElementById('settingsPaypalEmail').value = affiliate.paypalEmail;
+                        }
                     }
                 } else {
                     throw new Error('Invalid response');

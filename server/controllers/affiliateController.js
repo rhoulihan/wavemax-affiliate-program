@@ -125,27 +125,43 @@ exports.getAffiliateProfile = async (req, res) => {
       });
     }
     
-    // Return affiliate data (excluding sensitive info)
+    // Prepare response data
+    const responseData = {
+      affiliateId: affiliate.affiliateId,
+      firstName: affiliate.firstName,
+      lastName: affiliate.lastName,
+      email: affiliate.email,
+      phone: affiliate.phone,
+      businessName: affiliate.businessName,
+      address: affiliate.address,
+      city: affiliate.city,
+      state: affiliate.state,
+      zipCode: affiliate.zipCode,
+      serviceArea: affiliate.serviceArea,
+      deliveryFee: affiliate.deliveryFee,
+      paymentMethod: affiliate.paymentMethod,
+      isActive: affiliate.isActive,
+      dateRegistered: affiliate.dateRegistered,
+      lastLogin: affiliate.lastLogin
+    };
+    
+    // Include payment info if available (decrypt if necessary)
+    if (affiliate.paymentMethod === 'paypal' && affiliate.paypalEmail) {
+      try {
+        // Decrypt PayPal email if it's encrypted
+        responseData.paypalEmail = typeof affiliate.paypalEmail === 'object' 
+          ? encryptionUtil.decrypt(affiliate.paypalEmail)
+          : affiliate.paypalEmail;
+      } catch (error) {
+        console.error('Error decrypting PayPal email:', error);
+        // Don't include if decryption fails
+      }
+    }
+    
+    // Return affiliate data
     res.status(200).json({
       success: true,
-      affiliate: {
-        affiliateId: affiliate.affiliateId,
-        firstName: affiliate.firstName,
-        lastName: affiliate.lastName,
-        email: affiliate.email,
-        phone: affiliate.phone,
-        businessName: affiliate.businessName,
-        address: affiliate.address,
-        city: affiliate.city,
-        state: affiliate.state,
-        zipCode: affiliate.zipCode,
-        serviceArea: affiliate.serviceArea,
-        deliveryFee: affiliate.deliveryFee,
-        paymentMethod: affiliate.paymentMethod,
-        isActive: affiliate.isActive,
-        dateRegistered: affiliate.dateRegistered,
-        lastLogin: affiliate.lastLogin
-      }
+      affiliate: responseData
     });
   } catch (error) {
     console.error('Get affiliate profile error:', error);
