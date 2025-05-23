@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background-color: #dc2626; color: white; padding: 20px; text-align: center; border-radius: 5px 5px 0 0; }
+        .content { background-color: #f9f9f9; padding: 20px; border: 1px solid #ddd; }
+        .cancellation-details { background-color: #fee2e2; padding: 15px; margin: 15px 0; border-radius: 5px; border: 1px solid #f87171; }
+        .footer { background-color: #f5f5f5; padding: 15px; text-align: center; font-size: 12px; border-radius: 0 0 5px 5px; }
+        .button { display: inline-block; padding: 12px 30px; background-color: #3b82f6; color: white; text-decoration: none; border-radius: 5px; margin: 15px 0; }
+        .detail-row { margin: 10px 0; }
+        .detail-label { font-weight: bold; color: #555; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Order Cancelled</h1>
+        </div>
+        <div class="content">
+            <p>Hello [FIRST_NAME],</p>
+            
+            <p>Your laundry pickup order has been cancelled.</p>
+            
+            <div class="cancellation-details">
+                <h2 style="color: #dc2626; margin-bottom: 15px;">Cancellation Details</h2>
+                <div class="detail-row">
+                    <span class="detail-label">Order ID:</span> [ORDER_ID]
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Original Pickup Date:</span> [PICKUP_DATE]
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Cancelled At:</span> [CANCELLATION_TIME]
+                </div>
+            </div>
+            
+            <p>If you'd like to schedule a new pickup, you can do so at any time:</p>
+            
+            <p style="text-align: center;">
+                <a href="[SCHEDULE_URL]" class="button">Schedule New Pickup</a>
+            </p>
+            
+            <p style="text-align: center;">
+                <a href="[DASHBOARD_URL]" style="color: #3b82f6;">View Your Dashboard</a>
+            </p>
+            
+            <p>We're sorry for any inconvenience. If you have any questions, please contact your affiliate partner.</p>
+            
+            <p>Best regards,<br>
+            The WaveMAX Laundry Team</p>
+        </div>
+        <div class="footer">
+            <p>&copy; [CURRENT_YEAR] WaveMAX Laundry. All rights reserved.</p>
+            <p>This is an automated message. Please do not reply to this email.</p>
+        </div>
+    </div>
+</body>
+</html>

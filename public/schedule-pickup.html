@@ -386,6 +386,24 @@
                     const data = await response.json();
                     
                     if (data.success) {
+                        // Get delivery fee from the page
+                        const deliveryFeeText = document.getElementById('deliveryFee').textContent;
+                        const deliveryFee = parseFloat(deliveryFeeText.replace('$', '')) || 5.99;
+                        
+                        // Store order data temporarily for confirmation page
+                        const orderData = {
+                            orderId: data.orderId,
+                            estimatedTotal: data.estimatedTotal,
+                            deliveryFee: deliveryFee,
+                            ...pickupData,
+                            createdAt: new Date().toISOString()
+                        };
+                        
+                        // Store order in localStorage
+                        const storedOrders = JSON.parse(localStorage.getItem('wavemax_orders')) || {};
+                        storedOrders[data.orderId] = orderData;
+                        localStorage.setItem('wavemax_orders', JSON.stringify(storedOrders));
+                        
                         // Show confirmation and notify affiliate
                         alert(`Pickup successfully scheduled! Order ID: ${data.orderId}\n\nYour affiliate partner has been notified.`);
                         

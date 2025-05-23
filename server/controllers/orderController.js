@@ -84,9 +84,14 @@ exports.createOrder = async (req, res) => {
     
     await newOrder.save();
     
-    // Send notification emails
-    await emailService.sendCustomerOrderConfirmationEmail(customer, newOrder, affiliate);
-    await emailService.sendAffiliateNewOrderEmail(affiliate, customer, newOrder);
+    // Send notification emails (don't let email failures stop the order)
+    try {
+      await emailService.sendCustomerOrderConfirmationEmail(customer, newOrder, affiliate);
+      await emailService.sendAffiliateNewOrderEmail(affiliate, customer, newOrder);
+    } catch (emailError) {
+      console.error('Failed to send notification emails:', emailError);
+      // Continue with the response even if emails fail
+    }
     
     res.status(201).json({
       success: true,
