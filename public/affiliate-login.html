@@ -119,12 +119,16 @@
                     return response.json();
                 })
                 .then(data => {
-                    // Store token in localStorage
-                    localStorage.setItem('token', data.token);
-                    localStorage.setItem('currentAffiliate', JSON.stringify(data.affiliate));
-                    
-                    // Redirect to dashboard
-                    window.location.href = `affiliate-dashboard.html?id=${data.affiliate.affiliateId}`;
+                    if (data.success) {
+                        // Store token in localStorage
+                        localStorage.setItem('affiliateToken', data.token);
+                        localStorage.setItem('currentAffiliate', JSON.stringify(data.affiliate));
+                        
+                        // Redirect to dashboard
+                        window.location.href = `affiliate-dashboard.html?id=${data.affiliate.affiliateId}`;
+                    } else {
+                        alert(data.message || 'Login failed. Please check your credentials and try again.');
+                    }
                 })
                 .catch(error => {
                     // For demo purposes, simulate successful login

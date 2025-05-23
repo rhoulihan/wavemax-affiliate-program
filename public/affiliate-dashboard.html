@@ -417,9 +417,18 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Get affiliate ID from URL or localStorage
-            const urlParams = new URLSearchParams(window.location.search);
-            const affiliateId = urlParams.get('id') || JSON.parse(localStorage.getItem('currentAffiliate'))?.affiliateId || 'AFF123456';
+            // Check authentication
+            const token = localStorage.getItem('affiliateToken');
+            const currentAffiliate = JSON.parse(localStorage.getItem('currentAffiliate'));
+            
+            if (!token || !currentAffiliate) {
+                // Redirect to login if not authenticated
+                window.location.href = 'affiliate-login.html';
+                return;
+            }
+            
+            // Get affiliate ID from current affiliate data
+            const affiliateId = currentAffiliate.affiliateId;
             
             // Set affiliate ID in the page
             document.getElementById('affiliateId').textContent = `Affiliate ID: ${affiliateId}`;
@@ -489,8 +498,9 @@
                 e.preventDefault();
                 // Clear affiliate session
                 localStorage.removeItem('currentAffiliate');
+                localStorage.removeItem('affiliateToken');
                 // Redirect to login page
-                window.location.href = 'index.html';
+                window.location.href = 'affiliate-login.html';
             });
             
             // Settings form payment method toggle
@@ -560,187 +570,134 @@
         });
         
         // Load affiliate data
-        function loadAffiliateData(affiliateId) {
-            // In a real implementation, this would make an API call to get affiliate data
-            // For demo purposes, we'll use localStorage
-            const storedAffiliates = JSON.parse(localStorage.getItem('wavemax_affiliates')) || {};
-            
-            if (storedAffiliates[affiliateId]) {
-                const affiliate = storedAffiliates[affiliateId];
-                document.getElementById('welcomeMessage').textContent = `Welcome back, ${affiliate.firstName} ${affiliate.lastName}!`;
-            } else {
-                // Create mock affiliate data for demo
-                const mockAffiliate = {
-                    affiliateId: affiliateId,
-                    firstName: 'Demo',
-                    lastName: 'Affiliate',
-                    email: 'demo@example.com',
-                    phone: '(555) 123-4567',
-                    address: '123 Main St',
-                    city: 'Austin',
-                    state: 'TX',
-                    zipCode: '78701',
-                    serviceArea: 'Downtown Austin, South Congress, Zilker',
-                    deliveryFee: '5.99',
-                    paymentMethod: 'directDeposit'
-                };
+        async function loadAffiliateData(affiliateId) {
+            try {
+                const token = localStorage.getItem('affiliateToken');
+                const response = await fetch(`/api/affiliates/${affiliateId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
                 
-                storedAffiliates[affiliateId] = mockAffiliate;
-                localStorage.setItem('wavemax_affiliates', JSON.stringify(storedAffiliates));
+                if (!response.ok) {
+                    throw new Error('Failed to fetch affiliate data');
+                }
                 
-                document.getElementById('welcomeMessage').textContent = `Welcome back, ${mockAffiliate.firstName} ${mockAffiliate.lastName}!`;
+                const data = await response.json();
+                
+                if (data.success && data.affiliate) {
+                    const affiliate = data.affiliate;
+                    document.getElementById('welcomeMessage').textContent = `Welcome back, ${affiliate.firstName} ${affiliate.lastName}!`;
+                    
+                    // Store affiliate data for other functions
+                    window.currentAffiliateData = affiliate;
+                } else {
+                    throw new Error('Invalid response');
+                }
+            } catch (error) {
+                console.error('Error loading affiliate data:', error);
+                // Use cached data if available
+                const currentAffiliate = JSON.parse(localStorage.getItem('currentAffiliate'));
+                if (currentAffiliate) {
+                    document.getElementById('welcomeMessage').textContent = `Welcome back, ${currentAffiliate.firstName} ${currentAffiliate.lastName}!`;
+                }
             }
         }
         
         // Load dashboard statistics
-        function loadDashboardStats(affiliateId) {
-            // In a real implementation, this would make an API call to get statistics
-            // For demo purposes, we'll create mock data
-            
-            // Get customers for this affiliate
-            const storedCustomers = JSON.parse(localStorage.getItem('wavemax_customers')) || {};
-            let customerCount = 0;
-            
-            Object.values(storedCustomers).forEach(customer => {
-                if (customer.affiliateId === affiliateId) {
-                    customerCount++;
-                }
-            });
-            
-            // Get active orders for this affiliate
-            const storedOrders = JSON.parse(localStorage.getItem('wavemax_orders')) || {};
-            let activeOrderCount = 0;
-            let totalEarnings = 0;
-            
-            Object.values(storedOrders).forEach(order => {
-                if (order.affiliateId === affiliateId) {
-                    if (['scheduled', 'picked_up', 'processing', 'ready_for_delivery'].includes(order.status)) {
-                        activeOrderCount++;
+        async function loadDashboardStats(affiliateId) {
+            try {
+                const token = localStorage.getItem('affiliateToken');
+                const response = await fetch(`/api/affiliates/${affiliateId}/dashboard`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
                     }
-                    
-                    // Add mock earnings
-                    const orderEarnings = (Math.random() * 5 + 5).toFixed(2);
-                    totalEarnings += parseFloat(orderEarnings);
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Failed to fetch dashboard stats');
                 }
-            });
-            
-            // Update stats in the UI
-            document.getElementById('totalCustomers').textContent = customerCount;
-            document.getElementById('activeOrders').textContent = activeOrderCount;
-            document.getElementById('totalEarnings').textContent = `$${totalEarnings.toFixed(2)}`;
-            
-            // Update earnings tab data
-            document.getElementById('monthEarnings').textContent = `$${(totalEarnings * 0.7).toFixed(2)}`;
-            document.getElementById('weekEarnings').textContent = `$${(totalEarnings * 0.3).toFixed(2)}`;
-            document.getElementById('pendingEarnings').textContent = `$${(totalEarnings * 0.5).toFixed(2)}`;
-            
-            // Set mock order counts
-            document.getElementById('monthOrderCount').textContent = Math.floor(activeOrderCount * 1.5);
-            document.getElementById('weekOrderCount').textContent = Math.floor(activeOrderCount * 0.7);
-            
-            // Set next payout date
-            const nextPayoutDate = new Date();
-            nextPayoutDate.setDate(nextPayoutDate.getDate() + 7);
-            document.getElementById('nextPayoutDate').textContent = nextPayoutDate.toLocaleDateString();
+                
+                const data = await response.json();
+                
+                if (data.success && data.stats) {
+                    const stats = data.stats;
+                    
+                    // Update stats in the UI
+                    document.getElementById('totalCustomers').textContent = stats.totalCustomers || 0;
+                    document.getElementById('activeOrders').textContent = stats.activeOrders || 0;
+                    document.getElementById('totalEarnings').textContent = `$${(stats.totalEarnings || 0).toFixed(2)}`;
+                    
+                    // Update earnings tab data
+                    document.getElementById('monthEarnings').textContent = `$${(stats.monthlyEarnings || 0).toFixed(2)}`;
+                    document.getElementById('weekEarnings').textContent = `$${(stats.weeklyEarnings || 0).toFixed(2)}`;
+                    document.getElementById('pendingEarnings').textContent = `$${(stats.pendingEarnings || 0).toFixed(2)}`;
+                    
+                    // Set order counts
+                    document.getElementById('monthOrderCount').textContent = stats.monthlyOrders || 0;
+                    document.getElementById('weekOrderCount').textContent = stats.weeklyOrders || 0;
+                    
+                    // Set next payout date
+                    if (stats.nextPayoutDate) {
+                        const nextPayoutDate = new Date(stats.nextPayoutDate);
+                        document.getElementById('nextPayoutDate').textContent = nextPayoutDate.toLocaleDateString();
+                    } else {
+                        const nextPayoutDate = new Date();
+                        nextPayoutDate.setDate(nextPayoutDate.getDate() + 7);
+                        document.getElementById('nextPayoutDate').textContent = nextPayoutDate.toLocaleDateString();
+                    }
+                } else {
+                    throw new Error('Invalid response');
+                }
+            } catch (error) {
+                console.error('Error loading dashboard stats:', error);
+                // Set default values on error
+                document.getElementById('totalCustomers').textContent = '0';
+                document.getElementById('activeOrders').textContent = '0';
+                document.getElementById('totalEarnings').textContent = '$0.00';
+                document.getElementById('monthEarnings').textContent = '$0.00';
+                document.getElementById('weekEarnings').textContent = '$0.00';
+                document.getElementById('pendingEarnings').textContent = '$0.00';
+                document.getElementById('monthOrderCount').textContent = '0';
+                document.getElementById('weekOrderCount').textContent = '0';
+                
+                const nextPayoutDate = new Date();
+                nextPayoutDate.setDate(nextPayoutDate.getDate() + 7);
+                document.getElementById('nextPayoutDate').textContent = nextPayoutDate.toLocaleDateString();
+            }
         }
         
         // Load orders for the pickups tab
-        function loadOrders(affiliateId) {
-            // In a real implementation, this would make an API call to get orders
-            // For demo purposes, we'll generate mock data
-            
+        async function loadOrders(affiliateId) {
             const ordersTableBody = document.getElementById('ordersTableBody');
-            ordersTableBody.innerHTML = '';
+            ordersTableBody.innerHTML = '<tr><td colspan="6" class="text-center py-4">Loading...</td></tr>';
             
-            // Get stored orders or generate mock data
-            const storedOrders = JSON.parse(localStorage.getItem('wavemax_orders')) || {};
-            let ordersForAffiliate = [];
-            
-            // If we have stored orders, filter for this affiliate
-            if (Object.keys(storedOrders).length > 0) {
-                Object.entries(storedOrders).forEach(([orderId, order]) => {
-                    if (order.affiliateId === affiliateId) {
-                        ordersForAffiliate.push({
-                            orderId,
-                            ...order
-                        });
-                    }
-                });
-            }
-            
-            // If no stored orders for this affiliate, generate mock data
-            if (ordersForAffiliate.length === 0) {
-                // Get customers for this affiliate or create mock customers
-                const storedCustomers = JSON.parse(localStorage.getItem('wavemax_customers')) || {};
-                let customersForAffiliate = [];
-                
-                Object.entries(storedCustomers).forEach(([customerId, customer]) => {
-                    if (customer.affiliateId === affiliateId) {
-                        customersForAffiliate.push({
-                            customerId,
-                            ...customer
-                        });
+            try {
+                const token = localStorage.getItem('affiliateToken');
+                const response = await fetch(`/api/affiliates/${affiliateId}/orders`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
                     }
                 });
                 
-                // If no customers, create mock customers
-                if (customersForAffiliate.length === 0) {
-                    customersForAffiliate = [
-                        {
-                            customerId: 'CUST123456',
-                            firstName: 'John',
-                            lastName: 'Doe',
-                            email: 'john.doe@example.com',
-                            phone: '(555) 123-4567',
-                            address: '123 Main St',
-                            city: 'Austin',
-                            state: 'TX',
-                            zipCode: '78701'
-                        },
-                        {
-                            customerId: 'CUST234567',
-                            firstName: 'Jane',
-                            lastName: 'Smith',
-                            email: 'jane.smith@example.com',
-                            phone: '(555) 987-6543',
-                            address: '456 Oak Ave',
-                            city: 'Austin',
-                            state: 'TX',
-                            zipCode: '78702'
+                if (!response.ok) {
+                    throw new Error('Failed to fetch orders');
+                }
+                
+                const data = await response.json();
+                
+                if (data.success && data.orders) {
+                    let ordersForAffiliate = data.orders;
+            
+                    // Process orders data
+                    ordersForAffiliate = ordersForAffiliate.map(order => {
+                        // Add customer name and address if not present
+                        if (!order.customerName && order.customer) {
+                            order.customerName = `${order.customer.firstName} ${order.customer.lastName}`;
+                            order.customerAddress = `${order.customer.address}, ${order.customer.city}, ${order.customer.state} ${order.customer.zipCode}`;
                         }
-                    ];
-                }
-                
-                // Generate mock orders
-                const orderStatuses = ['scheduled', 'picked_up', 'processing', 'ready_for_delivery', 'delivered'];
-                
-                for (let i = 0; i < 10; i++) {
-                    const orderDate = new Date();
-                    orderDate.setDate(orderDate.getDate() + Math.floor(Math.random() * 7));
-                    
-                    const deliveryDate = new Date(orderDate);
-                    deliveryDate.setDate(deliveryDate.getDate() + 2);
-                    
-                    const customer = customersForAffiliate[Math.floor(Math.random() * customersForAffiliate.length)];
-                    
-                    const order = {
-                        orderId: 'ORD' + Math.floor(100000 + Math.random() * 900000),
-                        customerId: customer.customerId,
-                        customerName: `${customer.firstName} ${customer.lastName}`,
-                        customerAddress: `${customer.address}, ${customer.city}, ${customer.state} ${customer.zipCode}`,
-                        affiliateId: affiliateId,
-                        pickupDate: orderDate.toISOString(),
-                        pickupTime: ['morning', 'afternoon', 'evening'][Math.floor(Math.random() * 3)],
-                        deliveryDate: deliveryDate.toISOString(),
-                        deliveryTime: ['morning', 'afternoon', 'evening'][Math.floor(Math.random() * 3)],
-                        status: orderStatuses[Math.floor(Math.random() * orderStatuses.length)],
-                        estimatedSize: ['small', 'medium', 'large'][Math.floor(Math.random() * 3)],
-                        createdAt: new Date().toISOString()
-                    };
-                    
-                    ordersForAffiliate.push(order);
-                }
-            }
+                        return order;
+                    });
             
             // Filter based on status dropdown
             const statusFilter = document.getElementById('orderStatusFilter').value;
@@ -822,95 +779,40 @@
                 });
             }
             
-            // Update pagination info
-            document.getElementById('ordersShowing').textContent = ordersForAffiliate.length;
-            document.getElementById('ordersTotal').textContent = ordersForAffiliate.length;
-            
-            // Store orders in localStorage
-            const allOrders = {};
-            ordersForAffiliate.forEach(order => {
-                allOrders[order.orderId] = order;
-            });
-            localStorage.setItem('wavemax_orders', JSON.stringify(allOrders));
+                    // Update pagination info
+                    document.getElementById('ordersShowing').textContent = ordersForAffiliate.length;
+                    document.getElementById('ordersTotal').textContent = data.totalItems || ordersForAffiliate.length;
+                } else {
+                    throw new Error('Invalid response');
+                }
+            } catch (error) {
+                console.error('Error loading orders:', error);
+                ordersTableBody.innerHTML = '<tr class="text-center"><td colspan="7" class="px-6 py-4 text-red-500">Failed to load orders. Please try again.</td></tr>';
+            }
         }
         
         // Load customers for the customers tab
-        function loadCustomers(affiliateId) {
-            // In a real implementation, this would make an API call to get customers
-            // For demo purposes, we'll use localStorage or generate mock data
-            
+        async function loadCustomers(affiliateId) {
             const customersTableBody = document.getElementById('customersTableBody');
-            customersTableBody.innerHTML = '';
+            customersTableBody.innerHTML = '<tr><td colspan="5" class="text-center py-4">Loading...</td></tr>';
             
-            // Get stored customers or generate mock data
-            const storedCustomers = JSON.parse(localStorage.getItem('wavemax_customers')) || {};
-            let customersForAffiliate = [];
-            
-            // If we have stored customers, filter for this affiliate
-            if (Object.keys(storedCustomers).length > 0) {
-                Object.entries(storedCustomers).forEach(([customerId, customer]) => {
-                    if (customer.affiliateId === affiliateId) {
-                        customersForAffiliate.push({
-                            customerId,
-                            ...customer
-                        });
+            try {
+                const token = localStorage.getItem('affiliateToken');
+                const response = await fetch(`/api/affiliates/${affiliateId}/customers`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
                     }
                 });
-            }
+                
+                if (!response.ok) {
+                    throw new Error('Failed to fetch customers');
+                }
+                
+                const data = await response.json();
+                
+                if (data.success && data.customers) {
+                    let customersForAffiliate = data.customers;
             
-            // If no stored customers for this affiliate, generate mock data
-            if (customersForAffiliate.length === 0) {
-                const mockCustomers = [
-                    {
-                        customerId: 'CUST123456',
-                        firstName: 'John',
-                        lastName: 'Doe',
-                        email: 'john.doe@example.com',
-                        phone: '(555) 123-4567',
-                        address: '123 Main St',
-                        city: 'Austin',
-                        state: 'TX',
-                        zipCode: '78701',
-                        affiliateId: affiliateId,
-                        registrationDate: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000).toISOString()
-                    },
-                    {
-                        customerId: 'CUST234567',
-                        firstName: 'Jane',
-                        lastName: 'Smith',
-                        email: 'jane.smith@example.com',
-                        phone: '(555) 987-6543',
-                        address: '456 Oak Ave',
-                        city: 'Austin',
-                        state: 'TX',
-                        zipCode: '78702',
-                        affiliateId: affiliateId,
-                        registrationDate: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000).toISOString()
-                    },
-                    {
-                        customerId: 'CUST345678',
-                        firstName: 'Michael',
-                        lastName: 'Johnson',
-                        email: 'michael.johnson@example.com',
-                        phone: '(555) 456-7890',
-                        address: '789 Pine St',
-                        city: 'Austin',
-                        state: 'TX',
-                        zipCode: '78703',
-                        affiliateId: affiliateId,
-                        registrationDate: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000).toISOString()
-                    }
-                ];
-                
-                customersForAffiliate = mockCustomers;
-                
-                // Store mock customers in localStorage
-                const allCustomers = {...storedCustomers};
-                mockCustomers.forEach(customer => {
-                    allCustomers[customer.customerId] = customer;
-                });
-                localStorage.setItem('wavemax_customers', JSON.stringify(allCustomers));
-            }
             
             // Get order counts for each customer
             const storedOrders = JSON.parse(localStorage.getItem('wavemax_orders')) || {};
@@ -964,9 +866,16 @@
                 });
             }
             
-            // Update pagination info
-            document.getElementById('customersShowing').textContent = customersForAffiliate.length;
-            document.getElementById('customersTotal').textContent = customersForAffiliate.length;
+                    // Update pagination info
+                    document.getElementById('customersShowing').textContent = customersForAffiliate.length;
+                    document.getElementById('customersTotal').textContent = data.totalItems || customersForAffiliate.length;
+                } else {
+                    throw new Error('Invalid response');
+                }
+            } catch (error) {
+                console.error('Error loading customers:', error);
+                customersTableBody.innerHTML = '<tr class="text-center"><td colspan="7" class="px-6 py-4 text-red-500">Failed to load customers. Please try again.</td></tr>';
+            }
         }
         
         // Load earnings data for the earnings tab
