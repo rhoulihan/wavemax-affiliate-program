@@ -248,14 +248,27 @@
                     document.getElementById('affiliateId').value = loggedInCustomer.affiliateId || affiliateId;
                     
                     // Get affiliate information for pricing
-                    const storedAffiliates = JSON.parse(localStorage.getItem('wavemax_affiliates')) || {};
                     const customerAffiliateId = loggedInCustomer.affiliateId || affiliateId;
                     
-                    if (storedAffiliates[customerAffiliateId]) {
-                        const affiliate = storedAffiliates[customerAffiliateId];
-                        document.getElementById('deliveryFee').textContent = `$${parseFloat(affiliate.deliveryFee).toFixed(2)}`;
+                    if (customerAffiliateId) {
+                        // Fetch affiliate info from the server
+                        fetch(`/api/affiliates/${customerAffiliateId}/public`)
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.success && data.affiliate) {
+                                    document.getElementById('deliveryFee').textContent = `$${parseFloat(data.affiliate.deliveryFee).toFixed(2)}`;
+                                } else {
+                                    // Fallback price if affiliate not found
+                                    document.getElementById('deliveryFee').textContent = '$5.99';
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Error fetching affiliate info:', error);
+                                // Fallback price on error
+                                document.getElementById('deliveryFee').textContent = '$5.99';
+                            });
                     } else {
-                        // Fallback price if affiliate not found
+                        // Fallback price if no affiliate ID
                         document.getElementById('deliveryFee').textContent = '$5.99';
                     }
                     

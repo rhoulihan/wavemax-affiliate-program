@@ -266,23 +266,28 @@
                 // Set the hidden affiliate ID field
                 document.getElementById('affiliateId').value = affiliateId;
                 
-                // In a real implementation, you would fetch affiliate info from the server
-                // For demo purposes, we'll check localStorage for affiliate info
-                const storedAffiliates = JSON.parse(localStorage.getItem('wavemax_affiliates')) || {};
-                
-                // Display affiliate info if available
-                if (storedAffiliates[affiliateId]) {
-                    const affiliate = storedAffiliates[affiliateId];
-                    const affiliateIntro = document.getElementById('affiliateIntro');
-                    affiliateIntro.textContent = `Sign up for premium laundry pickup and delivery service with ${affiliate.firstName} ${affiliate.lastName}.`;
-                    
-                    // Set delivery fee based on affiliate's rate
-                    document.getElementById('deliveryFee').textContent = `$${parseFloat(affiliate.deliveryFee).toFixed(2)}`;
-                } else {
-                    // Simulate affiliate data
-                    const deliveryFee = 5.99;
-                    document.getElementById('deliveryFee').textContent = `$${deliveryFee.toFixed(2)}`;
-                }
+                // Fetch affiliate info from the server
+                fetch(`/api/affiliates/${affiliateId}/public`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success && data.affiliate) {
+                            const affiliate = data.affiliate;
+                            const affiliateIntro = document.getElementById('affiliateIntro');
+                            const name = affiliate.businessName || `${affiliate.firstName} ${affiliate.lastName}`;
+                            affiliateIntro.textContent = `Sign up for premium laundry pickup and delivery service with ${name}.`;
+                            
+                            // Set delivery fee based on affiliate's rate
+                            document.getElementById('deliveryFee').textContent = `$${parseFloat(affiliate.deliveryFee).toFixed(2)}`;
+                        } else {
+                            alert('Invalid affiliate ID. Please use a valid registration link.');
+                            window.location.href = 'index.html';
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error fetching affiliate info:', error);
+                        alert('Unable to load affiliate information. Please try again.');
+                        window.location.href = 'index.html';
+                    });
             } else {
                 // Redirect if no affiliate ID is provided
                 alert('No affiliate ID provided. Please use a valid registration link.');
@@ -333,27 +338,34 @@
                     }
                 });
                 
-                // Generate a unique customer ID
-                const customerId = 'CUST' + Math.floor(100000 + Math.random() * 900000);
-                customerData.customerId = customerId;
+                // Add payment information to the data
+                if (document.getElementById('savePaymentInfo').checked) {
+                    customerData.cardNumber = formData.get('cardNumber').replace(/\s/g, '');
+                    customerData.cvv = formData.get('cvv');
+                    customerData.expiryDate = formData.get('expiryDate');
+                }
                 
-                // This would normally be sent to the server for processing
-                console.log('Customer Registration Data:', customerData);
-                
-                // In a real implementation, this would securely process payment information
-                // and store encrypted customer data in MongoDB
-                
-                // For demonstration, show a success message and redirect
-                alert('Customer registration successful!');
-                
-                // Store customer data in localStorage (for demo purposes only)
-                // In a real implementation, this would be stored securely in MongoDB
-                const storedCustomers = JSON.parse(localStorage.getItem('wavemax_customers')) || {};
-                storedCustomers[customerId] = customerData;
-                localStorage.setItem('wavemax_customers', JSON.stringify(storedCustomers));
-                
-                // Redirect to success page
-                window.location.href = 'customer-success.html?id=' + customerId;
+                // Submit to server
+                fetch('/api/customers/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(customerData)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Redirect to success page without alert
+                        window.location.href = `customer-success.html?id=${data.customerId}&barcode=${data.bagBarcode}`;
+                    } else {
+                        alert(data.message || 'Registration failed. Please try again.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Registration error:', error);
+                    alert('An error occurred during registration. Please try again.');
+                });
             });
             
             // Payment field formatting - basic examples
