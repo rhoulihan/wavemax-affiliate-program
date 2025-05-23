@@ -522,7 +522,7 @@
             });
             
             // Settings form submission
-            document.getElementById('settingsForm').addEventListener('submit', function(e) {
+            document.getElementById('settingsForm').addEventListener('submit', async function(e) {
                 e.preventDefault();
                 
                 // Collect form data
@@ -530,7 +530,9 @@
                 const settingsData = {};
                 
                 formData.forEach((value, key) => {
-                    settingsData[key] = value;
+                    if (key !== '_csrf' && value) {  // Skip CSRF token and empty values
+                        settingsData[key] = value;
+                    }
                 });
                 
                 // Validate password fields if they were filled
@@ -546,23 +548,35 @@
                     }
                 }
                 
-                // In a real implementation, this would be sent to the server
-                console.log('Settings Update Data:', settingsData);
+                // Remove confirmPassword from data sent to server
+                delete settingsData.confirmPassword;
                 
-                // Update affiliate data in localStorage for demo purposes
-                const storedAffiliates = JSON.parse(localStorage.getItem('wavemax_affiliates')) || {};
-                if (storedAffiliates[affiliateId]) {
-                    // Update fields
-                    Object.keys(settingsData).forEach(key => {
-                        if (settingsData[key] && key !== 'currentPassword' && key !== 'newPassword' && key !== 'confirmPassword') {
-                            storedAffiliates[affiliateId][key] = settingsData[key];
-                        }
+                try {
+                    const token = localStorage.getItem('affiliateToken');
+                    const response = await fetch(`/api/affiliates/${affiliateId}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(settingsData)
                     });
                     
-                    localStorage.setItem('wavemax_affiliates', JSON.stringify(storedAffiliates));
+                    const data = await response.json();
+                    
+                    if (response.ok && data.success) {
+                        alert('Settings updated successfully!');
+                        // Clear password fields
+                        document.getElementById('settingsCurrentPassword').value = '';
+                        document.getElementById('settingsNewPassword').value = '';
+                        document.getElementById('settingsConfirmPassword').value = '';
+                    } else {
+                        alert(data.message || 'Failed to update settings. Please try again.');
+                    }
+                } catch (error) {
+                    console.error('Settings update error:', error);
+                    alert('An error occurred while updating settings. Please try again.');
                 }
-                
-                alert('Settings updated successfully!');
             });
             
             // Load initial data
@@ -994,42 +1008,58 @@
         }
         
         // Load settings data for the settings tab
-        function loadSettings(affiliateId) {
-            // In a real implementation, this would make an API call to get affiliate data
-            // For demo purposes, we'll use localStorage
-            const storedAffiliates = JSON.parse(localStorage.getItem('wavemax_affiliates')) || {};
-            
-            if (storedAffiliates[affiliateId]) {
-                const affiliate = storedAffiliates[affiliateId];
+        async function loadSettings(affiliateId) {
+            try {
+                const token = localStorage.getItem('affiliateToken');
+                const response = await fetch(`/api/affiliates/${affiliateId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
                 
-                // Fill form fields with affiliate data
-                document.getElementById('settingsFirstName').value = affiliate.firstName || '';
-                document.getElementById('settingsLastName').value = affiliate.lastName || '';
-                document.getElementById('settingsEmail').value = affiliate.email || '';
-                document.getElementById('settingsPhone').value = affiliate.phone || '';
-                document.getElementById('settingsAddress').value = affiliate.address || '';
-                document.getElementById('settingsCity').value = affiliate.city || '';
-                document.getElementById('settingsState').value = affiliate.state || '';
-                document.getElementById('settingsZipCode').value = affiliate.zipCode || '';
-                document.getElementById('settingsServiceArea').value = affiliate.serviceArea || '';
-                document.getElementById('settingsDeliveryFee').value = affiliate.deliveryFee || '';
-                
-                // Set payment method and show relevant fields
-                const paymentMethod = affiliate.paymentMethod || 'directDeposit';
-                document.getElementById('settingsPaymentMethod').value = paymentMethod;
-                
-                // Show relevant payment containers
-                document.getElementById('settingsBankInfoContainer').style.display = 'none';
-                document.getElementById('settingsPaypalInfoContainer').style.display = 'none';
-                
-                if (paymentMethod === 'directDeposit') {
-                    document.getElementById('settingsBankInfoContainer').style.display = 'block';
-                    document.getElementById('settingsAccountNumber').value = affiliate.accountNumber || '';
-                    document.getElementById('settingsRoutingNumber').value = affiliate.routingNumber || '';
-                } else if (paymentMethod === 'paypal') {
-                    document.getElementById('settingsPaypalInfoContainer').style.display = 'block';
-                    document.getElementById('settingsPaypalEmail').value = affiliate.paypalEmail || '';
+                if (!response.ok) {
+                    throw new Error('Failed to fetch affiliate data');
                 }
+                
+                const data = await response.json();
+                
+                if (data.success && data.affiliate) {
+                    const affiliate = data.affiliate;
+                    
+                    // Fill form fields with affiliate data
+                    document.getElementById('settingsFirstName').value = affiliate.firstName || '';
+                    document.getElementById('settingsLastName').value = affiliate.lastName || '';
+                    document.getElementById('settingsEmail').value = affiliate.email || '';
+                    document.getElementById('settingsPhone').value = affiliate.phone || '';
+                    document.getElementById('settingsAddress').value = affiliate.address || '';
+                    document.getElementById('settingsCity').value = affiliate.city || '';
+                    document.getElementById('settingsState').value = affiliate.state || '';
+                    document.getElementById('settingsZipCode').value = affiliate.zipCode || '';
+                    document.getElementById('settingsServiceArea').value = affiliate.serviceArea || '';
+                    document.getElementById('settingsDeliveryFee').value = affiliate.deliveryFee || '';
+                    
+                    // Set payment method and show relevant fields
+                    const paymentMethod = affiliate.paymentMethod || 'directDeposit';
+                    document.getElementById('settingsPaymentMethod').value = paymentMethod;
+                    
+                    // Show relevant payment containers
+                    document.getElementById('settingsBankInfoContainer').style.display = 'none';
+                    document.getElementById('settingsPaypalInfoContainer').style.display = 'none';
+                    
+                    if (paymentMethod === 'directDeposit') {
+                        document.getElementById('settingsBankInfoContainer').style.display = 'block';
+                        // Note: Account numbers are sensitive and should not be displayed in full
+                        // The API should return masked versions if needed
+                    } else if (paymentMethod === 'paypal') {
+                        document.getElementById('settingsPaypalInfoContainer').style.display = 'block';
+                        // PayPal email might be returned by the API if appropriate
+                    }
+                } else {
+                    throw new Error('Invalid response');
+                }
+            } catch (error) {
+                console.error('Error loading settings:', error);
+                alert('Failed to load settings. Please try again.');
             }
         }
     </script>
