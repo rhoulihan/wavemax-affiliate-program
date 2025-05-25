@@ -12,135 +12,195 @@ The WaveMAX Affiliate Program enables individuals to register as affiliates, onb
 - **Customer Registration**: Allow affiliates to register customers using unique affiliate links
 - **Order Management**: Schedule pickups, track order status, and manage deliveries
 - **Laundry Bag Tracking**: Track customer bags with barcodes for accurate order processing
-- **Secure Payments**: Encrypted payment processing and commission tracking
-- **Dashboard Analytics**: Comprehensive metrics for both affiliates and customers
+- **Secure Payments**: Encrypted payment processing with PCI-compliant storage
+- **Dashboard Analytics**: Comprehensive metrics for both affiliates and customers with visual charts
 - **Email Notifications**: Automated emails for all important events in the lifecycle
+- **Advanced Security**: Industry-standard security features including JWT, CSRF protection, and audit logging
+- **API Versioning**: Future-proof API design with version management
 
-## Recent Improvements
+## Recent Improvements (January 2025)
 
-Latest updates to the project include:
+### Security Enhancements
+- **Enhanced Authentication**: JWT tokens reduced from 7 days to 1 hour with secure refresh token rotation
+- **Input Sanitization**: Added XSS and NoSQL injection prevention middleware
+- **CSRF Protection**: Enabled for all state-changing API operations
+- **Password Security**: Increased PBKDF2 iterations from 10,000 to 100,000
+- **Audit Logging**: Comprehensive security event logging for compliance
+- **Field-Level Access Control**: Role-based API response filtering
+- **Error Handling**: Secure error messages that don't expose internal details
 
-- **Complete Authentication System**: Implemented affiliate and customer login with JWT tokens
-- **Real-time Dashboard Integration**: Affiliate dashboards now fetch live data from API endpoints
-- **Enhanced Security**: JWT-based authentication, rate limiting, and removed CSRF from API routes
-- **Comprehensive Test Suite**: 80%+ code coverage with unit and integration tests including Jest, MongoDB Memory Server
-- **Complete Email Template System**: Professional HTML email templates for all user notifications
-- **Amazon SES Integration**: Scalable email notifications with professional templates and error handling
-- **Order Management**: Complete pickup scheduling and order tracking system with localStorage integration
-- **Error Handling**: Graceful email failure handling and improved error propagation to prevent order blocking
-- **Production Ready**: Robust deployment configuration with PM2 and Nginx
-- **Updated Dependencies**: Node.js 20, MongoDB 7.0, and modern testing infrastructure
+### Infrastructure Improvements
+- **API Versioning**: Implemented /api/v1/ structure for backward compatibility
+- **HTTPS Enforcement**: Automatic redirect in production environments
+- **Security Headers**: Added HSTS, X-Frame-Options, and strict CSP
+- **Rate Limiting**: Enhanced protection on authentication endpoints
+- **CORS Security**: Restricted to specific allowed origins only
+
+### Code Quality
+- **Dead Code Removal**: Cleaned up 100+ lines of unused code
+- **Dependency Updates**: Added express-mongo-sanitize and xss packages
+- **Validation**: Added comprehensive input validation on all endpoints
+- **Error Handling**: Centralized error handling with proper logging
+
+### Feature Updates
+- **Customer Dashboard**: Fixed API endpoints and CSP violations
+- **Payment Security**: Enhanced encryption for payment information storage
+- **Refresh Tokens**: Proper implementation with 30-day expiry and rotation
+- **Customer Model**: Removed redundant bags array field
 
 ## Project Structure
-
-This repository is organized as follows:
 
 ```
 wavemax-affiliate-program/
 │
 ├── public/                                # Frontend HTML/CSS/JS
-│   ├── assets/                            # Static assets (images, CSS, JS)
+│   ├── assets/                            # Static assets
+│   │   └── js/
+│   │       ├── components/                # Reusable components
+│   │       │   ├── AffiliateMetricsDashboard.js
+│   │       │   └── CustomerDashboardAnalytics.js
+│   │       └── errorHandler.js            # Client-side error handling
 │   ├── index.html                         # Landing page
-│   ├── affiliate-register.html            # Affiliate registration form
-│   ├── affiliate-login.html               # Affiliate login page
-│   ├── affiliate-success.html             # Affiliate registration success
+│   ├── affiliate-register.html            # Affiliate registration
+│   ├── affiliate-login.html               # Affiliate login
+│   ├── affiliate-success.html             # Registration success
 │   ├── affiliate-dashboard.html           # Affiliate dashboard
-│   ├── customer-register.html             # Customer registration form
-│   ├── customer-login.html                # Customer login page
-│   ├── customer-success.html              # Customer registration success
+│   ├── customer-register.html             # Customer registration
+│   ├── customer-login.html                # Customer login
+│   ├── customer-success.html              # Registration success
 │   ├── customer-dashboard.html            # Customer dashboard
-│   ├── schedule-pickup.html               # Pickup scheduling form
-│   ├── order-confirmation.html            # Order confirmation page
-│   └── api-docs.html                      # API documentation (Swagger UI)
+│   ├── schedule-pickup.html               # Pickup scheduling
+│   ├── order-confirmation.html            # Order confirmation
+│   └── api-docs.html                      # API documentation
 │
 ├── server/                                # Server-side code
 │   ├── controllers/                       # API controllers
-│   │   ├── affiliateController.js         # Affiliate endpoints
-│   │   ├── authController.js              # Authentication endpoints 
-│   │   ├── bagController.js               # Bag endpoints
-│   │   ├── customerController.js          # Customer endpoints
-│   │   └── orderController.js             # Order endpoints
+│   │   ├── affiliateController.js         
+│   │   ├── authController.js              
+│   │   ├── bagController.js               
+│   │   ├── customerController.js          
+│   │   └── orderController.js             
 │   │
 │   ├── middleware/                        # Express middleware
-│   │   ├── auth.js                        # Authentication middleware
-│   │   └── errorHandler.js                # Central error handling middleware
+│   │   ├── auth.js                        # JWT authentication
+│   │   ├── errorHandler.js                # Error handling
+│   │   └── sanitization.js                # Input sanitization
 │   │
 │   ├── models/                            # Mongoose models
-│   │   ├── Affiliate.js                   # Affiliate model
-│   │   ├── Customer.js                    # Customer model
-│   │   ├── Order.js                       # Order model
-│   │   ├── Bag.js                         # Bag model
-│   │   ├── RefreshToken.js                # Refresh token model
-│   │   └── Transaction.js                 # Transaction model
+│   │   ├── Affiliate.js                   
+│   │   ├── Customer.js                    
+│   │   ├── Order.js                       
+│   │   ├── Bag.js                         
+│   │   ├── RefreshToken.js                
+│   │   └── Transaction.js                 
 │   │
 │   ├── routes/                            # Express routes
-│   │   ├── affiliateRoutes.js             # Affiliate routes
-│   │   ├── authRoutes.js                  # Authentication routes
-│   │   ├── bagRoutes.js                   # Bag routes
-│   │   ├── customerRoutes.js              # Customer routes
-│   │   └── orderRoutes.js                 # Order routes
+│   │   ├── affiliateRoutes.js             
+│   │   ├── authRoutes.js                  
+│   │   ├── bagRoutes.js                   
+│   │   ├── customerRoutes.js              
+│   │   └── orderRoutes.js                 
 │   │
 │   ├── templates/                         # Email templates
-│   │   └── emails/                        # Email HTML templates
-│   │       ├── affiliate-welcome.html           # Affiliate welcome email
-│   │       ├── affiliate-new-customer.html      # New customer notification
-│   │       ├── affiliate-new-order.html         # New order notification
-│   │       ├── affiliate-commission.html        # Commission earned
-│   │       ├── affiliate-order-cancelled.html   # Order cancellation
-│   │       ├── affiliate-lost-bag.html          # Lost bag report
-│   │       ├── customer-welcome.html            # Customer welcome email
-│   │       ├── customer-order-confirmation.html # Order confirmation
-│   │       ├── customer-order-status.html       # Order status updates
-│   │       └── customer-order-cancelled.html    # Order cancellation
+│   │   └── emails/                        
 │   │
 │   └── utils/                             # Utility functions
-│       ├── emailService.js                # Email sending service
-│       ├── encryption.js                  # Data encryption utilities
-│       ├── logger.js                      # Logging service
-│       └── paginationMiddleware.js        # Pagination utility
+│       ├── auditLogger.js                 # Security audit logging
+│       ├── emailService.js                # Email service
+│       ├── encryption.js                  # AES-256-GCM encryption
+│       ├── fieldFilter.js                 # API field filtering
+│       ├── logger.js                      # Winston logging
+│       └── paginationMiddleware.js        
 │
-├── tests/                                 # Test files
-│   ├── setup.js                           # Test setup configuration
-│   ├── README.md                          # Test documentation
-│   ├── runAllTests.sh                     # Complete test suite script
-│   ├── integration/                       # Integration tests
-│   │   ├── affiliate.test.js              # Affiliate API tests
-│   │   ├── auth.test.js                   # Authentication flow tests
-│   │   ├── customer.test.js               # Customer API tests
-│   │   └── order.test.js                  # Order management tests
-│   └── unit/                              # Unit tests
-│       ├── authController.test.js         # Authentication controller tests
-│       ├── authMiddleware.test.js         # Auth middleware tests
-│       ├── customerController.test.js     # Customer controller tests
-│       ├── emailService.test.js           # Email service tests
-│       ├── encryption.test.js             # Encryption utility tests
-│       ├── models.test.js                 # Database model tests
-│       ├── orderController.test.js        # Order controller tests
-│       └── paginationMiddleware.test.js   # Pagination tests
-│
-├── scripts/                               # Utility scripts
-│
-├── .env.example                           # Environment variables template
+├── tests/                                 # Comprehensive test suite
+├── .env.example                           # Environment template
 ├── Dockerfile                             # Docker configuration
-├── docker-compose.yml                     # Docker Compose config
-├── ecosystem.config.js                    # PM2 process configuration
-├── init-mongo.js                          # MongoDB initialization script
-├── jest.config.js                         # Jest test configuration
-├── package.json                           # NPM dependencies
-└── server.js                              # Main application entry point
+├── docker-compose.yml                     # Docker Compose
+├── ecosystem.config.js                    # PM2 configuration
+├── package.json                           # Dependencies
+└── server.js                              # Application entry point
 ```
 
 ## Technologies Used
 
-- **Frontend**: HTML, CSS (Tailwind CSS), JavaScript
+- **Frontend**: HTML, CSS (Tailwind CSS), JavaScript, Recharts
 - **Backend**: Node.js 20, Express.js
-- **Database**: MongoDB 7.0 (with MongoDB Atlas)
-- **Visualization**: React, Recharts
-- **Security**: JWT, Rate limiting, AES-256-GCM encryption
-- **Deployment**: Docker, Nginx, PM2
+- **Database**: MongoDB 7.0 with Mongoose ODM
+- **Security**: JWT, CSRF, bcrypt, AES-256-GCM encryption
 - **Email**: Amazon SES, Nodemailer
 - **Testing**: Jest, Supertest, MongoDB Memory Server
-- **Logging**: Winston
+- **Deployment**: Docker, Nginx, PM2
+- **Logging**: Winston with audit logging
+
+## Security Features
+
+### Authentication & Authorization
+- JWT-based authentication with 1-hour token expiry
+- Refresh token rotation with 30-day expiry
+- Role-based access control (Admin, Affiliate, Customer)
+- Secure password hashing with 100,000 PBKDF2 iterations
+
+### Data Protection
+- AES-256-GCM encryption for sensitive data
+- Payment information encryption at rest
+- Only last 4 digits of credit cards stored
+- Field-level API response filtering
+
+### Security Middleware
+- CSRF protection on all state-changing operations
+- XSS prevention through input sanitization
+- NoSQL injection prevention
+- Rate limiting on authentication endpoints
+- Comprehensive request validation
+
+### Security Headers
+- Content Security Policy (CSP)
+- HTTP Strict Transport Security (HSTS)
+- X-Frame-Options: DENY
+- X-Content-Type-Options: nosniff
+- Referrer-Policy: same-origin
+
+### Audit & Monitoring
+- Security event logging
+- Login attempt tracking
+- Sensitive data access logging
+- Suspicious activity detection
+
+## API Documentation
+
+### Authentication Endpoints
+
+All API endpoints use the base URL `/api/v1/`
+
+#### Login
+```
+POST /api/v1/auth/affiliate/login
+POST /api/v1/auth/customer/login
+```
+
+#### Token Management
+```
+GET /api/v1/auth/verify
+POST /api/v1/auth/refresh-token
+```
+
+#### Password Reset
+```
+POST /api/v1/auth/forgot-password
+POST /api/v1/auth/reset-password
+```
+
+### Protected Endpoints
+
+All protected endpoints require JWT token in Authorization header:
+```
+Authorization: Bearer <token>
+```
+
+For state-changing operations, include CSRF token:
+```
+X-CSRF-Token: <csrf-token>
+```
 
 ## Local Development Setup
 
@@ -153,258 +213,60 @@ wavemax-affiliate-program/
 ### Installation Steps
 
 1. Clone the repository:
-   ```
+   ```bash
    git clone https://github.com/yourusername/wavemax-affiliate-program.git
    cd wavemax-affiliate-program
    ```
 
 2. Install dependencies:
-   ```
+   ```bash
    npm install
    ```
 
 3. Configure environment variables:
-   ```
-   cp .env.example .env
-   # Edit .env with your settings
-   ```
-
-4. Generate secure keys and configure all required settings:
-
    ```bash
-   # Open the .env file in your editor
-   nano .env
+   cp .env.example .env
    ```
 
-### Environment Variable Configuration Guide
-
-Below is a detailed guide for configuring each setting in your `.env` file:
-
-#### Basic Configuration
-
-| Variable | Description | How to Generate/Configure |
-|----------|-------------|---------------------------|
-| `NODE_ENV` | Environment mode | Set to `development`, `test`, or `production` |
-| `PORT` | Server port | Set to `3000` or your preferred port |
-
-#### MongoDB Configuration
-
-| Variable | Description | How to Generate/Configure |
-|----------|-------------|---------------------------|
-| `MONGODB_URI` | MongoDB connection string | For local development: `mongodb://localhost:27017/wavemax`<br>For MongoDB Atlas: `mongodb+srv://<username>:<password>@cluster0.mongodb.net/wavemax?retryWrites=true&w=majority` |
-
-#### Security Keys
-
-| Variable | Description | How to Generate/Configure |
-|----------|-------------|---------------------------|
-| `ENCRYPTION_KEY` | 32-byte key for data encryption | Generate using:<br>`node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"` |
-| `JWT_SECRET` | Secret for JWT token signing | Generate using:<br>`node -e "console.log(require('crypto').randomBytes(64).toString('hex'))"` |
-| `SESSION_SECRET` | Secret for Express sessions | Generate using:<br>`node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"` |
-
-#### Email Configuration with Amazon SES
-
-| Variable | Description | How to Generate/Configure |
-|----------|-------------|---------------------------|
-| `EMAIL_PROVIDER` | Email service to use | Set to `ses` to use Amazon SES |
-| `AWS_REGION` | AWS region for SES | Example: `us-east-1` |
-| `AWS_ACCESS_KEY_ID` | AWS IAM access key | From your IAM user with SES permissions |
-| `AWS_SECRET_ACCESS_KEY` | AWS IAM secret key | From your IAM user with SES permissions |
-| `SES_FROM_EMAIL` | Verified sender email | Email verified in SES, e.g., `noreply@yourdomain.com` |
-
-#### CORS Configuration
-
-| Variable | Description | How to Generate/Configure |
-|----------|-------------|---------------------------|
-| `CORS_ORIGIN` | Allowed origins for CORS | For development: `http://localhost:3000`<br>For production: `https://yourdomain.com,https://www.yourdomain.com`<br>Multiple domains separated by commas |
-
-#### Payment Processing (Optional)
-
-| Variable | Description | How to Generate/Configure |
-|----------|-------------|---------------------------|
-| `STRIPE_SECRET_KEY` | Stripe secret API key | 1. Create a Stripe account<br>2. Go to Developers > API keys<br>3. Copy the Secret key<br>Format: `sk_test_...` or `sk_live_...` |
-| `STRIPE_PUBLISHABLE_KEY` | Stripe publishable API key | Copy from the same Stripe dashboard<br>Format: `pk_test_...` or `pk_live_...` |
-
-#### File Storage (Optional for Bag Barcodes)
-
-| Variable | Description | How to Generate/Configure |
-|----------|-------------|---------------------------|
-| `AWS_S3_BUCKET` | AWS S3 bucket name | Create in AWS S3 console: `wavemax-laundry-barcodes` |
-| `AWS_REGION` | AWS region for the bucket | Example: `us-east-1` |
-
-#### Frontend URL Configuration
-
-| Variable | Description | How to Generate/Configure |
-|----------|-------------|---------------------------|
-| `FRONTEND_URL` | Base URL for frontend links | Development: `http://localhost:3000`<br>Production: `https://yourdomain.com` |
-
-#### Logging Configuration
-
-| Variable | Description | How to Generate/Configure |
-|----------|-------------|---------------------------|
-| `LOG_LEVEL` | Logging verbosity level | Set to `error`, `warn`, `info`, `verbose`, `debug`, or `silly`. Default: `info` |
-| `LOG_DIR` | Directory for log files | Default: `logs` directory in project root. Make sure this directory exists |
-
-5. Start the development server:
+4. Generate secure keys:
+   ```bash
+   # Generate encryption key
+   node -e "console.log('ENCRYPTION_KEY=' + require('crypto').randomBytes(32).toString('hex'))"
+   
+   # Generate JWT secret
+   node -e "console.log('JWT_SECRET=' + require('crypto').randomBytes(64).toString('hex'))"
+   
+   # Generate session secret
+   node -e "console.log('SESSION_SECRET=' + require('crypto').randomBytes(32).toString('hex'))"
    ```
+
+5. Start development server:
+   ```bash
    npm run dev
    ```
 
 6. Access the application at `http://localhost:3000`
 
-### Using Amazon SES for Email Notifications
+### Environment Variables
 
-The WaveMAX Laundry Affiliate Program uses Amazon Simple Email Service (SES) for sending emails to affiliates and customers. Follow these steps to configure Amazon SES:
-
-#### 1. Set Up Your AWS Account
-
-If you don't already have an AWS account, create one at [aws.amazon.com](https://aws.amazon.com/).
-
-#### 2. Verify Email Addresses or Domains in SES
-
-1. Navigate to the Amazon SES console
-2. Select "Verified Identities" from the left sidebar
-3. Click "Create identity"
-4. Choose between verifying an email address or an entire domain
-   - For email addresses: Enter the email and click "Create identity"
-   - For domains: Follow the DNS verification instructions provided
-5. Complete the verification process by following the instructions sent to your email or by adding the required DNS records
-
-#### 3. Create an IAM User with SES Permissions
-
-1. Navigate to the IAM console
-2. Select "Users" from the left sidebar
-3. Click "Add users"
-4. Enter a username (e.g., `wavemax-ses-user`)
-5. Select "Access key - Programmatic access" as the access type
-6. Click "Next: Permissions"
-7. Click "Attach existing policies directly"
-8. Create a new policy with the following JSON:
-
-```json
-{
-    "Version": "2012-10-17",
-    "Statement": [
-        {
-            "Effect": "Allow",
-            "Action": [
-                "ses:SendEmail",
-                "ses:SendRawEmail",
-                "ses:SendTemplatedEmail"
-            ],
-            "Resource": "*"
-        }
-    ]
-}
-```
-
-9. Name the policy (e.g., `WaveMAXSESPolicy`), provide a description, and create it
-10. Attach the newly created policy to your user
-11. Complete the user creation process
-12. Save the Access Key ID and Secret Access Key displayed at the end
-
-#### 4. Configure Your Application
-
-Update your `.env` file with the SES configuration:
-
-```
-EMAIL_PROVIDER=ses
-AWS_REGION=us-east-1
-AWS_ACCESS_KEY_ID=your_access_key_id
-AWS_SECRET_ACCESS_KEY=your_secret_access_key
-SES_FROM_EMAIL=noreply@yourdomain.com
-```
-
-#### 5. Move from SES Sandbox to Production (Optional)
-
-By default, new AWS accounts have SES in sandbox mode, which only allows sending to verified email addresses. To move to production:
-
-1. Navigate to the SES console
-2. Select "Account dashboard" from the left sidebar
-3. Find the "Production access" section
-4. Click "Request production access"
-5. Fill out the request form with your use case details
-6. Submit the request and wait for AWS approval
-
-#### 6. Set Up Bounce and Complaint Handling
-
-To maintain a good sender reputation:
-
-1. Navigate to the SES console
-2. Select "Configuration sets" from the left sidebar
-3. Create a new configuration set
-4. Add an SNS event destination for bounce and complaint notifications
-5. Create an SNS topic to receive these notifications
-6. Implement a handler for these notifications in your application or set up email forwarding
-
-### Docker Development
-
-1. Start using Docker Compose:
-   ```
-   docker-compose up
-   ```
-
-2. Access the application at `http://localhost:3000`
-
-When using Docker, ensure your environment variables in the docker-compose.yml file are properly set.
-
-## Known Issues and Troubleshooting
-
-### Authentication
-
-The application uses JWT-based authentication for API endpoints:
-
-1. **API Authentication**: All API routes use JWT tokens in Authorization headers:
-   ```javascript
-   fetch('/api/endpoint', {
-     method: 'POST',
-     headers: {
-       'Content-Type': 'application/json',
-       'Authorization': `Bearer ${token}`
-     },
-     body: JSON.stringify(data)
-   });
-   ```
-
-2. **Login Flow**: 
-   - Affiliates login at `/api/auth/affiliate/login`
-   - Customers login at `/api/auth/customer/login`
-   - Tokens are stored in localStorage and used for subsequent requests
-
-3. **Protected Routes**: Dashboard pages redirect to login if no valid token is found
-
-4. **Token Refresh**: Automatic token refresh using refresh tokens for extended sessions
-
-### Rate Limiting
-
-The application uses express-rate-limit for security. When deploying behind a proxy:
-
-1. Ensure proper proxy configuration in `server.js`:
-   ```javascript
-   // Add this near the beginning of server.js
-   app.set('trust proxy', 1);  // Trust first proxy
-   ```
-
-2. If experiencing rate limit issues, check the IP identification configuration in auth.js.
-
-### Data Encryption
-
-Sensitive data like payment information is encrypted using AES-256-GCM:
-
-1. Ensure `ENCRYPTION_KEY` is properly set in `.env`
-2. For model fields that need encryption, they should be defined as objects in the schema:
-   ```javascript
-   fieldName: {
-     iv: String,
-     encryptedData: String,
-     authTag: String
-   }
-   ```
-
-3. The encryption/decryption is handled by middleware in the model definition.
+| Variable | Description | Required |
+|----------|-------------|----------|
+| `NODE_ENV` | Environment (development/production) | Yes |
+| `PORT` | Server port | Yes |
+| `MONGODB_URI` | MongoDB connection string | Yes |
+| `ENCRYPTION_KEY` | 32-byte hex key for encryption | Yes |
+| `JWT_SECRET` | Secret for JWT signing | Yes |
+| `SESSION_SECRET` | Express session secret | Yes |
+| `EMAIL_PROVIDER` | Email service (ses/smtp) | Yes |
+| `AWS_REGION` | AWS region for SES | If using SES |
+| `AWS_ACCESS_KEY_ID` | AWS access key | If using SES |
+| `AWS_SECRET_ACCESS_KEY` | AWS secret key | If using SES |
+| `SES_FROM_EMAIL` | Verified sender email | Yes |
+| `CORS_ORIGIN` | Allowed CORS origins | Yes |
+| `LOG_LEVEL` | Logging level | No |
+| `LOG_DIR` | Directory for log files | No |
 
 ## Testing
-
-The project includes a comprehensive test suite with 80%+ code coverage:
 
 ### Running Tests
 
@@ -412,455 +274,179 @@ The project includes a comprehensive test suite with 80%+ code coverage:
 # Run all tests
 npm test
 
-# Run unit tests only
-npm run test:unit
-
-# Run integration tests only
-npm run test:integration
-
-# Run tests with coverage report
+# Run with coverage
 npm run test:coverage
 
-# Run tests in watch mode (development)
-npm run test:watch
+# Run specific test suites
+npm run test:unit
+npm run test:integration
 
-# Run complete test suite with linting
-npm run test:all
+# Watch mode for development
+npm run test:watch
 ```
 
 ### Test Coverage
 
-The test suite covers:
-- **Controllers**: All API controllers with mock dependencies
-- **Models**: Database models with validation and business logic
-- **Middleware**: Authentication, authorization, and pagination
-- **Integration**: Complete API endpoint testing
-- **Utilities**: Email service, encryption, and helper functions
-
-### Test Infrastructure
-
-- **Jest**: Test framework with coverage reporting
-- **MongoDB Memory Server**: In-memory database for integration tests
-- **Supertest**: HTTP assertion testing for API endpoints
-- **Coverage Thresholds**: 80% minimum coverage for branches, functions, lines, and statements
-
-See `tests/README.md` for detailed testing documentation.
+The project maintains 80%+ code coverage across:
+- Controllers
+- Models
+- Middleware
+- Utilities
+- API endpoints
 
 ## Production Deployment
 
-See the [Deployment Guide](#deployment-guide) for detailed instructions on deploying to production.
+### Using PM2
 
-## Deployment Guide
-
-### System Requirements
-
-- Ubuntu 20.04 LTS or newer
-- 2GB RAM minimum (4GB recommended)
-- 20GB storage (minimum)
-- Non-root user with sudo privileges
-
-### Server Setup
-
-1. **Update System**
-
+1. Install PM2 globally:
    ```bash
-   sudo apt update && sudo apt upgrade -y
-   sudo apt install -y curl git build-essential
+   npm install -g pm2
    ```
 
-2. **Install Node.js 20.x**
-
-   ```bash
-   curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
-   sudo apt install -y nodejs
-   
-   # Verify installation
-   node -v  # Should show v20.x.x
-   npm -v   # Should show 9.x.x or newer
-   ```
-
-3. **Install MongoDB 7.0**
-
-   ```bash
-   # Import MongoDB public key
-   curl -fsSL https://pgp.mongodb.com/server-7.0.asc | \
-     sudo gpg -o /usr/share/keyrings/mongodb-server-7.0.gpg \
-     --dearmor
-   
-   # Create MongoDB repository list file
-   echo "deb [ arch=amd64,arm64 signed-by=/usr/share/keyrings/mongodb-server-7.0.gpg ] https://repo.mongodb.org/apt/ubuntu focal/mongodb-org/7.0 multiverse" | \
-     sudo tee /etc/apt/sources.list.d/mongodb-org-7.0.list
-   
-   # Update package list and install MongoDB
-   sudo apt update
-   sudo apt install -y mongodb-org
-   
-   # Start and enable MongoDB service
-   sudo systemctl start mongod
-   sudo systemctl enable mongod
-   
-   # Verify MongoDB is running
-   sudo systemctl status mongod
-   ```
-
-4. **Install Nginx**
-
-   ```bash
-   sudo apt install -y nginx
-   
-   # Enable and start Nginx
-   sudo systemctl enable nginx
-   sudo systemctl start nginx
-   
-   # Configure firewall (if enabled)
-   sudo ufw allow 'Nginx Full'
-   ```
-
-### Application Deployment
-
-1. **Create Application Directory**
-
-   ```bash
-   sudo mkdir -p /var/www/wavemax
-   sudo chown -R $USER:$USER /var/www/wavemax
-   ```
-
-2. **Clone the Repository**
-
-   ```bash
-   cd /var/www/wavemax
-   git clone https://github.com/yourusername/wavemax-affiliate-program.git .
-   ```
-
-3. **Set Up Environment Variables**
-
-   ```bash
-   cp .env.example .env
-   ```
-
-   Edit the `.env` file with your production settings:
-
-   ```bash
-   # Generate secure encryption key
-   ENCRYPTION_KEY=$(node -e "console.log(require('crypto').randomBytes(32).toString('hex'))")
-   
-   # Generate secure JWT secret
-   JWT_SECRET=$(node -e "console.log(require('crypto').randomBytes(64).toString('hex'))")
-   
-   # Generate secure session secret
-   SESSION_SECRET=$(node -e "console.log(require('crypto').randomBytes(32).toString('hex'))")
-   
-   # Edit .env file with secure keys and production settings
-   sed -i "s/^ENCRYPTION_KEY=.*/ENCRYPTION_KEY=$ENCRYPTION_KEY/" .env
-   sed -i "s/^JWT_SECRET=.*/JWT_SECRET=$JWT_SECRET/" .env
-   sed -i "s/^SESSION_SECRET=.*/SESSION_SECRET=$SESSION_SECRET/" .env
-   sed -i "s/^NODE_ENV=.*/NODE_ENV=production/" .env
-   
-   # Set MongoDB URI (change as needed for your setup)
-   sed -i "s|^MONGODB_URI=.*|MONGODB_URI=mongodb://localhost:27017/wavemax|" .env
-   
-   # Set additional environment variables manually
-   nano .env
-   ```
-   
-   Refer to the [Environment Variable Configuration Guide](#environment-variable-configuration-guide) for details on configuring each setting.
-
-4. **Install Dependencies and Build**
-
-   ```bash
-   npm ci --production
-   ```
-
-5. **Initialize MongoDB (Optional)**
-
-   ```bash
-   mongosh < init-mongo.js
-   ```
-
-6. **Configure Nginx**
-
-   Create a new Nginx configuration file:
-
-   ```bash
-   sudo nano /etc/nginx/sites-available/wavemax
-   ```
-
-   Add the following configuration:
-
-   ```nginx
-   server {
-       listen 80;
-       server_name yourdomain.com www.yourdomain.com;
-       
-       location / {
-           proxy_pass http://localhost:3000;
-           proxy_http_version 1.1;
-           proxy_set_header Upgrade $http_upgrade;
-           proxy_set_header Connection 'upgrade';
-           proxy_set_header Host $host;
-           proxy_set_header X-Real-IP $remote_addr;
-           proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-           proxy_set_header X-Forwarded-Proto $scheme;
-           proxy_cache_bypass $http_upgrade;
-       }
-   }
-   ```
-
-   Enable the configuration:
-
-   ```bash
-   sudo ln -s /etc/nginx/sites-available/wavemax /etc/nginx/sites-enabled/
-   sudo nginx -t  # Test configuration
-   sudo systemctl restart nginx
-   ```
-
-7. **Set Up SSL with Let's Encrypt (Recommended)**
-
-   ```bash
-   sudo apt install -y certbot python3-certbot-nginx
-   sudo certbot --nginx -d yourdomain.com -d www.yourdomain.com
-   ```
-
-### Process Management with PM2
-
-1. **Install PM2**
-
-   ```bash
-   sudo npm install -g pm2
-   ```
-
-2. **Create PM2 Configuration**
-
-   Create an ecosystem file:
-
-   ```bash
-   nano ecosystem.config.js
-   ```
-
-   Add the following content:
-
-   ```javascript
-   module.exports = {
-     apps: [{
-       name: 'wavemax',
-       script: 'server.js',
-       instances: 'max',
-       exec_mode: 'cluster',
-       autorestart: true,
-       watch: false,
-       max_memory_restart: '1G',
-       env: {
-         NODE_ENV: 'production'
-       }
-     }]
-   };
-   ```
-
-3. **Start the Application**
-
+2. Start the application:
    ```bash
    pm2 start ecosystem.config.js
-   
-   # Save PM2 configuration to start on system boot
+   ```
+
+3. Save PM2 configuration:
+   ```bash
    pm2 startup
    pm2 save
    ```
 
-4. **Monitor the Application**
+### Using Docker
 
+1. Build the image:
    ```bash
-   pm2 status
-   pm2 logs
-   pm2 monit  # Interactive monitoring
+   docker build -t wavemax-affiliate .
    ```
 
-### Database Backup Configuration
-
-Set up automated MongoDB backups:
-
-1. **Create Backup Script**
-
+2. Run with Docker Compose:
    ```bash
-   mkdir -p /var/www/wavemax/scripts/backup
-   nano /var/www/wavemax/scripts/backup/mongodb-backup.sh
+   docker-compose up -d
    ```
 
-   Add the following content:
+### Nginx Configuration
 
+```nginx
+server {
+    listen 80;
+    server_name yourdomain.com;
+    
+    # Redirect HTTP to HTTPS
+    return 301 https://$server_name$request_uri;
+}
+
+server {
+    listen 443 ssl http2;
+    server_name yourdomain.com;
+    
+    ssl_certificate /path/to/cert.pem;
+    ssl_certificate_key /path/to/key.pem;
+    
+    location / {
+        proxy_pass http://localhost:3000;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_cache_bypass $http_upgrade;
+    }
+}
+```
+
+## Monitoring & Maintenance
+
+### Application Monitoring
+
+- PM2 status: `pm2 status`
+- PM2 logs: `pm2 logs`
+- PM2 monitoring: `pm2 monit`
+
+### Log Files
+
+Logs are stored in the `logs/` directory:
+- `combined.log`: All application logs
+- `error.log`: Error logs only
+- `audit.log`: Security audit events
+- `security-critical.log`: Critical security events
+
+### Database Backup
+
+Set up automated backups using the provided script:
+```bash
+# Create backup manually
+mongodump --db wavemax --gzip --archive=backup.gz
+
+# Restore from backup
+mongorestore --gzip --archive=backup.gz
+```
+
+## Troubleshooting
+
+### Common Issues
+
+1. **CSRF Token Errors**
+   - Ensure you're fetching CSRF token from `/api/csrf-token`
+   - Include token in `X-CSRF-Token` header
+
+2. **JWT Token Expired**
+   - Implement automatic token refresh using refresh tokens
+   - Tokens expire after 1 hour
+
+3. **Rate Limiting**
+   - Authentication endpoints limited to 5 attempts per 15 minutes
+   - API endpoints limited to 100 requests per 15 minutes
+
+4. **MongoDB Connection Issues**
+   - Verify MongoDB is running: `sudo systemctl status mongod`
+   - Check connection string in `.env`
+
+## Security Best Practices
+
+1. **Regular Updates**
    ```bash
-   #!/bin/bash
-   
-   # Set variables
-   BACKUP_DIR="/var/www/wavemax/backups"
-   TIMESTAMP=$(date +%Y%m%d_%H%M%S)
-   BACKUP_FILE="$BACKUP_DIR/wavemax_$TIMESTAMP.gz"
-   
-   # Create backup directory if it doesn't exist
-   mkdir -p $BACKUP_DIR
-   
-   # Create backup
-   mongodump --db wavemax --gzip --archive=$BACKUP_FILE
-   
-   # Delete backups older than 14 days
-   find $BACKUP_DIR -type f -name "wavemax_*.gz" -mtime +14 -delete
+   npm audit
+   npm audit fix
    ```
 
-2. **Make the Script Executable**
+2. **Environment Variables**
+   - Never commit `.env` files
+   - Use strong, unique secrets
+   - Rotate keys regularly
 
-   ```bash
-   chmod +x /var/www/wavemax/scripts/backup/mongodb-backup.sh
-   ```
+3. **Database Security**
+   - Enable MongoDB authentication
+   - Use connection string with credentials
+   - Regular backups
 
-3. **Set Up Cron Job**
+4. **HTTPS Only**
+   - Always use HTTPS in production
+   - Enable HSTS headers
+   - Use SSL/TLS certificates
 
-   ```bash
-   crontab -e
-   ```
+## Contributing
 
-   Add the following line to run the backup daily at 2 AM:
-
-   ```
-   0 2 * * * /var/www/wavemax/scripts/backup/mongodb-backup.sh
-   ```
-
-### Security Considerations
-
-1. **Set Up a Firewall**
-
-   ```bash
-   sudo ufw enable
-   sudo ufw allow ssh
-   sudo ufw allow 'Nginx Full'
-   sudo ufw status
-   ```
-
-2. **Secure MongoDB**
-
-   Create a MongoDB admin user:
-
-   ```javascript
-   use admin
-   db.createUser({
-     user: "adminUser",
-     pwd: "securePassword",
-     roles: [ { role: "userAdminAnyDatabase", db: "admin" } ]
-   })
-   ```
-
-   Edit MongoDB configuration:
-
-   ```bash
-   sudo nano /etc/mongod.conf
-   ```
-
-   Add security settings:
-
-   ```yaml
-   security:
-     authorization: enabled
-   ```
-
-   Restart MongoDB:
-
-   ```bash
-   sudo systemctl restart mongod
-   ```
-
-3. **Application Security**
-
-   - JWT tokens for API authentication
-   - Rate limiting on authentication endpoints
-   - Input validation and sanitization
-   - Encrypted sensitive data storage
-   - Secure session management
-
-4. **Regular Updates**
-
-   Set up automated security updates:
-
-   ```bash
-   sudo apt install -y unattended-upgrades
-   sudo dpkg-reconfigure -plow unattended-upgrades
-   ```
-
-### Monitoring and Logging
-
-1. **Set Up Application Monitoring**
-
-   ```bash
-   pm2 install pm2-server-monit  # Monitor server metrics
-   ```
-
-2. **Set Up Log Rotation**
-
-   ```bash
-   sudo nano /etc/logrotate.d/wavemax
-   ```
-
-   Add configuration:
-
-   ```
-   /var/www/wavemax/logs/*.log {
-       daily
-       missingok
-       rotate 14
-       compress
-       delaycompress
-       notifempty
-       create 0640 www-data www-data
-       sharedscripts
-       postrotate
-           pm2 reload all
-       endscript
-   }
-   ```
-
-3. **Create Logs Directory**
-
-   ```bash
-   mkdir -p /var/www/wavemax/logs
-   chmod 755 /var/www/wavemax/logs
-   ```
-
-## Maintenance
-
-1. **Application Updates**
-
-   ```bash
-   # Pull latest changes
-   cd /var/www/wavemax
-   git pull
-   
-   # Install dependencies
-   npm ci --production
-   
-   # Restart application
-   pm2 reload all
-   ```
-
-2. **Database Maintenance**
-
-   ```bash
-   # Create database backup before maintenance
-   /var/www/wavemax/scripts/backup/mongodb-backup.sh
-   
-   # Connect to MongoDB
-   mongosh
-   
-   # Run database operations
-   use wavemax
-   db.getCollectionNames()
-   db.orders.createIndex({ "status": 1, "createdAt": 1 })
-   ```
+1. Fork the repository
+2. Create a feature branch
+3. Commit your changes
+4. Push to the branch
+5. Create a Pull Request
 
 ## License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
 
-## Contributors
+## Support
 
-- Your Name <your.email@example.com>
+For issues and questions:
+- Create an issue on GitHub
+- Contact: support@wavemax.promo
 
 ## Acknowledgments
 
 - WaveMAX Laundry for the concept and business model
+- All contributors and testers
