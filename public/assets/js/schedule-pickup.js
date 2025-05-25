@@ -227,12 +227,18 @@ document.addEventListener('DOMContentLoaded', function() {
             
             console.log('Sending order request with token:', token.substring(0, 20) + '...');
             
+            // Fetch CSRF token first
+            const csrfResponse = await fetch('/api/csrf-token');
+            const csrfData = await csrfResponse.json();
+            const csrfToken = csrfData.csrfToken;
+            
             // Submit order to the server
             const response = await fetch('/api/orders', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
+                    'Authorization': `Bearer ${token}`,
+                    'X-CSRF-Token': csrfToken
                 },
                 body: JSON.stringify(pickupData)
             });
