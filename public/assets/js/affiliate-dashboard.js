@@ -479,114 +479,79 @@ async function loadCustomers(affiliateId) {
 }
 
 // Load earnings data for the earnings tab
-function loadEarnings(affiliateId) {
-    // In a real implementation, this would make an API call to get earnings data
-    // For demo purposes, we'll generate mock data
-    
+async function loadEarnings(affiliateId) {
     const transactionsTableBody = document.getElementById('transactionsTableBody');
-    transactionsTableBody.innerHTML = '';
+    transactionsTableBody.innerHTML = '<tr><td colspan="6" class="text-center py-4">Loading...</td></tr>';
     
-    // Generate mock transactions
-    const transactions = [];
-    const storedOrders = JSON.parse(localStorage.getItem('wavemax_orders')) || {};
-    const storedCustomers = JSON.parse(localStorage.getItem('wavemax_customers')) || {};
-    
-    // Use existing orders if available, otherwise generate mock data
-    if (Object.keys(storedOrders).length > 0) {
-        Object.entries(storedOrders).forEach(([orderId, order]) => {
-            if (order.affiliateId === affiliateId && order.status === 'delivered') {
-                const customer = storedCustomers[order.customerId] || { firstName: 'Unknown', lastName: 'Customer' };
-                
-                // Generate mock payment data
-                const weight = order.estimatedSize === 'small' ? Math.random() * 10 + 5 : 
-                              order.estimatedSize === 'medium' ? Math.random() * 15 + 15 : 
-                              Math.random() * 20 + 30;
-                
-                const orderTotal = (weight * 1.89).toFixed(2);
-                const commission = (orderTotal * 0.1).toFixed(2);
-                
-                transactions.push({
-                    date: new Date(order.deliveryDate || Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000),
-                    orderId,
-                    customerName: `${customer.firstName} ${customer.lastName}`,
-                    service: 'Wash, Dry, Fold',
-                    weight: weight.toFixed(2),
-                    orderTotal,
-                    commission
-                });
+    try {
+        const token = localStorage.getItem('affiliateToken');
+        
+        // Load earnings data from API
+        const earningsResponse = await fetch(`/api/affiliates/${affiliateId}/earnings?period=all`, {
+            headers: {
+                'Authorization': `Bearer ${token}`
             }
         });
-    }
-    
-    // If no transactions, generate mock data
-    if (transactions.length === 0) {
-        const customers = [
-            { name: 'John Doe' },
-            { name: 'Jane Smith' },
-            { name: 'Michael Johnson' }
-        ];
         
-        for (let i = 0; i < 10; i++) {
-            const date = new Date();
-            date.setDate(date.getDate() - Math.floor(Math.random() * 30));
-            
-            const weight = Math.floor(Math.random() * 30) + 5;
-            const orderTotal = (weight * 1.89).toFixed(2);
-            const commission = (orderTotal * 0.1).toFixed(2);
-            
-            transactions.push({
-                date,
-                orderId: 'ORD' + Math.floor(100000 + Math.random() * 900000),
-                customerName: customers[Math.floor(Math.random() * customers.length)].name,
-                service: 'Wash, Dry, Fold',
-                weight: weight.toFixed(2),
-                orderTotal,
-                commission
-            });
+        if (!earningsResponse.ok) {
+            throw new Error('Failed to fetch earnings data');
         }
-    }
-    
-    // Sort transactions by date (newest first)
-    transactions.sort((a, b) => b.date - a.date);
-    
-    // Update UI with transactions
-    if (transactions.length === 0) {
-        transactionsTableBody.innerHTML = '<tr class="text-center"><td colspan="6" class="px-6 py-4 text-gray-500">No transactions found.</td></tr>';
-    } else {
-        // Clear the loading message first
-        transactionsTableBody.innerHTML = '';
-        transactions.forEach(transaction => {
-            const row = document.createElement('tr');
+        
+        const earningsData = await earningsResponse.json();
+        
+        if (earningsData.success && earningsData.orders) {
+            const orders = earningsData.orders;
             
-            row.innerHTML = `
-                <td class="px-6 py-4 whitespace-nowrap">
-                    <div class="text-sm text-gray-900">${transaction.date.toLocaleDateString()}</div>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap">
-                    <div class="text-sm font-medium text-gray-900">${transaction.orderId}</div>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap">
-                    <div class="text-sm text-gray-900">${transaction.customerName}</div>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap">
-                    <div class="text-sm text-gray-900">${transaction.service}</div>
-                    <div class="text-sm text-gray-500">${transaction.weight} lbs</div>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap">
-                    <div class="text-sm text-gray-900">$${transaction.orderTotal}</div>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap">
-                    <div class="text-sm font-medium text-green-600">$${transaction.commission}</div>
-                </td>
-            `;
+            // Update UI with real transactions
+            if (orders.length === 0) {
+                transactionsTableBody.innerHTML = '<tr class="text-center"><td colspan="6" class="px-6 py-4 text-gray-500">No earnings transactions found.</td></tr>';
+            } else {
+                // Clear the loading message first
+                transactionsTableBody.innerHTML = '';
+                orders.forEach(order => {
+                    const row = document.createElement('tr');
+                    
+                    const deliveredDate = new Date(order.deliveredAt);
+                    const weight = order.actualWeight || 0;
+                    const orderTotal = order.actualTotal || 0;
+                    const commission = order.affiliateCommission || 0;
+                    
+                    row.innerHTML = `
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm text-gray-900">${deliveredDate.toLocaleDateString()}</div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm font-medium text-gray-900">${order.orderId}</div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm text-gray-900">${order.customerName}</div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm text-gray-900">Wash, Dry, Fold</div>
+                            <div class="text-sm text-gray-500">${weight.toFixed(2)} lbs</div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm text-gray-900">$${orderTotal.toFixed(2)}</div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm font-medium text-green-600">$${commission.toFixed(2)}</div>
+                        </td>
+                    `;
+                    
+                    transactionsTableBody.appendChild(row);
+                });
+            }
             
-            transactionsTableBody.appendChild(row);
-        });
+            // Update pagination info
+            document.getElementById('transactionsShowing').textContent = orders.length;
+            document.getElementById('transactionsTotal').textContent = orders.length;
+        } else {
+            throw new Error('Invalid earnings response');
+        }
+    } catch (error) {
+        console.error('Error loading earnings:', error);
+        transactionsTableBody.innerHTML = '<tr class="text-center"><td colspan="6" class="px-6 py-4 text-red-500">Failed to load earnings data. Please try again.</td></tr>';
     }
-    
-    // Update pagination info
-    document.getElementById('transactionsShowing').textContent = transactions.length;
-    document.getElementById('transactionsTotal').textContent = transactions.length;
 }
 
 // Load settings data for the settings tab
