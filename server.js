@@ -77,19 +77,21 @@ if (process.env.NODE_ENV === 'production') {
   });
 }
 
-// Security headers
+// Security headers with iframe embedding support
 app.use(helmet({
   contentSecurityPolicy: {
     directives: {
       defaultSrc: ['\'self\''],
-      scriptSrc: ['\'self\'', 'https://cdnjs.cloudflare.com'],
-      styleSrc: ['\'self\'', 'https://cdnjs.cloudflare.com', '\'unsafe-inline\''], // unsafe-inline needed for Tailwind
+      scriptSrc: ['\'self\'', 'https://cdnjs.cloudflare.com', 'https://cdn.jsdelivr.net'],
+      styleSrc: ['\'self\'', 'https://cdnjs.cloudflare.com', 'https://cdn.jsdelivr.net', '\'unsafe-inline\''], // unsafe-inline needed for Tailwind
       imgSrc: ['\'self\'', 'data:', 'https://www.wavemax.promo'],
       connectSrc: ['\'self\''],
-      fontSrc: ['\'self\'', 'https://cdnjs.cloudflare.com'],
+      fontSrc: ['\'self\'', 'https://cdnjs.cloudflare.com', 'https://cdnjs.cloudflare.com'],
       objectSrc: ['\'none\''],
       mediaSrc: ['\'self\''],
-      frameSrc: ['\'none\'']
+      frameSrc: ['\'none\''],
+      // Allow embedding on WaveMAX Laundry domains
+      frameAncestors: ['\'self\'', 'https://www.wavemaxlaundry.com', 'https://wavemaxlaundry.com']
     }
   },
   hsts: {
@@ -100,7 +102,8 @@ app.use(helmet({
   xssFilter: true,
   noSniff: true,
   referrerPolicy: { policy: 'same-origin' },
-  frameguard: { action: 'deny' }
+  // Remove frameguard to use CSP frame-ancestors instead
+  frameguard: false
 }));
 
 // CORS setup
@@ -109,11 +112,19 @@ const corsOptions = {
     const allowedOrigins = process.env.CORS_ORIGIN
       ? process.env.CORS_ORIGIN.split(',').map(o => o.trim())
       : ['http://localhost:3000'];
+    
+    // Add WaveMAX Laundry domains to allowed origins
+    const wavemaxDomains = [
+      'https://www.wavemaxlaundry.com',
+      'https://wavemaxlaundry.com'
+    ];
+    
+    const allAllowedOrigins = [...allowedOrigins, ...wavemaxDomains];
 
     // Allow requests with no origin (like mobile apps or Postman)
     if (!origin) return callback(null, true);
 
-    if (allowedOrigins.indexOf(origin) !== -1) {
+    if (allAllowedOrigins.indexOf(origin) !== -1) {
       callback(null, true);
     } else {
       callback(new Error('Not allowed by CORS'));
