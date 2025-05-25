@@ -3,7 +3,7 @@
 const express = require('express');
 const router = express.Router();
 const authController = require('../controllers/authController');
-const { authLimiter } = require('../middleware/auth');
+const { authLimiter, authenticate } = require('../middleware/auth');
 
 /**
  * @route   POST /api/auth/affiliate/login
@@ -38,7 +38,7 @@ router.post('/reset-password', authController.resetPassword);
  * @desc    Verify user token
  * @access  Private
  */
-router.get('/verify', authController.verifyToken);
+router.get('/verify', authenticate, authController.verifyToken);
 
 router.post('/refresh-token', authController.refreshToken);
 

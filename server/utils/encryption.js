@@ -83,7 +83,7 @@ exports.hashPassword = (password) => {
     const hash = crypto.pbkdf2Sync(
       password, 
       salt, 
-      10000, // 10,000 iterations
+      100000, // 100,000 iterations for better security
       64,    // 64 bytes (512 bits)
       'sha512'
     ).toString('hex');
@@ -111,7 +111,7 @@ exports.verifyPassword = (password, storedSalt, storedHash) => {
     const hash = crypto.pbkdf2Sync(
       password, 
       storedSalt, 
-      10000, // Must match the iteration count used in hashPassword
+      100000, // Must match the iteration count used in hashPassword
       64,    // Must match the byte length used in hashPassword
       'sha512'
     ).toString('hex');
