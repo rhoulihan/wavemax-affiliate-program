@@ -13,9 +13,19 @@
             background-color: #3b82f6;
         }
         .header-wave {
-            background-image: url('https://www.wavemax.promo/wp-content/themes/wavemax-laundry/assets/img/wave-header.svg');
-            background-size: cover;
-            background-position: center bottom;
+            /* Removed external SVG due to CORS issue - using gradient instead */
+            background: linear-gradient(180deg, #3b82f6 0%, #2563eb 100%);
+            position: relative;
+        }
+        .header-wave::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 40px;
+            background: #f3f4f6;
+            clip-path: polygon(0 20px, 100% 0, 100% 100%, 0 100%);
         }
     </style>
 </head>
@@ -204,13 +214,6 @@
         </div>
     </footer>
 
-    <script>
-        // Basic JavaScript for the landing page
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('WaveMAX Affiliate Program Landing Page Loaded');
-            
-            // Add any additional client-side functionality as needed
-        });
-    </script>
+    <script src="/assets/js/landing.js"></script>
 </body>
 </html>
