@@ -130,6 +130,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 loginSection.style.display = 'none';
                 pickupDetailsSection.style.display = 'block';
                 
+                // Add required attributes to the form fields now that they're visible
+                document.getElementById('pickupDate').setAttribute('required', 'required');
+                document.getElementById('pickupTime').setAttribute('required', 'required');
+                document.getElementById('estimatedSize').setAttribute('required', 'required');
+                document.getElementById('deliveryDate').setAttribute('required', 'required');
+                document.getElementById('deliveryTime').setAttribute('required', 'required');
+                
                 // Set minimum dates
                 const today = new Date();
                 const tomorrow = new Date(today);
