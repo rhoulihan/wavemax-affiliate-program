@@ -247,9 +247,6 @@ const apiV1Router = express.Router();
 
 // Mount v1 routes
 apiV1Router.use('/auth', authRoutes);
-apiV1Router.post('/affiliates/register', affiliateController.registerAffiliate);
-apiV1Router.get('/affiliates/:affiliateId/public', affiliateController.getPublicAffiliateInfo);
-apiV1Router.post('/customers/register', customerController.registerCustomer);
 apiV1Router.use('/affiliates', affiliateRoutes);
 apiV1Router.use('/customers', customerRoutes);
 apiV1Router.use('/orders', orderRoutes);

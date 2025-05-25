@@ -13,7 +13,7 @@ document.addEventListener('DOMContentLoaded', function() {
         console.log('Login request:', { username, password });
         
         // Mock API request
-        fetch('/api/auth/affiliate/login', {
+        fetch('/api/v1/auth/affiliate/login', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
