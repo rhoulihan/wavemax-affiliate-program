@@ -325,6 +325,16 @@ exports.getAffiliateEarnings = async (req, res) => {
       deliveredAt: { $gte: startDate, $lte: endDate }
     }).sort({ deliveredAt: -1 });
     
+    // Get customer details for each order
+    const customerIds = [...new Set(orders.map(order => order.customerId))];
+    const customers = await Customer.find({ customerId: { $in: customerIds } });
+    
+    // Map customers to a dictionary for quick lookup
+    const customerMap = {};
+    customers.forEach(customer => {
+      customerMap[customer.customerId] = customer;
+    });
+    
     // Calculate total earnings
     let totalEarnings = 0;
     orders.forEach(order => {
@@ -347,14 +357,18 @@ exports.getAffiliateEarnings = async (req, res) => {
       totalEarnings,
       pendingAmount,
       orderCount: orders.length,
-      orders: orders.map(order => ({
-        orderId: order.orderId,
-        customerId: order.customerId,
-        deliveredAt: order.deliveredAt,
-        actualWeight: order.actualWeight,
-        actualTotal: order.actualTotal,
-        affiliateCommission: order.affiliateCommission
-      }))
+      orders: orders.map(order => {
+        const customer = customerMap[order.customerId];
+        return {
+          orderId: order.orderId,
+          customerId: order.customerId,
+          customerName: customer ? `${customer.firstName} ${customer.lastName}` : 'Unknown Customer',
+          deliveredAt: order.deliveredAt,
+          actualWeight: order.actualWeight,
+          actualTotal: order.actualTotal,
+          affiliateCommission: order.affiliateCommission
+        };
+      })
     });
   } catch (error) {
     console.error('Affiliate earnings error:', error);
