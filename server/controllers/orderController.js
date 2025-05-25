@@ -5,11 +5,9 @@ const Affiliate = require('../models/Affiliate');
 const Customer = require('../models/Customer');
 const Order = require('../models/Order');
 const Bag = require('../models/Bag');
-const Transaction = require('../models/Transaction');
 const encryptionUtil = require('../utils/encryption');
 const emailService = require('../utils/emailService');
 const jwt = require('jsonwebtoken');
-const { v4: uuidv4 } = require('uuid');
 
 // ============================================================================
 // Order Controllers

@@ -47,14 +47,7 @@ const customerSchema = new mongoose.Schema({
   savePaymentInfo: { type: Boolean, default: false },
   isActive: { type: Boolean, default: true },
   registrationDate: { type: Date, default: Date.now },
-  lastLogin: Date,
-  // Assigned laundry bags
-  bags: [{
-    bagId: String,
-    barcode: String,
-    issuedDate: Date,
-    isActive: { type: Boolean, default: true },
-  }]
+  lastLogin: Date
 }, { timestamps: true });
 
 // Middleware for encrypting sensitive payment data before saving
