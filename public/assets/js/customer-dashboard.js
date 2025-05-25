@@ -159,7 +159,7 @@ async function loadProfile(editMode = false) {
         let profileHtml = `
             <div class="flex justify-between items-center mb-4">
                 <h3 class="text-xl font-bold">My Profile</h3>
-                <button onclick="loadProfile(true)" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+                <button id="editProfileBtn" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
                     Edit Profile
                 </button>
             </div>
@@ -200,16 +200,21 @@ async function loadProfile(editMode = false) {
         `;
         
         contentArea.innerHTML = profileHtml;
+        
+        // Add event listener for edit button
+        document.getElementById('editProfileBtn').addEventListener('click', function() {
+            loadProfile(true);
+        });
     } else {
         // Edit mode
         let editHtml = `
             <div class="flex justify-between items-center mb-4">
                 <h3 class="text-xl font-bold">Edit Profile</h3>
                 <div>
-                    <button onclick="saveProfile()" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 mr-2">
+                    <button id="saveProfileBtn" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 mr-2">
                         Save Changes
                     </button>
-                    <button onclick="loadProfile(false)" class="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700">
+                    <button id="cancelEditBtn" class="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700">
                         Cancel
                     </button>
                 </div>
@@ -263,6 +268,15 @@ async function loadProfile(editMode = false) {
         `;
         
         contentArea.innerHTML = editHtml;
+        
+        // Add event listeners for save and cancel buttons
+        document.getElementById('saveProfileBtn').addEventListener('click', function() {
+            saveProfile();
+        });
+        
+        document.getElementById('cancelEditBtn').addEventListener('click', function() {
+            loadProfile(false);
+        });
     }
 }
 
@@ -341,10 +355,6 @@ async function saveProfile() {
         alert('An error occurred while saving. Please try again.');
     }
 }
-
-// Make loadProfile available globally
-window.loadProfile = loadProfile;
-window.saveProfile = saveProfile;
 
 // Set up event listeners after DOM content loads
 document.addEventListener('DOMContentLoaded', function() {
