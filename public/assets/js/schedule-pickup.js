@@ -203,7 +203,13 @@ document.addEventListener('DOMContentLoaded', function() {
         
         formData.forEach((value, key) => {
             if (key !== 'loginUsername' && key !== 'loginPassword' && key !== '_csrf') {
-                pickupData[key] = value;
+                // Convert date fields to ISO8601 format
+                if ((key === 'pickupDate' || key === 'deliveryDate') && value) {
+                    // Add time to make it a valid ISO8601 date
+                    pickupData[key] = new Date(value + 'T12:00:00').toISOString();
+                } else {
+                    pickupData[key] = value;
+                }
             }
         });
         
