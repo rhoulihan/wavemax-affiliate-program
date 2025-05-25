@@ -78,12 +78,12 @@ document.addEventListener('DOMContentLoaded', function() {
         // Update order link with affiliate ID
         document.getElementById('scheduleAnotherBtn').href = `schedule-pickup.html?affiliate=${affiliateId}`;
         
-        // Set view orders link with customer ID
+        // Set view orders link to customer dashboard
         const customerId = order.customerId;
         if (customerId) {
-            document.getElementById('viewOrdersBtn').href = `customer-orders.html?id=${customerId}`;
+            document.getElementById('viewOrdersBtn').href = `customer-dashboard.html`;
         } else {
-            document.getElementById('viewOrdersBtn').href = '#';
+            document.getElementById('viewOrdersBtn').href = 'customer-login.html';
         }
         
         // Use the estimated total from the order data if available
