@@ -6,12 +6,22 @@ const Order = require('../models/Order');
 const Transaction = require('../models/Transaction');
 const encryptionUtil = require('../utils/encryption');
 const emailService = require('../utils/emailService');
+const { validationResult } = require('express-validator');
 
 /**
  * Register a new affiliate
  */
 exports.registerAffiliate = async (req, res) => {
   try {
+    // Check for validation errors
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({
+        success: false,
+        errors: errors.array()
+      });
+    }
+    
     const {
       firstName,
       lastName,
