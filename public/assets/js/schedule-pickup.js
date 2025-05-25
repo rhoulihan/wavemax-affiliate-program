@@ -200,6 +200,8 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
         
+        console.log('Pickup data being sent:', pickupData);
+        
         try {
             // Get the stored token
             const token = localStorage.getItem('customerToken');
@@ -209,6 +211,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 location.reload();
                 return;
             }
+            
+            console.log('Sending order request with token:', token.substring(0, 20) + '...');
             
             // Submit order to the server
             const response = await fetch('/api/orders', {
@@ -220,7 +224,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 body: JSON.stringify(pickupData)
             });
             
+            console.log('Response status:', response.status);
             const data = await response.json();
+            console.log('Response data:', data);
             
             if (data.success) {
                 // Get delivery fee from the page
