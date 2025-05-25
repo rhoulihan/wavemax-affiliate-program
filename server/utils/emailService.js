@@ -10,8 +10,23 @@ const AWS = require('aws-sdk');
 
 // Create email transport
 const createTransport = () => {
+  // Check if using console (for development/testing)
+  if (process.env.EMAIL_PROVIDER === 'console') {
+    // Return a mock transport that logs to console
+    return {
+      sendMail: async (mailOptions) => {
+        console.log('=== EMAIL CONSOLE LOG ===');
+        console.log('From:', mailOptions.from);
+        console.log('To:', mailOptions.to);
+        console.log('Subject:', mailOptions.subject);
+        console.log('HTML Preview: [HTML content logged to console]');
+        console.log('========================');
+        return { messageId: `console-${Date.now()}` };
+      }
+    };
+  }
   // Check if using Amazon SES
-  if (process.env.EMAIL_PROVIDER === 'ses') {
+  else if (process.env.EMAIL_PROVIDER === 'ses') {
     // Configure AWS SDK
     AWS.config.update({
       accessKeyId: process.env.AWS_ACCESS_KEY_ID,
@@ -103,6 +118,8 @@ const sendEmail = async (to, subject, html) => {
     
     const from = process.env.EMAIL_PROVIDER === 'ses' 
       ? process.env.SES_FROM_EMAIL
+      : process.env.EMAIL_PROVIDER === 'console'
+      ? process.env.EMAIL_FROM || 'noreply@wavemax.promo'
       : `"WaveMAX Laundry" <${process.env.EMAIL_USER}>`;
     
     const info = await transporter.sendMail({
