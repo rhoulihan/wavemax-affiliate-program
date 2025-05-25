@@ -82,10 +82,10 @@ app.use(helmet({
   contentSecurityPolicy: {
     directives: {
       defaultSrc: ['\'self\''],
-      scriptSrc: ['\'self\'', 'https://cdnjs.cloudflare.com', 'https://cdn.jsdelivr.net'],
+      scriptSrc: ['\'self\'', 'https://cdnjs.cloudflare.com', 'https://cdn.jsdelivr.net', '\'unsafe-inline\''], // Added unsafe-inline for embed pages
       styleSrc: ['\'self\'', 'https://cdnjs.cloudflare.com', 'https://cdn.jsdelivr.net', '\'unsafe-inline\''], // unsafe-inline needed for Tailwind
       imgSrc: ['\'self\'', 'data:', 'https://www.wavemax.promo'],
-      connectSrc: ['\'self\''],
+      connectSrc: ['\'self\'', 'https://wavemax.promo'],
       fontSrc: ['\'self\'', 'https://cdnjs.cloudflare.com', 'https://cdnjs.cloudflare.com'],
       objectSrc: ['\'none\''],
       mediaSrc: ['\'self\''],
