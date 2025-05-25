@@ -53,7 +53,7 @@ document.addEventListener('DOMContentLoaded', function() {
             });
             
             // In a real implementation, this would be an API call to the server
-            const response = await fetch('/api/affiliates/register', {
+            const response = await fetch('/api/v1/affiliates/register', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
