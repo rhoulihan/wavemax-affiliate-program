@@ -5,11 +5,11 @@ const Affiliate = require('../models/Affiliate');
 const Customer = require('../models/Customer');
 const Order = require('../models/Order');
 const Bag = require('../models/Bag');
-const Transaction = require('../models/Transaction');
 const encryptionUtil = require('../utils/encryption');
 const emailService = require('../utils/emailService');
 const jwt = require('jsonwebtoken');
 const { v4: uuidv4 } = require('uuid');
+const { getFilteredData } = require('../utils/fieldFilter');
 
 // ============================================================================
 // Customer Controllers
@@ -113,16 +113,6 @@ exports.registerCustomer = async (req, res) => {
     
     await newBag.save();
     
-    // Update customer with bag info
-    newCustomer.bags.push({
-      bagId: newBag.bagId,
-      barcode: bagBarcode,
-      issuedDate: new Date(),
-      isActive: true
-    });
-    
-    await newCustomer.save();
-    
     // Send welcome emails
     try {
       await emailService.sendCustomerWelcomeEmail(newCustomer, bagBarcode, affiliate);
@@ -194,45 +184,26 @@ exports.getCustomerProfile = async (req, res) => {
     // Get customer's bag information
     const bags = await Bag.find({ customerId });
     
-    // Return customer data (excluding sensitive info)
+    // Determine user role and if viewing own profile
+    const userRole = req.user ? req.user.role : 'public';
+    const isSelf = req.user && (req.user.customerId === customerId || req.user.role === 'admin');
+    
+    // Filter customer data based on role
+    const filteredCustomer = getFilteredData('customer', customer.toObject(), userRole, { isSelf });
+    
+    // Add affiliate info if authorized
+    if (userRole === 'admin' || userRole === 'affiliate' || isSelf) {
+      filteredCustomer.affiliate = affiliate ? getFilteredData('affiliate', affiliate.toObject(), 'public') : null;
+    }
+    
+    // Add bag details based on role
+    if (userRole === 'admin' || userRole === 'affiliate' || isSelf) {
+      filteredCustomer.bagDetails = getFilteredData('bag', bags.map(b => b.toObject()), userRole);
+    }
+    
     res.status(200).json({
       success: true,
-      customer: {
-        customerId: customer.customerId,
-        firstName: customer.firstName,
-        lastName: customer.lastName,
-        email: customer.email,
-        phone: customer.phone,
-        address: customer.address,
-        city: customer.city,
-        state: customer.state,
-        zipCode: customer.zipCode,
-        deliveryInstructions: customer.deliveryInstructions,
-        serviceFrequency: customer.serviceFrequency,
-        preferredDay: customer.preferredDay,
-        preferredTime: customer.preferredTime,
-        specialInstructions: customer.specialInstructions,
-        lastFourDigits: customer.lastFourDigits,
-        savePaymentInfo: customer.savePaymentInfo,
-        isActive: customer.isActive,
-        registrationDate: customer.registrationDate,
-        lastLogin: customer.lastLogin,
-        bags: customer.bags,
-        affiliate: affiliate ? {
-          affiliateId: affiliate.affiliateId,
-          name: `${affiliate.firstName} ${affiliate.lastName}`,
-          phone: affiliate.phone,
-          email: affiliate.email,
-          deliveryFee: affiliate.deliveryFee
-        } : null,
-        bagDetails: bags.map(bag => ({
-          bagId: bag.bagId,
-          barcode: bag.barcode,
-          status: bag.status,
-          issueDate: bag.issueDate,
-          lastUsedDate: bag.lastUsedDate
-        }))
-      }
+      customer: filteredCustomer
     });
   } catch (error) {
     console.error('Get customer profile error:', error);
@@ -597,12 +568,7 @@ exports.reportLostBag = async (req, res) => {
     bag.status = 'lost';
     await bag.save();
     
-    // Update customer's bag record
-    const bagIndex = customer.bags.findIndex(b => b.bagId === bagId);
-    if (bagIndex !== -1) {
-      customer.bags[bagIndex].isActive = false;
-      await customer.save();
-    }
+    // No need to update customer record as bags are managed separately
     
     // Notify affiliate
     const affiliate = await Affiliate.findOne({ affiliateId: customer.affiliateId });

@@ -7,27 +7,43 @@ const encryptionUtil = require('../utils/encryption');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const emailService = require('../utils/emailService');
+const { logLoginAttempt, logAuditEvent, AuditEvents } = require('../utils/auditLogger');
 
 /**
  * Generate JWT token
  */
-const generateToken = (data, expiresIn = '7d') => {
+const generateToken = (data, expiresIn = '1h') => {
   return jwt.sign(
     data,
     process.env.JWT_SECRET,
-    { expiresIn }
+    { 
+      expiresIn,
+      issuer: 'wavemax-api',
+      audience: 'wavemax-client'
+    }
   );
 };
 
-const generateRefreshToken = async (userId, userType, ip) => {
-  // Create a refresh token that expires in 7 days
+const generateRefreshToken = async (userId, userType, ip, replaceToken = null) => {
+  // Create a refresh token that expires in 30 days
   const expiryDate = new Date();
-  expiryDate.setDate(expiryDate.getDate() + 7);
+  expiryDate.setDate(expiryDate.getDate() + 30);
   
   // Generate a secure random token
   const token = crypto.randomBytes(40).toString('hex');
   
-  // Save token to database
+  // If replacing a token, mark the old one as revoked
+  if (replaceToken) {
+    const oldToken = await RefreshToken.findOne({ token: replaceToken });
+    if (oldToken && !oldToken.revoked) {
+      oldToken.revoked = new Date();
+      oldToken.revokedByIp = ip;
+      oldToken.replacedByToken = token;
+      await oldToken.save();
+    }
+  }
+  
+  // Save new token to database
   const refreshToken = new RefreshToken({
     token,
     userId,
@@ -52,6 +68,7 @@ exports.affiliateLogin = async (req, res) => {
     const affiliate = await Affiliate.findOne({ username });
     
     if (!affiliate) {
+      logLoginAttempt(false, 'affiliate', username, req, 'User not found');
       return res.status(401).json({
         success: false,
         message: 'Invalid username or password'
@@ -66,6 +83,7 @@ exports.affiliateLogin = async (req, res) => {
     );
     
     if (!isPasswordValid) {
+      logLoginAttempt(false, 'affiliate', username, req, 'Invalid password');
       return res.status(401).json({
         success: false,
         message: 'Invalid username or password'
@@ -89,6 +107,9 @@ exports.affiliateLogin = async (req, res) => {
       'affiliate',
       req.ip
     );
+
+    // Log successful login
+    logLoginAttempt(true, 'affiliate', username, req);
 
     res.status(200).json({
       success: true,
@@ -124,7 +145,7 @@ exports.refreshToken = async (req, res) => {
     // Find the token in the database
     const storedToken = await RefreshToken.findOne({ 
       token: refreshToken,
-      isRevoked: false,
+      revoked: null,
       expiryDate: { $gt: new Date() }
     });
     
@@ -158,16 +179,13 @@ exports.refreshToken = async (req, res) => {
       role: storedToken.userType
     });
     
-    // Generate new refresh token
+    // Generate new refresh token with proper token rotation
     const newRefreshToken = await generateRefreshToken(
       user._id,
       storedToken.userType,
-      req.ip
+      req.ip,
+      refreshToken // Pass the old token for proper rotation
     );
-    
-    // Revoke the old refresh token
-    storedToken.isRevoked = true;
-    await storedToken.save();
     
     res.status(200).json({
       success: true,
@@ -208,6 +226,7 @@ exports.customerLogin = async (req, res) => {
     );
     
     if (!isPasswordValid) {
+      logLoginAttempt(false, 'affiliate', username, req, 'Invalid password');
       return res.status(401).json({
         success: false,
         message: 'Invalid username or password'

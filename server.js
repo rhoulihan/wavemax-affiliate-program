@@ -12,6 +12,9 @@ const morgan = require('morgan');
 const rateLimit = require('express-rate-limit');
 const compression = require('compression');
 
+// Import middleware
+const { mongoSanitize, sanitizeRequest } = require('./server/middleware/sanitization');
+
 // Import routes
 const authRoutes = require('./server/routes/authRoutes');
 const affiliateRoutes = require('./server/routes/affiliateRoutes');
@@ -132,6 +135,10 @@ if (process.env.NODE_ENV !== 'production') {
 app.use(express.json({ limit: '1mb' }));
 app.use(express.urlencoded({ extended: true, limit: '1mb' }));
 
+// Sanitization middleware
+app.use(mongoSanitize()); // Prevent NoSQL injection
+app.use(sanitizeRequest); // Sanitize all inputs for XSS prevention
+
 // Compression for all responses
 app.use(compression());
 
@@ -165,26 +172,103 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // Set up CSRF protection
 const csrf = require('csurf');
-const csrfProtection = csrf({ cookie: true });
+const csrfProtection = csrf({ 
+  cookie: {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'strict'
+  }
+});
 
-// Create API routes - API routes use JWT authentication instead of CSRF
-// Auth routes don't need CSRF for login endpoints
-app.use('/api/auth', authRoutes);
-app.post('/api/affiliates/register', affiliateController.registerAffiliate);
-// Add public affiliate info route without CSRF protection
-app.get('/api/affiliates/:affiliateId/public', affiliateController.getPublicAffiliateInfo);
-// Customer registration needs to work without CSRF for now
-app.post('/api/customers/register', customerController.registerCustomer);
-// API routes use JWT authentication, not CSRF
-app.use('/api/affiliates', affiliateRoutes);
-app.use('/api/customers', customerRoutes);
-app.use('/api/orders', orderRoutes);
-app.use('/api/bags', bagRoutes);
+// CSRF excluded paths - only public endpoints that don't require authentication
+const csrfExcludedPaths = [
+  '/api/auth/affiliate/login',
+  '/api/auth/customer/login',
+  '/api/auth/forgot-password',
+  '/api/auth/reset-password',
+  '/api/auth/refresh-token',
+  '/api/affiliates/register',
+  '/api/customers/register',
+  '/api/affiliates/:affiliateId/public',
+  '/api/customers/:customerId/profile'
+];
 
-// For routes that render templates and need CSRF tokens, use csrfProtection middleware
-app.get('/admin/*', csrfProtection, (req, res, next) => {
-  // Set CSRF token for templates
-  res.locals.csrfToken = req.csrfToken();
+// Apply CSRF conditionally
+const conditionalCsrf = (req, res, next) => {
+  // Check if path is excluded
+  const isExcluded = csrfExcludedPaths.some(path => {
+    if (path.includes(':')) {
+      const regex = new RegExp('^' + path.replace(/:[^/]+/g, '[^/]+') + '$');
+      return regex.test(req.path);
+    }
+    return req.path === path;
+  });
+  
+  // Skip CSRF for excluded paths and GET requests
+  if (isExcluded || req.method === 'GET' || req.method === 'HEAD' || req.method === 'OPTIONS') {
+    return next();
+  }
+  
+  // Apply CSRF protection for all other routes
+  csrfProtection(req, res, next);
+};
+
+// Apply conditional CSRF to all routes
+app.use(conditionalCsrf);
+
+// CSRF token endpoint
+app.get('/api/csrf-token', csrfProtection, (req, res) => {
+  res.json({ csrfToken: req.csrfToken() });
+});
+
+// API Versioning middleware
+const API_VERSION = 'v1';
+const apiVersioning = (req, res, next) => {
+  // Extract version from header or URL
+  const versionFromHeader = req.headers['api-version'];
+  const versionFromUrl = req.path.match(/^\/api\/(v\d+)\//)?.[1];
+  
+  // Use version from URL first, then header, then default
+  req.apiVersion = versionFromUrl || versionFromHeader || API_VERSION;
+  
+  // Rewrite URL if version is in header but not in URL
+  if (!versionFromUrl && req.path.startsWith('/api/')) {
+    req.url = req.path.replace('/api/', `/api/${req.apiVersion}/`);
+  }
+  
+  next();
+};
+
+// Apply API versioning
+app.use(apiVersioning);
+
+// API Routes with versioning
+const apiV1Router = express.Router();
+
+// Mount v1 routes
+apiV1Router.use('/auth', authRoutes);
+apiV1Router.post('/affiliates/register', affiliateController.registerAffiliate);
+apiV1Router.get('/affiliates/:affiliateId/public', affiliateController.getPublicAffiliateInfo);
+apiV1Router.post('/customers/register', customerController.registerCustomer);
+apiV1Router.use('/affiliates', affiliateRoutes);
+apiV1Router.use('/customers', customerRoutes);
+apiV1Router.use('/orders', orderRoutes);
+apiV1Router.use('/bags', bagRoutes);
+
+// Mount versioned API
+app.use('/api/v1', apiV1Router);
+
+// Legacy support - redirect unversioned API calls to v1
+app.use('/api', (req, res, next) => {
+  if (!req.path.match(/^\/v\d+\//)) {
+    req.url = `/v1${req.path}`;
+  }
+  next();
+}, apiV1Router);
+
+// Admin routes with CSRF
+app.get('/admin/*', (req, res, next) => {
+  res.locals.csrfToken = req.csrfToken ? req.csrfToken() : null;
   next();
 });
 
