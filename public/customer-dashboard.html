@@ -50,10 +50,10 @@
                 <a href="#" id="schedulePickupBtn" class="bg-blue-600 text-white text-center py-3 px-4 rounded-lg hover:bg-blue-700 transition">
                     Schedule Pickup
                 </a>
-                <button onclick="loadOrders()" class="bg-green-600 text-white py-3 px-4 rounded-lg hover:bg-green-700 transition">
+                <button id="viewOrdersBtn" class="bg-green-600 text-white py-3 px-4 rounded-lg hover:bg-green-700 transition">
                     View Orders
                 </button>
-                <button onclick="loadProfile()" class="bg-purple-600 text-white py-3 px-4 rounded-lg hover:bg-purple-700 transition">
+                <button id="myProfileBtn" class="bg-purple-600 text-white py-3 px-4 rounded-lg hover:bg-purple-700 transition">
                     My Profile
                 </button>
             </div>
@@ -160,7 +160,7 @@
 
             try {
                 const token = localStorage.getItem('customerToken');
-                const response = await fetch(`/api/orders/customer/${customerId}`, {
+                const response = await fetch(`/api/customers/${customerId}/orders`, {
                     headers: {
                         'Authorization': `Bearer ${token}`
                     }
@@ -262,6 +262,16 @@
             localStorage.removeItem('customerToken');
             localStorage.removeItem('currentCustomer');
             window.location.href = 'customer-login.html';
+        });
+
+        // View Orders button
+        document.getElementById('viewOrdersBtn').addEventListener('click', function() {
+            loadOrders();
+        });
+
+        // My Profile button
+        document.getElementById('myProfileBtn').addEventListener('click', function() {
+            loadProfile();
         });
     </script>
 </body>
