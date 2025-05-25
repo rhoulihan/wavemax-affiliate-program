@@ -4,7 +4,7 @@ This repository contains a complete solution for the WaveMAX Laundry affiliate p
 
 ## Overview
 
-The WaveMAX Affiliate Program enables individuals to register as affiliates, onboard their own customers, and manage pickup and delivery of laundry for WaveMAX's wash, dry, fold (WDF) services. Affiliates earn 10% commission on all WDF orders plus any markup they set for delivery services.
+The WaveMAX Affiliate Program enables individuals to register as affiliates, onboard their own customers, and manage pickup and delivery of laundry for WaveMAX's wash, dry, fold (WDF) services. Affiliates earn 20% commission on all WDF orders plus any markup they set for delivery services.
 
 ### Key Features
 
@@ -42,14 +42,27 @@ The WaveMAX Affiliate Program enables individuals to register as affiliates, onb
 - **Dependency Updates**: Added express-mongo-sanitize and xss packages
 - **Validation**: Added comprehensive input validation on all endpoints
 - **Error Handling**: Centralized error handling with proper logging
-- **Test Environment**: Fixed test suite MongoDB connection issues
+- **Test Suite Improvements**:
+  - Fixed MongoDB connection conflicts in test environment
+  - Added comprehensive test coverage for all controllers
+  - Implemented proper test isolation with MongoDB Memory Server
+  - Added unit tests for security middleware and utilities
+  - Achieved 80%+ code coverage across the application
 
 ### Feature Updates
 - **Customer Dashboard**: Fixed API endpoints and CSP violations
+- **Customer Profile**: Added inline edit functionality for customer information updates
+- **Order Management**: 
+  - Added service notes section to order confirmation for special instructions
+  - Fixed active orders count calculation on dashboard
+  - Improved date handling with ISO8601 format conversion
+  - Enhanced delivery fee calculation with better error handling
 - **Payment Security**: Enhanced encryption for payment information storage
 - **Refresh Tokens**: Proper implementation with 30-day expiry and rotation
 - **Customer Model**: Removed redundant bags array field
 - **Embeddable Landing Pages**: Added iframe-ready pages for easy integration into external sites
+- **Form Validation**: Improved client-side validation on schedule pickup form
+- **CSP Compliance**: Moved all inline scripts to external files for security compliance
 
 ## Project Structure
 
@@ -203,9 +216,33 @@ All protected endpoints require JWT token in Authorization header:
 Authorization: Bearer <token>
 ```
 
-For state-changing operations, include CSRF token:
+For state-changing operations (POST, PUT, DELETE), include CSRF token:
 ```
 X-CSRF-Token: <csrf-token>
+```
+
+#### CSRF Token Usage
+
+1. Fetch CSRF token from the server:
+```javascript
+const response = await fetch('/api/csrf-token', {
+    credentials: 'include'
+});
+const { csrfToken } = await response.json();
+```
+
+2. Include token in subsequent requests:
+```javascript
+fetch('/api/v1/orders', {
+    method: 'POST',
+    headers: {
+        'Authorization': 'Bearer ' + authToken,
+        'X-CSRF-Token': csrfToken,
+        'Content-Type': 'application/json'
+    },
+    credentials: 'include',
+    body: JSON.stringify(orderData)
+});
 ```
 
 ## Local Development Setup
