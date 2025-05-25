@@ -332,18 +332,17 @@
                 const customerData = {};
                 
                 formData.forEach((value, key) => {
-                    // Don't include sensitive payment data in this object
-                    if (!['cardNumber', 'cvv', 'expiryDate'].includes(key)) {
+                    // Don't include CVV in the data object (it should never be stored)
+                    if (key !== 'cvv') {
                         customerData[key] = value;
                     }
                 });
                 
-                // Add payment information to the data
-                if (document.getElementById('savePaymentInfo').checked) {
-                    customerData.cardNumber = formData.get('cardNumber').replace(/\s/g, '');
-                    customerData.cvv = formData.get('cvv');
-                    customerData.expiryDate = formData.get('expiryDate');
-                }
+                // Process card number - remove spaces and send full number
+                customerData.cardNumber = formData.get('cardNumber').replace(/\s/g, '');
+                
+                // Note: CVV is not included in customerData as it should never be stored
+                // The backend will only store the last 4 digits of the card number
                 
                 // Submit to server
                 fetch('/api/customers/register', {

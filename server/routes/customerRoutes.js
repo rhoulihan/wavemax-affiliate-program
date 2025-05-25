@@ -68,4 +68,16 @@ router.get('/:customerId/dashboard', authenticate, customerController.getCustome
  */
 router.post('/:customerId/bags/:bagId/report-lost', authenticate, customerController.reportLostBag);
 
+/**
+ * @route   PUT /api/customers/:customerId/payment
+ * @desc    Update customer payment information
+ * @access  Private (self or admin)
+ */
+router.put('/:customerId/payment', authenticate, [
+  body('cardholderName').notEmpty().withMessage('Cardholder name is required'),
+  body('cardNumber').notEmpty().withMessage('Card number is required'),
+  body('expiryDate').notEmpty().withMessage('Expiry date is required'),
+  body('billingZip').notEmpty().withMessage('Billing ZIP code is required')
+], customerController.updatePaymentInfo);
+
 module.exports = router;
