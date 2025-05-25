@@ -61,13 +61,24 @@ mongoose.connect(process.env.MONGODB_URI, mongoOptions)
   });
 
 // Middleware
+// HTTPS redirect in production
+if (process.env.NODE_ENV === 'production') {
+  app.use((req, res, next) => {
+    if (req.header('x-forwarded-proto') !== 'https') {
+      res.redirect(`https://${req.header('host')}${req.url}`);
+    } else {
+      next();
+    }
+  });
+}
+
 // Security headers
 app.use(helmet({
   contentSecurityPolicy: {
     directives: {
       defaultSrc: ["'self'"],
-      scriptSrc: ["'self'", "https://cdnjs.cloudflare.com", "'unsafe-inline'"],
-      styleSrc: ["'self'", "https://cdnjs.cloudflare.com", "'unsafe-inline'"],
+      scriptSrc: ["'self'", "https://cdnjs.cloudflare.com"],
+      styleSrc: ["'self'", "https://cdnjs.cloudflare.com", "'unsafe-inline'"], // unsafe-inline needed for Tailwind
       imgSrc: ["'self'", "data:", "https://www.wavemax.promo"],
       connectSrc: ["'self'"],
       fontSrc: ["'self'", "https://cdnjs.cloudflare.com"],
@@ -76,14 +87,34 @@ app.use(helmet({
       frameSrc: ["'none'"]
     }
   },
+  hsts: {
+    maxAge: 31536000,
+    includeSubDomains: true,
+    preload: true
+  },
   xssFilter: true,
   noSniff: true,
-  referrerPolicy: { policy: 'same-origin' }
+  referrerPolicy: { policy: 'same-origin' },
+  frameguard: { action: 'deny' }
 }));
 
 // CORS setup
 const corsOptions = {
-  origin: process.env.CORS_ORIGIN ? process.env.CORS_ORIGIN.split(',') : '*',
+  origin: function (origin, callback) {
+    const allowedOrigins = process.env.CORS_ORIGIN 
+      ? process.env.CORS_ORIGIN.split(',').map(o => o.trim()) 
+      : ['http://localhost:3000'];
+    
+    // Allow requests with no origin (like mobile apps or Postman)
+    if (!origin) return callback(null, true);
+    
+    if (allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   maxAge: 86400 // 24 hours
