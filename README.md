@@ -4,7 +4,7 @@ This repository contains a complete solution for the WaveMAX Laundry affiliate p
 
 ## Overview
 
-The WaveMAX Affiliate Program enables individuals to register as affiliates, onboard their own customers, and manage pickup and delivery of laundry for WaveMAX's wash, dry, fold (WDF) services. Affiliates earn 20% commission on all WDF orders plus any markup they set for delivery services.
+The WaveMAX Affiliate Program enables individuals to register as affiliates, onboard their own customers, and manage pickup and delivery of laundry for WaveMAX's wash, dry, fold (WDF) services. Affiliates earn 10% commission on all WDF orders plus any markup they set for delivery services.
 
 ### Key Features
 
@@ -586,7 +586,7 @@ If you prefer not to use iframes:
 ```html
 <div style="text-align: center; padding: 40px 20px; background: #f8f9fa;">
     <h2>Become a WaveMAX Affiliate</h2>
-    <p>Earn 20% recurring commission on every customer you refer!</p>
+    <p>Earn 10% recurring commission on every customer you refer!</p>
     <div style="margin-top: 20px;">
         <a href="https://wavemax.promo/affiliate-register.html" 
            target="_blank"
