@@ -60,6 +60,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Display affiliate delivery fee from login response if available
                 if (customer.affiliate && customer.affiliate.deliveryFee) {
                     document.getElementById('deliveryFee').textContent = `$${parseFloat(customer.affiliate.deliveryFee).toFixed(2)}`;
+                    console.log('Set delivery fee from login response:', customer.affiliate.deliveryFee);
+                } else {
+                    console.log('No affiliate delivery fee in login response, will try from profile API');
                 }
                 
                 // Fetch full customer profile to get address and affiliate details
@@ -81,9 +84,45 @@ document.addEventListener('DOMContentLoaded', function() {
                     // Display affiliate delivery fee
                     if (fullCustomer.affiliate && fullCustomer.affiliate.deliveryFee) {
                         document.getElementById('deliveryFee').textContent = `$${parseFloat(fullCustomer.affiliate.deliveryFee).toFixed(2)}`;
+                        console.log('Set delivery fee from profile response:', fullCustomer.affiliate.deliveryFee);
                     } else {
-                        // Fallback price if affiliate not found
+                        console.log('No affiliate delivery fee in profile response, trying to fetch affiliate directly');
+                        // Try to fetch affiliate data directly
+                        const affiliateResponse = await fetch(`/api/affiliates/${customer.affiliateId || affiliateId}/public`);
+                        if (affiliateResponse.ok) {
+                            const affiliateData = await affiliateResponse.json();
+                            if (affiliateData.success && affiliateData.affiliate && affiliateData.affiliate.deliveryFee) {
+                                document.getElementById('deliveryFee').textContent = `$${parseFloat(affiliateData.affiliate.deliveryFee).toFixed(2)}`;
+                                console.log('Set delivery fee from direct affiliate API:', affiliateData.affiliate.deliveryFee);
+                            } else {
+                                // Final fallback price
+                                document.getElementById('deliveryFee').textContent = '$5.99';
+                                console.log('Using fallback delivery fee: $5.99');
+                            }
+                        } else {
+                            // Final fallback price
+                            document.getElementById('deliveryFee').textContent = '$5.99';
+                            console.log('Using fallback delivery fee: $5.99');
+                        }
+                    }
+                } else {
+                    console.log('Failed to get customer profile, trying to fetch affiliate directly');
+                    // Try to fetch affiliate data directly as fallback
+                    const affiliateResponse = await fetch(`/api/affiliates/${customer.affiliateId || affiliateId}/public`);
+                    if (affiliateResponse.ok) {
+                        const affiliateData = await affiliateResponse.json();
+                        if (affiliateData.success && affiliateData.affiliate && affiliateData.affiliate.deliveryFee) {
+                            document.getElementById('deliveryFee').textContent = `$${parseFloat(affiliateData.affiliate.deliveryFee).toFixed(2)}`;
+                            console.log('Set delivery fee from direct affiliate API (profile fallback):', affiliateData.affiliate.deliveryFee);
+                        } else {
+                            // Final fallback price
+                            document.getElementById('deliveryFee').textContent = '$5.99';
+                            console.log('Using fallback delivery fee: $5.99');
+                        }
+                    } else {
+                        // Final fallback price
                         document.getElementById('deliveryFee').textContent = '$5.99';
+                        console.log('Using fallback delivery fee: $5.99');
                     }
                 }
                 
