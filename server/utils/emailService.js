@@ -6,7 +6,8 @@ const fs = require('fs');
 const path = require('path');
 const { promisify } = require('util');
 const readFile = promisify(fs.readFile);
-const AWS = require('aws-sdk');
+const { SESClient } = require('@aws-sdk/client-ses');
+const { defaultProvider } = require('@aws-sdk/credential-provider-node');
 
 // Create email transport
 const createTransport = () => {
@@ -27,16 +28,15 @@ const createTransport = () => {
   }
   // Check if using Amazon SES
   else if (process.env.EMAIL_PROVIDER === 'ses') {
-    // Configure AWS SDK
-    AWS.config.update({
-      accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-      secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-      region: process.env.AWS_REGION
+    // Create SES client with v3 SDK
+    const sesClient = new SESClient({
+      region: process.env.AWS_REGION || 'us-east-1',
+      credentials: defaultProvider()
     });
 
     // Create SES transporter
     return nodemailer.createTransport({
-      SES: new AWS.SES({ apiVersion: '2010-12-01' })
+      SES: { ses: sesClient, aws: require('@aws-sdk/client-ses') }
     });
   } else {
     // Use standard SMTP transport for non-SES configuration

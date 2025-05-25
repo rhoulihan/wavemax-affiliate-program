@@ -30,7 +30,8 @@
   "author": "WaveMAX Laundry",
   "license": "MIT",
   "dependencies": {
-    "aws-sdk": "^2.1692.0",
+    "@aws-sdk/client-ses": "^3.817.0",
+    "@aws-sdk/credential-provider-ini": "^3.817.0",
     "compression": "1.7.4",
     "connect-mongo": "^5.1.0",
     "cors": "2.8.5",
