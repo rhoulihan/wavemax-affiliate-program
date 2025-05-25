@@ -190,7 +190,17 @@ const csrfExcludedPaths = [
   '/api/affiliates/register',
   '/api/customers/register',
   '/api/affiliates/:affiliateId/public',
-  '/api/customers/:customerId/profile'
+  '/api/customers/:customerId/profile',
+  // Also include versioned API paths
+  '/api/v1/auth/affiliate/login',
+  '/api/v1/auth/customer/login',
+  '/api/v1/auth/forgot-password',
+  '/api/v1/auth/reset-password',
+  '/api/v1/auth/refresh-token',
+  '/api/v1/affiliates/register',
+  '/api/v1/customers/register',
+  '/api/v1/affiliates/:affiliateId/public',
+  '/api/v1/customers/:customerId/profile'
 ];
 
 // Apply CSRF conditionally
