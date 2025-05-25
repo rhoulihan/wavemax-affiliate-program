@@ -64,8 +64,8 @@ async function loadDashboardData() {
         if (statsResponse.ok) {
             const statsResult = await statsResponse.json();
             if (statsResult.success && statsResult.stats) {
-                document.getElementById('activeOrders').textContent = statsResult.stats.activeOrders || 0;
-                document.getElementById('completedOrders').textContent = statsResult.stats.completedOrders || 0;
+                document.getElementById('activeOrders').textContent = statsResult.stats.activeOrdersCount || 0;
+                document.getElementById('completedOrders').textContent = statsResult.stats.completedOrdersCount || 0;
                 document.getElementById('totalSpent').textContent = `$${(statsResult.stats.totalSpent || 0).toFixed(2)}`;
             }
         }
