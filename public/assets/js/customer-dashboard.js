@@ -151,40 +151,200 @@ async function loadOrders() {
 }
 
 // Load profile
-async function loadProfile() {
+async function loadProfile(editMode = false) {
     const contentArea = document.getElementById('contentArea');
     
-    let profileHtml = `
-        <h3 class="text-xl font-bold mb-4">My Profile</h3>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-                <label class="block text-gray-600 mb-1">Name</label>
-                <p class="font-semibold">${customerData.firstName} ${customerData.lastName}</p>
+    if (!editMode) {
+        // View mode
+        let profileHtml = `
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-bold">My Profile</h3>
+                <button onclick="loadProfile(true)" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+                    Edit Profile
+                </button>
             </div>
-            <div>
-                <label class="block text-gray-600 mb-1">Email</label>
-                <p class="font-semibold">${customerData.email}</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-gray-600 mb-1">First Name</label>
+                    <p class="font-semibold">${customerData.firstName}</p>
+                </div>
+                <div>
+                    <label class="block text-gray-600 mb-1">Last Name</label>
+                    <p class="font-semibold">${customerData.lastName}</p>
+                </div>
+                <div>
+                    <label class="block text-gray-600 mb-1">Email</label>
+                    <p class="font-semibold">${customerData.email}</p>
+                </div>
+                <div>
+                    <label class="block text-gray-600 mb-1">Phone</label>
+                    <p class="font-semibold">${customerData.phone || 'Not provided'}</p>
+                </div>
+                <div>
+                    <label class="block text-gray-600 mb-1">Customer ID</label>
+                    <p class="font-semibold text-gray-500">${customerData.customerId} (Cannot be changed)</p>
+                </div>
             </div>
-            <div>
-                <label class="block text-gray-600 mb-1">Phone</label>
-                <p class="font-semibold">${customerData.phone || 'Not provided'}</p>
+            ${customerData.address || customerData.city ? `
+                <div class="mt-4">
+                    <label class="block text-gray-600 mb-1">Address</label>
+                    <p class="font-semibold">${customerData.address || 'Not provided'}<br>
+                    ${customerData.city || ''}, ${customerData.state || ''} ${customerData.zipCode || ''}</p>
+                </div>
+            ` : `
+                <div class="mt-4">
+                    <label class="block text-gray-600 mb-1">Address</label>
+                    <p class="font-semibold">Not provided</p>
+                </div>
+            `}
+        `;
+        
+        contentArea.innerHTML = profileHtml;
+    } else {
+        // Edit mode
+        let editHtml = `
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-bold">Edit Profile</h3>
+                <div>
+                    <button onclick="saveProfile()" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 mr-2">
+                        Save Changes
+                    </button>
+                    <button onclick="loadProfile(false)" class="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700">
+                        Cancel
+                    </button>
+                </div>
             </div>
-            <div>
-                <label class="block text-gray-600 mb-1">Customer ID</label>
-                <p class="font-semibold">${customerData.customerId}</p>
-            </div>
-        </div>
-        ${customerData.address ? `
-            <div class="mt-4">
-                <label class="block text-gray-600 mb-1">Address</label>
-                <p class="font-semibold">${customerData.address}<br>
-                ${customerData.city}, ${customerData.state} ${customerData.zipCode}</p>
-            </div>
-        ` : ''}
-    `;
-    
-    contentArea.innerHTML = profileHtml;
+            <form id="profileForm" class="space-y-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-gray-600 mb-1">First Name</label>
+                        <input type="text" id="editFirstName" value="${customerData.firstName}" 
+                               class="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-gray-600 mb-1">Last Name</label>
+                        <input type="text" id="editLastName" value="${customerData.lastName}" 
+                               class="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-gray-600 mb-1">Email</label>
+                        <input type="email" id="editEmail" value="${customerData.email}" 
+                               class="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-gray-600 mb-1">Phone</label>
+                        <input type="tel" id="editPhone" value="${customerData.phone || ''}" 
+                               class="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-gray-600 mb-1">Customer ID</label>
+                        <input type="text" value="${customerData.customerId}" disabled
+                               class="w-full p-2 border rounded bg-gray-100 text-gray-500">
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <label class="block text-gray-600 mb-1">Address</label>
+                    <input type="text" id="editAddress" value="${customerData.address || ''}" 
+                           class="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500 mb-2"
+                           placeholder="Street Address">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
+                        <input type="text" id="editCity" value="${customerData.city || ''}" 
+                               class="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                               placeholder="City">
+                        <input type="text" id="editState" value="${customerData.state || ''}" 
+                               class="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                               placeholder="State" maxlength="2">
+                        <input type="text" id="editZipCode" value="${customerData.zipCode || ''}" 
+                               class="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                               placeholder="ZIP Code">
+                    </div>
+                </div>
+            </form>
+        `;
+        
+        contentArea.innerHTML = editHtml;
+    }
 }
+
+// Save profile changes
+async function saveProfile() {
+    try {
+        const token = localStorage.getItem('customerToken');
+        
+        // Gather form data
+        const updatedData = {
+            firstName: document.getElementById('editFirstName').value.trim(),
+            lastName: document.getElementById('editLastName').value.trim(),
+            email: document.getElementById('editEmail').value.trim(),
+            phone: document.getElementById('editPhone').value.trim(),
+            address: document.getElementById('editAddress').value.trim(),
+            city: document.getElementById('editCity').value.trim(),
+            state: document.getElementById('editState').value.trim().toUpperCase(),
+            zipCode: document.getElementById('editZipCode').value.trim()
+        };
+        
+        // Validate required fields
+        if (!updatedData.firstName || !updatedData.lastName || !updatedData.email) {
+            alert('First name, last name, and email are required.');
+            return;
+        }
+        
+        // Validate email format
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(updatedData.email)) {
+            alert('Please enter a valid email address.');
+            return;
+        }
+        
+        // Validate phone format if provided
+        if (updatedData.phone) {
+            const phoneRegex = /^[\d\s\-\(\)]+$/;
+            if (!phoneRegex.test(updatedData.phone)) {
+                alert('Please enter a valid phone number.');
+                return;
+            }
+        }
+        
+        // Make API request to update customer
+        const response = await fetch(`/api/customers/${customerId}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            credentials: 'include',
+            body: JSON.stringify(updatedData)
+        });
+        
+        if (response.ok) {
+            const result = await response.json();
+            if (result.success) {
+                // Update local customer data
+                customerData = { ...customerData, ...updatedData };
+                
+                // Update localStorage
+                localStorage.setItem('currentCustomer', JSON.stringify(customerData));
+                
+                // Update welcome message
+                document.getElementById('welcomeMessage').textContent = `Welcome, ${customerData.firstName}!`;
+                
+                alert('Profile updated successfully!');
+                loadProfile(false); // Return to view mode
+            } else {
+                alert(result.message || 'Failed to update profile.');
+            }
+        } else {
+            alert('Failed to update profile. Please try again.');
+        }
+    } catch (error) {
+        console.error('Error saving profile:', error);
+        alert('An error occurred while saving. Please try again.');
+    }
+}
+
+// Make loadProfile available globally
+window.loadProfile = loadProfile;
+window.saveProfile = saveProfile;
 
 // Set up event listeners after DOM content loads
 document.addEventListener('DOMContentLoaded', function() {

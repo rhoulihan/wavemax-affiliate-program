@@ -247,7 +247,7 @@ exports.updateCustomerProfile = async (req, res) => {
     
     // Fields that can be updated
     const updatableFields = [
-      'firstName', 'lastName', 'phone', 'address', 'city', 'state', 'zipCode',
+      'firstName', 'lastName', 'email', 'phone', 'address', 'city', 'state', 'zipCode',
       'deliveryInstructions', 'serviceFrequency', 'preferredDay', 'preferredTime',
       'specialInstructions', 'cardholderName'
     ];
