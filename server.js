@@ -53,15 +53,17 @@ const mongoOptions = {
   tlsAllowInvalidCertificates: process.env.NODE_ENV !== 'production'
 };
 
-// Connect to MongoDB with consistent options
-mongoose.connect(process.env.MONGODB_URI, mongoOptions)
-  .then(() => {
-    logger.info('Connected to MongoDB');
-  })
-  .catch(err => {
-    logger.error('MongoDB connection error:', { error: err.message });
-    process.exit(1);
-  });
+// Connect to MongoDB with consistent options (skip in test environment)
+if (process.env.NODE_ENV !== 'test') {
+  mongoose.connect(process.env.MONGODB_URI, mongoOptions)
+    .then(() => {
+      logger.info('Connected to MongoDB');
+    })
+    .catch(err => {
+      logger.error('MongoDB connection error:', { error: err.message });
+      process.exit(1);
+    });
+}
 
 // Middleware
 // HTTPS redirect in production
@@ -325,10 +327,12 @@ app.use((err, req, res, next) => {
   });
 });
 
-// Start server
-app.listen(PORT, () => {
-  logger.info(`Server running on port ${PORT} in ${process.env.NODE_ENV || 'development'} mode`);
-});
+// Start server (skip in test environment)
+if (process.env.NODE_ENV !== 'test') {
+  app.listen(PORT, () => {
+    logger.info(`Server running on port ${PORT} in ${process.env.NODE_ENV || 'development'} mode`);
+  });
+}
 
 // Handle unhandled promise rejections
 process.on('unhandledRejection', (err) => {
