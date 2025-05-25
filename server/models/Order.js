@@ -4,8 +4,8 @@ const mongoose = require('mongoose');
 
 // Order Schema
 const orderSchema = new mongoose.Schema({
-  orderId: { 
-    type: String, 
+  orderId: {
+    type: String,
     default: () => 'ORD' + Math.floor(100000 + Math.random() * 900000),
     unique: true
   },
@@ -13,13 +13,13 @@ const orderSchema = new mongoose.Schema({
   affiliateId: { type: String, required: true, ref: 'Affiliate' },
   // Pickup information
   pickupDate: { type: Date, required: true },
-  pickupTime: { 
-    type: String, 
+  pickupTime: {
+    type: String,
     enum: ['morning', 'afternoon', 'evening'],
-    required: true 
+    required: true
   },
   specialPickupInstructions: String,
-  estimatedSize: { 
+  estimatedSize: {
     type: String,
     enum: ['small', 'medium', 'large'],
     required: true
@@ -27,15 +27,15 @@ const orderSchema = new mongoose.Schema({
   serviceNotes: String,
   // Delivery information
   deliveryDate: { type: Date, required: true },
-  deliveryTime: { 
-    type: String, 
+  deliveryTime: {
+    type: String,
     enum: ['morning', 'afternoon', 'evening'],
-    required: true 
+    required: true
   },
   specialDeliveryInstructions: String,
   // Order status
-  status: { 
-    type: String, 
+  status: {
+    type: String,
     enum: ['scheduled', 'picked_up', 'processing', 'ready_for_delivery', 'delivered', 'cancelled'],
     default: 'scheduled'
   },
@@ -49,8 +49,8 @@ const orderSchema = new mongoose.Schema({
   estimatedTotal: Number,
   actualTotal: Number,
   affiliateCommission: Number,
-  paymentStatus: { 
-    type: String, 
+  paymentStatus: {
+    type: String,
     enum: ['pending', 'processing', 'completed', 'refunded', 'failed'],
     default: 'pending'
   },
@@ -80,40 +80,40 @@ orderSchema.pre('save', function(next) {
     } else if (this.estimatedSize === 'large') {
       estimatedWeight = 35; // approximate for 31+ lbs
     }
-    
+
     // Calculate estimated total
     this.estimatedTotal = parseFloat((estimatedWeight * this.baseRate + this.deliveryFee).toFixed(2));
   }
-  
+
   // Calculate actual total if actual weight is available
   if (this.isModified('actualWeight') && this.actualWeight) {
     this.actualTotal = parseFloat((this.actualWeight * this.baseRate + this.deliveryFee).toFixed(2));
     // Calculate affiliate commission (10% of WDF + all delivery fee)
     this.affiliateCommission = parseFloat((this.actualWeight * this.baseRate * 0.1 + this.deliveryFee).toFixed(2));
   }
-  
+
   // Update status timestamps
   if (this.isModified('status')) {
     const now = new Date();
     switch (this.status) {
-      case 'picked_up':
-        this.pickedUpAt = now;
-        break;
-      case 'processing':
-        this.processedAt = now;
-        break;
-      case 'ready_for_delivery':
-        this.readyForDeliveryAt = now;
-        break;
-      case 'delivered':
-        this.deliveredAt = now;
-        break;
-      case 'cancelled':
-        this.cancelledAt = now;
-        break;
+    case 'picked_up':
+      this.pickedUpAt = now;
+      break;
+    case 'processing':
+      this.processedAt = now;
+      break;
+    case 'ready_for_delivery':
+      this.readyForDeliveryAt = now;
+      break;
+    case 'delivered':
+      this.deliveredAt = now;
+      break;
+    case 'cancelled':
+      this.cancelledAt = now;
+      break;
     }
   }
-  
+
   next();
 });
 

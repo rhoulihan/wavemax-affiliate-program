@@ -29,9 +29,9 @@ exports.createOrder = async (req, res) => {
         errors: errors.array()
       });
     }
-    
+
     console.log('Creating order with data:', req.body);
-    
+
     const {
       customerId,
       affiliateId,
@@ -44,11 +44,11 @@ exports.createOrder = async (req, res) => {
       deliveryTime,
       specialDeliveryInstructions
     } = req.body;
-    
+
     // Verify customer exists
     console.log('Looking for customer with ID:', customerId);
     const customer = await Customer.findOne({ customerId });
-    
+
     if (!customer) {
       console.log('Customer not found with ID:', customerId);
       return res.status(400).json({
@@ -57,11 +57,11 @@ exports.createOrder = async (req, res) => {
       });
     }
     console.log('Found customer:', customer.firstName, customer.lastName);
-    
+
     // Verify affiliate exists
     console.log('Looking for affiliate with ID:', affiliateId);
     const affiliate = await Affiliate.findOne({ affiliateId });
-    
+
     if (!affiliate) {
       console.log('Affiliate not found with ID:', affiliateId);
       return res.status(400).json({
@@ -70,20 +70,20 @@ exports.createOrder = async (req, res) => {
       });
     }
     console.log('Found affiliate:', affiliate.firstName, affiliate.lastName);
-    
+
     // Check authorization (admin, affiliate, or customer self)
-    const isAuthorized = 
-      req.user.role === 'admin' || 
-      req.user.customerId === customerId || 
+    const isAuthorized =
+      req.user.role === 'admin' ||
+      req.user.customerId === customerId ||
       (req.user.role === 'affiliate' && req.user.affiliateId === affiliateId);
-    
+
     if (!isAuthorized) {
       return res.status(403).json({
         success: false,
         message: 'Unauthorized'
       });
     }
-    
+
     // Create new order
     const newOrder = new Order({
       customerId,
@@ -99,9 +99,9 @@ exports.createOrder = async (req, res) => {
       deliveryFee: affiliate.deliveryFee,
       status: 'scheduled'
     });
-    
+
     await newOrder.save();
-    
+
     // Send notification emails (don't let email failures stop the order)
     try {
       await emailService.sendCustomerOrderConfirmationEmail(customer, newOrder, affiliate);
@@ -110,7 +110,7 @@ exports.createOrder = async (req, res) => {
       console.error('Failed to send notification emails:', emailError);
       // Continue with the response even if emails fail
     }
-    
+
     res.status(201).json({
       success: true,
       orderId: newOrder.orderId,
@@ -132,36 +132,36 @@ exports.createOrder = async (req, res) => {
 exports.getOrderDetails = async (req, res) => {
   try {
     const { orderId } = req.params;
-    
+
     // Find order
     const order = await Order.findOne({ orderId });
-    
+
     if (!order) {
       return res.status(404).json({
         success: false,
         message: 'Order not found'
       });
     }
-    
+
     // Check authorization (admin, associated affiliate, or customer)
-    const isAuthorized = 
-      req.user.role === 'admin' || 
+    const isAuthorized =
+      req.user.role === 'admin' ||
       (req.user.role === 'affiliate' && req.user.affiliateId === order.affiliateId) ||
       (req.user.role === 'customer' && req.user.customerId === order.customerId);
-    
+
     if (!isAuthorized) {
       return res.status(403).json({
         success: false,
         message: 'Unauthorized'
       });
     }
-    
+
     // Get customer details
     const customer = await Customer.findOne({ customerId: order.customerId });
-    
+
     // Get affiliate details
     const affiliate = await Affiliate.findOne({ affiliateId: order.affiliateId });
-    
+
     res.status(200).json({
       success: true,
       order: {
@@ -221,29 +221,29 @@ exports.updateOrderStatus = async (req, res) => {
   try {
     const { orderId } = req.params;
     const { status, actualWeight } = req.body;
-    
+
     // Find order
     const order = await Order.findOne({ orderId });
-    
+
     if (!order) {
       return res.status(404).json({
         success: false,
         message: 'Order not found'
       });
     }
-    
+
     // Check authorization (admin or associated affiliate)
-    const isAuthorized = 
-      req.user.role === 'admin' || 
+    const isAuthorized =
+      req.user.role === 'admin' ||
       (req.user.role === 'affiliate' && req.user.affiliateId === order.affiliateId);
-    
+
     if (!isAuthorized) {
       return res.status(403).json({
         success: false,
         message: 'Unauthorized'
       });
     }
-    
+
     // Check for valid status transition
     const validTransitions = {
       scheduled: ['picked_up', 'cancelled'],
@@ -253,38 +253,38 @@ exports.updateOrderStatus = async (req, res) => {
       delivered: [],
       cancelled: []
     };
-    
+
     if (!validTransitions[order.status].includes(status)) {
       return res.status(400).json({
         success: false,
         message: `Invalid status transition from ${order.status} to ${status}`
       });
     }
-    
+
     // Update order status
     order.status = status;
-    
+
     // If the order is being marked as processing, update actual weight
     if (status === 'processing' && actualWeight) {
       order.actualWeight = parseFloat(actualWeight);
     }
-    
+
     await order.save();
-    
+
     // Find customer and affiliate
     const customer = await Customer.findOne({ customerId: order.customerId });
     const affiliate = await Affiliate.findOne({ affiliateId: order.affiliateId });
-    
+
     // Send status update email to customer
     if (customer && ['picked_up', 'processing', 'ready_for_delivery', 'delivered'].includes(status)) {
       await emailService.sendOrderStatusUpdateEmail(customer, order, status);
-      
+
       // If order is delivered, also notify affiliate of commission
       if (status === 'delivered' && affiliate) {
         await emailService.sendAffiliateCommissionEmail(affiliate, order, customer);
       }
     }
-    
+
     res.status(200).json({
       success: true,
       orderId: order.orderId,
@@ -309,17 +309,17 @@ exports.updateOrderStatus = async (req, res) => {
 exports.cancelOrder = async (req, res) => {
   try {
     const { orderId } = req.params;
-    
+
     // Find order
     const order = await Order.findOne({ orderId });
-    
+
     if (!order) {
       return res.status(404).json({
         success: false,
         message: 'Order not found'
       });
     }
-    
+
     // Check if order can be cancelled
     if (!['scheduled', 'picked_up'].includes(order.status)) {
       return res.status(400).json({
@@ -327,38 +327,38 @@ exports.cancelOrder = async (req, res) => {
         message: `Orders in ${order.status} status cannot be cancelled`
       });
     }
-    
+
     // Check authorization (admin, associated affiliate, or customer)
-    const isAuthorized = 
-      req.user.role === 'admin' || 
+    const isAuthorized =
+      req.user.role === 'admin' ||
       (req.user.role === 'affiliate' && req.user.affiliateId === order.affiliateId) ||
       (req.user.role === 'customer' && req.user.customerId === order.customerId);
-    
+
     if (!isAuthorized) {
       return res.status(403).json({
         success: false,
         message: 'Unauthorized'
       });
     }
-    
+
     // Update order status
     order.status = 'cancelled';
     order.cancelledAt = new Date();
     await order.save();
-    
+
     // Find customer and affiliate
     const customer = await Customer.findOne({ customerId: order.customerId });
     const affiliate = await Affiliate.findOne({ affiliateId: order.affiliateId });
-    
+
     // Send cancellation emails
     if (customer) {
       await emailService.sendOrderCancellationEmail(customer, order);
     }
-    
+
     if (affiliate) {
       await emailService.sendAffiliateOrderCancellationEmail(affiliate, order, customer);
     }
-    
+
     res.status(200).json({
       success: true,
       message: 'Order cancelled successfully'

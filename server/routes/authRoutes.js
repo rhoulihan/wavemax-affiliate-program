@@ -10,8 +10,8 @@ const { body, validationResult } = require('express-validator');
 const validate = (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    return res.status(400).json({ 
-      success: false, 
+    return res.status(400).json({
+      success: false,
       message: 'Validation failed',
       errors: errors.array().map(err => err.msg)
     });
@@ -24,7 +24,7 @@ const validate = (req, res, next) => {
  * @desc    Login affiliate
  * @access  Public
  */
-router.post('/affiliate/login', 
+router.post('/affiliate/login',
   authLimiter,
   [
     body('username').trim().notEmpty().withMessage('Username is required')
@@ -40,7 +40,7 @@ router.post('/affiliate/login',
  * @desc    Login customer
  * @access  Public
  */
-router.post('/customer/login', 
+router.post('/customer/login',
   authLimiter,
   [
     body('username').trim().notEmpty().withMessage('Username is required')
@@ -56,7 +56,7 @@ router.post('/customer/login',
  * @desc    Request password reset
  * @access  Public
  */
-router.post('/forgot-password', 
+router.post('/forgot-password',
   authLimiter,
   [
     body('email').trim().isEmail().withMessage('Valid email is required'),
@@ -71,7 +71,7 @@ router.post('/forgot-password',
  * @desc    Reset password with token
  * @access  Public
  */
-router.post('/reset-password', 
+router.post('/reset-password',
   authLimiter,
   [
     body('token').trim().notEmpty().withMessage('Reset token is required')
@@ -91,7 +91,7 @@ router.post('/reset-password',
  */
 router.get('/verify', authenticate, authController.verifyToken);
 
-router.post('/refresh-token', 
+router.post('/refresh-token',
   [
     body('refreshToken').trim().notEmpty().withMessage('Refresh token is required')
       .isLength({ min: 80, max: 80 }).withMessage('Invalid refresh token format')

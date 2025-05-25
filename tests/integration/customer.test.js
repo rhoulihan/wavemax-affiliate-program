@@ -8,19 +8,10 @@ const encryptionUtil = require('../../server/utils/encryption');
 const jwt = require('jsonwebtoken');
 
 describe('Customer Integration Tests', () => {
-  let server;
   let testAffiliate;
   let testCustomer;
   let customerToken;
   let affiliateToken;
-
-  beforeAll(() => {
-    server = app.listen(0);
-  });
-
-  afterAll(async () => {
-    await server.close();
-  });
 
   beforeEach(async () => {
     // Clear database
@@ -85,7 +76,7 @@ describe('Customer Integration Tests', () => {
 
   describe('POST /api/customers/register', () => {
     it('should register a new customer', async () => {
-      const response = await request(server)
+      const response = await request(app)
         .post('/api/customers/register')
         .send({
           firstName: 'Bob',
@@ -122,7 +113,7 @@ describe('Customer Integration Tests', () => {
     });
 
     it('should fail with invalid affiliate ID', async () => {
-      const response = await request(server)
+      const response = await request(app)
         .post('/api/customers/register')
         .send({
           firstName: 'Bob',
@@ -147,7 +138,7 @@ describe('Customer Integration Tests', () => {
     });
 
     it('should fail with duplicate email', async () => {
-      const response = await request(server)
+      const response = await request(app)
         .post('/api/customers/register')
         .send({
           firstName: 'Bob',
@@ -172,7 +163,7 @@ describe('Customer Integration Tests', () => {
     });
 
     it('should fail with duplicate username', async () => {
-      const response = await request(server)
+      const response = await request(app)
         .post('/api/customers/register')
         .send({
           firstName: 'Bob',
@@ -199,7 +190,7 @@ describe('Customer Integration Tests', () => {
 
   describe('GET /api/customers/:customerId/profile', () => {
     it('should return customer profile for authenticated customer', async () => {
-      const response = await request(server)
+      const response = await request(app)
         .get('/api/customers/CUST123/profile')
         .set('Authorization', `Bearer ${customerToken}`);
 
@@ -227,7 +218,7 @@ describe('Customer Integration Tests', () => {
     });
 
     it('should return customer profile for affiliate', async () => {
-      const response = await request(server)
+      const response = await request(app)
         .get('/api/customers/CUST123/profile')
         .set('Authorization', `Bearer ${affiliateToken}`);
 
@@ -247,7 +238,7 @@ describe('Customer Integration Tests', () => {
         process.env.JWT_SECRET || 'test-secret'
       );
 
-      const response = await request(server)
+      const response = await request(app)
         .get('/api/customers/CUST123/profile')
         .set('Authorization', `Bearer ${otherCustomerToken}`);
 
@@ -259,7 +250,7 @@ describe('Customer Integration Tests', () => {
     });
 
     it('should fail without authentication', async () => {
-      const response = await request(server)
+      const response = await request(app)
         .get('/api/customers/CUST123/profile');
 
       expect(response.status).toBe(401);
@@ -268,7 +259,7 @@ describe('Customer Integration Tests', () => {
 
   describe('PUT /api/customers/:customerId/profile', () => {
     it('should update customer profile', async () => {
-      const response = await request(server)
+      const response = await request(app)
         .put('/api/customers/CUST123/profile')
         .set('Authorization', `Bearer ${customerToken}`)
         .send({
@@ -291,7 +282,7 @@ describe('Customer Integration Tests', () => {
     });
 
     it('should not update protected fields', async () => {
-      const response = await request(server)
+      const response = await request(app)
         .put('/api/customers/CUST123/profile')
         .set('Authorization', `Bearer ${customerToken}`)
         .send({
@@ -349,7 +340,7 @@ describe('Customer Integration Tests', () => {
     });
 
     it('should return customer orders with pagination', async () => {
-      const response = await request(server)
+      const response = await request(app)
         .get('/api/customers/CUST123/orders')
         .set('Authorization', `Bearer ${customerToken}`)
         .query({ page: 1, limit: 10 });
@@ -371,7 +362,7 @@ describe('Customer Integration Tests', () => {
     });
 
     it('should filter orders by status', async () => {
-      const response = await request(server)
+      const response = await request(app)
         .get('/api/customers/CUST123/orders')
         .set('Authorization', `Bearer ${customerToken}`)
         .query({ status: 'delivered' });
@@ -394,7 +385,7 @@ describe('Customer Integration Tests', () => {
     });
 
     it('should report lost bag', async () => {
-      const response = await request(server)
+      const response = await request(app)
         .post('/api/customers/report-lost-bag')
         .set('Authorization', `Bearer ${customerToken}`)
         .send({
@@ -413,7 +404,7 @@ describe('Customer Integration Tests', () => {
     });
 
     it('should fail for non-existent bag', async () => {
-      const response = await request(server)
+      const response = await request(app)
         .post('/api/customers/report-lost-bag')
         .set('Authorization', `Bearer ${customerToken}`)
         .send({
@@ -436,7 +427,7 @@ describe('Customer Integration Tests', () => {
       });
       await otherBag.save();
 
-      const response = await request(server)
+      const response = await request(app)
         .post('/api/customers/report-lost-bag')
         .set('Authorization', `Bearer ${customerToken}`)
         .send({
@@ -448,6 +439,259 @@ describe('Customer Integration Tests', () => {
         success: false,
         message: 'Unauthorized'
       });
+    });
+  });
+
+  describe('PUT /api/customers/:customerId/password', () => {
+    it('should update customer password', async () => {
+      const response = await request(app)
+        .put('/api/customers/CUST123/password')
+        .set('Authorization', `Bearer ${customerToken}`)
+        .send({
+          currentPassword: 'customerpass',
+          newPassword: 'newPassword123!'
+        });
+
+      expect(response.status).toBe(200);
+      expect(response.body).toMatchObject({
+        success: true,
+        message: 'Password updated successfully'
+      });
+
+      // Verify new password works
+      const loginResponse = await request(app)
+        .post('/api/auth/customer/login')
+        .send({
+          username: 'janesmith',
+          password: 'newPassword123!'
+        });
+
+      expect(loginResponse.status).toBe(200);
+      expect(loginResponse.body.success).toBe(true);
+    });
+
+    it('should fail with incorrect current password', async () => {
+      const response = await request(app)
+        .put('/api/customers/CUST123/password')
+        .set('Authorization', `Bearer ${customerToken}`)
+        .send({
+          currentPassword: 'wrongpassword',
+          newPassword: 'newPassword123!'
+        });
+
+      expect(response.status).toBe(401);
+      expect(response.body).toMatchObject({
+        success: false,
+        message: 'Current password is incorrect'
+      });
+    });
+
+    it('should fail with weak new password', async () => {
+      const response = await request(app)
+        .put('/api/customers/CUST123/password')
+        .set('Authorization', `Bearer ${customerToken}`)
+        .send({
+          currentPassword: 'customerpass',
+          newPassword: 'weak'
+        });
+
+      expect(response.status).toBe(400);
+      expect(response.body).toMatchObject({
+        success: false,
+        message: expect.stringContaining('Password')
+      });
+    });
+  });
+
+  describe('GET /api/customers/:customerId/bags', () => {
+    beforeEach(async () => {
+      const bags = [
+        {
+          bagBarcode: 'BAG001',
+          customerId: 'CUST123',
+          status: 'active',
+          issuedDate: new Date('2025-01-01')
+        },
+        {
+          bagBarcode: 'BAG002',
+          customerId: 'CUST123',
+          status: 'active',
+          issuedDate: new Date('2025-02-01')
+        },
+        {
+          bagBarcode: 'BAG003',
+          customerId: 'CUST123',
+          status: 'lost',
+          issuedDate: new Date('2025-03-01'),
+          reportedLostAt: new Date('2025-03-15')
+        }
+      ];
+
+      await Bag.insertMany(bags);
+    });
+
+    it('should return customer bags', async () => {
+      const response = await request(app)
+        .get('/api/customers/CUST123/bags')
+        .set('Authorization', `Bearer ${customerToken}`);
+
+      expect(response.status).toBe(200);
+      expect(response.body).toMatchObject({
+        success: true,
+        bags: expect.arrayContaining([
+          expect.objectContaining({ bagBarcode: 'BAG001', status: 'active' }),
+          expect.objectContaining({ bagBarcode: 'BAG002', status: 'active' }),
+          expect.objectContaining({ bagBarcode: 'BAG003', status: 'lost' })
+        ])
+      });
+      expect(response.body.bags).toHaveLength(3);
+    });
+
+    it('should filter bags by status', async () => {
+      const response = await request(app)
+        .get('/api/customers/CUST123/bags')
+        .set('Authorization', `Bearer ${customerToken}`)
+        .query({ status: 'active' });
+
+      expect(response.status).toBe(200);
+      expect(response.body.bags).toHaveLength(2);
+      expect(response.body.bags.every(bag => bag.status === 'active')).toBe(true);
+    });
+
+    it('should allow affiliate to view customer bags', async () => {
+      const response = await request(app)
+        .get('/api/customers/CUST123/bags')
+        .set('Authorization', `Bearer ${affiliateToken}`);
+
+      expect(response.status).toBe(200);
+      expect(response.body.success).toBe(true);
+      expect(response.body.bags).toHaveLength(3);
+    });
+  });
+
+  describe('GET /api/customers/:customerId/dashboard', () => {
+    beforeEach(async () => {
+      // Create test orders for dashboard statistics
+      const orders = [
+        {
+          orderId: 'ORD001',
+          customerId: 'CUST123',
+          affiliateId: 'AFF123',
+          pickupDate: new Date('2025-05-01'),
+          pickupTime: 'morning',
+          deliveryDate: new Date('2025-05-03'),
+          deliveryTime: 'afternoon',
+          status: 'delivered',
+          estimatedSize: 'medium',
+          actualWeight: 23.5,
+          baseRate: 1.89,
+          deliveryFee: 5.99,
+          actualTotal: 50.40,
+          deliveredAt: new Date('2025-05-03')
+        },
+        {
+          orderId: 'ORD002',
+          customerId: 'CUST123',
+          affiliateId: 'AFF123',
+          pickupDate: new Date('2025-05-10'),
+          pickupTime: 'afternoon',
+          deliveryDate: new Date('2025-05-12'),
+          deliveryTime: 'morning',
+          status: 'delivered',
+          estimatedSize: 'large',
+          actualWeight: 35.0,
+          baseRate: 1.89,
+          deliveryFee: 5.99,
+          actualTotal: 72.15,
+          deliveredAt: new Date('2025-05-12')
+        },
+        {
+          orderId: 'ORD003',
+          customerId: 'CUST123',
+          affiliateId: 'AFF123',
+          pickupDate: new Date('2025-05-20'),
+          pickupTime: 'morning',
+          deliveryDate: new Date('2025-05-22'),
+          deliveryTime: 'evening',
+          status: 'processing',
+          estimatedSize: 'small',
+          baseRate: 1.89,
+          deliveryFee: 5.99
+        }
+      ];
+
+      await Order.insertMany(orders);
+    });
+
+    it('should return customer dashboard statistics', async () => {
+      const response = await request(app)
+        .get('/api/customers/CUST123/dashboard')
+        .set('Authorization', `Bearer ${customerToken}`);
+
+      expect(response.status).toBe(200);
+      expect(response.body).toMatchObject({
+        success: true,
+        dashboard: {
+          statistics: {
+            totalOrders: 3,
+            completedOrders: 2,
+            activeOrders: 1,
+            totalSpent: 122.55,
+            averageOrderValue: 61.275,
+            lastOrderDate: expect.any(String)
+          },
+          recentOrders: expect.arrayContaining([
+            expect.objectContaining({ orderId: 'ORD003' }),
+            expect.objectContaining({ orderId: 'ORD002' }),
+            expect.objectContaining({ orderId: 'ORD001' })
+          ]),
+          upcomingPickups: expect.arrayContaining([
+            expect.objectContaining({ orderId: 'ORD003', status: 'processing' })
+          ]),
+          affiliate: {
+            affiliateId: 'AFF123',
+            name: 'John Doe',
+            phone: '555-123-4567',
+            deliveryFee: 5.99
+          }
+        }
+      });
+    });
+
+    it('should return monthly statistics', async () => {
+      const response = await request(app)
+        .get('/api/customers/CUST123/dashboard')
+        .set('Authorization', `Bearer ${customerToken}`)
+        .query({ includeMonthlyStats: true });
+
+      expect(response.status).toBe(200);
+      expect(response.body.dashboard).toHaveProperty('monthlyStatistics');
+      expect(response.body.dashboard.monthlyStatistics).toMatchObject({
+        currentMonth: {
+          orders: 3,
+          spent: 122.55
+        },
+        lastMonth: {
+          orders: 0,
+          spent: 0
+        },
+        monthlyAverage: {
+          orders: expect.any(Number),
+          spent: expect.any(Number)
+        }
+      });
+    });
+
+    it('should allow affiliate to view customer dashboard', async () => {
+      const response = await request(app)
+        .get('/api/customers/CUST123/dashboard')
+        .set('Authorization', `Bearer ${affiliateToken}`);
+
+      expect(response.status).toBe(200);
+      expect(response.body.success).toBe(true);
+      expect(response.body.dashboard).toHaveProperty('statistics');
+      // Affiliate should not see financial details
+      expect(response.body.dashboard.statistics).not.toHaveProperty('totalSpent');
     });
   });
 });

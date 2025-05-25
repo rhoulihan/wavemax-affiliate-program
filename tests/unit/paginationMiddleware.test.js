@@ -97,7 +97,7 @@ describe('Pagination Middleware', () => {
     testCases.forEach(({ page, limit, expectedSkip }) => {
       req.query = { page: String(page), limit: String(limit) };
       paginationMiddleware(req, res, next);
-      
+
       expect(req.pagination.skip).toBe(expectedSkip);
     });
   });

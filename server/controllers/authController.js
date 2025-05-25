@@ -16,7 +16,7 @@ const generateToken = (data, expiresIn = '1h') => {
   return jwt.sign(
     data,
     process.env.JWT_SECRET,
-    { 
+    {
       expiresIn,
       issuer: 'wavemax-api',
       audience: 'wavemax-client'
@@ -28,10 +28,10 @@ const generateRefreshToken = async (userId, userType, ip, replaceToken = null) =
   // Create a refresh token that expires in 30 days
   const expiryDate = new Date();
   expiryDate.setDate(expiryDate.getDate() + 30);
-  
+
   // Generate a secure random token
   const token = crypto.randomBytes(40).toString('hex');
-  
+
   // If replacing a token, mark the old one as revoked
   if (replaceToken) {
     const oldToken = await RefreshToken.findOne({ token: replaceToken });
@@ -42,7 +42,7 @@ const generateRefreshToken = async (userId, userType, ip, replaceToken = null) =
       await oldToken.save();
     }
   }
-  
+
   // Save new token to database
   const refreshToken = new RefreshToken({
     token,
@@ -51,11 +51,11 @@ const generateRefreshToken = async (userId, userType, ip, replaceToken = null) =
     expiryDate,
     createdByIp: ip
   });
-  
+
   await refreshToken.save();
-  
+
   return token;
-}
+};
 
 /**
  * Affiliate login controller
@@ -63,10 +63,10 @@ const generateRefreshToken = async (userId, userType, ip, replaceToken = null) =
 exports.affiliateLogin = async (req, res) => {
   try {
     const { username, password } = req.body;
-    
+
     // Find affiliate by username
     const affiliate = await Affiliate.findOne({ username });
-    
+
     if (!affiliate) {
       logLoginAttempt(false, 'affiliate', username, req, 'User not found');
       return res.status(401).json({
@@ -74,14 +74,14 @@ exports.affiliateLogin = async (req, res) => {
         message: 'Invalid username or password'
       });
     }
-    
+
     // Verify password
     const isPasswordValid = encryptionUtil.verifyPassword(
       password,
       affiliate.passwordSalt,
       affiliate.passwordHash
     );
-    
+
     if (!isPasswordValid) {
       logLoginAttempt(false, 'affiliate', username, req, 'Invalid password');
       return res.status(401).json({
@@ -89,18 +89,18 @@ exports.affiliateLogin = async (req, res) => {
         message: 'Invalid username or password'
       });
     }
-    
+
     // Update last login
     affiliate.lastLogin = new Date();
     await affiliate.save();
-    
+
     // Generate token
     const token = generateToken({
       id: affiliate._id,
       affiliateId: affiliate.affiliateId,
       role: 'affiliate'
     });
-    
+
     // Generate refresh token
     const refreshToken = await generateRefreshToken(
       affiliate._id,
@@ -134,28 +134,28 @@ exports.affiliateLogin = async (req, res) => {
 exports.refreshToken = async (req, res) => {
   try {
     const { refreshToken } = req.body;
-    
+
     if (!refreshToken) {
       return res.status(400).json({
         success: false,
         message: 'Refresh token is required'
       });
     }
-    
+
     // Find the token in the database
-    const storedToken = await RefreshToken.findOne({ 
+    const storedToken = await RefreshToken.findOne({
       token: refreshToken,
       revoked: null,
       expiryDate: { $gt: new Date() }
     });
-    
+
     if (!storedToken) {
       return res.status(401).json({
         success: false,
         message: 'Invalid or expired refresh token'
       });
     }
-    
+
     // Find the user based on the token
     let user;
     if (storedToken.userType === 'affiliate') {
@@ -163,14 +163,14 @@ exports.refreshToken = async (req, res) => {
     } else if (storedToken.userType === 'customer') {
       user = await Customer.findById(storedToken.userId);
     }
-    
+
     if (!user) {
       return res.status(401).json({
         success: false,
         message: 'User not found'
       });
     }
-    
+
     // Generate new access token
     const accessToken = generateToken({
       id: user._id,
@@ -178,7 +178,7 @@ exports.refreshToken = async (req, res) => {
       ...(storedToken.userType === 'customer' && { customerId: user.customerId }),
       role: storedToken.userType
     });
-    
+
     // Generate new refresh token with proper token rotation
     const newRefreshToken = await generateRefreshToken(
       user._id,
@@ -186,7 +186,7 @@ exports.refreshToken = async (req, res) => {
       req.ip,
       refreshToken // Pass the old token for proper rotation
     );
-    
+
     res.status(200).json({
       success: true,
       token: accessToken,
@@ -207,24 +207,24 @@ exports.refreshToken = async (req, res) => {
 exports.customerLogin = async (req, res) => {
   try {
     const { username, password } = req.body;
-    
+
     // Find customer by username
     const customer = await Customer.findOne({ username });
-    
+
     if (!customer) {
       return res.status(401).json({
         success: false,
         message: 'Invalid username or password'
       });
     }
-    
+
     // Verify password
     const isPasswordValid = encryptionUtil.verifyPassword(
       password,
       customer.passwordSalt,
       customer.passwordHash
     );
-    
+
     if (!isPasswordValid) {
       logLoginAttempt(false, 'affiliate', username, req, 'Invalid password');
       return res.status(401).json({
@@ -232,14 +232,14 @@ exports.customerLogin = async (req, res) => {
         message: 'Invalid username or password'
       });
     }
-    
+
     // Update last login
     customer.lastLogin = new Date();
     await customer.save();
-    
+
     // Find affiliate
     const affiliate = await Affiliate.findOne({ affiliateId: customer.affiliateId });
-    
+
     // Generate token
     const token = generateToken({
       id: customer._id,
@@ -247,7 +247,7 @@ exports.customerLogin = async (req, res) => {
       affiliateId: customer.affiliateId,
       role: 'customer'
     });
-    
+
     res.status(200).json({
       success: true,
       token,
@@ -279,14 +279,14 @@ exports.customerLogin = async (req, res) => {
 exports.forgotPassword = async (req, res) => {
   try {
     const { email, userType } = req.body;
-    
+
     if (!email || !userType) {
       return res.status(400).json({
         success: false,
         message: 'Email and user type are required'
       });
     }
-    
+
     // Find user based on user type
     let user;
     if (userType === 'affiliate') {
@@ -299,26 +299,26 @@ exports.forgotPassword = async (req, res) => {
         message: 'Invalid user type'
       });
     }
-    
+
     if (!user) {
       return res.status(404).json({
         success: false,
         message: 'No account found with that email address'
       });
     }
-    
+
     // Generate reset token
     const resetToken = crypto.randomBytes(32).toString('hex');
     const resetTokenExpiry = Date.now() + 3600000; // 1 hour
-    
+
     // Store token and expiry (in a real implementation, these would be fields on the user models)
     user.resetToken = resetToken;
     user.resetTokenExpiry = resetTokenExpiry;
     await user.save();
-    
+
     // Send password reset email
     const resetUrl = `${process.env.FRONTEND_URL}/reset-password?token=${resetToken}&type=${userType}`;
-    
+
     // Use the emailService to send the reset email
     if (userType === 'affiliate') {
       // Send affiliate password reset email
@@ -327,7 +327,7 @@ exports.forgotPassword = async (req, res) => {
       // Send customer password reset email
       await emailService.sendCustomerPasswordResetEmail(user, resetUrl);
     }
-    
+
     res.status(200).json({
       success: true,
       message: 'Password reset email sent'
@@ -347,23 +347,23 @@ exports.forgotPassword = async (req, res) => {
 exports.resetPassword = async (req, res) => {
   try {
     const { token, userType, password } = req.body;
-    
+
     if (!token || !userType || !password) {
       return res.status(400).json({
         success: false,
         message: 'Token, user type, and new password are required'
       });
     }
-    
+
     // Find user based on reset token
     let user;
     if (userType === 'affiliate') {
-      user = await Affiliate.findOne({ 
+      user = await Affiliate.findOne({
         resetToken: token,
         resetTokenExpiry: { $gt: Date.now() }
       });
     } else if (userType === 'customer') {
-      user = await Customer.findOne({ 
+      user = await Customer.findOne({
         resetToken: token,
         resetTokenExpiry: { $gt: Date.now() }
       });
@@ -373,27 +373,27 @@ exports.resetPassword = async (req, res) => {
         message: 'Invalid user type'
       });
     }
-    
+
     if (!user) {
       return res.status(400).json({
         success: false,
         message: 'Invalid or expired token'
       });
     }
-    
+
     // Hash new password
     const { salt, hash } = encryptionUtil.hashPassword(password);
-    
+
     // Update password
     user.passwordSalt = salt;
     user.passwordHash = hash;
-    
+
     // Clear reset token fields
     user.resetToken = undefined;
     user.resetTokenExpiry = undefined;
-    
+
     await user.save();
-    
+
     res.status(200).json({
       success: true,
       message: 'Password has been reset successfully'
@@ -414,7 +414,7 @@ exports.verifyToken = async (req, res) => {
   try {
     // The auth middleware has already validated the token
     // and added the user data to req.user
-    
+
     // Return user data from token
     res.status(200).json({
       success: true,

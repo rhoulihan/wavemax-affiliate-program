@@ -4,8 +4,8 @@ const mongoose = require('mongoose');
 
 // Transaction Schema (for tracking affiliate payments)
 const transactionSchema = new mongoose.Schema({
-  transactionId: { 
-    type: String, 
+  transactionId: {
+    type: String,
     default: () => 'TRX' + Math.floor(100000 + Math.random() * 900000),
     unique: true
   },
@@ -13,8 +13,8 @@ const transactionSchema = new mongoose.Schema({
   amount: { type: Number, required: true },
   description: String,
   orders: [{ type: String, ref: 'Order' }],
-  status: { 
-    type: String, 
+  status: {
+    type: String,
     enum: ['pending', 'processing', 'completed', 'failed'],
     default: 'pending'
   },

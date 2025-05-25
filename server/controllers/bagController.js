@@ -36,7 +36,7 @@ exports.createBag = async (req, res) => {
 
     // Generate unique barcode
     const barcode = 'WM-' + crypto.randomBytes(4).toString('hex').toUpperCase();
-    
+
     // Create new bag
     const newBag = new Bag({
       bagId: 'BAG' + Math.floor(100000 + Math.random() * 900000),
@@ -275,9 +275,9 @@ exports.reportBag = async (req, res) => {
     const { status, reportReason } = req.body;
 
     if (!status || !['lost', 'damaged'].includes(status)) {
-      return res.status(400).json({ 
-        success: false, 
-        message: 'Status must be either "lost" or "damaged"' 
+      return res.status(400).json({
+        success: false,
+        message: 'Status must be either "lost" or "damaged"'
       });
     }
 
@@ -347,7 +347,7 @@ exports.replaceBag = async (req, res) => {
 
     // Generate new barcode
     const barcode = 'WM-' + crypto.randomBytes(4).toString('hex').toUpperCase();
-    
+
     // Create new replacement bag
     const newBag = new Bag({
       bagId: 'BAG' + Math.floor(100000 + Math.random() * 900000),

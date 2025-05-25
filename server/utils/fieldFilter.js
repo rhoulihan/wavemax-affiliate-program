@@ -9,14 +9,14 @@
  */
 const filterFields = (obj, allowedFields) => {
   if (!obj || typeof obj !== 'object') return obj;
-  
+
   const filtered = {};
   allowedFields.forEach(field => {
     if (obj.hasOwnProperty(field)) {
       filtered[field] = obj[field];
     }
   });
-  
+
   return filtered;
 };
 
@@ -36,56 +36,56 @@ const fieldDefinitions = {
   // Affiliate fields visible to different roles
   affiliate: {
     public: ['affiliateId', 'firstName', 'lastName', 'businessName', 'deliveryFee'],
-    self: ['affiliateId', 'firstName', 'lastName', 'email', 'phone', 'businessName', 
-           'deliveryFee', 'commissionRate', 'isActive', 'registrationDate', 'lastLogin'],
-    admin: ['_id', 'affiliateId', 'firstName', 'lastName', 'email', 'phone', 
-            'businessName', 'address', 'city', 'state', 'zipCode', 'deliveryFee', 
-            'commissionRate', 'isActive', 'registrationDate', 'lastLogin', 
-            'totalEarnings', 'totalCustomers', 'totalOrders']
+    self: ['affiliateId', 'firstName', 'lastName', 'email', 'phone', 'businessName',
+      'deliveryFee', 'commissionRate', 'isActive', 'registrationDate', 'lastLogin'],
+    admin: ['_id', 'affiliateId', 'firstName', 'lastName', 'email', 'phone',
+      'businessName', 'address', 'city', 'state', 'zipCode', 'deliveryFee',
+      'commissionRate', 'isActive', 'registrationDate', 'lastLogin',
+      'totalEarnings', 'totalCustomers', 'totalOrders']
   },
-  
+
   // Customer fields visible to different roles
   customer: {
     public: ['customerId', 'firstName', 'lastName'],
-    self: ['customerId', 'firstName', 'lastName', 'email', 'phone', 'address', 
-           'city', 'state', 'zipCode', 'deliveryInstructions', 'serviceFrequency', 
-           'preferredDay', 'preferredTime', 'specialInstructions', 'lastFourDigits', 
-           'savePaymentInfo', 'isActive', 'registrationDate', 'lastLogin'],
-    affiliate: ['customerId', 'firstName', 'lastName', 'email', 'phone', 'address', 
-                'city', 'state', 'zipCode', 'serviceFrequency', 'preferredDay', 
-                'preferredTime', 'isActive', 'registrationDate'],
-    admin: ['_id', 'customerId', 'affiliateId', 'firstName', 'lastName', 'email', 
-            'phone', 'address', 'city', 'state', 'zipCode', 'deliveryInstructions', 
-            'serviceFrequency', 'preferredDay', 'preferredTime', 'specialInstructions', 
-            'username', 'lastFourDigits', 'billingZip', 'savePaymentInfo', 'isActive', 
-            'registrationDate', 'lastLogin']
+    self: ['customerId', 'firstName', 'lastName', 'email', 'phone', 'address',
+      'city', 'state', 'zipCode', 'deliveryInstructions', 'serviceFrequency',
+      'preferredDay', 'preferredTime', 'specialInstructions', 'lastFourDigits',
+      'savePaymentInfo', 'isActive', 'registrationDate', 'lastLogin'],
+    affiliate: ['customerId', 'firstName', 'lastName', 'email', 'phone', 'address',
+      'city', 'state', 'zipCode', 'serviceFrequency', 'preferredDay',
+      'preferredTime', 'isActive', 'registrationDate'],
+    admin: ['_id', 'customerId', 'affiliateId', 'firstName', 'lastName', 'email',
+      'phone', 'address', 'city', 'state', 'zipCode', 'deliveryInstructions',
+      'serviceFrequency', 'preferredDay', 'preferredTime', 'specialInstructions',
+      'username', 'lastFourDigits', 'billingZip', 'savePaymentInfo', 'isActive',
+      'registrationDate', 'lastLogin']
   },
-  
+
   // Order fields visible to different roles
   order: {
-    customer: ['orderId', 'pickupDate', 'pickupTime', 'deliveryDate', 'deliveryTime', 
-               'status', 'estimatedSize', 'actualWeight', 'estimatedTotal', 'actualTotal', 
-               'deliveryFee', 'paymentStatus', 'createdAt'],
-    affiliate: ['orderId', 'customerId', 'pickupDate', 'pickupTime', 'deliveryDate', 
-                'deliveryTime', 'status', 'estimatedSize', 'actualWeight', 'baseRate', 
-                'deliveryFee', 'estimatedTotal', 'actualTotal', 'affiliateCommission', 
-                'paymentStatus', 'specialPickupInstructions', 'specialDeliveryInstructions', 
-                'serviceNotes', 'washInstructions', 'createdAt', 'pickedUpAt', 
-                'processedAt', 'readyForDeliveryAt', 'deliveredAt'],
-    admin: ['_id', 'orderId', 'customerId', 'affiliateId', 'pickupDate', 'pickupTime', 
-            'deliveryDate', 'deliveryTime', 'status', 'estimatedSize', 'actualWeight', 
-            'baseRate', 'deliveryFee', 'estimatedTotal', 'actualTotal', 'affiliateCommission', 
-            'paymentStatus', 'specialPickupInstructions', 'specialDeliveryInstructions', 
-            'serviceNotes', 'washInstructions', 'bagIDs', 'createdAt', 'pickedUpAt', 
-            'processedAt', 'readyForDeliveryAt', 'deliveredAt', 'cancelledAt']
+    customer: ['orderId', 'pickupDate', 'pickupTime', 'deliveryDate', 'deliveryTime',
+      'status', 'estimatedSize', 'actualWeight', 'estimatedTotal', 'actualTotal',
+      'deliveryFee', 'paymentStatus', 'createdAt'],
+    affiliate: ['orderId', 'customerId', 'pickupDate', 'pickupTime', 'deliveryDate',
+      'deliveryTime', 'status', 'estimatedSize', 'actualWeight', 'baseRate',
+      'deliveryFee', 'estimatedTotal', 'actualTotal', 'affiliateCommission',
+      'paymentStatus', 'specialPickupInstructions', 'specialDeliveryInstructions',
+      'serviceNotes', 'washInstructions', 'createdAt', 'pickedUpAt',
+      'processedAt', 'readyForDeliveryAt', 'deliveredAt'],
+    admin: ['_id', 'orderId', 'customerId', 'affiliateId', 'pickupDate', 'pickupTime',
+      'deliveryDate', 'deliveryTime', 'status', 'estimatedSize', 'actualWeight',
+      'baseRate', 'deliveryFee', 'estimatedTotal', 'actualTotal', 'affiliateCommission',
+      'paymentStatus', 'specialPickupInstructions', 'specialDeliveryInstructions',
+      'serviceNotes', 'washInstructions', 'bagIDs', 'createdAt', 'pickedUpAt',
+      'processedAt', 'readyForDeliveryAt', 'deliveredAt', 'cancelledAt']
   },
-  
+
   // Bag fields visible to different roles
   bag: {
     customer: ['bagId', 'barcode', 'status'],
     affiliate: ['bagId', 'barcode', 'customerId', 'status', 'issueDate', 'lastUsedDate'],
-    admin: ['_id', 'bagId', 'barcode', 'customerId', 'affiliateId', 'status', 
-            'issueDate', 'lastUsedDate', 'lostReportedDate', 'notes']
+    admin: ['_id', 'bagId', 'barcode', 'customerId', 'affiliateId', 'status',
+      'issueDate', 'lastUsedDate', 'lostReportedDate', 'notes']
   }
 };
 
@@ -99,9 +99,9 @@ const fieldDefinitions = {
  */
 const getFilteredData = (dataType, data, userRole, context = {}) => {
   if (!data || !fieldDefinitions[dataType]) return data;
-  
+
   let fields;
-  
+
   // Determine which fields to use based on role and context
   if (userRole === 'admin') {
     fields = fieldDefinitions[dataType].admin || fieldDefinitions[dataType].public;
@@ -117,12 +117,12 @@ const getFilteredData = (dataType, data, userRole, context = {}) => {
   } else {
     fields = fieldDefinitions[dataType].public || [];
   }
-  
+
   // Handle arrays
   if (Array.isArray(data)) {
     return filterArray(data, fields);
   }
-  
+
   // Handle single objects
   return filterFields(data, fields);
 };
@@ -133,28 +133,28 @@ const getFilteredData = (dataType, data, userRole, context = {}) => {
 const responseFilter = (req, res, next) => {
   // Store the original json method
   const originalJson = res.json;
-  
+
   // Override the json method
   res.json = function(data) {
     // If the response has a specific data type marker, filter it
     if (data && data._filterType) {
       const filterType = data._filterType;
       delete data._filterType;
-      
+
       // Get user role from request
       const userRole = req.user ? req.user.role : 'public';
       const userId = req.user ? (req.user.affiliateId || req.user.customerId || req.user.id) : null;
-      
+
       // Filter the response data
       if (data.data) {
         data.data = getFilteredData(filterType, data.data, userRole, { userId });
       }
     }
-    
+
     // Call the original json method
     return originalJson.call(this, data);
   };
-  
+
   next();
 };
 

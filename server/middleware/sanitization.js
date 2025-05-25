@@ -37,17 +37,17 @@ const sanitizeRequest = (req, res, next) => {
   if (req.body) {
     req.body = sanitizeInput(req.body);
   }
-  
+
   // Sanitize query parameters
   if (req.query) {
     req.query = sanitizeInput(req.query);
   }
-  
+
   // Sanitize URL parameters
   if (req.params) {
     req.params = sanitizeInput(req.params);
   }
-  
+
   next();
 };
 
@@ -56,10 +56,10 @@ const sanitizeRequest = (req, res, next) => {
  */
 const sanitizeEmail = (email) => {
   if (!email || typeof email !== 'string') return '';
-  
+
   // Remove any HTML and trim whitespace
   email = xss(email).trim().toLowerCase();
-  
+
   // Basic email validation
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return emailRegex.test(email) ? email : '';
@@ -70,7 +70,7 @@ const sanitizeEmail = (email) => {
  */
 const sanitizePhone = (phone) => {
   if (!phone || typeof phone !== 'string') return '';
-  
+
   // Remove everything except digits, +, -, (, ), and spaces
   return phone.replace(/[^0-9+\-() ]/g, '').trim();
 };
@@ -80,7 +80,7 @@ const sanitizePhone = (phone) => {
  */
 const sanitizeId = (id) => {
   if (!id || typeof id !== 'string') return '';
-  
+
   // Only allow alphanumeric characters and hyphens
   return id.replace(/[^a-zA-Z0-9-]/g, '').trim();
 };
@@ -90,7 +90,7 @@ const sanitizeId = (id) => {
  */
 const sanitizePath = (path) => {
   if (!path || typeof path !== 'string') return '';
-  
+
   // Remove any directory traversal attempts
   return path.replace(/\.\./g, '').replace(/[^a-zA-Z0-9._\-\/]/g, '');
 };

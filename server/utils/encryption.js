@@ -9,25 +9,25 @@ const crypto = require('crypto');
  */
 exports.encrypt = (text) => {
   if (!text) return null;
-  
+
   try {
     // Generate a random initialization vector
     const iv = crypto.randomBytes(16);
-    
+
     // Create cipher using AES-256-GCM with the encryption key
     const cipher = crypto.createCipheriv(
-      'aes-256-gcm', 
-      Buffer.from(process.env.ENCRYPTION_KEY, 'hex'), 
+      'aes-256-gcm',
+      Buffer.from(process.env.ENCRYPTION_KEY, 'hex'),
       iv
     );
-    
+
     // Encrypt the data
     let encrypted = cipher.update(text, 'utf8', 'hex');
     encrypted += cipher.final('hex');
-    
+
     // Get the authentication tag
     const authTag = cipher.getAuthTag().toString('hex');
-    
+
     return {
       iv: iv.toString('hex'),
       encryptedData: encrypted,
@@ -46,7 +46,7 @@ exports.encrypt = (text) => {
  */
 exports.decrypt = (encryptedObj) => {
   if (!encryptedObj) return null;
-  
+
   try {
     // Create decipher using AES-256-GCM with the encryption key
     const decipher = crypto.createDecipheriv(
@@ -54,14 +54,14 @@ exports.decrypt = (encryptedObj) => {
       Buffer.from(process.env.ENCRYPTION_KEY, 'hex'),
       Buffer.from(encryptedObj.iv, 'hex')
     );
-    
+
     // Set the authentication tag
     decipher.setAuthTag(Buffer.from(encryptedObj.authTag, 'hex'));
-    
+
     // Decrypt the data
     let decrypted = decipher.update(encryptedObj.encryptedData, 'hex', 'utf8');
     decrypted += decipher.final('utf8');
-    
+
     return decrypted;
   } catch (error) {
     console.error('Decryption error:', error);
@@ -78,16 +78,16 @@ exports.hashPassword = (password) => {
   try {
     // Generate a random salt
     const salt = crypto.randomBytes(16).toString('hex');
-    
+
     // Hash the password with PBKDF2
     const hash = crypto.pbkdf2Sync(
-      password, 
-      salt, 
+      password,
+      salt,
       100000, // 100,000 iterations for better security
       64,    // 64 bytes (512 bits)
       'sha512'
     ).toString('hex');
-    
+
     return {
       salt,
       hash
@@ -109,13 +109,13 @@ exports.verifyPassword = (password, storedSalt, storedHash) => {
   try {
     // Hash the provided password with the stored salt
     const hash = crypto.pbkdf2Sync(
-      password, 
-      storedSalt, 
+      password,
+      storedSalt,
       100000, // Must match the iteration count used in hashPassword
       64,    // Must match the byte length used in hashPassword
       'sha512'
     ).toString('hex');
-    
+
     // Compare the generated hash with the stored hash
     return hash === storedHash;
   } catch (error) {
@@ -141,7 +141,7 @@ exports.generateBarcode = () => {
   // Generate a unique ID with a prefix
   const prefix = 'WM-';
   const randomPart = crypto.randomBytes(4).toString('hex').toUpperCase();
-  
+
   return `${prefix}${randomPart}`;
 };
 
