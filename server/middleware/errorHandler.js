@@ -3,6 +3,16 @@ const logger = require('../utils/logger');
 
 // Central error handling middleware
 const errorHandler = (err, req, res, next) => {
+  // Console log for immediate debugging
+  console.error('=== API ERROR ===');
+  console.error('Error message:', err.message);
+  console.error('Error stack:', err.stack);
+  console.error('Request path:', req.path);
+  console.error('Request method:', req.method);
+  console.error('Error type:', err.name);
+  console.error('Error code:', err.code);
+  console.error('================');
+  
   // Log the error with additional context
   logger.error('API Error:', { 
     error: err.message,
