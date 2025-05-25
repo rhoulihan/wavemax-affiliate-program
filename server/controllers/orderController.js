@@ -18,6 +18,20 @@ const jwt = require('jsonwebtoken');
  */
 exports.createOrder = async (req, res) => {
   try {
+    // Check for validation errors first
+    const { validationResult } = require('express-validator');
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      console.log('Validation errors:', errors.array());
+      return res.status(400).json({
+        success: false,
+        message: 'Validation failed',
+        errors: errors.array()
+      });
+    }
+    
+    console.log('Creating order with data:', req.body);
+    
     const {
       customerId,
       affiliateId,
@@ -32,24 +46,30 @@ exports.createOrder = async (req, res) => {
     } = req.body;
     
     // Verify customer exists
+    console.log('Looking for customer with ID:', customerId);
     const customer = await Customer.findOne({ customerId });
     
     if (!customer) {
+      console.log('Customer not found with ID:', customerId);
       return res.status(400).json({
         success: false,
         message: 'Invalid customer ID'
       });
     }
+    console.log('Found customer:', customer.firstName, customer.lastName);
     
     // Verify affiliate exists
+    console.log('Looking for affiliate with ID:', affiliateId);
     const affiliate = await Affiliate.findOne({ affiliateId });
     
     if (!affiliate) {
+      console.log('Affiliate not found with ID:', affiliateId);
       return res.status(400).json({
         success: false,
         message: 'Invalid affiliate ID'
       });
     }
+    console.log('Found affiliate:', affiliate.firstName, affiliate.lastName);
     
     // Check authorization (admin, affiliate, or customer self)
     const isAuthorized = 
