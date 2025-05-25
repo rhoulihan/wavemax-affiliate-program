@@ -89,11 +89,11 @@ exports.registerCustomer = async (req, res) => {
       username,
       passwordSalt: salt,
       passwordHash: hash,
-      cardholderName,
+      cardholderName: savePaymentInfo ? cardholderName : null,
       // Only store last 4 digits of card
-      lastFourDigits: cardNumber.slice(-4),
-      expiryDate,
-      billingZip,
+      lastFourDigits: cardNumber && savePaymentInfo ? cardNumber.slice(-4) : null,
+      expiryDate: savePaymentInfo ? expiryDate : null,
+      billingZip: savePaymentInfo ? billingZip : null,
       savePaymentInfo: !!savePaymentInfo
     });
     
@@ -623,6 +623,59 @@ exports.reportLostBag = async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'An error occurred while reporting lost bag'
+    });
+  }
+};
+
+/**
+ * Update customer payment information
+ */
+exports.updatePaymentInfo = async (req, res) => {
+  try {
+    const { customerId } = req.params;
+    const { cardholderName, cardNumber, expiryDate, billingZip } = req.body;
+    
+    // Verify customer exists
+    const customer = await Customer.findOne({ customerId });
+    
+    if (!customer) {
+      return res.status(404).json({
+        success: false,
+        message: 'Customer not found'
+      });
+    }
+    
+    // Check authorization (only self or admin)
+    const isAuthorized = 
+      req.user.role === 'admin' || 
+      req.user.customerId === customerId;
+    
+    if (!isAuthorized) {
+      return res.status(403).json({
+        success: false,
+        message: 'Unauthorized'
+      });
+    }
+    
+    // Update payment information
+    customer.cardholderName = cardholderName;
+    customer.lastFourDigits = cardNumber.slice(-4);
+    customer.expiryDate = expiryDate;
+    customer.billingZip = billingZip;
+    customer.savePaymentInfo = true;
+    
+    await customer.save();
+    
+    res.status(200).json({
+      success: true,
+      message: 'Payment information updated successfully',
+      lastFourDigits: customer.lastFourDigits
+    });
+  } catch (error) {
+    console.error('Update payment info error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'An error occurred while updating payment information'
     });
   }
 };
