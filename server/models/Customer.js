@@ -5,8 +5,8 @@ const encryptionUtil = require('../utils/encryption');
 
 // Customer Schema
 const customerSchema = new mongoose.Schema({
-  customerId: { 
-    type: String, 
+  customerId: {
+    type: String,
     default: () => 'CUST' + Math.floor(100000 + Math.random() * 900000),
     unique: true
   },
@@ -20,7 +20,7 @@ const customerSchema = new mongoose.Schema({
   state: { type: String, required: true },
   zipCode: { type: String, required: true },
   deliveryInstructions: String,
-  serviceFrequency: { 
+  serviceFrequency: {
     type: String,
     enum: ['weekly', 'biweekly', 'monthly', 'onDemand'],
     required: true
@@ -55,11 +55,11 @@ customerSchema.pre('save', function(next) {
   if (this.isModified('cardholderName') && this.cardholderName && typeof this.cardholderName === 'string') {
     this.cardholderName = encryptionUtil.encrypt(this.cardholderName);
   }
-  
+
   if (this.isModified('expiryDate') && this.expiryDate && typeof this.expiryDate === 'string') {
     this.expiryDate = encryptionUtil.encrypt(this.expiryDate);
   }
-  
+
   next();
 });
 

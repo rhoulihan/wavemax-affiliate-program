@@ -79,15 +79,15 @@ if (process.env.NODE_ENV === 'production') {
 app.use(helmet({
   contentSecurityPolicy: {
     directives: {
-      defaultSrc: ["'self'"],
-      scriptSrc: ["'self'", "https://cdnjs.cloudflare.com"],
-      styleSrc: ["'self'", "https://cdnjs.cloudflare.com", "'unsafe-inline'"], // unsafe-inline needed for Tailwind
-      imgSrc: ["'self'", "data:", "https://www.wavemax.promo"],
-      connectSrc: ["'self'"],
-      fontSrc: ["'self'", "https://cdnjs.cloudflare.com"],
-      objectSrc: ["'none'"],
-      mediaSrc: ["'self'"],
-      frameSrc: ["'none'"]
+      defaultSrc: ['\'self\''],
+      scriptSrc: ['\'self\'', 'https://cdnjs.cloudflare.com'],
+      styleSrc: ['\'self\'', 'https://cdnjs.cloudflare.com', '\'unsafe-inline\''], // unsafe-inline needed for Tailwind
+      imgSrc: ['\'self\'', 'data:', 'https://www.wavemax.promo'],
+      connectSrc: ['\'self\''],
+      fontSrc: ['\'self\'', 'https://cdnjs.cloudflare.com'],
+      objectSrc: ['\'none\''],
+      mediaSrc: ['\'self\''],
+      frameSrc: ['\'none\'']
     }
   },
   hsts: {
@@ -104,13 +104,13 @@ app.use(helmet({
 // CORS setup
 const corsOptions = {
   origin: function (origin, callback) {
-    const allowedOrigins = process.env.CORS_ORIGIN 
-      ? process.env.CORS_ORIGIN.split(',').map(o => o.trim()) 
+    const allowedOrigins = process.env.CORS_ORIGIN
+      ? process.env.CORS_ORIGIN.split(',').map(o => o.trim())
       : ['http://localhost:3000'];
-    
+
     // Allow requests with no origin (like mobile apps or Postman)
     if (!origin) return callback(null, true);
-    
+
     if (allowedOrigins.indexOf(origin) !== -1) {
       callback(null, true);
     } else {
@@ -172,7 +172,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // Set up CSRF protection using sessions instead of cookies
 const csrf = require('csurf');
-const csrfProtection = csrf({ 
+const csrfProtection = csrf({
   cookie: false // Use req.session instead of cookies
 });
 
@@ -209,12 +209,12 @@ const conditionalCsrf = (req, res, next) => {
     }
     return req.path === path;
   });
-  
+
   // Skip CSRF for excluded paths and GET requests
   if (isExcluded || req.method === 'GET' || req.method === 'HEAD' || req.method === 'OPTIONS') {
     return next();
   }
-  
+
   // Apply CSRF protection for all other routes
   csrfProtection(req, res, next);
 };
@@ -228,7 +228,7 @@ app.get('/api/csrf-token', (req, res, next) => {
   if (!req.session) {
     return res.status(500).json({ error: 'Session not initialized' });
   }
-  
+
   // Apply CSRF protection and generate token
   csrfProtection(req, res, (err) => {
     if (err) {
@@ -244,15 +244,15 @@ const apiVersioning = (req, res, next) => {
   // Extract version from header or URL
   const versionFromHeader = req.headers['api-version'];
   const versionFromUrl = req.path.match(/^\/api\/(v\d+)\//)?.[1];
-  
+
   // Use version from URL first, then header, then default
   req.apiVersion = versionFromUrl || versionFromHeader || API_VERSION;
-  
+
   // Rewrite URL if version is in header but not in URL
   if (!versionFromUrl && req.path.startsWith('/api/')) {
     req.url = req.path.replace('/api/', `/api/${req.apiVersion}/`);
   }
-  
+
   next();
 };
 
@@ -312,10 +312,10 @@ app.use(errorHandler);
 // Error handling middleware
 app.use((err, req, res, next) => {
   console.error(err.stack);
-  
+
   const statusCode = err.statusCode || 500;
   const message = err.message || 'Internal Server Error';
-  
+
   res.status(statusCode).json({
     success: false,
     error: {

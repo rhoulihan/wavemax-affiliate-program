@@ -33,7 +33,7 @@ const createTransport = () => {
       secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
       region: process.env.AWS_REGION
     });
-    
+
     // Create SES transporter
     return nodemailer.createTransport({
       SES: new AWS.SES({ apiVersion: '2010-12-01' })
@@ -98,7 +98,7 @@ const fillTemplate = (template, data) => {
     // First try the exact placeholder (uppercase), then try lowercase
     const upperKey = placeholder;
     const lowerKey = placeholder.toLowerCase();
-    
+
     if (data[upperKey] !== undefined) {
       return data[upperKey];
     } else if (data[lowerKey] !== undefined) {
@@ -115,20 +115,20 @@ const fillTemplate = (template, data) => {
 const sendEmail = async (to, subject, html) => {
   try {
     const transporter = createTransport();
-    
-    const from = process.env.EMAIL_PROVIDER === 'ses' 
+
+    const from = process.env.EMAIL_PROVIDER === 'ses'
       ? process.env.SES_FROM_EMAIL
       : process.env.EMAIL_PROVIDER === 'console'
-      ? process.env.EMAIL_FROM || 'noreply@wavemax.promo'
-      : `"WaveMAX Laundry" <${process.env.EMAIL_USER}>`;
-    
+        ? process.env.EMAIL_FROM || 'noreply@wavemax.promo'
+        : `"WaveMAX Laundry" <${process.env.EMAIL_USER}>`;
+
     const info = await transporter.sendMail({
       from,
       to,
       subject,
       html
     });
-    
+
     console.log(`Email sent: ${info.messageId}`);
     return info;
   } catch (error) {
@@ -148,7 +148,7 @@ exports.sendAffiliateWelcomeEmail = async (affiliate) => {
   try {
     const template = await loadTemplate('affiliate-welcome');
     const registrationUrl = `${process.env.FRONTEND_URL || 'https://wavemax.promo'}/customer-register.html?affiliate=${affiliate.affiliateId}`;
-    
+
     const data = {
       first_name: affiliate.firstName,
       last_name: affiliate.lastName,
@@ -157,9 +157,9 @@ exports.sendAffiliateWelcomeEmail = async (affiliate) => {
       login_url: `${process.env.FRONTEND_URL || 'https://wavemax.promo'}/affiliate-login.html`,
       current_year: new Date().getFullYear()
     };
-    
+
     const html = fillTemplate(template, data);
-    
+
     await sendEmail(
       affiliate.email,
       'Welcome to WaveMAX Laundry Affiliate Program',
@@ -176,7 +176,7 @@ exports.sendAffiliateWelcomeEmail = async (affiliate) => {
 exports.sendAffiliateNewCustomerEmail = async (affiliate, customer, bagBarcode) => {
   try {
     const template = await loadTemplate('affiliate-new-customer');
-    
+
     const data = {
       affiliate_first_name: affiliate.firstName,
       affiliate_name: affiliate.businessName || `${affiliate.firstName} ${affiliate.lastName}`,
@@ -192,9 +192,9 @@ exports.sendAffiliateNewCustomerEmail = async (affiliate, customer, bagBarcode) 
       dashboard_url: `${process.env.FRONTEND_URL || 'https://wavemax.promo'}/affiliate-dashboard.html?id=${affiliate.affiliateId}`,
       current_year: new Date().getFullYear()
     };
-    
+
     const html = fillTemplate(template, data);
-    
+
     await sendEmail(
       affiliate.email,
       'New Customer Registration',
@@ -211,7 +211,7 @@ exports.sendAffiliateNewCustomerEmail = async (affiliate, customer, bagBarcode) 
 exports.sendAffiliateNewOrderEmail = async (affiliate, customer, order) => {
   try {
     const template = await loadTemplate('affiliate-new-order');
-    
+
     const data = {
       affiliate_first_name: affiliate.firstName,
       order_id: order.orderId,
@@ -225,9 +225,9 @@ exports.sendAffiliateNewOrderEmail = async (affiliate, customer, order) => {
       dashboard_url: `${process.env.FRONTEND_URL || 'https://wavemax.promo'}/affiliate-dashboard.html?id=${affiliate.affiliateId}`,
       current_year: new Date().getFullYear()
     };
-    
+
     const html = fillTemplate(template, data);
-    
+
     await sendEmail(
       affiliate.email,
       'New Laundry Pickup Order',
@@ -244,7 +244,7 @@ exports.sendAffiliateNewOrderEmail = async (affiliate, customer, order) => {
 exports.sendAffiliateCommissionEmail = async (affiliate, order, customer) => {
   try {
     const template = await loadTemplate('affiliate-commission');
-    
+
     const data = {
       affiliate_first_name: affiliate.firstName,
       order_id: order.orderId,
@@ -254,9 +254,9 @@ exports.sendAffiliateCommissionEmail = async (affiliate, order, customer) => {
       dashboard_url: `${process.env.FRONTEND_URL || 'https://wavemax.promo'}/affiliate-dashboard.html?id=${affiliate.affiliateId}`,
       current_year: new Date().getFullYear()
     };
-    
+
     const html = fillTemplate(template, data);
-    
+
     await sendEmail(
       affiliate.email,
       'Commission Earned: Order Delivered',
@@ -273,7 +273,7 @@ exports.sendAffiliateCommissionEmail = async (affiliate, order, customer) => {
 exports.sendAffiliateLostBagEmail = async (affiliate, customer, bagBarcode) => {
   try {
     const template = await loadTemplate('affiliate-lost-bag');
-    
+
     const data = {
       affiliate_first_name: affiliate.firstName,
       customer_name: `${customer.firstName} ${customer.lastName}`,
@@ -284,9 +284,9 @@ exports.sendAffiliateLostBagEmail = async (affiliate, customer, bagBarcode) => {
       dashboard_url: `${process.env.FRONTEND_URL || 'https://wavemax.promo'}/affiliate-dashboard.html?id=${affiliate.affiliateId}`,
       current_year: new Date().getFullYear()
     };
-    
+
     const html = fillTemplate(template, data);
-    
+
     await sendEmail(
       affiliate.email,
       'Customer Reported Lost Laundry Bag',
@@ -303,7 +303,7 @@ exports.sendAffiliateLostBagEmail = async (affiliate, customer, bagBarcode) => {
 exports.sendAffiliateOrderCancellationEmail = async (affiliate, order, customer) => {
   try {
     const template = await loadTemplate('affiliate-order-cancelled');
-    
+
     const data = {
       affiliate_first_name: affiliate.firstName,
       order_id: order.orderId,
@@ -314,9 +314,9 @@ exports.sendAffiliateOrderCancellationEmail = async (affiliate, order, customer)
       dashboard_url: `${process.env.FRONTEND_URL || 'https://wavemax.promo'}/affiliate-dashboard.html?id=${affiliate.affiliateId}`,
       current_year: new Date().getFullYear()
     };
-    
+
     const html = fillTemplate(template, data);
-    
+
     await sendEmail(
       affiliate.email,
       'Order Cancelled',
@@ -337,7 +337,7 @@ exports.sendAffiliateOrderCancellationEmail = async (affiliate, order, customer)
 exports.sendCustomerWelcomeEmail = async (customer, bagBarcode, affiliate) => {
   try {
     const template = await loadTemplate('customer-welcome');
-    
+
     const data = {
       first_name: customer.firstName,
       last_name: customer.lastName,
@@ -350,9 +350,9 @@ exports.sendCustomerWelcomeEmail = async (customer, bagBarcode, affiliate) => {
       schedule_url: `${process.env.FRONTEND_URL || 'https://wavemax.promo'}/schedule-pickup.html?affiliate=${affiliate.affiliateId}&customer=${customer.customerId}`,
       current_year: new Date().getFullYear()
     };
-    
+
     const html = fillTemplate(template, data);
-    
+
     await sendEmail(
       customer.email,
       'Welcome to WaveMAX Laundry Service',
@@ -369,7 +369,7 @@ exports.sendCustomerWelcomeEmail = async (customer, bagBarcode, affiliate) => {
 exports.sendCustomerOrderConfirmationEmail = async (customer, order, affiliate) => {
   try {
     const template = await loadTemplate('customer-order-confirmation');
-    
+
     const data = {
       first_name: customer.firstName,
       order_id: order.orderId,
@@ -384,9 +384,9 @@ exports.sendCustomerOrderConfirmationEmail = async (customer, order, affiliate) 
       login_url: `${process.env.FRONTEND_URL || 'https://wavemax.promo'}/customer-login.html`,
       current_year: new Date().getFullYear()
     };
-    
+
     const html = fillTemplate(template, data);
-    
+
     await sendEmail(
       customer.email,
       'Your Laundry Pickup Confirmation',
@@ -403,21 +403,21 @@ exports.sendCustomerOrderConfirmationEmail = async (customer, order, affiliate) 
 exports.sendOrderStatusUpdateEmail = async (customer, order, status) => {
   try {
     const template = await loadTemplate('customer-order-status');
-    
+
     const statusMessages = {
       picked_up: 'Your laundry has been picked up',
       processing: 'Your laundry is being processed',
       ready_for_delivery: 'Your laundry is ready for delivery',
       delivered: 'Your laundry has been delivered'
     };
-    
+
     const statusTitles = {
       picked_up: 'Laundry Picked Up',
       processing: 'Laundry Processing',
       ready_for_delivery: 'Ready for Delivery',
       delivered: 'Laundry Delivered'
     };
-    
+
     const data = {
       first_name: customer.firstName,
       order_id: order.orderId,
@@ -427,9 +427,9 @@ exports.sendOrderStatusUpdateEmail = async (customer, order, status) => {
       dashboard_url: `${process.env.FRONTEND_URL || 'https://wavemax.promo'}/customer-dashboard.html?id=${customer.customerId}`,
       current_year: new Date().getFullYear()
     };
-    
+
     const html = fillTemplate(template, data);
-    
+
     await sendEmail(
       customer.email,
       `Order Update: ${statusTitles[status]}`,
@@ -446,7 +446,7 @@ exports.sendOrderStatusUpdateEmail = async (customer, order, status) => {
 exports.sendOrderCancellationEmail = async (customer, order) => {
   try {
     const template = await loadTemplate('customer-order-cancelled');
-    
+
     const data = {
       first_name: customer.firstName,
       order_id: order.orderId,
@@ -456,9 +456,9 @@ exports.sendOrderCancellationEmail = async (customer, order) => {
       schedule_url: `${process.env.FRONTEND_URL || 'https://wavemax.promo'}/schedule-pickup.html?customer=${customer.customerId}`,
       current_year: new Date().getFullYear()
     };
-    
+
     const html = fillTemplate(template, data);
-    
+
     await sendEmail(
       customer.email,
       'Your Order Has Been Cancelled',
@@ -478,14 +478,14 @@ exports.sendOrderCancellationEmail = async (customer, order) => {
  */
 const formatTimeSlot = (timeSlot) => {
   switch (timeSlot) {
-    case 'morning':
-      return 'Morning (8am - 12pm)';
-    case 'afternoon':
-      return 'Afternoon (12pm - 5pm)';
-    case 'evening':
-      return 'Evening (5pm - 8pm)';
-    default:
-      return timeSlot;
+  case 'morning':
+    return 'Morning (8am - 12pm)';
+  case 'afternoon':
+    return 'Afternoon (12pm - 5pm)';
+  case 'evening':
+    return 'Evening (5pm - 8pm)';
+  default:
+    return timeSlot;
   }
 };
 
@@ -494,14 +494,14 @@ const formatTimeSlot = (timeSlot) => {
  */
 const formatSize = (size) => {
   switch (size) {
-    case 'small':
-      return 'Small (10-15 lbs)';
-    case 'medium':
-      return 'Medium (16-30 lbs)';
-    case 'large':
-      return 'Large (31+ lbs)';
-    default:
-      return size;
+  case 'small':
+    return 'Small (10-15 lbs)';
+  case 'medium':
+    return 'Medium (16-30 lbs)';
+  case 'large':
+    return 'Large (31+ lbs)';
+  default:
+    return size;
   }
 };
 

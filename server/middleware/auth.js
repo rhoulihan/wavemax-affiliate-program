@@ -20,27 +20,27 @@ exports.authenticate = async (req, res, next) => {
   try {
     // Get the token from the request headers
     const authHeader = req.headers.authorization;
-    
+
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       return res.status(401).json({
         success: false,
         message: 'Authentication required. Please provide a valid token.'
       });
     }
-    
+
     // Extract the token
     const token = authHeader.split(' ')[1];
-    
+
     if (!token) {
       return res.status(401).json({
         success: false,
         message: 'Authentication required. Please provide a valid token.'
       });
     }
-    
+
     // Verify the token
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    
+
     // Check token expiration
     const currentTimestamp = Math.floor(Date.now() / 1000);
     if (decoded.exp <= currentTimestamp) {
@@ -49,10 +49,10 @@ exports.authenticate = async (req, res, next) => {
         message: 'Token has expired. Please login again.'
       });
     }
-    
+
     // Find the user based on the token data
     let user = null;
-    
+
     if (decoded.role === 'affiliate') {
       user = await Affiliate.findOne({ affiliateId: decoded.affiliateId });
     } else if (decoded.role === 'customer') {
@@ -62,14 +62,14 @@ exports.authenticate = async (req, res, next) => {
       // For simplicity, we'll just use the decoded data
       user = { ...decoded, isAdmin: true };
     }
-    
+
     if (!user) {
       return res.status(401).json({
         success: false,
         message: 'User not found or token is invalid.'
       });
     }
-    
+
     // Add user data to the request object
     req.user = {
       id: decoded.id,
@@ -77,7 +77,7 @@ exports.authenticate = async (req, res, next) => {
       ...(decoded.affiliateId && { affiliateId: decoded.affiliateId }),
       ...(decoded.customerId && { customerId: decoded.customerId })
     };
-    
+
     next();
   } catch (error) {
     if (error.name === 'JsonWebTokenError') {
@@ -86,9 +86,9 @@ exports.authenticate = async (req, res, next) => {
         message: 'Invalid token. Please login again.'
       });
     }
-    
+
     console.error('Authentication error:', error);
-    
+
     res.status(500).json({
       success: false,
       message: 'An error occurred during authentication.'
@@ -108,14 +108,14 @@ exports.authorize = (roles) => {
         message: 'Authentication required before authorization.'
       });
     }
-    
+
     if (!roles.includes(req.user.role)) {
       return res.status(403).json({
         success: false,
         message: 'You do not have permission to access this resource.'
       });
     }
-    
+
     next();
   };
 };
@@ -127,14 +127,14 @@ exports.authorize = (roles) => {
 exports.validateRequest = (schema) => {
   return (req, res, next) => {
     const { error } = schema.validate(req.body);
-    
+
     if (error) {
       return res.status(400).json({
         success: false,
         message: error.details[0].message
       });
     }
-    
+
     next();
   };
 };

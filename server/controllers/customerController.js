@@ -44,32 +44,32 @@ exports.registerCustomer = async (req, res) => {
       billingZip,
       savePaymentInfo
     } = req.body;
-    
+
     // Verify affiliate exists
     const affiliate = await Affiliate.findOne({ affiliateId });
-    
+
     if (!affiliate) {
       return res.status(400).json({
         success: false,
         message: 'Invalid affiliate ID'
       });
     }
-    
+
     // Check if email or username already exists
     const existingCustomer = await Customer.findOne({
       $or: [{ email }, { username }]
     });
-    
+
     if (existingCustomer) {
       return res.status(400).json({
         success: false,
         message: 'Email or username already in use'
       });
     }
-    
+
     // Hash password
     const { salt, hash } = encryptionUtil.hashPassword(password);
-    
+
     // Create new customer
     const newCustomer = new Customer({
       affiliateId,
@@ -96,12 +96,12 @@ exports.registerCustomer = async (req, res) => {
       billingZip: savePaymentInfo ? billingZip : null,
       savePaymentInfo: !!savePaymentInfo
     });
-    
+
     await newCustomer.save();
-    
+
     // Generate a unique bag barcode
     const bagBarcode = 'WM-' + uuidv4().substring(0, 8).toUpperCase();
-    
+
     // Create a new bag and assign to customer
     const newBag = new Bag({
       barcode: bagBarcode,
@@ -110,9 +110,9 @@ exports.registerCustomer = async (req, res) => {
       status: 'assigned',
       issueDate: new Date()
     });
-    
+
     await newBag.save();
-    
+
     // Send welcome emails
     try {
       await emailService.sendCustomerWelcomeEmail(newCustomer, bagBarcode, affiliate);
@@ -122,7 +122,7 @@ exports.registerCustomer = async (req, res) => {
       console.warn('Welcome email(s) could not be sent:', emailError);
       // Continue with registration process even if email fails
     }
-    
+
     res.status(201).json({
       success: true,
       customerId: newCustomer.customerId,
@@ -152,24 +152,24 @@ exports.registerCustomer = async (req, res) => {
 exports.getCustomerProfile = async (req, res) => {
   try {
     const { customerId } = req.params;
-    
+
     // Verify customer exists
     const customer = await Customer.findOne({ customerId });
-    
+
     if (!customer) {
       return res.status(404).json({
         success: false,
         message: 'Customer not found'
       });
     }
-    
+
     // Check authorization (admin, affiliate, or self) - skip for public profile endpoint
     if (req.user) {
-      const isAuthorized = 
-        req.user.role === 'admin' || 
-        req.user.customerId === customerId || 
+      const isAuthorized =
+        req.user.role === 'admin' ||
+        req.user.customerId === customerId ||
         (req.user.role === 'affiliate' && req.user.affiliateId === customer.affiliateId);
-      
+
       if (!isAuthorized) {
         return res.status(403).json({
           success: false,
@@ -177,30 +177,30 @@ exports.getCustomerProfile = async (req, res) => {
         });
       }
     }
-    
+
     // Get affiliate details
     const affiliate = await Affiliate.findOne({ affiliateId: customer.affiliateId });
-    
+
     // Get customer's bag information
     const bags = await Bag.find({ customerId });
-    
+
     // Determine user role and if viewing own profile
     const userRole = req.user ? req.user.role : 'public';
     const isSelf = req.user && (req.user.customerId === customerId || req.user.role === 'admin');
-    
+
     // Filter customer data based on role
     const filteredCustomer = getFilteredData('customer', customer.toObject(), userRole, { isSelf });
-    
+
     // Add affiliate info if authorized
     if (userRole === 'admin' || userRole === 'affiliate' || isSelf) {
       filteredCustomer.affiliate = affiliate ? getFilteredData('affiliate', affiliate.toObject(), 'public') : null;
     }
-    
+
     // Add bag details based on role
     if (userRole === 'admin' || userRole === 'affiliate' || isSelf) {
       filteredCustomer.bagDetails = getFilteredData('bag', bags.map(b => b.toObject()), userRole);
     }
-    
+
     res.status(200).json({
       success: true,
       customer: filteredCustomer
@@ -221,50 +221,50 @@ exports.updateCustomerProfile = async (req, res) => {
   try {
     const { customerId } = req.params;
     const updates = req.body;
-    
+
     // Verify customer exists
     const customer = await Customer.findOne({ customerId });
-    
+
     if (!customer) {
       return res.status(404).json({
         success: false,
         message: 'Customer not found'
       });
     }
-    
+
     // Check authorization (admin, affiliate, or self)
-    const isAuthorized = 
-      req.user.role === 'admin' || 
-      req.user.customerId === customerId || 
+    const isAuthorized =
+      req.user.role === 'admin' ||
+      req.user.customerId === customerId ||
       (req.user.role === 'affiliate' && req.user.affiliateId === customer.affiliateId);
-    
+
     if (!isAuthorized) {
       return res.status(403).json({
         success: false,
         message: 'Unauthorized'
       });
     }
-    
+
     // Fields that can be updated
     const updatableFields = [
       'firstName', 'lastName', 'email', 'phone', 'address', 'city', 'state', 'zipCode',
       'deliveryInstructions', 'serviceFrequency', 'preferredDay', 'preferredTime',
       'specialInstructions', 'cardholderName'
     ];
-    
+
     // Update fields
     updatableFields.forEach(field => {
       if (updates[field] !== undefined) {
         customer[field] = updates[field];
       }
     });
-    
+
     // Handle special case for service frequency
     if (updates.serviceFrequency === 'onDemand') {
       customer.preferredDay = null;
       customer.preferredTime = null;
     }
-    
+
     // Handle password change if provided
     if (updates.currentPassword && updates.newPassword) {
       // Verify current password
@@ -273,22 +273,22 @@ exports.updateCustomerProfile = async (req, res) => {
         customer.passwordSalt,
         customer.passwordHash
       );
-      
+
       if (!isPasswordValid) {
         return res.status(400).json({
           success: false,
           message: 'Current password is incorrect'
         });
       }
-      
+
       // Update password
       const { salt, hash } = encryptionUtil.hashPassword(updates.newPassword);
       customer.passwordSalt = salt;
       customer.passwordHash = hash;
     }
-    
+
     await customer.save();
-    
+
     res.status(200).json({
       success: true,
       message: 'Customer profile updated successfully'
@@ -309,33 +309,33 @@ exports.getCustomerOrders = async (req, res) => {
   try {
     const { customerId } = req.params;
     const { status, page = 1, limit = 10 } = req.query;
-    
+
     // Verify customer exists
     const customer = await Customer.findOne({ customerId });
-    
+
     if (!customer) {
       return res.status(404).json({
         success: false,
         message: 'Customer not found'
       });
     }
-    
+
     // Check authorization (admin, affiliate, or self)
-    const isAuthorized = 
-      req.user.role === 'admin' || 
-      req.user.customerId === customerId || 
+    const isAuthorized =
+      req.user.role === 'admin' ||
+      req.user.customerId === customerId ||
       (req.user.role === 'affiliate' && req.user.affiliateId === customer.affiliateId);
-    
+
     if (!isAuthorized) {
       return res.status(403).json({
         success: false,
         message: 'Unauthorized'
       });
     }
-    
+
     // Build query
     const query = { customerId };
-    
+
     // Add status filter if provided
     if (status && status !== 'all') {
       if (status === 'active') {
@@ -348,16 +348,16 @@ exports.getCustomerOrders = async (req, res) => {
         query.status = status;
       }
     }
-    
+
     // Get total count for pagination
     const totalOrders = await Order.countDocuments(query);
-    
+
     // Get paginated orders
     const orders = await Order.find(query)
       .sort({ createdAt: -1 })
       .skip((page - 1) * limit)
       .limit(parseInt(limit));
-    
+
     // Prepare response data
     const ordersData = orders.map(order => ({
       orderId: order.orderId,
@@ -374,7 +374,7 @@ exports.getCustomerOrders = async (req, res) => {
       pickedUpAt: order.pickedUpAt,
       deliveredAt: order.deliveredAt
     }));
-    
+
     res.status(200).json({
       success: true,
       orders: ordersData,
@@ -400,83 +400,83 @@ exports.getCustomerOrders = async (req, res) => {
 exports.getCustomerDashboardStats = async (req, res) => {
   try {
     const { customerId } = req.params;
-    
+
     // Verify customer exists
     const customer = await Customer.findOne({ customerId });
-    
+
     if (!customer) {
       return res.status(404).json({
         success: false,
         message: 'Customer not found'
       });
     }
-    
+
     // Check authorization (admin, affiliate, or self)
-    const isAuthorized = 
-      req.user.role === 'admin' || 
-      req.user.customerId === customerId || 
+    const isAuthorized =
+      req.user.role === 'admin' ||
+      req.user.customerId === customerId ||
       (req.user.role === 'affiliate' && req.user.affiliateId === customer.affiliateId);
-    
+
     if (!isAuthorized) {
       return res.status(403).json({
         success: false,
         message: 'Unauthorized'
       });
     }
-    
+
     // Get active orders count
     const activeOrdersCount = await Order.countDocuments({
       customerId,
       status: { $in: ['scheduled', 'picked_up', 'processing', 'ready_for_delivery'] }
     });
-    
+
     // Get completed orders
     const completedOrders = await Order.find({
       customerId,
       status: 'delivered'
     });
-    
+
     const completedOrdersCount = completedOrders.length;
-    
+
     // Calculate total spent
     let totalSpent = 0;
     completedOrders.forEach(order => {
       totalSpent += order.actualTotal || order.estimatedTotal || 0;
     });
-    
+
     // Get next scheduled pickup
     const nextPickup = await Order.findOne({
       customerId,
       status: 'scheduled',
       pickupDate: { $gte: new Date() }
     }).sort({ pickupDate: 1 });
-    
+
     // Get affiliate info
     const affiliate = await Affiliate.findOne({ affiliateId: customer.affiliateId });
-    
+
     // Get customer's bags
     const bags = await Bag.find({ customerId });
-    
+
     // Calculate average order weight
     let totalWeight = 0;
     let weightedOrders = 0;
-    
+
     completedOrders.forEach(order => {
       if (order.actualWeight) {
         totalWeight += order.actualWeight;
         weightedOrders++;
       }
     });
-    
+
     const averageWeight = weightedOrders > 0 ? totalWeight / weightedOrders : 0;
-    
+
     // Analyze order sizes
     const orderSizes = {
       small: 0,
       medium: 0,
       large: 0
     };
-    
+
     completedOrders.forEach(order => {
       if (order.actualWeight) {
         if (order.actualWeight < 15) {
@@ -490,7 +490,7 @@ exports.getCustomerDashboardStats = async (req, res) => {
         orderSizes[order.estimatedSize]++;
       }
     });
-    
+
     res.status(200).json({
       success: true,
       stats: {
@@ -530,46 +530,46 @@ exports.getCustomerDashboardStats = async (req, res) => {
 exports.reportLostBag = async (req, res) => {
   try {
     const { customerId, bagId } = req.params;
-    
+
     // Verify customer exists
     const customer = await Customer.findOne({ customerId });
-    
+
     if (!customer) {
       return res.status(404).json({
         success: false,
         message: 'Customer not found'
       });
     }
-    
+
     // Check authorization (admin, affiliate, or self)
-    const isAuthorized = 
-      req.user.role === 'admin' || 
-      req.user.customerId === customerId || 
+    const isAuthorized =
+      req.user.role === 'admin' ||
+      req.user.customerId === customerId ||
       (req.user.role === 'affiliate' && req.user.affiliateId === customer.affiliateId);
-    
+
     if (!isAuthorized) {
       return res.status(403).json({
         success: false,
         message: 'Unauthorized'
       });
     }
-    
+
     // Find the bag
     const bag = await Bag.findOne({ bagId, customerId });
-    
+
     if (!bag) {
       return res.status(404).json({
         success: false,
         message: 'Bag not found'
       });
     }
-    
+
     // Update bag status
     bag.status = 'lost';
     await bag.save();
-    
+
     // No need to update customer record as bags are managed separately
-    
+
     // Notify affiliate
     const affiliate = await Affiliate.findOne({ affiliateId: customer.affiliateId });
     if (affiliate) {
@@ -579,7 +579,7 @@ exports.reportLostBag = async (req, res) => {
         bag.barcode
       );
     }
-    
+
     res.status(200).json({
       success: true,
       message: 'Bag reported as lost successfully'
@@ -600,38 +600,38 @@ exports.updatePaymentInfo = async (req, res) => {
   try {
     const { customerId } = req.params;
     const { cardholderName, cardNumber, expiryDate, billingZip } = req.body;
-    
+
     // Verify customer exists
     const customer = await Customer.findOne({ customerId });
-    
+
     if (!customer) {
       return res.status(404).json({
         success: false,
         message: 'Customer not found'
       });
     }
-    
+
     // Check authorization (only self or admin)
-    const isAuthorized = 
-      req.user.role === 'admin' || 
+    const isAuthorized =
+      req.user.role === 'admin' ||
       req.user.customerId === customerId;
-    
+
     if (!isAuthorized) {
       return res.status(403).json({
         success: false,
         message: 'Unauthorized'
       });
     }
-    
+
     // Update payment information
     customer.cardholderName = cardholderName;
     customer.lastFourDigits = cardNumber.slice(-4);
     customer.expiryDate = expiryDate;
     customer.billingZip = billingZip;
     customer.savePaymentInfo = true;
-    
+
     await customer.save();
-    
+
     res.status(200).json({
       success: true,
       message: 'Payment information updated successfully',

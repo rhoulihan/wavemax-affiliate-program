@@ -12,7 +12,7 @@ describe('Email Service', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
-  
+
   test('should send affiliate welcome email', async () => {
     const affiliate = {
       affiliateId: 'AFF123456',
@@ -20,12 +20,12 @@ describe('Email Service', () => {
       lastName: 'Affiliate',
       email: 'test@example.com'
     };
-    
+
     await emailService.sendAffiliateWelcomeEmail(affiliate);
-    
+
     const nodemailer = require('nodemailer');
     const sendMailMock = nodemailer.createTransport().sendMail;
-    
+
     expect(sendMailMock).toHaveBeenCalled();
     const emailArgs = sendMailMock.mock.calls[0][0];
     expect(emailArgs.to).toBe(affiliate.email);

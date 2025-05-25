@@ -21,7 +21,7 @@ exports.registerAffiliate = async (req, res) => {
         errors: errors.array()
       });
     }
-    
+
     const {
       firstName,
       lastName,
@@ -41,22 +41,22 @@ exports.registerAffiliate = async (req, res) => {
       routingNumber,
       paypalEmail
     } = req.body;
-    
+
     // Check if email or username already exists
     const existingAffiliate = await Affiliate.findOne({
       $or: [{ email }, { username }]
     });
-    
+
     if (existingAffiliate) {
       return res.status(400).json({
         success: false,
         message: 'Email or username already in use'
       });
     }
-    
+
     // Hash password
     const { salt, hash } = encryptionUtil.hashPassword(password);
-    
+
     // Create new affiliate
     const newAffiliate = new Affiliate({
       firstName,
@@ -75,7 +75,7 @@ exports.registerAffiliate = async (req, res) => {
       passwordHash: hash,
       paymentMethod
     });
-    
+
     // Add payment information if provided
     if (paymentMethod === 'directDeposit' && accountNumber && routingNumber) {
       newAffiliate.accountNumber = accountNumber;
@@ -84,9 +84,9 @@ exports.registerAffiliate = async (req, res) => {
       newAffiliate.paypalEmail = paypalEmail;
       // The encryption middleware will handle this automatically
     }
-    
+
     await newAffiliate.save();
-    
+
     // Send welcome email
     try {
       await emailService.sendAffiliateWelcomeEmail(newAffiliate);
@@ -95,7 +95,7 @@ exports.registerAffiliate = async (req, res) => {
       console.warn('Welcome email could not be sent:', emailError);
       // Continue with registration process even if email fails
     }
-    
+
     res.status(201).json({
       success: true,
       affiliateId: newAffiliate.affiliateId,
@@ -116,17 +116,17 @@ exports.registerAffiliate = async (req, res) => {
 exports.getAffiliateProfile = async (req, res) => {
   try {
     const { affiliateId } = req.params;
-    
+
     // Verify affiliate exists
     const affiliate = await Affiliate.findOne({ affiliateId });
-    
+
     if (!affiliate) {
       return res.status(404).json({
         success: false,
         message: 'Affiliate not found'
       });
     }
-    
+
     // Check authorization (admin or self)
     if (req.user.role !== 'admin' && req.user.affiliateId !== affiliateId) {
       return res.status(403).json({
@@ -134,7 +134,7 @@ exports.getAffiliateProfile = async (req, res) => {
         message: 'Unauthorized'
       });
     }
-    
+
     // Prepare response data
     const responseData = {
       affiliateId: affiliate.affiliateId,
@@ -154,12 +154,12 @@ exports.getAffiliateProfile = async (req, res) => {
       dateRegistered: affiliate.dateRegistered,
       lastLogin: affiliate.lastLogin
     };
-    
+
     // Include payment info if available (decrypt if necessary)
     if (affiliate.paymentMethod === 'paypal' && affiliate.paypalEmail) {
       try {
         // Decrypt PayPal email if it's encrypted
-        responseData.paypalEmail = typeof affiliate.paypalEmail === 'object' 
+        responseData.paypalEmail = typeof affiliate.paypalEmail === 'object'
           ? encryptionUtil.decrypt(affiliate.paypalEmail)
           : affiliate.paypalEmail;
       } catch (error) {
@@ -167,7 +167,7 @@ exports.getAffiliateProfile = async (req, res) => {
         // Don't include if decryption fails
       }
     }
-    
+
     // Return affiliate data
     res.status(200).json({
       success: true,
@@ -189,7 +189,7 @@ exports.updateAffiliateProfile = async (req, res) => {
   try {
     const { affiliateId } = req.params;
     const updates = req.body;
-    
+
     // Check authorization (admin or self)
     if (req.user.role !== 'admin' && req.user.affiliateId !== affiliateId) {
       return res.status(403).json({
@@ -197,35 +197,35 @@ exports.updateAffiliateProfile = async (req, res) => {
         message: 'Unauthorized'
       });
     }
-    
+
     // Verify affiliate exists
     const affiliate = await Affiliate.findOne({ affiliateId });
-    
+
     if (!affiliate) {
       return res.status(404).json({
         success: false,
         message: 'Affiliate not found'
       });
     }
-    
+
     // Fields that can be updated
     const updatableFields = [
-      'firstName', 'lastName', 'phone', 'businessName', 
-      'address', 'city', 'state', 'zipCode', 'serviceArea', 
+      'firstName', 'lastName', 'phone', 'businessName',
+      'address', 'city', 'state', 'zipCode', 'serviceArea',
       'deliveryFee', 'paymentMethod'
     ];
-    
+
     // Update fields
     updatableFields.forEach(field => {
       if (updates[field] !== undefined) {
         affiliate[field] = updates[field];
       }
     });
-    
+
     // Special handling for payment info
     if (updates.paymentMethod) {
       affiliate.paymentMethod = updates.paymentMethod;
-      
+
       if (updates.paymentMethod === 'directDeposit') {
         if (updates.accountNumber) {
           affiliate.accountNumber = updates.accountNumber;
@@ -239,7 +239,7 @@ exports.updateAffiliateProfile = async (req, res) => {
         }
       }
     }
-    
+
     // Handle password change if provided
     if (updates.currentPassword && updates.newPassword) {
       // Verify current password
@@ -248,22 +248,22 @@ exports.updateAffiliateProfile = async (req, res) => {
         affiliate.passwordSalt,
         affiliate.passwordHash
       );
-      
+
       if (!isPasswordValid) {
         return res.status(400).json({
           success: false,
           message: 'Current password is incorrect'
         });
       }
-      
+
       // Update password
       const { salt, hash } = encryptionUtil.hashPassword(updates.newPassword);
       affiliate.passwordSalt = salt;
       affiliate.passwordHash = hash;
     }
-    
+
     await affiliate.save();
-    
+
     res.status(200).json({
       success: true,
       message: 'Affiliate profile updated successfully'
@@ -284,7 +284,7 @@ exports.getAffiliateEarnings = async (req, res) => {
   try {
     const { affiliateId } = req.params;
     const { period } = req.query;
-    
+
     // Check authorization (admin or self)
     if (req.user.role !== 'admin' && req.user.affiliateId !== affiliateId) {
       return res.status(403).json({
@@ -292,21 +292,21 @@ exports.getAffiliateEarnings = async (req, res) => {
         message: 'Unauthorized'
       });
     }
-    
+
     // Verify affiliate exists
     const affiliate = await Affiliate.findOne({ affiliateId });
-    
+
     if (!affiliate) {
       return res.status(404).json({
         success: false,
         message: 'Affiliate not found'
       });
     }
-    
+
     // Determine date range based on period
     let startDate = new Date();
     const endDate = new Date();
-    
+
     if (period === 'week') {
       startDate.setDate(startDate.getDate() - 7);
     } else if (period === 'month') {
@@ -317,41 +317,41 @@ exports.getAffiliateEarnings = async (req, res) => {
       // Default to all-time
       startDate = new Date(0);
     }
-    
+
     // Find all delivered orders for this affiliate within the date range
     const orders = await Order.find({
       affiliateId,
       status: 'delivered',
       deliveredAt: { $gte: startDate, $lte: endDate }
     }).sort({ deliveredAt: -1 });
-    
+
     // Get customer details for each order
     const customerIds = [...new Set(orders.map(order => order.customerId))];
     const customers = await Customer.find({ customerId: { $in: customerIds } });
-    
+
     // Map customers to a dictionary for quick lookup
     const customerMap = {};
     customers.forEach(customer => {
       customerMap[customer.customerId] = customer;
     });
-    
+
     // Calculate total earnings
     let totalEarnings = 0;
     orders.forEach(order => {
       totalEarnings += order.affiliateCommission || 0;
     });
-    
+
     // Find pending transactions (not yet paid out)
     const pendingTransactions = await Transaction.find({
       affiliateId,
       status: { $in: ['pending', 'processing'] }
     });
-    
+
     let pendingAmount = 0;
     pendingTransactions.forEach(transaction => {
       pendingAmount += transaction.amount;
     });
-    
+
     res.status(200).json({
       success: true,
       totalEarnings,
@@ -387,7 +387,7 @@ exports.getAffiliateCustomers = async (req, res) => {
     const { affiliateId } = req.params;
     const { search, sort } = req.query;
     const { page, limit, skip } = req.pagination; // Use values from middleware
-    
+
     // Check authorization (admin or self)
     if (req.user.role !== 'admin' && req.user.affiliateId !== affiliateId) {
       return res.status(403).json({
@@ -395,10 +395,10 @@ exports.getAffiliateCustomers = async (req, res) => {
         message: 'Unauthorized'
       });
     }
-    
+
     // Build query
     const query = { affiliateId };
-    
+
     // Add search if provided
     if (search) {
       query.$or = [
@@ -409,51 +409,51 @@ exports.getAffiliateCustomers = async (req, res) => {
         { customerId: { $regex: search, $options: 'i' } }
       ];
     }
-    
+
     // Build sort options
     let sortOptions = {};
-    
+
     if (sort) {
       switch (sort) {
-        case 'name_asc':
-          sortOptions = { firstName: 1, lastName: 1 };
-          break;
-        case 'name_desc':
-          sortOptions = { firstName: -1, lastName: -1 };
-          break;
-        case 'recent':
-          sortOptions = { registrationDate: -1 };
-          break;
-        default:
-          sortOptions = { registrationDate: -1 };
+      case 'name_asc':
+        sortOptions = { firstName: 1, lastName: 1 };
+        break;
+      case 'name_desc':
+        sortOptions = { firstName: -1, lastName: -1 };
+        break;
+      case 'recent':
+        sortOptions = { registrationDate: -1 };
+        break;
+      default:
+        sortOptions = { registrationDate: -1 };
       }
     } else {
       sortOptions = { registrationDate: -1 };
     }
-    
+
     // Get total count for pagination
     const totalCustomers = await Customer.countDocuments(query);
-    
+
     // Get paginated customers
     const customers = await Customer.find(query)
       .sort(sortOptions)
       .skip(skip)
       .limit(limit);
-      
+
     // Get order counts for each customer
     const customerIds = customers.map(customer => customer.customerId);
-    
+
     const orderCounts = await Order.aggregate([
       { $match: { customerId: { $in: customerIds } } },
       { $group: { _id: '$customerId', count: { $sum: 1 } } }
     ]);
-    
+
     // Map order counts to customer objects
     const orderCountMap = {};
     orderCounts.forEach(item => {
       orderCountMap[item._id] = item.count;
     });
-    
+
     // Prepare response data
     const customersData = customers.map(customer => ({
       customerId: customer.customerId,
@@ -470,7 +470,7 @@ exports.getAffiliateCustomers = async (req, res) => {
       serviceFrequency: customer.serviceFrequency,
       orderCount: orderCountMap[customer.customerId] || 0
     }));
-    
+
     res.status(200).json({
       success: true,
       customers: customersData,
@@ -497,14 +497,14 @@ exports.getAffiliateCustomers = async (req, res) => {
 exports.getAffiliateOrders = async (req, res) => {
   try {
     const { affiliateId } = req.params;
-    const { 
-      status, 
-      date, 
-      search, 
-      page = 1, 
-      limit = 10 
+    const {
+      status,
+      date,
+      search,
+      page = 1,
+      limit = 10
     } = req.query;
-    
+
     // Check authorization (admin or self)
     if (req.user.role !== 'admin' && req.user.affiliateId !== affiliateId) {
       return res.status(403).json({
@@ -512,48 +512,48 @@ exports.getAffiliateOrders = async (req, res) => {
         message: 'Unauthorized'
       });
     }
-    
+
     // Build query
     const query = { affiliateId };
-    
+
     // Add status filter if provided
     if (status && status !== 'all') {
       query.status = status;
     }
-    
+
     // Add date filter if provided
     if (date) {
       const now = new Date();
       let startDate, endDate;
-      
+
       switch (date) {
-        case 'today':
-          startDate = new Date(now.setHours(0, 0, 0, 0));
-          endDate = new Date(now.setHours(23, 59, 59, 999));
-          break;
-        case 'tomorrow':
-          startDate = new Date(now.setHours(0, 0, 0, 0));
-          startDate.setDate(startDate.getDate() + 1);
-          endDate = new Date(startDate);
-          endDate.setHours(23, 59, 59, 999);
-          break;
-        case 'week':
-          startDate = new Date(now.setHours(0, 0, 0, 0));
-          endDate = new Date(startDate);
-          endDate.setDate(endDate.getDate() + 7);
-          break;
-        case 'month':
-          startDate = new Date(now.setHours(0, 0, 0, 0));
-          endDate = new Date(startDate);
-          endDate.setMonth(endDate.getMonth() + 1);
-          break;
+      case 'today':
+        startDate = new Date(now.setHours(0, 0, 0, 0));
+        endDate = new Date(now.setHours(23, 59, 59, 999));
+        break;
+      case 'tomorrow':
+        startDate = new Date(now.setHours(0, 0, 0, 0));
+        startDate.setDate(startDate.getDate() + 1);
+        endDate = new Date(startDate);
+        endDate.setHours(23, 59, 59, 999);
+        break;
+      case 'week':
+        startDate = new Date(now.setHours(0, 0, 0, 0));
+        endDate = new Date(startDate);
+        endDate.setDate(endDate.getDate() + 7);
+        break;
+      case 'month':
+        startDate = new Date(now.setHours(0, 0, 0, 0));
+        endDate = new Date(startDate);
+        endDate.setMonth(endDate.getMonth() + 1);
+        break;
       }
-      
+
       if (startDate && endDate) {
         query.pickupDate = { $gte: startDate, $lte: endDate };
       }
     }
-    
+
     // Add search if provided
     if (search) {
       query.$or = [
@@ -561,30 +561,30 @@ exports.getAffiliateOrders = async (req, res) => {
         { customerId: { $regex: search, $options: 'i' } }
       ];
     }
-    
+
     // Get total count for pagination
     const totalOrders = await Order.countDocuments(query);
-    
+
     // Get paginated orders
     const orders = await Order.find(query)
       .sort({ createdAt: -1 })
       .skip((page - 1) * limit)
       .limit(parseInt(limit));
-      
+
     // Get customer details for each order
     const customerIds = [...new Set(orders.map(order => order.customerId))];
     const customers = await Customer.find({ customerId: { $in: customerIds } });
-    
+
     // Map customers to a dictionary for quick lookup
     const customerMap = {};
     customers.forEach(customer => {
       customerMap[customer.customerId] = customer;
     });
-    
+
     // Prepare response data
     const ordersData = orders.map(order => {
       const customer = customerMap[order.customerId];
-      
+
       return {
         orderId: order.orderId,
         customerId: order.customerId,
@@ -605,7 +605,7 @@ exports.getAffiliateOrders = async (req, res) => {
         createdAt: order.createdAt
       };
     });
-    
+
     res.status(200).json({
       success: true,
       orders: ordersData,
@@ -633,7 +633,7 @@ exports.getAffiliateTransactions = async (req, res) => {
   try {
     const { affiliateId } = req.params;
     const { status, page = 1, limit = 10 } = req.query;
-    
+
     // Check authorization (admin or self)
     if (req.user.role !== 'admin' && req.user.affiliateId !== affiliateId) {
       return res.status(403).json({
@@ -641,24 +641,24 @@ exports.getAffiliateTransactions = async (req, res) => {
         message: 'Unauthorized'
       });
     }
-    
+
     // Build query
     const query = { affiliateId };
-    
+
     // Add status filter if provided
     if (status && status !== 'all') {
       query.status = status;
     }
-    
+
     // Get total count for pagination
     const totalTransactions = await Transaction.countDocuments(query);
-    
+
     // Get paginated transactions
     const transactions = await Transaction.find(query)
       .sort({ createdAt: -1 })
       .skip((page - 1) * limit)
       .limit(parseInt(limit));
-    
+
     res.status(200).json({
       success: true,
       transactions,
@@ -684,7 +684,7 @@ exports.getAffiliateTransactions = async (req, res) => {
 exports.getAffiliateDashboardStats = async (req, res) => {
   try {
     const { affiliateId } = req.params;
-    
+
     // Check authorization (admin or self)
     if (req.user.role !== 'admin' && req.user.affiliateId !== affiliateId) {
       return res.status(403).json({
@@ -692,69 +692,69 @@ exports.getAffiliateDashboardStats = async (req, res) => {
         message: 'Unauthorized'
       });
     }
-    
+
     // Get customer count
     const customerCount = await Customer.countDocuments({ affiliateId });
-    
+
     // Get active orders count
     const activeOrderCount = await Order.countDocuments({
       affiliateId,
       status: { $in: ['scheduled', 'picked_up', 'processing', 'ready_for_delivery'] }
     });
-    
+
     // Get total earnings
     const deliveredOrders = await Order.find({
       affiliateId,
       status: 'delivered'
     });
-    
+
     let totalEarnings = 0;
     deliveredOrders.forEach(order => {
       totalEarnings += order.affiliateCommission || 0;
     });
-    
+
     // Get earnings for this month
     const now = new Date();
     const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-    
-    const monthOrders = deliveredOrders.filter(order => 
+
+    const monthOrders = deliveredOrders.filter(order =>
       order.deliveredAt && order.deliveredAt >= firstDayOfMonth
     );
-    
+
     let monthEarnings = 0;
     monthOrders.forEach(order => {
       monthEarnings += order.affiliateCommission || 0;
     });
-    
+
     // Get earnings for this week
     const firstDayOfWeek = new Date(now);
     firstDayOfWeek.setDate(now.getDate() - now.getDay());
     firstDayOfWeek.setHours(0, 0, 0, 0);
-    
-    const weekOrders = deliveredOrders.filter(order => 
+
+    const weekOrders = deliveredOrders.filter(order =>
       order.deliveredAt && order.deliveredAt >= firstDayOfWeek
     );
-    
+
     let weekEarnings = 0;
     weekOrders.forEach(order => {
       weekEarnings += order.affiliateCommission || 0;
     });
-    
+
     // Get pending payments
     const pendingTransactions = await Transaction.find({
       affiliateId,
       status: { $in: ['pending', 'processing'] }
     });
-    
+
     let pendingEarnings = 0;
     pendingTransactions.forEach(transaction => {
       pendingEarnings += transaction.amount;
     });
-    
+
     // Calculate next payout date (typically weekly on Fridays)
     const nextPayoutDate = new Date();
     nextPayoutDate.setDate(nextPayoutDate.getDate() + ((5 - nextPayoutDate.getDay() + 7) % 7));
-    
+
     res.status(200).json({
       success: true,
       stats: {
@@ -784,17 +784,17 @@ exports.getAffiliateDashboardStats = async (req, res) => {
 exports.getPublicAffiliateInfo = async (req, res) => {
   try {
     const { affiliateId } = req.params;
-    
+
     // Find affiliate
     const affiliate = await Affiliate.findOne({ affiliateId });
-    
+
     if (!affiliate) {
       return res.status(404).json({
         success: false,
         message: 'Affiliate not found'
       });
     }
-    
+
     // Return only public information
     res.status(200).json({
       success: true,

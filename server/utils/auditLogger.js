@@ -13,13 +13,13 @@ const auditLogger = winston.createLogger({
   ),
   transports: [
     // Audit log file
-    new winston.transports.File({ 
+    new winston.transports.File({
       filename: path.join(__dirname, '../../logs/audit.log'),
       maxsize: 10 * 1024 * 1024, // 10MB
       maxFiles: 30 // Keep 30 days of logs
     }),
     // Critical security events also go to error log
-    new winston.transports.File({ 
+    new winston.transports.File({
       filename: path.join(__dirname, '../../logs/security-critical.log'),
       level: 'error',
       maxsize: 10 * 1024 * 1024,
@@ -46,34 +46,34 @@ const AuditEvents = {
   PASSWORD_RESET_FAILED: 'PASSWORD_RESET_FAILED',
   TOKEN_REFRESH: 'TOKEN_REFRESH',
   TOKEN_REFRESH_FAILED: 'TOKEN_REFRESH_FAILED',
-  
+
   // Authorization events
   UNAUTHORIZED_ACCESS: 'UNAUTHORIZED_ACCESS',
   PERMISSION_DENIED: 'PERMISSION_DENIED',
-  
+
   // Data access events
   SENSITIVE_DATA_ACCESS: 'SENSITIVE_DATA_ACCESS',
   PAYMENT_INFO_ACCESS: 'PAYMENT_INFO_ACCESS',
   PAYMENT_INFO_UPDATE: 'PAYMENT_INFO_UPDATE',
-  
+
   // Account management
   ACCOUNT_CREATED: 'ACCOUNT_CREATED',
   ACCOUNT_UPDATED: 'ACCOUNT_UPDATED',
   ACCOUNT_DELETED: 'ACCOUNT_DELETED',
   ACCOUNT_SUSPENDED: 'ACCOUNT_SUSPENDED',
-  
+
   // Security events
   SUSPICIOUS_ACTIVITY: 'SUSPICIOUS_ACTIVITY',
   RATE_LIMIT_EXCEEDED: 'RATE_LIMIT_EXCEEDED',
   INVALID_CSRF_TOKEN: 'INVALID_CSRF_TOKEN',
   SQL_INJECTION_ATTEMPT: 'SQL_INJECTION_ATTEMPT',
   XSS_ATTEMPT: 'XSS_ATTEMPT',
-  
+
   // Order events
   ORDER_CREATED: 'ORDER_CREATED',
   ORDER_CANCELLED: 'ORDER_CANCELLED',
   ORDER_STATUS_CHANGED: 'ORDER_STATUS_CHANGED',
-  
+
   // Financial events
   COMMISSION_CALCULATED: 'COMMISSION_CALCULATED',
   PAYMENT_PROCESSED: 'PAYMENT_PROCESSED',
@@ -92,20 +92,20 @@ const logAuditEvent = (eventType, details, req = null) => {
     timestamp: new Date().toISOString(),
     ...details
   };
-  
+
   // Add request context if available
   if (req) {
     auditEntry.ip = req.ip || req.connection.remoteAddress;
     auditEntry.userAgent = req.get('user-agent');
     auditEntry.method = req.method;
     auditEntry.path = req.path;
-    
+
     // Add user context if authenticated
     if (req.user) {
       auditEntry.userId = req.user.id || req.user._id;
       auditEntry.userRole = req.user.role;
       auditEntry.username = req.user.username || req.user.email;
-      
+
       if (req.user.affiliateId) {
         auditEntry.affiliateId = req.user.affiliateId;
       }
@@ -114,7 +114,7 @@ const logAuditEvent = (eventType, details, req = null) => {
       }
     }
   }
-  
+
   // Determine log level based on event type
   const criticalEvents = [
     AuditEvents.UNAUTHORIZED_ACCESS,
@@ -124,9 +124,9 @@ const logAuditEvent = (eventType, details, req = null) => {
     AuditEvents.XSS_ATTEMPT,
     AuditEvents.INVALID_CSRF_TOKEN
   ];
-  
+
   const level = criticalEvents.includes(eventType) ? 'error' : 'info';
-  
+
   auditLogger.log(level, auditEntry);
 };
 
@@ -144,7 +144,7 @@ const auditMiddleware = (eventType) => {
         }, req);
       }
     });
-    
+
     next();
   };
 };
@@ -184,10 +184,10 @@ const logSensitiveDataAccess = (dataType, dataId, action, req) => {
  * Log payment information access/updates
  */
 const logPaymentActivity = (action, customerId, req, details = {}) => {
-  const eventType = action === 'access' 
-    ? AuditEvents.PAYMENT_INFO_ACCESS 
+  const eventType = action === 'access'
+    ? AuditEvents.PAYMENT_INFO_ACCESS
     : AuditEvents.PAYMENT_INFO_UPDATE;
-    
+
   logAuditEvent(
     eventType,
     {

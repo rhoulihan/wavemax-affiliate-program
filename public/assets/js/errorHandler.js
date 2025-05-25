@@ -4,7 +4,7 @@ class ErrorHandler {
     this.errorContainer = document.getElementById(errorContainerId);
     this.setup();
   }
-  
+
   setup() {
     // Create error container if it doesn't exist
     if (!this.errorContainer) {
@@ -21,19 +21,19 @@ class ErrorHandler {
         </div>
       `;
       document.body.appendChild(this.errorContainer);
-      
+
       // Add close button event listener
       document.getElementById('closeError').addEventListener('click', () => {
         this.hideError();
       });
     }
   }
-  
+
   showError(message, timeout = 5000) {
     const errorMessage = document.getElementById('errorMessage');
     errorMessage.textContent = message;
     this.errorContainer.classList.remove('hidden');
-    
+
     // Automatically hide after timeout
     if (timeout > 0) {
       setTimeout(() => {
@@ -41,11 +41,11 @@ class ErrorHandler {
       }, timeout);
     }
   }
-  
+
   hideError() {
     this.errorContainer.classList.add('hidden');
   }
-  
+
   // Handle fetch API errors
   async handleFetchError(response) {
     if (!response.ok) {

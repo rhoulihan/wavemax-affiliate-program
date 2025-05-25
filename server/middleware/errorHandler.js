@@ -12,9 +12,9 @@ const errorHandler = (err, req, res, next) => {
   console.error('Error type:', err.name);
   console.error('Error code:', err.code);
   console.error('================');
-  
+
   // Log the error with additional context
-  logger.error('API Error:', { 
+  logger.error('API Error:', {
     error: err.message,
     stack: err.stack,
     path: req.path,
@@ -24,56 +24,56 @@ const errorHandler = (err, req, res, next) => {
     errorType: err.name,
     errorCode: err.code
   });
-  
+
   // Handle specific error types
   let statusCode = err.statusCode || 500;
   let message = 'An error occurred. Please try again later.';
-  
+
   // Mongoose validation error
   if (err.name === 'ValidationError') {
     statusCode = 400;
     message = 'Invalid input data';
   }
-  
+
   // MongoDB duplicate key error
   else if (err.code === 11000) {
     statusCode = 400;
     message = 'This record already exists';
   }
-  
+
   // JWT errors
   else if (err.name === 'JsonWebTokenError') {
     statusCode = 401;
     message = 'Authentication failed';
   }
-  
+
   else if (err.name === 'TokenExpiredError') {
     statusCode = 401;
     message = 'Session expired. Please login again';
   }
-  
+
   // Rate limiting error
   else if (err.status === 429) {
     statusCode = 429;
     message = 'Too many requests. Please try again later';
   }
-  
+
   // CastError (invalid MongoDB ObjectId)
   else if (err.name === 'CastError') {
     statusCode = 400;
     message = 'Invalid data format';
   }
-  
+
   // For non-500 errors in production, use the original message if it's safe
   else if (statusCode !== 500 && process.env.NODE_ENV === 'production') {
     message = err.message || message;
   }
-  
+
   // Prepare error response
   const errorResponse = {
     success: false,
     message,
-    ...(process.env.NODE_ENV !== 'production' && { 
+    ...(process.env.NODE_ENV !== 'production' && {
       error: {
         details: err.message,
         type: err.name,
@@ -81,7 +81,7 @@ const errorHandler = (err, req, res, next) => {
       }
     })
   };
-  
+
   // Send error response
   res.status(statusCode).json(errorResponse);
 };
