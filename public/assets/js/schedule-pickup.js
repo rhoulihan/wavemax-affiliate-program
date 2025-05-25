@@ -227,13 +227,27 @@ document.addEventListener('DOMContentLoaded', function() {
             
             console.log('Sending order request with token:', token.substring(0, 20) + '...');
             
-            // Submit order to the server
+            // Fetch CSRF token first (with credentials to maintain session)
+            const csrfResponse = await fetch('/api/csrf-token', {
+                credentials: 'include' // Important: include cookies for session
+            });
+            
+            if (!csrfResponse.ok) {
+                throw new Error('Failed to get CSRF token');
+            }
+            
+            const csrfData = await csrfResponse.json();
+            const csrfToken = csrfData.csrfToken;
+            
+            // Submit order to the server with CSRF token
             const response = await fetch('/api/orders', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
+                    'Authorization': `Bearer ${token}`,
+                    'X-CSRF-Token': csrfToken
                 },
+                credentials: 'include', // Include cookies for session
                 body: JSON.stringify(pickupData)
             });
             

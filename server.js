@@ -170,14 +170,10 @@ app.use(session({
 // Serve static files in all environments
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Set up CSRF protection
+// Set up CSRF protection using sessions instead of cookies
 const csrf = require('csurf');
 const csrfProtection = csrf({ 
-  cookie: {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'strict'
-  }
+  cookie: false // Use req.session instead of cookies
 });
 
 // CSRF excluded paths - only public endpoints that don't require authentication
@@ -200,10 +196,7 @@ const csrfExcludedPaths = [
   '/api/v1/affiliates/register',
   '/api/v1/customers/register',
   '/api/v1/affiliates/:affiliateId/public',
-  '/api/v1/customers/:customerId/profile',
-  // Temporarily exclude orders endpoint while fixing CSRF
-  '/api/orders',
-  '/api/v1/orders'
+  '/api/v1/customers/:customerId/profile'
 ];
 
 // Apply CSRF conditionally
@@ -229,9 +222,20 @@ const conditionalCsrf = (req, res, next) => {
 // Apply conditional CSRF to all routes
 app.use(conditionalCsrf);
 
-// CSRF token endpoint
-app.get('/api/csrf-token', csrfProtection, (req, res) => {
-  res.json({ csrfToken: req.csrfToken() });
+// CSRF token endpoint - ensure session exists before generating token
+app.get('/api/csrf-token', (req, res, next) => {
+  // Initialize session if it doesn't exist
+  if (!req.session) {
+    return res.status(500).json({ error: 'Session not initialized' });
+  }
+  
+  // Apply CSRF protection and generate token
+  csrfProtection(req, res, (err) => {
+    if (err) {
+      return res.status(500).json({ error: 'Failed to generate CSRF token' });
+    }
+    res.json({ csrfToken: req.csrfToken() });
+  });
 });
 
 // API Versioning middleware
