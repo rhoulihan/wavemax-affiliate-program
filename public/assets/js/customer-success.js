@@ -1,6 +1,12 @@
-document.addEventListener('DOMContentLoaded', function() {
+// Debug info
+console.log('customer-success.js loaded');
+console.log('Current URL:', window.location.href);
+
+function initializeSuccessPage() {
+  console.log('Initializing success page');
   // Get registration data from sessionStorage
   const registrationData = sessionStorage.getItem('registrationData');
+  console.log('Registration data from sessionStorage:', registrationData);
 
   if (!registrationData) {
     // Check URL parameters as fallback (for backward compatibility)
@@ -49,7 +55,15 @@ document.addEventListener('DOMContentLoaded', function() {
     // Clear the registration data from sessionStorage
     sessionStorage.removeItem('registrationData');
   }
-});
+}
+
+// Check if DOM is already loaded or wait for it
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initializeSuccessPage);
+} else {
+  // DOM is already loaded, initialize immediately
+  initializeSuccessPage();
+}
 
 function displayCustomerData(data) {
   // Set customer information
