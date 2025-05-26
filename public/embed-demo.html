@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WaveMAX Embed Demo - Parent Window</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .controls {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .controls h2 {
+            margin-top: 0;
+        }
+        .page-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .page-buttons button {
+            padding: 10px 20px;
+            border: none;
+            background: #3b82f6;
+            color: white;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        .page-buttons button:hover {
+            background: #2563eb;
+        }
+        .iframe-container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            min-height: 600px;
+        }
+        #embeddedFrame {
+            width: 100%;
+            height: 800px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .message-log {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 20px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .message-log h3 {
+            margin-top: 0;
+        }
+        .message-item {
+            background: white;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        .message-type {
+            font-weight: bold;
+            color: #3b82f6;
+        }
+        .message-data {
+            color: #666;
+            margin-top: 5px;
+            font-family: monospace;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>WaveMAX Embed Demo - Parent Window</h1>
+        
+        <div class="controls">
+            <h2>Embedded Page Navigation</h2>
+            <div class="page-buttons">
+                <button onclick="loadPage('affiliate-login-embed.html')">Affiliate Login</button>
+                <button onclick="loadPage('affiliate-dashboard-embed.html')">Affiliate Dashboard</button>
+                <button onclick="loadPage('affiliate-success-embed.html')">Affiliate Success</button>
+                <button onclick="loadPage('customer-register-embed.html')">Customer Register</button>
+                <button onclick="loadPage('customer-login-embed.html')">Customer Login</button>
+                <button onclick="loadPage('customer-dashboard-embed.html')">Customer Dashboard</button>
+                <button onclick="loadPage('schedule-pickup-embed.html')">Schedule Pickup</button>
+                <button onclick="loadPage('order-confirmation-embed.html?orderId=TEST123')">Order Confirmation</button>
+                <button onclick="loadPage('customer-success-embed.html')">Customer Success</button>
+            </div>
+            
+            <div>
+                <h3>Current URL:</h3>
+                <input type="text" id="currentUrl" style="width: 100%; padding: 8px;" readonly>
+            </div>
+        </div>
+        
+        <div class="iframe-container">
+            <iframe id="embeddedFrame" src="affiliate-login-embed.html"></iframe>
+        </div>
+        
+        <div class="message-log">
+            <h3>Message Log (from embedded iframe)</h3>
+            <div id="messageLog"></div>
+        </div>
+    </div>
+
+    <script>
+        // Update current URL display
+        function updateUrlDisplay() {
+            const iframe = document.getElementById('embeddedFrame');
+            document.getElementById('currentUrl').value = iframe.src;
+        }
+
+        // Load a page in the iframe
+        function loadPage(page) {
+            const iframe = document.getElementById('embeddedFrame');
+            iframe.src = page;
+            updateUrlDisplay();
+        }
+
+        // Log messages from iframe
+        function logMessage(type, data) {
+            const logContainer = document.getElementById('messageLog');
+            const messageItem = document.createElement('div');
+            messageItem.className = 'message-item';
+            
+            const timestamp = new Date().toLocaleTimeString();
+            messageItem.innerHTML = `
+                <div class="message-type">[${timestamp}] ${type}</div>
+                <div class="message-data">${JSON.stringify(data, null, 2)}</div>
+            `;
+            
+            logContainer.insertBefore(messageItem, logContainer.firstChild);
+            
+            // Keep only last 10 messages
+            while (logContainer.children.length > 10) {
+                logContainer.removeChild(logContainer.lastChild);
+            }
+        }
+
+        // Handle messages from embedded iframe
+        window.addEventListener('message', function(event) {
+            // In production, you should verify the origin
+            // if (event.origin !== 'https://wavemax.promo') return;
+            
+            if (event.data && event.data.source === 'wavemax-embed') {
+                const { type, data } = event.data;
+                
+                // Log all messages
+                logMessage(type, data);
+                
+                // Handle specific message types
+                switch (type) {
+                    case 'navigate':
+                        // Handle navigation requests
+                        handleNavigation(data.page);
+                        break;
+                        
+                    case 'iframe-loaded':
+                        console.log('Iframe loaded:', data.page);
+                        break;
+                        
+                    case 'login-success':
+                        console.log('Login successful:', data);
+                        // Could redirect to dashboard automatically
+                        if (data.userType === 'affiliate') {
+                            setTimeout(() => loadPage('affiliate-dashboard-embed.html'), 1000);
+                        } else if (data.userType === 'customer') {
+                            setTimeout(() => loadPage('customer-dashboard-embed.html'), 1000);
+                        }
+                        break;
+                        
+                    case 'registration-success':
+                        console.log('Registration successful:', data);
+                        // Navigate to success page
+                        if (data.userType === 'customer') {
+                            setTimeout(() => loadPage('customer-success-embed.html'), 1000);
+                        }
+                        break;
+                        
+                    case 'order-created':
+                        console.log('Order created:', data);
+                        // Navigate to order confirmation
+                        setTimeout(() => loadPage(`order-confirmation-embed.html?orderId=${data.orderId}`), 1000);
+                        break;
+                        
+                    case 'logout':
+                        console.log('User logged out:', data);
+                        // Navigate to appropriate login page
+                        if (data.userType === 'affiliate') {
+                            loadPage('affiliate-login-embed.html');
+                        } else if (data.userType === 'customer') {
+                            loadPage('customer-login-embed.html');
+                        }
+                        break;
+                        
+                    case 'form-error':
+                    case 'login-error':
+                    case 'registration-error':
+                    case 'order-error':
+                        console.error('Error:', type, data);
+                        break;
+                        
+                    default:
+                        console.log('Unhandled message type:', type, data);
+                }
+            }
+        });
+
+        // Handle navigation requests
+        function handleNavigation(page) {
+            const pageMap = {
+                'affiliate-login': 'affiliate-login-embed.html',
+                'affiliate-register': 'affiliate-register-embed.html',
+                'affiliate-dashboard': 'affiliate-dashboard-embed.html',
+                'affiliate-success': 'affiliate-success-embed.html',
+                'customer-login': 'customer-login-embed.html',
+                'customer-register': 'customer-register-embed.html',
+                'customer-dashboard': 'customer-dashboard-embed.html',
+                'customer-success': 'customer-success-embed.html',
+                'schedule-pickup': 'schedule-pickup-embed.html',
+                'order-confirmation': 'order-confirmation-embed.html',
+                'forgot-password': '#', // Handle password reset
+                'contact-affiliate': '#', // Handle contact form
+                'terms': '#', // Handle terms page
+                'privacy': '#' // Handle privacy page
+            };
+            
+            const pagePath = pageMap[page];
+            if (pagePath && pagePath !== '#') {
+                loadPage(pagePath);
+            } else {
+                console.log('Navigation requested to:', page);
+                // In production, handle these special cases
+            }
+        }
+
+        // Initialize
+        updateUrlDisplay();
+        logMessage('Parent Window Initialized', { ready: true });
+    </script>
+</body>
+</html>

@@ -697,6 +697,67 @@ For embedding assistance:
 - Email: tech@wavemaxlaundry.com
 - Check browser console for error messages
 
+## Full Application Embedding
+
+The entire WaveMAX Affiliate Program application can run embedded within an iframe on external websites. This includes all forms, dashboards, and user flows.
+
+### Embed Router System
+
+Use the embed router for a complete embedded application experience:
+
+```html
+<iframe 
+    id="affiliate-app"
+    src="https://wavemax.promo/embed-router.html" 
+    width="100%" 
+    height="800" 
+    frameborder="0"
+    allow="fullscreen"
+    style="border: none;">
+</iframe>
+```
+
+### Available Embedded Pages
+
+All application pages have embedded versions with `-embed.html` suffix:
+
+- `/affiliate-register-embed.html` - Affiliate registration
+- `/affiliate-login-embed.html` - Affiliate login  
+- `/affiliate-dashboard-embed.html` - Full affiliate dashboard
+- `/customer-register-embed.html` - Customer registration
+- `/customer-login-embed.html` - Customer login
+- `/customer-dashboard-embed.html` - Customer dashboard
+- `/schedule-pickup-embed.html` - Schedule pickup form
+- `/order-confirmation-embed.html` - Order confirmation
+
+### Navigation Between Pages
+
+The embedded pages communicate via postMessage API:
+
+```javascript
+// Listen for navigation requests
+window.addEventListener('message', function(event) {
+    if (event.origin !== 'https://wavemax.promo') return;
+    
+    if (event.data.type === 'navigate') {
+        // Handle navigation to embedded pages
+        console.log('Navigate to:', event.data.data.url);
+    }
+});
+
+// Navigate programmatically
+document.getElementById('affiliate-app').contentWindow.postMessage({
+    type: 'navigate',
+    data: { route: '/affiliate-dashboard' }
+}, 'https://wavemax.promo');
+```
+
+### Integration Example
+
+View the complete integration example:
+- Demo: https://wavemax.promo/wavemaxlaundry-integration.html
+- Shows navigation, authentication, and message handling
+
 ## Acknowledgments
 
 - WaveMAX Laundry for the concept and business model

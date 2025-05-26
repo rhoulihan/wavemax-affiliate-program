@@ -3,223 +3,156 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WaveMAX Affiliate Program - Embed Example</title>
+    <title>Embed Example - WaveMAX Affiliate Registration</title>
     <style>
         body {
             font-family: Arial, sans-serif;
+            padding: 20px;
             max-width: 1200px;
             margin: 0 auto;
-            padding: 20px;
-            background: #f5f5f5;
         }
         
-        .example-section {
-            background: white;
-            padding: 30px;
-            margin-bottom: 30px;
+        h1 {
+            color: #1e3a8a;
+        }
+        
+        .embed-container {
+            width: 100%;
+            border: 2px solid #e5e7eb;
             border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            overflow: hidden;
+            margin: 20px 0;
         }
         
-        h1, h2 {
-            color: #333;
+        #affiliateFormIframe {
+            width: 100%;
+            border: none;
+            min-height: 800px;
         }
         
-        pre {
-            background: #f8f9fa;
-            border: 1px solid #e9ecef;
-            border-radius: 4px;
-            padding: 15px;
+        .code-example {
+            background-color: #f3f4f6;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
             overflow-x: auto;
         }
         
-        code {
-            font-family: 'Courier New', monospace;
+        pre {
+            margin: 0;
             font-size: 14px;
-        }
-        
-        .iframe-container {
-            width: 100%;
-            margin: 20px 0;
-        }
-        
-        .note {
-            background: #e3f2fd;
-            border-left: 4px solid #2196f3;
-            padding: 15px;
-            margin: 20px 0;
         }
     </style>
 </head>
 <body>
-    <h1>WaveMAX Affiliate Program - Embedding Instructions</h1>
+    <h1>WaveMAX Affiliate Registration - Embed Example</h1>
     
-    <div class="example-section">
-        <h2>Option 1: Full Landing Page (Recommended)</h2>
-        <p>Use this option to display the complete affiliate program landing page on your site:</p>
-        
-        <pre><code>&lt;!-- Add this where you want the affiliate program to appear --&gt;
+    <p>This page demonstrates how to embed the WaveMAX affiliate registration form on your website.</p>
+    
+    <h2>Live Example</h2>
+    <div class="embed-container">
+        <iframe 
+            id="affiliateFormIframe"
+            src="affiliate-register-embed.html"
+            title="WaveMAX Affiliate Registration Form"
+            scrolling="no">
+        </iframe>
+    </div>
+    
+    <h2>Integration Code</h2>
+    <div class="code-example">
+        <pre>&lt;!-- Add this iframe to your page where you want the form to appear --&gt;
 &lt;iframe 
-    src="https://wavemax.promo/embed-landing.html" 
-    width="100%" 
-    height="2400" 
-    frameborder="0" 
-    scrolling="no"
-    style="width: 100%; min-height: 2400px; border: none;"&gt;
-&lt;/iframe&gt;</code></pre>
-        
-        <div class="note">
-            <strong>Note:</strong> This version includes all features, testimonials, and FAQ sections. Adjust the height based on your needs.
-        </div>
-    </div>
-    
-    <div class="example-section">
-        <h2>Option 2: Compact Iframe Version</h2>
-        <p>Use this option for a smaller, more focused embed:</p>
-        
-        <pre><code>&lt;!-- Compact version for sidebars or smaller spaces --&gt;
-&lt;iframe 
-    src="https://wavemax.promo/iframe-embed.html" 
-    width="100%" 
-    height="800" 
-    frameborder="0" 
-    scrolling="no"
-    style="width: 100%; min-height: 600px; border: none;"&gt;
-&lt;/iframe&gt;</code></pre>
-        
-        <h3>Live Preview:</h3>
-        <div class="iframe-container">
-            <iframe 
-                src="/iframe-embed.html" 
-                width="100%" 
-                height="800" 
-                frameborder="0" 
-                scrolling="no"
-                style="width: 100%; min-height: 600px; border: 1px solid #ddd;">
-            </iframe>
-        </div>
-    </div>
-    
-    <div class="example-section">
-        <h2>Option 3: Direct Link Buttons</h2>
-        <p>If you prefer not to use iframes, you can add direct link buttons:</p>
-        
-        <pre><code>&lt;!-- Simple button links --&gt;
-&lt;div style="text-align: center; padding: 40px 20px; background: #f8f9fa;"&gt;
-    &lt;h2&gt;Become a WaveMAX Affiliate&lt;/h2&gt;
-    &lt;p&gt;Earn 10% recurring commission on every customer you refer!&lt;/p&gt;
-    &lt;div style="margin-top: 20px;"&gt;
-        &lt;a href="https://wavemax.promo/affiliate-register.html" 
-           target="_blank"
-           style="display: inline-block; padding: 12px 30px; 
-                  background: #3b82f6; color: white; 
-                  text-decoration: none; border-radius: 6px; 
-                  font-weight: bold; margin: 0 10px;"&gt;
-            Join Now
-        &lt;/a&gt;
-        &lt;a href="https://wavemax.promo/affiliate-login.html" 
-           target="_blank"
-           style="display: inline-block; padding: 12px 30px; 
-                  background: white; color: #3b82f6; 
-                  text-decoration: none; border-radius: 6px; 
-                  font-weight: bold; margin: 0 10px;
-                  border: 2px solid #3b82f6;"&gt;
-            Affiliate Login
-        &lt;/a&gt;
-    &lt;/div&gt;
-&lt;/div&gt;</code></pre>
-    </div>
-    
-    <div class="example-section">
-        <h2>Option 4: Responsive Iframe with Auto-Resize</h2>
-        <p>For a responsive iframe that adjusts its height automatically:</p>
-        
-        <pre><code>&lt;!-- Responsive iframe with auto-resize --&gt;
-&lt;div id="affiliate-iframe-container"&gt;&lt;/div&gt;
+    id="affiliateFormIframe"
+    src="https://wavemax.promo/affiliate-register-embed.html"
+    title="WaveMAX Affiliate Registration Form"
+    style="width: 100%; border: none; min-height: 800px;"
+    scrolling="no"&gt;
+&lt;/iframe&gt;
 
+&lt;!-- Add this script to handle dynamic iframe resizing --&gt;
 &lt;script&gt;
-(function() {
-    var container = document.getElementById('affiliate-iframe-container');
-    var iframe = document.createElement('iframe');
-    iframe.src = 'https://wavemax.promo/iframe-embed.html';
-    iframe.style.width = '100%';
-    iframe.style.border = 'none';
-    iframe.frameBorder = '0';
-    
-    // Auto-resize function
-    function resizeIframe() {
-        try {
-            var height = iframe.contentWindow.document.body.scrollHeight;
-            iframe.style.height = height + 'px';
-        } catch(e) {
-            iframe.style.height = '800px'; // Fallback height
-        }
+// Listen for messages from the iframe
+window.addEventListener('message', function(event) {
+    // Verify the origin for security
+    if (event.origin !== 'https://wavemax.promo') {
+        return;
     }
     
-    iframe.onload = resizeIframe;
-    window.addEventListener('resize', resizeIframe);
+    const iframe = document.getElementById('affiliateFormIframe');
     
-    container.appendChild(iframe);
-})();
-&lt;/script&gt;</code></pre>
-    </div>
-    
-    <div class="example-section">
-        <h2>WordPress Shortcode</h2>
-        <p>If the WaveMAX site uses WordPress, you can create a shortcode:</p>
-        
-        <pre><code>&lt;?php
-// Add this to your theme's functions.php file
-function wavemax_affiliate_embed_shortcode($atts) {
-    $atts = shortcode_atts(array(
-        'height' => '800',
-        'type' => 'compact'
-    ), $atts);
-    
-    $url = ($atts['type'] === 'full') 
-        ? 'https://wavemax.promo/embed-landing.html' 
-        : 'https://wavemax.promo/iframe-embed.html';
-    
-    return '&lt;iframe src="' . $url . '" 
-            width="100%" 
-            height="' . $atts['height'] . '" 
-            frameborder="0" 
-            style="border: none;"&gt;&lt;/iframe&gt;';
-}
-add_shortcode('wavemax_affiliate', 'wavemax_affiliate_embed_shortcode');
+    switch (event.data.type) {
+        case 'form-loaded':
+        case 'form-height':
+            // Dynamically resize iframe based on content height
+            if (event.data.height) {
+                iframe.style.height = event.data.height + 'px';
+            }
+            break;
+            
+        case 'registration-error':
+            // Handle registration errors
+            console.error('Registration error:', event.data.message);
+            // You can display this error to your users as needed
+            break;
+    }
+});
 
-// Usage: [wavemax_affiliate type="compact" height="800"]
-?&gt;</code></pre>
+// Optional: Prefill form data
+function prefillForm(data) {
+    const iframe = document.getElementById('affiliateFormIframe');
+    iframe.contentWindow.postMessage({
+        type: 'prefill-form',
+        data: data
+    }, 'https://wavemax.promo');
+}
+
+// Example usage:
+// prefillForm({
+//     firstName: 'John',
+//     lastName: 'Doe',
+//     email: 'john@example.com'
+// });
+&lt;/script&gt;</pre>
     </div>
     
-    <div class="example-section">
-        <h2>Important Notes</h2>
-        <ul>
-            <li><strong>HTTPS Required:</strong> Both sites must use HTTPS for iframe embedding to work properly</li>
-            <li><strong>Mobile Responsive:</strong> All embed options are mobile-friendly</li>
-            <li><strong>Tracking:</strong> UTM parameters are automatically added to track traffic from embeds</li>
-            <li><strong>Browser Compatibility:</strong> Works in all modern browsers (Chrome, Firefox, Safari, Edge)</li>
-            <li><strong>Loading Performance:</strong> Consider lazy loading for better page performance</li>
-        </ul>
-        
-        <h3>Lazy Loading Example:</h3>
-        <pre><code>&lt;iframe 
-    src="https://wavemax.promo/iframe-embed.html" 
-    width="100%" 
-    height="800" 
-    frameborder="0"
-    loading="lazy"
-    style="border: none;"&gt;
-&lt;/iframe&gt;</code></pre>
-    </div>
+    <h2>Features</h2>
+    <ul>
+        <li>Responsive design that adapts to your container width</li>
+        <li>Automatic height adjustment based on form content</li>
+        <li>Secure cross-origin communication</li>
+        <li>Form validation and error handling</li>
+        <li>Redirects to success page in parent window upon completion</li>
+        <li>Optional form prefilling capability</li>
+    </ul>
     
-    <div class="example-section">
-        <h2>Contact Support</h2>
-        <p>If you need help with embedding or customization, please contact:</p>
-        <ul>
-            <li>Email: <a href="mailto:tech@wavemaxlaundry.com">tech@wavemaxlaundry.com</a></li>
-            <li>Phone: (512) 555-0123</li>
-        </ul>
-    </div>
+    <h2>Security Considerations</h2>
+    <ul>
+        <li>Always verify the origin of messages when using postMessage</li>
+        <li>The form uses HTTPS for all API communications</li>
+        <li>CSRF protection is built into the form</li>
+        <li>Sensitive data is transmitted securely</li>
+    </ul>
+
+    <script>
+        // Handle iframe messages for this demo
+        window.addEventListener('message', function(event) {
+            const iframe = document.getElementById('affiliateFormIframe');
+            
+            switch (event.data.type) {
+                case 'form-loaded':
+                case 'form-height':
+                    if (event.data.height) {
+                        iframe.style.height = event.data.height + 'px';
+                    }
+                    break;
+                    
+                case 'registration-error':
+                    console.error('Registration error:', event.data.message);
+                    alert('Registration error: ' + event.data.message);
+                    break;
+            }
+        });
+    </script>
 </body>
 </html>
