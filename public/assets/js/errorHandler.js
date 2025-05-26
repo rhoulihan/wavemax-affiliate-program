@@ -1,5 +1,7 @@
 // Create a new file for frontend error handling
-class ErrorHandler {
+// Check if ErrorHandler already exists to prevent duplicate declarations
+if (typeof ErrorHandler === 'undefined') {
+  class ErrorHandler {
   constructor(errorContainerId = 'errorContainer') {
     this.errorContainer = document.getElementById(errorContainerId);
     this.setup();
@@ -62,7 +64,8 @@ class ErrorHandler {
     }
     return response;
   }
-}
+  }
 
-// Export for use in other files
-window.ErrorHandler = new ErrorHandler();
+  // Export for use in other files
+  window.ErrorHandler = new ErrorHandler();
+}
