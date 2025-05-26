@@ -375,55 +375,89 @@ function copyRegistrationLink() {
   const linkInput = document.getElementById('registrationLink');
   const copyBtn = document.getElementById('copyRegistrationLinkBtn');
   
-  try {
-    // Try modern clipboard API first
-    if (navigator.clipboard && window.isSecureContext) {
-      navigator.clipboard.writeText(linkInput.value).then(() => {
-        showCopySuccess(copyBtn);
-      }).catch(() => {
-        // Fallback to older method
-        fallbackCopyToClipboard(linkInput, copyBtn);
-      });
-    } else {
-      // Use fallback for non-secure contexts or older browsers
-      fallbackCopyToClipboard(linkInput, copyBtn);
-    }
-  } catch (err) {
-    // If all else fails, use the fallback
-    fallbackCopyToClipboard(linkInput, copyBtn);
-  }
-}
-
-// Fallback copy method for iframe/older browser compatibility
-function fallbackCopyToClipboard(input, button) {
-  // Store the current selection
-  const currentSelection = document.getSelection().rangeCount > 0 
-    ? document.getSelection().getRangeAt(0) 
-    : false;
-  
-  // Select the text
-  input.select();
-  input.setSelectionRange(0, 99999); // For mobile devices
+  // Focus the input first
+  linkInput.focus();
+  linkInput.select();
   
   try {
-    // Try to copy using execCommand
+    // Use execCommand which works better in iframes
     const successful = document.execCommand('copy');
     if (successful) {
-      showCopySuccess(button);
+      showCopySuccess(copyBtn);
     } else {
       // If copy fails, show the text for manual copying
-      alert('Copy failed. Please manually copy the link:\n\n' + input.value);
+      showManualCopyPrompt(linkInput.value);
     }
   } catch (err) {
     // Show text for manual copying if everything fails
-    alert('Copy failed. Please manually copy the link:\n\n' + input.value);
+    showManualCopyPrompt(linkInput.value);
   }
   
-  // Restore the original selection
-  if (currentSelection) {
-    document.getSelection().removeAllRanges();
-    document.getSelection().addRange(currentSelection);
-  }
+  // Blur the input after copying
+  linkInput.blur();
+}
+
+// Show manual copy prompt
+function showManualCopyPrompt(text) {
+  // Create a temporary textarea for better compatibility
+  const textarea = document.createElement('textarea');
+  textarea.value = text;
+  textarea.style.position = 'fixed';
+  textarea.style.top = '50%';
+  textarea.style.left = '50%';
+  textarea.style.transform = 'translate(-50%, -50%)';
+  textarea.style.width = '80%';
+  textarea.style.maxWidth = '400px';
+  textarea.style.height = '100px';
+  textarea.style.padding = '10px';
+  textarea.style.border = '2px solid #1e3a8a';
+  textarea.style.borderRadius = '8px';
+  textarea.style.backgroundColor = 'white';
+  textarea.style.zIndex = '10000';
+  textarea.style.fontSize = '14px';
+  
+  // Create overlay
+  const overlay = document.createElement('div');
+  overlay.style.position = 'fixed';
+  overlay.style.top = '0';
+  overlay.style.left = '0';
+  overlay.style.width = '100%';
+  overlay.style.height = '100%';
+  overlay.style.backgroundColor = 'rgba(0,0,0,0.5)';
+  overlay.style.zIndex = '9999';
+  
+  // Create instruction text
+  const instruction = document.createElement('div');
+  instruction.textContent = 'Press Ctrl+C (or Cmd+C) to copy, then click anywhere to close';
+  instruction.style.position = 'fixed';
+  instruction.style.top = 'calc(50% - 70px)';
+  instruction.style.left = '50%';
+  instruction.style.transform = 'translateX(-50%)';
+  instruction.style.color = 'white';
+  instruction.style.fontSize = '16px';
+  instruction.style.fontWeight = 'bold';
+  instruction.style.zIndex = '10001';
+  instruction.style.textAlign = 'center';
+  
+  document.body.appendChild(overlay);
+  document.body.appendChild(instruction);
+  document.body.appendChild(textarea);
+  
+  // Select the text
+  textarea.focus();
+  textarea.select();
+  
+  // Remove elements when clicked
+  const cleanup = () => {
+    document.body.removeChild(textarea);
+    document.body.removeChild(overlay);
+    document.body.removeChild(instruction);
+  };
+  
+  overlay.addEventListener('click', cleanup);
+  textarea.addEventListener('blur', () => {
+    setTimeout(cleanup, 100);
+  });
 }
 
 // Show copy success feedback
