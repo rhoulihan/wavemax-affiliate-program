@@ -80,8 +80,11 @@ function initializeAffiliateRegistration() {
 
         // Handle redirect based on whether we're embedded
         if (isEmbedded) {
-          // If embedded, redirect parent window
-          window.parent.location.href = `${baseUrl}/affiliate-success.html`;
+          // For embed-app, send navigation message
+          window.parent.postMessage({
+            type: 'navigate',
+            data: { url: '/affiliate-success' }
+          }, '*');
         } else {
           // Otherwise, normal redirect
           window.location.href = `${baseUrl}/affiliate-success.html`;
