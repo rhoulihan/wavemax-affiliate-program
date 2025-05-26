@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', async function() {
   const customerStr = localStorage.getItem('currentCustomer');
 
   if (!token || !customerStr) {
-    window.location.href = 'customer-login.html';
+    window.location.href = '/customer-login';
     return;
   }
 
@@ -22,7 +22,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     document.getElementById('customerInfo').textContent = `Customer ID: ${customerId}`;
 
     // Set schedule pickup link
-    document.getElementById('schedulePickupBtn').href = `schedule-pickup.html?affiliate=${customerData.affiliateId}&customer=${customerId}`;
+    document.getElementById('schedulePickupBtn').href = `/schedule-pickup?affiliate=${customerData.affiliateId}&customer=${customerId}`;
 
     // Load dashboard data
     await loadDashboardData();
@@ -30,7 +30,7 @@ document.addEventListener('DOMContentLoaded', async function() {
   } catch (error) {
     console.error('Error initializing dashboard:', error);
     alert('Error loading dashboard. Please login again.');
-    window.location.href = 'customer-login.html';
+    window.location.href = '/customer-login';
   }
 });
 
@@ -362,7 +362,7 @@ document.addEventListener('DOMContentLoaded', function() {
   document.getElementById('logoutBtn').addEventListener('click', function() {
     localStorage.removeItem('customerToken');
     localStorage.removeItem('currentCustomer');
-    window.location.href = 'customer-login.html';
+    window.location.href = '/customer-login';
   });
 
   // View Orders button

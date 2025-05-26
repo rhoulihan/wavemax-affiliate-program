@@ -5,7 +5,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
   if (token && currentCustomer) {
     // User is already logged in, redirect to dashboard
-    window.location.href = `customer-dashboard.html?id=${currentCustomer.customerId}`;
+    window.location.href = `/customer-dashboard?id=${currentCustomer.customerId}`;
     return;
   }
 
@@ -16,7 +16,7 @@ document.addEventListener('DOMContentLoaded', function() {
   // If affiliate ID is present, update register link
   if (affiliateId) {
     const registerLink = document.getElementById('registerLink');
-    registerLink.href = `customer-register.html?affiliate=${affiliateId}`;
+    registerLink.href = `/customer-register?affiliate=${affiliateId}`;
     registerLink.textContent = 'Register here';
   }
 
@@ -66,7 +66,7 @@ document.addEventListener('DOMContentLoaded', function() {
         window.location.href = redirectUrl;
       } else {
         // Default redirect to dashboard
-        window.location.href = `customer-dashboard.html?id=${data.customer.customerId}`;
+        window.location.href = `/customer-dashboard?id=${data.customer.customerId}`;
       }
     } catch (error) {
       console.error('Login error:', error);

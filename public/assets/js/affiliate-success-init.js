@@ -68,7 +68,7 @@ function initializeAffiliateSuccess() {
                 document.getElementById('affiliateEmail').textContent = affiliateData.email;
                 
                 // Generate registration link
-                const registrationLink = `${baseUrl}/customer-register.html?affid=${affiliateData.affiliateId}`;
+                const registrationLink = `${baseUrl}/customer-register?affid=${affiliateData.affiliateId}`;
                 document.getElementById('registrationLink').value = registrationLink;
                 
                 // Update dashboard link
