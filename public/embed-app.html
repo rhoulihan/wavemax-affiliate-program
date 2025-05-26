@@ -289,10 +289,19 @@
         
         // Handle messages from embedded pages
         window.addEventListener('message', function(event) {
+            console.log('Message received:', event);
+            console.log('Message origin:', event.origin);
+            console.log('Message data:', event.data);
+            console.log('BASE_URL:', BASE_URL);
+            console.log('window.location.origin:', window.location.origin);
+            
             // Allow messages from same origin or from within iframes
-            if (event.origin !== BASE_URL && event.origin !== window.location.origin) return;
+            // For now, let's be more permissive to debug
+            // if (event.origin !== BASE_URL && event.origin !== window.location.origin) return;
             
             const { type, data } = event.data;
+            console.log('Message type:', type);
+            console.log('Message data object:', data);
             
             if (type === 'navigate' && data && data.url) {
                 // Handle navigation request
