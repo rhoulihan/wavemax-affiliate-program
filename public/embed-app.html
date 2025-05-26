@@ -101,7 +101,11 @@
             try {
                 container.innerHTML = '<div class="loading"><i class="fas fa-spinner fa-spin me-2"></i>Loading...</div>';
                 
-                const response = await fetch(BASE_URL + pagePath);
+                // Build URL with current query parameters
+                const currentParams = new URLSearchParams(window.location.search);
+                const fetchUrl = BASE_URL + pagePath + (currentParams.toString() ? '?' + currentParams.toString() : '');
+                
+                const response = await fetch(fetchUrl);
                 if (!response.ok) throw new Error('Failed to load page');
                 
                 let html = await response.text();
