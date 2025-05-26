@@ -278,7 +278,7 @@ document.addEventListener('DOMContentLoaded', function() {
         localStorage.removeItem('customerToken');
 
         // Redirect directly to order confirmation page
-        window.location.href = '/order-confirmation?id=' + data.orderId;
+        window.location.href = '/embed-app.html?route=/order-confirmation&id=' + data.orderId;
       } else {
         alert(data.message || 'Failed to schedule pickup. Please try again.');
       }

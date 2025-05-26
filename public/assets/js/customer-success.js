@@ -10,7 +10,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     if (!customerId) {
       alert('No registration data found. Please register first.');
-      window.location.href = '/';
+      window.location.href = '/embed-app.html';
       return;
     }
 
@@ -33,13 +33,13 @@ document.addEventListener('DOMContentLoaded', function() {
         } else {
           console.error('Failed to load customer data:', data.message);
           alert('Unable to load customer information.');
-          window.location.href = '/';
+          window.location.href = '/embed-app.html';
         }
       })
       .catch(error => {
         console.error('Error fetching customer data:', error);
         alert('An error occurred while loading customer information.');
-        window.location.href = '/';
+        window.location.href = '/embed-app.html';
       });
   } else {
     // Use data from sessionStorage
