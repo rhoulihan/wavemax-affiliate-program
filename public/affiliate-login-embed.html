@@ -34,9 +34,7 @@
                 <p class="mt-2">Sign in to access your affiliate dashboard</p>
             </div>
             
-            <form id="affiliateLoginForm" class="p-6 space-y-6">
-                <!-- Hidden CSRF token -->
-                <input type="hidden" name="_csrf" value="{{csrfToken}}">
+            <form id="affiliateLoginForm" class="p-6 space-y-6" onsubmit="return false;">
                 
                 <!-- Demo credentials notice -->
                 <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
