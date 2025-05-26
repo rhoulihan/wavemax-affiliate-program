@@ -157,7 +157,8 @@ function initializeAffiliateDashboard() {
 // Copy the existing functions from affiliate-dashboard.js
 async function loadAffiliateData(affiliateId) {
   try {
-    const response = await fetch(`/api/v1/affiliates/${affiliateId}`, {
+    const baseUrl = window.EMBED_CONFIG?.baseUrl || 'https://wavemax.promo';
+    const response = await fetch(`${baseUrl}/api/v1/affiliates/${affiliateId}`, {
       headers: {
         'Authorization': `Bearer ${localStorage.getItem('affiliateToken')}`
       }
@@ -195,7 +196,8 @@ async function loadAffiliateData(affiliateId) {
 
 async function loadDashboardStats(affiliateId) {
   try {
-    const response = await fetch(`/api/v1/affiliates/${affiliateId}/dashboard`, {
+    const baseUrl = window.EMBED_CONFIG?.baseUrl || 'https://wavemax.promo';
+    const response = await fetch(`${baseUrl}/api/v1/affiliates/${affiliateId}/dashboard`, {
       headers: {
         'Authorization': `Bearer ${localStorage.getItem('affiliateToken')}`
       }
@@ -481,7 +483,9 @@ function showCopySuccess(button) {
 // Load settings data
 async function loadSettingsData(affiliateId) {
   try {
-    const response = await fetch(`/api/v1/affiliates/${affiliateId}`, {
+    console.log('Loading settings data for affiliate:', affiliateId);
+    const baseUrl = window.EMBED_CONFIG?.baseUrl || 'https://wavemax.promo';
+    const response = await fetch(`${baseUrl}/api/v1/affiliates/${affiliateId}`, {
       headers: {
         'Authorization': `Bearer ${localStorage.getItem('affiliateToken')}`
       }
@@ -489,19 +493,35 @@ async function loadSettingsData(affiliateId) {
 
     if (response.ok) {
       const data = await response.json();
+      console.log('Affiliate data received:', data);
       
-      // Populate settings fields
-      document.getElementById('settingsFirstName').value = data.firstName || '';
-      document.getElementById('settingsLastName').value = data.lastName || '';
-      document.getElementById('settingsEmail').value = data.email || '';
-      document.getElementById('settingsPhone').value = data.phone || '';
-      document.getElementById('settingsBusinessName').value = data.businessName || '';
-      document.getElementById('settingsServiceArea').value = data.serviceArea || '';
-      
-      // Generate and display registration link
-      const baseUrl = window.location.origin;
-      const registrationLink = `${baseUrl}/customer-register?affid=${affiliateId}`;
-      document.getElementById('registrationLink').value = registrationLink;
+      // Wait a bit to ensure DOM is ready
+      setTimeout(() => {
+        // Populate settings fields with null checks
+        const firstNameField = document.getElementById('settingsFirstName');
+        const lastNameField = document.getElementById('settingsLastName');
+        const emailField = document.getElementById('settingsEmail');
+        const phoneField = document.getElementById('settingsPhone');
+        const businessNameField = document.getElementById('settingsBusinessName');
+        const serviceAreaField = document.getElementById('settingsServiceArea');
+        const registrationLinkField = document.getElementById('registrationLink');
+        
+        if (firstNameField) firstNameField.value = data.firstName || '';
+        if (lastNameField) lastNameField.value = data.lastName || '';
+        if (emailField) emailField.value = data.email || '';
+        if (phoneField) phoneField.value = data.phone || '';
+        if (businessNameField) businessNameField.value = data.businessName || '';
+        if (serviceAreaField) serviceAreaField.value = data.serviceArea || '';
+        
+        // Generate and display registration link
+        const baseUrl = window.location.origin;
+        const registrationLink = `${baseUrl}/customer-register?affid=${affiliateId}`;
+        if (registrationLinkField) registrationLinkField.value = registrationLink;
+        
+        console.log('Settings fields populated');
+      }, 100);
+    } else {
+      console.error('Failed to load affiliate data:', response.status);
     }
   } catch (error) {
     console.error('Error loading settings data:', error);
@@ -550,7 +570,8 @@ async function saveSettings(affiliateId) {
       serviceArea: formData.get('serviceArea')
     };
     
-    const response = await fetch(`/api/v1/affiliates/${affiliateId}`, {
+    const baseUrl = window.EMBED_CONFIG?.baseUrl || 'https://wavemax.promo';
+    const response = await fetch(`${baseUrl}/api/v1/affiliates/${affiliateId}`, {
       method: 'PUT',
       headers: {
         'Authorization': `Bearer ${localStorage.getItem('affiliateToken')}`,
