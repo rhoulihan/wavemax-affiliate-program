@@ -83,11 +83,33 @@ function initializeAffiliateRegistration() {
         // Handle redirect based on whether we're embedded
         if (isEmbedded) {
           // For embed-app, send navigation message
+          console.log('isEmbedded:', isEmbedded);
           console.log('Sending navigation message to parent');
-          window.parent.postMessage({
-            type: 'navigate',
-            data: { url: '/affiliate-success' }
-          }, '*');
+          console.log('Window parent:', window.parent);
+          console.log('Window parent !== window:', window.parent !== window);
+          
+          // Try multiple navigation approaches
+          try {
+            // First try postMessage
+            window.parent.postMessage({
+              type: 'navigate',
+              data: { url: '/affiliate-success' }
+            }, '*');
+            console.log('Navigation message sent successfully');
+            
+            // Also try direct navigation as fallback
+            setTimeout(() => {
+              console.log('Trying direct navigation as fallback');
+              // Check if we're still on the same page
+              if (window.location.href.includes('affiliate-register')) {
+                window.location.href = `${baseUrl}/affiliate-success-embed.html`;
+              }
+            }, 1000);
+          } catch (msgError) {
+            console.error('Error sending message:', msgError);
+            // Fallback to direct navigation
+            window.location.href = `${baseUrl}/affiliate-success-embed.html`;
+          }
         } else {
           // Otherwise, normal redirect
           window.location.href = `${baseUrl}/affiliate-success.html`;
