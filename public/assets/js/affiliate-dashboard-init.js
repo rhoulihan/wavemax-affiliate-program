@@ -104,6 +104,30 @@ function initializeAffiliateDashboard() {
     console.error('Logout button not found in DOM');
   }
   
+  // Schedule pickup button
+  const scheduleBtn = document.getElementById('schedulePickupBtn');
+  if (scheduleBtn) {
+    scheduleBtn.addEventListener('click', function(e) {
+      e.preventDefault();
+      console.log('Schedule pickup button clicked');
+      
+      if (isEmbedded) {
+        // For embedded, use postMessage navigation
+        window.parent.postMessage({
+          type: 'navigate',
+          data: { url: '/schedule-pickup' }
+        }, '*');
+        
+        // Fallback direct navigation after a short delay
+        setTimeout(() => {
+          window.location.href = '/embed-app.html?route=/schedule-pickup';
+        }, 500);
+      } else {
+        window.location.href = '/embed-app.html?route=/schedule-pickup';
+      }
+    });
+  }
+  
 
   // Make functions available globally (they're used by the existing dashboard code)
   window.loadAffiliateData = loadAffiliateData;
