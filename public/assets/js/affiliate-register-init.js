@@ -71,6 +71,8 @@ function initializeAffiliateRegistration() {
 
         await window.ErrorHandler.handleFetchError(response);
         const data = await response.json();
+        
+        console.log('Registration response:', data);
 
         // Store the affiliate data
         localStorage.setItem('currentAffiliate', JSON.stringify({
@@ -81,6 +83,7 @@ function initializeAffiliateRegistration() {
         // Handle redirect based on whether we're embedded
         if (isEmbedded) {
           // For embed-app, send navigation message
+          console.log('Sending navigation message to parent');
           window.parent.postMessage({
             type: 'navigate',
             data: { url: '/affiliate-success' }
