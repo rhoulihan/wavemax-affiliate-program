@@ -263,33 +263,60 @@
                     <form id="settingsForm">
                         <input type="hidden" name="_csrf" value="{{csrfToken}}">
 
+                        <!-- Registration Link Section -->
                         <div class="mb-6">
-                            <h3 class="text-lg font-bold mb-4">Personal Information</h3>
+                            <h3 class="text-lg font-bold mb-4">Customer Registration Link</h3>
+                            <div class="mb-4">
+                                <label for="registrationLink" class="block text-gray-700 mb-2">Your Custom Registration URL</label>
+                                <div class="flex">
+                                    <input type="text" id="registrationLink" class="w-full px-4 py-2 border rounded-l-lg bg-gray-100" readonly>
+                                    <button type="button" onclick="copyRegistrationLink()" class="bg-blue-600 text-white px-4 py-2 rounded-r-lg hover:bg-blue-700 transition">Copy</button>
+                                </div>
+                                <p class="text-sm text-gray-600 mt-1">Share this link with customers to register under your affiliate account</p>
+                            </div>
+                        </div>
+
+                        <div class="mb-6">
+                            <div class="flex justify-between items-center mb-4">
+                                <h3 class="text-lg font-bold">Personal Information</h3>
+                                <button type="button" id="editBtn" class="text-blue-600 hover:text-blue-700 font-medium">Edit</button>
+                            </div>
                             <div class="grid md:grid-cols-2 gap-4">
                                 <div>
                                     <label for="settingsFirstName" class="block text-gray-700 mb-2">First Name</label>
-                                    <input type="text" id="settingsFirstName" name="firstName" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <input type="text" id="settingsFirstName" name="firstName" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-100" readonly>
                                 </div>
                                 
                                 <div>
                                     <label for="settingsLastName" class="block text-gray-700 mb-2">Last Name</label>
-                                    <input type="text" id="settingsLastName" name="lastName" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <input type="text" id="settingsLastName" name="lastName" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-100" readonly>
                                 </div>
                                 
                                 <div>
                                     <label for="settingsEmail" class="block text-gray-700 mb-2">Email Address</label>
-                                    <input type="email" id="settingsEmail" name="email" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <input type="email" id="settingsEmail" name="email" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-100" readonly>
                                 </div>
                                 
                                 <div>
                                     <label for="settingsPhone" class="block text-gray-700 mb-2">Phone Number</label>
-                                    <input type="tel" id="settingsPhone" name="phone" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <input type="tel" id="settingsPhone" name="phone" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-100" readonly>
+                                </div>
+
+                                <div>
+                                    <label for="settingsBusinessName" class="block text-gray-700 mb-2">Business Name</label>
+                                    <input type="text" id="settingsBusinessName" name="businessName" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-100" readonly>
+                                </div>
+
+                                <div>
+                                    <label for="settingsServiceArea" class="block text-gray-700 mb-2">Service Area</label>
+                                    <input type="text" id="settingsServiceArea" name="serviceArea" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-100" readonly>
                                 </div>
                             </div>
                         </div>
                         
-                        <div>
-                            <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition">Save Changes</button>
+                        <div id="formButtons" style="display: none;">
+                            <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition mr-2">Save Changes</button>
+                            <button type="button" id="cancelBtn" class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition">Cancel</button>
                         </div>
                     </form>
                 </div>
@@ -321,6 +348,25 @@
             localStorage.removeItem('currentAffiliate');
             sendMessageToParent('logout', { userType: 'affiliate' });
             navigateParent('affiliate-login');
+        }
+
+        // Copy registration link
+        function copyRegistrationLink() {
+            const linkInput = document.getElementById('registrationLink');
+            linkInput.select();
+            document.execCommand('copy');
+            
+            const copyBtn = event.target;
+            const originalText = copyBtn.textContent;
+            copyBtn.textContent = 'Copied!';
+            copyBtn.classList.remove('bg-blue-600');
+            copyBtn.classList.add('bg-green-600');
+            
+            setTimeout(() => {
+                copyBtn.textContent = originalText;
+                copyBtn.classList.remove('bg-green-600');
+                copyBtn.classList.add('bg-blue-600');
+            }, 2000);
         }
 
         // Override link behaviors for embedded version
