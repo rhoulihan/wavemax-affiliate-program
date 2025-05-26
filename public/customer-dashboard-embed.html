@@ -31,7 +31,7 @@
                     <h2 class="text-2xl font-bold mb-2" id="welcomeMessage">Welcome!</h2>
                     <p class="text-gray-600" id="customerInfo">Loading...</p>
                 </div>
-                <button id="logoutBtn" class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition" onclick="handleLogout()">Logout</button>
+                <button id="logoutBtn" class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition">Logout</button>
             </div>
         </div>
 
@@ -55,13 +55,13 @@
         <div class="bg-white rounded-lg shadow-md p-6 mb-8">
             <h3 class="text-xl font-bold mb-4">Quick Actions</h3>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <a href="#" id="schedulePickupBtn" class="bg-blue-600 text-white text-center py-3 px-4 rounded-lg hover:bg-blue-700 transition" onclick="navigateParent('schedule-pickup'); return false;">
+                <a href="#" id="schedulePickupBtn" class="bg-blue-600 text-white text-center py-3 px-4 rounded-lg hover:bg-blue-700 transition">
                     Schedule Pickup
                 </a>
-                <button id="viewOrdersBtn" class="bg-green-600 text-white py-3 px-4 rounded-lg hover:bg-green-700 transition" onclick="showOrders()">
+                <button id="viewOrdersBtn" class="bg-green-600 text-white py-3 px-4 rounded-lg hover:bg-green-700 transition">
                     View Orders
                 </button>
-                <button id="myProfileBtn" class="bg-purple-600 text-white py-3 px-4 rounded-lg hover:bg-purple-700 transition" onclick="showProfile()">
+                <button id="myProfileBtn" class="bg-purple-600 text-white py-3 px-4 rounded-lg hover:bg-purple-700 transition">
                     My Profile
                 </button>
             </div>
@@ -76,7 +76,8 @@
         </div>
     </div>
 
-    <script>
+    <!-- Script removed - all functionality is in customer-dashboard.js -->
+    <!--
         // PostMessage communication with parent window
         function sendMessageToParent(type, data) {
             if (window.parent && window.parent !== window) {
@@ -273,6 +274,6 @@
             sendMessageToParent('view-order', { orderId: orderId });
             navigateParent(`order-confirmation?orderId=${orderId}`);
         }
-    </script>
+    -->
 </body>
 </html>

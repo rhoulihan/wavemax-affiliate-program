@@ -27,7 +27,41 @@ async function initializeDashboard() {
     document.getElementById('customerInfo').textContent = `Customer ID: ${customerId}`;
 
     // Set schedule pickup link
-    document.getElementById('schedulePickupBtn').href = `/schedule-pickup?affiliate=${customerData.affiliateId}&customer=${customerId}`;
+    const schedulePickupBtn = document.getElementById('schedulePickupBtn');
+    if (schedulePickupBtn) {
+      schedulePickupBtn.href = '#';
+      schedulePickupBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        window.location.href = '/embed-app.html?route=/schedule-pickup';
+      });
+    }
+
+    // Setup logout button
+    const logoutBtn = document.getElementById('logoutBtn');
+    if (logoutBtn) {
+      logoutBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        handleLogout();
+      });
+    }
+
+    // Setup view orders button
+    const viewOrdersBtn = document.getElementById('viewOrdersBtn');
+    if (viewOrdersBtn) {
+      viewOrdersBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        showOrders();
+      });
+    }
+
+    // Setup profile button
+    const myProfileBtn = document.getElementById('myProfileBtn');
+    if (myProfileBtn) {
+      myProfileBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        showProfile();
+      });
+    }
 
     // Load dashboard data
     await loadDashboardData();
@@ -369,22 +403,19 @@ async function saveProfile() {
   }
 }
 
-// Set up event listeners after DOM content loads
-document.addEventListener('DOMContentLoaded', function() {
-  // Logout
-  document.getElementById('logoutBtn').addEventListener('click', function() {
-    localStorage.removeItem('customerToken');
-    localStorage.removeItem('currentCustomer');
-    window.location.href = '/embed-app.html?route=/customer-login';
-  });
+// Handle logout
+function handleLogout() {
+  localStorage.removeItem('customerToken');
+  localStorage.removeItem('currentCustomer');
+  window.location.href = '/embed-app.html?route=/customer-login';
+}
 
-  // View Orders button
-  document.getElementById('viewOrdersBtn').addEventListener('click', function() {
-    loadOrders();
-  });
+// Show orders (alias for loadOrders)
+function showOrders() {
+  loadOrders();
+}
 
-  // My Profile button
-  document.getElementById('myProfileBtn').addEventListener('click', function() {
-    loadProfile();
-  });
-});
+// Show profile (alias for loadProfile)
+function showProfile() {
+  loadProfile();
+}
