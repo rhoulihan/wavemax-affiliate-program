@@ -22,11 +22,21 @@
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: transparent;
             min-height: 100vh;
+            margin: 0;
+            padding: 0;
         }
         
         #app-container {
             width: 100%;
             min-height: 600px;
+            margin: 0;
+            padding: 0;
+        }
+        
+        /* Remove any top margins/padding from first child elements */
+        #app-container > *:first-child {
+            margin-top: 0 !important;
+            padding-top: 0 !important;
         }
         
         .loading {
@@ -213,7 +223,7 @@
                 
                 window.parent.postMessage({
                     type: 'resize',
-                    data: { height: height + 50 } // Add some padding
+                    data: { height: height }
                 }, '*');
             }
         }
