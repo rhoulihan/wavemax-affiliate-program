@@ -122,8 +122,8 @@ function initializeAffiliateSuccess() {
                     `${affiliateData.firstName} ${affiliateData.lastName}`;
                 document.getElementById('affiliateEmail').textContent = affiliateData.email;
                 
-                // Generate registration link
-                const registrationLink = `${baseUrl}/customer-register?affid=${affiliateData.affiliateId}`;
+                // Generate registration link with new format
+                const registrationLink = `https://www.wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program?affid=${affiliateData.affiliateId}`;
                 document.getElementById('registrationLink').value = registrationLink;
                 
                 // Update dashboard link to go to login
