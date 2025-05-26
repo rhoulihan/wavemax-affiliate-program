@@ -265,7 +265,9 @@
             return urlParams.get(name);
         }
 
-        // Initialize form with affiliate ID if present
+        // All initialization and form handling is done in customer-register.js
+        // This ensures there are no conflicts between inline and external scripts
+        /*
         document.addEventListener('DOMContentLoaded', function() {
             const affiliateId = getUrlParameter('affid') || getUrlParameter('affiliateId');
             if (affiliateId) {
@@ -352,6 +354,7 @@
                 });
             });
         });
+        */
 
         // Notify parent that iframe is loaded
         window.addEventListener('load', function() {

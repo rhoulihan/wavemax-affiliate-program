@@ -1,7 +1,32 @@
+// Debug info
+console.log('customer-register.js loaded');
+console.log('Current URL:', window.location.href);
+console.log('Window parent same as window?', window.parent === window);
+
 document.addEventListener('DOMContentLoaded', function() {
+  console.log('DOMContentLoaded fired in customer-register.js');
   // Extract affiliate ID from URL query parameter
-  const urlParams = new URLSearchParams(window.location.search);
-  const affiliateId = urlParams.get('affid') || urlParams.get('affiliate') || sessionStorage.getItem('affiliateId'); // Support multiple parameters
+  let urlParams = new URLSearchParams(window.location.search);
+  let affiliateId = urlParams.get('affid') || urlParams.get('affiliate') || sessionStorage.getItem('affiliateId');
+  
+  // If we're in an iframe and no affiliate ID found, check parent URL
+  if (!affiliateId && window.parent !== window) {
+    try {
+      // Try to get parent URL parameters
+      const parentUrl = new URL(window.parent.location.href);
+      const parentParams = new URLSearchParams(parentUrl.search);
+      affiliateId = parentParams.get('affid') || parentParams.get('affiliate');
+      console.log('Checking parent URL for affiliate ID:', affiliateId);
+    } catch (e) {
+      console.log('Cannot access parent URL (cross-origin), checking embed-app URL');
+      // If cross-origin, try to parse the referrer or use the embed-app URL pattern
+      if (document.referrer) {
+        const referrerUrl = new URL(document.referrer);
+        const referrerParams = new URLSearchParams(referrerUrl.search);
+        affiliateId = referrerParams.get('affid') || referrerParams.get('affiliate');
+      }
+    }
+  }
 
   if (affiliateId) {
     console.log('Affiliate ID found:', affiliateId);
