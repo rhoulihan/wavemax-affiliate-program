@@ -5,7 +5,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
   if (token && currentCustomer) {
     // User is already logged in, redirect to dashboard
-    window.location.href = `/customer-dashboard?id=${currentCustomer.customerId}`;
+    window.location.href = `/embed-app.html?route=/customer-dashboard&id=${currentCustomer.customerId}`;
     return;
   }
 
@@ -66,7 +66,7 @@ document.addEventListener('DOMContentLoaded', function() {
         window.location.href = redirectUrl;
       } else {
         // Default redirect to dashboard
-        window.location.href = `/customer-dashboard?id=${data.customer.customerId}`;
+        window.location.href = `/embed-app.html?route=/customer-dashboard&id=${data.customer.customerId}`;
       }
     } catch (error) {
       console.error('Login error:', error);

@@ -17,7 +17,7 @@ function initializeAffiliateDashboard() {
         data: { url: '/affiliate-login' }
       }, '*');
     } else {
-      window.location.href = '/affiliate-login';
+      window.location.href = '/embed-app.html?route=/affiliate-login';
     }
     return;
   }
@@ -87,7 +87,7 @@ function initializeAffiliateDashboard() {
           data: { url: '/affiliate-login' }
         }, '*');
       } else {
-        window.location.href = '/affiliate-login';
+        window.location.href = '/embed-app.html?route=/affiliate-login';
       }
     });
   }

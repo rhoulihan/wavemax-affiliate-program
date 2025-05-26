@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', async function() {
   const customerStr = localStorage.getItem('currentCustomer');
 
   if (!token || !customerStr) {
-    window.location.href = '/customer-login';
+    window.location.href = '/embed-app.html?route=/customer-login';
     return;
   }
 
@@ -30,7 +30,7 @@ document.addEventListener('DOMContentLoaded', async function() {
   } catch (error) {
     console.error('Error initializing dashboard:', error);
     alert('Error loading dashboard. Please login again.');
-    window.location.href = '/customer-login';
+    window.location.href = '/embed-app.html?route=/customer-login';
   }
 });
 
@@ -362,7 +362,7 @@ document.addEventListener('DOMContentLoaded', function() {
   document.getElementById('logoutBtn').addEventListener('click', function() {
     localStorage.removeItem('customerToken');
     localStorage.removeItem('currentCustomer');
-    window.location.href = '/customer-login';
+    window.location.href = '/embed-app.html?route=/customer-login';
   });
 
   // View Orders button

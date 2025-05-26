@@ -5,7 +5,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
   if (!orderId) {
     alert('No order ID provided. Redirecting to homepage.');
-    window.location.href = '/';
+    window.location.href = '/embed-app.html';
     return;
   }
 
@@ -148,7 +148,7 @@ document.addEventListener('DOMContentLoaded', function() {
       const token = localStorage.getItem('customerToken');
       if (!token) {
         alert('Please log in to view order details.');
-        window.location.href = '/customer-login';
+        window.location.href = '/embed-app.html?route=/customer-login';
         return;
       }
 
@@ -171,7 +171,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
       } else {
         alert('Order not found. Redirecting to homepage.');
-        window.location.href = '/';
+        window.location.href = '/embed-app.html';
       }
     } catch (error) {
       console.error('Error fetching order:', error);

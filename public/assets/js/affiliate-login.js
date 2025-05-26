@@ -34,7 +34,7 @@ document.addEventListener('DOMContentLoaded', function() {
           localStorage.setItem('currentAffiliate', JSON.stringify(data.affiliate));
 
           // Redirect to dashboard
-          window.location.href = `/affiliate-dashboard?id=${data.affiliate.affiliateId}`;
+          window.location.href = `/embed-app.html?route=/affiliate-dashboard&id=${data.affiliate.affiliateId}`;
         } else {
           alert(data.message || 'Login failed. Please check your credentials and try again.');
         }
