@@ -165,7 +165,9 @@ async function loadAffiliateData(affiliateId) {
     });
 
     if (response.ok) {
-      const data = await response.json();
+      const result = await response.json();
+      // Extract the actual affiliate data from the response
+      const data = result.affiliate || result;
       
       // Update profile information with null checks
       const nameElement = document.getElementById('affiliateName');
@@ -492,8 +494,12 @@ async function loadSettingsData(affiliateId) {
     });
 
     if (response.ok) {
-      const data = await response.json();
-      console.log('Affiliate data received:', data);
+      const result = await response.json();
+      console.log('Affiliate data received:', result);
+      
+      // Extract the actual affiliate data from the response
+      const data = result.affiliate || result;
+      console.log('Extracted affiliate data:', data);
       
       // Wait a bit to ensure DOM is ready
       setTimeout(() => {
@@ -505,6 +511,15 @@ async function loadSettingsData(affiliateId) {
         const businessNameField = document.getElementById('settingsBusinessName');
         const serviceAreaField = document.getElementById('settingsServiceArea');
         const registrationLinkField = document.getElementById('registrationLink');
+        
+        console.log('Setting field values:', {
+          firstName: data.firstName,
+          lastName: data.lastName,
+          email: data.email,
+          phone: data.phone,
+          businessName: data.businessName,
+          serviceArea: data.serviceArea
+        });
         
         if (firstNameField) firstNameField.value = data.firstName || '';
         if (lastNameField) lastNameField.value = data.lastName || '';
