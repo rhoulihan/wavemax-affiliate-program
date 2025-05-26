@@ -155,10 +155,10 @@
 
         <!-- Action Buttons -->
         <div class="action-buttons">
-            <a href="https://wavemax.promo/affiliate-register.html" target="_blank" class="btn btn-primary">
+            <a href="#" data-navigate="/affiliate-register" class="btn btn-primary">
                 Start Earning Today
             </a>
-            <a href="https://wavemax.promo/affiliate-login.html" target="_blank" class="btn btn-secondary">
+            <a href="#" data-navigate="/affiliate-login" class="btn btn-secondary">
                 Affiliate Login
             </a>
         </div>
@@ -197,18 +197,7 @@
         </div>
     </div>
 
-    <script>
-        // Add UTM tracking
-        document.addEventListener('DOMContentLoaded', function() {
-            const links = document.querySelectorAll('a[href*="wavemax.promo"]');
-            links.forEach(link => {
-                const url = new URL(link.href);
-                url.searchParams.set('utm_source', 'wavemaxlaundry.com');
-                url.searchParams.set('utm_medium', 'iframe');
-                url.searchParams.set('utm_campaign', 'austin-embed');
-                link.href = url.toString();
-            });
-        });
-    </script>
+    <!-- Include embed navigation script -->
+    <script src="/assets/js/embed-navigation.js"></script>
 </body>
 </html>
