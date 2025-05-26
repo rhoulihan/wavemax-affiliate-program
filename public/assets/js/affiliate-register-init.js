@@ -74,7 +74,7 @@ function initializeAffiliateRegistration() {
         
         console.log('Registration response:', data);
 
-        // Store the affiliate data
+        // Store the affiliate data for the success page
         localStorage.setItem('currentAffiliate', JSON.stringify({
           ...affiliateData,
           affiliateId: data.affiliateId
