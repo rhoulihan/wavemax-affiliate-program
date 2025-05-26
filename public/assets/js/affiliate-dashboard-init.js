@@ -112,17 +112,27 @@ async function loadAffiliateData(affiliateId) {
     if (response.ok) {
       const data = await response.json();
       
-      // Update profile information
-      document.getElementById('affiliateName').textContent = `${data.firstName} ${data.lastName}`;
-      document.getElementById('affiliateEmail').textContent = data.email;
-      document.getElementById('businessName').textContent = data.businessName || 'N/A';
-      document.getElementById('serviceArea').textContent = data.serviceArea;
-      document.getElementById('deliveryFee').textContent = `$${data.deliveryFee.toFixed(2)}`;
+      // Update profile information with null checks
+      const nameElement = document.getElementById('affiliateName');
+      if (nameElement) nameElement.textContent = `${data.firstName} ${data.lastName}`;
+      
+      const emailElement = document.getElementById('affiliateEmail');
+      if (emailElement) emailElement.textContent = data.email;
+      
+      const businessElement = document.getElementById('businessName');
+      if (businessElement) businessElement.textContent = data.businessName || 'N/A';
+      
+      const serviceAreaElement = document.getElementById('serviceArea');
+      if (serviceAreaElement) serviceAreaElement.textContent = data.serviceArea;
+      
+      const deliveryFeeElement = document.getElementById('deliveryFee');
+      if (deliveryFeeElement) deliveryFeeElement.textContent = `$${data.deliveryFee.toFixed(2)}`;
       
       // Generate and display registration link
       const baseUrl = window.location.origin;
       const registrationLink = `${baseUrl}/customer-register?affid=${affiliateId}`;
-      document.getElementById('registrationLink').value = registrationLink;
+      const linkElement = document.getElementById('registrationLink');
+      if (linkElement) linkElement.value = registrationLink;
     }
   } catch (error) {
     console.error('Error loading affiliate data:', error);
@@ -131,7 +141,7 @@ async function loadAffiliateData(affiliateId) {
 
 async function loadDashboardStats(affiliateId) {
   try {
-    const response = await fetch(`/api/v1/affiliates/${affiliateId}/stats`, {
+    const response = await fetch(`/api/v1/affiliates/${affiliateId}/dashboard`, {
       headers: {
         'Authorization': `Bearer ${localStorage.getItem('affiliateToken')}`
       }
@@ -140,11 +150,18 @@ async function loadDashboardStats(affiliateId) {
     if (response.ok) {
       const stats = await response.json();
       
-      // Update dashboard statistics
-      document.getElementById('totalCustomers').textContent = stats.totalCustomers || 0;
-      document.getElementById('activeOrders').textContent = stats.activeOrders || 0;
-      document.getElementById('monthlyRevenue').textContent = `$${(stats.monthlyRevenue || 0).toFixed(2)}`;
-      document.getElementById('pendingPayment').textContent = `$${(stats.pendingPayment || 0).toFixed(2)}`;
+      // Update dashboard statistics with null checks
+      const customersElement = document.getElementById('totalCustomers');
+      if (customersElement) customersElement.textContent = stats.totalCustomers || 0;
+      
+      const ordersElement = document.getElementById('activeOrders');
+      if (ordersElement) ordersElement.textContent = stats.activeOrders || 0;
+      
+      const revenueElement = document.getElementById('monthlyRevenue');
+      if (revenueElement) revenueElement.textContent = `$${(stats.monthlyRevenue || 0).toFixed(2)}`;
+      
+      const paymentElement = document.getElementById('pendingPayment');
+      if (paymentElement) paymentElement.textContent = `$${(stats.pendingPayment || 0).toFixed(2)}`;
     }
   } catch (error) {
     console.error('Error loading dashboard stats:', error);
