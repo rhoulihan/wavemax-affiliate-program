@@ -126,12 +126,12 @@ function initializeAffiliateSuccess() {
                 const registrationLink = `${baseUrl}/customer-register?affid=${affiliateData.affiliateId}`;
                 document.getElementById('registrationLink').value = registrationLink;
                 
-                // Update dashboard link
+                // Update dashboard link to go to login
                 const dashboardLink = document.getElementById('dashboardLink');
                 if (dashboardLink) {
                     dashboardLink.onclick = function(e) {
                         e.preventDefault();
-                        console.log('Dashboard button clicked (from init.js)');
+                        console.log('Dashboard button clicked - redirecting to login');
                         
                         if (isEmbedded && window.parent && window.parent !== window) {
                             console.log('Sending navigation message to parent');
@@ -144,7 +144,7 @@ function initializeAffiliateSuccess() {
                                 console.log(`Attempting to send message to parent level ${attempts + 1}`);
                                 targetWindow.postMessage({
                                     type: 'navigate',
-                                    data: { url: '/affiliate-dashboard' }
+                                    data: { url: '/affiliate-login' }
                                 }, '*');
                                 
                                 if (targetWindow.parent && targetWindow.parent !== targetWindow) {
@@ -158,12 +158,12 @@ function initializeAffiliateSuccess() {
                             // Also try direct navigation as ultimate fallback
                             setTimeout(() => {
                                 if (window.location.href.includes('affiliate-success')) {
-                                    console.log('Fallback: Direct navigation to dashboard');
-                                    window.location.href = '/embed-app.html?route=/affiliate-dashboard';
+                                    console.log('Fallback: Direct navigation to login');
+                                    window.location.href = '/embed-app.html?route=/affiliate-login';
                                 }
                             }, 1000);
                         } else {
-                            window.location.href = '/embed-app.html?route=/affiliate-dashboard';
+                            window.location.href = '/embed-app.html?route=/affiliate-login';
                         }
                         return false;
                     };
