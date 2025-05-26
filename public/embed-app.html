@@ -242,6 +242,17 @@
                         console.log('Loaded script:', scripts[scriptIndex]);
                         scriptIndex++;
                         loadNextScript();
+                        
+                        // If this is the last script, trigger DOMContentLoaded for legacy scripts
+                        if (scriptIndex === scripts.length) {
+                            setTimeout(() => {
+                                const event = new Event('DOMContentLoaded', {
+                                    bubbles: true,
+                                    cancelable: true
+                                });
+                                document.dispatchEvent(event);
+                            }, 0);
+                        }
                     };
                     script.onerror = function() {
                         console.error('Failed to load script:', scripts[scriptIndex]);
