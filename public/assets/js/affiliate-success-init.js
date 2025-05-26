@@ -30,25 +30,42 @@ function initializeAffiliateSuccess() {
     // Copy link functionality
     window.copyLink = function() {
         const linkInput = document.getElementById('registrationLink');
-        linkInput.select();
-        linkInput.setSelectionRange(0, 99999); // For mobile devices
+        
+        // Create a temporary textarea to copy from (works better in iframes)
+        const tempTextarea = document.createElement('textarea');
+        tempTextarea.value = linkInput.value;
+        tempTextarea.style.position = 'absolute';
+        tempTextarea.style.left = '-9999px';
+        document.body.appendChild(tempTextarea);
         
         try {
-            document.execCommand('copy');
-            const btn = document.getElementById('copyLinkBtn');
-            const originalText = btn.textContent;
-            btn.textContent = 'Copied!';
-            btn.classList.add('bg-green-600');
+            tempTextarea.select();
+            tempTextarea.setSelectionRange(0, 99999); // For mobile devices
             
-            setTimeout(() => {
-                btn.textContent = originalText;
-                btn.classList.remove('bg-green-600');
-            }, 2000);
+            const successful = document.execCommand('copy');
+            document.body.removeChild(tempTextarea);
             
-            sendMessageToParent('link-copied', { link: linkInput.value });
+            if (successful) {
+                const btn = document.getElementById('copyLinkBtn');
+                const originalText = btn.textContent;
+                btn.textContent = 'Copied!';
+                btn.classList.add('bg-green-600');
+                
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                    btn.classList.remove('bg-green-600');
+                }, 2000);
+                
+                sendMessageToParent('link-copied', { link: linkInput.value });
+            } else {
+                throw new Error('Copy command failed');
+            }
         } catch (err) {
             console.error('Failed to copy link:', err);
-            alert('Failed to copy link. Please copy it manually.');
+            // Fallback: select the input for manual copying
+            linkInput.select();
+            linkInput.focus();
+            alert('Please press Ctrl+C (or Cmd+C on Mac) to copy the link.');
         }
     }
 
@@ -76,7 +93,17 @@ function initializeAffiliateSuccess() {
                 if (dashboardLink) {
                     dashboardLink.onclick = function(e) {
                         e.preventDefault();
-                        window.navigateParent('affiliate-dashboard');
+                        console.log('Dashboard button clicked (from init.js)');
+                        
+                        if (isEmbedded && window.parent && window.parent !== window) {
+                            console.log('Sending navigation message to parent');
+                            window.parent.postMessage({
+                                type: 'navigate',
+                                data: { url: '/affiliate-dashboard' }
+                            }, '*');
+                        } else {
+                            window.navigateParent('affiliate-dashboard');
+                        }
                         return false;
                     };
                 }
