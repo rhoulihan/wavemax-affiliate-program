@@ -156,24 +156,20 @@
 
                         console.log('Login successful, navigating to dashboard');
                         
-                        // Get affiliate ID from storage or URL
-                        const urlParams = new URLSearchParams(window.location.search);
-                        const affiliateId = urlParams.get('affid') || urlParams.get('affiliate') || sessionStorage.getItem('affiliateId');
-                        
                         // Check URL params for pickup flag
+                        const urlParams = new URLSearchParams(window.location.search);
                         const shouldRedirectToPickup = urlParams.get('pickup') === 'true';
                         
-                        // Redirect to wavemaxlaundry.com with appropriate parameters
-                        let redirectUrl = `https://www.wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program?affid=${affiliateId || data.customer.affiliateId}`;
-                        
+                        // Navigate within the embed system
                         if (shouldRedirectToPickup) {
-                            redirectUrl += '&pickup=true';
+                            console.log('Redirecting to schedule pickup');
+                            // Navigate to schedule pickup page
+                            window.location.href = '/embed-app.html?route=/schedule-pickup';
+                        } else {
+                            console.log('Redirecting to customer dashboard');
+                            // Navigate to customer dashboard
+                            window.location.href = '/embed-app.html?route=/customer-dashboard';
                         }
-                        
-                        console.log('Redirecting to:', redirectUrl);
-                        
-                        // Always redirect to the top window
-                        window.top.location.href = redirectUrl;
                     } else {
                         throw new Error(data.message || 'Login failed');
                     }

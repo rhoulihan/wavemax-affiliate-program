@@ -2,13 +2,18 @@
 let customerData = null;
 let customerId = null;
 
-// Initialize dashboard
-document.addEventListener('DOMContentLoaded', async function() {
+// Function to initialize dashboard
+async function initializeDashboard() {
+  console.log('Initializing customer dashboard');
   // Check authentication
   const token = localStorage.getItem('customerToken');
   const customerStr = localStorage.getItem('currentCustomer');
+  
+  console.log('Token exists:', !!token);
+  console.log('Customer data exists:', !!customerStr);
 
   if (!token || !customerStr) {
+    console.log('No authentication found, redirecting to login');
     window.location.href = '/embed-app.html?route=/customer-login';
     return;
   }
@@ -32,7 +37,15 @@ document.addEventListener('DOMContentLoaded', async function() {
     alert('Error loading dashboard. Please login again.');
     window.location.href = '/embed-app.html?route=/customer-login';
   }
-});
+}
+
+// Check if DOM is already loaded or wait for it
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initializeDashboard);
+} else {
+  // DOM is already loaded, initialize immediately
+  initializeDashboard();
+}
 
 // Load dashboard data
 async function loadDashboardData() {
