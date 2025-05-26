@@ -373,19 +373,70 @@ window.copyLink = function() {
 // Copy registration link
 function copyRegistrationLink() {
   const linkInput = document.getElementById('registrationLink');
-  linkInput.select();
-  document.execCommand('copy');
-  
   const copyBtn = document.getElementById('copyRegistrationLinkBtn');
-  const originalText = copyBtn.textContent;
-  copyBtn.textContent = 'Copied!';
-  copyBtn.classList.remove('bg-blue-600');
-  copyBtn.classList.add('bg-green-600');
+  
+  try {
+    // Try modern clipboard API first
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText(linkInput.value).then(() => {
+        showCopySuccess(copyBtn);
+      }).catch(() => {
+        // Fallback to older method
+        fallbackCopyToClipboard(linkInput, copyBtn);
+      });
+    } else {
+      // Use fallback for non-secure contexts or older browsers
+      fallbackCopyToClipboard(linkInput, copyBtn);
+    }
+  } catch (err) {
+    // If all else fails, use the fallback
+    fallbackCopyToClipboard(linkInput, copyBtn);
+  }
+}
+
+// Fallback copy method for iframe/older browser compatibility
+function fallbackCopyToClipboard(input, button) {
+  // Store the current selection
+  const currentSelection = document.getSelection().rangeCount > 0 
+    ? document.getSelection().getRangeAt(0) 
+    : false;
+  
+  // Select the text
+  input.select();
+  input.setSelectionRange(0, 99999); // For mobile devices
+  
+  try {
+    // Try to copy using execCommand
+    const successful = document.execCommand('copy');
+    if (successful) {
+      showCopySuccess(button);
+    } else {
+      // If copy fails, show the text for manual copying
+      alert('Copy failed. Please manually copy the link:\n\n' + input.value);
+    }
+  } catch (err) {
+    // Show text for manual copying if everything fails
+    alert('Copy failed. Please manually copy the link:\n\n' + input.value);
+  }
+  
+  // Restore the original selection
+  if (currentSelection) {
+    document.getSelection().removeAllRanges();
+    document.getSelection().addRange(currentSelection);
+  }
+}
+
+// Show copy success feedback
+function showCopySuccess(button) {
+  const originalText = button.textContent;
+  button.textContent = 'Copied!';
+  button.classList.remove('bg-blue-600', 'hover:bg-blue-700');
+  button.classList.add('bg-green-600', 'hover:bg-green-700');
   
   setTimeout(() => {
-    copyBtn.textContent = originalText;
-    copyBtn.classList.remove('bg-green-600');
-    copyBtn.classList.add('bg-blue-600');
+    button.textContent = originalText;
+    button.classList.remove('bg-green-600', 'hover:bg-green-700');
+    button.classList.add('bg-blue-600', 'hover:bg-blue-700');
   }, 2000);
 }
 
