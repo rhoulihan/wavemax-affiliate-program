@@ -64,7 +64,7 @@
             <div class="bg-gray-50 p-6 border-t">
                 <p class="text-sm text-gray-700 text-center">
                     Don't have an account yet? 
-                    <a href="#" id="registerLink" class="text-blue-600 hover:underline" onclick="navigateToRegister(); return false;">Register here</a>
+                    <a href="#" id="registerLink" class="text-blue-600 hover:underline">Register here</a>
                 </p>
             </div>
         </div>
@@ -112,6 +112,17 @@
             }
         }
 
+        // Setup register link click handler
+        document.addEventListener('DOMContentLoaded', function() {
+            const registerLink = document.getElementById('registerLink');
+            if (registerLink) {
+                registerLink.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    navigateToRegister();
+                });
+            }
+        });
+        
         // Form submission
         document.getElementById('customerLoginForm').addEventListener('submit', function(e) {
             e.preventDefault();
