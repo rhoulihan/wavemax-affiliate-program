@@ -295,33 +295,52 @@
         
         // Handle messages from embedded pages
         window.addEventListener('message', function(event) {
-            console.log('Message received:', event);
-            console.log('Message origin:', event.origin);
-            console.log('Message data:', event.data);
-            console.log('BASE_URL:', BASE_URL);
-            console.log('window.location.origin:', window.location.origin);
+            console.log('=== Message Received in embed-app.html ===');
+            console.log('Full event:', event);
+            console.log('Event data:', event.data);
+            console.log('Event data type:', typeof event.data);
             
-            // Allow messages from same origin or from within iframes
-            // For now, let's be more permissive to debug
-            // if (event.origin !== BASE_URL && event.origin !== window.location.origin) return;
+            // Check if we have valid message data
+            if (!event.data || typeof event.data !== 'object') {
+                console.log('Invalid message data, ignoring');
+                return;
+            }
             
-            const { type, data } = event.data;
-            console.log('Message type:', type);
-            console.log('Message data object:', data);
+            // Extract type and data, checking for different possible structures
+            let messageType, messageData;
             
-            if (type === 'navigate' && data) {
+            // Check if it's our expected format
+            if (event.data.type && event.data.data) {
+                messageType = event.data.type;
+                messageData = event.data.data;
+            } else if (event.data.type) {
+                // Maybe data is not nested
+                messageType = event.data.type;
+                messageData = event.data;
+            }
+            
+            console.log('Extracted message type:', messageType);
+            console.log('Extracted message data:', messageData);
+            
+            if (messageType === 'navigate' && messageData) {
+                console.log('Processing navigation message');
+                
                 // Handle navigation request
-                if (data.url) {
+                if (messageData.url) {
                     // Old format with just URL
-                    const route = data.url.startsWith('/') ? data.url : '/' + data.url;
-                    console.log('Navigation request received:', route);
+                    const route = messageData.url.startsWith('/') ? messageData.url : '/' + messageData.url;
+                    console.log('Navigating to route (old format):', route);
                     navigateTo(route);
-                } else if (data.page) {
+                } else if (messageData.page) {
                     // New format with page and optional params
-                    const route = data.page.startsWith('/') ? data.page : '/' + data.page;
-                    console.log('Navigation request received:', route, 'with params:', data.params);
-                    navigateTo(route, data.params || {});
+                    const route = messageData.page.startsWith('/') ? messageData.page : '/' + messageData.page;
+                    console.log('Navigating to route (new format):', route, 'with params:', messageData.params);
+                    navigateTo(route, messageData.params || {});
+                } else {
+                    console.log('No valid navigation target found in message data');
                 }
+            } else {
+                console.log('Not a navigation message or no data');
             }
         });
         
