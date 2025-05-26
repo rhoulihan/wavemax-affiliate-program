@@ -1,4 +1,29 @@
 document.addEventListener('DOMContentLoaded', function() {
+  // Check if customer is already logged in
+  const token = localStorage.getItem('customerToken');
+  const customerStr = localStorage.getItem('currentCustomer');
+  
+  if (token && customerStr) {
+    // Customer is already logged in, skip to pickup form
+    console.log('Customer already logged in, loading pickup form');
+    
+    try {
+      const customer = JSON.parse(customerStr);
+      const loginSection = document.getElementById('loginSection');
+      const pickupDetailsSection = document.getElementById('pickupDetailsSection');
+      
+      // Hide login section and show pickup form
+      loginSection.style.display = 'none';
+      pickupDetailsSection.style.display = 'block';
+      
+      // Load pickup form with customer data
+      loadCustomerIntoForm(customer, token);
+      return;
+    } catch (error) {
+      console.error('Error parsing customer data:', error);
+    }
+  }
+  
   // Extract parameters from URL
   const urlParams = new URLSearchParams(window.location.search);
   const affiliateId = urlParams.get('affiliate');
@@ -288,3 +313,53 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   });
 });
+
+// Function to load customer data into the pickup form
+async function loadCustomerIntoForm(customer, token) {
+  try {
+    // Set customer data fields
+    document.getElementById('customerId').value = customer.customerId;
+    document.getElementById('customerName').textContent = `${customer.firstName} ${customer.lastName}`;
+    document.getElementById('customerPhone').textContent = customer.email || customer.phone;
+    document.getElementById('customerAddress').textContent = 'Loading address...';
+
+    // Set affiliate ID
+    document.getElementById('affiliateId').value = customer.affiliateId;
+
+    // Fetch full customer profile to get address and affiliate details
+    const profileResponse = await fetch(`/api/customers/${customer.customerId}/profile`, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+
+    if (profileResponse.ok) {
+      const profileData = await profileResponse.json();
+      
+      if (profileData.success) {
+        const fullCustomer = profileData.customer;
+        
+        // Update address
+        const address = `${fullCustomer.address}, ${fullCustomer.city}, ${fullCustomer.state} ${fullCustomer.zipCode}`;
+        document.getElementById('customerAddress').textContent = address;
+        
+        // Set delivery fee if available
+        if (fullCustomer.affiliate && fullCustomer.affiliate.deliveryFee) {
+          document.getElementById('deliveryFee').textContent = `$${parseFloat(fullCustomer.affiliate.deliveryFee).toFixed(2)}`;
+        }
+      }
+    }
+    
+    // Set pickup date to tomorrow by default
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const dateStr = tomorrow.toISOString().split('T')[0];
+    document.getElementById('pickupDate').value = dateStr;
+    document.getElementById('pickupDate').min = dateStr;
+    
+  } catch (error) {
+    console.error('Error loading customer data:', error);
+    alert('Error loading customer information. Please try logging in again.');
+    window.location.href = '/embed-app.html?route=/customer-login&pickup=true';
+  }
+}
