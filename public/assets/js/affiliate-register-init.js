@@ -102,17 +102,17 @@ function initializeAffiliateRegistration() {
               console.log('Trying direct navigation as fallback');
               // Check if we're still on the same page
               if (window.location.href.includes('affiliate-register')) {
-                window.location.href = `${baseUrl}/affiliate-success-embed.html`;
+                window.location.href = `/affiliate-success`;
               }
             }, 1000);
           } catch (msgError) {
             console.error('Error sending message:', msgError);
             // Fallback to direct navigation
-            window.location.href = `${baseUrl}/affiliate-success-embed.html`;
+            window.location.href = `/affiliate-success`;
           }
         } else {
           // Otherwise, normal redirect
-          window.location.href = `${baseUrl}/affiliate-success.html`;
+          window.location.href = `/affiliate-success`;
         }
       } catch (error) {
         console.error('Registration error:', error);

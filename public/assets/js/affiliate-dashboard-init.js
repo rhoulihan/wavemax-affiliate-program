@@ -17,7 +17,7 @@ function initializeAffiliateDashboard() {
         data: { url: '/affiliate-login' }
       }, '*');
     } else {
-      window.location.href = 'affiliate-login.html';
+      window.location.href = '/affiliate-login';
     }
     return;
   }
@@ -87,7 +87,7 @@ function initializeAffiliateDashboard() {
           data: { url: '/affiliate-login' }
         }, '*');
       } else {
-        window.location.href = 'affiliate-login.html';
+        window.location.href = '/affiliate-login';
       }
     });
   }
@@ -121,7 +121,7 @@ async function loadAffiliateData(affiliateId) {
       
       // Generate and display registration link
       const baseUrl = window.location.origin;
-      const registrationLink = `${baseUrl}/customer-register.html?affid=${affiliateId}`;
+      const registrationLink = `${baseUrl}/customer-register?affid=${affiliateId}`;
       document.getElementById('registrationLink').value = registrationLink;
     }
   } catch (error) {

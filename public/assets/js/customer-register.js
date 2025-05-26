@@ -21,18 +21,18 @@ document.addEventListener('DOMContentLoaded', function() {
           document.getElementById('deliveryFee').textContent = `$${parseFloat(affiliate.deliveryFee).toFixed(2)}`;
         } else {
           alert('Invalid affiliate ID. Please use a valid registration link.');
-          window.location.href = 'index.html';
+          window.location.href = '/';
         }
       })
       .catch(error => {
         console.error('Error fetching affiliate info:', error);
         alert('Unable to load affiliate information. Please try again.');
-        window.location.href = 'index.html';
+        window.location.href = '/';
       });
   } else {
     // Redirect if no affiliate ID is provided
     alert('No affiliate ID provided. Please use a valid registration link.');
-    window.location.href = 'index.html';
+    window.location.href = '/';
   }
 
   // Service frequency selection behavior
@@ -109,7 +109,7 @@ document.addEventListener('DOMContentLoaded', function() {
           }));
 
           // Redirect to success page
-          window.location.href = 'customer-success.html';
+          window.location.href = '/customer-success';
         } else {
           alert(data.message || 'Registration failed. Please try again.');
         }

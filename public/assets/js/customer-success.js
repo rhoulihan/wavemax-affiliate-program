@@ -10,7 +10,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     if (!customerId) {
       alert('No registration data found. Please register first.');
-      window.location.href = 'index.html';
+      window.location.href = '/';
       return;
     }
 
@@ -33,13 +33,13 @@ document.addEventListener('DOMContentLoaded', function() {
         } else {
           console.error('Failed to load customer data:', data.message);
           alert('Unable to load customer information.');
-          window.location.href = 'index.html';
+          window.location.href = '/';
         }
       })
       .catch(error => {
         console.error('Error fetching customer data:', error);
         alert('An error occurred while loading customer information.');
-        window.location.href = 'index.html';
+        window.location.href = '/';
       });
   } else {
     // Use data from sessionStorage
@@ -63,8 +63,8 @@ function displayCustomerData(data) {
   document.getElementById('deliveryFee').textContent = `$${parseFloat(data.deliveryFee).toFixed(2)} per pickup/delivery`;
 
   // Update button links
-  document.getElementById('schedulePickupBtn').href = `schedule-pickup.html?affiliate=${data.affiliateId}&customer=${data.customerId}`;
-  document.getElementById('customerDashboardBtn').href = `customer-dashboard.html?id=${data.customerId}`;
+  document.getElementById('schedulePickupBtn').href = `/schedule-pickup?affiliate=${data.affiliateId}&customer=${data.customerId}`;
+  document.getElementById('customerDashboardBtn').href = `/customer-dashboard?id=${data.customerId}`;
 
   // Set bag barcode
   if (data.bagBarcode) {

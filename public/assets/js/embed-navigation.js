@@ -6,7 +6,7 @@
     
     // Configuration
     const BASE_URL = 'https://wavemax.promo';
-    const EMBED_SUFFIX = '-embed.html';
+    const EMBED_SUFFIX = '';
     
     // Navigation function for embedded context
     window.navigateToPage = function(route) {
@@ -15,12 +15,12 @@
             window.parent.postMessage({
                 type: 'navigate',
                 data: {
-                    url: BASE_URL + route + EMBED_SUFFIX
+                    url: route
                 }
             }, '*');
         } else {
             // If not in iframe, navigate directly
-            window.location.href = BASE_URL + route + '.html';
+            window.location.href = route;
         }
     };
     

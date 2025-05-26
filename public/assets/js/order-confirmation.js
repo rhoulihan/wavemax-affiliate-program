@@ -5,7 +5,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
   if (!orderId) {
     alert('No order ID provided. Redirecting to homepage.');
-    window.location.href = 'index.html';
+    window.location.href = '/';
     return;
   }
 
@@ -76,14 +76,14 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('deliveryFee').textContent = `$${parseFloat(deliveryFee).toFixed(2)}`;
 
     // Update order link with affiliate ID
-    document.getElementById('scheduleAnotherBtn').href = `schedule-pickup.html?affiliate=${affiliateId}`;
+    document.getElementById('scheduleAnotherBtn').href = `/schedule-pickup?affiliate=${affiliateId}`;
 
     // Set view orders link to customer dashboard
     const customerId = order.customerId;
     if (customerId) {
-      document.getElementById('viewOrdersBtn').href = 'customer-dashboard.html';
+      document.getElementById('viewOrdersBtn').href = '/customer-dashboard';
     } else {
-      document.getElementById('viewOrdersBtn').href = 'customer-login.html';
+      document.getElementById('viewOrdersBtn').href = '/customer-login';
     }
 
     // Use the estimated total from the order data if available
@@ -148,7 +148,7 @@ document.addEventListener('DOMContentLoaded', function() {
       const token = localStorage.getItem('customerToken');
       if (!token) {
         alert('Please log in to view order details.');
-        window.location.href = 'customer-login.html';
+        window.location.href = '/customer-login';
         return;
       }
 
@@ -171,7 +171,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
       } else {
         alert('Order not found. Redirecting to homepage.');
-        window.location.href = 'index.html';
+        window.location.href = '/';
       }
     } catch (error) {
       console.error('Error fetching order:', error);
