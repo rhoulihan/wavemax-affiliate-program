@@ -64,7 +64,7 @@
             <div class="bg-gray-50 p-6 border-t">
                 <p class="text-sm text-gray-700 text-center">
                     Don't have an account yet? 
-                    <a href="#" id="registerLink" class="text-blue-600 hover:underline" onclick="navigateParent('contact-affiliate'); return false;">Contact your affiliate partner</a>
+                    <a href="#" id="registerLink" class="text-blue-600 hover:underline" onclick="navigateToRegister(); return false;">Register here</a>
                 </p>
             </div>
         </div>
@@ -85,6 +85,31 @@
         // Navigate parent frame
         function navigateParent(page) {
             sendMessageToParent('navigate', { page: page });
+        }
+        
+        // Navigate to register with affiliate ID if present
+        function navigateToRegister() {
+            // Check for affiliate ID in URL or session storage
+            const urlParams = new URLSearchParams(window.location.search);
+            const affiliateId = urlParams.get('affid') || urlParams.get('affiliate') || sessionStorage.getItem('affiliateId');
+            
+            if (affiliateId) {
+                // Navigate to registration with affiliate ID
+                if (window.parent && window.parent !== window) {
+                    window.parent.postMessage({
+                        type: 'navigate',
+                        source: 'wavemax-embed',
+                        data: { 
+                            page: 'customer-register',
+                            params: { affid: affiliateId }
+                        }
+                    }, '*');
+                } else {
+                    window.location.href = `/customer-register?affid=${affiliateId}`;
+                }
+            } else {
+                navigateParent('customer-register');
+            }
         }
 
         // Form submission

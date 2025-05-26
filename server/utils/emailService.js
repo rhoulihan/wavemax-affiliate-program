@@ -147,7 +147,7 @@ const sendEmail = async (to, subject, html) => {
 exports.sendAffiliateWelcomeEmail = async (affiliate) => {
   try {
     const template = await loadTemplate('affiliate-welcome');
-    const registrationUrl = `${process.env.FRONTEND_URL || 'https://wavemax.promo'}/customer-register.html?affiliate=${affiliate.affiliateId}`;
+    const registrationUrl = `https://www.wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program?affid=${affiliate.affiliateId}`;
 
     const data = {
       first_name: affiliate.firstName,
