@@ -26,12 +26,15 @@
     
     // Initialize when DOM is ready
     function init() {
+        console.log('Embed navigation initialized');
+        
         // Handle all navigation links with data-navigate attribute
         document.addEventListener('click', function(e) {
             const navLink = e.target.closest('[data-navigate]');
             if (navLink) {
                 e.preventDefault();
                 const route = navLink.getAttribute('data-navigate');
+                console.log('Navigation clicked:', route);
                 navigateToPage(route);
             }
         });
