@@ -99,13 +99,20 @@
 
     // Setup form submission
     function setupFormSubmission() {
+        console.log('Setting up form submission');
         const form = document.getElementById('customerLoginForm');
+        console.log('Form element:', form);
+        
         if (form) {
+            console.log('Adding submit event listener to form');
             form.addEventListener('submit', function(e) {
                 e.preventDefault();
+                console.log('Form submitted');
 
                 const username = document.getElementById('username').value;
                 const password = document.getElementById('password').value;
+                
+                console.log('Submitting login with username:', username);
 
                 // Send login status to parent
                 sendMessageToParent('form-submit', { form: 'customer-login' });
@@ -158,12 +165,18 @@
                     alert(error.message || 'Invalid username or password');
                 });
             });
+        } else {
+            console.error('Form not found! Looking for: customerLoginForm');
+            // Try again after a short delay
+            setTimeout(setupFormSubmission, 500);
         }
     }
 
     // Initialize everything when DOM is ready
     function init() {
         console.log('Customer login embed initializing');
+        console.log('Document ready state:', document.readyState);
+        console.log('Current URL:', window.location.href);
         
         // Store affiliate ID if present in URL
         const urlParams = new URLSearchParams(window.location.search);
