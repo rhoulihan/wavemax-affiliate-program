@@ -196,6 +196,63 @@
                 console.log('Embed navigation script loaded');
             };
             document.body.appendChild(embedNavScript);
+            
+            // Load page-specific scripts
+            loadPageScripts();
+        }
+        
+        // Load page-specific scripts
+        function loadPageScripts() {
+            // Clean up old scripts first (except embed-navigation.js)
+            const existingScripts = document.querySelectorAll('script[src*="/assets/js/"]');
+            existingScripts.forEach(script => {
+                if (!script.src.includes('embed-navigation.js')) {
+                    script.remove();
+                }
+            });
+            
+            // Map of routes to their required scripts
+            const pageScripts = {
+                '/affiliate-register': ['/assets/js/errorHandler.js', '/assets/js/affiliate-register-embed.js'],
+                '/affiliate-login': ['/assets/js/errorHandler.js', '/assets/js/affiliate-login.js'],
+                '/affiliate-dashboard': ['/assets/js/errorHandler.js', '/assets/js/affiliate-dashboard.js'],
+                '/customer-register': ['/assets/js/errorHandler.js', '/assets/js/customer-register.js'],
+                '/customer-login': ['/assets/js/errorHandler.js', '/assets/js/customer-login.js'],
+                '/customer-dashboard': ['/assets/js/errorHandler.js', '/assets/js/customer-dashboard.js'],
+                '/schedule-pickup': ['/assets/js/errorHandler.js', '/assets/js/schedule-pickup.js'],
+                '/order-confirmation': ['/assets/js/errorHandler.js', '/assets/js/order-confirmation.js']
+            };
+            
+            const scripts = pageScripts[currentRoute] || [];
+            
+            // Set embed config before loading scripts
+            window.EMBED_CONFIG = {
+                baseUrl: BASE_URL,
+                isEmbedded: true
+            };
+            
+            // Load scripts sequentially
+            let scriptIndex = 0;
+            function loadNextScript() {
+                if (scriptIndex < scripts.length) {
+                    const script = document.createElement('script');
+                    script.src = BASE_URL + scripts[scriptIndex];
+                    script.setAttribute('data-page-script', 'true');
+                    script.onload = function() {
+                        console.log('Loaded script:', scripts[scriptIndex]);
+                        scriptIndex++;
+                        loadNextScript();
+                    };
+                    script.onerror = function() {
+                        console.error('Failed to load script:', scripts[scriptIndex]);
+                        scriptIndex++;
+                        loadNextScript();
+                    };
+                    document.body.appendChild(script);
+                }
+            }
+            
+            loadNextScript();
         }
         
         // Navigate to a route
