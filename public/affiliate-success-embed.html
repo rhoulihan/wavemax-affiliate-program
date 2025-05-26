@@ -82,7 +82,7 @@
                 </div>
                 
                 <div class="pt-4 border-t">
-                    <a href="#" id="dashboardLink" class="block w-full bg-blue-600 text-white text-center font-bold py-3 px-4 rounded-lg hover:bg-blue-700 transition">Go to Affiliate Dashboard</a>
+                    <button id="dashboardLink" class="block w-full bg-blue-600 text-white text-center font-bold py-3 px-4 rounded-lg hover:bg-blue-700 transition">Go to Affiliate Dashboard</button>
                 </div>
             </div>
         </div>
@@ -146,12 +146,23 @@
                     document.getElementById('affiliateEmail').textContent = affiliateData.email;
                     
                     // Generate registration link
-                    const registrationLink = `https://wavemax.promo/customer-register.html?affid=${affiliateData.affiliateId}`;
+                    const registrationLink = `https://wavemax.promo/embed-app.html?route=/customer-register&affid=${affiliateData.affiliateId}`;
                     document.getElementById('registrationLink').value = registrationLink;
                     
-                    // Update dashboard link
-                    document.getElementById('dashboardLink').href = 
-                        `https://wavemax.promo/affiliate-dashboard.html?id=${affiliateData.affiliateId}`;
+                    // Set up dashboard link click handler
+                    const dashboardBtn = document.getElementById('dashboardLink');
+                    if (dashboardBtn) {
+                        dashboardBtn.onclick = function(e) {
+                            e.preventDefault();
+                            if (window.parent && window.parent !== window) {
+                                window.parent.postMessage({
+                                    type: 'navigate',
+                                    data: { url: '/affiliate-dashboard' }
+                                }, '*');
+                            }
+                            return false;
+                        };
+                    }
                     
                     // Notify parent of successful registration
                     sendMessageToParent('registration-complete', {
