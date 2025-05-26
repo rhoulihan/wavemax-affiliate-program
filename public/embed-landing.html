@@ -27,6 +27,53 @@
             text-align: center;
             margin-bottom: 40px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+        
+        .header-actions {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            gap: 10px;
+        }
+        
+        .header-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 12px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+        }
+        
+        .header-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            text-decoration: none;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+        
+        .header-btn i {
+            font-size: 0.875rem;
+        }
+        
+        .header-btn-primary {
+            background: rgba(255, 255, 255, 0.9);
+            color: #1e3a8a;
+        }
+        
+        .header-btn-primary:hover {
+            background: white;
+            color: #1e3a8a;
         }
         
         .wavemax-affiliate-header h1 {
@@ -151,6 +198,17 @@
             .feature-card {
                 margin-bottom: 20px;
             }
+            
+            .header-actions {
+                position: static;
+                justify-content: center;
+                margin-bottom: 20px;
+            }
+            
+            .header-btn {
+                font-size: 0.8rem;
+                padding: 6px 10px;
+            }
         }
     </style>
 </head>
@@ -158,6 +216,16 @@
     <div class="wavemax-affiliate-container">
         <!-- Header Section -->
         <div class="wavemax-affiliate-header">
+            <div class="header-actions">
+                <a href="#" data-navigate="/affiliate-login" class="header-btn" title="Sign in to your existing affiliate account">
+                    <i class="fas fa-sign-in-alt"></i>
+                    <span>Login</span>
+                </a>
+                <a href="#" data-navigate="/affiliate-register" class="header-btn header-btn-primary" title="Create a new affiliate account and start earning">
+                    <i class="fas fa-user-plus"></i>
+                    <span>Become an Affiliate</span>
+                </a>
+            </div>
             <div class="container">
                 <h1>Join the WaveMAX Affiliate Program</h1>
                 <p>Partner with Austin's premier laundry service and earn recurring commissions while helping your community save time</p>
