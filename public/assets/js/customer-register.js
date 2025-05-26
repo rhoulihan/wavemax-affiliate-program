@@ -165,9 +165,10 @@ function initializeRegistrationForm() {
     })
       .then(response => response.json())
       .then(data => {
+        console.log('Registration response:', data);
         if (data.success) {
           // Store customer data in sessionStorage for success page
-          sessionStorage.setItem('registrationData', JSON.stringify({
+          const registrationData = {
             customerId: data.customerId,
             bagBarcode: data.bagBarcode,
             firstName: data.customerData.firstName,
@@ -176,7 +177,9 @@ function initializeRegistrationForm() {
             affiliateId: data.customerData.affiliateId,
             affiliateName: data.customerData.affiliateName,
             deliveryFee: data.customerData.deliveryFee
-          }));
+          };
+          console.log('Storing registration data:', registrationData);
+          sessionStorage.setItem('registrationData', JSON.stringify(registrationData));
 
           // Redirect to success page
           window.location.href = '/embed-app.html?route=/customer-success';
