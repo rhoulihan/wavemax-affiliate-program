@@ -41,13 +41,15 @@
         .header-btn {
             display: inline-flex;
             align-items: center;
-            gap: 6px;
-            padding: 8px 12px;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            padding: 0;
             background: rgba(255, 255, 255, 0.1);
             color: white;
             text-decoration: none;
-            border-radius: 6px;
-            font-size: 0.875rem;
+            border-radius: 8px;
+            font-size: 1rem;
             font-weight: 500;
             transition: all 0.3s ease;
             border: 1px solid rgba(255, 255, 255, 0.2);
@@ -63,7 +65,7 @@
         }
         
         .header-btn i {
-            font-size: 0.875rem;
+            font-size: 1rem;
         }
         
         .header-btn-primary {
@@ -206,8 +208,9 @@
             }
             
             .header-btn {
-                font-size: 0.8rem;
-                padding: 6px 10px;
+                width: 36px;
+                height: 36px;
+                font-size: 0.9rem;
             }
         }
     </style>
@@ -219,11 +222,9 @@
             <div class="header-actions">
                 <a href="#" data-navigate="/affiliate-login" class="header-btn" title="Sign in to your existing affiliate account">
                     <i class="fas fa-sign-in-alt"></i>
-                    <span>Login</span>
                 </a>
                 <a href="#" data-navigate="/affiliate-register" class="header-btn header-btn-primary" title="Create a new affiliate account and start earning">
                     <i class="fas fa-user-plus"></i>
-                    <span>Become an Affiliate</span>
                 </a>
             </div>
             <div class="container">
