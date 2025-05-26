@@ -30,30 +30,67 @@ function initializeAffiliateSuccess() {
     // Copy link functionality
     window.copyLink = function() {
         const linkInput = document.getElementById('registrationLink');
+        const btn = document.getElementById('copyLinkBtn');
         
-        // Create a temporary textarea to copy from (works better in iframes)
+        // Method 1: Try selecting the input directly first
+        try {
+            linkInput.select();
+            linkInput.setSelectionRange(0, 99999);
+            
+            const successful = document.execCommand('copy');
+            
+            if (successful) {
+                const originalText = btn.textContent;
+                btn.textContent = 'Copied!';
+                btn.classList.add('bg-green-600');
+                btn.classList.remove('bg-blue-600');
+                
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                    btn.classList.remove('bg-green-600');
+                    btn.classList.add('bg-blue-600');
+                }, 2000);
+                
+                sendMessageToParent('link-copied', { link: linkInput.value });
+                return;
+            }
+        } catch (err) {
+            console.log('Direct copy failed, trying textarea method');
+        }
+        
+        // Method 2: Fallback to textarea method
         const tempTextarea = document.createElement('textarea');
         tempTextarea.value = linkInput.value;
-        tempTextarea.style.position = 'absolute';
-        tempTextarea.style.left = '-9999px';
+        tempTextarea.style.position = 'fixed';
+        tempTextarea.style.top = '0';
+        tempTextarea.style.left = '0';
+        tempTextarea.style.width = '2em';
+        tempTextarea.style.height = '2em';
+        tempTextarea.style.padding = '0';
+        tempTextarea.style.border = 'none';
+        tempTextarea.style.outline = 'none';
+        tempTextarea.style.boxShadow = 'none';
+        tempTextarea.style.background = 'transparent';
+        
         document.body.appendChild(tempTextarea);
         
         try {
+            tempTextarea.focus();
             tempTextarea.select();
-            tempTextarea.setSelectionRange(0, 99999); // For mobile devices
             
             const successful = document.execCommand('copy');
             document.body.removeChild(tempTextarea);
             
             if (successful) {
-                const btn = document.getElementById('copyLinkBtn');
                 const originalText = btn.textContent;
                 btn.textContent = 'Copied!';
                 btn.classList.add('bg-green-600');
+                btn.classList.remove('bg-blue-600');
                 
                 setTimeout(() => {
                     btn.textContent = originalText;
                     btn.classList.remove('bg-green-600');
+                    btn.classList.add('bg-blue-600');
                 }, 2000);
                 
                 sendMessageToParent('link-copied', { link: linkInput.value });
@@ -61,6 +98,7 @@ function initializeAffiliateSuccess() {
                 throw new Error('Copy command failed');
             }
         } catch (err) {
+            document.body.removeChild(tempTextarea);
             console.error('Failed to copy link:', err);
             // Fallback: select the input for manual copying
             linkInput.select();
@@ -97,12 +135,35 @@ function initializeAffiliateSuccess() {
                         
                         if (isEmbedded && window.parent && window.parent !== window) {
                             console.log('Sending navigation message to parent');
-                            window.parent.postMessage({
-                                type: 'navigate',
-                                data: { url: '/affiliate-dashboard' }
-                            }, '*');
+                            
+                            // Try multiple parent levels in case of nested iframes
+                            let targetWindow = window.parent;
+                            let attempts = 0;
+                            
+                            while (targetWindow && attempts < 5) {
+                                console.log(`Attempting to send message to parent level ${attempts + 1}`);
+                                targetWindow.postMessage({
+                                    type: 'navigate',
+                                    data: { url: '/affiliate-dashboard' }
+                                }, '*');
+                                
+                                if (targetWindow.parent && targetWindow.parent !== targetWindow) {
+                                    targetWindow = targetWindow.parent;
+                                    attempts++;
+                                } else {
+                                    break;
+                                }
+                            }
+                            
+                            // Also try direct navigation as ultimate fallback
+                            setTimeout(() => {
+                                if (window.location.href.includes('affiliate-success')) {
+                                    console.log('Fallback: Direct navigation to dashboard');
+                                    window.location.href = '/embed-app.html?route=/affiliate-dashboard';
+                                }
+                            }, 1000);
                         } else {
-                            window.navigateParent('affiliate-dashboard');
+                            window.location.href = '/embed-app.html?route=/affiliate-dashboard';
                         }
                         return false;
                     };
