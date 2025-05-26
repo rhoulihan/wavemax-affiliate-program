@@ -81,6 +81,16 @@ function initializeAffiliateSuccess() {
                     };
                 }
                 
+                // Set up copy button event listener
+                const copyBtn = document.getElementById('copyLinkBtn');
+                if (copyBtn) {
+                    copyBtn.onclick = function(e) {
+                        e.preventDefault();
+                        window.copyLink();
+                        return false;
+                    };
+                }
+                
                 // Notify parent of successful registration
                 sendMessageToParent('registration-complete', {
                     affiliateId: affiliateData.affiliateId,
