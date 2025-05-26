@@ -289,14 +289,15 @@
         
         // Handle messages from embedded pages
         window.addEventListener('message', function(event) {
-            if (event.origin !== BASE_URL) return;
+            // Allow messages from same origin or from within iframes
+            if (event.origin !== BASE_URL && event.origin !== window.location.origin) return;
             
             const { type, data } = event.data;
             
-            if (type === 'navigate' && data.url) {
-                const url = new URL(data.url, BASE_URL);
-                const path = url.pathname.replace('.html', '').replace('-embed', '');
-                const route = Object.keys(EMBED_PAGES).find(r => EMBED_PAGES[r].includes(path)) || '/';
+            if (type === 'navigate' && data && data.url) {
+                // Handle navigation request
+                const route = data.url.startsWith('/') ? data.url : '/' + data.url;
+                console.log('Navigation request received:', route);
                 navigateTo(route);
             }
         });
