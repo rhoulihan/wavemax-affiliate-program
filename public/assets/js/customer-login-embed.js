@@ -117,6 +117,9 @@
                 // Send login status to parent
                 sendMessageToParent('form-submit', { form: 'customer-login' });
 
+                console.log('Making API request to:', 'https://wavemax.promo/api/v1/auth/customer/login');
+                console.log('Request body:', { username, password: '***' });
+
                 // API call with full URL
                 fetch('https://wavemax.promo/api/v1/auth/customer/login', {
                     method: 'POST',
@@ -127,12 +130,19 @@
                     body: JSON.stringify({ username, password })
                 })
                 .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Login failed');
-                    }
-                    return response.json();
+                    console.log('Response status:', response.status);
+                    console.log('Response ok:', response.ok);
+                    
+                    return response.json().then(data => {
+                        if (!response.ok) {
+                            console.error('API error response:', data);
+                            throw new Error(data.message || 'Login failed');
+                        }
+                        return data;
+                    });
                 })
                 .then(data => {
+                    console.log('Login response data:', data);
                     if (data.success) {
                         // Store token
                         localStorage.setItem('customerToken', data.token);
