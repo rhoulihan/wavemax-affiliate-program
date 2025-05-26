@@ -680,6 +680,11 @@ Add this to your site's `<head>` for faster loading:
 - Check for Content Security Policy restrictions
 - Verify the embed URL is correct
 
+**CSP frame-src errors?**
+- Use `embed-app.html` instead of `embed-router.html`
+- Check console for "Refused to frame" errors
+- The embed-app version works with strict CSP policies
+
 **Height issues?**
 - Use the auto-resize script for dynamic content
 - Adjust the height attribute as needed
@@ -689,6 +694,11 @@ Add this to your site's `<head>` for faster loading:
 - The iframe content is isolated from parent styles
 - Use the compact version for minimal styling
 - Custom CSS won't affect iframe content
+
+**Navigation not working?**
+- Check if embed-navigation.js is loading
+- Look for console errors about inline scripts
+- Ensure you're using data-navigate attributes
 
 ### Support
 
@@ -701,9 +711,32 @@ For embedding assistance:
 
 The entire WaveMAX Affiliate Program application can run embedded within an iframe on external websites. This includes all forms, dashboards, and user flows.
 
-### Embed Router System
+### Embed Options
 
-Use the embed router for a complete embedded application experience:
+#### Option 1: Embed App (Recommended for Strict CSP)
+
+Use `embed-app.html` for sites with strict Content Security Policy that blocks nested iframes:
+
+```html
+<iframe 
+    id="affiliate-app"
+    src="https://wavemax.promo/embed-app.html" 
+    width="100%" 
+    height="800" 
+    frameborder="0"
+    style="border: none;">
+</iframe>
+```
+
+This version:
+- Works with `frame-src 'none'` CSP policies
+- Loads content dynamically without nested iframes
+- Provides smooth navigation within a single iframe
+- Auto-adjusts height based on content
+
+#### Option 2: Embed Router (Full Featured)
+
+Use `embed-router.html` if your site allows nested iframes:
 
 ```html
 <iframe 
@@ -757,6 +790,22 @@ document.getElementById('affiliate-app').contentWindow.postMessage({
 View the complete integration example:
 - Demo: https://wavemax.promo/wavemaxlaundry-integration.html
 - Shows navigation, authentication, and message handling
+
+### Direct Navigation
+
+To navigate to specific pages within the embed:
+
+```javascript
+// For embed-app.html
+document.getElementById('affiliate-app').src = 
+    'https://wavemax.promo/embed-app.html?route=/affiliate-register';
+
+// For embed-router.html
+document.getElementById('affiliate-app').contentWindow.postMessage({
+    type: 'navigate',
+    data: { route: '/affiliate-register' }
+}, 'https://wavemax.promo');
+```
 
 ## Acknowledgments
 
