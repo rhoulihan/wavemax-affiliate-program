@@ -47,14 +47,6 @@
             margin: 20px;
             text-align: center;
         }
-        
-        /* Ensure all content is styled appropriately for embedding */
-        .embed-content {
-            padding: 20px;
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
     </style>
 </head>
 <body>
@@ -104,18 +96,42 @@
                 
                 let html = await response.text();
                 
-                // Extract body content
+                // Extract head content for styles
+                const headMatch = html.match(/<head[^>]*>([\s\S]*)<\/head>/i);
                 const bodyMatch = html.match(/<body[^>]*>([\s\S]*)<\/body>/i);
-                if (bodyMatch) {
-                    html = bodyMatch[1];
+                
+                if (headMatch && bodyMatch) {
+                    // Extract styles and links from head
+                    const headContent = headMatch[1];
+                    const styles = headContent.match(/<style[^>]*>[\s\S]*?<\/style>/gi) || [];
+                    const styleLinks = headContent.match(/<link[^>]*rel=["']stylesheet["'][^>]*>/gi) || [];
+                    
+                    // Get body content
+                    let bodyContent = bodyMatch[1];
+                    
+                    // Remove script tags to prevent duplicate execution
+                    bodyContent = bodyContent.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '');
+                    
+                    // Update relative URLs to absolute
+                    bodyContent = bodyContent.replace(/src=["'](?!http|\/\/)([^"']+)["']/g, `src="${BASE_URL}/$1"`);
+                    bodyContent = bodyContent.replace(/href=["'](?!http|\/\/|#)([^"']+)["']/g, `href="${BASE_URL}/$1"`);
+                    
+                    // Add external stylesheets to head if not already present
+                    styleLinks.forEach(link => {
+                        // Update relative paths in link tags
+                        const updatedLink = link.replace(/href=["'](?!http|\/\/)([^"']+)["']/g, `href="${BASE_URL}/$1"`);
+                        // Check if this stylesheet is already in the document
+                        const linkHref = updatedLink.match(/href=["']([^"']+)["']/);
+                        if (linkHref && !document.querySelector(`link[href="${linkHref[1]}"]`)) {
+                            const linkElement = document.createElement('div');
+                            linkElement.innerHTML = updatedLink;
+                            document.head.appendChild(linkElement.firstChild);
+                        }
+                    });
+                    
+                    // Combine styles and body content
+                    html = styles.join('\n') + bodyContent;
                 }
-                
-                // Remove script tags to prevent duplicate execution
-                html = html.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '');
-                
-                // Update relative URLs to absolute
-                html = html.replace(/src=["'](?!http|\/\/)([^"']+)["']/g, `src="${BASE_URL}/$1"`);
-                html = html.replace(/href=["'](?!http|\/\/|#)([^"']+)["']/g, `href="${BASE_URL}/$1"`);
                 
                 container.innerHTML = html;
                 currentRoute = route;
