@@ -20,6 +20,13 @@ The WaveMAX Affiliate Program enables individuals to register as affiliates, onb
 
 ## Recent Improvements (January 2025)
 
+### Embedded-Only Deployment
+- **Simplified Architecture**: Converted to embedded-only deployment, removing all standalone HTML files
+- **Single Entry Point**: All functionality now operates through `embed-app.html` with route-based navigation
+- **Consistent CSP Compliance**: All navigation uses postMessage API for compatibility with strict CSP environments
+- **Reduced Codebase**: Eliminated duplicate standalone/embedded versions, reducing maintenance overhead
+- **Unified User Experience**: Single, consistent interface for all users regardless of deployment context
+
 ### Security Enhancements
 - **Enhanced Authentication**: JWT tokens reduced from 7 days to 1 hour with secure refresh token rotation
 - **Input Sanitization**: Added XSS and NoSQL injection prevention middleware
@@ -38,10 +45,11 @@ The WaveMAX Affiliate Program enables individuals to register as affiliates, onb
 - **AWS SDK v3**: Upgraded to latest AWS SDK for improved performance and security
 
 ### Code Quality
-- **Dead Code Removal**: Cleaned up 100+ lines of unused code
+- **Dead Code Removal**: Removed all standalone HTML/JS files, cleaning up 4000+ lines of code
 - **Dependency Updates**: Added express-mongo-sanitize and xss packages
 - **Validation**: Added comprehensive input validation on all endpoints
 - **Error Handling**: Centralized error handling with proper logging
+- **Route-Based Navigation**: Updated all internal navigation to use routes instead of file paths
 - **Test Suite Improvements**:
   - Fixed MongoDB connection conflicts in test environment
   - Added comprehensive test coverage for all controllers
@@ -50,6 +58,7 @@ The WaveMAX Affiliate Program enables individuals to register as affiliates, onb
   - Achieved 80%+ code coverage across the application
 
 ### Feature Updates
+- **Landing Page Update**: Changed "5 Stars on Google" to "$0 Startup Cost" in promotional messaging
 - **Customer Dashboard**: Fixed API endpoints and CSP violations
 - **Customer Profile**: Added inline edit functionality for customer information updates
 - **Order Management**: 
@@ -60,8 +69,6 @@ The WaveMAX Affiliate Program enables individuals to register as affiliates, onb
 - **Payment Security**: Enhanced encryption for payment information storage
 - **Refresh Tokens**: Proper implementation with 30-day expiry and rotation
 - **Customer Model**: Removed redundant bags array field
-- **Embeddable Landing Pages**: Added iframe-ready pages for easy integration into external sites
-- **Form Validation**: Improved client-side validation on schedule pickup form
 - **CSP Compliance**: Moved all inline scripts to external files for security compliance
 
 ## Project Structure
@@ -69,26 +76,37 @@ The WaveMAX Affiliate Program enables individuals to register as affiliates, onb
 ```
 wavemax-affiliate-program/
 │
-├── public/                                # Frontend HTML/CSS/JS
+├── public/                                # Frontend HTML/CSS/JS (Embedded-Only)
 │   ├── assets/                            # Static assets
 │   │   └── js/
 │   │       ├── components/                # Reusable components
 │   │       │   ├── AffiliateMetricsDashboard.js
 │   │       │   └── CustomerDashboardAnalytics.js
-│   │       └── errorHandler.js            # Client-side error handling
-│   ├── index.html                         # Landing page
-│   ├── affiliate-register.html            # Affiliate registration
-│   ├── affiliate-login.html               # Affiliate login
-│   ├── affiliate-success.html             # Registration success
-│   ├── affiliate-dashboard.html           # Affiliate dashboard
-│   ├── customer-register.html             # Customer registration
-│   ├── customer-login.html                # Customer login
-│   ├── customer-success.html              # Registration success
-│   ├── customer-dashboard.html            # Customer dashboard
-│   ├── schedule-pickup.html               # Pickup scheduling
-│   ├── order-confirmation.html            # Order confirmation
-│   ├── api-docs.html                      # API documentation
+│   │       ├── affiliate-dashboard-init.js # Embedded dashboard
+│   │       ├── affiliate-login.js         # Login functionality
+│   │       ├── affiliate-register-init.js # Embedded registration
+│   │       ├── affiliate-success-init.js  # Embedded success page
+│   │       ├── customer-dashboard.js      # Customer dashboard
+│   │       ├── customer-login.js          # Customer login
+│   │       ├── customer-register.js       # Customer registration
+│   │       ├── customer-success.js        # Customer success
+│   │       ├── embed-navigation.js        # CSP-compliant navigation
+│   │       ├── errorHandler.js            # Client-side error handling
+│   │       ├── order-confirmation.js      # Order confirmation
+│   │       └── schedule-pickup.js         # Pickup scheduling
+│   ├── embed-app.html                     # Main application (Single Entry Point)
 │   ├── embed-landing.html                 # Full embeddable landing page
+│   ├── affiliate-register-embed.html      # Affiliate registration
+│   ├── affiliate-login-embed.html         # Affiliate login
+│   ├── affiliate-success-embed.html       # Registration success
+│   ├── affiliate-dashboard-embed.html     # Affiliate dashboard
+│   ├── customer-register-embed.html       # Customer registration
+│   ├── customer-login-embed.html          # Customer login
+│   ├── customer-success-embed.html        # Registration success
+│   ├── customer-dashboard-embed.html      # Customer dashboard
+│   ├── schedule-pickup-embed.html         # Pickup scheduling
+│   ├── order-confirmation-embed.html      # Order confirmation
+│   ├── api-docs.html                      # API documentation
 │   ├── iframe-embed.html                  # Compact iframe version
 │   └── embed-example.html                 # Embedding documentation
 │
@@ -491,34 +509,27 @@ For issues and questions:
 
 ## Embedding the Affiliate Program
 
-The WaveMAX Affiliate Program can be easily embedded into any website, including the main WaveMAX Laundry site. We provide multiple embedding options to suit different needs.
+The WaveMAX Affiliate Program is designed for embedded deployment and runs entirely within iframes. The application uses a single-page architecture through `embed-app.html` for maximum compatibility with Content Security Policy (CSP) restrictions.
 
-### Available Embed Pages
+### Single Entry Point Architecture
 
-1. **Full Landing Page** (`/embed-landing.html`)
-   - Complete affiliate program presentation
-   - Professional design with all features
-   - Includes testimonials, FAQ, and detailed information
-   - Best for dedicated affiliate program pages
+The entire application runs through one embedded entry point that handles all navigation internally:
 
-2. **Compact Iframe Version** (`/iframe-embed.html`)
-   - Streamlined version optimized for embedding
-   - Essential information and call-to-action buttons
-   - Minimal styling for seamless integration
-   - Best for sidebars or smaller spaces
+**Primary Embed Method** (`embed-app.html`):
+- Single iframe containing the entire application
+- Route-based navigation within the iframe
+- CSP-compliant (works with `frame-src 'none'` policies)
+- Auto-resizing based on content
+- Full user registration, login, and dashboard flows
 
-3. **Implementation Guide** (`/embed-example.html`)
-   - Complete documentation with code examples
-   - Live previews of all embedding options
-   - Best practices and troubleshooting tips
-
-### Quick Start - Basic Iframe Embed
+### Quick Start - Full Application Embed
 
 Add this code where you want the affiliate program to appear:
 
 ```html
 <iframe 
-    src="https://wavemax.promo/iframe-embed.html" 
+    id="wavemax-affiliate-app"
+    src="https://wavemax.promo/embed-app.html" 
     width="100%" 
     height="800" 
     frameborder="0" 
@@ -529,12 +540,11 @@ Add this code where you want the affiliate program to appear:
 
 ### Embedding Options
 
-#### Option 1: Full Landing Page
+#### Option 1: Landing Page Only
 
-Use this for a complete affiliate program presentation:
+For just the landing page without the full application:
 
 ```html
-<!-- Full featured landing page -->
 <iframe 
     src="https://wavemax.promo/embed-landing.html" 
     width="100%" 
@@ -545,50 +555,31 @@ Use this for a complete affiliate program presentation:
 </iframe>
 ```
 
-#### Option 2: Responsive Auto-Resize Iframe
+#### Option 2: Compact Promotional Widget
 
-For automatic height adjustment based on content:
+Minimal version for sidebars or smaller spaces:
 
 ```html
-<div id="affiliate-iframe-container"></div>
-
-<script>
-(function() {
-    var container = document.getElementById('affiliate-iframe-container');
-    var iframe = document.createElement('iframe');
-    iframe.src = 'https://wavemax.promo/iframe-embed.html';
-    iframe.style.width = '100%';
-    iframe.style.border = 'none';
-    iframe.frameBorder = '0';
-    
-    // Auto-resize function
-    function resizeIframe() {
-        try {
-            var height = iframe.contentWindow.document.body.scrollHeight;
-            iframe.style.height = height + 'px';
-        } catch(e) {
-            iframe.style.height = '800px'; // Fallback height
-        }
-    }
-    
-    iframe.onload = resizeIframe;
-    window.addEventListener('resize', resizeIframe);
-    
-    container.appendChild(iframe);
-})();
-</script>
+<iframe 
+    src="https://wavemax.promo/iframe-embed.html" 
+    width="100%" 
+    height="600" 
+    frameborder="0" 
+    scrolling="no"
+    style="width: 100%; min-height: 500px; border: none;">
+</iframe>
 ```
 
-#### Option 3: Direct Link Buttons
+#### Option 3: Direct Navigation Links
 
-If you prefer not to use iframes:
+Link directly to specific pages within the application:
 
 ```html
 <div style="text-align: center; padding: 40px 20px; background: #f8f9fa;">
     <h2>Become a WaveMAX Affiliate</h2>
     <p>Earn 10% recurring commission on every customer you refer!</p>
     <div style="margin-top: 20px;">
-        <a href="https://wavemax.promo/affiliate-register.html" 
+        <a href="https://wavemax.promo/embed-app.html?route=/affiliate-register" 
            target="_blank"
            style="display: inline-block; padding: 12px 30px; 
                   background: #3b82f6; color: white; 
@@ -596,7 +587,7 @@ If you prefer not to use iframes:
                   font-weight: bold; margin: 0 10px;">
             Join Now
         </a>
-        <a href="https://wavemax.promo/affiliate-login.html" 
+        <a href="https://wavemax.promo/embed-app.html?route=/affiliate-login" 
            target="_blank"
            style="display: inline-block; padding: 12px 30px; 
                   background: white; color: #3b82f6; 
@@ -617,12 +608,28 @@ If your site uses WordPress, create a shortcode by adding this to your theme's `
 function wavemax_affiliate_embed_shortcode($atts) {
     $atts = shortcode_atts(array(
         'height' => '800',
-        'type' => 'compact'
+        'type' => 'app',
+        'route' => '/'
     ), $atts);
     
-    $url = ($atts['type'] === 'full') 
-        ? 'https://wavemax.promo/embed-landing.html' 
-        : 'https://wavemax.promo/iframe-embed.html';
+    $url = 'https://wavemax.promo/';
+    
+    switch($atts['type']) {
+        case 'app':
+            $url .= 'embed-app.html';
+            if ($atts['route'] !== '/') {
+                $url .= '?route=' . urlencode($atts['route']);
+            }
+            break;
+        case 'landing':
+            $url .= 'embed-landing.html';
+            break;
+        case 'compact':
+            $url .= 'iframe-embed.html';
+            break;
+        default:
+            $url .= 'embed-app.html';
+    }
     
     return '<iframe src="' . $url . '" 
             width="100%" 
@@ -635,7 +642,9 @@ add_shortcode('wavemax_affiliate', 'wavemax_affiliate_embed_shortcode');
 
 Then use in any page or post:
 ```
-[wavemax_affiliate type="compact" height="800"]
+[wavemax_affiliate type="app" height="800"]
+[wavemax_affiliate type="app" route="/affiliate-register"]
+[wavemax_affiliate type="landing" height="2400"]
 ```
 
 ### Embedding Features
@@ -681,9 +690,9 @@ Add this to your site's `<head>` for faster loading:
 - Verify the embed URL is correct
 
 **CSP frame-src errors?**
-- Use `embed-app.html` instead of `embed-router.html`
-- Check console for "Refused to frame" errors
-- The embed-app version works with strict CSP policies
+- `embed-app.html` is designed for strict CSP environments
+- Check console for "Refused to frame" errors  
+- Works with `frame-src 'none'` policies unlike nested iframe approaches
 
 **Height issues?**
 - Use the auto-resize script for dynamic content
@@ -707,104 +716,111 @@ For embedding assistance:
 - Email: tech@wavemaxlaundry.com
 - Check browser console for error messages
 
-## Full Application Embedding
+## Full Application Embedding Architecture
 
-The entire WaveMAX Affiliate Program application can run embedded within an iframe on external websites. This includes all forms, dashboards, and user flows.
+The WaveMAX Affiliate Program uses a unified embedded architecture through `embed-app.html` as the single entry point for all functionality.
 
-### Embed Options
+### Unified Embed Application
 
-#### Option 1: Embed App (Recommended for Strict CSP)
+The `embed-app.html` provides:
+- Single iframe containing the entire application
+- Route-based navigation (no page reloads)
+- CSP-compliant operation with strict policies
+- Dynamic content loading without nested iframes
+- Auto-resizing based on content
+- Full user flows: registration, login, dashboards, order management
 
-Use `embed-app.html` for sites with strict Content Security Policy that blocks nested iframes:
+### Available Routes
 
+All functionality is accessible through route parameters:
+
+- `/` or `/landing` - Landing page
+- `/affiliate-register` - Affiliate registration
+- `/affiliate-login` - Affiliate login  
+- `/affiliate-dashboard` - Full affiliate dashboard
+- `/affiliate-success` - Registration success
+- `/customer-register` - Customer registration
+- `/customer-login` - Customer login
+- `/customer-dashboard` - Customer dashboard
+- `/customer-success` - Customer success
+- `/schedule-pickup` - Schedule pickup form
+- `/order-confirmation` - Order confirmation
+
+### Navigation Methods
+
+#### URL Parameters
 ```html
-<iframe 
-    id="affiliate-app"
-    src="https://wavemax.promo/embed-app.html" 
-    width="100%" 
-    height="800" 
-    frameborder="0"
-    style="border: none;">
-</iframe>
+<!-- Direct navigation via URL -->
+<iframe src="https://wavemax.promo/embed-app.html?route=/affiliate-register"></iframe>
 ```
 
-This version:
-- Works with `frame-src 'none'` CSP policies
-- Loads content dynamically without nested iframes
-- Provides smooth navigation within a single iframe
-- Auto-adjusts height based on content
-
-#### Option 2: Embed Router (Full Featured)
-
-Use `embed-router.html` if your site allows nested iframes:
-
-```html
-<iframe 
-    id="affiliate-app"
-    src="https://wavemax.promo/embed-router.html" 
-    width="100%" 
-    height="800" 
-    frameborder="0"
-    allow="fullscreen"
-    style="border: none;">
-</iframe>
-```
-
-### Available Embedded Pages
-
-All application pages have embedded versions with `-embed.html` suffix:
-
-- `/affiliate-register-embed.html` - Affiliate registration
-- `/affiliate-login-embed.html` - Affiliate login  
-- `/affiliate-dashboard-embed.html` - Full affiliate dashboard
-- `/customer-register-embed.html` - Customer registration
-- `/customer-login-embed.html` - Customer login
-- `/customer-dashboard-embed.html` - Customer dashboard
-- `/schedule-pickup-embed.html` - Schedule pickup form
-- `/order-confirmation-embed.html` - Order confirmation
-
-### Navigation Between Pages
-
-The embedded pages communicate via postMessage API:
-
+#### PostMessage API
 ```javascript
-// Listen for navigation requests
+// Listen for navigation events
 window.addEventListener('message', function(event) {
     if (event.origin !== 'https://wavemax.promo') return;
     
     if (event.data.type === 'navigate') {
-        // Handle navigation to embedded pages
-        console.log('Navigate to:', event.data.data.url);
+        console.log('User navigated to:', event.data.data.url);
+    }
+    
+    if (event.data.type === 'resize') {
+        // Auto-resize iframe
+        const iframe = document.getElementById('affiliate-app');
+        iframe.style.height = event.data.data.height + 'px';
     }
 });
 
-// Navigate programmatically
-document.getElementById('affiliate-app').contentWindow.postMessage({
+// Programmatic navigation
+const iframe = document.getElementById('affiliate-app');
+iframe.contentWindow.postMessage({
     type: 'navigate',
-    data: { route: '/affiliate-dashboard' }
+    data: { url: '/affiliate-dashboard' }
 }, 'https://wavemax.promo');
 ```
 
 ### Integration Example
 
-View the complete integration example:
-- Demo: https://wavemax.promo/wavemaxlaundry-integration.html
-- Shows navigation, authentication, and message handling
+Complete integration with auto-resizing and navigation handling:
 
-### Direct Navigation
+```html
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Embedded WaveMAX Affiliate Program</title>
+</head>
+<body>
+    <div>
+        <h1>Our Affiliate Program</h1>
+        <iframe 
+            id="wavemax-app"
+            src="https://wavemax.promo/embed-app.html" 
+            width="100%" 
+            height="800" 
+            frameborder="0"
+            style="border: none;">
+        </iframe>
+    </div>
 
-To navigate to specific pages within the embed:
-
-```javascript
-// For embed-app.html
-document.getElementById('affiliate-app').src = 
-    'https://wavemax.promo/embed-app.html?route=/affiliate-register';
-
-// For embed-router.html
-document.getElementById('affiliate-app').contentWindow.postMessage({
-    type: 'navigate',
-    data: { route: '/affiliate-register' }
-}, 'https://wavemax.promo');
+    <script>
+        const iframe = document.getElementById('wavemax-app');
+        
+        // Handle messages from the embedded app
+        window.addEventListener('message', function(event) {
+            if (event.origin !== 'https://wavemax.promo') return;
+            
+            if (event.data.type === 'resize') {
+                iframe.style.height = event.data.data.height + 'px';
+            }
+            
+            if (event.data.type === 'navigate') {
+                console.log('User navigated to:', event.data.data.url);
+                // Optional: Update parent URL or analytics
+            }
+        });
+    </script>
+</body>
+</html>
 ```
 
 ## Acknowledgments
