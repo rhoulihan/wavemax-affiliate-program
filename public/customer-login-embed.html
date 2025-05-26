@@ -89,13 +89,18 @@
         
         // Navigate to register with affiliate ID if present
         function navigateToRegister() {
+            console.log('navigateToRegister called');
+            
             // Check for affiliate ID in URL or session storage
             const urlParams = new URLSearchParams(window.location.search);
             const affiliateId = urlParams.get('affid') || urlParams.get('affiliate') || sessionStorage.getItem('affiliateId');
             
+            console.log('Affiliate ID found:', affiliateId);
+            
             if (affiliateId) {
                 // Navigate to registration with affiliate ID
                 if (window.parent && window.parent !== window) {
+                    console.log('Sending navigation message with affiliate ID');
                     window.parent.postMessage({
                         type: 'navigate',
                         source: 'wavemax-embed',
@@ -108,20 +113,34 @@
                     window.location.href = `/customer-register?affid=${affiliateId}`;
                 }
             } else {
+                console.log('No affiliate ID, navigating without it');
                 navigateParent('customer-register');
             }
         }
 
         // Setup register link click handler
-        document.addEventListener('DOMContentLoaded', function() {
+        function setupRegisterLink() {
+            console.log('Setting up register link');
             const registerLink = document.getElementById('registerLink');
             if (registerLink) {
+                console.log('Register link found, adding click handler');
                 registerLink.addEventListener('click', function(e) {
                     e.preventDefault();
+                    console.log('Register link clicked');
                     navigateToRegister();
                 });
+            } else {
+                console.log('Register link not found');
             }
-        });
+        }
+        
+        // Try to set up the link when DOM is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', setupRegisterLink);
+        } else {
+            // DOM is already loaded
+            setupRegisterLink();
+        }
         
         // Form submission
         document.getElementById('customerLoginForm').addEventListener('submit', function(e) {
