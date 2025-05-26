@@ -3,13 +3,17 @@ console.log('customer-register.js loaded');
 console.log('Current URL:', window.location.href);
 console.log('Window parent same as window?', window.parent === window);
 
-document.addEventListener('DOMContentLoaded', function() {
-  console.log('DOMContentLoaded fired in customer-register.js');
+// Function to initialize the registration form
+function initializeRegistrationForm() {
+  console.log('Initializing registration form');
   // Extract affiliate ID from URL query parameter
+  // When loaded via embed-app.html, we need to check the actual page URL, not the base URL
   let urlParams = new URLSearchParams(window.location.search);
   let affiliateId = urlParams.get('affid') || urlParams.get('affiliate') || sessionStorage.getItem('affiliateId');
   
-  // If we're in an iframe and no affiliate ID found, check parent URL
+  console.log('Window location search:', window.location.search);
+  console.log('Initial affiliate ID search:', affiliateId);
+  
   if (!affiliateId && window.parent !== window) {
     try {
       // Try to get parent URL parameters
@@ -24,6 +28,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const referrerUrl = new URL(document.referrer);
         const referrerParams = new URLSearchParams(referrerUrl.search);
         affiliateId = referrerParams.get('affid') || referrerParams.get('affiliate');
+        console.log('Found affiliate ID in referrer:', affiliateId);
       }
     }
   }
@@ -217,4 +222,12 @@ document.addEventListener('DOMContentLoaded', function() {
     if (value.length > 4) value = value.slice(0, 4);
     e.target.value = value;
   });
-});
+}
+
+// Check if DOM is already loaded or wait for it
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initializeRegistrationForm);
+} else {
+  // DOM is already loaded, initialize immediately
+  initializeRegistrationForm();
+}
