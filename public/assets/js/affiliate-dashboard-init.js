@@ -375,26 +375,30 @@ function copyRegistrationLink() {
   const linkInput = document.getElementById('registrationLink');
   const copyBtn = document.getElementById('copyRegistrationLinkBtn');
   
-  // Focus the input first
-  linkInput.focus();
-  linkInput.select();
-  
-  try {
-    // Use execCommand which works better in iframes
-    const successful = document.execCommand('copy');
-    if (successful) {
-      showCopySuccess(copyBtn);
-    } else {
-      // If copy fails, show the text for manual copying
+  // Use setTimeout to ensure our code runs in a clean call stack
+  setTimeout(() => {
+    // Focus the input first
+    linkInput.focus();
+    linkInput.select();
+    
+    try {
+      // Use execCommand which works better in iframes
+      const successful = document.execCommand('copy');
+      if (successful) {
+        showCopySuccess(copyBtn);
+        // Blur the input after successful copy
+        linkInput.blur();
+      } else {
+        // If copy fails, show the text for manual copying
+        linkInput.blur();
+        showManualCopyPrompt(linkInput.value);
+      }
+    } catch (err) {
+      // Show text for manual copying if everything fails
+      linkInput.blur();
       showManualCopyPrompt(linkInput.value);
     }
-  } catch (err) {
-    // Show text for manual copying if everything fails
-    showManualCopyPrompt(linkInput.value);
-  }
-  
-  // Blur the input after copying
-  linkInput.blur();
+  }, 10);
 }
 
 // Show manual copy prompt
