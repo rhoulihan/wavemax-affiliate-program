@@ -75,39 +75,63 @@ function initializeAffiliateDashboard() {
 
   // Logout functionality
   const logoutBtn = document.getElementById('logoutBtn');
+  console.log('Logout button found:', logoutBtn);
   if (logoutBtn) {
-    logoutBtn.addEventListener('click', function() {
+    logoutBtn.addEventListener('click', function(e) {
+      e.preventDefault();
+      console.log('Logout button clicked');
       localStorage.removeItem('affiliateToken');
       localStorage.removeItem('currentAffiliate');
       
       if (isEmbedded) {
+        console.log('Sending logout navigation message');
         // For embedded, use postMessage navigation
         window.parent.postMessage({
           type: 'navigate',
           data: { url: '/affiliate-login' }
         }, '*');
+        
+        // Fallback direct navigation after a short delay
+        setTimeout(() => {
+          console.log('Fallback: Direct navigation to login');
+          window.location.href = '/embed-app.html?route=/affiliate-login';
+        }, 500);
       } else {
         window.location.href = '/embed-app.html?route=/affiliate-login';
       }
     });
+  } else {
+    console.error('Logout button not found in DOM');
   }
   
   // Register new customer button
   const registerBtn = document.getElementById('registerCustomerBtn');
+  console.log('Register button found:', registerBtn);
   if (registerBtn) {
-    registerBtn.addEventListener('click', function() {
+    registerBtn.addEventListener('click', function(e) {
+      e.preventDefault();
+      console.log('Register customer button clicked');
       const registrationLink = `/customer-register?affid=${affiliateId}`;
       
       if (isEmbedded) {
+        console.log('Sending register navigation message');
         // For embedded, use postMessage navigation
         window.parent.postMessage({
           type: 'navigate',
           data: { url: registrationLink }
         }, '*');
+        
+        // Fallback direct navigation after a short delay
+        setTimeout(() => {
+          console.log('Fallback: Direct navigation to customer register');
+          window.location.href = `/embed-app.html?route=${registrationLink}`;
+        }, 500);
       } else {
         window.location.href = `/embed-app.html?route=${registrationLink}`;
       }
     });
+  } else {
+    console.error('Register button not found in DOM');
   }
 
   // Make functions available globally (they're used by the existing dashboard code)
