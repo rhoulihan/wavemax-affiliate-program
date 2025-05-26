@@ -158,7 +158,20 @@
                         
                         // Check URL params for pickup flag
                         const urlParams = new URLSearchParams(window.location.search);
-                        const shouldRedirectToPickup = urlParams.get('pickup') === 'true';
+                        const pickupParam = urlParams.get('pickup');
+                        const pickupFromSession = sessionStorage.getItem('redirectToPickup');
+                        
+                        console.log('Current URL:', window.location.href);
+                        console.log('URL search params:', window.location.search);
+                        console.log('Pickup parameter from URL:', pickupParam);
+                        console.log('Pickup parameter from session:', pickupFromSession);
+                        
+                        const shouldRedirectToPickup = pickupParam === 'true' || pickupFromSession === 'true';
+                        
+                        // Clear the session flag after reading
+                        if (pickupFromSession) {
+                            sessionStorage.removeItem('redirectToPickup');
+                        }
                         
                         // Navigate within the embed system
                         if (shouldRedirectToPickup) {
@@ -200,6 +213,13 @@
         const affiliateId = urlParams.get('affid') || urlParams.get('affiliate');
         if (affiliateId) {
             sessionStorage.setItem('affiliateId', affiliateId);
+        }
+        
+        // Store pickup flag if present
+        const pickupFlag = urlParams.get('pickup');
+        if (pickupFlag === 'true') {
+            sessionStorage.setItem('redirectToPickup', 'true');
+            console.log('Stored pickup flag in session');
         }
         
         // Setup components
