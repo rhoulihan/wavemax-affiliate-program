@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WaveMAX Affiliate Program</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: transparent;
+            min-height: 100vh;
+        }
+        
+        #app-container {
+            width: 100%;
+            min-height: 600px;
+        }
+        
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 400px;
+            font-size: 1.2rem;
+            color: #666;
+        }
+        
+        .error {
+            padding: 20px;
+            background: #fee;
+            border: 1px solid #fcc;
+            border-radius: 8px;
+            color: #c00;
+            margin: 20px;
+            text-align: center;
+        }
+        
+        /* Ensure all content is styled appropriately for embedding */
+        .embed-content {
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+    <div id="app-container">
+        <div class="loading">
+            <i class="fas fa-spinner fa-spin me-2"></i>
+            Loading...
+        </div>
+    </div>
+
+    <script>
+        // Single page embedded application
+        const BASE_URL = 'https://wavemax.promo';
+        const EMBED_PAGES = {
+            '/': '/embed-landing.html',
+            '/landing': '/embed-landing.html',
+            '/affiliate-register': '/affiliate-register-embed.html',
+            '/affiliate-login': '/affiliate-login-embed.html',
+            '/affiliate-dashboard': '/affiliate-dashboard-embed.html',
+            '/affiliate-success': '/affiliate-success-embed.html',
+            '/customer-register': '/customer-register-embed.html',
+            '/customer-login': '/customer-login-embed.html',
+            '/customer-dashboard': '/customer-dashboard-embed.html',
+            '/customer-success': '/customer-success-embed.html',
+            '/schedule-pickup': '/schedule-pickup-embed.html',
+            '/order-confirmation': '/order-confirmation-embed.html'
+        };
+        
+        let currentRoute = '/';
+        
+        // Get route from URL parameter
+        function getRouteFromUrl() {
+            const params = new URLSearchParams(window.location.search);
+            return params.get('route') || '/';
+        }
+        
+        // Load page content
+        async function loadPage(route) {
+            const container = document.getElementById('app-container');
+            const pagePath = EMBED_PAGES[route] || EMBED_PAGES['/'];
+            
+            try {
+                container.innerHTML = '<div class="loading"><i class="fas fa-spinner fa-spin me-2"></i>Loading...</div>';
+                
+                const response = await fetch(BASE_URL + pagePath);
+                if (!response.ok) throw new Error('Failed to load page');
+                
+                let html = await response.text();
+                
+                // Extract body content
+                const bodyMatch = html.match(/<body[^>]*>([\s\S]*)<\/body>/i);
+                if (bodyMatch) {
+                    html = bodyMatch[1];
+                }
+                
+                // Remove script tags to prevent duplicate execution
+                html = html.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '');
+                
+                // Update relative URLs to absolute
+                html = html.replace(/src=["'](?!http|\/\/)([^"']+)["']/g, `src="${BASE_URL}/$1"`);
+                html = html.replace(/href=["'](?!http|\/\/|#)([^"']+)["']/g, `href="${BASE_URL}/$1"`);
+                
+                container.innerHTML = html;
+                currentRoute = route;
+                
+                // Initialize navigation for the loaded content
+                initializeNavigation();
+                
+                // Update parent URL if in iframe
+                if (window.parent !== window) {
+                    window.parent.postMessage({
+                        type: 'route-changed',
+                        data: { route: route }
+                    }, '*');
+                }
+                
+                // Send height to parent
+                sendHeight();
+                
+            } catch (error) {
+                console.error('Error loading page:', error);
+                container.innerHTML = '<div class="error">Failed to load content. Please try again.</div>';
+            }
+        }
+        
+        // Initialize navigation handlers
+        function initializeNavigation() {
+            // Handle data-navigate links
+            document.querySelectorAll('[data-navigate]').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const route = this.getAttribute('data-navigate');
+                    navigateTo(route);
+                });
+            });
+            
+            // Handle regular links that should navigate
+            document.querySelectorAll('a[href^="/"]').forEach(link => {
+                const href = link.getAttribute('href');
+                if (href && !link.hasAttribute('target')) {
+                    link.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        const route = href.replace('.html', '').replace('-embed', '');
+                        navigateTo(route);
+                    });
+                }
+            });
+            
+            // Load external navigation script if exists
+            const embedNavScript = document.createElement('script');
+            embedNavScript.src = BASE_URL + '/assets/js/embed-navigation.js';
+            embedNavScript.onload = function() {
+                console.log('Embed navigation script loaded');
+            };
+            document.body.appendChild(embedNavScript);
+        }
+        
+        // Navigate to a route
+        function navigateTo(route) {
+            console.log('Navigating to:', route);
+            
+            // Update URL parameter
+            const url = new URL(window.location);
+            url.searchParams.set('route', route);
+            window.history.pushState({}, '', url);
+            
+            // Load the new page
+            loadPage(route);
+        }
+        
+        // Send height to parent window
+        function sendHeight() {
+            if (window.parent !== window) {
+                const height = Math.max(
+                    document.body.scrollHeight,
+                    document.body.offsetHeight,
+                    document.documentElement.scrollHeight,
+                    document.documentElement.offsetHeight
+                );
+                
+                window.parent.postMessage({
+                    type: 'resize',
+                    data: { height: height + 50 } // Add some padding
+                }, '*');
+            }
+        }
+        
+        // Handle messages from embedded pages
+        window.addEventListener('message', function(event) {
+            if (event.origin !== BASE_URL) return;
+            
+            const { type, data } = event.data;
+            
+            if (type === 'navigate' && data.url) {
+                const url = new URL(data.url, BASE_URL);
+                const path = url.pathname.replace('.html', '').replace('-embed', '');
+                const route = Object.keys(EMBED_PAGES).find(r => EMBED_PAGES[r].includes(path)) || '/';
+                navigateTo(route);
+            }
+        });
+        
+        // Handle browser back/forward
+        window.addEventListener('popstate', function() {
+            const route = getRouteFromUrl();
+            loadPage(route);
+        });
+        
+        // Monitor content changes for height updates
+        const resizeObserver = new ResizeObserver(() => {
+            sendHeight();
+        });
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            const initialRoute = getRouteFromUrl();
+            loadPage(initialRoute);
+            
+            // Start observing body for size changes
+            resizeObserver.observe(document.body);
+        });
+        
+        // Also send height on window resize
+        window.addEventListener('resize', sendHeight);
+    </script>
+</body>
+</html>
