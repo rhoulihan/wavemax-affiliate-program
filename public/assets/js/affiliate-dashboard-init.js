@@ -69,6 +69,8 @@ function initializeAffiliateDashboard() {
         loadCustomers(affiliateId);
       } else if (tabId === 'invoices') {
         loadInvoices(affiliateId);
+      } else if (tabId === 'settings') {
+        loadSettingsData(affiliateId);
       }
     });
   });
@@ -106,6 +108,31 @@ function initializeAffiliateDashboard() {
   
   // Schedule pickup button removed - affiliates should not schedule pickups
   
+  // Settings form edit mode
+  const editBtn = document.getElementById('editBtn');
+  const cancelBtn = document.getElementById('cancelBtn');
+  const settingsForm = document.getElementById('settingsForm');
+  const formButtons = document.getElementById('formButtons');
+  
+  if (editBtn) {
+    editBtn.addEventListener('click', function() {
+      enableEditMode();
+    });
+  }
+  
+  if (cancelBtn) {
+    cancelBtn.addEventListener('click', function() {
+      disableEditMode();
+      loadSettingsData(affiliateId); // Reload original data
+    });
+  }
+  
+  if (settingsForm) {
+    settingsForm.addEventListener('submit', async function(e) {
+      e.preventDefault();
+      await saveSettings(affiliateId);
+    });
+  }
 
   // Make functions available globally (they're used by the existing dashboard code)
   window.loadAffiliateData = loadAffiliateData;
@@ -113,6 +140,7 @@ function initializeAffiliateDashboard() {
   window.loadPickupRequests = loadPickupRequests;
   window.loadCustomers = loadCustomers;
   window.loadInvoices = loadInvoices;
+  window.loadSettingsData = loadSettingsData;
 }
 
 // Copy the existing functions from affiliate-dashboard.js
@@ -329,6 +357,101 @@ window.copyLink = function() {
     copyBtn.textContent = originalText;
     copyBtn.classList.remove('bg-green-600');
   }, 2000);
+}
+
+// Load settings data
+async function loadSettingsData(affiliateId) {
+  try {
+    const response = await fetch(`/api/v1/affiliates/${affiliateId}`, {
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('affiliateToken')}`
+      }
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      
+      // Populate settings fields
+      document.getElementById('settingsFirstName').value = data.firstName || '';
+      document.getElementById('settingsLastName').value = data.lastName || '';
+      document.getElementById('settingsEmail').value = data.email || '';
+      document.getElementById('settingsPhone').value = data.phone || '';
+      document.getElementById('settingsBusinessName').value = data.businessName || '';
+      document.getElementById('settingsServiceArea').value = data.serviceArea || '';
+      
+      // Generate and display registration link
+      const baseUrl = window.location.origin;
+      const registrationLink = `${baseUrl}/customer-register?affid=${affiliateId}`;
+      document.getElementById('registrationLink').value = registrationLink;
+    }
+  } catch (error) {
+    console.error('Error loading settings data:', error);
+  }
+}
+
+// Enable edit mode
+function enableEditMode() {
+  const inputs = document.querySelectorAll('#settingsForm input[type="text"], #settingsForm input[type="email"], #settingsForm input[type="tel"]');
+  inputs.forEach(input => {
+    // Skip the registration link field
+    if (input.id !== 'registrationLink') {
+      input.removeAttribute('readonly');
+      input.classList.remove('bg-gray-100');
+    }
+  });
+  
+  document.getElementById('editBtn').style.display = 'none';
+  document.getElementById('formButtons').style.display = 'block';
+}
+
+// Disable edit mode
+function disableEditMode() {
+  const inputs = document.querySelectorAll('#settingsForm input[type="text"], #settingsForm input[type="email"], #settingsForm input[type="tel"]');
+  inputs.forEach(input => {
+    if (input.id !== 'registrationLink') {
+      input.setAttribute('readonly', true);
+      input.classList.add('bg-gray-100');
+    }
+  });
+  
+  document.getElementById('editBtn').style.display = 'block';
+  document.getElementById('formButtons').style.display = 'none';
+}
+
+// Save settings
+async function saveSettings(affiliateId) {
+  try {
+    const formData = new FormData(document.getElementById('settingsForm'));
+    const data = {
+      firstName: formData.get('firstName'),
+      lastName: formData.get('lastName'),
+      email: formData.get('email'),
+      phone: formData.get('phone'),
+      businessName: formData.get('businessName'),
+      serviceArea: formData.get('serviceArea')
+    };
+    
+    const response = await fetch(`/api/v1/affiliates/${affiliateId}`, {
+      method: 'PUT',
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('affiliateToken')}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(data)
+    });
+    
+    if (response.ok) {
+      alert('Settings updated successfully!');
+      disableEditMode();
+      loadSettingsData(affiliateId); // Reload data
+    } else {
+      const error = await response.json();
+      alert('Error updating settings: ' + (error.message || 'Unknown error'));
+    }
+  } catch (error) {
+    console.error('Error saving settings:', error);
+    alert('Error saving settings. Please try again.');
+  }
 }
 
 // Initialize when DOM is ready or immediately if already ready
