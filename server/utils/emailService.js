@@ -346,8 +346,8 @@ exports.sendCustomerWelcomeEmail = async (customer, bagBarcode, affiliate) => {
       affiliate_phone: affiliate.phone,
       affiliate_email: affiliate.email,
       bag_barcode: bagBarcode,
-      login_url: `${process.env.FRONTEND_URL || 'https://wavemax.promo'}/customer-login.html`,
-      schedule_url: `${process.env.FRONTEND_URL || 'https://wavemax.promo'}/schedule-pickup.html?affiliate=${affiliate.affiliateId}&customer=${customer.customerId}`,
+      login_url: `https://www.wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program?affid=${affiliate.affiliateId}`,
+      schedule_url: `https://www.wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program?affid=${affiliate.affiliateId}&pickup=true`,
       current_year: new Date().getFullYear()
     };
 
@@ -381,7 +381,7 @@ exports.sendCustomerOrderConfirmationEmail = async (customer, order, affiliate) 
       affiliate_name: `${affiliate.firstName} ${affiliate.lastName}`,
       affiliate_phone: affiliate.phone,
       affiliate_email: affiliate.email,
-      login_url: `${process.env.FRONTEND_URL || 'https://wavemax.promo'}/customer-login.html`,
+      login_url: `https://www.wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program?affid=${affiliate.affiliateId}`,
       current_year: new Date().getFullYear()
     };
 
