@@ -303,10 +303,10 @@
                             <h2 class="mb-3">Ready to Start Earning?</h2>
                             <p class="mb-4">Join hundreds of Austin affiliates who are earning recurring income while helping their community save time on laundry.</p>
                             <div class="d-flex gap-3 flex-wrap">
-                                <a href="/affiliate-register.html" class="btn btn-primary-custom">
+                                <a href="#" onclick="navigateToPage('/affiliate-register'); return false;" class="btn btn-primary-custom">
                                     <i class="fas fa-user-plus me-2"></i>Create Affiliate Account
                                 </a>
-                                <a href="/affiliate-login.html" class="btn btn-secondary-custom">
+                                <a href="#" onclick="navigateToPage('/affiliate-login'); return false;" class="btn btn-secondary-custom">
                                     <i class="fas fa-sign-in-alt me-2"></i>Affiliate Login
                                 </a>
                             </div>
@@ -365,6 +365,22 @@
     
     <!-- Custom JS for embedding -->
     <script>
+        // Navigation function for embedded context
+        function navigateToPage(route) {
+            // If in iframe, use postMessage to navigate
+            if (window.parent !== window) {
+                window.parent.postMessage({
+                    type: 'navigate',
+                    data: {
+                        url: 'https://wavemax.promo' + route + '-embed.html'
+                    }
+                }, '*');
+            } else {
+                // If not in iframe, navigate directly
+                window.location.href = 'https://wavemax.promo' + route + '.html';
+            }
+        }
+
         // Ensure all links work correctly when embedded
         document.addEventListener('DOMContentLoaded', function() {
             // Update links to use the full URL when embedded
@@ -373,7 +389,7 @@
             
             links.forEach(link => {
                 const href = link.getAttribute('href');
-                if (href.startsWith('/')) {
+                if (href.startsWith('/') && !link.onclick) {
                     link.setAttribute('href', baseUrl + href);
                     // Open affiliate portal links in new tab
                     if (href.includes('affiliate-')) {
@@ -386,12 +402,33 @@
             // Add UTM tracking for embedded page
             const affiliateLinks = document.querySelectorAll('a[href*="affiliate-"]');
             affiliateLinks.forEach(link => {
-                const url = new URL(link.href);
-                url.searchParams.set('utm_source', 'wavemaxlaundry.com');
-                url.searchParams.set('utm_medium', 'embedded');
-                url.searchParams.set('utm_campaign', 'austin-affiliate');
-                link.href = url.toString();
+                if (!link.onclick) {
+                    const url = new URL(link.href);
+                    url.searchParams.set('utm_source', 'wavemaxlaundry.com');
+                    url.searchParams.set('utm_medium', 'embedded');
+                    url.searchParams.set('utm_campaign', 'austin-affiliate');
+                    link.href = url.toString();
+                }
             });
+            
+            // Send height to parent for iframe resizing
+            if (window.parent !== window) {
+                function sendHeight() {
+                    window.parent.postMessage({
+                        type: 'resize',
+                        data: {
+                            height: document.body.scrollHeight
+                        }
+                    }, '*');
+                }
+                
+                // Send initial height
+                sendHeight();
+                
+                // Monitor for changes
+                const resizeObserver = new ResizeObserver(sendHeight);
+                resizeObserver.observe(document.body);
+            }
         });
     </script>
 </body>

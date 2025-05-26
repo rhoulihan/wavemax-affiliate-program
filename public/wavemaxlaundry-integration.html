@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WaveMAX Laundry Austin - Affiliate Program Integration</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: #f5f5f5;
+        }
+        
+        .site-header {
+            background: #1e3a8a;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .main-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .embed-container {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            overflow: hidden;
+            margin: 20px 0;
+        }
+        
+        #affiliate-iframe {
+            width: 100%;
+            min-height: 600px;
+            border: none;
+            display: block;
+        }
+        
+        .info-box {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        
+        .code-block {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 4px;
+            padding: 15px;
+            font-family: monospace;
+            font-size: 14px;
+            overflow-x: auto;
+            margin: 10px 0;
+        }
+        
+        h2 {
+            color: #1e3a8a;
+            margin-top: 30px;
+        }
+        
+        .nav-buttons {
+            margin: 20px 0;
+        }
+        
+        .nav-buttons button {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin: 5px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        
+        .nav-buttons button:hover {
+            background: #2563eb;
+        }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #4caf50;
+            color: white;
+            padding: 15px 20px;
+            border-radius: 4px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            display: none;
+            z-index: 1000;
+        }
+    </style>
+</head>
+<body>
+    <!-- Example WaveMAX Laundry site header -->
+    <div class="site-header">
+        <h1>WaveMAX Laundry - Austin, TX</h1>
+        <p>Professional Wash, Dry, Fold Services</p>
+    </div>
+
+    <div class="main-content">
+        <h1>Affiliate Program</h1>
+        
+        <div class="info-box">
+            <strong>Integration Example:</strong> This page demonstrates how the WaveMAX Affiliate Program 
+            can be embedded into the main WaveMAX Laundry website. The entire application runs within 
+            the iframe below while maintaining the parent site's branding and navigation.
+        </div>
+
+        <!-- Navigation buttons for testing -->
+        <div class="nav-buttons">
+            <button onclick="navigateTo('/')">Home</button>
+            <button onclick="navigateTo('/affiliate-register')">Affiliate Register</button>
+            <button onclick="navigateTo('/affiliate-login')">Affiliate Login</button>
+            <button onclick="navigateTo('/customer-register')">Customer Register</button>
+            <button onclick="navigateTo('/customer-login')">Customer Login</button>
+            <button onclick="navigateTo('/schedule-pickup')">Schedule Pickup</button>
+        </div>
+
+        <!-- Embedded Affiliate Application -->
+        <div class="embed-container">
+            <iframe 
+                id="affiliate-iframe"
+                src="https://wavemax.promo/embed-router.html"
+                allow="fullscreen"
+                loading="eager">
+            </iframe>
+        </div>
+
+        <h2>Integration Code</h2>
+        <p>To embed the affiliate program on your WaveMAX Laundry page, use this code:</p>
+        
+        <div class="code-block">
+&lt;!-- Embedded Affiliate Application --&gt;
+&lt;iframe 
+    id="affiliate-iframe"
+    src="https://wavemax.promo/embed-router.html"
+    width="100%"
+    height="800"
+    frameborder="0"
+    allow="fullscreen"
+    loading="eager"&gt;
+&lt;/iframe&gt;
+
+&lt;script&gt;
+// Handle communication with embedded app
+window.addEventListener('message', function(event) {
+    if (event.origin !== 'https://wavemax.promo') return;
+    
+    const { type, data } = event.data;
+    
+    switch (type) {
+        case 'resize':
+            // Auto-resize iframe
+            document.getElementById('affiliate-iframe').style.height = data.height + 'px';
+            break;
+            
+        case 'navigate':
+            // Handle navigation requests
+            console.log('Navigation requested:', data.url);
+            break;
+            
+        case 'message':
+            // Display notifications
+            showNotification(data.message, data.type);
+            break;
+    }
+});
+
+// Navigate to specific pages
+function navigateTo(route) {
+    const iframe = document.getElementById('affiliate-iframe');
+    iframe.contentWindow.postMessage({
+        type: 'navigate',
+        data: { route: route }
+    }, 'https://wavemax.promo');
+}
+&lt;/script&gt;
+        </div>
+
+        <h2>Available Routes</h2>
+        <ul>
+            <li><code>/</code> - Landing page</li>
+            <li><code>/affiliate-register</code> - Affiliate registration</li>
+            <li><code>/affiliate-login</code> - Affiliate login</li>
+            <li><code>/affiliate-dashboard</code> - Affiliate dashboard</li>
+            <li><code>/customer-register</code> - Customer registration</li>
+            <li><code>/customer-login</code> - Customer login</li>
+            <li><code>/customer-dashboard</code> - Customer dashboard</li>
+            <li><code>/schedule-pickup</code> - Schedule laundry pickup</li>
+            <li><code>/order-confirmation</code> - Order confirmation</li>
+        </ul>
+
+        <h2>Advanced Features</h2>
+        
+        <h3>Prefilling Forms</h3>
+        <div class="code-block">
+// Prefill registration form
+iframe.contentWindow.postMessage({
+    type: 'prefill',
+    data: {
+        firstName: 'John',
+        lastName: 'Doe',
+        email: 'john@example.com'
+    }
+}, 'https://wavemax.promo');
+        </div>
+
+        <h3>Authentication Status</h3>
+        <div class="code-block">
+// Listen for auth status updates
+window.addEventListener('message', function(event) {
+    if (event.data.type === 'auth-status') {
+        console.log('User logged in:', event.data.data.isAuthenticated);
+        console.log('User type:', event.data.data.userType);
+    }
+});
+        </div>
+
+        <h3>Custom Styling</h3>
+        <p>The embedded pages use minimal styling and transparent backgrounds to blend with your site's design. 
+        You can wrap the iframe in a styled container to match your branding.</p>
+    </div>
+
+    <!-- Notification for demo -->
+    <div id="notification" class="notification"></div>
+
+    <script>
+        // Handle messages from embedded app
+        window.addEventListener('message', function(event) {
+            if (event.origin !== 'https://wavemax.promo') return;
+            
+            const { type, data } = event.data;
+            console.log('Received message:', type, data);
+            
+            switch (type) {
+                case 'resize':
+                    // Auto-resize iframe
+                    const iframe = document.getElementById('affiliate-iframe');
+                    if (iframe && data.height) {
+                        iframe.style.height = data.height + 'px';
+                    }
+                    break;
+                    
+                case 'router-ready':
+                    console.log('Router ready with routes:', data.routes);
+                    break;
+                    
+                case 'update-url':
+                    // Update browser URL to reflect current page
+                    const newUrl = `${window.location.pathname}?route=${data.route}${data.queryString ? '&' + data.queryString : ''}`;
+                    window.history.pushState({}, '', newUrl);
+                    break;
+                    
+                case 'message':
+                    // Display notifications
+                    showNotification(data.message, data.type);
+                    break;
+                    
+                case 'auth-status':
+                    // Handle auth status updates
+                    console.log('Auth status:', data.data);
+                    if (data.data.isAuthenticated) {
+                        showNotification(`Logged in as ${data.data.userType}`, 'success');
+                    }
+                    break;
+            }
+        });
+        
+        // Navigate to specific pages
+        function navigateTo(route) {
+            const iframe = document.getElementById('affiliate-iframe');
+            iframe.contentWindow.postMessage({
+                type: 'navigate',
+                data: { route: route }
+            }, 'https://wavemax.promo');
+        }
+        
+        // Show notification
+        function showNotification(message, type = 'info') {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.style.background = type === 'error' ? '#f44336' : '#4caf50';
+            notification.style.display = 'block';
+            
+            setTimeout(() => {
+                notification.style.display = 'none';
+            }, 5000);
+        }
+        
+        // Check initial route from URL
+        const params = new URLSearchParams(window.location.search);
+        const initialRoute = params.get('route');
+        if (initialRoute) {
+            setTimeout(() => {
+                navigateTo(initialRoute);
+            }, 1000);
+        }
+    </script>
+</body>
+</html>

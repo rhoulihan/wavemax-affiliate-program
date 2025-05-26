@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WaveMAX Laundry - Registration Success</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: transparent;
+        }
+        .wavemax-blue {
+            background-color: #1e3a8a;
+        }
+        .wavemax-light-blue {
+            background-color: #3b82f6;
+        }
+        /* Minimal styling for iframe */
+        .embed-container {
+            max-width: 100%;
+            margin: 0;
+            padding: 16px;
+        }
+    </style>
+</head>
+<body class="bg-white font-sans">
+    <!-- Success Content -->
+    <div class="embed-container">
+        <div class="max-w-3xl mx-auto bg-white rounded-lg shadow-md overflow-hidden">
+            <div class="wavemax-blue text-white p-6">
+                <h2 class="text-2xl font-bold">Registration Successful!</h2>
+                <p class="mt-2">Thank you for signing up for WaveMAX Laundry pickup and delivery service.</p>
+            </div>
+            
+            <div class="p-6 space-y-6">
+                <div class="bg-green-50 border border-green-200 text-green-800 rounded-lg p-4">
+                    <h3 class="font-bold text-lg">Your account has been created!</h3>
+                    <p>We're excited to provide you with premium laundry services.</p>
+                </div>
+                
+                <!-- Customer Information -->
+                <div>
+                    <h3 class="text-xl font-bold mb-4">Your Account Information</h3>
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <div class="mb-2">
+                            <span class="font-bold">Customer ID:</span>
+                            <span id="customerId">Loading...</span>
+                        </div>
+                        <div class="mb-2">
+                            <span class="font-bold">Name:</span>
+                            <span id="customerName">Loading...</span>
+                        </div>
+                        <div>
+                            <span class="font-bold">Email:</span>
+                            <span id="customerEmail">Loading...</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Service Provider Information -->
+                <div>
+                    <h3 class="text-xl font-bold mb-4">Your Service Provider</h3>
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <div class="mb-2">
+                            <span class="font-bold">Provider:</span>
+                            <span id="affiliateName">Loading...</span>
+                        </div>
+                        <div class="mb-2">
+                            <span class="font-bold">Service Area:</span>
+                            <span id="serviceArea">Loading...</span>
+                        </div>
+                        <div>
+                            <span class="font-bold">Delivery Fee:</span>
+                            <span id="deliveryFee">Loading...</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Laundry Bag Information -->
+                <div>
+                    <h3 class="text-xl font-bold mb-4">Your Laundry Bag</h3>
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <p class="mb-4">Your dedicated laundry bag with a unique barcode will be delivered to you shortly by your service provider.</p>
+                        <div class="mb-2">
+                            <span class="font-bold">Bag Barcode:</span>
+                            <span id="bagBarcode">Will be assigned upon delivery</span>
+                        </div>
+                        <p class="text-sm text-gray-500">Please use this bag for all your laundry pickup orders.</p>
+                    </div>
+                </div>
+                
+                <!-- Next Steps -->
+                <div>
+                    <h3 class="text-xl font-bold mb-4">Next Steps</h3>
+                    <ol class="list-decimal pl-6 space-y-2">
+                        <li>Your service provider will contact you to deliver your laundry bag.</li>
+                        <li>Schedule your first laundry pickup using our online system or by contacting your service provider directly.</li>
+                        <li>Prepare your laundry in the provided bag on the scheduled pickup date.</li>
+                        <li>Your clean laundry will be delivered back to you within 48 hours.</li>
+                    </ol>
+                </div>
+                
+                <!-- Actions -->
+                <div class="pt-4 border-t">
+                    <div class="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-4">
+                        <a href="#" id="schedulePickupBtn" class="bg-blue-600 text-white text-center font-bold py-3 px-4 rounded-lg hover:bg-blue-700 transition" onclick="navigateParent('schedule-pickup'); return false;">Schedule Your First Pickup</a>
+                        <a href="#" id="customerDashboardBtn" class="border border-blue-600 text-blue-600 text-center font-bold py-3 px-4 rounded-lg hover:bg-blue-50 transition" onclick="navigateParent('customer-dashboard'); return false;">Go to Customer Dashboard</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // PostMessage communication with parent window
+        function sendMessageToParent(type, data) {
+            if (window.parent && window.parent !== window) {
+                window.parent.postMessage({
+                    type: type,
+                    source: 'wavemax-embed',
+                    data: data
+                }, '*');
+            }
+        }
+
+        // Navigate parent frame
+        function navigateParent(page) {
+            sendMessageToParent('navigate', { page: page });
+        }
+
+        // Load customer information
+        document.addEventListener('DOMContentLoaded', function() {
+            // Try to get customer info from localStorage
+            const customer = localStorage.getItem('currentCustomer');
+            
+            if (customer) {
+                try {
+                    const customerData = JSON.parse(customer);
+                    
+                    // Display customer information
+                    document.getElementById('customerId').textContent = customerData.customerId;
+                    document.getElementById('customerName').textContent = 
+                        `${customerData.firstName} ${customerData.lastName}`;
+                    document.getElementById('customerEmail').textContent = customerData.email;
+                    
+                    // Load affiliate information if available
+                    if (customerData.affiliateId) {
+                        loadAffiliateInfo(customerData.affiliateId);
+                    } else {
+                        showFallbackAffiliateInfo();
+                    }
+                    
+                    // Notify parent of successful registration
+                    sendMessageToParent('customer-registered', {
+                        customerId: customerData.customerId,
+                        affiliateId: customerData.affiliateId
+                    });
+                } catch (e) {
+                    console.error('Error parsing customer data:', e);
+                    showFallbackContent();
+                }
+            } else {
+                showFallbackContent();
+            }
+            
+            // Notify parent that iframe is loaded
+            sendMessageToParent('iframe-loaded', { page: 'customer-success' });
+        });
+
+        function loadAffiliateInfo(affiliateId) {
+            fetch(`https://wavemax.promo/api/v1/affiliates/${affiliateId}/public`, {
+                credentials: 'include'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success && data.affiliate) {
+                    const affiliate = data.affiliate;
+                    document.getElementById('affiliateName').textContent = 
+                        `${affiliate.firstName} ${affiliate.lastName} (${affiliate.businessName})`;
+                    document.getElementById('serviceArea').textContent = 
+                        affiliate.serviceArea || 'Your local area';
+                    document.getElementById('deliveryFee').textContent = 
+                        `$${(affiliate.deliveryFee || 0).toFixed(2)} per pickup/delivery`;
+                } else {
+                    showFallbackAffiliateInfo();
+                }
+            })
+            .catch(error => {
+                console.error('Error loading affiliate:', error);
+                showFallbackAffiliateInfo();
+            });
+        }
+
+        function showFallbackAffiliateInfo() {
+            document.getElementById('affiliateName').textContent = 'Your local WaveMAX partner';
+            document.getElementById('serviceArea').textContent = 'Your local area';
+            document.getElementById('deliveryFee').textContent = 'Contact provider for pricing';
+        }
+
+        function showFallbackContent() {
+            document.getElementById('customerId').textContent = 'Your unique ID will be provided shortly';
+            document.getElementById('customerName').textContent = 'Your information is being processed';
+            document.getElementById('customerEmail').textContent = 'Check your email for confirmation';
+            showFallbackAffiliateInfo();
+        }
+    </script>
+</body>
+</html>

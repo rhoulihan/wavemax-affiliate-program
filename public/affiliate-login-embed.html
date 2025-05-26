@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WaveMAX Laundry - Affiliate Login</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: transparent;
+        }
+        .wavemax-blue {
+            background-color: #1e3a8a;
+        }
+        .wavemax-light-blue {
+            background-color: #3b82f6;
+        }
+        /* Minimal styling for iframe */
+        .embed-container {
+            max-width: 100%;
+            margin: 0;
+            padding: 16px;
+        }
+    </style>
+</head>
+<body class="bg-white font-sans">
+    <!-- Login Form -->
+    <div class="embed-container">
+        <div class="max-w-md mx-auto bg-white rounded-lg shadow-md overflow-hidden">
+            <div class="wavemax-blue text-white p-6">
+                <h2 class="text-2xl font-bold">Affiliate Login</h2>
+                <p class="mt-2">Sign in to access your affiliate dashboard</p>
+            </div>
+            
+            <form id="affiliateLoginForm" class="p-6 space-y-6">
+                <!-- Hidden CSRF token -->
+                <input type="hidden" name="_csrf" value="{{csrfToken}}">
+                
+                <!-- Demo credentials notice -->
+                <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+                    <p class="text-sm text-blue-800">
+                        <strong>Demo Account:</strong><br>
+                        Username: demoaffiliate<br>
+                        Password: password123
+                    </p>
+                </div>
+                
+                <div class="mb-4">
+                    <label for="username" class="block text-gray-700 mb-2">Username</label>
+                    <input type="text" id="username" name="username" required class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                
+                <div class="mb-4">
+                    <label for="password" class="block text-gray-700 mb-2">Password</label>
+                    <input type="password" id="password" name="password" required class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                
+                <div class="flex items-center justify-between mb-4">
+                    <div class="flex items-center">
+                        <input type="checkbox" id="remember" name="remember" class="h-4 w-4 text-blue-600">
+                        <label for="remember" class="ml-2 text-sm text-gray-700">Remember me</label>
+                    </div>
+                    <a href="#" class="text-sm text-blue-600 hover:underline" onclick="navigateParent('forgot-password'); return false;">Forgot password?</a>
+                </div>
+                
+                <div>
+                    <button type="submit" class="w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-blue-700 transition">Sign In</button>
+                </div>
+            </form>
+            
+            <div class="bg-gray-50 p-6 border-t">
+                <p class="text-sm text-gray-700 text-center">
+                    Don't have an affiliate account? 
+                    <a href="#" class="text-blue-600 hover:underline" onclick="navigateParent('affiliate-register'); return false;">Register now</a>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // PostMessage communication with parent window
+        function sendMessageToParent(type, data) {
+            if (window.parent && window.parent !== window) {
+                window.parent.postMessage({
+                    type: type,
+                    source: 'wavemax-embed',
+                    data: data
+                }, '*');
+            }
+        }
+
+        // Navigate parent frame
+        function navigateParent(page) {
+            sendMessageToParent('navigate', { page: page });
+        }
+
+        // Form submission
+        document.getElementById('affiliateLoginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            // Send login status to parent
+            sendMessageToParent('form-submit', { form: 'affiliate-login' });
+
+            // API call with full URL
+            fetch('https://wavemax.promo/api/v1/auth/affiliate/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                credentials: 'include',
+                body: JSON.stringify({ username, password })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Login failed');
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    // Store token
+                    localStorage.setItem('affiliateToken', data.token);
+                    localStorage.setItem('currentAffiliate', JSON.stringify(data.affiliate));
+
+                    // Notify parent of successful login
+                    sendMessageToParent('login-success', {
+                        userType: 'affiliate',
+                        affiliateId: data.affiliate.affiliateId
+                    });
+
+                    // Navigate to dashboard
+                    navigateParent('affiliate-dashboard');
+                } else {
+                    sendMessageToParent('login-error', {
+                        message: data.message || 'Login failed'
+                    });
+                    alert(data.message || 'Login failed. Please check your credentials and try again.');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                sendMessageToParent('login-error', {
+                    message: 'Login failed. Please check your credentials and try again.'
+                });
+                alert('Login failed. Please check your credentials and try again.');
+            });
+        });
+
+        // Notify parent that iframe is loaded
+        window.addEventListener('load', function() {
+            sendMessageToParent('iframe-loaded', { page: 'affiliate-login' });
+        });
+    </script>
+</body>
+</html>

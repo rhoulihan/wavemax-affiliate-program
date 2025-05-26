@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WaveMAX Laundry - Schedule Pickup</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: transparent;
+        }
+        .wavemax-blue {
+            background-color: #1e3a8a;
+        }
+        .wavemax-light-blue {
+            background-color: #3b82f6;
+        }
+        /* Minimal styling for iframe */
+        .embed-container {
+            max-width: 100%;
+            margin: 0;
+            padding: 16px;
+        }
+    </style>
+</head>
+<body class="bg-white font-sans">
+    <!-- Pickup Scheduling Form -->
+    <div class="embed-container">
+        <div class="max-w-3xl mx-auto bg-white rounded-lg shadow-md overflow-hidden">
+            <div class="wavemax-blue text-white p-6">
+                <h2 class="text-2xl font-bold">Schedule a Laundry Pickup</h2>
+                <p class="mt-2" id="affiliateIntro">Use this form to schedule a pickup for your laundry.</p>
+            </div>
+            
+            <form id="pickupScheduleForm" class="p-6 space-y-6">
+                <!-- Hidden CSRF token -->
+                <input type="hidden" name="_csrf" value="{{csrfToken}}">
+                
+                <!-- Login Section -->
+                <div id="loginSection">
+                    <h3 class="text-xl font-bold mb-4">Customer Login</h3>
+                    <p class="mb-4">Please login to schedule a pickup. If you don't have an account, please contact your affiliate partner.</p>
+                    
+                    <div class="grid md:grid-cols-2 gap-4">
+                        <div>
+                            <label for="loginUsername" class="block text-gray-700 mb-2">Username *</label>
+                            <input type="text" id="loginUsername" name="loginUsername" required class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        
+                        <div>
+                            <label for="loginPassword" class="block text-gray-700 mb-2">Password *</label>
+                            <input type="password" id="loginPassword" name="loginPassword" required class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4">
+                        <button type="button" id="loginBtn" class="w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-blue-700 transition">Login</button>
+                    </div>
+                </div>
+                
+                <!-- Pickup Details Section (initially hidden) -->
+                <div id="pickupDetailsSection" style="display: none;">
+                    <!-- Hidden fields for customer and affiliate data -->
+                    <input type="hidden" id="customerId" name="customerId">
+                    <input type="hidden" id="affiliateId" name="affiliateId">
+                    
+                    <!-- Customer Information Display (non-editable) -->
+                    <div class="mb-6">
+                        <h3 class="text-xl font-bold mb-4">Customer Information</h3>
+                        <div class="bg-gray-50 p-4 rounded-lg">
+                            <div class="grid md:grid-cols-2 gap-2">
+                                <div>
+                                    <span class="font-bold">Name:</span>
+                                    <span id="customerName">-</span>
+                                </div>
+                                <div>
+                                    <span class="font-bold">Phone:</span>
+                                    <span id="customerPhone">-</span>
+                                </div>
+                                <div class="md:col-span-2">
+                                    <span class="font-bold">Address:</span>
+                                    <span id="customerAddress">-</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Pickup Details -->
+                    <div>
+                        <h3 class="text-xl font-bold mb-4">Pickup Details</h3>
+                        <div class="grid md:grid-cols-2 gap-4">
+                            <div>
+                                <label for="pickupDate" class="block text-gray-700 mb-2">Pickup Date *</label>
+                                <input type="date" id="pickupDate" name="pickupDate" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            </div>
+                            
+                            <div>
+                                <label for="pickupTime" class="block text-gray-700 mb-2">Preferred Time *</label>
+                                <select id="pickupTime" name="pickupTime" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <option value="">Select a time</option>
+                                    <option value="morning">Morning (8am - 12pm)</option>
+                                    <option value="afternoon">Afternoon (12pm - 5pm)</option>
+                                    <option value="evening">Evening (5pm - 8pm)</option>
+                                </select>
+                            </div>
+                            
+                            <div class="md:col-span-2">
+                                <label for="specialPickupInstructions" class="block text-gray-700 mb-2">Special Pickup Instructions (Optional)</label>
+                                <textarea id="specialPickupInstructions" name="specialPickupInstructions" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" rows="2" placeholder="Ring doorbell, leave at front door, etc."></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Estimated Order Size -->
+                    <div>
+                        <h3 class="text-xl font-bold mb-4">Estimated Order Size</h3>
+                        <div class="grid md:grid-cols-2 gap-4">
+                            <div class="md:col-span-2">
+                                <label for="estimatedSize" class="block text-gray-700 mb-2">Estimated Laundry Size *</label>
+                                <select id="estimatedSize" name="estimatedSize" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <option value="">Select an option</option>
+                                    <option value="small">Small (1-2 bags, approx. 10-15 lbs)</option>
+                                    <option value="medium">Medium (3-4 bags, approx. 16-30 lbs)</option>
+                                    <option value="large">Large (5+ bags, approx. 31+ lbs)</option>
+                                </select>
+                            </div>
+                            
+                            <div class="md:col-span-2">
+                                <label for="serviceNotes" class="block text-gray-700 mb-2">Service Notes (Optional)</label>
+                                <textarea id="serviceNotes" name="serviceNotes" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" rows="2" placeholder="Any special handling requests, sorting preferences, etc."></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Delivery Options -->
+                    <div>
+                        <h3 class="text-xl font-bold mb-4">Delivery Options</h3>
+                        <div class="grid md:grid-cols-2 gap-4">
+                            <div>
+                                <label for="deliveryDate" class="block text-gray-700 mb-2">Preferred Delivery Date *</label>
+                                <input type="date" id="deliveryDate" name="deliveryDate" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            </div>
+                            
+                            <div>
+                                <label for="deliveryTime" class="block text-gray-700 mb-2">Preferred Time *</label>
+                                <select id="deliveryTime" name="deliveryTime" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <option value="">Select a time</option>
+                                    <option value="morning">Morning (8am - 12pm)</option>
+                                    <option value="afternoon">Afternoon (12pm - 5pm)</option>
+                                    <option value="evening">Evening (5pm - 8pm)</option>
+                                </select>
+                            </div>
+                            
+                            <div class="md:col-span-2">
+                                <label for="specialDeliveryInstructions" class="block text-gray-700 mb-2">Special Delivery Instructions (Optional)</label>
+                                <textarea id="specialDeliveryInstructions" name="specialDeliveryInstructions" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" rows="2" placeholder="Leave on porch, text upon arrival, etc."></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Service and Pricing Summary -->
+                    <div class="border-t pt-6">
+                        <h3 class="text-xl font-bold mb-4">Order Summary</h3>
+                        <div class="bg-gray-50 p-4 rounded-lg">
+                            <div class="mb-2">
+                                <span class="font-bold">Delivery Fee:</span>
+                                <span id="deliveryFee">$0.00</span> per pickup/delivery
+                            </div>
+                            <div>
+                                <span class="font-bold">Wash, Dry, Fold Service:</span>
+                                <span>$1.89 per pound</span>
+                            </div>
+                            <p class="text-sm text-gray-500 mt-2">Final cost will depend on the weight of your laundry.</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Submit Button -->
+                    <div class="mt-6">
+                        <button type="submit" class="w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-blue-700 transition">Schedule Pickup</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // PostMessage communication with parent window
+        function sendMessageToParent(type, data) {
+            if (window.parent && window.parent !== window) {
+                window.parent.postMessage({
+                    type: type,
+                    source: 'wavemax-embed',
+                    data: data
+                }, '*');
+            }
+        }
+
+        // Navigate parent frame
+        function navigateParent(page) {
+            sendMessageToParent('navigate', { page: page });
+        }
+
+        // Set minimum date to today
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('pickupDate').setAttribute('min', today);
+        document.getElementById('deliveryDate').setAttribute('min', today);
+
+        // Login functionality
+        document.getElementById('loginBtn').addEventListener('click', function() {
+            const username = document.getElementById('loginUsername').value;
+            const password = document.getElementById('loginPassword').value;
+
+            if (!username || !password) {
+                alert('Please enter both username and password');
+                return;
+            }
+
+            // Send login attempt to parent
+            sendMessageToParent('form-submit', { form: 'schedule-pickup-login' });
+
+            // API call with full URL
+            fetch('https://wavemax.promo/api/v1/auth/customer/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                credentials: 'include',
+                body: JSON.stringify({ username, password })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Store customer data
+                    localStorage.setItem('customerToken', data.token);
+                    localStorage.setItem('currentCustomer', JSON.stringify(data.customer));
+
+                    // Populate customer info
+                    document.getElementById('customerId').value = data.customer.customerId;
+                    document.getElementById('customerName').textContent = 
+                        `${data.customer.firstName} ${data.customer.lastName}`;
+                    document.getElementById('customerPhone').textContent = data.customer.phone;
+                    document.getElementById('customerAddress').textContent = 
+                        `${data.customer.address}, ${data.customer.city}, ${data.customer.state} ${data.customer.zipCode}`;
+                    
+                    if (data.customer.affiliateId) {
+                        document.getElementById('affiliateId').value = data.customer.affiliateId;
+                    }
+
+                    // Show pickup form
+                    document.getElementById('loginSection').style.display = 'none';
+                    document.getElementById('pickupDetailsSection').style.display = 'block';
+
+                    // Notify parent of successful login
+                    sendMessageToParent('login-success', {
+                        userType: 'customer',
+                        customerId: data.customer.customerId,
+                        context: 'schedule-pickup'
+                    });
+                } else {
+                    sendMessageToParent('login-error', {
+                        message: data.message || 'Login failed',
+                        context: 'schedule-pickup'
+                    });
+                    alert(data.message || 'Login failed. Please check your credentials.');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                sendMessageToParent('login-error', {
+                    message: 'Login failed. Please try again.',
+                    context: 'schedule-pickup'
+                });
+                alert('Login failed. Please try again.');
+            });
+        });
+
+        // Form submission
+        document.getElementById('pickupScheduleForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            // Validate dates
+            const pickupDate = new Date(document.getElementById('pickupDate').value);
+            const deliveryDate = new Date(document.getElementById('deliveryDate').value);
+            
+            if (deliveryDate <= pickupDate) {
+                alert('Delivery date must be after pickup date');
+                return;
+            }
+
+            // Collect form data
+            const formData = {
+                customerId: document.getElementById('customerId').value,
+                affiliateId: document.getElementById('affiliateId').value,
+                pickupDate: document.getElementById('pickupDate').value,
+                pickupTime: document.getElementById('pickupTime').value,
+                deliveryDate: document.getElementById('deliveryDate').value,
+                deliveryTime: document.getElementById('deliveryTime').value,
+                estimatedSize: document.getElementById('estimatedSize').value,
+                specialPickupInstructions: document.getElementById('specialPickupInstructions').value,
+                specialDeliveryInstructions: document.getElementById('specialDeliveryInstructions').value,
+                serviceNotes: document.getElementById('serviceNotes').value
+            };
+
+            // Send form submission to parent
+            sendMessageToParent('form-submit', { form: 'schedule-pickup' });
+
+            // API call with full URL
+            fetch('https://wavemax.promo/api/v1/orders', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('customerToken')}`
+                },
+                credentials: 'include',
+                body: JSON.stringify(formData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Notify parent of successful order
+                    sendMessageToParent('order-created', {
+                        orderId: data.order.orderId,
+                        customerId: formData.customerId,
+                        affiliateId: formData.affiliateId
+                    });
+
+                    // Navigate to order confirmation
+                    navigateParent(`order-confirmation?orderId=${data.order.orderId}`);
+                } else {
+                    sendMessageToParent('order-error', {
+                        message: data.message || 'Failed to schedule pickup'
+                    });
+                    alert(data.message || 'Failed to schedule pickup. Please try again.');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                sendMessageToParent('order-error', {
+                    message: 'Failed to schedule pickup. Please try again.'
+                });
+                alert('Failed to schedule pickup. Please try again.');
+            });
+        });
+
+        // Check if already logged in
+        window.addEventListener('load', function() {
+            const token = localStorage.getItem('customerToken');
+            const customer = localStorage.getItem('currentCustomer');
+            
+            if (token && customer) {
+                try {
+                    const customerData = JSON.parse(customer);
+                    // Auto-populate and show pickup form
+                    document.getElementById('customerId').value = customerData.customerId;
+                    document.getElementById('customerName').textContent = 
+                        `${customerData.firstName} ${customerData.lastName}`;
+                    document.getElementById('customerPhone').textContent = customerData.phone;
+                    document.getElementById('customerAddress').textContent = 
+                        `${customerData.address}, ${customerData.city}, ${customerData.state} ${customerData.zipCode}`;
+                    
+                    if (customerData.affiliateId) {
+                        document.getElementById('affiliateId').value = customerData.affiliateId;
+                    }
+
+                    document.getElementById('loginSection').style.display = 'none';
+                    document.getElementById('pickupDetailsSection').style.display = 'block';
+                } catch (e) {
+                    console.error('Error parsing customer data:', e);
+                }
+            }
+
+            // Notify parent that iframe is loaded
+            sendMessageToParent('iframe-loaded', { page: 'schedule-pickup' });
+        });
+    </script>
+</body>
+</html>
