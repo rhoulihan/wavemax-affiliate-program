@@ -154,15 +154,26 @@
                             customerId: data.customer.customerId
                         });
 
-                        // Navigate to dashboard
-                        if (window.parent && window.parent !== window) {
-                            window.parent.postMessage({
-                                type: 'navigate',
-                                data: { url: `/customer-dashboard?id=${data.customer.customerId}` }
-                            }, '*');
-                        } else {
-                            window.location.href = `/customer-dashboard?id=${data.customer.customerId}`;
+                        console.log('Login successful, navigating to dashboard');
+                        
+                        // Get affiliate ID from storage or URL
+                        const urlParams = new URLSearchParams(window.location.search);
+                        const affiliateId = urlParams.get('affid') || urlParams.get('affiliate') || sessionStorage.getItem('affiliateId');
+                        
+                        // Check URL params for pickup flag
+                        const shouldRedirectToPickup = urlParams.get('pickup') === 'true';
+                        
+                        // Redirect to wavemaxlaundry.com with appropriate parameters
+                        let redirectUrl = `https://www.wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program?affid=${affiliateId || data.customer.affiliateId}`;
+                        
+                        if (shouldRedirectToPickup) {
+                            redirectUrl += '&pickup=true';
                         }
+                        
+                        console.log('Redirecting to:', redirectUrl);
+                        
+                        // Always redirect to the top window
+                        window.top.location.href = redirectUrl;
                     } else {
                         throw new Error(data.message || 'Login failed');
                     }
