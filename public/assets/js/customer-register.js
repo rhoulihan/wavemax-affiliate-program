@@ -1,11 +1,13 @@
 document.addEventListener('DOMContentLoaded', function() {
   // Extract affiliate ID from URL query parameter
   const urlParams = new URLSearchParams(window.location.search);
-  const affiliateId = urlParams.get('affiliate');
+  const affiliateId = urlParams.get('affid') || urlParams.get('affiliate') || sessionStorage.getItem('affiliateId'); // Support multiple parameters
 
   if (affiliateId) {
     // Set the hidden affiliate ID field
     document.getElementById('affiliateId').value = affiliateId;
+    // Clear from session storage after use
+    sessionStorage.removeItem('affiliateId');
 
     // Fetch affiliate info from the server
     fetch(`/api/affiliates/${affiliateId}/public`)

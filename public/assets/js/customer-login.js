@@ -11,13 +11,18 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // Extract affiliate ID from URL query parameter (if any)
   const urlParams = new URLSearchParams(window.location.search);
-  const affiliateId = urlParams.get('affiliate');
+  const affiliateId = urlParams.get('affid') || urlParams.get('affiliate'); // Support both parameters
 
-  // If affiliate ID is present, update register link
+  // If affiliate ID is present, update register link and store it
   if (affiliateId) {
+    // Store affiliate ID for registration
+    sessionStorage.setItem('affiliateId', affiliateId);
+    
     const registerLink = document.getElementById('registerLink');
-    registerLink.href = `/customer-register?affiliate=${affiliateId}`;
-    registerLink.textContent = 'Register here';
+    if (registerLink) {
+      registerLink.href = `/customer-register?affid=${affiliateId}`;
+      registerLink.textContent = 'Register here';
+    }
   }
 
   // Form submission

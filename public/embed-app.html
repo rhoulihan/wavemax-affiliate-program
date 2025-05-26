@@ -258,12 +258,18 @@
         }
         
         // Navigate to a route
-        function navigateTo(route) {
-            console.log('Navigating to:', route);
+        function navigateTo(route, params = {}) {
+            console.log('Navigating to:', route, 'with params:', params);
             
             // Update URL parameter
             const url = new URL(window.location);
             url.searchParams.set('route', route);
+            
+            // Add any additional parameters
+            Object.keys(params).forEach(key => {
+                url.searchParams.set(key, params[key]);
+            });
+            
             window.history.pushState({}, '', url);
             
             // Load the new page
@@ -303,11 +309,19 @@
             console.log('Message type:', type);
             console.log('Message data object:', data);
             
-            if (type === 'navigate' && data && data.url) {
+            if (type === 'navigate' && data) {
                 // Handle navigation request
-                const route = data.url.startsWith('/') ? data.url : '/' + data.url;
-                console.log('Navigation request received:', route);
-                navigateTo(route);
+                if (data.url) {
+                    // Old format with just URL
+                    const route = data.url.startsWith('/') ? data.url : '/' + data.url;
+                    console.log('Navigation request received:', route);
+                    navigateTo(route);
+                } else if (data.page) {
+                    // New format with page and optional params
+                    const route = data.page.startsWith('/') ? data.page : '/' + data.page;
+                    console.log('Navigation request received:', route, 'with params:', data.params);
+                    navigateTo(route, data.params || {});
+                }
             }
         });
         
