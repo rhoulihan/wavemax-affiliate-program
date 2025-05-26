@@ -55,15 +55,25 @@
 
 &lt;script&gt;
 (function() {
-    // Get affiliate ID from URL
+    // Get parameters from URL
     const urlParams = new URLSearchParams(window.location.search);
     const affiliateId = urlParams.get('affid');
+    const pickup = urlParams.get('pickup');
+    
+    // Build iframe URL with parameters
+    let iframeSrc = 'https://wavemax.promo/embed-app.html?route=/customer-login';
     
     if (affiliateId) {
-        // Update iframe src with affiliate ID
-        const iframe = document.getElementById('wavemax-iframe');
-        iframe.src = `https://wavemax.promo/embed-app.html?route=/customer-login&affid=${affiliateId}`;
+        iframeSrc += `&affid=${affiliateId}`;
     }
+    
+    if (pickup === 'true') {
+        iframeSrc += '&pickup=true';
+    }
+    
+    // Update iframe src
+    const iframe = document.getElementById('wavemax-iframe');
+    iframe.src = iframeSrc;
     
     // Handle iframe resizing
     window.addEventListener('message', function(event) {
@@ -87,13 +97,16 @@
         <li>The affiliate ID is preserved throughout the registration process</li>
     </ol>
     
-    <h2>Example URL</h2>
+    <h2>Example URLs</h2>
     
     <p>When affiliates share their link:</p>
     <code>https://www.wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program?affid=AFF123456</code>
     
     <p>The embedded iframe will automatically load:</p>
     <code>https://wavemax.promo/embed-app.html?route=/customer-login&affid=AFF123456</code>
+    
+    <p>For direct schedule pickup (redirects to schedule form after login):</p>
+    <code>https://www.wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program?affid=AFF123456&pickup=true</code>
     
     <h2>Testing</h2>
     
