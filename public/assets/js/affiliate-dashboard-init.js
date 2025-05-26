@@ -144,6 +144,15 @@ function initializeAffiliateDashboard() {
       await saveSettings(affiliateId);
     });
   }
+  
+  // Change password form
+  const changePasswordForm = document.getElementById('changePasswordForm');
+  if (changePasswordForm) {
+    changePasswordForm.addEventListener('submit', async function(e) {
+      e.preventDefault();
+      await changePassword(affiliateId);
+    });
+  }
 
   // Make functions available globally (they're used by the existing dashboard code)
   window.loadAffiliateData = loadAffiliateData;
@@ -606,6 +615,69 @@ async function saveSettings(affiliateId) {
   } catch (error) {
     console.error('Error saving settings:', error);
     alert('Error saving settings. Please try again.');
+  }
+}
+
+// Change password function
+async function changePassword(affiliateId) {
+  const currentPassword = document.getElementById('currentPassword').value;
+  const newPassword = document.getElementById('newPassword').value;
+  const confirmPassword = document.getElementById('confirmPassword').value;
+  const errorDiv = document.getElementById('passwordError');
+  const successDiv = document.getElementById('passwordSuccess');
+  
+  // Hide previous messages
+  errorDiv.classList.add('hidden');
+  successDiv.classList.add('hidden');
+  
+  // Validate passwords match
+  if (newPassword !== confirmPassword) {
+    errorDiv.textContent = 'New passwords do not match';
+    errorDiv.classList.remove('hidden');
+    return;
+  }
+  
+  // Validate password length
+  if (newPassword.length < 8) {
+    errorDiv.textContent = 'Password must be at least 8 characters long';
+    errorDiv.classList.remove('hidden');
+    return;
+  }
+  
+  try {
+    const baseUrl = window.EMBED_CONFIG?.baseUrl || 'https://wavemax.promo';
+    const response = await fetch(`${baseUrl}/api/v1/affiliates/${affiliateId}/change-password`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('affiliateToken')}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        currentPassword: currentPassword,
+        newPassword: newPassword
+      })
+    });
+    
+    if (response.ok) {
+      successDiv.textContent = 'Password changed successfully!';
+      successDiv.classList.remove('hidden');
+      
+      // Clear the form
+      document.getElementById('changePasswordForm').reset();
+      
+      // Hide success message after 5 seconds
+      setTimeout(() => {
+        successDiv.classList.add('hidden');
+      }, 5000);
+    } else {
+      const error = await response.json();
+      errorDiv.textContent = error.message || 'Failed to change password';
+      errorDiv.classList.remove('hidden');
+    }
+  } catch (error) {
+    console.error('Error changing password:', error);
+    errorDiv.textContent = 'Error changing password. Please try again.';
+    errorDiv.classList.remove('hidden');
   }
 }
 
