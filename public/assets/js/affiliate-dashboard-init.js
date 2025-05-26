@@ -91,6 +91,24 @@ function initializeAffiliateDashboard() {
       }
     });
   }
+  
+  // Register new customer button
+  const registerBtn = document.getElementById('registerCustomerBtn');
+  if (registerBtn) {
+    registerBtn.addEventListener('click', function() {
+      const registrationLink = `/customer-register?affid=${affiliateId}`;
+      
+      if (isEmbedded) {
+        // For embedded, use postMessage navigation
+        window.parent.postMessage({
+          type: 'navigate',
+          data: { url: registrationLink }
+        }, '*');
+      } else {
+        window.location.href = `/embed-app.html?route=${registrationLink}`;
+      }
+    });
+  }
 
   // Make functions available globally (they're used by the existing dashboard code)
   window.loadAffiliateData = loadAffiliateData;
