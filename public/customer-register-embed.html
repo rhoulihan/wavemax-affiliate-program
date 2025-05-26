@@ -277,15 +277,7 @@
                 sendMessageToParent('affiliate-referral', { affiliateId: affiliateId });
             }
 
-            // Service frequency change handler
-            document.getElementById('serviceFrequency').addEventListener('change', function() {
-                const recurringContainer = document.getElementById('recurringScheduleContainer');
-                if (this.value === 'weekly' || this.value === 'biweekly' || this.value === 'monthly') {
-                    recurringContainer.style.display = 'block';
-                } else {
-                    recurringContainer.style.display = 'none';
-                }
-            });
+            // Service frequency change handler is handled in customer-register.js
 
             // Form submission
             document.getElementById('customerRegistrationForm').addEventListener('submit', function(e) {

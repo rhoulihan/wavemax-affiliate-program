@@ -4,24 +4,56 @@ document.addEventListener('DOMContentLoaded', function() {
   const affiliateId = urlParams.get('affid') || urlParams.get('affiliate') || sessionStorage.getItem('affiliateId'); // Support multiple parameters
 
   if (affiliateId) {
+    console.log('Affiliate ID found:', affiliateId);
+    
     // Set the hidden affiliate ID field
-    document.getElementById('affiliateId').value = affiliateId;
+    const affiliateIdField = document.getElementById('affiliateId');
+    if (affiliateIdField) {
+      affiliateIdField.value = affiliateId;
+      console.log('Set affiliate ID field to:', affiliateId);
+    } else {
+      console.error('affiliateId field not found');
+    }
+    
     // Clear from session storage after use
     sessionStorage.removeItem('affiliateId');
 
     // Fetch affiliate info from the server
-    fetch(`/api/affiliates/${affiliateId}/public`)
-      .then(response => response.json())
+    const baseUrl = window.EMBED_CONFIG?.baseUrl || 'https://wavemax.promo';
+    const apiUrl = `${baseUrl}/api/v1/affiliates/${affiliateId}/public`;
+    console.log('Fetching affiliate info from:', apiUrl);
+    
+    fetch(apiUrl)
+      .then(response => {
+        console.log('Response status:', response.status);
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+      })
       .then(data => {
+        console.log('Affiliate data received:', data);
         if (data.success && data.affiliate) {
           const affiliate = data.affiliate;
           const affiliateIntro = document.getElementById('affiliateIntro');
-          const name = affiliate.businessName || `${affiliate.firstName} ${affiliate.lastName}`;
-          affiliateIntro.textContent = `Sign up for premium laundry pickup and delivery service with ${name}.`;
+          if (affiliateIntro) {
+            const name = affiliate.businessName || `${affiliate.firstName} ${affiliate.lastName}`;
+            affiliateIntro.textContent = `Sign up for premium laundry pickup and delivery service with ${name}.`;
+          }
 
           // Set delivery fee based on affiliate's rate
-          document.getElementById('deliveryFee').textContent = `$${parseFloat(affiliate.deliveryFee).toFixed(2)}`;
+          const deliveryFeeElement = document.getElementById('deliveryFee');
+          if (deliveryFeeElement) {
+            // Ensure deliveryFee exists and is a valid number
+            const affiliateFee = affiliate.deliveryFee || 0;
+            const fee = parseFloat(affiliateFee).toFixed(2);
+            console.log('Affiliate delivery fee:', affiliate.deliveryFee, '-> Formatted:', fee);
+            deliveryFeeElement.textContent = `$${fee}`;
+          } else {
+            console.error('deliveryFee element not found');
+          }
         } else {
+          console.error('Invalid affiliate data:', data);
           alert('Invalid affiliate ID. Please use a valid registration link.');
           window.location.href = '/embed-app.html';
         }
@@ -43,17 +75,22 @@ document.addEventListener('DOMContentLoaded', function() {
   const preferredDay = document.getElementById('preferredDay');
   const preferredTime = document.getElementById('preferredTime');
 
-  serviceFrequency.addEventListener('change', function() {
-    if (this.value === 'onDemand') {
-      recurringScheduleContainer.style.display = 'none';
-      preferredDay.required = false;
-      preferredTime.required = false;
-    } else {
-      recurringScheduleContainer.style.display = 'block';
-      preferredDay.required = true;
-      preferredTime.required = true;
-    }
-  });
+  if (serviceFrequency) {
+    serviceFrequency.addEventListener('change', function() {
+      console.log('Service frequency changed to:', this.value);
+      if (this.value === 'onDemand' || this.value === '') {
+        recurringScheduleContainer.style.display = 'none';
+        preferredDay.required = false;
+        preferredTime.required = false;
+      } else {
+        recurringScheduleContainer.style.display = 'block';
+        preferredDay.required = true;
+        preferredTime.required = true;
+      }
+    });
+  } else {
+    console.error('serviceFrequency element not found');
+  }
 
   // Form submission
   const form = document.getElementById('customerRegistrationForm');
@@ -88,7 +125,8 @@ document.addEventListener('DOMContentLoaded', function() {
     // The backend will only store the last 4 digits of the card number
 
     // Submit to server
-    fetch('/api/customers/register', {
+    const baseUrl = window.EMBED_CONFIG?.baseUrl || 'https://wavemax.promo';
+    fetch(`${baseUrl}/api/v1/customers/register`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
