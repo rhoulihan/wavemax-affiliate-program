@@ -108,25 +108,42 @@
         // Copy link functionality
         function copyLink() {
             const linkInput = document.getElementById('registrationLink');
-            linkInput.select();
-            linkInput.setSelectionRange(0, 99999); // For mobile devices
+            
+            // Create a temporary textarea to copy from (works better in iframes)
+            const tempTextarea = document.createElement('textarea');
+            tempTextarea.value = linkInput.value;
+            tempTextarea.style.position = 'absolute';
+            tempTextarea.style.left = '-9999px';
+            document.body.appendChild(tempTextarea);
             
             try {
-                document.execCommand('copy');
-                const btn = document.getElementById('copyLinkBtn');
-                const originalText = btn.textContent;
-                btn.textContent = 'Copied!';
-                btn.classList.add('bg-green-600');
+                tempTextarea.select();
+                tempTextarea.setSelectionRange(0, 99999); // For mobile devices
                 
-                setTimeout(() => {
-                    btn.textContent = originalText;
-                    btn.classList.remove('bg-green-600');
-                }, 2000);
+                const successful = document.execCommand('copy');
+                document.body.removeChild(tempTextarea);
                 
-                sendMessageToParent('link-copied', { link: linkInput.value });
+                if (successful) {
+                    const btn = document.getElementById('copyLinkBtn');
+                    const originalText = btn.textContent;
+                    btn.textContent = 'Copied!';
+                    btn.classList.add('bg-green-600');
+                    
+                    setTimeout(() => {
+                        btn.textContent = originalText;
+                        btn.classList.remove('bg-green-600');
+                    }, 2000);
+                    
+                    sendMessageToParent('link-copied', { link: linkInput.value });
+                } else {
+                    throw new Error('Copy command failed');
+                }
             } catch (err) {
                 console.error('Failed to copy link:', err);
-                alert('Failed to copy link. Please copy it manually.');
+                // Fallback: select the input for manual copying
+                linkInput.select();
+                linkInput.focus();
+                alert('Please press Ctrl+C (or Cmd+C on Mac) to copy the link.');
             }
         }
 
@@ -154,12 +171,26 @@
                     if (dashboardBtn) {
                         dashboardBtn.onclick = function(e) {
                             e.preventDefault();
+                            console.log('Dashboard button clicked');
                             if (window.parent && window.parent !== window) {
+                                console.log('Sending navigation message to parent');
                                 window.parent.postMessage({
                                     type: 'navigate',
                                     data: { url: '/affiliate-dashboard' }
                                 }, '*');
+                            } else {
+                                console.log('No parent window or same window');
                             }
+                            return false;
+                        };
+                    }
+                    
+                    // Set up copy button click handler
+                    const copyBtn = document.getElementById('copyLinkBtn');
+                    if (copyBtn) {
+                        copyBtn.onclick = function(e) {
+                            e.preventDefault();
+                            copyLink();
                             return false;
                         };
                     }
