@@ -108,7 +108,7 @@ window.addEventListener('message', function(event) {
 
 Some pages accept URL parameters:
 
-- **https://www.wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program?affid=AFFILIATE_ID** - Affiliate customer registration link
+- **https://www.wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program?affid=AFFILIATE_ID** - Affiliate customer registration link (requires embed code on wavemaxlaundry.com)
 - **order-confirmation-embed.html?orderId=ORDER_ID** - Show specific order
 
 ## Security Considerations

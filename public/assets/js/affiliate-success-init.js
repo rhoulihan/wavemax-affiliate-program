@@ -122,7 +122,7 @@ function initializeAffiliateSuccess() {
                     `${affiliateData.firstName} ${affiliateData.lastName}`;
                 document.getElementById('affiliateEmail').textContent = affiliateData.email;
                 
-                // Generate registration link with new format
+                // Generate registration link with wavemaxlaundry.com format
                 const registrationLink = `https://www.wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program?affid=${affiliateData.affiliateId}`;
                 document.getElementById('registrationLink').value = registrationLink;
                 

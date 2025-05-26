@@ -194,7 +194,7 @@ async function loadAffiliateData(affiliateId) {
       const deliveryFeeElement = document.getElementById('deliveryFee');
       if (deliveryFeeElement) deliveryFeeElement.textContent = `$${data.deliveryFee.toFixed(2)}`;
       
-      // Generate and display registration link with new format
+      // Generate and display registration link with wavemaxlaundry.com format
       const registrationLink = `https://www.wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program?affid=${affiliateId}`;
       const linkElement = document.getElementById('registrationLink');
       if (linkElement) linkElement.value = registrationLink;
@@ -536,7 +536,7 @@ async function loadSettingsData(affiliateId) {
         if (businessNameField) businessNameField.value = data.businessName || '';
         if (serviceAreaField) serviceAreaField.value = data.serviceArea || '';
         
-        // Generate and display registration link with new format
+        // Generate and display registration link with wavemaxlaundry.com format
         const registrationLink = `https://www.wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program?affid=${affiliateId}`;
         if (registrationLinkField) registrationLinkField.value = registrationLink;
         
