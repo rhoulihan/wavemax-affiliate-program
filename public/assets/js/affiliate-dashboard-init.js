@@ -36,6 +36,9 @@ function initializeAffiliateDashboard() {
 
   // Load dashboard statistics
   loadDashboardStats(affiliateId);
+  
+  // Load settings data on initial load
+  loadSettingsData(affiliateId);
 
   // Setup tab navigation
   const tabButtons = document.querySelectorAll('.tab-btn');
@@ -107,6 +110,14 @@ function initializeAffiliateDashboard() {
   }
   
   // Schedule pickup button removed - affiliates should not schedule pickups
+  
+  // Copy registration link button
+  const copyBtn = document.getElementById('copyRegistrationLinkBtn');
+  if (copyBtn) {
+    copyBtn.addEventListener('click', function() {
+      copyRegistrationLink();
+    });
+  }
   
   // Settings form edit mode
   const editBtn = document.getElementById('editBtn');
@@ -356,6 +367,25 @@ window.copyLink = function() {
   setTimeout(() => {
     copyBtn.textContent = originalText;
     copyBtn.classList.remove('bg-green-600');
+  }, 2000);
+}
+
+// Copy registration link
+function copyRegistrationLink() {
+  const linkInput = document.getElementById('registrationLink');
+  linkInput.select();
+  document.execCommand('copy');
+  
+  const copyBtn = document.getElementById('copyRegistrationLinkBtn');
+  const originalText = copyBtn.textContent;
+  copyBtn.textContent = 'Copied!';
+  copyBtn.classList.remove('bg-blue-600');
+  copyBtn.classList.add('bg-green-600');
+  
+  setTimeout(() => {
+    copyBtn.textContent = originalText;
+    copyBtn.classList.remove('bg-green-600');
+    copyBtn.classList.add('bg-blue-600');
   }, 2000);
 }
 
