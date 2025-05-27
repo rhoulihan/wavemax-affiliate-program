@@ -289,7 +289,7 @@ function setupFormSubmission(token) {
       }
     });
     
-    console.log('Submitting pickup order:', pickupData);
+    console.log('Submitting pickup order:', JSON.stringify(pickupData, null, 2));
     
     try {
       // Submit the order
@@ -305,7 +305,7 @@ function setupFormSubmission(token) {
       
       console.log('Order submission response status:', response.status);
       const data = await response.json();
-      console.log('Order submission response:', data);
+      console.log('Order submission response:', JSON.stringify(data, null, 2));
       
       if (response.ok && data.success) {
         console.log('Order created successfully:', data.orderId);

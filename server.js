@@ -209,7 +209,18 @@ const csrfExcludedPaths = [
   '/api/v1/affiliates/register',
   '/api/v1/customers/register',
   '/api/v1/affiliates/:affiliateId/public',
-  '/api/v1/customers/:customerId/profile'
+  '/api/v1/customers/:customerId/profile',
+  // Add authenticated API endpoints that use JWT instead of CSRF
+  '/api/v1/orders',
+  '/api/v1/orders/:orderId',
+  '/api/v1/orders/:orderId/status',
+  '/api/v1/orders/:orderId/cancel',
+  '/api/v1/customers/:customerId',
+  '/api/v1/customers/:customerId/orders',
+  '/api/v1/customers/:customerId/dashboard',
+  '/api/v1/affiliates/:affiliateId/customers',
+  '/api/v1/affiliates/:affiliateId/orders',
+  '/api/v1/affiliates/:affiliateId/dashboard'
 ];
 
 // Apply CSRF conditionally
