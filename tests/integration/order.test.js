@@ -79,10 +79,10 @@ describe('Order Integration Tests', () => {
     );
   });
 
-  describe('POST /api/orders', () => {
+  describe('POST /api/v1/orders', () => {
     it('should create order as customer', async () => {
       const response = await request(app)
-        .post('/api/orders')
+        .post('/api/v1/orders')
         .set('Authorization', `Bearer ${customerToken}`)
         .send({
           customerId: 'CUST123',
@@ -116,7 +116,7 @@ describe('Order Integration Tests', () => {
 
     it('should create order as affiliate for their customer', async () => {
       const response = await request(app)
-        .post('/api/orders')
+        .post('/api/v1/orders')
         .set('Authorization', `Bearer ${affiliateToken}`)
         .send({
           customerId: 'CUST123',
@@ -134,7 +134,7 @@ describe('Order Integration Tests', () => {
 
     it('should fail with invalid customer ID', async () => {
       const response = await request(app)
-        .post('/api/orders')
+        .post('/api/v1/orders')
         .set('Authorization', `Bearer ${adminToken}`)
         .send({
           customerId: 'INVALID',
@@ -155,7 +155,7 @@ describe('Order Integration Tests', () => {
 
     it('should fail with invalid affiliate ID', async () => {
       const response = await request(app)
-        .post('/api/orders')
+        .post('/api/v1/orders')
         .set('Authorization', `Bearer ${adminToken}`)
         .send({
           customerId: 'CUST123',
@@ -195,7 +195,7 @@ describe('Order Integration Tests', () => {
       await otherCustomer.save();
 
       const response = await request(app)
-        .post('/api/orders')
+        .post('/api/v1/orders')
         .set('Authorization', `Bearer ${customerToken}`)
         .send({
           customerId: 'CUST999',
@@ -216,7 +216,7 @@ describe('Order Integration Tests', () => {
 
     it('should validate required fields', async () => {
       const response = await request(app)
-        .post('/api/orders')
+        .post('/api/v1/orders')
         .set('Authorization', `Bearer ${customerToken}`)
         .send({
           customerId: 'CUST123',
@@ -228,7 +228,7 @@ describe('Order Integration Tests', () => {
     });
   });
 
-  describe('GET /api/orders/:orderId', () => {
+  describe('GET /api/v1/orders/:orderId', () => {
     let testOrder;
 
     beforeEach(async () => {
@@ -250,7 +250,7 @@ describe('Order Integration Tests', () => {
 
     it('should return order details for customer', async () => {
       const response = await request(app)
-        .get('/api/orders/ORD123456')
+        .get('/api/v1/orders/ORD123456')
         .set('Authorization', `Bearer ${customerToken}`);
 
       expect(response.status).toBe(200);
@@ -275,7 +275,7 @@ describe('Order Integration Tests', () => {
 
     it('should return order details for affiliate', async () => {
       const response = await request(app)
-        .get('/api/orders/ORD123456')
+        .get('/api/v1/orders/ORD123456')
         .set('Authorization', `Bearer ${affiliateToken}`);
 
       expect(response.status).toBe(200);
@@ -290,7 +290,7 @@ describe('Order Integration Tests', () => {
       );
 
       const response = await request(app)
-        .get('/api/orders/ORD123456')
+        .get('/api/v1/orders/ORD123456')
         .set('Authorization', `Bearer ${otherCustomerToken}`);
 
       expect(response.status).toBe(403);
@@ -302,7 +302,7 @@ describe('Order Integration Tests', () => {
 
     it('should return 404 for non-existent order', async () => {
       const response = await request(app)
-        .get('/api/orders/NONEXISTENT')
+        .get('/api/v1/orders/NONEXISTENT')
         .set('Authorization', `Bearer ${adminToken}`);
 
       expect(response.status).toBe(404);
@@ -313,7 +313,7 @@ describe('Order Integration Tests', () => {
     });
   });
 
-  describe('PUT /api/orders/:orderId/status', () => {
+  describe('PUT /api/v1/orders/:orderId/status', () => {
     let testOrder;
 
     beforeEach(async () => {
@@ -335,7 +335,7 @@ describe('Order Integration Tests', () => {
 
     it('should update order status as affiliate', async () => {
       const response = await request(app)
-        .put('/api/orders/ORD123456/status')
+        .put('/api/v1/orders/ORD123456/status')
         .set('Authorization', `Bearer ${affiliateToken}`)
         .send({
           status: 'picked_up'
@@ -363,7 +363,7 @@ describe('Order Integration Tests', () => {
       );
 
       const response = await request(app)
-        .put('/api/orders/ORD123456/status')
+        .put('/api/v1/orders/ORD123456/status')
         .set('Authorization', `Bearer ${affiliateToken}`)
         .send({
           status: 'processing',
@@ -387,7 +387,7 @@ describe('Order Integration Tests', () => {
       );
 
       const response = await request(app)
-        .put('/api/orders/ORD123456/status')
+        .put('/api/v1/orders/ORD123456/status')
         .set('Authorization', `Bearer ${affiliateToken}`)
         .send({
           status: 'scheduled'
@@ -407,7 +407,7 @@ describe('Order Integration Tests', () => {
       );
 
       const response = await request(app)
-        .put('/api/orders/ORD123456/status')
+        .put('/api/v1/orders/ORD123456/status')
         .set('Authorization', `Bearer ${otherAffiliateToken}`)
         .send({
           status: 'picked_up'
@@ -422,7 +422,7 @@ describe('Order Integration Tests', () => {
 
     it('should fail for customers', async () => {
       const response = await request(app)
-        .put('/api/orders/ORD123456/status')
+        .put('/api/v1/orders/ORD123456/status')
         .set('Authorization', `Bearer ${customerToken}`)
         .send({
           status: 'picked_up'
@@ -432,7 +432,7 @@ describe('Order Integration Tests', () => {
     });
   });
 
-  describe('POST /api/orders/:orderId/cancel', () => {
+  describe('POST /api/v1/orders/:orderId/cancel', () => {
     let testOrder;
 
     beforeEach(async () => {
@@ -454,7 +454,7 @@ describe('Order Integration Tests', () => {
 
     it('should cancel order as customer', async () => {
       const response = await request(app)
-        .post('/api/orders/ORD123456/cancel')
+        .post('/api/v1/orders/ORD123456/cancel')
         .set('Authorization', `Bearer ${customerToken}`);
 
       expect(response.status).toBe(200);
@@ -471,7 +471,7 @@ describe('Order Integration Tests', () => {
 
     it('should cancel order as affiliate', async () => {
       const response = await request(app)
-        .post('/api/orders/ORD123456/cancel')
+        .post('/api/v1/orders/ORD123456/cancel')
         .set('Authorization', `Bearer ${affiliateToken}`);
 
       expect(response.status).toBe(200);
@@ -486,7 +486,7 @@ describe('Order Integration Tests', () => {
       );
 
       const response = await request(app)
-        .post('/api/orders/ORD123456/cancel')
+        .post('/api/v1/orders/ORD123456/cancel')
         .set('Authorization', `Bearer ${customerToken}`);
 
       expect(response.status).toBe(400);
@@ -503,7 +503,7 @@ describe('Order Integration Tests', () => {
       );
 
       const response = await request(app)
-        .post('/api/orders/ORD123456/cancel')
+        .post('/api/v1/orders/ORD123456/cancel')
         .set('Authorization', `Bearer ${otherCustomerToken}`);
 
       expect(response.status).toBe(403);
@@ -565,7 +565,7 @@ describe('Order Integration Tests', () => {
 
     it('should update multiple orders status in bulk', async () => {
       const response = await request(app)
-        .put('/api/orders/bulk/status')
+        .put('/api/v1/orders/bulk/status')
         .set('Authorization', `Bearer ${affiliateToken}`)
         .send({
           orderIds: ['ORD001', 'ORD002'],
@@ -593,7 +593,7 @@ describe('Order Integration Tests', () => {
       await Order.updateOne({ orderId: 'ORD001' }, { status: 'delivered' });
 
       const response = await request(app)
-        .put('/api/orders/bulk/status')
+        .put('/api/v1/orders/bulk/status')
         .set('Authorization', `Bearer ${affiliateToken}`)
         .send({
           orderIds: ['ORD001', 'ORD002', 'ORD003'],
@@ -615,7 +615,7 @@ describe('Order Integration Tests', () => {
 
     it('should cancel multiple orders in bulk', async () => {
       const response = await request(app)
-        .post('/api/orders/bulk/cancel')
+        .post('/api/v1/orders/bulk/cancel')
         .set('Authorization', `Bearer ${affiliateToken}`)
         .send({
           orderIds: ['ORD001', 'ORD002', 'ORD003']
@@ -659,7 +659,7 @@ describe('Order Integration Tests', () => {
 
     it('should export orders as CSV', async () => {
       const response = await request(app)
-        .get('/api/orders/export')
+        .get('/api/v1/orders/export')
         .set('Authorization', `Bearer ${affiliateToken}`)
         .query({
           format: 'csv',
@@ -678,7 +678,7 @@ describe('Order Integration Tests', () => {
 
     it('should export orders as JSON', async () => {
       const response = await request(app)
-        .get('/api/orders/export')
+        .get('/api/v1/orders/export')
         .set('Authorization', `Bearer ${affiliateToken}`)
         .query({
           format: 'json',
@@ -704,7 +704,7 @@ describe('Order Integration Tests', () => {
 
     it('should export orders as Excel', async () => {
       const response = await request(app)
-        .get('/api/orders/export')
+        .get('/api/v1/orders/export')
         .set('Authorization', `Bearer ${adminToken}`)
         .query({
           format: 'xlsx',
@@ -720,7 +720,7 @@ describe('Order Integration Tests', () => {
     it('should respect export permissions', async () => {
       // Customer should not be able to export all orders
       const response = await request(app)
-        .get('/api/orders/export')
+        .get('/api/v1/orders/export')
         .set('Authorization', `Bearer ${customerToken}`)
         .query({
           format: 'csv'
@@ -760,7 +760,7 @@ describe('Order Integration Tests', () => {
 
     it('should update payment status', async () => {
       const response = await request(app)
-        .put('/api/orders/ORD123456/payment-status')
+        .put('/api/v1/orders/ORD123456/payment-status')
         .set('Authorization', `Bearer ${adminToken}`)
         .send({
           paymentStatus: 'paid',
@@ -789,7 +789,7 @@ describe('Order Integration Tests', () => {
 
     it('should handle payment failure', async () => {
       const response = await request(app)
-        .put('/api/orders/ORD123456/payment-status')
+        .put('/api/v1/orders/ORD123456/payment-status')
         .set('Authorization', `Bearer ${adminToken}`)
         .send({
           paymentStatus: 'failed',
@@ -805,7 +805,7 @@ describe('Order Integration Tests', () => {
       await Order.updateOne({ orderId: 'ORD123456' }, { status: 'processing' });
 
       const response = await request(app)
-        .put('/api/orders/ORD123456/payment-status')
+        .put('/api/v1/orders/ORD123456/payment-status')
         .set('Authorization', `Bearer ${adminToken}`)
         .send({
           paymentStatus: 'paid'
@@ -826,7 +826,7 @@ describe('Order Integration Tests', () => {
       );
 
       const response = await request(app)
-        .put('/api/orders/ORD123456/payment-status')
+        .put('/api/v1/orders/ORD123456/payment-status')
         .set('Authorization', `Bearer ${adminToken}`)
         .send({
           paymentStatus: 'refunded',
@@ -917,7 +917,7 @@ describe('Order Integration Tests', () => {
 
     it('should search orders by customer name', async () => {
       const response = await request(app)
-        .get('/api/orders/search')
+        .get('/api/v1/orders/search')
         .set('Authorization', `Bearer ${affiliateToken}`)
         .query({
           search: 'alice',
@@ -937,7 +937,7 @@ describe('Order Integration Tests', () => {
 
     it('should filter orders by multiple criteria', async () => {
       const response = await request(app)
-        .get('/api/orders')
+        .get('/api/v1/orders')
         .set('Authorization', `Bearer ${affiliateToken}`)
         .query({
           affiliateId: 'AFF123',
@@ -957,7 +957,7 @@ describe('Order Integration Tests', () => {
 
     it('should filter by pickup time slots', async () => {
       const response = await request(app)
-        .get('/api/orders')
+        .get('/api/v1/orders')
         .set('Authorization', `Bearer ${affiliateToken}`)
         .query({
           affiliateId: 'AFF123',
@@ -973,7 +973,7 @@ describe('Order Integration Tests', () => {
 
     it('should provide aggregated statistics with filters', async () => {
       const response = await request(app)
-        .get('/api/orders/statistics')
+        .get('/api/v1/orders/statistics')
         .set('Authorization', `Bearer ${affiliateToken}`)
         .query({
           affiliateId: 'AFF123',

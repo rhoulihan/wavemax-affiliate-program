@@ -436,8 +436,9 @@ describe('Bag Controller', () => {
       const mockBag = {
         bagId: 'BAG123',
         status: 'active',
-        save: jest.fn().mockResolvedValue(true)
+        save: jest.fn()
       };
+      mockBag.save.mockResolvedValue(mockBag);
 
       req.params.id = 'BAG123';
       req.body = {
@@ -469,8 +470,9 @@ describe('Bag Controller', () => {
       const mockBag = {
         bagId: 'BAG123',
         status: 'active',
-        save: jest.fn().mockResolvedValue(true)
+        save: jest.fn()
       };
+      mockBag.save.mockResolvedValue(mockBag);
 
       req.params.id = 'BAG123';
       req.body = {
@@ -542,7 +544,9 @@ describe('Bag Controller', () => {
 
       mongoose.Types.ObjectId.isValid.mockReturnValue(false);
       Bag.findOne.mockResolvedValue(oldBag);
-      crypto.randomBytes.mockReturnValue(Buffer.from('NEWCODE', 'hex'));
+      crypto.randomBytes.mockReturnValue({
+        toString: jest.fn().mockReturnValue('NEWCODE')
+      });
       Bag.prototype.save = jest.fn().mockResolvedValue(newBag);
       Customer.findOneAndUpdate.mockResolvedValue(true);
 

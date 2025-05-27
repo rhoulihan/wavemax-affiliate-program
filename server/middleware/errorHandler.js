@@ -3,6 +3,13 @@ const logger = require('../utils/logger');
 
 // Central error handling middleware
 const errorHandler = (err, req, res, next) => {
+  // Ensure err is an object
+  if (!err) {
+    err = new Error('Unknown error occurred');
+  } else if (typeof err === 'string') {
+    err = new Error(err);
+  }
+  
   // Console log for immediate debugging
   console.error('=== API ERROR ===');
   console.error('Error message:', err.message);
@@ -14,16 +21,21 @@ const errorHandler = (err, req, res, next) => {
   console.error('================');
 
   // Log the error with additional context
-  logger.error('API Error:', {
-    error: err.message,
-    stack: err.stack,
-    path: req.path,
-    method: req.method,
-    ip: req.ip,
-    userId: req.user ? (req.user.id || req.user.affiliateId || req.user.customerId) : null,
-    errorType: err.name,
-    errorCode: err.code
-  });
+  try {
+    logger.error('API Error:', {
+      error: err.message,
+      stack: err.stack,
+      path: req.path,
+      method: req.method,
+      ip: req.ip,
+      userId: req.user ? (req.user.id || req.user.affiliateId || req.user.customerId) : null,
+      errorType: err.name,
+      errorCode: err.code
+    });
+  } catch (logError) {
+    // If logging fails, continue with error handling
+    console.error('Failed to log error:', logError);
+  }
 
   // Handle specific error types
   let statusCode = err.statusCode || 500;

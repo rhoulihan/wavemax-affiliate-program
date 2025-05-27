@@ -44,6 +44,7 @@ describe('Order Controller', () => {
         estimatedTotal: 49.46,
         save: jest.fn()
       };
+      mockOrder.save.mockResolvedValue(mockOrder);
 
       req.body = {
         customerId: 'CUST123',
@@ -61,7 +62,10 @@ describe('Order Controller', () => {
 
       Customer.findOne.mockResolvedValue(mockCustomer);
       Affiliate.findOne.mockResolvedValue(mockAffiliate);
-      Order.prototype.save = jest.fn().mockResolvedValue(mockOrder);
+      Order.prototype.save = jest.fn().mockImplementation(function() {
+        Object.assign(this, mockOrder);
+        return Promise.resolve(this);
+      });
       emailService.sendCustomerOrderConfirmationEmail.mockResolvedValue();
       emailService.sendAffiliateNewOrderEmail.mockResolvedValue();
 
@@ -81,7 +85,12 @@ describe('Order Controller', () => {
     it('should handle email sending failures gracefully', async () => {
       const mockCustomer = { customerId: 'CUST123' };
       const mockAffiliate = { affiliateId: 'AFF123', deliveryFee: 5.99 };
-      const mockOrder = { orderId: 'ORD123456', estimatedTotal: 49.46, save: jest.fn() };
+      const mockOrder = { 
+        orderId: 'ORD123456', 
+        estimatedTotal: 49.46, 
+        save: jest.fn() 
+      };
+      mockOrder.save.mockResolvedValue(mockOrder);
 
       req.body = {
         customerId: 'CUST123',
@@ -96,7 +105,10 @@ describe('Order Controller', () => {
 
       Customer.findOne.mockResolvedValue(mockCustomer);
       Affiliate.findOne.mockResolvedValue(mockAffiliate);
-      Order.prototype.save = jest.fn().mockResolvedValue(mockOrder);
+      Order.prototype.save = jest.fn().mockImplementation(function() {
+        Object.assign(this, mockOrder);
+        return Promise.resolve(this);
+      });
       emailService.sendCustomerOrderConfirmationEmail.mockRejectedValue(new Error('Email failed'));
       emailService.sendAffiliateNewOrderEmail.mockRejectedValue(new Error('Email failed'));
 

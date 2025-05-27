@@ -137,7 +137,8 @@ describe('Audit Logger', () => {
           role: 'customer',
           email: 'customer@example.com',
           customerId: 'CUST456'
-        }
+        },
+        get: jest.fn().mockReturnValue('Mozilla/5.0')
       };
 
       logAuditEvent(AuditEvents.ORDER_CREATED, { orderId: 'ORD123' }, req);
@@ -178,7 +179,8 @@ describe('Audit Logger', () => {
       const req = {
         ip: '192.168.1.3',
         method: 'GET',
-        path: '/public'
+        path: '/public',
+        get: jest.fn().mockReturnValue('Mozilla/5.0')
       };
 
       logAuditEvent(AuditEvents.LOGIN_FAILED, { reason: 'Invalid credentials' }, req);
@@ -193,7 +195,8 @@ describe('Audit Logger', () => {
       const req = {
         connection: { remoteAddress: '10.0.0.1' },
         method: 'POST',
-        path: '/api/test'
+        path: '/api/test',
+        get: jest.fn().mockReturnValue('Mozilla/5.0')
       };
 
       logAuditEvent(AuditEvents.LOGIN_SUCCESS, {}, req);
@@ -338,7 +341,8 @@ describe('Audit Logger', () => {
         user: {
           id: 'admin123',
           role: 'admin'
-        }
+        },
+        get: jest.fn().mockReturnValue('Mozilla/5.0')
       };
     });
 
@@ -375,7 +379,8 @@ describe('Audit Logger', () => {
           id: 'user123',
           role: 'customer',
           customerId: 'CUST123'
-        }
+        },
+        get: jest.fn().mockReturnValue('Mozilla/5.0')
       };
     });
 

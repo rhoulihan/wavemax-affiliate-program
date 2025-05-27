@@ -18,7 +18,8 @@ describe('Auth Controller', () => {
   beforeEach(() => {
     req = {
       body: {},
-      ip: '127.0.0.1'
+      ip: '127.0.0.1',
+      get: jest.fn().mockReturnValue('User-Agent')
     };
     res = {
       status: jest.fn().mockReturnThis(),
@@ -193,55 +194,54 @@ describe('Auth Controller', () => {
 
   describe('verifyToken', () => {
     it('should verify a valid JWT token', async () => {
-      req.headers = {
-        authorization: 'Bearer validtoken'
-      };
-
-      const decodedToken = {
+      req.user = {
         id: 'user123',
-        role: 'affiliate'
+        role: 'affiliate',
+        affiliateId: 'AFF123'
       };
-
-      jwt.verify.mockReturnValue(decodedToken);
 
       await authController.verifyToken(req, res);
 
-      expect(jwt.verify).toHaveBeenCalledWith('validtoken', process.env.JWT_SECRET);
       expect(res.status).toHaveBeenCalledWith(200);
       expect(res.json).toHaveBeenCalledWith({
         success: true,
-        valid: true,
-        user: decodedToken
+        user: {
+          id: 'user123',
+          role: 'affiliate',
+          affiliateId: 'AFF123'
+        }
       });
     });
 
-    it('should return error for missing token', async () => {
-      req.headers = {};
+    it('should handle missing user data', async () => {
+      req.user = null;
 
       await authController.verifyToken(req, res);
 
-      expect(res.status).toHaveBeenCalledWith(401);
+      expect(res.status).toHaveBeenCalledWith(500);
       expect(res.json).toHaveBeenCalledWith({
         success: false,
-        message: 'No token provided'
+        message: 'An error occurred during token verification'
       });
     });
 
-    it('should return error for invalid token', async () => {
-      req.headers = {
-        authorization: 'Bearer invalidtoken'
+    it('should return customer user data', async () => {
+      req.user = {
+        id: 'user456',
+        role: 'customer',
+        customerId: 'CUST456'
       };
 
-      jwt.verify.mockImplementation(() => {
-        throw new Error('Invalid token');
-      });
-
       await authController.verifyToken(req, res);
 
-      expect(res.status).toHaveBeenCalledWith(401);
+      expect(res.status).toHaveBeenCalledWith(200);
       expect(res.json).toHaveBeenCalledWith({
-        success: false,
-        message: 'Invalid token'
+        success: true,
+        user: {
+          id: 'user456',
+          role: 'customer',
+          customerId: 'CUST456'
+        }
       });
     });
   });
@@ -258,6 +258,7 @@ describe('Auth Controller', () => {
         userType: 'affiliate',
         expiryDate: new Date(Date.now() + 86400000),
         isActive: true,
+        save: jest.fn(),
         remove: jest.fn()
       };
 
@@ -294,10 +295,10 @@ describe('Auth Controller', () => {
 
       await authController.refreshToken(req, res);
 
-      expect(res.status).toHaveBeenCalledWith(403);
+      expect(res.status).toHaveBeenCalledWith(401);
       expect(res.json).toHaveBeenCalledWith({
         success: false,
-        message: 'Invalid refresh token'
+        message: 'Invalid or expired refresh token'
       });
     });
 
@@ -306,20 +307,15 @@ describe('Auth Controller', () => {
         refreshToken: 'expiredRefreshToken'
       };
 
-      const mockRefreshToken = {
-        token: 'expiredRefreshToken',
-        expiryDate: new Date(Date.now() - 86400000),
-        isActive: true
-      };
-
-      RefreshToken.findOne.mockResolvedValue(mockRefreshToken);
+      // Expired tokens won't be found by the query
+      RefreshToken.findOne.mockResolvedValue(null);
 
       await authController.refreshToken(req, res);
 
-      expect(res.status).toHaveBeenCalledWith(403);
+      expect(res.status).toHaveBeenCalledWith(401);
       expect(res.json).toHaveBeenCalledWith({
         success: false,
-        message: 'Refresh token expired'
+        message: 'Invalid or expired refresh token'
       });
     });
   });

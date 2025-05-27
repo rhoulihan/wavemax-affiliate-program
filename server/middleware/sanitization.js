@@ -91,8 +91,8 @@ const sanitizeId = (id) => {
 const sanitizePath = (path) => {
   if (!path || typeof path !== 'string') return '';
 
-  // Remove any directory traversal attempts
-  return path.replace(/\.\./g, '').replace(/[^a-zA-Z0-9._\-\/]/g, '');
+  // Remove any directory traversal attempts and preserve backslashes for Windows paths
+  return path.replace(/\.\./g, '').replace(/[^a-zA-Z0-9._\-\/\\:]/g, '');
 };
 
 module.exports = {

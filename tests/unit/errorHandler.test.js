@@ -12,7 +12,8 @@ describe('Error Handler Middleware', () => {
       path: '/api/test',
       method: 'GET',
       ip: '127.0.0.1',
-      user: null
+      user: null,
+      get: jest.fn().mockReturnValue('Mozilla/5.0')
     };
     res = {
       status: jest.fn().mockReturnThis(),
@@ -167,7 +168,7 @@ describe('Error Handler Middleware', () => {
       errorHandler(error, req, res, next);
 
       expect(logger.error).toHaveBeenCalledWith('API Error:', expect.objectContaining({
-        userId: 'CUST456'
+        userId: 'user456'  // Should use id first if available
       }));
     });
 

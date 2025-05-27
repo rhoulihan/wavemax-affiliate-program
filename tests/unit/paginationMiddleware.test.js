@@ -5,7 +5,8 @@ describe('Pagination Middleware', () => {
 
   beforeEach(() => {
     req = {
-      query: {}
+      query: {},
+      get: jest.fn().mockReturnValue('Mozilla/5.0')
     };
     res = {};
     next = jest.fn();
