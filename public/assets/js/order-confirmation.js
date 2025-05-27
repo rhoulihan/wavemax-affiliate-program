@@ -23,12 +23,47 @@ function initializeOrderConfirmation() {
   // Get order details from localStorage
   const storedOrdersStr = localStorage.getItem('wavemax_orders');
   console.log('Stored orders string:', storedOrdersStr);
-  const storedOrders = JSON.parse(storedOrdersStr || '{}');
+  let storedOrders = {};
+  let order = null;
+  
+  try {
+    const parsed = JSON.parse(storedOrdersStr || '{}');
+    
+    // Handle both old array format and new object format
+    if (Array.isArray(parsed)) {
+      console.log('Converting old array format to new object format');
+      // Convert array to object format
+      storedOrders = {};
+      parsed.forEach(o => {
+        if (o.orderId) {
+          storedOrders[o.orderId] = o;
+        }
+      });
+      // Update localStorage with new format
+      localStorage.setItem('wavemax_orders', JSON.stringify(storedOrders));
+    } else {
+      storedOrders = parsed;
+    }
+    
+    order = storedOrders[orderId];
+  } catch (e) {
+    console.error('Error parsing stored orders:', e);
+  }
+  
   console.log('Stored orders object:', storedOrders);
-  const order = storedOrders[orderId];
   console.log('Order data for', orderId, ':', order);
 
   if (order) {
+    displayOrderData(order);
+  } else {
+    // Order not found in localStorage - try to fetch from API
+    fetchOrderFromAPI(orderId);
+  }
+
+  // Function to display order data
+  function displayOrderData(order) {
+    console.log('Displaying order data:', order);
+    
     // Set order date
     const orderDate = new Date(order.createdAt || Date.now());
     document.getElementById('orderDate').textContent = orderDate.toLocaleDateString() + ' ' + orderDate.toLocaleTimeString();
@@ -124,9 +159,6 @@ function initializeOrderConfirmation() {
 
     // Fetch affiliate information
     fetchAffiliateInfo(affiliateId);
-  } else {
-    // Order not found in localStorage - try to fetch from API
-    fetchOrderFromAPI(orderId);
   }
 
   // Fetch affiliate information from API
@@ -176,12 +208,12 @@ function initializeOrderConfirmation() {
         const data = await response.json();
         if (data.success && data.order) {
           // Store in localStorage for future reference
-          const storedOrders = JSON.parse(localStorage.getItem('wavemax_orders')) || {};
+          const storedOrders = JSON.parse(localStorage.getItem('wavemax_orders') || '{}');
           storedOrders[orderId] = data.order;
           localStorage.setItem('wavemax_orders', JSON.stringify(storedOrders));
 
-          // Reload page to display the order
-          location.reload();
+          // Display the order data directly without reloading
+          displayOrderData(data.order);
         }
       } else {
         alert('Order not found. Redirecting to homepage.');
