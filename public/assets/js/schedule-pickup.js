@@ -1,6 +1,9 @@
 // Schedule Pickup Page - Requires Authentication
-document.addEventListener('DOMContentLoaded', async function() {
-  console.log('Schedule pickup page loading');
+console.log('Schedule pickup script loaded');
+
+// Function to initialize the page
+async function initializeSchedulePickup() {
+  console.log('Initializing schedule pickup page');
   
   // Check if customer is logged in
   const token = localStorage.getItem('customerToken');
@@ -8,6 +11,10 @@ document.addEventListener('DOMContentLoaded', async function() {
   
   console.log('Token exists:', !!token);
   console.log('Customer data exists:', !!customerStr);
+  console.log('LocalStorage contents:', {
+    customerToken: token ? 'exists' : 'missing',
+    currentCustomer: customerStr ? 'exists' : 'missing'
+  });
   
   if (!token || !customerStr) {
     // Not logged in, redirect to login page with pickup flag
@@ -53,7 +60,16 @@ document.addEventListener('DOMContentLoaded', async function() {
     // If there's an error, redirect to login
     window.location.href = '/embed-app.html?route=/customer-login&pickup=true';
   }
-});
+}
+
+// Check if DOM is already loaded
+if (document.readyState === 'loading') {
+  console.log('DOM still loading, adding event listener');
+  document.addEventListener('DOMContentLoaded', initializeSchedulePickup);
+} else {
+  console.log('DOM already loaded, initializing immediately');
+  initializeSchedulePickup();
+}
 
 // Function to load customer data into the pickup form
 async function loadCustomerIntoForm(customer, token) {
