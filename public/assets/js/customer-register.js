@@ -99,28 +99,6 @@ function initializeRegistrationForm() {
     window.location.href = '/embed-app.html';
   }
 
-  // Service frequency selection behavior
-  const serviceFrequency = document.getElementById('serviceFrequency');
-  const recurringScheduleContainer = document.getElementById('recurringScheduleContainer');
-  const preferredDay = document.getElementById('preferredDay');
-  const preferredTime = document.getElementById('preferredTime');
-
-  if (serviceFrequency) {
-    serviceFrequency.addEventListener('change', function() {
-      console.log('Service frequency changed to:', this.value);
-      if (this.value === 'onDemand' || this.value === '') {
-        recurringScheduleContainer.style.display = 'none';
-        preferredDay.required = false;
-        preferredTime.required = false;
-      } else {
-        recurringScheduleContainer.style.display = 'block';
-        preferredDay.required = true;
-        preferredTime.required = true;
-      }
-    });
-  } else {
-    console.error('serviceFrequency element not found');
-  }
 
   // Form submission
   const form = document.getElementById('customerRegistrationForm');
