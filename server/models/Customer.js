@@ -25,8 +25,6 @@ const customerSchema = new mongoose.Schema({
     enum: ['weekly', 'biweekly', 'monthly', 'onDemand'],
     required: true
   },
-  preferredDay: String,
-  preferredTime: String,
   specialInstructions: String,
   username: { type: String, required: true, unique: true },
   passwordSalt: { type: String, required: true },

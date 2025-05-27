@@ -32,8 +32,6 @@ exports.registerCustomer = async (req, res) => {
       zipCode,
       deliveryInstructions,
       serviceFrequency,
-      preferredDay,
-      preferredTime,
       specialInstructions,
       username,
       password,
@@ -83,8 +81,6 @@ exports.registerCustomer = async (req, res) => {
       zipCode,
       deliveryInstructions,
       serviceFrequency,
-      preferredDay: serviceFrequency !== 'onDemand' ? preferredDay : null,
-      preferredTime: serviceFrequency !== 'onDemand' ? preferredTime : null,
       specialInstructions,
       username,
       passwordSalt: salt,
@@ -248,8 +244,7 @@ exports.updateCustomerProfile = async (req, res) => {
     // Fields that can be updated
     const updatableFields = [
       'firstName', 'lastName', 'email', 'phone', 'address', 'city', 'state', 'zipCode',
-      'deliveryInstructions', 'serviceFrequency', 'preferredDay', 'preferredTime',
-      'specialInstructions', 'cardholderName'
+      'deliveryInstructions', 'serviceFrequency', 'specialInstructions', 'cardholderName'
     ];
 
     // Update fields
@@ -259,11 +254,6 @@ exports.updateCustomerProfile = async (req, res) => {
       }
     });
 
-    // Handle special case for service frequency
-    if (updates.serviceFrequency === 'onDemand') {
-      customer.preferredDay = null;
-      customer.preferredTime = null;
-    }
 
     // Handle password change if provided
     if (updates.currentPassword && updates.newPassword) {
