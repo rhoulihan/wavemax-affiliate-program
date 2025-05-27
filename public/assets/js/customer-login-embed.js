@@ -143,6 +143,7 @@
                 })
                 .then(data => {
                     console.log('Login response data:', data);
+                    console.log('Customer data details:', JSON.stringify(data.customer, null, 2));
                     if (data.success) {
                         // Store token
                         localStorage.setItem('customerToken', data.token);

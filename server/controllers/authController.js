@@ -239,6 +239,9 @@ exports.customerLogin = async (req, res) => {
 
     // Find affiliate
     const affiliate = await Affiliate.findOne({ affiliateId: customer.affiliateId });
+    console.log('Customer affiliateId:', customer.affiliateId);
+    console.log('Found affiliate:', affiliate ? affiliate.affiliateId : 'null');
+    console.log('Affiliate delivery fee:', affiliate ? affiliate.deliveryFee : 'null');
 
     // Generate token
     const token = generateToken({
@@ -248,7 +251,7 @@ exports.customerLogin = async (req, res) => {
       role: 'customer'
     });
 
-    res.status(200).json({
+    const responseData = {
       success: true,
       token,
       customer: {
@@ -268,7 +271,10 @@ exports.customerLogin = async (req, res) => {
           deliveryFee: affiliate.deliveryFee
         } : null
       }
-    });
+    };
+    
+    console.log('Sending customer login response:', JSON.stringify(responseData.customer, null, 2));
+    res.status(200).json(responseData);
   } catch (error) {
     console.error('Customer login error:', error);
     res.status(500).json({
