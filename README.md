@@ -79,15 +79,12 @@ wavemax-affiliate-program/
 ├── public/                                # Frontend HTML/CSS/JS (Embedded-Only)
 │   ├── assets/                            # Static assets
 │   │   └── js/
-│   │       ├── components/                # Reusable components
-│   │       │   ├── AffiliateMetricsDashboard.js
-│   │       │   └── CustomerDashboardAnalytics.js
 │   │       ├── affiliate-dashboard-init.js # Embedded dashboard
-│   │       ├── affiliate-login.js         # Login functionality
+│   │       ├── affiliate-login-init.js    # Login functionality
 │   │       ├── affiliate-register-init.js # Embedded registration
 │   │       ├── affiliate-success-init.js  # Embedded success page
 │   │       ├── customer-dashboard.js      # Customer dashboard
-│   │       ├── customer-login.js          # Customer login
+│   │       ├── customer-login-embed.js    # Customer login
 │   │       ├── customer-register.js       # Customer registration
 │   │       ├── customer-success.js        # Customer success
 │   │       ├── embed-navigation.js        # CSP-compliant navigation
@@ -105,10 +102,7 @@ wavemax-affiliate-program/
 │   ├── customer-success-embed.html        # Registration success
 │   ├── customer-dashboard-embed.html      # Customer dashboard
 │   ├── schedule-pickup-embed.html         # Pickup scheduling
-│   ├── order-confirmation-embed.html      # Order confirmation
-│   ├── api-docs.html                      # API documentation
-│   ├── iframe-embed.html                  # Compact iframe version
-│   └── embed-example.html                 # Embedding documentation
+│   └── order-confirmation-embed.html      # Order confirmation
 │
 ├── server/                                # Server-side code
 │   ├── controllers/                       # API controllers
@@ -213,18 +207,52 @@ All API endpoints use the base URL `/api/v1/`
 ```
 POST /api/v1/auth/affiliate/login
 POST /api/v1/auth/customer/login
+
+Request Body:
+{
+    "username": "string",  // Email or affiliate ID
+    "password": "string"
+}
+
+Response:
+{
+    "success": true,
+    "token": "jwt-token",
+    "refreshToken": "refresh-token",
+    "user": {
+        "id": "string",
+        "email": "string",
+        "role": "affiliate|customer"
+    }
+}
 ```
 
 #### Token Management
 ```
 GET /api/v1/auth/verify
+Headers: Authorization: Bearer <token>
+
 POST /api/v1/auth/refresh-token
+Request Body:
+{
+    "refreshToken": "string"
+}
 ```
 
 #### Password Reset
 ```
 POST /api/v1/auth/forgot-password
+Request Body:
+{
+    "email": "string"
+}
+
 POST /api/v1/auth/reset-password
+Request Body:
+{
+    "token": "string",
+    "newPassword": "string"
+}
 ```
 
 ### Protected Endpoints
@@ -237,6 +265,40 @@ Authorization: Bearer <token>
 For state-changing operations (POST, PUT, DELETE), include CSRF token:
 ```
 X-CSRF-Token: <csrf-token>
+```
+
+#### Affiliate Endpoints
+```
+GET /api/v1/affiliates/:id
+GET /api/v1/affiliates/:id/dashboard
+GET /api/v1/affiliates/:id/customers
+GET /api/v1/affiliates/:id/orders
+PUT /api/v1/affiliates/:id
+POST /api/v1/affiliates/:id/change-password
+```
+
+#### Customer Endpoints
+```
+POST /api/v1/customers/register
+GET /api/v1/customers/:id
+PUT /api/v1/customers/:id
+GET /api/v1/customers/:id/orders
+GET /api/v1/customers/:id/active-orders
+```
+
+#### Order Endpoints
+```
+POST /api/v1/orders
+GET /api/v1/orders/:id
+PUT /api/v1/orders/:id
+POST /api/v1/orders/:id/cancel
+```
+
+#### Bag Management
+```
+POST /api/v1/bags
+GET /api/v1/bags/:barcode
+PUT /api/v1/bags/:id
 ```
 
 #### CSRF Token Usage
@@ -538,6 +600,37 @@ Add this code where you want the affiliate program to appear:
 </iframe>
 ```
 
+### WaveMAX Laundry Austin Integration
+
+For the main WaveMAX Laundry website, use this specific embed code:
+
+```html
+<!-- WaveMAX Austin Affiliate Program Embed -->
+<div id="wavemax-affiliate-container" style="width: 100%; min-height: 600px;">
+    <iframe 
+        id="wavemax-affiliate-iframe"
+        src="https://wavemax.promo/embed-app.html" 
+        width="100%" 
+        height="800" 
+        frameborder="0" 
+        scrolling="no"
+        style="width: 100%; min-height: 600px; border: none;">
+    </iframe>
+</div>
+
+<script>
+// Auto-resize iframe based on content
+window.addEventListener('message', function(event) {
+    if (event.origin !== 'https://wavemax.promo') return;
+    
+    if (event.data.type === 'resize') {
+        const iframe = document.getElementById('wavemax-affiliate-iframe');
+        iframe.style.height = event.data.data.height + 'px';
+    }
+});
+</script>
+```
+
 ### Embedding Options
 
 #### Option 1: Landing Page Only
@@ -555,13 +648,13 @@ For just the landing page without the full application:
 </iframe>
 ```
 
-#### Option 2: Compact Promotional Widget
+#### Option 2: Direct to Specific Page
 
-Minimal version for sidebars or smaller spaces:
+Navigate directly to a specific section:
 
 ```html
 <iframe 
-    src="https://wavemax.promo/iframe-embed.html" 
+    src="https://wavemax.promo/embed-app.html?route=/affiliate-register" 
     width="100%" 
     height="600" 
     frameborder="0" 
@@ -624,8 +717,8 @@ function wavemax_affiliate_embed_shortcode($atts) {
         case 'landing':
             $url .= 'embed-landing.html';
             break;
-        case 'compact':
-            $url .= 'iframe-embed.html';
+        case 'register':
+            $url .= 'embed-app.html?route=/affiliate-register';
             break;
         default:
             $url .= 'embed-app.html';
@@ -712,7 +805,6 @@ Add this to your site's `<head>` for faster loading:
 ### Support
 
 For embedding assistance:
-- View live examples: https://wavemax.promo/embed-example.html
 - Email: tech@wavemaxlaundry.com
 - Check browser console for error messages
 
