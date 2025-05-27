@@ -6,6 +6,9 @@ document.addEventListener('DOMContentLoaded', async function() {
   const token = localStorage.getItem('customerToken');
   const customerStr = localStorage.getItem('currentCustomer');
   
+  console.log('Token exists:', !!token);
+  console.log('Customer data exists:', !!customerStr);
+  
   if (!token || !customerStr) {
     // Not logged in, redirect to login page with pickup flag
     console.log('User not authenticated, redirecting to login');
@@ -16,6 +19,7 @@ document.addEventListener('DOMContentLoaded', async function() {
   try {
     const customer = JSON.parse(customerStr);
     console.log('Customer authenticated:', customer.customerId);
+    console.log('Customer data:', customer);
     
     // Hide login section if it exists
     const loginSection = document.getElementById('loginSection');
@@ -44,18 +48,36 @@ document.addEventListener('DOMContentLoaded', async function() {
 
 // Function to load customer data into the pickup form
 async function loadCustomerIntoForm(customer, token) {
+  console.log('Loading customer into form:', customer);
+  
   try {
+    // Check if form fields exist
+    const customerIdField = document.getElementById('customerId');
+    const customerNameField = document.getElementById('customerName');
+    const customerPhoneField = document.getElementById('customerPhone');
+    const customerAddressField = document.getElementById('customerAddress');
+    const affiliateIdField = document.getElementById('affiliateId');
+    
+    console.log('Form fields found:', {
+      customerId: !!customerIdField,
+      customerName: !!customerNameField,
+      customerPhone: !!customerPhoneField,
+      customerAddress: !!customerAddressField,
+      affiliateId: !!affiliateIdField
+    });
+    
     // Set customer data fields
-    document.getElementById('customerId').value = customer.customerId;
-    document.getElementById('customerName').textContent = `${customer.firstName} ${customer.lastName}`;
-    document.getElementById('customerPhone').textContent = customer.phone || customer.email;
-    document.getElementById('customerAddress').textContent = 'Loading address...';
+    if (customerIdField) customerIdField.value = customer.customerId;
+    if (customerNameField) customerNameField.textContent = `${customer.firstName} ${customer.lastName}`;
+    if (customerPhoneField) customerPhoneField.textContent = customer.phone || customer.email;
+    if (customerAddressField) customerAddressField.textContent = 'Loading address...';
 
     // Set affiliate ID
-    document.getElementById('affiliateId').value = customer.affiliateId;
+    if (affiliateIdField) affiliateIdField.value = customer.affiliateId;
 
     // Fetch full customer profile to get address and affiliate details
-    const profileResponse = await fetch(`/api/customers/${customer.customerId}/profile`, {
+    const baseUrl = window.EMBED_CONFIG?.baseUrl || 'https://wavemax.promo';
+    const profileResponse = await fetch(`${baseUrl}/api/v1/customers/${customer.customerId}/profile`, {
       headers: {
         'Authorization': `Bearer ${token}`
       }
@@ -98,26 +120,39 @@ async function loadCustomerIntoForm(customer, token) {
 
 // Function to fetch affiliate delivery fee
 async function fetchAffiliateDeliveryFee(affiliateId) {
+  console.log('Fetching affiliate delivery fee for:', affiliateId);
+  
+  const deliveryFeeField = document.getElementById('deliveryFee');
+  if (!deliveryFeeField) {
+    console.error('Delivery fee field not found in DOM');
+    return;
+  }
+  
   if (!affiliateId) {
-    document.getElementById('deliveryFee').textContent = '$5.99';
+    deliveryFeeField.textContent = '$5.99';
     return;
   }
   
   try {
-    const response = await fetch(`/api/affiliates/${affiliateId}/public`);
+    const baseUrl = window.EMBED_CONFIG?.baseUrl || 'https://wavemax.promo';
+    const response = await fetch(`${baseUrl}/api/v1/affiliates/${affiliateId}/public`);
+    console.log('Affiliate API response status:', response.status);
+    
     if (response.ok) {
       const data = await response.json();
+      console.log('Affiliate data:', data);
+      
       if (data.success && data.affiliate && data.affiliate.deliveryFee) {
-        document.getElementById('deliveryFee').textContent = `$${parseFloat(data.affiliate.deliveryFee).toFixed(2)}`;
+        deliveryFeeField.textContent = `$${parseFloat(data.affiliate.deliveryFee).toFixed(2)}`;
       } else {
-        document.getElementById('deliveryFee').textContent = '$5.99';
+        deliveryFeeField.textContent = '$5.99';
       }
     } else {
-      document.getElementById('deliveryFee').textContent = '$5.99';
+      deliveryFeeField.textContent = '$5.99';
     }
   } catch (error) {
     console.error('Error fetching affiliate fee:', error);
-    document.getElementById('deliveryFee').textContent = '$5.99';
+    deliveryFeeField.textContent = '$5.99';
   }
 }
 
@@ -189,7 +224,8 @@ function setupFormSubmission(token) {
     
     try {
       // Submit the order
-      const response = await fetch('/api/orders', {
+      const baseUrl = window.EMBED_CONFIG?.baseUrl || 'https://wavemax.promo';
+      const response = await fetch(`${baseUrl}/api/v1/orders`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
