@@ -135,22 +135,23 @@ function initializeOrderConfirmation() {
     const deliveryFee = order.deliveryFee || 5.99;
     document.getElementById('deliveryFee').textContent = `$${parseFloat(deliveryFee).toFixed(2)}`;
 
-    // Update order link with affiliate ID
+    // Update order link with affiliate ID - redirect to main site with pickup flag
     const scheduleAnotherBtn = document.getElementById('scheduleAnotherBtn');
     if (scheduleAnotherBtn) {
-      // Use the embed routing format
-      scheduleAnotherBtn.href = `/embed-app.html?route=/schedule-pickup&affid=${affiliateId}`;
+      // Redirect to WaveMAX main site with affiliate ID and pickup flag
+      scheduleAnotherBtn.href = `https://www.wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program?affid=${affiliateId}&pickup=true`;
+      // Open in parent window, not iframe
+      scheduleAnotherBtn.target = '_parent';
     }
 
-    // Set view orders link to customer dashboard
+    // Set view orders link to customer dashboard on main site
     const customerId = order.customerId;
     const viewOrdersBtn = document.getElementById('viewOrdersBtn');
     if (viewOrdersBtn) {
-      if (customerId) {
-        viewOrdersBtn.href = '/embed-app.html?route=/customer-dashboard';
-      } else {
-        viewOrdersBtn.href = '/embed-app.html?route=/customer-login';
-      }
+      // Redirect to WaveMAX main site with affiliate ID
+      viewOrdersBtn.href = `https://www.wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program?affid=${affiliateId}`;
+      // Open in parent window, not iframe
+      viewOrdersBtn.target = '_parent';
     }
 
     // Use the estimated total from the order data if available
