@@ -99,8 +99,16 @@ async function loadCustomerIntoForm(customer, token) {
     // Set address if available
     if (customerAddressField) {
       if (customer.address && customer.city && customer.state && customer.zipCode) {
-        customerAddressField.textContent = `${customer.address}, ${customer.city}, ${customer.state} ${customer.zipCode}`;
+        const fullAddress = `${customer.address}, ${customer.city}, ${customer.state} ${customer.zipCode}`;
+        console.log('Setting customer address:', fullAddress);
+        customerAddressField.textContent = fullAddress;
       } else {
+        console.log('Customer address fields missing:', {
+          address: customer.address,
+          city: customer.city,
+          state: customer.state,
+          zipCode: customer.zipCode
+        });
         customerAddressField.textContent = 'Loading address...';
       }
     }
@@ -122,7 +130,8 @@ async function loadCustomerIntoForm(customer, token) {
 
     // Fetch full customer profile to get address and other details
     const baseUrl = window.EMBED_CONFIG?.baseUrl || 'https://wavemax.promo';
-    const profileResponse = await fetch(`${baseUrl}/api/v1/customers/${customer.customerId}/profile`, {
+    // Use the authenticated endpoint (without /profile) to get full data
+    const profileResponse = await fetch(`${baseUrl}/api/v1/customers/${customer.customerId}`, {
       headers: {
         'Authorization': `Bearer ${token}`
       }
@@ -137,9 +146,14 @@ async function loadCustomerIntoForm(customer, token) {
         console.log('Full customer data:', fullCustomer);
         console.log('Affiliate data in customer:', fullCustomer.affiliate);
         
-        // Update address
-        const address = `${fullCustomer.address}, ${fullCustomer.city}, ${fullCustomer.state} ${fullCustomer.zipCode}`;
-        document.getElementById('customerAddress').textContent = address;
+        // Update address only if we have the data
+        if (fullCustomer.address && fullCustomer.city && fullCustomer.state && fullCustomer.zipCode) {
+          const address = `${fullCustomer.address}, ${fullCustomer.city}, ${fullCustomer.state} ${fullCustomer.zipCode}`;
+          console.log('Updating address from profile:', address);
+          document.getElementById('customerAddress').textContent = address;
+        } else {
+          console.log('Profile missing address fields, keeping existing address');
+        }
         
         // Update phone if available
         if (fullCustomer.phone) {
