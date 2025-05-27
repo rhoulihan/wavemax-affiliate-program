@@ -816,4 +816,79 @@ exports.getPublicAffiliateInfo = async (req, res) => {
   }
 };
 
+/**
+ * Delete all data for an affiliate (development/test only)
+ */
+exports.deleteAffiliateData = async (req, res) => {
+  try {
+    // Only allow in development or test environments
+    if (process.env.NODE_ENV !== 'development' && process.env.NODE_ENV !== 'test') {
+      return res.status(403).json({
+        success: false,
+        message: 'This operation is not allowed in production'
+      });
+    }
+
+    const { affiliateId } = req.user;
+
+    // Verify the affiliate exists and matches the logged-in user
+    const affiliate = await Affiliate.findOne({ affiliateId });
+    if (!affiliate || affiliate.affiliateId !== affiliateId) {
+      return res.status(403).json({
+        success: false,
+        message: 'Unauthorized'
+      });
+    }
+
+    // Find all customers associated with this affiliate
+    const customers = await Customer.find({ affiliateId });
+    const customerIds = customers.map(c => c.customerId);
+
+    // Delete all related data
+    // 1. Delete all orders for these customers
+    await Order.deleteMany({ 
+      $or: [
+        { affiliateId },
+        { customerId: { $in: customerIds } }
+      ]
+    });
+
+    // 2. Delete all bags for these customers
+    const Bag = require('../models/Bag');
+    await Bag.deleteMany({ 
+      $or: [
+        { affiliateId },
+        { customerId: { $in: customerIds } }
+      ]
+    });
+
+    // 3. Delete all transactions for this affiliate
+    await Transaction.deleteMany({ affiliateId });
+
+    // 4. Delete all customers
+    await Customer.deleteMany({ affiliateId });
+
+    // 5. Delete the affiliate
+    await Affiliate.deleteOne({ affiliateId });
+
+    res.status(200).json({
+      success: true,
+      message: 'All data has been deleted successfully',
+      deletedData: {
+        affiliate: 1,
+        customers: customers.length,
+        orders: 'All related orders deleted',
+        bags: 'All related bags deleted',
+        transactions: 'All transactions deleted'
+      }
+    });
+  } catch (error) {
+    console.error('Delete affiliate data error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'An error occurred while deleting data'
+    });
+  }
+};
+
 module.exports = exports;

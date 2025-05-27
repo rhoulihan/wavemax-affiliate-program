@@ -286,6 +286,14 @@ app.use(apiVersioning);
 // API Routes with versioning
 const apiV1Router = express.Router();
 
+// Environment endpoint (for checking if in dev/test mode)
+apiV1Router.get('/environment', (req, res) => {
+  res.json({
+    success: true,
+    nodeEnv: process.env.NODE_ENV || 'development'
+  });
+});
+
 // Mount v1 routes
 apiV1Router.use('/auth', authRoutes);
 apiV1Router.use('/affiliates', affiliateRoutes);

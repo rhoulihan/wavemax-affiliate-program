@@ -21,7 +21,6 @@ router.post('/register', [
   body('city').notEmpty().withMessage('City is required'),
   body('state').notEmpty().withMessage('State is required'),
   body('zipCode').notEmpty().withMessage('ZIP code is required'),
-  body('serviceFrequency').isIn(['weekly', 'biweekly', 'monthly', 'onDemand']).withMessage('Invalid service frequency'),
   body('username').notEmpty().withMessage('Username is required'),
   body('password').isLength({ min: 8 }).withMessage('Password must be at least 8 characters long')
 ], customerController.registerCustomer);
@@ -79,5 +78,12 @@ router.put('/:customerId/payment', authenticate, [
   body('expiryDate').notEmpty().withMessage('Expiry date is required'),
   body('billingZip').notEmpty().withMessage('Billing ZIP code is required')
 ], customerController.updatePaymentInfo);
+
+/**
+ * @route   DELETE /api/customers/:customerId/delete-all-data
+ * @desc    Delete all data for a customer (development/test only)
+ * @access  Private (self only, development/test environments)
+ */
+router.delete('/:customerId/delete-all-data', authenticate, authorize(['customer']), customerController.deleteCustomerData);
 
 module.exports = router;
