@@ -271,6 +271,10 @@ function setupFormSubmission(token) {
   const form = document.getElementById('pickupScheduleForm');
   if (!form) return;
   
+  // Get customer data for delivery fee
+  const customerStr = localStorage.getItem('currentCustomer');
+  const customer = customerStr ? JSON.parse(customerStr) : {};
+  
   form.addEventListener('submit', async function(e) {
     e.preventDefault();
     
@@ -313,17 +317,24 @@ function setupFormSubmission(token) {
         // Store order data for confirmation page
         const orderData = {
           orderId: data.orderId,
+          customerId: pickupData.customerId,
+          affiliateId: pickupData.affiliateId,
           pickupDate: pickupData.pickupDate,
           pickupTime: pickupData.pickupTime,
           deliveryDate: pickupData.deliveryDate,
           deliveryTime: pickupData.deliveryTime,
           estimatedSize: pickupData.estimatedSize,
-          specialInstructions: pickupData.specialPickupInstructions || 'None'
+          specialPickupInstructions: pickupData.specialPickupInstructions || '',
+          specialDeliveryInstructions: pickupData.specialDeliveryInstructions || '',
+          serviceNotes: pickupData.serviceNotes || '',
+          estimatedTotal: data.estimatedTotal,
+          deliveryFee: customer.affiliate?.deliveryFee || 5.99, // Get from customer's affiliate data
+          createdAt: new Date().toISOString()
         };
         
-        // Store in localStorage for the confirmation page
-        const storedOrders = JSON.parse(localStorage.getItem('wavemax_orders') || '[]');
-        storedOrders.push(orderData);
+        // Store in localStorage for the confirmation page - use object format expected by order-confirmation.js
+        const storedOrders = JSON.parse(localStorage.getItem('wavemax_orders') || '{}');
+        storedOrders[data.orderId] = orderData;
         localStorage.setItem('wavemax_orders', JSON.stringify(storedOrders));
         
         // Redirect to order confirmation page

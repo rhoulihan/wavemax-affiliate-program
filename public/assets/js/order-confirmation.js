@@ -120,7 +120,8 @@ document.addEventListener('DOMContentLoaded', function() {
   // Fetch affiliate information from API
   async function fetchAffiliateInfo(affiliateId) {
     try {
-      const response = await fetch(`/api/affiliates/${affiliateId}/public`);
+      const baseUrl = window.EMBED_CONFIG?.baseUrl || 'https://wavemax.promo';
+      const response = await fetch(`${baseUrl}/api/v1/affiliates/${affiliateId}/public`);
       if (response.ok) {
         const data = await response.json();
         if (data.success && data.affiliate) {
@@ -152,7 +153,8 @@ document.addEventListener('DOMContentLoaded', function() {
         return;
       }
 
-      const response = await fetch(`/api/orders/${orderId}`, {
+      const baseUrl = window.EMBED_CONFIG?.baseUrl || 'https://wavemax.promo';
+      const response = await fetch(`${baseUrl}/api/v1/orders/${orderId}`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
