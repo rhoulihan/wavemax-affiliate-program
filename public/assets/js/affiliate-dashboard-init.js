@@ -253,7 +253,7 @@ async function loadPickupRequests(affiliateId) {
       
       // Extract orders array from response
       const orders = data.orders || [];
-      const tbody = document.querySelector('#pickupsTable tbody');
+      const tbody = document.getElementById('ordersTableBody');
       tbody.innerHTML = '';
 
       if (orders.length === 0) {
@@ -316,7 +316,7 @@ async function loadCustomers(affiliateId) {
       
       // Extract customers array from response
       const customers = data.customers || [];
-      const tbody = document.querySelector('#customersTable tbody');
+      const tbody = document.getElementById('customersTableBody');
       tbody.innerHTML = '';
 
       if (customers.length === 0) {
