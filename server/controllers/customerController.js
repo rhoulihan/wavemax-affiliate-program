@@ -636,4 +636,56 @@ exports.updatePaymentInfo = async (req, res) => {
   }
 };
 
+/**
+ * Delete all data for a customer (development/test only)
+ */
+exports.deleteCustomerData = async (req, res) => {
+  try {
+    // Only allow in development or test environments
+    if (process.env.NODE_ENV !== 'development' && process.env.NODE_ENV !== 'test') {
+      return res.status(403).json({
+        success: false,
+        message: 'This operation is not allowed in production'
+      });
+    }
+
+    const { customerId } = req.user;
+
+    // Verify the customer exists and matches the logged-in user
+    const customer = await Customer.findOne({ customerId });
+    if (!customer || customer.customerId !== customerId) {
+      return res.status(403).json({
+        success: false,
+        message: 'Unauthorized'
+      });
+    }
+
+    // Delete all related data
+    // 1. Delete all orders for this customer
+    const deletedOrders = await Order.deleteMany({ customerId });
+
+    // 2. Delete all bags for this customer
+    const deletedBags = await Bag.deleteMany({ customerId });
+
+    // 3. Delete the customer
+    await Customer.deleteOne({ customerId });
+
+    res.status(200).json({
+      success: true,
+      message: 'All data has been deleted successfully',
+      deletedData: {
+        customer: 1,
+        orders: deletedOrders.deletedCount || 0,
+        bags: deletedBags.deletedCount || 0
+      }
+    });
+  } catch (error) {
+    console.error('Delete customer data error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'An error occurred while deleting data'
+    });
+  }
+};
+
 module.exports = exports;

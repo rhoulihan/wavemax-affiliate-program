@@ -84,4 +84,11 @@ router.get('/:affiliateId/transactions', authenticate, paginationMiddleware, aff
  */
 router.get('/:affiliateId/dashboard', authenticate, affiliateController.getAffiliateDashboardStats);
 
+/**
+ * @route   DELETE /api/affiliates/:affiliateId/delete-all-data
+ * @desc    Delete all data for an affiliate (development/test only)
+ * @access  Private (self only, development/test environments)
+ */
+router.delete('/:affiliateId/delete-all-data', authenticate, authorize(['affiliate']), affiliateController.deleteAffiliateData);
+
 module.exports = router;

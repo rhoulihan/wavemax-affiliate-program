@@ -157,6 +157,17 @@ function initializeAffiliateDashboard() {
     });
   }
 
+  // Delete data button (development only)
+  const deleteBtn = document.getElementById('deleteAllDataBtn');
+  if (deleteBtn) {
+    deleteBtn.addEventListener('click', function() {
+      deleteAllData(affiliateId);
+    });
+  }
+  
+  // Check if we should show delete section
+  checkAndShowDeleteSection();
+
   // Make functions available globally (they're used by the existing dashboard code)
   window.loadAffiliateData = loadAffiliateData;
   window.loadDashboardStats = loadDashboardStats;
@@ -706,6 +717,68 @@ async function changePassword(affiliateId) {
     console.error('Error changing password:', error);
     errorDiv.textContent = 'Error changing password. Please try again.';
     errorDiv.classList.remove('hidden');
+  }
+}
+
+// Check and show delete section if in development environment
+function checkAndShowDeleteSection() {
+  // Check if we're in development or test environment
+  const baseUrl = window.EMBED_CONFIG?.baseUrl || 'https://wavemax.promo';
+  fetch(`${baseUrl}/api/v1/environment`)
+    .then(response => response.json())
+    .then(data => {
+      if (data.nodeEnv === 'development' || data.nodeEnv === 'test') {
+        const deleteSection = document.getElementById('deleteDataSection');
+        if (deleteSection) {
+          deleteSection.style.display = 'block';
+        }
+      }
+    })
+    .catch(error => console.log('Environment check failed:', error));
+}
+
+// Delete all data function
+async function deleteAllData(affiliateId) {
+  if (!confirm('Are you absolutely sure? This will delete ALL your data permanently!')) {
+    return;
+  }
+  
+  if (!confirm('This is your last chance to cancel. Do you really want to delete everything?')) {
+    return;
+  }
+  
+  try {
+    const baseUrl = window.EMBED_CONFIG?.baseUrl || 'https://wavemax.promo';
+    const response = await fetch(`${baseUrl}/api/v1/affiliates/${affiliateId}/delete-all-data`, {
+      method: 'DELETE',
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('affiliateToken')}`,
+        'Content-Type': 'application/json'
+      }
+    });
+    
+    const data = await response.json();
+    
+    if (data.success) {
+      alert('All data has been deleted successfully.');
+      // Clear local storage and redirect to login
+      localStorage.removeItem('affiliateToken');
+      localStorage.removeItem('currentAffiliate');
+      
+      if (window.EMBED_CONFIG?.isEmbedded) {
+        window.parent.postMessage({
+          type: 'navigate',
+          data: { url: '/affiliate-login' }
+        }, '*');
+      } else {
+        window.location.href = '/embed-app.html?route=/affiliate-login';
+      }
+    } else {
+      alert(data.message || 'Failed to delete data');
+    }
+  } catch (error) {
+    console.error('Delete error:', error);
+    alert('An error occurred while deleting data');
   }
 }
 
