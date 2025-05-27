@@ -31,8 +31,8 @@ exports.registerCustomer = async (req, res) => {
       state,
       zipCode,
       deliveryInstructions,
-      serviceFrequency,
       specialInstructions,
+      affiliateSpecialInstructions,
       username,
       password,
       cardholderName,
@@ -80,8 +80,8 @@ exports.registerCustomer = async (req, res) => {
       state,
       zipCode,
       deliveryInstructions,
-      serviceFrequency,
       specialInstructions,
+      affiliateSpecialInstructions,
       username,
       passwordSalt: salt,
       passwordHash: hash,
@@ -244,7 +244,7 @@ exports.updateCustomerProfile = async (req, res) => {
     // Fields that can be updated
     const updatableFields = [
       'firstName', 'lastName', 'email', 'phone', 'address', 'city', 'state', 'zipCode',
-      'deliveryInstructions', 'serviceFrequency', 'specialInstructions', 'cardholderName'
+      'deliveryInstructions', 'specialInstructions', 'affiliateSpecialInstructions', 'cardholderName'
     ];
 
     // Update fields

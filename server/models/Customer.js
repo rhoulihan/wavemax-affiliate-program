@@ -20,12 +20,8 @@ const customerSchema = new mongoose.Schema({
   state: { type: String, required: true },
   zipCode: { type: String, required: true },
   deliveryInstructions: String,
-  serviceFrequency: {
-    type: String,
-    enum: ['weekly', 'biweekly', 'monthly', 'onDemand'],
-    required: true
-  },
   specialInstructions: String,
+  affiliateSpecialInstructions: String,
   username: { type: String, required: true, unique: true },
   passwordSalt: { type: String, required: true },
   passwordHash: { type: String, required: true },

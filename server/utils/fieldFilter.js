@@ -48,14 +48,14 @@ const fieldDefinitions = {
   customer: {
     public: ['customerId', 'firstName', 'lastName'],
     self: ['customerId', 'firstName', 'lastName', 'email', 'phone', 'address',
-      'city', 'state', 'zipCode', 'deliveryInstructions', 'serviceFrequency',
-      'specialInstructions', 'lastFourDigits',
+      'city', 'state', 'zipCode', 'deliveryInstructions',
+      'specialInstructions', 'affiliateSpecialInstructions', 'lastFourDigits',
       'savePaymentInfo', 'isActive', 'registrationDate', 'lastLogin'],
     affiliate: ['customerId', 'firstName', 'lastName', 'email', 'phone', 'address',
-      'city', 'state', 'zipCode', 'serviceFrequency', 'isActive', 'registrationDate'],
+      'city', 'state', 'zipCode', 'specialInstructions', 'affiliateSpecialInstructions', 'isActive', 'registrationDate'],
     admin: ['_id', 'customerId', 'affiliateId', 'firstName', 'lastName', 'email',
       'phone', 'address', 'city', 'state', 'zipCode', 'deliveryInstructions',
-      'serviceFrequency', 'specialInstructions',
+      'specialInstructions', 'affiliateSpecialInstructions',
       'username', 'lastFourDigits', 'billingZip', 'savePaymentInfo', 'isActive',
       'registrationDate', 'lastLogin']
   },
