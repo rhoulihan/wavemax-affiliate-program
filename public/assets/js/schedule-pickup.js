@@ -70,12 +70,32 @@ async function loadCustomerIntoForm(customer, token) {
     if (customerIdField) customerIdField.value = customer.customerId;
     if (customerNameField) customerNameField.textContent = `${customer.firstName} ${customer.lastName}`;
     if (customerPhoneField) customerPhoneField.textContent = customer.phone || customer.email;
-    if (customerAddressField) customerAddressField.textContent = 'Loading address...';
+    
+    // Set address if available
+    if (customerAddressField) {
+      if (customer.address && customer.city && customer.state && customer.zipCode) {
+        customerAddressField.textContent = `${customer.address}, ${customer.city}, ${customer.state} ${customer.zipCode}`;
+      } else {
+        customerAddressField.textContent = 'Loading address...';
+      }
+    }
 
     // Set affiliate ID
     if (affiliateIdField) affiliateIdField.value = customer.affiliateId;
+    
+    console.log('Customer affiliateId:', customer.affiliateId);
+    console.log('Customer data has affiliate info:', customer.affiliate);
+    
+    // Check if we already have affiliate data with delivery fee from login
+    if (customer.affiliate && customer.affiliate.deliveryFee) {
+      console.log('Using affiliate delivery fee from login data:', customer.affiliate.deliveryFee);
+      const deliveryFeeField = document.getElementById('deliveryFee');
+      if (deliveryFeeField) {
+        deliveryFeeField.textContent = `$${parseFloat(customer.affiliate.deliveryFee).toFixed(2)}`;
+      }
+    }
 
-    // Fetch full customer profile to get address and affiliate details
+    // Fetch full customer profile to get address and other details
     const baseUrl = window.EMBED_CONFIG?.baseUrl || 'https://wavemax.promo';
     const profileResponse = await fetch(`${baseUrl}/api/v1/customers/${customer.customerId}/profile`, {
       headers: {
@@ -85,9 +105,12 @@ async function loadCustomerIntoForm(customer, token) {
 
     if (profileResponse.ok) {
       const profileData = await profileResponse.json();
+      console.log('Customer profile response:', profileData);
       
       if (profileData.success && profileData.customer) {
         const fullCustomer = profileData.customer;
+        console.log('Full customer data:', fullCustomer);
+        console.log('Affiliate data in customer:', fullCustomer.affiliate);
         
         // Update address
         const address = `${fullCustomer.address}, ${fullCustomer.city}, ${fullCustomer.state} ${fullCustomer.zipCode}`;
@@ -98,14 +121,21 @@ async function loadCustomerIntoForm(customer, token) {
           document.getElementById('customerPhone').textContent = fullCustomer.phone;
         }
         
-        // Set delivery fee if available
-        if (fullCustomer.affiliate && fullCustomer.affiliate.deliveryFee) {
-          document.getElementById('deliveryFee').textContent = `$${parseFloat(fullCustomer.affiliate.deliveryFee).toFixed(2)}`;
-        } else {
-          // Try to fetch affiliate data directly
-          await fetchAffiliateDeliveryFee(customer.affiliateId);
+        // Set delivery fee if available and not already set
+        const deliveryFeeField = document.getElementById('deliveryFee');
+        if (deliveryFeeField && deliveryFeeField.textContent === '$0.00') {
+          if (fullCustomer.affiliate && fullCustomer.affiliate.deliveryFee) {
+            console.log('Setting delivery fee from customer profile:', fullCustomer.affiliate.deliveryFee);
+            deliveryFeeField.textContent = `$${parseFloat(fullCustomer.affiliate.deliveryFee).toFixed(2)}`;
+          } else {
+            console.log('No affiliate delivery fee in customer profile, fetching directly');
+            // Try to fetch affiliate data directly
+            await fetchAffiliateDeliveryFee(customer.affiliateId);
+          }
         }
       }
+    } else {
+      console.error('Customer profile request failed:', profileResponse.status, profileResponse.statusText);
     }
     
     // Setup date fields
