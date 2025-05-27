@@ -303,9 +303,11 @@ function setupFormSubmission(token) {
         body: JSON.stringify(pickupData)
       });
       
+      console.log('Order submission response status:', response.status);
       const data = await response.json();
+      console.log('Order submission response:', data);
       
-      if (data.success) {
+      if (response.ok && data.success) {
         console.log('Order created successfully:', data.orderId);
         
         // Store order data for confirmation page
@@ -327,6 +329,7 @@ function setupFormSubmission(token) {
         // Redirect to order confirmation page
         window.location.href = '/embed-app.html?route=/order-confirmation&id=' + data.orderId;
       } else {
+        console.error('Order submission failed:', data);
         alert(data.message || 'Failed to schedule pickup. Please try again.');
       }
     } catch (error) {
