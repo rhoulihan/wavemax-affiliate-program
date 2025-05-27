@@ -214,20 +214,24 @@ async function loadDashboardStats(affiliateId) {
     });
 
     if (response.ok) {
-      const stats = await response.json();
+      const data = await response.json();
+      console.log('Dashboard stats response:', data);
+      
+      // Extract stats from response
+      const stats = data.stats || data;
       
       // Update dashboard statistics with null checks
       const customersElement = document.getElementById('totalCustomers');
-      if (customersElement) customersElement.textContent = stats.totalCustomers || 0;
+      if (customersElement) customersElement.textContent = stats.customerCount || 0;
       
       const ordersElement = document.getElementById('activeOrders');
-      if (ordersElement) ordersElement.textContent = stats.activeOrders || 0;
+      if (ordersElement) ordersElement.textContent = stats.activeOrderCount || 0;
       
       const revenueElement = document.getElementById('monthlyRevenue');
-      if (revenueElement) revenueElement.textContent = `$${(stats.monthlyRevenue || 0).toFixed(2)}`;
+      if (revenueElement) revenueElement.textContent = `$${(stats.monthEarnings || 0).toFixed(2)}`;
       
       const paymentElement = document.getElementById('pendingPayment');
-      if (paymentElement) paymentElement.textContent = `$${(stats.pendingPayment || 0).toFixed(2)}`;
+      if (paymentElement) paymentElement.textContent = `$${(stats.pendingEarnings || 0).toFixed(2)}`;
     }
   } catch (error) {
     console.error('Error loading dashboard stats:', error);
@@ -236,38 +240,56 @@ async function loadDashboardStats(affiliateId) {
 
 async function loadPickupRequests(affiliateId) {
   try {
-    const response = await fetch(`/api/v1/affiliates/${affiliateId}/pickups`, {
+    const baseUrl = window.EMBED_CONFIG?.baseUrl || 'https://wavemax.promo';
+    const response = await fetch(`${baseUrl}/api/v1/affiliates/${affiliateId}/orders`, {
       headers: {
         'Authorization': `Bearer ${localStorage.getItem('affiliateToken')}`
       }
     });
 
     if (response.ok) {
-      const pickups = await response.json();
+      const data = await response.json();
+      console.log('Orders response:', data);
+      
+      // Extract orders array from response
+      const orders = data.orders || [];
       const tbody = document.querySelector('#pickupsTable tbody');
       tbody.innerHTML = '';
 
-      if (pickups.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="5" class="text-center py-4 text-gray-500">No pickup requests found</td></tr>';
+      if (orders.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" class="text-center py-4 text-gray-500">No orders found</td></tr>';
       } else {
-        pickups.forEach(pickup => {
+        orders.forEach(order => {
+          // Get customer info from order
+          const customerName = order.customer ? 
+            order.customer.name : 
+            'Unknown Customer';
+          
+          const address = order.customer ? 
+            order.customer.address : 
+            'No address';
+          
           const row = document.createElement('tr');
           row.className = 'border-b hover:bg-gray-50';
           row.innerHTML = `
-            <td class="py-3 px-4">${new Date(pickup.date).toLocaleDateString()}</td>
-            <td class="py-3 px-4">${pickup.customerName}</td>
-            <td class="py-3 px-4">${pickup.address}</td>
+            <td class="py-3 px-4">${new Date(order.pickupDate).toLocaleDateString()}</td>
+            <td class="py-3 px-4">${customerName}</td>
+            <td class="py-3 px-4">${address}</td>
             <td class="py-3 px-4">
               <span class="px-2 py-1 rounded text-xs ${
-                pickup.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                pickup.status === 'completed' ? 'bg-green-100 text-green-800' :
+                order.status === 'scheduled' ? 'bg-yellow-100 text-yellow-800' :
+                order.status === 'picked_up' ? 'bg-blue-100 text-blue-800' :
+                order.status === 'processing' ? 'bg-purple-100 text-purple-800' :
+                order.status === 'ready_for_delivery' ? 'bg-indigo-100 text-indigo-800' :
+                order.status === 'delivered' ? 'bg-green-100 text-green-800' :
+                order.status === 'cancelled' ? 'bg-red-100 text-red-800' :
                 'bg-gray-100 text-gray-800'
               }">
-                ${pickup.status}
+                ${order.status.replace(/_/g, ' ')}
               </span>
             </td>
             <td class="py-3 px-4">
-              <button class="text-blue-600 hover:underline">View Details</button>
+              <span class="text-gray-600">Order #${order.orderId}</span>
             </td>
           `;
           tbody.appendChild(row);
@@ -281,14 +303,19 @@ async function loadPickupRequests(affiliateId) {
 
 async function loadCustomers(affiliateId) {
   try {
-    const response = await fetch(`/api/v1/affiliates/${affiliateId}/customers`, {
+    const baseUrl = window.EMBED_CONFIG?.baseUrl || 'https://wavemax.promo';
+    const response = await fetch(`${baseUrl}/api/v1/affiliates/${affiliateId}/customers`, {
       headers: {
         'Authorization': `Bearer ${localStorage.getItem('affiliateToken')}`
       }
     });
 
     if (response.ok) {
-      const customers = await response.json();
+      const data = await response.json();
+      console.log('Customers response:', data);
+      
+      // Extract customers array from response
+      const customers = data.customers || [];
       const tbody = document.querySelector('#customersTable tbody');
       tbody.innerHTML = '';
 
@@ -299,15 +326,15 @@ async function loadCustomers(affiliateId) {
           const row = document.createElement('tr');
           row.className = 'border-b hover:bg-gray-50';
           row.innerHTML = `
-            <td class="py-3 px-4">${customer.name}</td>
+            <td class="py-3 px-4">${customer.firstName} ${customer.lastName}</td>
             <td class="py-3 px-4">${customer.email}</td>
             <td class="py-3 px-4">${customer.phone}</td>
             <td class="py-3 px-4">
               <span class="px-2 py-1 rounded text-xs ${
-                customer.status === 'active' ? 'bg-green-100 text-green-800' :
+                customer.isActive !== false ? 'bg-green-100 text-green-800' :
                 'bg-gray-100 text-gray-800'
               }">
-                ${customer.status}
+                ${customer.isActive !== false ? 'Active' : 'Inactive'}
               </span>
             </td>
           `;
