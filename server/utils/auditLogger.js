@@ -106,10 +106,11 @@ const logAuditEvent = (eventType, details, req = null) => {
       auditEntry.userRole = req.user.role;
       auditEntry.username = req.user.username || req.user.email;
 
-      if (req.user.affiliateId) {
+      // Only add affiliateId/customerId if not already in details
+      if (req.user.affiliateId && !auditEntry.affiliateId) {
         auditEntry.affiliateId = req.user.affiliateId;
       }
-      if (req.user.customerId) {
+      if (req.user.customerId && !auditEntry.customerId) {
         auditEntry.customerId = req.user.customerId;
       }
     }

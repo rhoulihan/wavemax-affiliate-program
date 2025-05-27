@@ -10,7 +10,8 @@ describe('Auth Middleware', () => {
   beforeEach(() => {
     req = {
       headers: {},
-      user: null
+      user: null,
+      get: jest.fn().mockReturnValue('Mozilla/5.0')
     };
     res = {
       status: jest.fn().mockReturnThis(),
@@ -68,7 +69,9 @@ describe('Auth Middleware', () => {
     it('should reject request with invalid token', () => {
       req.headers.authorization = 'Bearer invalidtoken';
       jwt.verify.mockImplementation(() => {
-        throw new Error('Invalid token');
+        const error = new Error('Invalid token');
+        error.name = 'JsonWebTokenError';
+        throw error;
       });
 
       authenticate(req, res, next);

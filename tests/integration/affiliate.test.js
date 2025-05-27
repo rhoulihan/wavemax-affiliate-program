@@ -42,7 +42,7 @@ describe('Affiliate API', () => {
 
   test('should register a new affiliate', async () => {
     const res = await request(app)
-      .post('/api/affiliates/register')
+      .post('/api/v1/affiliates/register')
       .send({
         firstName: 'New',
         lastName: 'Affiliate',
@@ -66,7 +66,7 @@ describe('Affiliate API', () => {
 
   test('should get affiliate profile', async () => {
     const res = await request(app)
-      .get(`/api/affiliates/${testAffiliate.affiliateId}`)
+      .get(`/api/v1/affiliates/${testAffiliate.affiliateId}`)
       .set('Authorization', `Bearer ${authToken}`);
 
     expect(res.statusCode).toEqual(200);
@@ -77,7 +77,7 @@ describe('Affiliate API', () => {
 
   test('should update affiliate profile', async () => {
     const res = await request(app)
-      .put(`/api/affiliates/${testAffiliate.affiliateId}`)
+      .put(`/api/v1/affiliates/${testAffiliate.affiliateId}`)
       .set('Authorization', `Bearer ${authToken}`)
       .send({
         firstName: 'Updated',
@@ -102,7 +102,7 @@ describe('Affiliate API', () => {
     );
 
     const res = await request(app)
-      .post('/api/auth/affiliate/login')
+      .post('/api/v1/auth/affiliate/login')
       .send({
         username: 'testaffiliate',
         password: 'testpassword'
@@ -154,7 +154,7 @@ describe('Affiliate API', () => {
     ]);
 
     const res = await request(app)
-      .get(`/api/affiliates/${testAffiliate.affiliateId}/customers`)
+      .get(`/api/v1/affiliates/${testAffiliate.affiliateId}/customers`)
       .set('Authorization', `Bearer ${authToken}`)
       .query({ page: 1, limit: 10 });
 
@@ -206,7 +206,7 @@ describe('Affiliate API', () => {
     ]);
 
     const res = await request(app)
-      .get(`/api/affiliates/${testAffiliate.affiliateId}/orders`)
+      .get(`/api/v1/affiliates/${testAffiliate.affiliateId}/orders`)
       .set('Authorization', `Bearer ${authToken}`)
       .query({ page: 1, limit: 10 });
 
@@ -243,7 +243,7 @@ describe('Affiliate API', () => {
     ]);
 
     const res = await request(app)
-      .get(`/api/affiliates/${testAffiliate.affiliateId}/transactions`)
+      .get(`/api/v1/affiliates/${testAffiliate.affiliateId}/transactions`)
       .set('Authorization', `Bearer ${authToken}`)
       .query({ page: 1, limit: 10 });
 
@@ -262,7 +262,7 @@ describe('Affiliate API', () => {
 
   test('should update payment information', async () => {
     const res = await request(app)
-      .put(`/api/affiliates/${testAffiliate.affiliateId}/payment`)
+      .put(`/api/v1/affiliates/${testAffiliate.affiliateId}/payment`)
       .set('Authorization', `Bearer ${authToken}`)
       .send({
         paymentMethod: 'check',
@@ -286,7 +286,7 @@ describe('Affiliate API', () => {
   test('should handle commission-related endpoints', async () => {
     // Test getting commission summary
     const res = await request(app)
-      .get(`/api/affiliates/${testAffiliate.affiliateId}/commission-summary`)
+      .get(`/api/v1/affiliates/${testAffiliate.affiliateId}/commission-summary`)
       .set('Authorization', `Bearer ${authToken}`);
 
     expect(res.statusCode).toEqual(200);

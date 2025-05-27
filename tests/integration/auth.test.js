@@ -13,7 +13,7 @@ describe('Authentication Integration Tests', () => {
     await RefreshToken.deleteMany({});
   });
 
-  describe('POST /api/auth/affiliate/login', () => {
+  describe('POST /api/v1/auth/affiliate/login', () => {
     it('should login affiliate with valid credentials', async () => {
       // Create test affiliate
       const { hash, salt } = encryptionUtil.hashPassword('password123');
@@ -37,7 +37,7 @@ describe('Authentication Integration Tests', () => {
       await affiliate.save();
 
       const response = await request(app)
-        .post('/api/auth/affiliate/login')
+        .post('/api/v1/auth/affiliate/login')
         .send({
           username: 'johndoe',
           password: 'password123'
@@ -77,7 +77,7 @@ describe('Authentication Integration Tests', () => {
       await affiliate.save();
 
       const response = await request(app)
-        .post('/api/auth/affiliate/login')
+        .post('/api/v1/auth/affiliate/login')
         .send({
           username: 'johndoe',
           password: 'wrongpassword'
@@ -92,7 +92,7 @@ describe('Authentication Integration Tests', () => {
 
     it('should fail with non-existent username', async () => {
       const response = await request(app)
-        .post('/api/auth/affiliate/login')
+        .post('/api/v1/auth/affiliate/login')
         .send({
           username: 'nonexistent',
           password: 'password123'
@@ -106,7 +106,7 @@ describe('Authentication Integration Tests', () => {
     });
   });
 
-  describe('POST /api/auth/customer/login', () => {
+  describe('POST /api/v1/auth/customer/login', () => {
     it('should login customer with valid credentials', async () => {
       // Create test affiliate
       const affiliate = new Affiliate({
@@ -149,7 +149,7 @@ describe('Authentication Integration Tests', () => {
       await customer.save();
 
       const response = await request(app)
-        .post('/api/auth/customer/login')
+        .post('/api/v1/auth/customer/login')
         .send({
           username: 'janesmith',
           password: 'customerpass'
@@ -173,7 +173,7 @@ describe('Authentication Integration Tests', () => {
     });
   });
 
-  describe('GET /api/auth/verify', () => {
+  describe('GET /api/v1/auth/verify', () => {
     it('should verify valid token', async () => {
       // Create affiliate and get token
       const { hash, salt } = encryptionUtil.hashPassword('password123');
@@ -197,7 +197,7 @@ describe('Authentication Integration Tests', () => {
       await affiliate.save();
 
       const loginResponse = await request(app)
-        .post('/api/auth/affiliate/login')
+        .post('/api/v1/auth/affiliate/login')
         .send({
           username: 'johndoe',
           password: 'password123'
@@ -206,7 +206,7 @@ describe('Authentication Integration Tests', () => {
       const token = loginResponse.body.token;
 
       const response = await request(app)
-        .get('/api/auth/verify')
+        .get('/api/v1/auth/verify')
         .set('Authorization', `Bearer ${token}`);
 
       expect(response.status).toBe(200);
@@ -223,7 +223,7 @@ describe('Authentication Integration Tests', () => {
 
     it('should fail with invalid token', async () => {
       const response = await request(app)
-        .get('/api/auth/verify')
+        .get('/api/v1/auth/verify')
         .set('Authorization', 'Bearer invalidtoken');
 
       expect(response.status).toBe(401);
@@ -235,7 +235,7 @@ describe('Authentication Integration Tests', () => {
 
     it('should fail with missing token', async () => {
       const response = await request(app)
-        .get('/api/auth/verify');
+        .get('/api/v1/auth/verify');
 
       expect(response.status).toBe(401);
       expect(response.body).toMatchObject({
@@ -245,7 +245,7 @@ describe('Authentication Integration Tests', () => {
     });
   });
 
-  describe('POST /api/auth/refresh-token', () => {
+  describe('POST /api/v1/auth/refresh-token', () => {
     it('should refresh token successfully', async () => {
       // Create affiliate and get refresh token
       const { hash, salt } = encryptionUtil.hashPassword('password123');
@@ -269,7 +269,7 @@ describe('Authentication Integration Tests', () => {
       await affiliate.save();
 
       const loginResponse = await request(app)
-        .post('/api/auth/affiliate/login')
+        .post('/api/v1/auth/affiliate/login')
         .send({
           username: 'johndoe',
           password: 'password123'
@@ -278,7 +278,7 @@ describe('Authentication Integration Tests', () => {
       const refreshToken = loginResponse.body.refreshToken;
 
       const response = await request(app)
-        .post('/api/auth/refresh-token')
+        .post('/api/v1/auth/refresh-token')
         .send({
           refreshToken: refreshToken
         });
@@ -294,7 +294,7 @@ describe('Authentication Integration Tests', () => {
 
     it('should fail with invalid refresh token', async () => {
       const response = await request(app)
-        .post('/api/auth/refresh-token')
+        .post('/api/v1/auth/refresh-token')
         .send({
           refreshToken: 'invalidrefreshtoken'
         });
@@ -318,7 +318,7 @@ describe('Authentication Integration Tests', () => {
       await expiredToken.save();
 
       const response = await request(app)
-        .post('/api/auth/refresh-token')
+        .post('/api/v1/auth/refresh-token')
         .send({
           refreshToken: 'expiredtoken'
         });
@@ -331,7 +331,7 @@ describe('Authentication Integration Tests', () => {
     });
   });
 
-  describe('POST /api/auth/logout', () => {
+  describe('POST /api/v1/auth/logout', () => {
     it('should logout successfully and blacklist tokens', async () => {
       // Create affiliate and get tokens
       const { hash, salt } = encryptionUtil.hashPassword('password123');
@@ -355,7 +355,7 @@ describe('Authentication Integration Tests', () => {
       await affiliate.save();
 
       const loginResponse = await request(app)
-        .post('/api/auth/affiliate/login')
+        .post('/api/v1/auth/affiliate/login')
         .send({
           username: 'johndoe',
           password: 'password123'
@@ -366,7 +366,7 @@ describe('Authentication Integration Tests', () => {
 
       // Logout
       const logoutResponse = await request(app)
-        .post('/api/auth/logout')
+        .post('/api/v1/auth/logout')
         .set('Authorization', `Bearer ${token}`)
         .send({
           refreshToken: refreshToken
@@ -380,7 +380,7 @@ describe('Authentication Integration Tests', () => {
 
       // Verify token is blacklisted
       const verifyResponse = await request(app)
-        .get('/api/auth/verify')
+        .get('/api/v1/auth/verify')
         .set('Authorization', `Bearer ${token}`);
 
       expect(verifyResponse.status).toBe(401);
@@ -391,7 +391,7 @@ describe('Authentication Integration Tests', () => {
 
       // Verify refresh token is revoked
       const refreshResponse = await request(app)
-        .post('/api/auth/refresh-token')
+        .post('/api/v1/auth/refresh-token')
         .send({
           refreshToken: refreshToken
         });
@@ -425,7 +425,7 @@ describe('Authentication Integration Tests', () => {
       for (let i = 0; i < 6; i++) {
         attempts.push(
           request(app)
-            .post('/api/auth/affiliate/login')
+            .post('/api/v1/auth/affiliate/login')
             .send({
               username: 'johndoe',
               password: 'wrongpassword'
@@ -453,7 +453,7 @@ describe('Authentication Integration Tests', () => {
       for (let i = 0; i < 11; i++) {
         attempts.push(
           request(app)
-            .post('/api/auth/refresh-token')
+            .post('/api/v1/auth/refresh-token')
             .send({
               refreshToken: 'invalidtoken'
             })
@@ -496,7 +496,7 @@ describe('Authentication Integration Tests', () => {
       await affiliate.save();
 
       const loginResponse = await request(app)
-        .post('/api/auth/affiliate/login')
+        .post('/api/v1/auth/affiliate/login')
         .send({
           username: 'johndoe',
           password: 'password123'
@@ -509,7 +509,7 @@ describe('Authentication Integration Tests', () => {
       for (let i = 0; i < 5; i++) {
         concurrentRequests.push(
           request(app)
-            .post('/api/auth/refresh-token')
+            .post('/api/v1/auth/refresh-token')
             .send({
               refreshToken: refreshToken
             })
@@ -568,7 +568,7 @@ describe('Authentication Integration Tests', () => {
 
       // Login and get first token
       const login1 = await request(app)
-        .post('/api/auth/affiliate/login')
+        .post('/api/v1/auth/affiliate/login')
         .send({
           username: 'johndoe',
           password: 'password123'
@@ -579,7 +579,7 @@ describe('Authentication Integration Tests', () => {
 
       // Use refresh token to get second token
       const refresh1 = await request(app)
-        .post('/api/auth/refresh-token')
+        .post('/api/v1/auth/refresh-token')
         .send({
           refreshToken: refreshToken1
         });
@@ -588,11 +588,11 @@ describe('Authentication Integration Tests', () => {
 
       // Both tokens should work before logout
       const verify1Before = await request(app)
-        .get('/api/auth/verify')
+        .get('/api/v1/auth/verify')
         .set('Authorization', `Bearer ${token1}`);
 
       const verify2Before = await request(app)
-        .get('/api/auth/verify')
+        .get('/api/v1/auth/verify')
         .set('Authorization', `Bearer ${token2}`);
 
       expect(verify1Before.status).toBe(200);
@@ -600,7 +600,7 @@ describe('Authentication Integration Tests', () => {
 
       // Logout with the second token
       await request(app)
-        .post('/api/auth/logout')
+        .post('/api/v1/auth/logout')
         .set('Authorization', `Bearer ${token2}`)
         .send({
           refreshToken: refresh1.body.refreshToken
@@ -608,11 +608,11 @@ describe('Authentication Integration Tests', () => {
 
       // Both tokens should be blacklisted after logout
       const verify1After = await request(app)
-        .get('/api/auth/verify')
+        .get('/api/v1/auth/verify')
         .set('Authorization', `Bearer ${token1}`);
 
       const verify2After = await request(app)
-        .get('/api/auth/verify')
+        .get('/api/v1/auth/verify')
         .set('Authorization', `Bearer ${token2}`);
 
       expect(verify1After.status).toBe(401);

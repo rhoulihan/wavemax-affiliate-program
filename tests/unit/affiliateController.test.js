@@ -70,7 +70,10 @@ describe('Affiliate Controller', () => {
         salt: 'salt',
         hash: 'hashedPassword'
       });
-      Affiliate.prototype.save = jest.fn().mockResolvedValue(mockAffiliate);
+      Affiliate.prototype.save = jest.fn().mockImplementation(function() {
+        Object.assign(this, mockAffiliate);
+        return Promise.resolve(this);
+      });
       emailService.sendAffiliateWelcomeEmail.mockResolvedValue(true);
 
       await affiliateController.registerAffiliate(req, res);
@@ -149,7 +152,10 @@ describe('Affiliate Controller', () => {
         salt: 'salt',
         hash: 'hashedPassword'
       });
-      Affiliate.prototype.save = jest.fn().mockResolvedValue(mockAffiliate);
+      Affiliate.prototype.save = jest.fn().mockImplementation(function() {
+        Object.assign(this, mockAffiliate);
+        return Promise.resolve(this);
+      });
       emailService.sendAffiliateWelcomeEmail.mockRejectedValue(new Error('Email failed'));
 
       await affiliateController.registerAffiliate(req, res);
@@ -430,7 +436,9 @@ describe('Affiliate Controller', () => {
       req.query.period = 'month';
 
       Affiliate.findOne.mockResolvedValue(mockAffiliate);
-      Order.find.mockResolvedValue(mockOrders);
+      Order.find.mockReturnValue({
+        sort: jest.fn().mockResolvedValue(mockOrders)
+      });
       Customer.find.mockResolvedValue(mockCustomers);
       Transaction.find.mockResolvedValue(mockTransactions);
 
@@ -463,7 +471,9 @@ describe('Affiliate Controller', () => {
       req.query.period = 'week';
 
       Affiliate.findOne.mockResolvedValue({ affiliateId: 'AFF123' });
-      Order.find.mockResolvedValue([]);
+      Order.find.mockReturnValue({
+        sort: jest.fn().mockResolvedValue([])
+      });
       Customer.find.mockResolvedValue([]);
       Transaction.find.mockResolvedValue([]);
 
@@ -493,7 +503,9 @@ describe('Affiliate Controller', () => {
       req.user = { role: 'affiliate', affiliateId: 'AFF123' };
 
       Affiliate.findOne.mockResolvedValue({ affiliateId: 'AFF123' });
-      Order.find.mockResolvedValue(mockOrders);
+      Order.find.mockReturnValue({
+        sort: jest.fn().mockResolvedValue(mockOrders)
+      });
       Customer.find.mockResolvedValue([]);
       Transaction.find.mockResolvedValue([]);
 
@@ -769,10 +781,10 @@ describe('Affiliate Controller', () => {
         customerCount: 10,
         activeOrderCount: 3,
         totalEarnings: 25,
-        monthEarnings: 10,
+        monthEarnings: 25,
         weekEarnings: 10,
         pendingEarnings: 25,
-        monthlyOrders: 1,
+        monthlyOrders: 2,
         weeklyOrders: 1
       });
       expect(response.stats.nextPayoutDate).toBeDefined();

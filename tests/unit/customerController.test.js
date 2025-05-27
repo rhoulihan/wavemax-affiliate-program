@@ -19,28 +19,7 @@ jest.mock('../../server/utils/encryption', () => ({
   decryptData: jest.fn()
 }));
 jest.mock('../../server/utils/emailService');
-jest.mock('../../server/utils/fieldFilter', () => ({
-  getFilteredData: jest.fn((type, data, role, options) => {
-    // Always return an object, never undefined
-    if (!data) return {};
-
-    // Return appropriate filtered data based on type
-    if (type === 'customer') {
-      return { ...data };
-    }
-    if (type === 'affiliate') {
-      return {
-        affiliateId: data.affiliateId,
-        name: `${data.firstName} ${data.lastName}`,
-        deliveryFee: data.deliveryFee
-      };
-    }
-    if (type === 'bag' && Array.isArray(data)) {
-      return data;
-    }
-    return data;
-  })
-}));
+jest.mock('../../server/utils/fieldFilter');
 
 describe('Customer Controller', () => {
   let req, res;
@@ -213,6 +192,24 @@ describe('Customer Controller', () => {
       Customer.findOne.mockResolvedValue(mockCustomer);
       Affiliate.findOne.mockResolvedValue(mockAffiliate);
       Bag.find.mockResolvedValue(mockBags);
+
+      // Mock getFilteredData to return expected data
+      getFilteredData.mockImplementation((type, data, role, options) => {
+        if (type === 'customer') {
+          return mockCustomerData;
+        }
+        if (type === 'affiliate') {
+          return {
+            affiliateId: mockAffiliateData.affiliateId,
+            name: `${mockAffiliateData.firstName} ${mockAffiliateData.lastName}`,
+            deliveryFee: mockAffiliateData.deliveryFee
+          };
+        }
+        if (type === 'bag') {
+          return data;
+        }
+        return data;
+      });
 
       await customerController.getCustomerProfile(req, res);
 
