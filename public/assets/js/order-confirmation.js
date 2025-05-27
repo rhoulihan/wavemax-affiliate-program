@@ -60,17 +60,30 @@ function initializeOrderConfirmation() {
     fetchOrderFromAPI(orderId);
   }
 
+  // Helper function to safely set element text
+  function setElementText(elementId, text) {
+    const element = document.getElementById(elementId);
+    if (element) {
+      element.textContent = text;
+    } else {
+      console.warn(`Element with id '${elementId}' not found`);
+    }
+  }
+
   // Function to display order data
   function displayOrderData(order) {
     console.log('Displaying order data:', order);
     
     // Set order date
     const orderDate = new Date(order.createdAt || Date.now());
-    document.getElementById('orderDate').textContent = orderDate.toLocaleDateString() + ' ' + orderDate.toLocaleTimeString();
+    const orderDateElement = document.getElementById('orderDate');
+    if (orderDateElement) {
+      orderDateElement.textContent = orderDate.toLocaleDateString() + ' ' + orderDate.toLocaleTimeString();
+    }
 
     // Set pickup details
     const pickupDate = new Date(order.pickupDate);
-    document.getElementById('pickupDate').textContent = pickupDate.toLocaleDateString();
+    setElementText('pickupDate', pickupDate.toLocaleDateString());
 
     let pickupTimeText = 'Not specified';
     if (order.pickupTime === 'morning') {
@@ -123,14 +136,20 @@ function initializeOrderConfirmation() {
     document.getElementById('deliveryFee').textContent = `$${parseFloat(deliveryFee).toFixed(2)}`;
 
     // Update order link with affiliate ID
-    document.getElementById('scheduleAnotherBtn').href = `/schedule-pickup?affiliate=${affiliateId}`;
+    const scheduleAnotherBtn = document.getElementById('scheduleAnotherBtn');
+    if (scheduleAnotherBtn) {
+      scheduleAnotherBtn.href = `/schedule-pickup?affiliate=${affiliateId}`;
+    }
 
     // Set view orders link to customer dashboard
     const customerId = order.customerId;
-    if (customerId) {
-      document.getElementById('viewOrdersBtn').href = '/customer-dashboard';
-    } else {
-      document.getElementById('viewOrdersBtn').href = '/customer-login';
+    const viewOrdersBtn = document.getElementById('viewOrdersBtn');
+    if (viewOrdersBtn) {
+      if (customerId) {
+        viewOrdersBtn.href = '/customer-dashboard';
+      } else {
+        viewOrdersBtn.href = '/customer-login';
+      }
     }
 
     // Use the estimated total from the order data if available
