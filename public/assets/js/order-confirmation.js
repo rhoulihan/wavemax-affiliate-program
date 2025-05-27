@@ -138,7 +138,8 @@ function initializeOrderConfirmation() {
     // Update order link with affiliate ID
     const scheduleAnotherBtn = document.getElementById('scheduleAnotherBtn');
     if (scheduleAnotherBtn) {
-      scheduleAnotherBtn.href = `/schedule-pickup?affiliate=${affiliateId}`;
+      // Use the embed routing format
+      scheduleAnotherBtn.href = `/embed-app.html?route=/schedule-pickup&affid=${affiliateId}`;
     }
 
     // Set view orders link to customer dashboard
@@ -146,9 +147,9 @@ function initializeOrderConfirmation() {
     const viewOrdersBtn = document.getElementById('viewOrdersBtn');
     if (viewOrdersBtn) {
       if (customerId) {
-        viewOrdersBtn.href = '/customer-dashboard';
+        viewOrdersBtn.href = '/embed-app.html?route=/customer-dashboard';
       } else {
-        viewOrdersBtn.href = '/customer-login';
+        viewOrdersBtn.href = '/embed-app.html?route=/customer-login';
       }
     }
 
