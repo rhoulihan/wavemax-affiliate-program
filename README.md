@@ -20,12 +20,34 @@ The WaveMAX Affiliate Program enables individuals to register as affiliates, onb
 
 ## Recent Improvements (May 2025)
 
+### Customer Registration Simplification
+- **Removed Schedule Preferences**: Simplified registration by removing preferred day/time selection
+- **Service Frequency Removed**: Eliminated service frequency requirement from registration
+- **Enhanced Special Instructions**: Added separate fields for laundry and affiliate-specific instructions
+- **Updated Pricing Display**: Changed to "$1.25/lb (includes service fees)" for clarity
+
+### Development Tools
+- **Delete Data Functionality**: Added delete all data feature for development/test environments
+  - Available in affiliate settings and customer profile sections
+  - Only visible when NODE_ENV is development or test
+  - Requires double confirmation before deletion
+  - Affiliates can delete all related customers, orders, bags, and transactions
+  - Customers can delete their account and all related data
+- **Environment Endpoint**: Added `/api/v1/environment` endpoint for checking current environment
+
+### Email Service Enhancements
+- **Microsoft Exchange Support**: Added support for Microsoft Exchange Server email provider
+  - Compatible with Exchange 2013, 2016, 2019, and Exchange Online
+  - Support for Office 365 SMTP configuration
+  - Configurable SSL certificate validation for development environments
+
 ### Testing & Quality Assurance
 - **Integration Test Fixes**: Updated all integration tests to properly handle CSRF tokens
 - **Test Coverage**: Skipped tests for non-existent endpoints with TODO markers for future implementation
 - **Rate Limiting**: Fixed rate limiting tests to match actual configuration (20 attempts)
 - **Helper Scripts**: Added test maintenance utilities for CSRF token management
 - **API Server Improvements**: Added informative root endpoint and blocked WordPress scanning attempts
+- **Delete Functionality Tests**: Added comprehensive unit and integration tests for data deletion
 
 ## Recent Improvements (January 2025)
 

@@ -112,13 +112,13 @@ const corsOptions = {
     const allowedOrigins = process.env.CORS_ORIGIN
       ? process.env.CORS_ORIGIN.split(',').map(o => o.trim())
       : ['http://localhost:3000'];
-    
+
     // Add WaveMAX Laundry domains to allowed origins
     const wavemaxDomains = [
       'https://www.wavemaxlaundry.com',
       'https://wavemaxlaundry.com'
     ];
-    
+
     const allAllowedOrigins = [...allowedOrigins, ...wavemaxDomains];
 
     // Allow requests with no origin (like mobile apps or Postman)
@@ -363,11 +363,11 @@ app.use((req, res, next) => {
     'xmlrpc',
     'wlwmanifest'
   ];
-  
-  const isBlocked = blockedPaths.some(path => 
+
+  const isBlocked = blockedPaths.some(path =>
     req.path.toLowerCase().includes(path)
   );
-  
+
   if (isBlocked) {
     // Return 404 to discourage scanners
     return res.status(404).json({
@@ -375,7 +375,7 @@ app.use((req, res, next) => {
       message: 'Not found'
     });
   }
-  
+
   next();
 });
 

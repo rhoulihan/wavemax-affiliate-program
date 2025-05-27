@@ -24,13 +24,13 @@ exports.authenticate = async (req, res, next) => {
   try {
     // Get the token from the request headers
     let token;
-    
+
     // Check Authorization header with Bearer token
     const authHeader = req.headers.authorization;
     if (authHeader && authHeader.startsWith('Bearer ')) {
       token = authHeader.split(' ')[1];
     }
-    
+
     // Check x-auth-token header as fallback
     if (!token && req.headers['x-auth-token']) {
       token = req.headers['x-auth-token'];
@@ -62,7 +62,7 @@ exports.authenticate = async (req, res, next) => {
         message: 'Invalid token'
       });
     }
-    
+
     if (error.name === 'TokenExpiredError') {
       return res.status(401).json({
         success: false,
@@ -86,7 +86,7 @@ exports.authenticate = async (req, res, next) => {
 exports.authorize = (...roles) => {
   // If first argument is an array, use it; otherwise use all arguments
   const allowedRoles = Array.isArray(roles[0]) ? roles[0] : roles;
-  
+
   return (req, res, next) => {
     if (!req.user) {
       return res.status(403).json({

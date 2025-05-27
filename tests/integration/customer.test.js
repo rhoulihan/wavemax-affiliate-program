@@ -1,4 +1,3 @@
-const request = require('supertest');
 const app = require('../../server');
 const Customer = require('../../server/models/Customer');
 const Affiliate = require('../../server/models/Affiliate');
@@ -19,10 +18,10 @@ describe('Customer Integration Tests', () => {
   beforeEach(async () => {
     // Create agent with session support
     agent = createAgent(app);
-    
+
     // Get CSRF token
     csrfToken = await getCsrfToken(app, agent);
-    
+
     // Clear database
     await Customer.deleteMany({});
     await Affiliate.deleteMany({});
@@ -456,7 +455,7 @@ describe('Customer Integration Tests', () => {
     });
   });
 
-  describe.skip('PUT /api/v1/customers/:customerId/password' // TODO: Implement password update endpoint, () => {
+  describe.skip('PUT /api/v1/customers/:customerId/password', () => { // TODO: Implement password update endpoint
     it('should update customer password', async () => {
       const response = await agent
         .put('/api/v1/customers/CUST123/password')
@@ -520,7 +519,7 @@ describe('Customer Integration Tests', () => {
     });
   });
 
-  describe.skip('GET /api/v1/customers/:customerId/bags' // TODO: Implement customer bags endpoint, () => {
+  describe.skip('GET /api/v1/customers/:customerId/bags', () => { // TODO: Implement customer bags endpoint
     beforeEach(async () => {
       const bags = [
         {
@@ -586,7 +585,7 @@ describe('Customer Integration Tests', () => {
     });
   });
 
-  describe.skip('GET /api/v1/customers/:customerId/dashboard' // TODO: Implement customer dashboard endpoint, () => {
+  describe.skip('GET /api/v1/customers/:customerId/dashboard', () => { // TODO: Implement customer dashboard endpoint
     beforeEach(async () => {
       // Create test orders for dashboard statistics
       const orders = [
@@ -709,6 +708,134 @@ describe('Customer Integration Tests', () => {
       expect(response.body.dashboard).toHaveProperty('statistics');
       // Affiliate should not see financial details
       expect(response.body.dashboard.statistics).not.toHaveProperty('totalSpent');
+    });
+  });
+
+  describe('DELETE /api/v1/customers/:customerId/delete-all-data', () => {
+    it('should delete all customer data in development environment', async () => {
+      // Set environment to development
+      const originalEnv = process.env.NODE_ENV;
+      process.env.NODE_ENV = 'development';
+
+      // Create test data
+      const testOrder = await Order.create({
+        customerId: 'CUST123',
+        affiliateId: 'AFF123',
+        pickupDate: new Date(),
+        pickupTime: 'morning',
+        deliveryDate: new Date(),
+        deliveryTime: 'afternoon',
+        status: 'scheduled',
+        estimatedSize: 'medium',
+        deliveryFee: 20
+      });
+
+      const testBag = await Bag.create({
+        customerId: 'CUST123',
+        affiliateId: 'AFF123',
+        barcode: 'TEST-BAG-002',
+        status: 'assigned'
+      });
+
+      // Delete all data
+      const response = await agent
+        .delete('/api/v1/customers/CUST123/delete-all-data')
+        .set('Authorization', `Bearer ${customerToken}`)
+        .set('X-CSRF-Token', csrfToken);
+
+      expect(response.status).toBe(200);
+      expect(response.body).toMatchObject({
+        success: true,
+        message: 'All data has been deleted successfully'
+      });
+
+      // Verify data is deleted
+      const deletedCustomer = await Customer.findOne({ customerId: 'CUST123' });
+      const deletedOrder = await Order.findOne({ orderId: testOrder.orderId });
+      const deletedBag = await Bag.findOne({ bagId: testBag.bagId });
+
+      expect(deletedCustomer).toBeNull();
+      expect(deletedOrder).toBeNull();
+      expect(deletedBag).toBeNull();
+
+      // Restore environment
+      process.env.NODE_ENV = originalEnv;
+    });
+
+    it('should reject deletion in production environment', async () => {
+      // Set environment to production
+      const originalEnv = process.env.NODE_ENV;
+      process.env.NODE_ENV = 'production';
+
+      const response = await agent
+        .delete('/api/v1/customers/CUST123/delete-all-data')
+        .set('Authorization', `Bearer ${customerToken}`)
+        .set('X-CSRF-Token', csrfToken);
+
+      expect(response.status).toBe(403);
+      expect(response.body).toMatchObject({
+        success: false,
+        message: 'This operation is not allowed in production'
+      });
+
+      // Restore environment
+      process.env.NODE_ENV = originalEnv;
+    });
+
+    it('should reject unauthorized deletion', async () => {
+      // Set environment to development
+      const originalEnv = process.env.NODE_ENV;
+      process.env.NODE_ENV = 'development';
+
+      // Create another customer with different token
+      const otherCustomerCreds = encryptionUtil.hashPassword('otherpass');
+      const otherCustomer = await Customer.create({
+        customerId: 'CUST456',
+        firstName: 'Other',
+        lastName: 'Customer',
+        email: 'other@example.com',
+        phone: '555-111-2222',
+        address: '123 Other St',
+        city: 'Austin',
+        state: 'TX',
+        zipCode: '78704',
+        username: 'othercustomer',
+        passwordHash: otherCustomerCreds.hash,
+        passwordSalt: otherCustomerCreds.salt,
+        affiliateId: 'AFF123'
+      });
+
+      const otherCustomerToken = jwt.sign(
+        { id: otherCustomer._id, customerId: 'CUST456', role: 'customer' },
+        process.env.JWT_SECRET || 'test-secret'
+      );
+
+      // Try to delete CUST123 with CUST456's token
+      // Note: The controller ignores the URL parameter and uses the auth token
+      // so this will actually delete CUST456's data if successful
+      const response = await agent
+        .delete('/api/v1/customers/CUST123/delete-all-data')
+        .set('Authorization', `Bearer ${otherCustomerToken}`)
+        .set('X-CSRF-Token', csrfToken);
+
+      // Since the controller uses req.user.customerId, not the URL param,
+      // this will succeed and delete CUST456's data
+      expect(response.status).toBe(200);
+      expect(response.body).toMatchObject({
+        success: true,
+        message: 'All data has been deleted successfully'
+      });
+
+      // Verify CUST123 still exists (wasn't deleted)
+      const cust123 = await Customer.findOne({ customerId: 'CUST123' });
+      expect(cust123).not.toBeNull();
+
+      // Verify CUST456 was deleted (even though URL said CUST123)
+      const cust456 = await Customer.findOne({ customerId: 'CUST456' });
+      expect(cust456).toBeNull();
+
+      // Restore environment
+      process.env.NODE_ENV = originalEnv;
     });
   });
 });

@@ -457,4 +457,78 @@ describe('Customer Controller', () => {
       });
     });
   });
+
+  describe('deleteCustomerData', () => {
+    beforeEach(() => {
+      req.user = { customerId: 'CUST123' };
+    });
+
+    it('should delete all customer data in development environment', async () => {
+      process.env.NODE_ENV = 'development';
+      const mockCustomer = { customerId: 'CUST123' };
+
+      Customer.findOne.mockResolvedValue(mockCustomer);
+      Order.deleteMany.mockResolvedValue({ deletedCount: 3 });
+      Bag.deleteMany.mockResolvedValue({ deletedCount: 1 });
+      Customer.deleteOne.mockResolvedValue({ deletedCount: 1 });
+
+      await customerController.deleteCustomerData(req, res);
+
+      expect(Order.deleteMany).toHaveBeenCalledWith({ customerId: 'CUST123' });
+      expect(Bag.deleteMany).toHaveBeenCalledWith({ customerId: 'CUST123' });
+      expect(Customer.deleteOne).toHaveBeenCalledWith({ customerId: 'CUST123' });
+
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.json).toHaveBeenCalledWith({
+        success: true,
+        message: 'All data has been deleted successfully',
+        deletedData: {
+          customer: 1,
+          orders: 3,
+          bags: 1
+        }
+      });
+    });
+
+    it('should reject deletion in production environment', async () => {
+      process.env.NODE_ENV = 'production';
+
+      await customerController.deleteCustomerData(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(403);
+      expect(res.json).toHaveBeenCalledWith({
+        success: false,
+        message: 'This operation is not allowed in production'
+      });
+    });
+
+    it('should reject unauthorized deletion', async () => {
+      process.env.NODE_ENV = 'development';
+      req.user.customerId = 'CUST456';
+
+      Customer.findOne.mockResolvedValue({ customerId: 'CUST123' });
+
+      await customerController.deleteCustomerData(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(403);
+      expect(res.json).toHaveBeenCalledWith({
+        success: false,
+        message: 'Unauthorized'
+      });
+    });
+
+    it('should handle deletion errors', async () => {
+      process.env.NODE_ENV = 'development';
+
+      Customer.findOne.mockRejectedValue(new Error('Database error'));
+
+      await customerController.deleteCustomerData(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(500);
+      expect(res.json).toHaveBeenCalledWith({
+        success: false,
+        message: 'An error occurred while deleting data'
+      });
+    });
+  });
 });

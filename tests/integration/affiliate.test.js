@@ -1,6 +1,8 @@
-const request = require('supertest');
 const app = require('../../server');
 const Affiliate = require('../../server/models/Affiliate');
+const Customer = require('../../server/models/Customer');
+const Order = require('../../server/models/Order');
+const Bag = require('../../server/models/Bag');
 const jwt = require('jsonwebtoken');
 const { getCsrfToken, createAgent } = require('../helpers/csrfHelper');
 
@@ -13,10 +15,10 @@ describe('Affiliate API', () => {
   beforeEach(async () => {
     // Create agent with session support
     agent = createAgent(app);
-    
+
     // Get CSRF token
     csrfToken = await getCsrfToken(app, agent);
-    
+
     // Create a test affiliate
     testAffiliate = new Affiliate({
       firstName: 'Test',
@@ -271,7 +273,7 @@ describe('Affiliate API', () => {
     });
   });
 
-  test.skip('should update payment information' // TODO: Implement PUT /api/v1/affiliates/:affiliateId/payment endpoint, async () => {
+  test.skip('should update payment information', async () => { // TODO: Implement PUT /api/v1/affiliates/:affiliateId/payment endpoint
     const res = await agent
       .put(`/api/v1/affiliates/${testAffiliate.affiliateId}/payment`)
       .set('Authorization', `Bearer ${authToken}`)
@@ -295,7 +297,7 @@ describe('Affiliate API', () => {
     expect(updatedAffiliate.preferredPaymentDay).toBe('friday');
   });
 
-  test.skip('should handle commission-related endpoints' // TODO: Implement GET /api/v1/affiliates/:affiliateId/commission-summary endpoint, async () => {
+  test.skip('should handle commission-related endpoints', async () => { // TODO: Implement GET /api/v1/affiliates/:affiliateId/commission-summary endpoint
     // Test getting commission summary
     const res = await agent
       .get(`/api/v1/affiliates/${testAffiliate.affiliateId}/commission-summary`)
@@ -309,5 +311,88 @@ describe('Affiliate API', () => {
     expect(res.body.summary).toHaveProperty('yearToDate');
     expect(res.body.summary).toHaveProperty('lifetime');
     expect(res.body.summary).toHaveProperty('pendingPayouts');
+  });
+
+  test('Delete all affiliate data (development only)', async () => {
+    // Set environment to development
+    const originalEnv = process.env.NODE_ENV;
+    process.env.NODE_ENV = 'development';
+
+    // Create some test data
+    const testCustomer = await Customer.create({
+      affiliateId: testAffiliate.affiliateId,
+      firstName: 'Test',
+      lastName: 'Customer',
+      email: 'testcustomer@example.com',
+      phone: '555-0123',
+      address: '123 Test St',
+      city: 'Austin',
+      state: 'TX',
+      zipCode: '78701',
+      username: 'testcustomer',
+      passwordSalt: 'salt',
+      passwordHash: 'hash'
+    });
+
+    const testOrder = await Order.create({
+      customerId: testCustomer.customerId,
+      affiliateId: testAffiliate.affiliateId,
+      pickupDate: new Date(),
+      pickupTime: 'morning',
+      deliveryDate: new Date(),
+      deliveryTime: 'afternoon',
+      status: 'scheduled',
+      estimatedSize: 'medium',
+      deliveryFee: 20
+    });
+
+    const testBag = await Bag.create({
+      customerId: testCustomer.customerId,
+      affiliateId: testAffiliate.affiliateId,
+      barcode: 'TEST-BAG-001',
+      status: 'assigned'
+    });
+
+    // Delete all data
+    const res = await agent
+      .delete(`/api/v1/affiliates/${testAffiliate.affiliateId}/delete-all-data`)
+      .set('Authorization', `Bearer ${authToken}`)
+      .set('X-CSRF-Token', csrfToken);
+
+    expect(res.statusCode).toEqual(200);
+    expect(res.body).toHaveProperty('success', true);
+    expect(res.body).toHaveProperty('message', 'All data has been deleted successfully');
+
+    // Verify data is deleted
+    const deletedAffiliate = await Affiliate.findOne({ affiliateId: testAffiliate.affiliateId });
+    const deletedCustomer = await Customer.findOne({ customerId: testCustomer.customerId });
+    const deletedOrder = await Order.findOne({ orderId: testOrder.orderId });
+    const deletedBag = await Bag.findOne({ bagId: testBag.bagId });
+
+    expect(deletedAffiliate).toBeNull();
+    expect(deletedCustomer).toBeNull();
+    expect(deletedOrder).toBeNull();
+    expect(deletedBag).toBeNull();
+
+    // Restore environment
+    process.env.NODE_ENV = originalEnv;
+  });
+
+  test('Reject delete in production environment', async () => {
+    // Set environment to production
+    const originalEnv = process.env.NODE_ENV;
+    process.env.NODE_ENV = 'production';
+
+    const res = await agent
+      .delete(`/api/v1/affiliates/${testAffiliate.affiliateId}/delete-all-data`)
+      .set('Authorization', `Bearer ${authToken}`)
+      .set('X-CSRF-Token', csrfToken);
+
+    expect(res.statusCode).toEqual(403);
+    expect(res.body).toHaveProperty('success', false);
+    expect(res.body).toHaveProperty('message', 'This operation is not allowed in production');
+
+    // Restore environment
+    process.env.NODE_ENV = originalEnv;
   });
 });

@@ -7,7 +7,7 @@ describe('Email Service', () => {
 
   test('should have all required email functions', () => {
     const emailService = require('../../server/utils/emailService');
-    
+
     // Affiliate email functions
     expect(typeof emailService.sendAffiliateWelcomeEmail).toBe('function');
     expect(typeof emailService.sendAffiliateNewCustomerEmail).toBe('function');
@@ -15,7 +15,7 @@ describe('Email Service', () => {
     expect(typeof emailService.sendAffiliateCommissionEmail).toBe('function');
     expect(typeof emailService.sendAffiliateLostBagEmail).toBe('function');
     expect(typeof emailService.sendAffiliateOrderCancellationEmail).toBe('function');
-    
+
     // Customer email functions
     expect(typeof emailService.sendCustomerWelcomeEmail).toBe('function');
     expect(typeof emailService.sendCustomerOrderConfirmationEmail).toBe('function');

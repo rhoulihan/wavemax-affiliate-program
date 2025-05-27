@@ -8,7 +8,7 @@ describe('Logger Utility', () => {
 
   it('should export logger methods', () => {
     logger = require('../../server/utils/logger');
-    
+
     expect(logger).toBeDefined();
     expect(typeof logger.info).toBe('function');
     expect(typeof logger.error).toBe('function');
@@ -18,7 +18,7 @@ describe('Logger Utility', () => {
 
   it('should be a winston logger instance', () => {
     logger = require('../../server/utils/logger');
-    
+
     // Logger should have winston logger properties
     expect(logger.level).toBeDefined();
     expect(logger.transports).toBeDefined();

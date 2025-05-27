@@ -8,7 +8,7 @@ async function initializeDashboard() {
   // Check authentication
   const token = localStorage.getItem('customerToken');
   const customerStr = localStorage.getItem('currentCustomer');
-  
+
   console.log('Token exists:', !!token);
   console.log('Customer data exists:', !!customerStr);
 

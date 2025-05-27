@@ -1,7 +1,5 @@
 const winston = require('winston');
-const path = require('path');
 const {
-  auditLogger,
   AuditEvents,
   logAuditEvent,
   auditMiddleware,
@@ -481,7 +479,7 @@ describe('Audit Logger', () => {
   describe('Logger configuration', () => {
     it('should export audit logger with required methods', () => {
       const auditLoggerModule = require('../../server/utils/auditLogger');
-      
+
       expect(auditLoggerModule.AuditEvents).toBeDefined();
       expect(typeof auditLoggerModule.logAuditEvent).toBe('function');
       expect(typeof auditLoggerModule.auditMiddleware).toBe('function');

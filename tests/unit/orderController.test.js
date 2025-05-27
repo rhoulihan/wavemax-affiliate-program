@@ -85,10 +85,10 @@ describe('Order Controller', () => {
     it('should handle email sending failures gracefully', async () => {
       const mockCustomer = { customerId: 'CUST123' };
       const mockAffiliate = { affiliateId: 'AFF123', deliveryFee: 5.99 };
-      const mockOrder = { 
-        orderId: 'ORD123456', 
-        estimatedTotal: 49.46, 
-        save: jest.fn() 
+      const mockOrder = {
+        orderId: 'ORD123456',
+        estimatedTotal: 49.46,
+        save: jest.fn()
       };
       mockOrder.save.mockResolvedValue(mockOrder);
 
