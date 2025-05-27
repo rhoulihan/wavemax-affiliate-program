@@ -36,10 +36,10 @@ function initializeAffiliateDashboard() {
 
   // Load dashboard statistics
   loadDashboardStats(affiliateId);
-  
+
   // Load settings data on initial load
   loadSettingsData(affiliateId);
-  
+
   // Load pickups data for the default active tab
   loadPickupRequests(affiliateId);
 
@@ -90,7 +90,7 @@ function initializeAffiliateDashboard() {
       console.log('Logout button clicked');
       localStorage.removeItem('affiliateToken');
       localStorage.removeItem('currentAffiliate');
-      
+
       if (isEmbedded) {
         console.log('Sending logout navigation message');
         // For embedded, use postMessage navigation
@@ -98,7 +98,7 @@ function initializeAffiliateDashboard() {
           type: 'navigate',
           data: { url: '/affiliate-login' }
         }, '*');
-        
+
         // Fallback direct navigation after a short delay
         setTimeout(() => {
           console.log('Fallback: Direct navigation to login');
@@ -111,9 +111,9 @@ function initializeAffiliateDashboard() {
   } else {
     console.error('Logout button not found in DOM');
   }
-  
+
   // Schedule pickup button removed - affiliates should not schedule pickups
-  
+
   // Copy registration link button
   const copyBtn = document.getElementById('copyRegistrationLinkBtn');
   if (copyBtn) {
@@ -121,33 +121,33 @@ function initializeAffiliateDashboard() {
       copyRegistrationLink();
     });
   }
-  
+
   // Settings form edit mode
   const editBtn = document.getElementById('editBtn');
   const cancelBtn = document.getElementById('cancelBtn');
   const settingsForm = document.getElementById('settingsForm');
   const formButtons = document.getElementById('formButtons');
-  
+
   if (editBtn) {
     editBtn.addEventListener('click', function() {
       enableEditMode();
     });
   }
-  
+
   if (cancelBtn) {
     cancelBtn.addEventListener('click', function() {
       disableEditMode();
       loadSettingsData(affiliateId); // Reload original data
     });
   }
-  
+
   if (settingsForm) {
     settingsForm.addEventListener('submit', async function(e) {
       e.preventDefault();
       await saveSettings(affiliateId);
     });
   }
-  
+
   // Change password form
   const changePasswordForm = document.getElementById('changePasswordForm');
   if (changePasswordForm) {
@@ -164,7 +164,7 @@ function initializeAffiliateDashboard() {
       deleteAllData(affiliateId);
     });
   }
-  
+
   // Check if we should show delete section
   checkAndShowDeleteSection();
 
@@ -191,23 +191,23 @@ async function loadAffiliateData(affiliateId) {
       const result = await response.json();
       // Extract the actual affiliate data from the response
       const data = result.affiliate || result;
-      
+
       // Update profile information with null checks
       const nameElement = document.getElementById('affiliateName');
       if (nameElement) nameElement.textContent = `${data.firstName} ${data.lastName}`;
-      
+
       const emailElement = document.getElementById('affiliateEmail');
       if (emailElement) emailElement.textContent = data.email;
-      
+
       const businessElement = document.getElementById('businessName');
       if (businessElement) businessElement.textContent = data.businessName || 'N/A';
-      
+
       const serviceAreaElement = document.getElementById('serviceArea');
       if (serviceAreaElement) serviceAreaElement.textContent = data.serviceArea;
-      
+
       const deliveryFeeElement = document.getElementById('deliveryFee');
       if (deliveryFeeElement) deliveryFeeElement.textContent = `$${data.deliveryFee.toFixed(2)}`;
-      
+
       // Generate and display registration link with wavemaxlaundry.com format
       const registrationLink = `https://www.wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program?affid=${affiliateId}`;
       const linkElement = document.getElementById('registrationLink');
@@ -230,20 +230,20 @@ async function loadDashboardStats(affiliateId) {
     if (response.ok) {
       const data = await response.json();
       console.log('Dashboard stats response:', data);
-      
+
       // Extract stats from response
       const stats = data.stats || data;
-      
+
       // Update dashboard statistics with null checks
       const customersElement = document.getElementById('totalCustomers');
       if (customersElement) customersElement.textContent = stats.customerCount || 0;
-      
+
       const ordersElement = document.getElementById('activeOrders');
       if (ordersElement) ordersElement.textContent = stats.activeOrderCount || 0;
-      
+
       const revenueElement = document.getElementById('monthlyRevenue');
       if (revenueElement) revenueElement.textContent = `$${(stats.monthEarnings || 0).toFixed(2)}`;
-      
+
       const paymentElement = document.getElementById('pendingPayment');
       if (paymentElement) paymentElement.textContent = `$${(stats.pendingEarnings || 0).toFixed(2)}`;
     }
@@ -264,7 +264,7 @@ async function loadPickupRequests(affiliateId) {
     if (response.ok) {
       const data = await response.json();
       console.log('Orders response:', data);
-      
+
       // Extract orders array from response
       const orders = data.orders || [];
       const tbody = document.getElementById('ordersTableBody');
@@ -275,14 +275,14 @@ async function loadPickupRequests(affiliateId) {
       } else {
         orders.forEach(order => {
           // Get customer info from order
-          const customerName = order.customer ? 
-            order.customer.name : 
+          const customerName = order.customer ?
+            order.customer.name :
             'Unknown Customer';
-          
-          const address = order.customer ? 
-            order.customer.address : 
+
+          const address = order.customer ?
+            order.customer.address :
             'No address';
-          
+
           const row = document.createElement('tr');
           row.className = 'border-b hover:bg-gray-50';
           row.innerHTML = `
@@ -291,14 +291,14 @@ async function loadPickupRequests(affiliateId) {
             <td class="py-3 px-4">${address}</td>
             <td class="py-3 px-4">
               <span class="px-2 py-1 rounded text-xs ${
-                order.status === 'scheduled' ? 'bg-yellow-100 text-yellow-800' :
-                order.status === 'picked_up' ? 'bg-blue-100 text-blue-800' :
-                order.status === 'processing' ? 'bg-purple-100 text-purple-800' :
-                order.status === 'ready_for_delivery' ? 'bg-indigo-100 text-indigo-800' :
-                order.status === 'delivered' ? 'bg-green-100 text-green-800' :
-                order.status === 'cancelled' ? 'bg-red-100 text-red-800' :
-                'bg-gray-100 text-gray-800'
-              }">
+  order.status === 'scheduled' ? 'bg-yellow-100 text-yellow-800' :
+    order.status === 'picked_up' ? 'bg-blue-100 text-blue-800' :
+      order.status === 'processing' ? 'bg-purple-100 text-purple-800' :
+        order.status === 'ready_for_delivery' ? 'bg-indigo-100 text-indigo-800' :
+          order.status === 'delivered' ? 'bg-green-100 text-green-800' :
+            order.status === 'cancelled' ? 'bg-red-100 text-red-800' :
+              'bg-gray-100 text-gray-800'
+}">
                 ${order.status.replace(/_/g, ' ')}
               </span>
             </td>
@@ -327,7 +327,7 @@ async function loadCustomers(affiliateId) {
     if (response.ok) {
       const data = await response.json();
       console.log('Customers response:', data);
-      
+
       // Extract customers array from response
       const customers = data.customers || [];
       const tbody = document.getElementById('customersTableBody');
@@ -345,9 +345,9 @@ async function loadCustomers(affiliateId) {
             <td class="py-3 px-4">${customer.phone}</td>
             <td class="py-3 px-4">
               <span class="px-2 py-1 rounded text-xs ${
-                customer.isActive !== false ? 'bg-green-100 text-green-800' :
-                'bg-gray-100 text-gray-800'
-              }">
+  customer.isActive !== false ? 'bg-green-100 text-green-800' :
+    'bg-gray-100 text-gray-800'
+}">
                 ${customer.isActive !== false ? 'Active' : 'Inactive'}
               </span>
             </td>
@@ -386,10 +386,10 @@ async function loadInvoices(affiliateId) {
             <td class="py-3 px-4">$${invoice.amount.toFixed(2)}</td>
             <td class="py-3 px-4">
               <span class="px-2 py-1 rounded text-xs ${
-                invoice.status === 'paid' ? 'bg-green-100 text-green-800' :
-                invoice.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                'bg-gray-100 text-gray-800'
-              }">
+  invoice.status === 'paid' ? 'bg-green-100 text-green-800' :
+    invoice.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+      'bg-gray-100 text-gray-800'
+}">
                 ${invoice.status}
               </span>
             </td>
@@ -421,19 +421,19 @@ window.copyLink = function() {
     copyBtn.textContent = originalText;
     copyBtn.classList.remove('bg-green-600');
   }, 2000);
-}
+};
 
 // Copy registration link
 function copyRegistrationLink() {
   const linkInput = document.getElementById('registrationLink');
   const copyBtn = document.getElementById('copyRegistrationLinkBtn');
-  
+
   // Use setTimeout to ensure our code runs in a clean call stack
   setTimeout(() => {
     // Focus the input first
     linkInput.focus();
     linkInput.select();
-    
+
     try {
       // Use execCommand which works better in iframes
       const successful = document.execCommand('copy');
@@ -472,7 +472,7 @@ function showManualCopyPrompt(text) {
   textarea.style.backgroundColor = 'white';
   textarea.style.zIndex = '10000';
   textarea.style.fontSize = '14px';
-  
+
   // Create overlay
   const overlay = document.createElement('div');
   overlay.style.position = 'fixed';
@@ -482,7 +482,7 @@ function showManualCopyPrompt(text) {
   overlay.style.height = '100%';
   overlay.style.backgroundColor = 'rgba(0,0,0,0.5)';
   overlay.style.zIndex = '9999';
-  
+
   // Create instruction text
   const instruction = document.createElement('div');
   instruction.textContent = 'Press Ctrl+C (or Cmd+C) to copy, then click anywhere to close';
@@ -495,22 +495,22 @@ function showManualCopyPrompt(text) {
   instruction.style.fontWeight = 'bold';
   instruction.style.zIndex = '10001';
   instruction.style.textAlign = 'center';
-  
+
   document.body.appendChild(overlay);
   document.body.appendChild(instruction);
   document.body.appendChild(textarea);
-  
+
   // Select the text
   textarea.focus();
   textarea.select();
-  
+
   // Remove elements when clicked
   const cleanup = () => {
     document.body.removeChild(textarea);
     document.body.removeChild(overlay);
     document.body.removeChild(instruction);
   };
-  
+
   overlay.addEventListener('click', cleanup);
   textarea.addEventListener('blur', () => {
     setTimeout(cleanup, 100);
@@ -523,7 +523,7 @@ function showCopySuccess(button) {
   button.textContent = 'Copied!';
   button.classList.remove('bg-blue-600', 'hover:bg-blue-700');
   button.classList.add('bg-green-600', 'hover:bg-green-700');
-  
+
   setTimeout(() => {
     button.textContent = originalText;
     button.classList.remove('bg-green-600', 'hover:bg-green-700');
@@ -545,11 +545,11 @@ async function loadSettingsData(affiliateId) {
     if (response.ok) {
       const result = await response.json();
       console.log('Affiliate data received:', result);
-      
+
       // Extract the actual affiliate data from the response
       const data = result.affiliate || result;
       console.log('Extracted affiliate data:', data);
-      
+
       // Wait a bit to ensure DOM is ready
       setTimeout(() => {
         // Populate settings fields with null checks
@@ -560,7 +560,7 @@ async function loadSettingsData(affiliateId) {
         const businessNameField = document.getElementById('settingsBusinessName');
         const serviceAreaField = document.getElementById('settingsServiceArea');
         const registrationLinkField = document.getElementById('registrationLink');
-        
+
         console.log('Setting field values:', {
           firstName: data.firstName,
           lastName: data.lastName,
@@ -569,18 +569,18 @@ async function loadSettingsData(affiliateId) {
           businessName: data.businessName,
           serviceArea: data.serviceArea
         });
-        
+
         if (firstNameField) firstNameField.value = data.firstName || '';
         if (lastNameField) lastNameField.value = data.lastName || '';
         if (emailField) emailField.value = data.email || '';
         if (phoneField) phoneField.value = data.phone || '';
         if (businessNameField) businessNameField.value = data.businessName || '';
         if (serviceAreaField) serviceAreaField.value = data.serviceArea || '';
-        
+
         // Generate and display registration link with wavemaxlaundry.com format
         const registrationLink = `https://www.wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program?affid=${affiliateId}`;
         if (registrationLinkField) registrationLinkField.value = registrationLink;
-        
+
         console.log('Settings fields populated');
       }, 100);
     } else {
@@ -601,7 +601,7 @@ function enableEditMode() {
       input.classList.remove('bg-gray-100');
     }
   });
-  
+
   document.getElementById('editBtn').style.display = 'none';
   document.getElementById('formButtons').style.display = 'block';
 }
@@ -615,7 +615,7 @@ function disableEditMode() {
       input.classList.add('bg-gray-100');
     }
   });
-  
+
   document.getElementById('editBtn').style.display = 'block';
   document.getElementById('formButtons').style.display = 'none';
 }
@@ -632,7 +632,7 @@ async function saveSettings(affiliateId) {
       businessName: formData.get('businessName'),
       serviceArea: formData.get('serviceArea')
     };
-    
+
     const baseUrl = window.EMBED_CONFIG?.baseUrl || 'https://wavemax.promo';
     const response = await fetch(`${baseUrl}/api/v1/affiliates/${affiliateId}`, {
       method: 'PUT',
@@ -642,7 +642,7 @@ async function saveSettings(affiliateId) {
       },
       body: JSON.stringify(data)
     });
-    
+
     if (response.ok) {
       alert('Settings updated successfully!');
       disableEditMode();
@@ -664,25 +664,25 @@ async function changePassword(affiliateId) {
   const confirmPassword = document.getElementById('confirmPassword').value;
   const errorDiv = document.getElementById('passwordError');
   const successDiv = document.getElementById('passwordSuccess');
-  
+
   // Hide previous messages
   errorDiv.classList.add('hidden');
   successDiv.classList.add('hidden');
-  
+
   // Validate passwords match
   if (newPassword !== confirmPassword) {
     errorDiv.textContent = 'New passwords do not match';
     errorDiv.classList.remove('hidden');
     return;
   }
-  
+
   // Validate password length
   if (newPassword.length < 8) {
     errorDiv.textContent = 'Password must be at least 8 characters long';
     errorDiv.classList.remove('hidden');
     return;
   }
-  
+
   try {
     const baseUrl = window.EMBED_CONFIG?.baseUrl || 'https://wavemax.promo';
     const response = await fetch(`${baseUrl}/api/v1/affiliates/${affiliateId}/change-password`, {
@@ -696,14 +696,14 @@ async function changePassword(affiliateId) {
         newPassword: newPassword
       })
     });
-    
+
     if (response.ok) {
       successDiv.textContent = 'Password changed successfully!';
       successDiv.classList.remove('hidden');
-      
+
       // Clear the form
       document.getElementById('changePasswordForm').reset();
-      
+
       // Hide success message after 5 seconds
       setTimeout(() => {
         successDiv.classList.add('hidden');
@@ -742,11 +742,11 @@ async function deleteAllData(affiliateId) {
   if (!confirm('Are you absolutely sure? This will delete ALL your data permanently!')) {
     return;
   }
-  
+
   if (!confirm('This is your last chance to cancel. Do you really want to delete everything?')) {
     return;
   }
-  
+
   try {
     const baseUrl = window.EMBED_CONFIG?.baseUrl || 'https://wavemax.promo';
     const response = await fetch(`${baseUrl}/api/v1/affiliates/${affiliateId}/delete-all-data`, {
@@ -756,15 +756,15 @@ async function deleteAllData(affiliateId) {
         'Content-Type': 'application/json'
       }
     });
-    
+
     const data = await response.json();
-    
+
     if (data.success) {
       alert('All data has been deleted successfully.');
       // Clear local storage and redirect to login
       localStorage.removeItem('affiliateToken');
       localStorage.removeItem('currentAffiliate');
-      
+
       if (window.EMBED_CONFIG?.isEmbedded) {
         window.parent.postMessage({
           type: 'navigate',

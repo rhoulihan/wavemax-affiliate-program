@@ -765,7 +765,7 @@ describe('Order Integration Tests', () => {
     });
   });
 
-  describe.skip('Payment status updates' // TODO: Implement payment status endpoints, () => {
+  describe.skip('Payment status updates', () => { // TODO: Implement payment status endpoints
     let testOrder;
 
     beforeEach(async () => {

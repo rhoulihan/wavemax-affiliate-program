@@ -17,16 +17,16 @@ const testFiles = fs.readdirSync(integrationTestsDir)
 testFiles.forEach(file => {
   const filePath = path.join(integrationTestsDir, file);
   const content = fs.readFileSync(filePath, 'utf8');
-  
+
   // Find all lines with request(app)
   const lines = content.split('\n');
   const updates = [];
-  
+
   lines.forEach((line, index) => {
-    if (line.includes('request(app)') && 
-        !line.includes('agent') && 
+    if (line.includes('request(app)') &&
+        !line.includes('agent') &&
         !line.includes('// Create agent')) {
-      
+
       // Check the next few lines to see the HTTP method
       for (let i = 1; i <= 5 && index + i < lines.length; i++) {
         const nextLine = lines[index + i];
@@ -51,7 +51,7 @@ testFiles.forEach(file => {
       }
     }
   });
-  
+
   if (updates.length > 0) {
     console.log(`\n${file}:`);
     updates.forEach(update => {

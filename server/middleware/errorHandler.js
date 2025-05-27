@@ -9,7 +9,7 @@ const errorHandler = (err, req, res, next) => {
   } else if (typeof err === 'string') {
     err = new Error(err);
   }
-  
+
   // Console log for immediate debugging
   console.error('=== API ERROR ===');
   console.error('Error message:', err.message);

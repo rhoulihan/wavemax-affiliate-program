@@ -1,7 +1,7 @@
 // Order confirmation page initialization
 function initializeOrderConfirmation() {
   console.log('Order confirmation page initializing');
-  
+
   // Extract order ID from URL query parameter
   const urlParams = new URLSearchParams(window.location.search);
   const orderId = urlParams.get('id');
@@ -25,10 +25,10 @@ function initializeOrderConfirmation() {
   console.log('Stored orders string:', storedOrdersStr);
   let storedOrders = {};
   let order = null;
-  
+
   try {
     const parsed = JSON.parse(storedOrdersStr || '{}');
-    
+
     // Handle both old array format and new object format
     if (Array.isArray(parsed)) {
       console.log('Converting old array format to new object format');
@@ -44,12 +44,12 @@ function initializeOrderConfirmation() {
     } else {
       storedOrders = parsed;
     }
-    
+
     order = storedOrders[orderId];
   } catch (e) {
     console.error('Error parsing stored orders:', e);
   }
-  
+
   console.log('Stored orders object:', storedOrders);
   console.log('Order data for', orderId, ':', order);
 
@@ -73,7 +73,7 @@ function initializeOrderConfirmation() {
   // Function to display order data
   function displayOrderData(order) {
     console.log('Displaying order data:', order);
-    
+
     // Set order date
     const orderDate = new Date(order.createdAt || Date.now());
     const orderDateElement = document.getElementById('orderDate');

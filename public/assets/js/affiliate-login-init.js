@@ -1,15 +1,15 @@
 // Affiliate login functionality for embedded environment
 function initializeAffiliateLogin() {
   console.log('Initializing affiliate login...');
-  
+
   // Form submission
   const form = document.getElementById('affiliateLoginForm');
-  
+
   if (!form) {
     console.error('Login form not found');
     return;
   }
-  
+
   console.log('Login form found, attaching submit handler');
 
   form.addEventListener('submit', function(e) {

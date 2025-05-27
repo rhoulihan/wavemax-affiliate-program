@@ -10,10 +10,10 @@ function initializeRegistrationForm() {
   // When loaded via embed-app.html, we need to check the actual page URL, not the base URL
   let urlParams = new URLSearchParams(window.location.search);
   let affiliateId = urlParams.get('affid') || urlParams.get('affiliate') || sessionStorage.getItem('affiliateId');
-  
+
   console.log('Window location search:', window.location.search);
   console.log('Initial affiliate ID search:', affiliateId);
-  
+
   if (!affiliateId && window.parent !== window) {
     try {
       // Try to get parent URL parameters
@@ -35,7 +35,7 @@ function initializeRegistrationForm() {
 
   if (affiliateId) {
     console.log('Affiliate ID found:', affiliateId);
-    
+
     // Set the hidden affiliate ID field
     const affiliateIdField = document.getElementById('affiliateId');
     if (affiliateIdField) {
@@ -44,7 +44,7 @@ function initializeRegistrationForm() {
     } else {
       console.error('affiliateId field not found');
     }
-    
+
     // Clear from session storage after use
     sessionStorage.removeItem('affiliateId');
 
@@ -52,7 +52,7 @@ function initializeRegistrationForm() {
     const baseUrl = window.EMBED_CONFIG?.baseUrl || 'https://wavemax.promo';
     const apiUrl = `${baseUrl}/api/v1/affiliates/${affiliateId}/public`;
     console.log('Fetching affiliate info from:', apiUrl);
-    
+
     fetch(apiUrl)
       .then(response => {
         console.log('Response status:', response.status);

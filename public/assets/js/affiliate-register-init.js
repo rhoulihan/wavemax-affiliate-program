@@ -71,7 +71,7 @@ function initializeAffiliateRegistration() {
 
         await window.ErrorHandler.handleFetchError(response);
         const data = await response.json();
-        
+
         console.log('Registration response:', data);
 
         // Store the affiliate data for the success page
@@ -87,7 +87,7 @@ function initializeAffiliateRegistration() {
           console.log('Sending navigation message to parent');
           console.log('Window parent:', window.parent);
           console.log('Window parent !== window:', window.parent !== window);
-          
+
           // Try multiple navigation approaches
           try {
             // First try postMessage
@@ -96,27 +96,27 @@ function initializeAffiliateRegistration() {
               data: { url: '/affiliate-success' }
             }, '*');
             console.log('Navigation message sent successfully');
-            
+
             // Also try direct navigation as fallback
             setTimeout(() => {
               console.log('Trying direct navigation as fallback');
               // Check if we're still on the same page
               if (window.location.href.includes('affiliate-register')) {
-                window.location.href = `/embed-app.html?route=/affiliate-success`;
+                window.location.href = '/embed-app.html?route=/affiliate-success';
               }
             }, 1000);
           } catch (msgError) {
             console.error('Error sending message:', msgError);
             // Fallback to direct navigation
-            window.location.href = `/embed-app.html?route=/affiliate-success`;
+            window.location.href = '/embed-app.html?route=/affiliate-success';
           }
         } else {
           // Otherwise, normal redirect
-          window.location.href = `/embed-app.html?route=/affiliate-success`;
+          window.location.href = '/embed-app.html?route=/affiliate-success';
         }
       } catch (error) {
         console.error('Registration error:', error);
-        
+
         // If we're embedded and there's a connection error, notify parent
         if (isEmbedded && error.message.includes('fetch')) {
           window.parent.postMessage({
@@ -138,25 +138,25 @@ function initializeAffiliateRegistration() {
 
       // Handle different message types
       switch (event.data.type) {
-        case 'prefill-form':
-          // Allow parent to prefill form data
-          if (event.data.data) {
-            Object.keys(event.data.data).forEach(key => {
-              const field = document.getElementById(key);
-              if (field) {
-                field.value = event.data.data[key];
-              }
-            });
-          }
-          break;
-        
-        case 'get-form-height':
-          // Send form height to parent for iframe resizing
-          window.parent.postMessage({
-            type: 'form-height',
-            height: document.body.scrollHeight
-          }, event.origin);
-          break;
+      case 'prefill-form':
+        // Allow parent to prefill form data
+        if (event.data.data) {
+          Object.keys(event.data.data).forEach(key => {
+            const field = document.getElementById(key);
+            if (field) {
+              field.value = event.data.data[key];
+            }
+          });
+        }
+        break;
+
+      case 'get-form-height':
+        // Send form height to parent for iframe resizing
+        window.parent.postMessage({
+          type: 'form-height',
+          height: document.body.scrollHeight
+        }, event.origin);
+        break;
       }
     });
 

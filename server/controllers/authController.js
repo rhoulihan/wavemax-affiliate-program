@@ -272,7 +272,7 @@ exports.customerLogin = async (req, res) => {
         } : null
       }
     };
-    
+
     console.log('Sending customer login response:', JSON.stringify(responseData.customer, null, 2));
     res.status(200).json(responseData);
   } catch (error) {

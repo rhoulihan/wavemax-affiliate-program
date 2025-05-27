@@ -9,11 +9,11 @@ const { getCsrfToken, createAgent } = require('../helpers/csrfHelper');
 describe('Authentication Integration Tests', () => {
   let agent;
   let csrfToken;
-  
+
   beforeEach(async () => {
     // Create agent with session support
     agent = createAgent(app);
-    
+
     // Get CSRF token
     csrfToken = await getCsrfToken(app, agent);
     // Clear database
@@ -336,7 +336,7 @@ describe('Authentication Integration Tests', () => {
         paymentMethod: 'directDeposit'
       });
       await affiliate.save();
-      
+
       // Create an expired refresh token with valid ObjectId
       const expiredToken = new RefreshToken({
         token: 'a'.repeat(80), // Valid 80-character token

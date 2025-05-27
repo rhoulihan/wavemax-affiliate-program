@@ -10,7 +10,7 @@ async function getCsrfToken(app, agent) {
   const response = await agent
     .get('/api/csrf-token')
     .expect(200);
-  
+
   return response.body.csrfToken;
 }
 

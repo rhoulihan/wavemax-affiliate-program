@@ -3,6 +3,7 @@ const Affiliate = require('../../server/models/Affiliate');
 const Customer = require('../../server/models/Customer');
 const Order = require('../../server/models/Order');
 const Transaction = require('../../server/models/Transaction');
+const Bag = require('../../server/models/Bag');
 const encryptionUtil = require('../../server/utils/encryption');
 const emailService = require('../../server/utils/emailService');
 const { validationResult } = require('express-validator');
@@ -12,6 +13,7 @@ jest.mock('../../server/models/Affiliate');
 jest.mock('../../server/models/Customer');
 jest.mock('../../server/models/Order');
 jest.mock('../../server/models/Transaction');
+jest.mock('../../server/models/Bag');
 jest.mock('../../server/utils/encryption');
 jest.mock('../../server/utils/emailService');
 jest.mock('express-validator');
@@ -879,6 +881,101 @@ describe('Affiliate Controller', () => {
       expect(res.json).toHaveBeenCalledWith({
         success: false,
         message: 'An error occurred while retrieving affiliate profile'
+      });
+    });
+  });
+
+  describe('deleteAffiliateData', () => {
+    beforeEach(() => {
+      req.user = { affiliateId: 'AFF123' };
+    });
+
+    it('should delete all affiliate data in development environment', async () => {
+      process.env.NODE_ENV = 'development';
+      const mockAffiliate = { affiliateId: 'AFF123' };
+      const mockCustomers = [
+        { customerId: 'CUST1' },
+        { customerId: 'CUST2' }
+      ];
+
+      Affiliate.findOne.mockResolvedValue(mockAffiliate);
+      Customer.find.mockResolvedValue(mockCustomers);
+      Order.deleteMany = jest.fn().mockResolvedValue({ deletedCount: 5 });
+      Bag.deleteMany = jest.fn().mockResolvedValue({ deletedCount: 2 });
+      Transaction.deleteMany.mockResolvedValue({ deletedCount: 3 });
+      Customer.deleteMany.mockResolvedValue({ deletedCount: 2 });
+      Affiliate.deleteOne.mockResolvedValue({ deletedCount: 1 });
+
+      await affiliateController.deleteAffiliateData(req, res);
+
+      expect(Order.deleteMany).toHaveBeenCalledWith({
+        $or: [
+          { affiliateId: 'AFF123' },
+          { customerId: { $in: ['CUST1', 'CUST2'] } }
+        ]
+      });
+      expect(Bag.deleteMany).toHaveBeenCalledWith({
+        $or: [
+          { affiliateId: 'AFF123' },
+          { customerId: { $in: ['CUST1', 'CUST2'] } }
+        ]
+      });
+      expect(Transaction.deleteMany).toHaveBeenCalledWith({ affiliateId: 'AFF123' });
+      expect(Customer.deleteMany).toHaveBeenCalledWith({ affiliateId: 'AFF123' });
+      expect(Affiliate.deleteOne).toHaveBeenCalledWith({ affiliateId: 'AFF123' });
+
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.json).toHaveBeenCalledWith({
+        success: true,
+        message: 'All data has been deleted successfully',
+        deletedData: {
+          affiliate: 1,
+          customers: 2,
+          orders: 'All related orders deleted',
+          bags: 'All related bags deleted',
+          transactions: 'All transactions deleted'
+        }
+      });
+    });
+
+    it('should reject deletion in production environment', async () => {
+      process.env.NODE_ENV = 'production';
+
+      await affiliateController.deleteAffiliateData(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(403);
+      expect(res.json).toHaveBeenCalledWith({
+        success: false,
+        message: 'This operation is not allowed in production'
+      });
+    });
+
+    it('should reject unauthorized deletion', async () => {
+      process.env.NODE_ENV = 'development';
+      req.user.affiliateId = 'AFF456';
+
+      Affiliate.findOne.mockResolvedValue({ affiliateId: 'AFF123' });
+
+      await affiliateController.deleteAffiliateData(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(403);
+      expect(res.json).toHaveBeenCalledWith({
+        success: false,
+        message: 'Unauthorized'
+      });
+    });
+
+    it('should handle deletion errors', async () => {
+      process.env.NODE_ENV = 'development';
+
+      Affiliate.findOne.mockRejectedValue(new Error('Database error'));
+
+      await affiliateController.deleteAffiliateData(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(500);
+      expect(res.json).toHaveBeenCalledWith({
+        success: false,
+        message: 'An error occurred while deleting data'
       });
     });
   });

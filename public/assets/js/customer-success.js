@@ -79,7 +79,7 @@ function displayCustomerData(data) {
   // Update button links to redirect to wavemaxlaundry.com
   const schedulePickupBtn = document.getElementById('schedulePickupBtn');
   const customerDashboardBtn = document.getElementById('customerDashboardBtn');
-  
+
   if (schedulePickupBtn) {
     schedulePickupBtn.href = `https://www.wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program?affid=${data.affiliateId}&pickup=true`;
     schedulePickupBtn.onclick = function(e) {
@@ -87,7 +87,7 @@ function displayCustomerData(data) {
       window.top.location.href = this.href;
     };
   }
-  
+
   if (customerDashboardBtn) {
     customerDashboardBtn.href = `https://www.wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program?affid=${data.affiliateId}`;
     customerDashboardBtn.onclick = function(e) {
