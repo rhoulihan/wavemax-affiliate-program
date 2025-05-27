@@ -324,12 +324,63 @@ app.get('/api/docs', (req, res) => {
   res.redirect('/api-docs.html');
 });
 
-// Serve the frontend in production
-if (process.env.NODE_ENV === 'production') {
-  app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+// Root endpoint - API server info
+app.get('/', (req, res) => {
+  res.json({
+    name: 'WaveMAX Affiliate Program API',
+    version: '1.0.0',
+    status: 'running',
+    endpoints: {
+      health: '/api/health',
+      docs: '/api/docs',
+      auth: '/api/v1/auth',
+      affiliates: '/api/v1/affiliates',
+      customers: '/api/v1/customers',
+      orders: '/api/v1/orders'
+    },
+    timestamp: new Date().toISOString()
   });
-}
+});
+
+// Block common WordPress scanning paths
+app.use((req, res, next) => {
+  const blockedPaths = [
+    '/wp-admin',
+    '/wp-login',
+    '/wp-content',
+    '/wp-includes',
+    '/wordpress',
+    '.php',
+    'wp-',
+    'xmlrpc',
+    'wlwmanifest'
+  ];
+  
+  const isBlocked = blockedPaths.some(path => 
+    req.path.toLowerCase().includes(path)
+  );
+  
+  if (isBlocked) {
+    // Return 404 to discourage scanners
+    return res.status(404).json({
+      success: false,
+      message: 'Not found'
+    });
+  }
+  
+  next();
+});
+
+// Catch all other routes and return API error
+app.use('*', (req, res) => {
+  res.status(404).json({
+    success: false,
+    message: 'API endpoint not found',
+    path: req.path,
+    method: req.method,
+    hint: 'Check the API documentation at /api/docs'
+  });
+});
 
 app.use(errorHandler);
 
