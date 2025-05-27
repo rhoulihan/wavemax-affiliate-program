@@ -1,7 +1,11 @@
-document.addEventListener('DOMContentLoaded', function() {
+// Order confirmation page initialization
+function initializeOrderConfirmation() {
+  console.log('Order confirmation page initializing');
+  
   // Extract order ID from URL query parameter
   const urlParams = new URLSearchParams(window.location.search);
   const orderId = urlParams.get('id');
+  console.log('Order ID from URL:', orderId);
 
   if (!orderId) {
     alert('No order ID provided. Redirecting to homepage.');
@@ -10,11 +14,19 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   // Set order ID in the page
-  document.getElementById('orderId').textContent = orderId;
+  const orderIdElement = document.getElementById('orderId');
+  console.log('Order ID element found:', !!orderIdElement);
+  if (orderIdElement) {
+    orderIdElement.textContent = orderId;
+  }
 
   // Get order details from localStorage
-  const storedOrders = JSON.parse(localStorage.getItem('wavemax_orders')) || {};
+  const storedOrdersStr = localStorage.getItem('wavemax_orders');
+  console.log('Stored orders string:', storedOrdersStr);
+  const storedOrders = JSON.parse(storedOrdersStr || '{}');
+  console.log('Stored orders object:', storedOrders);
   const order = storedOrders[orderId];
+  console.log('Order data for', orderId, ':', order);
 
   if (order) {
     // Set order date
@@ -180,4 +192,14 @@ document.addEventListener('DOMContentLoaded', function() {
       alert('Error loading order details. Please try again later.');
     }
   }
-});
+}
+
+// Check if DOM is already loaded
+console.log('Order confirmation script loaded, checking DOM state');
+if (document.readyState === 'loading') {
+  console.log('DOM still loading, adding event listener');
+  document.addEventListener('DOMContentLoaded', initializeOrderConfirmation);
+} else {
+  console.log('DOM already loaded, initializing immediately');
+  initializeOrderConfirmation();
+}
