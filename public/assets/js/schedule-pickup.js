@@ -17,9 +17,18 @@ document.addEventListener('DOMContentLoaded', async function() {
   }
   
   try {
+    console.log('Raw customer string from localStorage:', customerStr);
     const customer = JSON.parse(customerStr);
     console.log('Customer authenticated:', customer.customerId);
     console.log('Customer data:', customer);
+    console.log('Customer has all fields:', {
+      hasFirstName: !!customer.firstName,
+      hasLastName: !!customer.lastName,
+      hasPhone: !!customer.phone,
+      hasAddress: !!customer.address,
+      hasAffiliateId: !!customer.affiliateId,
+      hasAffiliate: !!customer.affiliate
+    });
     
     // Hide login section if it exists
     const loginSection = document.getElementById('loginSection');

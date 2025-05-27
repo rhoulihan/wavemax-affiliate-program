@@ -242,7 +242,7 @@
             function loadNextScript() {
                 if (scriptIndex < scripts.length) {
                     const script = document.createElement('script');
-                    script.src = BASE_URL + scripts[scriptIndex];
+                    script.src = BASE_URL + scripts[scriptIndex] + '?v=' + Date.now();
                     script.setAttribute('data-page-script', 'true');
                     script.onload = function() {
                         console.log('Loaded script:', scripts[scriptIndex]);
