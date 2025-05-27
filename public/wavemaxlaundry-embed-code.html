@@ -35,17 +35,17 @@
 <body>
     <h1>WaveMAX Affiliate Program - Embed Code</h1>
     
-    <p>This page provides the embed code needed for the wavemaxlaundry.com site to display the customer login page with affiliate tracking.</p>
+    <p>This page provides the embed code needed for the wavemaxlaundry.com site to display the affiliate program landing page by default, or the customer login page when an affiliate ID is provided.</p>
     
     <h2>Embed Code for wavemaxlaundry.com</h2>
     
     <p>Add this code to your page at <code>https://www.wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program</code>:</p>
     
-    <pre><code>&lt;!-- WaveMAX Affiliate Customer Login Embed --&gt;
+    <pre><code>&lt;!-- WaveMAX Affiliate Program Embed --&gt;
 &lt;div id="wavemax-affiliate-embed"&gt;
     &lt;iframe 
         id="wavemax-iframe"
-        src="https://wavemax.promo/embed-app.html?route=/customer-login"
+        src="https://wavemax.promo/embed-app.html"
         width="100%"
         height="600"
         frameborder="0"
@@ -60,15 +60,20 @@
     const affiliateId = urlParams.get('affid');
     const pickup = urlParams.get('pickup');
     
-    // Build iframe URL with parameters
-    let iframeSrc = 'https://wavemax.promo/embed-app.html?route=/customer-login';
+    // Build iframe URL
+    let iframeSrc = 'https://wavemax.promo/embed-app.html';
     
+    // Only add route parameter if there's an affiliate ID
     if (affiliateId) {
+        iframeSrc += '?route=/customer-login';
         iframeSrc += `&affid=${affiliateId}`;
-    }
-    
-    if (pickup === 'true') {
-        iframeSrc += '&pickup=true';
+        
+        if (pickup === 'true') {
+            iframeSrc += '&pickup=true';
+        }
+    } else {
+        // No affiliate ID - show landing page
+        iframeSrc += '?route=/landing';
     }
     
     // Update iframe src
@@ -90,16 +95,19 @@
     <h2>How It Works</h2>
     
     <ol>
-        <li>The embed code creates an iframe that loads the WaveMAX customer login page</li>
-        <li>JavaScript automatically detects the <code>affid</code> parameter from the URL</li>
-        <li>The affiliate ID is passed to the embedded login page</li>
-        <li>Customers can either log in or click "Register here" to create a new account</li>
-        <li>The affiliate ID is preserved throughout the registration process</li>
+        <li>When no parameters are present, the embed displays the affiliate program landing page</li>
+        <li>When an <code>affid</code> parameter is detected in the URL, it shows the customer login page</li>
+        <li>The affiliate ID is passed to the embedded pages for tracking</li>
+        <li>Customers can log in or register with the affiliate's ID automatically attached</li>
+        <li>The affiliate ID is preserved throughout the entire customer journey</li>
     </ol>
     
     <h2>Example URLs</h2>
     
-    <p>When affiliates share their link:</p>
+    <p>When visiting the page without parameters (shows landing page):</p>
+    <code>https://www.wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program</code>
+    
+    <p>When affiliates share their link (shows customer login):</p>
     <code>https://www.wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program?affid=AFF123456</code>
     
     <p>The embedded iframe will automatically load:</p>
@@ -117,7 +125,7 @@
         <div id="test-embed">
             <iframe 
                 id="test-iframe"
-                src="https://wavemax.promo/embed-app.html?route=/customer-login"
+                src="https://wavemax.promo/embed-app.html"
                 width="100%"
                 height="600"
                 frameborder="0"
@@ -131,10 +139,19 @@
     (function() {
         const urlParams = new URLSearchParams(window.location.search);
         const affiliateId = urlParams.get('affid');
+        const pickup = urlParams.get('pickup');
+        
+        const iframe = document.getElementById('test-iframe');
         
         if (affiliateId) {
-            const iframe = document.getElementById('test-iframe');
-            iframe.src = `https://wavemax.promo/embed-app.html?route=/customer-login&affid=${affiliateId}`;
+            let src = `https://wavemax.promo/embed-app.html?route=/customer-login&affid=${affiliateId}`;
+            if (pickup === 'true') {
+                src += '&pickup=true';
+            }
+            iframe.src = src;
+        } else {
+            // Show landing page by default
+            iframe.src = 'https://wavemax.promo/embed-app.html?route=/landing';
         }
         
         window.addEventListener('message', function(event) {
