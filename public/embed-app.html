@@ -90,13 +90,17 @@
         // Get route from URL parameter
         function getRouteFromUrl() {
             const params = new URLSearchParams(window.location.search);
-            return params.get('route') || '/';
+            const route = params.get('route') || '/';
+            console.log('Route from URL:', route);
+            return route;
         }
         
         // Load page content
         async function loadPage(route) {
+            console.log('Loading page for route:', route);
             const container = document.getElementById('app-container');
             const pagePath = EMBED_PAGES[route] || EMBED_PAGES['/'];
+            console.log('Page path:', pagePath);
             
             try {
                 container.innerHTML = '<div class="loading"><i class="fas fa-spinner fa-spin me-2"></i>Loading...</div>';
