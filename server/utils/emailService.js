@@ -189,7 +189,7 @@ exports.sendAffiliateNewCustomerEmail = async (affiliate, customer, bagBarcode) 
       customer_address: `${customer.address}, ${customer.city}, ${customer.state} ${customer.zipCode}`,
       service_frequency: customer.serviceFrequency,
       bag_barcode: bagBarcode,
-      dashboard_url: `${process.env.FRONTEND_URL || 'https://wavemax.promo'}/embed-app.html?route=/affiliate-dashboard`,
+      dashboard_url: 'https://www.wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program',
       current_year: new Date().getFullYear()
     };
 
@@ -222,7 +222,7 @@ exports.sendAffiliateNewOrderEmail = async (affiliate, customer, order) => {
       pickup_time: formatTimeSlot(order.pickupTime),
       estimated_size: formatSize(order.estimatedSize),
       special_instructions: order.specialPickupInstructions || 'None',
-      dashboard_url: `${process.env.FRONTEND_URL || 'https://wavemax.promo'}/embed-app.html?route=/affiliate-dashboard`,
+      dashboard_url: 'https://www.wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program',
       current_year: new Date().getFullYear()
     };
 
@@ -251,7 +251,7 @@ exports.sendAffiliateCommissionEmail = async (affiliate, order, customer) => {
       customer_name: `${customer.firstName} ${customer.lastName}`,
       order_total: order.actualTotal ? `$${order.actualTotal.toFixed(2)}` : 'N/A',
       commission_amount: order.affiliateCommission ? `$${order.affiliateCommission.toFixed(2)}` : 'N/A',
-      dashboard_url: `${process.env.FRONTEND_URL || 'https://wavemax.promo'}/embed-app.html?route=/affiliate-dashboard`,
+      dashboard_url: 'https://www.wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program',
       current_year: new Date().getFullYear()
     };
 
@@ -281,7 +281,7 @@ exports.sendAffiliateLostBagEmail = async (affiliate, customer, bagBarcode) => {
       customer_email: customer.email,
       customer_phone: customer.phone,
       bag_barcode: bagBarcode,
-      dashboard_url: `${process.env.FRONTEND_URL || 'https://wavemax.promo'}/embed-app.html?route=/affiliate-dashboard`,
+      dashboard_url: 'https://www.wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program',
       current_year: new Date().getFullYear()
     };
 
@@ -311,7 +311,7 @@ exports.sendAffiliateOrderCancellationEmail = async (affiliate, order, customer)
       pickup_date: new Date(order.pickupDate).toLocaleDateString(),
       pickup_time: formatTimeSlot(order.pickupTime),
       cancellation_time: new Date().toLocaleTimeString(),
-      dashboard_url: `${process.env.FRONTEND_URL || 'https://wavemax.promo'}/embed-app.html?route=/affiliate-dashboard`,
+      dashboard_url: 'https://www.wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program',
       current_year: new Date().getFullYear()
     };
 
