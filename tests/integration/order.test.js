@@ -542,7 +542,7 @@ describe('Order Integration Tests', () => {
     });
   });
 
-  describe.skip('Bulk order operations' // TODO: Implement bulk order endpoints, () => {
+  describe.skip('Bulk order operations', () => { // TODO: Implement bulk order endpoints
     let testOrders;
 
     beforeEach(async () => {
@@ -665,7 +665,7 @@ describe('Order Integration Tests', () => {
     });
   });
 
-  describe.skip('Order export functionality' // TODO: Implement order export endpoints, () => {
+  describe.skip('Order export functionality', () => { // TODO: Implement order export endpoints
     beforeEach(async () => {
       const orders = [];
       for (let i = 1; i <= 15; i++) {

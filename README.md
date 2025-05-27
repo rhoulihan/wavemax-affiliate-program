@@ -364,6 +364,53 @@ fetch('/api/v1/orders', {
 });
 ```
 
+## Email Service Configuration
+
+The application supports multiple email providers for sending notifications:
+
+### Supported Email Providers
+
+1. **Standard SMTP** (`EMAIL_PROVIDER=smtp`)
+   - Works with any SMTP server (Gmail, SendGrid, Mailgun, etc.)
+   - Simple username/password authentication
+
+2. **Amazon SES** (`EMAIL_PROVIDER=ses`)
+   - High-volume, cost-effective email service
+   - Requires AWS credentials and verified domain/email
+
+3. **MS Exchange Server** (`EMAIL_PROVIDER=exchange`)
+   - Support for Microsoft Exchange Server (on-premise or Office 365)
+   - Compatible with Exchange 2013, 2016, 2019, and Exchange Online
+   - Supports both standard and self-signed certificates
+
+4. **Console Logging** (`EMAIL_PROVIDER=console`)
+   - Development/testing mode
+   - Logs emails to console instead of sending
+
+### Exchange Server Setup Example
+
+For Office 365:
+```env
+EMAIL_PROVIDER=exchange
+EXCHANGE_HOST=smtp.office365.com
+EXCHANGE_PORT=587
+EXCHANGE_USER=your-email@yourdomain.com
+EXCHANGE_PASS=your-password
+EXCHANGE_FROM_EMAIL=noreply@yourdomain.com
+```
+
+For On-Premise Exchange:
+```env
+EMAIL_PROVIDER=exchange
+EXCHANGE_HOST=mail.yourdomain.local
+EXCHANGE_PORT=587
+EXCHANGE_USER=DOMAIN\\username
+EXCHANGE_PASS=your-password
+EXCHANGE_FROM_EMAIL=noreply@yourdomain.com
+# For self-signed certificates in dev/test environments only
+EXCHANGE_REJECT_UNAUTHORIZED=false
+```
+
 ## Local Development Setup
 
 ### Prerequisites
@@ -419,14 +466,36 @@ fetch('/api/v1/orders', {
 | `ENCRYPTION_KEY` | 32-byte hex key for encryption | Yes |
 | `JWT_SECRET` | Secret for JWT signing | Yes |
 | `SESSION_SECRET` | Express session secret | Yes |
-| `EMAIL_PROVIDER` | Email service (ses/smtp) | Yes |
-| `AWS_REGION` | AWS region for SES | If using SES |
-| `AWS_ACCESS_KEY_ID` | AWS access key | If using SES |
-| `AWS_SECRET_ACCESS_KEY` | AWS secret key | If using SES |
-| `SES_FROM_EMAIL` | Verified sender email | Yes |
+| `EMAIL_PROVIDER` | Email service (ses/smtp/exchange/console) | Yes |
 | `CORS_ORIGIN` | Allowed CORS origins | Yes |
 | `LOG_LEVEL` | Logging level | No |
 | `LOG_DIR` | Directory for log files | No |
+
+#### Standard SMTP Configuration (when EMAIL_PROVIDER=smtp)
+| Variable | Description | Required |
+|----------|-------------|----------|
+| `EMAIL_HOST` | SMTP server hostname | Yes |
+| `EMAIL_PORT` | SMTP server port | Yes |
+| `EMAIL_USER` | SMTP username | Yes |
+| `EMAIL_PASS` | SMTP password | Yes |
+
+#### Amazon SES Configuration (when EMAIL_PROVIDER=ses)
+| Variable | Description | Required |
+|----------|-------------|----------|
+| `AWS_REGION` | AWS region for SES | Yes |
+| `AWS_ACCESS_KEY_ID` | AWS access key | Yes |
+| `AWS_SECRET_ACCESS_KEY` | AWS secret key | Yes |
+| `SES_FROM_EMAIL` | Verified sender email | Yes |
+
+#### MS Exchange Server Configuration (when EMAIL_PROVIDER=exchange)
+| Variable | Description | Required |
+|----------|-------------|----------|
+| `EXCHANGE_HOST` | Exchange server hostname | Yes |
+| `EXCHANGE_PORT` | Exchange server port (default: 587) | Yes |
+| `EXCHANGE_USER` | Exchange username | Yes |
+| `EXCHANGE_PASS` | Exchange password | Yes |
+| `EXCHANGE_FROM_EMAIL` | Sender email address | No |
+| `EXCHANGE_REJECT_UNAUTHORIZED` | Validate SSL certificates (default: true) | No |
 
 ## Testing
 

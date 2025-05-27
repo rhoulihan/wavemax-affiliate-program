@@ -38,6 +38,24 @@ const createTransport = () => {
     return nodemailer.createTransport({
       SES: { ses: sesClient, aws: require('@aws-sdk/client-ses') }
     });
+  }
+  // Check if using MS Exchange Server
+  else if (process.env.EMAIL_PROVIDER === 'exchange') {
+    return nodemailer.createTransport({
+      host: process.env.EXCHANGE_HOST,
+      port: parseInt(process.env.EXCHANGE_PORT) || 587,
+      secure: process.env.EXCHANGE_PORT === '465',
+      auth: {
+        user: process.env.EXCHANGE_USER,
+        pass: process.env.EXCHANGE_PASS
+      },
+      tls: {
+        ciphers: 'SSLv3',
+        rejectUnauthorized: process.env.EXCHANGE_REJECT_UNAUTHORIZED !== 'false'
+      },
+      debug: process.env.NODE_ENV === 'development',
+      logger: process.env.NODE_ENV === 'development'
+    });
   } else {
     // Use standard SMTP transport for non-SES configuration
     return nodemailer.createTransport({
@@ -120,7 +138,9 @@ const sendEmail = async (to, subject, html) => {
       ? process.env.SES_FROM_EMAIL
       : process.env.EMAIL_PROVIDER === 'console'
         ? process.env.EMAIL_FROM || 'noreply@wavemax.promo'
-        : `"WaveMAX Laundry" <${process.env.EMAIL_USER}>`;
+        : process.env.EMAIL_PROVIDER === 'exchange'
+          ? process.env.EXCHANGE_FROM_EMAIL || process.env.EXCHANGE_USER
+          : `"WaveMAX Laundry" <${process.env.EMAIL_USER}>`;
 
     const info = await transporter.sendMail({
       from,
