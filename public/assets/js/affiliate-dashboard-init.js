@@ -39,6 +39,9 @@ function initializeAffiliateDashboard() {
   
   // Load settings data on initial load
   loadSettingsData(affiliateId);
+  
+  // Load pickups data for the default active tab
+  loadPickupRequests(affiliateId);
 
   // Setup tab navigation
   const tabButtons = document.querySelectorAll('.tab-btn');
