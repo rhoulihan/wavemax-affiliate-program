@@ -426,7 +426,7 @@ describe('Order Integration Tests', () => {
 
       const response = await agent
         .put('/api/v1/orders/ORD123456/status')
-        .set('Authorization', `Bearer ${affiliateToken}`)
+        .set('Authorization', `Bearer ${otherAffiliateToken}`)
         .set('X-CSRF-Token', csrfToken)
         .send({
           status: 'picked_up'
@@ -442,7 +442,7 @@ describe('Order Integration Tests', () => {
     it('should fail for customers', async () => {
       const response = await agent
         .put('/api/v1/orders/ORD123456/status')
-        .set('Authorization', `Bearer ${affiliateToken}`)
+        .set('Authorization', `Bearer ${customerToken}`)
         .set('X-CSRF-Token', csrfToken)
         .send({
           status: 'picked_up'
@@ -530,7 +530,7 @@ describe('Order Integration Tests', () => {
 
       const response = await agent
         .post('/api/v1/orders/ORD123456/cancel')
-        .set('Authorization', `Bearer ${customerToken}`)
+        .set('Authorization', `Bearer ${otherCustomerToken}`)
         .set('X-CSRF-Token', csrfToken)
         .send({});
 
@@ -881,7 +881,7 @@ describe('Order Integration Tests', () => {
     });
   });
 
-  describe.skip('Order filtering and search' // TODO: Implement search and statistics endpoints, () => {
+  describe.skip('Order filtering and search', () => { // TODO: Implement search and statistics endpoints
     beforeEach(async () => {
       const customers = [
         { customerId: 'CUST001', firstName: 'Alice', lastName: 'Anderson', affiliateId: 'AFF123' },
