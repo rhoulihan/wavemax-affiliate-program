@@ -12,7 +12,7 @@
     "test:coverage": "jest --coverage --runInBand --forceExit",
     "test:watch": "jest --watch",
     "test:all": "./tests/runAllTests.sh",
-    "test:memory": "NODE_OPTIONS='--max-old-space-size=512' jest --runInBand --forceExit --maxWorkers=1",
+    "test:memory": "NODE_OPTIONS='--max-old-space-size=512' jest --runInBand --forceExit",
     "test:memory:batch": "./tests/runMemoryOptimizedTests.sh",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
