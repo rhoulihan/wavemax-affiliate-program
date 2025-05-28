@@ -1,12 +1,12 @@
 const express = require('express');
 const router = express.Router();
 const operatorController = require('../controllers/operatorController');
-const { authenticateToken } = require('../middleware/auth');
-const { requireRole } = require('../middleware/rbac');
+const { authenticate } = require('../middleware/auth');
+const { checkRole } = require('../middleware/rbac');
 
 // All routes require authentication and operator role
-router.use(authenticateToken);
-router.use(requireRole('operator'));
+router.use(authenticate);
+router.use(checkRole(['operator']));
 
 // Dashboard
 router.get('/dashboard', operatorController.getDashboard);
