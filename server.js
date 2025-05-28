@@ -176,7 +176,7 @@ app.use(session({
   saveUninitialized: false,
   store: MongoStore.create({ mongoUrl: process.env.MONGODB_URI }),
   cookie: {
-    secure: true, // Always use secure in production
+    secure: process.env.NODE_ENV === 'production', // Only use secure in production
     httpOnly: true,
     maxAge: 24 * 60 * 60 * 1000,
     sameSite: 'lax' // Allow cookies in same-site requests
@@ -255,14 +255,6 @@ const conditionalCsrf = (req, res, next) => {
   // Skip CSRF for excluded paths and GET requests
   if (isExcluded || req.method === 'GET' || req.method === 'HEAD' || req.method === 'OPTIONS') {
     return next();
-  }
-
-  // Debug logging for CSRF
-  if (req.path.includes('delete-all-data')) {
-    console.log('CSRF Debug - Path:', req.path);
-    console.log('CSRF Debug - Session:', req.session);
-    console.log('CSRF Debug - Headers:', req.headers);
-    console.log('CSRF Debug - Body:', req.body);
   }
 
   // Apply CSRF protection for all other routes

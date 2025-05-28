@@ -134,6 +134,9 @@ The WaveMAX Affiliate Program enables individuals to register as affiliates, onb
   - Implemented proper test isolation with MongoDB Memory Server
   - Added unit tests for security middleware and utilities
   - Achieved 80%+ code coverage across the application
+  - Fixed all failing tests (auth, affiliate, transaction models)
+  - Added memory optimization for resource-constrained environments
+  - Created custom test sequencer for efficient test execution
 
 ### Feature Updates
 - **Landing Page Update**: Changed "5 Stars on Google" to "$0 Startup Cost" in promotional messaging
@@ -583,7 +586,21 @@ npm run test:integration
 
 # Watch mode for development
 npm run test:watch
+
+# Memory-optimized testing (for resource-constrained environments)
+npm run test:memory          # Runs all tests with memory limits
+npm run test:memory:batch    # Runs tests with detailed memory optimization
+
+# If running on a server with limited memory, use:
+NODE_OPTIONS="--max-old-space-size=512" npm test -- --runInBand --maxWorkers=1
 ```
+
+### Memory Optimization
+
+For servers with limited memory (< 1GB), tests may fail due to resource exhaustion. The project includes:
+- Custom test sequencer that runs unit tests before integration tests
+- Memory-optimized Jest configuration with single worker process
+- Batch test script with heap usage monitoring
 
 ### Test Coverage
 

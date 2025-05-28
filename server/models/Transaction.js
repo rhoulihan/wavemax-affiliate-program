@@ -10,6 +10,11 @@ const transactionSchema = new mongoose.Schema({
     unique: true
   },
   affiliateId: { type: String, required: true, ref: 'Affiliate' },
+  type: {
+    type: String,
+    enum: ['commission', 'payout', 'adjustment'],
+    required: true
+  },
   amount: { type: Number, required: true },
   description: String,
   orders: [{ type: String, ref: 'Order' }],

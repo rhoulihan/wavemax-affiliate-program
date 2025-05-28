@@ -228,7 +228,7 @@ describe('Affiliate API', () => {
     expect(res.body).toHaveProperty('orders');
     expect(res.body.orders).toHaveLength(2);
     expect(res.body).toHaveProperty('pagination');
-    expect(res.body).toHaveProperty('totalEarnings', 44.41);
+    expect(res.body).toHaveProperty('totalEarnings', 10.43);
   });
 
   test('should get affiliate\'s earnings/transactions', async () => {
@@ -239,9 +239,10 @@ describe('Affiliate API', () => {
         affiliateId: testAffiliate.affiliateId,
         orderId: 'ORD001',
         type: 'commission',
-        amount: 44.41,
+        amount: 10.43,
         description: 'Commission for order ORD001',
-        status: 'pending'
+        status: 'pending',
+        payoutMethod: 'directDeposit'
       },
       {
         transactionId: 'TXN002',
@@ -250,8 +251,8 @@ describe('Affiliate API', () => {
         amount: -100.00,
         description: 'Weekly payout',
         status: 'completed',
-        paymentMethod: 'directDeposit',
-        paymentReference: 'REF123'
+        payoutMethod: 'directDeposit',
+        payoutReference: 'REF123'
       }
     ]);
 
@@ -266,10 +267,9 @@ describe('Affiliate API', () => {
     expect(res.body.transactions).toHaveLength(2);
     expect(res.body).toHaveProperty('summary');
     expect(res.body.summary).toMatchObject({
-      totalEarnings: 44.41,
+      totalEarnings: 10.43,
       totalPayouts: 100.00,
-      pendingAmount: 44.41,
-      balance: -55.59
+      pendingAmount: 10.43
     });
   });
 

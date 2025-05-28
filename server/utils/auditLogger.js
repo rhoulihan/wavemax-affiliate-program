@@ -94,8 +94,8 @@ const logAuditEvent = (eventType, details, req = null) => {
   };
 
   // Add request context if available
-  if (req) {
-    auditEntry.ip = req.ip || req.connection.remoteAddress;
+  if (req && typeof req.get === 'function') {
+    auditEntry.ip = req.ip || (req.connection && req.connection.remoteAddress) || 'unknown';
     auditEntry.userAgent = req.get('user-agent');
     auditEntry.method = req.method;
     auditEntry.path = req.path;

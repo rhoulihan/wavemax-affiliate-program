@@ -243,8 +243,8 @@ exports.updateCustomerProfile = async (req, res) => {
 
     // Fields that can be updated
     const updatableFields = [
-      'firstName', 'lastName', 'email', 'phone', 'address', 'city', 'state', 'zipCode',
-      'deliveryInstructions', 'specialInstructions', 'affiliateSpecialInstructions', 'cardholderName'
+      'firstName', 'lastName', 'phone', 'address', 'city', 'state', 'zipCode',
+      'serviceFrequency', 'deliveryInstructions', 'specialInstructions', 'affiliateSpecialInstructions', 'cardholderName'
     ];
 
     // Update fields
@@ -281,7 +281,7 @@ exports.updateCustomerProfile = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      message: 'Customer profile updated successfully'
+      message: 'Customer profile updated successfully!'
     });
   } catch (error) {
     console.error('Update customer profile error:', error);
@@ -348,30 +348,21 @@ exports.getCustomerOrders = async (req, res) => {
       .skip((page - 1) * limit)
       .limit(parseInt(limit));
 
-    // Prepare response data
-    const ordersData = orders.map(order => ({
-      orderId: order.orderId,
-      pickupDate: order.pickupDate,
-      pickupTime: order.pickupTime,
-      deliveryDate: order.deliveryDate,
-      deliveryTime: order.deliveryTime,
-      status: order.status,
-      estimatedSize: order.estimatedSize,
-      actualWeight: order.actualWeight,
-      estimatedTotal: order.estimatedTotal,
-      actualTotal: order.actualTotal,
-      createdAt: order.createdAt,
-      pickedUpAt: order.pickedUpAt,
-      deliveredAt: order.deliveredAt
-    }));
+    // Determine user role
+    const userRole = req.user ? req.user.role : 'public';
+    
+    // Filter orders based on role
+    const filteredOrders = getFilteredData('order', orders.map(o => o.toObject()), userRole);
 
     res.status(200).json({
       success: true,
-      orders: ordersData,
+      orders: filteredOrders,
       pagination: {
         total: totalOrders,
-        page,
-        limit,
+        page: parseInt(page),
+        currentPage: parseInt(page),
+        limit: parseInt(limit),
+        perPage: parseInt(limit),
         pages: Math.ceil(totalOrders / limit)
       }
     });
@@ -519,7 +510,15 @@ exports.getCustomerDashboardStats = async (req, res) => {
  */
 exports.reportLostBag = async (req, res) => {
   try {
-    const { customerId, bagId } = req.params;
+    // Handle both route formats
+    let { customerId, bagId } = req.params;
+    let bagBarcode = req.body.bagBarcode;
+    
+    // If using the alternate route, get data from body
+    if (!customerId || !bagId) {
+      customerId = req.body.customerId || req.user?.customerId;
+      bagId = req.body.bagId;
+    }
 
     // Verify customer exists
     const customer = await Customer.findOne({ customerId });
@@ -544,8 +543,21 @@ exports.reportLostBag = async (req, res) => {
       });
     }
 
-    // Find the bag
-    const bag = await Bag.findOne({ bagId, customerId });
+    // Find the bag by ID or barcode
+    let bag;
+    if (bagId) {
+      bag = await Bag.findOne({ bagId, customerId });
+    } else if (bagBarcode) {
+      bag = await Bag.findOne({ barcode: bagBarcode });
+      
+      // If found by barcode, verify it belongs to the customer
+      if (bag && bag.customerId !== customerId) {
+        return res.status(403).json({
+          success: false,
+          message: 'Unauthorized'
+        });
+      }
+    }
 
     if (!bag) {
       return res.status(404).json({
@@ -572,7 +584,7 @@ exports.reportLostBag = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      message: 'Bag reported as lost successfully'
+      message: 'Lost bag report submitted successfully'
     });
   } catch (error) {
     console.error('Report lost bag error:', error);
