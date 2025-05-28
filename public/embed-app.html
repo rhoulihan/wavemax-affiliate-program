@@ -169,8 +169,12 @@
                     }, '*');
                 }
                 
-                // Send height to parent
-                sendHeight();
+                // Send height to parent after a short delay to ensure content is rendered
+                setTimeout(() => {
+                    sendHeight();
+                    // Also scroll parent to top
+                    scrollParentToTop();
+                }, 100);
                 
             } catch (error) {
                 console.error('Error loading page:', error);
@@ -234,7 +238,11 @@
                 '/customer-dashboard': ['/assets/js/errorHandler.js', '/assets/js/customer-dashboard.js'],
                 '/customer-success': ['/assets/js/customer-success.js'],
                 '/schedule-pickup': ['/assets/js/errorHandler.js', '/assets/js/schedule-pickup.js'],
-                '/order-confirmation': ['/assets/js/errorHandler.js', '/assets/js/order-confirmation.js']
+                '/order-confirmation': ['/assets/js/errorHandler.js', '/assets/js/order-confirmation.js'],
+                '/administrator-login': ['/assets/js/errorHandler.js', '/assets/js/administrator-login-init.js'],
+                '/administrator-dashboard': ['/assets/js/errorHandler.js', '/assets/js/administrator-dashboard-init.js'],
+                '/operator-login': ['/assets/js/errorHandler.js', '/assets/js/operator-login-init.js'],
+                '/operator-dashboard': ['/assets/js/errorHandler.js', '/assets/js/operator-dashboard-init.js']
             };
             
             const scripts = pageScripts[currentRoute] || [];
@@ -263,6 +271,11 @@
                         loadNextScript();
                     };
                     document.body.appendChild(script);
+                } else {
+                    // All scripts loaded, send height again
+                    setTimeout(() => {
+                        sendHeight();
+                    }, 200);
                 }
             }
             
@@ -291,16 +304,37 @@
         // Send height to parent window
         function sendHeight() {
             if (window.parent !== window) {
-                const height = Math.max(
+                // Force a reflow to ensure accurate height measurement
+                document.body.style.display = 'none';
+                document.body.offsetHeight; // Force reflow
+                document.body.style.display = '';
+                
+                // Get the most accurate height
+                const heights = [
                     document.body.scrollHeight,
                     document.body.offsetHeight,
                     document.documentElement.scrollHeight,
-                    document.documentElement.offsetHeight
-                );
+                    document.documentElement.offsetHeight,
+                    document.querySelector('#app-container')?.scrollHeight || 0
+                ];
+                
+                const height = Math.max(...heights) + 50; // Add some buffer
+                
+                console.log('Sending height to parent:', height);
                 
                 window.parent.postMessage({
                     type: 'resize',
                     data: { height: height }
+                }, '*');
+            }
+        }
+        
+        // Scroll parent window to top
+        function scrollParentToTop() {
+            if (window.parent !== window) {
+                window.parent.postMessage({
+                    type: 'scroll-to-top',
+                    data: {}
                 }, '*');
             }
         }
@@ -374,6 +408,23 @@
             
             // Start observing body for size changes
             resizeObserver.observe(document.body);
+            
+            // Also observe the app container specifically
+            const appContainer = document.getElementById('app-container');
+            if (appContainer) {
+                resizeObserver.observe(appContainer);
+                
+                // Additionally use MutationObserver for DOM changes
+                const mutationObserver = new MutationObserver(() => {
+                    setTimeout(sendHeight, 100);
+                });
+                
+                mutationObserver.observe(appContainer, {
+                    childList: true,
+                    subtree: true,
+                    attributes: true
+                });
+            }
         });
         
         // Also send height on window resize
