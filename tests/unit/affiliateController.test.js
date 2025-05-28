@@ -892,6 +892,8 @@ describe('Affiliate Controller', () => {
 
     it('should delete all affiliate data in development environment', async () => {
       process.env.NODE_ENV = 'development';
+      req.params.affiliateId = 'AFF123';
+      
       const mockAffiliate = { affiliateId: 'AFF123' };
       const mockCustomers = [
         { customerId: 'CUST1' },
@@ -952,21 +954,21 @@ describe('Affiliate Controller', () => {
 
     it('should reject unauthorized deletion', async () => {
       process.env.NODE_ENV = 'development';
+      req.params.affiliateId = 'AFF123';
       req.user.affiliateId = 'AFF456';
-
-      Affiliate.findOne.mockResolvedValue({ affiliateId: 'AFF123' });
 
       await affiliateController.deleteAffiliateData(req, res);
 
       expect(res.status).toHaveBeenCalledWith(403);
       expect(res.json).toHaveBeenCalledWith({
         success: false,
-        message: 'Unauthorized'
+        message: 'You can only delete your own data'
       });
     });
 
     it('should handle deletion errors', async () => {
       process.env.NODE_ENV = 'development';
+      req.params.affiliateId = 'AFF123';
 
       Affiliate.findOne.mockRejectedValue(new Error('Database error'));
 

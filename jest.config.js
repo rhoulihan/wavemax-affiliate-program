@@ -28,5 +28,9 @@ module.exports = {
   },
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/server/$1'
-  }
+  },
+  // Resource optimization for limited memory environments
+  maxWorkers: 1,
+  maxConcurrency: 1,
+  testSequencer: '<rootDir>/tests/testSequencer.js'
 };

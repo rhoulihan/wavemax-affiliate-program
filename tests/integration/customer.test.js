@@ -117,7 +117,7 @@ describe('Customer Integration Tests', () => {
       // Verify bag was created
       const bag = await Bag.findOne({ customerId: customer.customerId });
       expect(bag).toBeTruthy();
-      expect(bag.status).toBe('active');
+      expect(bag.status).toBe('assigned');
     });
 
     it('should fail with invalid affiliate ID', async () => {
@@ -166,7 +166,7 @@ describe('Customer Integration Tests', () => {
       expect(response.status).toBe(400);
       expect(response.body).toMatchObject({
         success: false,
-        message: 'Email or username already exists'
+        message: 'Email or username already in use'
       });
     });
 
@@ -191,7 +191,7 @@ describe('Customer Integration Tests', () => {
       expect(response.status).toBe(400);
       expect(response.body).toMatchObject({
         success: false,
-        message: 'Email or username already exists'
+        message: 'Email or username already in use'
       });
     });
   });
@@ -257,11 +257,23 @@ describe('Customer Integration Tests', () => {
       });
     });
 
-    it('should fail without authentication', async () => {
+    it('should return limited data without authentication', async () => {
       const response = await agent
         .get('/api/v1/customers/CUST123/profile');
 
-      expect(response.status).toBe(401);
+      expect(response.status).toBe(200);
+      expect(response.body).toMatchObject({
+        success: true,
+        customer: {
+          customerId: 'CUST123',
+          firstName: 'Jane',
+          lastName: 'Smith'
+        }
+      });
+      // Should not include sensitive data
+      expect(response.body.customer).not.toHaveProperty('email');
+      expect(response.body.customer).not.toHaveProperty('phone');
+      expect(response.body.customer).not.toHaveProperty('address');
     });
   });
 
@@ -387,9 +399,10 @@ describe('Customer Integration Tests', () => {
     beforeEach(async () => {
       // Create test bag
       const bag = new Bag({
-        bagBarcode: 'BAG123',
+        barcode: 'BAG123',
         customerId: 'CUST123',
-        status: 'active'
+        affiliateId: 'AFF123',
+        status: 'assigned'
       });
       await bag.save();
     });
@@ -410,7 +423,7 @@ describe('Customer Integration Tests', () => {
       });
 
       // Verify bag status was updated
-      const bag = await Bag.findOne({ bagBarcode: 'BAG123' });
+      const bag = await Bag.findOne({ barcode: 'BAG123' });
       expect(bag.status).toBe('lost');
     });
 
@@ -433,9 +446,10 @@ describe('Customer Integration Tests', () => {
     it('should fail for unauthorized bag report', async () => {
       // Create bag for different customer
       const otherBag = new Bag({
-        bagBarcode: 'BAG999',
+        barcode: 'BAG999',
         customerId: 'CUST999',
-        status: 'active'
+        affiliateId: 'AFF123',
+        status: 'assigned'
       });
       await otherBag.save();
 

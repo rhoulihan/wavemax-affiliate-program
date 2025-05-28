@@ -27,10 +27,23 @@ router.post('/register', [
 
 /**
  * @route   GET /api/customers/:customerId/profile
- * @desc    Get customer profile (public for success page)
- * @access  Public (temporary for registration success)
+ * @desc    Get customer profile (public for success page, authenticated for full profile)
+ * @access  Public (limited) / Private (full)
  */
-router.get('/:customerId/profile', customerController.getCustomerProfile);
+router.get('/:customerId/profile', (req, res, next) => {
+  // Try to authenticate if token is provided, but don't require it
+  if (req.headers.authorization || req.headers['x-auth-token']) {
+    authenticate(req, res, (err) => {
+      if (err) {
+        // Authentication failed, continue without user
+        req.user = null;
+      }
+      next();
+    });
+  } else {
+    next();
+  }
+}, customerController.getCustomerProfile);
 
 /**
  * @route   GET /api/customers/:customerId
@@ -40,11 +53,11 @@ router.get('/:customerId/profile', customerController.getCustomerProfile);
 router.get('/:customerId', authenticate, customerController.getCustomerProfile);
 
 /**
- * @route   PUT /api/customers/:customerId
+ * @route   PUT /api/customers/:customerId/profile
  * @desc    Update customer profile
  * @access  Private (self, affiliated affiliate, or admin)
  */
-router.put('/:customerId', authenticate, customerController.updateCustomerProfile);
+router.put('/:customerId/profile', authenticate, customerController.updateCustomerProfile);
 
 /**
  * @route   GET /api/customers/:customerId/orders
@@ -66,6 +79,13 @@ router.get('/:customerId/dashboard', authenticate, customerController.getCustome
  * @access  Private (self, affiliated affiliate, or admin)
  */
 router.post('/:customerId/bags/:bagId/report-lost', authenticate, customerController.reportLostBag);
+
+/**
+ * @route   POST /api/customers/report-lost-bag
+ * @desc    Report a lost bag (alternative route)
+ * @access  Private (self, affiliated affiliate, or admin)
+ */
+router.post('/report-lost-bag', authenticate, customerController.reportLostBag);
 
 /**
  * @route   PUT /api/customers/:customerId/payment

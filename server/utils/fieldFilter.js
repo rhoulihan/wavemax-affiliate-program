@@ -35,7 +35,7 @@ const filterArray = (arr, allowedFields) => {
 const fieldDefinitions = {
   // Affiliate fields visible to different roles
   affiliate: {
-    public: ['affiliateId', 'firstName', 'lastName', 'businessName', 'deliveryFee'],
+    public: ['affiliateId', 'firstName', 'lastName', 'businessName', 'deliveryFee', 'name'],
     self: ['affiliateId', 'firstName', 'lastName', 'email', 'phone', 'businessName',
       'deliveryFee', 'commissionRate', 'isActive', 'registrationDate', 'lastLogin'],
     admin: ['_id', 'affiliateId', 'firstName', 'lastName', 'email', 'phone',
@@ -48,13 +48,13 @@ const fieldDefinitions = {
   customer: {
     public: ['customerId', 'firstName', 'lastName'],
     self: ['customerId', 'firstName', 'lastName', 'email', 'phone', 'address',
-      'city', 'state', 'zipCode', 'deliveryInstructions',
+      'city', 'state', 'zipCode', 'deliveryInstructions', 'serviceFrequency',
       'specialInstructions', 'affiliateSpecialInstructions', 'lastFourDigits',
       'savePaymentInfo', 'isActive', 'registrationDate', 'lastLogin'],
     affiliate: ['customerId', 'firstName', 'lastName', 'email', 'phone', 'address',
-      'city', 'state', 'zipCode', 'specialInstructions', 'affiliateSpecialInstructions', 'isActive', 'registrationDate'],
+      'city', 'state', 'zipCode', 'serviceFrequency', 'specialInstructions', 'affiliateSpecialInstructions', 'isActive', 'registrationDate'],
     admin: ['_id', 'customerId', 'affiliateId', 'firstName', 'lastName', 'email',
-      'phone', 'address', 'city', 'state', 'zipCode', 'deliveryInstructions',
+      'phone', 'address', 'city', 'state', 'zipCode', 'deliveryInstructions', 'serviceFrequency',
       'specialInstructions', 'affiliateSpecialInstructions',
       'username', 'lastFourDigits', 'billingZip', 'savePaymentInfo', 'isActive',
       'registrationDate', 'lastLogin']
@@ -162,5 +162,6 @@ module.exports = {
   filterArray,
   getFilteredData,
   responseFilter,
-  fieldDefinitions
+  fieldDefinitions,
+  fieldFilter: (data, role) => data // Simple passthrough for compatibility
 };

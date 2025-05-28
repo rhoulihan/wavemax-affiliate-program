@@ -46,7 +46,16 @@ const affiliateSchema = new mongoose.Schema({
   isActive: { type: Boolean, default: true },
   dateRegistered: { type: Date, default: Date.now },
   lastLogin: Date
-}, { timestamps: true });
+}, { 
+  timestamps: true,
+  toObject: { virtuals: true },
+  toJSON: { virtuals: true }
+});
+
+// Virtual field for full name
+affiliateSchema.virtual('name').get(function() {
+  return `${this.firstName} ${this.lastName}`;
+});
 
 // Middleware for encrypting sensitive payment data before saving
 affiliateSchema.pre('save', function(next) {

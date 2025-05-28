@@ -19,6 +19,7 @@ const customerSchema = new mongoose.Schema({
   city: { type: String, required: true },
   state: { type: String, required: true },
   zipCode: { type: String, required: true },
+  serviceFrequency: { type: String, enum: ['weekly', 'biweekly', 'monthly'], default: 'weekly' },
   deliveryInstructions: String,
   specialInstructions: String,
   affiliateSpecialInstructions: String,

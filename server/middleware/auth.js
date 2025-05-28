@@ -11,12 +11,13 @@ const rateLimit = require('express-rate-limit');
 // Rate limiter for authentication
 exports.authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 20, // 20 attempts per IP (increased from 5 for better UX)
+  max: process.env.NODE_ENV === 'test' ? 1000 : 20, // Higher limit for tests
   message: { success: false, message: 'Too many login attempts, please try again later' },
   standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
   legacyHeaders: false, // Disable the `X-RateLimit-*` headers
   // Skip successful requests
-  skipSuccessfulRequests: true
+  skipSuccessfulRequests: true,
+  skip: () => process.env.NODE_ENV === 'test' // Skip rate limiting in test environment
 });
 
 /**

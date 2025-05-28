@@ -479,7 +479,9 @@ exports.getAffiliateCustomers = async (req, res) => {
         total: totalCustomers,
         page,
         limit,
-        pages: Math.ceil(totalCustomers / limit)
+        pages: Math.ceil(totalCustomers / limit),
+        currentPage: page,
+        perPage: limit
       }
     });
   } catch (error) {
@@ -606,10 +608,19 @@ exports.getAffiliateOrders = async (req, res) => {
       };
     });
 
+    // Calculate total earnings from delivered orders
+    const totalEarnings = orders.reduce((sum, order) => {
+      if (order.status === 'delivered' && order.affiliateCommission) {
+        return sum + order.affiliateCommission;
+      }
+      return sum;
+    }, 0);
+
     res.status(200).json({
       success: true,
       orders: ordersData,
       totalItems: totalOrders,
+      totalEarnings: parseFloat(totalEarnings.toFixed(2)),
       pagination: {
         total: totalOrders,
         page,
@@ -659,9 +670,33 @@ exports.getAffiliateTransactions = async (req, res) => {
       .skip((page - 1) * limit)
       .limit(parseInt(limit));
 
+    // Calculate summary
+    const allTransactions = await Transaction.find({ affiliateId });
+    const summary = {
+      totalEarnings: 0,
+      totalPayouts: 0,
+      pendingAmount: 0
+    };
+
+    allTransactions.forEach(transaction => {
+      if (transaction.type === 'commission') {
+        summary.totalEarnings += transaction.amount;
+        if (transaction.status === 'pending') {
+          summary.pendingAmount += transaction.amount;
+        }
+      } else if (transaction.type === 'payout' && transaction.status === 'completed') {
+        summary.totalPayouts += Math.abs(transaction.amount);
+      }
+    });
+
     res.status(200).json({
       success: true,
       transactions,
+      summary: {
+        totalEarnings: parseFloat(summary.totalEarnings.toFixed(2)),
+        totalPayouts: parseFloat(summary.totalPayouts.toFixed(2)),
+        pendingAmount: parseFloat(summary.pendingAmount.toFixed(2))
+      },
       pagination: {
         total: totalTransactions,
         page,
@@ -821,17 +856,8 @@ exports.getPublicAffiliateInfo = async (req, res) => {
  */
 exports.deleteAffiliateData = async (req, res) => {
   try {
-    console.log('Delete data request received');
-    console.log('NODE_ENV:', process.env.NODE_ENV);
-    console.log('req.params:', req.params);
-    console.log('req.user:', req.user);
-    console.log('req.headers:', req.headers);
-    console.log('req.session:', req.session);
-    console.log('req.body:', req.body);
-    
     // Only allow in development or test environments
     if (process.env.NODE_ENV !== 'development' && process.env.NODE_ENV !== 'test') {
-      console.log('Environment check failed');
       return res.status(403).json({
         success: false,
         message: 'This operation is not allowed in production'

@@ -246,34 +246,21 @@ exports.administratorLogin = async (req, res) => {
     }
 
     // Verify password
-    const isPasswordValid = await administrator.comparePassword(password);
+    const isPasswordValid = administrator.verifyPassword(password);
 
     if (!isPasswordValid) {
       // Increment failed login attempts
-      administrator.failedLoginAttempts += 1;
-      
-      // Lock account after 5 failed attempts
-      if (administrator.failedLoginAttempts >= 5) {
-        administrator.isLocked = true;
-        administrator.lockedUntil = new Date(Date.now() + 30 * 60 * 1000); // 30 minutes
-      }
-      
-      await administrator.save();
+      await administrator.incLoginAttempts();
       
       logLoginAttempt(false, 'administrator', email, req, 'Invalid password');
       return res.status(401).json({
         success: false,
-        message: 'Invalid email or password',
-        ...(administrator.failedLoginAttempts >= 3 && {
-          warning: `${5 - administrator.failedLoginAttempts} attempts remaining before account lock`
-        })
+        message: 'Invalid email or password'
       });
     }
 
     // Reset failed login attempts
-    administrator.failedLoginAttempts = 0;
-    administrator.lastLogin = new Date();
-    await administrator.save();
+    await administrator.resetLoginAttempts();
 
     // Generate token
     const token = generateToken({
@@ -292,20 +279,23 @@ exports.administratorLogin = async (req, res) => {
 
     // Log successful login
     logLoginAttempt(true, 'administrator', email, req);
-    logAuditEvent(AuditEvents.AUTH_LOGIN, 'administrator', administrator._id, {
-      adminId: administrator.adminId,
-      ip: req.ip
-    });
+    logAuditEvent(AuditEvents.AUTH_LOGIN, {
+      userType: 'administrator',
+      userId: administrator._id,
+      adminId: administrator.adminId
+    }, req);
 
     res.status(200).json({
       success: true,
       token,
       refreshToken,
-      administrator: {
+      user: {
+        id: administrator._id,
         adminId: administrator.adminId,
         firstName: administrator.firstName,
         lastName: administrator.lastName,
         email: administrator.email,
+        role: 'administrator',
         permissions: administrator.permissions
       }
     });
@@ -395,21 +385,24 @@ exports.operatorLogin = async (req, res) => {
 
     // Log successful login
     logLoginAttempt(true, 'operator', email, req);
-    logAuditEvent(AuditEvents.AUTH_LOGIN, 'operator', operator._id, {
+    logAuditEvent(AuditEvents.AUTH_LOGIN, {
+      userType: 'operator',
+      userId: operator._id,
       operatorId: operator.operatorId,
-      ip: req.ip,
       shift: `${operator.shiftStart} - ${operator.shiftEnd}`
-    });
+    }, req);
 
     res.status(200).json({
       success: true,
       token,
       refreshToken,
-      operator: {
+      user: {
+        id: operator._id,
         operatorId: operator.operatorId,
         firstName: operator.firstName,
         lastName: operator.lastName,
         email: operator.email,
+        role: 'operator',
         shiftStart: operator.shiftStart,
         shiftEnd: operator.shiftEnd,
         workStation: operator.workStation
