@@ -119,7 +119,7 @@ router.post('/reset-password',
  * @desc    Verify user token
  * @access  Private
  */
-router.get('/verify', authenticateToken, authController.verifyToken);
+router.get('/verify', authenticateToken, (req, res) => authController.verifyToken(req, res));
 
 router.post('/refresh-token',
   [
