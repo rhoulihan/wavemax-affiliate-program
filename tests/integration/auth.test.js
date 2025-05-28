@@ -2,6 +2,8 @@ const request = require('supertest');
 const app = require('../../server');
 const Affiliate = require('../../server/models/Affiliate');
 const Customer = require('../../server/models/Customer');
+const Administrator = require('../../server/models/Administrator');
+const Operator = require('../../server/models/Operator');
 const RefreshToken = require('../../server/models/RefreshToken');
 const encryptionUtil = require('../../server/utils/encryption');
 const { getCsrfToken, createAgent } = require('../helpers/csrfHelper');
@@ -19,6 +21,8 @@ describe('Authentication Integration Tests', () => {
     // Clear database
     await Affiliate.deleteMany({});
     await Customer.deleteMany({});
+    await Administrator.deleteMany({});
+    await Operator.deleteMany({});
     await RefreshToken.deleteMany({});
   });
 
@@ -653,6 +657,191 @@ describe('Authentication Integration Tests', () => {
 
       expect(verify1After.status).toBe(401);
       expect(verify2After.status).toBe(401);
+    });
+  });
+
+  describe('POST /api/v1/auth/administrator/login', () => {
+    it('should login administrator with valid credentials', async () => {
+      // Create test administrator
+      const admin = new Administrator({
+        adminId: 'ADM001',
+        firstName: 'Admin',
+        lastName: 'User',
+        email: 'admin@example.com',
+        password: 'Admin123!',
+        permissions: ['system_config', 'operator_management'],
+        isActive: true
+      });
+      await admin.save();
+
+      const response = await agent
+        .post('/api/v1/auth/administrator/login')
+        .set('X-CSRF-Token', csrfToken)
+        .send({
+          email: 'admin@example.com',
+          password: 'Admin123!'
+        });
+
+      expect(response.status).toBe(200);
+      expect(response.body).toMatchObject({
+        success: true,
+        token: expect.any(String),
+        refreshToken: expect.any(String),
+        user: {
+          id: expect.any(String),
+          email: 'admin@example.com',
+          role: 'administrator',
+          adminId: 'ADM001'
+        }
+      });
+    });
+
+    it('should fail with invalid administrator credentials', async () => {
+      const admin = new Administrator({
+        adminId: 'ADM001',
+        firstName: 'Admin',
+        lastName: 'User',
+        email: 'admin@example.com',
+        password: 'Admin123!',
+        permissions: ['system_config'],
+        isActive: true
+      });
+      await admin.save();
+
+      const response = await agent
+        .post('/api/v1/auth/administrator/login')
+        .set('X-CSRF-Token', csrfToken)
+        .send({
+          email: 'admin@example.com',
+          password: 'wrongpassword'
+        });
+
+      expect(response.status).toBe(401);
+      expect(response.body).toMatchObject({
+        success: false,
+        message: 'Invalid credentials'
+      });
+    });
+
+    it('should fail when administrator is inactive', async () => {
+      const admin = new Administrator({
+        adminId: 'ADM001',
+        firstName: 'Admin',
+        lastName: 'User',
+        email: 'admin@example.com',
+        password: 'Admin123!',
+        permissions: ['system_config'],
+        isActive: false
+      });
+      await admin.save();
+
+      const response = await agent
+        .post('/api/v1/auth/administrator/login')
+        .set('X-CSRF-Token', csrfToken)
+        .send({
+          email: 'admin@example.com',
+          password: 'Admin123!'
+        });
+
+      expect(response.status).toBe(403);
+      expect(response.body).toMatchObject({
+        success: false,
+        message: 'Account is inactive'
+      });
+    });
+  });
+
+  describe('POST /api/v1/auth/operator/login', () => {
+    it('should login operator with valid credentials', async () => {
+      // Create test operator
+      const operator = new Operator({
+        operatorId: 'OPR001',
+        firstName: 'Op',
+        lastName: 'User',
+        email: 'operator@example.com',
+        password: 'Operator123!',
+        shiftStart: '08:00',
+        shiftEnd: '16:00',
+        isActive: true
+      });
+      await operator.save();
+
+      const response = await agent
+        .post('/api/v1/auth/operator/login')
+        .set('X-CSRF-Token', csrfToken)
+        .send({
+          email: 'operator@example.com',
+          password: 'Operator123!'
+        });
+
+      expect(response.status).toBe(200);
+      expect(response.body).toMatchObject({
+        success: true,
+        token: expect.any(String),
+        refreshToken: expect.any(String),
+        user: {
+          id: expect.any(String),
+          email: 'operator@example.com',
+          role: 'operator',
+          operatorId: 'OPR001'
+        }
+      });
+    });
+
+    it('should fail with invalid operator credentials', async () => {
+      const operator = new Operator({
+        operatorId: 'OPR001',
+        firstName: 'Op',
+        lastName: 'User',
+        email: 'operator@example.com',
+        password: 'Operator123!',
+        shiftStart: '08:00',
+        shiftEnd: '16:00',
+        isActive: true
+      });
+      await operator.save();
+
+      const response = await agent
+        .post('/api/v1/auth/operator/login')
+        .set('X-CSRF-Token', csrfToken)
+        .send({
+          email: 'operator@example.com',
+          password: 'wrongpassword'
+        });
+
+      expect(response.status).toBe(401);
+      expect(response.body).toMatchObject({
+        success: false,
+        message: 'Invalid credentials'
+      });
+    });
+
+    it('should fail when operator is inactive', async () => {
+      const operator = new Operator({
+        operatorId: 'OPR001',
+        firstName: 'Op',
+        lastName: 'User',
+        email: 'operator@example.com',
+        password: 'Operator123!',
+        shiftStart: '08:00',
+        shiftEnd: '16:00',
+        isActive: false
+      });
+      await operator.save();
+
+      const response = await agent
+        .post('/api/v1/auth/operator/login')
+        .set('X-CSRF-Token', csrfToken)
+        .send({
+          email: 'operator@example.com',
+          password: 'Operator123!'
+        });
+
+      expect(response.status).toBe(403);
+      expect(response.body).toMatchObject({
+        success: false,
+        message: 'Account is inactive'
+      });
     });
   });
 });

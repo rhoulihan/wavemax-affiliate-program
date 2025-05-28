@@ -59,6 +59,29 @@ const orderSchema = new mongoose.Schema({
     enum: ['card', 'cash', 'other'],
     default: 'card'
   },
+  // Operator processing fields
+  assignedOperator: { 
+    type: mongoose.Schema.Types.ObjectId, 
+    ref: 'Operator' 
+  },
+  processingStarted: Date,
+  processingCompleted: Date,
+  operatorNotes: String,
+  qualityCheckPassed: { 
+    type: Boolean, 
+    default: null 
+  },
+  qualityCheckBy: { 
+    type: mongoose.Schema.Types.ObjectId, 
+    ref: 'Operator' 
+  },
+  qualityCheckNotes: String,
+  processingTimeMinutes: Number, // Auto-calculated
+  orderProcessingStatus: {
+    type: String,
+    enum: ['pending', 'assigned', 'washing', 'drying', 'folding', 'quality_check', 'ready', 'completed'],
+    default: 'pending'
+  },
   // Timestamps
   scheduledAt: { type: Date, default: Date.now },
   pickedUpAt: Date,
@@ -110,6 +133,28 @@ orderSchema.pre('save', function(next) {
       break;
     case 'cancelled':
       this.cancelledAt = now;
+      break;
+    }
+  }
+
+  // Update order processing status timestamps
+  if (this.isModified('orderProcessingStatus')) {
+    const now = new Date();
+    switch (this.orderProcessingStatus) {
+    case 'washing':
+    case 'drying':
+    case 'folding':
+      if (!this.processingStarted) {
+        this.processingStarted = now;
+      }
+      break;
+    case 'completed':
+      this.processingCompleted = now;
+      // Calculate processing time in minutes
+      if (this.processingStarted) {
+        const diffMs = now - this.processingStarted;
+        this.processingTimeMinutes = Math.round(diffMs / 60000);
+      }
       break;
     }
   }

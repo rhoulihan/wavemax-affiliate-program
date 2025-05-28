@@ -3,7 +3,7 @@
 const express = require('express');
 const router = express.Router();
 const authController = require('../controllers/authController');
-const { authLimiter, authenticate } = require('../middleware/auth');
+const { authLimiter, authenticateToken } = require('../middleware/auth');
 const { body, validationResult } = require('express-validator');
 
 // Validation middleware
@@ -52,6 +52,36 @@ router.post('/customer/login',
 );
 
 /**
+ * @route   POST /api/auth/administrator/login
+ * @desc    Login administrator
+ * @access  Public
+ */
+router.post('/administrator/login',
+  authLimiter,
+  [
+    body('email').trim().isEmail().withMessage('Valid email is required'),
+    body('password').notEmpty().withMessage('Password is required')
+  ],
+  validate,
+  authController.administratorLogin
+);
+
+/**
+ * @route   POST /api/auth/operator/login
+ * @desc    Login operator
+ * @access  Public
+ */
+router.post('/operator/login',
+  authLimiter,
+  [
+    body('email').trim().isEmail().withMessage('Valid email is required'),
+    body('password').notEmpty().withMessage('Password is required')
+  ],
+  validate,
+  authController.operatorLogin
+);
+
+/**
  * @route   POST /api/auth/forgot-password
  * @desc    Request password reset
  * @access  Public
@@ -60,7 +90,7 @@ router.post('/forgot-password',
   authLimiter,
   [
     body('email').trim().isEmail().withMessage('Valid email is required'),
-    body('userType').isIn(['affiliate', 'customer']).withMessage('Invalid user type')
+    body('userType').isIn(['affiliate', 'customer', 'administrator', 'operator']).withMessage('Invalid user type')
   ],
   validate,
   authController.forgotPassword
@@ -76,7 +106,7 @@ router.post('/reset-password',
   [
     body('token').trim().notEmpty().withMessage('Reset token is required')
       .isLength({ min: 64, max: 64 }).withMessage('Invalid reset token'),
-    body('userType').isIn(['affiliate', 'customer']).withMessage('Invalid user type'),
+    body('userType').isIn(['affiliate', 'customer', 'administrator', 'operator']).withMessage('Invalid user type'),
     body('password').isLength({ min: 8 }).withMessage('Password must be at least 8 characters')
       .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/).withMessage('Password must contain uppercase, lowercase, and numbers')
   ],
@@ -89,7 +119,7 @@ router.post('/reset-password',
  * @desc    Verify user token
  * @access  Private
  */
-router.get('/verify', authenticate, authController.verifyToken);
+router.get('/verify', authenticateToken, authController.verifyToken);
 
 router.post('/refresh-token',
   [

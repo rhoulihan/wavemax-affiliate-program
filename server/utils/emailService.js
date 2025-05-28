@@ -490,6 +490,165 @@ exports.sendOrderCancellationEmail = async (customer, order) => {
 };
 
 // =============================================================================
+// Administrator Emails
+// =============================================================================
+
+/**
+ * Send welcome email to a new administrator
+ */
+exports.sendAdministratorWelcomeEmail = async (administrator) => {
+  try {
+    const template = await loadTemplate('administrator-welcome');
+
+    const data = {
+      first_name: administrator.firstName,
+      last_name: administrator.lastName,
+      admin_id: administrator.adminId,
+      email: administrator.email,
+      login_url: `${process.env.FRONTEND_URL || 'https://wavemax.promo'}/administrator-login-embed.html`,
+      permissions: administrator.permissions.join(', '),
+      current_year: new Date().getFullYear()
+    };
+
+    const html = fillTemplate(template, data);
+
+    await sendEmail(
+      administrator.email,
+      'Welcome to WaveMAX Administrator Portal',
+      html
+    );
+  } catch (error) {
+    console.error('Error sending administrator welcome email:', error);
+  }
+};
+
+/**
+ * Send password reset email to administrator
+ */
+exports.sendAdministratorPasswordResetEmail = async (administrator, resetUrl) => {
+  try {
+    const template = await loadTemplate('administrator-password-reset');
+
+    const data = {
+      first_name: administrator.firstName,
+      admin_id: administrator.adminId,
+      reset_url: resetUrl,
+      expire_time: '1 hour',
+      current_year: new Date().getFullYear()
+    };
+
+    const html = fillTemplate(template, data);
+
+    await sendEmail(
+      administrator.email,
+      'Password Reset Request - WaveMAX Administrator Portal',
+      html
+    );
+  } catch (error) {
+    console.error('Error sending administrator password reset email:', error);
+  }
+};
+
+// =============================================================================
+// Operator Emails
+// =============================================================================
+
+/**
+ * Send welcome email to a new operator
+ */
+exports.sendOperatorWelcomeEmail = async (operator, temporaryPin) => {
+  try {
+    const template = await loadTemplate('operator-welcome');
+
+    const data = {
+      first_name: operator.firstName,
+      last_name: operator.lastName,
+      employee_id: operator.employeeId,
+      email: operator.email,
+      temporary_pin: temporaryPin,
+      shift_hours: `${operator.shiftStart} - ${operator.shiftEnd}`,
+      specializations: operator.specializations.join(', '),
+      login_url: `${process.env.FRONTEND_URL || 'https://wavemax.promo'}/operator-login-embed.html`,
+      current_year: new Date().getFullYear()
+    };
+
+    const html = fillTemplate(template, data);
+
+    await sendEmail(
+      operator.email,
+      'Welcome to WaveMAX Operations Team',
+      html
+    );
+  } catch (error) {
+    console.error('Error sending operator welcome email:', error);
+  }
+};
+
+/**
+ * Send PIN reset email to operator
+ */
+exports.sendOperatorPinResetEmail = async (operator, newPin) => {
+  try {
+    const template = await loadTemplate('operator-pin-reset');
+
+    const data = {
+      first_name: operator.firstName,
+      employee_id: operator.employeeId,
+      new_pin: newPin,
+      login_url: `${process.env.FRONTEND_URL || 'https://wavemax.promo'}/operator-login-embed.html`,
+      current_year: new Date().getFullYear()
+    };
+
+    const html = fillTemplate(template, data);
+
+    await sendEmail(
+      operator.email,
+      'Your PIN Has Been Reset',
+      html
+    );
+  } catch (error) {
+    console.error('Error sending operator PIN reset email:', error);
+  }
+};
+
+/**
+ * Send shift reminder email to operator
+ */
+exports.sendOperatorShiftReminderEmail = async (operator) => {
+  try {
+    const template = await loadTemplate('operator-shift-reminder');
+
+    const data = {
+      first_name: operator.firstName,
+      employee_id: operator.employeeId,
+      shift_start: operator.shiftStart,
+      shift_end: operator.shiftEnd,
+      login_url: `${process.env.FRONTEND_URL || 'https://wavemax.promo'}/operator-login-embed.html`,
+      current_year: new Date().getFullYear()
+    };
+
+    const html = fillTemplate(template, data);
+
+    await sendEmail(
+      operator.email,
+      'Shift Reminder - Starting Soon',
+      html
+    );
+  } catch (error) {
+    console.error('Error sending operator shift reminder email:', error);
+  }
+};
+
+/**
+ * Note: sendOperatorPasswordResetEmail is not needed since operators use PINs
+ */
+exports.sendOperatorPasswordResetEmail = async (operator, resetUrl) => {
+  // Operators don't have passwords, they use PINs
+  // This method is here for interface compatibility but should not be called
+  console.error('Operators use PINs, not passwords. Use sendOperatorPinResetEmail instead.');
+};
+
+// =============================================================================
 // Helper Functions
 // =============================================================================
 

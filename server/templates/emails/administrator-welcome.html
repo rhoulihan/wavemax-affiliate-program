@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 600px;
+            margin: 20px auto;
+            background-color: #ffffff;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+            background: linear-gradient(135deg, #4A90E2 0%, #1e3a8a 100%);
+            color: white;
+            padding: 40px 30px;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 32px;
+            font-weight: 700;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        .header p {
+            margin: 10px 0 0;
+            font-size: 18px;
+            opacity: 0.9;
+        }
+        .content {
+            padding: 40px 30px;
+        }
+        .greeting {
+            font-size: 20px;
+            color: #1e3a8a;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+        .info-box {
+            background-color: #f0f7ff;
+            border: 1px solid #d0e5ff;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .info-item {
+            display: flex;
+            margin: 10px 0;
+        }
+        .info-label {
+            font-weight: 600;
+            color: #1e3a8a;
+            min-width: 140px;
+        }
+        .info-value {
+            color: #333;
+        }
+        .permissions-box {
+            background-color: #e8f5e9;
+            border: 1px solid #c8e6c9;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .permissions-title {
+            font-weight: 600;
+            color: #2e7d32;
+            margin-bottom: 10px;
+        }
+        .button-container {
+            text-align: center;
+            margin: 40px 0;
+        }
+        .button {
+            display: inline-block;
+            padding: 16px 40px;
+            background: linear-gradient(135deg, #4A90E2 0%, #1e3a8a 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: 600;
+            box-shadow: 0 4px 15px rgba(74, 144, 226, 0.3);
+            transition: all 0.3s ease;
+        }
+        .button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(74, 144, 226, 0.4);
+        }
+        .security-note {
+            background-color: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            color: #856404;
+        }
+        .security-note strong {
+            display: block;
+            margin-bottom: 10px;
+            color: #664d03;
+        }
+        .footer {
+            background-color: #f8f9fa;
+            padding: 30px;
+            text-align: center;
+            color: #666;
+            font-size: 14px;
+        }
+        .footer a {
+            color: #4A90E2;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>WaveMAX Administrator Portal</h1>
+            <p>Welcome to the Management Team</p>
+        </div>
+        
+        <div class="content">
+            <div class="greeting">
+                Welcome, [FIRST_NAME]!
+            </div>
+            
+            <p>Your administrator account has been successfully created. You now have access to the WaveMAX Administrator Portal where you can manage operators, view analytics, and configure system settings.</p>
+            
+            <div class="info-box">
+                <div class="info-item">
+                    <span class="info-label">Administrator ID:</span>
+                    <span class="info-value">[ADMIN_ID]</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Email:</span>
+                    <span class="info-value">[EMAIL]</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Account Status:</span>
+                    <span class="info-value">Active</span>
+                </div>
+            </div>
+            
+            <div class="permissions-box">
+                <div class="permissions-title">Your Permissions:</div>
+                <div>[PERMISSIONS]</div>
+            </div>
+            
+            <div class="button-container">
+                <a href="[LOGIN_URL]" class="button">Access Admin Portal</a>
+            </div>
+            
+            <div class="security-note">
+                <strong>Security Reminder:</strong>
+                • Use a strong password and change it regularly<br>
+                • Never share your login credentials<br>
+                • Always log out when finished<br>
+                • Report any suspicious activity immediately
+            </div>
+            
+            <p>If you have any questions or need assistance, please contact the system administrator.</p>
+        </div>
+        
+        <div class="footer">
+            <p>© [CURRENT_YEAR] WaveMAX Laundry. All rights reserved.</p>
+            <p>This is a secure administrator account notification.</p>
+        </div>
+    </div>
+</body>
+</html>

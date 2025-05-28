@@ -3,6 +3,8 @@
 const jwt = require('jsonwebtoken');
 const Affiliate = require('../models/Affiliate');
 const Customer = require('../models/Customer');
+const Administrator = require('../models/Administrator');
+const Operator = require('../models/Operator');
 
 const rateLimit = require('express-rate-limit');
 
@@ -51,7 +53,9 @@ exports.authenticate = async (req, res, next) => {
       id: decoded.id,
       role: decoded.role,
       ...(decoded.affiliateId && { affiliateId: decoded.affiliateId }),
-      ...(decoded.customerId && { customerId: decoded.customerId })
+      ...(decoded.customerId && { customerId: decoded.customerId }),
+      ...(decoded.adminId && { adminId: decoded.adminId }),
+      ...(decoded.operatorId && { operatorId: decoded.operatorId })
     };
 
     next();

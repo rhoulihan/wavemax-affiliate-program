@@ -20,6 +20,53 @@ The WaveMAX Affiliate Program enables individuals to register as affiliates, onb
 
 ## Recent Improvements (May 2025)
 
+### Administrator & Operator Management System
+- **New Role-Based Access Control**: Added administrator and operator roles with granular permissions
+  - Administrators: Full system access, operator management, analytics, configuration
+  - Operators: Order processing, quality checks, workstation management
+- **Administrator Features**:
+  - System configuration management
+  - Operator lifecycle management (create, update, deactivate)
+  - Comprehensive analytics dashboard
+  - Order and affiliate reporting
+  - System health monitoring
+- **Operator Features**:
+  - Personal dashboard with active orders and performance metrics
+  - Order queue management by workstation
+  - Quality check workflow
+  - Shift management and status updates
+  - Customer note management
+- **Security Enhancements**:
+  - Separate authentication endpoints for administrators and operators
+  - Permission-based access control middleware
+  - Account lockout after failed login attempts
+  - Password reset functionality for both roles
+
+### Testing Infrastructure Improvements
+- **MongoDB Connection**: Migrated from in-memory MongoDB to real database connection for tests
+  - Uses separate test database (wavemax_test) to avoid conflicts
+  - Improved test reliability and reduced timeout issues
+  - Proper cleanup between tests without permission errors
+- **Test Coverage Expansion**:
+  - Added comprehensive unit tests for administrator controller
+  - Added comprehensive unit tests for operator controller
+  - Updated integration tests for new authentication endpoints
+  - Fixed duplicate index warnings in Mongoose schemas
+- **Test Configuration**:
+  - Increased Jest timeout to 60 seconds for database operations
+  - Updated test setup to use environment variables
+  - Added proper test data cleanup logic
+
+### Database Schema Improvements
+- **Fixed Duplicate Index Warnings**: Removed redundant index definitions in:
+  - Administrator model (adminId field)
+  - Operator model (operatorId field)
+  - SystemConfig model (key and category fields)
+- **New Models**:
+  - Administrator: System administrators with permissions and audit trail
+  - Operator: Laundry operators with shift and performance tracking
+  - SystemConfig: Dynamic system configuration management
+
 ### Customer Registration Simplification
 - **Removed Schedule Preferences**: Simplified registration by removing preferred day/time selection
 - **Service Frequency Removed**: Eliminated service frequency requirement from registration
