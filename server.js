@@ -21,6 +21,8 @@ const affiliateRoutes = require('./server/routes/affiliateRoutes');
 const customerRoutes = require('./server/routes/customerRoutes');
 const orderRoutes = require('./server/routes/orderRoutes');
 const bagRoutes = require('./server/routes/bagRoutes');
+const administratorRoutes = require('./server/routes/administratorRoutes');
+const operatorRoutes = require('./server/routes/operatorRoutes');
 const affiliateController = require('./server/controllers/affiliateController');
 const customerController = require('./server/controllers/customerController');
 
@@ -203,6 +205,8 @@ const csrfProtection = csrf({
 const csrfExcludedPaths = [
   '/api/auth/affiliate/login',
   '/api/auth/customer/login',
+  '/api/auth/administrator/login',
+  '/api/auth/operator/login',
   '/api/auth/forgot-password',
   '/api/auth/reset-password',
   '/api/auth/refresh-token',
@@ -213,6 +217,8 @@ const csrfExcludedPaths = [
   // Also include versioned API paths
   '/api/v1/auth/affiliate/login',
   '/api/v1/auth/customer/login',
+  '/api/v1/auth/administrator/login',
+  '/api/v1/auth/operator/login',
   '/api/v1/auth/forgot-password',
   '/api/v1/auth/reset-password',
   '/api/v1/auth/refresh-token',
@@ -320,6 +326,8 @@ apiV1Router.use('/affiliates', affiliateRoutes);
 apiV1Router.use('/customers', customerRoutes);
 apiV1Router.use('/orders', orderRoutes);
 apiV1Router.use('/bags', bagRoutes);
+apiV1Router.use('/administrators', administratorRoutes);
+apiV1Router.use('/operators', operatorRoutes);
 
 // Mount versioned API
 app.use('/api/v1', apiV1Router);

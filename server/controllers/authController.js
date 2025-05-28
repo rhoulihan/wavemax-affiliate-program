@@ -3,6 +3,8 @@
 const RefreshToken = require('../models/RefreshToken');
 const Affiliate = require('../models/Affiliate');
 const Customer = require('../models/Customer');
+const Administrator = require('../models/Administrator');
+const Operator = require('../models/Operator');
 const encryptionUtil = require('../utils/encryption');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
@@ -162,6 +164,10 @@ exports.refreshToken = async (req, res) => {
       user = await Affiliate.findById(storedToken.userId);
     } else if (storedToken.userType === 'customer') {
       user = await Customer.findById(storedToken.userId);
+    } else if (storedToken.userType === 'administrator') {
+      user = await Administrator.findById(storedToken.userId);
+    } else if (storedToken.userType === 'operator') {
+      user = await Operator.findById(storedToken.userId);
     }
 
     if (!user) {
@@ -176,6 +182,8 @@ exports.refreshToken = async (req, res) => {
       id: user._id,
       ...(storedToken.userType === 'affiliate' && { affiliateId: user.affiliateId }),
       ...(storedToken.userType === 'customer' && { customerId: user.customerId }),
+      ...(storedToken.userType === 'administrator' && { adminId: user.adminId }),
+      ...(storedToken.userType === 'operator' && { employeeId: user.employeeId }),
       role: storedToken.userType
     });
 
@@ -197,6 +205,221 @@ exports.refreshToken = async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'An error occurred during token refresh'
+    });
+  }
+};
+
+/**
+ * Administrator login controller
+ */
+exports.administratorLogin = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    // Find administrator by email
+    const administrator = await Administrator.findOne({ email }).select('+password');
+
+    if (!administrator) {
+      logLoginAttempt(false, 'administrator', email, req, 'User not found');
+      return res.status(401).json({
+        success: false,
+        message: 'Invalid email or password'
+      });
+    }
+
+    // Check if account is active
+    if (!administrator.isActive) {
+      logLoginAttempt(false, 'administrator', email, req, 'Account inactive');
+      return res.status(403).json({
+        success: false,
+        message: 'Account is inactive. Please contact system administrator.'
+      });
+    }
+
+    // Check if account is locked
+    if (administrator.isLocked) {
+      logLoginAttempt(false, 'administrator', email, req, 'Account locked');
+      return res.status(403).json({
+        success: false,
+        message: 'Account is locked due to multiple failed login attempts.'
+      });
+    }
+
+    // Verify password
+    const isPasswordValid = await administrator.comparePassword(password);
+
+    if (!isPasswordValid) {
+      // Increment failed login attempts
+      administrator.failedLoginAttempts += 1;
+      
+      // Lock account after 5 failed attempts
+      if (administrator.failedLoginAttempts >= 5) {
+        administrator.isLocked = true;
+        administrator.lockedUntil = new Date(Date.now() + 30 * 60 * 1000); // 30 minutes
+      }
+      
+      await administrator.save();
+      
+      logLoginAttempt(false, 'administrator', email, req, 'Invalid password');
+      return res.status(401).json({
+        success: false,
+        message: 'Invalid email or password',
+        ...(administrator.failedLoginAttempts >= 3 && {
+          warning: `${5 - administrator.failedLoginAttempts} attempts remaining before account lock`
+        })
+      });
+    }
+
+    // Reset failed login attempts
+    administrator.failedLoginAttempts = 0;
+    administrator.lastLogin = new Date();
+    await administrator.save();
+
+    // Generate token
+    const token = generateToken({
+      id: administrator._id,
+      adminId: administrator.adminId,
+      role: 'administrator',
+      permissions: administrator.permissions
+    });
+
+    // Generate refresh token
+    const refreshToken = await generateRefreshToken(
+      administrator._id,
+      'administrator',
+      req.ip
+    );
+
+    // Log successful login
+    logLoginAttempt(true, 'administrator', email, req);
+    logAuditEvent(AuditEvents.AUTH_LOGIN, 'administrator', administrator._id, {
+      adminId: administrator.adminId,
+      ip: req.ip
+    });
+
+    res.status(200).json({
+      success: true,
+      token,
+      refreshToken,
+      administrator: {
+        adminId: administrator.adminId,
+        firstName: administrator.firstName,
+        lastName: administrator.lastName,
+        email: administrator.email,
+        permissions: administrator.permissions
+      }
+    });
+  } catch (error) {
+    console.error('Administrator login error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'An error occurred during login'
+    });
+  }
+};
+
+/**
+ * Operator login controller
+ */
+exports.operatorLogin = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    // Find operator by email with password
+    const operator = await Operator.findByEmailWithPassword(email);
+
+    if (!operator) {
+      logLoginAttempt(false, 'operator', email, req, 'User not found');
+      return res.status(401).json({
+        success: false,
+        message: 'Invalid email or password'
+      });
+    }
+
+    // Check if account is locked
+    if (operator.isLocked) {
+      logLoginAttempt(false, 'operator', email, req, 'Account locked');
+      return res.status(403).json({
+        success: false,
+        message: 'Account is locked due to multiple failed login attempts. Please try again later.'
+      });
+    }
+
+    // Check if account is active
+    if (!operator.isActive) {
+      logLoginAttempt(false, 'operator', email, req, 'Account inactive');
+      return res.status(403).json({
+        success: false,
+        message: 'Account is inactive. Please contact your supervisor.'
+      });
+    }
+
+    // Verify password
+    const isPasswordValid = operator.verifyPassword(password);
+
+    if (!isPasswordValid) {
+      await operator.incLoginAttempts();
+      logLoginAttempt(false, 'operator', email, req, 'Invalid password');
+      return res.status(401).json({
+        success: false,
+        message: 'Invalid email or password'
+      });
+    }
+
+    // Check shift hours
+    if (!operator.isOnShift) {
+      logLoginAttempt(false, 'operator', email, req, 'Outside shift hours');
+      return res.status(403).json({
+        success: false,
+        message: 'Login not allowed outside of shift hours',
+        shiftHours: `${operator.shiftStart} - ${operator.shiftEnd}`
+      });
+    }
+
+    // Reset login attempts
+    await operator.resetLoginAttempts();
+
+    // Generate token
+    const token = generateToken({
+      id: operator._id,
+      operatorId: operator.operatorId,
+      role: 'operator'
+    });
+
+    // Generate refresh token
+    const refreshToken = await generateRefreshToken(
+      operator._id,
+      'operator',
+      req.ip
+    );
+
+    // Log successful login
+    logLoginAttempt(true, 'operator', email, req);
+    logAuditEvent(AuditEvents.AUTH_LOGIN, 'operator', operator._id, {
+      operatorId: operator.operatorId,
+      ip: req.ip,
+      shift: `${operator.shiftStart} - ${operator.shiftEnd}`
+    });
+
+    res.status(200).json({
+      success: true,
+      token,
+      refreshToken,
+      operator: {
+        operatorId: operator.operatorId,
+        firstName: operator.firstName,
+        lastName: operator.lastName,
+        email: operator.email,
+        shiftStart: operator.shiftStart,
+        shiftEnd: operator.shiftEnd,
+        workStation: operator.workStation
+      }
+    });
+  } catch (error) {
+    console.error('Operator login error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'An error occurred during login'
     });
   }
 };
@@ -304,6 +527,10 @@ exports.forgotPassword = async (req, res) => {
       user = await Affiliate.findOne({ email });
     } else if (userType === 'customer') {
       user = await Customer.findOne({ email });
+    } else if (userType === 'administrator') {
+      user = await Administrator.findOne({ email });
+    } else if (userType === 'operator') {
+      user = await Operator.findOne({ email });
     } else {
       return res.status(400).json({
         success: false,
@@ -334,9 +561,15 @@ exports.forgotPassword = async (req, res) => {
     if (userType === 'affiliate') {
       // Send affiliate password reset email
       await emailService.sendAffiliatePasswordResetEmail(user, resetUrl);
-    } else {
+    } else if (userType === 'customer') {
       // Send customer password reset email
       await emailService.sendCustomerPasswordResetEmail(user, resetUrl);
+    } else if (userType === 'administrator') {
+      // Send administrator password reset email
+      await emailService.sendAdministratorPasswordResetEmail(user, resetUrl);
+    } else if (userType === 'operator') {
+      // Send operator password reset email
+      await emailService.sendOperatorPasswordResetEmail(user, resetUrl);
     }
 
     res.status(200).json({
@@ -378,6 +611,16 @@ exports.resetPassword = async (req, res) => {
         resetToken: token,
         resetTokenExpiry: { $gt: Date.now() }
       });
+    } else if (userType === 'administrator') {
+      user = await Administrator.findOne({
+        resetToken: token,
+        resetTokenExpiry: { $gt: Date.now() }
+      });
+    } else if (userType === 'operator') {
+      user = await Operator.findOne({
+        resetToken: token,
+        resetTokenExpiry: { $gt: Date.now() }
+      });
     } else {
       return res.status(400).json({
         success: false,
@@ -392,12 +635,22 @@ exports.resetPassword = async (req, res) => {
       });
     }
 
-    // Hash new password
-    const { salt, hash } = encryptionUtil.hashPassword(password);
-
-    // Update password
-    user.passwordSalt = salt;
-    user.passwordHash = hash;
+    // Update password based on user type
+    if (userType === 'administrator') {
+      // Administrators use bcrypt
+      user.password = password; // Will be hashed by pre-save hook
+    } else if (userType === 'operator') {
+      // Operators have PINs, not passwords - this should not happen
+      return res.status(400).json({
+        success: false,
+        message: 'Operators cannot reset passwords. Please contact your supervisor to reset your PIN.'
+      });
+    } else {
+      // Affiliates and customers use PBKDF2
+      const { salt, hash } = encryptionUtil.hashPassword(password);
+      user.passwordSalt = salt;
+      user.passwordHash = hash;
+    }
 
     // Clear reset token fields
     user.resetToken = undefined;

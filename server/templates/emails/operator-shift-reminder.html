@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 600px;
+            margin: 20px auto;
+            background-color: #ffffff;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            color: white;
+            padding: 40px 30px;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 32px;
+            font-weight: 700;
+        }
+        .header .clock-icon {
+            font-size: 60px;
+            margin-bottom: 20px;
+        }
+        .content {
+            padding: 40px 30px;
+        }
+        .greeting {
+            font-size: 20px;
+            color: #2980b9;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+        .shift-box {
+            background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+            border: 2px solid #2196f3;
+            border-radius: 12px;
+            padding: 30px;
+            margin: 30px 0;
+            text-align: center;
+        }
+        .shift-time {
+            font-size: 36px;
+            font-weight: 700;
+            color: #1565c0;
+            margin: 10px 0;
+        }
+        .shift-label {
+            font-size: 18px;
+            color: #666;
+            margin-bottom: 10px;
+        }
+        .info-grid {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            margin: 10px 0;
+            padding: 10px 0;
+            border-bottom: 1px solid #e9ecef;
+        }
+        .info-row:last-child {
+            border-bottom: none;
+        }
+        .info-label {
+            font-weight: 600;
+            color: #495057;
+        }
+        .info-value {
+            color: #333;
+        }
+        .button-container {
+            text-align: center;
+            margin: 40px 0;
+        }
+        .button {
+            display: inline-block;
+            padding: 16px 40px;
+            background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: 600;
+            box-shadow: 0 4px 15px rgba(46, 204, 113, 0.3);
+        }
+        .reminder-list {
+            background-color: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .reminder-list h3 {
+            color: #856404;
+            margin-bottom: 10px;
+        }
+        .reminder-list ul {
+            margin: 10px 0;
+            padding-left: 20px;
+        }
+        .reminder-list li {
+            margin: 5px 0;
+            color: #856404;
+        }
+        .footer {
+            background-color: #f8f9fa;
+            padding: 30px;
+            text-align: center;
+            color: #666;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="clock-icon">⏰</div>
+            <h1>Shift Reminder</h1>
+        </div>
+        
+        <div class="content">
+            <div class="greeting">
+                Hi [FIRST_NAME],
+            </div>
+            
+            <p>This is a friendly reminder that your shift is starting soon!</p>
+            
+            <div class="shift-box">
+                <div class="shift-label">Your shift starts at:</div>
+                <div class="shift-time">[SHIFT_START]</div>
+                <div class="shift-label">and ends at:</div>
+                <div class="shift-time">[SHIFT_END]</div>
+            </div>
+            
+            <div class="info-grid">
+                <div class="info-row">
+                    <span class="info-label">Employee ID:</span>
+                    <span class="info-value">[EMPLOYEE_ID]</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Date:</span>
+                    <span class="info-value">Today</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Expected Duration:</span>
+                    <span class="info-value">8 hours</span>
+                </div>
+            </div>
+            
+            <div class="reminder-list">
+                <h3>Remember to:</h3>
+                <ul>
+                    <li>Arrive a few minutes early to prepare</li>
+                    <li>Clock in when you arrive</li>
+                    <li>Check the order queue for priority items</li>
+                    <li>Follow all safety protocols</li>
+                    <li>Clock out at the end of your shift</li>
+                </ul>
+            </div>
+            
+            <div class="button-container">
+                <a href="[LOGIN_URL]" class="button">Login to Operator Portal</a>
+            </div>
+            
+            <p>Have a great shift! If you cannot make your shift, please contact your supervisor as soon as possible.</p>
+        </div>
+        
+        <div class="footer">
+            <p>© [CURRENT_YEAR] WaveMAX Laundry. All rights reserved.</p>
+            <p>This is an automated shift reminder.</p>
+        </div>
+    </div>
+</body>
+</html>

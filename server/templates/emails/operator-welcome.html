@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 600px;
+            margin: 20px auto;
+            background-color: #ffffff;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+            background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+            color: white;
+            padding: 40px 30px;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 32px;
+            font-weight: 700;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        .header p {
+            margin: 10px 0 0;
+            font-size: 18px;
+            opacity: 0.9;
+        }
+        .content {
+            padding: 40px 30px;
+        }
+        .greeting {
+            font-size: 20px;
+            color: #27ae60;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+        .credentials-box {
+            background-color: #e8f8f5;
+            border: 2px solid #2ecc71;
+            border-radius: 8px;
+            padding: 25px;
+            margin: 30px 0;
+            text-align: center;
+        }
+        .credentials-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #27ae60;
+            margin-bottom: 15px;
+        }
+        .credential-item {
+            margin: 15px 0;
+            font-size: 16px;
+        }
+        .credential-label {
+            font-weight: 600;
+            color: #333;
+        }
+        .credential-value {
+            display: block;
+            font-size: 24px;
+            color: #2c3e50;
+            font-weight: 700;
+            margin-top: 5px;
+            letter-spacing: 2px;
+        }
+        .pin-highlight {
+            background-color: #f1c40f;
+            padding: 5px 15px;
+            border-radius: 6px;
+            display: inline-block;
+        }
+        .info-grid {
+            display: table;
+            width: 100%;
+            margin: 20px 0;
+        }
+        .info-row {
+            display: table-row;
+        }
+        .info-label {
+            display: table-cell;
+            padding: 10px 15px;
+            font-weight: 600;
+            color: #27ae60;
+            width: 40%;
+            vertical-align: top;
+        }
+        .info-value {
+            display: table-cell;
+            padding: 10px 15px;
+            color: #333;
+        }
+        .button-container {
+            text-align: center;
+            margin: 40px 0;
+        }
+        .button {
+            display: inline-block;
+            padding: 16px 40px;
+            background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: 600;
+            box-shadow: 0 4px 15px rgba(46, 204, 113, 0.3);
+        }
+        .important-notes {
+            background-color: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .important-notes h3 {
+            color: #856404;
+            margin-bottom: 10px;
+        }
+        .important-notes ul {
+            margin: 10px 0;
+            padding-left: 20px;
+        }
+        .important-notes li {
+            margin: 5px 0;
+            color: #856404;
+        }
+        .footer {
+            background-color: #f8f9fa;
+            padding: 30px;
+            text-align: center;
+            color: #666;
+            font-size: 14px;
+        }
+        .footer a {
+            color: #2ecc71;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Welcome to WaveMAX Operations</h1>
+            <p>Your Operator Account is Ready</p>
+        </div>
+        
+        <div class="content">
+            <div class="greeting">
+                Welcome aboard, [FIRST_NAME]!
+            </div>
+            
+            <p>We're excited to have you join the WaveMAX operations team. Your operator account has been created and you're ready to start processing orders.</p>
+            
+            <div class="credentials-box">
+                <div class="credentials-title">Your Login Credentials</div>
+                <div class="credential-item">
+                    <span class="credential-label">Employee ID:</span>
+                    <span class="credential-value">[EMPLOYEE_ID]</span>
+                </div>
+                <div class="credential-item">
+                    <span class="credential-label">Temporary PIN:</span>
+                    <span class="credential-value pin-highlight">[TEMPORARY_PIN]</span>
+                </div>
+            </div>
+            
+            <div class="info-grid">
+                <div class="info-row">
+                    <div class="info-label">Email:</div>
+                    <div class="info-value">[EMAIL]</div>
+                </div>
+                <div class="info-row">
+                    <div class="info-label">Shift Hours:</div>
+                    <div class="info-value">[SHIFT_HOURS]</div>
+                </div>
+                <div class="info-row">
+                    <div class="info-label">Specializations:</div>
+                    <div class="info-value">[SPECIALIZATIONS]</div>
+                </div>
+            </div>
+            
+            <div class="button-container">
+                <a href="[LOGIN_URL]" class="button">Login to Operator Portal</a>
+            </div>
+            
+            <div class="important-notes">
+                <h3>Important Information:</h3>
+                <ul>
+                    <li>Change your PIN on first login</li>
+                    <li>You can only login during your assigned shift hours</li>
+                    <li>Keep your PIN confidential - never share it with anyone</li>
+                    <li>Clock in at the start of your shift and clock out when finished</li>
+                    <li>Contact your supervisor if you have any questions</li>
+                </ul>
+            </div>
+            
+            <p>If you need assistance or have questions about your account, please contact your supervisor or the administrator.</p>
+        </div>
+        
+        <div class="footer">
+            <p>© [CURRENT_YEAR] WaveMAX Laundry. All rights reserved.</p>
+            <p>This email contains confidential login information. Please keep it secure.</p>
+        </div>
+    </div>
+</body>
+</html>
