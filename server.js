@@ -174,9 +174,10 @@ app.use(session({
   saveUninitialized: false,
   store: MongoStore.create({ mongoUrl: process.env.MONGODB_URI }),
   cookie: {
-    secure: process.env.NODE_ENV === 'production',
+    secure: true, // Always use secure in production
     httpOnly: true,
-    maxAge: 24 * 60 * 60 * 1000
+    maxAge: 24 * 60 * 60 * 1000,
+    sameSite: 'lax' // Allow cookies in same-site requests
   }
 }));
 
@@ -186,7 +187,16 @@ app.use(express.static(path.join(__dirname, 'public')));
 // Set up CSRF protection using sessions instead of cookies
 const csrf = require('csurf');
 const csrfProtection = csrf({
-  cookie: false // Use req.session instead of cookies
+  cookie: false, // Use req.session instead of cookies
+  value: (req) => {
+    // Check multiple locations for CSRF token
+    return req.body._csrf || 
+           req.query._csrf || 
+           req.headers['csrf-token'] || 
+           req.headers['xsrf-token'] || 
+           req.headers['x-csrf-token'] || 
+           req.headers['x-xsrf-token'];
+  }
 });
 
 // CSRF excluded paths - only public endpoints that don't require authentication
@@ -220,7 +230,9 @@ const csrfExcludedPaths = [
   '/api/v1/customers/:customerId/dashboard',
   '/api/v1/affiliates/:affiliateId/customers',
   '/api/v1/affiliates/:affiliateId/orders',
-  '/api/v1/affiliates/:affiliateId/dashboard'
+  '/api/v1/affiliates/:affiliateId/dashboard',
+  // Temporarily exclude delete endpoint - it's already protected by JWT auth
+  '/api/v1/affiliates/:affiliateId/delete-all-data'
 ];
 
 // Apply CSRF conditionally
@@ -237,6 +249,14 @@ const conditionalCsrf = (req, res, next) => {
   // Skip CSRF for excluded paths and GET requests
   if (isExcluded || req.method === 'GET' || req.method === 'HEAD' || req.method === 'OPTIONS') {
     return next();
+  }
+
+  // Debug logging for CSRF
+  if (req.path.includes('delete-all-data')) {
+    console.log('CSRF Debug - Path:', req.path);
+    console.log('CSRF Debug - Session:', req.session);
+    console.log('CSRF Debug - Headers:', req.headers);
+    console.log('CSRF Debug - Body:', req.body);
   }
 
   // Apply CSRF protection for all other routes

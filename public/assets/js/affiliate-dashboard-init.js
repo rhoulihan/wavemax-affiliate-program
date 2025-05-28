@@ -1,3 +1,48 @@
+// Store CSRF token globally
+let csrfToken = null;
+
+// Helper function to fetch CSRF token if needed
+async function ensureCsrfToken() {
+  if (!csrfToken) {
+    const baseUrl = window.EMBED_CONFIG?.baseUrl || 'https://wavemax.promo';
+    console.log('Fetching CSRF token from:', `${baseUrl}/api/csrf-token`);
+    const response = await fetch(`${baseUrl}/api/csrf-token`, {
+      credentials: 'include'
+    });
+    const data = await response.json();
+    csrfToken = data.csrfToken;
+    console.log('CSRF token received:', csrfToken);
+  }
+  return csrfToken;
+}
+
+// Helper function to make authenticated API requests with CSRF token
+async function authenticatedFetch(url, options = {}) {
+  const baseUrl = window.EMBED_CONFIG?.baseUrl || 'https://wavemax.promo';
+  const fullUrl = url.startsWith('http') ? url : `${baseUrl}${url}`;
+  
+  // Add authorization header
+  const headers = {
+    'Authorization': `Bearer ${localStorage.getItem('affiliateToken')}`,
+    ...options.headers
+  };
+  
+  // Add CSRF token for non-GET requests
+  if (options.method && options.method !== 'GET') {
+    await ensureCsrfToken();
+    headers['x-csrf-token'] = csrfToken;
+    console.log('Request headers:', headers);
+  }
+  
+  console.log('Making request to:', fullUrl, 'with method:', options.method || 'GET');
+  
+  return fetch(fullUrl, {
+    ...options,
+    headers,
+    credentials: 'include'
+  });
+}
+
 // Affiliate dashboard functionality for embedded environment
 function initializeAffiliateDashboard() {
   const isEmbedded = window.EMBED_CONFIG?.isEmbedded || false;
@@ -633,11 +678,9 @@ async function saveSettings(affiliateId) {
       serviceArea: formData.get('serviceArea')
     };
 
-    const baseUrl = window.EMBED_CONFIG?.baseUrl || 'https://wavemax.promo';
-    const response = await fetch(`${baseUrl}/api/v1/affiliates/${affiliateId}`, {
+    const response = await authenticatedFetch(`/api/v1/affiliates/${affiliateId}`, {
       method: 'PUT',
       headers: {
-        'Authorization': `Bearer ${localStorage.getItem('affiliateToken')}`,
         'Content-Type': 'application/json'
       },
       body: JSON.stringify(data)
@@ -684,11 +727,9 @@ async function changePassword(affiliateId) {
   }
 
   try {
-    const baseUrl = window.EMBED_CONFIG?.baseUrl || 'https://wavemax.promo';
-    const response = await fetch(`${baseUrl}/api/v1/affiliates/${affiliateId}/change-password`, {
+    const response = await authenticatedFetch(`/api/v1/affiliates/${affiliateId}/change-password`, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${localStorage.getItem('affiliateToken')}`,
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
@@ -722,19 +763,29 @@ async function changePassword(affiliateId) {
 
 // Check and show delete section if in development environment
 function checkAndShowDeleteSection() {
+  console.log('Checking environment for delete section visibility...');
   // Check if we're in development or test environment
   const baseUrl = window.EMBED_CONFIG?.baseUrl || 'https://wavemax.promo';
+  console.log('Fetching environment from:', `${baseUrl}/api/v1/environment`);
+  
   fetch(`${baseUrl}/api/v1/environment`)
     .then(response => response.json())
     .then(data => {
+      console.log('Environment data received:', data);
       if (data.nodeEnv === 'development' || data.nodeEnv === 'test') {
+        console.log('Development/test environment detected, showing delete section');
         const deleteSection = document.getElementById('deleteDataSection');
         if (deleteSection) {
           deleteSection.style.display = 'block';
+          console.log('Delete section made visible');
+        } else {
+          console.error('Delete section element not found!');
         }
+      } else {
+        console.log('Production environment detected, hiding delete section');
       }
     })
-    .catch(error => console.log('Environment check failed:', error));
+    .catch(error => console.error('Environment check failed:', error));
 }
 
 // Delete all data function
@@ -748,13 +799,17 @@ async function deleteAllData(affiliateId) {
   }
 
   try {
-    const baseUrl = window.EMBED_CONFIG?.baseUrl || 'https://wavemax.promo';
-    const response = await fetch(`${baseUrl}/api/v1/affiliates/${affiliateId}/delete-all-data`, {
+    // Get CSRF token first
+    await ensureCsrfToken();
+    
+    const response = await authenticatedFetch(`/api/v1/affiliates/${affiliateId}/delete-all-data`, {
       method: 'DELETE',
       headers: {
-        'Authorization': `Bearer ${localStorage.getItem('affiliateToken')}`,
         'Content-Type': 'application/json'
-      }
+      },
+      body: JSON.stringify({
+        _csrf: csrfToken  // Try sending in body as well
+      })
     });
 
     const data = await response.json();

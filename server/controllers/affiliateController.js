@@ -821,22 +821,40 @@ exports.getPublicAffiliateInfo = async (req, res) => {
  */
 exports.deleteAffiliateData = async (req, res) => {
   try {
+    console.log('Delete data request received');
+    console.log('NODE_ENV:', process.env.NODE_ENV);
+    console.log('req.params:', req.params);
+    console.log('req.user:', req.user);
+    console.log('req.headers:', req.headers);
+    console.log('req.session:', req.session);
+    console.log('req.body:', req.body);
+    
     // Only allow in development or test environments
     if (process.env.NODE_ENV !== 'development' && process.env.NODE_ENV !== 'test') {
+      console.log('Environment check failed');
       return res.status(403).json({
         success: false,
         message: 'This operation is not allowed in production'
       });
     }
 
-    const { affiliateId } = req.user;
+    const { affiliateId } = req.params;
+    const loggedInAffiliateId = req.user.affiliateId;
 
-    // Verify the affiliate exists and matches the logged-in user
-    const affiliate = await Affiliate.findOne({ affiliateId });
-    if (!affiliate || affiliate.affiliateId !== affiliateId) {
+    // Verify the logged-in user is deleting their own data
+    if (affiliateId !== loggedInAffiliateId) {
       return res.status(403).json({
         success: false,
-        message: 'Unauthorized'
+        message: 'You can only delete your own data'
+      });
+    }
+
+    // Verify the affiliate exists
+    const affiliate = await Affiliate.findOne({ affiliateId });
+    if (!affiliate) {
+      return res.status(404).json({
+        success: false,
+        message: 'Affiliate not found'
       });
     }
 

@@ -69,7 +69,7 @@
 
     <script>
         // Single page embedded application
-        const BASE_URL = 'https://wavemax.promo';
+        const BASE_URL = window.location.protocol + '//' + window.location.host;
         const EMBED_PAGES = {
             '/': '/embed-landing.html',
             '/landing': '/embed-landing.html',
