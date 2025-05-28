@@ -3,7 +3,7 @@
 const express = require('express');
 const router = express.Router();
 const authController = require('../controllers/authController');
-const { authLimiter, authenticateToken } = require('../middleware/auth');
+const { authLimiter, authenticate } = require('../middleware/auth');
 const { body, validationResult } = require('express-validator');
 
 // Validation middleware
@@ -119,7 +119,7 @@ router.post('/reset-password',
  * @desc    Verify user token
  * @access  Private
  */
-router.get('/verify', authenticateToken, (req, res) => authController.verifyToken(req, res));
+router.get('/verify', authenticate, authController.verifyToken);
 
 router.post('/refresh-token',
   [

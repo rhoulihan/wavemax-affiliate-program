@@ -1,38 +1,35 @@
 const express = require('express');
 const router = express.Router();
 const administratorController = require('../controllers/administratorController');
-const { authenticateToken } = require('../middleware/auth');
-const { requireRole, requirePermission } = require('../middleware/rbac');
+const { authenticate } = require('../middleware/auth');
+const { checkRole, checkAdminPermission } = require('../middleware/rbac');
 
 // All routes require authentication and administrator role
-router.use(authenticateToken);
-router.use(requireRole('administrator'));
+router.use(authenticate);
+router.use(checkRole(['administrator']));
 
 // Dashboard
 router.get('/dashboard', administratorController.getDashboard);
 
 // Operator Management
-router.post('/operators', requirePermission('operator_management'), administratorController.createOperator);
+router.post('/operators', checkAdminPermission(['operator_management']), administratorController.createOperator);
 router.get('/operators', administratorController.getOperators);
-router.get('/operators/:operatorId', administratorController.getOperatorDetails);
-router.put('/operators/:operatorId', requirePermission('operator_management'), administratorController.updateOperator);
-router.delete('/operators/:operatorId', requirePermission('operator_management'), administratorController.deleteOperator);
-router.post('/operators/:operatorId/reset-pin', requirePermission('operator_management'), administratorController.resetOperatorPin);
-router.post('/operators/:operatorId/toggle-status', requirePermission('operator_management'), administratorController.toggleOperatorStatus);
+router.get('/operators/:operatorId', administratorController.getOperatorById);
+router.put('/operators/:operatorId', checkAdminPermission(['operator_management']), administratorController.updateOperator);
+router.delete('/operators/:operatorId', checkAdminPermission(['operator_management']), administratorController.deactivateOperator);
+router.post('/operators/:operatorId/reset-password', checkAdminPermission(['operator_management']), administratorController.resetOperatorPassword);
 
 // Analytics
-router.get('/analytics/orders', requirePermission('view_analytics'), administratorController.getOrderAnalytics);
-router.get('/analytics/operators', requirePermission('view_analytics'), administratorController.getOperatorAnalytics);
-router.get('/analytics/affiliates', requirePermission('view_analytics'), administratorController.getAffiliateAnalytics);
+router.get('/analytics/orders', checkAdminPermission(['view_analytics']), administratorController.getOrderAnalytics);
+router.get('/analytics/operators', checkAdminPermission(['view_analytics']), administratorController.getOperatorAnalytics);
+router.get('/analytics/affiliates', checkAdminPermission(['view_analytics']), administratorController.getAffiliateAnalytics);
 
 // Reports
-router.post('/reports/generate', requirePermission('view_analytics'), administratorController.generateReport);
-router.get('/reports/:reportId/download', requirePermission('view_analytics'), administratorController.downloadReport);
+router.post('/reports/export', checkAdminPermission(['view_analytics']), administratorController.exportReport);
 
 // System Configuration
-router.get('/config', requirePermission('system_config'), administratorController.getSystemConfig);
-router.put('/config', requirePermission('system_config'), administratorController.updateSystemConfig);
-router.get('/config/categories', requirePermission('system_config'), administratorController.getConfigCategories);
+router.get('/config', checkAdminPermission(['system_config']), administratorController.getSystemConfig);
+router.put('/config', checkAdminPermission(['system_config']), administratorController.updateSystemConfig);
 
 // System Health
 router.get('/system/health', administratorController.getSystemHealth);
