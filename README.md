@@ -813,13 +813,21 @@ For the main WaveMAX Laundry website, use this specific embed code:
 </div>
 
 <script>
-// Auto-resize iframe based on content
+// Handle iframe communication for resizing and navigation
 window.addEventListener('message', function(event) {
     if (event.origin !== 'https://wavemax.promo') return;
     
-    if (event.data.type === 'resize') {
-        const iframe = document.getElementById('wavemax-affiliate-iframe');
+    const iframe = document.getElementById('wavemax-affiliate-iframe');
+    
+    // Handle iframe resize
+    if (event.data.type === 'resize' && event.data.data && event.data.data.height) {
         iframe.style.height = event.data.data.height + 'px';
+    }
+    
+    // Handle scroll to top on navigation
+    if (event.data.type === 'scroll-to-top') {
+        iframe.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 });
 </script>
@@ -1108,6 +1116,21 @@ Complete integration with auto-resizing and navigation handling:
 </body>
 </html>
 ```
+
+### Parent Page Implementation Example
+
+A complete example is available at `/iframe-parent-example.html` that demonstrates:
+- Automatic iframe resizing on content changes
+- Smooth scrolling to top on page transitions
+- Route change tracking for analytics
+- Current height display for debugging
+- Secure origin validation
+
+The implementation includes:
+- ResizeObserver for detecting content size changes
+- MutationObserver for DOM updates
+- Automatic height adjustment with smooth transitions
+- Support for all administrator and operator pages
 
 ## Acknowledgments
 
