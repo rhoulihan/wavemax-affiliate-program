@@ -172,6 +172,7 @@ app.use('/api/', apiLimiter);
 const session = require('express-session');
 
 app.use(session({
+  name: 'wavemax.sid', // Explicit session cookie name
   secret: process.env.SESSION_SECRET || process.env.JWT_SECRET,
   resave: false,
   saveUninitialized: true, // Changed to true to ensure sessions are created for CSRF
@@ -180,12 +181,29 @@ app.use(session({
     secure: process.env.NODE_ENV === 'production', // Only use secure in production
     httpOnly: true,
     maxAge: 24 * 60 * 60 * 1000,
-    sameSite: 'lax' // Allow cookies in same-site requests
+    sameSite: 'lax', // Allow cookies in same-site requests
+    path: '/', // Ensure cookie is available for all paths
+    domain: undefined // Let browser handle domain (works better for same-origin)
   }
 }));
 
 // Serve static files in all environments
 app.use(express.static(path.join(__dirname, 'public')));
+
+// Debug middleware to track sessions
+app.use((req, res, next) => {
+  if (req.path.includes('/api/') && req.path.includes('csrf')) {
+    console.log('Session Debug:', {
+      path: req.path,
+      method: req.method,
+      sessionID: req.sessionID,
+      cookies: req.headers.cookie,
+      hasSession: !!req.session,
+      sessionData: req.session ? Object.keys(req.session) : []
+    });
+  }
+  next();
+});
 
 // Apply CSRF protection with new configuration
 app.use(conditionalCsrf);
