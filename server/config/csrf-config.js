@@ -184,6 +184,14 @@ const conditionalCsrf = (req, res, next) => {
     return next();
   }
 
+  // Debug session state
+  console.log('CSRF check for:', req.path, {
+    sessionID: req.sessionID,
+    hasSession: !!req.session,
+    sessionCookie: req.headers.cookie,
+    hasCsrfSecret: !!req.session?.csrfSecret
+  });
+
   // Apply CSRF protection
   csrfProtection(req, res, (err) => {
     if (err && err.code === 'EBADCSRFTOKEN') {

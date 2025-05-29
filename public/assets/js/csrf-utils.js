@@ -70,6 +70,7 @@
     function clearCsrfToken() {
         csrfToken = null;
         tokenFetchPromise = null;
+        console.log('CSRF token cleared, will fetch new one on next request');
     }
 
     /**
