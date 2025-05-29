@@ -653,6 +653,33 @@ EXCHANGE_REJECT_UNAUTHORIZED=false
 
 6. Access the application at `http://localhost:3000`
 
+### Setting Up Administrator Account
+
+To create an administrator account, you can use the provided script:
+
+1. Make sure MongoDB is running and your `.env` file is configured with the correct `MONGODB_URI`
+
+2. Run the admin creation script:
+   ```bash
+   node scripts/create-admin-directly.js
+   ```
+
+3. The script will create an administrator with the following default credentials:
+   - **Admin ID**: ADM001
+   - **Email**: rickh@wavemaxlaundry.com
+   - **Password**: R8der50!
+   - **Permissions**: system_config, operator_management, view_analytics, manage_affiliates
+
+4. After running the script, you can log in to the administrator dashboard at:
+   ```
+   http://localhost:3000/embed-app.html?route=/administrator-login
+   ```
+
+**Important**: For production deployments, make sure to:
+- Modify the script to use secure credentials before running it
+- Change the default password immediately after first login
+- Store credentials securely and never commit them to version control
+
 ### Environment Variables
 
 | Variable | Description | Required |
