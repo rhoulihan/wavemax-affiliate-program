@@ -14,7 +14,6 @@ const compression = require('compression');
 
 // Import middleware
 const { mongoSanitize, sanitizeRequest } = require('./server/middleware/sanitization');
-const { conditionalCsrf, csrfTokenEndpoint } = require('./server/config/csrf-config');
 
 // Import routes
 const authRoutes = require('./server/routes/authRoutes');
@@ -187,11 +186,107 @@ app.use(session({
 // Serve static files in all environments
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Apply CSRF protection with new configuration
+// Set up CSRF protection using sessions instead of cookies
+const csrf = require('csurf');
+const csrfProtection = csrf({
+  cookie: false, // Use req.session instead of cookies
+  value: (req) => {
+    // Check multiple locations for CSRF token
+    return req.body._csrf || 
+           req.query._csrf || 
+           req.headers['csrf-token'] || 
+           req.headers['xsrf-token'] || 
+           req.headers['x-csrf-token'] || 
+           req.headers['x-xsrf-token'];
+  }
+});
+
+// CSRF excluded paths - only public endpoints that don't require authentication
+const csrfExcludedPaths = [
+  '/api/auth/affiliate/login',
+  '/api/auth/customer/login',
+  '/api/auth/administrator/login',
+  '/api/auth/operator/login',
+  '/api/auth/forgot-password',
+  '/api/auth/reset-password',
+  '/api/auth/refresh-token',
+  '/api/affiliates/register',
+  '/api/customers/register',
+  '/api/affiliates/:affiliateId/public',
+  '/api/customers/:customerId/profile',
+  // Also include versioned API paths
+  '/api/v1/auth/affiliate/login',
+  '/api/v1/auth/customer/login',
+  '/api/v1/auth/administrator/login',
+  '/api/v1/auth/operator/login',
+  '/api/v1/auth/forgot-password',
+  '/api/v1/auth/reset-password',
+  '/api/v1/auth/refresh-token',
+  '/api/v1/auth/logout',
+  '/api/v1/affiliates/register',
+  '/api/v1/customers/register',
+  '/api/v1/affiliates/:affiliateId/public',
+  '/api/v1/customers/:customerId/profile',
+  // Add authenticated API endpoints that use JWT instead of CSRF
+  '/api/v1/orders',
+  '/api/v1/orders/export',
+  '/api/v1/orders/search',
+  '/api/v1/orders/statistics',
+  '/api/v1/orders/bulk/status',
+  '/api/v1/orders/:orderId',
+  '/api/v1/orders/:orderId/status',
+  '/api/v1/orders/:orderId/cancel',
+  '/api/v1/orders/:orderId/payment-status',
+  '/api/v1/customers/:customerId',
+  '/api/v1/customers/:customerId/orders',
+  '/api/v1/customers/:customerId/dashboard',
+  '/api/v1/customers/:customerId/password',
+  '/api/v1/customers/:customerId/bags',
+  '/api/v1/affiliates/:affiliateId/customers',
+  '/api/v1/affiliates/:affiliateId/orders',
+  '/api/v1/affiliates/:affiliateId/dashboard',
+  // Temporarily exclude delete endpoint - it's already protected by JWT auth
+  '/api/v1/affiliates/:affiliateId/delete-all-data'
+];
+
+// Apply CSRF conditionally
+const conditionalCsrf = (req, res, next) => {
+  // Check if path is excluded
+  const isExcluded = csrfExcludedPaths.some(path => {
+    if (path.includes(':')) {
+      const regex = new RegExp('^' + path.replace(/:[^/]+/g, '[^/]+') + '$');
+      return regex.test(req.path);
+    }
+    return req.path === path;
+  });
+
+  // Skip CSRF for excluded paths and GET requests
+  if (isExcluded || req.method === 'GET' || req.method === 'HEAD' || req.method === 'OPTIONS') {
+    return next();
+  }
+
+  // Apply CSRF protection for all other routes
+  csrfProtection(req, res, next);
+};
+
+// Apply conditional CSRF to all routes
 app.use(conditionalCsrf);
 
-// CSRF token endpoint
-app.get('/api/csrf-token', csrfTokenEndpoint);
+// CSRF token endpoint - ensure session exists before generating token
+app.get('/api/csrf-token', (req, res, next) => {
+  // Initialize session if it doesn't exist
+  if (!req.session) {
+    return res.status(500).json({ error: 'Session not initialized' });
+  }
+
+  // Apply CSRF protection and generate token
+  csrfProtection(req, res, (err) => {
+    if (err) {
+      return res.status(500).json({ error: 'Failed to generate CSRF token' });
+    }
+    res.json({ csrfToken: req.csrfToken() });
+  });
+});
 
 // API Versioning middleware
 const API_VERSION = 'v1';

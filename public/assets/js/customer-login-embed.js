@@ -2,6 +2,9 @@
 (function() {
   'use strict';
 
+  // Note: Login endpoints currently don't require CSRF tokens
+  // But we'll prepare for future implementation
+
   // PostMessage communication with parent window
   function sendMessageToParent(type, data) {
     if (window.parent && window.parent !== window) {
@@ -121,7 +124,9 @@
         console.log('Request body:', { username, password: '***' });
 
         // API call with full URL
-        fetch('https://wavemax.promo/api/v1/auth/customer/login', {
+        const loginFetch = window.CsrfUtils && window.CsrfUtils.csrfFetch ? window.CsrfUtils.csrfFetch : fetch;
+        
+        loginFetch('https://wavemax.promo/api/v1/auth/customer/login', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'

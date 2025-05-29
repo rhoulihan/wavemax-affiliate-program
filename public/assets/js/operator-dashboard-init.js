@@ -1,6 +1,12 @@
 (function() {
     'use strict';
 
+    // Load CSRF utilities
+    if (!window.CsrfUtils) {
+        console.error('CSRF utilities not loaded. Please include csrf-utils.js before this script.');
+        return;
+    }
+
     // Configuration
     const config = window.EMBED_CONFIG || {
         baseUrl: 'https://wavemax.promo'
@@ -24,16 +30,17 @@
     let selectedOrderId = null;
     let currentOrderStatus = null;
 
-    // Authenticated fetch helper
-    async function authenticatedFetch(url, options = {}) {
-        const response = await fetch(`${BASE_URL}${url}`, {
-            ...options,
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json',
-                ...options.headers
-            }
-        });
+    // Create authenticated fetch with CSRF support
+    const authenticatedFetch = window.CsrfUtils.createAuthenticatedFetch(() => token);
+
+    // Wrapper to handle 401 responses
+    async function operatorFetch(url, options = {}) {
+        // Add base URL and ensure headers
+        const fullUrl = `${BASE_URL}${url}`;
+        options.headers = options.headers || {};
+        options.headers['Content-Type'] = options.headers['Content-Type'] || 'application/json';
+
+        const response = await authenticatedFetch(fullUrl, options);
 
         if (response.status === 401) {
             // Token expired, redirect to login
@@ -63,7 +70,7 @@
     // Load dashboard data
     async function loadDashboard() {
         try {
-            const response = await authenticatedFetch('/api/v1/operators/dashboard');
+            const response = await operatorFetch('/api/v1/operators/dashboard');
             const data = await response.json();
 
             if (response.ok) {
@@ -92,7 +99,7 @@
     // Load order queue
     async function loadOrderQueue() {
         try {
-            const response = await authenticatedFetch('/api/v1/operators/orders/queue?status=pending');
+            const response = await operatorFetch('/api/v1/operators/orders/queue?status=pending');
             const data = await response.json();
 
             if (response.ok) {
@@ -264,8 +271,9 @@
     // Claim order
     async function claimOrder(orderId) {
         try {
-            const response = await authenticatedFetch(`/api/v1/operators/orders/${orderId}/claim`, {
-                method: 'POST'
+            const response = await operatorFetch(`/api/v1/operators/orders/${orderId}/claim`, {
+                method: 'POST',
+                body: JSON.stringify({})
             });
 
             const data = await response.json();
@@ -299,7 +307,7 @@
             }
 
             try {
-                const response = await authenticatedFetch(`/api/v1/operators/orders/${orderId}/status`, {
+                const response = await operatorFetch(`/api/v1/operators/orders/${orderId}/status`, {
                     method: 'PUT',
                     body: JSON.stringify({ 
                         status: newStatus,
@@ -371,7 +379,7 @@
         const notes = document.getElementById('statusNotes').value;
 
         try {
-            const response = await authenticatedFetch(`/api/v1/operators/orders/${selectedOrderId}/status`, {
+            const response = await operatorFetch(`/api/v1/operators/orders/${selectedOrderId}/status`, {
                 method: 'PUT',
                 body: JSON.stringify({ 
                     status: currentOrderStatus,
@@ -401,7 +409,7 @@
         const notes = document.getElementById('qualityNotes').value;
 
         try {
-            const response = await authenticatedFetch(`/api/v1/operators/orders/${selectedOrderId}/quality-check`, {
+            const response = await operatorFetch(`/api/v1/operators/orders/${selectedOrderId}/quality-check`, {
                 method: 'POST',
                 body: JSON.stringify({ 
                     passed: result === 'pass',
@@ -465,7 +473,7 @@
         }
 
         try {
-            const response = await authenticatedFetch('/api/v1/operators/shift/status', {
+            const response = await operatorFetch('/api/v1/operators/shift/status', {
                 method: 'POST',
                 body: JSON.stringify({ action: 'end' })
             });

@@ -3,6 +3,10 @@ console.log('customer-register.js loaded');
 console.log('Current URL:', window.location.href);
 console.log('Window parent same as window?', window.parent === window);
 
+// Note: Registration endpoints currently don't require CSRF tokens
+// But we'll prepare for future implementation
+const csrfFetch = window.CsrfUtils && window.CsrfUtils.csrfFetch ? window.CsrfUtils.csrfFetch : fetch;
+
 // Function to initialize the registration form
 function initializeRegistrationForm() {
   console.log('Initializing registration form');
@@ -134,11 +138,12 @@ function initializeRegistrationForm() {
 
     // Submit to server
     const baseUrl = window.EMBED_CONFIG?.baseUrl || 'https://wavemax.promo';
-    fetch(`${baseUrl}/api/v1/customers/register`, {
+    csrfFetch(`${baseUrl}/api/v1/customers/register`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
       },
+      credentials: 'include',
       body: JSON.stringify(customerData)
     })
       .then(response => response.json())
