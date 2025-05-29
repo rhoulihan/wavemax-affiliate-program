@@ -1,14 +1,27 @@
 // Schedule Pickup Page - Requires Authentication
-console.log('Schedule pickup script loaded');
+(function() {
+  'use strict';
+  
+  console.log('Schedule pickup script loaded');
 
-// Load CSRF utilities
-if (!window.CsrfUtils) {
-  console.error('CSRF utilities not loaded. Please include csrf-utils.js before this script.');
-}
+  // Load CSRF utilities
+  if (!window.CsrfUtils) {
+    console.error('CSRF utilities not loaded. Please include csrf-utils.js before this script.');
+  }
 
 // Function to initialize the page
 async function initializeSchedulePickup() {
   console.log('Initializing schedule pickup page');
+
+  // Initialize CSRF token
+  if (window.CsrfUtils) {
+    try {
+      await window.CsrfUtils.ensureCsrfToken();
+      console.log('CSRF token initialized');
+    } catch (error) {
+      console.error('Failed to initialize CSRF token:', error);
+    }
+  }
 
   // Check if customer is logged in
   const token = localStorage.getItem('customerToken');
@@ -305,17 +318,35 @@ function setupFormSubmission(token) {
       const baseUrl = window.EMBED_CONFIG?.baseUrl || 'https://wavemax.promo';
       
       // Use CSRF-enabled fetch if available
-      const authenticatedFetch = window.CsrfUtils ? window.CsrfUtils.createAuthenticatedFetch(() => token) : fetch;
-      
-      const response = await authenticatedFetch(`${baseUrl}/api/v1/orders`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        credentials: 'include',
-        body: JSON.stringify(pickupData)
-      });
+      let response;
+      if (window.CsrfUtils && window.CsrfUtils.csrfFetch) {
+        // Ensure CSRF token is available
+        await window.CsrfUtils.ensureCsrfToken();
+        console.log('Using CSRF-enabled fetch with token:', window.CsrfUtils.getToken());
+        
+        // Use csrfFetch directly with authorization header
+        response = await window.CsrfUtils.csrfFetch(`${baseUrl}/api/v1/orders`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          credentials: 'include',
+          body: JSON.stringify(pickupData)
+        });
+      } else {
+        // Fallback to regular fetch
+        console.warn('CSRF utils not available, using regular fetch');
+        response = await fetch(`${baseUrl}/api/v1/orders`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          credentials: 'include',
+          body: JSON.stringify(pickupData)
+        });
+      }
 
       console.log('Order submission response status:', response.status);
       const data = await response.json();
@@ -359,3 +390,5 @@ function setupFormSubmission(token) {
     }
   });
 }
+
+})(); // End IIFE
