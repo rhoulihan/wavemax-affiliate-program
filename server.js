@@ -180,7 +180,8 @@ app.use(session({
     secure: process.env.NODE_ENV === 'production', // Only use secure in production
     httpOnly: true,
     maxAge: 24 * 60 * 60 * 1000,
-    sameSite: 'lax' // Allow cookies in same-site requests
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax', // 'none' for cross-origin iframe in production
+    domain: process.env.NODE_ENV === 'production' ? '.wavemax.promo' : undefined // Allow subdomain sharing
   }
 }));
 
