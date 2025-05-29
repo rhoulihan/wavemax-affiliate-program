@@ -1,3 +1,8 @@
+// Load CSRF utilities
+if (!window.CsrfUtils) {
+  console.error('CSRF utilities not loaded. Please include csrf-utils.js before this script.');
+}
+
 // Global variables
 let customerData = null;
 let customerId = null;
@@ -86,8 +91,11 @@ async function loadDashboardData() {
   try {
     const token = localStorage.getItem('customerToken');
 
+    // Create authenticated fetch with CSRF support
+    const authenticatedFetch = window.CsrfUtils ? window.CsrfUtils.createAuthenticatedFetch(() => token) : fetch;
+
     // Fetch customer details
-    const customerResponse = await fetch(`/api/customers/${customerId}`, {
+    const customerResponse = await authenticatedFetch(`/api/customers/${customerId}`, {
       headers: {
         'Authorization': `Bearer ${token}`
       }
@@ -366,8 +374,11 @@ async function saveProfile() {
       }
     }
 
+    // Use CSRF-enabled fetch if available
+    const authenticatedFetch = window.CsrfUtils ? window.CsrfUtils.createAuthenticatedFetch(() => token) : fetch;
+
     // Make API request to update customer
-    const response = await fetch(`/api/customers/${customerId}`, {
+    const response = await authenticatedFetch(`/api/customers/${customerId}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',

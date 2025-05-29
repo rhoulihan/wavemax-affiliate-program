@@ -1,6 +1,12 @@
 (function() {
     'use strict';
 
+    // Load CSRF utilities
+    if (!window.CsrfUtils) {
+        console.error('CSRF utilities not loaded. Please include csrf-utils.js before this script.');
+        return;
+    }
+
     // Configuration
     const config = window.EMBED_CONFIG || {
         baseUrl: 'https://wavemax.promo'
@@ -39,16 +45,17 @@
         });
     });
 
-    // Authenticated fetch helper
-    async function authenticatedFetch(url, options = {}) {
-        const response = await fetch(`${BASE_URL}${url}`, {
-            ...options,
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json',
-                ...options.headers
-            }
-        });
+    // Create authenticated fetch with CSRF support
+    const authenticatedFetch = window.CsrfUtils.createAuthenticatedFetch(() => token);
+
+    // Wrapper to handle 401 responses
+    async function adminFetch(url, options = {}) {
+        // Add base URL and ensure headers
+        const fullUrl = `${BASE_URL}${url}`;
+        options.headers = options.headers || {};
+        options.headers['Content-Type'] = options.headers['Content-Type'] || 'application/json';
+
+        const response = await authenticatedFetch(fullUrl, options);
 
         if (response.status === 401) {
             // Token expired, redirect to login
@@ -86,7 +93,7 @@
     // Load dashboard
     async function loadDashboard() {
         try {
-            const response = await authenticatedFetch('/api/v1/administrators/dashboard');
+            const response = await adminFetch('/api/v1/administrators/dashboard');
             const data = await response.json();
 
             if (response.ok) {
@@ -164,7 +171,7 @@
     // Load operators
     async function loadOperators() {
         try {
-            const response = await authenticatedFetch('/api/v1/administrators/operators');
+            const response = await adminFetch('/api/v1/administrators/operators');
             const data = await response.json();
 
             if (response.ok) {
@@ -221,7 +228,7 @@
     // Load analytics
     async function loadAnalytics() {
         try {
-            const response = await authenticatedFetch('/api/v1/administrators/analytics/orders?period=week');
+            const response = await adminFetch('/api/v1/administrators/analytics/orders?period=week');
             const data = await response.json();
 
             if (response.ok) {
@@ -262,7 +269,7 @@
     // Load affiliates
     async function loadAffiliates() {
         try {
-            const response = await authenticatedFetch('/api/v1/administrators/analytics/affiliates?period=month');
+            const response = await adminFetch('/api/v1/administrators/analytics/affiliates?period=month');
             const data = await response.json();
 
             if (response.ok) {
@@ -312,7 +319,7 @@
     // Load system config
     async function loadSystemConfig() {
         try {
-            const response = await authenticatedFetch('/api/v1/administrators/config');
+            const response = await adminFetch('/api/v1/administrators/config');
             const data = await response.json();
 
             if (response.ok) {
@@ -405,7 +412,7 @@
             
             const method = editingOperatorId ? 'PUT' : 'POST';
             
-            const response = await authenticatedFetch(url, {
+            const response = await adminFetch(url, {
                 method,
                 body: JSON.stringify(operatorData)
             });
@@ -453,7 +460,7 @@
         }
 
         try {
-            const response = await authenticatedFetch('/api/v1/administrators/config', {
+            const response = await adminFetch('/api/v1/administrators/config', {
                 method: 'PUT',
                 body: JSON.stringify({ updates })
             });
@@ -483,7 +490,7 @@
     // Global functions for inline handlers
     window.editOperator = async (operatorId) => {
         try {
-            const response = await authenticatedFetch(`/api/v1/administrators/operators/${operatorId}`);
+            const response = await adminFetch(`/api/v1/administrators/operators/${operatorId}`);
             const data = await response.json();
 
             if (response.ok) {
@@ -517,8 +524,9 @@
         }
 
         try {
-            const response = await authenticatedFetch(`/api/v1/administrators/operators/${operatorId}/reset-pin`, {
-                method: 'POST'
+            const response = await adminFetch(`/api/v1/administrators/operators/${operatorId}/reset-pin`, {
+                method: 'POST',
+                body: JSON.stringify({})
             });
 
             if (response.ok) {

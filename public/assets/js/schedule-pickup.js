@@ -1,6 +1,11 @@
 // Schedule Pickup Page - Requires Authentication
 console.log('Schedule pickup script loaded');
 
+// Load CSRF utilities
+if (!window.CsrfUtils) {
+  console.error('CSRF utilities not loaded. Please include csrf-utils.js before this script.');
+}
+
 // Function to initialize the page
 async function initializeSchedulePickup() {
   console.log('Initializing schedule pickup page');
@@ -298,12 +303,17 @@ function setupFormSubmission(token) {
     try {
       // Submit the order
       const baseUrl = window.EMBED_CONFIG?.baseUrl || 'https://wavemax.promo';
-      const response = await fetch(`${baseUrl}/api/v1/orders`, {
+      
+      // Use CSRF-enabled fetch if available
+      const authenticatedFetch = window.CsrfUtils ? window.CsrfUtils.createAuthenticatedFetch(() => token) : fetch;
+      
+      const response = await authenticatedFetch(`${baseUrl}/api/v1/orders`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
+        credentials: 'include',
         body: JSON.stringify(pickupData)
       });
 

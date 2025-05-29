@@ -1,4 +1,8 @@
 // Affiliate login functionality for embedded environment
+// Note: Login endpoints currently don't require CSRF tokens
+// But we'll prepare for future implementation
+const csrfFetch = window.CsrfUtils && window.CsrfUtils.csrfFetch ? window.CsrfUtils.csrfFetch : fetch;
+
 function initializeAffiliateLogin() {
   console.log('Initializing affiliate login...');
 
@@ -23,11 +27,12 @@ function initializeAffiliateLogin() {
     console.log('Login request:', { username });
 
     // API request
-    fetch('/api/v1/auth/affiliate/login', {
+    csrfFetch('/api/v1/auth/affiliate/login', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
       },
+      credentials: 'include',
       body: JSON.stringify({ username, password })
     })
       .then(response => {

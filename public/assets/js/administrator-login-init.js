@@ -1,6 +1,10 @@
 (function() {
     'use strict';
 
+    // Note: Login endpoints currently don't require CSRF tokens
+    // But we'll prepare for future implementation
+    const csrfFetch = window.CsrfUtils && window.CsrfUtils.csrfFetch ? window.CsrfUtils.csrfFetch : fetch;
+
     // Get config from parent window or use defaults
     const config = window.EMBED_CONFIG || {
         baseUrl: 'https://wavemax.promo',
@@ -63,11 +67,12 @@
         submitText.innerHTML = '<span class="loading"></span>';
 
         try {
-            const response = await fetch(`${BASE_URL}/api/v1/auth/administrator/login`, {
+            const response = await csrfFetch(`${BASE_URL}/api/v1/auth/administrator/login`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
+                credentials: 'include',
                 body: JSON.stringify({ email, password })
             });
 
@@ -135,11 +140,12 @@
         }
 
         try {
-            const response = await fetch(`${BASE_URL}/api/v1/auth/forgot-password`, {
+            const response = await csrfFetch(`${BASE_URL}/api/v1/auth/forgot-password`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
+                credentials: 'include',
                 body: JSON.stringify({ 
                     email, 
                     userType: 'administrator' 
