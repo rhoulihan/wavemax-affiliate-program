@@ -1,14 +1,17 @@
-// Debug info
-console.log('customer-register.js loaded');
-console.log('Current URL:', window.location.href);
-console.log('Window parent same as window?', window.parent === window);
+(function() {
+  'use strict';
 
-// Note: Registration endpoints currently don't require CSRF tokens
-// But we'll prepare for future implementation
-const csrfFetch = window.CsrfUtils && window.CsrfUtils.csrfFetch ? window.CsrfUtils.csrfFetch : fetch;
+  // Debug info
+  console.log('customer-register.js loaded');
+  console.log('Current URL:', window.location.href);
+  console.log('Window parent same as window?', window.parent === window);
 
-// Function to initialize the registration form
-function initializeRegistrationForm() {
+  // Note: Registration endpoints currently don't require CSRF tokens
+  // But we'll prepare for future implementation
+  const csrfFetch = window.CsrfUtils && window.CsrfUtils.csrfFetch ? window.CsrfUtils.csrfFetch : fetch;
+
+  // Function to initialize the registration form
+  function initializeRegistrationForm() {
   console.log('Initializing registration form');
   // Extract affiliate ID from URL query parameter
   // When loaded via embed-app.html, we need to check the actual page URL, not the base URL
@@ -208,12 +211,14 @@ function initializeRegistrationForm() {
     if (value.length > 4) value = value.slice(0, 4);
     e.target.value = value;
   });
-}
+  }
 
-// Check if DOM is already loaded or wait for it
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', initializeRegistrationForm);
-} else {
-  // DOM is already loaded, initialize immediately
-  initializeRegistrationForm();
-}
+  // Check if DOM is already loaded or wait for it
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initializeRegistrationForm);
+  } else {
+    // DOM is already loaded, initialize immediately
+    initializeRegistrationForm();
+  }
+
+})(); // End IIFE

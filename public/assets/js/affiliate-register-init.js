@@ -1,7 +1,10 @@
 // Initialization function for affiliate registration when dynamically loaded
-// Note: Registration endpoints currently don't require CSRF tokens
-// But we'll prepare for future implementation
-const csrfFetch = window.CsrfUtils && window.CsrfUtils.csrfFetch ? window.CsrfUtils.csrfFetch : fetch;
+(function() {
+  'use strict';
+  
+  // Note: Registration endpoints currently don't require CSRF tokens
+  // But we'll prepare for future implementation
+  const csrfFetch = window.CsrfUtils && window.CsrfUtils.csrfFetch ? window.CsrfUtils.csrfFetch : fetch;
 
 function initializeAffiliateRegistration() {
   // Configuration for embedded environment
@@ -222,3 +225,5 @@ function initializeAffiliateRegistration() {
 
 // Initialize immediately when script loads
 initializeAffiliateRegistration();
+
+})(); // End IIFE

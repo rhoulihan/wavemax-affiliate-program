@@ -252,10 +252,12 @@
         
         // Load page-specific scripts
         function loadPageScripts() {
-            // Clean up old scripts first (except embed-navigation.js)
+            // Clean up old scripts first (except embed-navigation.js and utility scripts)
             const existingScripts = document.querySelectorAll('script[src*="/assets/js/"]');
             existingScripts.forEach(script => {
-                if (!script.src.includes('embed-navigation.js')) {
+                if (!script.src.includes('embed-navigation.js') && 
+                    !script.src.includes('csrf-utils.js') && 
+                    !script.src.includes('errorHandler.js')) {
                     script.remove();
                 }
             });
@@ -290,8 +292,21 @@
             let scriptIndex = 0;
             function loadNextScript() {
                 if (scriptIndex < scripts.length) {
+                    const scriptPath = scripts[scriptIndex];
+                    
+                    // Check if utility scripts are already loaded
+                    const isUtilityScript = scriptPath.includes('csrf-utils.js') || scriptPath.includes('errorHandler.js');
+                    const scriptAlreadyLoaded = document.querySelector(`script[src*="${scriptPath}"]`);
+                    
+                    if (isUtilityScript && scriptAlreadyLoaded) {
+                        console.log('Script already loaded, skipping:', scriptPath);
+                        scriptIndex++;
+                        loadNextScript();
+                        return;
+                    }
+                    
                     const script = document.createElement('script');
-                    script.src = BASE_URL + scripts[scriptIndex] + '?v=' + Date.now();
+                    script.src = BASE_URL + scriptPath + '?v=' + Date.now();
                     script.setAttribute('data-page-script', 'true');
                     script.onload = function() {
                         console.log('Loaded script:', scripts[scriptIndex]);
