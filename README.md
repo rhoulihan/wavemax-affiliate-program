@@ -20,6 +20,43 @@ The WaveMAX Affiliate Program enables individuals to register as affiliates, onb
 
 ## Recent Improvements (May 2025)
 
+### CSRF Protection Implementation
+- **Enhanced Security**: Full CSRF protection implementation across all state-changing endpoints
+  - CSRF tokens required for POST, PUT, DELETE operations
+  - Session-based token management with secure storage
+  - Automatic token rotation on each request
+  - Cross-origin iframe support with proper CORS headers
+- **Session Management**: Improved session handling for iframe contexts
+  - Fixed session persistence issues in embedded deployments
+  - Added session debugging capabilities
+  - Proper session initialization for CSRF validation
+- **Frontend Integration**: Updated all forms and API calls to include CSRF tokens
+  - Created csrf-utils.js for centralized CSRF handling
+  - Automatic token refresh on 403 responses
+  - Support for both cookie and header-based token transmission
+
+### Data Management Features
+- **Delete Data Functionality**: Enhanced delete all data feature
+  - Now controlled by ENABLE_DELETE_DATA_FEATURE environment variable
+  - Available in both customer and affiliate dashboards
+  - Visible only when feature flag is enabled
+  - Consistent implementation across all user types
+- **Dashboard Improvements**:
+  - Fixed customer dashboard stats not displaying correctly
+  - Removed redundant getCustomerDashboard function
+  - Improved order count calculations
+  - Enhanced profile editing in customer dashboard
+
+### Bug Fixes and Optimizations
+- **Iframe Height Management**: Fixed infinite resize loops in embedded applications
+  - Implemented debouncing for resize events
+  - Added proper height reset on page navigation
+  - Improved ResizeObserver and MutationObserver handling
+- **JavaScript Errors**: Fixed duplicate declaration errors in embedded forms
+- **API Consistency**: Standardized dashboard endpoints and data structures
+
+## Recent Improvements (May 2025 - Earlier Updates)
+
 ### Administrator & Operator Management System
 - **New Role-Based Access Control**: Added administrator and operator roles with granular permissions
   - Administrators: Full system access, operator management, analytics, configuration
@@ -542,6 +579,7 @@ EXCHANGE_REJECT_UNAUTHORIZED=false
 | `CORS_ORIGIN` | Allowed CORS origins | Yes |
 | `LOG_LEVEL` | Logging level | No |
 | `LOG_DIR` | Directory for log files | No |
+| `ENABLE_DELETE_DATA_FEATURE` | Enable delete all data feature (true/false) | No |
 
 #### Standard SMTP Configuration (when EMAIL_PROVIDER=smtp)
 | Variable | Description | Required |
