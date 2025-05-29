@@ -761,10 +761,9 @@ async function changePassword(affiliateId) {
   }
 }
 
-// Check and show delete section if in development environment
+// Check and show delete section if enabled
 function checkAndShowDeleteSection() {
   console.log('Checking environment for delete section visibility...');
-  // Check if we're in development or test environment
   const baseUrl = window.EMBED_CONFIG?.baseUrl || 'https://wavemax.promo';
   console.log('Fetching environment from:', `${baseUrl}/api/v1/environment`);
   
@@ -772,8 +771,8 @@ function checkAndShowDeleteSection() {
     .then(response => response.json())
     .then(data => {
       console.log('Environment data received:', data);
-      if (data.nodeEnv === 'development' || data.nodeEnv === 'test') {
-        console.log('Development/test environment detected, showing delete section');
+      if (data.enableDeleteDataFeature === true) {
+        console.log('Delete data feature enabled, showing delete section');
         const deleteSection = document.getElementById('deleteDataSection');
         if (deleteSection) {
           deleteSection.style.display = 'block';
@@ -782,7 +781,7 @@ function checkAndShowDeleteSection() {
           console.error('Delete section element not found!');
         }
       } else {
-        console.log('Production environment detected, hiding delete section');
+        console.log('Delete data feature not enabled, hiding delete section');
       }
     })
     .catch(error => console.error('Environment check failed:', error));

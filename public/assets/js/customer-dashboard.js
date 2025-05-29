@@ -252,6 +252,23 @@ async function loadProfile(editMode = false) {
                     <p class="font-semibold">Not provided</p>
                 </div>
             `}
+            <div id="deleteDataSection" class="mt-8 pt-6 border-t" style="display: none;">
+                <h3 class="text-lg font-bold mb-4 text-red-600">Danger Zone - Development Only</h3>
+                <div class="bg-red-50 border border-red-300 rounded-lg p-4">
+                    <p class="text-red-800 mb-4">
+                        <strong>Warning:</strong> This will permanently delete ALL your data including:
+                    </p>
+                    <ul class="list-disc list-inside text-red-700 mb-4">
+                        <li>Your customer account</li>
+                        <li>All your orders</li>
+                        <li>All your bag assignments</li>
+                    </ul>
+                    <p class="text-red-800 font-bold mb-4">This action cannot be undone!</p>
+                    <button type="button" id="deleteAllDataBtn" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition">
+                        Delete All My Data
+                    </button>
+                </div>
+            </div>
         `;
 
     contentArea.innerHTML = profileHtml;
@@ -260,6 +277,17 @@ async function loadProfile(editMode = false) {
     document.getElementById('editProfileBtn').addEventListener('click', function() {
       loadProfile(true);
     });
+
+    // Add event listener for delete data button
+    const deleteDataBtn = document.getElementById('deleteAllDataBtn');
+    if (deleteDataBtn) {
+      deleteDataBtn.addEventListener('click', function() {
+        deleteAllData();
+      });
+    }
+
+    // Check if delete data feature should be shown
+    checkAndShowDeleteSection();
   } else {
     // Edit mode
     let editHtml = `
@@ -429,4 +457,60 @@ function showOrders() {
 // Show profile (alias for loadProfile)
 function showProfile() {
   loadProfile();
+}
+
+// Check and show delete section if enabled
+async function checkAndShowDeleteSection() {
+  try {
+    const response = await fetch('/api/v1/environment');
+    const data = await response.json();
+    
+    if (data.enableDeleteDataFeature === true) {
+      const deleteSection = document.getElementById('deleteDataSection');
+      if (deleteSection) {
+        deleteSection.style.display = 'block';
+      }
+    }
+  } catch (error) {
+    console.log('Environment check failed:', error);
+  }
+}
+
+// Delete all customer data
+async function deleteAllData() {
+  if (!confirm('Are you absolutely sure? This will delete ALL your data permanently!')) {
+    return;
+  }
+  
+  if (!confirm('This is your last chance to cancel. Do you really want to delete everything?')) {
+    return;
+  }
+  
+  try {
+    const token = localStorage.getItem('customerToken');
+    
+    // Use CSRF-enabled fetch if available
+    const authenticatedFetch = window.CsrfUtils ? window.CsrfUtils.createAuthenticatedFetch(() => token) : fetch;
+    
+    const response = await authenticatedFetch(`/api/customers/${customerId}/delete-all-data`, {
+      method: 'DELETE',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      },
+      credentials: 'include'
+    });
+    
+    const data = await response.json();
+    
+    if (data.success) {
+      alert('All data has been deleted successfully.');
+      handleLogout();
+    } else {
+      alert(data.message || 'Failed to delete data');
+    }
+  } catch (error) {
+    console.error('Delete error:', error);
+    alert('An error occurred while deleting data');
+  }
 }
