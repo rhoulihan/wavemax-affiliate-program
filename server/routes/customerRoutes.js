@@ -78,7 +78,7 @@ router.get('/:customerId/orders', authenticate, customerController.getCustomerOr
  * @desc    Get customer dashboard stats
  * @access  Private (self, affiliated affiliate, or admin)
  */
-router.get('/:customerId/dashboard', authenticate, customerController.getCustomerDashboard);
+router.get('/:customerId/dashboard', authenticate, customerController.getCustomerDashboardStats);
 
 /**
  * @route   PUT /api/customers/:customerId/password
