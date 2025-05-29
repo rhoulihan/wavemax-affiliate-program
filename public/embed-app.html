@@ -317,31 +317,42 @@
             loadPage(route);
         }
         
+        // Track last sent height to prevent loops
+        let lastSentHeight = 0;
+        let heightDebounceTimer = null;
+        
         // Send height to parent window
         function sendHeight() {
             if (window.parent !== window) {
-                // Force a reflow to ensure accurate height measurement
-                document.body.style.display = 'none';
-                document.body.offsetHeight; // Force reflow
-                document.body.style.display = '';
+                // Clear any pending height updates
+                if (heightDebounceTimer) {
+                    clearTimeout(heightDebounceTimer);
+                }
                 
-                // Get the most accurate height
-                const heights = [
-                    document.body.scrollHeight,
-                    document.body.offsetHeight,
-                    document.documentElement.scrollHeight,
-                    document.documentElement.offsetHeight,
-                    document.querySelector('#app-container')?.scrollHeight || 0
-                ];
-                
-                const height = Math.max(...heights) + 50; // Add some buffer
-                
-                console.log('Sending height to parent:', height);
-                
-                window.parent.postMessage({
-                    type: 'resize',
-                    data: { height: height }
-                }, '*');
+                // Debounce height updates
+                heightDebounceTimer = setTimeout(() => {
+                    // Get the most accurate height
+                    const heights = [
+                        document.body.scrollHeight,
+                        document.body.offsetHeight,
+                        document.documentElement.scrollHeight,
+                        document.documentElement.offsetHeight,
+                        document.querySelector('#app-container')?.scrollHeight || 0
+                    ];
+                    
+                    const height = Math.max(...heights) + 50; // Add some buffer
+                    
+                    // Only send if height has changed significantly (more than 5px)
+                    if (Math.abs(height - lastSentHeight) > 5) {
+                        console.log('Sending height to parent:', height);
+                        lastSentHeight = height;
+                        
+                        window.parent.postMessage({
+                            type: 'resize',
+                            data: { height: height }
+                        }, '*');
+                    }
+                }, 100); // Debounce for 100ms
             }
         }
         
@@ -413,8 +424,15 @@
         });
         
         // Monitor content changes for height updates
+        let resizeThrottleTimer = null;
         const resizeObserver = new ResizeObserver(() => {
-            sendHeight();
+            // Throttle resize observations
+            if (!resizeThrottleTimer) {
+                resizeThrottleTimer = setTimeout(() => {
+                    sendHeight();
+                    resizeThrottleTimer = null;
+                }, 200); // Throttle to once every 200ms
+            }
         });
         
         // Initialize
@@ -431,20 +449,36 @@
                 resizeObserver.observe(appContainer);
                 
                 // Additionally use MutationObserver for DOM changes
+                let mutationThrottleTimer = null;
                 const mutationObserver = new MutationObserver(() => {
-                    setTimeout(sendHeight, 100);
+                    // Throttle mutation observations
+                    if (!mutationThrottleTimer) {
+                        mutationThrottleTimer = setTimeout(() => {
+                            sendHeight();
+                            mutationThrottleTimer = null;
+                        }, 300); // Throttle to once every 300ms
+                    }
                 });
                 
                 mutationObserver.observe(appContainer, {
                     childList: true,
                     subtree: true,
-                    attributes: true
+                    attributes: true,
+                    attributeFilter: ['style', 'class'] // Only watch relevant attributes
                 });
             }
         });
         
-        // Also send height on window resize
-        window.addEventListener('resize', sendHeight);
+        // Also send height on window resize (throttled)
+        let windowResizeTimer = null;
+        window.addEventListener('resize', () => {
+            if (windowResizeTimer) {
+                clearTimeout(windowResizeTimer);
+            }
+            windowResizeTimer = setTimeout(() => {
+                sendHeight();
+            }, 250);
+        });
     </script>
 </body>
 </html>
