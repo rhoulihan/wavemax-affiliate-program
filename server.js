@@ -174,14 +174,13 @@ const session = require('express-session');
 app.use(session({
   secret: process.env.SESSION_SECRET || process.env.JWT_SECRET,
   resave: false,
-  saveUninitialized: false,
+  saveUninitialized: true, // Changed to true to ensure sessions are created for CSRF
   store: MongoStore.create({ mongoUrl: process.env.MONGODB_URI }),
   cookie: {
     secure: process.env.NODE_ENV === 'production', // Only use secure in production
     httpOnly: true,
     maxAge: 24 * 60 * 60 * 1000,
-    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax', // 'none' for cross-origin iframe in production
-    domain: process.env.NODE_ENV === 'production' ? '.wavemax.promo' : undefined // Allow subdomain sharing
+    sameSite: 'lax' // Allow cookies in same-site requests
   }
 }));
 
