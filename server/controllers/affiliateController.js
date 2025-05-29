@@ -856,11 +856,11 @@ exports.getPublicAffiliateInfo = async (req, res) => {
  */
 exports.deleteAffiliateData = async (req, res) => {
   try {
-    // Only allow in development or test environments
-    if (process.env.NODE_ENV !== 'development' && process.env.NODE_ENV !== 'test') {
+    // Only allow if feature is enabled
+    if (process.env.ENABLE_DELETE_DATA_FEATURE !== 'true') {
       return res.status(403).json({
         success: false,
-        message: 'This operation is not allowed in production'
+        message: 'This operation is not allowed'
       });
     }
 

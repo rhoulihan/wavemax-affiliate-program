@@ -492,7 +492,7 @@ async function deleteAllData() {
     // Use CSRF-enabled fetch if available
     const authenticatedFetch = window.CsrfUtils ? window.CsrfUtils.createAuthenticatedFetch(() => token) : fetch;
     
-    const response = await authenticatedFetch(`/api/customers/${customerId}/delete-all-data`, {
+    const response = await authenticatedFetch(`/api/v1/customers/${customerId}/delete-all-data`, {
       method: 'DELETE',
       headers: {
         'Authorization': `Bearer ${token}`,

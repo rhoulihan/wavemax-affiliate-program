@@ -258,6 +258,14 @@ apiV1Router.use('/bags', bagRoutes);
 apiV1Router.use('/administrators', administratorRoutes);
 apiV1Router.use('/operators', operatorRoutes);
 
+// Environment endpoint
+apiV1Router.get('/environment', (req, res) => {
+  res.json({
+    environment: process.env.NODE_ENV || 'development',
+    enableDeleteDataFeature: process.env.ENABLE_DELETE_DATA_FEATURE === 'true'
+  });
+});
+
 // Mount versioned API
 app.use('/api/v1', apiV1Router);
 

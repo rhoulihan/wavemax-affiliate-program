@@ -638,22 +638,31 @@ exports.updatePaymentInfo = async (req, res) => {
  */
 exports.deleteCustomerData = async (req, res) => {
   try {
-    // Only allow in development or test environments
-    if (process.env.NODE_ENV !== 'development' && process.env.NODE_ENV !== 'test') {
+    // Only allow if feature is enabled
+    if (process.env.ENABLE_DELETE_DATA_FEATURE !== 'true') {
       return res.status(403).json({
         success: false,
-        message: 'This operation is not allowed in production'
+        message: 'This operation is not allowed'
       });
     }
 
-    const { customerId } = req.user;
+    const { customerId } = req.params;
+    const loggedInCustomerId = req.user.customerId;
 
-    // Verify the customer exists and matches the logged-in user
-    const customer = await Customer.findOne({ customerId });
-    if (!customer || customer.customerId !== customerId) {
+    // Verify the logged-in user is deleting their own data
+    if (customerId !== loggedInCustomerId) {
       return res.status(403).json({
         success: false,
-        message: 'Unauthorized'
+        message: 'You can only delete your own data'
+      });
+    }
+
+    // Verify the customer exists
+    const customer = await Customer.findOne({ customerId });
+    if (!customer) {
+      return res.status(404).json({
+        success: false,
+        message: 'Customer not found'
       });
     }
 
