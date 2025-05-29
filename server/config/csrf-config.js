@@ -8,11 +8,7 @@ const auditLogger = require('../utils/auditLogger');
 
 // CSRF token generation middleware
 const csrfProtection = csrf({
-  cookie: {
-    httpOnly: false, // Allow JavaScript to read the cookie for double-submit
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'none' // Required for cross-origin iframe
-  },
+  cookie: false, // Use req.session instead of cookies
   value: (req) => {
     // Check multiple locations for CSRF token
     return req.body._csrf || 

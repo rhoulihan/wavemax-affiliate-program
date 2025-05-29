@@ -18,36 +18,10 @@
     }
 
     /**
-     * Get CSRF token from cookie
-     */
-    function getCsrfTokenFromCookie() {
-        const name = '_csrf=';
-        const decodedCookie = decodeURIComponent(document.cookie);
-        const ca = decodedCookie.split(';');
-        for(let i = 0; i < ca.length; i++) {
-            let c = ca[i];
-            while (c.charAt(0) == ' ') {
-                c = c.substring(1);
-            }
-            if (c.indexOf(name) == 0) {
-                return c.substring(name.length, c.length);
-            }
-        }
-        return null;
-    }
-
-    /**
      * Fetch CSRF token from server
      * Uses promise caching to prevent multiple simultaneous requests
      */
     async function fetchCsrfToken() {
-        // First check if token exists in cookie
-        const cookieToken = getCsrfTokenFromCookie();
-        if (cookieToken) {
-            csrfToken = cookieToken;
-            return cookieToken;
-        }
-
         if (tokenFetchPromise) {
             return tokenFetchPromise;
         }
@@ -67,11 +41,6 @@
         .then(data => {
             csrfToken = data.csrfToken;
             tokenFetchPromise = null;
-            // Also check cookie after fetch
-            const cookieToken = getCsrfTokenFromCookie();
-            if (cookieToken) {
-                csrfToken = cookieToken;
-            }
             return csrfToken;
         })
         .catch(error => {
