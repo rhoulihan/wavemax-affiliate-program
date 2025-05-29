@@ -1,9 +1,12 @@
-// Affiliate login functionality for embedded environment
-// Note: Login endpoints currently don't require CSRF tokens
-// But we'll prepare for future implementation
-const csrfFetch = window.CsrfUtils && window.CsrfUtils.csrfFetch ? window.CsrfUtils.csrfFetch : fetch;
+(function() {
+  'use strict';
 
-function initializeAffiliateLogin() {
+  // Affiliate login functionality for embedded environment
+  // Note: Login endpoints currently don't require CSRF tokens
+  // But we'll prepare for future implementation
+  const csrfFetch = window.CsrfUtils && window.CsrfUtils.csrfFetch ? window.CsrfUtils.csrfFetch : fetch;
+
+  function initializeAffiliateLogin() {
   console.log('Initializing affiliate login...');
 
   // Form submission
@@ -60,7 +63,9 @@ function initializeAffiliateLogin() {
         alert('Login failed. Please check your credentials and try again.');
       });
   });
-}
+  }
 
-// Initialize immediately
-initializeAffiliateLogin();
+  // Initialize immediately
+  initializeAffiliateLogin();
+
+})(); // End IIFE
