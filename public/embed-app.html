@@ -118,6 +118,18 @@
             // Clean up current page before loading new one
             cleanupCurrentPage();
             
+            // Reset height tracking for new page
+            lastSentHeight = 0;
+            isUpdatingHeight = false;
+            
+            // Send a smaller height to trigger resize on new page
+            if (window.parent !== window) {
+                window.parent.postMessage({
+                    type: 'resize',
+                    data: { height: 600 } // Reset to minimum height
+                }, '*');
+            }
+            
             const container = document.getElementById('app-container');
             const pagePath = EMBED_PAGES[route] || EMBED_PAGES['/'];
             console.log('Page path:', pagePath);
@@ -191,6 +203,11 @@
                     // Also scroll parent to top
                     scrollParentToTop();
                 }, 100);
+                
+                // Double-check height after a longer delay for complex content
+                setTimeout(() => {
+                    sendHeight(true); // Force another check
+                }, 500);
                 
             } catch (error) {
                 console.error('Error loading page:', error);
