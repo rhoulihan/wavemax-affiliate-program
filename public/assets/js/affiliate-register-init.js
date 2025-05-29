@@ -1,4 +1,8 @@
 // Initialization function for affiliate registration when dynamically loaded
+// Note: Registration endpoints currently don't require CSRF tokens
+// But we'll prepare for future implementation
+const csrfFetch = window.CsrfUtils && window.CsrfUtils.csrfFetch ? window.CsrfUtils.csrfFetch : fetch;
+
 function initializeAffiliateRegistration() {
   // Configuration for embedded environment
   const baseUrl = window.EMBED_CONFIG?.baseUrl || 'https://wavemax.promo';
@@ -61,11 +65,12 @@ function initializeAffiliateRegistration() {
         });
 
         // API call to the server with proper base URL
-        const response = await fetch(`${baseUrl}/api/v1/affiliates/register`, {
+        const response = await csrfFetch(`${baseUrl}/api/v1/affiliates/register`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
           },
+          credentials: 'include',
           body: JSON.stringify(affiliateData)
         });
 
@@ -130,6 +135,9 @@ function initializeAffiliateRegistration() {
 
   // Listen for messages from parent window if embedded
   if (isEmbedded) {
+    // Store ResizeObserver instance for cleanup
+    let resizeObserver = null;
+    
     window.addEventListener('message', function(event) {
       // Verify origin for security
       if (event.origin !== baseUrl.replace(/\/$/, '')) {
@@ -167,15 +175,48 @@ function initializeAffiliateRegistration() {
     }, '*');
 
     // Monitor form height changes
-    const resizeObserver = new ResizeObserver(entries => {
-      for (let entry of entries) {
-        window.parent.postMessage({
-          type: 'form-height',
-          height: entry.target.scrollHeight
-        }, '*');
+    resizeObserver = new ResizeObserver(entries => {
+      // Check if we're still on the registration page
+      if (!window.location.href.includes('affiliate-success')) {
+        for (let entry of entries) {
+          console.log('Sending height to parent:', entry.target.scrollHeight);
+          window.parent.postMessage({
+            type: 'form-height',
+            height: entry.target.scrollHeight
+          }, '*');
+        }
+      } else {
+        // If we've navigated away, disconnect the observer
+        if (resizeObserver) {
+          resizeObserver.disconnect();
+          resizeObserver = null;
+        }
       }
     });
     resizeObserver.observe(document.body);
+    
+    // Clean up observer before navigation
+    window.addEventListener('beforeunload', function() {
+      if (resizeObserver) {
+        resizeObserver.disconnect();
+        resizeObserver = null;
+      }
+    });
+    
+    // Also clean up on custom events from parent
+    window.addEventListener('page-cleanup', function() {
+      if (resizeObserver) {
+        resizeObserver.disconnect();
+        resizeObserver = null;
+      }
+    });
+    
+    window.addEventListener('disconnect-observers', function() {
+      if (resizeObserver) {
+        resizeObserver.disconnect();
+        resizeObserver = null;
+      }
+    });
   }
 }
 

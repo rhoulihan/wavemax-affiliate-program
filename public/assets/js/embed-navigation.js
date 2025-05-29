@@ -86,6 +86,9 @@
 
     // Handle iframe resizing
     if (window.parent !== window) {
+      let lastHeight = 0;
+      let heightTimeout = null;
+      
       function sendHeight() {
         const height = Math.max(
           document.body.scrollHeight,
@@ -95,17 +98,32 @@
           document.documentElement.offsetHeight
         );
 
-        window.parent.postMessage({
-          type: 'resize',
-          data: { height: height }
-        }, '*');
+        // Only send if height has actually changed
+        if (Math.abs(height - lastHeight) > 5) { // 5px threshold to avoid minor fluctuations
+          lastHeight = height;
+          
+          // Debounce height messages to prevent flooding
+          if (heightTimeout) {
+            clearTimeout(heightTimeout);
+          }
+          
+          heightTimeout = setTimeout(() => {
+            console.log('Sending height to parent:', height);
+            window.parent.postMessage({
+              type: 'resize',
+              data: { height: height }
+            }, '*');
+          }, 50); // 50ms debounce
+        }
       }
 
       // Send initial height
       sendHeight();
 
       // Monitor for changes
-      const resizeObserver = new ResizeObserver(sendHeight);
+      const resizeObserver = new ResizeObserver(() => {
+        sendHeight();
+      });
       resizeObserver.observe(document.body);
 
       // Also send height on window resize
@@ -113,6 +131,35 @@
 
       // Send height after images load
       window.addEventListener('load', sendHeight);
+      
+      // Clean up on page unload
+      window.addEventListener('beforeunload', function() {
+        if (resizeObserver) {
+          resizeObserver.disconnect();
+        }
+        if (heightTimeout) {
+          clearTimeout(heightTimeout);
+        }
+      });
+      
+      // Also clean up on custom events
+      window.addEventListener('page-cleanup', function() {
+        if (resizeObserver) {
+          resizeObserver.disconnect();
+        }
+        if (heightTimeout) {
+          clearTimeout(heightTimeout);
+        }
+      });
+      
+      window.addEventListener('disconnect-observers', function() {
+        if (resizeObserver) {
+          resizeObserver.disconnect();
+        }
+        if (heightTimeout) {
+          clearTimeout(heightTimeout);
+        }
+      });
     }
   }
 
