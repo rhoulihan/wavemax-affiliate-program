@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Management Guide - WaveMAX Affiliate Program</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f8f9fa;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+            color: white;
+            padding: 30px 0;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        header h1 {
+            font-size: 2rem;
+            margin-bottom: 5px;
+        }
+        
+        header .breadcrumb {
+            opacity: 0.9;
+        }
+        
+        header .breadcrumb a {
+            color: white;
+            text-decoration: none;
+        }
+        
+        .content {
+            background: white;
+            border-radius: 8px;
+            padding: 40px;
+            margin-top: 30px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+        
+        h2 {
+            color: #1e3a8a;
+            margin-top: 30px;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+        
+        h3 {
+            color: #333;
+            margin-top: 25px;
+            margin-bottom: 15px;
+        }
+        
+        .user-type-section {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 25px;
+            margin: 20px 0;
+            border-left: 4px solid #3b82f6;
+        }
+        
+        .user-type-section.admin {
+            border-left-color: #dc3545;
+        }
+        
+        .user-type-section.operator {
+            border-left-color: #fd7e14;
+        }
+        
+        .user-type-section.affiliate {
+            border-left-color: #3b82f6;
+        }
+        
+        .user-type-section.customer {
+            border-left-color: #28a745;
+        }
+        
+        code {
+            background: #f4f4f4;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+        
+        pre {
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 6px;
+            overflow-x: auto;
+            margin: 15px 0;
+        }
+        
+        pre code {
+            background: none;
+            padding: 0;
+            color: inherit;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #1e3a8a;
+        }
+        
+        .process-flow {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin: 20px 0;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        
+        .process-step {
+            flex: 1;
+            text-align: center;
+            padding: 15px;
+            background: white;
+            border-radius: 6px;
+            margin: 0 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .process-step .number {
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            line-height: 30px;
+            background: #3b82f6;
+            color: white;
+            border-radius: 50%;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+        
+        .warning {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 4px;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        
+        .warning strong {
+            color: #856404;
+        }
+        
+        .info {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+            border-radius: 4px;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        
+        .info strong {
+            color: #0c5460;
+        }
+        
+        .success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            border-radius: 4px;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        
+        .success strong {
+            color: #155724;
+        }
+        
+        .nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 40px;
+            padding-top: 30px;
+            border-top: 1px solid #e0e0e0;
+        }
+        
+        .nav-buttons a {
+            display: inline-block;
+            padding: 10px 20px;
+            background: #3b82f6;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            transition: background 0.2s;
+        }
+        
+        .nav-buttons a:hover {
+            background: #2563eb;
+        }
+        
+        .form-example {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 6px;
+            margin: 15px 0;
+        }
+        
+        .form-example input,
+        .form-example select {
+            width: 100%;
+            padding: 8px 12px;
+            margin: 5px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        
+        .form-example label {
+            display: block;
+            margin-top: 10px;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="breadcrumb">
+                <a href="index.html">Documentation</a> → User Management
+            </div>
+            <h1>User Management Guide</h1>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="content">
+            <div class="info">
+                <strong>ℹ️ Overview:</strong> This guide covers creating, managing, and maintaining all user types in the WaveMAX Affiliate Program system.
+            </div>
+
+            <h2>User Creation Process Flow</h2>
+            
+            <div class="process-flow">
+                <div class="process-step">
+                    <div class="number">1</div>
+                    <strong>Choose User Type</strong>
+                    <p>Admin, Operator, Affiliate, Customer</p>
+                </div>
+                <div class="process-step">
+                    <div class="number">2</div>
+                    <strong>Enter Details</strong>
+                    <p>Required information</p>
+                </div>
+                <div class="process-step">
+                    <div class="number">3</div>
+                    <strong>Set Permissions</strong>
+                    <p>Role-based access</p>
+                </div>
+                <div class="process-step">
+                    <div class="number">4</div>
+                    <strong>Send Welcome</strong>
+                    <p>Email with credentials</p>
+                </div>
+            </div>
+
+            <h2>Creating Administrator Accounts</h2>
+
+            <div class="user-type-section admin">
+                <h3>Via Admin Dashboard</h3>
+                <ol>
+                    <li>Login as administrator with <code>operator_management</code> permission</li>
+                    <li>Navigate to Users → Administrators</li>
+                    <li>Click "Create New Administrator"</li>
+                    <li>Fill in the required fields</li>
+                    <li>Select permissions</li>
+                    <li>Click "Create Administrator"</li>
+                </ol>
+
+                <h3>Via API</h3>
+                <pre><code>POST /api/v1/administrators
+Authorization: Bearer {admin_token}
+Content-Type: application/json
+
+{
+    "firstName": "Jane",
+    "lastName": "Smith",
+    "email": "jane.smith@wavemaxlaundry.com",
+    "password": "SecurePassword123!",
+    "permissions": [
+        "system_config",
+        "operator_management",
+        "view_analytics"
+    ]
+}</code></pre>
+
+                <h3>Via Database Script</h3>
+                <pre><code>// Create admin user programmatically
+const Administrator = require('./server/models/Administrator');
+
+const newAdmin = new Administrator({
+    adminId: generateAdminId(),
+    firstName: 'Jane',
+    lastName: 'Smith',
+    email: 'jane.smith@wavemaxlaundry.com',
+    password: 'SecurePassword123!',  // Will be hashed automatically
+    permissions: ['system_config', 'view_analytics'],
+    isActive: true,
+    createdBy: req.user.id
+});
+
+await newAdmin.save();</code></pre>
+            </div>
+
+            <h2>Creating Operator Accounts</h2>
+
+            <div class="user-type-section operator">
+                <h3>Operator Information Required</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Field</th>
+                            <th>Type</th>
+                            <th>Required</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>firstName</td>
+                            <td>String</td>
+                            <td>Yes</td>
+                            <td>Operator's first name</td>
+                        </tr>
+                        <tr>
+                            <td>lastName</td>
+                            <td>String</td>
+                            <td>Yes</td>
+                            <td>Operator's last name</td>
+                        </tr>
+                        <tr>
+                            <td>email</td>
+                            <td>Email</td>
+                            <td>Yes</td>
+                            <td>Unique email address</td>
+                        </tr>
+                        <tr>
+                            <td>pin</td>
+                            <td>String</td>
+                            <td>Yes</td>
+                            <td>4-digit PIN for quick login</td>
+                        </tr>
+                        <tr>
+                            <td>workstation</td>
+                            <td>String</td>
+                            <td>Yes</td>
+                            <td>Assigned workstation</td>
+                        </tr>
+                        <tr>
+                            <td>shift</td>
+                            <td>String</td>
+                            <td>No</td>
+                            <td>morning, afternoon, evening</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h3>Creating via Dashboard</h3>
+                <div class="form-example">
+                    <form>
+                        <label>First Name</label>
+                        <input type="text" value="John" />
+                        
+                        <label>Last Name</label>
+                        <input type="text" value="Doe" />
+                        
+                        <label>Email</label>
+                        <input type="email" value="john.doe@wavemaxlaundry.com" />
+                        
+                        <label>PIN (4 digits)</label>
+                        <input type="text" value="1234" maxlength="4" />
+                        
+                        <label>Workstation</label>
+                        <select>
+                            <option>Washing Station 1</option>
+                            <option>Drying Station 1</option>
+                            <option>Folding Station 1</option>
+                            <option>Quality Check</option>
+                        </select>
+                        
+                        <label>Shift</label>
+                        <select>
+                            <option>Morning (6AM - 2PM)</option>
+                            <option>Afternoon (2PM - 10PM)</option>
+                            <option>Evening (10PM - 6AM)</option>
+                        </select>
+                    </form>
+                </div>
+
+                <h3>API Creation</h3>
+                <pre><code>POST /api/v1/operators
+Authorization: Bearer {admin_token}
+Content-Type: application/json
+
+{
+    "firstName": "John",
+    "lastName": "Doe",
+    "email": "john.doe@wavemaxlaundry.com",
+    "pin": "1234",
+    "workstation": "washing_station_1",
+    "shift": "morning",
+    "startDate": "2025-06-01"
+}</code></pre>
+            </div>
+
+            <h2>Managing Affiliate Accounts</h2>
+
+            <div class="user-type-section affiliate">
+                <h3>Affiliate Lifecycle</h3>
+                <ol>
+                    <li><strong>Self-Registration:</strong> Affiliates register through the embed form</li>
+                    <li><strong>Review:</strong> Administrators review applications</li>
+                    <li><strong>Approval:</strong> Admin approves/rejects with reason</li>
+                    <li><strong>Onboarding:</strong> Affiliate receives welcome email and training</li>
+                    <li><strong>Active:</strong> Can register customers and earn commissions</li>
+                </ol>
+
+                <h3>Approval Process</h3>
+                <pre><code>// Approve affiliate
+PUT /api/v1/affiliates/{affiliateId}/approve
+Authorization: Bearer {admin_token}
+Content-Type: application/json
+
+{
+    "approved": true,
+    "approvalNotes": "Background check completed",
+    "commissionRate": 0.10,  // 10% commission
+    "territory": "Austin North"
+}
+
+// Reject affiliate
+PUT /api/v1/affiliates/{affiliateId}/approve
+{
+    "approved": false,
+    "rejectionReason": "Incomplete application"
+}</code></pre>
+
+                <h3>Update Affiliate Status</h3>
+                <pre><code>// Deactivate affiliate
+PUT /api/v1/affiliates/{affiliateId}/status
+{
+    "isActive": false,
+    "reason": "Contract violation",
+    "effectiveDate": "2025-06-01"
+}
+
+// Reactivate affiliate
+PUT /api/v1/affiliates/{affiliateId}/status
+{
+    "isActive": true,
+    "reason": "Issue resolved"
+}</code></pre>
+            </div>
+
+            <h2>Customer Management</h2>
+
+            <div class="user-type-section customer">
+                <h3>Customer Creation Methods</h3>
+                
+                <h4>1. Affiliate Registration</h4>
+                <p>Customers register through affiliate links:</p>
+                <ul>
+                    <li>Affiliate shares unique registration link</li>
+                    <li>Customer fills out registration form</li>
+                    <li>Automatically linked to affiliate</li>
+                    <li>Welcome email sent to customer</li>
+                </ul>
+
+                <h4>2. Admin Direct Creation</h4>
+                <pre><code>POST /api/v1/customers
+Authorization: Bearer {admin_token}
+Content-Type: application/json
+
+{
+    "firstName": "Sarah",
+    "lastName": "Johnson",
+    "email": "sarah.johnson@email.com",
+    "phone": "(512) 555-0123",
+    "password": "CustomerPass123!",
+    "address": {
+        "street": "123 Main St",
+        "apartment": "Apt 4B",
+        "city": "Austin",
+        "state": "TX",
+        "zipCode": "78701"
+    },
+    "affiliateId": "AFF123",
+    "specialInstructions": {
+        "laundry": "Use fragrance-free detergent",
+        "delivery": "Leave at door"
+    }
+}</code></pre>
+
+                <h4>3. Bulk Import</h4>
+                <p>Import multiple customers via CSV:</p>
+                <pre><code>// CSV Format
+firstName,lastName,email,phone,address,affiliateId
+John,Smith,john@email.com,(512)555-0001,"123 Oak St, Austin, TX 78701",AFF123
+Jane,Doe,jane@email.com,(512)555-0002,"456 Elm St, Austin, TX 78702",AFF123</code></pre>
+            </div>
+
+            <h2>Bulk User Operations</h2>
+
+            <h3>Export Users</h3>
+            <pre><code>// Export all users of a type
+GET /api/v1/users/export?type=affiliate&format=csv
+Authorization: Bearer {admin_token}
+
+// Export with filters
+GET /api/v1/users/export?type=customer&status=active&createdAfter=2025-01-01</code></pre>
+
+            <h3>Bulk Status Update</h3>
+            <pre><code>PUT /api/v1/users/bulk/status
+Authorization: Bearer {admin_token}
+Content-Type: application/json
+
+{
+    "userType": "operator",
+    "userIds": ["OP001", "OP002", "OP003"],
+    "status": "inactive",
+    "reason": "Seasonal layoff"
+}</code></pre>
+
+            <h3>Bulk Delete (Development Only)</h3>
+            <div class="warning">
+                <strong>⚠️ Warning:</strong> This operation is only available when <code>ENABLE_DELETE_DATA_FEATURE=true</code>
+            </div>
+            <pre><code>DELETE /api/v1/users/bulk
+Authorization: Bearer {admin_token}
+Content-Type: application/json
+
+{
+    "userType": "customer",
+    "userIds": ["CUST001", "CUST002"],
+    "deleteRelatedData": true,
+    "confirmationCode": "DELETE-CONFIRM-123"
+}</code></pre>
+
+            <h2>User Account Management</h2>
+
+            <h3>Password Management</h3>
+            
+            <h4>Force Password Reset</h4>
+            <pre><code>POST /api/v1/users/{userId}/force-password-reset
+Authorization: Bearer {admin_token}
+
+{
+    "userType": "affiliate",
+    "reason": "Security policy update",
+    "notifyUser": true
+}</code></pre>
+
+            <h4>Password Requirements by User Type</h4>
+            <table>
+                <thead>
+                    <tr>
+                        <th>User Type</th>
+                        <th>Min Length</th>
+                        <th>Requirements</th>
+                        <th>Expiry</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Administrator</td>
+                        <td>12 chars</td>
+                        <td>Upper, lower, number, special</td>
+                        <td>90 days</td>
+                    </tr>
+                    <tr>
+                        <td>Operator</td>
+                        <td>PIN: 4 digits</td>
+                        <td>Numeric only</td>
+                        <td>Never</td>
+                    </tr>
+                    <tr>
+                        <td>Affiliate</td>
+                        <td>8 chars</td>
+                        <td>Upper, lower, number</td>
+                        <td>180 days</td>
+                    </tr>
+                    <tr>
+                        <td>Customer</td>
+                        <td>8 chars</td>
+                        <td>Any combination</td>
+                        <td>Never</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>Account Locking</h3>
+            
+            <h4>Lock Account</h4>
+            <pre><code>PUT /api/v1/users/{userId}/lock
+Authorization: Bearer {admin_token}
+
+{
+    "userType": "affiliate",
+    "reason": "Suspicious activity detected",
+    "duration": "24h",  // or "permanent"
+    "notifyUser": true
+}</code></pre>
+
+            <h4>Unlock Account</h4>
+            <pre><code>PUT /api/v1/users/{userId}/unlock
+Authorization: Bearer {admin_token}
+
+{
+    "userType": "affiliate",
+    "reason": "Issue resolved",
+    "resetLoginAttempts": true
+}</code></pre>
+
+            <h2>User Activity Monitoring</h2>
+
+            <h3>View User Activity</h3>
+            <pre><code>// Get user login history
+GET /api/v1/users/{userId}/activity?type=logins&days=30
+
+// Get user actions
+GET /api/v1/users/{userId}/activity?type=actions&limit=100
+
+// Get suspicious activity
+GET /api/v1/users/{userId}/activity?type=suspicious</code></pre>
+
+            <h3>Activity Reports</h3>
+            <pre><code>// Generate user activity report
+POST /api/v1/reports/user-activity
+{
+    "userType": "all",
+    "dateRange": {
+        "start": "2025-01-01",
+        "end": "2025-01-31"
+    },
+    "includeMetrics": [
+        "loginCount",
+        "failedLogins",
+        "actionsPerformed",
+        "lastActivity"
+    ],
+    "format": "pdf"
+}</code></pre>
+
+            <h2>User Data Privacy</h2>
+
+            <div class="info">
+                <strong>ℹ️ GDPR Compliance:</strong> The system supports user data privacy requirements:
+            </div>
+
+            <h3>Data Export (Right to Access)</h3>
+            <pre><code>GET /api/v1/users/{userId}/data-export
+Authorization: Bearer {token}
+
+// Returns all user data in JSON format</code></pre>
+
+            <h3>Data Deletion (Right to be Forgotten)</h3>
+            <pre><code>DELETE /api/v1/users/{userId}/personal-data
+Authorization: Bearer {token}
+
+{
+    "confirmEmail": "user@email.com",
+    "retainFinancialRecords": true,  // For legal compliance
+    "reason": "User request"
+}</code></pre>
+
+            <h2>Best Practices</h2>
+
+            <div class="success">
+                <strong>✓ User Management Best Practices:</strong>
+                <ul>
+                    <li>Regular audit of user accounts and permissions</li>
+                    <li>Immediate deactivation when employees leave</li>
+                    <li>Use strong password policies</li>
+                    <li>Monitor failed login attempts</li>
+                    <li>Regular backup of user data</li>
+                    <li>Document all user status changes</li>
+                    <li>Use principle of least privilege</li>
+                    <li>Enable audit logging for all user operations</li>
+                </ul>
+            </div>
+
+            <h2>Troubleshooting Common Issues</h2>
+
+            <div class="warning">
+                <strong>Cannot Create User - Email Already Exists</strong>
+                <pre><code># Check if email is already in use
+db.administrators.findOne({ email: "user@email.com" })
+db.operators.findOne({ email: "user@email.com" })
+db.affiliates.findOne({ email: "user@email.com" })
+db.customers.findOne({ email: "user@email.com" })</code></pre>
+            </div>
+
+            <div class="warning">
+                <strong>User Cannot Login After Creation</strong>
+                <ul>
+                    <li>Verify account is active: <code>isActive: true</code></li>
+                    <li>Check login attempts: <code>loginAttempts < 5</code></li>
+                    <li>Verify email was sent successfully</li>
+                    <li>Check password meets requirements</li>
+                    <li>Ensure user type matches login endpoint</li>
+                </ul>
+            </div>
+
+            <div class="nav-buttons">
+                <a href="rbac-guide.html">← RBAC Guide</a>
+                <a href="api-reference.html">Next: API Reference →</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

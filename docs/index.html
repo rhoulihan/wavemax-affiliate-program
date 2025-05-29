@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WaveMAX Affiliate Program - Documentation</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f8f9fa;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+            color: white;
+            padding: 40px 0;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        
+        header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        
+        .search-box {
+            margin: 30px 0;
+            text-align: center;
+        }
+        
+        .search-box input {
+            width: 100%;
+            max-width: 600px;
+            padding: 15px 20px;
+            font-size: 1rem;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+        
+        .doc-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 20px;
+            margin-top: 40px;
+        }
+        
+        .doc-card {
+            background: white;
+            border-radius: 8px;
+            padding: 25px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            transition: transform 0.2s, box-shadow 0.2s;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+        
+        .doc-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+        }
+        
+        .doc-card h2 {
+            color: #1e3a8a;
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .doc-card .icon {
+            font-size: 1.5rem;
+        }
+        
+        .doc-card p {
+            color: #666;
+            margin-bottom: 15px;
+        }
+        
+        .doc-card ul {
+            list-style: none;
+            padding-left: 0;
+        }
+        
+        .doc-card li {
+            padding: 4px 0;
+            color: #555;
+            font-size: 0.9rem;
+        }
+        
+        .doc-card li:before {
+            content: "→ ";
+            color: #3b82f6;
+            font-weight: bold;
+        }
+        
+        .quick-start {
+            background: #e8f4fd;
+            border-radius: 8px;
+            padding: 30px;
+            margin: 40px 0;
+        }
+        
+        .quick-start h2 {
+            color: #1e3a8a;
+            margin-bottom: 20px;
+        }
+        
+        .quick-start ol {
+            padding-left: 20px;
+        }
+        
+        .quick-start li {
+            margin-bottom: 10px;
+        }
+        
+        .quick-start code {
+            background: #f4f4f4;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 40px 0;
+            color: #666;
+            border-top: 1px solid #e0e0e0;
+            margin-top: 60px;
+        }
+        
+        .version-info {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 4px;
+            padding: 10px 15px;
+            margin: 20px 0;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>WaveMAX Affiliate Program</h1>
+            <p>Complete Documentation & Implementation Guide</p>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="version-info">
+            <strong>Version 1.0.0</strong> | Last Updated: May 29, 2025
+        </div>
+
+        <div class="search-box">
+            <input type="text" id="searchInput" placeholder="Search documentation..." onkeyup="searchDocs()">
+        </div>
+
+        <div class="quick-start">
+            <h2>🚀 Quick Start</h2>
+            <ol>
+                <li>Clone the repository: <code>git clone https://github.com/yourusername/wavemax-affiliate-program.git</code></li>
+                <li>Install dependencies: <code>npm install</code></li>
+                <li>Configure environment: <code>cp .env.example .env</code></li>
+                <li>Set up administrator: <code>node scripts/create-admin-directly.js</code></li>
+                <li>Start the server: <code>npm run dev</code></li>
+                <li>Access admin panel: <code>http://localhost:3000/embed-app.html?route=/administrator-login</code></li>
+            </ol>
+        </div>
+
+        <div class="doc-grid">
+            <a href="server-configuration.html" class="doc-card">
+                <h2><span class="icon">⚙️</span> Server Configuration</h2>
+                <p>Complete guide to configuring and managing the WaveMAX server environment.</p>
+                <ul>
+                    <li>Environment variables setup</li>
+                    <li>Database configuration</li>
+                    <li>Email service providers</li>
+                    <li>PM2 & Nginx setup</li>
+                    <li>SSL/TLS configuration</li>
+                </ul>
+            </a>
+
+            <a href="embedding-guide.html" class="doc-card">
+                <h2><span class="icon">🌐</span> WaveMAX Website Embedding</h2>
+                <p>Specific instructions for embedding the affiliate program in wavemaxlaundry.com.</p>
+                <ul>
+                    <li>Recommended iframe setup</li>
+                    <li>Auto-resize implementation</li>
+                    <li>CSP compliance</li>
+                    <li>Analytics integration</li>
+                    <li>Mobile optimization</li>
+                </ul>
+            </a>
+
+            <a href="generic-embedding.html" class="doc-card">
+                <h2><span class="icon">📦</span> Generic Site Embedding</h2>
+                <p>Flexible embedding options for any website or platform.</p>
+                <ul>
+                    <li>Multiple embedding methods</li>
+                    <li>WordPress integration</li>
+                    <li>React/Vue/Angular guides</li>
+                    <li>Performance optimization</li>
+                    <li>Custom styling options</li>
+                </ul>
+            </a>
+
+            <a href="administrator-setup.html" class="doc-card">
+                <h2><span class="icon">👤</span> Administrator Setup</h2>
+                <p>Step-by-step guide to creating and configuring administrator accounts.</p>
+                <ul>
+                    <li>Initial admin creation</li>
+                    <li>Script usage guide</li>
+                    <li>Manual creation via MongoDB</li>
+                    <li>Security best practices</li>
+                    <li>Account recovery</li>
+                </ul>
+            </a>
+
+            <a href="rbac-guide.html" class="doc-card">
+                <h2><span class="icon">🔐</span> RBAC & Permissions</h2>
+                <p>Understanding and implementing role-based access control.</p>
+                <ul>
+                    <li>Role hierarchy</li>
+                    <li>Permission definitions</li>
+                    <li>Custom permissions</li>
+                    <li>API endpoint security</li>
+                    <li>Audit trail setup</li>
+                </ul>
+            </a>
+
+            <a href="user-management.html" class="doc-card">
+                <h2><span class="icon">👥</span> User Management</h2>
+                <p>Comprehensive guide to managing all user types in the system.</p>
+                <ul>
+                    <li>Creating administrators</li>
+                    <li>Managing operators</li>
+                    <li>Affiliate management</li>
+                    <li>Customer operations</li>
+                    <li>Bulk operations</li>
+                </ul>
+            </a>
+
+            <a href="api-reference.html" class="doc-card">
+                <h2><span class="icon">📡</span> API Reference</h2>
+                <p>Complete API documentation with examples and best practices.</p>
+                <ul>
+                    <li>Authentication endpoints</li>
+                    <li>CRUD operations</li>
+                    <li>CSRF token usage</li>
+                    <li>Error handling</li>
+                    <li>Rate limiting</li>
+                </ul>
+            </a>
+
+            <a href="security-guide.html" class="doc-card">
+                <h2><span class="icon">🛡️</span> Security Guide</h2>
+                <p>Security best practices and implementation details.</p>
+                <ul>
+                    <li>Authentication security</li>
+                    <li>Data encryption</li>
+                    <li>CSRF & XSS protection</li>
+                    <li>Security headers</li>
+                    <li>Compliance guidelines</li>
+                </ul>
+            </a>
+
+            <a href="troubleshooting.html" class="doc-card">
+                <h2><span class="icon">🔧</span> Troubleshooting</h2>
+                <p>Common issues and their solutions.</p>
+                <ul>
+                    <li>Error message reference</li>
+                    <li>Debug mode setup</li>
+                    <li>Performance issues</li>
+                    <li>Email delivery problems</li>
+                    <li>Database maintenance</li>
+                </ul>
+            </a>
+
+            <a href="deployment-guide.html" class="doc-card">
+                <h2><span class="icon">🚀</span> Deployment Guide</h2>
+                <p>Production deployment best practices and procedures.</p>
+                <ul>
+                    <li>Pre-deployment checklist</li>
+                    <li>Docker deployment</li>
+                    <li>Zero-downtime updates</li>
+                    <li>Monitoring setup</li>
+                    <li>Scaling strategies</li>
+                </ul>
+            </a>
+
+            <a href="development-guide.html" class="doc-card">
+                <h2><span class="icon">💻</span> Development Guide</h2>
+                <p>Developer documentation for extending the platform.</p>
+                <ul>
+                    <li>Development setup</li>
+                    <li>Code structure</li>
+                    <li>Testing procedures</li>
+                    <li>Contributing guidelines</li>
+                    <li>Feature development</li>
+                </ul>
+            </a>
+
+            <a href="changelog.html" class="doc-card">
+                <h2><span class="icon">📋</span> Changelog</h2>
+                <p>Version history and release notes.</p>
+                <ul>
+                    <li>Latest updates</li>
+                    <li>Breaking changes</li>
+                    <li>Migration guides</li>
+                    <li>Deprecated features</li>
+                    <li>Roadmap</li>
+                </ul>
+            </a>
+        </div>
+    </div>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2025 WaveMAX Laundry. All rights reserved.</p>
+            <p>Need help? Contact <a href="mailto:support@wavemax.promo">support@wavemax.promo</a></p>
+        </div>
+    </footer>
+
+    <script>
+        function searchDocs() {
+            const input = document.getElementById('searchInput');
+            const filter = input.value.toLowerCase();
+            const cards = document.getElementsByClassName('doc-card');
+            
+            for (let i = 0; i < cards.length; i++) {
+                const card = cards[i];
+                const text = card.textContent || card.innerText;
+                
+                if (text.toLowerCase().indexOf(filter) > -1) {
+                    card.style.display = "";
+                } else {
+                    card.style.display = "none";
+                }
+            }
+        }
+    </script>
+</body>
+</html>

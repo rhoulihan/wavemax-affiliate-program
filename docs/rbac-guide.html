@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RBAC & Permissions Guide - WaveMAX Affiliate Program</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f8f9fa;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+            color: white;
+            padding: 30px 0;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        header h1 {
+            font-size: 2rem;
+            margin-bottom: 5px;
+        }
+        
+        header .breadcrumb {
+            opacity: 0.9;
+        }
+        
+        header .breadcrumb a {
+            color: white;
+            text-decoration: none;
+        }
+        
+        .content {
+            background: white;
+            border-radius: 8px;
+            padding: 40px;
+            margin-top: 30px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+        
+        h2 {
+            color: #1e3a8a;
+            margin-top: 30px;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+        
+        h3 {
+            color: #333;
+            margin-top: 25px;
+            margin-bottom: 15px;
+        }
+        
+        .role-card {
+            background: #f8f9fa;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .role-card.admin {
+            border-color: #dc3545;
+            background: #fff5f5;
+        }
+        
+        .role-card.operator {
+            border-color: #fd7e14;
+            background: #fff9f5;
+        }
+        
+        .role-card.affiliate {
+            border-color: #3b82f6;
+            background: #f0f7ff;
+        }
+        
+        .role-card.customer {
+            border-color: #28a745;
+            background: #f5fff8;
+        }
+        
+        .role-card h4 {
+            margin-bottom: 10px;
+            font-size: 1.2rem;
+        }
+        
+        code {
+            background: #f4f4f4;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+        
+        pre {
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 6px;
+            overflow-x: auto;
+            margin: 15px 0;
+        }
+        
+        pre code {
+            background: none;
+            padding: 0;
+            color: inherit;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #1e3a8a;
+        }
+        
+        tr:hover {
+            background: #f8f9fa;
+        }
+        
+        .permission-matrix {
+            overflow-x: auto;
+            margin: 20px 0;
+        }
+        
+        .permission-matrix table {
+            min-width: 800px;
+        }
+        
+        .permission-matrix th {
+            text-align: center;
+            white-space: nowrap;
+        }
+        
+        .permission-matrix td {
+            text-align: center;
+        }
+        
+        .has-permission {
+            color: #28a745;
+            font-weight: bold;
+        }
+        
+        .no-permission {
+            color: #dc3545;
+            opacity: 0.3;
+        }
+        
+        .info {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+            border-radius: 4px;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        
+        .info strong {
+            color: #0c5460;
+        }
+        
+        .warning {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 4px;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        
+        .warning strong {
+            color: #856404;
+        }
+        
+        .hierarchy-diagram {
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 8px;
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        .hierarchy-level {
+            margin: 20px 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        
+        .hierarchy-box {
+            background: white;
+            border: 2px solid #3b82f6;
+            border-radius: 6px;
+            padding: 15px 25px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 40px;
+            padding-top: 30px;
+            border-top: 1px solid #e0e0e0;
+        }
+        
+        .nav-buttons a {
+            display: inline-block;
+            padding: 10px 20px;
+            background: #3b82f6;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            transition: background 0.2s;
+        }
+        
+        .nav-buttons a:hover {
+            background: #2563eb;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="breadcrumb">
+                <a href="index.html">Documentation</a> → RBAC & Permissions
+            </div>
+            <h1>Role-Based Access Control (RBAC) Guide</h1>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="content">
+            <div class="info">
+                <strong>ℹ️ Overview:</strong> The WaveMAX Affiliate Program uses Role-Based Access Control (RBAC) to manage user permissions and ensure secure access to system resources.
+            </div>
+
+            <h2>System Roles Overview</h2>
+            
+            <div class="hierarchy-diagram">
+                <h3>Role Hierarchy</h3>
+                <div class="hierarchy-level">
+                    <div class="hierarchy-box" style="border-color: #dc3545;">
+                        <strong>Administrator</strong><br>
+                        Full System Access
+                    </div>
+                </div>
+                <div class="hierarchy-level">
+                    <div class="hierarchy-box" style="border-color: #fd7e14;">
+                        <strong>Operator</strong><br>
+                        Order Management
+                    </div>
+                </div>
+                <div class="hierarchy-level">
+                    <div class="hierarchy-box" style="border-color: #3b82f6;">
+                        <strong>Affiliate</strong><br>
+                        Customer & Commission Management
+                    </div>
+                    <div class="hierarchy-box" style="border-color: #28a745;">
+                        <strong>Customer</strong><br>
+                        Order Placement & Tracking
+                    </div>
+                </div>
+            </div>
+
+            <h2>Role Definitions</h2>
+
+            <div class="role-card admin">
+                <h4>🔴 Administrator Role</h4>
+                <p><strong>Purpose:</strong> Complete system control and configuration</p>
+                <p><strong>Typical Users:</strong> System administrators, business owners</p>
+                <ul>
+                    <li>Full access to all system features</li>
+                    <li>User management across all roles</li>
+                    <li>System configuration and settings</li>
+                    <li>Financial reports and analytics</li>
+                    <li>Audit log access</li>
+                </ul>
+            </div>
+
+            <div class="role-card operator">
+                <h4>🟠 Operator Role</h4>
+                <p><strong>Purpose:</strong> Day-to-day order processing and quality control</p>
+                <p><strong>Typical Users:</strong> Laundry operators, shift managers</p>
+                <ul>
+                    <li>View and process orders</li>
+                    <li>Update order status</li>
+                    <li>Manage bag assignments</li>
+                    <li>Quality check workflows</li>
+                    <li>View personal performance metrics</li>
+                </ul>
+            </div>
+
+            <div class="role-card affiliate">
+                <h4>🔵 Affiliate Role</h4>
+                <p><strong>Purpose:</strong> Manage customers and earn commissions</p>
+                <p><strong>Typical Users:</strong> Independent contractors, delivery drivers</p>
+                <ul>
+                    <li>Register new customers</li>
+                    <li>View customer list</li>
+                    <li>Track commissions</li>
+                    <li>Schedule pickups</li>
+                    <li>View order history</li>
+                </ul>
+            </div>
+
+            <div class="role-card customer">
+                <h4>🟢 Customer Role</h4>
+                <p><strong>Purpose:</strong> Place orders and track laundry services</p>
+                <p><strong>Typical Users:</strong> End customers using the service</p>
+                <ul>
+                    <li>Place new orders</li>
+                    <li>Track order status</li>
+                    <li>View order history</li>
+                    <li>Manage profile and preferences</li>
+                    <li>Update payment methods</li>
+                </ul>
+            </div>
+
+            <h2>Permission Matrix</h2>
+
+            <div class="permission-matrix">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Permission / Feature</th>
+                            <th>Administrator</th>
+                            <th>Operator</th>
+                            <th>Affiliate</th>
+                            <th>Customer</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>System Configuration</td>
+                            <td class="has-permission">✓</td>
+                            <td class="no-permission">✗</td>
+                            <td class="no-permission">✗</td>
+                            <td class="no-permission">✗</td>
+                        </tr>
+                        <tr>
+                            <td>Create Administrators</td>
+                            <td class="has-permission">✓</td>
+                            <td class="no-permission">✗</td>
+                            <td class="no-permission">✗</td>
+                            <td class="no-permission">✗</td>
+                        </tr>
+                        <tr>
+                            <td>Create Operators</td>
+                            <td class="has-permission">✓</td>
+                            <td class="no-permission">✗</td>
+                            <td class="no-permission">✗</td>
+                            <td class="no-permission">✗</td>
+                        </tr>
+                        <tr>
+                            <td>Manage Affiliates</td>
+                            <td class="has-permission">✓</td>
+                            <td class="no-permission">✗</td>
+                            <td class="no-permission">✗</td>
+                            <td class="no-permission">✗</td>
+                        </tr>
+                        <tr>
+                            <td>Register Customers</td>
+                            <td class="has-permission">✓</td>
+                            <td class="no-permission">✗</td>
+                            <td class="has-permission">✓</td>
+                            <td class="no-permission">✗</td>
+                        </tr>
+                        <tr>
+                            <td>View All Orders</td>
+                            <td class="has-permission">✓</td>
+                            <td class="has-permission">✓</td>
+                            <td class="no-permission">✗</td>
+                            <td class="no-permission">✗</td>
+                        </tr>
+                        <tr>
+                            <td>Process Orders</td>
+                            <td class="has-permission">✓</td>
+                            <td class="has-permission">✓</td>
+                            <td class="no-permission">✗</td>
+                            <td class="no-permission">✗</td>
+                        </tr>
+                        <tr>
+                            <td>View Own Orders</td>
+                            <td class="has-permission">✓</td>
+                            <td class="has-permission">✓</td>
+                            <td class="has-permission">✓</td>
+                            <td class="has-permission">✓</td>
+                        </tr>
+                        <tr>
+                            <td>Financial Reports</td>
+                            <td class="has-permission">✓</td>
+                            <td class="no-permission">✗</td>
+                            <td class="no-permission">✗</td>
+                            <td class="no-permission">✗</td>
+                        </tr>
+                        <tr>
+                            <td>Commission Tracking</td>
+                            <td class="has-permission">✓</td>
+                            <td class="no-permission">✗</td>
+                            <td class="has-permission">✓</td>
+                            <td class="no-permission">✗</td>
+                        </tr>
+                        <tr>
+                            <td>Audit Logs</td>
+                            <td class="has-permission">✓</td>
+                            <td class="no-permission">✗</td>
+                            <td class="no-permission">✗</td>
+                            <td class="no-permission">✗</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h2>Administrator Permissions</h2>
+
+            <p>Administrators can be assigned specific permissions for granular control:</p>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Permission Key</th>
+                        <th>Description</th>
+                        <th>Capabilities</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>system_config</code></td>
+                        <td>System Configuration</td>
+                        <td>
+                            <ul>
+                                <li>Modify system settings</li>
+                                <li>Configure email providers</li>
+                                <li>Set pricing and fees</li>
+                                <li>Manage API keys</li>
+                            </ul>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><code>operator_management</code></td>
+                        <td>Operator Management</td>
+                        <td>
+                            <ul>
+                                <li>Create operator accounts</li>
+                                <li>Assign workstations</li>
+                                <li>Set shift schedules</li>
+                                <li>Deactivate operators</li>
+                            </ul>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><code>view_analytics</code></td>
+                        <td>Analytics Access</td>
+                        <td>
+                            <ul>
+                                <li>View dashboard metrics</li>
+                                <li>Generate reports</li>
+                                <li>Export data</li>
+                                <li>View trends</li>
+                            </ul>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><code>manage_affiliates</code></td>
+                        <td>Affiliate Management</td>
+                        <td>
+                            <ul>
+                                <li>Approve/reject affiliates</li>
+                                <li>Set commission rates</li>
+                                <li>View affiliate performance</li>
+                                <li>Process payouts</li>
+                            </ul>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><code>financial_reports</code></td>
+                        <td>Financial Access</td>
+                        <td>
+                            <ul>
+                                <li>View revenue reports</li>
+                                <li>Access payment data</li>
+                                <li>Generate invoices</li>
+                                <li>Export financial data</li>
+                            </ul>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><code>audit_logs</code></td>
+                        <td>Security Audit Access</td>
+                        <td>
+                            <ul>
+                                <li>View login history</li>
+                                <li>Track user actions</li>
+                                <li>Monitor security events</li>
+                                <li>Generate compliance reports</li>
+                            </ul>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h2>Implementation in Code</h2>
+
+            <h3>Middleware Usage</h3>
+            <pre><code>// Protect routes with authentication and role checking
+router.get('/api/v1/admin/dashboard', 
+    authenticate,                          // Verify JWT token
+    authorize(['administrator']),          // Check role
+    checkPermission('view_analytics'),     // Check specific permission
+    adminController.getDashboard
+);
+
+// Multiple roles allowed
+router.get('/api/v1/orders', 
+    authenticate,
+    authorize(['administrator', 'operator']),
+    orderController.getAllOrders
+);</code></pre>
+
+            <h3>Permission Checking in Controllers</h3>
+            <pre><code>// Check permissions within controller logic
+exports.updateSystemConfig = async (req, res) => {
+    // Additional permission check
+    if (!req.user.permissions.includes('system_config')) {
+        return res.status(403).json({
+            success: false,
+            message: 'Insufficient permissions'
+        });
+    }
+    
+    // Process the update...
+};</code></pre>
+
+            <h3>Dynamic Permission Assignment</h3>
+            <pre><code>// Assign permissions to administrator
+const admin = await Administrator.findById(adminId);
+admin.permissions.push('financial_reports');
+await admin.save();
+
+// Remove permission
+admin.permissions = admin.permissions.filter(p => p !== 'audit_logs');
+await admin.save();</code></pre>
+
+            <h2>API Endpoint Security</h2>
+
+            <div class="info">
+                <strong>ℹ️ All API endpoints are protected by role-based middleware that checks:</strong>
+                <ol>
+                    <li>Valid JWT token (authentication)</li>
+                    <li>User role matches allowed roles (authorization)</li>
+                    <li>Specific permissions for sensitive operations</li>
+                    <li>Resource ownership for user-specific data</li>
+                </ol>
+            </div>
+
+            <h3>Endpoint Protection Examples</h3>
+            <pre><code>// Public endpoint - no authentication required
+router.post('/api/v1/auth/login', authController.login);
+
+// Authenticated users only
+router.get('/api/v1/profile', 
+    authenticate, 
+    userController.getProfile
+);
+
+// Role-specific endpoint
+router.get('/api/v1/operators', 
+    authenticate,
+    authorize(['administrator']),
+    operatorController.getAllOperators
+);
+
+// Permission-specific endpoint
+router.put('/api/v1/system/config', 
+    authenticate,
+    authorize(['administrator']),
+    checkPermission('system_config'),
+    systemController.updateConfig
+);
+
+// Resource ownership check
+router.get('/api/v1/customers/:customerId/orders', 
+    authenticate,
+    authorize(['customer', 'affiliate', 'administrator']),
+    checkResourceOwnership,  // Ensures customer can only see their orders
+    orderController.getCustomerOrders
+);</code></pre>
+
+            <h2>Best Practices</h2>
+
+            <div class="warning">
+                <strong>⚠️ Security Best Practices:</strong>
+                <ul>
+                    <li>Always use the principle of least privilege</li>
+                    <li>Regularly audit user permissions</li>
+                    <li>Remove unnecessary permissions promptly</li>
+                    <li>Use role-based access instead of user-specific permissions when possible</li>
+                    <li>Log all permission changes for audit trails</li>
+                    <li>Implement permission expiration for temporary access</li>
+                </ul>
+            </div>
+
+            <h2>Custom Role Creation</h2>
+
+            <p>While the system has predefined roles, you can create custom permission sets for administrators:</p>
+
+            <pre><code>// Example: Read-only administrator
+const readOnlyAdmin = new Administrator({
+    adminId: 'ADM_RO_001',
+    email: 'readonly@wavemaxlaundry.com',
+    permissions: [
+        'view_analytics',
+        'audit_logs'
+        // No write permissions
+    ]
+});
+
+// Example: Financial administrator
+const financialAdmin = new Administrator({
+    adminId: 'ADM_FIN_001',
+    email: 'finance@wavemaxlaundry.com',
+    permissions: [
+        'financial_reports',
+        'view_analytics',
+        'manage_affiliates'  // For commission processing
+    ]
+});</code></pre>
+
+            <h2>Troubleshooting Access Issues</h2>
+
+            <h3>Common Permission Errors</h3>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Error Message</th>
+                        <th>Cause</th>
+                        <th>Solution</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>"Unauthorized"</td>
+                        <td>No valid JWT token</td>
+                        <td>Ensure token is included in Authorization header</td>
+                    </tr>
+                    <tr>
+                        <td>"Forbidden - Insufficient role"</td>
+                        <td>User role not allowed</td>
+                        <td>Check user's role matches endpoint requirements</td>
+                    </tr>
+                    <tr>
+                        <td>"Forbidden - Missing permission"</td>
+                        <td>Specific permission required</td>
+                        <td>Add required permission to user account</td>
+                    </tr>
+                    <tr>
+                        <td>"Access denied to resource"</td>
+                        <td>Resource ownership check failed</td>
+                        <td>User trying to access another user's data</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="info">
+                <strong>Debug Permission Issues:</strong>
+                <pre><code># Check user permissions in database
+db.administrators.findOne({ email: "admin@example.com" }, { permissions: 1 })
+
+# View audit logs for permission denials
+tail -f logs/audit.log | grep "permission_denied"</code></pre>
+            </div>
+
+            <div class="nav-buttons">
+                <a href="administrator-setup.html">← Administrator Setup</a>
+                <a href="user-management.html">Next: User Management →</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Administrator Setup Guide - WaveMAX Affiliate Program</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f8f9fa;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+            color: white;
+            padding: 30px 0;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        header h1 {
+            font-size: 2rem;
+            margin-bottom: 5px;
+        }
+        
+        header .breadcrumb {
+            opacity: 0.9;
+        }
+        
+        header .breadcrumb a {
+            color: white;
+            text-decoration: none;
+        }
+        
+        .content {
+            background: white;
+            border-radius: 8px;
+            padding: 40px;
+            margin-top: 30px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+        
+        h2 {
+            color: #1e3a8a;
+            margin-top: 30px;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+        
+        h3 {
+            color: #333;
+            margin-top: 25px;
+            margin-bottom: 15px;
+        }
+        
+        code {
+            background: #f4f4f4;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+        
+        pre {
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 6px;
+            overflow-x: auto;
+            margin: 15px 0;
+        }
+        
+        pre code {
+            background: none;
+            padding: 0;
+            color: inherit;
+        }
+        
+        .warning {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 4px;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        
+        .warning strong {
+            color: #856404;
+        }
+        
+        .success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            border-radius: 4px;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        
+        .success strong {
+            color: #155724;
+        }
+        
+        .info {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+            border-radius: 4px;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        
+        .info strong {
+            color: #0c5460;
+        }
+        
+        .step-box {
+            background: #f8f9fa;
+            border-left: 4px solid #3b82f6;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        
+        .step-box h4 {
+            color: #1e3a8a;
+            margin-bottom: 10px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #1e3a8a;
+        }
+        
+        .nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 40px;
+            padding-top: 30px;
+            border-top: 1px solid #e0e0e0;
+        }
+        
+        .nav-buttons a {
+            display: inline-block;
+            padding: 10px 20px;
+            background: #3b82f6;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            transition: background 0.2s;
+        }
+        
+        .nav-buttons a:hover {
+            background: #2563eb;
+        }
+        
+        .security-checklist {
+            background: #fef3f2;
+            border: 1px solid #fee;
+            border-radius: 6px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .security-checklist h4 {
+            color: #dc3545;
+            margin-bottom: 15px;
+        }
+        
+        .security-checklist ul {
+            list-style: none;
+            padding-left: 0;
+        }
+        
+        .security-checklist li {
+            padding: 8px 0;
+            border-bottom: 1px solid #fee;
+        }
+        
+        .security-checklist li:last-child {
+            border-bottom: none;
+        }
+        
+        .security-checklist li:before {
+            content: "🔒 ";
+            margin-right: 8px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="breadcrumb">
+                <a href="index.html">Documentation</a> → Administrator Setup
+            </div>
+            <h1>Administrator Setup Guide</h1>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="content">
+            <div class="info">
+                <strong>ℹ️ Overview:</strong> This guide covers the complete process of setting up administrator accounts for the WaveMAX Affiliate Program, including initial setup, security configuration, and best practices.
+            </div>
+
+            <h2>Quick Start: Using the Setup Script</h2>
+            
+            <div class="step-box">
+                <h4>Step 1: Ensure Prerequisites</h4>
+                <ul>
+                    <li>MongoDB is running and accessible</li>
+                    <li>Environment variables are configured in <code>.env</code></li>
+                    <li>Node.js dependencies are installed</li>
+                </ul>
+            </div>
+
+            <div class="step-box">
+                <h4>Step 2: Run the Admin Creation Script</h4>
+                <pre><code>cd /path/to/wavemax-affiliate-program
+node scripts/create-admin-directly.js</code></pre>
+            </div>
+
+            <div class="step-box">
+                <h4>Step 3: Default Administrator Credentials</h4>
+                <p>The script creates an administrator with these default values:</p>
+                <table>
+                    <tr>
+                        <th>Field</th>
+                        <th>Default Value</th>
+                    </tr>
+                    <tr>
+                        <td>Admin ID</td>
+                        <td>ADM001</td>
+                    </tr>
+                    <tr>
+                        <td>Email</td>
+                        <td>rickh@wavemaxlaundry.com</td>
+                    </tr>
+                    <tr>
+                        <td>Password</td>
+                        <td>R8der50!</td>
+                    </tr>
+                    <tr>
+                        <td>Name</td>
+                        <td>John Houlihan</td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="warning">
+                <strong>⚠️ Security Warning:</strong> These are default credentials. For production use, modify the script before running or change the password immediately after first login.
+            </div>
+
+            <h2>Customizing the Admin Creation Script</h2>
+
+            <p>To create an administrator with custom credentials, modify <code>scripts/create-admin-directly.js</code>:</p>
+
+            <pre><code>const admin = new Administrator({
+    adminId: 'ADM002',                          // Unique admin ID
+    firstName: 'Jane',                          // First name
+    lastName: 'Smith',                          // Last name
+    email: 'jane.smith@wavemaxlaundry.com',    // Email address
+    password: 'YourSecurePassword123!',         // Strong password
+    permissions: [                              // Permissions array
+        'system_config',
+        'operator_management',
+        'view_analytics',
+        'manage_affiliates'
+    ],
+    isActive: true,
+    createdBy: 'system'
+});</code></pre>
+
+            <h2>Manual Administrator Creation via MongoDB</h2>
+
+            <p>For direct database creation, use the MongoDB shell:</p>
+
+            <pre><code># Connect to MongoDB
+mongosh mongodb://localhost:27017/wavemax
+
+# Switch to the database
+use wavemax
+
+# Create administrator manually
+db.administrators.insertOne({
+    adminId: "ADM003",
+    firstName: "Admin",
+    lastName: "User",
+    email: "admin@wavemaxlaundry.com",
+    password: "$2b$10$hashedpasswordhere",  // Use bcrypt to hash
+    permissions: [
+        "system_config",
+        "operator_management",
+        "view_analytics",
+        "manage_affiliates"
+    ],
+    isActive: true,
+    loginAttempts: 0,
+    createdBy: "manual",
+    createdAt: new Date(),
+    updatedAt: new Date()
+})</code></pre>
+
+            <div class="info">
+                <strong>ℹ️ Note:</strong> When creating administrators manually, you must hash the password using bcrypt with 10 rounds.
+            </div>
+
+            <h2>Password Hashing Example</h2>
+
+            <p>To generate a properly hashed password:</p>
+
+            <pre><code>// Create a simple Node.js script
+const bcrypt = require('bcrypt');
+
+async function hashPassword(password) {
+    const salt = await bcrypt.genSalt(10);
+    const hash = await bcrypt.hash(password, salt);
+    console.log('Hashed password:', hash);
+}
+
+hashPassword('YourSecurePassword123!');</code></pre>
+
+            <h2>Available Administrator Permissions</h2>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Permission</th>
+                        <th>Description</th>
+                        <th>Access Level</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>system_config</code></td>
+                        <td>Modify system configuration settings</td>
+                        <td>Full system access</td>
+                    </tr>
+                    <tr>
+                        <td><code>operator_management</code></td>
+                        <td>Create, update, delete operators</td>
+                        <td>User management</td>
+                    </tr>
+                    <tr>
+                        <td><code>view_analytics</code></td>
+                        <td>Access analytics and reports</td>
+                        <td>Read-only</td>
+                    </tr>
+                    <tr>
+                        <td><code>manage_affiliates</code></td>
+                        <td>Manage affiliate accounts</td>
+                        <td>Full CRUD</td>
+                    </tr>
+                    <tr>
+                        <td><code>manage_customers</code></td>
+                        <td>Manage customer accounts</td>
+                        <td>Full CRUD</td>
+                    </tr>
+                    <tr>
+                        <td><code>manage_orders</code></td>
+                        <td>Process and manage orders</td>
+                        <td>Full CRUD</td>
+                    </tr>
+                    <tr>
+                        <td><code>financial_reports</code></td>
+                        <td>Access financial data</td>
+                        <td>Read-only</td>
+                    </tr>
+                    <tr>
+                        <td><code>audit_logs</code></td>
+                        <td>View security audit logs</td>
+                        <td>Read-only</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h2>First-Time Login Process</h2>
+
+            <div class="step-box">
+                <h4>Step 1: Access the Administrator Login</h4>
+                <p>Navigate to:</p>
+                <pre><code>https://yourdomain.com/embed-app.html?route=/administrator-login</code></pre>
+                <p>Or for local development:</p>
+                <pre><code>http://localhost:3000/embed-app.html?route=/administrator-login</code></pre>
+            </div>
+
+            <div class="step-box">
+                <h4>Step 2: Enter Credentials</h4>
+                <ul>
+                    <li>Email: The email address used during setup</li>
+                    <li>Password: The password set during creation</li>
+                </ul>
+            </div>
+
+            <div class="step-box">
+                <h4>Step 3: Change Default Password</h4>
+                <p>If using default credentials, immediately:</p>
+                <ol>
+                    <li>Navigate to Settings → My Profile</li>
+                    <li>Click "Change Password"</li>
+                    <li>Enter current password</li>
+                    <li>Set a strong new password</li>
+                    <li>Confirm the new password</li>
+                </ol>
+            </div>
+
+            <h2>Password Requirements</h2>
+
+            <div class="info">
+                <strong>Strong Password Requirements:</strong>
+                <ul>
+                    <li>Minimum 8 characters</li>
+                    <li>At least one uppercase letter</li>
+                    <li>At least one lowercase letter</li>
+                    <li>At least one number</li>
+                    <li>At least one special character (!@#$%^&*)</li>
+                    <li>No common dictionary words</li>
+                    <li>Not similar to email or name</li>
+                </ul>
+            </div>
+
+            <h2>Account Recovery Options</h2>
+
+            <h3>Password Reset via Email</h3>
+            <ol>
+                <li>Click "Forgot Password?" on the login page</li>
+                <li>Enter the administrator email address</li>
+                <li>Check email for reset instructions</li>
+                <li>Click the reset link (valid for 1 hour)</li>
+                <li>Set a new password</li>
+            </ol>
+
+            <h3>Manual Password Reset</h3>
+            <p>If email is not available, reset via database:</p>
+            <pre><code># Generate new password hash
+const bcrypt = require('bcrypt');
+const newHash = await bcrypt.hash('NewSecurePassword123!', 10);
+
+# Update in MongoDB
+db.administrators.updateOne(
+    { email: "admin@wavemaxlaundry.com" },
+    { 
+        $set: { 
+            password: newHash,
+            loginAttempts: 0,
+            lastPasswordChange: new Date()
+        }
+    }
+)</code></pre>
+
+            <h2>Security Best Practices</h2>
+
+            <div class="security-checklist">
+                <h4>Administrator Account Security Checklist</h4>
+                <ul>
+                    <li>Use unique, strong passwords for each administrator</li>
+                    <li>Enable two-factor authentication when available</li>
+                    <li>Regularly rotate passwords (every 90 days)</li>
+                    <li>Limit administrator accounts to essential personnel only</li>
+                    <li>Use principle of least privilege for permissions</li>
+                    <li>Monitor administrator login activity</li>
+                    <li>Disable accounts immediately when employees leave</li>
+                    <li>Use separate accounts for daily operations vs. admin tasks</li>
+                    <li>Never share administrator credentials</li>
+                    <li>Always use HTTPS for administrator access</li>
+                </ul>
+            </div>
+
+            <h2>Multiple Administrator Setup</h2>
+
+            <p>To create multiple administrators with different permission levels:</p>
+
+            <pre><code>// Super Admin - Full Access
+const superAdmin = new Administrator({
+    adminId: 'ADM001',
+    email: 'superadmin@wavemaxlaundry.com',
+    permissions: ['*']  // All permissions
+});
+
+// Operations Manager - Limited Access
+const opsManager = new Administrator({
+    adminId: 'ADM002',
+    email: 'operations@wavemaxlaundry.com',
+    permissions: [
+        'operator_management',
+        'manage_orders',
+        'view_analytics'
+    ]
+});
+
+// Financial Admin - Financial Access Only
+const financeAdmin = new Administrator({
+    adminId: 'ADM003',
+    email: 'finance@wavemaxlaundry.com',
+    permissions: [
+        'financial_reports',
+        'view_analytics',
+        'audit_logs'
+    ]
+});</code></pre>
+
+            <h2>Monitoring Administrator Activity</h2>
+
+            <p>All administrator actions are logged. To view audit logs:</p>
+
+            <pre><code># View recent admin activity
+tail -f logs/audit.log | grep "administrator"
+
+# Check login attempts
+db.administrators.find({ loginAttempts: { $gt: 0 } })
+
+# View permission usage
+db.auditlogs.find({ 
+    userType: "administrator",
+    createdAt: { $gte: new Date(Date.now() - 24*60*60*1000) }
+})</code></pre>
+
+            <h2>Troubleshooting</h2>
+
+            <div class="warning">
+                <strong>Account Locked:</strong> After 5 failed login attempts, accounts are locked for security. To unlock:
+                <pre><code>db.administrators.updateOne(
+    { email: "admin@wavemaxlaundry.com" },
+    { $set: { loginAttempts: 0, isLocked: false } }
+)</code></pre>
+            </div>
+
+            <div class="warning">
+                <strong>Cannot Login:</strong> Verify:
+                <ul>
+                    <li>Email address is correct (case-sensitive)</li>
+                    <li>Account is active: <code>isActive: true</code></li>
+                    <li>No typos in password</li>
+                    <li>Account exists in database</li>
+                </ul>
+            </div>
+
+            <div class="success">
+                <strong>✓ Setup Complete!</strong> Your administrator account is now ready. Remember to:
+                <ul>
+                    <li>Change default passwords immediately</li>
+                    <li>Set up additional administrators as needed</li>
+                    <li>Configure system settings in the admin dashboard</li>
+                    <li>Review security settings</li>
+                </ul>
+            </div>
+
+            <div class="nav-buttons">
+                <a href="embedding-guide.html">← Embedding Guide</a>
+                <a href="rbac-guide.html">Next: RBAC Guide →</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
