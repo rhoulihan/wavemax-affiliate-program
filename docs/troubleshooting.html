@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Troubleshooting Guide - WaveMAX Affiliate Program</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f8f9fa;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+            color: white;
+            padding: 30px 0;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        header h1 {
+            font-size: 2rem;
+            margin-bottom: 5px;
+        }
+        
+        header .breadcrumb {
+            opacity: 0.9;
+        }
+        
+        header .breadcrumb a {
+            color: white;
+            text-decoration: none;
+        }
+        
+        .content {
+            background: white;
+            border-radius: 8px;
+            padding: 40px;
+            margin-top: 30px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+        
+        h2 {
+            color: #1e3a8a;
+            margin-top: 30px;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+        
+        h3 {
+            color: #333;
+            margin-top: 25px;
+            margin-bottom: 15px;
+        }
+        
+        .issue {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        
+        .issue h4 {
+            color: #856404;
+            margin-bottom: 10px;
+        }
+        
+        .solution {
+            background: #d4edda;
+            border-left: 4px solid #28a745;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        
+        .solution h4 {
+            color: #155724;
+            margin-bottom: 10px;
+        }
+        
+        code {
+            background: #f4f4f4;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+        
+        pre {
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 6px;
+            overflow-x: auto;
+            margin: 15px 0;
+        }
+        
+        pre code {
+            background: none;
+            padding: 0;
+            color: inherit;
+        }
+        
+        .error-box {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            border-radius: 4px;
+            padding: 15px;
+            margin: 15px 0;
+            font-family: monospace;
+            font-size: 0.9em;
+        }
+        
+        .info {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+            border-radius: 4px;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        
+        .info strong {
+            color: #0c5460;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #1e3a8a;
+        }
+        
+        .nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 40px;
+            padding-top: 30px;
+            border-top: 1px solid #e0e0e0;
+        }
+        
+        .nav-buttons a {
+            display: inline-block;
+            padding: 10px 20px;
+            background: #3b82f6;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            transition: background 0.2s;
+        }
+        
+        .nav-buttons a:hover {
+            background: #2563eb;
+        }
+        
+        .toc {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 6px;
+            margin-bottom: 30px;
+        }
+        
+        .toc h3 {
+            margin-top: 0;
+        }
+        
+        .toc ul {
+            list-style: none;
+            padding-left: 0;
+        }
+        
+        .toc li {
+            padding: 5px 0;
+        }
+        
+        .toc a {
+            color: #3b82f6;
+            text-decoration: none;
+        }
+        
+        .toc a:hover {
+            text-decoration: underline;
+        }
+        
+        .debug-steps {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 6px;
+            margin: 20px 0;
+        }
+        
+        .debug-steps ol {
+            padding-left: 20px;
+        }
+        
+        .debug-steps li {
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="breadcrumb">
+                <a href="index.html">Documentation</a> → Troubleshooting
+            </div>
+            <h1>Troubleshooting Guide</h1>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="content">
+            <div class="toc">
+                <h3>Common Issues</h3>
+                <ul>
+                    <li><a href="#startup-issues">Startup Issues</a></li>
+                    <li><a href="#database-issues">Database Connection Problems</a></li>
+                    <li><a href="#authentication-issues">Authentication Issues</a></li>
+                    <li><a href="#csrf-issues">CSRF Token Errors</a></li>
+                    <li><a href="#email-issues">Email Delivery Problems</a></li>
+                    <li><a href="#performance-issues">Performance Issues</a></li>
+                    <li><a href="#embedding-issues">Embedding Problems</a></li>
+                    <li><a href="#api-issues">API Errors</a></li>
+                    <li><a href="#deployment-issues">Deployment Issues</a></li>
+                    <li><a href="#debugging-tools">Debugging Tools</a></li>
+                </ul>
+            </div>
+
+            <h2 id="startup-issues">Startup Issues</h2>
+
+            <div class="issue">
+                <h4>🔴 Error: Cannot find module</h4>
+                <div class="error-box">Error: Cannot find module 'express'</div>
+            </div>
+
+            <div class="solution">
+                <h4>✅ Solution</h4>
+                <p>Install missing dependencies:</p>
+                <pre><code>npm install
+
+# Or if specific module is missing
+npm install express</code></pre>
+            </div>
+
+            <div class="issue">
+                <h4>🔴 Port Already in Use</h4>
+                <div class="error-box">Error: listen EADDRINUSE: address already in use :::3000</div>
+            </div>
+
+            <div class="solution">
+                <h4>✅ Solution</h4>
+                <p>Find and kill the process using the port:</p>
+                <pre><code># Find process using port 3000
+lsof -i :3000
+
+# Kill the process
+kill -9 [PID]
+
+# Or change the port in .env
+PORT=3001</code></pre>
+            </div>
+
+            <div class="issue">
+                <h4>🔴 Environment Variables Not Loading</h4>
+                <div class="error-box">TypeError: Cannot read property 'MONGODB_URI' of undefined</div>
+            </div>
+
+            <div class="solution">
+                <h4>✅ Solution</h4>
+                <ol>
+                    <li>Ensure .env file exists in project root</li>
+                    <li>Check file permissions: <code>chmod 644 .env</code></li>
+                    <li>Verify dotenv is installed: <code>npm install dotenv</code></li>
+                    <li>Check that server.js starts with: <code>require('dotenv').config();</code></li>
+                </ol>
+            </div>
+
+            <h2 id="database-issues">Database Connection Problems</h2>
+
+            <div class="issue">
+                <h4>🔴 MongoDB Connection Failed</h4>
+                <div class="error-box">MongoNetworkError: failed to connect to server</div>
+            </div>
+
+            <div class="solution">
+                <h4>✅ Solution</h4>
+                <div class="debug-steps">
+                    <ol>
+                        <li><strong>Check MongoDB is running:</strong>
+                            <pre><code>sudo systemctl status mongod
+# If not running:
+sudo systemctl start mongod</code></pre>
+                        </li>
+                        <li><strong>Verify connection string:</strong>
+                            <pre><code># Local MongoDB
+MONGODB_URI=mongodb://localhost:27017/wavemax
+
+# MongoDB Atlas
+MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/wavemax</code></pre>
+                        </li>
+                        <li><strong>Test connection:</strong>
+                            <pre><code>mongosh "mongodb://localhost:27017/wavemax"</code></pre>
+                        </li>
+                        <li><strong>Check firewall:</strong>
+                            <pre><code>sudo ufw allow 27017</code></pre>
+                        </li>
+                    </ol>
+                </div>
+            </div>
+
+            <div class="issue">
+                <h4>🔴 MongoDB Atlas Connection Issues</h4>
+                <div class="error-box">MongoServerError: bad auth : Authentication failed</div>
+            </div>
+
+            <div class="solution">
+                <h4>✅ Solution</h4>
+                <ul>
+                    <li>Verify username and password are correct</li>
+                    <li>Check IP whitelist in MongoDB Atlas (add current IP)</li>
+                    <li>Ensure database user has correct permissions</li>
+                    <li>URL encode special characters in password</li>
+                </ul>
+                <pre><code># If password contains special characters like @, #, $
+# Replace @ with %40, # with %23, etc.
+mongodb+srv://user:p%40ssw0rd@cluster.mongodb.net/wavemax</code></pre>
+            </div>
+
+            <h2 id="authentication-issues">Authentication Issues</h2>
+
+            <div class="issue">
+                <h4>🔴 JWT Token Invalid or Expired</h4>
+                <div class="error-box">JsonWebTokenError: invalid token</div>
+            </div>
+
+            <div class="solution">
+                <h4>✅ Solution</h4>
+                <ol>
+                    <li><strong>Check token format:</strong> Ensure "Bearer " prefix is included</li>
+                    <li><strong>Verify JWT secret:</strong> Must match between signing and verification</li>
+                    <li><strong>Token expiry:</strong> Tokens expire after 1 hour, use refresh token</li>
+                    <li><strong>Clear and re-login:</strong>
+                        <pre><code>// Clear local storage
+localStorage.removeItem('token');
+localStorage.removeItem('refreshToken');
+// Re-authenticate</code></pre>
+                    </li>
+                </ol>
+            </div>
+
+            <div class="issue">
+                <h4>🔴 Account Locked After Failed Logins</h4>
+            </div>
+
+            <div class="solution">
+                <h4>✅ Solution</h4>
+                <p>Reset login attempts in database:</p>
+                <pre><code># For affiliate
+db.affiliates.updateOne(
+    { email: "user@email.com" },
+    { $set: { loginAttempts: 0, isLocked: false } }
+)
+
+# For administrator
+db.administrators.updateOne(
+    { email: "admin@email.com" },
+    { $set: { loginAttempts: 0, isLocked: false } }
+)</code></pre>
+            </div>
+
+            <h2 id="csrf-issues">CSRF Token Errors</h2>
+
+            <div class="issue">
+                <h4>🔴 CSRF Token Missing or Invalid</h4>
+                <div class="error-box">ForbiddenError: invalid csrf token</div>
+            </div>
+
+            <div class="solution">
+                <h4>✅ Solution</h4>
+                <ol>
+                    <li><strong>Fetch CSRF token first:</strong>
+                        <pre><code>const response = await fetch('/api/csrf-token', {
+    credentials: 'include'
+});
+const { csrfToken } = await response.json();</code></pre>
+                    </li>
+                    <li><strong>Include in headers:</strong>
+                        <pre><code>fetch('/api/v1/orders', {
+    method: 'POST',
+    headers: {
+        'X-CSRF-Token': csrfToken,
+        'Content-Type': 'application/json'
+    },
+    credentials: 'include',
+    body: JSON.stringify(data)
+})</code></pre>
+                    </li>
+                    <li><strong>Check session configuration:</strong> Ensure cookies are enabled</li>
+                </ol>
+            </div>
+
+            <div class="issue">
+                <h4>🔴 CSRF Session Issues in Iframe</h4>
+            </div>
+
+            <div class="solution">
+                <h4>✅ Solution</h4>
+                <p>For cross-origin iframe embedding:</p>
+                <pre><code># In production .env
+NODE_ENV=production
+
+# Session configuration allows cross-site
+cookie: {
+    sameSite: 'none',  // Required for cross-origin
+    secure: true       // HTTPS required
+}</code></pre>
+            </div>
+
+            <h2 id="email-issues">Email Delivery Problems</h2>
+
+            <div class="issue">
+                <h4>🔴 Emails Not Sending</h4>
+            </div>
+
+            <div class="solution">
+                <h4>✅ Solution</h4>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Provider</th>
+                            <th>Common Issues</th>
+                            <th>Solution</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>SMTP</td>
+                            <td>Authentication failed</td>
+                            <td>
+                                - Check username/password<br>
+                                - Enable "Less secure apps" (Gmail)<br>
+                                - Use app-specific password
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Amazon SES</td>
+                            <td>Email address not verified</td>
+                            <td>
+                                - Verify sender email in SES console<br>
+                                - Check AWS credentials<br>
+                                - Ensure out of sandbox mode
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Exchange</td>
+                            <td>Certificate errors</td>
+                            <td>
+                                - Set EXCHANGE_REJECT_UNAUTHORIZED=false (dev only)<br>
+                                - Use correct authentication format
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+                <h4>Debug Email Configuration:</h4>
+                <pre><code># Test with console provider first
+EMAIL_PROVIDER=console
+
+# Check logs for email content
+tail -f logs/combined.log | grep "Email would be sent"</code></pre>
+            </div>
+
+            <h2 id="performance-issues">Performance Issues</h2>
+
+            <div class="issue">
+                <h4>🔴 Slow API Response Times</h4>
+            </div>
+
+            <div class="solution">
+                <h4>✅ Solution</h4>
+                <div class="debug-steps">
+                    <ol>
+                        <li><strong>Enable query logging:</strong>
+                            <pre><code>mongoose.set('debug', true);</code></pre>
+                        </li>
+                        <li><strong>Add database indexes:</strong>
+                            <pre><code>// Check slow queries
+db.setProfilingLevel(1, { slowms: 100 })
+db.system.profile.find().limit(10).sort({ ts: -1 })
+
+// Add missing indexes
+db.orders.createIndex({ customerId: 1, createdAt: -1 })
+db.customers.createIndex({ email: 1 })</code></pre>
+                        </li>
+                        <li><strong>Enable compression:</strong>
+                            <pre><code>app.use(compression());</code></pre>
+                        </li>
+                        <li><strong>Check PM2 cluster mode:</strong>
+                            <pre><code>pm2 start ecosystem.config.js -i max</code></pre>
+                        </li>
+                    </ol>
+                </div>
+            </div>
+
+            <div class="issue">
+                <h4>🔴 High Memory Usage</h4>
+            </div>
+
+            <div class="solution">
+                <h4>✅ Solution</h4>
+                <pre><code># Monitor memory usage
+pm2 monit
+
+# Set memory limit in ecosystem.config.js
+{
+    max_memory_restart: '1G',
+    node_args: '--max-old-space-size=1024'
+}
+
+# Find memory leaks
+node --inspect server.js
+# Use Chrome DevTools Memory Profiler</code></pre>
+            </div>
+
+            <h2 id="embedding-issues">Embedding Problems</h2>
+
+            <div class="issue">
+                <h4>🔴 Iframe Not Displaying</h4>
+                <div class="error-box">Refused to display in a frame: X-Frame-Options</div>
+            </div>
+
+            <div class="solution">
+                <h4>✅ Solution</h4>
+                <ol>
+                    <li>Check X-Frame-Options header is set to SAMEORIGIN</li>
+                    <li>Add parent domain to frameAncestors in CSP</li>
+                    <li>Ensure both sites use HTTPS</li>
+                    <li>Verify iframe src URL is correct</li>
+                </ol>
+                <pre><code>// In server.js helmet configuration
+frameAncestors: ['self', 'https://wavemaxlaundry.com']</code></pre>
+            </div>
+
+            <div class="issue">
+                <h4>🔴 Auto-resize Not Working</h4>
+            </div>
+
+            <div class="solution">
+                <h4>✅ Solution</h4>
+                <p>Implement message listener in parent page:</p>
+                <pre><code>window.addEventListener('message', function(event) {
+    if (event.origin !== 'https://wavemax.promo') return;
+    
+    if (event.data.type === 'resize') {
+        const iframe = document.getElementById('wavemax-iframe');
+        iframe.style.height = event.data.data.height + 'px';
+    }
+});</code></pre>
+            </div>
+
+            <h2 id="api-issues">API Errors</h2>
+
+            <div class="issue">
+                <h4>🔴 404 Not Found on API Endpoints</h4>
+            </div>
+
+            <div class="solution">
+                <h4>✅ Solution</h4>
+                <ul>
+                    <li>Verify API version: <code>/api/v1/</code> prefix required</li>
+                    <li>Check route exists: <code>grep -r "router.get" server/routes/</code></li>
+                    <li>Ensure middleware order is correct</li>
+                    <li>Check for typos in URL</li>
+                </ul>
+            </div>
+
+            <div class="issue">
+                <h4>🔴 CORS Errors</h4>
+                <div class="error-box">Access to fetch at 'https://api.example.com' from origin 'https://example.com' has been blocked by CORS policy</div>
+            </div>
+
+            <div class="solution">
+                <h4>✅ Solution</h4>
+                <pre><code># Add origin to CORS whitelist in .env
+CORS_ORIGIN=https://example.com,https://www.example.com
+
+# Or for development
+CORS_ORIGIN=*</code></pre>
+            </div>
+
+            <h2 id="deployment-issues">Deployment Issues</h2>
+
+            <div class="issue">
+                <h4>🔴 Application Crashes in Production</h4>
+            </div>
+
+            <div class="solution">
+                <h4>✅ Solution</h4>
+                <div class="debug-steps">
+                    <ol>
+                        <li><strong>Check PM2 logs:</strong>
+                            <pre><code>pm2 logs wavemax --lines 100
+pm2 show wavemax</code></pre>
+                        </li>
+                        <li><strong>Verify environment variables:</strong>
+                            <pre><code>pm2 env 0  # Check loaded environment</code></pre>
+                        </li>
+                        <li><strong>Check system resources:</strong>
+                            <pre><code>free -h    # Memory
+df -h      # Disk space
+top        # CPU usage</code></pre>
+                        </li>
+                        <li><strong>Enable detailed logging:</strong>
+                            <pre><code>LOG_LEVEL=debug pm2 restart wavemax --update-env</code></pre>
+                        </li>
+                    </ol>
+                </div>
+            </div>
+
+            <div class="issue">
+                <h4>🔴 SSL Certificate Issues</h4>
+            </div>
+
+            <div class="solution">
+                <h4>✅ Solution</h4>
+                <pre><code># Test SSL certificate
+openssl s_client -connect yourdomain.com:443
+
+# Renew Let's Encrypt certificate
+sudo certbot renew
+
+# Check Nginx SSL configuration
+sudo nginx -t</code></pre>
+            </div>
+
+            <h2 id="debugging-tools">Debugging Tools</h2>
+
+            <div class="info">
+                <strong>🛠️ Useful Debugging Commands</strong>
+            </div>
+
+            <h3>Application Logs</h3>
+            <pre><code># View all logs
+tail -f logs/combined.log
+
+# Filter error logs
+grep ERROR logs/error.log
+
+# View security events
+tail -f logs/audit.log
+
+# PM2 logs
+pm2 logs wavemax --err --lines 50</code></pre>
+
+            <h3>Database Debugging</h3>
+            <pre><code># MongoDB shell
+mongosh
+
+# Show collections
+show collections
+
+# Count documents
+db.affiliates.countDocuments()
+
+# Find recent errors
+db.logs.find({ level: "error" }).sort({ timestamp: -1 }).limit(10)</code></pre>
+
+            <h3>Network Debugging</h3>
+            <pre><code># Test API endpoint
+curl -X GET http://localhost:3000/api/v1/health
+
+# Test with headers
+curl -H "Authorization: Bearer TOKEN" \
+     -H "Content-Type: application/json" \
+     http://localhost:3000/api/v1/affiliates/me
+
+# Monitor network traffic
+tcpdump -i any -n port 3000</code></pre>
+
+            <h3>Performance Analysis</h3>
+            <pre><code># Node.js profiling
+node --prof server.js
+node --prof-process isolate-*.log > profile.txt
+
+# Memory heap snapshot
+node --inspect server.js
+# Open chrome://inspect in Chrome
+
+# PM2 monitoring
+pm2 monit</code></pre>
+
+            <div class="info">
+                <strong>💡 Pro Tip:</strong> Enable debug mode in development for detailed logging:
+                <pre><code>DEBUG=* npm run dev</code></pre>
+            </div>
+
+            <h3>Emergency Procedures</h3>
+
+            <div class="error-box">
+                <strong>🚨 If the application is completely down:</strong>
+            </div>
+
+            <ol>
+                <li><strong>Restart services:</strong>
+                    <pre><code>pm2 restart all
+sudo systemctl restart mongod
+sudo systemctl restart nginx</code></pre>
+                </li>
+                <li><strong>Check disk space:</strong>
+                    <pre><code>df -h
+# Clear logs if needed
+rm logs/*.log</code></pre>
+                </li>
+                <li><strong>Restore from backup:</strong>
+                    <pre><code>mongorestore --gzip --archive=backup.gz</code></pre>
+                </li>
+                <li><strong>Contact support:</strong> support@wavemax.promo</li>
+            </ol>
+
+            <div class="nav-buttons">
+                <a href="security-guide.html">← Security Guide</a>
+                <a href="deployment-guide.html">Next: Deployment Guide →</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

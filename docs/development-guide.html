@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Development Guide - WaveMAX Affiliate Program</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f8f9fa;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+            color: white;
+            padding: 30px 0;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        header h1 {
+            font-size: 2rem;
+            margin-bottom: 5px;
+        }
+        
+        header .breadcrumb {
+            opacity: 0.9;
+        }
+        
+        header .breadcrumb a {
+            color: white;
+            text-decoration: none;
+        }
+        
+        .content {
+            background: white;
+            border-radius: 8px;
+            padding: 40px;
+            margin-top: 30px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+        
+        h2 {
+            color: #1e3a8a;
+            margin-top: 30px;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+        
+        h3 {
+            color: #333;
+            margin-top: 25px;
+            margin-bottom: 15px;
+        }
+        
+        .setup-section {
+            background: #f8f9fa;
+            border-left: 4px solid #3b82f6;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        
+        code {
+            background: #f4f4f4;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+        
+        pre {
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 6px;
+            overflow-x: auto;
+            margin: 15px 0;
+        }
+        
+        pre code {
+            background: none;
+            padding: 0;
+            color: inherit;
+        }
+        
+        .file-structure {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 6px;
+            margin: 20px 0;
+            font-family: monospace;
+        }
+        
+        .file-structure ul {
+            list-style: none;
+            padding-left: 20px;
+        }
+        
+        .file-structure > ul {
+            padding-left: 0;
+        }
+        
+        .warning {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 4px;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        
+        .warning strong {
+            color: #856404;
+        }
+        
+        .info {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+            border-radius: 4px;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        
+        .info strong {
+            color: #0c5460;
+        }
+        
+        .tip {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            border-radius: 4px;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        
+        .tip strong {
+            color: #155724;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #1e3a8a;
+        }
+        
+        .nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 40px;
+            padding-top: 30px;
+            border-top: 1px solid #e0e0e0;
+        }
+        
+        .nav-buttons a {
+            display: inline-block;
+            padding: 10px 20px;
+            background: #3b82f6;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            transition: background 0.2s;
+        }
+        
+        .nav-buttons a:hover {
+            background: #2563eb;
+        }
+        
+        .code-example {
+            background: #f8f9fa;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .code-example h4 {
+            margin-bottom: 10px;
+            color: #1e3a8a;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="breadcrumb">
+                <a href="index.html">Documentation</a> → Development Guide
+            </div>
+            <h1>Development Guide</h1>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="content">
+            <div class="info">
+                <strong>💻 Overview:</strong> This guide covers setting up a development environment, code structure, testing procedures, and contributing to the WaveMAX Affiliate Program.
+            </div>
+
+            <h2>Development Environment Setup</h2>
+
+            <div class="setup-section">
+                <h3>Prerequisites</h3>
+                <ul>
+                    <li>Node.js v20.x LTS (recommended) or v18.x</li>
+                    <li>npm v9+ or yarn</li>
+                    <li>MongoDB 7.0 (local or Atlas)</li>
+                    <li>Git</li>
+                    <li>VS Code or preferred IDE</li>
+                    <li>Postman or similar API testing tool</li>
+                </ul>
+            </div>
+
+            <h3>Initial Setup</h3>
+            <pre><code># Clone the repository
+git clone https://github.com/yourusername/wavemax-affiliate-program.git
+cd wavemax-affiliate-program
+
+# Install dependencies
+npm install
+
+# Copy environment template
+cp .env.example .env
+
+# Generate secure keys for development
+npm run generate-keys
+
+# Start MongoDB (if local)
+mongod --dbpath /path/to/data
+
+# Run database migrations/seeds
+npm run db:setup
+
+# Start development server
+npm run dev</code></pre>
+
+            <h3>Development Scripts</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Script</th>
+                        <th>Command</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Development Server</td>
+                        <td><code>npm run dev</code></td>
+                        <td>Start with nodemon and debugging</td>
+                    </tr>
+                    <tr>
+                        <td>Run Tests</td>
+                        <td><code>npm test</code></td>
+                        <td>Run all tests</td>
+                    </tr>
+                    <tr>
+                        <td>Test Watch</td>
+                        <td><code>npm run test:watch</code></td>
+                        <td>Run tests in watch mode</td>
+                    </tr>
+                    <tr>
+                        <td>Test Coverage</td>
+                        <td><code>npm run test:coverage</code></td>
+                        <td>Generate coverage report</td>
+                    </tr>
+                    <tr>
+                        <td>Lint Code</td>
+                        <td><code>npm run lint</code></td>
+                        <td>Run ESLint</td>
+                    </tr>
+                    <tr>
+                        <td>Format Code</td>
+                        <td><code>npm run format</code></td>
+                        <td>Run Prettier</td>
+                    </tr>
+                    <tr>
+                        <td>Security Audit</td>
+                        <td><code>npm audit</code></td>
+                        <td>Check for vulnerabilities</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h2>Project Structure</h2>
+
+            <div class="file-structure">
+                <ul>
+                    <li>📁 <strong>wavemax-affiliate-program/</strong>
+                        <ul>
+                            <li>📁 <strong>server/</strong> - Backend code
+                                <ul>
+                                    <li>📁 <strong>controllers/</strong> - Request handlers</li>
+                                    <li>📁 <strong>models/</strong> - Mongoose schemas</li>
+                                    <li>📁 <strong>routes/</strong> - API routes</li>
+                                    <li>📁 <strong>middleware/</strong> - Express middleware</li>
+                                    <li>📁 <strong>utils/</strong> - Helper functions</li>
+                                    <li>📁 <strong>config/</strong> - Configuration files</li>
+                                    <li>📁 <strong>templates/</strong> - Email templates</li>
+                                </ul>
+                            </li>
+                            <li>📁 <strong>public/</strong> - Frontend files
+                                <ul>
+                                    <li>📁 <strong>assets/</strong> - Static assets</li>
+                                    <li>📄 <strong>*-embed.html</strong> - Embedded pages</li>
+                                </ul>
+                            </li>
+                            <li>📁 <strong>tests/</strong> - Test files
+                                <ul>
+                                    <li>📁 <strong>unit/</strong> - Unit tests</li>
+                                    <li>📁 <strong>integration/</strong> - Integration tests</li>
+                                    <li>📁 <strong>helpers/</strong> - Test utilities</li>
+                                </ul>
+                            </li>
+                            <li>📁 <strong>scripts/</strong> - Utility scripts</li>
+                            <li>📁 <strong>docs/</strong> - Documentation</li>
+                            <li>📄 <strong>server.js</strong> - Application entry</li>
+                            <li>📄 <strong>package.json</strong> - Dependencies</li>
+                            <li>📄 <strong>.env.example</strong> - Environment template</li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+
+            <h2>Code Style Guide</h2>
+
+            <div class="setup-section">
+                <h3>JavaScript Standards</h3>
+                <ul>
+                    <li>ES6+ syntax (async/await, arrow functions, destructuring)</li>
+                    <li>2 spaces for indentation</li>
+                    <li>Single quotes for strings</li>
+                    <li>Semicolons required</li>
+                    <li>camelCase for variables and functions</li>
+                    <li>PascalCase for classes and constructors</li>
+                    <li>UPPER_SNAKE_CASE for constants</li>
+                </ul>
+            </div>
+
+            <h3>ESLint Configuration</h3>
+            <pre><code>// .eslintrc.js
+module.exports = {
+  extends: ['eslint:recommended'],
+  env: {
+    node: true,
+    es2021: true,
+    jest: true
+  },
+  parserOptions: {
+    ecmaVersion: 2021
+  },
+  rules: {
+    'indent': ['error', 2],
+    'quotes': ['error', 'single'],
+    'semi': ['error', 'always'],
+    'no-unused-vars': ['error', { 'argsIgnorePattern': '^_' }],
+    'no-console': ['warn', { allow: ['warn', 'error'] }]
+  }
+};</code></pre>
+
+            <h2>Adding New Features</h2>
+
+            <div class="code-example">
+                <h4>Example: Adding a New API Endpoint</h4>
+                
+                <p><strong>1. Create the Model (if needed)</strong></p>
+                <pre><code>// server/models/Feature.js
+const mongoose = require('mongoose');
+
+const featureSchema = new mongoose.Schema({
+  name: {
+    type: String,
+    required: true,
+    trim: true
+  },
+  description: String,
+  isActive: {
+    type: Boolean,
+    default: true
+  }
+}, {
+  timestamps: true
+});
+
+module.exports = mongoose.model('Feature', featureSchema);</code></pre>
+
+                <p><strong>2. Create the Controller</strong></p>
+                <pre><code>// server/controllers/featureController.js
+const Feature = require('../models/Feature');
+
+exports.getAllFeatures = async (req, res, next) => {
+  try {
+    const features = await Feature.find({ isActive: true });
+    res.json({
+      success: true,
+      features
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.createFeature = async (req, res, next) => {
+  try {
+    const feature = new Feature(req.body);
+    await feature.save();
+    res.status(201).json({
+      success: true,
+      feature
+    });
+  } catch (error) {
+    next(error);
+  }
+};</code></pre>
+
+                <p><strong>3. Create the Routes</strong></p>
+                <pre><code>// server/routes/featureRoutes.js
+const express = require('express');
+const router = express.Router();
+const { authenticate, authorize } = require('../middleware/auth');
+const featureController = require('../controllers/featureController');
+
+router.get('/', authenticate, featureController.getAllFeatures);
+router.post('/', 
+  authenticate, 
+  authorize(['administrator']), 
+  featureController.createFeature
+);
+
+module.exports = router;</code></pre>
+
+                <p><strong>4. Register Routes in Server</strong></p>
+                <pre><code>// In server.js or routes index
+const featureRoutes = require('./server/routes/featureRoutes');
+apiV1Router.use('/features', featureRoutes);</code></pre>
+
+                <p><strong>5. Write Tests</strong></p>
+                <pre><code>// tests/unit/featureController.test.js
+describe('Feature Controller', () => {
+  describe('getAllFeatures', () => {
+    it('should return all active features', async () => {
+      const mockFeatures = [
+        { name: 'Feature 1', isActive: true },
+        { name: 'Feature 2', isActive: true }
+      ];
+      
+      Feature.find = jest.fn().mockResolvedValue(mockFeatures);
+      
+      await featureController.getAllFeatures(req, res, next);
+      
+      expect(res.json).toHaveBeenCalledWith({
+        success: true,
+        features: mockFeatures
+      });
+    });
+  });
+});</code></pre>
+            </div>
+
+            <h2>Testing Guidelines</h2>
+
+            <div class="setup-section">
+                <h3>Test Structure</h3>
+                <ul>
+                    <li><strong>Unit Tests:</strong> Test individual functions/methods</li>
+                    <li><strong>Integration Tests:</strong> Test API endpoints</li>
+                    <li><strong>E2E Tests:</strong> Test complete user flows</li>
+                </ul>
+            </div>
+
+            <h3>Writing Unit Tests</h3>
+            <pre><code>// Example unit test
+const { encrypt, decrypt } = require('../../server/utils/encryption');
+
+describe('Encryption Utils', () => {
+  const testData = 'sensitive data';
+  
+  it('should encrypt and decrypt data correctly', () => {
+    const encrypted = encrypt(testData);
+    const decrypted = decrypt(encrypted);
+    
+    expect(encrypted).not.toBe(testData);
+    expect(decrypted).toBe(testData);
+  });
+  
+  it('should throw error for invalid data', () => {
+    expect(() => decrypt('invalid')).toThrow();
+  });
+});</code></pre>
+
+            <h3>Writing Integration Tests</h3>
+            <pre><code>// Example integration test
+const request = require('supertest');
+const app = require('../../server');
+
+describe('POST /api/v1/auth/login', () => {
+  it('should login with valid credentials', async () => {
+    const response = await request(app)
+      .post('/api/v1/auth/affiliate/login')
+      .send({
+        username: 'test@email.com',
+        password: 'password123'
+      });
+      
+    expect(response.status).toBe(200);
+    expect(response.body.success).toBe(true);
+    expect(response.body.token).toBeDefined();
+  });
+});</code></pre>
+
+            <h3>Test Coverage Requirements</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Component</th>
+                        <th>Minimum Coverage</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Controllers</td>
+                        <td>80%</td>
+                    </tr>
+                    <tr>
+                        <td>Models</td>
+                        <td>90%</td>
+                    </tr>
+                    <tr>
+                        <td>Utils</td>
+                        <td>95%</td>
+                    </tr>
+                    <tr>
+                        <td>Middleware</td>
+                        <td>85%</td>
+                    </tr>
+                    <tr>
+                        <td>Overall</td>
+                        <td>80%</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h2>Database Development</h2>
+
+            <div class="code-example">
+                <h4>Working with Mongoose</h4>
+                
+                <p><strong>Creating Indexes</strong></p>
+                <pre><code>// In model definition
+affiliateSchema.index({ email: 1 }, { unique: true });
+affiliateSchema.index({ createdAt: -1 });
+affiliateSchema.index({ isActive: 1, isApproved: 1 });
+
+// Compound index
+orderSchema.index({ customerId: 1, createdAt: -1 });</code></pre>
+
+                <p><strong>Virtual Properties</strong></p>
+                <pre><code>customerSchema.virtual('fullName').get(function() {
+  return `${this.firstName} ${this.lastName}`;
+});
+
+customerSchema.virtual('orderCount', {
+  ref: 'Order',
+  localField: '_id',
+  foreignField: 'customerId',
+  count: true
+});</code></pre>
+
+                <p><strong>Middleware Hooks</strong></p>
+                <pre><code>// Pre-save hook
+userSchema.pre('save', async function(next) {
+  if (this.isModified('password')) {
+    this.password = await bcrypt.hash(this.password, 10);
+  }
+  next();
+});
+
+// Post-save hook
+orderSchema.post('save', async function(doc) {
+  await sendOrderConfirmation(doc);
+});</code></pre>
+            </div>
+
+            <h2>API Development</h2>
+
+            <div class="tip">
+                <strong>💡 API Best Practices:</strong>
+                <ul>
+                    <li>Always version your APIs (/api/v1/)</li>
+                    <li>Use proper HTTP status codes</li>
+                    <li>Implement pagination for list endpoints</li>
+                    <li>Return consistent response formats</li>
+                    <li>Include request validation</li>
+                    <li>Document all endpoints</li>
+                </ul>
+            </div>
+
+            <h3>Response Format</h3>
+            <pre><code>// Success response
+{
+  "success": true,
+  "data": { ... },
+  "message": "Operation successful"
+}
+
+// Error response
+{
+  "success": false,
+  "message": "Error description",
+  "errors": {
+    "field": "Validation error message"
+  }
+}
+
+// Paginated response
+{
+  "success": true,
+  "data": [...],
+  "pagination": {
+    "page": 1,
+    "limit": 20,
+    "total": 100,
+    "pages": 5
+  }
+}</code></pre>
+
+            <h2>Debugging Tips</h2>
+
+            <div class="setup-section">
+                <h3>VS Code Launch Configuration</h3>
+                <pre><code>// .vscode/launch.json
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Debug Server",
+      "skipFiles": ["<node_internals>/**"],
+      "program": "${workspaceFolder}/server.js",
+      "envFile": "${workspaceFolder}/.env",
+      "console": "integratedTerminal"
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Debug Tests",
+      "skipFiles": ["<node_internals>/**"],
+      "program": "${workspaceFolder}/node_modules/.bin/jest",
+      "args": ["--runInBand"],
+      "console": "integratedTerminal"
+    }
+  ]
+}</code></pre>
+            </div>
+
+            <h3>Debug Logging</h3>
+            <pre><code>// Enable debug logging
+DEBUG=app:* npm run dev
+
+// In code
+const debug = require('debug')('app:feature');
+debug('Processing feature: %o', feature);
+
+// Mongoose debugging
+mongoose.set('debug', true);
+
+// Express route debugging
+app.use((req, res, next) => {
+  console.log(`${req.method} ${req.path}`, req.body);
+  next();
+});</code></pre>
+
+            <h2>Performance Optimization</h2>
+
+            <div class="code-example">
+                <h4>Database Query Optimization</h4>
+                
+                <p><strong>Use Projection</strong></p>
+                <pre><code>// Bad - fetches all fields
+const users = await User.find();
+
+// Good - only fetch needed fields
+const users = await User.find()
+  .select('name email createdAt')
+  .lean();</code></pre>
+
+                <p><strong>Use Pagination</strong></p>
+                <pre><code>const page = parseInt(req.query.page) || 1;
+const limit = parseInt(req.query.limit) || 20;
+const skip = (page - 1) * limit;
+
+const users = await User.find()
+  .skip(skip)
+  .limit(limit)
+  .sort({ createdAt: -1 });</code></pre>
+
+                <p><strong>Use Aggregation for Complex Queries</strong></p>
+                <pre><code>const stats = await Order.aggregate([
+  { $match: { status: 'completed' } },
+  { $group: {
+    _id: '$customerId',
+    totalOrders: { $sum: 1 },
+    totalSpent: { $sum: '$totalAmount' }
+  }},
+  { $sort: { totalSpent: -1 } },
+  { $limit: 10 }
+]);</code></pre>
+            </div>
+
+            <h2>Git Workflow</h2>
+
+            <div class="setup-section">
+                <h3>Branch Naming Convention</h3>
+                <ul>
+                    <li><code>feature/</code> - New features</li>
+                    <li><code>bugfix/</code> - Bug fixes</li>
+                    <li><code>hotfix/</code> - Critical production fixes</li>
+                    <li><code>refactor/</code> - Code refactoring</li>
+                    <li><code>docs/</code> - Documentation updates</li>
+                </ul>
+            </div>
+
+            <h3>Commit Message Format</h3>
+            <pre><code># Format: type(scope): subject
+
+feat(auth): add two-factor authentication
+fix(orders): resolve calculation error in total amount
+docs(api): update endpoint documentation
+refactor(models): optimize database queries
+test(auth): add integration tests for login</code></pre>
+
+            <h3>Pull Request Process</h3>
+            <ol>
+                <li>Create feature branch from main</li>
+                <li>Make changes and commit</li>
+                <li>Push branch to remote</li>
+                <li>Create pull request</li>
+                <li>Pass all CI checks</li>
+                <li>Get code review approval</li>
+                <li>Merge to main</li>
+            </ol>
+
+            <h2>Development Tools</h2>
+
+            <div class="info">
+                <strong>🛠️ Recommended Tools:</strong>
+                <ul>
+                    <li><strong>MongoDB Compass:</strong> GUI for MongoDB</li>
+                    <li><strong>Postman:</strong> API testing</li>
+                    <li><strong>ngrok:</strong> Expose local server for webhook testing</li>
+                    <li><strong>nodemon:</strong> Auto-restart on file changes</li>
+                    <li><strong>Chrome DevTools:</strong> Frontend debugging</li>
+                </ul>
+            </div>
+
+            <h3>VS Code Extensions</h3>
+            <ul>
+                <li>ESLint</li>
+                <li>Prettier</li>
+                <li>MongoDB for VS Code</li>
+                <li>Thunder Client (API testing)</li>
+                <li>GitLens</li>
+                <li>Bracket Pair Colorizer</li>
+                <li>Auto Rename Tag</li>
+            </ul>
+
+            <h2>Common Development Tasks</h2>
+
+            <div class="code-example">
+                <h4>Creating a Database Seed</h4>
+                <pre><code>// scripts/seed-dev-data.js
+const mongoose = require('mongoose');
+const Affiliate = require('../server/models/Affiliate');
+
+async function seedData() {
+  await mongoose.connect(process.env.MONGODB_URI);
+  
+  // Clear existing data
+  await Affiliate.deleteMany({});
+  
+  // Create test affiliates
+  const affiliates = [
+    {
+      firstName: 'Test',
+      lastName: 'Affiliate',
+      email: 'test@affiliate.com',
+      password: 'password123',
+      isApproved: true,
+      isActive: true
+    }
+  ];
+  
+  await Affiliate.insertMany(affiliates);
+  console.log('Seed data created');
+  process.exit(0);
+}
+
+seedData().catch(console.error);</code></pre>
+            </div>
+
+            <div class="warning">
+                <strong>⚠️ Development Security:</strong>
+                <ul>
+                    <li>Never use production data in development</li>
+                    <li>Use different API keys for development</li>
+                    <li>Keep .env.development separate from .env</li>
+                    <li>Use weak passwords only in development</li>
+                    <li>Clear sensitive data before committing</li>
+                </ul>
+            </div>
+
+            <div class="nav-buttons">
+                <a href="deployment-guide.html">← Deployment Guide</a>
+                <a href="changelog.html">Next: Changelog →</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
