@@ -111,6 +111,10 @@ const loadTemplate = async (templateName) => {
 
 // Fill template with data
 const fillTemplate = (template, data) => {
+  // Add BASE_URL to all template data
+  const baseUrl = process.env.BASE_URL || 'https://wavemax.promo';
+  data.BASE_URL = baseUrl;
+  
   // Use a regex to find all placeholders and replace them in one operation
   return template.replace(/\[([A-Z_]+)\]/g, (match, placeholder) => {
     // First try the exact placeholder (uppercase), then try lowercase
@@ -174,7 +178,7 @@ exports.sendAffiliateWelcomeEmail = async (affiliate) => {
       last_name: affiliate.lastName,
       affiliate_id: affiliate.affiliateId,
       registration_url: registrationUrl,
-      login_url: `${process.env.FRONTEND_URL || 'https://wavemax.promo'}/affiliate-login.html`,
+      login_url: `${process.env.BASE_URL || 'https://wavemax.promo'}/embed-app.html?login=affiliate`,
       current_year: new Date().getFullYear()
     };
 
@@ -366,8 +370,8 @@ exports.sendCustomerWelcomeEmail = async (customer, bagBarcode, affiliate) => {
       affiliate_phone: affiliate.phone,
       affiliate_email: affiliate.email,
       bag_barcode: bagBarcode,
-      login_url: `https://www.wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program?affid=${affiliate.affiliateId}`,
-      schedule_url: `https://www.wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program?affid=${affiliate.affiliateId}&pickup=true`,
+      login_url: `${process.env.BASE_URL || 'https://wavemax.promo'}/embed-app.html?login=customer`,
+      schedule_url: `${process.env.BASE_URL || 'https://wavemax.promo'}/embed-app.html?login=customer&pickup=true`,
       current_year: new Date().getFullYear()
     };
 
@@ -401,7 +405,7 @@ exports.sendCustomerOrderConfirmationEmail = async (customer, order, affiliate) 
       affiliate_name: `${affiliate.firstName} ${affiliate.lastName}`,
       affiliate_phone: affiliate.phone,
       affiliate_email: affiliate.email,
-      login_url: `https://www.wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program?affid=${affiliate.affiliateId}`,
+      login_url: `${process.env.BASE_URL || 'https://wavemax.promo'}/embed-app.html?login=customer`,
       current_year: new Date().getFullYear()
     };
 
@@ -444,7 +448,7 @@ exports.sendOrderStatusUpdateEmail = async (customer, order, status) => {
       status_message: statusMessages[status],
       weight_info: order.actualWeight ? `Your laundry weighs ${order.actualWeight} lbs.` : '',
       total_info: order.actualTotal ? `Final total: $${order.actualTotal.toFixed(2)}` : '',
-      dashboard_url: `${process.env.FRONTEND_URL || 'https://wavemax.promo'}/customer-dashboard.html?id=${customer.customerId}`,
+      dashboard_url: `${process.env.BASE_URL || 'https://wavemax.promo'}/embed-app.html?route=/customer-dashboard`,
       current_year: new Date().getFullYear()
     };
 
@@ -472,8 +476,8 @@ exports.sendOrderCancellationEmail = async (customer, order) => {
       order_id: order.orderId,
       pickup_date: new Date(order.pickupDate).toLocaleDateString(),
       cancellation_time: new Date().toLocaleTimeString(),
-      dashboard_url: `${process.env.FRONTEND_URL || 'https://wavemax.promo'}/customer-dashboard.html?id=${customer.customerId}`,
-      schedule_url: `${process.env.FRONTEND_URL || 'https://wavemax.promo'}/schedule-pickup.html?customer=${customer.customerId}`,
+      dashboard_url: `${process.env.BASE_URL || 'https://wavemax.promo'}/embed-app.html?route=/customer-dashboard`,
+      schedule_url: `${process.env.BASE_URL || 'https://wavemax.promo'}/embed-app.html?route=/schedule-pickup`,
       current_year: new Date().getFullYear()
     };
 
@@ -505,7 +509,7 @@ exports.sendAdministratorWelcomeEmail = async (administrator) => {
       last_name: administrator.lastName,
       admin_id: administrator.adminId,
       email: administrator.email,
-      login_url: `${process.env.FRONTEND_URL || 'https://wavemax.promo'}/administrator-login-embed.html`,
+      login_url: `${process.env.BASE_URL || 'https://wavemax.promo'}/embed-app.html?login=admin`,
       permissions: administrator.permissions.join(', '),
       current_year: new Date().getFullYear()
     };
@@ -568,7 +572,7 @@ exports.sendOperatorWelcomeEmail = async (operator, temporaryPin) => {
       temporary_pin: temporaryPin,
       shift_hours: `${operator.shiftStart} - ${operator.shiftEnd}`,
       specializations: operator.specializations.join(', '),
-      login_url: `${process.env.FRONTEND_URL || 'https://wavemax.promo'}/operator-login-embed.html`,
+      login_url: `${process.env.BASE_URL || 'https://wavemax.promo'}/embed-app.html?login=operator`,
       current_year: new Date().getFullYear()
     };
 
@@ -595,7 +599,7 @@ exports.sendOperatorPinResetEmail = async (operator, newPin) => {
       first_name: operator.firstName,
       employee_id: operator.employeeId,
       new_pin: newPin,
-      login_url: `${process.env.FRONTEND_URL || 'https://wavemax.promo'}/operator-login-embed.html`,
+      login_url: `${process.env.BASE_URL || 'https://wavemax.promo'}/embed-app.html?login=operator`,
       current_year: new Date().getFullYear()
     };
 
@@ -623,7 +627,7 @@ exports.sendOperatorShiftReminderEmail = async (operator) => {
       employee_id: operator.employeeId,
       shift_start: operator.shiftStart,
       shift_end: operator.shiftEnd,
-      login_url: `${process.env.FRONTEND_URL || 'https://wavemax.promo'}/operator-login-embed.html`,
+      login_url: `${process.env.BASE_URL || 'https://wavemax.promo'}/embed-app.html?login=operator`,
       current_year: new Date().getFullYear()
     };
 

@@ -9,6 +9,7 @@ process.env.ENCRYPTION_KEY = '0123456789abcdef0123456789abcdef0123456789abcdef01
 process.env.SESSION_SECRET = 'test-session-secret';
 process.env.EMAIL_PROVIDER = 'ses'; // Keep SES to test the mocking
 process.env.SES_FROM_EMAIL = 'test@example.com';
+process.env.BASE_URL = 'https://wavemax.promo';
 
 // Get MongoDB URI and append test database name
 const baseUri = process.env.MONGODB_URI || 'mongodb://localhost:27017/wavemax_affiliate';

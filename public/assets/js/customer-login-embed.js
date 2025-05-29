@@ -21,67 +21,12 @@
     sendMessageToParent('navigate', { page: page });
   }
 
-  // Navigate to register with affiliate ID if present
+  // Navigate to register
   function navigateToRegister() {
     console.log('navigateToRegister called');
-
-    // Check for affiliate ID in URL or session storage
-    const urlParams = new URLSearchParams(window.location.search);
-    const affiliateId = urlParams.get('affid') || urlParams.get('affiliate') || sessionStorage.getItem('affiliateId');
-
-    console.log('Affiliate ID found:', affiliateId);
-    console.log('Current window location:', window.location.href);
-    console.log('Parent window exists:', window.parent !== window);
-
-    if (affiliateId) {
-      // Try multiple approaches to ensure message reaches the right window
-      const navigationMessage = {
-        type: 'navigate',
-        source: 'wavemax-embed',
-        data: {
-          page: 'customer-register',
-          params: { affid: affiliateId }
-        }
-      };
-
-      // Log what we're sending
-      console.log('Sending navigation message:', navigationMessage);
-
-      // Check if we're inside embed-app.html by looking at parent's URL
-      if (window.parent && window.parent !== window) {
-        try {
-          // Try to access parent URL (might fail due to cross-origin)
-          const parentUrl = window.parent.location.href;
-          console.log('Parent URL:', parentUrl);
-        } catch (e) {
-          console.log('Cannot access parent URL (cross-origin)');
-        }
-
-        // Send message to parent
-        console.log('Posting to parent window');
-        window.parent.postMessage(navigationMessage, '*');
-
-        // Also try direct URL navigation as a fallback
-        // This should work if we're in embed-app.html
-        const currentUrl = new URL(window.location.href);
-        if (currentUrl.pathname.includes('embed-app.html')) {
-          console.log('We are in embed-app.html, trying direct URL update');
-          const newUrl = new URL(window.location.href);
-          newUrl.searchParams.set('route', '/customer-register');
-          newUrl.searchParams.set('affid', affiliateId);
-          window.location.href = newUrl.toString();
-        } else {
-          console.log('Not in embed-app.html, relying on postMessage');
-        }
-      } else {
-        // Fallback to direct navigation
-        console.log('No parent window, using direct navigation');
-        window.location.href = `/customer-register?affid=${affiliateId}`;
-      }
-    } else {
-      console.log('No affiliate ID, navigating without it');
-      navigateParent('customer-register');
-    }
+    
+    // Simply navigate to customer register without any affiliate logic
+    navigateParent('customer-register');
   }
 
   // Setup register link click handler
@@ -214,12 +159,8 @@
     console.log('Document ready state:', document.readyState);
     console.log('Current URL:', window.location.href);
 
-    // Store affiliate ID if present in URL
+    // Check URL parameters
     const urlParams = new URLSearchParams(window.location.search);
-    const affiliateId = urlParams.get('affid') || urlParams.get('affiliate');
-    if (affiliateId) {
-      sessionStorage.setItem('affiliateId', affiliateId);
-    }
 
     // Store pickup flag if present
     const pickupFlag = urlParams.get('pickup');
