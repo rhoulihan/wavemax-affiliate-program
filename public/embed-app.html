@@ -94,6 +94,25 @@
         // Get route from URL parameter
         function getRouteFromUrl() {
             const params = new URLSearchParams(window.location.search);
+            
+            // Check for login parameter first
+            const login = params.get('login');
+            if (login) {
+                switch(login) {
+                    case 'admin':
+                        return '/administrator-login';
+                    case 'operator':
+                        return '/operator-login';
+                    case 'affiliate':
+                        return '/affiliate-login';
+                    case 'customer':
+                        return '/customer-login';
+                    default:
+                        console.log('Unknown login type:', login);
+                        return '/';
+                }
+            }
+            
             const route = params.get('route') || '/';
             console.log('Route from URL:', route);
             return route;

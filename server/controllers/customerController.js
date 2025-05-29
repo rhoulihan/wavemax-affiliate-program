@@ -405,95 +405,80 @@ exports.getCustomerDashboardStats = async (req, res) => {
       });
     }
 
-    // Get active orders count
-    const activeOrdersCount = await Order.countDocuments({
-      customerId,
-      status: { $in: ['scheduled', 'picked_up', 'processing', 'ready_for_delivery'] }
-    });
-
+    // Get all orders for statistics
+    const allOrders = await Order.find({ customerId }).sort({ createdAt: -1 });
+    
+    // Get active orders
+    const activeOrders = allOrders.filter(order => 
+      ['scheduled', 'picked_up', 'processing', 'ready_for_delivery'].includes(order.status)
+    );
+    
     // Get completed orders
-    const completedOrders = await Order.find({
-      customerId,
-      status: 'delivered'
-    });
-
+    const completedOrders = allOrders.filter(order => order.status === 'delivered');
+    
+    // Calculate statistics
+    const totalOrders = allOrders.length;
+    const activeOrdersCount = activeOrders.length;
     const completedOrdersCount = completedOrders.length;
-
-    // Calculate total spent
+    
+    // Calculate total spent and average order value
     let totalSpent = 0;
     completedOrders.forEach(order => {
       totalSpent += order.actualTotal || order.estimatedTotal || 0;
     });
-
-    // Get next scheduled pickup
-    const nextPickup = await Order.findOne({
+    
+    const averageOrderValue = completedOrdersCount > 0 ? totalSpent / completedOrdersCount : 0;
+    
+    // Get recent orders (limit to 5)
+    const recentOrders = allOrders.slice(0, 5).map(order => ({
+      orderId: order.orderId,
+      status: order.status,
+      pickupDate: order.pickupDate,
+      deliveryDate: order.deliveryDate,
+      estimatedTotal: order.estimatedTotal,
+      actualTotal: order.actualTotal,
+      createdAt: order.createdAt
+    }));
+    
+    // Get upcoming pickups
+    const upcomingPickups = await Order.find({
       customerId,
       status: 'scheduled',
       pickupDate: { $gte: new Date() }
-    }).sort({ pickupDate: 1 });
-
+    }).sort({ pickupDate: 1 }).limit(5);
+    
     // Get affiliate info
     const affiliate = await Affiliate.findOne({ affiliateId: customer.affiliateId });
-
-    // Get customer's bags
-    const bags = await Bag.find({ customerId });
-
-    // Calculate average order weight
-    let totalWeight = 0;
-    let weightedOrders = 0;
-
-    completedOrders.forEach(order => {
-      if (order.actualWeight) {
-        totalWeight += order.actualWeight;
-        weightedOrders++;
-      }
-    });
-
-    const averageWeight = weightedOrders > 0 ? totalWeight / weightedOrders : 0;
-
-    // Analyze order sizes
-    const orderSizes = {
-      small: 0,
-      medium: 0,
-      large: 0
-    };
-
-    completedOrders.forEach(order => {
-      if (order.actualWeight) {
-        if (order.actualWeight < 15) {
-          orderSizes.small++;
-        } else if (order.actualWeight < 30) {
-          orderSizes.medium++;
-        } else {
-          orderSizes.large++;
-        }
-      } else if (order.estimatedSize) {
-        orderSizes[order.estimatedSize]++;
-      }
-    });
-
+    
+    // Get last order date
+    const lastOrder = completedOrders.length > 0 ? completedOrders[0] : null;
+    const lastOrderDate = lastOrder ? lastOrder.deliveredAt || lastOrder.updatedAt : null;
+    
     res.status(200).json({
       success: true,
-      stats: {
-        activeOrdersCount,
-        completedOrdersCount,
-        totalSpent,
-        averageWeight,
-        orderSizes,
-        nextPickup: nextPickup ? {
-          orderId: nextPickup.orderId,
-          pickupDate: nextPickup.pickupDate,
-          pickupTime: nextPickup.pickupTime,
-          estimatedSize: nextPickup.estimatedSize,
-          estimatedTotal: nextPickup.estimatedTotal
-        } : null,
+      dashboard: {
+        statistics: {
+          totalOrders,
+          completedOrders: completedOrdersCount,
+          activeOrders: activeOrdersCount,
+          totalSpent,
+          averageOrderValue,
+          ...(lastOrderDate && { lastOrderDate })
+        },
+        recentOrders,
+        upcomingPickups: upcomingPickups.map(pickup => ({
+          orderId: pickup.orderId,
+          pickupDate: pickup.pickupDate,
+          pickupTime: pickup.pickupTime,
+          estimatedSize: pickup.estimatedSize,
+          estimatedTotal: pickup.estimatedTotal
+        })),
         affiliate: affiliate ? {
-          name: `${affiliate.firstName} ${affiliate.lastName}`,
-          phone: affiliate.phone,
-          email: affiliate.email,
+          affiliateId: affiliate.affiliateId,
+          firstName: affiliate.firstName,
+          lastName: affiliate.lastName,
           deliveryFee: affiliate.deliveryFee
-        } : null,
-        bagCount: bags.length
+        } : null
       }
     });
   } catch (error) {

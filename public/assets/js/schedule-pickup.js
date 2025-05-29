@@ -37,7 +37,7 @@ async function initializeSchedulePickup() {
   if (!token || !customerStr) {
     // Not logged in, redirect to login page with pickup flag
     console.log('User not authenticated, redirecting to login');
-    window.location.href = '/embed-app.html?route=/customer-login&pickup=true';
+    window.location.href = '/embed-app.html?login=customer&pickup=true';
     return;
   }
 
@@ -76,7 +76,7 @@ async function initializeSchedulePickup() {
   } catch (error) {
     console.error('Error initializing schedule pickup:', error);
     // If there's an error, redirect to login
-    window.location.href = '/embed-app.html?route=/customer-login&pickup=true';
+    window.location.href = '/embed-app.html?login=customer&pickup=true';
   }
 }
 
@@ -201,7 +201,7 @@ async function loadCustomerIntoForm(customer, token) {
   } catch (error) {
     console.error('Error loading customer data:', error);
     alert('Error loading customer information. Please try logging in again.');
-    window.location.href = '/embed-app.html?route=/customer-login&pickup=true';
+    window.location.href = '/embed-app.html?login=customer&pickup=true';
   }
 }
 
