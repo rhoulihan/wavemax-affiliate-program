@@ -187,7 +187,17 @@ const conditionalCsrf = (req, res, next) => {
   // Apply CSRF protection
   csrfProtection(req, res, (err) => {
     if (err && err.code === 'EBADCSRFTOKEN') {
-      // Log CSRF violation
+      // Log CSRF violation with more details
+      console.error('CSRF validation failed:', {
+        error: err.message,
+        sessionID: req.sessionID,
+        hasSession: !!req.session,
+        hasCsrfSecret: !!req.session?.csrfSecret,
+        receivedToken: req.headers['x-csrf-token'] || 'none',
+        path: req.path,
+        method: req.method
+      });
+      
       auditLogger.logSuspiciousActivity(
         'CSRF_VALIDATION_FAILED',
         {
@@ -234,6 +244,12 @@ const csrfTokenEndpoint = (req, res, next) => {
     });
   }
 
+  console.log('CSRF token generation:', {
+    sessionID: req.sessionID,
+    hasSession: !!req.session,
+    hasCsrfSecret: !!req.session?.csrfSecret
+  });
+
   // Apply CSRF protection to generate token
   csrfProtection(req, res, (err) => {
     if (err) {
@@ -244,10 +260,17 @@ const csrfTokenEndpoint = (req, res, next) => {
       });
     }
     
+    const token = req.csrfToken();
+    console.log('Generated CSRF token:', {
+      token: token,
+      sessionID: req.sessionID,
+      csrfSecret: req.session?.csrfSecret
+    });
+    
     // Return token
     res.json({ 
       success: true,
-      csrfToken: req.csrfToken() 
+      csrfToken: token
     });
   });
 };
