@@ -298,11 +298,11 @@
         }
         
         function checkAndShowDeleteSection() {
-            // Check if we're in development or test environment
+            // Check if delete data feature is enabled
             fetch('https://wavemax.promo/api/v1/environment')
                 .then(response => response.json())
                 .then(data => {
-                    if (data.nodeEnv === 'development' || data.nodeEnv === 'test') {
+                    if (data.enableDeleteDataFeature === true) {
                         const deleteSection = document.getElementById('deleteDataSection');
                         if (deleteSection) {
                             deleteSection.style.display = 'block';

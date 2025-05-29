@@ -244,7 +244,8 @@ const apiV1Router = express.Router();
 apiV1Router.get('/environment', (req, res) => {
   res.json({
     success: true,
-    nodeEnv: process.env.NODE_ENV || 'development'
+    nodeEnv: process.env.NODE_ENV || 'development',
+    enableDeleteDataFeature: process.env.ENABLE_DELETE_DATA_FEATURE === 'true'
   });
 });
 
