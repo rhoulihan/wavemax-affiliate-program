@@ -192,6 +192,16 @@ app.use(session({
 // Serve static files in all environments
 app.use(express.static(path.join(__dirname, 'public')));
 
+// Serve documentation if enabled
+if (process.env.SHOW_DOCS === 'true') {
+  app.use('/docs', express.static(path.join(__dirname, 'docs')));
+  
+  // Redirect /docs to /docs/index.html
+  app.get('/docs', (req, res) => {
+    res.redirect('/docs/index.html');
+  });
+}
+
 // Debug middleware to track sessions
 app.use((req, res, next) => {
   if (req.path.includes('/api/') && (req.path.includes('csrf') || req.path.includes('orders'))) {

@@ -411,6 +411,43 @@ wavemax-affiliate-program/
 - Sensitive data access logging
 - Suspicious activity detection
 
+## Documentation
+
+The WaveMAX Affiliate Program includes comprehensive HTML documentation covering all aspects of deployment, configuration, and usage.
+
+### Accessing Documentation
+
+1. **Enable documentation in your environment:**
+   ```bash
+   # Add to your .env file
+   SHOW_DOCS=true
+   ```
+
+2. **Restart the server:**
+   ```bash
+   pm2 restart wavemax
+   ```
+
+3. **Access documentation at:**
+   ```
+   https://yourdomain.com/docs
+   ```
+
+### Available Documentation
+
+- **Server Configuration** - Complete setup guide for all server components
+- **Embedding Guide** - Instructions for integrating with wavemaxlaundry.com
+- **Administrator Setup** - Creating and managing administrator accounts
+- **RBAC Guide** - Role-based access control and permissions
+- **User Management** - Managing all user types in the system
+
+### Security Note
+
+For production environments, it's recommended to disable documentation access:
+```bash
+SHOW_DOCS=false
+```
+
 ## API Documentation
 
 ### Root Endpoint
@@ -695,6 +732,7 @@ To create an administrator account, you can use the provided script:
 | `LOG_LEVEL` | Logging level | No |
 | `LOG_DIR` | Directory for log files | No |
 | `ENABLE_DELETE_DATA_FEATURE` | Enable delete all data feature (true/false) | No |
+| `SHOW_DOCS` | Enable documentation at /docs (true/false) | No |
 
 #### Standard SMTP Configuration (when EMAIL_PROVIDER=smtp)
 | Variable | Description | Required |

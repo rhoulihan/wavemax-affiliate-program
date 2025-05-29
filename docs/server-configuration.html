@@ -309,6 +309,11 @@
                         <td>false</td>
                     </tr>
                     <tr>
+                        <td><code>SHOW_DOCS</code></td>
+                        <td>Enable documentation at /docs</td>
+                        <td>false</td>
+                    </tr>
+                    <tr>
                         <td><code>RATE_LIMIT_WINDOW</code></td>
                         <td>Rate limit window (ms)</td>
                         <td>900000</td>
@@ -611,6 +616,28 @@ aws s3 cp $BACKUP_DIR/wavemax_$DATE.gz s3://your-backup-bucket/mongodb/</code></
             <h3>Automated Backups</h3>
             <pre><code># Add to crontab
 0 2 * * * /usr/local/bin/backup-wavemax.sh</code></pre>
+
+            <h2 id="documentation-access">Documentation Access</h2>
+
+            <div class="info">
+                <strong>ℹ️ Documentation Hosting:</strong> The application can serve its own documentation when enabled.
+            </div>
+
+            <h3>Enabling Documentation</h3>
+            <pre><code># In your .env file
+SHOW_DOCS=true
+
+# Restart the application
+pm2 restart wavemax</code></pre>
+
+            <h3>Accessing Documentation</h3>
+            <p>When enabled, documentation is available at:</p>
+            <pre><code>https://yourdomain.com/docs</code></pre>
+
+            <div class="warning">
+                <strong>⚠️ Production Warning:</strong> For security reasons, it's recommended to disable documentation in production:
+                <pre><code>SHOW_DOCS=false</code></pre>
+            </div>
 
             <h2 id="monitoring">Monitoring & Health Checks</h2>
 
