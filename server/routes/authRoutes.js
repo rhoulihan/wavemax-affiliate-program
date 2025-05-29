@@ -130,4 +130,18 @@ router.post('/refresh-token',
   authController.refreshToken
 );
 
+/**
+ * @route   POST /api/auth/logout
+ * @desc    Logout user
+ * @access  Private
+ */
+router.post('/logout',
+  authenticate,
+  [
+    body('refreshToken').trim().notEmpty().withMessage('Refresh token is required')
+  ],
+  validate,
+  authController.logout
+);
+
 module.exports = router;

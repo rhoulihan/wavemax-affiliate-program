@@ -6,7 +6,9 @@ const refreshTokenSchema = new mongoose.Schema({
   userId: { type: mongoose.Schema.Types.ObjectId, required: true },
   userType: { type: String, enum: ['affiliate', 'customer', 'administrator', 'operator'], required: true },
   expiryDate: { type: Date, required: true },
-  isRevoked: { type: Boolean, default: false },
+  revoked: { type: Date, default: null },
+  revokedByIp: String,
+  replacedByToken: String,
   createdByIp: String
 }, { timestamps: true });
 

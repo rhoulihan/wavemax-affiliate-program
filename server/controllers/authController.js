@@ -1,6 +1,7 @@
 // Authentication Controller for WaveMAX Laundry Affiliate Program
 
 const RefreshToken = require('../models/RefreshToken');
+const TokenBlacklist = require('../models/TokenBlacklist');
 const Affiliate = require('../models/Affiliate');
 const Customer = require('../models/Customer');
 const Administrator = require('../models/Administrator');
@@ -34,15 +35,12 @@ const generateRefreshToken = async (userId, userType, ip, replaceToken = null) =
   // Generate a secure random token
   const token = crypto.randomBytes(40).toString('hex');
 
-  // If replacing a token, mark the old one as revoked
+  // If replacing a token, update it with the replacement token
   if (replaceToken) {
-    const oldToken = await RefreshToken.findOne({ token: replaceToken });
-    if (oldToken && !oldToken.revoked) {
-      oldToken.revoked = new Date();
-      oldToken.revokedByIp = ip;
-      oldToken.replacedByToken = token;
-      await oldToken.save();
-    }
+    await RefreshToken.findOneAndUpdate(
+      { token: replaceToken },
+      { replacedByToken: token }
+    );
   }
 
   // Save new token to database
@@ -144,12 +142,21 @@ exports.refreshToken = async (req, res) => {
       });
     }
 
-    // Find the token in the database
-    const storedToken = await RefreshToken.findOne({
-      token: refreshToken,
-      revoked: null,
-      expiryDate: { $gt: new Date() }
-    });
+    // Find and immediately mark the token as used to prevent concurrent use
+    const storedToken = await RefreshToken.findOneAndUpdate(
+      {
+        token: refreshToken,
+        revoked: null,
+        expiryDate: { $gt: new Date() }
+      },
+      {
+        revoked: new Date(),
+        revokedByIp: req.ip
+      },
+      {
+        new: false // Return the original document
+      }
+    );
 
     if (!storedToken) {
       return res.status(401).json({
@@ -687,6 +694,82 @@ exports.verifyToken = async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'An error occurred during token verification'
+    });
+  }
+};
+
+/**
+ * Logout user
+ */
+exports.logout = async (req, res) => {
+  try {
+    const { refreshToken } = req.body;
+
+    // Verify refresh token was provided
+    if (!refreshToken) {
+      return res.status(400).json({
+        success: false,
+        message: 'Refresh token is required'
+      });
+    }
+
+    // Get the access token from the authorization header
+    const authHeader = req.headers.authorization || req.headers['x-auth-token'];
+    let accessToken;
+    
+    if (authHeader) {
+      if (authHeader.startsWith('Bearer ')) {
+        accessToken = authHeader.substring(7);
+      } else {
+        accessToken = authHeader;
+      }
+    }
+
+    // Note: In a production system, you might want to blacklist ALL active tokens
+    // for this user, not just the one used in the logout request.
+    // This would require tracking all issued tokens per user.
+    
+    // Blacklist the access token if provided
+    if (accessToken && req.user) {
+      try {
+        // Decode token to get expiration time
+        const decoded = jwt.decode(accessToken);
+        if (decoded && decoded.exp) {
+          const expiresAt = new Date(decoded.exp * 1000);
+          await TokenBlacklist.blacklistToken(
+            accessToken,
+            req.user.id || req.user.userId || req.user.affiliateId || req.user.customerId || req.user.administratorId || req.user.operatorId,
+            req.user.role || req.user.userType,
+            expiresAt,
+            'logout'
+          );
+        }
+      } catch (blacklistError) {
+        console.error('Error blacklisting token:', blacklistError);
+        // Continue with logout even if blacklisting fails
+      }
+    }
+
+    // Find and delete the refresh token
+    const deletedToken = await RefreshToken.findOneAndDelete({ token: refreshToken });
+
+    if (!deletedToken) {
+      // Token not found, but still return success for security reasons
+      return res.status(200).json({
+        success: true,
+        message: 'Logged out successfully'
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: 'Logged out successfully'
+    });
+  } catch (error) {
+    console.error('Logout error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'An error occurred during logout'
     });
   }
 };
