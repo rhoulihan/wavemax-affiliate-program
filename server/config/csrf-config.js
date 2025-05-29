@@ -269,11 +269,11 @@ const csrfTokenEndpoint = (req, res, next) => {
     }
     
     const token = req.csrfToken();
-    console.log('Generated CSRF token:', {
-      token: token,
-      sessionID: req.sessionID,
-      csrfSecret: req.session?.csrfSecret
-    });
+    console.log('=== Generated CSRF token ===');
+    console.log('Token:', token);
+    console.log('Session ID:', req.sessionID);
+    console.log('CSRF Secret:', req.session?.csrfSecret?.substring(0, 10) + '...');
+    console.log('===========================');
     
     // Return token
     res.json({ 
