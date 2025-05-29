@@ -187,7 +187,7 @@
                 
                 // Send height to parent after a short delay to ensure content is rendered
                 setTimeout(() => {
-                    sendHeight();
+                    sendHeight(true); // Force send on page load
                     // Also scroll parent to top
                     scrollParentToTop();
                 }, 100);
@@ -290,7 +290,7 @@
                 } else {
                     // All scripts loaded, send height again
                     setTimeout(() => {
-                        sendHeight();
+                        sendHeight(true); // Force send after scripts load
                     }, 200);
                 }
             }
@@ -320,10 +320,11 @@
         // Track last sent height to prevent loops
         let lastSentHeight = 0;
         let heightDebounceTimer = null;
+        let isUpdatingHeight = false;
         
         // Send height to parent window
-        function sendHeight() {
-            if (window.parent !== window) {
+        function sendHeight(force = false) {
+            if (window.parent !== window && !isUpdatingHeight) {
                 // Clear any pending height updates
                 if (heightDebounceTimer) {
                     clearTimeout(heightDebounceTimer);
@@ -331,7 +332,9 @@
                 
                 // Debounce height updates
                 heightDebounceTimer = setTimeout(() => {
-                    // Get the most accurate height
+                    isUpdatingHeight = true;
+                    
+                    // Get the most accurate height without buffer first
                     const heights = [
                         document.body.scrollHeight,
                         document.body.offsetHeight,
@@ -340,18 +343,23 @@
                         document.querySelector('#app-container')?.scrollHeight || 0
                     ];
                     
-                    const height = Math.max(...heights) + 50; // Add some buffer
+                    const height = Math.max(...heights);
                     
-                    // Only send if height has changed significantly (more than 5px)
-                    if (Math.abs(height - lastSentHeight) > 5) {
+                    // Only send if height has changed significantly (more than 10px) or forced
+                    if (force || Math.abs(height - lastSentHeight) > 10) {
                         console.log('Sending height to parent:', height);
                         lastSentHeight = height;
                         
                         window.parent.postMessage({
                             type: 'resize',
-                            data: { height: height }
+                            data: { height: height + 20 } // Small buffer instead of 50
                         }, '*');
                     }
+                    
+                    // Reset flag after a delay to allow for any parent-triggered reflows
+                    setTimeout(() => {
+                        isUpdatingHeight = false;
+                    }, 500);
                 }, 100); // Debounce for 100ms
             }
         }
@@ -440,19 +448,25 @@
             const initialRoute = getRouteFromUrl();
             loadPage(initialRoute);
             
-            // Start observing body for size changes
-            resizeObserver.observe(document.body);
-            
-            // Also observe the app container specifically
+            // Only observe the app container, not the body (to prevent loops)
             const appContainer = document.getElementById('app-container');
             if (appContainer) {
                 resizeObserver.observe(appContainer);
                 
                 // Additionally use MutationObserver for DOM changes
                 let mutationThrottleTimer = null;
-                const mutationObserver = new MutationObserver(() => {
-                    // Throttle mutation observations
-                    if (!mutationThrottleTimer) {
+                const mutationObserver = new MutationObserver((mutations) => {
+                    // Check if mutation is actually changing content
+                    let hasContentChange = false;
+                    for (const mutation of mutations) {
+                        if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
+                            hasContentChange = true;
+                            break;
+                        }
+                    }
+                    
+                    // Only send height if content actually changed
+                    if (hasContentChange && !mutationThrottleTimer) {
                         mutationThrottleTimer = setTimeout(() => {
                             sendHeight();
                             mutationThrottleTimer = null;
@@ -462,9 +476,8 @@
                 
                 mutationObserver.observe(appContainer, {
                     childList: true,
-                    subtree: true,
-                    attributes: true,
-                    attributeFilter: ['style', 'class'] // Only watch relevant attributes
+                    subtree: true
+                    // Removed attributes observation to prevent loops
                 });
             }
         });
