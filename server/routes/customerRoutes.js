@@ -26,6 +26,13 @@ router.post('/register', [
 ], customerController.registerCustomer);
 
 /**
+ * @route   POST /api/customers/report-lost-bag
+ * @desc    Report a lost bag (alternative route)
+ * @access  Private (self, affiliated affiliate, or admin)
+ */
+router.post('/report-lost-bag', authenticate, customerController.reportLostBag);
+
+/**
  * @route   GET /api/customers/:customerId/profile
  * @desc    Get customer profile (public for success page, authenticated for full profile)
  * @access  Public (limited) / Private (full)
@@ -71,7 +78,24 @@ router.get('/:customerId/orders', authenticate, customerController.getCustomerOr
  * @desc    Get customer dashboard stats
  * @access  Private (self, affiliated affiliate, or admin)
  */
-router.get('/:customerId/dashboard', authenticate, customerController.getCustomerDashboardStats);
+router.get('/:customerId/dashboard', authenticate, customerController.getCustomerDashboard);
+
+/**
+ * @route   PUT /api/customers/:customerId/password
+ * @desc    Update customer password
+ * @access  Private (self or admin)
+ */
+router.put('/:customerId/password', authenticate, [
+  body('currentPassword').notEmpty().withMessage('Current password is required'),
+  body('newPassword').isLength({ min: 8 }).withMessage('New password must be at least 8 characters long')
+], customerController.updateCustomerPassword);
+
+/**
+ * @route   GET /api/customers/:customerId/bags
+ * @desc    Get customer bags
+ * @access  Private (self, affiliated affiliate, or admin)
+ */
+router.get('/:customerId/bags', authenticate, customerController.getCustomerBags);
 
 /**
  * @route   POST /api/customers/:customerId/bags/:bagId/report-lost
@@ -79,13 +103,6 @@ router.get('/:customerId/dashboard', authenticate, customerController.getCustome
  * @access  Private (self, affiliated affiliate, or admin)
  */
 router.post('/:customerId/bags/:bagId/report-lost', authenticate, customerController.reportLostBag);
-
-/**
- * @route   POST /api/customers/report-lost-bag
- * @desc    Report a lost bag (alternative route)
- * @access  Private (self, affiliated affiliate, or admin)
- */
-router.post('/report-lost-bag', authenticate, customerController.reportLostBag);
 
 /**
  * @route   PUT /api/customers/:customerId/payment

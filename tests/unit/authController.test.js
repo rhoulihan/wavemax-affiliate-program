@@ -268,14 +268,31 @@ describe('Auth Controller', () => {
         role: 'affiliate'
       };
 
-      RefreshToken.findOne.mockResolvedValue(mockRefreshToken);
+      RefreshToken.findOneAndUpdate.mockResolvedValue(mockRefreshToken);
       Affiliate.findById.mockResolvedValue(mockAffiliate);
       jwt.sign.mockReturnValue('newMockToken');
       RefreshToken.prototype.save = jest.fn();
+      RefreshToken.create.mockResolvedValue({
+        token: 'newRefreshToken',
+        save: jest.fn()
+      });
 
       await authController.refreshToken(req, res);
 
-      expect(RefreshToken.findOne).toHaveBeenCalledWith({ token: 'validRefreshToken' });
+      expect(RefreshToken.findOneAndUpdate).toHaveBeenCalledWith(
+        {
+          token: 'validRefreshToken',
+          revoked: null,
+          expiryDate: { $gt: expect.any(Date) }
+        },
+        {
+          revoked: expect.any(Date),
+          revokedByIp: req.ip
+        },
+        {
+          new: false
+        }
+      );
       expect(res.status).toHaveBeenCalledWith(200);
       expect(res.json).toHaveBeenCalledWith(
         expect.objectContaining({

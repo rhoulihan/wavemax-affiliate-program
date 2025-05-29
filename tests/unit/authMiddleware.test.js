@@ -1,8 +1,14 @@
 const { authenticate, authorize, authLimiter } = require('../../server/middleware/auth');
 const jwt = require('jsonwebtoken');
+const TokenBlacklist = require('../../server/models/TokenBlacklist');
 
 // Mock jwt
 jest.mock('jsonwebtoken');
+
+// Mock TokenBlacklist
+jest.mock('../../server/models/TokenBlacklist', () => ({
+  isBlacklisted: jest.fn()
+}));
 
 describe('Auth Middleware', () => {
   let req, res, next;
@@ -19,10 +25,13 @@ describe('Auth Middleware', () => {
     };
     next = jest.fn();
     jest.clearAllMocks();
+    
+    // Reset TokenBlacklist mock
+    TokenBlacklist.isBlacklisted.mockReset();
   });
 
   describe('authenticate', () => {
-    it('should authenticate valid Bearer token', () => {
+    it('should authenticate valid Bearer token', async () => {
       req.headers.authorization = 'Bearer validtoken';
       const decodedToken = {
         id: 'user123',
@@ -30,16 +39,18 @@ describe('Auth Middleware', () => {
         affiliateId: 'AFF123'
       };
       jwt.verify.mockReturnValue(decodedToken);
+      TokenBlacklist.isBlacklisted.mockResolvedValue(false);
 
-      authenticate(req, res, next);
+      await authenticate(req, res, next);
 
       expect(jwt.verify).toHaveBeenCalledWith('validtoken', process.env.JWT_SECRET);
+      expect(TokenBlacklist.isBlacklisted).toHaveBeenCalledWith('validtoken');
       expect(req.user).toEqual(decodedToken);
       expect(next).toHaveBeenCalled();
       expect(res.status).not.toHaveBeenCalled();
     });
 
-    it('should authenticate valid x-auth-token header', () => {
+    it('should authenticate valid x-auth-token header', async () => {
       req.headers['x-auth-token'] = 'validtoken';
       const decodedToken = {
         id: 'user123',
@@ -47,16 +58,18 @@ describe('Auth Middleware', () => {
         customerId: 'CUST123'
       };
       jwt.verify.mockReturnValue(decodedToken);
+      TokenBlacklist.isBlacklisted.mockResolvedValue(false);
 
-      authenticate(req, res, next);
+      await authenticate(req, res, next);
 
       expect(jwt.verify).toHaveBeenCalledWith('validtoken', process.env.JWT_SECRET);
+      expect(TokenBlacklist.isBlacklisted).toHaveBeenCalledWith('validtoken');
       expect(req.user).toEqual(decodedToken);
       expect(next).toHaveBeenCalled();
     });
 
-    it('should reject request with no token', () => {
-      authenticate(req, res, next);
+    it('should reject request with no token', async () => {
+      await authenticate(req, res, next);
 
       expect(res.status).toHaveBeenCalledWith(401);
       expect(res.json).toHaveBeenCalledWith({
@@ -66,7 +79,7 @@ describe('Auth Middleware', () => {
       expect(next).not.toHaveBeenCalled();
     });
 
-    it('should reject request with invalid token', () => {
+    it('should reject request with invalid token', async () => {
       req.headers.authorization = 'Bearer invalidtoken';
       jwt.verify.mockImplementation(() => {
         const error = new Error('Invalid token');
@@ -74,7 +87,7 @@ describe('Auth Middleware', () => {
         throw error;
       });
 
-      authenticate(req, res, next);
+      await authenticate(req, res, next);
 
       expect(res.status).toHaveBeenCalledWith(401);
       expect(res.json).toHaveBeenCalledWith({
@@ -84,7 +97,7 @@ describe('Auth Middleware', () => {
       expect(next).not.toHaveBeenCalled();
     });
 
-    it('should reject request with expired token', () => {
+    it('should reject request with expired token', async () => {
       req.headers.authorization = 'Bearer expiredtoken';
       jwt.verify.mockImplementation(() => {
         const error = new Error('Token expired');
@@ -92,7 +105,7 @@ describe('Auth Middleware', () => {
         throw error;
       });
 
-      authenticate(req, res, next);
+      await authenticate(req, res, next);
 
       expect(res.status).toHaveBeenCalledWith(401);
       expect(res.json).toHaveBeenCalledWith({
@@ -102,15 +115,37 @@ describe('Auth Middleware', () => {
       expect(next).not.toHaveBeenCalled();
     });
 
-    it('should handle malformed Authorization header', () => {
+    it('should handle malformed Authorization header', async () => {
       req.headers.authorization = 'InvalidFormat';
 
-      authenticate(req, res, next);
+      await authenticate(req, res, next);
 
       expect(res.status).toHaveBeenCalledWith(401);
       expect(res.json).toHaveBeenCalledWith({
         success: false,
         message: 'No token provided'
+      });
+      expect(next).not.toHaveBeenCalled();
+    });
+
+    it('should reject blacklisted token', async () => {
+      req.headers.authorization = 'Bearer blacklistedtoken';
+      const decodedToken = {
+        id: 'user123',
+        role: 'customer',
+        customerId: 'CUST123'
+      };
+      jwt.verify.mockReturnValue(decodedToken);
+      TokenBlacklist.isBlacklisted.mockResolvedValue(true);
+
+      await authenticate(req, res, next);
+
+      expect(jwt.verify).toHaveBeenCalledWith('blacklistedtoken', process.env.JWT_SECRET);
+      expect(TokenBlacklist.isBlacklisted).toHaveBeenCalledWith('blacklistedtoken');
+      expect(res.status).toHaveBeenCalledWith(401);
+      expect(res.json).toHaveBeenCalledWith({
+        success: false,
+        message: 'Token has been blacklisted'
       });
       expect(next).not.toHaveBeenCalled();
     });

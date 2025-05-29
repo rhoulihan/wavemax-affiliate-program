@@ -5,6 +5,7 @@ const Affiliate = require('../models/Affiliate');
 const Customer = require('../models/Customer');
 const Administrator = require('../models/Administrator');
 const Operator = require('../models/Operator');
+const TokenBlacklist = require('../models/TokenBlacklist');
 
 const rateLimit = require('express-rate-limit');
 
@@ -48,6 +49,15 @@ exports.authenticate = async (req, res, next) => {
 
     // Verify the token
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    // Check if token is blacklisted
+    const isBlacklisted = await TokenBlacklist.isBlacklisted(token);
+    if (isBlacklisted) {
+      return res.status(401).json({
+        success: false,
+        message: 'Token has been blacklisted'
+      });
+    }
 
     // Add user data to the request object
     req.user = {

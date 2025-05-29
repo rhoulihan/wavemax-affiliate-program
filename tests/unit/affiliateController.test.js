@@ -568,10 +568,18 @@ describe('Affiliate Controller', () => {
         customers: expect.arrayContaining([
           expect.objectContaining({
             customerId: 'CUST001',
+            firstName: 'John',
+            lastName: 'Doe',
+            email: 'john@example.com',
+            phone: '123-456-7890',
             orderCount: 5
           }),
           expect.objectContaining({
             customerId: 'CUST002',
+            firstName: 'Jane',
+            lastName: 'Smith',
+            email: 'jane@example.com',
+            phone: '987-654-3210',
             orderCount: 3
           })
         ]),
@@ -580,7 +588,9 @@ describe('Affiliate Controller', () => {
           total: 2,
           page: 1,
           limit: 10,
-          pages: 1
+          pages: 1,
+          currentPage: 1,
+          perPage: 10
         }
       });
     });
@@ -704,6 +714,7 @@ describe('Affiliate Controller', () => {
         {
           transactionId: 'TXN001',
           affiliateId: 'AFF123',
+          type: 'commission',
           amount: 100,
           status: 'completed',
           createdAt: new Date()
@@ -711,6 +722,7 @@ describe('Affiliate Controller', () => {
         {
           transactionId: 'TXN002',
           affiliateId: 'AFF123',
+          type: 'commission',
           amount: 50,
           status: 'pending',
           createdAt: new Date()
@@ -719,14 +731,19 @@ describe('Affiliate Controller', () => {
 
       req.params.affiliateId = 'AFF123';
       req.user = { role: 'affiliate', affiliateId: 'AFF123' };
-      req.query = { status: 'pending', page: '1', limit: '10' };
+      req.query = { status: 'pending', page: 1, limit: 10 };
 
       Transaction.countDocuments.mockResolvedValue(1);
-      Transaction.find.mockReturnValue({
+      
+      // First call - for paginated results
+      Transaction.find.mockReturnValueOnce({
         sort: jest.fn().mockReturnThis(),
         skip: jest.fn().mockReturnThis(),
         limit: jest.fn().mockResolvedValue([mockTransactions[1]])
       });
+      
+      // Second call - for all transactions (summary calculation)
+      Transaction.find.mockResolvedValueOnce(mockTransactions);
 
       await affiliateController.getAffiliateTransactions(req, res);
 
@@ -739,10 +756,15 @@ describe('Affiliate Controller', () => {
       expect(res.json).toHaveBeenCalledWith({
         success: true,
         transactions: [mockTransactions[1]],
+        summary: {
+          totalEarnings: 150,
+          totalPayouts: 0,
+          pendingAmount: 50
+        },
         pagination: {
           total: 1,
-          page: '1',
-          limit: '10',
+          page: 1,
+          limit: 10,
           pages: 1
         }
       });

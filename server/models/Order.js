@@ -59,6 +59,13 @@ const orderSchema = new mongoose.Schema({
     enum: ['card', 'cash', 'other'],
     default: 'card'
   },
+  paymentDate: Date,
+  paymentReference: String,
+  paymentError: String,
+  refundAmount: Number,
+  refundReason: String,
+  refundReference: String,
+  refundedAt: Date,
   // Operator processing fields
   assignedOperator: { 
     type: mongoose.Schema.Types.ObjectId, 

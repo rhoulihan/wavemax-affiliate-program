@@ -22,6 +22,46 @@ router.post('/', [
 ], authenticate, orderController.createOrder);
 
 /**
+ * @route   GET /api/orders/export
+ * @desc    Export orders in various formats
+ * @access  Private (affiliate or admin)
+ */
+router.get('/export', authenticate, orderController.exportOrders);
+
+/**
+ * @route   GET /api/orders/search
+ * @desc    Search orders
+ * @access  Private (affiliate or admin)
+ */
+router.get('/search', authenticate, orderController.searchOrders);
+
+/**
+ * @route   GET /api/orders/statistics
+ * @desc    Get order statistics
+ * @access  Private (affiliate or admin)
+ */
+router.get('/statistics', authenticate, orderController.getOrderStatistics);
+
+/**
+ * @route   PUT /api/orders/bulk/status
+ * @desc    Bulk update order status
+ * @access  Private (affiliate or admin)
+ */
+router.put('/bulk/status', authenticate, [
+  body('orderIds').isArray().withMessage('Order IDs must be an array'),
+  body('status').isIn(['scheduled', 'picked_up', 'processing', 'ready_for_delivery', 'delivered', 'cancelled']).withMessage('Invalid status')
+], orderController.bulkUpdateOrderStatus);
+
+/**
+ * @route   POST /api/orders/bulk/cancel
+ * @desc    Bulk cancel orders
+ * @access  Private (affiliate or admin)
+ */
+router.post('/bulk/cancel', authenticate, [
+  body('orderIds').isArray().withMessage('Order IDs must be an array')
+], orderController.bulkCancelOrders);
+
+/**
  * @route   GET /api/orders/:orderId
  * @desc    Get order details
  * @access  Private (involved customer, affiliate, or admin)
@@ -41,5 +81,14 @@ router.put('/:orderId/status', authenticate, orderController.updateOrderStatus);
  * @access  Private (involved customer, affiliate, or admin)
  */
 router.post('/:orderId/cancel', authenticate, orderController.cancelOrder);
+
+/**
+ * @route   PUT /api/orders/:orderId/payment-status
+ * @desc    Update payment status
+ * @access  Private (affiliate or admin)
+ */
+router.put('/:orderId/payment-status', authenticate, [
+  body('paymentStatus').isIn(['pending', 'paid', 'failed', 'refunded']).withMessage('Invalid payment status')
+], orderController.updatePaymentStatus);
 
 module.exports = router;

@@ -13,7 +13,6 @@ npm run test -- --clearCache
 # Run tests with resource optimization flags
 npm test -- \
   --runInBand \
-  --maxWorkers=1 \
   --logHeapUsage \
   --detectOpenHandles \
   --forceExit

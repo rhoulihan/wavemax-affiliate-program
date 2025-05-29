@@ -55,7 +55,10 @@ describe('Model Tests', () => {
       expect(error.errors.username).toBeDefined();
     });
 
-    it.skip('should enforce unique constraints', async () => {
+    it('should enforce unique constraints', async () => {
+      // First, ensure indexes are created
+      await Affiliate.ensureIndexes();
+      
       const affiliateData = {
         firstName: 'John',
         lastName: 'Doe',
@@ -75,26 +78,44 @@ describe('Model Tests', () => {
 
       await new Affiliate(affiliateData).save();
 
-      // Try to save duplicate
-      const duplicate = new Affiliate({
+      // Try to save duplicate with same email
+      const duplicateEmail = new Affiliate({
         ...affiliateData,
+        username: 'differentusername',
         firstName: 'Jane',
         lastName: 'Smith'
       });
 
-      let error;
+      let emailError;
       try {
-        await duplicate.save();
+        await duplicateEmail.save();
       } catch (e) {
-        error = e;
+        emailError = e;
       }
 
-      expect(error).toBeDefined();
-      // MongoDB duplicate key error or validation error
-      expect(error.code === 11000 || error.name === 'ValidationError' || error.name === 'MongoServerError').toBe(true);
+      expect(emailError).toBeDefined();
+      expect(emailError.code === 11000 || emailError.name === 'MongoServerError').toBe(true);
+
+      // Try to save duplicate with same username
+      const duplicateUsername = new Affiliate({
+        ...affiliateData,
+        email: 'different@example.com',
+        firstName: 'Bob',
+        lastName: 'Johnson'
+      });
+
+      let usernameError;
+      try {
+        await duplicateUsername.save();
+      } catch (e) {
+        usernameError = e;
+      }
+
+      expect(usernameError).toBeDefined();
+      expect(usernameError.code === 11000 || usernameError.name === 'MongoServerError').toBe(true);
     });
 
-    it.skip('should handle payment information correctly', async () => {
+    it('should handle payment information correctly', async () => {
       const affiliate = new Affiliate({
         firstName: 'Test',
         lastName: 'User',
@@ -282,6 +303,7 @@ describe('Model Tests', () => {
     it('should create a valid transaction', async () => {
       const transaction = new Transaction({
         affiliateId: 'AFF123',
+        type: 'commission',
         amount: 25.50,
         description: 'Commission for order ORD123456',
         orders: ['ORD123456'],
@@ -299,6 +321,7 @@ describe('Model Tests', () => {
     it('should validate transaction type', async () => {
       const transaction = new Transaction({
         affiliateId: 'AFF123',
+        type: 'commission',
         amount: 25.50,
         description: 'Test transaction',
         payoutMethod: 'invalid'
@@ -321,6 +344,7 @@ describe('Model Tests', () => {
         type: 'commission',
         amount: 25.50,
         description: 'Test transaction',
+        payoutMethod: 'directDeposit',
         status: 'invalid'
       });
 
@@ -350,7 +374,7 @@ describe('Model Tests', () => {
 
       expect(saved._id).toBeDefined();
       expect(saved.token).toBe('testtoken123');
-      expect(saved.isRevoked).toBe(false);
+      expect(saved.revoked).toBe(null);
     });
 
     it('should validate user type', async () => {

@@ -372,4 +372,643 @@ exports.cancelOrder = async (req, res) => {
   }
 };
 
+/**
+ * Bulk update order status
+ */
+exports.bulkUpdateOrderStatus = async (req, res) => {
+  try {
+    const { orderIds, status } = req.body;
+
+    // Validate input
+    if (!orderIds || !Array.isArray(orderIds) || orderIds.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'Order IDs must be provided as an array'
+      });
+    }
+
+    // Validate status
+    const validStatuses = ['scheduled', 'picked_up', 'processing', 'ready_for_delivery', 'delivered', 'cancelled'];
+    if (!validStatuses.includes(status)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid status'
+      });
+    }
+
+    // Find all orders
+    const orders = await Order.find({ orderId: { $in: orderIds } });
+
+    if (orders.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: 'No orders found'
+      });
+    }
+
+    // Check authorization (admin or affiliated affiliate)
+    const isAuthorized = req.user.role === 'admin' || 
+      (req.user.role === 'affiliate' && orders.every(order => order.affiliateId === req.user.affiliateId));
+
+    if (!isAuthorized) {
+      return res.status(403).json({
+        success: false,
+        message: 'Unauthorized'
+      });
+    }
+
+    // Update orders
+    const results = [];
+    let updated = 0;
+    let failed = 0;
+
+    for (const order of orders) {
+      try {
+        // Check if status transition is valid
+        const currentStatus = order.status;
+        const canTransition = checkStatusTransition(currentStatus, status);
+
+        if (!canTransition) {
+          results.push({
+            orderId: order.orderId,
+            success: false,
+            message: `Cannot transition from ${currentStatus} to ${status}`
+          });
+          failed++;
+          continue;
+        }
+
+        // Update order
+        order.status = status;
+        
+        // Update status timestamps
+        if (status === 'picked_up') order.pickupDate = new Date();
+        if (status === 'processing') order.processingStartDate = new Date();
+        if (status === 'ready_for_delivery') order.readyForDeliveryDate = new Date();
+        if (status === 'delivered') order.deliveredDate = new Date();
+        if (status === 'cancelled') order.cancelledAt = new Date();
+
+        await order.save();
+
+        results.push({
+          orderId: order.orderId,
+          success: true,
+          message: 'Order updated successfully'
+        });
+        updated++;
+      } catch (error) {
+        results.push({
+          orderId: order.orderId,
+          success: false,
+          message: error.message
+        });
+        failed++;
+      }
+    }
+
+    res.status(200).json({
+      success: true,
+      updated,
+      failed,
+      results
+    });
+  } catch (error) {
+    console.error('Bulk update order status error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'An error occurred while updating orders'
+    });
+  }
+};
+
+/**
+ * Bulk cancel orders
+ */
+exports.bulkCancelOrders = async (req, res) => {
+  try {
+    const { orderIds } = req.body;
+
+    if (!orderIds || !Array.isArray(orderIds) || orderIds.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid order IDs provided'
+      });
+    }
+
+    // Check authorization (admin or affiliated affiliate)
+    const orders = await Order.find({ orderId: { $in: orderIds } });
+    
+    if (orders.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: 'No orders found'
+      });
+    }
+
+    // Check if user is authorized for all orders
+    const unauthorized = orders.some(order => {
+      return req.user.role !== 'admin' &&
+        !(req.user.role === 'affiliate' && req.user.affiliateId === order.affiliateId);
+    });
+
+    if (unauthorized) {
+      return res.status(403).json({
+        success: false,
+        message: 'Unauthorized to cancel one or more orders'
+      });
+    }
+
+    let cancelled = 0;
+    let failed = 0;
+    const results = [];
+
+    for (const order of orders) {
+      // Check if order can be cancelled
+      if (['delivered', 'cancelled'].includes(order.status)) {
+        results.push({
+          orderId: order.orderId,
+          success: false,
+          error: `Cannot cancel order with status: ${order.status}`
+        });
+        failed++;
+      } else {
+        order.status = 'cancelled';
+        order.cancelledAt = new Date();
+        order.cancelledBy = req.user.id;
+        order.cancelReason = 'Bulk cancellation';
+        await order.save();
+        
+        results.push({
+          orderId: order.orderId,
+          success: true
+        });
+        cancelled++;
+      }
+    }
+
+    res.status(200).json({
+      success: true,
+      cancelled,
+      failed,
+      results
+    });
+  } catch (error) {
+    console.error('Bulk cancel orders error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'An error occurred while cancelling orders'
+    });
+  }
+};
+
+/**
+ * Export orders
+ */
+exports.exportOrders = async (req, res) => {
+  try {
+    const { format = 'csv', startDate, endDate, affiliateId, status } = req.query;
+
+    // Build query
+    const query = {};
+
+    // Date range filter
+    if (startDate || endDate) {
+      query.createdAt = {};
+      if (startDate) query.createdAt.$gte = new Date(startDate);
+      if (endDate) query.createdAt.$lte = new Date(endDate);
+    }
+
+    // Affiliate filter
+    if (affiliateId) {
+      query.affiliateId = affiliateId;
+    }
+
+    // Status filter
+    if (status) {
+      query.status = status;
+    }
+
+    // Check authorization
+    if (req.user.role === 'affiliate') {
+      // Affiliates can only export their own orders
+      query.affiliateId = req.user.affiliateId;
+    } else if (req.user.role !== 'admin') {
+      return res.status(403).json({
+        success: false,
+        message: 'Insufficient permissions for this export'
+      });
+    }
+
+    // Get orders
+    const orders = await Order.find(query)
+      .sort({ createdAt: -1 });
+
+    // Get unique customer IDs
+    const customerIds = [...new Set(orders.map(order => order.customerId))];
+    
+    // Fetch customer data
+    const customers = await Customer.find({ customerId: { $in: customerIds } });
+    const customerMap = {};
+    customers.forEach(customer => {
+      customerMap[customer.customerId] = customer;
+    });
+
+    // Format based on requested format
+    if (format === 'csv') {
+      // Generate CSV
+      const csvHeaders = [
+        'Order ID',
+        'Customer Name',
+        'Customer Email',
+        'Affiliate ID',
+        'Status',
+        'Estimated Size',
+        'Actual Weight',
+        'Estimated Total',
+        'Actual Total',
+        'Commission',
+        'Pickup Date',
+        'Delivery Date',
+        'Created At'
+      ].join(',');
+
+      const csvRows = orders.map(order => {
+        const customer = customerMap[order.customerId];
+        return [
+          order.orderId,
+          customer ? `${customer.firstName} ${customer.lastName}` : '',
+          customer ? customer.email : '',
+          order.affiliateId,
+          order.status,
+          order.estimatedSize,
+          order.actualWeight || '',
+          order.estimatedTotal || '',
+          order.actualTotal || '',
+          order.affiliateCommission || '',
+          order.pickupDate ? new Date(order.pickupDate).toISOString() : '',
+          order.deliveryDate ? new Date(order.deliveryDate).toISOString() : '',
+          new Date(order.createdAt).toISOString()
+        ].join(',');
+      });
+
+      const csv = [csvHeaders, ...csvRows].join('\n');
+
+      res.setHeader('Content-Type', 'text/csv');
+      res.setHeader('Content-Disposition', `attachment; filename=orders-export-${Date.now()}.csv`);
+      res.send(csv);
+    } else if (format === 'json') {
+      res.setHeader('Content-Type', 'application/json');
+      res.setHeader('Content-Disposition', `attachment; filename=orders-export-${Date.now()}.json`);
+      res.json({
+        success: true,
+        exportDate: new Date().toISOString(),
+        filters: { startDate, endDate, affiliateId, status },
+        totalOrders: orders.length,
+        orders: orders.map(order => {
+          const customer = customerMap[order.customerId];
+          return {
+            orderId: order.orderId,
+            customer: customer ? {
+              name: `${customer.firstName} ${customer.lastName}`,
+              email: customer.email
+            } : null,
+            affiliateId: order.affiliateId,
+            status: order.status,
+            estimatedSize: order.estimatedSize,
+            actualWeight: order.actualWeight,
+            estimatedTotal: order.estimatedTotal,
+            actualTotal: order.actualTotal,
+            commission: order.affiliateCommission,
+            pickupDate: order.pickupDate,
+            deliveryDate: order.deliveryDate,
+            createdAt: order.createdAt
+          };
+        })
+      });
+    } else if (format === 'excel') {
+      // For Excel format, we'll return JSON with a note
+      // In production, you'd use a library like exceljs
+      res.status(501).json({
+        success: false,
+        message: 'Excel export not yet implemented'
+      });
+    } else {
+      res.status(400).json({
+        success: false,
+        message: 'Invalid export format. Supported formats: csv, json'
+      });
+    }
+  } catch (error) {
+    console.error('Export orders error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'An error occurred while exporting orders'
+    });
+  }
+};
+
+/**
+ * Update payment status
+ */
+exports.updatePaymentStatus = async (req, res) => {
+  try {
+    const { orderId } = req.params;
+    const { 
+      paymentStatus, 
+      paymentMethod, 
+      paymentReference, 
+      paymentError,
+      refundAmount,
+      refundReason,
+      refundReference
+    } = req.body;
+
+    // Find order
+    const order = await Order.findOne({ orderId });
+
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        message: 'Order not found'
+      });
+    }
+
+    // Check authorization (admin or affiliated affiliate)
+    const isAuthorized = 
+      req.user.role === 'admin' ||
+      (req.user.role === 'affiliate' && req.user.affiliateId === order.affiliateId);
+
+    if (!isAuthorized) {
+      return res.status(403).json({
+        success: false,
+        message: 'Unauthorized'
+      });
+    }
+
+    // Check if order is delivered (payment status can only be updated for delivered orders)
+    if (order.status !== 'delivered') {
+      return res.status(400).json({
+        success: false,
+        message: 'Cannot update payment status for non-delivered orders'
+      });
+    }
+
+    // Validate payment status
+    const validPaymentStatuses = ['pending', 'processing', 'completed', 'failed', 'refunded'];
+    if (!validPaymentStatuses.includes(paymentStatus)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid payment status'
+      });
+    }
+
+    // Update payment information
+    order.paymentStatus = paymentStatus;
+    if (paymentMethod) order.paymentMethod = paymentMethod;
+    if (paymentReference) order.paymentReference = paymentReference;
+    if (paymentError) order.paymentError = paymentError;
+    
+    if (paymentStatus === 'completed') {
+      order.paymentDate = new Date();
+    }
+    
+    if (paymentStatus === 'refunded') {
+      order.refundedAt = new Date();
+      if (refundAmount) order.refundAmount = refundAmount;
+      if (refundReason) order.refundReason = refundReason;
+      if (refundReference) order.refundReference = refundReference;
+    }
+
+    await order.save();
+
+    res.status(200).json({
+      success: true,
+      message: 'Payment status updated successfully',
+      order: {
+        orderId: order.orderId,
+        paymentStatus: order.paymentStatus,
+        paymentMethod: order.paymentMethod,
+        paymentReference: order.paymentReference,
+        paymentDate: order.paymentDate,
+        paymentError: order.paymentError,
+        refundAmount: order.refundAmount,
+        refundReason: order.refundReason,
+        refundReference: order.refundReference,
+        refundedAt: order.refundedAt
+      }
+    });
+  } catch (error) {
+    console.error('Update payment status error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'An error occurred while updating payment status'
+    });
+  }
+};
+
+/**
+ * Search orders
+ */
+exports.searchOrders = async (req, res) => {
+  try {
+    const { search, affiliateId } = req.query;
+    const { page = 1, limit = 10 } = req.pagination || req.query;
+
+    // Build query
+    const query = {};
+
+    // Affiliate filter
+    if (affiliateId) {
+      query.affiliateId = affiliateId;
+    }
+
+    // Check authorization
+    if (req.user.role === 'affiliate') {
+      // Affiliates can only search their own orders
+      query.affiliateId = req.user.affiliateId;
+    } else if (req.user.role !== 'admin') {
+      return res.status(403).json({
+        success: false,
+        message: 'Unauthorized'
+      });
+    }
+
+    // Search filter - search in customer names
+    let orders;
+    if (search) {
+      // First find customers matching the search term
+      const customers = await Customer.find({
+        $or: [
+          { firstName: { $regex: search, $options: 'i' } },
+          { lastName: { $regex: search, $options: 'i' } },
+          { email: { $regex: search, $options: 'i' } }
+        ]
+      }).select('customerId');
+
+      const customerIds = customers.map(c => c.customerId);
+      query.customerId = { $in: customerIds };
+    }
+
+    // Get total count
+    const totalResults = await Order.countDocuments(query);
+
+    // Get paginated results
+    orders = await Order.find(query)
+      .sort({ createdAt: -1 })
+      .skip((page - 1) * limit)
+      .limit(parseInt(limit));
+    
+    // Get customer data
+    const customerIds = [...new Set(orders.map(order => order.customerId))];
+    const customers = await Customer.find({ customerId: { $in: customerIds } });
+    const customerMap = {};
+    customers.forEach(customer => {
+      customerMap[customer.customerId] = customer;
+    });
+
+    res.status(200).json({
+      success: true,
+      orders: orders.map(order => {
+        const customer = customerMap[order.customerId];
+        return {
+          orderId: order.orderId,
+          customer: customer ? {
+            customerId: customer.customerId,
+            name: `${customer.firstName} ${customer.lastName}`,
+            email: customer.email
+          } : null,
+          affiliateId: order.affiliateId,
+          status: order.status,
+          estimatedSize: order.estimatedSize,
+          actualWeight: order.actualWeight,
+          estimatedTotal: order.estimatedTotal,
+          actualTotal: order.actualTotal,
+          createdAt: order.createdAt
+        };
+      }),
+      totalResults,
+      pagination: {
+        page: parseInt(page),
+        limit: parseInt(limit),
+        pages: Math.ceil(totalResults / limit)
+      }
+    });
+  } catch (error) {
+    console.error('Search orders error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'An error occurred while searching orders'
+    });
+  }
+};
+
+/**
+ * Get order statistics
+ */
+exports.getOrderStatistics = async (req, res) => {
+  try {
+    const { affiliateId, includeStats = 'true' } = req.query;
+
+    // Build query
+    const query = {};
+
+    // Affiliate filter
+    if (affiliateId) {
+      query.affiliateId = affiliateId;
+    }
+
+    // Check authorization
+    if (req.user.role === 'affiliate') {
+      // Affiliates can only view their own statistics
+      query.affiliateId = req.user.affiliateId;
+    } else if (req.user.role !== 'admin') {
+      return res.status(403).json({
+        success: false,
+        message: 'Unauthorized'
+      });
+    }
+
+    // Get all orders
+    const orders = await Order.find(query);
+
+    // Calculate statistics
+    const totalOrders = orders.length;
+    
+    // Orders by status
+    const ordersByStatus = {
+      scheduled: 0,
+      picked_up: 0,
+      processing: 0,
+      ready_for_delivery: 0,
+      delivered: 0,
+      cancelled: 0
+    };
+
+    let totalRevenue = 0;
+    let deliveredCount = 0;
+
+    // Orders by size
+    const ordersBySize = {
+      small: 0,
+      medium: 0,
+      large: 0
+    };
+
+    orders.forEach(order => {
+      // Count by status
+      if (ordersByStatus.hasOwnProperty(order.status)) {
+        ordersByStatus[order.status]++;
+      }
+
+      // Calculate revenue from delivered orders
+      if (order.status === 'delivered') {
+        totalRevenue += order.actualTotal || order.estimatedTotal || 0;
+        deliveredCount++;
+      }
+
+      // Count by size
+      if (order.estimatedSize && ordersBySize.hasOwnProperty(order.estimatedSize)) {
+        ordersBySize[order.estimatedSize]++;
+      }
+    });
+
+    const averageOrderValue = deliveredCount > 0 ? totalRevenue / deliveredCount : 0;
+
+    const statistics = {
+      totalOrders,
+      ordersByStatus,
+      totalRevenue,
+      averageOrderValue,
+      ordersBySize
+    };
+
+    res.status(200).json({
+      success: true,
+      statistics
+    });
+  } catch (error) {
+    console.error('Get order statistics error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'An error occurred while retrieving statistics'
+    });
+  }
+};
+
+/**
+ * Helper function to check if status transition is valid
+ */
+function checkStatusTransition(currentStatus, newStatus) {
+  const validTransitions = {
+    'scheduled': ['picked_up', 'cancelled'],
+    'picked_up': ['processing', 'cancelled'],
+    'processing': ['ready_for_delivery'],
+    'ready_for_delivery': ['delivered'],
+    'delivered': [],
+    'cancelled': []
+  };
+
+  return validTransitions[currentStatus]?.includes(newStatus) || false;
+}
+
 module.exports = exports;

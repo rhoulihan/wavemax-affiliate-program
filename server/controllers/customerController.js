@@ -700,4 +700,239 @@ exports.deleteCustomerData = async (req, res) => {
   }
 };
 
+/**
+ * Update customer password
+ */
+exports.updateCustomerPassword = async (req, res) => {
+  try {
+    const { customerId } = req.params;
+    const { currentPassword, newPassword } = req.body;
+
+    // Verify customer exists
+    const customer = await Customer.findOne({ customerId });
+
+    if (!customer) {
+      return res.status(404).json({
+        success: false,
+        message: 'Customer not found'
+      });
+    }
+
+    // Check authorization (only self or admin)
+    const isAuthorized =
+      req.user.role === 'admin' ||
+      req.user.customerId === customerId;
+
+    if (!isAuthorized) {
+      return res.status(403).json({
+        success: false,
+        message: 'Unauthorized'
+      });
+    }
+
+    // Verify current password
+    const isPasswordValid = encryptionUtil.verifyPassword(
+      currentPassword,
+      customer.passwordSalt,
+      customer.passwordHash
+    );
+
+    if (!isPasswordValid) {
+      return res.status(401).json({
+        success: false,
+        message: 'Current password is incorrect'
+      });
+    }
+
+    // Validate new password strength
+    if (!newPassword || newPassword.length < 8) {
+      return res.status(400).json({
+        success: false,
+        message: 'New password must be at least 8 characters long'
+      });
+    }
+
+    // Update password
+    const { salt, hash } = encryptionUtil.hashPassword(newPassword);
+    customer.passwordSalt = salt;
+    customer.passwordHash = hash;
+
+    await customer.save();
+
+    res.status(200).json({
+      success: true,
+      message: 'Password updated successfully'
+    });
+  } catch (error) {
+    console.error('Update customer password error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'An error occurred while updating password'
+    });
+  }
+};
+
+/**
+ * Get customer bags
+ */
+exports.getCustomerBags = async (req, res) => {
+  try {
+    const { customerId } = req.params;
+    const { status } = req.query;
+
+    // Verify customer exists
+    const customer = await Customer.findOne({ customerId });
+
+    if (!customer) {
+      return res.status(404).json({
+        success: false,
+        message: 'Customer not found'
+      });
+    }
+
+    // Check authorization (admin, affiliate, or self)
+    const isAuthorized =
+      req.user.role === 'admin' ||
+      req.user.customerId === customerId ||
+      (req.user.role === 'affiliate' && req.user.affiliateId === customer.affiliateId);
+
+    if (!isAuthorized) {
+      return res.status(403).json({
+        success: false,
+        message: 'Unauthorized'
+      });
+    }
+
+    // Build query
+    const query = { customerId };
+    
+    // Add status filter if provided
+    if (status) {
+      query.status = status;
+    }
+
+    // Get bags
+    const bags = await Bag.find(query).sort({ issueDate: -1 });
+
+    // Determine user role
+    const userRole = req.user ? req.user.role : 'public';
+    
+    // Filter bags based on role
+    const filteredBags = getFilteredData('bag', bags.map(b => b.toObject()), userRole);
+
+    res.status(200).json({
+      success: true,
+      bags: filteredBags
+    });
+  } catch (error) {
+    console.error('Get customer bags error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'An error occurred while retrieving bags'
+    });
+  }
+};
+
+/**
+ * Get customer dashboard
+ */
+exports.getCustomerDashboard = async (req, res) => {
+  try {
+    const { customerId } = req.params;
+
+    // Verify customer exists
+    const customer = await Customer.findOne({ customerId });
+
+    if (!customer) {
+      return res.status(404).json({
+        success: false,
+        message: 'Customer not found'
+      });
+    }
+
+    // Check authorization (admin, affiliate, or self)
+    const isAuthorized =
+      req.user.role === 'admin' ||
+      req.user.customerId === customerId ||
+      (req.user.role === 'affiliate' && req.user.affiliateId === customer.affiliateId);
+
+    if (!isAuthorized) {
+      return res.status(403).json({
+        success: false,
+        message: 'Unauthorized'
+      });
+    }
+
+    // Get all orders
+    const allOrders = await Order.find({ customerId });
+
+    // Calculate statistics
+    const totalOrders = allOrders.length;
+    const completedOrders = allOrders.filter(order => order.status === 'delivered').length;
+    const activeOrders = allOrders.filter(order => 
+      ['scheduled', 'picked_up', 'processing', 'ready_for_delivery'].includes(order.status)
+    ).length;
+
+    // Calculate total spent and average order value
+    let totalSpent = 0;
+    allOrders.forEach(order => {
+      if (order.status === 'delivered') {
+        totalSpent += order.actualTotal || order.estimatedTotal || 0;
+      }
+    });
+
+    const averageOrderValue = completedOrders > 0 ? totalSpent / completedOrders : 0;
+
+    // Get last order date
+    const deliveredOrders = allOrders.filter(order => order.status === 'delivered');
+    const lastOrderDate = deliveredOrders.length > 0 
+      ? deliveredOrders.sort((a, b) => b.deliveredDate - a.deliveredDate)[0].deliveredDate
+      : null;
+
+    // Get recent orders (last 5)
+    const recentOrders = await Order.find({ customerId })
+      .sort({ createdAt: -1 })
+      .limit(5);
+
+    // Get upcoming pickups
+    const upcomingPickups = await Order.find({
+      customerId,
+      status: 'scheduled',
+      pickupDate: { $gte: new Date() }
+    }).sort({ pickupDate: 1 });
+
+    // Get affiliate info
+    const affiliate = await Affiliate.findOne({ affiliateId: customer.affiliateId });
+
+    // Determine user role
+    const userRole = req.user ? req.user.role : 'public';
+
+    // Prepare response
+    const dashboard = {
+      statistics: {
+        totalOrders,
+        completedOrders,
+        activeOrders,
+        totalSpent,
+        averageOrderValue,
+        lastOrderDate
+      },
+      recentOrders: getFilteredData('order', recentOrders.map(o => o.toObject()), userRole),
+      upcomingPickups: getFilteredData('order', upcomingPickups.map(o => o.toObject()), userRole),
+      affiliate: affiliate ? getFilteredData('affiliate', affiliate.toObject(), 'public') : null
+    };
+
+    res.status(200).json({
+      success: true,
+      dashboard
+    });
+  } catch (error) {
+    console.error('Get customer dashboard error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'An error occurred while retrieving dashboard'
+    });
+  }
+};
+
 module.exports = exports;
