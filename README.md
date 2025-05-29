@@ -197,20 +197,29 @@ wavemax-affiliate-program/
 ├── public/                                # Frontend HTML/CSS/JS (Embedded-Only)
 │   ├── assets/                            # Static assets
 │   │   └── js/
-│   │       ├── affiliate-dashboard-init.js # Embedded dashboard
-│   │       ├── affiliate-login-init.js    # Login functionality
-│   │       ├── affiliate-register-init.js # Embedded registration
-│   │       ├── affiliate-success-init.js  # Embedded success page
-│   │       ├── customer-dashboard.js      # Customer dashboard
-│   │       ├── customer-login-embed.js    # Customer login
-│   │       ├── customer-register.js       # Customer registration
-│   │       ├── customer-success.js        # Customer success
-│   │       ├── embed-navigation.js        # CSP-compliant navigation
-│   │       ├── errorHandler.js            # Client-side error handling
-│   │       ├── order-confirmation.js      # Order confirmation
-│   │       └── schedule-pickup.js         # Pickup scheduling
+│   │       ├── administrator-dashboard-init.js # Administrator dashboard
+│   │       ├── administrator-login-init.js    # Administrator login
+│   │       ├── affiliate-dashboard-init.js    # Affiliate dashboard
+│   │       ├── affiliate-login-init.js        # Affiliate login
+│   │       ├── affiliate-register-init.js     # Affiliate registration
+│   │       ├── affiliate-success-init.js      # Affiliate success page
+│   │       ├── csrf-utils.js                  # CSRF token utilities
+│   │       ├── customer-dashboard.js          # Customer dashboard
+│   │       ├── customer-login-embed.js        # Customer login
+│   │       ├── customer-register.js           # Customer registration
+│   │       ├── customer-success.js            # Customer success
+│   │       ├── embed-navigation.js            # CSP-compliant navigation
+│   │       ├── errorHandler.js                # Client-side error handling
+│   │       ├── operator-dashboard-init.js     # Operator dashboard
+│   │       ├── operator-login-init.js         # Operator login
+│   │       ├── order-confirmation.js          # Order confirmation
+│   │       └── schedule-pickup.js             # Pickup scheduling
 │   ├── embed-app.html                     # Main application (Single Entry Point)
 │   ├── embed-landing.html                 # Full embeddable landing page
+│   ├── embed-integration-guide.md         # Integration documentation
+│   ├── iframe-parent-example.html         # Parent page implementation example
+│   ├── administrator-dashboard-embed.html # Administrator dashboard
+│   ├── administrator-login-embed.html     # Administrator login
 │   ├── affiliate-register-embed.html      # Affiliate registration
 │   ├── affiliate-login-embed.html         # Affiliate login
 │   ├── affiliate-success-embed.html       # Registration success
@@ -219,39 +228,68 @@ wavemax-affiliate-program/
 │   ├── customer-login-embed.html          # Customer login
 │   ├── customer-success-embed.html        # Registration success
 │   ├── customer-dashboard-embed.html      # Customer dashboard
+│   ├── operator-dashboard-embed.html      # Operator dashboard
+│   ├── operator-login-embed.html          # Operator login
 │   ├── schedule-pickup-embed.html         # Pickup scheduling
 │   └── order-confirmation-embed.html      # Order confirmation
 │
 ├── server/                                # Server-side code
+│   ├── config/                            # Configuration files
+│   │   └── csrf-config.js                 # CSRF configuration
+│   │
 │   ├── controllers/                       # API controllers
-│   │   ├── affiliateController.js         
-│   │   ├── authController.js              
-│   │   ├── bagController.js               
-│   │   ├── customerController.js          
-│   │   └── orderController.js             
+│   │   ├── administratorController.js     # Administrator management
+│   │   ├── affiliateController.js         # Affiliate operations
+│   │   ├── authController.js              # Authentication
+│   │   ├── bagController.js               # Bag management
+│   │   ├── customerController.js          # Customer operations
+│   │   ├── operatorController.js          # Operator management
+│   │   └── orderController.js             # Order processing
 │   │
 │   ├── middleware/                        # Express middleware
 │   │   ├── auth.js                        # JWT authentication
 │   │   ├── errorHandler.js                # Error handling
+│   │   ├── rbac.js                        # Role-based access control
 │   │   └── sanitization.js                # Input sanitization
 │   │
 │   ├── models/                            # Mongoose models
-│   │   ├── Affiliate.js                   
-│   │   ├── Customer.js                    
-│   │   ├── Order.js                       
-│   │   ├── Bag.js                         
-│   │   ├── RefreshToken.js                
-│   │   └── Transaction.js                 
+│   │   ├── Administrator.js               # Administrator model
+│   │   ├── Affiliate.js                   # Affiliate model
+│   │   ├── Bag.js                         # Bag tracking model
+│   │   ├── Customer.js                    # Customer model
+│   │   ├── Operator.js                    # Operator model
+│   │   ├── Order.js                       # Order model
+│   │   ├── RefreshToken.js                # Refresh token model
+│   │   ├── SystemConfig.js                # System configuration
+│   │   ├── TokenBlacklist.js              # Token blacklist model
+│   │   └── Transaction.js                 # Transaction model
 │   │
 │   ├── routes/                            # Express routes
-│   │   ├── affiliateRoutes.js             
-│   │   ├── authRoutes.js                  
-│   │   ├── bagRoutes.js                   
-│   │   ├── customerRoutes.js              
-│   │   └── orderRoutes.js                 
+│   │   ├── administratorRoutes.js         # Administrator endpoints
+│   │   ├── affiliateRoutes.js             # Affiliate endpoints
+│   │   ├── authRoutes.js                  # Authentication endpoints
+│   │   ├── bagRoutes.js                   # Bag management endpoints
+│   │   ├── customerRoutes.js              # Customer endpoints
+│   │   ├── operatorRoutes.js              # Operator endpoints
+│   │   └── orderRoutes.js                 # Order endpoints
 │   │
 │   ├── templates/                         # Email templates
-│   │   └── emails/                        
+│   │   └── emails/
+│   │       ├── administrator-password-reset.html
+│   │       ├── administrator-welcome.html
+│   │       ├── affiliate-commission.html
+│   │       ├── affiliate-lost-bag.html
+│   │       ├── affiliate-new-customer.html
+│   │       ├── affiliate-new-order.html
+│   │       ├── affiliate-order-cancelled.html
+│   │       ├── affiliate-welcome.html
+│   │       ├── customer-order-cancelled.html
+│   │       ├── customer-order-confirmation.html
+│   │       ├── customer-order-status.html
+│   │       ├── customer-welcome.html
+│   │       ├── operator-pin-reset.html
+│   │       ├── operator-shift-reminder.html
+│   │       └── operator-welcome.html
 │   │
 │   └── utils/                             # Utility functions
 │       ├── auditLogger.js                 # Security audit logging
@@ -259,23 +297,73 @@ wavemax-affiliate-program/
 │       ├── encryption.js                  # AES-256-GCM encryption
 │       ├── fieldFilter.js                 # API field filtering
 │       ├── logger.js                      # Winston logging
-│       └── paginationMiddleware.js        
+│       └── paginationMiddleware.js        # Pagination helper
+│
+├── scripts/                               # Utility scripts
+│   ├── complete-migration-fixed.js        # Migration script (fixed)
+│   ├── complete-migration.js              # Migration script
+│   ├── create-admin-directly.js           # Create admin user
+│   ├── csrf-rollout.js                    # CSRF rollout script
+│   ├── delete-admin-operators.js          # Delete admins/operators
+│   ├── migrate-admin-system-auto.js       # Auto admin migration
+│   ├── migrate-admin-system-interactive.js # Interactive migration
+│   ├── migrate-admin-system.js            # Admin system migration
+│   └── test-csrf.js                       # CSRF testing script
 │
 ├── tests/                                 # Comprehensive test suite
 │   ├── unit/                              # Unit tests for all modules
+│   │   ├── administratorController.test.js
+│   │   ├── affiliateController.test.js
+│   │   ├── auditLogger.test.js
+│   │   ├── authController.test.js
+│   │   ├── authMiddleware.test.js
+│   │   ├── bagController.test.js
+│   │   ├── customerController.test.js
+│   │   ├── emailService.test.js
+│   │   ├── encryption.test.js
+│   │   ├── errorHandler.test.js
+│   │   ├── fieldFilter.test.js
+│   │   ├── logger.test.js
+│   │   ├── models.test.js
+│   │   ├── operatorController.test.js
+│   │   ├── orderController.test.js
+│   │   ├── paginationMiddleware.test.js
+│   │   └── sanitization.test.js
+│   │
 │   ├── integration/                       # API integration tests
+│   │   ├── affiliate.test.js
+│   │   ├── auth.test.js
+│   │   ├── customer.test.js
+│   │   ├── order.test.js
+│   │   └── TEST_ADDITIONS_SUMMARY.md
+│   │
 │   ├── helpers/                           # Test utilities
 │   │   ├── csrfHelper.js                  # CSRF token management
 │   │   ├── autoUpdateCsrf.js              # Auto-update CSRF tokens
 │   │   ├── fixIntegrationTests.js         # Fix test issues
-│   │   └── commentNonExistentTests.js     # Skip unimplemented endpoints
-│   └── setup.js                           # Test configuration
+│   │   ├── commentNonExistentTests.js     # Skip unimplemented endpoints
+│   │   └── updateTestsForCsrf.js          # Update tests for CSRF
+│   │
+│   ├── setup.js                           # Test configuration
+│   ├── testSequencer.js                   # Custom test sequencer
+│   ├── README.md                          # Test documentation
+│   ├── runAllTests.sh                     # Run all tests script
+│   └── runMemoryOptimizedTests.sh         # Memory-optimized test script
+│
 ├── .env.example                           # Environment template
+├── .eslintrc.js                           # ESLint configuration
 ├── Dockerfile                             # Docker configuration
 ├── docker-compose.yml                     # Docker Compose
 ├── ecosystem.config.js                    # PM2 configuration
+├── init-mongo.js                          # MongoDB initialization
+├── jest.config.js                         # Jest configuration
 ├── package.json                           # Dependencies
-└── server.js                              # Application entry point
+├── package-lock.json                      # Dependency lock file
+├── server.js                              # Application entry point
+├── server.js.backup-csrf-remediation-*    # Backup file
+├── csrf-exclusion-analysis.md             # CSRF analysis documentation
+├── csrf-test-plan.md                      # CSRF testing plan
+└── README.md                              # This file
 ```
 
 ## Technologies Used
