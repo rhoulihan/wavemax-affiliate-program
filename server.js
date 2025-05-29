@@ -119,7 +119,8 @@ const corsOptions = {
     // Add WaveMAX Laundry domains to allowed origins
     const wavemaxDomains = [
       'https://www.wavemaxlaundry.com',
-      'https://wavemaxlaundry.com'
+      'https://wavemaxlaundry.com',
+      'https://wavemax.promo' // Add our own domain for iframe same-origin
     ];
 
     const allAllowedOrigins = [...allowedOrigins, ...wavemaxDomains];
@@ -182,7 +183,7 @@ app.use(session({
     secure: process.env.NODE_ENV === 'production', // Only use secure in production
     httpOnly: true,
     maxAge: 24 * 60 * 60 * 1000,
-    sameSite: 'lax', // Allow cookies in same-site requests
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax', // 'none' required for cross-site iframe in production
     path: '/', // Ensure cookie is available for all paths
     domain: undefined // Let browser handle domain (works better for same-origin)
   }
