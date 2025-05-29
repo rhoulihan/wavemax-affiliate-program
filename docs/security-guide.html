@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Security Guide - WaveMAX Affiliate Program</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f8f9fa;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+            color: white;
+            padding: 30px 0;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        header h1 {
+            font-size: 2rem;
+            margin-bottom: 5px;
+        }
+        
+        header .breadcrumb {
+            opacity: 0.9;
+        }
+        
+        header .breadcrumb a {
+            color: white;
+            text-decoration: none;
+        }
+        
+        .content {
+            background: white;
+            border-radius: 8px;
+            padding: 40px;
+            margin-top: 30px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+        
+        h2 {
+            color: #1e3a8a;
+            margin-top: 30px;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+        
+        h3 {
+            color: #333;
+            margin-top: 25px;
+            margin-bottom: 15px;
+        }
+        
+        .security-section {
+            background: #f8f9fa;
+            border-left: 4px solid #dc3545;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        
+        .best-practice {
+            background: #d4edda;
+            border-left: 4px solid #28a745;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        
+        code {
+            background: #f4f4f4;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+        
+        pre {
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 6px;
+            overflow-x: auto;
+            margin: 15px 0;
+        }
+        
+        pre code {
+            background: none;
+            padding: 0;
+            color: inherit;
+        }
+        
+        .warning {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 4px;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        
+        .warning strong {
+            color: #856404;
+        }
+        
+        .critical {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            border-radius: 4px;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        
+        .critical strong {
+            color: #721c24;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #1e3a8a;
+        }
+        
+        .nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 40px;
+            padding-top: 30px;
+            border-top: 1px solid #e0e0e0;
+        }
+        
+        .nav-buttons a {
+            display: inline-block;
+            padding: 10px 20px;
+            background: #3b82f6;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            transition: background 0.2s;
+        }
+        
+        .nav-buttons a:hover {
+            background: #2563eb;
+        }
+        
+        .checklist {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 6px;
+            margin: 20px 0;
+        }
+        
+        .checklist h4 {
+            margin-top: 0;
+            color: #dc3545;
+        }
+        
+        .checklist ul {
+            list-style: none;
+            padding-left: 0;
+        }
+        
+        .checklist li {
+            padding: 8px 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .checklist li:last-child {
+            border-bottom: none;
+        }
+        
+        .checklist li:before {
+            content: "🔒 ";
+            margin-right: 8px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="breadcrumb">
+                <a href="index.html">Documentation</a> → Security Guide
+            </div>
+            <h1>Security Best Practices Guide</h1>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="content">
+            <div class="critical">
+                <strong>🔐 Security First:</strong> This guide covers essential security practices for the WaveMAX Affiliate Program. Following these guidelines is critical for protecting user data and maintaining system integrity.
+            </div>
+
+            <h2>Security Overview</h2>
+            
+            <p>The WaveMAX Affiliate Program implements multiple layers of security to protect sensitive data and prevent unauthorized access. This guide covers configuration, best practices, and security features.</p>
+
+            <h2>Authentication Security</h2>
+
+            <div class="security-section">
+                <h3>JWT Token Configuration</h3>
+                <p>JSON Web Tokens are used for stateless authentication with the following security measures:</p>
+                <ul>
+                    <li>Short expiration time (1 hour)</li>
+                    <li>Secure refresh token rotation</li>
+                    <li>Strong secret keys (minimum 64 bytes)</li>
+                    <li>Token blacklisting for revocation</li>
+                </ul>
+            </div>
+
+            <h3>Generating Secure Secrets</h3>
+            <pre><code># Generate JWT secret (64 bytes)
+node -e "console.log('JWT_SECRET=' + require('crypto').randomBytes(64).toString('hex'))"
+
+# Generate encryption key (32 bytes for AES-256)
+node -e "console.log('ENCRYPTION_KEY=' + require('crypto').randomBytes(32).toString('hex'))"
+
+# Generate session secret (32 bytes)
+node -e "console.log('SESSION_SECRET=' + require('crypto').randomBytes(32).toString('hex'))"</code></pre>
+
+            <h3>Password Security</h3>
+            
+            <table>
+                <thead>
+                    <tr>
+                        <th>User Type</th>
+                        <th>Hash Algorithm</th>
+                        <th>Rounds/Iterations</th>
+                        <th>Min Length</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>All Users</td>
+                        <td>bcrypt</td>
+                        <td>10 rounds</td>
+                        <td>8 characters</td>
+                    </tr>
+                    <tr>
+                        <td>Administrators</td>
+                        <td>bcrypt</td>
+                        <td>10 rounds</td>
+                        <td>12 characters + complexity</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="best-practice">
+                <h4>✓ Password Best Practices</h4>
+                <ul>
+                    <li>Enforce strong password requirements</li>
+                    <li>Implement account lockout after 5 failed attempts</li>
+                    <li>Require password changes every 90 days for administrators</li>
+                    <li>Prevent password reuse (last 5 passwords)</li>
+                    <li>Use secure password reset tokens with 1-hour expiry</li>
+                </ul>
+            </div>
+
+            <h2>Data Encryption</h2>
+
+            <h3>Encryption at Rest</h3>
+            
+            <div class="security-section">
+                <h4>AES-256-GCM Encryption</h4>
+                <p>Sensitive data is encrypted using AES-256-GCM with the following implementation:</p>
+                <pre><code>// Encryption configuration
+const algorithm = 'aes-256-gcm';
+const keyLength = 32; // 256 bits
+const ivLength = 16;  // 128 bits
+const tagLength = 16; // 128 bits
+const saltLength = 32; // 256 bits
+
+// Fields encrypted at rest:
+- Payment card numbers (only last 4 digits stored)
+- Bank account details
+- Social Security Numbers
+- Driver's license numbers</code></pre>
+            </div>
+
+            <h3>Encryption in Transit</h3>
+            
+            <ul>
+                <li>TLS 1.2+ required for all connections</li>
+                <li>HSTS header with 1-year max-age</li>
+                <li>Secure cookies with httpOnly and secure flags</li>
+                <li>Certificate pinning for mobile applications</li>
+            </ul>
+
+            <h2>CSRF Protection</h2>
+
+            <div class="security-section">
+                <h3>Implementation Details</h3>
+                <pre><code>// CSRF token generation
+const csrfToken = tokens.create(req.session.csrfSecret);
+
+// Token validation on state-changing operations
+if (!tokens.verify(req.session.csrfSecret, providedToken)) {
+    return res.status(403).json({ error: 'Invalid CSRF token' });
+}</code></pre>
+                
+                <h4>Protected Endpoints</h4>
+                <ul>
+                    <li>All POST endpoints</li>
+                    <li>All PUT endpoints</li>
+                    <li>All DELETE endpoints</li>
+                    <li>Critical GET endpoints that modify state</li>
+                </ul>
+            </div>
+
+            <h2>Input Validation & Sanitization</h2>
+
+            <h3>XSS Prevention</h3>
+            <pre><code>// All user inputs are sanitized
+const xss = require('xss');
+const sanitized = xss(userInput, {
+    whiteList: {},          // No HTML tags allowed
+    stripIgnoreTag: true,   // Remove all HTML
+    stripIgnoreTagBody: ['script']
+});</code></pre>
+
+            <h3>SQL/NoSQL Injection Prevention</h3>
+            <pre><code>// MongoDB sanitization
+const mongoSanitize = require('express-mongo-sanitize');
+app.use(mongoSanitize({
+    replaceWith: '_',
+    allowDots: false
+}));</code></pre>
+
+            <div class="warning">
+                <strong>⚠️ Never trust user input:</strong>
+                <ul>
+                    <li>Validate all inputs against expected formats</li>
+                    <li>Use parameterized queries</li>
+                    <li>Escape special characters</li>
+                    <li>Implement strict type checking</li>
+                </ul>
+            </div>
+
+            <h2>Security Headers</h2>
+
+            <h3>Required Security Headers</h3>
+            <pre><code>// Helmet.js configuration
+app.use(helmet({
+    contentSecurityPolicy: {
+        directives: {
+            defaultSrc: ["'self'"],
+            scriptSrc: ["'self'", "'unsafe-inline'"],
+            styleSrc: ["'self'", "'unsafe-inline'"],
+            imgSrc: ["'self'", "data:", "https:"],
+            connectSrc: ["'self'"],
+            fontSrc: ["'self'"],
+            objectSrc: ["'none'"],
+            mediaSrc: ["'self'"],
+            frameSrc: ["'none'"]
+        }
+    },
+    hsts: {
+        maxAge: 31536000,
+        includeSubDomains: true,
+        preload: true
+    }
+}));</code></pre>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Header</th>
+                        <th>Value</th>
+                        <th>Purpose</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Strict-Transport-Security</td>
+                        <td>max-age=31536000; includeSubDomains</td>
+                        <td>Force HTTPS connections</td>
+                    </tr>
+                    <tr>
+                        <td>X-Frame-Options</td>
+                        <td>SAMEORIGIN</td>
+                        <td>Prevent clickjacking</td>
+                    </tr>
+                    <tr>
+                        <td>X-Content-Type-Options</td>
+                        <td>nosniff</td>
+                        <td>Prevent MIME sniffing</td>
+                    </tr>
+                    <tr>
+                        <td>Referrer-Policy</td>
+                        <td>same-origin</td>
+                        <td>Control referrer information</td>
+                    </tr>
+                    <tr>
+                        <td>Permissions-Policy</td>
+                        <td>geolocation=(), microphone=(), camera=()</td>
+                        <td>Restrict browser features</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h2>Audit Logging</h2>
+
+            <div class="security-section">
+                <h3>Security Events Logged</h3>
+                <ul>
+                    <li>Failed login attempts</li>
+                    <li>Successful logins</li>
+                    <li>Password changes</li>
+                    <li>Permission changes</li>
+                    <li>Data access (sensitive fields)</li>
+                    <li>Administrative actions</li>
+                    <li>API rate limit violations</li>
+                    <li>CSRF token failures</li>
+                </ul>
+                
+                <h4>Log Format</h4>
+                <pre><code>{
+    timestamp: '2025-05-29T10:00:00.000Z',
+    level: 'security',
+    event: 'login_failure',
+    userId: 'user123',
+    ip: '192.168.1.1',
+    userAgent: 'Mozilla/5.0...',
+    details: {
+        reason: 'invalid_password',
+        attemptNumber: 3
+    }
+}</code></pre>
+            </div>
+
+            <h2>API Security</h2>
+
+            <h3>Rate Limiting</h3>
+            <pre><code>// Authentication endpoints - strict limits
+const authLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,  // 15 minutes
+    max: 20,                    // 20 attempts
+    message: 'Too many login attempts',
+    standardHeaders: true,
+    legacyHeaders: false
+});
+
+// General API endpoints
+const apiLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,  // 15 minutes
+    max: 100,                   // 100 requests
+    message: 'Too many requests'
+});</code></pre>
+
+            <h3>API Key Management</h3>
+            <ul>
+                <li>Use environment variables for API keys</li>
+                <li>Rotate keys regularly (every 90 days)</li>
+                <li>Implement key scoping for different environments</li>
+                <li>Monitor key usage for anomalies</li>
+            </ul>
+
+            <h2>Session Security</h2>
+
+            <div class="security-section">
+                <h3>Session Configuration</h3>
+                <pre><code>app.use(session({
+    name: 'wavemax.sid',
+    secret: process.env.SESSION_SECRET,
+    resave: false,
+    saveUninitialized: false,
+    rolling: true,
+    store: MongoStore.create({ 
+        mongoUrl: process.env.MONGODB_URI,
+        ttl: 24 * 60 * 60  // 24 hours
+    }),
+    cookie: {
+        secure: true,      // HTTPS only
+        httpOnly: true,    // No JS access
+        maxAge: 24 * 60 * 60 * 1000,
+        sameSite: 'strict' // CSRF protection
+    }
+}));</code></pre>
+            </div>
+
+            <h2>Database Security</h2>
+
+            <div class="checklist">
+                <h4>MongoDB Security Checklist</h4>
+                <ul>
+                    <li>Enable authentication (--auth flag)</li>
+                    <li>Create specific database users with minimal privileges</li>
+                    <li>Disable anonymous access</li>
+                    <li>Use TLS/SSL for connections</li>
+                    <li>Enable audit logging</li>
+                    <li>Regular security patches</li>
+                    <li>Implement IP whitelisting</li>
+                    <li>Regular backups with encryption</li>
+                </ul>
+            </div>
+
+            <h3>Connection Security</h3>
+            <pre><code>// Secure MongoDB connection
+const mongoOptions = {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+    authSource: 'admin',
+    ssl: true,
+    sslValidate: true,
+    sslCA: fs.readFileSync('./ca-certificate.crt')
+};</code></pre>
+
+            <h2>File Upload Security</h2>
+
+            <div class="critical">
+                <strong>⚠️ File Upload Restrictions:</strong>
+                <ul>
+                    <li>Whitelist allowed file types</li>
+                    <li>Scan uploads for malware</li>
+                    <li>Store files outside web root</li>
+                    <li>Generate unique filenames</li>
+                    <li>Limit file size (max 10MB)</li>
+                </ul>
+            </div>
+
+            <pre><code>// Multer configuration
+const upload = multer({
+    storage: multer.diskStorage({
+        destination: '/secure/uploads/',
+        filename: (req, file, cb) => {
+            const uniqueName = crypto.randomBytes(16).toString('hex');
+            cb(null, uniqueName + path.extname(file.originalname));
+        }
+    }),
+    fileFilter: (req, file, cb) => {
+        const allowedTypes = /jpeg|jpg|png|pdf/;
+        const extname = allowedTypes.test(path.extname(file.originalname));
+        const mimetype = allowedTypes.test(file.mimetype);
+        
+        if (mimetype && extname) {
+            return cb(null, true);
+        } else {
+            cb(new Error('Invalid file type'));
+        }
+    },
+    limits: { fileSize: 10 * 1024 * 1024 } // 10MB
+});</code></pre>
+
+            <h2>Deployment Security</h2>
+
+            <div class="best-practice">
+                <h4>✓ Production Deployment Checklist</h4>
+                <ul>
+                    <li>Set NODE_ENV=production</li>
+                    <li>Disable debug mode</li>
+                    <li>Remove development dependencies</li>
+                    <li>Enable HTTPS redirect</li>
+                    <li>Configure firewall rules</li>
+                    <li>Set up intrusion detection</li>
+                    <li>Enable security monitoring</li>
+                    <li>Configure automated backups</li>
+                    <li>Set SHOW_DOCS=false</li>
+                    <li>Review and update all secrets</li>
+                </ul>
+            </div>
+
+            <h2>Incident Response</h2>
+
+            <h3>Security Incident Procedures</h3>
+            <ol>
+                <li><strong>Detection:</strong> Monitor logs for suspicious activity</li>
+                <li><strong>Containment:</strong> Isolate affected systems</li>
+                <li><strong>Investigation:</strong> Analyze logs and identify scope</li>
+                <li><strong>Eradication:</strong> Remove threat and patch vulnerabilities</li>
+                <li><strong>Recovery:</strong> Restore services and verify integrity</li>
+                <li><strong>Documentation:</strong> Document incident and lessons learned</li>
+            </ol>
+
+            <h3>Emergency Contacts</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Role</th>
+                        <th>Contact</th>
+                        <th>When to Contact</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Security Team</td>
+                        <td>security@wavemaxlaundry.com</td>
+                        <td>Any security incident</td>
+                    </tr>
+                    <tr>
+                        <td>System Admin</td>
+                        <td>admin@wavemaxlaundry.com</td>
+                        <td>System compromise</td>
+                    </tr>
+                    <tr>
+                        <td>Legal Team</td>
+                        <td>legal@wavemaxlaundry.com</td>
+                        <td>Data breach</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h2>Compliance & Standards</h2>
+
+            <div class="security-section">
+                <h3>PCI DSS Compliance</h3>
+                <ul>
+                    <li>Never store full credit card numbers</li>
+                    <li>Only store last 4 digits for reference</li>
+                    <li>Use tokenization for payment processing</li>
+                    <li>Implement network segmentation</li>
+                    <li>Regular security assessments</li>
+                </ul>
+            </div>
+
+            <h3>GDPR Compliance</h3>
+            <ul>
+                <li>Right to access - data export functionality</li>
+                <li>Right to erasure - data deletion features</li>
+                <li>Privacy by design - minimal data collection</li>
+                <li>Consent management - clear opt-in/opt-out</li>
+                <li>Data breach notification within 72 hours</li>
+            </ul>
+
+            <div class="warning">
+                <strong>Regular Security Reviews:</strong> Conduct security audits quarterly and penetration testing annually. Keep all dependencies updated and monitor for vulnerabilities.
+            </div>
+
+            <div class="nav-buttons">
+                <a href="api-reference.html">← API Reference</a>
+                <a href="troubleshooting.html">Next: Troubleshooting →</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

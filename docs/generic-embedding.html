@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generic Embedding Guide - WaveMAX Affiliate Program</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f8f9fa;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+            color: white;
+            padding: 30px 0;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        header h1 {
+            font-size: 2rem;
+            margin-bottom: 5px;
+        }
+        
+        header .breadcrumb {
+            opacity: 0.9;
+        }
+        
+        header .breadcrumb a {
+            color: white;
+            text-decoration: none;
+        }
+        
+        .content {
+            background: white;
+            border-radius: 8px;
+            padding: 40px;
+            margin-top: 30px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+        
+        h2 {
+            color: #1e3a8a;
+            margin-top: 30px;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+        
+        h3 {
+            color: #333;
+            margin-top: 25px;
+            margin-bottom: 15px;
+        }
+        
+        .example-section {
+            background: #f8f9fa;
+            border-left: 4px solid #3b82f6;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        
+        code {
+            background: #f4f4f4;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+        
+        pre {
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 6px;
+            overflow-x: auto;
+            margin: 15px 0;
+        }
+        
+        pre code {
+            background: none;
+            padding: 0;
+            color: inherit;
+        }
+        
+        .warning {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 4px;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        
+        .warning strong {
+            color: #856404;
+        }
+        
+        .info {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+            border-radius: 4px;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        
+        .info strong {
+            color: #0c5460;
+        }
+        
+        .tip {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            border-radius: 4px;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        
+        .tip strong {
+            color: #155724;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #1e3a8a;
+        }
+        
+        .nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 40px;
+            padding-top: 30px;
+            border-top: 1px solid #e0e0e0;
+        }
+        
+        .nav-buttons a {
+            display: inline-block;
+            padding: 10px 20px;
+            background: #3b82f6;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            transition: background 0.2s;
+        }
+        
+        .nav-buttons a:hover {
+            background: #2563eb;
+        }
+        
+        .iframe-demo {
+            border: 2px dashed #ccc;
+            padding: 20px;
+            background: #f8f9fa;
+            margin: 20px 0;
+            text-align: center;
+            min-height: 300px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .parameter-table {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 6px;
+            margin: 20px 0;
+        }
+        
+        .parameter-table h4 {
+            margin-bottom: 15px;
+            color: #1e3a8a;
+        }
+        
+        .flow-diagram {
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 6px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        
+        .flow-step {
+            display: inline-block;
+            padding: 10px 20px;
+            background: #3b82f6;
+            color: white;
+            border-radius: 6px;
+            margin: 10px;
+        }
+        
+        .flow-arrow {
+            display: inline-block;
+            margin: 0 10px;
+            color: #3b82f6;
+            font-size: 1.5em;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="breadcrumb">
+                <a href="index.html">Documentation</a> → Generic Embedding
+            </div>
+            <h1>Generic Embedding Guide</h1>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="content">
+            <div class="info">
+                <strong>📌 Overview:</strong> The generic embedding system allows you to embed any WaveMAX interface into your website using a flexible, parameter-driven approach. This guide covers implementation, customization, and best practices.
+            </div>
+
+            <h2>Quick Start</h2>
+
+            <div class="example-section">
+                <h3>Basic Implementation</h3>
+                <pre><code>&lt;!-- Embed WaveMAX Generic Interface --&gt;
+&lt;iframe 
+    id="wavemax-embed"
+    src="https://wavemax.promo/embed-app.html"
+    width="100%"
+    height="600"
+    frameborder="0"
+    allow="payment"&gt;
+&lt;/iframe&gt;
+
+&lt;script&gt;
+// Handle iframe communication
+window.addEventListener('message', function(event) {
+    if (event.origin !== 'https://wavemax.promo') return;
+    
+    // Handle different message types
+    switch(event.data.type) {
+        case 'resize':
+            document.getElementById('wavemax-embed').style.height = 
+                event.data.data.height + 'px';
+            break;
+        case 'navigate':
+            // Handle navigation events
+            console.log('Navigation:', event.data.data);
+            break;
+        case 'ready':
+            // Iframe is ready
+            console.log('WaveMAX embed ready');
+            break;
+    }
+});
+&lt;/script&gt;</code></pre>
+            </div>
+
+            <h2>URL Parameters</h2>
+
+            <div class="parameter-table">
+                <h4>Available Parameters</h4>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Parameter</th>
+                            <th>Type</th>
+                            <th>Description</th>
+                            <th>Example</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>page</code></td>
+                            <td>string</td>
+                            <td>Initial page to display</td>
+                            <td>affiliate-login, customer-register</td>
+                        </tr>
+                        <tr>
+                            <td><code>affiliateId</code></td>
+                            <td>string</td>
+                            <td>Pre-fill affiliate ID</td>
+                            <td>AFF123</td>
+                        </tr>
+                        <tr>
+                            <td><code>theme</code></td>
+                            <td>string</td>
+                            <td>Color theme</td>
+                            <td>light, dark, custom</td>
+                        </tr>
+                        <tr>
+                            <td><code>hideNav</code></td>
+                            <td>boolean</td>
+                            <td>Hide navigation elements</td>
+                            <td>true, false</td>
+                        </tr>
+                        <tr>
+                            <td><code>redirect</code></td>
+                            <td>url</td>
+                            <td>Success redirect URL</td>
+                            <td>https://yoursite.com/success</td>
+                        </tr>
+                        <tr>
+                            <td><code>lang</code></td>
+                            <td>string</td>
+                            <td>Language preference</td>
+                            <td>en, es, fr</td>
+                        </tr>
+                        <tr>
+                            <td><code>debug</code></td>
+                            <td>boolean</td>
+                            <td>Enable debug mode</td>
+                            <td>true, false</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h2>Common Use Cases</h2>
+
+            <h3>Customer Registration with Affiliate</h3>
+            <pre><code>&lt;iframe 
+    src="https://wavemax.promo/embed-app.html?page=customer-register&affiliateId=AFF123&hideNav=true"
+    width="100%"
+    height="800"
+    frameborder="0"&gt;
+&lt;/iframe&gt;</code></pre>
+
+            <h3>Affiliate Dashboard</h3>
+            <pre><code>&lt;iframe 
+    src="https://wavemax.promo/embed-app.html?page=affiliate-dashboard"
+    width="100%"
+    height="1000"
+    frameborder="0"&gt;
+&lt;/iframe&gt;</code></pre>
+
+            <h3>Order Scheduling</h3>
+            <pre><code>&lt;iframe 
+    src="https://wavemax.promo/embed-app.html?page=schedule-pickup&customerId=CUST123"
+    width="100%"
+    height="600"
+    frameborder="0"&gt;
+&lt;/iframe&gt;</code></pre>
+
+            <h2>Advanced Integration</h2>
+
+            <div class="example-section">
+                <h3>Full Communication Example</h3>
+                <pre><code>&lt;div id="wavemax-container"&gt;
+    &lt;iframe 
+        id="wavemax-embed"
+        src="https://wavemax.promo/embed-app.html"
+        width="100%"
+        height="600"
+        frameborder="0"&gt;
+    &lt;/iframe&gt;
+&lt;/div&gt;
+
+&lt;script&gt;
+class WaveMaxEmbed {
+    constructor(containerId) {
+        this.container = document.getElementById(containerId);
+        this.iframe = this.container.querySelector('iframe');
+        this.setupListeners();
+    }
+    
+    setupListeners() {
+        window.addEventListener('message', this.handleMessage.bind(this));
+        this.iframe.addEventListener('load', this.onLoad.bind(this));
+    }
+    
+    handleMessage(event) {
+        if (event.origin !== 'https://wavemax.promo') return;
+        
+        const { type, data } = event.data;
+        
+        switch(type) {
+            case 'resize':
+                this.resize(data.height);
+                break;
+            case 'navigate':
+                this.onNavigate(data);
+                break;
+            case 'success':
+                this.onSuccess(data);
+                break;
+            case 'error':
+                this.onError(data);
+                break;
+            case 'analytics':
+                this.trackEvent(data);
+                break;
+        }
+    }
+    
+    resize(height) {
+        this.iframe.style.height = height + 'px';
+    }
+    
+    onNavigate(data) {
+        console.log('Navigation event:', data);
+        // Update your app's URL or breadcrumbs
+    }
+    
+    onSuccess(data) {
+        console.log('Success:', data);
+        // Handle successful operations
+        if (data.action === 'registration') {
+            window.location.href = '/welcome';
+        }
+    }
+    
+    onError(data) {
+        console.error('Error:', data);
+        // Display error to user
+    }
+    
+    trackEvent(data) {
+        // Send to your analytics
+        if (window.gtag) {
+            gtag('event', data.event, data.parameters);
+        }
+    }
+    
+    onLoad() {
+        // Send configuration to iframe
+        this.sendMessage({
+            type: 'config',
+            data: {
+                theme: 'light',
+                lang: 'en',
+                affiliate: 'AFF123'
+            }
+        });
+    }
+    
+    sendMessage(message) {
+        this.iframe.contentWindow.postMessage(
+            message, 
+            'https://wavemax.promo'
+        );
+    }
+    
+    // Public methods
+    navigate(page) {
+        this.sendMessage({
+            type: 'navigate',
+            data: { page }
+        });
+    }
+    
+    setTheme(theme) {
+        this.sendMessage({
+            type: 'setTheme',
+            data: { theme }
+        });
+    }
+}
+
+// Initialize
+const wavemax = new WaveMaxEmbed('wavemax-container');
+
+// Example usage
+document.getElementById('switchToLogin').onclick = () => {
+    wavemax.navigate('affiliate-login');
+};
+&lt;/script&gt;</code></pre>
+            </div>
+
+            <h2>Styling and Customization</h2>
+
+            <h3>Responsive Container</h3>
+            <pre><code>&lt;style&gt;
+.wavemax-wrapper {
+    position: relative;
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.wavemax-wrapper iframe {
+    width: 100%;
+    min-height: 600px;
+    border: none;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Loading state */
+.wavemax-wrapper.loading::after {
+    content: 'Loading WaveMAX...';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 18px;
+    color: #666;
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+    .wavemax-wrapper iframe {
+        min-height: 800px;
+    }
+}
+&lt;/style&gt;
+
+&lt;div class="wavemax-wrapper loading" id="wavemax-wrapper"&gt;
+    &lt;iframe 
+        src="https://wavemax.promo/embed-app.html"
+        onload="document.getElementById('wavemax-wrapper').classList.remove('loading')"&gt;
+    &lt;/iframe&gt;
+&lt;/div&gt;</code></pre>
+
+            <h3>Custom Theme Parameters</h3>
+            <pre><code>// Pass custom theme via URL parameters
+const themeConfig = {
+    primaryColor: '#1e3a8a',
+    secondaryColor: '#3b82f6',
+    backgroundColor: '#f8f9fa',
+    fontFamily: 'Arial, sans-serif'
+};
+
+const themeParams = btoa(JSON.stringify(themeConfig));
+const iframeSrc = `https://wavemax.promo/embed-app.html?theme=custom&themeConfig=${themeParams}`;</code></pre>
+
+            <h2>Security Considerations</h2>
+
+            <div class="warning">
+                <strong>⚠️ Important Security Notes:</strong>
+                <ul>
+                    <li>Always validate the origin of postMessage events</li>
+                    <li>Use HTTPS for both parent and embedded pages</li>
+                    <li>Implement Content Security Policy headers</li>
+                    <li>Sanitize any data passed between frames</li>
+                    <li>Use specific origins instead of '*' in postMessage</li>
+                </ul>
+            </div>
+
+            <h3>Secure Implementation</h3>
+            <pre><code>// Content Security Policy for parent page
+&lt;meta http-equiv="Content-Security-Policy" 
+      content="frame-src https://wavemax.promo; 
+               script-src 'self' 'unsafe-inline' https://wavemax.promo;"&gt;
+
+// Secure message handling
+window.addEventListener('message', function(event) {
+    // Strict origin check
+    const allowedOrigins = ['https://wavemax.promo', 'https://www.wavemax.promo'];
+    
+    if (!allowedOrigins.includes(event.origin)) {
+        console.warn('Rejected message from:', event.origin);
+        return;
+    }
+    
+    // Validate message structure
+    if (!event.data || typeof event.data !== 'object') {
+        console.warn('Invalid message format');
+        return;
+    }
+    
+    // Process message safely
+    try {
+        handleWaveMaxMessage(event.data);
+    } catch (error) {
+        console.error('Error handling message:', error);
+    }
+});</code></pre>
+
+            <h2>Message Types Reference</h2>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Message Type</th>
+                        <th>Direction</th>
+                        <th>Data Structure</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>ready</code></td>
+                        <td>Embed → Parent</td>
+                        <td><code>{version: string}</code></td>
+                        <td>Iframe loaded and ready</td>
+                    </tr>
+                    <tr>
+                        <td><code>resize</code></td>
+                        <td>Embed → Parent</td>
+                        <td><code>{height: number}</code></td>
+                        <td>Request height adjustment</td>
+                    </tr>
+                    <tr>
+                        <td><code>navigate</code></td>
+                        <td>Both ways</td>
+                        <td><code>{page: string, params: object}</code></td>
+                        <td>Navigation event or command</td>
+                    </tr>
+                    <tr>
+                        <td><code>auth</code></td>
+                        <td>Embed → Parent</td>
+                        <td><code>{status: string, user: object}</code></td>
+                        <td>Authentication state change</td>
+                    </tr>
+                    <tr>
+                        <td><code>success</code></td>
+                        <td>Embed → Parent</td>
+                        <td><code>{action: string, data: object}</code></td>
+                        <td>Successful operation</td>
+                    </tr>
+                    <tr>
+                        <td><code>error</code></td>
+                        <td>Embed → Parent</td>
+                        <td><code>{code: string, message: string}</code></td>
+                        <td>Error occurred</td>
+                    </tr>
+                    <tr>
+                        <td><code>config</code></td>
+                        <td>Parent → Embed</td>
+                        <td><code>{theme: object, lang: string}</code></td>
+                        <td>Configuration update</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h2>Troubleshooting</h2>
+
+            <div class="tip">
+                <strong>💡 Common Issues and Solutions:</strong>
+            </div>
+
+            <h3>Iframe Not Loading</h3>
+            <ul>
+                <li>Check Content Security Policy headers</li>
+                <li>Verify HTTPS is used on both domains</li>
+                <li>Check for X-Frame-Options conflicts</li>
+                <li>Ensure cookies are enabled for third-party sites</li>
+            </ul>
+
+            <h3>Auto-resize Not Working</h3>
+            <pre><code>// Debug auto-resize
+window.addEventListener('message', function(event) {
+    console.log('Message received:', event.origin, event.data);
+    
+    if (event.data.type === 'resize') {
+        console.log('Resize to:', event.data.data.height);
+        const iframe = document.getElementById('wavemax-embed');
+        console.log('Current height:', iframe.style.height);
+        iframe.style.height = event.data.data.height + 'px';
+        console.log('New height:', iframe.style.height);
+    }
+});</code></pre>
+
+            <h3>Authentication Issues</h3>
+            <ul>
+                <li>Enable third-party cookies in browser</li>
+                <li>Check SameSite cookie settings</li>
+                <li>Verify CORS configuration</li>
+                <li>Use token-based auth for cross-domain</li>
+            </ul>
+
+            <h2>Performance Optimization</h2>
+
+            <div class="example-section">
+                <h3>Lazy Loading</h3>
+                <pre><code>&lt;!-- Lazy load iframe when visible --&gt;
+&lt;div class="wavemax-placeholder" data-src="https://wavemax.promo/embed-app.html"&gt;
+    &lt;button onclick="loadWaveMax(this)"&gt;Load WaveMAX&lt;/button&gt;
+&lt;/div&gt;
+
+&lt;script&gt;
+function loadWaveMax(button) {
+    const container = button.parentElement;
+    const src = container.dataset.src;
+    
+    const iframe = document.createElement('iframe');
+    iframe.src = src;
+    iframe.width = '100%';
+    iframe.height = '600';
+    iframe.frameBorder = '0';
+    
+    container.innerHTML = '';
+    container.appendChild(iframe);
+}
+
+// Or use Intersection Observer for auto-load
+const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) {
+            loadWaveMax(entry.target.querySelector('button'));
+            observer.unobserve(entry.target);
+        }
+    });
+});
+
+document.querySelectorAll('.wavemax-placeholder').forEach(el => {
+    observer.observe(el);
+});
+&lt;/script&gt;</code></pre>
+            </div>
+
+            <h3>Preconnect Headers</h3>
+            <pre><code>&lt;!-- Add to document head for faster loading --&gt;
+&lt;link rel="preconnect" href="https://wavemax.promo"&gt;
+&lt;link rel="dns-prefetch" href="https://wavemax.promo"&gt;</code></pre>
+
+            <h2>Analytics Integration</h2>
+
+            <pre><code>// Track WaveMAX events in Google Analytics
+window.addEventListener('message', function(event) {
+    if (event.origin !== 'https://wavemax.promo') return;
+    
+    if (event.data.type === 'analytics') {
+        const { category, action, label, value } = event.data.data;
+        
+        // Google Analytics 4
+        if (window.gtag) {
+            gtag('event', action, {
+                event_category: category,
+                event_label: label,
+                value: value
+            });
+        }
+        
+        // Google Tag Manager
+        if (window.dataLayer) {
+            dataLayer.push({
+                event: 'wavemax_event',
+                category: category,
+                action: action,
+                label: label,
+                value: value
+            });
+        }
+    }
+});</code></pre>
+
+            <div class="info">
+                <strong>📊 Available Analytics Events:</strong>
+                <ul>
+                    <li>Page views within iframe</li>
+                    <li>Form submissions</li>
+                    <li>Button clicks</li>
+                    <li>Error occurrences</li>
+                    <li>Success conversions</li>
+                </ul>
+            </div>
+
+            <div class="nav-buttons">
+                <a href="embedding-guide.html">← Embedding Guide</a>
+                <a href="index.html">Back to Documentation →</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

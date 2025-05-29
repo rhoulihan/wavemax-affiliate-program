@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deployment Guide - WaveMAX Affiliate Program</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f8f9fa;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+            color: white;
+            padding: 30px 0;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        header h1 {
+            font-size: 2rem;
+            margin-bottom: 5px;
+        }
+        
+        header .breadcrumb {
+            opacity: 0.9;
+        }
+        
+        header .breadcrumb a {
+            color: white;
+            text-decoration: none;
+        }
+        
+        .content {
+            background: white;
+            border-radius: 8px;
+            padding: 40px;
+            margin-top: 30px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+        
+        h2 {
+            color: #1e3a8a;
+            margin-top: 30px;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+        
+        h3 {
+            color: #333;
+            margin-top: 25px;
+            margin-bottom: 15px;
+        }
+        
+        .deployment-method {
+            background: #f8f9fa;
+            border-left: 4px solid #3b82f6;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        
+        .deployment-method h4 {
+            color: #1e3a8a;
+            margin-bottom: 10px;
+        }
+        
+        code {
+            background: #f4f4f4;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+        
+        pre {
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 6px;
+            overflow-x: auto;
+            margin: 15px 0;
+        }
+        
+        pre code {
+            background: none;
+            padding: 0;
+            color: inherit;
+        }
+        
+        .checklist {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            padding: 20px;
+            border-radius: 6px;
+            margin: 20px 0;
+        }
+        
+        .checklist h4 {
+            color: #155724;
+            margin-bottom: 15px;
+        }
+        
+        .checklist ul {
+            list-style: none;
+            padding-left: 0;
+        }
+        
+        .checklist li {
+            padding: 8px 0;
+            border-bottom: 1px solid #c3e6cb;
+        }
+        
+        .checklist li:last-child {
+            border-bottom: none;
+        }
+        
+        .checklist li:before {
+            content: "✓ ";
+            color: #28a745;
+            font-weight: bold;
+            margin-right: 8px;
+        }
+        
+        .warning {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 4px;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        
+        .warning strong {
+            color: #856404;
+        }
+        
+        .info {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+            border-radius: 4px;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        
+        .info strong {
+            color: #0c5460;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #1e3a8a;
+        }
+        
+        .nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 40px;
+            padding-top: 30px;
+            border-top: 1px solid #e0e0e0;
+        }
+        
+        .nav-buttons a {
+            display: inline-block;
+            padding: 10px 20px;
+            background: #3b82f6;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            transition: background 0.2s;
+        }
+        
+        .nav-buttons a:hover {
+            background: #2563eb;
+        }
+        
+        .step-number {
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            background: #3b82f6;
+            color: white;
+            text-align: center;
+            line-height: 30px;
+            border-radius: 50%;
+            margin-right: 10px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="breadcrumb">
+                <a href="index.html">Documentation</a> → Deployment Guide
+            </div>
+            <h1>Production Deployment Guide</h1>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="content">
+            <div class="info">
+                <strong>📦 Overview:</strong> This guide covers deploying the WaveMAX Affiliate Program to production using various methods including PM2, Docker, and cloud platforms.
+            </div>
+
+            <h2>Pre-Deployment Checklist</h2>
+            
+            <div class="checklist">
+                <h4>✅ Before You Deploy</h4>
+                <ul>
+                    <li>All tests passing: <code>npm test</code></li>
+                    <li>Security audit clean: <code>npm audit</code></li>
+                    <li>Environment variables configured</li>
+                    <li>SSL certificates obtained</li>
+                    <li>Domain DNS configured</li>
+                    <li>Database backup created</li>
+                    <li>Monitoring tools setup</li>
+                    <li>Error tracking configured</li>
+                    <li>Documentation updated</li>
+                    <li>SHOW_DOCS set to false</li>
+                </ul>
+            </div>
+
+            <h2>Server Requirements</h2>
+            
+            <table>
+                <thead>
+                    <tr>
+                        <th>Component</th>
+                        <th>Minimum</th>
+                        <th>Recommended</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>CPU</td>
+                        <td>2 cores</td>
+                        <td>4+ cores</td>
+                    </tr>
+                    <tr>
+                        <td>RAM</td>
+                        <td>2 GB</td>
+                        <td>4+ GB</td>
+                    </tr>
+                    <tr>
+                        <td>Storage</td>
+                        <td>20 GB</td>
+                        <td>50+ GB SSD</td>
+                    </tr>
+                    <tr>
+                        <td>Node.js</td>
+                        <td>v18.x</td>
+                        <td>v20.x LTS</td>
+                    </tr>
+                    <tr>
+                        <td>MongoDB</td>
+                        <td>5.0</td>
+                        <td>7.0</td>
+                    </tr>
+                    <tr>
+                        <td>OS</td>
+                        <td>Ubuntu 20.04</td>
+                        <td>Ubuntu 22.04 LTS</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h2>Deployment Method 1: PM2 (Recommended)</h2>
+
+            <div class="deployment-method">
+                <h4><span class="step-number">1</span> Install PM2</h4>
+                <pre><code>npm install -g pm2
+pm2 install pm2-logrotate</code></pre>
+            </div>
+
+            <div class="deployment-method">
+                <h4><span class="step-number">2</span> Configure ecosystem.config.js</h4>
+                <pre><code>module.exports = {
+  apps: [{
+    name: 'wavemax-affiliate',
+    script: './server.js',
+    instances: 'max',
+    exec_mode: 'cluster',
+    env: {
+      NODE_ENV: 'production',
+      PORT: 3000
+    },
+    error_file: './logs/pm2-error.log',
+    out_file: './logs/pm2-out.log',
+    log_file: './logs/pm2-combined.log',
+    time: true,
+    max_memory_restart: '1G',
+    node_args: '--max-old-space-size=1024',
+    autorestart: true,
+    watch: false
+  }]
+};</code></pre>
+            </div>
+
+            <div class="deployment-method">
+                <h4><span class="step-number">3</span> Deploy Application</h4>
+                <pre><code># Clone repository
+git clone https://github.com/yourusername/wavemax-affiliate-program.git
+cd wavemax-affiliate-program
+
+# Install dependencies
+npm ci --production
+
+# Copy environment file
+cp .env.example .env
+# Edit .env with production values
+
+# Start with PM2
+pm2 start ecosystem.config.js
+
+# Save PM2 configuration
+pm2 save
+pm2 startup</code></pre>
+            </div>
+
+            <div class="deployment-method">
+                <h4><span class="step-number">4</span> Setup Nginx Reverse Proxy</h4>
+                <pre><code>sudo nano /etc/nginx/sites-available/wavemax-affiliate
+
+# Add configuration:
+server {
+    listen 80;
+    server_name wavemax.promo www.wavemax.promo;
+    return 301 https://$server_name$request_uri;
+}
+
+server {
+    listen 443 ssl http2;
+    server_name wavemax.promo www.wavemax.promo;
+    
+    ssl_certificate /etc/letsencrypt/live/wavemax.promo/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/wavemax.promo/privkey.pem;
+    
+    location / {
+        proxy_pass http://localhost:3000;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_cache_bypass $http_upgrade;
+    }
+}
+
+# Enable site
+sudo ln -s /etc/nginx/sites-available/wavemax-affiliate /etc/nginx/sites-enabled/
+sudo nginx -t
+sudo systemctl reload nginx</code></pre>
+            </div>
+
+            <h2>Deployment Method 2: Docker</h2>
+
+            <div class="deployment-method">
+                <h4><span class="step-number">1</span> Build Docker Image</h4>
+                <pre><code># Dockerfile is included in the project
+docker build -t wavemax-affiliate:latest .
+
+# Or use docker-compose
+docker-compose build</code></pre>
+            </div>
+
+            <div class="deployment-method">
+                <h4><span class="step-number">2</span> Run with Docker Compose</h4>
+                <pre><code># docker-compose.yml
+version: '3.8'
+services:
+  app:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+    env_file:
+      - .env
+    depends_on:
+      - mongo
+    restart: unless-stopped
+
+  mongo:
+    image: mongo:7.0
+    volumes:
+      - mongo-data:/data/db
+    environment:
+      - MONGO_INITDB_DATABASE=wavemax
+    restart: unless-stopped
+
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+      - ./ssl:/etc/nginx/ssl
+    depends_on:
+      - app
+    restart: unless-stopped
+
+volumes:
+  mongo-data:
+
+# Deploy
+docker-compose up -d</code></pre>
+            </div>
+
+            <h2>Deployment Method 3: Cloud Platforms</h2>
+
+            <h3>AWS EC2</h3>
+            <div class="deployment-method">
+                <h4>Launch EC2 Instance</h4>
+                <ol>
+                    <li>Choose Ubuntu 22.04 LTS AMI</li>
+                    <li>Select t3.medium instance type</li>
+                    <li>Configure security group:
+                        <ul>
+                            <li>SSH (22) - Your IP</li>
+                            <li>HTTP (80) - Anywhere</li>
+                            <li>HTTPS (443) - Anywhere</li>
+                        </ul>
+                    </li>
+                    <li>Allocate Elastic IP</li>
+                    <li>Create or select key pair</li>
+                </ol>
+                
+                <h4>Setup Instance</h4>
+                <pre><code># Connect to instance
+ssh -i your-key.pem ubuntu@your-instance-ip
+
+# Update system
+sudo apt update && sudo apt upgrade -y
+
+# Install Node.js
+curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+sudo apt-get install -y nodejs
+
+# Install MongoDB
+# Follow MongoDB installation guide
+
+# Install Nginx
+sudo apt install nginx -y
+
+# Clone and setup application
+git clone https://github.com/yourusername/wavemax-affiliate-program.git
+cd wavemax-affiliate-program
+npm ci --production
+
+# Install PM2
+sudo npm install -g pm2
+
+# Start application
+pm2 start ecosystem.config.js</code></pre>
+            </div>
+
+            <h3>DigitalOcean App Platform</h3>
+            <div class="deployment-method">
+                <h4>Deploy to App Platform</h4>
+                <pre><code># app.yaml
+name: wavemax-affiliate
+services:
+- name: web
+  github:
+    repo: yourusername/wavemax-affiliate-program
+    branch: main
+  build_command: npm ci --production
+  run_command: npm start
+  environment_slug: node-js
+  instance_size_slug: basic-s
+  instance_count: 1
+  http_port: 3000
+  envs:
+  - key: NODE_ENV
+    value: production
+  - key: MONGODB_URI
+    value: ${mongodb.DATABASE_URL}
+    
+databases:
+- name: mongodb
+  engine: MONGO
+  version: "7"</code></pre>
+            </div>
+
+            <h2>SSL/TLS Configuration</h2>
+
+            <div class="deployment-method">
+                <h4>Let's Encrypt with Certbot</h4>
+                <pre><code># Install Certbot
+sudo apt install certbot python3-certbot-nginx -y
+
+# Obtain certificate
+sudo certbot --nginx -d wavemax.promo -d www.wavemax.promo
+
+# Auto-renewal
+sudo certbot renew --dry-run
+
+# Add to crontab
+0 2 * * * /usr/bin/certbot renew --quiet</code></pre>
+            </div>
+
+            <h2>Environment Configuration</h2>
+
+            <div class="warning">
+                <strong>⚠️ Production Environment Variables:</strong>
+                <pre><code># Required for production
+NODE_ENV=production
+PORT=3000
+MONGODB_URI=mongodb://user:pass@localhost:27017/wavemax?authSource=admin
+ENCRYPTION_KEY=[32-byte hex key]
+JWT_SECRET=[64-byte hex key]
+SESSION_SECRET=[32-byte hex key]
+EMAIL_PROVIDER=ses
+CORS_ORIGIN=https://wavemaxlaundry.com,https://www.wavemaxlaundry.com
+SHOW_DOCS=false
+ENABLE_DELETE_DATA_FEATURE=false
+TRUST_PROXY=true
+COOKIE_SECURE=true</code></pre>
+            </div>
+
+            <h2>Database Setup</h2>
+
+            <div class="deployment-method">
+                <h4>MongoDB Production Configuration</h4>
+                <pre><code># Enable authentication
+mongosh
+use admin
+db.createUser({
+  user: "adminUser",
+  pwd: "securePassword",
+  roles: [ { role: "userAdminAnyDatabase", db: "admin" } ]
+})
+
+use wavemax
+db.createUser({
+  user: "wavemaxUser",
+  pwd: "securePassword",
+  roles: [ { role: "readWrite", db: "wavemax" } ]
+})
+
+# Enable auth in /etc/mongod.conf
+security:
+  authorization: enabled
+
+# Restart MongoDB
+sudo systemctl restart mongod</code></pre>
+            </div>
+
+            <h2>Monitoring & Logging</h2>
+
+            <div class="deployment-method">
+                <h4>PM2 Monitoring</h4>
+                <pre><code># Real-time monitoring
+pm2 monit
+
+# Web dashboard
+pm2 install pm2-web
+pm2 web
+
+# Log rotation
+pm2 install pm2-logrotate
+pm2 set pm2-logrotate:max_size 10M
+pm2 set pm2-logrotate:retain 30</code></pre>
+            </div>
+
+            <div class="deployment-method">
+                <h4>Application Monitoring</h4>
+                <pre><code># Health check endpoint
+curl https://wavemax.promo/api/health
+
+# Create monitoring script
+#!/bin/bash
+response=$(curl -s -o /dev/null -w "%{http_code}" https://wavemax.promo/api/health)
+if [ $response != "200" ]; then
+    echo "Health check failed with status $response"
+    pm2 restart wavemax-affiliate
+fi
+
+# Add to crontab (every 5 minutes)
+*/5 * * * * /path/to/health-check.sh</code></pre>
+            </div>
+
+            <h2>Backup Strategy</h2>
+
+            <div class="deployment-method">
+                <h4>Automated Backups</h4>
+                <pre><code>#!/bin/bash
+# backup.sh
+BACKUP_DIR="/var/backups/wavemax"
+DATE=$(date +%Y%m%d_%H%M%S)
+
+# Create backup directory
+mkdir -p $BACKUP_DIR
+
+# Backup MongoDB
+mongodump --uri="$MONGODB_URI" --gzip --archive=$BACKUP_DIR/mongo_$DATE.gz
+
+# Backup application files
+tar -czf $BACKUP_DIR/app_$DATE.tar.gz /var/www/wavemax-affiliate
+
+# Upload to S3 (optional)
+aws s3 cp $BACKUP_DIR/mongo_$DATE.gz s3://your-backup-bucket/mongo/
+aws s3 cp $BACKUP_DIR/app_$DATE.tar.gz s3://your-backup-bucket/app/
+
+# Keep only last 30 days
+find $BACKUP_DIR -type f -mtime +30 -delete
+
+# Schedule in crontab
+0 2 * * * /path/to/backup.sh</code></pre>
+            </div>
+
+            <h2>Zero-Downtime Deployment</h2>
+
+            <div class="deployment-method">
+                <h4>Blue-Green Deployment with PM2</h4>
+                <pre><code># Deploy new version
+git pull origin main
+npm ci --production
+
+# Graceful reload with zero downtime
+pm2 reload ecosystem.config.js
+
+# If issues arise, revert
+pm2 reload ecosystem.config.js --update-env</code></pre>
+            </div>
+
+            <h2>Security Hardening</h2>
+
+            <div class="checklist">
+                <h4>🔒 Production Security Checklist</h4>
+                <ul>
+                    <li>Firewall configured (ufw or iptables)</li>
+                    <li>SSH key-only authentication</li>
+                    <li>Fail2ban installed for brute force protection</li>
+                    <li>Regular security updates scheduled</li>
+                    <li>Application runs as non-root user</li>
+                    <li>Database access restricted to localhost</li>
+                    <li>Sensitive files permissions set correctly</li>
+                    <li>Security headers configured in Nginx</li>
+                    <li>Rate limiting enabled</li>
+                    <li>HTTPS enforced everywhere</li>
+                </ul>
+            </div>
+
+            <pre><code># Firewall setup
+sudo ufw default deny incoming
+sudo ufw default allow outgoing
+sudo ufw allow ssh
+sudo ufw allow 'Nginx Full'
+sudo ufw enable
+
+# Create application user
+sudo useradd -m -s /bin/bash wavemax
+sudo chown -R wavemax:wavemax /var/www/wavemax-affiliate
+
+# Run PM2 as wavemax user
+sudo -u wavemax pm2 start ecosystem.config.js</code></pre>
+
+            <h2>Rollback Procedures</h2>
+
+            <div class="warning">
+                <strong>⚠️ Emergency Rollback:</strong>
+                <pre><code># Tag releases before deployment
+git tag -a v1.0.0 -m "Release version 1.0.0"
+git push origin v1.0.0
+
+# Rollback to previous version
+git checkout v0.9.0
+npm ci --production
+pm2 reload ecosystem.config.js
+
+# Restore database if needed
+mongorestore --gzip --archive=backup.gz --drop</code></pre>
+            </div>
+
+            <h2>Post-Deployment Verification</h2>
+
+            <div class="checklist">
+                <h4>✅ Verify Deployment Success</h4>
+                <ul>
+                    <li>Application responds at https://yourdomain.com</li>
+                    <li>Health check endpoint returns 200 OK</li>
+                    <li>Can login as administrator</li>
+                    <li>Can register new affiliate</li>
+                    <li>Email sending works</li>
+                    <li>Database connections stable</li>
+                    <li>SSL certificate valid</li>
+                    <li>Monitoring alerts configured</li>
+                    <li>Backup script runs successfully</li>
+                    <li>Error tracking captures issues</li>
+                </ul>
+            </div>
+
+            <div class="info">
+                <strong>📊 Performance Testing:</strong>
+                <pre><code># Load test with Apache Bench
+ab -n 1000 -c 10 https://wavemax.promo/api/health
+
+# Monitor response times
+pm2 monit</code></pre>
+            </div>
+
+            <div class="nav-buttons">
+                <a href="troubleshooting.html">← Troubleshooting</a>
+                <a href="development-guide.html">Next: Development Guide →</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

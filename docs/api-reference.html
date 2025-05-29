@@ -1,0 +1,989 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Reference - WaveMAX Affiliate Program</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f8f9fa;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+            color: white;
+            padding: 30px 0;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        header h1 {
+            font-size: 2rem;
+            margin-bottom: 5px;
+        }
+        
+        header .breadcrumb {
+            opacity: 0.9;
+        }
+        
+        header .breadcrumb a {
+            color: white;
+            text-decoration: none;
+        }
+        
+        .content {
+            background: white;
+            border-radius: 8px;
+            padding: 40px;
+            margin-top: 30px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+        
+        h2 {
+            color: #1e3a8a;
+            margin-top: 30px;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+        
+        h3 {
+            color: #333;
+            margin-top: 25px;
+            margin-bottom: 15px;
+        }
+        
+        .endpoint {
+            background: #f8f9fa;
+            border-left: 4px solid #3b82f6;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        
+        .endpoint h4 {
+            margin-bottom: 10px;
+            color: #1e3a8a;
+        }
+        
+        .method {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 0.9em;
+            margin-right: 10px;
+        }
+        
+        .method.get {
+            background: #28a745;
+            color: white;
+        }
+        
+        .method.post {
+            background: #007bff;
+            color: white;
+        }
+        
+        .method.put {
+            background: #ffc107;
+            color: #333;
+        }
+        
+        .method.delete {
+            background: #dc3545;
+            color: white;
+        }
+        
+        code {
+            background: #f4f4f4;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+        
+        pre {
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 6px;
+            overflow-x: auto;
+            margin: 15px 0;
+        }
+        
+        pre code {
+            background: none;
+            padding: 0;
+            color: inherit;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #1e3a8a;
+        }
+        
+        .nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 40px;
+            padding-top: 30px;
+            border-top: 1px solid #e0e0e0;
+        }
+        
+        .nav-buttons a {
+            display: inline-block;
+            padding: 10px 20px;
+            background: #3b82f6;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            transition: background 0.2s;
+        }
+        
+        .nav-buttons a:hover {
+            background: #2563eb;
+        }
+        
+        .toc {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 6px;
+            margin-bottom: 30px;
+        }
+        
+        .toc h3 {
+            margin-top: 0;
+        }
+        
+        .toc ul {
+            list-style: none;
+            padding-left: 0;
+        }
+        
+        .toc li {
+            padding: 5px 0;
+        }
+        
+        .toc a {
+            color: #3b82f6;
+            text-decoration: none;
+        }
+        
+        .toc a:hover {
+            text-decoration: underline;
+        }
+        
+        .response-example {
+            background: #f8f9fa;
+            border: 1px solid #e0e0e0;
+            border-radius: 4px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        
+        .response-example h5 {
+            margin-bottom: 10px;
+            color: #666;
+        }
+        
+        .status-code {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 0.9em;
+            margin-right: 10px;
+        }
+        
+        .status-code.success {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .status-code.error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="breadcrumb">
+                <a href="index.html">Documentation</a> → API Reference
+            </div>
+            <h1>API Reference</h1>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="content">
+            <div class="toc">
+                <h3>Table of Contents</h3>
+                <ul>
+                    <li><a href="#overview">Overview</a></li>
+                    <li><a href="#authentication">Authentication</a></li>
+                    <li><a href="#auth-endpoints">Auth Endpoints</a></li>
+                    <li><a href="#affiliate-endpoints">Affiliate Endpoints</a></li>
+                    <li><a href="#customer-endpoints">Customer Endpoints</a></li>
+                    <li><a href="#order-endpoints">Order Endpoints</a></li>
+                    <li><a href="#administrator-endpoints">Administrator Endpoints</a></li>
+                    <li><a href="#operator-endpoints">Operator Endpoints</a></li>
+                    <li><a href="#bag-endpoints">Bag Endpoints</a></li>
+                    <li><a href="#error-handling">Error Handling</a></li>
+                    <li><a href="#rate-limiting">Rate Limiting</a></li>
+                </ul>
+            </div>
+
+            <h2 id="overview">Overview</h2>
+            
+            <p>The WaveMAX Affiliate Program API is a RESTful API that provides endpoints for managing affiliates, customers, orders, and administrative functions.</p>
+            
+            <h3>Base URL</h3>
+            <pre><code>https://wavemax.promo/api/v1</code></pre>
+            
+            <h3>Content Type</h3>
+            <p>All requests and responses use JSON format:</p>
+            <pre><code>Content-Type: application/json</code></pre>
+
+            <h2 id="authentication">Authentication</h2>
+            
+            <h3>JWT Token Authentication</h3>
+            <p>Most endpoints require JWT authentication. Include the token in the Authorization header:</p>
+            <pre><code>Authorization: Bearer {jwt_token}</code></pre>
+            
+            <h3>CSRF Protection</h3>
+            <p>State-changing operations (POST, PUT, DELETE) require a CSRF token:</p>
+            
+            <div class="endpoint">
+                <h4>Get CSRF Token</h4>
+                <span class="method get">GET</span> <code>/api/csrf-token</code>
+                
+                <h5>Response:</h5>
+                <pre><code>{
+    "csrfToken": "KDaRue5v-7PH31sdfQ8RqPqXvCzKqXtPHxHI"
+}</code></pre>
+            </div>
+            
+            <p>Include the CSRF token in subsequent requests:</p>
+            <pre><code>X-CSRF-Token: {csrf_token}</code></pre>
+
+            <h2 id="auth-endpoints">Authentication Endpoints</h2>
+
+            <div class="endpoint">
+                <h4>Affiliate Login</h4>
+                <span class="method post">POST</span> <code>/api/v1/auth/affiliate/login</code>
+                
+                <h5>Request Body:</h5>
+                <pre><code>{
+    "username": "affiliate@email.com",  // or affiliate ID
+    "password": "password123"
+}</code></pre>
+                
+                <h5>Response:</h5>
+                <pre><code>{
+    "success": true,
+    "token": "eyJhbGciOiJIUzI1NiIs...",
+    "refreshToken": "refresh_token_here",
+    "affiliate": {
+        "id": "5f7b1a2b3c4d5e6f7g8h9i0j",
+        "affiliateId": "AFF123",
+        "email": "affiliate@email.com",
+        "firstName": "John",
+        "lastName": "Doe"
+    }
+}</code></pre>
+            </div>
+
+            <div class="endpoint">
+                <h4>Customer Login</h4>
+                <span class="method post">POST</span> <code>/api/v1/auth/customer/login</code>
+                
+                <h5>Request Body:</h5>
+                <pre><code>{
+    "email": "customer@email.com",
+    "password": "password123"
+}</code></pre>
+                
+                <h5>Response:</h5>
+                <pre><code>{
+    "success": true,
+    "token": "eyJhbGciOiJIUzI1NiIs...",
+    "refreshToken": "refresh_token_here",
+    "customer": {
+        "id": "5f7b1a2b3c4d5e6f7g8h9i0j",
+        "customerId": "CUST123",
+        "email": "customer@email.com",
+        "firstName": "Jane",
+        "lastName": "Smith"
+    }
+}</code></pre>
+            </div>
+
+            <div class="endpoint">
+                <h4>Administrator Login</h4>
+                <span class="method post">POST</span> <code>/api/v1/auth/administrator/login</code>
+                
+                <h5>Request Body:</h5>
+                <pre><code>{
+    "email": "admin@wavemaxlaundry.com",
+    "password": "securePassword123!"
+}</code></pre>
+            </div>
+
+            <div class="endpoint">
+                <h4>Operator Login</h4>
+                <span class="method post">POST</span> <code>/api/v1/auth/operator/login</code>
+                
+                <h5>Request Body:</h5>
+                <pre><code>{
+    "operatorId": "OP001",
+    "pin": "1234"
+}</code></pre>
+            </div>
+
+            <div class="endpoint">
+                <h4>Refresh Token</h4>
+                <span class="method post">POST</span> <code>/api/v1/auth/refresh-token</code>
+                
+                <h5>Request Body:</h5>
+                <pre><code>{
+    "refreshToken": "refresh_token_here"
+}</code></pre>
+                
+                <h5>Response:</h5>
+                <pre><code>{
+    "success": true,
+    "token": "new_jwt_token",
+    "refreshToken": "new_refresh_token"
+}</code></pre>
+            </div>
+
+            <div class="endpoint">
+                <h4>Verify Token</h4>
+                <span class="method get">GET</span> <code>/api/v1/auth/verify</code>
+                
+                <h5>Headers:</h5>
+                <pre><code>Authorization: Bearer {jwt_token}</code></pre>
+                
+                <h5>Response:</h5>
+                <pre><code>{
+    "success": true,
+    "valid": true,
+    "user": {
+        "id": "user_id",
+        "role": "affiliate"
+    }
+}</code></pre>
+            </div>
+
+            <div class="endpoint">
+                <h4>Forgot Password</h4>
+                <span class="method post">POST</span> <code>/api/v1/auth/forgot-password</code>
+                
+                <h5>Request Body:</h5>
+                <pre><code>{
+    "email": "user@email.com",
+    "userType": "affiliate"  // or "customer", "administrator"
+}</code></pre>
+            </div>
+
+            <div class="endpoint">
+                <h4>Reset Password</h4>
+                <span class="method post">POST</span> <code>/api/v1/auth/reset-password</code>
+                
+                <h5>Request Body:</h5>
+                <pre><code>{
+    "token": "reset_token_from_email",
+    "newPassword": "newSecurePassword123!"
+}</code></pre>
+            </div>
+
+            <h2 id="affiliate-endpoints">Affiliate Endpoints</h2>
+
+            <div class="endpoint">
+                <h4>Register Affiliate</h4>
+                <span class="method post">POST</span> <code>/api/v1/affiliates/register</code>
+                
+                <h5>Request Body:</h5>
+                <pre><code>{
+    "firstName": "John",
+    "lastName": "Doe",
+    "email": "john.doe@email.com",
+    "password": "securePassword123",
+    "phone": "(512) 555-0123",
+    "address": {
+        "street": "123 Main St",
+        "city": "Austin",
+        "state": "TX",
+        "zipCode": "78701"
+    },
+    "driversLicense": {
+        "number": "12345678",
+        "state": "TX"
+    },
+    "businessInfo": {
+        "type": "individual",  // or "company"
+        "name": "John's Delivery Service",
+        "ein": "12-3456789"  // optional
+    }
+}</code></pre>
+            </div>
+
+            <div class="endpoint">
+                <h4>Get Affiliate Profile</h4>
+                <span class="method get">GET</span> <code>/api/v1/affiliates/:affiliateId</code>
+                
+                <h5>Headers:</h5>
+                <pre><code>Authorization: Bearer {jwt_token}</code></pre>
+                
+                <h5>Response:</h5>
+                <pre><code>{
+    "success": true,
+    "affiliate": {
+        "id": "5f7b1a2b3c4d5e6f7g8h9i0j",
+        "affiliateId": "AFF123",
+        "firstName": "John",
+        "lastName": "Doe",
+        "email": "john.doe@email.com",
+        "phone": "(512) 555-0123",
+        "isActive": true,
+        "isApproved": true,
+        "commissionRate": 0.10,
+        "totalEarnings": 1250.50,
+        "customerCount": 25,
+        "createdAt": "2025-01-15T10:00:00.000Z"
+    }
+}</code></pre>
+            </div>
+
+            <div class="endpoint">
+                <h4>Update Affiliate Profile</h4>
+                <span class="method put">PUT</span> <code>/api/v1/affiliates/:affiliateId</code>
+                
+                <h5>Headers:</h5>
+                <pre><code>Authorization: Bearer {jwt_token}
+X-CSRF-Token: {csrf_token}</code></pre>
+                
+                <h5>Request Body:</h5>
+                <pre><code>{
+    "phone": "(512) 555-0124",
+    "address": {
+        "street": "456 Oak Ave",
+        "city": "Austin",
+        "state": "TX",
+        "zipCode": "78702"
+    }
+}</code></pre>
+            </div>
+
+            <div class="endpoint">
+                <h4>Get Affiliate Dashboard</h4>
+                <span class="method get">GET</span> <code>/api/v1/affiliates/:affiliateId/dashboard</code>
+                
+                <h5>Response:</h5>
+                <pre><code>{
+    "success": true,
+    "dashboard": {
+        "totalCustomers": 25,
+        "activeOrders": 5,
+        "totalEarnings": 1250.50,
+        "pendingEarnings": 125.00,
+        "thisMonthEarnings": 450.00,
+        "recentOrders": [...],
+        "topCustomers": [...]
+    }
+}</code></pre>
+            </div>
+
+            <div class="endpoint">
+                <h4>Get Affiliate Customers</h4>
+                <span class="method get">GET</span> <code>/api/v1/affiliates/:affiliateId/customers</code>
+                
+                <h5>Query Parameters:</h5>
+                <pre><code>page=1&limit=20&status=active&search=john</code></pre>
+            </div>
+
+            <div class="endpoint">
+                <h4>Get Affiliate Orders</h4>
+                <span class="method get">GET</span> <code>/api/v1/affiliates/:affiliateId/orders</code>
+                
+                <h5>Query Parameters:</h5>
+                <pre><code>page=1&limit=20&status=completed&startDate=2025-01-01&endDate=2025-01-31</code></pre>
+            </div>
+
+            <div class="endpoint">
+                <h4>Change Affiliate Password</h4>
+                <span class="method post">POST</span> <code>/api/v1/affiliates/:affiliateId/change-password</code>
+                
+                <h5>Request Body:</h5>
+                <pre><code>{
+    "currentPassword": "oldPassword123",
+    "newPassword": "newSecurePassword123!"
+}</code></pre>
+            </div>
+
+            <div class="endpoint">
+                <h4>Delete Affiliate Data (Dev Only)</h4>
+                <span class="method delete">DELETE</span> <code>/api/v1/affiliates/:affiliateId/delete-all-data</code>
+                
+                <h5>Note:</h5>
+                <p>Only available when <code>ENABLE_DELETE_DATA_FEATURE=true</code></p>
+            </div>
+
+            <h2 id="customer-endpoints">Customer Endpoints</h2>
+
+            <div class="endpoint">
+                <h4>Register Customer</h4>
+                <span class="method post">POST</span> <code>/api/v1/customers/register</code>
+                
+                <h5>Request Body:</h5>
+                <pre><code>{
+    "firstName": "Jane",
+    "lastName": "Smith",
+    "email": "jane.smith@email.com",
+    "password": "password123",
+    "phone": "(512) 555-0456",
+    "address": {
+        "street": "789 Elm St",
+        "apartment": "Apt 2B",
+        "city": "Austin",
+        "state": "TX",
+        "zipCode": "78703"
+    },
+    "paymentMethod": {
+        "type": "card",
+        "cardNumber": "4111111111111111",
+        "expiryMonth": "12",
+        "expiryYear": "2025",
+        "cvv": "123"
+    },
+    "specialInstructions": {
+        "laundry": "Use fragrance-free detergent",
+        "delivery": "Leave at door"
+    },
+    "affiliateId": "AFF123"  // Required - from registration link
+}</code></pre>
+            </div>
+
+            <div class="endpoint">
+                <h4>Get Customer Profile</h4>
+                <span class="method get">GET</span> <code>/api/v1/customers/:customerId</code>
+                
+                <h5>Headers:</h5>
+                <pre><code>Authorization: Bearer {jwt_token}</code></pre>
+            </div>
+
+            <div class="endpoint">
+                <h4>Update Customer Profile</h4>
+                <span class="method put">PUT</span> <code>/api/v1/customers/:customerId</code>
+                
+                <h5>Headers:</h5>
+                <pre><code>Authorization: Bearer {jwt_token}
+X-CSRF-Token: {csrf_token}</code></pre>
+                
+                <h5>Request Body:</h5>
+                <pre><code>{
+    "phone": "(512) 555-0457",
+    "address": {
+        "street": "789 Elm St",
+        "apartment": "Apt 3C",
+        "city": "Austin",
+        "state": "TX",
+        "zipCode": "78703"
+    },
+    "specialInstructions": {
+        "laundry": "Extra fabric softener",
+        "delivery": "Ring doorbell"
+    }
+}</code></pre>
+            </div>
+
+            <div class="endpoint">
+                <h4>Get Customer Orders</h4>
+                <span class="method get">GET</span> <code>/api/v1/customers/:customerId/orders</code>
+                
+                <h5>Query Parameters:</h5>
+                <pre><code>page=1&limit=10&status=active</code></pre>
+            </div>
+
+            <div class="endpoint">
+                <h4>Get Active Orders</h4>
+                <span class="method get">GET</span> <code>/api/v1/customers/:customerId/active-orders</code>
+            </div>
+
+            <div class="endpoint">
+                <h4>Delete Customer Data (Dev Only)</h4>
+                <span class="method delete">DELETE</span> <code>/api/v1/customers/:customerId/delete-all-data</code>
+            </div>
+
+            <h2 id="order-endpoints">Order Endpoints</h2>
+
+            <div class="endpoint">
+                <h4>Create Order</h4>
+                <span class="method post">POST</span> <code>/api/v1/orders</code>
+                
+                <h5>Headers:</h5>
+                <pre><code>Authorization: Bearer {jwt_token}
+X-CSRF-Token: {csrf_token}</code></pre>
+                
+                <h5>Request Body:</h5>
+                <pre><code>{
+    "customerId": "CUST123",
+    "serviceType": "wash_dry_fold",
+    "pickupDate": "2025-06-01",
+    "pickupTime": "morning",  // morning, afternoon, evening
+    "deliveryDate": "2025-06-03",
+    "deliveryTime": "afternoon",
+    "estimatedWeight": 20,  // pounds
+    "specialInstructions": "Handle with care",
+    "rushService": false
+}</code></pre>
+            </div>
+
+            <div class="endpoint">
+                <h4>Get Order Details</h4>
+                <span class="method get">GET</span> <code>/api/v1/orders/:orderId</code>
+                
+                <h5>Response:</h5>
+                <pre><code>{
+    "success": true,
+    "order": {
+        "id": "5f7b1a2b3c4d5e6f7g8h9i0j",
+        "orderId": "ORD-2025-0001",
+        "customerId": "CUST123",
+        "affiliateId": "AFF123",
+        "status": "in_progress",
+        "serviceType": "wash_dry_fold",
+        "pickupDate": "2025-06-01",
+        "deliveryDate": "2025-06-03",
+        "actualWeight": 18.5,
+        "price": 23.13,  // $1.25/lb
+        "deliveryFee": 10.00,
+        "totalAmount": 33.13,
+        "bags": [
+            {
+                "barcode": "BAG123456",
+                "weight": 18.5
+            }
+        ],
+        "createdAt": "2025-05-30T10:00:00.000Z"
+    }
+}</code></pre>
+            </div>
+
+            <div class="endpoint">
+                <h4>Update Order Status</h4>
+                <span class="method put">PUT</span> <code>/api/v1/orders/:orderId</code>
+                
+                <h5>Request Body:</h5>
+                <pre><code>{
+    "status": "ready_for_delivery",
+    "actualWeight": 18.5,
+    "operatorNotes": "Items cleaned and folded"
+}</code></pre>
+            </div>
+
+            <div class="endpoint">
+                <h4>Cancel Order</h4>
+                <span class="method post">POST</span> <code>/api/v1/orders/:orderId/cancel</code>
+                
+                <h5>Request Body:</h5>
+                <pre><code>{
+    "reason": "Customer requested cancellation"
+}</code></pre>
+            </div>
+
+            <h2 id="administrator-endpoints">Administrator Endpoints</h2>
+
+            <div class="endpoint">
+                <h4>Get All Administrators</h4>
+                <span class="method get">GET</span> <code>/api/v1/administrators</code>
+                
+                <h5>Required Permission:</h5>
+                <p><code>operator_management</code></p>
+            </div>
+
+            <div class="endpoint">
+                <h4>Create Administrator</h4>
+                <span class="method post">POST</span> <code>/api/v1/administrators</code>
+                
+                <h5>Request Body:</h5>
+                <pre><code>{
+    "firstName": "Admin",
+    "lastName": "User",
+    "email": "admin@wavemaxlaundry.com",
+    "password": "SecurePassword123!",
+    "permissions": [
+        "system_config",
+        "operator_management",
+        "view_analytics",
+        "manage_affiliates"
+    ]
+}</code></pre>
+            </div>
+
+            <div class="endpoint">
+                <h4>Update Administrator</h4>
+                <span class="method put">PUT</span> <code>/api/v1/administrators/:adminId</code>
+                
+                <h5>Request Body:</h5>
+                <pre><code>{
+    "permissions": [
+        "view_analytics",
+        "manage_affiliates"
+    ],
+    "isActive": true
+}</code></pre>
+            </div>
+
+            <div class="endpoint">
+                <h4>Get System Configuration</h4>
+                <span class="method get">GET</span> <code>/api/v1/administrators/system-config</code>
+                
+                <h5>Required Permission:</h5>
+                <p><code>system_config</code></p>
+            </div>
+
+            <div class="endpoint">
+                <h4>Update System Configuration</h4>
+                <span class="method put">PUT</span> <code>/api/v1/administrators/system-config</code>
+                
+                <h5>Request Body:</h5>
+                <pre><code>{
+    "pricing": {
+        "washDryFold": 1.25,
+        "deliveryFee": 10.00,
+        "rushServiceMultiplier": 1.5
+    },
+    "commissionRate": 0.10,
+    "businessHours": {
+        "monday": { "open": "06:00", "close": "22:00" },
+        "tuesday": { "open": "06:00", "close": "22:00" }
+        // ... other days
+    }
+}</code></pre>
+            </div>
+
+            <h2 id="operator-endpoints">Operator Endpoints</h2>
+
+            <div class="endpoint">
+                <h4>Get All Operators</h4>
+                <span class="method get">GET</span> <code>/api/v1/operators</code>
+                
+                <h5>Query Parameters:</h5>
+                <pre><code>status=active&workstation=washing_station_1&shift=morning</code></pre>
+            </div>
+
+            <div class="endpoint">
+                <h4>Create Operator</h4>
+                <span class="method post">POST</span> <code>/api/v1/operators</code>
+                
+                <h5>Request Body:</h5>
+                <pre><code>{
+    "firstName": "John",
+    "lastName": "Worker",
+    "email": "john.worker@wavemaxlaundry.com",
+    "pin": "1234",
+    "workstation": "washing_station_1",
+    "shift": "morning"
+}</code></pre>
+            </div>
+
+            <div class="endpoint">
+                <h4>Get Operator Dashboard</h4>
+                <span class="method get">GET</span> <code>/api/v1/operators/:operatorId/dashboard</code>
+                
+                <h5>Response:</h5>
+                <pre><code>{
+    "success": true,
+    "dashboard": {
+        "activeOrders": 5,
+        "completedToday": 12,
+        "pendingQualityCheck": 3,
+        "performance": {
+            "averageProcessingTime": 45,  // minutes
+            "qualityScore": 98.5,  // percentage
+            "ordersProcessed": 256
+        }
+    }
+}</code></pre>
+            </div>
+
+            <div class="endpoint">
+                <h4>Clock In/Out</h4>
+                <span class="method post">POST</span> <code>/api/v1/operators/:operatorId/clock</code>
+                
+                <h5>Request Body:</h5>
+                <pre><code>{
+    "action": "in"  // or "out"
+}</code></pre>
+            </div>
+
+            <h2 id="bag-endpoints">Bag Management Endpoints</h2>
+
+            <div class="endpoint">
+                <h4>Create Bag</h4>
+                <span class="method post">POST</span> <code>/api/v1/bags</code>
+                
+                <h5>Request Body:</h5>
+                <pre><code>{
+    "customerId": "CUST123",
+    "type": "standard",  // or "delicate", "heavy_duty"
+    "size": "large"  // small, medium, large
+}</code></pre>
+            </div>
+
+            <div class="endpoint">
+                <h4>Get Bag by Barcode</h4>
+                <span class="method get">GET</span> <code>/api/v1/bags/:barcode</code>
+                
+                <h5>Response:</h5>
+                <pre><code>{
+    "success": true,
+    "bag": {
+        "id": "5f7b1a2b3c4d5e6f7g8h9i0j",
+        "barcode": "BAG123456",
+        "customerId": "CUST123",
+        "status": "in_use",
+        "type": "standard",
+        "size": "large",
+        "createdAt": "2025-01-15T10:00:00.000Z"
+    }
+}</code></pre>
+            </div>
+
+            <div class="endpoint">
+                <h4>Update Bag Status</h4>
+                <span class="method put">PUT</span> <code>/api/v1/bags/:bagId</code>
+                
+                <h5>Request Body:</h5>
+                <pre><code>{
+    "status": "lost",  // in_use, returned, damaged, lost
+    "notes": "Customer reported bag missing"
+}</code></pre>
+            </div>
+
+            <h2 id="error-handling">Error Handling</h2>
+            
+            <p>All API errors follow a consistent format:</p>
+            
+            <div class="response-example">
+                <h5><span class="status-code error">400</span> Bad Request</h5>
+                <pre><code>{
+    "success": false,
+    "message": "Validation error",
+    "errors": {
+        "email": "Invalid email format",
+        "password": "Password must be at least 8 characters"
+    }
+}</code></pre>
+            </div>
+            
+            <div class="response-example">
+                <h5><span class="status-code error">401</span> Unauthorized</h5>
+                <pre><code>{
+    "success": false,
+    "message": "Invalid or expired token"
+}</code></pre>
+            </div>
+            
+            <div class="response-example">
+                <h5><span class="status-code error">403</span> Forbidden</h5>
+                <pre><code>{
+    "success": false,
+    "message": "Insufficient permissions"
+}</code></pre>
+            </div>
+            
+            <div class="response-example">
+                <h5><span class="status-code error">404</span> Not Found</h5>
+                <pre><code>{
+    "success": false,
+    "message": "Resource not found"
+}</code></pre>
+            </div>
+            
+            <div class="response-example">
+                <h5><span class="status-code error">429</span> Too Many Requests</h5>
+                <pre><code>{
+    "success": false,
+    "message": "Too many requests from this IP, please try again later"
+}</code></pre>
+            </div>
+            
+            <div class="response-example">
+                <h5><span class="status-code error">500</span> Internal Server Error</h5>
+                <pre><code>{
+    "success": false,
+    "message": "An error occurred processing your request"
+}</code></pre>
+            </div>
+
+            <h2 id="rate-limiting">Rate Limiting</h2>
+            
+            <p>The API implements rate limiting to prevent abuse:</p>
+            
+            <table>
+                <thead>
+                    <tr>
+                        <th>Endpoint Type</th>
+                        <th>Limit</th>
+                        <th>Window</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Authentication</td>
+                        <td>20 requests</td>
+                        <td>15 minutes</td>
+                    </tr>
+                    <tr>
+                        <td>General API</td>
+                        <td>100 requests</td>
+                        <td>15 minutes</td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <p>Rate limit information is included in response headers:</p>
+            <pre><code>X-RateLimit-Limit: 100
+X-RateLimit-Remaining: 95
+X-RateLimit-Reset: 1622544000</code></pre>
+
+            <div class="nav-buttons">
+                <a href="user-management.html">← User Management</a>
+                <a href="troubleshooting.html">Next: Troubleshooting →</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
