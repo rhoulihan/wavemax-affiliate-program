@@ -1,0 +1,141 @@
+WAVEMAX AFFILIATE PROGRAM DOCUMENTATION OUTLINE
+===============================================
+Created: 2025-05-29
+Status: In Progress
+
+DOCUMENTATION STRUCTURE
+----------------------
+
+1. INDEX.HTML - Documentation Homepage
+   - Overview of documentation
+   - Navigation to all sections
+   - Quick start guide
+   - Links to all documentation pages
+   Status: Pending
+
+2. SERVER-CONFIGURATION.HTML - Server Configuration Guide
+   - Environment variables configuration
+   - Database setup and configuration
+   - Email service configuration (SES, SMTP, Exchange)
+   - Security settings
+   - PM2 configuration
+   - Nginx setup
+   - SSL/TLS configuration
+   - Log management
+   - Backup procedures
+   Status: Pending
+
+3. EMBEDDING-GUIDE.HTML - WaveMAX Website Embedding
+   - Specific instructions for wavemaxlaundry.com
+   - Recommended iframe configuration
+   - Auto-resize implementation
+   - Navigation handling
+   - CSP compliance
+   - Analytics integration
+   - Mobile responsiveness
+   Status: Pending
+
+4. GENERIC-EMBEDDING.HTML - Generic Site Embedding
+   - General embedding instructions
+   - Multiple embedding options
+   - WordPress plugin/shortcode
+   - React/Vue/Angular integration
+   - Direct linking options
+   - Custom styling options
+   - Performance optimization
+   Status: Pending
+
+5. ADMINISTRATOR-SETUP.HTML - Administrator Account Setup
+   - Initial admin creation using script
+   - Manual admin creation via MongoDB
+   - Password security requirements
+   - First-time login procedures
+   - Security best practices
+   - Account recovery options
+   Status: Pending
+
+6. RBAC-GUIDE.HTML - Role-Based Access Control
+   - Overview of RBAC system
+   - Available roles (Admin, Operator, Affiliate, Customer)
+   - Permission definitions
+   - Permission assignment
+   - Custom permission creation
+   - Role hierarchy
+   - API endpoint permissions
+   Status: Pending
+
+7. USER-MANAGEMENT.HTML - User Management Guide
+   - Creating administrator accounts
+   - Creating operator accounts
+   - Managing affiliates
+   - Customer management
+   - Bulk operations
+   - Account deactivation/deletion
+   - Password policies
+   - Audit trail
+   Status: Pending
+
+8. API-REFERENCE.HTML - API Documentation
+   - Complete API endpoint reference
+   - Authentication methods
+   - Request/response formats
+   - Error codes
+   - Rate limiting
+   - CSRF token usage
+   - Example requests
+   - SDKs and client libraries
+   Status: Pending
+
+9. TROUBLESHOOTING.HTML - Troubleshooting Guide
+   - Common issues and solutions
+   - Error messages reference
+   - Debug mode configuration
+   - Log analysis
+   - Performance optimization
+   - Database maintenance
+   - Email delivery issues
+   Status: Pending
+
+10. SECURITY-GUIDE.HTML - Security Best Practices
+    - Security overview
+    - Authentication security
+    - Data encryption
+    - CSRF protection
+    - XSS prevention
+    - SQL injection prevention
+    - Security headers
+    - Audit logging
+    - Compliance considerations
+    Status: Pending
+
+11. DEPLOYMENT-GUIDE.HTML - Production Deployment
+    - Pre-deployment checklist
+    - Docker deployment
+    - PM2 deployment
+    - Database migration
+    - Zero-downtime deployment
+    - Rollback procedures
+    - Monitoring setup
+    - Scaling considerations
+    Status: Pending
+
+12. DEVELOPMENT-GUIDE.HTML - Developer Documentation
+    - Development environment setup
+    - Code structure
+    - Testing procedures
+    - Contributing guidelines
+    - Git workflow
+    - Code style guide
+    - Adding new features
+    Status: Pending
+
+PROGRESS LOG
+============
+[2025-05-29 10:00] - Created documentation outline
+[2025-05-29 10:01] - Created docs folder
+[2025-05-29 10:02] - Created index.html - Documentation homepage with search functionality and navigation to all sections
+[2025-05-29 10:03] - Created server-configuration.html - Complete server configuration guide including environment variables, database setup, email providers, PM2, Nginx, SSL, logging, and backups
+[2025-05-29 10:04] - Created embedding-guide.html - Specific embedding instructions for wavemaxlaundry.com including implementation code, analytics, mobile app integration, and troubleshooting
+[2025-05-29 10:05] - Created administrator-setup.html - Complete admin setup guide with script usage, manual creation, password management, security best practices, and troubleshooting
+[2025-05-29 10:06] - Created rbac-guide.html - Comprehensive RBAC documentation covering roles, permissions, implementation, and troubleshooting
+[2025-05-29 10:07] - Created user-management.html - Complete user management guide for all user types including creation, bulk operations, activity monitoring, and privacy compliance

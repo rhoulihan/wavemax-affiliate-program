@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WaveMAX Website Embedding Guide - WaveMAX Affiliate Program</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f8f9fa;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+            color: white;
+            padding: 30px 0;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        header h1 {
+            font-size: 2rem;
+            margin-bottom: 5px;
+        }
+        
+        header .breadcrumb {
+            opacity: 0.9;
+        }
+        
+        header .breadcrumb a {
+            color: white;
+            text-decoration: none;
+        }
+        
+        .content {
+            background: white;
+            border-radius: 8px;
+            padding: 40px;
+            margin-top: 30px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+        
+        h2 {
+            color: #1e3a8a;
+            margin-top: 30px;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+        
+        h3 {
+            color: #333;
+            margin-top: 25px;
+            margin-bottom: 15px;
+        }
+        
+        .implementation-box {
+            background: #f0f9ff;
+            border: 2px solid #3b82f6;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        code {
+            background: #f4f4f4;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+        
+        pre {
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 6px;
+            overflow-x: auto;
+            margin: 15px 0;
+        }
+        
+        pre code {
+            background: none;
+            padding: 0;
+            color: inherit;
+        }
+        
+        .warning {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 4px;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        
+        .warning strong {
+            color: #856404;
+        }
+        
+        .success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            border-radius: 4px;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        
+        .success strong {
+            color: #155724;
+        }
+        
+        .info {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+            border-radius: 4px;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        
+        .info strong {
+            color: #0c5460;
+        }
+        
+        .demo-container {
+            background: #f8f9fa;
+            border: 2px dashed #dee2e6;
+            border-radius: 8px;
+            padding: 30px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        
+        .demo-container h4 {
+            color: #495057;
+            margin-bottom: 20px;
+        }
+        
+        .checklist {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 6px;
+            margin: 20px 0;
+        }
+        
+        .checklist h4 {
+            margin-top: 0;
+            color: #1e3a8a;
+        }
+        
+        .checklist ul {
+            list-style: none;
+            padding-left: 0;
+        }
+        
+        .checklist li {
+            padding: 8px 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .checklist li:last-child {
+            border-bottom: none;
+        }
+        
+        .checklist li:before {
+            content: "✓ ";
+            color: #28a745;
+            font-weight: bold;
+            margin-right: 8px;
+        }
+        
+        .nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 40px;
+            padding-top: 30px;
+            border-top: 1px solid #e0e0e0;
+        }
+        
+        .nav-buttons a {
+            display: inline-block;
+            padding: 10px 20px;
+            background: #3b82f6;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            transition: background 0.2s;
+        }
+        
+        .nav-buttons a:hover {
+            background: #2563eb;
+        }
+        
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        .feature-card {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 6px;
+            text-align: center;
+        }
+        
+        .feature-card .icon {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="breadcrumb">
+                <a href="index.html">Documentation</a> → WaveMAX Website Embedding
+            </div>
+            <h1>WaveMAX Website Embedding Guide</h1>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="content">
+            <div class="implementation-box">
+                <h3>🎯 Quick Implementation for wavemaxlaundry.com</h3>
+                <p>This guide provides specific instructions for embedding the WaveMAX Affiliate Program into the main WaveMAX Laundry website.</p>
+            </div>
+
+            <h2>Complete Embed Code for WaveMAX Austin</h2>
+            
+            <p>Add this code to any page on wavemaxlaundry.com where you want the affiliate program to appear:</p>
+            
+            <pre><code>&lt;!-- WaveMAX Austin Affiliate Program Embed --&gt;
+&lt;div id="wavemax-affiliate-container" style="width: 100%; min-height: 600px;"&gt;
+    &lt;iframe 
+        id="wavemax-affiliate-iframe"
+        src="https://wavemax.promo/embed-app.html" 
+        width="100%" 
+        height="800" 
+        frameborder="0" 
+        scrolling="no"
+        style="width: 100%; min-height: 600px; border: none;"&gt;
+    &lt;/iframe&gt;
+&lt;/div&gt;
+
+&lt;script&gt;
+// Handle iframe communication for resizing and navigation
+window.addEventListener('message', function(event) {
+    if (event.origin !== 'https://wavemax.promo') return;
+    
+    const iframe = document.getElementById('wavemax-affiliate-iframe');
+    
+    // Handle iframe resize
+    if (event.data.type === 'resize' && event.data.data && event.data.data.height) {
+        iframe.style.height = event.data.data.height + 'px';
+    }
+    
+    // Handle scroll to top on navigation
+    if (event.data.type === 'scroll-to-top') {
+        iframe.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+});
+&lt;/script&gt;</code></pre>
+
+            <h2>Features & Benefits</h2>
+            
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <div class="icon">📱</div>
+                    <h4>Mobile Responsive</h4>
+                    <p>Automatically adapts to all screen sizes</p>
+                </div>
+                <div class="feature-card">
+                    <div class="icon">📏</div>
+                    <h4>Auto-Resize</h4>
+                    <p>Iframe height adjusts to content automatically</p>
+                </div>
+                <div class="feature-card">
+                    <div class="icon">🔒</div>
+                    <h4>Secure</h4>
+                    <p>HTTPS enforced with origin validation</p>
+                </div>
+                <div class="feature-card">
+                    <div class="icon">⚡</div>
+                    <h4>Fast Loading</h4>
+                    <p>Optimized for performance</p>
+                </div>
+            </div>
+
+            <h2>Direct Link Options</h2>
+            
+            <p>You can also add direct links to specific sections of the affiliate program:</p>
+            
+            <h3>Navigation Menu Links</h3>
+            <pre><code>&lt;!-- Add to your website navigation --&gt;
+&lt;ul class="nav-menu"&gt;
+    &lt;li&gt;&lt;a href="https://wavemax.promo/embed-app.html?route=/affiliate-register" target="_blank"&gt;Become an Affiliate&lt;/a&gt;&lt;/li&gt;
+    &lt;li&gt;&lt;a href="https://wavemax.promo/embed-app.html?route=/affiliate-login" target="_blank"&gt;Affiliate Login&lt;/a&gt;&lt;/li&gt;
+    &lt;li&gt;&lt;a href="https://wavemax.promo/embed-app.html?route=/customer-login" target="_blank"&gt;Customer Portal&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;</code></pre>
+
+            <h3>Call-to-Action Buttons</h3>
+            <pre><code>&lt;!-- CTA Button for Affiliate Registration --&gt;
+&lt;div class="affiliate-cta" style="text-align: center; padding: 40px 20px; background: #f8f9fa;"&gt;
+    &lt;h2&gt;Join Our Affiliate Program&lt;/h2&gt;
+    &lt;p&gt;Earn 10% recurring commission on every customer you refer!&lt;/p&gt;
+    &lt;a href="https://wavemax.promo/embed-app.html?route=/affiliate-register" 
+       target="_blank"
+       style="display: inline-block; margin-top: 20px; padding: 15px 40px; 
+              background: #3b82f6; color: white; text-decoration: none; 
+              border-radius: 8px; font-weight: bold; font-size: 18px;"&gt;
+        Start Earning Today
+    &lt;/a&gt;
+&lt;/div&gt;</code></pre>
+
+            <h2>Specific Page Integrations</h2>
+
+            <h3>Home Page Integration</h3>
+            <div class="implementation-box">
+                <p>Add a section on your homepage to promote the affiliate program:</p>
+                <pre><code>&lt;section class="affiliate-program-section"&gt;
+    &lt;div class="container"&gt;
+        &lt;h2&gt;Partner with WaveMAX&lt;/h2&gt;
+        &lt;p&gt;Join our affiliate program and earn commission on every referral&lt;/p&gt;
+        &lt;iframe 
+            src="https://wavemax.promo/embed-app.html?route=/landing" 
+            width="100%" 
+            height="600" 
+            frameborder="0"
+            style="border: none; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);"&gt;
+        &lt;/iframe&gt;
+    &lt;/div&gt;
+&lt;/section&gt;</code></pre>
+            </div>
+
+            <h3>Dedicated Affiliate Page</h3>
+            <p>Create a dedicated page at <code>wavemaxlaundry.com/affiliates</code>:</p>
+            <pre><code>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+    &lt;title&gt;Affiliate Program - WaveMAX Laundry Austin&lt;/title&gt;
+    &lt;meta name="description" content="Join WaveMAX Laundry's affiliate program. Earn 10% commission on wash, dry, fold services."&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;!-- Your site header --&gt;
+    
+    &lt;main&gt;
+        &lt;iframe 
+            id="wavemax-affiliate-app"
+            src="https://wavemax.promo/embed-app.html" 
+            width="100%" 
+            height="800" 
+            frameborder="0" 
+            scrolling="no"
+            style="width: 100%; min-height: 600px; border: none;"&gt;
+        &lt;/iframe&gt;
+    &lt;/main&gt;
+    
+    &lt;!-- Your site footer --&gt;
+    
+    &lt;script&gt;
+    window.addEventListener('message', function(event) {
+        if (event.origin !== 'https://wavemax.promo') return;
+        
+        const iframe = document.getElementById('wavemax-affiliate-app');
+        
+        if (event.data.type === 'resize') {
+            iframe.style.height = event.data.data.height + 'px';
+        }
+        
+        if (event.data.type === 'scroll-to-top') {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    });
+    &lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+
+            <h2>Performance Optimization</h2>
+
+            <h3>Preconnect for Faster Loading</h3>
+            <p>Add these tags to your site's <code>&lt;head&gt;</code> section:</p>
+            <pre><code>&lt;!-- Preconnect to affiliate domain for faster loading --&gt;
+&lt;link rel="preconnect" href="https://wavemax.promo"&gt;
+&lt;link rel="dns-prefetch" href="https://wavemax.promo"&gt;</code></pre>
+
+            <h3>Lazy Loading (for below-fold embeds)</h3>
+            <pre><code>&lt;iframe 
+    src="https://wavemax.promo/embed-app.html" 
+    width="100%" 
+    height="800" 
+    frameborder="0"
+    loading="lazy"
+    style="border: none;"&gt;
+&lt;/iframe&gt;</code></pre>
+
+            <h2>Analytics Integration</h2>
+
+            <p>Track affiliate program interactions with Google Analytics:</p>
+            <pre><code>&lt;script&gt;
+window.addEventListener('message', function(event) {
+    if (event.origin !== 'https://wavemax.promo') return;
+    
+    // Track page views within iframe
+    if (event.data.type === 'route-changed') {
+        gtag('event', 'page_view', {
+            page_title: 'Affiliate Program - ' + event.data.data.route,
+            page_location: 'https://wavemaxlaundry.com/affiliates' + event.data.data.route
+        });
+    }
+    
+    // Track conversions
+    if (event.data.type === 'affiliate-registered') {
+        gtag('event', 'conversion', {
+            'send_to': 'AW-XXXXXXXXX/XXXXXXXXX',
+            'value': 1.0,
+            'currency': 'USD'
+        });
+    }
+});
+&lt;/script&gt;</code></pre>
+
+            <h2>Mobile App Integration</h2>
+
+            <p>If you have a mobile app, you can open the affiliate program in a WebView:</p>
+            
+            <h3>iOS (Swift)</h3>
+            <pre><code>import WebKit
+
+class AffiliateViewController: UIViewController {
+    @IBOutlet weak var webView: WKWebView!
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        
+        if let url = URL(string: "https://wavemax.promo/embed-app.html") {
+            let request = URLRequest(url: url)
+            webView.load(request)
+        }
+    }
+}</code></pre>
+
+            <h3>Android (Kotlin)</h3>
+            <pre><code>class AffiliateActivity : AppCompatActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_affiliate)
+        
+        val webView = findViewById&lt;WebView&gt;(R.id.webView)
+        webView.settings.javaScriptEnabled = true
+        webView.loadUrl("https://wavemax.promo/embed-app.html")
+    }
+}</code></pre>
+
+            <h2>Testing Checklist</h2>
+
+            <div class="checklist">
+                <h4>Before Going Live</h4>
+                <ul>
+                    <li>Test on multiple browsers (Chrome, Safari, Firefox, Edge)</li>
+                    <li>Verify mobile responsiveness on iOS and Android</li>
+                    <li>Check auto-resize functionality</li>
+                    <li>Test all navigation links</li>
+                    <li>Verify HTTPS is working correctly</li>
+                    <li>Test form submissions (registration, login)</li>
+                    <li>Check analytics tracking</li>
+                    <li>Verify CSP compliance</li>
+                    <li>Test with ad blockers enabled</li>
+                    <li>Check page load performance</li>
+                </ul>
+            </div>
+
+            <h2>Content Security Policy</h2>
+
+            <div class="info">
+                <strong>ℹ️ CSP Headers:</strong> The embed is designed to work with strict CSP policies. Add these to your site's CSP if needed:
+            </div>
+
+            <pre><code>Content-Security-Policy: 
+    frame-src https://wavemax.promo; 
+    connect-src https://wavemax.promo;</code></pre>
+
+            <h2>Troubleshooting</h2>
+
+            <h3>Common Issues</h3>
+
+            <div class="warning">
+                <strong>Issue:</strong> Iframe not displaying<br>
+                <strong>Solution:</strong> Ensure both sites use HTTPS and check browser console for errors
+            </div>
+
+            <div class="warning">
+                <strong>Issue:</strong> Height not adjusting<br>
+                <strong>Solution:</strong> Verify the message event listener is properly implemented
+            </div>
+
+            <div class="warning">
+                <strong>Issue:</strong> Navigation not working<br>
+                <strong>Solution:</strong> Check that JavaScript is enabled and no errors in console
+            </div>
+
+            <h2>Support & Contact</h2>
+
+            <div class="success">
+                <strong>Need Help?</strong><br>
+                Technical Support: <a href="mailto:tech@wavemaxlaundry.com">tech@wavemaxlaundry.com</a><br>
+                Business Questions: <a href="mailto:affiliates@wavemaxlaundry.com">affiliates@wavemaxlaundry.com</a>
+            </div>
+
+            <div class="demo-container">
+                <h4>Live Demo</h4>
+                <p>See the affiliate program in action:</p>
+                <a href="https://wavemax.promo/embed-app.html" target="_blank" 
+                   style="display: inline-block; padding: 12px 30px; background: #3b82f6; 
+                          color: white; text-decoration: none; border-radius: 6px;">
+                    View Live Demo
+                </a>
+            </div>
+
+            <div class="nav-buttons">
+                <a href="server-configuration.html">← Server Configuration</a>
+                <a href="generic-embedding.html">Next: Generic Embedding →</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
