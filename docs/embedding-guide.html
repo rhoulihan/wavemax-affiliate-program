@@ -248,9 +248,9 @@
 &lt;div id="wavemax-affiliate-container" style="width: 100%; min-height: 600px;"&gt;
     &lt;iframe 
         id="wavemax-affiliate-iframe"
-        src="https://wavemax.promo/embed-app.html" 
+        src=""
         width="100%" 
-        height="800" 
+        height="600" 
         frameborder="0" 
         scrolling="no"
         style="width: 100%; min-height: 600px; border: none;"&gt;
@@ -258,23 +258,52 @@
 &lt;/div&gt;
 
 &lt;script&gt;
-// Handle iframe communication for resizing and navigation
-window.addEventListener('message', function(event) {
-    if (event.origin !== 'https://wavemax.promo') return;
+(function() {
+    // Build iframe URL from parent page parameters
+    function buildIframeUrl() {
+        const baseUrl = 'https://wavemax.promo/embed-app.html';
+        const params = new URLSearchParams(window.location.search);
+        const iframeParams = new URLSearchParams();
+        
+        // Pass through parameters: login, affid/affiliate, pickup, route
+        ['login', 'affid', 'affiliate', 'pickup', 'route'].forEach(param =&gt; {
+            const value = params.get(param);
+            if (value) {
+                iframeParams.set(param === 'affiliate' ? 'affid' : param, value);
+            }
+        });
+        
+        // Default to landing if no params
+        if (!iframeParams.toString()) {
+            iframeParams.set('route', '/landing');
+        }
+        
+        return `${baseUrl}?${iframeParams.toString()}`;
+    }
     
+    // Set iframe source
     const iframe = document.getElementById('wavemax-affiliate-iframe');
-    
-    // Handle iframe resize
-    if (event.data.type === 'resize' && event.data.data && event.data.data.height) {
-        iframe.style.height = event.data.data.height + 'px';
+    if (iframe) {
+        iframe.src = buildIframeUrl();
     }
     
-    // Handle scroll to top on navigation
-    if (event.data.type === 'scroll-to-top') {
-        iframe.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-});
+    // Handle iframe messages
+    window.addEventListener('message', function(e) {
+        if (e.origin !== 'https://wavemax.promo') return;
+        
+        const iframe = document.getElementById('wavemax-affiliate-iframe');
+        
+        // Auto-resize iframe
+        if (e.data?.type === 'resize' && e.data.data?.height) {
+            iframe.style.height = e.data.data.height + 'px';
+        }
+        
+        // Scroll to top
+        if (e.data?.type === 'scroll-to-top') {
+            iframe.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    });
+})();
 &lt;/script&gt;</code></pre>
 
             <h2>Features & Benefits</h2>
@@ -301,6 +330,35 @@ window.addEventListener('message', function(event) {
                     <p>Optimized for performance</p>
                 </div>
             </div>
+
+            <h2>URL Parameters</h2>
+            
+            <p>The iframe automatically passes URL parameters from your page to the embedded application. This enables deep linking and proper routing:</p>
+            
+            <div class="info">
+                <strong>📌 Important:</strong> Customer registration requires an affiliate ID. There is no general registration link - customers must use affiliate-specific links.
+            </div>
+            
+            <h3>Supported Parameters</h3>
+            <ul>
+                <li><code>?affid=AFFILIATE_ID</code> - Routes directly to customer registration for that affiliate</li>
+                <li><code>?login=customer</code> - Shows customer login page</li>
+                <li><code>?login=customer&pickup=true</code> - Customer login → Schedule pickup flow</li>
+                <li><code>?login=affiliate</code> - Shows affiliate login page</li>
+                <li><code>?login=admin</code> - Shows administrator login page</li>
+                <li><code>?login=operator</code> - Shows operator login page</li>
+                <li><code>?route=/specific-page</code> - Routes to any specific page</li>
+            </ul>
+            
+            <h3>Example URLs</h3>
+            <pre><code>// Affiliate shares this link for customer registration
+https://wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program?affid=AFF123456
+
+// Customer login from email
+https://wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program?login=customer
+
+// Schedule pickup after login
+https://wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program?login=customer&pickup=true</code></pre>
 
             <h2>Direct Link Options</h2>
             

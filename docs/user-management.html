@@ -490,13 +490,17 @@ PUT /api/v1/affiliates/{affiliateId}/status
                 <h3>Customer Creation Methods</h3>
                 
                 <h4>1. Affiliate Registration</h4>
-                <p>Customers register through affiliate links:</p>
+                <p>Customers register through affiliate-specific links:</p>
                 <ul>
-                    <li>Affiliate shares unique registration link</li>
-                    <li>Customer fills out registration form</li>
-                    <li>Automatically linked to affiliate</li>
-                    <li>Welcome email sent to customer</li>
+                    <li>Affiliate shares unique registration link with their ID (e.g., <code>?affid=AFF123456</code>)</li>
+                    <li>Customer is directed straight to registration form (no general registration available)</li>
+                    <li>Registration form displays affiliate information and delivery fee</li>
+                    <li>Customer account is automatically linked to the affiliate</li>
+                    <li>Welcome email sent with login instructions</li>
                 </ul>
+                <div class="info">
+                    <strong>📌 Important:</strong> There is no general customer registration. Customers must use an affiliate-specific link to register.
+                </div>
 
                 <h4>2. Admin Direct Creation</h4>
                 <pre><code>POST /api/v1/customers

@@ -243,14 +243,49 @@
             <div class="version-nav">
                 <h3>Quick Navigation</h3>
                 <ul>
-                    <li><a href="#v1.2.0">v1.2.0 - Current Release</a></li>
+                    <li><a href="#v1.2.1">v1.2.1 - Current Release</a></li>
+                    <li><a href="#v1.2.0">v1.2.0 - Documentation System</a></li>
                     <li><a href="#v1.1.0">v1.1.0 - CSRF Protection</a></li>
                     <li><a href="#v1.0.0">v1.0.0 - Initial Release</a></li>
                 </ul>
             </div>
 
+            <div id="v1.2.1" class="release">
+                <h2>Version 1.2.1 <span class="tag new">Latest</span></h2>
+                <div class="release-date">Released on January 30, 2025</div>
+                
+                <h3>🔧 Improvements</h3>
+                <ul>
+                    <li><span class="tag improved">IMPROVED</span> <strong>Customer Registration Flow:</strong> Simplified registration process - customers now go directly to registration when accessing with affiliate ID</li>
+                    <li><span class="tag improved">IMPROVED</span> <strong>Iframe Embedding:</strong> Created proper embed code with URL parameter passing for wavemaxlaundry.com</li>
+                    <li><span class="tag improved">IMPROVED</span> <strong>Email Links:</strong> Updated all customer email links to use proper login parameters</li>
+                    <li><span class="tag improved">IMPROVED</span> <strong>Success Page Navigation:</strong> Fixed navigation buttons to work correctly within iframe context</li>
+                </ul>
+
+                <h3>🐛 Bug Fixes</h3>
+                <ul>
+                    <li><span class="tag fixed">FIXED</span> Customer registration form not loading when accessed with affiliate ID</li>
+                    <li><span class="tag fixed">FIXED</span> URL parameters not being passed from parent page to iframe</li>
+                    <li><span class="tag fixed">FIXED</span> Schedule pickup links using incorrect parameters</li>
+                    <li><span class="tag fixed">FIXED</span> Customer login page showing non-functional "Register here" link</li>
+                </ul>
+
+                <h3>🚫 Removed Features</h3>
+                <ul>
+                    <li><span class="tag removed">REMOVED</span> "Register here" link from customer login page - customers must use affiliate-specific registration links</li>
+                </ul>
+
+                <h3>📚 Documentation</h3>
+                <ul>
+                    <li>Updated embedding guide with new iframe implementation code</li>
+                    <li>Added URL parameter documentation</li>
+                    <li>Created wavemaxlaundry-iframe-embed.html with complete implementation</li>
+                    <li>Updated README with iframe embedding instructions</li>
+                </ul>
+            </div>
+
             <div id="v1.2.0" class="release">
-                <h2>Version 1.2.0 <span class="tag new">Latest</span></h2>
+                <h2>Version 1.2.0</h2>
                 <div class="release-date">Released on May 29, 2025</div>
                 
                 <h3>✨ New Features</h3>
