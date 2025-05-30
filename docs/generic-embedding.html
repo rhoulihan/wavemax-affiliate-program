@@ -292,16 +292,28 @@ window.addEventListener('message', function(event) {
                     </thead>
                     <tbody>
                         <tr>
-                            <td><code>page</code></td>
+                            <td><code>route</code></td>
                             <td>string</td>
-                            <td>Initial page to display</td>
-                            <td>affiliate-login, customer-register</td>
+                            <td>Specific route to display</td>
+                            <td>/affiliate-login, /customer-dashboard</td>
                         </tr>
                         <tr>
-                            <td><code>affiliateId</code></td>
+                            <td><code>affid</code></td>
                             <td>string</td>
-                            <td>Pre-fill affiliate ID</td>
-                            <td>AFF123</td>
+                            <td>Affiliate ID for customer registration</td>
+                            <td>AFF123456</td>
+                        </tr>
+                        <tr>
+                            <td><code>login</code></td>
+                            <td>string</td>
+                            <td>Login type selector</td>
+                            <td>customer, affiliate, admin, operator</td>
+                        </tr>
+                        <tr>
+                            <td><code>pickup</code></td>
+                            <td>boolean</td>
+                            <td>Redirect to schedule pickup after login</td>
+                            <td>true</td>
                         </tr>
                         <tr>
                             <td><code>theme</code></td>
@@ -341,7 +353,7 @@ window.addEventListener('message', function(event) {
 
             <h3>Customer Registration with Affiliate</h3>
             <pre><code>&lt;iframe 
-    src="https://wavemax.promo/embed-app.html?page=customer-register&affiliateId=AFF123&hideNav=true"
+    src="https://wavemax.promo/embed-app.html?affid=AFF123456"
     width="100%"
     height="800"
     frameborder="0"&gt;
