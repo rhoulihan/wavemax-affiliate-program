@@ -110,7 +110,7 @@ async function loadDashboardData() {
     }
 
     // Fetch dashboard stats
-    const statsResponse = await fetch(`/api/customers/${customerId}/dashboard`, {
+    const statsResponse = await authenticatedFetch(`/api/customers/${customerId}/dashboard`, {
       headers: {
         'Authorization': `Bearer ${token}`
       }
@@ -118,11 +118,16 @@ async function loadDashboardData() {
 
     if (statsResponse.ok) {
       const statsResult = await statsResponse.json();
-      if (statsResult.success && statsResult.stats) {
-        document.getElementById('activeOrders').textContent = statsResult.stats.activeOrdersCount || 0;
-        document.getElementById('completedOrders').textContent = statsResult.stats.completedOrdersCount || 0;
-        document.getElementById('totalSpent').textContent = `$${(statsResult.stats.totalSpent || 0).toFixed(2)}`;
+      console.log('Dashboard stats response:', statsResult);
+      if (statsResult.success && statsResult.dashboard && statsResult.dashboard.statistics) {
+        const stats = statsResult.dashboard.statistics;
+        console.log('Active orders count:', stats.activeOrders);
+        document.getElementById('activeOrders').textContent = stats.activeOrders || 0;
+        document.getElementById('completedOrders').textContent = stats.completedOrders || 0;
+        document.getElementById('totalSpent').textContent = `$${(stats.totalSpent || 0).toFixed(2)}`;
       }
+    } else {
+      console.error('Failed to fetch dashboard stats:', statsResponse.status, statsResponse.statusText);
     }
 
     // Load recent orders
