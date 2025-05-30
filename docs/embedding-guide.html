@@ -306,6 +306,38 @@
 })();
 &lt;/script&gt;</code></pre>
 
+            <h2>Simple Alternative (Recommended)</h2>
+            
+            <p>If you prefer a simpler implementation that passes all URL parameters automatically:</p>
+            
+            <pre><code>&lt;iframe 
+    id="wavemax-iframe"
+    width="100%" 
+    height="800" 
+    frameborder="0" 
+    style="border: none;"&gt;
+&lt;/iframe&gt;
+
+&lt;script&gt;
+(function() {
+    // Pass URL parameters from parent page to iframe
+    const urlParams = new URLSearchParams(window.location.search);
+    let iframeSrc = 'https://wavemax.promo/embed-app.html';
+    if (urlParams.toString()) {
+        iframeSrc += '?' + urlParams.toString();
+    }
+    document.getElementById('wavemax-iframe').src = iframeSrc;
+    
+    // Handle auto-resize messages from iframe
+    window.addEventListener('message', function(e) {
+        if (e.origin !== 'https://wavemax.promo') return;
+        if (e.data && e.data.type === 'resize' && e.data.data && e.data.data.height) {
+            document.getElementById('wavemax-iframe').style.height = e.data.data.height + 'px';
+        }
+    });
+})();
+&lt;/script&gt;</code></pre>
+
             <h2>Features & Benefits</h2>
             
             <div class="feature-grid">
@@ -565,6 +597,16 @@ class AffiliateViewController: UIViewController {
             <div class="warning">
                 <strong>Issue:</strong> Height not adjusting<br>
                 <strong>Solution:</strong> Verify the message event listener is properly implemented
+            </div>
+
+            <div class="warning">
+                <strong>Issue:</strong> URL parameters not being passed to iframe (e.g., ?login=affiliate shows landing page)<br>
+                <strong>Solution:</strong> Ensure the JavaScript code is included and the iframe src is set dynamically. The iframe src must be set by JavaScript, not hardcoded in HTML.
+            </div>
+
+            <div class="info">
+                <strong>Testing:</strong> Use our test page to verify your parameters are working: <br>
+                <code>https://wavemax.promo/test-iframe-embed.html?login=affiliate</code>
             </div>
 
             <div class="warning">

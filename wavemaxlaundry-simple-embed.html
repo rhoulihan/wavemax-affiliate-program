@@ -1,0 +1,36 @@
+<!-- SIMPLE WAVEMAX AFFILIATE IFRAME EMBED CODE -->
+<!-- Replace your current iframe with this code -->
+
+<iframe 
+    id="wavemax-iframe"
+    width="100%" 
+    height="800" 
+    frameborder="0" 
+    style="border: none;">
+</iframe>
+
+<script>
+// This script MUST be included for the iframe to work properly
+(function() {
+    // Get current page URL parameters
+    const urlParams = new URLSearchParams(window.location.search);
+    
+    // Build iframe URL with parameters
+    let iframeSrc = 'https://wavemax.promo/embed-app.html';
+    if (urlParams.toString()) {
+        iframeSrc += '?' + urlParams.toString();
+    }
+    
+    // Set iframe source
+    document.getElementById('wavemax-iframe').src = iframeSrc;
+    
+    // Handle iframe auto-resize
+    window.addEventListener('message', function(e) {
+        if (e.origin !== 'https://wavemax.promo') return;
+        
+        if (e.data && e.data.type === 'resize' && e.data.data && e.data.data.height) {
+            document.getElementById('wavemax-iframe').style.height = e.data.data.height + 'px';
+        }
+    });
+})();
+</script>
