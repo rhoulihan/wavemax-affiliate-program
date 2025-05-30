@@ -416,11 +416,39 @@ The WaveMAX Affiliate Program is designed to be embedded as an iframe on externa
 
 ### Embedding on External Sites
 
-To embed the WaveMAX Affiliate Program on your website (e.g., wavemaxlaundry.com), use the provided iframe embed code located in:
-- `wavemaxlaundry-iframe-embed.html` - Complete HTML implementation
-- `wavemaxlaundry-iframe-code.txt` - Documentation and implementation guide
+To embed the WaveMAX Affiliate Program on your website (e.g., wavemaxlaundry.com), use this iframe code:
 
-The embed code handles:
+```html
+<iframe 
+    id="wavemax-iframe"
+    width="100%" 
+    height="800" 
+    frameborder="0" 
+    style="border: none;">
+</iframe>
+
+<script>
+(function() {
+    // Pass URL parameters from parent page to iframe
+    const urlParams = new URLSearchParams(window.location.search);
+    let iframeSrc = 'https://wavemax.promo/embed-app.html';
+    if (urlParams.toString()) {
+        iframeSrc += '?' + urlParams.toString();
+    }
+    document.getElementById('wavemax-iframe').src = iframeSrc;
+    
+    // Handle auto-resize messages from iframe
+    window.addEventListener('message', function(e) {
+        if (e.origin !== 'https://wavemax.promo') return;
+        if (e.data && e.data.type === 'resize' && e.data.data && e.data.data.height) {
+            document.getElementById('wavemax-iframe').style.height = e.data.data.height + 'px';
+        }
+    });
+})();
+</script>
+```
+
+This embed code handles:
 - Dynamic URL parameter passing from parent to iframe
 - Automatic height adjustment based on content
 - Secure cross-origin communication
@@ -434,6 +462,14 @@ The embed code handles:
 - `?login=affiliate` - Show affiliate login page
 - `?login=admin` - Show administrator login page
 - `?login=operator` - Show operator login page
+
+### Troubleshooting Iframe Issues
+
+If URL parameters are not being passed to the iframe:
+1. Ensure the JavaScript code is included and executes after the iframe element
+2. Check browser console for any errors
+3. Verify the iframe ID matches (`wavemax-iframe`)
+4. Test with the provided test page: `https://wavemax.promo/test-iframe-embed.html`
 
 ### Security Headers
 - Content Security Policy (CSP)

@@ -178,7 +178,8 @@ exports.sendAffiliateWelcomeEmail = async (affiliate) => {
       last_name: affiliate.lastName,
       affiliate_id: affiliate.affiliateId,
       registration_url: registrationUrl,
-      login_url: `${process.env.BASE_URL || 'https://wavemax.promo'}/embed-app.html?login=affiliate`,
+      login_url: `https://www.wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program?login=affiliate`,
+      dashboard_url: `https://www.wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program?login=affiliate`,
       current_year: new Date().getFullYear()
     };
 
