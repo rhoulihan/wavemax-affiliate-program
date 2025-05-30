@@ -48,6 +48,18 @@ The WaveMAX Affiliate Program enables individuals to register as affiliates, onb
   - Enhanced profile editing in customer dashboard
 
 ### Bug Fixes and Optimizations
+- **Customer Registration Flow**: 
+  - Fixed customer registration routing when accessed with affiliate ID
+  - Removed "Register here" link from customer login page (customers must use affiliate-specific links)
+  - Improved handling of affiliate ID parameters across navigation
+- **Email Updates**:
+  - Updated customer email links to use proper login parameters
+  - Fixed schedule pickup links to use login=customer instead of affid
+  - Ensured consistent URL structure across all email templates
+- **Iframe Embedding**:
+  - Created proper iframe embed code for wavemaxlaundry.com
+  - Fixed URL parameter passing from parent page to iframe
+  - Added automatic height adjustment and cross-origin communication
 - **Iframe Height Management**: Fixed infinite resize loops in embedded applications
   - Implemented debouncing for resize events
   - Added proper height reset on page navigation
@@ -397,6 +409,31 @@ wavemax-affiliate-program/
 - NoSQL injection prevention
 - Rate limiting on authentication endpoints
 - Comprehensive request validation
+
+## Iframe Embedding
+
+The WaveMAX Affiliate Program is designed to be embedded as an iframe on external websites. The application includes proper URL parameter handling and cross-origin communication.
+
+### Embedding on External Sites
+
+To embed the WaveMAX Affiliate Program on your website (e.g., wavemaxlaundry.com), use the provided iframe embed code located in:
+- `wavemaxlaundry-iframe-embed.html` - Complete HTML implementation
+- `wavemaxlaundry-iframe-code.txt` - Documentation and implementation guide
+
+The embed code handles:
+- Dynamic URL parameter passing from parent to iframe
+- Automatic height adjustment based on content
+- Secure cross-origin communication
+- Proper routing for affiliate links, customer logins, and scheduling
+
+### Supported URL Parameters
+
+- `?affid=AFFILIATE_ID` - Direct customer to registration for specific affiliate
+- `?login=customer` - Show customer login page
+- `?login=customer&pickup=true` - Customer login → Schedule pickup flow
+- `?login=affiliate` - Show affiliate login page
+- `?login=admin` - Show administrator login page
+- `?login=operator` - Show operator login page
 
 ### Security Headers
 - Content Security Policy (CSP)

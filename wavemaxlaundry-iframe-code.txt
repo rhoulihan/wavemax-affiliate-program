@@ -1,0 +1,106 @@
+WAVEMAX AFFILIATE PROGRAM - IFRAME EMBED CODE FOR WAVEMAXLAUNDRY.COM
+=====================================================================
+
+Replace the current iframe code on the WaveMAXLaundry.com website with this code:
+
+<!-- START WAVEMAX EMBED -->
+<div id="wavemax-embed-container" style="width: 100%; min-height: 600px;">
+    <iframe 
+        id="wavemax-affiliate-iframe"
+        src=""
+        width="100%" 
+        height="600" 
+        frameborder="0" 
+        scrolling="no"
+        style="width: 100%; min-height: 600px; border: none;">
+    </iframe>
+</div>
+
+<script>
+(function() {
+    // Build iframe URL from parent page parameters
+    function buildIframeUrl() {
+        const baseUrl = 'https://wavemax.promo/embed-app.html';
+        const params = new URLSearchParams(window.location.search);
+        const iframeParams = new URLSearchParams();
+        
+        // Pass through parameters: login, affid/affiliate, pickup, route
+        ['login', 'affid', 'affiliate', 'pickup', 'route'].forEach(param => {
+            const value = params.get(param);
+            if (value) {
+                iframeParams.set(param === 'affiliate' ? 'affid' : param, value);
+            }
+        });
+        
+        // Default to landing if no params
+        if (!iframeParams.toString()) {
+            iframeParams.set('route', '/landing');
+        }
+        
+        return `${baseUrl}?${iframeParams.toString()}`;
+    }
+    
+    // Set iframe source
+    const iframe = document.getElementById('wavemax-affiliate-iframe');
+    if (iframe) {
+        iframe.src = buildIframeUrl();
+    }
+    
+    // Handle iframe messages
+    window.addEventListener('message', function(e) {
+        if (e.origin !== 'https://wavemax.promo') return;
+        
+        const iframe = document.getElementById('wavemax-affiliate-iframe');
+        
+        // Auto-resize iframe
+        if (e.data?.type === 'resize' && e.data.data?.height) {
+            iframe.style.height = e.data.data.height + 'px';
+        }
+        
+        // Scroll to top
+        if (e.data?.type === 'scroll-to-top') {
+            iframe.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    });
+})();
+</script>
+<!-- END WAVEMAX EMBED -->
+
+
+TESTING URLs:
+=============
+
+After implementing this code, test these URLs:
+
+1. Affiliate Registration:
+   https://www.wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program?affid=AFF227530
+
+2. Customer Login:
+   https://www.wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program?login=customer
+
+3. Schedule Pickup (from email):
+   https://www.wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program?login=customer&pickup=true
+
+4. Customer Dashboard:
+   https://www.wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program?login=customer
+
+5. Affiliate Login:
+   https://www.wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program?login=affiliate
+
+
+HOW IT WORKS:
+=============
+
+1. The script reads URL parameters from the parent page (wavemaxlaundry.com)
+2. It passes these parameters to the iframe URL (wavemax.promo)
+3. The iframe dynamically adjusts its height based on content
+4. All navigation stays within the iframe unless explicitly directed outside
+
+
+IMPORTANT NOTES:
+================
+
+- The iframe src is set dynamically based on URL parameters
+- Security check ensures only messages from wavemax.promo are accepted
+- Auto-resize keeps the iframe properly sized for content
+- All parameters are preserved when passed to the iframe

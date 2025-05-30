@@ -17,33 +17,11 @@
   }
 
   // Navigate parent frame
-  function navigateParent(page) {
-    sendMessageToParent('navigate', { page: page });
+  function navigateParent(page, params = {}) {
+    sendMessageToParent('navigate', { page: page, params: params });
   }
 
-  // Navigate to register
-  function navigateToRegister() {
-    console.log('navigateToRegister called');
-    
-    // Simply navigate to customer register without any affiliate logic
-    navigateParent('customer-register');
-  }
-
-  // Setup register link click handler
-  function setupRegisterLink() {
-    console.log('Setting up register link');
-    const registerLink = document.getElementById('registerLink');
-    if (registerLink) {
-      console.log('Register link found, adding click handler');
-      registerLink.addEventListener('click', function(e) {
-        e.preventDefault();
-        console.log('Register link clicked');
-        navigateToRegister();
-      });
-    } else {
-      console.log('Register link not found');
-    }
-  }
+  // Register link functionality removed - customers must use affiliate-specific registration links
 
   // Setup form submission
   function setupFormSubmission() {
@@ -158,9 +136,11 @@
     console.log('Customer login embed initializing');
     console.log('Document ready state:', document.readyState);
     console.log('Current URL:', window.location.href);
+    console.log('URL search string:', window.location.search);
 
     // Check URL parameters
     const urlParams = new URLSearchParams(window.location.search);
+    console.log('All URL parameters:', Array.from(urlParams.entries()));
 
     // Store pickup flag if present
     const pickupFlag = urlParams.get('pickup');
@@ -170,7 +150,6 @@
     }
 
     // Setup components
-    setupRegisterLink();
     setupFormSubmission();
 
     // Notify parent that iframe is loaded

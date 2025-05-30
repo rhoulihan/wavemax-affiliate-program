@@ -370,8 +370,8 @@ exports.sendCustomerWelcomeEmail = async (customer, bagBarcode, affiliate) => {
       affiliate_phone: affiliate.phone,
       affiliate_email: affiliate.email,
       bag_barcode: bagBarcode,
-      login_url: `${process.env.BASE_URL || 'https://wavemax.promo'}/embed-app.html?login=customer`,
-      schedule_url: `${process.env.BASE_URL || 'https://wavemax.promo'}/embed-app.html?login=customer&pickup=true`,
+      login_url: `https://wavemax.promo/embed-app.html?login=customer`,
+      schedule_url: `https://wavemax.promo/embed-app.html?login=customer&pickup=true`,
       current_year: new Date().getFullYear()
     };
 
@@ -405,7 +405,7 @@ exports.sendCustomerOrderConfirmationEmail = async (customer, order, affiliate) 
       affiliate_name: `${affiliate.firstName} ${affiliate.lastName}`,
       affiliate_phone: affiliate.phone,
       affiliate_email: affiliate.email,
-      login_url: `${process.env.BASE_URL || 'https://wavemax.promo'}/embed-app.html?login=customer`,
+      login_url: `https://wavemax.promo/embed-app.html?login=customer`,
       current_year: new Date().getFullYear()
     };
 
@@ -448,7 +448,7 @@ exports.sendOrderStatusUpdateEmail = async (customer, order, status) => {
       status_message: statusMessages[status],
       weight_info: order.actualWeight ? `Your laundry weighs ${order.actualWeight} lbs.` : '',
       total_info: order.actualTotal ? `Final total: $${order.actualTotal.toFixed(2)}` : '',
-      dashboard_url: `${process.env.BASE_URL || 'https://wavemax.promo'}/embed-app.html?route=/customer-dashboard`,
+      dashboard_url: `https://wavemax.promo/embed-app.html?login=customer`,
       current_year: new Date().getFullYear()
     };
 
@@ -476,8 +476,8 @@ exports.sendOrderCancellationEmail = async (customer, order) => {
       order_id: order.orderId,
       pickup_date: new Date(order.pickupDate).toLocaleDateString(),
       cancellation_time: new Date().toLocaleTimeString(),
-      dashboard_url: `${process.env.BASE_URL || 'https://wavemax.promo'}/embed-app.html?route=/customer-dashboard`,
-      schedule_url: `${process.env.BASE_URL || 'https://wavemax.promo'}/embed-app.html?route=/schedule-pickup`,
+      dashboard_url: `https://wavemax.promo/embed-app.html?login=customer`,
+      schedule_url: `https://wavemax.promo/embed-app.html?login=customer&pickup=true`,
       current_year: new Date().getFullYear()
     };
 
