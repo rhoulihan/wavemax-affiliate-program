@@ -76,23 +76,35 @@ function displayCustomerData(data) {
   document.getElementById('serviceArea').textContent = 'Austin, TX area';
   document.getElementById('deliveryFee').textContent = `$${parseFloat(data.deliveryFee).toFixed(2)} per pickup/delivery`;
 
-  // Update button links to redirect to wavemaxlaundry.com
+  // Update button links to use direct navigation
   const schedulePickupBtn = document.getElementById('schedulePickupBtn');
   const customerDashboardBtn = document.getElementById('customerDashboardBtn');
 
   if (schedulePickupBtn) {
-    schedulePickupBtn.href = `https://www.wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program?affid=${data.affiliateId}&pickup=true`;
+    schedulePickupBtn.href = 'https://wavemax.promo/embed-app.html?login=customer&pickup=true';
     schedulePickupBtn.onclick = function(e) {
       e.preventDefault();
-      window.top.location.href = this.href;
+      // For embedded context, navigate within iframe
+      if (window.parent !== window) {
+        window.location.href = '/embed-app.html?login=customer&pickup=true';
+      } else {
+        // For direct access, use the full URL
+        window.location.href = this.href;
+      }
     };
   }
 
   if (customerDashboardBtn) {
-    customerDashboardBtn.href = `https://www.wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program?affid=${data.affiliateId}`;
+    customerDashboardBtn.href = 'https://wavemax.promo/embed-app.html?login=customer';
     customerDashboardBtn.onclick = function(e) {
       e.preventDefault();
-      window.top.location.href = this.href;
+      // For embedded context, navigate within iframe
+      if (window.parent !== window) {
+        window.location.href = '/embed-app.html?login=customer';
+      } else {
+        // For direct access, use the full URL
+        window.location.href = this.href;
+      }
     };
   }
 

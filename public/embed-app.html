@@ -95,9 +95,24 @@
         function getRouteFromUrl() {
             const params = new URLSearchParams(window.location.search);
             
-            // Check for login parameter first
+            // Check if only affid parameter is present (for affiliate customer registration)
+            const affid = params.get('affid') || params.get('affiliate');
+            const hasOnlyAffid = affid && params.size === 1 && !params.get('route') && !params.get('login');
+            
+            if (hasOnlyAffid) {
+                console.log('Only affid parameter found, routing to customer registration');
+                return '/customer-register';
+            }
+            
+            // Check for login parameter
             const login = params.get('login');
             if (login) {
+                // Special case: if login=customer with affid, redirect to registration
+                if (login === 'customer' && affid) {
+                    console.log('Customer login with affid, redirecting to registration');
+                    return '/customer-register';
+                }
+                
                 switch(login) {
                     case 'admin':
                         return '/administrator-login';
@@ -114,6 +129,13 @@
             }
             
             const route = params.get('route') || '/';
+            
+            // If route is customer-login with affid, redirect to registration
+            if (route === '/customer-login' && affid) {
+                console.log('Customer login route with affid, redirecting to registration');
+                return '/customer-register';
+            }
+            
             console.log('Route from URL:', route);
             return route;
         }
@@ -133,6 +155,7 @@
         // Load page content
         async function loadPage(route) {
             console.log('Loading page for route:', route);
+            console.log('Current window.location.search:', window.location.search);
             
             // Clean up current page before loading new one
             cleanupCurrentPage();
@@ -156,9 +179,11 @@
             try {
                 container.innerHTML = '<div class="loading"><i class="fas fa-spinner fa-spin me-2"></i>Loading...</div>';
                 
-                // Build URL with current query parameters
+                // Build URL with current query parameters - use fresh read of location
                 const currentParams = new URLSearchParams(window.location.search);
+                console.log('Current params for fetch:', Array.from(currentParams.entries()));
                 const fetchUrl = BASE_URL + pagePath + (currentParams.toString() ? '?' + currentParams.toString() : '');
+                console.log('Fetching URL:', fetchUrl);
                 
                 const response = await fetch(fetchUrl);
                 if (!response.ok) throw new Error('Failed to load page');
@@ -355,7 +380,18 @@
             
             // Update URL parameter
             const url = new URL(window.location);
+            
+            // Preserve important parameters like affid and affiliate
+            const currentParams = new URLSearchParams(window.location.search);
+            const affiliateId = currentParams.get('affid') || currentParams.get('affiliate');
+            
+            // Clear the search params and rebuild
             url.searchParams.set('route', route);
+            
+            // Preserve affiliate ID if present
+            if (affiliateId && !params.affid && !params.affiliate) {
+                url.searchParams.set('affid', affiliateId);
+            }
             
             // Add any additional parameters
             Object.keys(params).forEach(key => {
@@ -454,8 +490,9 @@
             console.log('Extracted message type:', messageType);
             console.log('Extracted message data:', messageData);
             
-            if (messageType === 'navigate' && messageData) {
+            if (messageType === 'navigate') {
                 console.log('Processing navigation message');
+                console.log('Full messageData structure:', JSON.stringify(messageData, null, 2));
                 
                 // Handle navigation request
                 if (messageData.url) {
@@ -470,9 +507,10 @@
                     navigateTo(route, messageData.params || {});
                 } else {
                     console.log('No valid navigation target found in message data');
+                    console.log('Available keys in messageData:', Object.keys(messageData));
                 }
             } else {
-                console.log('Not a navigation message or no data');
+                console.log('Not a navigation message. Type:', messageType);
             }
         });
         

@@ -1,0 +1,78 @@
+<!-- WaveMAX Affiliate Program Iframe Embed Code for WaveMAXLaundry.com -->
+<!-- Replace the current iframe implementation with this code -->
+
+<div id="wavemax-embed-container" style="width: 100%; min-height: 600px;">
+    <iframe 
+        id="wavemax-affiliate-iframe"
+        src=""
+        width="100%" 
+        height="600" 
+        frameborder="0" 
+        scrolling="no"
+        style="width: 100%; min-height: 600px; border: none;">
+    </iframe>
+</div>
+
+<script>
+(function() {
+    // Function to build iframe URL with proper parameters
+    function buildIframeUrl() {
+        const baseUrl = 'https://wavemax.promo/embed-app.html';
+        const currentUrl = new URL(window.location.href);
+        const params = new URLSearchParams(currentUrl.search);
+        
+        // Create new params for iframe
+        const iframeParams = new URLSearchParams();
+        
+        // Pass through all relevant parameters
+        const paramsToPass = ['login', 'affid', 'affiliate', 'pickup', 'route'];
+        
+        paramsToPass.forEach(param => {
+            const value = params.get(param);
+            if (value) {
+                // Normalize 'affiliate' to 'affid'
+                const key = param === 'affiliate' ? 'affid' : param;
+                iframeParams.set(key, value);
+            }
+        });
+        
+        // If no parameters, default to landing page
+        if (iframeParams.toString() === '') {
+            iframeParams.set('route', '/landing');
+        }
+        
+        // Build final URL
+        const finalUrl = `${baseUrl}?${iframeParams.toString()}`;
+        console.log('WaveMAX Iframe URL:', finalUrl);
+        return finalUrl;
+    }
+    
+    // Set iframe source on load
+    window.addEventListener('DOMContentLoaded', function() {
+        const iframe = document.getElementById('wavemax-affiliate-iframe');
+        if (iframe) {
+            iframe.src = buildIframeUrl();
+        }
+    });
+    
+    // Handle messages from iframe for dynamic height adjustment
+    window.addEventListener('message', function(event) {
+        // Security: Only accept messages from wavemax.promo
+        if (event.origin !== 'https://wavemax.promo') return;
+        
+        const iframe = document.getElementById('wavemax-affiliate-iframe');
+        
+        if (event.data && event.data.type === 'resize' && event.data.data && event.data.data.height) {
+            // Update iframe height
+            iframe.style.height = event.data.data.height + 'px';
+            console.log('Iframe resized to:', event.data.data.height + 'px');
+        }
+        
+        if (event.data && event.data.type === 'scroll-to-top') {
+            // Scroll to top of iframe
+            iframe.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    });
+})();
+</script>
