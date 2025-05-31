@@ -5,6 +5,7 @@ const Order = require('../../server/models/Order');
 const Bag = require('../../server/models/Bag');
 const jwt = require('jsonwebtoken');
 const { getCsrfToken, createAgent } = require('../helpers/csrfHelper');
+const { getStrongPassword } = require('../helpers/testPasswords');
 
 describe('Affiliate API', () => {
   let testAffiliate;
@@ -67,7 +68,7 @@ describe('Affiliate API', () => {
         serviceArea: 'Test Area',
         deliveryFee: 5.99,
         username: 'newaffiliate',
-        password: 'Password123!',
+        password: getStrongPassword('affiliate', 1),
         paymentMethod: 'directDeposit'
       });
 
@@ -108,7 +109,8 @@ describe('Affiliate API', () => {
 
   test('should login affiliate', async () => {
     // Set up password for test affiliate
-    const { hash, salt } = require('../../server/utils/encryption').hashPassword('testpassword');
+    const testPassword = getStrongPassword('affiliate', 2);
+    const { hash, salt } = require('../../server/utils/encryption').hashPassword(testPassword);
     await Affiliate.updateOne(
       { affiliateId: testAffiliate.affiliateId },
       { passwordHash: hash, passwordSalt: salt }
@@ -116,9 +118,10 @@ describe('Affiliate API', () => {
 
     const res = await agent
       .post('/api/v1/auth/affiliate/login')
+      .set('x-csrf-token', csrfToken)
       .send({
         username: 'testaffiliate',
-        password: 'testpassword'
+        password: testPassword
       });
 
     expect(res.statusCode).toEqual(200);

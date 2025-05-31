@@ -214,6 +214,7 @@
                     <li><a href="#environment-variables">Environment Variables</a></li>
                     <li><a href="#database-setup">Database Setup</a></li>
                     <li><a href="#email-configuration">Email Service Configuration</a></li>
+                    <li><a href="#oauth-configuration">Social Media OAuth Configuration</a></li>
                     <li><a href="#security-settings">Security Settings</a></li>
                     <li><a href="#pm2-configuration">PM2 Configuration</a></li>
                     <li><a href="#nginx-setup">Nginx Setup</a></li>
@@ -412,6 +413,134 @@ EXCHANGE_PORT=587
 EXCHANGE_USER=your-email@yourdomain.com
 EXCHANGE_PASS=your-password
 EXCHANGE_FROM_EMAIL=noreply@yourdomain.com</code></pre>
+
+            <h2 id="oauth-configuration">Social Media OAuth Configuration</h2>
+
+            <div class="config-section">
+                <p>The WaveMAX Affiliate Program supports social media authentication for affiliates through Google, Facebook, and LinkedIn OAuth 2.0 integration. This provides a seamless registration and login experience while maintaining security.</p>
+            </div>
+
+            <div class="info">
+                <strong>ℹ️ Note:</strong> OAuth providers are optional. If environment variables are not provided, the application will run with traditional username/password authentication only.
+            </div>
+
+            <h3>Google OAuth 2.0 Setup</h3>
+            <div class="config-section">
+                <ol>
+                    <li><strong>Create a Google Cloud Project:</strong>
+                        <ul>
+                            <li>Go to <a href="https://console.cloud.google.com/" target="_blank">Google Cloud Console</a></li>
+                            <li>Create a new project or select existing one</li>
+                            <li>Enable the Google+ API and Google Identity API</li>
+                        </ul>
+                    </li>
+                    <li><strong>Configure OAuth Consent Screen:</strong>
+                        <ul>
+                            <li>Go to APIs & Services > OAuth consent screen</li>
+                            <li>Choose "External" user type</li>
+                            <li>Fill in application name: "WaveMAX Affiliate Program"</li>
+                            <li>Add authorized domains (your production domain)</li>
+                            <li>Add scopes: <code>email</code>, <code>profile</code></li>
+                        </ul>
+                    </li>
+                    <li><strong>Create OAuth 2.0 Credentials:</strong>
+                        <ul>
+                            <li>Go to APIs & Services > Credentials</li>
+                            <li>Click "Create Credentials" > "OAuth 2.0 Client IDs"</li>
+                            <li>Application type: "Web application"</li>
+                            <li>Add authorized redirect URIs:
+                                <ul>
+                                    <li><code>https://yourdomain.com/api/auth/google/callback</code></li>
+                                    <li><code>http://localhost:3000/api/auth/google/callback</code> (for development)</li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </li>
+                </ol>
+                <pre><code>GOOGLE_CLIENT_ID=your_google_client_id.apps.googleusercontent.com
+GOOGLE_CLIENT_SECRET=your_google_client_secret</code></pre>
+            </div>
+
+            <h3>Facebook OAuth Setup</h3>
+            <div class="config-section">
+                <ol>
+                    <li><strong>Create a Facebook App:</strong>
+                        <ul>
+                            <li>Go to <a href="https://developers.facebook.com/" target="_blank">Facebook Developers</a></li>
+                            <li>Create a new app of type "Consumer"</li>
+                            <li>Add Facebook Login product to your app</li>
+                        </ul>
+                    </li>
+                    <li><strong>Configure Facebook Login:</strong>
+                        <ul>
+                            <li>Go to Facebook Login > Settings</li>
+                            <li>Add Valid OAuth Redirect URIs:
+                                <ul>
+                                    <li><code>https://yourdomain.com/api/auth/facebook/callback</code></li>
+                                    <li><code>http://localhost:3000/api/auth/facebook/callback</code></li>
+                                </ul>
+                            </li>
+                            <li>Enable "Use Strict Mode for Redirect URIs"</li>
+                        </ul>
+                    </li>
+                    <li><strong>App Review (for production):</strong>
+                        <ul>
+                            <li>Request <code>email</code> permission if not automatically approved</li>
+                            <li>Submit app for review if using advanced features</li>
+                        </ul>
+                    </li>
+                </ol>
+                <pre><code>FACEBOOK_APP_ID=your_facebook_app_id
+FACEBOOK_APP_SECRET=your_facebook_app_secret</code></pre>
+            </div>
+
+            <h3>LinkedIn OAuth Setup</h3>
+            <div class="config-section">
+                <ol>
+                    <li><strong>Create a LinkedIn App:</strong>
+                        <ul>
+                            <li>Go to <a href="https://www.linkedin.com/developers/" target="_blank">LinkedIn Developer Portal</a></li>
+                            <li>Create a new app</li>
+                            <li>Select your organization or create a new one</li>
+                        </ul>
+                    </li>
+                    <li><strong>Configure OAuth Settings:</strong>
+                        <ul>
+                            <li>Go to Auth tab</li>
+                            <li>Add Authorized redirect URLs:
+                                <ul>
+                                    <li><code>https://yourdomain.com/api/auth/linkedin/callback</code></li>
+                                    <li><code>http://localhost:3000/api/auth/linkedin/callback</code></li>
+                                </ul>
+                            </li>
+                            <li>Request access to <code>r_liteprofile</code> and <code>r_emailaddress</code> scopes</li>
+                        </ul>
+                    </li>
+                </ol>
+                <pre><code>LINKEDIN_CLIENT_ID=your_linkedin_client_id
+LINKEDIN_CLIENT_SECRET=your_linkedin_client_secret</code></pre>
+            </div>
+
+            <h3>OAuth Security Features</h3>
+            <div class="config-section">
+                <ul>
+                    <li><strong>Secure Token Handling:</strong> OAuth tokens are encrypted and stored securely</li>
+                    <li><strong>Account Linking:</strong> Existing users can link social accounts to their profiles</li>
+                    <li><strong>Fallback Authentication:</strong> Traditional login always available as backup</li>
+                    <li><strong>Session Management:</strong> Proper session handling for both OAuth and traditional auth</li>
+                    <li><strong>Audit Logging:</strong> All social authentication events are logged for security</li>
+                </ul>
+            </div>
+
+            <div class="warning">
+                <strong>⚠️ Production Considerations:</strong>
+                <ul>
+                    <li>Use HTTPS callback URLs only in production</li>
+                    <li>Complete app review process for each provider</li>
+                    <li>Configure proper consent screens and privacy policies</li>
+                    <li>Monitor OAuth usage and rate limits</li>
+                </ul>
+            </div>
 
             <h2 id="security-settings">Security Settings</h2>
 

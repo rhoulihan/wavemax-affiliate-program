@@ -5,6 +5,7 @@ const router = express.Router();
 const authController = require('../controllers/authController');
 const { authLimiter, authenticate } = require('../middleware/auth');
 const { body, validationResult } = require('express-validator');
+const { customPasswordValidator } = require('../utils/passwordValidator');
 
 // Validation middleware
 const validate = (req, res, next) => {
@@ -107,8 +108,7 @@ router.post('/reset-password',
     body('token').trim().notEmpty().withMessage('Reset token is required')
       .isLength({ min: 64, max: 64 }).withMessage('Invalid reset token'),
     body('userType').isIn(['affiliate', 'customer', 'administrator', 'operator']).withMessage('Invalid user type'),
-    body('password').isLength({ min: 8 }).withMessage('Password must be at least 8 characters')
-      .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/).withMessage('Password must contain uppercase, lowercase, and numbers')
+    body('password').custom(customPasswordValidator)
   ],
   validate,
   authController.resetPassword

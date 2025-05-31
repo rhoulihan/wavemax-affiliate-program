@@ -30,11 +30,14 @@ jest.mock('../server/utils/emailService', () => ({
   sendOrderStatusUpdateEmail: jest.fn().mockResolvedValue({ MessageId: 'test-message-id' }),
   sendOrderCancellationEmail: jest.fn().mockResolvedValue({ MessageId: 'test-message-id' }),
   sendPasswordResetEmail: jest.fn().mockResolvedValue({ MessageId: 'test-message-id' }),
+  sendAffiliatePasswordResetEmail: jest.fn().mockResolvedValue({ MessageId: 'test-message-id' }),
+  sendCustomerPasswordResetEmail: jest.fn().mockResolvedValue({ MessageId: 'test-message-id' }),
   sendAdministratorWelcomeEmail: jest.fn().mockResolvedValue({ MessageId: 'test-message-id' }),
   sendAdministratorPasswordResetEmail: jest.fn().mockResolvedValue({ MessageId: 'test-message-id' }),
   sendOperatorWelcomeEmail: jest.fn().mockResolvedValue({ MessageId: 'test-message-id' }),
   sendOperatorPinResetEmail: jest.fn().mockResolvedValue({ MessageId: 'test-message-id' }),
-  sendOperatorShiftReminderEmail: jest.fn().mockResolvedValue({ MessageId: 'test-message-id' })
+  sendOperatorShiftReminderEmail: jest.fn().mockResolvedValue({ MessageId: 'test-message-id' }),
+  sendOperatorPasswordResetEmail: jest.fn().mockResolvedValue({ MessageId: 'test-message-id' })
 }));
 
 // Set up MongoDB connection before tests

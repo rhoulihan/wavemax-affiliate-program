@@ -381,7 +381,7 @@ describe('Operator Integration Tests', () => {
         firstName: 'New',
         lastName: 'Operator',
         email: 'newop@wavemax.com',
-        password: 'NewPass123!',
+        password: 'NewPassw0rd!',
         workStation: 'Station D',
         shiftStart: '00:00',
         shiftEnd: '23:59'
@@ -416,7 +416,7 @@ describe('Operator Integration Tests', () => {
         .post('/api/v1/auth/operator/login')
         .send({
           email: 'newop@wavemax.com',
-          password: 'NewPass123!'
+          password: 'NewPassw0rd!'
         });
       
       expect(loginRes.status).toBe(200);
@@ -462,7 +462,7 @@ describe('Operator Integration Tests', () => {
           firstName: 'Test',
           lastName: 'Operator',
           email: 'test@wavemax.com',
-          password: 'Password123!',
+          password: 'Passw0rdStr0ng!',
           shiftStart: '25:00' // Invalid time
         });
 
@@ -479,7 +479,7 @@ describe('Operator Integration Tests', () => {
           firstName: 'Duplicate',
           lastName: 'Operator',
           email: 'operator@wavemax.com', // Already exists
-          password: 'Password123!'
+          password: 'Passw0rdStr0ng!'
         });
 
       expect(response.status).toBe(409);
