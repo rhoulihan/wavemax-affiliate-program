@@ -913,13 +913,13 @@ describe('Affiliate Controller', () => {
     });
 
     it('should delete all affiliate data in development environment', async () => {
-      process.env.NODE_ENV = 'development';
+      process.env.ENABLE_DELETE_DATA_FEATURE = 'true';
       req.params.affiliateId = 'AFF123';
       
-      const mockAffiliate = { affiliateId: 'AFF123' };
+      const mockAffiliate = { affiliateId: 'AFF123', _id: 'affiliate-object-id' };
       const mockCustomers = [
-        { customerId: 'CUST1' },
-        { customerId: 'CUST2' }
+        { customerId: 'CUST1', _id: 'customer-object-id-1' },
+        { customerId: 'CUST2', _id: 'customer-object-id-2' }
       ];
 
       Affiliate.findOne.mockResolvedValue(mockAffiliate);
@@ -940,8 +940,8 @@ describe('Affiliate Controller', () => {
       });
       expect(Bag.deleteMany).toHaveBeenCalledWith({
         $or: [
-          { affiliateId: 'AFF123' },
-          { customerId: { $in: ['CUST1', 'CUST2'] } }
+          { affiliate: 'affiliate-object-id' },
+          { customer: { $in: ['customer-object-id-1', 'customer-object-id-2'] } }
         ]
       });
       expect(Transaction.deleteMany).toHaveBeenCalledWith({ affiliateId: 'AFF123' });
@@ -963,19 +963,19 @@ describe('Affiliate Controller', () => {
     });
 
     it('should reject deletion in production environment', async () => {
-      process.env.NODE_ENV = 'production';
+      process.env.ENABLE_DELETE_DATA_FEATURE = 'false';
 
       await affiliateController.deleteAffiliateData(req, res);
 
       expect(res.status).toHaveBeenCalledWith(403);
       expect(res.json).toHaveBeenCalledWith({
         success: false,
-        message: 'This operation is not allowed in production'
+        message: 'This operation is not allowed'
       });
     });
 
     it('should reject unauthorized deletion', async () => {
-      process.env.NODE_ENV = 'development';
+      process.env.ENABLE_DELETE_DATA_FEATURE = 'true';
       req.params.affiliateId = 'AFF123';
       req.user.affiliateId = 'AFF456';
 
@@ -989,7 +989,7 @@ describe('Affiliate Controller', () => {
     });
 
     it('should handle deletion errors', async () => {
-      process.env.NODE_ENV = 'development';
+      process.env.ENABLE_DELETE_DATA_FEATURE = 'true';
       req.params.affiliateId = 'AFF123';
 
       Affiliate.findOne.mockRejectedValue(new Error('Database error'));

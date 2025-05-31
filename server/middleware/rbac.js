@@ -172,7 +172,7 @@ exports.checkAdminPermission = (requiredPermissions) => {
       if (!hasPermission) {
         return res.status(403).json({
           success: false,
-          message: 'Access denied: Missing required permissions'
+          message: `Access denied: ${permissions.join(', ')} permission required`
         });
       }
 

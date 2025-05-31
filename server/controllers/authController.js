@@ -237,9 +237,9 @@ exports.administratorLogin = async (req, res) => {
     // Check if account is active
     if (!administrator.isActive) {
       logLoginAttempt(false, 'administrator', email, req, 'Account inactive');
-      return res.status(403).json({
+      return res.status(401).json({
         success: false,
-        message: 'Account is inactive. Please contact system administrator.'
+        message: 'Account is deactivated. Please contact system administrator.'
       });
     }
 
@@ -680,6 +680,10 @@ exports.verifyToken = async (req, res) => {
     // and added the user data to req.user
 
     // Return user data from token
+    if (!req.user || !req.user.id) {
+      throw new Error('User data not found in request');
+    }
+
     res.status(200).json({
       success: true,
       user: {

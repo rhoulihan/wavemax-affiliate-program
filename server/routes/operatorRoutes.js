@@ -1,11 +1,48 @@
 const express = require('express');
 const router = express.Router();
 const operatorController = require('../controllers/operatorController');
+const administratorController = require('../controllers/administratorController');
 const { authenticate } = require('../middleware/auth');
-const { checkRole } = require('../middleware/rbac');
+const { checkRole, checkAdminPermission } = require('../middleware/rbac');
 
-// All routes require authentication and operator role
+// All routes require authentication
 router.use(authenticate);
+
+// CRUD routes for administrators to manage operators
+router.get('/available', checkRole(['administrator']), checkAdminPermission(['operators.read']), administratorController.getAvailableOperators);
+router.get('/', checkRole(['administrator']), checkAdminPermission(['operators.read']), administratorController.getOperators);
+router.post('/', checkRole(['administrator']), checkAdminPermission(['operators.create']), administratorController.createOperator);
+router.get('/:id', authenticate, async (req, res, next) => {
+  // Allow operators to view their own profile
+  if (req.user.role === 'operator' && req.user.id === req.params.id) {
+    return administratorController.getOperatorSelf(req, res);
+  }
+  // Otherwise require admin permissions  
+  checkRole(['administrator'])(req, res, () => {
+    checkAdminPermission(['operators.read'])(req, res, () => {
+      administratorController.getOperatorById(req, res);
+    });
+  });
+});
+router.patch('/:id', authenticate, async (req, res, next) => {
+  // Allow operators to update their own profile with limited fields
+  if (req.user.role === 'operator' && req.user.id === req.params.id) {
+    // Call a special self-update method for operators
+    return administratorController.updateOperatorSelf(req, res);
+  }
+  // Otherwise require admin permissions
+  checkRole(['administrator'])(req, res, () => {
+    checkAdminPermission(['operators.update'])(req, res, () => {
+      administratorController.updateOperator(req, res);
+    });
+  });
+});
+router.delete('/:id', checkRole(['administrator']), checkAdminPermission(['operators.delete']), administratorController.deleteOperator);
+router.post('/:id/reset-password', checkRole(['administrator']), checkAdminPermission(['operators.update']), administratorController.resetOperatorPassword);
+router.post('/:id/reset-pin', checkRole(['administrator']), checkAdminPermission(['operators.update']), administratorController.resetOperatorPin);
+router.patch('/:id/stats', checkRole(['administrator']), checkAdminPermission(['operators.update']), administratorController.updateOperatorStats);
+
+// Operator-specific routes (require operator role)
 router.use(checkRole(['operator']));
 
 // Dashboard

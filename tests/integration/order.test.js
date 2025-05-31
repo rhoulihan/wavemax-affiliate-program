@@ -682,7 +682,8 @@ describe('Order Integration Tests', () => {
           actualWeight: i <= 10 ? 20 + i : null,
           baseRate: 1.89,
           deliveryFee: 5.99,
-          actualTotal: i <= 10 ? (20 + i) * 1.89 + 5.99 : null
+          actualTotal: i <= 10 ? (20 + i) * 1.89 + 5.99 : null,
+          createdAt: new Date(`2025-05-${String(i).padStart(2, '0')}`)
         });
       }
       await Order.insertMany(orders);

@@ -5,7 +5,16 @@ jest.mock('../../server/models/Order');
 jest.mock('../../server/models/Customer');
 jest.mock('../../server/models/Affiliate');
 jest.mock('../../server/models/SystemConfig');
-jest.mock('../../server/utils/auditLogger');
+jest.mock('../../server/utils/auditLogger', () => ({
+  logAuditEvent: jest.fn(),
+  AuditEvents: {
+    DATA_MODIFICATION: 'DATA_MODIFICATION',
+    ACCOUNT_CREATED: 'ACCOUNT_CREATED',
+    ACCOUNT_UPDATED: 'ACCOUNT_UPDATED',
+    ACCOUNT_DELETED: 'ACCOUNT_DELETED',
+    PASSWORD_RESET_SUCCESS: 'PASSWORD_RESET_SUCCESS'
+  }
+}));
 jest.mock('../../server/utils/emailService');
 jest.mock('../../server/utils/fieldFilter');
 
@@ -31,7 +40,7 @@ const Order = require('../../server/models/Order');
 const Customer = require('../../server/models/Customer');
 const Affiliate = require('../../server/models/Affiliate');
 const SystemConfig = require('../../server/models/SystemConfig');
-const auditLogger = require('../../server/utils/auditLogger');
+const { logAuditEvent, AuditEvents } = require('../../server/utils/auditLogger');
 const emailService = require('../../server/utils/emailService');
 const mongoose = require('mongoose');
 
@@ -50,8 +59,7 @@ describe('Administrator Controller', () => {
       status: jest.fn().mockReturnThis()
     };
     
-    // Mock auditLogger
-    auditLogger.log = jest.fn().mockResolvedValue(true);
+    // Clear mocks
     
     // Mock fieldFilter
     const { fieldFilter } = require('../../server/utils/fieldFilter');
@@ -105,9 +113,13 @@ describe('Administrator Controller', () => {
         expect(Operator.findOne).toHaveBeenCalledWith({ email: newOperatorData.email });
         expect(mockSave).toHaveBeenCalled();
         expect(emailService.sendOperatorWelcomeEmail).toHaveBeenCalled();
-        expect(auditLogger.log).toHaveBeenCalledWith(expect.objectContaining({
-          action: 'CREATE_OPERATOR'
-        }));
+        expect(logAuditEvent).toHaveBeenCalledWith(
+          AuditEvents.DATA_MODIFICATION,
+          expect.objectContaining({
+            action: 'CREATE_OPERATOR'
+          }),
+          req
+        );
         expect(res.status).toHaveBeenCalledWith(201);
         expect(res.json).toHaveBeenCalledWith(expect.objectContaining({
           success: true,
@@ -202,6 +214,17 @@ describe('Administrator Controller', () => {
           lastName: 'Smith'
         };
 
+        // Mock the existence check
+        Operator.findById.mockResolvedValue({
+          _id: 'op123',
+          firstName: 'John',
+          lastName: 'Doe',
+          email: 'old@email.com'
+        });
+        
+        // Mock email uniqueness check (no existing operator with new email)
+        Operator.findOne.mockResolvedValue(null);
+        
         Operator.findByIdAndUpdate.mockResolvedValue(mockOperator);
 
         await updateOperator(req, res);
@@ -211,9 +234,13 @@ describe('Administrator Controller', () => {
           { $set: { firstName: 'Jane', lastName: 'Smith' } },
           { new: true, runValidators: true }
         );
-        expect(auditLogger.log).toHaveBeenCalledWith(expect.objectContaining({
-          action: 'UPDATE_OPERATOR'
-        }));
+        expect(logAuditEvent).toHaveBeenCalledWith(
+          AuditEvents.DATA_MODIFICATION,
+          expect.objectContaining({
+            action: 'UPDATE_OPERATOR'
+          }),
+          req
+        );
         expect(res.json).toHaveBeenCalledWith({
           success: true,
           message: 'Operator updated successfully',
@@ -333,9 +360,13 @@ describe('Administrator Controller', () => {
           { start: '07:00', end: '23:00' },
           req.user.id
         );
-        expect(auditLogger.log).toHaveBeenCalledWith(expect.objectContaining({
-          action: 'UPDATE_SYSTEM_CONFIG'
-        }));
+        expect(logAuditEvent).toHaveBeenCalledWith(
+          AuditEvents.DATA_MODIFICATION,
+          expect.objectContaining({
+            action: 'UPDATE_SYSTEM_CONFIG'
+          }),
+          req
+        );
         expect(res.json).toHaveBeenCalledWith({
           success: true,
           message: 'Configuration updated successfully',

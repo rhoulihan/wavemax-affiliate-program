@@ -211,6 +211,49 @@
     if (value.length > 4) value = value.slice(0, 4);
     e.target.value = value;
   });
+
+  // Handle bag selection
+  const bagFee = 10.00; // Default bag fee, will be updated from server
+  const numberOfBagsSelect = document.getElementById('numberOfBags');
+  const totalBagFeeDisplay = document.getElementById('totalBagFee');
+  const bagFeeSummary = document.getElementById('bagFeeSummary');
+  const bagFeeSummaryAmount = document.getElementById('bagFeeSummaryAmount');
+
+  // Fetch bag fee from server configuration
+  const baseUrl = window.EMBED_CONFIG?.baseUrl || 'https://wavemax.promo';
+  fetch(`${baseUrl}/api/v1/config/bag-fee`)
+    .then(response => response.json())
+    .then(data => {
+      if (data.success && data.bagFee) {
+        const serverBagFee = parseFloat(data.bagFee);
+        // Update all bag fee displays
+        document.getElementById('bagFeeDisplay').textContent = `$${serverBagFee.toFixed(2)}`;
+        // Update select options
+        for (let i = 1; i <= 5; i++) {
+          const option = numberOfBagsSelect.querySelector(`option[value="${i}"]`);
+          if (option) {
+            option.textContent = `${i} bag${i > 1 ? 's' : ''} - $${(i * serverBagFee).toFixed(2)}`;
+          }
+        }
+      }
+    })
+    .catch(error => {
+      console.error('Error fetching bag fee:', error);
+    });
+
+  numberOfBagsSelect.addEventListener('change', function() {
+    const numberOfBags = parseInt(this.value) || 0;
+    const total = numberOfBags * bagFee;
+    
+    totalBagFeeDisplay.textContent = `$${total.toFixed(2)}`;
+    bagFeeSummaryAmount.textContent = `$${total.toFixed(2)}`;
+    
+    if (numberOfBags > 0) {
+      bagFeeSummary.style.display = 'block';
+    } else {
+      bagFeeSummary.style.display = 'none';
+    }
+  });
   }
 
   // Check if DOM is already loaded or wait for it

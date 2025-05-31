@@ -887,6 +887,7 @@ exports.deleteAffiliateData = async (req, res) => {
     // Find all customers associated with this affiliate
     const customers = await Customer.find({ affiliateId });
     const customerIds = customers.map(c => c.customerId);
+    const customerObjectIds = customers.map(c => c._id);
 
     // Delete all related data
     // 1. Delete all orders for these customers
@@ -901,8 +902,8 @@ exports.deleteAffiliateData = async (req, res) => {
     const Bag = require('../models/Bag');
     await Bag.deleteMany({
       $or: [
-        { affiliateId },
-        { customerId: { $in: customerIds } }
+        { affiliate: affiliate._id },
+        { customer: { $in: customerObjectIds } }
       ]
     });
 
