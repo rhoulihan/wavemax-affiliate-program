@@ -85,8 +85,17 @@ function initializeAffiliateDashboard() {
   // Load settings data on initial load
   loadSettingsData(affiliateId);
 
-  // Load pickups data for the default active tab
-  loadPickupRequests(affiliateId);
+  // Check URL parameters for specific customer filtering
+  const urlParams = new URLSearchParams(window.location.search);
+  const filterCustomerId = urlParams.get('customer');
+
+  if (filterCustomerId) {
+    // Switch to customers tab and filter by customer ID
+    switchToCustomersTab(affiliateId, filterCustomerId);
+  } else {
+    // Load pickups data for the default active tab
+    loadPickupRequests(affiliateId);
+  }
 
   // Setup tab navigation
   const tabButtons = document.querySelectorAll('.tab-btn');
@@ -220,6 +229,40 @@ function initializeAffiliateDashboard() {
   window.loadCustomers = loadCustomers;
   window.loadInvoices = loadInvoices;
   window.loadSettingsData = loadSettingsData;
+}
+
+// Function to switch to customers tab and highlight specific customer
+function switchToCustomersTab(affiliateId, customerIdToHighlight) {
+  // Switch to customers tab
+  const tabButtons = document.querySelectorAll('.tab-btn');
+  const tabContents = document.querySelectorAll('.tab-content');
+  
+  // Remove active class from all buttons and tabs
+  tabButtons.forEach(btn => {
+    btn.classList.remove('border-blue-600');
+    btn.classList.remove('text-blue-600');
+    btn.classList.add('border-transparent');
+  });
+
+  tabContents.forEach(content => {
+    content.classList.remove('active');
+  });
+
+  // Find and activate customers tab
+  const customersTabBtn = document.querySelector('[data-tab="customers"]');
+  if (customersTabBtn) {
+    customersTabBtn.classList.add('border-blue-600');
+    customersTabBtn.classList.add('text-blue-600');
+    customersTabBtn.classList.remove('border-transparent');
+  }
+
+  const customersTabContent = document.getElementById('customers-tab');
+  if (customersTabContent) {
+    customersTabContent.classList.add('active');
+  }
+
+  // Load customers with highlighting
+  loadCustomersWithHighlight(affiliateId, customerIdToHighlight);
 }
 
 // Copy the existing functions from affiliate-dashboard.js
@@ -361,6 +404,10 @@ async function loadPickupRequests(affiliateId) {
 }
 
 async function loadCustomers(affiliateId) {
+  await loadCustomersWithHighlight(affiliateId, null);
+}
+
+async function loadCustomersWithHighlight(affiliateId, highlightCustomerId) {
   try {
     const baseUrl = window.EMBED_CONFIG?.baseUrl || 'https://wavemax.promo';
     const response = await fetch(`${baseUrl}/api/v1/affiliates/${affiliateId}/customers`, {
@@ -383,9 +430,16 @@ async function loadCustomers(affiliateId) {
       } else {
         customers.forEach(customer => {
           const row = document.createElement('tr');
-          row.className = 'border-b hover:bg-gray-50';
+          const isHighlighted = highlightCustomerId && customer.customerId === highlightCustomerId;
+          
+          row.className = `border-b ${isHighlighted ? 'bg-blue-50 border-blue-200' : 'hover:bg-gray-50'}`;
+          
           row.innerHTML = `
-            <td class="py-3 px-4">${customer.firstName} ${customer.lastName}</td>
+            <td class="py-3 px-4">
+              ${isHighlighted ? '<span class="font-bold text-blue-800">★ </span>' : ''}
+              ${customer.firstName} ${customer.lastName}
+              ${isHighlighted ? ' <span class="text-xs text-blue-600">(New Registration)</span>' : ''}
+            </td>
             <td class="py-3 px-4">${customer.email}</td>
             <td class="py-3 px-4">${customer.phone}</td>
             <td class="py-3 px-4">
@@ -399,6 +453,16 @@ async function loadCustomers(affiliateId) {
           `;
           tbody.appendChild(row);
         });
+
+        // Scroll highlighted customer into view if found
+        if (highlightCustomerId) {
+          const highlightedRow = tbody.querySelector('tr.bg-blue-50');
+          if (highlightedRow) {
+            setTimeout(() => {
+              highlightedRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }, 100);
+          }
+        }
       }
     }
   } catch (error) {
