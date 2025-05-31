@@ -9,7 +9,7 @@ function initializeOrderConfirmation() {
 
   if (!orderId) {
     alert('No order ID provided. Redirecting to homepage.');
-    window.location.href = '/embed-app.html';
+    window.location.href = '/embed-app.html?login=customer';
     return;
   }
 
@@ -214,7 +214,7 @@ function initializeOrderConfirmation() {
       const token = localStorage.getItem('customerToken');
       if (!token) {
         alert('Please log in to view order details.');
-        window.location.href = '/embed-app.html?route=/customer-login';
+        window.location.href = '/embed-app.html?route=/customer-login&login=customer';
         return;
       }
 
@@ -238,7 +238,7 @@ function initializeOrderConfirmation() {
         }
       } else {
         alert('Order not found. Redirecting to homepage.');
-        window.location.href = '/embed-app.html';
+        window.location.href = '/embed-app.html?login=customer';
       }
     } catch (error) {
       console.error('Error fetching order:', error);

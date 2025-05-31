@@ -16,7 +16,7 @@ function initializeSuccessPage() {
 
     if (!customerId) {
       alert('No registration data found. Please register first.');
-      window.location.href = '/embed-app.html';
+      window.location.href = '/embed-app.html?login=customer';
       return;
     }
 
@@ -39,13 +39,13 @@ function initializeSuccessPage() {
         } else {
           console.error('Failed to load customer data:', data.message);
           alert('Unable to load customer information.');
-          window.location.href = '/embed-app.html';
+          window.location.href = '/embed-app.html?login=customer';
         }
       })
       .catch(error => {
         console.error('Error fetching customer data:', error);
         alert('An error occurred while loading customer information.');
-        window.location.href = '/embed-app.html';
+        window.location.href = '/embed-app.html?login=customer';
       });
   } else {
     // Use data from sessionStorage

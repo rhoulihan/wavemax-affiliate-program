@@ -92,18 +92,18 @@
         } else {
           console.error('Invalid affiliate data:', data);
           alert('Invalid affiliate ID. Please use a valid registration link.');
-          window.location.href = '/embed-app.html';
+          window.location.href = '/embed-app.html?login=customer';
         }
       })
       .catch(error => {
         console.error('Error fetching affiliate info:', error);
         alert('Unable to load affiliate information. Please try again.');
-        window.location.href = '/embed-app.html';
+        window.location.href = '/embed-app.html?login=customer';
       });
   } else {
     // Redirect if no affiliate ID is provided
     alert('No affiliate ID provided. Please use a valid registration link.');
-    window.location.href = '/embed-app.html';
+    window.location.href = '/embed-app.html?login=customer';
   }
 
 
