@@ -917,7 +917,7 @@ The WaveMAX Affiliate Program supports social media login for affiliates through
 1. **Create a Google Cloud Project:**
    - Go to [Google Cloud Console](https://console.cloud.google.com/)
    - Create a new project or select existing one
-   - Enable the Google+ API and Google Identity API
+   - Enable the Identity Platform API (for OAuth authentication)
 
 2. **Configure OAuth Consent Screen:**
    - Go to APIs & Services > OAuth consent screen
