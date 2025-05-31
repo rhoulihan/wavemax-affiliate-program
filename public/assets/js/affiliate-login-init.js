@@ -52,8 +52,21 @@
           localStorage.setItem('currentAffiliate', JSON.stringify(data.affiliate));
 
           console.log('Login successful, redirecting to dashboard');
-          // Redirect to dashboard
-          window.location.href = `/embed-app.html?route=/affiliate-dashboard&id=${data.affiliate.affiliateId}`;
+          
+          // Check for additional URL parameters to preserve (like customer filtering)
+          const urlParams = new URLSearchParams(window.location.search);
+          const customerParam = urlParams.get('customer');
+          
+          let redirectUrl = `/embed-app.html?route=/affiliate-dashboard&id=${data.affiliate.affiliateId}`;
+          
+          // Add customer parameter if it exists
+          if (customerParam) {
+            redirectUrl += `&customer=${customerParam}`;
+            console.log('Preserving customer parameter:', customerParam);
+          }
+          
+          console.log('Redirecting to:', redirectUrl);
+          window.location.href = redirectUrl;
         } else {
           alert(data.message || 'Login failed. Please check your credentials and try again.');
         }
