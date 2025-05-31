@@ -17,6 +17,9 @@ jest.mock('../../server/utils/auditLogger', () => ({
 }));
 jest.mock('../../server/utils/emailService');
 jest.mock('../../server/utils/fieldFilter');
+jest.mock('../../server/utils/passwordValidator', () => ({
+  validatePasswordStrength: jest.fn().mockReturnValue({ success: true })
+}));
 
 const { 
   createOperator,
@@ -42,6 +45,7 @@ const Affiliate = require('../../server/models/Affiliate');
 const SystemConfig = require('../../server/models/SystemConfig');
 const { logAuditEvent, AuditEvents } = require('../../server/utils/auditLogger');
 const emailService = require('../../server/utils/emailService');
+const { validatePasswordStrength } = require('../../server/utils/passwordValidator');
 const mongoose = require('mongoose');
 
 describe('Administrator Controller', () => {
@@ -65,6 +69,8 @@ describe('Administrator Controller', () => {
     const { fieldFilter } = require('../../server/utils/fieldFilter');
     fieldFilter.mockImplementation((obj) => obj);
     
+    // Mock password validator
+    validatePasswordStrength.mockReturnValue({ success: true });
     
     jest.clearAllMocks();
   });
@@ -110,7 +116,7 @@ describe('Administrator Controller', () => {
 
         await createOperator(req, res);
 
-        expect(Operator.findOne).toHaveBeenCalledWith({ email: newOperatorData.email });
+        expect(Operator.findOne).toHaveBeenCalledWith({ email: newOperatorData.email.toLowerCase() });
         expect(mockSave).toHaveBeenCalled();
         expect(emailService.sendOperatorWelcomeEmail).toHaveBeenCalled();
         expect(logAuditEvent).toHaveBeenCalledWith(

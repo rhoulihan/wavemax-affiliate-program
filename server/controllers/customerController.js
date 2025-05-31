@@ -10,6 +10,7 @@ const emailService = require('../utils/emailService');
 const jwt = require('jsonwebtoken');
 const { v4: uuidv4 } = require('uuid');
 const { getFilteredData } = require('../utils/fieldFilter');
+const { validationResult } = require('express-validator');
 
 // ============================================================================
 // Customer Controllers
@@ -20,6 +21,15 @@ const { getFilteredData } = require('../utils/fieldFilter');
  */
 exports.registerCustomer = async (req, res) => {
   try {
+    // Check for validation errors
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({
+        success: false,
+        errors: errors.array()
+      });
+    }
+
     const {
       affiliateId,
       firstName,

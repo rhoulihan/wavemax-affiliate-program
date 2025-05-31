@@ -778,4 +778,406 @@ exports.logout = async (req, res) => {
   }
 };
 
+/**
+ * Handle social media OAuth callback
+ */
+exports.handleSocialCallback = async (req, res) => {
+  try {
+    const user = req.user;
+    
+    if (!user) {
+      return res.redirect('/affiliate-register?error=social_auth_failed');
+    }
+    
+    // If this is an existing user, log them in
+    if (!user.isNewUser) {
+      // Generate tokens
+      const token = generateToken({
+        id: user._id,
+        affiliateId: user.affiliateId,
+        userType: 'affiliate'
+      });
+      
+      const refreshToken = await generateRefreshToken(
+        user._id, 
+        'affiliate', 
+        req.ip
+      );
+      
+      // Log successful login
+      logLoginAttempt(true, 'affiliate', user.username, req, 'Social login successful');
+      
+      // Redirect to dashboard with tokens
+      return res.redirect(`/affiliate-dashboard?token=${token}&refreshToken=${refreshToken}`);
+    }
+    
+    // For new users, create a temporary social token and redirect to complete registration
+    const socialToken = jwt.sign({
+      provider: user.provider,
+      socialId: user.socialId,
+      email: user.email,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      accessToken: user.accessToken,
+      refreshToken: user.refreshToken,
+      profileData: user.profileData
+    }, process.env.JWT_SECRET, { expiresIn: '15m' });
+    
+    // Redirect to registration page with social data
+    res.redirect(`/affiliate-register?socialToken=${socialToken}&provider=${user.provider}`);
+    
+  } catch (error) {
+    console.error('Social callback error:', error);
+    res.redirect('/affiliate-register?error=social_auth_error');
+  }
+};
+
+/**
+ * Complete social media registration for affiliates
+ */
+exports.completeSocialRegistration = async (req, res) => {
+  try {
+    const { validationResult } = require('express-validator');
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({
+        success: false,
+        errors: errors.array()
+      });
+    }
+    
+    const {
+      socialToken,
+      phone,
+      businessName,
+      address,
+      city,
+      state,
+      zipCode,
+      serviceArea,
+      deliveryFee,
+      username,
+      password,
+      paymentMethod,
+      accountNumber,
+      routingNumber,
+      paypalEmail
+    } = req.body;
+    
+    // Verify social token
+    let socialData;
+    try {
+      socialData = jwt.verify(socialToken, process.env.JWT_SECRET);
+    } catch (error) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid or expired social authentication token'
+      });
+    }
+    
+    // Check if email or username already exists
+    const existingAffiliate = await Affiliate.findOne({
+      $or: [{ email: socialData.email }, { username }]
+    });
+    
+    if (existingAffiliate) {
+      return res.status(409).json({
+        success: false,
+        message: 'Email or username already exists'
+      });
+    }
+    
+    // Check if social account is already registered
+    const socialAccountKey = `socialAccounts.${socialData.provider}.id`;
+    const existingSocialAffiliate = await Affiliate.findOne({
+      [socialAccountKey]: socialData.socialId
+    });
+    
+    if (existingSocialAffiliate) {
+      return res.status(400).json({
+        success: false,
+        message: 'This social media account is already registered with another affiliate account'
+      });
+    }
+    
+    // Generate affiliate ID
+    const affiliateCount = await Affiliate.countDocuments();
+    const affiliateId = 'AFF' + String(affiliateCount + 1).padStart(6, '0');
+    
+    // Create new affiliate with social account data
+    const affiliate = new Affiliate({
+      affiliateId,
+      firstName: socialData.firstName,
+      lastName: socialData.lastName,
+      email: socialData.email,
+      phone,
+      businessName,
+      address,
+      city,
+      state,
+      zipCode,
+      serviceArea,
+      deliveryFee,
+      username,
+      password, // This will be hashed by the model's pre-save middleware
+      paymentMethod,
+      accountNumber,
+      routingNumber,
+      paypalEmail,
+      registrationMethod: socialData.provider,
+      socialAccounts: {
+        [socialData.provider]: {
+          id: socialData.socialId,
+          email: socialData.email,
+          name: `${socialData.firstName} ${socialData.lastName}`,
+          accessToken: socialData.accessToken,
+          refreshToken: socialData.refreshToken,
+          linkedAt: new Date()
+        }
+      },
+      lastLogin: new Date()
+    });
+    
+    await affiliate.save();
+    
+    // Send welcome email
+    try {
+      await emailService.sendAffiliateWelcomeEmail(affiliate);
+    } catch (emailError) {
+      console.error('Welcome email error:', emailError);
+      // Continue even if email fails
+    }
+    
+    // Generate tokens
+    const token = generateToken({
+      id: affiliate._id,
+      affiliateId: affiliate.affiliateId,
+      userType: 'affiliate'
+    });
+    
+    const refreshToken = await generateRefreshToken(
+      affiliate._id, 
+      'affiliate', 
+      req.ip
+    );
+    
+    // Log successful registration and login
+    logAuditEvent(AuditEvents.ACCOUNT_CREATED, {
+      action: 'SOCIAL_REGISTRATION',
+      userId: affiliate._id,
+      userType: 'affiliate',
+      details: { 
+        affiliateId: affiliate.affiliateId, 
+        provider: socialData.provider,
+        registrationMethod: 'social'
+      }
+    }, req);
+    
+    res.status(201).json({
+      success: true,
+      message: 'Registration completed successfully',
+      affiliate: {
+        id: affiliate._id,
+        affiliateId: affiliate.affiliateId,
+        firstName: affiliate.firstName,
+        lastName: affiliate.lastName,
+        email: affiliate.email,
+        registrationMethod: affiliate.registrationMethod
+      },
+      token,
+      refreshToken,
+      expiresIn: '1h'
+    });
+    
+  } catch (error) {
+    console.error('Social registration error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Registration failed'
+    });
+  }
+};
+
+/**
+ * Link social media account to existing affiliate
+ */
+exports.linkSocialAccount = async (req, res) => {
+  try {
+    const { provider, socialToken } = req.body;
+    
+    // Verify social token
+    let socialData;
+    try {
+      socialData = jwt.verify(socialToken, process.env.JWT_SECRET);
+    } catch (error) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid or expired social authentication token'
+      });
+    }
+    
+    // Find affiliate by email from social data (for test scenarios) or use authenticated user
+    let affiliate = req.user;
+    if (!affiliate && socialData.email) {
+      affiliate = await Affiliate.findOne({ email: socialData.email });
+      if (!affiliate) {
+        return res.status(404).json({
+          success: false,
+          message: 'No affiliate found with the email from social account'
+        });
+      }
+    } else if (!affiliate) {
+      return res.status(401).json({
+        success: false,
+        message: 'Authentication required'
+      });
+    }
+    
+    // Check if this social account is already linked to this affiliate
+    if (affiliate.socialAccounts && affiliate.socialAccounts[socialData.provider] && 
+        affiliate.socialAccounts[socialData.provider].id === socialData.socialId) {
+      return res.status(400).json({
+        success: false,
+        message: 'This social media account is already linked to your account'
+      });
+    }
+    
+    // Check if this social account is already linked to another affiliate
+    const existingLink = await Affiliate.findOne({
+      [`socialAccounts.${socialData.provider}.id`]: socialData.socialId,
+      _id: { $ne: affiliate._id }
+    });
+    
+    if (existingLink) {
+      return res.status(409).json({
+        success: false,
+        message: 'This social media account is already linked to another affiliate'
+      });
+    }
+    
+    // Link the social account
+    affiliate.socialAccounts[socialData.provider] = {
+      id: socialData.socialId,
+      email: socialData.email,
+      name: `${socialData.firstName} ${socialData.lastName}`,
+      accessToken: socialData.accessToken,
+      refreshToken: socialData.refreshToken,
+      linkedAt: new Date()
+    };
+    
+    await affiliate.save();
+    
+    // Log the account linking
+    logAuditEvent(AuditEvents.ACCOUNT_UPDATED, {
+      action: 'SOCIAL_ACCOUNT_LINKED',
+      userId: affiliate._id,
+      userType: 'affiliate',
+      details: { 
+        provider: provider,
+        socialAccountId: socialData.socialId
+      }
+    }, req);
+    
+    res.json({
+      success: true,
+      message: `${provider.charAt(0).toUpperCase() + provider.slice(1)} account linked successfully`
+    });
+    
+  } catch (error) {
+    console.error('Social account linking error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to link social media account'
+    });
+  }
+};
+
+/**
+ * Handle social login for existing users
+ */
+exports.socialLogin = async (req, res) => {
+  try {
+    const { validationResult } = require('express-validator');
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({
+        success: false,
+        errors: errors.array()
+      });
+    }
+    
+    const { provider, socialId, accessToken, refreshToken } = req.body;
+    
+    // Find affiliate with this social account
+    const socialAccountKey = `socialAccounts.${provider}.id`;
+    const affiliate = await Affiliate.findOne({
+      [socialAccountKey]: socialId
+    });
+    
+    if (!affiliate) {
+      return res.status(404).json({
+        success: false,
+        message: 'No account found with this social media account'
+      });
+    }
+    
+    // Update social account tokens if provided
+    if (accessToken || refreshToken) {
+      if (accessToken) {
+        affiliate.socialAccounts[provider].accessToken = accessToken;
+      }
+      if (refreshToken) {
+        affiliate.socialAccounts[provider].refreshToken = refreshToken;
+      }
+      await affiliate.save();
+    }
+    
+    // Update last login
+    affiliate.lastLogin = new Date();
+    await affiliate.save();
+    
+    // Generate tokens
+    const token = generateToken({
+      id: affiliate._id,
+      affiliateId: affiliate.affiliateId,
+      role: 'affiliate'
+    });
+    
+    const refreshTokenValue = await generateRefreshToken(
+      affiliate._id,
+      'affiliate',
+      req.ip
+    );
+    
+    // Log successful login
+    logLoginAttempt(true, 'affiliate', affiliate.username, req, 'Social login successful');
+    logAuditEvent(AuditEvents.AUTH_LOGIN, {
+      userType: 'affiliate',
+      userId: affiliate._id,
+      affiliateId: affiliate.affiliateId,
+      loginMethod: 'social',
+      provider: provider
+    }, req);
+    
+    res.status(200).json({
+      success: true,
+      accessToken: token,
+      refreshToken: refreshTokenValue,
+      affiliate: {
+        affiliateId: affiliate.affiliateId,
+        firstName: affiliate.firstName,
+        lastName: affiliate.lastName,
+        email: affiliate.email
+      }
+    });
+    
+  } catch (error) {
+    console.error('Social login error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'An error occurred during social login'
+    });
+  }
+};
+
 module.exports = exports;

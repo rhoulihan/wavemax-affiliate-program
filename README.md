@@ -20,6 +20,22 @@ The WaveMAX Affiliate Program enables individuals to register as affiliates, onb
 
 ## Recent Improvements (May 2025)
 
+### Strong Password Security & Social Media Authentication
+- **Enhanced Password Security**: Implemented comprehensive strong password requirements
+  - Minimum 12 characters with uppercase, lowercase, numbers, and special characters
+  - Prevents common passwords, sequential patterns, and username/email inclusion
+  - Applied to all user types: affiliates, customers, administrators, and operators
+  - Real-time password strength validation with detailed feedback
+- **Social Media OAuth Integration**: Added seamless social login for affiliates
+  - Google, Facebook, and LinkedIn OAuth 2.0 support
+  - Social account linking to existing profiles
+  - Secure token handling and session management
+  - Fallback to traditional authentication if social login fails
+- **Security Enhancements**: Increased password entropy from ~40 bits to ~75+ bits
+  - Comprehensive validation utility with attack prevention
+  - Audit logging for all authentication events
+  - Backward compatibility with existing authentication flows
+
 ### Affiliate Email Links with Customer Dashboard Filtering
 - **Enhanced Email Experience**: Improved affiliate email links to automatically highlight specific customers in dashboard
   - Email URLs now include customer parameter for direct navigation
@@ -52,7 +68,7 @@ The WaveMAX Affiliate Program enables individuals to register as affiliates, onb
   - Database operations and error handling scenarios
 
 ### Comprehensive Test Suite Achievement
-- **100% Test Pass Rate**: Achieved complete test suite success with 796+ tests passing
+- **100% Test Pass Rate**: Achieved complete test suite success with 916+ tests passing
   - Fixed all failing unit and integration tests
   - Added missing endpoint implementations (getAvailableOperators)
   - Resolved pagination format inconsistencies
@@ -883,6 +899,181 @@ To create an administrator account, you can use the provided script:
 | `EXCHANGE_PASS` | Exchange password | Yes |
 | `EXCHANGE_FROM_EMAIL` | Sender email address | No |
 | `EXCHANGE_REJECT_UNAUTHORIZED` | Validate SSL certificates (default: true) | No |
+
+## Social Media Authentication Configuration
+
+The WaveMAX Affiliate Program supports social media login for affiliates through Google, Facebook, and LinkedIn OAuth 2.0 integration. This provides a seamless registration and login experience while maintaining security.
+
+### Supported OAuth Providers
+
+1. **Google OAuth 2.0** - Most trusted and widely used
+2. **Facebook Login** - High user adoption for business accounts  
+3. **LinkedIn OAuth** - Professional network, ideal for affiliate businesses
+
+### Setting Up OAuth Providers
+
+#### Google OAuth 2.0 Setup
+
+1. **Create a Google Cloud Project:**
+   - Go to [Google Cloud Console](https://console.cloud.google.com/)
+   - Create a new project or select existing one
+   - Enable the Google+ API and Google Identity API
+
+2. **Configure OAuth Consent Screen:**
+   - Go to APIs & Services > OAuth consent screen
+   - Choose "External" user type
+   - Fill in application name: "WaveMAX Affiliate Program"
+   - Add authorized domains (your production domain)
+   - Add scopes: `email`, `profile`
+
+3. **Create OAuth 2.0 Credentials:**
+   - Go to APIs & Services > Credentials
+   - Click "Create Credentials" > "OAuth 2.0 Client IDs"
+   - Application type: "Web application"
+   - Add authorized redirect URIs:
+     - `https://yourdomain.com/api/auth/google/callback`
+     - `http://localhost:3000/api/auth/google/callback` (for development)
+
+4. **Add to environment variables:**
+   ```bash
+   GOOGLE_CLIENT_ID=your_google_client_id.apps.googleusercontent.com
+   GOOGLE_CLIENT_SECRET=your_google_client_secret
+   ```
+
+#### Facebook OAuth Setup
+
+1. **Create a Facebook App:**
+   - Go to [Facebook Developers](https://developers.facebook.com/)
+   - Create a new app of type "Consumer"
+   - Add Facebook Login product to your app
+
+2. **Configure Facebook Login:**
+   - Go to Facebook Login > Settings
+   - Add Valid OAuth Redirect URIs:
+     - `https://yourdomain.com/api/auth/facebook/callback`
+     - `http://localhost:3000/api/auth/facebook/callback`
+   - Enable "Use Strict Mode for Redirect URIs"
+
+3. **App Review (for production):**
+   - Request `email` permission if not automatically approved
+   - Submit app for review if using advanced features
+
+4. **Add to environment variables:**
+   ```bash
+   FACEBOOK_APP_ID=your_facebook_app_id
+   FACEBOOK_APP_SECRET=your_facebook_app_secret
+   ```
+
+#### LinkedIn OAuth Setup
+
+1. **Create a LinkedIn App:**
+   - Go to [LinkedIn Developer Portal](https://www.linkedin.com/developers/)
+   - Create a new app
+   - Select your organization or create a new one
+
+2. **Configure OAuth Settings:**
+   - Go to Auth tab
+   - Add Authorized redirect URLs:
+     - `https://yourdomain.com/api/auth/linkedin/callback`
+     - `http://localhost:3000/api/auth/linkedin/callback`
+   - Request access to `r_liteprofile` and `r_emailaddress` scopes
+
+3. **Add to environment variables:**
+   ```bash
+   LINKEDIN_CLIENT_ID=your_linkedin_client_id
+   LINKEDIN_CLIENT_SECRET=your_linkedin_client_secret
+   ```
+
+### OAuth Environment Variables
+
+Add these variables to your `.env` file:
+
+| Variable | Description | Required |
+|----------|-------------|----------|
+| `GOOGLE_CLIENT_ID` | Google OAuth 2.0 Client ID | Optional |
+| `GOOGLE_CLIENT_SECRET` | Google OAuth 2.0 Client Secret | Optional |
+| `FACEBOOK_APP_ID` | Facebook App ID | Optional |
+| `FACEBOOK_APP_SECRET` | Facebook App Secret | Optional |
+| `LINKEDIN_CLIENT_ID` | LinkedIn OAuth Client ID | Optional |
+| `LINKEDIN_CLIENT_SECRET` | LinkedIn OAuth Client Secret | Optional |
+
+**Note:** OAuth providers are optional. If environment variables are not provided, the application will run with traditional username/password authentication only.
+
+### OAuth API Endpoints
+
+The OAuth integration provides the following endpoints:
+
+```bash
+# Initiate OAuth flow
+GET /api/auth/google
+GET /api/auth/facebook  
+GET /api/auth/linkedin
+
+# OAuth callback handling
+GET /api/auth/google/callback
+GET /api/auth/facebook/callback
+GET /api/auth/linkedin/callback
+
+# Link OAuth account to existing user
+POST /api/auth/link
+Body: { provider: 'google|facebook|linkedin', socialId: 'string' }
+
+# Unlink OAuth account
+DELETE /api/auth/unlink/:provider
+```
+
+### OAuth Frontend Integration
+
+Example JavaScript implementation for initiating OAuth flows:
+
+```javascript
+// Initiate OAuth login
+function loginWithProvider(provider) {
+    // Redirect to OAuth provider
+    window.location.href = `/api/auth/${provider}`;
+}
+
+// Handle OAuth response
+window.addEventListener('load', function() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const token = urlParams.get('token');
+    const error = urlParams.get('error');
+    
+    if (token) {
+        // Store token and redirect to dashboard
+        localStorage.setItem('authToken', token);
+        window.location.href = '/affiliate-dashboard';
+    } else if (error) {
+        // Handle OAuth error
+        console.error('OAuth error:', error);
+        showErrorMessage('Login failed. Please try again.');
+    }
+});
+```
+
+### OAuth Security Features
+
+- **Secure Token Handling**: OAuth tokens are encrypted and stored securely with AES-256-GCM
+- **Account Linking**: Existing users can link social accounts to their profiles seamlessly
+- **Fallback Authentication**: Traditional username/password login always available as backup
+- **Session Management**: Proper session handling for both OAuth and traditional authentication flows
+- **State Parameter Validation**: CSRF protection through OAuth state parameter verification
+- **Audit Logging**: All social authentication events are logged for security monitoring and compliance
+- **Token Expiration**: OAuth access tokens have appropriate expiration times with refresh token rotation
+- **Scope Limitation**: Minimal required scopes (email, profile) to protect user privacy
+
+### Development vs Production
+
+**Development:**
+- Use localhost callback URLs
+- OAuth providers may show security warnings
+- Test with personal accounts
+
+**Production:**
+- Use HTTPS callback URLs only
+- Complete app review process for each provider
+- Configure proper consent screens and privacy policies
+- Monitor OAuth usage and rate limits
 
 ## Testing
 

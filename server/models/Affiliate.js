@@ -23,8 +23,18 @@ const affiliateSchema = new mongoose.Schema({
   serviceArea: { type: String, required: true },
   deliveryFee: { type: Number, required: true },
   username: { type: String, required: true, unique: true },
-  passwordSalt: { type: String, required: true },
-  passwordHash: { type: String, required: true },
+  passwordSalt: { 
+    type: String, 
+    required: function() { 
+      return this.registrationMethod === 'traditional' || !this.registrationMethod;
+    }
+  },
+  passwordHash: { 
+    type: String, 
+    required: function() { 
+      return this.registrationMethod === 'traditional' || !this.registrationMethod;
+    }
+  },
   // Encrypted payment fields
   paymentMethod: {
     type: String,
@@ -45,7 +55,42 @@ const affiliateSchema = new mongoose.Schema({
   },
   isActive: { type: Boolean, default: true },
   dateRegistered: { type: Date, default: Date.now },
-  lastLogin: Date
+  lastLogin: Date,
+  // Social media account connections
+  socialAccounts: {
+    google: {
+      id: String,
+      email: String,
+      name: String,
+      accessToken: String,
+      refreshToken: String,
+      linkedAt: Date
+    },
+    facebook: {
+      id: String,
+      email: String,
+      name: String,
+      accessToken: String,
+      linkedAt: Date
+    },
+    linkedin: {
+      id: String,
+      email: String,
+      name: String,
+      accessToken: String,
+      refreshToken: String,
+      linkedAt: Date
+    }
+  },
+  // Registration method
+  registrationMethod: {
+    type: String,
+    enum: ['traditional', 'google', 'facebook', 'linkedin', 'social'],
+    default: 'traditional'
+  },
+  // Password reset fields
+  resetToken: String,
+  resetTokenExpiry: Date
 }, { 
   timestamps: true,
   toObject: { virtuals: true },

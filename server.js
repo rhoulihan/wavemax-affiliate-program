@@ -18,6 +18,7 @@ const { conditionalCsrf, csrfTokenEndpoint } = require('./server/config/csrf-con
 
 // Import routes
 const authRoutes = require('./server/routes/authRoutes');
+const socialAuthRoutes = require('./server/routes/socialAuthRoutes');
 const affiliateRoutes = require('./server/routes/affiliateRoutes');
 const customerRoutes = require('./server/routes/customerRoutes');
 const orderRoutes = require('./server/routes/orderRoutes');
@@ -32,6 +33,7 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 const logger = require('./server/utils/logger');
+const passport = require('./server/config/passport-config');
 
 const MongoStore = require('connect-mongo');
 
@@ -230,6 +232,10 @@ app.use((req, res, next) => {
   next();
 });
 
+// Initialize Passport for social media authentication
+app.use(passport.initialize());
+app.use(passport.session());
+
 // Serve static files in all environments
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -285,6 +291,7 @@ apiV1Router.get('/environment', (req, res) => {
 
 // Mount v1 routes
 apiV1Router.use('/auth', authRoutes);
+apiV1Router.use('/auth', socialAuthRoutes);  // Social auth routes
 apiV1Router.use('/affiliates', affiliateRoutes);
 apiV1Router.use('/customers', customerRoutes);
 apiV1Router.use('/orders', orderRoutes);

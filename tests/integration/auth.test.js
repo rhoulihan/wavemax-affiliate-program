@@ -7,6 +7,7 @@ const Operator = require('../../server/models/Operator');
 const RefreshToken = require('../../server/models/RefreshToken');
 const encryptionUtil = require('../../server/utils/encryption');
 const { getCsrfToken, createAgent } = require('../helpers/csrfHelper');
+const { getStrongPassword } = require('../helpers/testPasswords');
 
 describe('Authentication Integration Tests', () => {
   let agent;
@@ -29,7 +30,7 @@ describe('Authentication Integration Tests', () => {
   describe('POST /api/v1/auth/affiliate/login', () => {
     it('should login affiliate with valid credentials', async () => {
       // Create test affiliate
-      const { hash, salt } = encryptionUtil.hashPassword('password123');
+      const { hash, salt } = encryptionUtil.hashPassword(getStrongPassword('affiliate', 1));
       const affiliate = new Affiliate({
         affiliateId: 'AFF123',
         firstName: 'John',
@@ -53,7 +54,7 @@ describe('Authentication Integration Tests', () => {
         .post('/api/v1/auth/affiliate/login')
         .send({
           username: 'johndoe',
-          password: 'password123'
+          password: getStrongPassword('affiliate', 1)
         });
 
       expect(response.status).toBe(200);
@@ -95,7 +96,7 @@ describe('Authentication Integration Tests', () => {
         .post('/api/v1/auth/affiliate/login')
         .send({
           username: 'johndoe',
-          password: 'wrongpassword'
+          password: 'WrongPassword123!@#'
         });
 
       expect(response.status).toBe(401);
@@ -110,7 +111,7 @@ describe('Authentication Integration Tests', () => {
         .post('/api/v1/auth/affiliate/login')
         .send({
           username: 'nonexistent',
-          password: 'password123'
+          password: getStrongPassword('affiliate', 1)
         });
 
       expect(response.status).toBe(401);
@@ -144,7 +145,7 @@ describe('Authentication Integration Tests', () => {
       await affiliate.save();
 
       // Create test customer
-      const { hash, salt } = encryptionUtil.hashPassword('customerpass');
+      const { hash, salt } = encryptionUtil.hashPassword(getStrongPassword('customer', 1));
       const customer = new Customer({
         customerId: 'CUST123',
         firstName: 'Jane',
@@ -167,7 +168,7 @@ describe('Authentication Integration Tests', () => {
         .post('/api/v1/auth/customer/login')
         .send({
           username: 'janesmith',
-          password: 'customerpass'
+          password: getStrongPassword('customer', 1)
         });
 
       expect(response.status).toBe(200);
@@ -190,7 +191,7 @@ describe('Authentication Integration Tests', () => {
   describe('GET /api/v1/auth/verify', () => {
     it('should verify valid token', async () => {
       // Create affiliate and get token
-      const { hash, salt } = encryptionUtil.hashPassword('password123');
+      const { hash, salt } = encryptionUtil.hashPassword(getStrongPassword('affiliate', 1));
       const affiliate = new Affiliate({
         affiliateId: 'AFF123',
         firstName: 'John',
@@ -214,7 +215,7 @@ describe('Authentication Integration Tests', () => {
         .post('/api/v1/auth/affiliate/login')
         .send({
           username: 'johndoe',
-          password: 'password123'
+          password: getStrongPassword('affiliate', 1)
         });
 
       const token = loginResponse.body.token;
@@ -261,7 +262,7 @@ describe('Authentication Integration Tests', () => {
   describe('POST /api/v1/auth/refresh-token', () => {
     it('should refresh token successfully', async () => {
       // Create affiliate and get refresh token
-      const { hash, salt } = encryptionUtil.hashPassword('password123');
+      const { hash, salt } = encryptionUtil.hashPassword(getStrongPassword('affiliate', 1));
       const affiliate = new Affiliate({
         affiliateId: 'AFF123',
         firstName: 'John',
@@ -285,7 +286,7 @@ describe('Authentication Integration Tests', () => {
         .post('/api/v1/auth/affiliate/login')
         .send({
           username: 'johndoe',
-          password: 'password123'
+          password: getStrongPassword('affiliate', 1)
         });
 
       const refreshToken = loginResponse.body.refreshToken;
@@ -368,7 +369,7 @@ describe('Authentication Integration Tests', () => {
   describe('POST /api/v1/auth/logout', () => {
     it('should logout successfully and blacklist tokens', async () => {
       // Create affiliate and get tokens
-      const { hash, salt } = encryptionUtil.hashPassword('password123');
+      const { hash, salt } = encryptionUtil.hashPassword(getStrongPassword('affiliate', 1));
       const affiliate = new Affiliate({
         affiliateId: 'AFF123',
         firstName: 'John',
@@ -392,7 +393,7 @@ describe('Authentication Integration Tests', () => {
         .post('/api/v1/auth/affiliate/login')
         .send({
           username: 'johndoe',
-          password: 'password123'
+          password: getStrongPassword('affiliate', 1)
         });
 
       const token = loginResponse.body.token;
@@ -469,7 +470,7 @@ describe('Authentication Integration Tests', () => {
             .post('/api/v1/auth/affiliate/login')
             .send({
               username: 'johndoe',
-              password: 'wrongpassword'
+              password: 'WrongPassword123!@#'
             })
         );
       }
@@ -517,7 +518,7 @@ describe('Authentication Integration Tests', () => {
   describe('Concurrent refresh token usage', () => {
     it('should handle concurrent refresh token requests safely', async () => {
       // Create affiliate and get refresh token
-      const { hash, salt } = encryptionUtil.hashPassword('password123');
+      const { hash, salt } = encryptionUtil.hashPassword(getStrongPassword('affiliate', 1));
       const affiliate = new Affiliate({
         affiliateId: 'AFF123',
         firstName: 'John',
@@ -541,7 +542,7 @@ describe('Authentication Integration Tests', () => {
         .post('/api/v1/auth/affiliate/login')
         .send({
           username: 'johndoe',
-          password: 'password123'
+          password: getStrongPassword('affiliate', 1)
         });
 
       const refreshToken = loginResponse.body.refreshToken;
@@ -591,7 +592,7 @@ describe('Authentication Integration Tests', () => {
   describe('Token blacklisting after logout', () => {
     it('should blacklist all active tokens on logout', async () => {
       // Create affiliate
-      const { hash, salt } = encryptionUtil.hashPassword('password123');
+      const { hash, salt } = encryptionUtil.hashPassword(getStrongPassword('affiliate', 1));
       const affiliate = new Affiliate({
         affiliateId: 'AFF999',
         firstName: 'John',
@@ -616,7 +617,7 @@ describe('Authentication Integration Tests', () => {
         .post('/api/v1/auth/affiliate/login')
         .send({
           username: 'johndoe999',
-          password: 'password123'
+          password: getStrongPassword('affiliate', 1)
         });
 
       const token1 = login1.body.token;
@@ -630,7 +631,7 @@ describe('Authentication Integration Tests', () => {
         .post('/api/v1/auth/affiliate/login')
         .send({
           username: 'johndoe999',
-          password: 'password123'
+          password: getStrongPassword('affiliate', 1)
         });
 
       const token2 = login2.body.token;
@@ -705,7 +706,7 @@ describe('Authentication Integration Tests', () => {
         firstName: 'Admin',
         lastName: 'User',
         email: 'admin@example.com',
-        password: 'Admin123!',
+        password: getStrongPassword('admin', 1),
         permissions: ['system_config', 'operator_management'],
         isActive: true
       });
@@ -716,7 +717,7 @@ describe('Authentication Integration Tests', () => {
         .set('X-CSRF-Token', csrfToken)
         .send({
           email: 'admin@example.com',
-          password: 'Admin123!'
+          password: getStrongPassword('admin', 1)
         });
 
       expect(response.status).toBe(200);
@@ -739,7 +740,7 @@ describe('Authentication Integration Tests', () => {
         firstName: 'Admin',
         lastName: 'User',
         email: 'admin@example.com',
-        password: 'Admin123!',
+        password: getStrongPassword('admin', 1),
         permissions: ['system_config'],
         isActive: true
       });
@@ -750,7 +751,7 @@ describe('Authentication Integration Tests', () => {
         .set('X-CSRF-Token', csrfToken)
         .send({
           email: 'admin@example.com',
-          password: 'wrongpassword'
+          password: 'WrongPassword123!@#'
         });
 
       expect(response.status).toBe(401);
@@ -766,7 +767,7 @@ describe('Authentication Integration Tests', () => {
         firstName: 'Admin',
         lastName: 'User',
         email: 'admin@example.com',
-        password: 'Admin123!',
+        password: getStrongPassword('admin', 1),
         permissions: ['system_config'],
         isActive: false
       });
@@ -777,7 +778,7 @@ describe('Authentication Integration Tests', () => {
         .set('X-CSRF-Token', csrfToken)
         .send({
           email: 'admin@example.com',
-          password: 'Admin123!'
+          password: getStrongPassword('admin', 1)
         });
 
       expect(response.status).toBe(401);
@@ -796,7 +797,7 @@ describe('Authentication Integration Tests', () => {
         firstName: 'Admin',
         lastName: 'User',
         email: 'admin@example.com',
-        password: 'Admin123!'
+        password: getStrongPassword('admin', 1)
       });
       await admin.save();
 
@@ -806,7 +807,7 @@ describe('Authentication Integration Tests', () => {
         firstName: 'Op',
         lastName: 'User',
         email: 'operator@example.com',
-        password: 'Operator123!',
+        password: getStrongPassword('operator', 1),
         shiftStart: '00:00',
         shiftEnd: '23:59',
         isActive: true,
@@ -819,7 +820,7 @@ describe('Authentication Integration Tests', () => {
         .set('X-CSRF-Token', csrfToken)
         .send({
           email: 'operator@example.com',
-          password: 'Operator123!'
+          password: getStrongPassword('operator', 1)
         });
 
       expect(response.status).toBe(200);
@@ -843,7 +844,7 @@ describe('Authentication Integration Tests', () => {
         firstName: 'Admin',
         lastName: 'User2',
         email: 'admin2@example.com',
-        password: 'Admin123!'
+        password: getStrongPassword('admin', 1)
       });
       await admin.save();
 
@@ -852,7 +853,7 @@ describe('Authentication Integration Tests', () => {
         firstName: 'Op',
         lastName: 'User',
         email: 'operator@example.com',
-        password: 'Operator123!',
+        password: getStrongPassword('operator', 1),
         shiftStart: '00:00',
         shiftEnd: '23:59',
         isActive: true,
@@ -865,7 +866,7 @@ describe('Authentication Integration Tests', () => {
         .set('X-CSRF-Token', csrfToken)
         .send({
           email: 'operator@example.com',
-          password: 'wrongpassword'
+          password: 'WrongPassword123!@#'
         });
 
       expect(response.status).toBe(401);
@@ -882,7 +883,7 @@ describe('Authentication Integration Tests', () => {
         firstName: 'Admin',
         lastName: 'User3',
         email: 'admin3@example.com',
-        password: 'Admin123!'
+        password: getStrongPassword('admin', 1)
       });
       await admin.save();
 
@@ -891,7 +892,7 @@ describe('Authentication Integration Tests', () => {
         firstName: 'Op',
         lastName: 'User',
         email: 'operator@example.com',
-        password: 'Operator123!',
+        password: getStrongPassword('operator', 1),
         shiftStart: '00:00',
         shiftEnd: '23:59',
         isActive: false,
@@ -904,7 +905,7 @@ describe('Authentication Integration Tests', () => {
         .set('X-CSRF-Token', csrfToken)
         .send({
           email: 'operator@example.com',
-          password: 'Operator123!'
+          password: getStrongPassword('operator', 1)
         });
 
       expect(response.status).toBe(403);

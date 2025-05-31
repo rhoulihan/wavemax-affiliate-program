@@ -6,6 +6,7 @@ const affiliateController = require('../controllers/affiliateController');
 const { authenticate, authorize } = require('../middleware/auth');
 const { body } = require('express-validator');
 const paginationMiddleware = require('../utils/paginationMiddleware');
+const { customPasswordValidator } = require('../utils/passwordValidator');
 
 /**
  * @route   POST /api/affiliates/register
@@ -24,7 +25,7 @@ router.post('/register', [
   body('serviceArea').notEmpty().withMessage('Service area is required'),
   body('deliveryFee').isNumeric().withMessage('Delivery fee must be a number'),
   body('username').notEmpty().withMessage('Username is required'),
-  body('password').isLength({ min: 8 }).withMessage('Password must be at least 8 characters long'),
+  body('password').custom(customPasswordValidator),
   body('paymentMethod').isIn(['directDeposit', 'check', 'paypal']).withMessage('Invalid payment method')
 ], affiliateController.registerAffiliate);
 

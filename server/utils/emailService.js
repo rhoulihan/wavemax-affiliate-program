@@ -352,6 +352,33 @@ exports.sendAffiliateOrderCancellationEmail = async (affiliate, order, customer)
   }
 };
 
+/**
+ * Send password reset email to affiliate
+ */
+exports.sendAffiliatePasswordResetEmail = async (affiliate, resetUrl) => {
+  try {
+    const template = await loadTemplate('affiliate-password-reset');
+
+    const data = {
+      first_name: affiliate.firstName,
+      affiliate_id: affiliate.affiliateId,
+      reset_url: resetUrl,
+      expire_time: '1 hour',
+      current_year: new Date().getFullYear()
+    };
+
+    const html = fillTemplate(template, data);
+
+    await sendEmail(
+      affiliate.email,
+      'Password Reset Request - WaveMAX Affiliate Portal',
+      html
+    );
+  } catch (error) {
+    console.error('Error sending affiliate password reset email:', error);
+  }
+};
+
 // =============================================================================
 // Customer Emails
 // =============================================================================
@@ -491,6 +518,33 @@ exports.sendOrderCancellationEmail = async (customer, order) => {
     );
   } catch (error) {
     console.error('Error sending order cancellation email:', error);
+  }
+};
+
+/**
+ * Send password reset email to customer
+ */
+exports.sendCustomerPasswordResetEmail = async (customer, resetUrl) => {
+  try {
+    const template = await loadTemplate('customer-password-reset');
+
+    const data = {
+      first_name: customer.firstName,
+      customer_id: customer.customerId,
+      reset_url: resetUrl,
+      expire_time: '1 hour',
+      current_year: new Date().getFullYear()
+    };
+
+    const html = fillTemplate(template, data);
+
+    await sendEmail(
+      customer.email,
+      'Password Reset Request - WaveMAX Customer Portal',
+      html
+    );
+  } catch (error) {
+    console.error('Error sending customer password reset email:', error);
   }
 };
 

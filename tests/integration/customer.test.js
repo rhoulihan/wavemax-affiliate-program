@@ -98,9 +98,14 @@ describe('Customer Integration Tests', () => {
           zipCode: '78703',
           serviceFrequency: 'biweekly',
           username: 'bobjohnson',
-          password: 'bobpass123',
+          password: 'SecurePassw0rd!',
           affiliateId: 'AFF123'
         });
+
+      // Debug: Log the response
+      if (response.status !== 201) {
+        console.log('Customer registration response:', JSON.stringify(response.body, null, 2));
+      }
 
       expect(response.status).toBe(201);
       expect(response.body).toMatchObject({
@@ -135,7 +140,7 @@ describe('Customer Integration Tests', () => {
           zipCode: '78703',
           serviceFrequency: 'biweekly',
           username: 'bobjohnson',
-          password: 'bobpass123',
+          password: 'SecurePassw0rd!',
           affiliateId: 'INVALID'
         });
 
@@ -160,7 +165,7 @@ describe('Customer Integration Tests', () => {
           zipCode: '78703',
           serviceFrequency: 'biweekly',
           username: 'bobjohnson',
-          password: 'bobpass123',
+          password: 'SecurePassw0rd!',
           affiliateId: 'AFF123'
         });
 
@@ -185,7 +190,7 @@ describe('Customer Integration Tests', () => {
           zipCode: '78703',
           serviceFrequency: 'biweekly',
           username: 'janesmith', // Already exists
-          password: 'bobpass123',
+          password: 'SecurePassw0rd!',
           affiliateId: 'AFF123'
         });
 

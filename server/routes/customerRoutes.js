@@ -5,6 +5,7 @@ const router = express.Router();
 const customerController = require('../controllers/customerController');
 const { authenticate, authorize } = require('../middleware/auth');
 const { body } = require('express-validator');
+const { customPasswordValidator } = require('../utils/passwordValidator');
 
 /**
  * @route   POST /api/customers/register
@@ -22,7 +23,7 @@ router.post('/register', [
   body('state').notEmpty().withMessage('State is required'),
   body('zipCode').notEmpty().withMessage('ZIP code is required'),
   body('username').notEmpty().withMessage('Username is required'),
-  body('password').isLength({ min: 8 }).withMessage('Password must be at least 8 characters long')
+  body('password').custom(customPasswordValidator)
 ], customerController.registerCustomer);
 
 /**

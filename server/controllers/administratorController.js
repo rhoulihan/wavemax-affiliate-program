@@ -11,6 +11,7 @@ const Transaction = require('../models/Transaction');
 const { fieldFilter } = require('../utils/fieldFilter');
 const emailService = require('../utils/emailService');
 const { logAuditEvent, AuditEvents } = require('../utils/auditLogger');
+const { validatePasswordStrength } = require('../utils/passwordValidator');
 const crypto = require('crypto');
 const mongoose = require('mongoose');
 
@@ -144,10 +145,12 @@ exports.createAdministrator = async (req, res) => {
     }
 
     // Validate password strength
-    if (password.length < 8) {
+    const passwordValidation = validatePasswordStrength(password, '', email);
+    if (!passwordValidation.success) {
       return res.status(400).json({
         success: false,
-        message: 'Password must be at least 8 characters long'
+        message: 'Password does not meet security requirements',
+        errors: passwordValidation.errors
       });
     }
 
@@ -382,11 +385,13 @@ exports.resetAdministratorPassword = async (req, res) => {
       });
     }
 
-    // Validate password
-    if (!newPassword || newPassword.length < 8) {
+    // Validate password strength
+    const passwordValidation = validatePasswordStrength(newPassword, '', '');
+    if (!passwordValidation.success) {
       return res.status(400).json({
         success: false,
-        message: 'Password must be at least 8 characters long'
+        message: 'Password does not meet security requirements',
+        errors: passwordValidation.errors
       });
     }
 
@@ -499,6 +504,16 @@ exports.createOperator = async (req, res) => {
       return res.status(400).json({
         success: false,
         message: 'Valid email is required'
+      });
+    }
+
+    // Validate password strength
+    const passwordValidation = validatePasswordStrength(password, '', email);
+    if (!passwordValidation.success) {
+      return res.status(400).json({
+        success: false,
+        message: 'Password does not meet security requirements',
+        errors: passwordValidation.errors
       });
     }
 

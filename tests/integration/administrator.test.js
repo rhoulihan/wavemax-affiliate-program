@@ -261,7 +261,7 @@ describe('Administrator Integration Tests', () => {
         firstName: 'New',
         lastName: 'Admin',
         email: 'newadmin@wavemax.com',
-        password: 'NewPass123!',
+        password: 'NewPassw0rd!',
         permissions: ['customers.read', 'operators.read']
       };
 
@@ -288,7 +288,7 @@ describe('Administrator Integration Tests', () => {
         .post('/api/v1/auth/administrator/login')
         .send({
           email: 'newadmin@wavemax.com',
-          password: 'NewPass123!'
+          password: 'NewPassw0rd!'
         });
       
       expect(loginRes.status).toBe(200);
@@ -340,7 +340,7 @@ describe('Administrator Integration Tests', () => {
         });
 
       expect(response.status).toBe(400);
-      expect(response.body.message).toContain('Password must be at least 8 characters');
+      expect(response.body.message).toContain('Password does not meet security requirements');
     });
 
     it('should prevent duplicate emails', async () => {
@@ -352,7 +352,7 @@ describe('Administrator Integration Tests', () => {
           firstName: 'Duplicate',
           lastName: 'Admin',
           email: 'admin@wavemax.com', // Already exists
-          password: 'Password123!',
+          password: 'DuplicatePassw0rd!',
           permissions: []
         });
 
@@ -455,7 +455,7 @@ describe('Administrator Integration Tests', () => {
         .set('Authorization', `Bearer ${adminToken}`)
         .set('x-csrf-token', csrfToken)
         .send({
-          password: 'NewPassword123!'
+          password: 'NewPassw0rd492!'
         });
 
       expect(response.status).toBe(200);
@@ -465,7 +465,7 @@ describe('Administrator Integration Tests', () => {
         .post('/api/v1/auth/administrator/login')
         .send({
           email: 'target@wavemax.com',
-          password: 'NewPassword123!'
+          password: 'NewPassw0rd492!'
         });
       
       expect(loginRes.status).toBe(200);
@@ -685,7 +685,7 @@ describe('Administrator Integration Tests', () => {
         .set('Authorization', `Bearer ${adminToken}`)
         .set('x-csrf-token', csrfToken)
         .send({
-          newPassword: 'NewPassword123!'
+          newPassword: 'NewPassw0rd492!'
         });
 
       expect(response.status).toBe(200);
@@ -697,7 +697,7 @@ describe('Administrator Integration Tests', () => {
         .post('/api/v1/auth/administrator/login')
         .send({
           email: 'reset@wavemax.com',
-          password: 'NewPassword123!'
+          password: 'NewPassw0rd492!'
         });
       
       expect(loginRes.status).toBe(200);
@@ -724,7 +724,7 @@ describe('Administrator Integration Tests', () => {
         .set('Authorization', `Bearer ${adminToken}`)
         .set('x-csrf-token', csrfToken)
         .send({
-          newPassword: 'NewPassword123!'
+          newPassword: 'NewPassw0rd492!'
         });
 
       expect(response.status).toBe(200);
@@ -745,7 +745,7 @@ describe('Administrator Integration Tests', () => {
         });
 
       expect(response.status).toBe(400);
-      expect(response.body.message).toContain('Password must be at least 8 characters');
+      expect(response.body.message).toContain('Password does not meet security requirements');
     });
 
     it('should require administrators.update permission', async () => {
@@ -775,7 +775,7 @@ describe('Administrator Integration Tests', () => {
         .set('Authorization', `Bearer ${limitedLogin.body.token}`)
         .set('x-csrf-token', limitedCsrfToken)
         .send({
-          newPassword: 'NewPassword123!'
+          newPassword: 'NewPassw0rd492!'
         });
 
       expect(response.status).toBe(403);
