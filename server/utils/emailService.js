@@ -214,7 +214,7 @@ exports.sendAffiliateNewCustomerEmail = async (affiliate, customer, bagBarcode) 
       customer_address: `${customer.address}, ${customer.city}, ${customer.state} ${customer.zipCode}`,
       service_frequency: customer.serviceFrequency,
       bag_barcode: bagBarcode,
-      dashboard_url: 'https://www.wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program',
+      dashboard_url: `https://www.wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program?login=affiliate&customer=${customer.customerId}`,
       current_year: new Date().getFullYear()
     };
 
