@@ -1,4 +1,5 @@
 const app = require('../../server');
+const mongoose = require('mongoose');
 const Customer = require('../../server/models/Customer');
 const Affiliate = require('../../server/models/Affiliate');
 const Order = require('../../server/models/Order');
@@ -115,9 +116,9 @@ describe('Customer Integration Tests', () => {
       expect(customer.affiliateId).toBe('AFF123');
 
       // Verify bag was created
-      const bag = await Bag.findOne({ customerId: customer.customerId });
+      const bag = await Bag.findOne({ customer: customer._id });
       expect(bag).toBeTruthy();
-      expect(bag.status).toBe('assigned');
+      expect(bag.status).toBe('pending');
     });
 
     it('should fail with invalid affiliate ID', async () => {
@@ -400,9 +401,10 @@ describe('Customer Integration Tests', () => {
       // Create test bag
       const bag = new Bag({
         barcode: 'BAG123',
-        customerId: 'CUST123',
-        affiliateId: 'AFF123',
-        status: 'assigned'
+        customer: testCustomer._id,
+        affiliate: testAffiliate._id,
+        type: 'laundry',
+        status: 'pending'
       });
       await bag.save();
     });
@@ -447,9 +449,10 @@ describe('Customer Integration Tests', () => {
       // Create bag for different customer
       const otherBag = new Bag({
         barcode: 'BAG999',
-        customerId: 'CUST999',
-        affiliateId: 'AFF123',
-        status: 'assigned'
+        customer: new mongoose.Types.ObjectId(),
+        affiliate: testAffiliate._id,
+        type: 'laundry',
+        status: 'pending'
       });
       await otherBag.save();
 
@@ -538,21 +541,27 @@ describe('Customer Integration Tests', () => {
       const bags = [
         {
           barcode: 'BAG001',
-          customerId: 'CUST123',
-          status: 'in_use',
-          issueDate: new Date('2025-01-01')
+          customer: testCustomer._id,
+          affiliate: testAffiliate._id,
+          type: 'laundry',
+          status: 'ready',
+          createdAt: new Date('2025-01-01')
         },
         {
           barcode: 'BAG002',
-          customerId: 'CUST123',
-          status: 'in_use',
-          issueDate: new Date('2025-02-01')
+          customer: testCustomer._id,
+          affiliate: testAffiliate._id,
+          type: 'laundry',
+          status: 'ready',
+          createdAt: new Date('2025-02-01')
         },
         {
           barcode: 'BAG003',
-          customerId: 'CUST123',
+          customer: testCustomer._id,
+          affiliate: testAffiliate._id,
+          type: 'laundry',
           status: 'lost',
-          issueDate: new Date('2025-03-01')
+          createdAt: new Date('2025-03-01')
         }
       ];
 
@@ -568,8 +577,8 @@ describe('Customer Integration Tests', () => {
       expect(response.body).toMatchObject({
         success: true,
         bags: expect.arrayContaining([
-          expect.objectContaining({ barcode: 'BAG001', status: 'in_use' }),
-          expect.objectContaining({ barcode: 'BAG002', status: 'in_use' }),
+          expect.objectContaining({ barcode: 'BAG001', status: 'ready' }),
+          expect.objectContaining({ barcode: 'BAG002', status: 'ready' }),
           expect.objectContaining({ barcode: 'BAG003', status: 'lost' })
         ])
       });
@@ -580,11 +589,11 @@ describe('Customer Integration Tests', () => {
       const response = await agent
         .get('/api/v1/customers/CUST123/bags')
         .set('Authorization', `Bearer ${customerToken}`)
-        .query({ status: 'in_use' });
+        .query({ status: 'ready' });
 
       expect(response.status).toBe(200);
       expect(response.body.bags).toHaveLength(2);
-      expect(response.body.bags.every(bag => bag.status === 'in_use')).toBe(true);
+      expect(response.body.bags.every(bag => bag.status === 'ready')).toBe(true);
     });
 
     it('should allow affiliate to view customer bags', async () => {
@@ -712,9 +721,9 @@ describe('Customer Integration Tests', () => {
 
   describe('DELETE /api/v1/customers/:customerId/delete-all-data', () => {
     it('should delete all customer data in development environment', async () => {
-      // Set environment to development
-      const originalEnv = process.env.NODE_ENV;
-      process.env.NODE_ENV = 'development';
+      // Enable delete feature
+      const originalEnv = process.env.ENABLE_DELETE_DATA_FEATURE;
+      process.env.ENABLE_DELETE_DATA_FEATURE = 'true';
 
       // Create test data
       const testOrder = await Order.create({
@@ -730,10 +739,11 @@ describe('Customer Integration Tests', () => {
       });
 
       const testBag = await Bag.create({
-        customerId: 'CUST123',
-        affiliateId: 'AFF123',
+        customer: testCustomer._id,
+        affiliate: testAffiliate._id,
         barcode: 'TEST-BAG-002',
-        status: 'assigned'
+        type: 'laundry',
+        status: 'pending'
       });
 
       // Delete all data
@@ -758,13 +768,13 @@ describe('Customer Integration Tests', () => {
       expect(deletedBag).toBeNull();
 
       // Restore environment
-      process.env.NODE_ENV = originalEnv;
+      process.env.ENABLE_DELETE_DATA_FEATURE = originalEnv;
     });
 
     it('should reject deletion in production environment', async () => {
-      // Set environment to production
-      const originalEnv = process.env.NODE_ENV;
-      process.env.NODE_ENV = 'production';
+      // Disable delete feature
+      const originalEnv = process.env.ENABLE_DELETE_DATA_FEATURE;
+      process.env.ENABLE_DELETE_DATA_FEATURE = 'false';
 
       const response = await agent
         .delete('/api/v1/customers/CUST123/delete-all-data')
@@ -774,17 +784,17 @@ describe('Customer Integration Tests', () => {
       expect(response.status).toBe(403);
       expect(response.body).toMatchObject({
         success: false,
-        message: 'This operation is not allowed in production'
+        message: 'This operation is not allowed'
       });
 
       // Restore environment
-      process.env.NODE_ENV = originalEnv;
+      process.env.ENABLE_DELETE_DATA_FEATURE = originalEnv;
     });
 
     it('should reject unauthorized deletion', async () => {
-      // Set environment to development
-      const originalEnv = process.env.NODE_ENV;
-      process.env.NODE_ENV = 'development';
+      // Enable delete feature
+      const originalEnv = process.env.ENABLE_DELETE_DATA_FEATURE;
+      process.env.ENABLE_DELETE_DATA_FEATURE = 'true';
 
       // Create another customer with different token
       const otherCustomerCreds = encryptionUtil.hashPassword('otherpass');
@@ -810,31 +820,28 @@ describe('Customer Integration Tests', () => {
       );
 
       // Try to delete CUST123 with CUST456's token
-      // Note: The controller ignores the URL parameter and uses the auth token
-      // so this will actually delete CUST456's data if successful
+      // The controller properly checks that the URL parameter matches the authenticated user
       const response = await agent
         .delete('/api/v1/customers/CUST123/delete-all-data')
         .set('Authorization', `Bearer ${otherCustomerToken}`)
         .set('X-CSRF-Token', csrfToken);
 
-      // Since the controller uses req.user.customerId, not the URL param,
-      // this will succeed and delete CUST456's data
-      expect(response.status).toBe(200);
+      // Should reject because CUST456 is trying to delete CUST123's data
+      expect(response.status).toBe(403);
       expect(response.body).toMatchObject({
-        success: true,
-        message: 'All data has been deleted successfully'
+        success: false,
+        message: 'You can only delete your own data'
       });
 
-      // Verify CUST123 still exists (wasn't deleted)
+      // Verify both customers still exist
       const cust123 = await Customer.findOne({ customerId: 'CUST123' });
       expect(cust123).not.toBeNull();
 
-      // Verify CUST456 was deleted (even though URL said CUST123)
       const cust456 = await Customer.findOne({ customerId: 'CUST456' });
-      expect(cust456).toBeNull();
+      expect(cust456).not.toBeNull();
 
       // Restore environment
-      process.env.NODE_ENV = originalEnv;
+      process.env.ENABLE_DELETE_DATA_FEATURE = originalEnv;
     });
   });
 });

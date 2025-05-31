@@ -160,34 +160,75 @@ app.use(sanitizeRequest); // Sanitize all inputs for XSS prevention
 app.use(compression());
 
 // Rate limiting for API endpoints
-const apiLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // Limit each IP to 100 requests per windowMs
-  message: 'Too many requests from this IP, please try again later',
-  standardHeaders: true,
-  legacyHeaders: false
-});
-app.use('/api/', apiLimiter);
+if (process.env.NODE_ENV !== 'test') {
+  const apiLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 100, // Limit each IP to 100 requests per windowMs
+    message: 'Too many requests from this IP, please try again later',
+    standardHeaders: true,
+    legacyHeaders: false
+  });
+  app.use('/api/', apiLimiter);
+}
 
 // Setup session middleware - add this after other middleware like helmet, cors, etc.
 const session = require('express-session');
 
+// Calculate maxAge once to ensure consistency
+const sessionMaxAge = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
+
+// Configure session store based on environment
+const sessionStore = process.env.NODE_ENV === 'test' 
+  ? undefined // Use default MemoryStore for tests
+  : MongoStore.create({ 
+      mongoUrl: process.env.MONGODB_URI,
+      touchAfter: 24 * 3600 // Lazy session update in seconds (24 hours)
+    });
+
 app.use(session({
   name: 'wavemax.sid', // Explicit session cookie name
-  secret: process.env.SESSION_SECRET || process.env.JWT_SECRET,
-  resave: true, // Changed to true to force session save
+  secret: process.env.SESSION_SECRET || process.env.JWT_SECRET || 'default-dev-secret',
+  resave: false, // Don't resave session if unmodified
   saveUninitialized: true, // Changed to true to ensure sessions are created for CSRF
-  rolling: true, // Reset expiration on activity
-  store: MongoStore.create({ mongoUrl: process.env.MONGODB_URI }),
+  rolling: false, // Disable rolling to avoid maxAge issues
+  store: sessionStore,
   cookie: {
     secure: process.env.NODE_ENV === 'production', // Only use secure in production
     httpOnly: true,
-    maxAge: 24 * 60 * 60 * 1000,
+    maxAge: sessionMaxAge, // Use pre-calculated value
+    originalMaxAge: sessionMaxAge, // Store original maxAge
     sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax', // 'none' required for cross-site iframe in production
     path: '/', // Ensure cookie is available for all paths
     domain: undefined // Let browser handle domain (works better for same-origin)
   }
 }));
+
+// Add middleware to ensure session cookie maxAge is always valid
+app.use((req, res, next) => {
+  if (req.session && req.session.cookie) {
+    // Force reset cookie properties to ensure they're valid
+    const originalMaxAge = req.session.cookie.maxAge;
+    const originalExpires = req.session.cookie._expires;
+    
+    // Always ensure maxAge is a valid number
+    if (typeof originalMaxAge !== 'number' || isNaN(originalMaxAge) || originalMaxAge < 0) {
+      // Create a new cookie object to avoid prototype issues
+      req.session.cookie = {
+        ...req.session.cookie,
+        maxAge: sessionMaxAge,
+        originalMaxAge: sessionMaxAge,
+        expires: new Date(Date.now() + sessionMaxAge),
+        _expires: new Date(Date.now() + sessionMaxAge)
+      };
+    }
+    
+    // Double-check the maxAge is still valid
+    if (typeof req.session.cookie.maxAge !== 'number') {
+      req.session.cookie.maxAge = sessionMaxAge;
+    }
+  }
+  next();
+});
 
 // Serve static files in all environments
 app.use(express.static(path.join(__dirname, 'public')));
@@ -202,23 +243,6 @@ if (process.env.SHOW_DOCS === 'true') {
   });
 }
 
-// Debug middleware to track sessions
-app.use((req, res, next) => {
-  if (req.path.includes('/api/') && (req.path.includes('csrf') || req.path.includes('orders'))) {
-    console.log('=== Session Debug ===');
-    console.log('Path:', req.path);
-    console.log('Method:', req.method);
-    console.log('Session ID:', req.sessionID);
-    console.log('Session Cookie:', req.headers.cookie);
-    console.log('Has Session:', !!req.session);
-    if (req.session) {
-      console.log('Session Keys:', Object.keys(req.session));
-      console.log('CSRF Secret:', req.session.csrfSecret ? 'exists' : 'missing');
-    }
-    console.log('===================');
-  }
-  next();
-});
 
 // Apply CSRF protection with new configuration
 app.use(conditionalCsrf);
@@ -273,6 +297,14 @@ apiV1Router.get('/environment', (req, res) => {
   res.json({
     environment: process.env.NODE_ENV || 'development',
     enableDeleteDataFeature: process.env.ENABLE_DELETE_DATA_FEATURE === 'true'
+  });
+});
+
+// Configuration endpoints
+apiV1Router.get('/config/bag-fee', (req, res) => {
+  res.json({
+    success: true,
+    bagFee: process.env.BAG_FEE || '10.00'
   });
 });
 

@@ -314,9 +314,9 @@ describe('Affiliate API', () => {
   });
 
   test('Delete all affiliate data (development only)', async () => {
-    // Set environment to development
-    const originalEnv = process.env.NODE_ENV;
-    process.env.NODE_ENV = 'development';
+    // Enable delete feature
+    const originalEnv = process.env.ENABLE_DELETE_DATA_FEATURE;
+    process.env.ENABLE_DELETE_DATA_FEATURE = 'true';
 
     // Create some test data
     const testCustomer = await Customer.create({
@@ -347,10 +347,11 @@ describe('Affiliate API', () => {
     });
 
     const testBag = await Bag.create({
-      customerId: testCustomer.customerId,
-      affiliateId: testAffiliate.affiliateId,
+      customer: testCustomer._id,
+      affiliate: testAffiliate._id,
+      type: 'laundry',
       barcode: 'TEST-BAG-001',
-      status: 'assigned'
+      status: 'pending'
     });
 
     // Delete all data
@@ -375,13 +376,13 @@ describe('Affiliate API', () => {
     expect(deletedBag).toBeNull();
 
     // Restore environment
-    process.env.NODE_ENV = originalEnv;
+    process.env.ENABLE_DELETE_DATA_FEATURE = originalEnv;
   });
 
   test('Reject delete in production environment', async () => {
-    // Set environment to production
-    const originalEnv = process.env.NODE_ENV;
-    process.env.NODE_ENV = 'production';
+    // Disable delete feature
+    const originalEnv = process.env.ENABLE_DELETE_DATA_FEATURE;
+    process.env.ENABLE_DELETE_DATA_FEATURE = 'false';
 
     const res = await agent
       .delete(`/api/v1/affiliates/${testAffiliate.affiliateId}/delete-all-data`)
@@ -390,9 +391,9 @@ describe('Affiliate API', () => {
 
     expect(res.statusCode).toEqual(403);
     expect(res.body).toHaveProperty('success', false);
-    expect(res.body).toHaveProperty('message', 'This operation is not allowed in production');
+    expect(res.body).toHaveProperty('message', 'This operation is not allowed');
 
     // Restore environment
-    process.env.NODE_ENV = originalEnv;
+    process.env.ENABLE_DELETE_DATA_FEATURE = originalEnv;
   });
 });

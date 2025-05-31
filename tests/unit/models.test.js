@@ -271,25 +271,31 @@ describe('Model Tests', () => {
     it('should create a valid bag', async () => {
       const bag = new Bag({
         barcode: 'WM-' + Math.random().toString(36).substring(2, 10).toUpperCase(),
-        customerId: 'CUST123'
+        customer: new mongoose.Types.ObjectId(),
+        affiliate: new mongoose.Types.ObjectId(),
+        type: 'laundry'
       });
 
       const saved = await bag.save();
 
       expect(saved._id).toBeDefined();
-      expect(saved.bagId).toMatch(/^BAG\d{6}$/);
-      expect(saved.status).toBe('available');
-      expect(saved.customerId).toBe('CUST123');
+      expect(saved.bagId).toMatch(/^BG[A-Z0-9]+$/);
+      expect(saved.status).toBe('pending');
+      expect(saved.type).toBe('laundry');
     });
 
     it('should generate unique barcodes', async () => {
       const bag1 = new Bag({
         barcode: 'WM-' + Math.random().toString(36).substring(2, 10).toUpperCase(),
-        customerId: 'CUST123'
+        customer: new mongoose.Types.ObjectId(),
+        affiliate: new mongoose.Types.ObjectId(),
+        type: 'laundry'
       });
       const bag2 = new Bag({
         barcode: 'WM-' + Math.random().toString(36).substring(2, 10).toUpperCase(),
-        customerId: 'CUST123'
+        customer: new mongoose.Types.ObjectId(),
+        affiliate: new mongoose.Types.ObjectId(),
+        type: 'laundry'
       });
 
       await bag1.save();

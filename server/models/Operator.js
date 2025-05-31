@@ -8,8 +8,7 @@ const { encrypt, decrypt } = require('../utils/encryption');
 const operatorSchema = new mongoose.Schema({
   operatorId: { 
     type: String, 
-    unique: true, 
-    required: true
+    unique: true
   },
   firstName: { 
     type: String, 
@@ -130,7 +129,7 @@ operatorSchema.index({ workStation: 1 });
 operatorSchema.index({ createdAt: -1 });
 
 // Pre-save middleware
-operatorSchema.pre('save', async function(next) {
+operatorSchema.pre('save', function(next) {
   // Update timestamp
   this.updatedAt = new Date();
   

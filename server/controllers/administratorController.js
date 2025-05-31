@@ -10,9 +10,463 @@ const SystemConfig = require('../models/SystemConfig');
 const Transaction = require('../models/Transaction');
 const { fieldFilter } = require('../utils/fieldFilter');
 const emailService = require('../utils/emailService');
-const auditLogger = require('../utils/auditLogger');
+const { logAuditEvent, AuditEvents } = require('../utils/auditLogger');
 const crypto = require('crypto');
 const mongoose = require('mongoose');
+
+// Administrator Management
+
+/**
+ * Get all administrators
+ */
+exports.getAdministrators = async (req, res) => {
+  try {
+    const {
+      page = 1,
+      limit = 20,
+      active,
+      search,
+      sortBy = 'createdAt',
+      sortOrder = 'desc'
+    } = req.query;
+
+    // Build query
+    const query = {};
+    
+    if (active !== undefined) {
+      query.isActive = active === 'true';
+    }
+    
+    if (search) {
+      query.$or = [
+        { firstName: new RegExp(search, 'i') },
+        { lastName: new RegExp(search, 'i') },
+        { email: new RegExp(search, 'i') },
+        { adminId: new RegExp(search, 'i') }
+      ];
+    }
+
+    // Execute query with pagination
+    const administrators = await Administrator.find(query)
+      .select('-password')
+      .sort({ [sortBy]: sortOrder === 'asc' ? 1 : -1 })
+      .limit(limit * 1)
+      .skip((page - 1) * limit);
+
+    const total = await Administrator.countDocuments(query);
+
+    res.json({
+      success: true,
+      administrators: administrators.map(admin => fieldFilter(admin.toObject(), 'administrator')),
+      pagination: {
+        currentPage: parseInt(page),
+        totalPages: Math.ceil(total / limit),
+        totalItems: total,
+        itemsPerPage: parseInt(limit)
+      }
+    });
+
+  } catch (error) {
+    console.error('Error fetching administrators:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch administrators'
+    });
+  }
+};
+
+/**
+ * Get administrator by ID
+ */
+exports.getAdministratorById = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Validate ObjectId
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid administrator ID'
+      });
+    }
+
+    const administrator = await Administrator.findById(id).select('-password');
+
+    if (!administrator) {
+      return res.status(404).json({
+        success: false,
+        message: 'Administrator not found'
+      });
+    }
+
+    res.json({
+      success: true,
+      administrator: fieldFilter(administrator.toObject(), 'administrator')
+    });
+
+  } catch (error) {
+    console.error('Error fetching administrator:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch administrator'
+    });
+  }
+};
+
+/**
+ * Create new administrator
+ */
+exports.createAdministrator = async (req, res) => {
+  try {
+    const {
+      firstName,
+      lastName,
+      email,
+      password,
+      permissions = []
+    } = req.body;
+
+    // Validate required fields
+    if (!firstName || !lastName || !email || !password) {
+      return res.status(400).json({
+        success: false,
+        message: 'Validation failed: All fields are required'
+      });
+    }
+
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Valid email is required'
+      });
+    }
+
+    // Validate password strength
+    if (password.length < 8) {
+      return res.status(400).json({
+        success: false,
+        message: 'Password must be at least 8 characters long'
+      });
+    }
+
+    // Check if email already exists
+    const existingAdmin = await Administrator.findOne({ email: email.toLowerCase() });
+    if (existingAdmin) {
+      return res.status(409).json({
+        success: false,
+        message: 'Email already exists'
+      });
+    }
+
+    // Generate admin ID
+    const adminCount = await Administrator.countDocuments();
+    const adminId = `ADM${String(adminCount + 1).padStart(3, '0')}`;
+
+    // Create new administrator
+    const administrator = new Administrator({
+      adminId,
+      firstName,
+      lastName,
+      email: email.toLowerCase(),
+      password,
+      permissions,
+      createdAt: new Date()
+    });
+
+    await administrator.save();
+
+    // Log the action
+    logAuditEvent(AuditEvents.ACCOUNT_CREATED, {
+      action: 'CREATE_ADMINISTRATOR',
+      userId: req.user.id,
+      userType: 'administrator',
+      targetId: administrator._id,
+      targetType: 'administrator',
+      details: { adminId: administrator.adminId, email: administrator.email }
+    }, req);
+
+    res.status(201).json({
+      success: true,
+      message: 'Administrator created successfully',
+      administrator: fieldFilter(administrator.toObject(), 'administrator')
+    });
+
+  } catch (error) {
+    console.error('Error creating administrator:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to create administrator'
+    });
+  }
+};
+
+/**
+ * Update administrator
+ */
+exports.updateAdministrator = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const updates = req.body;
+
+    // Validate ObjectId
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid administrator ID'
+      });
+    }
+
+    // Prevent updating certain fields
+    delete updates.adminId;
+    delete updates.role;
+    delete updates.createdAt;
+
+    // Check for self-deactivation
+    if (updates.isActive === false && id === req.user.id) {
+      return res.status(400).json({
+        success: false,
+        message: 'Cannot deactivate your own account'
+      });
+    }
+
+    // Check email uniqueness if updating email
+    if (updates.email) {
+      const existingAdmin = await Administrator.findOne({
+        email: updates.email.toLowerCase(),
+        _id: { $ne: id }
+      });
+      if (existingAdmin) {
+        return res.status(409).json({
+          success: false,
+          message: 'Email already exists'
+        });
+      }
+      updates.email = updates.email.toLowerCase();
+    }
+
+    // Hash password if updating
+    if (updates.password) {
+      const admin = await Administrator.findById(id);
+      if (admin) {
+        admin.password = updates.password;
+        await admin.save();
+        delete updates.password;
+      }
+    }
+
+    const administrator = await Administrator.findByIdAndUpdate(
+      id,
+      { $set: updates },
+      { new: true, runValidators: true }
+    ).select('-password');
+
+    if (!administrator) {
+      return res.status(404).json({
+        success: false,
+        message: 'Administrator not found'
+      });
+    }
+
+    // Log the action
+    logAuditEvent(AuditEvents.ACCOUNT_UPDATED, {
+      action: 'UPDATE_ADMINISTRATOR',
+      userId: req.user.id,
+      userType: 'administrator',
+      targetId: administrator._id,
+      targetType: 'administrator',
+      details: { updates }
+    }, req);
+
+    res.json({
+      success: true,
+      message: 'Administrator updated successfully',
+      administrator: fieldFilter(administrator.toObject(), 'administrator')
+    });
+
+  } catch (error) {
+    console.error('Error updating administrator:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to update administrator'
+    });
+  }
+};
+
+/**
+ * Delete administrator
+ */
+exports.deleteAdministrator = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Validate ObjectId
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid administrator ID'
+      });
+    }
+
+    // Prevent self-deletion
+    if (id === req.user.id) {
+      return res.status(400).json({
+        success: false,
+        message: 'Cannot delete your own account'
+      });
+    }
+
+    // Check if this is the last administrator with 'all' permissions
+    const adminWithAllPerms = await Administrator.find({
+      permissions: 'all',
+      _id: { $ne: id }
+    });
+
+    if (adminWithAllPerms.length === 0) {
+      const targetAdmin = await Administrator.findById(id);
+      if (targetAdmin && targetAdmin.permissions.includes('all')) {
+        return res.status(400).json({
+          success: false,
+          message: 'Cannot delete the last administrator with full permissions'
+        });
+      }
+    }
+
+    const administrator = await Administrator.findByIdAndDelete(id);
+
+    if (!administrator) {
+      return res.status(404).json({
+        success: false,
+        message: 'Administrator not found'
+      });
+    }
+
+    // Log the action
+    logAuditEvent(AuditEvents.ACCOUNT_DELETED, {
+      action: 'DELETE_ADMINISTRATOR',
+      userId: req.user.id,
+      userType: 'administrator',
+      targetId: id,
+      targetType: 'administrator',
+      details: { adminId: administrator.adminId, email: administrator.email }
+    }, req);
+
+    res.json({
+      success: true,
+      message: 'Administrator deleted successfully'
+    });
+
+  } catch (error) {
+    console.error('Error deleting administrator:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to delete administrator'
+    });
+  }
+};
+
+/**
+ * Reset administrator password
+ */
+exports.resetAdministratorPassword = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { newPassword } = req.body;
+
+    // Validate ObjectId
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid administrator ID'
+      });
+    }
+
+    // Validate password
+    if (!newPassword || newPassword.length < 8) {
+      return res.status(400).json({
+        success: false,
+        message: 'Password must be at least 8 characters long'
+      });
+    }
+
+    const administrator = await Administrator.findById(id);
+    if (!administrator) {
+      return res.status(404).json({
+        success: false,
+        message: 'Administrator not found'
+      });
+    }
+
+    // Reset password
+    administrator.password = newPassword;
+    administrator.loginAttempts = 0;
+    administrator.lockUntil = undefined;
+    await administrator.save();
+
+    // Log the action
+    logAuditEvent(AuditEvents.PASSWORD_RESET_SUCCESS, {
+      action: 'RESET_ADMINISTRATOR_PASSWORD',
+      userId: req.user.id,
+      userType: 'administrator',
+      targetId: administrator._id,
+      targetType: 'administrator',
+      details: { adminId: administrator.adminId }
+    }, req);
+
+    res.json({
+      success: true,
+      message: 'Password reset successfully'
+    });
+
+  } catch (error) {
+    console.error('Error resetting administrator password:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to reset administrator password'
+    });
+  }
+};
+
+/**
+ * Get available permissions
+ */
+exports.getPermissions = async (req, res) => {
+  try {
+    const permissions = [
+      'all',
+      'administrators.read',
+      'administrators.create',
+      'administrators.update',
+      'administrators.delete',
+      'operators.manage',
+      'operators.read',
+      'customers.manage',
+      'customers.read',
+      'affiliates.manage',
+      'affiliates.read',
+      'orders.manage',
+      'orders.read',
+      'reports.view',
+      'system.configure',
+      'operator_management',
+      'view_analytics',
+      'system_config'
+    ];
+
+    res.json({
+      success: true,
+      permissions
+    });
+
+  } catch (error) {
+    console.error('Error fetching permissions:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch permissions'
+    });
+  }
+};
 
 // Operator Management
 
@@ -31,12 +485,38 @@ exports.createOperator = async (req, res) => {
       shiftEnd 
     } = req.body;
 
+    // Validate required fields
+    if (!firstName || !lastName || !email || !password) {
+      return res.status(400).json({
+        success: false,
+        message: 'Validation failed: All required fields must be provided'
+      });
+    }
+
+    // Validate email format
+    const emailRegex = /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Valid email is required'
+      });
+    }
+
+    // Validate shift time format if provided
+    const timeRegex = /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/;
+    if ((shiftStart && !timeRegex.test(shiftStart)) || (shiftEnd && !timeRegex.test(shiftEnd))) {
+      return res.status(400).json({
+        success: false,
+        message: 'Valid time format (HH:MM) required for shift times'
+      });
+    }
+
     // Check if operator already exists
     const existingOperator = await Operator.findOne({ email: email.toLowerCase() });
     if (existingOperator) {
-      return res.status(400).json({
+      return res.status(409).json({
         success: false,
-        message: 'An operator with this email already exists'
+        message: 'Email already exists'
       });
     }
 
@@ -58,14 +538,14 @@ exports.createOperator = async (req, res) => {
     await emailService.sendOperatorWelcomeEmail(operator, password);
 
     // Log the action
-    await auditLogger.log({
+    logAuditEvent(AuditEvents.DATA_MODIFICATION, {
       action: 'CREATE_OPERATOR',
       userId: req.user.id,
       userType: 'administrator',
       targetId: operator._id,
       targetType: 'operator',
       details: { operatorId: operator.operatorId, email: operator.email }
-    });
+    }, req);
 
     res.status(201).json({
       success: true,
@@ -91,7 +571,9 @@ exports.getOperators = async (req, res) => {
       page = 1, 
       limit = 20, 
       isActive, 
+      active, // Support both 'active' and 'isActive' parameters
       workStation, 
+      onShift,
       search,
       sortBy = 'createdAt',
       sortOrder = 'desc'
@@ -100,8 +582,10 @@ exports.getOperators = async (req, res) => {
     // Build query
     const query = {};
     
-    if (isActive !== undefined) {
-      query.isActive = isActive === 'true';
+    // Handle both 'active' and 'isActive' parameter names
+    const activeParam = active !== undefined ? active : isActive;
+    if (activeParam !== undefined) {
+      query.isActive = activeParam === 'true';
     }
     
     if (workStation) {
@@ -117,7 +601,38 @@ exports.getOperators = async (req, res) => {
       ];
     }
 
-    // Execute query with pagination
+    // If onShift filter is requested, we need to handle it specially since it's a virtual
+    if (onShift !== undefined) {
+      // Get all operators matching base query first
+      const allOperators = await Operator.find(query)
+        .sort({ [sortBy]: sortOrder === 'asc' ? 1 : -1 })
+        .populate('createdBy', 'firstName lastName');
+      
+      // Filter by onShift status
+      const isOnShiftFilter = onShift === 'true';
+      const filteredOperators = allOperators.filter(op => op.isOnShift === isOnShiftFilter);
+      
+      // Apply pagination to filtered results
+      const startIndex = (page - 1) * limit;
+      const endIndex = startIndex + parseInt(limit);
+      const operators = filteredOperators.slice(startIndex, endIndex);
+      
+      const total = filteredOperators.length;
+      
+      res.json({
+        success: true,
+        operators: operators.map(op => fieldFilter(op.toObject(), 'administrator')),
+        pagination: {
+          currentPage: parseInt(page),
+          totalPages: Math.ceil(total / limit),
+          totalItems: total,
+          itemsPerPage: parseInt(limit)
+        }
+      });
+      return;
+    }
+
+    // Regular query without onShift filtering
     const operators = await Operator.find(query)
       .sort({ [sortBy]: sortOrder === 'asc' ? 1 : -1 })
       .limit(limit * 1)
@@ -219,8 +734,40 @@ exports.updateOperator = async (req, res) => {
     const { id } = req.params;
     const updates = req.body;
 
+    // Check if operator exists
+    const existingOperator = await Operator.findById(id);
+    if (!existingOperator) {
+      return res.status(404).json({
+        success: false,
+        message: 'Operator not found'
+      });
+    }
+
+    // Check email uniqueness if email is being updated
+    if (updates.email && updates.email !== existingOperator.email) {
+      const emailExists = await Operator.findOne({ 
+        email: updates.email, 
+        _id: { $ne: id } 
+      });
+      if (emailExists) {
+        return res.status(409).json({
+          success: false,
+          message: 'Email already exists'
+        });
+      }
+    }
+
+    // Handle password update separately if provided
+    if (updates.password) {
+      const operator = await Operator.findById(id);
+      if (operator) {
+        operator.password = updates.password;
+        await operator.save();
+        delete updates.password;
+      }
+    }
+
     // Prevent updating sensitive fields
-    delete updates.password;
     delete updates.operatorId;
     delete updates.role;
     delete updates.createdBy;
@@ -231,22 +778,15 @@ exports.updateOperator = async (req, res) => {
       { new: true, runValidators: true }
     );
 
-    if (!operator) {
-      return res.status(404).json({
-        success: false,
-        message: 'Operator not found'
-      });
-    }
-
     // Log the action
-    await auditLogger.log({
+    logAuditEvent(AuditEvents.DATA_MODIFICATION, {
       action: 'UPDATE_OPERATOR',
       userId: req.user.id,
       userType: 'administrator',
       targetId: operator._id,
       targetType: 'operator',
       details: { updates }
-    });
+    }, req);
 
     res.json({
       success: true,
@@ -301,14 +841,14 @@ exports.deactivateOperator = async (req, res) => {
     );
 
     // Log the action
-    await auditLogger.log({
+    logAuditEvent(AuditEvents.DATA_MODIFICATION, {
       action: 'DEACTIVATE_OPERATOR',
       userId: req.user.id,
       userType: 'administrator',
       targetId: operator._id,
       targetType: 'operator',
       details: { operatorId: operator.operatorId }
-    });
+    }, req);
 
     res.json({
       success: true,
@@ -348,14 +888,14 @@ exports.resetOperatorPassword = async (req, res) => {
     await emailService.sendPasswordResetEmail(operator, newPassword);
 
     // Log the action
-    await auditLogger.log({
+    logAuditEvent(AuditEvents.DATA_MODIFICATION, {
       action: 'RESET_OPERATOR_PASSWORD',
       userId: req.user.id,
       userType: 'administrator',
       targetId: operator._id,
       targetType: 'operator',
       details: { operatorId: operator.operatorId }
-    });
+    }, req);
 
     res.json({
       success: true,
@@ -899,12 +1439,12 @@ exports.exportReport = async (req, res) => {
     }
 
     // Log the action
-    await auditLogger.log({
+    logAuditEvent(AuditEvents.DATA_MODIFICATION, {
       action: 'EXPORT_REPORT',
       userId: req.user.id,
       userType: 'administrator',
       details: { reportType, format, startDate, endDate }
-    });
+    }, req);
 
     res.json({
       success: true,
@@ -966,12 +1506,12 @@ exports.updateSystemConfig = async (req, res) => {
     const config = await SystemConfig.setValue(key, value, req.user.id);
 
     // Log the action
-    await auditLogger.log({
+    logAuditEvent(AuditEvents.DATA_MODIFICATION, {
       action: 'UPDATE_SYSTEM_CONFIG',
       userId: req.user.id,
       userType: 'administrator',
       details: { key, oldValue: config.value, newValue: value }
-    });
+    }, req);
 
     res.json({
       success: true,
@@ -1180,3 +1720,307 @@ async function generateComprehensiveReport(startDate, endDate) {
     }
   };
 }
+
+/**
+ * @desc    Update operator performance statistics
+ * @route   PATCH /api/v1/operators/:id/stats
+ * @access  Private (Admin with operators.update permission)
+ */
+exports.updateOperatorStats = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { processingTime, qualityScore, qualityPassed, totalOrdersProcessed } = req.body;
+
+    // Validate processingTime is positive
+    if (processingTime !== undefined && processingTime <= 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'Processing time must be positive'
+      });
+    }
+
+    // Validate qualityScore is between 0 and 100
+    if (qualityScore !== undefined && (qualityScore < 0 || qualityScore > 100)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Quality score must be between 0 and 100'
+      });
+    }
+
+    // Find and update operator
+    const operator = await Operator.findById(id);
+    if (!operator) {
+      return res.status(404).json({
+        success: false,
+        message: 'Operator not found'
+      });
+    }
+
+    // Handle processing time update (implies a completed order)
+    if (processingTime !== undefined) {
+      const currentTotal = operator.totalOrdersProcessed || 0;
+      const currentAvg = operator.averageProcessingTime || 0;
+      
+      // Calculate new running average: (old_avg * old_count + new_time) / new_count
+      const newTotal = currentTotal + 1;
+      const newAverage = (currentAvg * currentTotal + processingTime) / newTotal;
+      
+      operator.totalOrdersProcessed = newTotal;
+      operator.averageProcessingTime = newAverage;
+    }
+
+    // Handle quality score update
+    if (qualityPassed !== undefined) {
+      const currentScore = operator.qualityScore || 100;
+      // Apply weighted average: old_score * 0.9 + new_result * 0.1
+      const newResult = qualityPassed ? 100 : 0;
+      operator.qualityScore = currentScore * 0.9 + newResult * 0.1;
+    }
+
+    // Allow direct score setting if provided
+    if (qualityScore !== undefined) {
+      operator.qualityScore = qualityScore;
+    }
+
+    // Allow direct total setting if provided
+    if (totalOrdersProcessed !== undefined) {
+      operator.totalOrdersProcessed = totalOrdersProcessed;
+    }
+
+    await operator.save();
+
+    res.status(200).json({
+      success: true,
+      message: 'Operator statistics updated successfully',
+      operator: {
+        _id: operator._id,
+        operatorId: operator.operatorId,
+        firstName: operator.firstName,
+        lastName: operator.lastName,
+        averageProcessingTime: operator.averageProcessingTime,
+        qualityScore: operator.qualityScore,
+        totalOrdersProcessed: operator.totalOrdersProcessed
+      }
+    });
+  } catch (error) {
+    console.error('Error updating operator stats:', error);
+    res.status(500).json({
+      success: false,
+      message: 'An error occurred while updating operator statistics'
+    });
+  }
+};
+
+/**
+ * Get available operators for order assignment
+ */
+exports.getAvailableOperators = async (req, res) => {
+  try {
+    const { limit = 20 } = req.query;
+
+    // Get all active operators who are not too busy (less than 10 current orders)
+    const operators = await Operator.find({ 
+      isActive: true,
+      currentOrderCount: { $lt: 10 }
+    })
+      .sort({ currentOrderCount: 1 })
+      .limit(parseInt(limit))
+      .select('operatorId firstName lastName email workStation currentOrderCount isActive isOnShift shiftStart shiftEnd');
+
+    res.json({
+      success: true,
+      operators
+    });
+  } catch (error) {
+    console.error('Error getting available operators:', error);
+    res.status(500).json({
+      success: false,
+      message: 'An error occurred while fetching available operators'
+    });
+  }
+};
+
+/**
+ * Delete operator (hard delete)
+ */
+exports.deleteOperator = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const operator = await Operator.findById(id);
+    if (!operator) {
+      return res.status(404).json({
+        success: false,
+        message: 'Operator not found'
+      });
+    }
+
+    // Check if operator has active orders (either in DB or currentOrderCount field)
+    const activeOrdersCount = await Order.countDocuments({
+      assignedOperator: operator._id,
+      orderProcessingStatus: { $nin: ['completed', 'delivered', 'cancelled'] }
+    });
+
+    if (activeOrdersCount > 0 || operator.currentOrderCount > 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'Cannot delete operator with active orders'
+      });
+    }
+
+    // Hard delete the operator
+    await Operator.findByIdAndDelete(id);
+
+    // Log audit event
+    await logAuditEvent(AuditEvents.ADMIN_DELETE_OPERATOR, req.user.id, {
+      operatorId: operator.operatorId,
+      operatorEmail: operator.email
+    });
+
+    res.json({
+      success: true,
+      message: 'Operator deleted successfully'
+    });
+  } catch (error) {
+    console.error('Error deleting operator:', error);
+    res.status(500).json({
+      success: false,
+      message: 'An error occurred while deleting the operator'
+    });
+  }
+};
+
+/**
+ * Reset operator PIN/password
+ */
+exports.resetOperatorPin = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { newPassword } = req.body;
+
+    if (!newPassword) {
+      return res.status(400).json({
+        success: false,
+        message: 'New password is required'
+      });
+    }
+
+    const operator = await Operator.findById(id);
+    if (!operator) {
+      return res.status(404).json({
+        success: false,
+        message: 'Operator not found'
+      });
+    }
+
+    // Update password and clear login attempts using save() to trigger password hashing
+    operator.password = newPassword;
+    operator.loginAttempts = 0;
+    operator.lockUntil = undefined;
+    await operator.save();
+
+    // Log audit event
+    await logAuditEvent(AuditEvents.ADMIN_RESET_OPERATOR_PASSWORD, req.user.id, {
+      operatorId: operator.operatorId,
+      operatorEmail: operator.email
+    });
+
+    res.json({
+      success: true,
+      message: 'PIN reset successfully'
+    });
+  } catch (error) {
+    console.error('Error resetting operator PIN:', error);
+    res.status(500).json({
+      success: false,
+      message: 'An error occurred while resetting the PIN'
+    });
+  }
+};
+
+/**
+ * Allow operators to update their own profile (limited fields)
+ */
+exports.updateOperatorSelf = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const updates = req.body;
+
+    const operator = await Operator.findById(id);
+    if (!operator) {
+      return res.status(404).json({
+        success: false,
+        message: 'Operator not found'
+      });
+    }
+
+    // Only allow specific fields to be updated by operators themselves
+    const allowedFields = ['firstName', 'lastName', 'password', 'phone'];
+    const filteredUpdates = {};
+    
+    allowedFields.forEach(field => {
+      if (updates[field] !== undefined) {
+        filteredUpdates[field] = updates[field];
+      }
+    });
+
+    // Prevent operators from changing critical fields like workStation
+    delete filteredUpdates.workStation;
+    delete filteredUpdates.operatorId;
+    delete filteredUpdates.email;
+    delete filteredUpdates.isActive;
+    delete filteredUpdates.permissions;
+
+    // Apply updates
+    Object.assign(operator, filteredUpdates);
+    const updatedOperator = await operator.save();
+
+    // Filter sensitive fields from response - operator viewing their own profile
+    const { getFilteredData } = require('../utils/fieldFilter');
+    const responseData = getFilteredData('operator', updatedOperator.toObject(), 'operator', { isSelf: true });
+
+    res.json({
+      success: true,
+      message: 'Profile updated successfully',
+      operator: responseData
+    });
+  } catch (error) {
+    console.error('Error updating operator profile:', error);
+    res.status(500).json({
+      success: false,
+      message: 'An error occurred while updating the profile'
+    });
+  }
+};
+
+/**
+ * Allow operators to view their own profile
+ */
+exports.getOperatorSelf = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const operator = await Operator.findById(id);
+    if (!operator) {
+      return res.status(404).json({
+        success: false,
+        message: 'Operator not found'
+      });
+    }
+
+    // Filter sensitive fields from response - operator viewing their own profile  
+    const { getFilteredData } = require('../utils/fieldFilter');
+    const responseData = getFilteredData('operator', operator.toObject(), 'operator', { isSelf: true });
+
+    res.json({
+      success: true,
+      operator: responseData
+    });
+  } catch (error) {
+    console.error('Error getting operator profile:', error);
+    res.status(500).json({
+      success: false,
+      message: 'An error occurred while fetching the profile'
+    });
+  }
+};

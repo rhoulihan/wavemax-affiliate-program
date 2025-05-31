@@ -8,8 +8,7 @@ const { encrypt, decrypt } = require('../utils/encryption');
 const administratorSchema = new mongoose.Schema({
   adminId: { 
     type: String, 
-    unique: true, 
-    required: true
+    unique: true
   },
   firstName: { 
     type: String, 
@@ -41,7 +40,30 @@ const administratorSchema = new mongoose.Schema({
   },
   permissions: [{
     type: String,
-    enum: ['system_config', 'operator_management', 'view_analytics', 'manage_affiliates']
+    enum: [
+      'all', // Super admin - has all permissions
+      'system_config', 
+      'operator_management', 
+      'view_analytics', 
+      'manage_affiliates',
+      'administrators.read',
+      'administrators.create',
+      'administrators.update',
+      'administrators.delete',
+      'operators.read',
+      'operators.create',
+      'operators.update',
+      'operators.delete',
+      'operators.manage',
+      'customers.read',
+      'customers.manage',
+      'affiliates.read',
+      'affiliates.manage',
+      'orders.read',
+      'orders.manage',
+      'reports.view',
+      'system.configure'
+    ]
   }],
   isActive: { 
     type: Boolean, 
@@ -76,7 +98,7 @@ administratorSchema.index({ isActive: 1 });
 administratorSchema.index({ createdAt: -1 });
 
 // Pre-save middleware
-administratorSchema.pre('save', async function(next) {
+administratorSchema.pre('save', function(next) {
   // Update timestamp
   this.updatedAt = new Date();
   
@@ -156,16 +178,22 @@ administratorSchema.methods.generatePasswordResetToken = function() {
 
 // Method to check permissions
 administratorSchema.methods.hasPermission = function(permission) {
+  // If admin has 'all' permission, they can do anything
+  if (this.permissions.includes('all')) return true;
   return this.permissions.includes(permission);
 };
 
 // Method to check multiple permissions (AND operation)
 administratorSchema.methods.hasAllPermissions = function(permissions) {
+  // If admin has 'all' permission, they can do anything
+  if (this.permissions.includes('all')) return true;
   return permissions.every(permission => this.permissions.includes(permission));
 };
 
 // Method to check multiple permissions (OR operation)
 administratorSchema.methods.hasAnyPermission = function(permissions) {
+  // If admin has 'all' permission, they can do anything
+  if (this.permissions.includes('all')) return true;
   return permissions.some(permission => this.permissions.includes(permission));
 };
 

@@ -30,7 +30,6 @@ exports.registerCustomer = async (req, res) => {
       city,
       state,
       zipCode,
-      deliveryInstructions,
       specialInstructions,
       affiliateSpecialInstructions,
       username,
@@ -40,7 +39,8 @@ exports.registerCustomer = async (req, res) => {
       expiryDate,
       cvv,
       billingZip,
-      savePaymentInfo
+      savePaymentInfo,
+      numberOfBags
     } = req.body;
 
     // Verify affiliate exists
@@ -79,7 +79,6 @@ exports.registerCustomer = async (req, res) => {
       city,
       state,
       zipCode,
-      deliveryInstructions,
       specialInstructions,
       affiliateSpecialInstructions,
       username,
@@ -95,19 +94,32 @@ exports.registerCustomer = async (req, res) => {
 
     await newCustomer.save();
 
-    // Generate a unique bag barcode
-    const bagBarcode = 'WM-' + uuidv4().substring(0, 8).toUpperCase();
+    // Create bags based on customer's selection
+    const numBags = parseInt(numberOfBags) || 1;
+    const bagFee = parseFloat(process.env.BAG_FEE || 10.00);
+    const createdBags = [];
 
-    // Create a new bag and assign to customer
-    const newBag = new Bag({
-      barcode: bagBarcode,
-      customerId: newCustomer.customerId,
-      affiliateId,
-      status: 'assigned',
-      issueDate: new Date()
-    });
+    for (let i = 0; i < numBags; i++) {
+      // Generate a unique bag barcode
+      const bagBarcode = 'WM-' + uuidv4().substring(0, 8).toUpperCase();
 
-    await newBag.save();
+      // Create a new bag and assign to customer
+      const newBag = new Bag({
+        barcode: bagBarcode,
+        customer: newCustomer._id,
+        affiliate: affiliate._id,
+        type: 'laundry',
+        status: 'pending',
+        creditStatus: 'pending',
+        creditAmount: bagFee
+      });
+
+      await newBag.save();
+      createdBags.push(bagBarcode);
+    }
+
+    // Use the first bag barcode for backward compatibility
+    const bagBarcode = createdBags[0];
 
     // Send welcome emails
     try {
@@ -178,7 +190,7 @@ exports.getCustomerProfile = async (req, res) => {
     const affiliate = await Affiliate.findOne({ affiliateId: customer.affiliateId });
 
     // Get customer's bag information
-    const bags = await Bag.find({ customerId });
+    const bags = await Bag.find({ customer: customer._id });
 
     // Determine user role and if viewing own profile
     const userRole = req.user ? req.user.role : 'public';
@@ -244,7 +256,7 @@ exports.updateCustomerProfile = async (req, res) => {
     // Fields that can be updated
     const updatableFields = [
       'firstName', 'lastName', 'phone', 'address', 'city', 'state', 'zipCode',
-      'serviceFrequency', 'deliveryInstructions', 'specialInstructions', 'affiliateSpecialInstructions', 'cardholderName'
+      'serviceFrequency', 'specialInstructions', 'affiliateSpecialInstructions', 'cardholderName'
     ];
 
     // Update fields
@@ -454,6 +466,18 @@ exports.getCustomerDashboardStats = async (req, res) => {
     const lastOrder = completedOrders.length > 0 ? completedOrders[0] : null;
     const lastOrderDate = lastOrder ? lastOrder.deliveredAt || lastOrder.updatedAt : null;
     
+    // Calculate bag credits
+    const bags = await Bag.find({ 
+      customer: customer._id, 
+      creditStatus: 'pending',
+      isActive: true
+    });
+    
+    let totalBagCredits = 0;
+    bags.forEach(bag => {
+      totalBagCredits += bag.creditAmount || 0;
+    });
+    
     res.status(200).json({
       success: true,
       dashboard: {
@@ -463,6 +487,7 @@ exports.getCustomerDashboardStats = async (req, res) => {
           activeOrders: activeOrdersCount,
           totalSpent,
           averageOrderValue,
+          bagCredits: totalBagCredits,
           ...(lastOrderDate && { lastOrderDate })
         },
         recentOrders,
@@ -531,16 +556,18 @@ exports.reportLostBag = async (req, res) => {
     // Find the bag by ID or barcode
     let bag;
     if (bagId) {
-      bag = await Bag.findOne({ bagId, customerId });
+      bag = await Bag.findOne({ bagId, customer: customer._id });
     } else if (bagBarcode) {
-      bag = await Bag.findOne({ barcode: bagBarcode });
+      bag = await Bag.findOne({ barcode: bagBarcode }).populate('customer');
       
       // If found by barcode, verify it belongs to the customer
-      if (bag && bag.customerId !== customerId) {
-        return res.status(403).json({
-          success: false,
-          message: 'Unauthorized'
-        });
+      if (bag) {
+        if (!bag.customer || bag.customer.customerId !== customerId) {
+          return res.status(403).json({
+            success: false,
+            message: 'Unauthorized'
+          });
+        }
       }
     }
 
@@ -671,7 +698,7 @@ exports.deleteCustomerData = async (req, res) => {
     const deletedOrders = await Order.deleteMany({ customerId });
 
     // 2. Delete all bags for this customer
-    const deletedBags = await Bag.deleteMany({ customerId });
+    const deletedBags = await Bag.deleteMany({ customer: customer._id });
 
     // 3. Delete the customer
     await Customer.deleteOne({ customerId });
@@ -798,7 +825,7 @@ exports.getCustomerBags = async (req, res) => {
     }
 
     // Build query
-    const query = { customerId };
+    const query = { customer: customer._id };
     
     // Add status filter if provided
     if (status) {
@@ -806,7 +833,7 @@ exports.getCustomerBags = async (req, res) => {
     }
 
     // Get bags
-    const bags = await Bag.find(query).sort({ issueDate: -1 });
+    const bags = await Bag.find(query).sort({ createdAt: -1 });
 
     // Determine user role
     const userRole = req.user ? req.user.role : 'public';

@@ -48,13 +48,13 @@ const fieldDefinitions = {
   customer: {
     public: ['customerId', 'firstName', 'lastName'],
     self: ['customerId', 'firstName', 'lastName', 'email', 'phone', 'address',
-      'city', 'state', 'zipCode', 'deliveryInstructions', 'serviceFrequency',
+      'city', 'state', 'zipCode', 'serviceFrequency',
       'specialInstructions', 'affiliateSpecialInstructions', 'lastFourDigits',
       'savePaymentInfo', 'isActive', 'registrationDate', 'lastLogin'],
     affiliate: ['customerId', 'firstName', 'lastName', 'email', 'phone', 'address',
       'city', 'state', 'zipCode', 'serviceFrequency', 'specialInstructions', 'affiliateSpecialInstructions', 'isActive', 'registrationDate'],
     admin: ['_id', 'customerId', 'affiliateId', 'firstName', 'lastName', 'email',
-      'phone', 'address', 'city', 'state', 'zipCode', 'deliveryInstructions', 'serviceFrequency',
+      'phone', 'address', 'city', 'state', 'zipCode', 'serviceFrequency',
       'specialInstructions', 'affiliateSpecialInstructions',
       'username', 'lastFourDigits', 'billingZip', 'savePaymentInfo', 'isActive',
       'registrationDate', 'lastLogin']
@@ -85,6 +85,30 @@ const fieldDefinitions = {
     affiliate: ['bagId', 'barcode', 'customerId', 'status', 'issueDate', 'lastUsedDate'],
     admin: ['_id', 'bagId', 'barcode', 'customerId', 'affiliateId', 'status',
       'issueDate', 'lastUsedDate', 'lostReportedDate', 'notes']
+  },
+
+  // Administrator fields visible to different roles
+  administrator: {
+    public: ['adminId', 'firstName', 'lastName'],
+    self: ['adminId', 'firstName', 'lastName', 'email', 'permissions', 'isActive',
+      'lastLogin', 'createdAt'],
+    admin: ['_id', 'adminId', 'firstName', 'lastName', 'email', 'permissions',
+      'isActive', 'lastLogin', 'createdAt', 'lockUntil', 'loginAttempts'],
+    administrator: ['_id', 'adminId', 'firstName', 'lastName', 'email', 'permissions',
+      'isActive', 'lastLogin', 'createdAt', 'role']
+  },
+
+  // Operator fields visible to different roles
+  operator: {
+    public: ['operatorId', 'firstName', 'lastName'],
+    self: ['operatorId', 'firstName', 'lastName', 'email', 'workStation',
+      'shiftStart', 'shiftEnd', 'isActive', 'currentOrderCount'],
+    admin: ['_id', 'operatorId', 'firstName', 'lastName', 'email', 'workStation',
+      'shiftStart', 'shiftEnd', 'isActive', 'currentOrderCount', 'totalOrdersProcessed',
+      'averageProcessingTime', 'qualityScore', 'createdBy', 'createdAt'],
+    administrator: ['_id', 'operatorId', 'firstName', 'lastName', 'email', 'workStation',
+      'shiftStart', 'shiftEnd', 'isActive', 'currentOrderCount', 'totalOrdersProcessed',
+      'averageProcessingTime', 'qualityScore', 'createdBy', 'createdAt', 'role']
   }
 };
 
@@ -102,8 +126,8 @@ const getFilteredData = (dataType, data, userRole, context = {}) => {
   let fields;
 
   // Determine which fields to use based on role and context
-  if (userRole === 'admin') {
-    fields = fieldDefinitions[dataType].admin || fieldDefinitions[dataType].public;
+  if (userRole === 'admin' || userRole === 'administrator') {
+    fields = fieldDefinitions[dataType].administrator || fieldDefinitions[dataType].admin || fieldDefinitions[dataType].public;
   } else if (userRole === 'affiliate') {
     fields = fieldDefinitions[dataType].affiliate || fieldDefinitions[dataType].public;
   } else if (userRole === 'customer') {
@@ -112,6 +136,13 @@ const getFilteredData = (dataType, data, userRole, context = {}) => {
       fields = fieldDefinitions[dataType].self || fieldDefinitions[dataType].customer || fieldDefinitions[dataType].public;
     } else {
       fields = fieldDefinitions[dataType].customer || fieldDefinitions[dataType].public;
+    }
+  } else if (userRole === 'operator') {
+    // Check if it's the operator's own data
+    if (context.isSelf) {
+      fields = fieldDefinitions[dataType].self || fieldDefinitions[dataType].operator || fieldDefinitions[dataType].public;
+    } else {
+      fields = fieldDefinitions[dataType].operator || fieldDefinitions[dataType].public;
     }
   } else {
     fields = fieldDefinitions[dataType].public || [];
@@ -157,11 +188,41 @@ const responseFilter = (req, res, next) => {
   next();
 };
 
+/**
+ * Simple field filter for backward compatibility
+ * @param {Object} data - Data to filter
+ * @param {String} role - User role
+ * @returns {Object} Filtered data
+ */
+const fieldFilter = (data, role) => {
+  if (!data || typeof data !== 'object') return data;
+  
+  // Try to determine data type from the object
+  let dataType = null;
+  if (data.adminId !== undefined && data.permissions !== undefined) {
+    dataType = 'administrator';
+  } else if (data.operatorId !== undefined && data.workStation !== undefined) {
+    dataType = 'operator';
+  } else if (data.affiliateId !== undefined && data.businessName !== undefined) {
+    dataType = 'affiliate';
+  } else if (data.customerId !== undefined && data.serviceFrequency !== undefined) {
+    dataType = 'customer';
+  } else if (data.orderId !== undefined && data.pickupDate !== undefined) {
+    dataType = 'order';
+  } else if (data.bagId !== undefined && data.barcode !== undefined) {
+    dataType = 'bag';
+  }
+  
+  if (!dataType) return data;
+  
+  return getFilteredData(dataType, data, role);
+};
+
 module.exports = {
   filterFields,
   filterArray,
   getFilteredData,
   responseFilter,
   fieldDefinitions,
-  fieldFilter: (data, role) => data // Simple passthrough for compatibility
+  fieldFilter
 };

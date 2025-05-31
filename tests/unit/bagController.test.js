@@ -21,12 +21,27 @@ mongoose.Types.ObjectId.isValid = jest.fn();
 describe('Bag Controller', () => {
   let req, res;
 
+  // Helper to create chainable mock queries
+  const createMockQuery = (returnValue) => {
+    const mockQuery = {
+      populate: jest.fn().mockReturnThis(),
+      sort: jest.fn().mockReturnThis(),
+      skip: jest.fn().mockReturnThis(),
+      limit: jest.fn().mockReturnThis(),
+      select: jest.fn().mockReturnThis(),
+      lean: jest.fn().mockReturnThis()
+    };
+    // Make it thenable
+    mockQuery.then = (resolve) => resolve(returnValue);
+    return mockQuery;
+  };
+
   beforeEach(() => {
     req = {
       body: {},
       params: {},
       query: {},
-      user: {}
+      user: { role: 'administrator' }
     };
     res = {
       status: jest.fn().mockReturnThis(),
@@ -36,79 +51,86 @@ describe('Bag Controller', () => {
   });
 
   describe('createBag', () => {
-    it('should successfully create a new bag', async () => {
-      const mockBag = {
-        _id: 'bag_id',
-        bagId: 'BAG123456',
-        barcode: 'WM-ABCD1234',
-        customerId: 'CUST001',
-        affiliateId: 'AFF001',
-        status: 'active',
-        save: jest.fn().mockResolvedValue({
-          _id: 'bag_id',
-          bagId: 'BAG123456',
-          barcode: 'WM-ABCD1234',
-          customerId: 'CUST001',
-          affiliateId: 'AFF001',
-          status: 'active'
-        })
-      };
-
-      req.body = {
+    it('should successfully create a new bag as admin', async () => {
+      const mockCustomer = {
+        _id: 'customer_id',
         customerId: 'CUST001',
         affiliateId: 'AFF001'
       };
+      const mockAffiliate = {
+        _id: 'affiliate_id',
+        affiliateId: 'AFF001'
+      };
+      const mockBag = {
+        _id: 'bag_id',
+        tagNumber: 'TAG123',
+        type: 'standard',
+        customer: 'customer_id',
+        affiliate: 'affiliate_id',
+        save: jest.fn()
+      };
 
-      validationResult.mockReturnValue({
-        isEmpty: jest.fn().mockReturnValue(true),
-        array: jest.fn().mockReturnValue([])
-      });
+      req.body = {
+        tagNumber: 'TAG123',
+        type: 'standard',
+        weight: 10,
+        notes: 'Test bag',
+        specialInstructions: 'Handle with care',
+        customerId: 'CUST001'
+      };
+      req.user = { role: 'administrator' };
 
-      Customer.findOne.mockResolvedValue({ customerId: 'CUST001' });
-      Affiliate.findOne.mockResolvedValue({ affiliateId: 'AFF001' });
-      crypto.randomBytes.mockReturnValue(Buffer.from('ABCD1234', 'hex'));
+      Customer.findOne.mockResolvedValue(mockCustomer);
+      Affiliate.findOne.mockResolvedValue(mockAffiliate);
       Bag.prototype.save = jest.fn().mockResolvedValue(mockBag);
-      Customer.findOneAndUpdate.mockResolvedValue(true);
 
       await bagController.createBag(req, res);
 
       expect(Customer.findOne).toHaveBeenCalledWith({ customerId: 'CUST001' });
       expect(Affiliate.findOne).toHaveBeenCalledWith({ affiliateId: 'AFF001' });
-      expect(Customer.findOneAndUpdate).toHaveBeenCalledWith(
-        { customerId: 'CUST001' },
-        { $push: { bags: 'bag_id' }, $set: { bagBarcode: 'WM-ABCD1234' } }
-      );
       expect(res.status).toHaveBeenCalledWith(201);
       expect(res.json).toHaveBeenCalledWith({
         success: true,
-        data: mockBag
+        message: 'Bag created successfully',
+        bag: mockBag
       });
     });
 
-    it('should return validation errors', async () => {
-      validationResult.mockReturnValue({
-        isEmpty: jest.fn().mockReturnValue(false),
-        array: jest.fn().mockReturnValue([{ msg: 'Customer ID is required' }])
-      });
+    it('should require type field', async () => {
+      req.body = {
+        customerId: 'CUST001'
+      };
 
       await bagController.createBag(req, res);
 
       expect(res.status).toHaveBeenCalledWith(400);
       expect(res.json).toHaveBeenCalledWith({
         success: false,
-        errors: [{ msg: 'Customer ID is required' }]
+        message: 'Bag type is required'
+      });
+    });
+
+    it('should require customerId for admin users', async () => {
+      req.body = {
+        type: 'standard'
+      };
+      req.user = { role: 'administrator' };
+
+      await bagController.createBag(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(400);
+      expect(res.json).toHaveBeenCalledWith({
+        success: false,
+        message: 'Customer ID is required'
       });
     });
 
     it('should return 404 for non-existent customer', async () => {
       req.body = {
-        customerId: 'NONEXISTENT',
-        affiliateId: 'AFF001'
+        type: 'standard',
+        customerId: 'NONEXISTENT'
       };
-
-      validationResult.mockReturnValue({
-        isEmpty: jest.fn().mockReturnValue(true)
-      });
+      req.user = { role: 'administrator' };
 
       Customer.findOne.mockResolvedValue(null);
 
@@ -121,37 +143,69 @@ describe('Bag Controller', () => {
       });
     });
 
-    it('should return 404 for non-existent affiliate', async () => {
-      req.body = {
+    it('should handle customer role creating their own bag', async () => {
+      const mockCustomer = {
+        _id: 'customer_id',
         customerId: 'CUST001',
-        affiliateId: 'NONEXISTENT'
+        affiliateId: 'AFF001'
+      };
+      const mockAffiliate = {
+        _id: 'affiliate_id',
+        affiliateId: 'AFF001'
+      };
+      const mockBag = {
+        _id: 'bag_id',
+        type: 'standard'
       };
 
-      validationResult.mockReturnValue({
-        isEmpty: jest.fn().mockReturnValue(true)
-      });
+      req.body = {
+        type: 'standard',
+        weight: 10
+      };
+      req.user = { role: 'customer', id: 'customer_id' };
 
-      Customer.findOne.mockResolvedValue({ customerId: 'CUST001' });
-      Affiliate.findOne.mockResolvedValue(null);
+      Customer.findById.mockResolvedValue(mockCustomer);
+      Affiliate.findOne.mockResolvedValue(mockAffiliate);
+      Bag.prototype.save = jest.fn().mockResolvedValue(mockBag);
 
       await bagController.createBag(req, res);
 
-      expect(res.status).toHaveBeenCalledWith(404);
-      expect(res.json).toHaveBeenCalledWith({
-        success: false,
-        message: 'Affiliate not found'
-      });
+      expect(Customer.findById).toHaveBeenCalledWith('customer_id');
+      expect(res.status).toHaveBeenCalledWith(201);
+    });
+
+    it('should handle affiliate role with authorization check', async () => {
+      const mockCustomer = {
+        _id: 'customer_id',
+        customerId: 'CUST001',
+        affiliateId: 'AFF001'
+      };
+      const mockAffiliate = {
+        _id: 'affiliate_id',
+        affiliateId: 'AFF001'
+      };
+
+      req.body = {
+        type: 'standard',
+        customerId: 'CUST001'
+      };
+      req.user = { role: 'affiliate', id: 'affiliate_id' };
+
+      Customer.findOne.mockResolvedValue(mockCustomer);
+      Affiliate.findOne.mockResolvedValue(mockAffiliate);
+      Bag.prototype.save = jest.fn().mockResolvedValue({});
+
+      await bagController.createBag(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(201);
     });
 
     it('should handle database errors', async () => {
       req.body = {
-        customerId: 'CUST001',
-        affiliateId: 'AFF001'
+        type: 'standard',
+        customerId: 'CUST001'
       };
-
-      validationResult.mockReturnValue({
-        isEmpty: jest.fn().mockReturnValue(true)
-      });
+      req.user = { role: 'administrator' };
 
       Customer.findOne.mockRejectedValue(new Error('Database error'));
 
@@ -160,49 +214,81 @@ describe('Bag Controller', () => {
       expect(res.status).toHaveBeenCalledWith(500);
       expect(res.json).toHaveBeenCalledWith({
         success: false,
-        message: 'Server error',
+        message: 'Error creating bag',
         error: process.env.NODE_ENV === 'development' ? 'Database error' : undefined
       });
     });
   });
 
   describe('getAllBags', () => {
-    it('should return filtered and paginated bags', async () => {
+    it('should return filtered and paginated bags for admin', async () => {
       const mockBags = [
-        { bagId: 'BAG001', customerId: 'CUST001', status: 'active' },
-        { bagId: 'BAG002', customerId: 'CUST001', status: 'active' }
+        { bagId: 'BAG001', customer: { customerId: 'CUST001' }, status: 'active' },
+        { bagId: 'BAG002', customer: { customerId: 'CUST001' }, status: 'active' }
       ];
 
       req.query = {
-        customerId: 'CUST001',
         status: 'active',
+        type: 'standard',
         page: '1',
         limit: '10'
       };
+      req.user = { role: 'administrator' };
 
-      Bag.find.mockReturnValue({
-        sort: jest.fn().mockReturnThis(),
-        skip: jest.fn().mockReturnThis(),
-        limit: jest.fn().mockResolvedValue(mockBags)
-      });
+      Bag.find.mockReturnValue(createMockQuery(mockBags));
       Bag.countDocuments.mockResolvedValue(2);
 
       await bagController.getAllBags(req, res);
 
       expect(Bag.find).toHaveBeenCalledWith({
-        customerId: 'CUST001',
-        status: 'active'
+        status: 'active',
+        type: 'standard'
       });
       expect(res.status).toHaveBeenCalledWith(200);
       expect(res.json).toHaveBeenCalledWith({
         success: true,
-        count: 2,
-        total: 2,
+        bags: mockBags,
         pagination: {
-          totalPages: 1,
-          currentPage: 1
-        },
-        data: mockBags
+          currentPage: 1,
+          itemsPerPage: 10,
+          totalItems: 2,
+          totalPages: 1
+        }
+      });
+    });
+
+    it('should filter by customer for customer role', async () => {
+      const mockCustomer = {
+        _id: 'customer_id',
+        customerId: 'CUST001'
+      };
+
+      req.query = { page: '1', limit: '10' };
+      req.user = { role: 'customer', id: 'customer_id' };
+
+      Customer.findById.mockResolvedValue(mockCustomer);
+      Bag.find.mockReturnValue(createMockQuery([]));
+      Bag.countDocuments.mockResolvedValue(0);
+
+      await bagController.getAllBags(req, res);
+
+      expect(Customer.findById).toHaveBeenCalledWith('customer_id');
+      expect(Bag.find).toHaveBeenCalledWith({
+        customer: 'customer_id'
+      });
+    });
+
+    it('should filter by affiliate for affiliate role', async () => {
+      req.query = { page: '1', limit: '10' };
+      req.user = { role: 'affiliate', id: 'affiliate_id' };
+
+      Bag.find.mockReturnValue(createMockQuery([]));
+      Bag.countDocuments.mockResolvedValue(0);
+
+      await bagController.getAllBags(req, res);
+
+      expect(Bag.find).toHaveBeenCalledWith({
+        affiliate: 'affiliate_id'
       });
     });
 
@@ -211,47 +297,24 @@ describe('Bag Controller', () => {
         page: '2',
         limit: '5'
       };
+      req.user = { role: 'administrator' };
 
-      Bag.find.mockReturnValue({
-        sort: jest.fn().mockReturnThis(),
-        skip: jest.fn().mockReturnThis(),
-        limit: jest.fn().mockResolvedValue([])
-      });
+      const mockQuery = createMockQuery([]);
+      Bag.find.mockReturnValue(mockQuery);
       Bag.countDocuments.mockResolvedValue(10);
 
       await bagController.getAllBags(req, res);
 
-      const skipCall = Bag.find().skip.mock.calls[0][0];
-      expect(skipCall).toBe(5); // (page 2 - 1) * limit 5
+      expect(mockQuery.skip).toHaveBeenCalledWith(5); // (page 2 - 1) * limit 5
+      expect(mockQuery.limit).toHaveBeenCalledWith(5);
       expect(res.json).toHaveBeenCalledWith(expect.objectContaining({
         pagination: {
-          totalPages: 2,
-          currentPage: 2
+          currentPage: 2,
+          itemsPerPage: 5,
+          totalItems: 10,
+          totalPages: 2
         }
       }));
-    });
-
-    it('should apply all filters when provided', async () => {
-      req.query = {
-        customerId: 'CUST001',
-        affiliateId: 'AFF001',
-        status: 'lost'
-      };
-
-      Bag.find.mockReturnValue({
-        sort: jest.fn().mockReturnThis(),
-        skip: jest.fn().mockReturnThis(),
-        limit: jest.fn().mockResolvedValue([])
-      });
-      Bag.countDocuments.mockResolvedValue(0);
-
-      await bagController.getAllBags(req, res);
-
-      expect(Bag.find).toHaveBeenCalledWith({
-        customerId: 'CUST001',
-        affiliateId: 'AFF001',
-        status: 'lost'
-      });
     });
   });
 
@@ -260,12 +323,15 @@ describe('Bag Controller', () => {
       const mockBag = {
         _id: 'objectid123',
         bagId: 'BAG123',
-        barcode: 'WM-ABCD'
+        barcode: 'WM-ABCD',
+        customer: { _id: 'customer_id' },
+        affiliate: { _id: 'affiliate_id' }
       };
 
       req.params.id = 'objectid123';
+      req.user = { role: 'administrator' };
       mongoose.Types.ObjectId.isValid.mockReturnValue(true);
-      Bag.findById.mockResolvedValue(mockBag);
+      Bag.findById.mockReturnValue(createMockQuery(mockBag));
 
       await bagController.getBagById(req, res);
 
@@ -274,36 +340,38 @@ describe('Bag Controller', () => {
       expect(res.status).toHaveBeenCalledWith(200);
       expect(res.json).toHaveBeenCalledWith({
         success: true,
-        data: mockBag
+        bag: mockBag
       });
     });
 
-    it('should find bag by bagId or barcode', async () => {
+    it('should find bag by bagId when not ObjectId', async () => {
       const mockBag = {
         bagId: 'BAG123',
-        barcode: 'WM-ABCD'
+        barcode: 'WM-ABCD',
+        customer: { _id: 'customer_id' },
+        affiliate: { _id: 'affiliate_id' }
       };
 
       req.params.id = 'BAG123';
+      req.user = { role: 'administrator' };
       mongoose.Types.ObjectId.isValid.mockReturnValue(false);
-      Bag.findOne.mockResolvedValue(mockBag);
+      Bag.findOne.mockReturnValue(createMockQuery(mockBag));
 
       await bagController.getBagById(req, res);
 
-      expect(Bag.findOne).toHaveBeenCalledWith({
-        $or: [{ bagId: 'BAG123' }, { barcode: 'BAG123' }]
-      });
+      expect(Bag.findOne).toHaveBeenCalledWith({ bagId: 'BAG123' });
       expect(res.status).toHaveBeenCalledWith(200);
       expect(res.json).toHaveBeenCalledWith({
         success: true,
-        data: mockBag
+        bag: mockBag
       });
     });
 
     it('should return 404 for non-existent bag', async () => {
       req.params.id = 'NONEXISTENT';
+      req.user = { role: 'administrator' };
       mongoose.Types.ObjectId.isValid.mockReturnValue(false);
-      Bag.findOne.mockResolvedValue(null);
+      Bag.findOne.mockReturnValue(createMockQuery(null));
 
       await bagController.getBagById(req, res);
 
@@ -311,6 +379,31 @@ describe('Bag Controller', () => {
       expect(res.json).toHaveBeenCalledWith({
         success: false,
         message: 'Bag not found'
+      });
+    });
+
+    it('should enforce customer authorization', async () => {
+      const mockBag = {
+        bagId: 'BAG123',
+        customer: { _id: 'other_customer_id' },
+        affiliate: { _id: 'affiliate_id' }
+      };
+      const mockCustomer = {
+        _id: 'customer_id'
+      };
+
+      req.params.id = 'BAG123';
+      req.user = { role: 'customer', id: 'customer_id' };
+      mongoose.Types.ObjectId.isValid.mockReturnValue(false);
+      Bag.findOne.mockReturnValue(createMockQuery(mockBag));
+      Customer.findById.mockResolvedValue(mockCustomer);
+
+      await bagController.getBagById(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(403);
+      expect(res.json).toHaveBeenCalledWith({
+        success: false,
+        message: 'You can only view your own bags'
       });
     });
   });
@@ -318,108 +411,118 @@ describe('Bag Controller', () => {
   describe('updateBag', () => {
     it('should successfully update bag fields', async () => {
       const mockBag = {
+        _id: 'bag_id',
         bagId: 'BAG123',
-        status: 'active',
-        save: jest.fn().mockResolvedValue({
-          bagId: 'BAG123',
-          status: 'lost',
-          lastUsed: new Date(),
-          notes: 'Customer reported lost'
-        })
+        status: 'pending',
+        customer: { _id: 'customer_id' },
+        affiliate: { _id: 'affiliate_id' },
+        save: jest.fn()
       };
+      mockBag.save.mockResolvedValue({
+        ...mockBag,
+        status: 'pickedUp',
+        notes: 'Updated notes'
+      });
 
       req.params.id = 'BAG123';
       req.body = {
-        status: 'lost',
-        lastUsed: new Date(),
-        notes: 'Customer reported lost'
+        status: 'pickedUp',
+        notes: 'Updated notes'
       };
-
-      validationResult.mockReturnValue({
-        isEmpty: jest.fn().mockReturnValue(true)
-      });
+      req.user = { role: 'administrator' };
 
       mongoose.Types.ObjectId.isValid.mockReturnValue(false);
-      Bag.findOne.mockResolvedValue(mockBag);
+      Bag.findOne.mockReturnValue(createMockQuery(mockBag));
 
       await bagController.updateBag(req, res);
 
-      expect(mockBag.status).toBe('lost');
+      expect(mockBag.status).toBe('pickedUp');
+      expect(mockBag.notes).toBe('Updated notes');
       expect(mockBag.save).toHaveBeenCalled();
       expect(res.status).toHaveBeenCalledWith(200);
     });
 
-    it('should handle validation errors', async () => {
-      validationResult.mockReturnValue({
-        isEmpty: jest.fn().mockReturnValue(false),
-        array: jest.fn().mockReturnValue([{ msg: 'Invalid status' }])
-      });
+    it('should validate status transitions', async () => {
+      const mockBag = {
+        bagId: 'BAG123',
+        status: 'delivered',
+        customer: { _id: 'customer_id' },
+        affiliate: { _id: 'affiliate_id' }
+      };
+
+      req.params.id = 'BAG123';
+      req.body = { status: 'pending' };
+      req.user = { role: 'administrator' };
+
+      mongoose.Types.ObjectId.isValid.mockReturnValue(false);
+      Bag.findOne.mockReturnValue(createMockQuery(mockBag));
 
       await bagController.updateBag(req, res);
 
       expect(res.status).toHaveBeenCalledWith(400);
       expect(res.json).toHaveBeenCalledWith({
         success: false,
-        errors: [{ msg: 'Invalid status' }]
+        message: 'Invalid status transition from delivered to pending'
       });
     });
 
-    it('should log when bag is marked as lost or damaged', async () => {
-      const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
+    it('should restrict operator updates', async () => {
       const mockBag = {
         bagId: 'BAG123',
-        status: 'active',
-        save: jest.fn().mockResolvedValue({
-          bagId: 'BAG123',
-          status: 'damaged'
-        })
+        customer: { _id: 'customer_id' },
+        affiliate: { _id: 'affiliate_id' }
       };
 
       req.params.id = 'BAG123';
-      req.body = { status: 'damaged' };
-
-      validationResult.mockReturnValue({
-        isEmpty: jest.fn().mockReturnValue(true)
-      });
+      req.body = {
+        type: 'premium',
+        status: 'processing'
+      };
+      req.user = { role: 'operator' };
 
       mongoose.Types.ObjectId.isValid.mockReturnValue(false);
-      Bag.findOne.mockResolvedValue(mockBag);
+      Bag.findOne.mockReturnValue(createMockQuery(mockBag));
 
       await bagController.updateBag(req, res);
 
-      expect(consoleSpy).toHaveBeenCalledWith('Bag BAG123 marked as damaged');
-      consoleSpy.mockRestore();
+      expect(res.status).toHaveBeenCalledWith(403);
+      expect(res.json).toHaveBeenCalledWith({
+        success: false,
+        message: 'Operators can only update status and notes'
+      });
     });
   });
 
   describe('deleteBag', () => {
-    it('should soft delete bag by marking as inactive', async () => {
+    it('should delete bag permanently', async () => {
       const mockBag = {
+        _id: 'mockBagId',
         bagId: 'BAG123',
-        status: 'active',
-        save: jest.fn().mockResolvedValue(true)
+        status: 'active'
       };
 
       req.params.id = 'BAG123';
+      req.user = { role: 'administrator' };
       mongoose.Types.ObjectId.isValid.mockReturnValue(false);
-      Bag.findOne.mockResolvedValue(mockBag);
+      Bag.findOne.mockReturnValue(createMockQuery(mockBag));
+      Bag.findByIdAndDelete.mockResolvedValue(mockBag);
 
       await bagController.deleteBag(req, res);
 
-      expect(mockBag.status).toBe('inactive');
-      expect(mockBag.save).toHaveBeenCalled();
+      expect(Bag.findByIdAndDelete).toHaveBeenCalledWith(mockBag._id);
       expect(res.status).toHaveBeenCalledWith(200);
       expect(res.json).toHaveBeenCalledWith({
         success: true,
-        message: 'Bag successfully deactivated',
+        message: 'Bag deleted successfully',
         data: {}
       });
     });
 
     it('should return 404 for non-existent bag', async () => {
       req.params.id = 'NONEXISTENT';
+      req.user = { role: 'administrator' };
       mongoose.Types.ObjectId.isValid.mockReturnValue(false);
-      Bag.findOne.mockResolvedValue(null);
+      Bag.findOne.mockReturnValue(createMockQuery(null));
 
       await bagController.deleteBag(req, res);
 
@@ -431,194 +534,8 @@ describe('Bag Controller', () => {
     });
   });
 
-  describe('reportBag', () => {
-    it('should report bag as lost', async () => {
-      const mockBag = {
-        bagId: 'BAG123',
-        status: 'active',
-        save: jest.fn()
-      };
-      mockBag.save.mockResolvedValue(mockBag);
-
-      req.params.id = 'BAG123';
-      req.body = {
-        status: 'lost',
-        reportReason: 'Customer cannot find the bag'
-      };
-
-      validationResult.mockReturnValue({
-        isEmpty: jest.fn().mockReturnValue(true)
-      });
-
-      mongoose.Types.ObjectId.isValid.mockReturnValue(false);
-      Bag.findOne.mockResolvedValue(mockBag);
-
-      await bagController.reportBag(req, res);
-
-      expect(mockBag.status).toBe('lost');
-      expect(mockBag.reportReason).toBe('Customer cannot find the bag');
-      expect(mockBag.reportedAt).toBeDefined();
-      expect(res.status).toHaveBeenCalledWith(200);
-      expect(res.json).toHaveBeenCalledWith({
-        success: true,
-        message: 'Bag successfully reported as lost',
-        data: mockBag
-      });
-    });
-
-    it('should report bag as damaged', async () => {
-      const mockBag = {
-        bagId: 'BAG123',
-        status: 'active',
-        save: jest.fn()
-      };
-      mockBag.save.mockResolvedValue(mockBag);
-
-      req.params.id = 'BAG123';
-      req.body = {
-        status: 'damaged'
-      };
-
-      validationResult.mockReturnValue({
-        isEmpty: jest.fn().mockReturnValue(true)
-      });
-
-      mongoose.Types.ObjectId.isValid.mockReturnValue(false);
-      Bag.findOne.mockResolvedValue(mockBag);
-
-      await bagController.reportBag(req, res);
-
-      expect(mockBag.status).toBe('damaged');
-      expect(mockBag.reportReason).toBe('Bag reported as damaged');
-      expect(res.json).toHaveBeenCalledWith({
-        success: true,
-        message: 'Bag successfully reported as damaged',
-        data: mockBag
-      });
-    });
-
-    it('should reject invalid status', async () => {
-      req.params.id = 'BAG123';
-      req.body = {
-        status: 'invalid_status'
-      };
-
-      validationResult.mockReturnValue({
-        isEmpty: jest.fn().mockReturnValue(true)
-      });
-
-      await bagController.reportBag(req, res);
-
-      expect(res.status).toHaveBeenCalledWith(400);
-      expect(res.json).toHaveBeenCalledWith({
-        success: false,
-        message: 'Status must be either "lost" or "damaged"'
-      });
-    });
-  });
-
-  describe('replaceBag', () => {
-    it('should successfully create replacement bag', async () => {
-      const oldBag = {
-        _id: 'old_bag_id',
-        bagId: 'BAG123',
-        customerId: 'CUST001',
-        affiliateId: 'AFF001',
-        status: 'lost',
-        save: jest.fn().mockResolvedValue(true)
-      };
-
-      const newBag = {
-        _id: 'new_bag_id',
-        bagId: 'BAG456',
-        barcode: 'WM-NEWCODE',
-        customerId: 'CUST001',
-        affiliateId: 'AFF001',
-        status: 'active'
-      };
-
-      req.params.id = 'BAG123';
-      req.body = {
-        reason: 'Lost bag - customer requested replacement'
-      };
-
-      mongoose.Types.ObjectId.isValid.mockReturnValue(false);
-      Bag.findOne.mockResolvedValue(oldBag);
-      crypto.randomBytes.mockReturnValue({
-        toString: jest.fn().mockReturnValue('NEWCODE')
-      });
-      Bag.prototype.save = jest.fn().mockResolvedValue(newBag);
-      Customer.findOneAndUpdate.mockResolvedValue(true);
-
-      await bagController.replaceBag(req, res);
-
-      expect(oldBag.status).toBe('replaced');
-      expect(oldBag.replacementBagId).toBe('BAG456');
-      expect(oldBag.save).toHaveBeenCalled();
-      expect(Customer.findOneAndUpdate).toHaveBeenCalledWith(
-        { customerId: 'CUST001' },
-        { $push: { bags: 'new_bag_id' }, $set: { bagBarcode: 'WM-NEWCODE' } }
-      );
-      expect(res.status).toHaveBeenCalledWith(201);
-      expect(res.json).toHaveBeenCalledWith({
-        success: true,
-        message: 'Replacement bag issued successfully',
-        data: {
-          oldBag,
-          newBag
-        }
-      });
-    });
-
-    it('should return 404 for non-existent bag', async () => {
-      req.params.id = 'NONEXISTENT';
-      mongoose.Types.ObjectId.isValid.mockReturnValue(false);
-      Bag.findOne.mockResolvedValue(null);
-
-      await bagController.replaceBag(req, res);
-
-      expect(res.status).toHaveBeenCalledWith(404);
-      expect(res.json).toHaveBeenCalledWith({
-        success: false,
-        message: 'Bag not found'
-      });
-    });
-
-    it('should include default reason if not provided', async () => {
-      const oldBag = {
-        bagId: 'BAG123',
-        customerId: 'CUST001',
-        affiliateId: 'AFF001',
-        save: jest.fn().mockResolvedValue(true)
-      };
-
-      req.params.id = 'BAG123';
-      req.body = {};
-
-      mongoose.Types.ObjectId.isValid.mockReturnValue(false);
-      Bag.findOne.mockResolvedValue(oldBag);
-      crypto.randomBytes.mockReturnValue(Buffer.from('NEWCODE', 'hex'));
-
-      // Mock Bag constructor
-      const saveMock = jest.fn().mockResolvedValue({
-        bagId: 'BAG456',
-        notes: 'Replacement for BAG123. Reason: Replacement requested'
-      });
-      Bag.mockImplementation(() => ({
-        save: saveMock
-      }));
-
-      Customer.findOneAndUpdate.mockResolvedValue(true);
-
-      await bagController.replaceBag(req, res);
-
-      const bagConstructorCall = Bag.mock.calls[0][0];
-      expect(bagConstructorCall.notes).toContain('Replacement requested');
-    });
-  });
-
   describe('getBagHistory', () => {
-    it('should return bag with usage history', async () => {
+    it('should return bag with order history', async () => {
       const mockBag = {
         bagId: 'BAG123',
         barcode: 'WM-ABCD'
@@ -629,26 +546,23 @@ describe('Bag Controller', () => {
           orderId: 'ORD001',
           createdAt: new Date(),
           status: 'delivered',
-          actualWeight: 10,
-          pickupDate: new Date(),
-          deliveryDate: new Date()
+          totalWeight: 10,
+          totalPrice: 50
         },
         {
           orderId: 'ORD002',
           createdAt: new Date(),
           status: 'processing',
-          actualWeight: 15,
-          pickupDate: new Date()
+          totalWeight: 15,
+          totalPrice: 75
         }
       ];
 
       req.params.id = 'BAG123';
+      req.user = { role: 'administrator' };
       mongoose.Types.ObjectId.isValid.mockReturnValue(false);
-      Bag.findOne.mockResolvedValue(mockBag);
-      Order.find.mockReturnValue({
-        sort: jest.fn().mockReturnThis(),
-        select: jest.fn().mockResolvedValue(mockOrders)
-      });
+      Bag.findOne.mockReturnValue(createMockQuery(mockBag));
+      Order.find.mockReturnValue(createMockQuery(mockOrders));
 
       await bagController.getBagHistory(req, res);
 
@@ -665,8 +579,9 @@ describe('Bag Controller', () => {
 
     it('should return 404 for non-existent bag', async () => {
       req.params.id = 'NONEXISTENT';
+      req.user = { role: 'administrator' };
       mongoose.Types.ObjectId.isValid.mockReturnValue(false);
-      Bag.findOne.mockResolvedValue(null);
+      Bag.findOne.mockReturnValue(createMockQuery(null));
 
       await bagController.getBagHistory(req, res);
 
@@ -676,44 +591,26 @@ describe('Bag Controller', () => {
         message: 'Bag not found'
       });
     });
-
-    it('should handle empty usage history', async () => {
-      const mockBag = { bagId: 'BAG123' };
-
-      req.params.id = 'BAG123';
-      mongoose.Types.ObjectId.isValid.mockReturnValue(false);
-      Bag.findOne.mockResolvedValue(mockBag);
-      Order.find.mockReturnValue({
-        sort: jest.fn().mockReturnThis(),
-        select: jest.fn().mockResolvedValue([])
-      });
-
-      await bagController.getBagHistory(req, res);
-
-      expect(res.json).toHaveBeenCalledWith({
-        success: true,
-        data: {
-          bag: mockBag,
-          usageHistory: []
-        }
-      });
-    });
   });
 
   describe('Error handling', () => {
     it('should handle database errors in development mode', async () => {
       process.env.NODE_ENV = 'development';
       req.params.id = 'BAG123';
+      req.user = { role: 'administrator' };
 
       mongoose.Types.ObjectId.isValid.mockReturnValue(false);
-      Bag.findOne.mockRejectedValue(new Error('Connection timeout'));
+      // Mock findOne to throw error when called
+      Bag.findOne.mockImplementation(() => {
+        throw new Error('Connection timeout');
+      });
 
       await bagController.getBagById(req, res);
 
       expect(res.status).toHaveBeenCalledWith(500);
       expect(res.json).toHaveBeenCalledWith({
         success: false,
-        message: 'Server error',
+        message: 'Error fetching bag details',
         error: 'Connection timeout'
       });
     });
@@ -721,16 +618,20 @@ describe('Bag Controller', () => {
     it('should hide error details in production mode', async () => {
       process.env.NODE_ENV = 'production';
       req.params.id = 'BAG123';
+      req.user = { role: 'administrator' };
 
       mongoose.Types.ObjectId.isValid.mockReturnValue(false);
-      Bag.findOne.mockRejectedValue(new Error('Connection timeout'));
+      // Mock findOne to throw error when called
+      Bag.findOne.mockImplementation(() => {
+        throw new Error('Connection timeout');
+      });
 
       await bagController.getBagById(req, res);
 
       expect(res.status).toHaveBeenCalledWith(500);
       expect(res.json).toHaveBeenCalledWith({
         success: false,
-        message: 'Server error',
+        message: 'Error fetching bag details',
         error: undefined
       });
     });

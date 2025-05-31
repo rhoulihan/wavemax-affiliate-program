@@ -780,10 +780,10 @@ describe('Authentication Integration Tests', () => {
           password: 'Admin123!'
         });
 
-      expect(response.status).toBe(403);
+      expect(response.status).toBe(401);
       expect(response.body).toMatchObject({
         success: false,
-        message: 'Account is inactive. Please contact system administrator.'
+        message: 'Account is deactivated. Please contact system administrator.'
       });
     });
   });

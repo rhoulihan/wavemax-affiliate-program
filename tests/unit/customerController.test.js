@@ -390,7 +390,7 @@ describe('Customer Controller', () => {
     it('should successfully report a lost bag', async () => {
       const mockBag = {
         bagId: 'BAG123',
-        customerId: 'CUST123',
+        customer: 'customer_id',
         status: 'active',
         save: jest.fn()
       };
@@ -403,6 +403,7 @@ describe('Customer Controller', () => {
       };
 
       const mockCustomer = {
+        _id: 'customer_id',
         customerId: 'CUST123',
         affiliateId: 'AFF123',
         firstName: 'Jane',
@@ -420,7 +421,7 @@ describe('Customer Controller', () => {
       await customerController.reportLostBag(req, res);
 
       expect(Customer.findOne).toHaveBeenCalledWith({ customerId: 'CUST123' });
-      expect(Bag.findOne).toHaveBeenCalledWith({ bagId: 'BAG123', customerId: 'CUST123' });
+      expect(Bag.findOne).toHaveBeenCalledWith({ bagId: 'BAG123', customer: mockCustomer._id });
       expect(mockBag.status).toBe('lost');
       expect(mockBag.save).toHaveBeenCalled();
       expect(emailService.sendAffiliateLostBagEmail).toHaveBeenCalled();
@@ -476,11 +477,12 @@ describe('Customer Controller', () => {
   describe('deleteCustomerData', () => {
     beforeEach(() => {
       req.user = { customerId: 'CUST123' };
+      req.params = { customerId: 'CUST123' };
     });
 
     it('should delete all customer data in development environment', async () => {
-      process.env.NODE_ENV = 'development';
-      const mockCustomer = { customerId: 'CUST123' };
+      process.env.ENABLE_DELETE_DATA_FEATURE = 'true';
+      const mockCustomer = { _id: 'customer_id', customerId: 'CUST123' };
 
       Customer.findOne.mockResolvedValue(mockCustomer);
       Order.deleteMany.mockResolvedValue({ deletedCount: 3 });
@@ -490,7 +492,7 @@ describe('Customer Controller', () => {
       await customerController.deleteCustomerData(req, res);
 
       expect(Order.deleteMany).toHaveBeenCalledWith({ customerId: 'CUST123' });
-      expect(Bag.deleteMany).toHaveBeenCalledWith({ customerId: 'CUST123' });
+      expect(Bag.deleteMany).toHaveBeenCalledWith({ customer: 'customer_id' });
       expect(Customer.deleteOne).toHaveBeenCalledWith({ customerId: 'CUST123' });
 
       expect(res.status).toHaveBeenCalledWith(200);
@@ -506,20 +508,21 @@ describe('Customer Controller', () => {
     });
 
     it('should reject deletion in production environment', async () => {
-      process.env.NODE_ENV = 'production';
+      process.env.ENABLE_DELETE_DATA_FEATURE = 'false';
 
       await customerController.deleteCustomerData(req, res);
 
       expect(res.status).toHaveBeenCalledWith(403);
       expect(res.json).toHaveBeenCalledWith({
         success: false,
-        message: 'This operation is not allowed in production'
+        message: 'This operation is not allowed'
       });
     });
 
     it('should reject unauthorized deletion', async () => {
-      process.env.NODE_ENV = 'development';
+      process.env.ENABLE_DELETE_DATA_FEATURE = 'true';
       req.user.customerId = 'CUST456';
+      req.params.customerId = 'CUST123';
 
       Customer.findOne.mockResolvedValue({ customerId: 'CUST123' });
 
@@ -528,12 +531,13 @@ describe('Customer Controller', () => {
       expect(res.status).toHaveBeenCalledWith(403);
       expect(res.json).toHaveBeenCalledWith({
         success: false,
-        message: 'Unauthorized'
+        message: 'You can only delete your own data'
       });
     });
 
     it('should handle deletion errors', async () => {
-      process.env.NODE_ENV = 'development';
+      process.env.ENABLE_DELETE_DATA_FEATURE = 'true';
+      req.params.customerId = 'CUST123';
 
       Customer.findOne.mockRejectedValue(new Error('Database error'));
 
