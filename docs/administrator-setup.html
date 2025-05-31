@@ -228,7 +228,7 @@
                 <strong>ℹ️ Overview:</strong> This guide covers the complete process of setting up administrator accounts for the WaveMAX Affiliate Program, including initial setup, security configuration, and best practices.
             </div>
 
-            <h2>Quick Start: Using the Setup Script</h2>
+            <h2>Quick Start: Interactive Admin Creation Script</h2>
             
             <div class="step-box">
                 <h4>Step 1: Ensure Prerequisites</h4>
@@ -236,44 +236,75 @@
                     <li>MongoDB is running and accessible</li>
                     <li>Environment variables are configured in <code>.env</code></li>
                     <li>Node.js dependencies are installed</li>
+                    <li>Email service configured for welcome emails</li>
                 </ul>
             </div>
 
             <div class="step-box">
-                <h4>Step 2: Run the Admin Creation Script</h4>
+                <h4>Step 2: Run the Interactive Admin Creation Script</h4>
                 <pre><code>cd /path/to/wavemax-affiliate-program
 node scripts/create-admin-directly.js</code></pre>
+                <p>The script will prompt you for the following information:</p>
+                <ul>
+                    <li><strong>First Name:</strong> Administrator's first name</li>
+                    <li><strong>Last Name:</strong> Administrator's last name</li>
+                    <li><strong>Email:</strong> Administrator's email address</li>
+                    <li><strong>Password:</strong> Secure password (hidden input with asterisks)</li>
+                    <li><strong>Permissions:</strong> Select from available permissions or choose "all"</li>
+                </ul>
             </div>
 
             <div class="step-box">
-                <h4>Step 3: Default Administrator Credentials</h4>
-                <p>The script creates an administrator with these default values:</p>
+                <h4>Step 3: Permission Selection</h4>
+                <p>The script offers these permission options:</p>
                 <table>
                     <tr>
-                        <th>Field</th>
-                        <th>Default Value</th>
+                        <th>Option</th>
+                        <th>Permission</th>
+                        <th>Description</th>
                     </tr>
                     <tr>
-                        <td>Admin ID</td>
-                        <td>ADM001</td>
+                        <td>1</td>
+                        <td>system_config</td>
+                        <td>Manage system settings</td>
                     </tr>
                     <tr>
-                        <td>Email</td>
-                        <td>rickh@wavemaxlaundry.com</td>
+                        <td>2</td>
+                        <td>operator_management</td>
+                        <td>Manage operators</td>
                     </tr>
                     <tr>
-                        <td>Password</td>
-                        <td>R8der50!</td>
+                        <td>3</td>
+                        <td>view_analytics</td>
+                        <td>View analytics and reports</td>
                     </tr>
                     <tr>
-                        <td>Name</td>
-                        <td>John Houlihan</td>
+                        <td>4</td>
+                        <td>manage_affiliates</td>
+                        <td>Manage affiliate accounts</td>
+                    </tr>
+                    <tr>
+                        <td>all</td>
+                        <td>All permissions</td>
+                        <td>Grant all available permissions</td>
                     </tr>
                 </table>
+                <p><strong>Example:</strong> Enter "1,3,4" to grant system_config, view_analytics, and manage_affiliates permissions.</p>
             </div>
 
-            <div class="warning">
-                <strong>⚠️ Security Warning:</strong> These are default credentials. For production use, modify the script before running or change the password immediately after first login.
+            <div class="step-box">
+                <h4>Step 4: Automatic Features</h4>
+                <p>The script automatically handles:</p>
+                <ul>
+                    <li><strong>Sequential Admin ID:</strong> Generates ADM001, ADM002, ADM003, etc.</li>
+                    <li><strong>Password Hashing:</strong> Securely hashes passwords before storage</li>
+                    <li><strong>Welcome Email:</strong> Sends professional welcome email with login credentials</li>
+                    <li><strong>Database Validation:</strong> Ensures email uniqueness and required fields</li>
+                </ul>
+            </div>
+
+            <div class="success">
+                <strong>✅ Enhanced Security:</strong> The interactive script ensures secure password input (hidden), email validation, and automatic welcome email delivery with proper login links.
             </div>
 
             <h2>Customizing the Admin Creation Script</h2>
