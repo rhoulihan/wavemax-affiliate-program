@@ -100,7 +100,7 @@ const loadTemplate = async (templateName) => {
             [EMAIL_CONTENT]
           </div>
           <div class="footer">
-            &copy; 2025 WaveMAX Laundry. All rights reserved.
+            &copy; 2025 CRHS Enterprises, LLC. All rights reserved.
           </div>
         </div>
       </body>
