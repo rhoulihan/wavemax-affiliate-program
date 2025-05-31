@@ -529,7 +529,8 @@ X-CSRF-Token: {csrf_token}</code></pre>
                 <span class="method get">GET</span> <code>/api/v1/affiliates/:affiliateId/customers</code>
                 
                 <h5>Query Parameters:</h5>
-                <pre><code>page=1&limit=20&status=active&search=john</code></pre>
+                <pre><code>page=1&limit=20&status=active&search=john&customerId=CUST123</code></pre>
+                <p><strong>New:</strong> <code>customerId</code> - Filter to show only a specific customer (useful for email link navigation)</p>
             </div>
 
             <div class="endpoint">

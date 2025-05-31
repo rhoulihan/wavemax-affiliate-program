@@ -86,12 +86,26 @@ function initializeAffiliateDashboard() {
   loadSettingsData(affiliateId);
 
   // Check URL parameters for specific customer filtering
+  // Try both window.location.search and the global urlParams if available
   const urlParams = new URLSearchParams(window.location.search);
-  const filterCustomerId = urlParams.get('customer');
+  let filterCustomerId = urlParams.get('customer');
+  
+  // Also check if embed-app.html has parsed parameters globally
+  if (!filterCustomerId && window.location.search.includes('customer=')) {
+    const searchParams = window.location.search;
+    const customerMatch = searchParams.match(/customer=([^&]+)/);
+    if (customerMatch) {
+      filterCustomerId = customerMatch[1];
+    }
+  }
+  
+  console.log('Dashboard initialization - customer filter:', filterCustomerId);
 
   if (filterCustomerId) {
-    // Switch to customers tab and filter by customer ID
-    switchToCustomersTab(affiliateId, filterCustomerId);
+    // Switch to customers tab and filter by customer ID with a delay to ensure DOM is ready
+    setTimeout(() => {
+      switchToCustomersTab(affiliateId, filterCustomerId);
+    }, 500);
   } else {
     // Load pickups data for the default active tab
     loadPickupRequests(affiliateId);

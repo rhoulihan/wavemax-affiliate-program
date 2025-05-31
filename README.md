@@ -20,8 +20,20 @@ The WaveMAX Affiliate Program enables individuals to register as affiliates, onb
 
 ## Recent Improvements (May 2025)
 
+### Affiliate Email Links with Customer Dashboard Filtering
+- **Enhanced Email Experience**: Improved affiliate email links to automatically highlight specific customers in dashboard
+  - Email URLs now include customer parameter for direct navigation
+  - Affiliate dashboard automatically filters to show specific customer when accessed via email link
+  - Seamless flow from email notification to relevant customer information
+  - Updated email templates for new customer notifications and lost bag alerts
+- **Customer Dashboard Integration**: Enhanced customer filtering functionality
+  - Added customerId parameter support to affiliate customer list API
+  - Updated affiliate dashboard to handle customer highlighting via URL parameters
+  - Improved navigation flow for affiliate email notifications
+  - Added comprehensive test coverage for customer filtering workflows
+
 ### Comprehensive Test Suite Achievement
-- **100% Test Pass Rate**: Achieved complete test suite success with 730 tests passing
+- **100% Test Pass Rate**: Achieved complete test suite success with 730+ tests passing
   - Fixed all failing unit and integration tests
   - Added missing endpoint implementations (getAvailableOperators)
   - Resolved pagination format inconsistencies
@@ -37,6 +49,7 @@ The WaveMAX Affiliate Program enables individuals to register as affiliates, onb
   - Memory-optimized test runs for resource-constrained environments
   - CSRF token integration across all tests
   - Proper cleanup and database isolation
+  - Added comprehensive integration tests for affiliate customer filtering
 
 ### CSRF Protection Implementation
 - **Enhanced Security**: Full CSRF protection implementation across all state-changing endpoints

@@ -385,7 +385,7 @@ exports.getAffiliateEarnings = async (req, res) => {
 exports.getAffiliateCustomers = async (req, res) => {
   try {
     const { affiliateId } = req.params;
-    const { search, sort } = req.query;
+    const { search, sort, customerId } = req.query;
     const { page, limit, skip } = req.pagination; // Use values from middleware
 
     // Check authorization (admin or self)
@@ -398,6 +398,11 @@ exports.getAffiliateCustomers = async (req, res) => {
 
     // Build query
     const query = { affiliateId };
+
+    // Add customer ID filter if provided (for dashboard customer highlighting)
+    if (customerId) {
+      query.customerId = customerId;
+    }
 
     // Add search if provided
     if (search) {
