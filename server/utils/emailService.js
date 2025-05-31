@@ -506,13 +506,13 @@ exports.sendAdministratorWelcomeEmail = async (administrator) => {
     const template = await loadTemplate('administrator-welcome');
 
     const data = {
-      first_name: administrator.firstName,
-      last_name: administrator.lastName,
-      admin_id: administrator.adminId,
-      email: administrator.email,
-      login_url: `${process.env.BASE_URL || 'https://wavemax.promo'}/embed-app.html?login=admin`,
-      permissions: administrator.permissions.join(', '),
-      current_year: new Date().getFullYear()
+      FIRST_NAME: administrator.firstName,
+      LAST_NAME: administrator.lastName,
+      ADMIN_ID: administrator.adminId,
+      EMAIL: administrator.email,
+      LOGIN_URL: `${process.env.BASE_URL || 'https://wavemax.promo'}/embed-app.html?login=admin`,
+      PERMISSIONS: administrator.permissions.join(', '),
+      CURRENT_YEAR: new Date().getFullYear()
     };
 
     const html = fillTemplate(template, data);
