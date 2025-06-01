@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WaveMAX Affiliate Program - Transform Your Franchise Revenue</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        :root {
+            --primary-blue: #0066cc;
+            --secondary-blue: #004499;
+            --accent-green: #00b894;
+            --light-gray: #f8f9fa;
+            --dark-gray: #2c3e50;
+            --text-gray: #5a6c7d;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--dark-gray);
+            overflow-x: hidden;
+        }
+        
+        /* Hero Section */
+        .hero {
+            background: linear-gradient(135deg, var(--primary-blue) 0%, var(--secondary-blue) 100%);
+            color: white;
+            padding: 80px 20px;
+            position: relative;
+            overflow: hidden;
+            text-align: center;
+        }
+        
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: pulse 15s ease-in-out infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1) rotate(0deg); }
+            50% { transform: scale(1.1) rotate(180deg); }
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+        
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            font-weight: 700;
+            animation: fadeInUp 0.8s ease-out;
+        }
+        
+        .subtitle {
+            font-size: 1.4rem;
+            margin-bottom: 30px;
+            opacity: 0.9;
+            animation: fadeInUp 0.8s ease-out 0.2s both;
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        /* Revenue Calculator */
+        .calculator {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.1);
+            margin: -60px auto 60px;
+            max-width: 900px;
+            position: relative;
+            z-index: 10;
+            animation: slideIn 0.8s ease-out 0.4s both;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .calculator h2 {
+            color: var(--primary-blue);
+            margin-bottom: 30px;
+            font-size: 2rem;
+            text-align: center;
+        }
+        
+        .calc-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .calc-input {
+            position: relative;
+        }
+        
+        .calc-input label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 600;
+            color: var(--dark-gray);
+        }
+        
+        .calc-input input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .calc-input input:focus {
+            border-color: var(--primary-blue);
+            outline: none;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,102,204,0.2);
+        }
+        
+        .revenue-display {
+            background: linear-gradient(135deg, var(--accent-green) 0%, #00d2a0 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            margin-top: 30px;
+            transform: scale(1);
+            transition: transform 0.3s ease;
+        }
+        
+        .revenue-display:hover {
+            transform: scale(1.02);
+        }
+        
+        .revenue-amount {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+        
+        /* Stats Section */
+        .stats {
+            background: var(--light-gray);
+            padding: 80px 20px;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 40px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: linear-gradient(90deg, var(--primary-blue), var(--accent-green));
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.5s ease;
+        }
+        
+        .stat-card:hover::before {
+            transform: scaleX(1);
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+        }
+        
+        .stat-number {
+            font-size: 3rem;
+            font-weight: 700;
+            color: var(--primary-blue);
+            margin-bottom: 10px;
+        }
+        
+        .stat-label {
+            color: var(--text-gray);
+            font-size: 1.1rem;
+        }
+        
+        /* Features Section */
+        .features {
+            padding: 80px 20px;
+            background: white;
+        }
+        
+        .features h2 {
+            text-align: center;
+            font-size: 2.5rem;
+            color: var(--dark-gray);
+            margin-bottom: 60px;
+        }
+        
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 40px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .feature-card {
+            padding: 40px;
+            border-radius: 15px;
+            background: var(--light-gray);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+        }
+        
+        .feature-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, var(--primary-blue), var(--accent-green));
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            color: white;
+            margin-bottom: 20px;
+        }
+        
+        .feature-card h3 {
+            color: var(--dark-gray);
+            margin-bottom: 15px;
+            font-size: 1.5rem;
+        }
+        
+        .feature-card p {
+            color: var(--text-gray);
+            line-height: 1.8;
+        }
+        
+        /* How It Works */
+        .how-it-works {
+            background: var(--light-gray);
+            padding: 80px 20px;
+        }
+        
+        .steps {
+            max-width: 1000px;
+            margin: 0 auto;
+            position: relative;
+        }
+        
+        .steps::before {
+            content: '';
+            position: absolute;
+            left: 50%;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: var(--primary-blue);
+            transform: translateX(-50%);
+            display: none;
+        }
+        
+        @media (min-width: 768px) {
+            .steps::before {
+                display: block;
+            }
+        }
+        
+        .step {
+            display: flex;
+            align-items: center;
+            margin-bottom: 60px;
+            position: relative;
+        }
+        
+        .step:nth-child(even) {
+            flex-direction: row-reverse;
+        }
+        
+        .step-content {
+            flex: 1;
+            padding: 30px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            margin: 0 20px;
+        }
+        
+        .step-number {
+            width: 60px;
+            height: 60px;
+            background: var(--primary-blue);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: 700;
+            position: relative;
+            z-index: 1;
+        }
+        
+        /* Pricing Section */
+        .pricing {
+            padding: 80px 20px;
+            background: white;
+        }
+        
+        .pricing-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 40px;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        
+        .pricing-card {
+            padding: 40px;
+            border: 2px solid #e0e0e0;
+            border-radius: 20px;
+            text-align: center;
+            transition: all 0.3s ease;
+            position: relative;
+            background: white;
+        }
+        
+        .pricing-card.featured {
+            border-color: var(--primary-blue);
+            transform: scale(1.05);
+            box-shadow: 0 20px 40px rgba(0,102,204,0.2);
+        }
+        
+        .pricing-card.featured::before {
+            content: 'NO FIXED COST';
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--primary-blue);
+            color: white;
+            padding: 5px 20px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 700;
+        }
+        
+        .pricing-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+        }
+        
+        .pricing-card.featured:hover {
+            transform: scale(1.05) translateY(-10px);
+        }
+        
+        .price {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--primary-blue);
+            margin: 20px 0;
+        }
+        
+        .price-details {
+            color: var(--text-gray);
+            margin-bottom: 30px;
+            font-size: 1.1rem;
+        }
+        
+        /* CTA Section */
+        .cta {
+            background: linear-gradient(135deg, var(--primary-blue) 0%, var(--secondary-blue) 100%);
+            color: white;
+            padding: 80px 20px;
+            text-align: center;
+        }
+        
+        .cta h2 {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+        }
+        
+        .cta p {
+            font-size: 1.3rem;
+            margin-bottom: 40px;
+            opacity: 0.9;
+        }
+        
+        .cta-button {
+            display: inline-block;
+            padding: 20px 50px;
+            background: white;
+            color: var(--primary-blue);
+            text-decoration: none;
+            border-radius: 50px;
+            font-size: 1.2rem;
+            font-weight: 700;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .cta-button::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: var(--accent-green);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.6s ease, height 0.6s ease;
+        }
+        
+        .cta-button:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+        
+        .cta-button span {
+            position: relative;
+            z-index: 1;
+        }
+        
+        .cta-button:hover {
+            color: white;
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .subtitle {
+                font-size: 1.2rem;
+            }
+            
+            .revenue-amount {
+                font-size: 2rem;
+            }
+            
+            .stat-number {
+                font-size: 2rem;
+            }
+            
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .calc-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .step {
+                flex-direction: column !important;
+            }
+            
+            .step-number {
+                margin-bottom: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <h1>Transform Your WaveMAX Franchise</h1>
+            <p class="subtitle">Launch a Fully-Managed Affiliate Program and Add $500K+ Annual Revenue</p>
+        </div>
+    </section>
+
+    <!-- Revenue Calculator -->
+    <section class="calculator">
+        <h2>Calculate Your Potential Revenue</h2>
+        <div class="calc-grid">
+            <div class="calc-input">
+                <label for="affiliates">Number of Active Affiliates</label>
+                <input type="number" id="affiliates" value="20" min="1" max="100">
+            </div>
+            <div class="calc-input">
+                <label for="loads">Average Loads per Affiliate/Week</label>
+                <input type="number" id="loads" value="15" min="1" max="50">
+            </div>
+            <div class="calc-input">
+                <label for="weight">Average Load Weight (lbs)</label>
+                <input type="number" id="weight" value="30" min="10" max="100">
+            </div>
+            <div class="calc-input">
+                <label for="price">WDF Price per Pound</label>
+                <div style="position: relative;">
+                    <span style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #666; font-size: 1.1rem;">$</span>
+                    <input type="number" id="price" value="1.50" min="0.50" max="5.00" step="0.01" style="padding-left: 35px;">
+                </div>
+            </div>
+        </div>
+        <div class="revenue-display">
+            <div class="revenue-amount" id="revenue">$702,000</div>
+            <div>Projected Annual WDF Revenue</div>
+        </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section class="stats">
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-number">💰</div>
+                <div class="stat-label">High Reward, Low Cost Program</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">📈</div>
+                <div class="stat-label">Grow WDF Revenue</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">🛠️</div>
+                <div class="stat-label">No Recurring Maintenance</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">🗺️</div>
+                <div class="stat-label">Extend Your Service Range</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features">
+        <h2>Everything You Need to Succeed</h2>
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">🔌</div>
+                <h3>Seamless Cents POS Integration</h3>
+                <p>Our platform integrates directly with your existing Cents POS system. Process affiliate orders, track commissions, and manage payouts automatically.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">📱</div>
+                <h3>White-Label Mobile Apps</h3>
+                <p>Branded customer and affiliate apps with real-time tracking, route optimization, and automated notifications. Your brand, our technology.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🎓</div>
+                <h3>Comprehensive Training Program</h3>
+                <p>We handle affiliate onboarding, training, and ongoing support. Turn property managers and entrepreneurs into successful delivery partners.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">📊</div>
+                <h3>Real-Time Analytics Dashboard</h3>
+                <p>Monitor performance, track revenue, and optimize operations with our comprehensive analytics suite. Make data-driven decisions.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🚀</div>
+                <h3>Marketing & Recruitment Support</h3>
+                <p>Proven recruitment strategies, marketing materials, and ongoing campaigns to attract quality affiliates in your market.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">⚖️</div>
+                <h3>Legal Compliance Included</h3>
+                <p>IC-compliant contracts, automated 1099 generation, and ongoing regulatory updates. Stay protected and compliant.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works Section -->
+    <section class="how-it-works">
+        <div class="container">
+            <h2 style="text-align: center; font-size: 2.5rem; margin-bottom: 60px;">Launch in 30 Days</h2>
+            <div class="steps">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <div class="step-content">
+                        <h3>Setup & Integration</h3>
+                        <p>We integrate with your Cents POS, configure your service area, and customize your branded apps. Full setup completed within 7 days.</p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <div class="step-content">
+                        <h3>Affiliate Recruitment</h3>
+                        <p>Launch targeted campaigns to attract property managers, HOA reps, and local entrepreneurs. We handle screening and onboarding.</p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <div class="step-content">
+                        <h3>Training & Launch</h3>
+                        <p>Comprehensive 5-day training program for affiliates covering operations, customer service, and business development.</p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-number">4</div>
+                    <div class="step-content">
+                        <h3>Scale & Optimize</h3>
+                        <p>Monitor performance, optimize routes, and scale your affiliate network. We provide ongoing support and quarterly business reviews.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing Section -->
+    <section class="pricing">
+        <div class="container">
+            <h2 style="text-align: center; font-size: 2.5rem; margin-bottom: 60px;">Simple, Transparent Pricing</h2>
+            <div class="pricing-cards">
+                <div class="pricing-card">
+                    <h3 style="font-size: 1.8rem; margin-bottom: 20px;">Setup & Launch</h3>
+                    <div class="price">$[TBD]</div>
+                    <div class="price-details">One-time setup fee</div>
+                    <ul style="text-align: left; list-style: none; padding: 0;">
+                        <li style="padding: 10px 0;">✓ Cents POS integration</li>
+                        <li style="padding: 10px 0;">✓ Branded mobile apps</li>
+                        <li style="padding: 10px 0;">✓ Initial marketing campaign</li>
+                        <li style="padding: 10px 0;">✓ 30-day launch support</li>
+                    </ul>
+                </div>
+                <div class="pricing-card featured">
+                    <h3 style="font-size: 1.8rem; margin-bottom: 20px;">Revenue Share Model</h3>
+                    <div class="price">[TBD]%</div>
+                    <div class="price-details">of affiliate-generated WDF revenue</div>
+                    <ul style="text-align: left; list-style: none; padding: 0;">
+                        <li style="padding: 10px 0;">✓ Platform hosting & updates</li>
+                        <li style="padding: 10px 0;">✓ Affiliate support & training</li>
+                        <li style="padding: 10px 0;">✓ Marketing & recruitment</li>
+                        <li style="padding: 10px 0;">✓ Compliance & legal updates</li>
+                        <li style="padding: 10px 0;">✓ 24/7 technical support</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta">
+        <div class="container">
+            <h2>Ready to Transform Your Franchise?</h2>
+            <p>Join the pilot program and be among the first to offer this revolutionary service model</p>
+            <a href="#contact" class="cta-button">
+                <span>Schedule a Demo</span>
+            </a>
+        </div>
+    </section>
+
+    <script>
+        // Revenue Calculator
+        function calculateRevenue() {
+            const affiliates = document.getElementById('affiliates').value;
+            const loads = document.getElementById('loads').value;
+            const weight = document.getElementById('weight').value;
+            const price = document.getElementById('price').value;
+            
+            const weeklyRevenue = affiliates * loads * weight * price;
+            const annualRevenue = weeklyRevenue * 52;
+            
+            document.getElementById('revenue').textContent = '$' + annualRevenue.toLocaleString('en-US', {
+                maximumFractionDigits: 0
+            });
+        }
+
+        // Add event listeners
+        document.getElementById('affiliates').addEventListener('input', calculateRevenue);
+        document.getElementById('loads').addEventListener('input', calculateRevenue);
+        document.getElementById('weight').addEventListener('input', calculateRevenue);
+        document.getElementById('price').addEventListener('input', calculateRevenue);
+
+        // Intersection Observer for animations
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -100px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, observerOptions);
+
+        // Observe all feature cards and stat cards
+        document.querySelectorAll('.feature-card, .stat-card, .step').forEach(el => {
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(30px)';
+            el.style.transition = 'all 0.6s ease-out';
+            observer.observe(el);
+        });
+
+        // Smooth scroll for CTA button
+        document.querySelector('.cta-button').addEventListener('click', (e) => {
+            e.preventDefault();
+            // In production, this would scroll to a contact form or open a modal
+            alert('Contact form would open here. Please implement your preferred contact method.');
+        });
+    </script>
+</body>
+</html>
