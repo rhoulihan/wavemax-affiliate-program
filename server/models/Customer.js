@@ -26,6 +26,37 @@ const customerSchema = new mongoose.Schema({
   username: { type: String, required: true, unique: true },
   passwordSalt: { type: String, required: true },
   passwordHash: { type: String, required: true },
+  // Social authentication accounts
+  socialAccounts: {
+    google: {
+      id: String,
+      email: String,
+      name: String,
+      accessToken: String,
+      refreshToken: String,
+      linkedAt: Date
+    },
+    facebook: {
+      id: String,
+      email: String,
+      name: String,
+      accessToken: String,
+      linkedAt: Date
+    },
+    linkedin: {
+      id: String,
+      email: String,
+      name: String,
+      accessToken: String,
+      refreshToken: String,
+      linkedAt: Date
+    }
+  },
+  registrationMethod: {
+    type: String,
+    enum: ['traditional', 'google', 'facebook', 'linkedin', 'social'],
+    default: 'traditional'
+  },
   // Encrypted payment fields
   cardholderName: {
     iv: String,

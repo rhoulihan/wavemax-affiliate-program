@@ -426,39 +426,162 @@ EXCHANGE_FROM_EMAIL=noreply@yourdomain.com</code></pre>
 
             <h3>Google OAuth 2.0 Setup</h3>
             <div class="config-section">
+                <div class="warning">
+                    <strong>⚠️ Important:</strong> Follow these steps carefully and in order. Missing steps are the most common cause of OAuth setup issues.
+                </div>
+                
+                <h4>Step 1: Create a Google Cloud Project</h4>
                 <ol>
-                    <li><strong>Create a Google Cloud Project:</strong>
+                    <li>Navigate to <a href="https://console.cloud.google.com/" target="_blank">Google Cloud Console</a></li>
+                    <li>Click "Select a project" dropdown at the top of the page</li>
+                    <li>Click "NEW PROJECT" button</li>
+                    <li>Enter project details:
                         <ul>
-                            <li>Go to <a href="https://console.cloud.google.com/" target="_blank">Google Cloud Console</a></li>
-                            <li>Create a new project or select existing one</li>
-                            <li>Enable the Identity Platform API (for OAuth authentication)</li>
+                            <li><strong>Project name:</strong> <code>WaveMAX Affiliate Program</code> (or your preferred name)</li>
+                            <li><strong>Organization:</strong> Select your organization if applicable</li>
+                            <li><strong>Location:</strong> Choose your organization or "No organization"</li>
                         </ul>
                     </li>
-                    <li><strong>Configure OAuth Consent Screen:</strong>
+                    <li>Click "CREATE" and wait for project creation</li>
+                    <li>Ensure your new project is selected (check the project name in the top bar)</li>
+                </ol>
+
+                <h4>Step 2: Enable Required APIs</h4>
+                <ol>
+                    <li>In the Google Cloud Console, go to "APIs & Services" > "Library"</li>
+                    <li>Search for "Identity Platform API" (<strong>NOT</strong> "Google+ API")</li>
+                    <li>Click on "Identity Platform API" from the results</li>
+                    <li>Click "ENABLE" button</li>
+                    <li>Wait for the API to be enabled (you'll see a confirmation message)</li>
+                </ol>
+
+                <h4>Step 3: Configure OAuth Consent Screen</h4>
+                <ol>
+                    <li>Go to "APIs & Services" > "OAuth consent screen"</li>
+                    <li>Choose user type:
                         <ul>
-                            <li>Go to APIs & Services > OAuth consent screen</li>
-                            <li>Choose "External" user type</li>
-                            <li>Fill in application name: "WaveMAX Affiliate Program"</li>
-                            <li>Add authorized domains (your production domain)</li>
-                            <li>Add scopes: <code>email</code>, <code>profile</code></li>
+                            <li><strong>External:</strong> For production apps available to any Google user</li>
+                            <li><strong>Internal:</strong> Only if you have Google Workspace (for organization users only)</li>
                         </ul>
                     </li>
-                    <li><strong>Create OAuth 2.0 Credentials:</strong>
+                    <li>Click "CREATE"</li>
+                    <li>Fill out the OAuth consent screen form:
+                        <br><br>
+                        <strong>App Information:</strong>
                         <ul>
-                            <li>Go to APIs & Services > Credentials</li>
-                            <li>Click "Create Credentials" > "OAuth 2.0 Client IDs"</li>
-                            <li>Application type: "Web application"</li>
-                            <li>Add authorized redirect URIs:
+                            <li><strong>App name:</strong> <code>WaveMAX Affiliate Program</code></li>
+                            <li><strong>User support email:</strong> Your support email address</li>
+                            <li><strong>App logo:</strong> Upload your company logo (120x120px PNG recommended)</li>
+                            <li><strong>App domain:</strong> Your website domain (e.g., <code>wavemaxlaundry.com</code>)</li>
+                            <li><strong>Authorized domains:</strong> Add your domains:
                                 <ul>
-                                    <li><code>https://yourdomain.com/api/auth/google/callback</code></li>
-                                    <li><code>http://localhost:3000/api/auth/google/callback</code> (for development)</li>
+                                    <li><code>yourdomain.com</code> (your main domain)</li>
+                                    <li><code>wavemax.promo</code> (if using the embed service)</li>
                                 </ul>
                             </li>
                         </ul>
+                        <br>
+                        <strong>Developer Contact Information:</strong>
+                        <ul>
+                            <li><strong>Email addresses:</strong> Add your developer email addresses</li>
+                        </ul>
+                    </li>
+                    <li>Click "SAVE AND CONTINUE"</li>
+                    <li><strong>Scopes Configuration:</strong>
+                        <ul>
+                            <li>Click "ADD OR REMOVE SCOPES"</li>
+                            <li>Add these scopes:
+                                <ul>
+                                    <li><code>../auth/userinfo.email</code> (to access user's email)</li>
+                                    <li><code>../auth/userinfo.profile</code> (to access basic profile info)</li>
+                                </ul>
+                            </li>
+                            <li>Click "UPDATE" then "SAVE AND CONTINUE"</li>
+                        </ul>
+                    </li>
+                    <li><strong>Test users</strong> (if External and not published):
+                        <ul>
+                            <li>Add test email addresses that can access your app during development</li>
+                            <li>Click "SAVE AND CONTINUE"</li>
+                        </ul>
+                    </li>
+                    <li><strong>Summary:</strong> Review your settings and click "BACK TO DASHBOARD"</li>
+                </ol>
+
+                <h4>Step 4: Create OAuth 2.0 Credentials</h4>
+                <ol>
+                    <li>Go to "APIs & Services" > "Credentials"</li>
+                    <li>Click "CREATE CREDENTIALS" > "OAuth 2.0 Client IDs"</li>
+                    <li>If prompted to configure the consent screen, complete Step 3 first</li>
+                    <li>Configure the OAuth client:
+                        <ul>
+                            <li><strong>Application type:</strong> Select "Web application"</li>
+                            <li><strong>Name:</strong> <code>WaveMAX Affiliate OAuth Client</code></li>
+                        </ul>
+                    </li>
+                    <li><strong>Authorized JavaScript origins</strong> (add all that apply):
+                        <ul>
+                            <li><code>https://yourdomain.com</code></li>
+                            <li><code>https://www.yourdomain.com</code></li>
+                            <li><code>http://localhost:3000</code> (for development)</li>
+                            <li><code>http://localhost:3001</code> (if using different port)</li>
+                        </ul>
+                    </li>
+                    <li><strong>Authorized redirect URIs</strong> (add all that apply):
+                        <ul>
+                            <li><code>https://yourdomain.com/api/auth/google/callback</code></li>
+                            <li><code>https://www.yourdomain.com/api/auth/google/callback</code></li>
+                            <li><code>https://wavemax.promo/api/auth/google/callback</code> (if using embed service)</li>
+                            <li><code>http://localhost:3000/api/auth/google/callback</code> (for development)</li>
+                        </ul>
+                    </li>
+                    <li>Click "CREATE"</li>
+                    <li><strong>Important:</strong> Copy the Client ID and Client Secret immediately and store them securely</li>
+                </ol>
+
+                <h4>Step 5: Environment Configuration</h4>
+                <p>Add these variables to your <code>.env</code> file:</p>
+                <pre><code># Google OAuth Configuration
+GOOGLE_CLIENT_ID=1234567890-abcdefghijklmnop.apps.googleusercontent.com
+GOOGLE_CLIENT_SECRET=GOCSPX-YourSecretKeyHere</code></pre>
+
+                <h4>Step 6: Domain Verification (Production Only)</h4>
+                <ol>
+                    <li>Go to <a href="https://search.google.com/search-console" target="_blank">Google Search Console</a></li>
+                    <li>Add your domain property</li>
+                    <li>Verify ownership using one of the provided methods:
+                        <ul>
+                            <li>HTML file upload</li>
+                            <li>HTML tag in your website header</li>
+                            <li>Domain name provider (DNS record)</li>
+                            <li>Google Analytics tracking code</li>
+                        </ul>
                     </li>
                 </ol>
-                <pre><code>GOOGLE_CLIENT_ID=your_google_client_id.apps.googleusercontent.com
-GOOGLE_CLIENT_SECRET=your_google_client_secret</code></pre>
+
+                <h4>Step 7: Publishing Your App (Production)</h4>
+                <p>For production use with external users:</p>
+                <ol>
+                    <li>Return to "APIs & Services" > "OAuth consent screen"</li>
+                    <li>Click "PUBLISH APP" if you want to make it available to all Google users</li>
+                    <li>If you need sensitive scopes, submit for verification:
+                        <ul>
+                            <li>Click "Submit for verification"</li>
+                            <li>Provide required documentation</li>
+                            <li>Wait for Google's review (can take several days)</li>
+                        </ul>
+                    </li>
+                </ol>
+
+                <div class="warning">
+                    <h4>Troubleshooting Common Issues:</h4>
+                    <ul>
+                        <li><strong>"Error 400: redirect_uri_mismatch":</strong> Check that your redirect URI exactly matches what's configured in Google Console</li>
+                        <li><strong>"Access blocked":</strong> Your app may need to be published or the user needs to be added as a test user</li>
+                        <li><strong>"Invalid client":</strong> Verify your Client ID and Client Secret are correct in your environment variables</li>
+                        <li><strong>"API not enabled":</strong> Ensure you've enabled the Identity Platform API, not Google+ API</li>
+                    </ul>
+                </div>
             </div>
 
             <h3>Facebook OAuth Setup</h3>
@@ -519,6 +642,41 @@ FACEBOOK_APP_SECRET=your_facebook_app_secret</code></pre>
                 </ol>
                 <pre><code>LINKEDIN_CLIENT_ID=your_linkedin_client_id
 LINKEDIN_CLIENT_SECRET=your_linkedin_client_secret</code></pre>
+            </div>
+
+            <h3>Additional OAuth Configuration</h3>
+            <div class="config-section">
+                <p>The following additional environment variables provide enhanced OAuth functionality:</p>
+                
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Variable</th>
+                            <th>Description</th>
+                            <th>Default</th>
+                            <th>Example</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>OAUTH_CALLBACK_URI</code></td>
+                            <td>Base URL for OAuth callbacks (useful for embedded deployments)</td>
+                            <td>Uses BASE_URL</td>
+                            <td>https://wavemax.promo</td>
+                        </tr>
+                        <tr>
+                            <td><code>RELAX_RATE_LIMITING</code></td>
+                            <td>Disable rate limiting for development/testing</td>
+                            <td>false</td>
+                            <td>true</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="info">
+                    <p><strong>OAUTH_CALLBACK_URI:</strong> This setting is particularly useful when your application is embedded in another domain but OAuth callbacks need to go to the server where your Node.js application is actually running.</p>
+                    <p><strong>RELAX_RATE_LIMITING:</strong> Set to 'true' only in development environments to prevent rate limiting from interfering with OAuth testing. Never use in production.</p>
+                </div>
             </div>
 
             <h3>OAuth Security Features</h3>

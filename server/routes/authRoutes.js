@@ -144,4 +144,13 @@ router.post('/logout',
   authController.logout
 );
 
+/**
+ * @route   GET /api/auth/oauth-session/:sessionId
+ * @desc    Poll for OAuth session result
+ * @access  Public
+ */
+router.get('/oauth-session/:sessionId',
+  authController.pollOAuthSession
+);
+
 module.exports = router;

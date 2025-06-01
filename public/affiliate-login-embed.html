@@ -34,7 +34,47 @@
                 <p class="mt-2">Sign in to access your affiliate dashboard</p>
             </div>
             
-            <form id="affiliateLoginForm" class="p-6 space-y-6">
+            <!-- Social Login Section -->
+            <div class="p-6 pb-0">
+                <div class="bg-gray-50 p-4 rounded-lg mb-6">
+                    <p class="text-gray-600 mb-4 text-center">Sign in with your social media account</p>
+                    <div class="grid grid-cols-3 gap-3">
+                        <button type="button" id="googleLogin" class="flex items-center justify-center px-4 py-2 border border-gray-300 rounded-lg bg-white hover:bg-gray-50 transition">
+                            <svg class="w-5 h-5" viewBox="0 0 24 24">
+                                <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                                <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                                <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                                <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                            </svg>
+                        </button>
+                        
+                        <button type="button" id="facebookLogin" class="flex items-center justify-center px-4 py-2 border border-gray-300 rounded-lg bg-white hover:bg-gray-50 transition">
+                            <svg class="w-5 h-5" fill="#1877F2" viewBox="0 0 24 24">
+                                <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                            </svg>
+                        </button>
+                        
+                        <button type="button" id="linkedinLogin" class="flex items-center justify-center px-4 py-2 border border-gray-300 rounded-lg bg-white hover:bg-gray-50 transition">
+                            <svg class="w-5 h-5" fill="#0A66C2" viewBox="0 0 24 24">
+                                <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+                            </svg>
+                        </button>
+                    </div>
+                    
+                    <div class="mt-4 text-center">
+                        <div class="relative">
+                            <div class="absolute inset-0 flex items-center">
+                                <div class="w-full border-t border-gray-300"></div>
+                            </div>
+                            <div class="relative flex justify-center text-sm">
+                                <span class="px-2 bg-gray-50 text-gray-500">Or sign in with username and password</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <form id="affiliateLoginForm" class="p-6 pt-0 space-y-6">
                 
                 <div class="mb-4">
                     <label for="username" class="block text-gray-700 mb-2">Username</label>
@@ -68,7 +108,9 @@
         </div>
     </div>
 
+    <script src="/assets/js/csrf-utils.js"></script>
     <script>
+        console.log('🚀 Affiliate login script starting...');
         // PostMessage communication with parent window
         function sendMessageToParent(type, data) {
             if (window.parent && window.parent !== window) {
@@ -85,6 +127,195 @@
             sendMessageToParent('navigate', { page: page });
         }
 
+        // Configuration for embedded environment
+        const baseUrl = window.location.protocol + '//' + window.location.host;
+        const isEmbedded = true;
+        const csrfFetch = window.CsrfUtils && window.CsrfUtils.csrfFetch ? window.CsrfUtils.csrfFetch : fetch;
+        
+        console.log('🔧 Affiliate Login Configuration:', {
+            baseUrl: baseUrl,
+            isEmbedded: isEmbedded,
+            hasCsrfUtils: !!window.CsrfUtils,
+            csrfFetch: typeof csrfFetch
+        });
+
+        // OAuth Social Login Functionality for Affiliates
+        function handleAffiliateLogin(provider) {
+            console.log(`Starting ${provider} social login for affiliate`);
+
+            // For embedded context, use popup window to avoid iframe restrictions
+            if (isEmbedded || window.self !== window.top) {
+                // Generate unique session ID for database polling
+                const sessionId = 'oauth_' + Date.now() + '_' + Math.random().toString(36).substring(2);
+                console.log('Generated Affiliate Login OAuth session ID:', sessionId);
+                
+                const oauthUrl = `${baseUrl}/api/v1/auth/${provider}?popup=true&state=${sessionId}&t=${Date.now()}`;
+                console.log('🔗 Opening Affiliate Login OAuth URL:', oauthUrl);
+                
+                const popup = window.open(
+                    oauthUrl, 
+                    'affiliateSocialLogin',
+                    'width=500,height=600,scrollbars=yes,resizable=yes'
+                );
+                
+                console.log('Affiliate login popup opened:', {
+                    'popup exists': !!popup,
+                    'popup.closed': popup ? popup.closed : 'N/A'
+                });
+                
+                if (!popup || popup.closed) {
+                    alert('Popup was blocked. Please allow popups for this site and try again.');
+                    return;
+                }
+                
+                // Database polling approach (more reliable than postMessage)
+                let pollCount = 0;
+                const maxPolls = 120; // 6 minutes max (120 * 3 seconds)
+                let authResultReceived = false;
+                
+                console.log('Starting database polling for Affiliate Login OAuth result...');
+                
+                const pollForResult = setInterval(async () => {
+                    pollCount++;
+                    
+                    try {
+                        // Check if popup is closed
+                        if (popup.closed) {
+                            console.log('Affiliate login popup closed, continuing to poll for result...');
+                        }
+                        
+                        // Poll the database for result
+                        const response = await csrfFetch(`${baseUrl}/api/v1/auth/oauth-session/${sessionId}`);
+                        
+                        console.log('🔍 Affiliate login polling response:', {
+                            ok: response.ok,
+                            status: response.status,
+                            statusText: response.statusText
+                        });
+                        
+                        if (response.ok) {
+                            const data = await response.json();
+                            console.log('📊 Affiliate login response data:', data);
+                            if (data.success && data.result) {
+                                console.log('📨 Affiliate login OAuth result received from database:', data.result);
+                                authResultReceived = true;
+                                clearInterval(pollForResult);
+                                
+                                if (popup && !popup.closed) {
+                                    popup.close();
+                                }
+                                
+                                // Handle the result
+                                try {
+                                    if (data.result.type === 'social-auth-login') {
+                                        console.log('Processing affiliate social-auth-login from database');
+                                        
+                                        // Store token and affiliate data
+                                        localStorage.setItem('affiliateToken', data.result.token);
+                                        
+                                        // Notify parent of successful login
+                                        sendMessageToParent('login-success', {
+                                            userType: 'affiliate',
+                                            token: data.result.token
+                                        });
+
+                                        // Navigate to affiliate dashboard
+                                        console.log('Redirecting to affiliate dashboard after social login');
+                                        navigateParent('affiliate-dashboard');
+                                        
+                                    } else if (data.result.type === 'social-auth-success') {
+                                        console.log('Affiliate does not exist, redirecting to registration');
+                                        // New affiliate - redirect to registration with social token
+                                        alert('Account not found. You will be redirected to registration to create a new affiliate account.');
+                                        window.location.href = `/affiliate-register-embed.html?socialToken=${data.result.socialToken}&provider=${data.result.provider}`;
+                                        
+                                    } else if (data.result.type === 'social-auth-error') {
+                                        console.log('Processing affiliate social-auth-error from database');
+                                        alert(data.result.message || 'Social authentication failed');
+                                        
+                                    } else {
+                                        console.log('Unknown affiliate login result type:', data.result.type);
+                                    }
+                                } catch (resultError) {
+                                    console.error('Error processing Affiliate Login OAuth result:', resultError);
+                                    alert('Error processing authentication result');
+                                }
+                                return;
+                            }
+                        }
+                        
+                        // Check for timeout
+                        if (pollCount > maxPolls) {
+                            console.log('Affiliate login database polling timeout exceeded');
+                            clearInterval(pollForResult);
+                            if (popup && !popup.closed) {
+                                popup.close();
+                            }
+                            alert('Authentication timed out. Please try again.');
+                            return;
+                        }
+                        
+                        // Log progress every 5 polls (15 seconds)
+                        if (pollCount % 5 === 0) {
+                            console.log(`🔄 Polling for Affiliate Login OAuth result... (${pollCount}/${maxPolls})`);
+                        }
+                        
+                    } catch (error) {
+                        // 404 means no result yet, continue polling
+                        if (error.message && error.message.includes('404')) {
+                            return;
+                        }
+                        
+                        console.error('Error polling for Affiliate Login OAuth result:', error);
+                        
+                        // Don't stop polling for network errors, just log them
+                        if (pollCount % 10 === 0) {
+                            console.log('Network error during Affiliate Login polling, continuing...');
+                        }
+                    }
+                }, 3000); // Poll every 3 seconds
+            } else {
+                // For non-embedded context, use direct navigation
+                window.location.href = `${baseUrl}/api/v1/auth/${provider}`;
+            }
+        }
+
+        // Setup OAuth button handlers
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🔍 Setting up OAuth button handlers...');
+            const googleLogin = document.getElementById('googleLogin');
+            const facebookLogin = document.getElementById('facebookLogin');
+            const linkedinLogin = document.getElementById('linkedinLogin');
+
+            console.log('🔍 Found buttons:', {
+                googleLogin: !!googleLogin,
+                facebookLogin: !!facebookLogin,
+                linkedinLogin: !!linkedinLogin
+            });
+
+            if (googleLogin) {
+                console.log('✅ Attaching Google login handler');
+                googleLogin.addEventListener('click', function() {
+                    console.log('🔴 Google login button clicked!');
+                    handleAffiliateLogin('google');
+                });
+            } else {
+                console.error('❌ Google login button not found!');
+            }
+
+            if (facebookLogin) {
+                facebookLogin.addEventListener('click', function() {
+                    handleAffiliateLogin('facebook');
+                });
+            }
+
+            if (linkedinLogin) {
+                linkedinLogin.addEventListener('click', function() {
+                    handleAffiliateLogin('linkedin');
+                });
+            }
+        });
+
         // Form submission
         document.getElementById('affiliateLoginForm').addEventListener('submit', function(e) {
             e.preventDefault();
@@ -96,7 +327,7 @@
             sendMessageToParent('form-submit', { form: 'affiliate-login' });
 
             // API call with full URL
-            fetch('https://wavemax.promo/api/v1/auth/affiliate/login', {
+            fetch(`${baseUrl}/api/v1/auth/affiliate/login`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
