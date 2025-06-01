@@ -11,6 +11,7 @@ const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const emailService = require('../utils/emailService');
 const { logLoginAttempt, logAuditEvent, AuditEvents } = require('../utils/auditLogger');
+const { sanitizeInput } = require('../middleware/sanitization');
 
 /**
  * Generate JWT token
@@ -1142,6 +1143,16 @@ exports.completeSocialRegistration = async (req, res) => {
     let socialData;
     try {
       socialData = jwt.verify(socialToken, process.env.JWT_SECRET);
+      // Sanitize social data to prevent XSS attacks
+      socialData = sanitizeInput(socialData);
+      
+      // Validate that required fields are not empty after sanitization
+      if (!socialData.firstName || !socialData.lastName || !socialData.email) {
+        return res.status(400).json({
+          success: false,
+          message: 'Invalid social profile data'
+        });
+      }
     } catch (error) {
       return res.status(400).json({
         success: false,
@@ -1861,6 +1872,16 @@ exports.completeSocialCustomerRegistration = async (req, res) => {
     let socialData;
     try {
       socialData = jwt.verify(socialToken, process.env.JWT_SECRET);
+      // Sanitize social data to prevent XSS attacks
+      socialData = sanitizeInput(socialData);
+      
+      // Validate that required fields are not empty after sanitization
+      if (!socialData.firstName || !socialData.lastName || !socialData.email) {
+        return res.status(400).json({
+          success: false,
+          message: 'Invalid social profile data'
+        });
+      }
     } catch (error) {
       return res.status(400).json({
         success: false,

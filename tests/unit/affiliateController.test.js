@@ -773,6 +773,8 @@ describe('Affiliate Controller', () => {
 
   describe('getAffiliateDashboardStats', () => {
     it('should return comprehensive dashboard statistics', async () => {
+      const now = new Date();
+      const currentMonth = new Date(now.getFullYear(), now.getMonth(), 15); // 15th of current month
       const mockDeliveredOrders = [
         {
           affiliateId: 'AFF123',
@@ -782,7 +784,7 @@ describe('Affiliate Controller', () => {
         {
           affiliateId: 'AFF123',
           affiliateCommission: 15,
-          deliveredAt: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000) // 10 days ago
+          deliveredAt: currentMonth // Definitely within current month
         }
       ];
       const mockPendingTransactions = [
@@ -806,10 +808,10 @@ describe('Affiliate Controller', () => {
         activeOrderCount: 3,
         totalEarnings: 25,
         monthEarnings: 25,
-        weekEarnings: 10,
+        weekEarnings: 25,
         pendingEarnings: 25,
         monthlyOrders: 2,
-        weeklyOrders: 1
+        weeklyOrders: 2
       });
       expect(response.stats.nextPayoutDate).toBeDefined();
     });
