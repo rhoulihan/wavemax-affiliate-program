@@ -56,13 +56,7 @@ describe('Create Admin Script Tests', () => {
         email: 'first@admin.com',
         username: 'firstadmin',
         password: 'FirstAdminPassword123!',
-        permissions: {
-          affiliateManagement: true,
-          customerManagement: true,
-          orderManagement: true,
-          systemSettings: true,
-          reporting: true
-        }
+        permissions: ['all']
       });
 
       await admin1.save();
@@ -75,13 +69,7 @@ describe('Create Admin Script Tests', () => {
         email: 'second@admin.com',
         username: 'secondadmin',
         password: 'SecondAdminPassword123!',
-        permissions: {
-          affiliateManagement: true,
-          customerManagement: false,
-          orderManagement: true,
-          systemSettings: false,
-          reporting: true
-        }
+        permissions: ['manage_affiliates', 'orders.manage', 'reports.view']
       });
 
       await admin2.save();
@@ -103,7 +91,7 @@ describe('Create Admin Script Tests', () => {
           email: 'admin1@test.com',
           username: 'admin1',
           password: 'Password123!',
-          permissions: { affiliateManagement: true }
+          permissions: ['manage_affiliates']
         },
         {
           administratorId: 'ADM003', // Skip ADM002
@@ -112,7 +100,7 @@ describe('Create Admin Script Tests', () => {
           email: 'admin3@test.com',
           username: 'admin3',
           password: 'Password123!',
-          permissions: { affiliateManagement: true }
+          permissions: ['manage_affiliates']
         },
         {
           administratorId: 'ADM005', // Skip ADM004
@@ -121,7 +109,7 @@ describe('Create Admin Script Tests', () => {
           email: 'admin5@test.com',
           username: 'admin5',
           password: 'Password123!',
-          permissions: { affiliateManagement: true }
+          permissions: ['manage_affiliates']
         }
       ];
 
@@ -158,7 +146,7 @@ describe('Create Admin Script Tests', () => {
           email: 'test@admin.com',
           username: 'testadmin',
           password: weakPassword,
-          permissions: { affiliateManagement: true }
+          permissions: ['manage_affiliates']
         });
 
         // Should fail validation or be rejected by password validator
@@ -182,7 +170,7 @@ describe('Create Admin Script Tests', () => {
           email: `strong${i + 1}@admin.com`,
           username: `strongadmin${i + 1}`,
           password: strongPasswords[i],
-          permissions: { affiliateManagement: true }
+          permissions: ['manage_affiliates']
         });
 
         // Should save successfully
@@ -195,15 +183,13 @@ describe('Create Admin Script Tests', () => {
 
   describe('Permission System Validation', () => {
     test('should validate all permission types', async () => {
-      const allPermissions = {
-        affiliateManagement: true,
-        customerManagement: true,
-        orderManagement: true,
-        systemSettings: true,
-        reporting: true,
-        userManagement: false, // Some permissions false
-        auditLogs: false
-      };
+      const allPermissions = [
+        'manage_affiliates',
+        'customers.manage', 
+        'orders.manage',
+        'system_config',
+        'reports.view'
+      ];
 
       const admin = new Administrator({
         administratorId: 'ADM001',
@@ -216,15 +202,14 @@ describe('Create Admin Script Tests', () => {
       });
 
       const savedAdmin = await admin.save();
-      expect(savedAdmin.permissions).toMatchObject(allPermissions);
+      expect(savedAdmin.permissions).toEqual(expect.arrayContaining(allPermissions));
     });
 
     test('should handle partial permission sets', async () => {
-      const partialPermissions = {
-        affiliateManagement: true,
-        reporting: true
-        // Other permissions should default to false
-      };
+      const partialPermissions = [
+        'manage_affiliates',
+        'reports.view'
+      ];
 
       const admin = new Administrator({
         administratorId: 'ADM001',
@@ -237,10 +222,9 @@ describe('Create Admin Script Tests', () => {
       });
 
       const savedAdmin = await admin.save();
-      expect(savedAdmin.permissions.affiliateManagement).toBe(true);
-      expect(savedAdmin.permissions.reporting).toBe(true);
-      // Check that unspecified permissions have defaults
-      expect(savedAdmin.permissions.customerManagement).toBeDefined();
+      expect(savedAdmin.permissions).toContain('manage_affiliates');
+      expect(savedAdmin.permissions).toContain('reports.view');
+      expect(savedAdmin.permissions).toHaveLength(2);
     });
   });
 
@@ -253,7 +237,7 @@ describe('Create Admin Script Tests', () => {
         email: 'first@admin.com',
         username: 'firstadmin',
         password: 'FirstAdmin123!',
-        permissions: { affiliateManagement: true }
+        permissions: ['manage_affiliates']
       });
 
       await firstAdmin.save();
@@ -266,7 +250,7 @@ describe('Create Admin Script Tests', () => {
         email: 'duplicate@admin.com',
         username: 'duplicateadmin',
         password: 'DuplicateAdmin123!',
-        permissions: { customerManagement: true }
+        permissions: ['customers.manage']
       });
 
       await expect(duplicateAdmin.save()).rejects.toThrow();
@@ -280,7 +264,7 @@ describe('Create Admin Script Tests', () => {
         email: 'first@admin.com',
         username: 'uniqueadmin',
         password: 'FirstAdmin123!',
-        permissions: { affiliateManagement: true }
+        permissions: ['manage_affiliates']
       });
 
       await firstAdmin.save();
@@ -293,7 +277,7 @@ describe('Create Admin Script Tests', () => {
         email: 'second@admin.com',
         username: 'uniqueadmin', // Same username
         password: 'SecondAdmin123!',
-        permissions: { customerManagement: true }
+        permissions: ['customers.manage']
       });
 
       await expect(duplicateUsername.save()).rejects.toThrow();
@@ -307,7 +291,7 @@ describe('Create Admin Script Tests', () => {
         email: 'unique@admin.com',
         username: 'firstadmin',
         password: 'FirstAdmin123!',
-        permissions: { affiliateManagement: true }
+        permissions: ['manage_affiliates']
       });
 
       await firstAdmin.save();
@@ -320,7 +304,7 @@ describe('Create Admin Script Tests', () => {
         email: 'unique@admin.com', // Same email
         username: 'secondadmin',
         password: 'SecondAdmin123!',
-        permissions: { customerManagement: true }
+        permissions: ['customers.manage']
       });
 
       await expect(duplicateEmail.save()).rejects.toThrow();
@@ -337,13 +321,7 @@ describe('Create Admin Script Tests', () => {
         email: 'emailtest@admin.com',
         username: 'emailtest',
         password: 'EmailTest123!',
-        permissions: {
-          affiliateManagement: true,
-          customerManagement: true,
-          orderManagement: true,
-          systemSettings: true,
-          reporting: true
-        }
+        permissions: ['all']
       });
 
       const savedAdmin = await admin.save();
@@ -367,7 +345,7 @@ describe('Create Admin Script Tests', () => {
         email: 'special@admin.com',
         username: 'specialchars',
         password: 'SpecialChars123!',
-        permissions: { affiliateManagement: true }
+        permissions: ['manage_affiliates']
       });
 
       const savedAdmin = await admin.save();
@@ -383,7 +361,7 @@ describe('Create Admin Script Tests', () => {
         email: 'EMAIL@ADMIN.COM', // Uppercase email
         username: 'emailnormalize',
         password: 'EmailNormalize123!',
-        permissions: { affiliateManagement: true }
+        permissions: ['manage_affiliates']
       });
 
       const savedAdmin = await admin.save();
@@ -409,7 +387,7 @@ describe('Create Admin Script Tests', () => {
           email: invalidEmail,
           username: 'invalidemail',
           password: 'InvalidEmail123!',
-          permissions: { affiliateManagement: true }
+          permissions: ['manage_affiliates']
         });
 
         await expect(admin.save()).rejects.toThrow();
@@ -461,7 +439,7 @@ describe('Create Admin Script Tests', () => {
         email: 'passwordhash@admin.com',
         username: 'passwordhash',
         password: plainPassword,
-        permissions: { affiliateManagement: true }
+        permissions: ['manage_affiliates']
       });
 
       const savedAdmin = await admin.save();
