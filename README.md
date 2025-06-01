@@ -18,15 +18,35 @@ The WaveMAX Affiliate Program enables individuals to register as affiliates, onb
 - **Advanced Security**: Industry-standard security features including JWT, CSRF protection, and audit logging
 - **API Versioning**: Future-proof API design with version management
 
-## Recent Improvements (May 2025)
+## Recent Improvements (June 2025)
 
-### Strong Password Security & Social Media Authentication
+### Enhanced OAuth Integration & User Experience
+- **Unified OAuth Strategy**: Implemented comprehensive OAuth authentication for both affiliates and customers
+  - Single Google strategy with context detection for customer vs affiliate registration
+  - Cross-reference conflict detection to prevent social account duplication
+  - Enhanced user choice dialogs for account conflicts between user types
+  - Dedicated OAuth callback URI configuration separate from base URL
+- **Improved User Experience**: Added intelligent handling for existing users during registration
+  - Modal dialogs for existing affiliates attempting OAuth registration
+  - Options to login to existing account or try different authentication method
+  - Seamless social media profile auto-population for new registrations
+  - Professional UI feedback for OAuth success, errors, and conflicts
+- **Flexible Configuration**: Added environment-based OAuth and rate limiting controls
+  - `OAUTH_CALLBACK_URI` setting for production deployment flexibility
+  - `RELAX_RATE_LIMITING` flag for development and testing environments
+  - Separates OAuth callbacks from main application URLs for embedded deployments
+- **Database Polling OAuth**: Implemented reliable OAuth session management
+  - Database-based OAuth result polling instead of postMessage
+  - Works reliably in embedded iframe contexts
+  - Automatic cleanup of OAuth sessions with proper timeout handling
+
+### Strong Password Security & Social Media Authentication  
 - **Enhanced Password Security**: Implemented comprehensive strong password requirements
   - Minimum 12 characters with uppercase, lowercase, numbers, and special characters
   - Prevents common passwords, sequential patterns, and username/email inclusion
   - Applied to all user types: affiliates, customers, administrators, and operators
   - Real-time password strength validation with detailed feedback
-- **Social Media OAuth Integration**: Added seamless social login for affiliates
+- **Social Media OAuth Integration**: Added seamless social login for affiliates and customers
   - Google, Facebook, and LinkedIn OAuth 2.0 support
   - Social account linking to existing profiles
   - Secure token handling and session management
@@ -914,31 +934,122 @@ The WaveMAX Affiliate Program supports social media login for affiliates through
 
 #### Google OAuth 2.0 Setup
 
-1. **Create a Google Cloud Project:**
-   - Go to [Google Cloud Console](https://console.cloud.google.com/)
-   - Create a new project or select existing one
-   - Enable the Identity Platform API (for OAuth authentication)
+**Step 1: Create a Google Cloud Project**
 
-2. **Configure OAuth Consent Screen:**
-   - Go to APIs & Services > OAuth consent screen
-   - Choose "External" user type
-   - Fill in application name: "WaveMAX Affiliate Program"
-   - Add authorized domains (your production domain)
-   - Add scopes: `email`, `profile`
+1. Navigate to [Google Cloud Console](https://console.cloud.google.com/)
+2. Click "Select a project" dropdown at the top of the page
+3. Click "NEW PROJECT" button
+4. Enter project details:
+   - **Project name**: `WaveMAX Affiliate Program` (or your preferred name)
+   - **Organization**: Select your organization if applicable
+   - **Location**: Choose your organization or "No organization"
+5. Click "CREATE" and wait for project creation
+6. Ensure your new project is selected (check the project name in the top bar)
 
-3. **Create OAuth 2.0 Credentials:**
-   - Go to APIs & Services > Credentials
-   - Click "Create Credentials" > "OAuth 2.0 Client IDs"
-   - Application type: "Web application"
-   - Add authorized redirect URIs:
-     - `https://yourdomain.com/api/auth/google/callback`
-     - `http://localhost:3000/api/auth/google/callback` (for development)
+**Step 2: Enable Required APIs**
 
-4. **Add to environment variables:**
-   ```bash
-   GOOGLE_CLIENT_ID=your_google_client_id.apps.googleusercontent.com
-   GOOGLE_CLIENT_SECRET=your_google_client_secret
-   ```
+1. In the Google Cloud Console, go to "APIs & Services" > "Library"
+2. Search for "Identity Platform API" (NOT "Google+ API")
+3. Click on "Identity Platform API" from the results
+4. Click "ENABLE" button
+5. Wait for the API to be enabled (you'll see a confirmation message)
+
+**Step 3: Configure OAuth Consent Screen**
+
+1. Go to "APIs & Services" > "OAuth consent screen"
+2. Choose user type:
+   - **External**: For production apps available to any Google user
+   - **Internal**: Only if you have Google Workspace (for organization users only)
+3. Click "CREATE"
+4. Fill out the OAuth consent screen form:
+
+   **App Information:**
+   - **App name**: `WaveMAX Affiliate Program`
+   - **User support email**: Your support email address
+   - **App logo**: Upload your company logo (120x120px PNG recommended)
+   - **App domain**: Your website domain (e.g., `wavemaxlaundry.com`)
+   - **Authorized domains**: Add your domains:
+     - `yourdomain.com` (your main domain)
+     - `wavemax.promo` (if using the embed service)
+
+   **Developer Contact Information:**
+   - **Email addresses**: Add your developer email addresses
+
+5. Click "SAVE AND CONTINUE"
+
+6. **Scopes Configuration:**
+   - Click "ADD OR REMOVE SCOPES"
+   - Add these scopes:
+     - `../auth/userinfo.email` (to access user's email)
+     - `../auth/userinfo.profile` (to access basic profile info)
+   - Click "UPDATE" then "SAVE AND CONTINUE"
+
+7. **Test users** (if External and not published):
+   - Add test email addresses that can access your app during development
+   - Click "SAVE AND CONTINUE"
+
+8. **Summary**: Review your settings and click "BACK TO DASHBOARD"
+
+**Step 4: Create OAuth 2.0 Credentials**
+
+1. Go to "APIs & Services" > "Credentials"
+2. Click "CREATE CREDENTIALS" > "OAuth 2.0 Client IDs"
+3. If prompted to configure the consent screen, complete Step 3 first
+4. Configure the OAuth client:
+   - **Application type**: Select "Web application"
+   - **Name**: `WaveMAX Affiliate OAuth Client`
+
+5. **Authorized JavaScript origins** (add all that apply):
+   - `https://yourdomain.com`
+   - `https://www.yourdomain.com`
+   - `http://localhost:3000` (for development)
+   - `http://localhost:3001` (if using different port)
+
+6. **Authorized redirect URIs** (add all that apply):
+   - `https://yourdomain.com/api/auth/google/callback`
+   - `https://www.yourdomain.com/api/auth/google/callback`
+   - `https://wavemax.promo/api/auth/google/callback` (if using embed service)
+   - `http://localhost:3000/api/auth/google/callback` (for development)
+
+7. Click "CREATE"
+8. **Important**: Copy the Client ID and Client Secret immediately and store them securely
+
+**Step 5: Environment Configuration**
+
+Add these variables to your `.env` file:
+```bash
+# Google OAuth Configuration
+GOOGLE_CLIENT_ID=1234567890-abcdefghijklmnop.apps.googleusercontent.com
+GOOGLE_CLIENT_SECRET=GOCSPX-YourSecretKeyHere
+```
+
+**Step 6: Domain Verification (Production Only)**
+
+1. Go to [Google Search Console](https://search.google.com/search-console)
+2. Add your domain property
+3. Verify ownership using one of the provided methods:
+   - HTML file upload
+   - HTML tag in your website header
+   - Domain name provider (DNS record)
+   - Google Analytics tracking code
+
+**Step 7: Publishing Your App (Production)**
+
+For production use with external users:
+
+1. Return to "APIs & Services" > "OAuth consent screen"
+2. Click "PUBLISH APP" if you want to make it available to all Google users
+3. If you need sensitive scopes, submit for verification:
+   - Click "Submit for verification"
+   - Provide required documentation
+   - Wait for Google's review (can take several days)
+
+**Troubleshooting Common Issues:**
+
+- **"Error 400: redirect_uri_mismatch"**: Check that your redirect URI exactly matches what's configured in Google Console
+- **"Access blocked"**: Your app may need to be published or the user needs to be added as a test user
+- **"Invalid client"**: Verify your Client ID and Client Secret are correct in your environment variables
+- **API not enabled**: Ensure you've enabled the Identity Platform API, not Google+ API
 
 #### Facebook OAuth Setup
 
@@ -995,6 +1106,8 @@ Add these variables to your `.env` file:
 | `FACEBOOK_APP_ID` | Facebook App ID | Optional |
 | `FACEBOOK_APP_SECRET` | Facebook App Secret | Optional |
 | `LINKEDIN_CLIENT_ID` | LinkedIn OAuth Client ID | Optional |
+| `OAUTH_CALLBACK_URI` | Domain for OAuth callbacks (e.g., https://wavemax.promo) | Optional |
+| `RELAX_RATE_LIMITING` | Set to 'true' to disable rate limiting (development only) | Optional |
 | `LINKEDIN_CLIENT_SECRET` | LinkedIn OAuth Client Secret | Optional |
 
 **Note:** OAuth providers are optional. If environment variables are not provided, the application will run with traditional username/password authentication only.

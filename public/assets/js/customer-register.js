@@ -10,6 +10,10 @@
   // But we'll prepare for future implementation
   const csrfFetch = window.CsrfUtils && window.CsrfUtils.csrfFetch ? window.CsrfUtils.csrfFetch : fetch;
 
+  // Configuration for embedded environment
+  const baseUrl = window.EMBED_CONFIG?.baseUrl || (window.location.protocol + '//' + window.location.host);
+  const isEmbedded = window.EMBED_CONFIG?.isEmbedded || false;
+
   // Function to initialize the registration form
   function initializeRegistrationForm() {
   console.log('Initializing registration form');
@@ -113,17 +117,29 @@
   form.addEventListener('submit', function(e) {
     e.preventDefault();
 
-    // Check if passwords match
-    const password = document.getElementById('password').value;
-    const confirmPassword = document.getElementById('confirmPassword').value;
+    // Determine if this is a social registration first
+    const formData = new FormData(form);
+    const isSocialRegistration = formData.get('socialToken');
 
-    if (password !== confirmPassword) {
-      alert('Passwords do not match!');
+    // Check if passwords match (only for non-social registration)
+    if (!isSocialRegistration) {
+      const password = document.getElementById('password').value;
+      const confirmPassword = document.getElementById('confirmPassword').value;
+
+      if (password !== confirmPassword) {
+        alert('Passwords do not match!');
+        return;
+      }
+    }
+
+    // Validate required fields
+    const missingFields = validateFormFields(isSocialRegistration);
+    if (missingFields.length > 0) {
+      alert(`Please fill in the following required fields: ${missingFields.join(', ')}`);
       return;
     }
 
     // Collect form data
-    const formData = new FormData(form);
     const customerData = {};
 
     formData.forEach((value, key) => {
@@ -133,15 +149,21 @@
       }
     });
 
-    // Process card number - remove spaces and send full number
-    customerData.cardNumber = formData.get('cardNumber').replace(/\s/g, '');
+    // Process card number - remove spaces and send full number (only for traditional registration)
+    if (!isSocialRegistration && formData.get('cardNumber')) {
+      customerData.cardNumber = formData.get('cardNumber').replace(/\s/g, '');
+    }
 
     // Note: CVV is not included in customerData as it should never be stored
     // The backend will only store the last 4 digits of the card number
 
+    // Determine endpoint based on whether this is a social registration
+    const endpoint = isSocialRegistration 
+      ? `${baseUrl}/api/v1/auth/customer/social/register`
+      : `${baseUrl}/api/v1/customers/register`;
+
     // Submit to server
-    const baseUrl = window.EMBED_CONFIG?.baseUrl || 'https://wavemax.promo';
-    csrfFetch(`${baseUrl}/api/v1/customers/register`, {
+    csrfFetch(endpoint, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -254,6 +276,332 @@
       bagFeeSummary.style.display = 'none';
     }
   });
+
+  // Social registration button handlers
+  const googleRegister = document.getElementById('googleRegister');
+  const facebookRegister = document.getElementById('facebookRegister');
+  const linkedinRegister = document.getElementById('linkedinRegister');
+
+  // Shared validation function for both OAuth and form submission
+  function validateFormFields(isSocialRegistration = false) {
+    const requiredFields = [];
+    
+    // Personal information always required (OAuth pre-fills these but validation still checks)
+    requiredFields.push(
+      { id: 'firstName', name: 'First Name' },
+      { id: 'lastName', name: 'Last Name' },
+      { id: 'email', name: 'Email' }
+    );
+    
+    // Common required fields for all registrations
+    requiredFields.push(
+      { id: 'affiliateId', name: 'Affiliate ID' },
+      { id: 'phone', name: 'Phone Number' },
+      { id: 'address', name: 'Address' },
+      { id: 'city', name: 'City' },
+      { id: 'state', name: 'State' },
+      { id: 'zipCode', name: 'ZIP Code' },
+      { id: 'numberOfBags', name: 'Number of Bags' }
+    );
+
+    // Only require username and password for traditional registration (NOT OAuth)
+    if (!isSocialRegistration) {
+      requiredFields.push(
+        { id: 'username', name: 'Username' },
+        { id: 'password', name: 'Password' }
+      );
+    }
+
+    const missingFields = [];
+    for (const field of requiredFields) {
+      const element = document.getElementById(field.id);
+      if (!element || !element.value.trim()) {
+        missingFields.push(field.name);
+      }
+    }
+
+    return missingFields;
+  }
+
+  function handleSocialAuth(provider) {
+    // No validation required before OAuth - the point is to authenticate first and auto-populate the form
+    console.log(`🚀 Starting ${provider} OAuth authentication...`);
+
+    // For embedded context, use popup window to avoid iframe restrictions
+    if (isEmbedded || window.self !== window.top) {
+      // Generate unique session ID for database polling
+      const sessionId = 'oauth_' + Date.now() + '_' + Math.random().toString(36).substring(2);
+      console.log('Generated Customer OAuth session ID:', sessionId);
+      
+      const oauthUrl = `${baseUrl}/api/v1/auth/customer/${provider}?popup=true&state=${sessionId}&t=${Date.now()}`;
+      console.log('🔗 Opening Customer OAuth URL:', oauthUrl);
+      
+      const popup = window.open(
+        oauthUrl, 
+        'customerSocialAuth',
+        'width=500,height=600,scrollbars=yes,resizable=yes'
+      );
+      
+      console.log('Customer popup opened:', {
+        'popup exists': !!popup,
+        'popup.closed': popup ? popup.closed : 'N/A',
+        'popup type': typeof popup,
+        'popup URL': oauthUrl
+      });
+      
+      if (!popup || popup.closed) {
+        alert('Popup was blocked. Please allow popups for this site and try again.');
+        return;
+      }
+      
+      // Database polling approach (more reliable than postMessage)
+      let pollCount = 0;
+      const maxPolls = 120; // 6 minutes max (120 * 3 seconds)
+      let authResultReceived = false;
+      
+      console.log('Starting database polling for Customer OAuth result...');
+      
+      const pollForResult = setInterval(async () => {
+        pollCount++;
+        
+        try {
+          // Check if popup is closed
+          if (popup.closed) {
+            console.log('Customer popup closed, continuing to poll for result...');
+          }
+          
+          // Poll the database for result
+          const response = await csrfFetch(`${baseUrl}/api/v1/auth/oauth-session/${sessionId}`);
+          
+          console.log('🔍 Customer polling response:', {
+            ok: response.ok,
+            status: response.status,
+            statusText: response.statusText
+          });
+          
+          if (response.ok) {
+            const data = await response.json();
+            console.log('📊 Customer response data:', data);
+            if (data.success && data.result) {
+              console.log('📨 Customer OAuth result received from database:', data.result);
+              authResultReceived = true;
+              clearInterval(pollForResult);
+              
+              if (popup && !popup.closed) {
+                popup.close();
+              }
+              
+              // Handle the result
+              try {
+                if (data.result.type === 'social-auth-success') {
+                  console.log('Processing customer social-auth-success from database');
+                  console.log('Calling showCustomerSocialRegistrationCompletion with:', {
+                    socialToken: data.result.socialToken,
+                    provider: data.result.provider
+                  });
+                  showCustomerSocialRegistrationCompletion(data.result.socialToken, data.result.provider);
+                } else if (data.result.type === 'social-auth-login') {
+                console.log('Processing customer social-auth-login from database');
+                // Customer already exists and is now logged in - redirect to dashboard
+                if (isEmbedded) {
+                  window.parent.postMessage({
+                    type: 'navigate',
+                    data: { url: `/customer-dashboard?token=${data.result.token}&refreshToken=${data.result.refreshToken}` }
+                  }, '*');
+                } else {
+                  window.location.href = `/embed-app.html?route=/customer-dashboard&token=${data.result.token}&refreshToken=${data.result.refreshToken}`;
+                }
+              } else if (data.result.type === 'social-auth-error') {
+                console.log('Processing customer social-auth-error from database');
+                alert(data.result.message || 'Social authentication failed');
+              } else {
+                console.log('Unknown customer result type:', data.result.type);
+              }
+              } catch (resultError) {
+                console.error('Error processing Customer OAuth result:', resultError);
+                alert('Error processing authentication result');
+              }
+              return;
+            }
+          }
+          
+          // Check for timeout
+          if (pollCount > maxPolls) {
+            console.log('Customer database polling timeout exceeded');
+            clearInterval(pollForResult);
+            if (popup && !popup.closed) {
+              popup.close();
+            }
+            alert('Authentication timed out. Please try again.');
+            return;
+          }
+          
+          // Log progress every 5 polls (15 seconds)
+          if (pollCount % 5 === 0) {
+            console.log(`🔄 Polling for Customer OAuth result... (${pollCount}/${maxPolls})`);
+          }
+          
+        } catch (error) {
+          // 404 means no result yet, continue polling
+          if (error.message && error.message.includes('404')) {
+            // Result not ready yet, continue polling
+            return;
+          }
+          
+          console.error('Error polling for Customer OAuth result:', error);
+          
+          // Don't stop polling for network errors, just log them
+          if (pollCount % 10 === 0) {
+            console.log('Network error during Customer polling, continuing...');
+          }
+        }
+      }, 3000); // Poll every 3 seconds
+    } else {
+      // For non-embedded context, use direct navigation
+      window.location.href = `${baseUrl}/api/v1/auth/customer/${provider}`;
+    }
+  }
+
+  if (googleRegister) {
+    googleRegister.addEventListener('click', function() {
+      handleSocialAuth('google');
+    });
+  }
+
+  if (facebookRegister) {
+    facebookRegister.addEventListener('click', function() {
+      handleSocialAuth('facebook');
+    });
+  }
+
+  if (linkedinRegister) {
+    linkedinRegister.addEventListener('click', function() {
+      handleSocialAuth('linkedin');
+    });
+  }
+
+  // Handle customer social registration completion
+  function handleCustomerSocialRegistrationCallback() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const socialToken = urlParams.get('socialToken');
+    const provider = urlParams.get('provider');
+    const error = urlParams.get('error');
+
+    if (error) {
+      let errorMessage = 'Social authentication failed. Please try again.';
+      switch(error) {
+        case 'social_auth_failed':
+          errorMessage = 'Social authentication failed. Please try again or use traditional registration.';
+          break;
+        case 'social_auth_error':
+          errorMessage = 'An error occurred during social authentication. Please try again.';
+          break;
+      }
+      alert(errorMessage);
+      return;
+    }
+
+    if (socialToken && provider) {
+      // Pre-fill form with social data and show completion section
+      showCustomerSocialRegistrationCompletion(socialToken, provider);
+    }
+  }
+
+  function showCustomerSocialRegistrationCompletion(socialToken, provider) {
+    console.log('🎨 Showing customer social registration completion for provider:', provider);
+    
+    // Update the social auth section to show connected status
+    const socialAuthSection = document.getElementById('socialAuthSection');
+    console.log('🔍 Found customer social auth section:', socialAuthSection);
+    
+    if (socialAuthSection) {
+      console.log('✅ Updating customer social auth section with success message');
+      socialAuthSection.innerHTML = `
+        <h3 class="text-xl font-bold mb-4">Social Media Account Connected!</h3>
+        <div class="bg-green-50 border border-green-200 rounded-lg p-6">
+          <div class="flex items-center justify-center">
+            <svg class="w-8 h-8 text-green-500 mr-3" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+            </svg>
+            <div>
+              <h4 class="text-green-700 font-semibold text-lg">Successfully Connected with ${provider.charAt(0).toUpperCase() + provider.slice(1)}</h4>
+              <p class="text-green-600 text-sm mt-1">Your information has been automatically filled in below. Complete the remaining fields to finish your registration.</p>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    // Hide the account setup section since OAuth handles authentication
+    const accountSetupSection = document.getElementById('accountSetupSection');
+    if (accountSetupSection) {
+      accountSetupSection.style.display = 'none';
+      console.log('✅ Hidden customer account setup section for OAuth user');
+      
+      // Remove required attributes from username/password fields since they're hidden
+      const usernameField = document.getElementById('username');
+      const passwordField = document.getElementById('password');
+      const confirmPasswordField = document.getElementById('confirmPassword');
+      
+      if (usernameField) usernameField.removeAttribute('required');
+      if (passwordField) passwordField.removeAttribute('required');
+      if (confirmPasswordField) confirmPasswordField.removeAttribute('required');
+    }
+
+    // Store social token for form submission
+    const form = document.getElementById('customerRegistrationForm');
+    console.log('📝 Found customer form:', form ? 'Yes' : 'No');
+    if (form) {
+      const socialTokenInput = document.createElement('input');
+      socialTokenInput.type = 'hidden';
+      socialTokenInput.name = 'socialToken';
+      socialTokenInput.value = socialToken;
+      form.appendChild(socialTokenInput);
+      console.log('✅ Added social token to customer form');
+    }
+
+    // Auto-populate form fields from social token (decode JWT payload)
+    try {
+      const payload = JSON.parse(atob(socialToken.split('.')[1]));
+      console.log('🔓 Decoded customer social token payload:', payload);
+      
+      // Auto-fill personal information
+      if (payload.firstName) {
+        const firstNameField = document.getElementById('firstName');
+        if (firstNameField && !firstNameField.value) {
+          firstNameField.value = payload.firstName;
+          firstNameField.style.backgroundColor = '#f0fdf4'; // Light green to indicate auto-filled
+          console.log('✅ Pre-filled customer firstName:', payload.firstName);
+        }
+      }
+      
+      if (payload.lastName) {
+        const lastNameField = document.getElementById('lastName');
+        if (lastNameField && !lastNameField.value) {
+          lastNameField.value = payload.lastName;
+          lastNameField.style.backgroundColor = '#f0fdf4'; // Light green to indicate auto-filled
+          console.log('✅ Pre-filled customer lastName:', payload.lastName);
+        }
+      }
+      
+      if (payload.email) {
+        const emailField = document.getElementById('email');
+        if (emailField && !emailField.value) {
+          emailField.value = payload.email;
+          emailField.readOnly = true; // Make it read-only since it comes from OAuth
+          emailField.style.backgroundColor = '#f0fdf4'; // Light green to indicate auto-filled
+          console.log('✅ Pre-filled customer email:', payload.email);
+        }
+      }
+      
+    } catch (e) {
+      console.log('Could not decode customer social token for pre-filling:', e);
+    }
+  }
+
+  // Check for customer social registration callback on page load
+  handleCustomerSocialRegistrationCallback();
+
   }
 
   // Check if DOM is already loaded or wait for it

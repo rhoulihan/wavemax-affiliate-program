@@ -785,9 +785,92 @@ exports.handleSocialCallback = async (req, res) => {
   try {
     const user = req.user;
     
-    if (!user) {
-      return res.redirect('/affiliate-register?error=social_auth_failed');
+    // Check if this is a customer OAuth request (state starts with 'customer_')
+    const isCustomerRequest = req.query.state && req.query.state.startsWith('customer');
+    
+    if (isCustomerRequest) {
+      // This is a customer OAuth request, delegate to customer handler
+      return exports.handleCustomerSocialCallback(req, res);
     }
+    
+    // Extract sessionId from state parameter for database storage
+    // State parameter now contains just the sessionId (or null for non-popup requests)
+    const sessionId = req.query.state && req.query.state.startsWith('oauth_') 
+      ? req.query.state 
+      : null;
+      
+    console.log('OAuth Callback State Parameter Debug:', {
+      state: req.query.state,
+      sessionId: sessionId,
+      allParams: req.query
+    });
+    
+    if (!user) {
+      // Check if this is a popup request (for embedded contexts)
+      const isPopup = req.query.popup === 'true' || 
+                     sessionId !== null ||  // If we have a sessionId, it's a popup request
+                     req.headers.referer?.includes('accounts.google.com') ||
+                     req.headers.referer?.includes('facebook.com') ||
+                     req.headers.referer?.includes('linkedin.com');
+      
+      if (isPopup) {
+        const message = {
+          type: 'social-auth-error',
+          message: 'Social authentication failed'
+        };
+        
+        // Store in database if sessionId is provided
+        if (sessionId) {
+          try {
+            const OAuthSession = require('../models/OAuthSession');
+            await OAuthSession.createSession(sessionId, message);
+          } catch (dbError) {
+            console.error('Error storing OAuth session:', dbError);
+          }
+        }
+        
+        return res.send(`
+          <script>
+            try {
+              // Try multiple approaches to communicate with parent
+              const message = ${JSON.stringify(message)};
+              
+              if (window.opener && !window.opener.closed) {
+                window.opener.postMessage(message, '*');
+              } else if (window.parent && window.parent !== window) {
+                window.parent.postMessage(message, '*');
+              } else {
+                // Store in localStorage as fallback
+                localStorage.setItem('socialAuthResult', JSON.stringify(message));
+              }
+              
+              // Close popup after a short delay
+              setTimeout(() => window.close(), 500);
+            } catch (e) {
+              console.error('Error in popup communication:', e);
+              window.close();
+            }
+          </script>
+        `);
+      }
+      
+      return res.redirect('/affiliate-register-embed.html?error=social_auth_failed');
+    }
+    
+    // Check if this is a popup request (for embedded contexts)
+    const isPopup = req.query.popup === 'true' || 
+                   sessionId !== null ||  // If we have a sessionId, it's a popup request
+                   req.headers.referer?.includes('accounts.google.com') ||
+                   req.headers.referer?.includes('facebook.com') ||
+                   req.headers.referer?.includes('linkedin.com');
+    
+    console.log('OAuth Callback Debug:', {
+      popup: req.query.popup,
+      state: req.query.state,
+      referer: req.headers.referer,
+      isPopup,
+      userIsNew: user?.isNewUser
+    });
     
     // If this is an existing user, log them in
     if (!user.isNewUser) {
@@ -807,8 +890,108 @@ exports.handleSocialCallback = async (req, res) => {
       // Log successful login
       logLoginAttempt(true, 'affiliate', user.username, req, 'Social login successful');
       
+      if (isPopup) {
+        const message = {
+          type: 'social-auth-login',
+          token: token,
+          refreshToken: refreshToken,
+          affiliate: {
+            affiliateId: user.affiliateId,
+            id: user._id,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            email: user.email,
+            businessName: user.businessName
+          }
+        };
+        
+        // Store in database if sessionId is provided
+        if (sessionId) {
+          try {
+            const OAuthSession = require('../models/OAuthSession');
+            await OAuthSession.createSession(sessionId, message);
+          } catch (dbError) {
+            console.error('Error storing OAuth session:', dbError);
+          }
+        }
+        
+        return res.send(`
+          <script>
+            try {
+              // Try multiple approaches to communicate with parent
+              const message = ${JSON.stringify(message)};
+              
+              if (window.opener && !window.opener.closed) {
+                window.opener.postMessage(message, '*');
+              } else if (window.parent && window.parent !== window) {
+                window.parent.postMessage(message, '*');
+              } else {
+                // Store in localStorage as fallback
+                localStorage.setItem('socialAuthResult', JSON.stringify(message));
+              }
+              
+              // Close popup after a short delay
+              setTimeout(() => window.close(), 500);
+            } catch (e) {
+              console.error('Error in popup communication:', e);
+              window.close();
+            }
+          </script>
+        `);
+      }
+      
       // Redirect to dashboard with tokens
-      return res.redirect(`/affiliate-dashboard?token=${token}&refreshToken=${refreshToken}`);
+      return res.redirect(`/affiliate-dashboard-embed.html?token=${token}&refreshToken=${refreshToken}`);
+    }
+    
+    // Handle case where social account already exists as a customer
+    if (user.isExistingCustomer) {
+      const message = {
+        type: 'social-auth-account-conflict',
+        message: 'This social media account is already associated with a customer account. Would you like to login as a customer instead?',
+        provider: user.provider,
+        accountType: 'customer',
+        customerData: {
+          firstName: user.customer.firstName,
+          lastName: user.customer.lastName,
+          email: user.customer.email
+        }
+      };
+      
+      if (isPopup) {
+        // Store in database if sessionId is provided
+        if (sessionId) {
+          try {
+            const OAuthSession = require('../models/OAuthSession');
+            await OAuthSession.createSession(sessionId, message);
+          } catch (dbError) {
+            console.error('Error storing OAuth session:', dbError);
+          }
+        }
+        
+        return res.send(`
+          <script>
+            try {
+              const message = ${JSON.stringify(message)};
+              
+              if (window.opener && !window.opener.closed) {
+                window.opener.postMessage(message, '*');
+              } else if (window.parent && window.parent !== window) {
+                window.parent.postMessage(message, '*');
+              } else {
+                localStorage.setItem('socialAuthResult', JSON.stringify(message));
+              }
+              
+              setTimeout(() => window.close(), 500);
+            } catch (e) {
+              console.error('Error in popup communication:', e);
+              window.close();
+            }
+          </script>
+        `);
+      }
+      
+      return res.redirect('/affiliate-register-embed.html?error=account_exists_as_customer');
     }
     
     // For new users, create a temporary social token and redirect to complete registration
@@ -823,12 +1006,103 @@ exports.handleSocialCallback = async (req, res) => {
       profileData: user.profileData
     }, process.env.JWT_SECRET, { expiresIn: '15m' });
     
+    if (isPopup) {
+      const message = {
+        type: 'social-auth-success',
+        socialToken: socialToken,
+        provider: user.provider
+      };
+      
+      // Store in database if sessionId is provided
+      if (sessionId) {
+        try {
+          const OAuthSession = require('../models/OAuthSession');
+          await OAuthSession.createSession(sessionId, message);
+        } catch (dbError) {
+          console.error('Error storing OAuth session:', dbError);
+        }
+      }
+      
+      return res.send(`
+        <script>
+          console.log('Popup script executing for social-auth-success');
+          try {
+            // Try multiple approaches to communicate with parent
+            const message = ${JSON.stringify(message)};
+            
+            console.log('Attempting to send message:', message);
+            console.log('window.opener:', window.opener);
+            console.log('window.parent:', window.parent);
+            
+            if (window.opener && !window.opener.closed) {
+              console.log('Using window.opener.postMessage');
+              window.opener.postMessage(message, '*');
+            } else if (window.parent && window.parent !== window) {
+              console.log('Using window.parent.postMessage');
+              window.parent.postMessage(message, '*');
+            } else {
+              console.log('Using localStorage fallback');
+              // Store in localStorage as fallback
+              localStorage.setItem('socialAuthResult', JSON.stringify(message));
+              console.log('Stored in localStorage:', localStorage.getItem('socialAuthResult'));
+            }
+            
+            // Close popup after a short delay
+            setTimeout(() => {
+              console.log('Closing popup');
+              window.close();
+            }, 500);
+          } catch (e) {
+            console.error('Error in popup communication:', e);
+            window.close();
+          }
+        </script>
+      `);
+    }
+    
     // Redirect to registration page with social data
-    res.redirect(`/affiliate-register?socialToken=${socialToken}&provider=${user.provider}`);
+    res.redirect(`/affiliate-register-embed.html?socialToken=${socialToken}&provider=${user.provider}`);
     
   } catch (error) {
     console.error('Social callback error:', error);
-    res.redirect('/affiliate-register?error=social_auth_error');
+    
+    // Check if this is a popup request
+    const isPopup = req.query.popup === 'true' || 
+                   req.query.state === 'popup=true' ||
+                   req.headers.referer?.includes('accounts.google.com') ||
+                   req.headers.referer?.includes('facebook.com') ||
+                   req.headers.referer?.includes('linkedin.com');
+    
+    if (isPopup) {
+      return res.send(`
+        <script>
+          try {
+            // Try multiple approaches to communicate with parent
+            const message = {
+              type: 'social-auth-error',
+              message: 'An error occurred during social authentication'
+            };
+            
+            if (window.opener && !window.opener.closed) {
+              window.opener.postMessage(message, '*');
+            } else if (window.parent && window.parent !== window) {
+              window.parent.postMessage(message, '*');
+            } else {
+              // Store in localStorage as fallback
+              localStorage.setItem('socialAuthResult', JSON.stringify(message));
+            }
+            
+            // Close popup after a short delay
+            setTimeout(() => window.close(), 500);
+          } catch (e) {
+            console.error('Error in popup communication:', e);
+            window.close();
+          }
+        </script>
+      `);
+    }
+    
+    res.redirect('/affiliate-register-embed.html?error=social_auth_error');
   }
 };
 
@@ -875,9 +1149,25 @@ exports.completeSocialRegistration = async (req, res) => {
       });
     }
     
-    // Check if email or username already exists
+    // For OAuth users, username and password are not required - OAuth provides authentication
+    // Generate username from social data for account identification
+    const baseUsername = (socialData.firstName + socialData.lastName).toLowerCase().replace(/[^a-z0-9]/g, '');
+    let generatedUsername = baseUsername;
+    let counter = 1;
+    
+    // Check for uniqueness and append number if needed
+    while (await Affiliate.findOne({ username: generatedUsername })) {
+      generatedUsername = `${baseUsername}${counter}`;
+      counter++;
+    }
+    
+    // Generate a secure random password for backup login (not exposed to user)
+    const crypto = require('crypto');
+    const generatedPassword = crypto.randomBytes(32).toString('hex') + 'A1!'; // Ensures password requirements
+
+    // Check if email or username already exists (now using generatedUsername)
     const existingAffiliate = await Affiliate.findOne({
-      $or: [{ email: socialData.email }, { username }]
+      $or: [{ email: socialData.email }, { username: generatedUsername }]
     });
     
     if (existingAffiliate) {
@@ -918,8 +1208,8 @@ exports.completeSocialRegistration = async (req, res) => {
       zipCode,
       serviceArea,
       deliveryFee,
-      username,
-      password, // This will be hashed by the model's pre-save middleware
+      username: generatedUsername,
+      password: generatedPassword, // This will be hashed by the model's pre-save middleware
       paymentMethod,
       accountNumber,
       routingNumber,
@@ -1176,6 +1466,556 @@ exports.socialLogin = async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'An error occurred during social login'
+    });
+  }
+};
+
+/**
+ * Poll for OAuth session result
+ */
+exports.pollOAuthSession = async (req, res) => {
+  try {
+    const { sessionId } = req.params;
+    
+    if (!sessionId) {
+      return res.status(400).json({
+        success: false,
+        message: 'Session ID is required'
+      });
+    }
+    
+    const OAuthSession = require('../models/OAuthSession');
+    const sessionResult = await OAuthSession.consumeSession(sessionId);
+    
+    console.log('OAuth Session Polling Debug:', {
+      sessionId,
+      sessionResult: sessionResult ? 'found' : 'not found',
+      resultData: sessionResult
+    });
+    
+    if (!sessionResult) {
+      return res.status(404).json({
+        success: false,
+        message: 'Session not found or expired'
+      });
+    }
+    
+    const response = {
+      success: true,
+      result: sessionResult
+    };
+    
+    console.log('Sending OAuth response:', response);
+    res.json(response);
+    
+  } catch (error) {
+    console.error('OAuth session polling error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'An error occurred while polling OAuth session'
+    });
+  }
+};
+
+/**
+ * Handle social media OAuth callback for customers
+ */
+exports.handleCustomerSocialCallback = async (req, res) => {
+  try {
+    const user = req.user;
+    
+    // Extract sessionId from state parameter for database storage
+    // State format: 'customer_oauth_1234...' or 'customer' or 'oauth_1234...'
+    let sessionId = null;
+    if (req.query.state) {
+      if (req.query.state.startsWith('customer_oauth_')) {
+        sessionId = req.query.state.replace('customer_', '');
+      } else if (req.query.state.startsWith('oauth_')) {
+        sessionId = req.query.state;
+      }
+    }
+      
+    console.log('Customer OAuth Callback State Parameter Debug:', {
+      state: req.query.state,
+      sessionId: sessionId,
+      allParams: req.query
+    });
+    
+    if (!user) {
+      // Check if this is a popup request (for embedded contexts)
+      const isPopup = req.query.popup === 'true' || 
+                     sessionId !== null ||
+                     req.headers.referer?.includes('accounts.google.com') ||
+                     req.headers.referer?.includes('facebook.com') ||
+                     req.headers.referer?.includes('linkedin.com');
+      
+      if (isPopup) {
+        const message = {
+          type: 'social-auth-error',
+          message: 'Social authentication failed'
+        };
+        
+        // Store in database if sessionId is provided
+        if (sessionId) {
+          try {
+            const OAuthSession = require('../models/OAuthSession');
+            await OAuthSession.createSession(sessionId, message);
+          } catch (dbError) {
+            console.error('Error storing Customer OAuth session:', dbError);
+          }
+        }
+        
+        return res.send(`
+          <script>
+            try {
+              const message = ${JSON.stringify(message)};
+              
+              if (window.opener && !window.opener.closed) {
+                window.opener.postMessage(message, '*');
+              } else if (window.parent && window.parent !== window) {
+                window.parent.postMessage(message, '*');
+              } else {
+                localStorage.setItem('socialAuthResult', JSON.stringify(message));
+              }
+              
+              setTimeout(() => window.close(), 500);
+            } catch (e) {
+              console.error('Error in popup communication:', e);
+              window.close();
+            }
+          </script>
+        `);
+      }
+      
+      return res.redirect('/customer-register-embed.html?error=social_auth_failed');
+    }
+    
+    // Check if this is a popup request (for embedded contexts)
+    const isPopup = req.query.popup === 'true' || 
+                   sessionId !== null ||
+                   req.headers.referer?.includes('accounts.google.com') ||
+                   req.headers.referer?.includes('facebook.com') ||
+                   req.headers.referer?.includes('linkedin.com');
+    
+    console.log('Customer OAuth Callback Debug:', {
+      popup: req.query.popup,
+      state: req.query.state,
+      referer: req.headers.referer,
+      isPopup,
+      userIsNew: user?.isNewUser
+    });
+    
+    // If this is an existing customer, log them in
+    if (!user.isNewUser && user.customerId) {
+      // Generate tokens
+      const token = generateToken({
+        id: user._id,
+        customerId: user.customerId,
+        userType: 'customer'
+      });
+      
+      const refreshToken = await generateRefreshToken(
+        user._id, 
+        'customer', 
+        req.ip
+      );
+      
+      // Log successful login
+      logLoginAttempt(true, 'customer', user.username, req, 'Social login successful');
+      
+      if (isPopup) {
+        const message = {
+          type: 'social-auth-login',
+          token: token,
+          refreshToken: refreshToken,
+          customer: {
+            customerId: user.customerId,
+            id: user._id,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            email: user.email,
+            affiliateId: user.affiliateId
+          }
+        };
+        
+        // Store in database if sessionId is provided
+        if (sessionId) {
+          try {
+            const OAuthSession = require('../models/OAuthSession');
+            await OAuthSession.createSession(sessionId, message);
+          } catch (dbError) {
+            console.error('Error storing Customer OAuth session:', dbError);
+          }
+        }
+        
+        return res.send(`
+          <script>
+            try {
+              const message = ${JSON.stringify(message)};
+              
+              if (window.opener && !window.opener.closed) {
+                window.opener.postMessage(message, '*');
+              } else if (window.parent && window.parent !== window) {
+                window.parent.postMessage(message, '*');
+              } else {
+                localStorage.setItem('socialAuthResult', JSON.stringify(message));
+              }
+              
+              setTimeout(() => window.close(), 500);
+            } catch (e) {
+              console.error('Error in popup communication:', e);
+              window.close();
+            }
+          </script>
+        `);
+      }
+      
+      // Redirect to customer dashboard with tokens
+      return res.redirect(`/customer-dashboard-embed.html?token=${token}&refreshToken=${refreshToken}`);
+    }
+    
+    // Handle case where social account already exists as an affiliate
+    if (user.isExistingAffiliate) {
+      const message = {
+        type: 'social-auth-account-conflict',
+        message: 'This social media account is already associated with an affiliate account. Would you like to login as an affiliate instead?',
+        provider: user.provider,
+        accountType: 'affiliate',
+        affiliateData: {
+          firstName: user.affiliate.firstName,
+          lastName: user.affiliate.lastName,
+          email: user.affiliate.email,
+          businessName: user.affiliate.businessName
+        }
+      };
+      
+      if (isPopup) {
+        // Store in database if sessionId is provided
+        if (sessionId) {
+          try {
+            const OAuthSession = require('../models/OAuthSession');
+            await OAuthSession.createSession(sessionId, message);
+          } catch (dbError) {
+            console.error('Error storing Customer OAuth session:', dbError);
+          }
+        }
+        
+        return res.send(`
+          <script>
+            try {
+              const message = ${JSON.stringify(message)};
+              
+              if (window.opener && !window.opener.closed) {
+                window.opener.postMessage(message, '*');
+              } else if (window.parent && window.parent !== window) {
+                window.parent.postMessage(message, '*');
+              } else {
+                localStorage.setItem('socialAuthResult', JSON.stringify(message));
+              }
+              
+              setTimeout(() => window.close(), 500);
+            } catch (e) {
+              console.error('Error in popup communication:', e);
+              window.close();
+            }
+          </script>
+        `);
+      }
+      
+      return res.redirect('/customer-register-embed.html?error=account_exists_as_affiliate');
+    }
+    
+    // For new customers, create a temporary social token and redirect to complete registration
+    const socialToken = jwt.sign({
+      provider: user.provider,
+      socialId: user.socialId,
+      email: user.email,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      accessToken: user.accessToken,
+      refreshToken: user.refreshToken,
+      profileData: user.profileData
+    }, process.env.JWT_SECRET, { expiresIn: '15m' });
+    
+    if (isPopup) {
+      const message = {
+        type: 'social-auth-success',
+        socialToken: socialToken,
+        provider: user.provider
+      };
+      
+      // Store in database if sessionId is provided
+      if (sessionId) {
+        try {
+          const OAuthSession = require('../models/OAuthSession');
+          await OAuthSession.createSession(sessionId, message);
+        } catch (dbError) {
+          console.error('Error storing Customer OAuth session:', dbError);
+        }
+      }
+      
+      return res.send(`
+        <script>
+          console.log('Customer popup script executing for social-auth-success');
+          try {
+            const message = ${JSON.stringify(message)};
+            
+            console.log('Attempting to send customer message:', message);
+            
+            if (window.opener && !window.opener.closed) {
+              console.log('Using window.opener.postMessage for customer');
+              window.opener.postMessage(message, '*');
+            } else if (window.parent && window.parent !== window) {
+              console.log('Using window.parent.postMessage for customer');
+              window.parent.postMessage(message, '*');
+            } else {
+              console.log('Using localStorage fallback for customer');
+              localStorage.setItem('socialAuthResult', JSON.stringify(message));
+            }
+            
+            setTimeout(() => {
+              console.log('Closing customer popup');
+              window.close();
+            }, 500);
+          } catch (e) {
+            console.error('Error in customer popup communication:', e);
+            window.close();
+          }
+        </script>
+      `);
+    }
+    
+    // Redirect to customer registration page with social data
+    res.redirect(`/customer-register-embed.html?socialToken=${socialToken}&provider=${user.provider}`);
+    
+  } catch (error) {
+    console.error('Customer social callback error:', error);
+    
+    // Check if this is a popup request
+    const isPopup = req.query.popup === 'true' || 
+                   req.query.state === 'popup=true' ||
+                   req.headers.referer?.includes('accounts.google.com') ||
+                   req.headers.referer?.includes('facebook.com') ||
+                   req.headers.referer?.includes('linkedin.com');
+    
+    if (isPopup) {
+      return res.send(`
+        <script>
+          try {
+            const message = {
+              type: 'social-auth-error',
+              message: 'An error occurred during social authentication'
+            };
+            
+            if (window.opener && !window.opener.closed) {
+              window.opener.postMessage(message, '*');
+            } else if (window.parent && window.parent !== window) {
+              window.parent.postMessage(message, '*');
+            } else {
+              localStorage.setItem('socialAuthResult', JSON.stringify(message));
+            }
+            
+            setTimeout(() => window.close(), 500);
+          } catch (e) {
+            console.error('Error in popup communication:', e);
+            window.close();
+          }
+        </script>
+      `);
+    }
+    
+    res.redirect('/customer-register-embed.html?error=social_auth_error');
+  }
+};
+
+/**
+ * Complete social media registration for customers
+ */
+exports.completeSocialCustomerRegistration = async (req, res) => {
+  try {
+    const { validationResult } = require('express-validator');
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({
+        success: false,
+        errors: errors.array()
+      });
+    }
+    
+    const {
+      socialToken,
+      affiliateId,
+      phone,
+      address,
+      city,
+      state,
+      zipCode,
+      serviceFrequency,
+      deliveryInstructions,
+      specialInstructions,
+      username,
+      password
+    } = req.body;
+    
+    // Verify social token
+    let socialData;
+    try {
+      socialData = jwt.verify(socialToken, process.env.JWT_SECRET);
+    } catch (error) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid or expired social authentication token'
+      });
+    }
+    
+    // For OAuth users, username and password are not required - OAuth provides authentication
+    // Generate username from social data for account identification
+    const baseUsername = (socialData.firstName + socialData.lastName).toLowerCase().replace(/[^a-z0-9]/g, '');
+    let generatedUsername = baseUsername;
+    let counter = 1;
+    
+    // Check for uniqueness and append number if needed
+    while (await Customer.findOne({ username: generatedUsername })) {
+      generatedUsername = `${baseUsername}${counter}`;
+      counter++;
+    }
+    
+    // Generate a secure random password for backup login (not exposed to user)
+    const crypto = require('crypto');
+    const generatedPassword = crypto.randomBytes(32).toString('hex') + 'A1!'; // Ensures password requirements
+    
+    // Check if email already exists
+    const existingCustomer = await Customer.findOne({
+      email: socialData.email
+    });
+    
+    if (existingCustomer) {
+      return res.status(409).json({
+        success: false,
+        message: 'Email already exists'
+      });
+    }
+    
+    // Check if social account is already registered
+    const socialAccountKey = `socialAccounts.${socialData.provider}.id`;
+    const existingSocialCustomer = await Customer.findOne({
+      [socialAccountKey]: socialData.socialId
+    });
+    
+    if (existingSocialCustomer) {
+      return res.status(400).json({
+        success: false,
+        message: 'This social media account is already registered with another customer account'
+      });
+    }
+    
+    // Verify affiliate exists
+    const Affiliate = require('../models/Affiliate');
+    const affiliate = await Affiliate.findOne({ affiliateId });
+    if (!affiliate) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid affiliate ID'
+      });
+    }
+    
+    // Generate customer ID
+    const customerCount = await Customer.countDocuments();
+    const customerId = 'CUST' + String(customerCount + 1).padStart(6, '0');
+    
+    // Hash password for backup login
+    const { salt, hash } = encryptionUtil.hashPassword(generatedPassword);
+    
+    // Create new customer with social account data
+    const customer = new Customer({
+      customerId,
+      affiliateId,
+      firstName: socialData.firstName,
+      lastName: socialData.lastName,
+      email: socialData.email,
+      phone,
+      address,
+      city,
+      state,
+      zipCode,
+      serviceFrequency: serviceFrequency || 'weekly',
+      deliveryInstructions,
+      specialInstructions,
+      username: generatedUsername,
+      passwordSalt: salt,
+      passwordHash: hash,
+      registrationMethod: socialData.provider,
+      socialAccounts: {
+        [socialData.provider]: {
+          id: socialData.socialId,
+          email: socialData.email,
+          name: `${socialData.firstName} ${socialData.lastName}`,
+          accessToken: socialData.accessToken,
+          refreshToken: socialData.refreshToken,
+          linkedAt: new Date()
+        }
+      },
+      lastLogin: new Date()
+    });
+    
+    await customer.save();
+    
+    // Send welcome email
+    try {
+      await emailService.sendCustomerWelcomeEmail(customer);
+    } catch (emailError) {
+      console.error('Customer welcome email error:', emailError);
+      // Continue even if email fails
+    }
+    
+    // Generate tokens
+    const token = generateToken({
+      id: customer._id,
+      customerId: customer.customerId,
+      userType: 'customer'
+    });
+    
+    const refreshToken = await generateRefreshToken(
+      customer._id, 
+      'customer', 
+      req.ip
+    );
+    
+    // Log successful registration and login
+    logAuditEvent(AuditEvents.ACCOUNT_CREATED, {
+      action: 'SOCIAL_CUSTOMER_REGISTRATION',
+      userId: customer._id,
+      userType: 'customer',
+      details: { 
+        customerId: customer.customerId,
+        affiliateId: customer.affiliateId, 
+        provider: socialData.provider,
+        registrationMethod: 'social'
+      }
+    }, req);
+    
+    res.status(201).json({
+      success: true,
+      message: 'Customer registration completed successfully',
+      customer: {
+        id: customer._id,
+        customerId: customer.customerId,
+        firstName: customer.firstName,
+        lastName: customer.lastName,
+        email: customer.email,
+        affiliateId: customer.affiliateId,
+        registrationMethod: customer.registrationMethod
+      },
+      token,
+      refreshToken,
+      expiresIn: '1h'
+    });
+    
+  } catch (error) {
+    console.error('Customer social registration error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Customer registration failed'
     });
   }
 };

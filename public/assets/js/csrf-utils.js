@@ -14,7 +14,7 @@
      * Get the base URL from configuration or default
      */
     function getBaseUrl() {
-        return window.config?.baseUrl || window.EMBED_CONFIG?.baseUrl || 'https://wavemax.promo';
+        return window.config?.baseUrl || window.EMBED_CONFIG?.baseUrl || (window.location.protocol + '//' + window.location.host);
     }
 
     /**

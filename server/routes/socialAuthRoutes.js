@@ -21,8 +21,12 @@ router.get('/google', (req, res, next) => {
     });
   }
   
+  // Pass state parameter through OAuth (includes sessionId for popup requests)
+  const state = req.query.state || '';
+  
   passport.authenticate('google', {
-    scope: ['profile', 'email']
+    scope: ['profile', 'email'],
+    state: state
   })(req, res, next);
 });
 
@@ -109,9 +113,8 @@ router.post('/social/register', [
   body('serviceArea').notEmpty().withMessage('Service area is required'),
   body('deliveryFee').isNumeric().withMessage('Delivery fee must be a number'),
   body('paymentMethod').isIn(['directDeposit', 'check', 'paypal']).withMessage('Invalid payment method'),
-  // Username and password are still required for social registrations as backup
-  body('username').notEmpty().withMessage('Username is required'),
-  body('password').custom(customPasswordValidator)
+  // Username and password are NOT required for social registrations - OAuth provides authentication
+  // These fields will be auto-generated if not provided
 ], authController.completeSocialRegistration);
 
 /**
@@ -133,5 +136,124 @@ router.post('/social/callback', [
   body('provider').isIn(['google', 'facebook', 'linkedin']).withMessage('Invalid social media provider'),
   body('socialId').notEmpty().withMessage('Social ID is required')
 ], authController.socialLogin);
+
+/**
+ * @route   GET /api/auth/customer/google
+ * @desc    Start Google OAuth authentication for customers
+ * @access  Public
+ */
+router.get('/customer/google', (req, res, next) => {
+  // Check if Google OAuth is configured
+  if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET) {
+    return res.status(404).json({
+      success: false,
+      message: 'Google OAuth is not configured'
+    });
+  }
+  
+  // Pass state parameter through OAuth (includes sessionId for popup requests)
+  const state = req.query.state || '';
+  
+  // Add customer context to state parameter
+  const customerState = state ? `customer_${state}` : 'customer';
+  
+  passport.authenticate('google', {
+    scope: ['profile', 'email'],
+    state: customerState
+  })(req, res, next);
+});
+
+/**
+ * @route   GET /api/auth/customer/google/callback
+ * @desc    Handle Google OAuth callback for customers (redirects to main callback)
+ * @access  Public
+ */
+router.get('/customer/google/callback', (req, res) => {
+  // Redirect to main Google callback to avoid redirect_uri_mismatch
+  const queryString = new URLSearchParams(req.query).toString();
+  res.redirect(`/api/v1/auth/google/callback?${queryString}`);
+});
+
+/**
+ * @route   GET /api/auth/customer/facebook
+ * @desc    Start Facebook OAuth authentication for customers
+ * @access  Public
+ */
+router.get('/customer/facebook', (req, res, next) => {
+  // Check if Facebook OAuth is configured
+  if (!process.env.FACEBOOK_APP_ID || !process.env.FACEBOOK_APP_SECRET) {
+    return res.status(404).json({
+      success: false,
+      message: 'Facebook OAuth is not configured'
+    });
+  }
+  
+  const state = req.query.state || '';
+  
+  passport.authenticate('facebook', {
+    scope: ['email'],
+    state: state
+  })(req, res, next);
+});
+
+/**
+ * @route   GET /api/auth/customer/facebook/callback
+ * @desc    Handle Facebook OAuth callback for customers
+ * @access  Public
+ */
+router.get('/customer/facebook/callback',
+  passport.authenticate('facebook', { session: false }),
+  authController.handleCustomerSocialCallback
+);
+
+/**
+ * @route   GET /api/auth/customer/linkedin
+ * @desc    Start LinkedIn OAuth authentication for customers
+ * @access  Public
+ */
+router.get('/customer/linkedin', (req, res, next) => {
+  // Check if LinkedIn OAuth is configured
+  if (!process.env.LINKEDIN_CLIENT_ID || !process.env.LINKEDIN_CLIENT_SECRET) {
+    return res.status(404).json({
+      success: false,
+      message: 'LinkedIn OAuth is not configured'
+    });
+  }
+  
+  const state = req.query.state || '';
+  
+  passport.authenticate('linkedin', {
+    scope: ['r_emailaddress', 'r_liteprofile'],
+    state: state
+  })(req, res, next);
+});
+
+/**
+ * @route   GET /api/auth/customer/linkedin/callback
+ * @desc    Handle LinkedIn OAuth callback for customers
+ * @access  Public
+ */
+router.get('/customer/linkedin/callback',
+  passport.authenticate('linkedin', { session: false }),
+  authController.handleCustomerSocialCallback
+);
+
+/**
+ * @route   POST /api/auth/customer/social/register
+ * @desc    Complete social media registration for customers
+ * @access  Public
+ */
+router.post('/customer/social/register', [
+  body('socialToken').notEmpty().withMessage('Social authentication token is required'),
+  body('affiliateId').notEmpty().withMessage('Affiliate ID is required'),
+  body('phone').notEmpty().withMessage('Phone number is required'),
+  body('address').notEmpty().withMessage('Address is required'),
+  body('city').notEmpty().withMessage('City is required'),
+  body('state').notEmpty().withMessage('State is required'),
+  body('zipCode').notEmpty().withMessage('ZIP code is required'),
+  body('serviceFrequency').isIn(['weekly', 'biweekly', 'monthly']).withMessage('Invalid service frequency'),
+  // Username and password are NOT required for customer social registrations - OAuth provides authentication
+  // These fields will be auto-generated if not provided
+], authController.completeSocialCustomerRegistration);
 
 module.exports = router;

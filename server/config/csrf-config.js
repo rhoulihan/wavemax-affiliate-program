@@ -30,7 +30,21 @@ const CSRF_CONFIG = {
     
     // Health check endpoints
     '/api/health',
-    '/api/v1/health'
+    '/api/v1/health',
+    
+    // OAuth endpoints (GET only - these handle their own security)
+    '/api/v1/auth/google',
+    '/api/v1/auth/facebook',
+    '/api/v1/auth/linkedin',
+    '/api/v1/auth/google/callback',
+    '/api/v1/auth/facebook/callback',
+    '/api/v1/auth/linkedin/callback',
+    '/api/v1/auth/customer/google',
+    '/api/v1/auth/customer/facebook',
+    '/api/v1/auth/customer/linkedin',
+    '/api/v1/auth/customer/google/callback',
+    '/api/v1/auth/customer/facebook/callback',
+    '/api/v1/auth/customer/linkedin/callback'
   ],
 
   // Authentication endpoints - will add rate limiting instead of CSRF
@@ -48,7 +62,8 @@ const CSRF_CONFIG = {
     '/api/v1/auth/operator/login',
     '/api/v1/auth/forgot-password',
     '/api/v1/auth/reset-password',
-    '/api/v1/auth/refresh-token'
+    '/api/v1/auth/refresh-token',
+    '/api/v1/auth/oauth-session/:sessionId'
   ],
 
   // Registration endpoints - will add CAPTCHA instead of CSRF
@@ -56,7 +71,9 @@ const CSRF_CONFIG = {
     '/api/affiliates/register',
     '/api/customers/register',
     '/api/v1/affiliates/register',
-    '/api/v1/customers/register'
+    '/api/v1/customers/register',
+    '/api/v1/auth/social/register',
+    '/api/v1/auth/customer/social/register'
   ],
 
   // CRITICAL endpoints that MUST have CSRF protection (Phase 1)

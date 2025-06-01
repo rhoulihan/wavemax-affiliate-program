@@ -162,7 +162,7 @@ app.use(sanitizeRequest); // Sanitize all inputs for XSS prevention
 app.use(compression());
 
 // Rate limiting for API endpoints
-if (process.env.NODE_ENV !== 'test') {
+if (process.env.NODE_ENV !== 'test' && process.env.RELAX_RATE_LIMITING !== 'true') {
   const apiLimiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
     max: 100, // Limit each IP to 100 requests per windowMs
@@ -362,6 +362,15 @@ app.get('/', (req, res) => {
     },
     timestamp: new Date().toISOString()
   });
+});
+
+// Direct routes for legal pages (for Google and external access)
+app.get('/terms-of-service', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'terms-of-service.html'));
+});
+
+app.get('/privacy-policy', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'privacy-policy.html'));
 });
 
 // Block common WordPress scanning paths
