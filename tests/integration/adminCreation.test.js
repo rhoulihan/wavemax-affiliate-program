@@ -36,7 +36,7 @@ describe('Admin Creation Integration Tests', () => {
         firstName: 'John',
         lastName: 'Doe',
         email: 'john.doe@example.com',
-        password: 'password123',
+        password: 'StrongPassword417!',
         permissions: ['system_config', 'operator_management'],
         isActive: true
       };
@@ -58,7 +58,7 @@ describe('Admin Creation Integration Tests', () => {
         firstName: 'First',
         lastName: 'Admin',
         email: 'first@example.com',
-        password: 'password123',
+        password: 'StrongPassword417!',
         permissions: ['system_config'],
         isActive: true
       }).save();
@@ -68,7 +68,7 @@ describe('Admin Creation Integration Tests', () => {
         firstName: 'Second',
         lastName: 'Admin',
         email: 'second@example.com',
-        password: 'password123',
+        password: 'StrongPassword417!',
         permissions: ['operator_management'],
         isActive: true
       }).save();
@@ -88,7 +88,7 @@ describe('Admin Creation Integration Tests', () => {
         firstName: 'Super',
         lastName: 'Admin',
         email: 'super@example.com',
-        password: 'password123',
+        password: 'StrongPassword417!',
         permissions: ['system_config', 'operator_management', 'view_analytics', 'manage_affiliates'],
         isActive: true
       };
@@ -109,7 +109,7 @@ describe('Admin Creation Integration Tests', () => {
         firstName: 'Limited',
         lastName: 'Admin',
         email: 'limited@example.com',
-        password: 'password123',
+        password: 'StrongPassword417!',
         permissions: ['view_analytics'],
         isActive: true
       };
@@ -128,7 +128,7 @@ describe('Admin Creation Integration Tests', () => {
         adminId: 'ADM001',
         firstName: 'John',
         lastName: 'Doe',
-        password: 'password123',
+        password: 'StrongPassword417!',
         permissions: ['system_config'],
         isActive: true
       };
@@ -149,7 +149,7 @@ describe('Admin Creation Integration Tests', () => {
         firstName: 'John',
         lastName: 'Doe',
         email: 'john@example.com',
-        password: 'password123',
+        password: 'StrongPassword417!',
         permissions: ['system_config'],
         isActive: true
       };
@@ -159,7 +159,7 @@ describe('Admin Creation Integration Tests', () => {
         firstName: 'Jane',
         lastName: 'Smith',
         email: 'jane@example.com',
-        password: 'password456',
+        password: 'StrongPassword849!',
         permissions: ['operator_management'],
         isActive: true
       };
@@ -177,7 +177,7 @@ describe('Admin Creation Integration Tests', () => {
         firstName: 'John',
         lastName: 'Doe',
         email: 'john@example.com',
-        password: 'password123',
+        password: 'StrongPassword417!',
         permissions: ['system_config'],
         isActive: true
       };
@@ -187,7 +187,7 @@ describe('Admin Creation Integration Tests', () => {
         firstName: 'Jane',
         lastName: 'Smith',
         email: 'jane@example.com', // Different email
-        password: 'password456',
+        password: 'StrongPassword849!',
         permissions: ['operator_management'],
         isActive: true
       };
@@ -202,7 +202,7 @@ describe('Admin Creation Integration Tests', () => {
 
   describe('Password Handling', () => {
     it('should hash password before saving', async () => {
-      const plainPassword = 'password123';
+      const plainPassword = 'StrongPassword417!';
       const adminData = {
         adminId: 'ADM001',
         firstName: 'John',
@@ -221,7 +221,7 @@ describe('Admin Creation Integration Tests', () => {
     });
 
     it('should validate password with verifyPassword method', async () => {
-      const plainPassword = 'password123';
+      const plainPassword = 'StrongPassword417!';
       const adminData = {
         adminId: 'ADM001',
         firstName: 'John',
@@ -251,7 +251,7 @@ describe('Admin Creation Integration Tests', () => {
           firstName: 'John',
           lastName: 'Doe',
           email: 'john@example.com',
-          password: 'password123',
+          password: 'StrongPassword417!',
           permissions: ['system_config', 'operator_management'],
           isActive: true
         },
@@ -260,7 +260,7 @@ describe('Admin Creation Integration Tests', () => {
           firstName: 'Jane',
           lastName: 'Smith',
           email: 'jane@example.com',
-          password: 'password456',
+          password: 'StrongPassword849!',
           permissions: ['view_analytics'],
           isActive: false
         },
@@ -269,7 +269,7 @@ describe('Admin Creation Integration Tests', () => {
           firstName: 'Bob',
           lastName: 'Johnson',
           email: 'bob@example.com',
-          password: 'password789',
+          password: 'StrongPassword295!',
           permissions: ['manage_affiliates', 'view_analytics'],
           isActive: true
         }
@@ -324,7 +324,7 @@ describe('Admin Creation Integration Tests', () => {
         firstName: 'John',
         lastName: 'Doe',
         email: 'john@example.com',
-        password: 'password123',
+        password: 'StrongPassword417!',
         permissions: ['system_config'],
         isActive: true
       };
@@ -347,7 +347,7 @@ describe('Admin Creation Integration Tests', () => {
         firstName: 'John',
         lastName: 'Doe',
         email: 'john@example.com',
-        password: 'password123',
+        password: 'StrongPassword417!',
         permissions: ['system_config'],
         isActive: true
       };

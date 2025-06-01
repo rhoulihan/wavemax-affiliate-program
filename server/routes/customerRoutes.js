@@ -23,7 +23,7 @@ router.post('/register', [
   body('state').notEmpty().withMessage('State is required'),
   body('zipCode').notEmpty().withMessage('ZIP code is required'),
   body('username').notEmpty().withMessage('Username is required'),
-  body('password').custom(customPasswordValidator)
+  body('password').custom(customPasswordValidator())
 ], customerController.registerCustomer);
 
 /**

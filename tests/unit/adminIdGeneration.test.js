@@ -42,7 +42,7 @@ describe('Admin ID Generation Logic Tests', () => {
         lastName: 'Doe',
         email: 'john@example.com',
         username: 'johndoe',
-        password: 'password123',
+        password: 'StrongPassword417!',
         permissions: ['system_config'],
         isActive: true,
         createdBy: 'system'
@@ -60,7 +60,7 @@ describe('Admin ID Generation Logic Tests', () => {
           lastName: 'Doe',
           email: 'john@example.com',
           username: 'johndoe',
-          password: 'password123',
+          password: 'StrongPassword417!',
           permissions: ['system_config'],
           isActive: true,
           createdBy: 'system'
@@ -71,7 +71,7 @@ describe('Admin ID Generation Logic Tests', () => {
           lastName: 'Smith',
           email: 'jane@example.com',
           username: 'janesmith',
-          password: 'password456',
+          password: 'StrongPassword849!',
           permissions: ['operator_management'],
           isActive: true,
           createdBy: 'system'
@@ -90,7 +90,7 @@ describe('Admin ID Generation Logic Tests', () => {
           lastName: 'Doe',
           email: 'john@example.com',
           username: 'johndoe',
-          password: 'password123',
+          password: 'StrongPassword417!',
           permissions: ['system_config'],
           isActive: true,
           createdBy: 'system'
@@ -101,7 +101,7 @@ describe('Admin ID Generation Logic Tests', () => {
           lastName: 'Smith',
           email: 'jane@example.com',
           username: 'janesmith',
-          password: 'password456',
+          password: 'StrongPassword849!',
           permissions: ['operator_management'],
           isActive: true,
           createdBy: 'system'
@@ -119,7 +119,7 @@ describe('Admin ID Generation Logic Tests', () => {
         lastName: 'Doe',
         email: 'john@example.com',
         username: 'johndoe',
-        password: 'password123',
+        password: 'StrongPassword417!',
         permissions: ['system_config'],
         isActive: true,
         createdBy: 'system'
@@ -136,7 +136,7 @@ describe('Admin ID Generation Logic Tests', () => {
         lastName: 'Doe',
         email: 'john@example.com',
         username: 'johndoe',
-        password: 'password123',
+        password: 'StrongPassword417!',
         permissions: ['system_config'],
         isActive: true,
         createdBy: 'system'
@@ -153,7 +153,7 @@ describe('Admin ID Generation Logic Tests', () => {
         lastName: 'Doe',
         email: 'john@example.com',
         username: 'johndoe',
-        password: 'password123',
+        password: 'StrongPassword417!',
         permissions: ['system_config'],
         isActive: true,
         createdBy: 'system'
@@ -235,7 +235,7 @@ describe('Admin ID Generation Logic Tests', () => {
           lastName: 'Admin',
           email: 'active@example.com',
           username: 'activeadmin',
-          password: 'password123',
+          password: 'StrongPassword417!',
           permissions: ['system_config'],
           isActive: true,
           createdBy: 'system'
@@ -246,7 +246,7 @@ describe('Admin ID Generation Logic Tests', () => {
           lastName: 'Admin',
           email: 'inactive@example.com',
           username: 'inactiveadmin',
-          password: 'password456',
+          password: 'StrongPassword849!',
           permissions: ['operator_management'],
           isActive: false,
           createdBy: 'system'
@@ -272,7 +272,7 @@ describe('Admin ID Generation Logic Tests', () => {
           lastName: 'Admin',
           email: 'second@example.com',
           username: 'secondadmin',
-          password: 'password123',
+          password: 'StrongPassword417!',
           permissions: ['system_config'],
           isActive: true,
           createdBy: 'system',
@@ -284,7 +284,7 @@ describe('Admin ID Generation Logic Tests', () => {
           lastName: 'Admin',
           email: 'first@example.com',
           username: 'firstadmin',
-          password: 'password456',
+          password: 'StrongPassword849!',
           permissions: ['operator_management'],
           isActive: true,
           createdBy: 'system',
@@ -305,7 +305,7 @@ describe('Admin ID Generation Logic Tests', () => {
           lastName: 'Admin',
           email: 'limited@example.com',
           username: 'limitedadmin',
-          password: 'password123',
+          password: 'StrongPassword417!',
           permissions: ['view_analytics'],
           isActive: true,
           createdBy: 'system'
@@ -316,7 +316,7 @@ describe('Admin ID Generation Logic Tests', () => {
           lastName: 'Admin',
           email: 'super@example.com',
           username: 'superadmin',
-          password: 'password456',
+          password: 'StrongPassword849!',
           permissions: ['system_config', 'operator_management', 'view_analytics', 'manage_affiliates'],
           isActive: true,
           createdBy: 'system'
@@ -341,7 +341,7 @@ describe('Admin ID Generation Logic Tests', () => {
           lastName: '50',
           email: 'admin50@example.com',
           username: 'admin50',
-          password: 'password123',
+          password: 'StrongPassword417!',
           permissions: ['system_config'],
           isActive: true,
           createdBy: 'system'
@@ -364,7 +364,7 @@ describe('Admin ID Generation Logic Tests', () => {
           lastName: 'Admin',
           email: 'first@example.com',
           username: 'firstadmin',
-          password: 'password123',
+          password: 'StrongPassword417!',
           permissions: ['system_config'],
           isActive: true,
           createdBy: 'system'

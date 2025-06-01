@@ -4,6 +4,8 @@ const operatorController = require('../controllers/operatorController');
 const administratorController = require('../controllers/administratorController');
 const { authenticate } = require('../middleware/auth');
 const { checkRole, checkAdminPermission } = require('../middleware/rbac');
+const { body } = require('express-validator');
+const { customPasswordValidator } = require('../utils/passwordValidator');
 
 // All routes require authentication
 router.use(authenticate);
@@ -11,7 +13,12 @@ router.use(authenticate);
 // CRUD routes for administrators to manage operators
 router.get('/available', checkRole(['administrator']), checkAdminPermission(['operators.read']), administratorController.getAvailableOperators);
 router.get('/', checkRole(['administrator']), checkAdminPermission(['operators.read']), administratorController.getOperators);
-router.post('/', checkRole(['administrator']), checkAdminPermission(['operators.create']), administratorController.createOperator);
+router.post('/', checkRole(['administrator']), checkAdminPermission(['operators.create']), [
+  body('firstName').notEmpty().withMessage('First name is required'),
+  body('lastName').notEmpty().withMessage('Last name is required'),
+  body('email').isEmail().withMessage('Valid email is required'),
+  body('password').custom(customPasswordValidator())
+], administratorController.createOperator);
 router.get('/:id', authenticate, async (req, res, next) => {
   // Allow operators to view their own profile
   if (req.user.role === 'operator' && req.user.id === req.params.id) {

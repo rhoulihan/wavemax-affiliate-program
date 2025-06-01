@@ -1,7 +1,7 @@
 // OAuth Authentication Integration Tests for WaveMAX Laundry Affiliate Program
 
 const request = require('supertest');
-const { app } = require('../../server');
+const app = require('../../server');
 const mongoose = require('mongoose');
 const OAuthSession = require('../../server/models/OAuthSession');
 const Affiliate = require('../../server/models/Affiliate');
@@ -24,7 +24,7 @@ describe('OAuth Authentication Integration Tests', () => {
     await Customer.deleteMany({});
     
     // Get fresh CSRF token
-    csrfToken = await getCsrfToken(agent);
+    csrfToken = await getCsrfToken(app, agent);
   });
 
   afterAll(async () => {
@@ -53,13 +53,13 @@ describe('OAuth Authentication Integration Tests', () => {
         context: 'affiliate'
       };
 
-      await OAuthSession.createSession(sessionData);
+      await OAuthSession.createSession(sessionData.sessionId, sessionData);
 
       // Verify session was created
       const storedSession = await OAuthSession.findOne({ sessionId: 'test-oauth-session-123' });
       expect(storedSession).toBeTruthy();
-      expect(storedSession.provider).toBe('google');
-      expect(storedSession.email).toBe('oauth@example.com');
+      expect(storedSession.result.provider).toBe('google');
+      expect(storedSession.result.email).toBe('oauth@example.com');
     });
 
     test('should poll for OAuth session results', async () => {
@@ -74,7 +74,7 @@ describe('OAuth Authentication Integration Tests', () => {
         context: 'affiliate'
       };
 
-      await OAuthSession.createSession(sessionData);
+      await OAuthSession.createSession(sessionData.sessionId, sessionData);
 
       // Poll for session (should consume it)
       const response = await agent
@@ -111,7 +111,7 @@ describe('OAuth Authentication Integration Tests', () => {
         context: 'affiliate'
       };
 
-      await OAuthSession.createSession(sessionData);
+      await OAuthSession.createSession(sessionData.sessionId, sessionData);
 
       // Make multiple simultaneous requests
       const requests = Array(3).fill().map(() =>
@@ -750,12 +750,15 @@ describe('OAuth Authentication Integration Tests', () => {
       // Create session with expired date
       const expiredSession = new OAuthSession({
         sessionId: 'expired-session-test',
-        provider: 'google',
-        socialId: 'google-expired-session',
-        email: 'expired@example.com',
-        firstName: 'Expired',
-        lastName: 'Session',
-        createdAt: new Date(Date.now() - (6 * 60 * 1000)) // 6 minutes ago (TTL is 5 minutes)
+        result: {
+          provider: 'google',
+          socialId: 'google-expired-session',
+          email: 'expired@example.com',
+          firstName: 'Expired',
+          lastName: 'Session'
+        },
+        createdAt: new Date(Date.now() - (6 * 60 * 1000)), // 6 minutes ago (TTL is 5 minutes)
+        expiresAt: new Date(Date.now() - (1 * 60 * 1000)) // Expired 1 minute ago
       });
 
       await expiredSession.save();
@@ -772,11 +775,13 @@ describe('OAuth Authentication Integration Tests', () => {
       // Create fresh session
       const freshSession = new OAuthSession({
         sessionId: 'fresh-session-test',
-        provider: 'facebook',
-        socialId: 'facebook-fresh-session',
-        email: 'fresh@example.com',
-        firstName: 'Fresh',
-        lastName: 'Session'
+        result: {
+          provider: 'facebook',
+          socialId: 'facebook-fresh-session',
+          email: 'fresh@example.com',
+          firstName: 'Fresh',
+          lastName: 'Session'
+        }
         // createdAt will be set to current time by default
       });
 
@@ -788,7 +793,7 @@ describe('OAuth Authentication Integration Tests', () => {
       // Verify fresh session still exists
       const shouldExist = await OAuthSession.findOne({ sessionId: 'fresh-session-test' });
       expect(shouldExist).toBeTruthy();
-      expect(shouldExist.email).toBe('fresh@example.com');
+      expect(shouldExist.result.email).toBe('fresh@example.com');
     });
   });
 });

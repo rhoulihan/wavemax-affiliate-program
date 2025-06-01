@@ -14,7 +14,7 @@ describe('Administrator Model', () => {
         firstName: 'John',
         lastName: 'Doe',
         email: 'john.doe@wavemax.com',
-        password: 'SecurePassword123!'
+        password: 'SecurePassword417!'
       };
 
       const admin = new Administrator(adminData);
@@ -56,7 +56,7 @@ describe('Administrator Model', () => {
         firstName: 'John',
         lastName: 'Doe',
         email: 'invalid-email',
-        password: 'password123'
+        password: 'StrongPassword417!'
       });
 
       let error;
@@ -79,7 +79,7 @@ describe('Administrator Model', () => {
         firstName: 'John',
         lastName: 'Doe',
         email: 'john.doe@wavemax.com',
-        password: 'password123'
+        password: 'StrongPassword417!'
       };
 
       await new Administrator(adminData).save();
@@ -109,7 +109,7 @@ describe('Administrator Model', () => {
         firstName: 'John',
         lastName: 'Doe',
         email: 'john.doe@wavemax.com',
-        password: 'password123'
+        password: 'StrongPassword417!'
       });
       await admin1.save();
 
@@ -118,7 +118,7 @@ describe('Administrator Model', () => {
         firstName: 'Jane',
         lastName: 'Smith',
         email: 'jane.smith@wavemax.com',
-        password: 'password456'
+        password: 'StrongPassword849!'
       });
 
       let error;
@@ -137,7 +137,7 @@ describe('Administrator Model', () => {
         firstName: 'John',
         lastName: 'Doe',
         email: 'john@wavemax.com',
-        password: 'password123',
+        password: 'StrongPassword417!',
         permissions: ['invalid_permission']
       });
 
@@ -159,7 +159,7 @@ describe('Administrator Model', () => {
         firstName: 'John',
         lastName: 'Doe',
         email: 'john@wavemax.com',
-        password: 'password123',
+        password: 'StrongPassword417!',
         permissions: validPermissions
       });
 
@@ -172,7 +172,7 @@ describe('Administrator Model', () => {
         firstName: '  John  ',
         lastName: '  Doe  ',
         email: '  john@wavemax.com  ',
-        password: 'password123'
+        password: 'StrongPassword417!'
       });
 
       const saved = await admin.save();
@@ -186,7 +186,7 @@ describe('Administrator Model', () => {
         firstName: 'John',
         lastName: 'Doe',
         email: 'John.Doe@WaveMAX.com',
-        password: 'password123'
+        password: 'StrongPassword417!'
       });
 
       const saved = await admin.save();
@@ -198,7 +198,7 @@ describe('Administrator Model', () => {
         firstName: 'John',
         lastName: 'Doe',
         email: 'john@wavemax.com',
-        password: 'password123'
+        password: 'StrongPassword417!'
       });
 
       const saved = await admin.save();
@@ -215,7 +215,7 @@ describe('Administrator Model', () => {
 
   describe('Password Handling', () => {
     it('should hash password on save', async () => {
-      const plainPassword = 'SecurePassword123!';
+      const plainPassword = 'SecurePassword417!';
       const admin = new Administrator({
         firstName: 'John',
         lastName: 'Doe',
@@ -234,7 +234,7 @@ describe('Administrator Model', () => {
     });
 
     it('should verify correct password', async () => {
-      const plainPassword = 'SecurePassword123!';
+      const plainPassword = 'SecurePassword417!';
       const admin = new Administrator({
         firstName: 'John',
         lastName: 'Doe',
@@ -255,7 +255,7 @@ describe('Administrator Model', () => {
         firstName: 'John',
         lastName: 'Doe',
         email: 'john@wavemax.com',
-        password: 'CorrectPassword123!'
+        password: 'CorrectPassword417!'
       });
 
       await admin.save();
@@ -271,7 +271,7 @@ describe('Administrator Model', () => {
         firstName: 'John',
         lastName: 'Doe',
         email: 'john@wavemax.com',
-        password: 'password123'
+        password: 'StrongPassword417!'
       });
 
       const saved = await admin.save();
@@ -290,7 +290,7 @@ describe('Administrator Model', () => {
         firstName: 'John',
         lastName: 'Doe',
         email: 'john@wavemax.com',
-        password: 'password123'
+        password: 'StrongPassword417!'
       });
 
       await admin.save();
@@ -305,7 +305,7 @@ describe('Administrator Model', () => {
         firstName: 'John',
         lastName: 'Doe',
         email: 'john@wavemax.com',
-        password: 'password123',
+        password: 'StrongPassword417!',
         loginAttempts: 4
       });
 
@@ -324,7 +324,7 @@ describe('Administrator Model', () => {
         firstName: 'John',
         lastName: 'Doe',
         email: 'john@wavemax.com',
-        password: 'password123',
+        password: 'StrongPassword417!',
         loginAttempts: 3,
         lockUntil: new Date(Date.now() + 60000)
       });
@@ -343,7 +343,7 @@ describe('Administrator Model', () => {
         firstName: 'John',
         lastName: 'Doe',
         email: 'john@wavemax.com',
-        password: 'password123',
+        password: 'StrongPassword417!',
         loginAttempts: 5,
         lockUntil: new Date(Date.now() - 60000) // Expired lock
       });
@@ -361,7 +361,7 @@ describe('Administrator Model', () => {
         firstName: 'John',
         lastName: 'Doe',
         email: 'john@wavemax.com',
-        password: 'password123'
+        password: 'StrongPassword417!'
       });
 
       await admin.save();
@@ -385,7 +385,7 @@ describe('Administrator Model', () => {
         firstName: 'John',
         lastName: 'Doe',
         email: 'john@wavemax.com',
-        password: 'password123'
+        password: 'StrongPassword417!'
       });
 
       await admin.save();
@@ -405,7 +405,7 @@ describe('Administrator Model', () => {
         firstName: 'John',
         lastName: 'Doe',
         email: 'john@wavemax.com',
-        password: 'password123'
+        password: 'StrongPassword417!'
       });
 
       await admin.save();
@@ -428,7 +428,7 @@ describe('Administrator Model', () => {
         firstName: 'John',
         lastName: 'Doe',
         email: 'john@wavemax.com',
-        password: 'password123',
+        password: 'StrongPassword417!',
         permissions: ['system_config', 'view_analytics']
       });
 
@@ -444,7 +444,7 @@ describe('Administrator Model', () => {
         firstName: 'John',
         lastName: 'Doe',
         email: 'john@wavemax.com',
-        password: 'password123',
+        password: 'StrongPassword417!',
         permissions: ['system_config', 'view_analytics']
       });
 
@@ -460,7 +460,7 @@ describe('Administrator Model', () => {
         firstName: 'John',
         lastName: 'Doe',
         email: 'john@wavemax.com',
-        password: 'password123',
+        password: 'StrongPassword417!',
         permissions: ['system_config', 'view_analytics']
       });
 
@@ -476,7 +476,7 @@ describe('Administrator Model', () => {
         firstName: 'John',
         lastName: 'Doe',
         email: 'john@wavemax.com',
-        password: 'password123',
+        password: 'StrongPassword417!',
         permissions: []
       });
 
@@ -499,21 +499,21 @@ describe('Administrator Model', () => {
           firstName: 'Active',
           lastName: 'Admin1',
           email: 'active1@wavemax.com',
-          password: 'password123',
+          password: 'StrongPassword417!',
           isActive: true
         },
         {
           firstName: 'Inactive',
           lastName: 'Admin',
           email: 'inactive@wavemax.com',
-          password: 'password123',
+          password: 'StrongPassword417!',
           isActive: false
         },
         {
           firstName: 'Active',
           lastName: 'Admin2',
           email: 'active2@wavemax.com',
-          password: 'password123',
+          password: 'StrongPassword417!',
           isActive: true
         }
       ]);
@@ -529,7 +529,7 @@ describe('Administrator Model', () => {
         firstName: 'John',
         lastName: 'Doe',
         email: 'john@wavemax.com',
-        password: 'password123'
+        password: 'StrongPassword417!'
       });
 
       const admin = await Administrator.findByEmailWithPassword('john@wavemax.com');
@@ -544,7 +544,7 @@ describe('Administrator Model', () => {
         firstName: 'John',
         lastName: 'Doe',
         email: 'john@wavemax.com',
-        password: 'password123'
+        password: 'StrongPassword417!'
       });
 
       const admin = await Administrator.findByEmailWithPassword('JOHN@WAVEMAX.COM');
@@ -565,7 +565,7 @@ describe('Administrator Model', () => {
         firstName: 'John',
         lastName: 'Doe',
         email: 'john@wavemax.com',
-        password: 'password123'
+        password: 'StrongPassword417!'
       });
 
       const saved = await admin.save();
@@ -581,7 +581,7 @@ describe('Administrator Model', () => {
         firstName: 'John',
         lastName: 'Doe',
         email: 'john@wavemax.com',
-        password: 'password123'
+        password: 'StrongPassword417!'
       });
 
       const saved = await admin.save();
@@ -603,14 +603,14 @@ describe('Administrator Model', () => {
         firstName: 'John',
         lastName: 'Doe',
         email: 'john@wavemax.com',
-        password: 'password123'
+        password: 'StrongPassword417!'
       });
 
       const admin2 = new Administrator({
         firstName: 'Jane',
         lastName: 'Smith',
         email: 'jane@wavemax.com',
-        password: 'password456'
+        password: 'StrongPassword849!'
       });
 
       const saved1 = await admin1.save();
@@ -629,7 +629,7 @@ describe('Administrator Model', () => {
         firstName: 'John',
         lastName: 'Doe',
         email: 'john@wavemax.com',
-        password: 'password123'
+        password: 'StrongPassword417!'
       });
 
       const saved = await admin.save();

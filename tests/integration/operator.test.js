@@ -38,10 +38,10 @@ describe('Operator Integration Tests', () => {
     // Create test administrator
     testAdmin = await Administrator.create({
       adminId: 'ADMIN001',
-      firstName: 'Admin',
+      firstName: 'Super',
       lastName: 'User',
-      email: 'admin@wavemax.com',
-      password: 'AdminPass123!',
+      email: 'superuser@wavemax.com',
+      password: 'CompletelyUniquePassword417!',
       permissions: ['all']
     });
 
@@ -49,8 +49,8 @@ describe('Operator Integration Tests', () => {
     const adminLogin = await adminAgent
       .post('/api/v1/auth/administrator/login')
       .send({
-        email: 'admin@wavemax.com',
-        password: 'AdminPass123!'
+        email: 'superuser@wavemax.com',
+        password: 'CompletelyUniquePassword417!'
       });
     
     adminToken = adminLogin.body.token;
@@ -64,7 +64,7 @@ describe('Operator Integration Tests', () => {
       firstName: 'Test',
       lastName: 'Operator',
       email: 'operator@wavemax.com',
-      password: 'OperatorPass123!',
+      password: 'OperatorStrongPassword951!',
       workStation: 'Station A',
       shiftStart: '00:00',
       shiftEnd: '23:59',
@@ -76,7 +76,7 @@ describe('Operator Integration Tests', () => {
       .post('/api/v1/auth/operator/login')
       .send({
         email: 'operator@wavemax.com',
-        password: 'OperatorPass123!'
+        password: 'OperatorStrongPassword951!'
       });
     
     operatorToken = operatorLogin.body.token;
@@ -106,7 +106,7 @@ describe('Operator Integration Tests', () => {
           firstName: 'John',
           lastName: 'Doe',
           email: 'john@wavemax.com',
-          password: 'Password123!',
+          password: 'StrongPassword951!',
           workStation: 'Station B',
           shiftStart: '09:00',
           shiftEnd: '18:00',
@@ -118,7 +118,7 @@ describe('Operator Integration Tests', () => {
           firstName: 'Jane',
           lastName: 'Smith',
           email: 'jane@wavemax.com',
-          password: 'Password123!',
+          password: 'StrongPassword951!',
           workStation: 'Station C',
           isActive: false,
           createdBy: testAdmin._id
@@ -150,7 +150,7 @@ describe('Operator Integration Tests', () => {
         firstName: 'Inactive',
         lastName: 'Operator',
         email: 'inactive@wavemax.com',
-        password: 'Password123!',
+        password: 'StrongPassword951!',
         isActive: false,
         createdBy: testAdmin._id
       });
@@ -172,7 +172,7 @@ describe('Operator Integration Tests', () => {
           firstName: 'Station B',
           lastName: 'Operator',
           email: 'stationb@wavemax.com',
-          password: 'Password123!',
+          password: 'StrongPassword951!',
           workStation: 'Station B',
           createdBy: testAdmin._id
         },
@@ -181,7 +181,7 @@ describe('Operator Integration Tests', () => {
           firstName: 'Another Station A',
           lastName: 'Operator',
           email: 'stationa2@wavemax.com',
-          password: 'Password123!',
+          password: 'StrongPassword951!',
           workStation: 'Station A',
           createdBy: testAdmin._id
         }
@@ -211,7 +211,7 @@ describe('Operator Integration Tests', () => {
         firstName: 'Off Shift',
         lastName: 'Operator',
         email: 'offshift@wavemax.com',
-        password: 'Password123!',
+        password: 'StrongPassword951!',
         shiftStart: offShiftStart,
         shiftEnd: offShiftEnd,
         createdBy: testAdmin._id
@@ -237,7 +237,7 @@ describe('Operator Integration Tests', () => {
           firstName: `Op${i}`,
           lastName: 'Test',
           email: `op${i}@wavemax.com`,
-          password: 'Password123!',
+          password: 'StrongPassword951!',
           workStation: `Station ${i}`,
           createdBy: testAdmin._id,
           createdAt: new Date(Date.now() - i * 60000)
@@ -276,7 +276,7 @@ describe('Operator Integration Tests', () => {
         firstName: 'Limited',
         lastName: 'Admin',
         email: 'limited@wavemax.com',
-        password: 'Password123!',
+        password: 'StrongPassword951!',
         permissions: ['customers.read'] // No operator permissions
       });
 
@@ -284,7 +284,7 @@ describe('Operator Integration Tests', () => {
         .post('/api/v1/auth/administrator/login')
         .send({
           email: 'limited@wavemax.com',
-          password: 'Password123!'
+          password: 'StrongPassword951!'
         });
 
       const response = await agent
@@ -304,7 +304,7 @@ describe('Operator Integration Tests', () => {
         firstName: 'John',
         lastName: 'Doe',
         email: 'john@wavemax.com',
-        password: 'Password123!',
+        password: 'StrongPassword951!',
         workStation: 'Station B',
         shiftStart: '09:00',
         shiftEnd: '18:00',
@@ -349,7 +349,7 @@ describe('Operator Integration Tests', () => {
         firstName: 'Other',
         lastName: 'Operator',
         email: 'other@wavemax.com',
-        password: 'Password123!',
+        password: 'StrongPassword951!',
         createdBy: testAdmin._id
       });
 
@@ -446,7 +446,7 @@ describe('Operator Integration Tests', () => {
           firstName: 'Test',
           lastName: 'Operator',
           email: 'invalid-email',
-          password: 'Password123!'
+          password: 'StrongPassword951!'
         });
 
       expect(response.status).toBe(400);
@@ -493,7 +493,7 @@ describe('Operator Integration Tests', () => {
         firstName: 'Limited',
         lastName: 'Admin',
         email: 'limited2@wavemax.com',
-        password: 'Password123!',
+        password: 'StrongPassword951!',
         permissions: ['customers.manage'] // No operator permissions
       });
 
@@ -501,7 +501,7 @@ describe('Operator Integration Tests', () => {
         .post('/api/v1/auth/administrator/login')
         .send({
           email: 'limited2@wavemax.com',
-          password: 'Password123!'
+          password: 'StrongPassword951!'
         });
 
       const response = await agent
@@ -512,7 +512,7 @@ describe('Operator Integration Tests', () => {
           firstName: 'New',
           lastName: 'Operator',
           email: 'new@wavemax.com',
-          password: 'Password123!'
+          password: 'StrongPassword951!'
         });
 
       expect(response.status).toBe(403);
@@ -529,7 +529,7 @@ describe('Operator Integration Tests', () => {
         firstName: 'Target',
         lastName: 'Operator',
         email: 'target@wavemax.com',
-        password: 'Password123!',
+        password: 'StrongPassword951!',
         workStation: 'Station X',
         shiftStart: '00:00',
         shiftEnd: '23:59',
@@ -568,7 +568,7 @@ describe('Operator Integration Tests', () => {
         .set('Authorization', `Bearer ${adminToken}`)
         .set('x-csrf-token', adminCsrfToken)
         .send({
-          password: 'NewPassword123!'
+          password: 'NewStrongPassword951!'
         });
 
       expect(response.status).toBe(200);
@@ -578,7 +578,7 @@ describe('Operator Integration Tests', () => {
         .post('/api/v1/auth/operator/login')
         .send({
           email: 'target@wavemax.com',
-          password: 'NewPassword123!'
+          password: 'NewStrongPassword951!'
         });
       
       expect(loginRes.status).toBe(200);
@@ -601,7 +601,7 @@ describe('Operator Integration Tests', () => {
         .post('/api/v1/auth/operator/login')
         .send({
           email: 'target@wavemax.com',
-          password: 'Password123!'
+          password: 'StrongPassword951!'
         });
       
       expect(loginRes.status).toBe(403);
@@ -613,7 +613,7 @@ describe('Operator Integration Tests', () => {
         .post('/api/v1/auth/operator/login')
         .send({
           email: 'target@wavemax.com',
-          password: 'Password123!'
+          password: 'StrongPassword951!'
         });
 
       const response = await agent
@@ -623,7 +623,7 @@ describe('Operator Integration Tests', () => {
         .send({
           firstName: 'MyNew',
           lastName: 'Name',
-          password: 'MyNewPass123!'
+          password: 'MyNewPass417!'
         });
 
       expect(response.status).toBe(200);
@@ -636,7 +636,7 @@ describe('Operator Integration Tests', () => {
         .post('/api/v1/auth/operator/login')
         .send({
           email: 'target@wavemax.com',
-          password: 'Password123!'
+          password: 'StrongPassword951!'
         });
 
       const response = await agent
@@ -687,7 +687,7 @@ describe('Operator Integration Tests', () => {
         firstName: 'Delete',
         lastName: 'Me',
         email: 'delete@wavemax.com',
-        password: 'Password123!',
+        password: 'StrongPassword951!',
         createdBy: testAdmin._id
       });
     });
@@ -728,7 +728,7 @@ describe('Operator Integration Tests', () => {
         firstName: 'Limited',
         lastName: 'Admin',
         email: 'limited3@wavemax.com',
-        password: 'Password123!',
+        password: 'StrongPassword951!',
         permissions: ['customers.manage'] // No operator permissions
       });
 
@@ -736,7 +736,7 @@ describe('Operator Integration Tests', () => {
         .post('/api/v1/auth/administrator/login')
         .send({
           email: 'limited3@wavemax.com',
-          password: 'Password123!'
+          password: 'StrongPassword951!'
         });
 
       const response = await agent
@@ -770,7 +770,7 @@ describe('Operator Integration Tests', () => {
         firstName: 'Pin',
         lastName: 'Reset',
         email: 'pinreset@wavemax.com',
-        password: 'Password123!',
+        password: 'StrongPassword951!',
         createdBy: testAdmin._id
       });
     });
@@ -781,7 +781,7 @@ describe('Operator Integration Tests', () => {
         .set('Authorization', `Bearer ${adminToken}`)
         .set('x-csrf-token', adminCsrfToken)
         .send({
-          newPassword: 'NewPin123!'
+          newPassword: 'NewPin417!'
         });
 
       expect(response.status).toBe(200);
@@ -793,7 +793,7 @@ describe('Operator Integration Tests', () => {
         .post('/api/v1/auth/operator/login')
         .send({
           email: 'pinreset@wavemax.com',
-          password: 'NewPin123!'
+          password: 'NewPin417!'
         });
       
       expect(loginRes.status).toBe(200);
@@ -810,7 +810,7 @@ describe('Operator Integration Tests', () => {
         .set('Authorization', `Bearer ${adminToken}`)
         .set('x-csrf-token', adminCsrfToken)
         .send({
-          newPassword: 'NewPin123!'
+          newPassword: 'NewPin417!'
         });
 
       expect(response.status).toBe(200);
@@ -831,7 +831,7 @@ describe('Operator Integration Tests', () => {
           firstName: 'Available1',
           lastName: 'Op',
           email: 'avail1@wavemax.com',
-          password: 'Password123!',
+          password: 'StrongPassword951!',
           currentOrderCount: 2,
           createdBy: testAdmin._id
         },
@@ -840,7 +840,7 @@ describe('Operator Integration Tests', () => {
           firstName: 'Available2',
           lastName: 'Op',
           email: 'avail2@wavemax.com',
-          password: 'Password123!',
+          password: 'StrongPassword951!',
           currentOrderCount: 5,
           createdBy: testAdmin._id
         },
@@ -849,7 +849,7 @@ describe('Operator Integration Tests', () => {
           firstName: 'Busy',
           lastName: 'Op',
           email: 'busy@wavemax.com',
-          password: 'Password123!',
+          password: 'StrongPassword951!',
           currentOrderCount: 12, // Over limit
           createdBy: testAdmin._id
         },
@@ -858,7 +858,7 @@ describe('Operator Integration Tests', () => {
           firstName: 'Inactive',
           lastName: 'Op',
           email: 'inactive@wavemax.com',
-          password: 'Password123!',
+          password: 'StrongPassword951!',
           currentOrderCount: 0,
           isActive: false,
           createdBy: testAdmin._id
@@ -917,7 +917,7 @@ describe('Operator Integration Tests', () => {
         firstName: 'Stats',
         lastName: 'Operator',
         email: 'stats@wavemax.com',
-        password: 'Password123!',
+        password: 'StrongPassword951!',
         totalOrdersProcessed: 10,
         averageProcessingTime: 20,
         qualityScore: 90,

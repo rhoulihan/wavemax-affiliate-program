@@ -108,7 +108,7 @@ router.post('/reset-password',
     body('token').trim().notEmpty().withMessage('Reset token is required')
       .isLength({ min: 64, max: 64 }).withMessage('Invalid reset token'),
     body('userType').isIn(['affiliate', 'customer', 'administrator', 'operator']).withMessage('Invalid user type'),
-    body('password').custom(customPasswordValidator)
+    body('password').custom(customPasswordValidator())
   ],
   validate,
   authController.resetPassword
