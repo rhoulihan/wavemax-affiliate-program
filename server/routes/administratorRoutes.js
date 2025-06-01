@@ -3,6 +3,8 @@ const router = express.Router();
 const administratorController = require('../controllers/administratorController');
 const { authenticate } = require('../middleware/auth');
 const { checkRole, checkAdminPermission } = require('../middleware/rbac');
+const { body } = require('express-validator');
+const { customPasswordValidator } = require('../utils/passwordValidator');
 
 // All routes require authentication and administrator role
 router.use(authenticate);
@@ -14,14 +16,24 @@ router.get('/dashboard', administratorController.getDashboard);
 // Administrator CRUD routes
 router.get('/', checkAdminPermission(['administrators.read']), administratorController.getAdministrators);
 router.get('/permissions', administratorController.getPermissions);
-router.post('/', checkAdminPermission(['administrators.create']), administratorController.createAdministrator);
+router.post('/', checkAdminPermission(['administrators.create']), [
+  body('firstName').notEmpty().withMessage('First name is required'),
+  body('lastName').notEmpty().withMessage('Last name is required'),
+  body('email').isEmail().withMessage('Valid email is required'),
+  body('password').custom(customPasswordValidator())
+], administratorController.createAdministrator);
 router.get('/:id', checkAdminPermission(['administrators.read']), administratorController.getAdministratorById);
 router.patch('/:id', checkAdminPermission(['administrators.update']), administratorController.updateAdministrator);
 router.delete('/:id', checkAdminPermission(['administrators.delete']), administratorController.deleteAdministrator);
 router.post('/:id/reset-password', checkAdminPermission(['administrators.update']), administratorController.resetAdministratorPassword);
 
 // Operator Management
-router.post('/operators', checkAdminPermission(['operator_management']), administratorController.createOperator);
+router.post('/operators', checkAdminPermission(['operator_management']), [
+  body('firstName').notEmpty().withMessage('First name is required'),
+  body('lastName').notEmpty().withMessage('Last name is required'),
+  body('email').isEmail().withMessage('Valid email is required'),
+  body('password').custom(customPasswordValidator())
+], administratorController.createOperator);
 router.get('/operators', administratorController.getOperators);
 router.get('/operators/:operatorId', administratorController.getOperatorById);
 router.put('/operators/:operatorId', checkAdminPermission(['operator_management']), administratorController.updateOperator);

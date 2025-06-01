@@ -52,7 +52,7 @@ describe('Bag Management Integration Tests', () => {
     operatorCsrfToken = await getCsrfToken(app, operatorAgent);
 
     // Create test affiliate
-    const { hash: affHash, salt: affSalt } = encryptionUtil.hashPassword('AffPass123!');
+    const { hash: affHash, salt: affSalt } = encryptionUtil.hashPassword('AffiliateUniquePassword417!');
     testAffiliate = await Affiliate.create({
       affiliateId: 'AFF001',
       firstName: 'Test',
@@ -72,7 +72,7 @@ describe('Bag Management Integration Tests', () => {
     });
 
     // Create test customer
-    const { hash: custHash, salt: custSalt } = encryptionUtil.hashPassword('CustPass123!');
+    const { hash: custHash, salt: custSalt } = encryptionUtil.hashPassword('CustomerUniquePassword417!');
     testCustomer = await Customer.create({
       customerId: 'CUST001',
       firstName: 'Test',
@@ -96,7 +96,7 @@ describe('Bag Management Integration Tests', () => {
       firstName: 'Admin',
       lastName: 'User',
       email: 'admin@wavemax.com',
-      password: 'AdminPass123!',
+      password: 'CompletelyStrongPassword417!',
       permissions: ['all']
     });
 
@@ -106,7 +106,7 @@ describe('Bag Management Integration Tests', () => {
       firstName: 'Test',
       lastName: 'Operator',
       email: 'operator@wavemax.com',
-      password: 'OperatorPass123!',
+      password: 'UniqueOperatorPassword417!',
       createdBy: testAdmin._id
     });
 
@@ -115,7 +115,7 @@ describe('Bag Management Integration Tests', () => {
       .post('/api/v1/auth/customer/login')
       .send({
         username: 'testcustomer',
-        password: 'CustPass123!'
+        password: 'CustomerUniquePassword417!'
       });
     customerToken = customerLogin.body.token;
 
@@ -124,7 +124,7 @@ describe('Bag Management Integration Tests', () => {
       .post('/api/v1/auth/affiliate/login')
       .send({
         username: 'testaffiliate',
-        password: 'AffPass123!'
+        password: 'AffiliateUniquePassword417!'
       });
     affiliateToken = affiliateLogin.body.token;
 
@@ -133,7 +133,7 @@ describe('Bag Management Integration Tests', () => {
       .post('/api/v1/auth/administrator/login')
       .send({
         email: 'admin@wavemax.com',
-        password: 'AdminPass123!'
+        password: 'CompletelyStrongPassword417!'
       });
     adminToken = adminLogin.body.token;
 
@@ -142,7 +142,7 @@ describe('Bag Management Integration Tests', () => {
       .post('/api/v1/auth/operator/login')
       .send({
         email: 'operator@wavemax.com',
-        password: 'OperatorPass123!'
+        password: 'UniqueOperatorPassword417!'
       });
     operatorToken = operatorLogin.body.token;
   });
@@ -234,7 +234,7 @@ describe('Bag Management Integration Tests', () => {
 
     it('should prevent affiliate from creating bag for other affiliate\'s customer', async () => {
       // Create another affiliate and customer
-      const { hash, salt } = encryptionUtil.hashPassword('password123');
+      const { hash, salt } = encryptionUtil.hashPassword('OtherStrongPassword417!');
       const otherAffiliate = await Affiliate.create({
         affiliateId: 'AFF002',
         firstName: 'Other',
@@ -469,7 +469,7 @@ describe('Bag Management Integration Tests', () => {
 
     it('should prevent access to other customer\'s bags', async () => {
       // Create another customer
-      const { hash, salt } = encryptionUtil.hashPassword('password123');
+      const { hash, salt } = encryptionUtil.hashPassword('OtherStrongPassword417!');
       const otherCustomer = await Customer.create({
         customerId: 'CUST002',
         firstName: 'Other',
@@ -491,7 +491,7 @@ describe('Bag Management Integration Tests', () => {
         .post('/api/v1/auth/customer/login')
         .send({
           username: 'othercust',
-          password: 'password123'
+          password: 'OtherStrongPassword417!'
         });
 
       const response = await agent
@@ -758,7 +758,7 @@ describe('Bag Management Integration Tests', () => {
 
     it('should respect role-based access', async () => {
       // Create another affiliate's customer and bag
-      const { hash, salt } = encryptionUtil.hashPassword('password123');
+      const { hash, salt } = encryptionUtil.hashPassword('OtherStrongPassword417!');
       const otherAffiliate = await Affiliate.create({
         affiliateId: 'AFF002',
         firstName: 'Other',

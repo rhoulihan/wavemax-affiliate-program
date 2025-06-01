@@ -1,11 +1,19 @@
 # Logs
-logs
+logs/
 *.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 lerna-debug.log*
 .pnpm-debug.log*
+
+# Test output files
+test-*.log
+test-*.out
+test_*.log
+test_*.txt
+*_test_results.*
+admin_test_results.*
 
 # Diagnostic reports (https://nodejs.org/api/report.html)
 report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
@@ -135,3 +143,10 @@ dist
 .yarn/install-state.gz
 .pnp.*
 .env.backup
+
+# Project-specific temporary files
+*.out
+process.log
+docs.out
+wavemax-affiliate-program@*
+jest

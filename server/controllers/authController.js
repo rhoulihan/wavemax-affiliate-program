@@ -1379,7 +1379,7 @@ exports.linkSocialAccount = async (req, res) => {
       }
     }, req);
     
-    res.json({
+    res.status(200).json({
       success: true,
       message: `${provider.charAt(0).toUpperCase() + provider.slice(1)} account linked successfully`
     });
@@ -1416,9 +1416,46 @@ exports.socialLogin = async (req, res) => {
     });
     
     if (!affiliate) {
-      return res.status(404).json({
-        success: false,
-        message: 'No account found with this social media account'
+      // Try to find customer with this social account
+      const customer = await Customer.findOne({
+        [socialAccountKey]: socialId
+      });
+      
+      if (!customer) {
+        return res.status(404).json({
+          success: false,
+          message: 'No account found with this social media account'
+        });
+      }
+      
+      // Handle customer social login
+      customer.lastLogin = new Date();
+      await customer.save();
+      
+      const token = generateToken({
+        id: customer._id,
+        customerId: customer.customerId,
+        role: 'customer'
+      });
+      
+      const refreshTokenValue = await generateRefreshToken(
+        customer._id,
+        'customer',
+        req.ip
+      );
+      
+      logLoginAttempt(true, 'customer', customer.username, req, 'Social login successful');
+      
+      return res.status(200).json({
+        success: true,
+        accessToken: token,
+        refreshToken: refreshTokenValue,
+        affiliate: {
+          affiliateId: customer.customerId,
+          firstName: customer.firstName,
+          lastName: customer.lastName,
+          email: customer.email
+        }
       });
     }
     

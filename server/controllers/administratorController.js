@@ -12,6 +12,7 @@ const { fieldFilter } = require('../utils/fieldFilter');
 const emailService = require('../utils/emailService');
 const { logAuditEvent, AuditEvents } = require('../utils/auditLogger');
 const { validatePasswordStrength } = require('../utils/passwordValidator');
+const { validationResult } = require('express-validator');
 const crypto = require('crypto');
 const mongoose = require('mongoose');
 
@@ -119,6 +120,15 @@ exports.getAdministratorById = async (req, res) => {
  */
 exports.createAdministrator = async (req, res) => {
   try {
+    // Check for validation errors
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({
+        success: false,
+        errors: errors.array()
+      });
+    }
+
     const {
       firstName,
       lastName,
@@ -126,33 +136,6 @@ exports.createAdministrator = async (req, res) => {
       password,
       permissions = []
     } = req.body;
-
-    // Validate required fields
-    if (!firstName || !lastName || !email || !password) {
-      return res.status(400).json({
-        success: false,
-        message: 'Validation failed: All fields are required'
-      });
-    }
-
-    // Validate email format
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      return res.status(400).json({
-        success: false,
-        message: 'Valid email is required'
-      });
-    }
-
-    // Validate password strength
-    const passwordValidation = validatePasswordStrength(password, '', email);
-    if (!passwordValidation.success) {
-      return res.status(400).json({
-        success: false,
-        message: 'Password does not meet security requirements',
-        errors: passwordValidation.errors
-      });
-    }
 
     // Check if email already exists
     const existingAdmin = await Administrator.findOne({ email: email.toLowerCase() });
@@ -480,6 +463,15 @@ exports.getPermissions = async (req, res) => {
  */
 exports.createOperator = async (req, res) => {
   try {
+    // Check for validation errors
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({
+        success: false,
+        errors: errors.array()
+      });
+    }
+
     const { 
       firstName, 
       lastName, 
@@ -489,33 +481,6 @@ exports.createOperator = async (req, res) => {
       shiftStart, 
       shiftEnd 
     } = req.body;
-
-    // Validate required fields
-    if (!firstName || !lastName || !email || !password) {
-      return res.status(400).json({
-        success: false,
-        message: 'Validation failed: All required fields must be provided'
-      });
-    }
-
-    // Validate email format
-    const emailRegex = /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/;
-    if (!emailRegex.test(email)) {
-      return res.status(400).json({
-        success: false,
-        message: 'Valid email is required'
-      });
-    }
-
-    // Validate password strength
-    const passwordValidation = validatePasswordStrength(password, '', email);
-    if (!passwordValidation.success) {
-      return res.status(400).json({
-        success: false,
-        message: 'Password does not meet security requirements',
-        errors: passwordValidation.errors
-      });
-    }
 
     // Validate shift time format if provided
     const timeRegex = /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/;

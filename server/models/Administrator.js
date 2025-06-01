@@ -4,6 +4,7 @@
 const mongoose = require('mongoose');
 const crypto = require('crypto');
 const { encrypt, decrypt } = require('../utils/encryption');
+const { validatePasswordStrength } = require('../utils/passwordValidator');
 
 const administratorSchema = new mongoose.Schema({
   adminId: { 
@@ -108,8 +109,20 @@ administratorSchema.pre('save', function(next) {
                    crypto.randomBytes(3).toString('hex').toUpperCase();
   }
   
-  // Hash password if modified
+  // Validate and hash password if modified
   if (this.isModified('password')) {
+    // Validate password strength
+    const validation = validatePasswordStrength(this.password, {
+      username: this.email.split('@')[0], // Use email prefix as username
+      email: this.email
+    });
+    
+    if (!validation.success) {
+      const error = new Error(validation.errors.join('; '));
+      error.name = 'ValidationError';
+      throw error;
+    }
+    
     const salt = crypto.randomBytes(16);
     this.password = crypto.pbkdf2Sync(this.password, salt, 100000, 64, 'sha512')
       .toString('hex') + ':' + salt.toString('hex');
