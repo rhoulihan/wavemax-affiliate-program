@@ -373,6 +373,11 @@ app.get('/privacy-policy', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'privacy-policy.html'));
 });
 
+// Franchisee landing page route
+app.get('/franchisee-landing', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'franchisee-landing.html'));
+});
+
 // Block common WordPress scanning paths
 app.use((req, res, next) => {
   const blockedPaths = [

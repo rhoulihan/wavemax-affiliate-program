@@ -1665,6 +1665,7 @@ The `embed-app.html` provides:
 All functionality is accessible through route parameters:
 
 - `/` or `/landing` - Landing page
+- `/franchisee-landing` - Franchisee landing page for review
 - `/affiliate-register` - Affiliate registration
 - `/affiliate-login` - Affiliate login  
 - `/affiliate-dashboard` - Full affiliate dashboard
