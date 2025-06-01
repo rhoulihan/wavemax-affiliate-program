@@ -90,11 +90,17 @@
             }
             
             if (event.data.type === 'scroll-to-top') {
-                // Scroll to the top of the iframe
+                // Scroll to the top of the iframe (smooth animation)
                 iframe.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                // Also scroll the window to top if needed
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-                console.log('Scrolled to top');
+                
+                // Alternative: Scroll window to top immediately
+                // window.scrollTo({ top: 0, behavior: 'smooth' });
+                
+                // For immediate scroll (no animation), use:
+                // iframe.scrollIntoView({ block: 'start' });
+                // window.scrollTo(0, 0);
+                
+                console.log('Scrolled parent window to show iframe top');
             }
             
             if (event.data.type === 'navigate') {

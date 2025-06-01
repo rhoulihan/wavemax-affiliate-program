@@ -11,6 +11,81 @@ function initializeAffiliateRegistration() {
   const baseUrl = window.EMBED_CONFIG?.baseUrl || 'https://wavemax.promo';
   const isEmbedded = window.EMBED_CONFIG?.isEmbedded || false;
 
+  // Function to show modal when existing affiliate tries to register
+  function showExistingAffiliateModal(result) {
+    const affiliate = result.affiliate;
+    const affiliateName = `${affiliate.firstName} ${affiliate.lastName}`;
+    
+    // Create modal HTML - positioned at top of viewport for iframe visibility
+    const modalHTML = `
+      <div id="existingAffiliateModal" class="fixed inset-0 bg-black bg-opacity-50 z-50" style="z-index: 9999; position: fixed; top: 0; left: 0; width: 100%; height: 100vh; display: flex; align-items: flex-start; justify-content: center; padding-top: 20px;">
+        <div class="bg-white rounded-lg p-6 max-w-md mx-4 shadow-xl" style="margin-top: 0; position: relative;">
+          <div class="text-center mb-6">
+            <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-blue-100 mb-4">
+              <svg class="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+            </div>
+            <h3 class="text-lg font-medium text-gray-900 mb-2">Account Already Exists</h3>
+            <p class="text-sm text-gray-500 mb-4">
+              Welcome back, <strong>${affiliateName}</strong>! This Google account is already associated with affiliate ID <strong>${affiliate.affiliateId}</strong>.
+            </p>
+          </div>
+          
+          <div class="space-y-3">
+            <button id="loginToDashboard" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+              Continue to Dashboard
+            </button>
+            <button id="chooseAnotherMethod" class="w-full flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+              Use Different Login Method
+            </button>
+          </div>
+        </div>
+      </div>
+    `;
+    
+    // Add modal to page
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+    
+    // Scroll to top of the page to ensure modal is visible
+    window.scrollTo(0, 0);
+    
+    // Ensure modal is visible by also scrolling the document body to top
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+    
+    // Add event listeners
+    document.getElementById('loginToDashboard').addEventListener('click', function() {
+      console.log('User chose to login to dashboard');
+      
+      // Get affiliate ID from result
+      const affiliateId = result.affiliate.affiliateId;
+      console.log('Redirecting to affiliate dashboard, affiliateId:', affiliateId);
+      
+      // Always use direct window.location.href redirect like other successful logins
+      window.location.href = `/embed-app.html?route=/affiliate-dashboard&id=${affiliateId}`;
+      
+      // Close modal
+      document.getElementById('existingAffiliateModal').remove();
+    });
+    
+    document.getElementById('chooseAnotherMethod').addEventListener('click', function() {
+      console.log('User chose to use different login method');
+      // Close modal and let user try another method
+      document.getElementById('existingAffiliateModal').remove();
+      
+      // Optionally show a message about using a different account
+      alert('Please try logging in with a different Google account or use the username/password login method.');
+    });
+    
+    // Close modal when clicking outside
+    document.getElementById('existingAffiliateModal').addEventListener('click', function(e) {
+      if (e.target === this) {
+        this.remove();
+      }
+    });
+  }
+
   // Show/hide payment method fields based on selection
   const paymentMethodSelect = document.getElementById('paymentMethod');
   const bankInfoContainer = document.getElementById('bankInfoContainer');
@@ -678,76 +753,6 @@ function initializeAffiliateRegistration() {
     });
   }
 }
-
-  // Function to show modal when existing affiliate tries to register
-  function showExistingAffiliateModal(result) {
-    const affiliate = result.affiliate;
-    const affiliateName = `${affiliate.firstName} ${affiliate.lastName}`;
-    
-    // Create modal HTML
-    const modalHTML = `
-      <div id="existingAffiliateModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" style="z-index: 9999;">
-        <div class="bg-white rounded-lg p-6 max-w-md mx-4 shadow-xl">
-          <div class="text-center mb-6">
-            <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-blue-100 mb-4">
-              <svg class="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-              </svg>
-            </div>
-            <h3 class="text-lg font-medium text-gray-900 mb-2">Account Already Exists</h3>
-            <p class="text-sm text-gray-500 mb-4">
-              Welcome back, <strong>${affiliateName}</strong>! This Google account is already associated with affiliate ID <strong>${affiliate.affiliateId}</strong>.
-            </p>
-          </div>
-          
-          <div class="space-y-3">
-            <button id="loginToDashboard" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-              Continue to Dashboard
-            </button>
-            <button id="chooseAnotherMethod" class="w-full flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-              Use Different Login Method
-            </button>
-          </div>
-        </div>
-      </div>
-    `;
-    
-    // Add modal to page
-    document.body.insertAdjacentHTML('beforeend', modalHTML);
-    
-    // Add event listeners
-    document.getElementById('loginToDashboard').addEventListener('click', function() {
-      console.log('User chose to login to dashboard');
-      // Redirect to dashboard with tokens
-      if (isEmbedded) {
-        window.parent.postMessage({
-          type: 'navigate',
-          data: { url: `/affiliate-dashboard?token=${result.token}&refreshToken=${result.refreshToken}` }
-        }, '*');
-      } else {
-        window.location.href = `/embed-app.html?route=/affiliate-dashboard&token=${result.token}&refreshToken=${result.refreshToken}`;
-      }
-      
-      // Close modal
-      document.getElementById('existingAffiliateModal').remove();
-    });
-    
-    document.getElementById('chooseAnotherMethod').addEventListener('click', function() {
-      console.log('User chose to use different login method');
-      // Close modal and let user try another method
-      document.getElementById('existingAffiliateModal').remove();
-      
-      // Optionally show a message about using a different account
-      alert('Please try logging in with a different Google account or use the username/password login method.');
-    });
-    
-    // Close modal when clicking outside
-    document.getElementById('existingAffiliateModal').addEventListener('click', function(e) {
-      if (e.target === this) {
-        this.remove();
-      }
-    });
-  }
 
 // Initialize immediately when script loads
 initializeAffiliateRegistration();

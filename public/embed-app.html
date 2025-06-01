@@ -243,11 +243,21 @@
                     }, '*');
                 }
                 
+                // Scroll iframe content to top immediately
+                window.scrollTo(0, 0);
+                document.documentElement.scrollTop = 0;
+                document.body.scrollTop = 0;
+                
                 // Send height to parent after a short delay to ensure content is rendered
                 setTimeout(() => {
                     sendHeight(true); // Force send on page load
                     // Also scroll parent to top
                     scrollParentToTop();
+                    
+                    // Ensure iframe is scrolled to top after content loads
+                    window.scrollTo(0, 0);
+                    document.documentElement.scrollTop = 0;
+                    document.body.scrollTop = 0;
                 }, 100);
                 
                 // Double-check height after a longer delay for complex content
