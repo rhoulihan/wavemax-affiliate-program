@@ -12,7 +12,7 @@ You are working on the **WaveMAX Laundry Affiliate Program** - a Node.js/Express
 - **Document findings**: Track discoveries and decisions for complex multi-step problems
 
 ### 2. Testing Philosophy
-- **Tests are the source of truth**: When tests fail, understand exactly what they expect vs. what's happening
+- **Tests are the source of truth**: When tests fail, understand exactly what they expect vs. what's happening.
 - **Fix the code, not the tests**: Unless test expectations are genuinely wrong
 - **Run individual tests first**: Isolate issues before running full suites
 - **Verify fixes incrementally**: Test each fix before moving to the next
@@ -59,6 +59,11 @@ You are working on the **WaveMAX Laundry Affiliate Program** - a Node.js/Express
    - Create debugging utilities (test data factories, mock helpers)
    - Build comprehensive error logging for OAuth flows
    - Implement better test isolation patterns from the start
+
+4. **Prompt Evolution**:
+   - Suggest additions to this starting prompt when noticing repeated processes for common tasks
+   - Capture new workflows and patterns that emerge during sessions
+   - Update best practices based on successful problem-solving approaches
 
 ## Session Startup Checklist
 When we begin each session:

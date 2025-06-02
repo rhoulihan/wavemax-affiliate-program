@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WaveMAX Development Session - Claude Starting Prompt</title>
+    <meta name="description" content="A comprehensive starting prompt for AI-assisted development sessions on the WaveMAX Laundry Affiliate Program">
+    <meta name="keywords" content="development, AI, collaboration, prompt, Node.js, testing, debugging">
+    
+    <!-- Open Graph for social sharing -->
+    <meta property="og:title" content="WaveMAX Development Session - Claude Starting Prompt">
+    <meta property="og:description" content="A proven framework for AI-assisted development collaboration">
+    <meta property="og:type" content="article">
+    
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #64748b;
+            --accent-color: #0ea5e9;
+            --success-color: #059669;
+            --warning-color: #d97706;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --text-primary: #1e293b;
+            --text-secondary: #475569;
+            --border-color: #e2e8f0;
+            --code-bg: #f1f5f9;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+            line-height: 1.6;
+            color: var(--text-primary);
+            background: var(--bg-color);
+            font-size: 14px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 30px 20px;
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+            color: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(37, 99, 235, 0.15);
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 8px;
+            font-weight: 700;
+        }
+
+        .header .subtitle {
+            font-size: 16px;
+            opacity: 0.9;
+            font-weight: 400;
+        }
+
+        .section {
+            background: var(--card-bg);
+            margin-bottom: 24px;
+            padding: 24px;
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .section h2 {
+            color: var(--primary-color);
+            font-size: 20px;
+            margin-bottom: 16px;
+            font-weight: 600;
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 8px;
+        }
+
+        .section h3 {
+            color: var(--text-primary);
+            font-size: 16px;
+            margin: 20px 0 12px 0;
+            font-weight: 600;
+        }
+
+        .section h4 {
+            color: var(--secondary-color);
+            font-size: 14px;
+            margin: 16px 0 8px 0;
+            font-weight: 600;
+        }
+
+        ul, ol {
+            margin-left: 20px;
+            margin-bottom: 16px;
+        }
+
+        li {
+            margin-bottom: 6px;
+            line-height: 1.5;
+        }
+
+        .highlight-box {
+            background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
+            border: 1px solid var(--accent-color);
+            border-radius: 8px;
+            padding: 16px;
+            margin: 16px 0;
+        }
+
+        .checklist {
+            background: var(--code-bg);
+            border-radius: 6px;
+            padding: 16px;
+            margin: 12px 0;
+        }
+
+        .checklist ul {
+            list-style: none;
+            margin-left: 0;
+        }
+
+        .checklist li {
+            position: relative;
+            padding-left: 24px;
+            margin-bottom: 8px;
+        }
+
+        .checklist li:before {
+            content: "□";
+            position: absolute;
+            left: 0;
+            color: var(--primary-color);
+            font-weight: bold;
+        }
+
+        .principles {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 16px;
+            margin-top: 16px;
+        }
+
+        .principle-card {
+            background: var(--code-bg);
+            padding: 16px;
+            border-radius: 8px;
+            border-left: 4px solid var(--success-color);
+        }
+
+        .principle-card h4 {
+            color: var(--success-color);
+            margin-bottom: 8px;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            padding: 24px;
+            background: var(--text-primary);
+            color: white;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .badge {
+            display: inline-block;
+            background: var(--warning-color);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            margin: 4px 4px 0 0;
+        }
+
+        .tech-stack {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin: 12px 0;
+        }
+
+        .emoji {
+            font-size: 16px;
+            margin-right: 6px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 12px;
+            }
+            
+            .header h1 {
+                font-size: 24px;
+            }
+            
+            .section {
+                padding: 16px;
+            }
+            
+            .principles {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Tweet-friendly highlights */
+        .tweet-highlight {
+            background: linear-gradient(135deg, #fef3c7, #fbbf24);
+            border: 2px solid #f59e0b;
+            border-radius: 8px;
+            padding: 16px;
+            margin: 16px 0;
+            font-weight: 600;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1><span class="emoji">🚀</span>WaveMAX Development Session</h1>
+            <div class="subtitle">Claude Starting Prompt for AI-Assisted Development</div>
+            <div class="tech-stack">
+                <span class="badge">Node.js</span>
+                <span class="badge">Express</span>
+                <span class="badge">MongoDB</span>
+                <span class="badge">OAuth</span>
+                <span class="badge">Jest</span>
+            </div>
+        </header>
+
+        <div class="tweet-highlight">
+            <span class="emoji">💡</span>A proven framework for collaborative AI development sessions
+        </div>
+
+        <section class="section">
+            <h2><span class="emoji">🎯</span>Project Context</h2>
+            <p>You are working on the <strong>WaveMAX Laundry Affiliate Program</strong> - a Node.js/Express application with MongoDB, featuring OAuth authentication, social registration, affiliate management, and comprehensive testing. The codebase prioritizes security, maintainability, and robust error handling.</p>
+        </section>
+
+        <section class="section">
+            <h2><span class="emoji">🔍</span>Our Proven Problem-Solving Process</h2>
+            
+            <h3>1. Systematic Investigation Approach</h3>
+            <ul>
+                <li><strong>Always start with facts</strong>: Use <code>git status</code>, <code>npm test</code>, logs to understand current state</li>
+                <li><strong>Trace the root cause</strong>: Don't fix symptoms - find the underlying issue</li>
+                <li><strong>Use multiple tools in parallel</strong>: Batch <code>Read</code>, <code>Grep</code>, <code>Bash</code> calls for efficiency</li>
+                <li><strong>Document findings</strong>: Track discoveries and decisions for complex multi-step problems</li>
+            </ul>
+
+            <h3>2. Testing Philosophy</h3>
+            <ul>
+                <li><strong>Tests are the source of truth</strong>: When tests fail, understand exactly what they expect vs. what's happening</li>
+                <li><strong>Fix the code, not the tests</strong>: Unless test expectations are genuinely wrong</li>
+                <li><strong>Run individual tests first</strong>: Isolate issues before running full suites</li>
+                <li><strong>Verify fixes incrementally</strong>: Test each fix before moving to the next</li>
+            </ul>
+
+            <h3>3. Code Quality Standards</h3>
+            <ul>
+                <li><strong>Follow existing patterns</strong>: Study neighboring code before implementing changes</li>
+                <li><strong>Maintain backward compatibility</strong>: Add new fields alongside existing ones when possible</li>
+                <li><strong>Security first</strong>: Never expose sensitive data, validate all inputs</li>
+                <li><strong>No magic numbers/strings</strong>: Use meaningful constants and clear variable names</li>
+            </ul>
+
+            <h3>4. Git Workflow</h3>
+            <ul>
+                <li><strong>Commit frequently</strong>: Logical, atomic commits with descriptive messages</li>
+                <li><strong>Document thoroughly</strong>: Include both what changed and why</li>
+                <li><strong>Test before committing</strong>: Ensure all tests pass before creating commits</li>
+            </ul>
+        </section>
+
+        <section class="section">
+            <h2><span class="emoji">📚</span>Lessons Learned from Our Sessions</h2>
+            
+            <h3>Complex Debugging Strategies</h3>
+            <ol>
+                <li><strong>Jest Mock Issues</strong>: When tests pass individually but fail together, investigate mock isolation, <code>clearMocks</code> configuration, and require cache clearing</li>
+                <li><strong>OAuth/Authentication</strong>: Always verify environment variables, token structures, and response formats match test expectations</li>
+                <li><strong>Database Issues</strong>: Check model validations, unique constraints, and ensure test data cleanup between runs</li>
+                <li><strong>Response Structure Mismatches</strong>: Tests often expect top-level fields that controllers return nested - add both for compatibility</li>
+            </ol>
+
+            <h3>Effective Communication Patterns</h3>
+            <ul>
+                <li><strong>Be explicit about assumptions</strong>: State what you think is happening and ask for confirmation</li>
+                <li><strong>Propose multiple solutions</strong>: Offer 2-3 approaches with trade-offs</li>
+                <li><strong>Ask for input on complex decisions</strong>: Architecture changes, security implications, test strategies</li>
+                <li><strong>Summarize progress regularly</strong>: Especially in long debugging sessions</li>
+            </ul>
+        </section>
+
+        <section class="section">
+            <h2><span class="emoji">🚀</span>Improvement Opportunities</h2>
+            
+            <h3>For Future Sessions</h3>
+            
+            <h4>1. Proactive Error Prevention</h4>
+            <ul>
+                <li>Check test expectations before implementing features</li>
+                <li>Verify environment setup early in OAuth/external service work</li>
+                <li>Run quick smoke tests after major changes</li>
+            </ul>
+
+            <h4>2. Better Documentation</h4>
+            <ul>
+                <li>Create inline comments for complex logic (OAuth flows, validation rules)</li>
+                <li>Maintain decision logs for architectural choices</li>
+                <li>Document test patterns for future reference</li>
+            </ul>
+
+            <h4>3. Enhanced Debugging</h4>
+            <ul>
+                <li>Create debugging utilities (test data factories, mock helpers)</li>
+                <li>Build comprehensive error logging for OAuth flows</li>
+                <li>Implement better test isolation patterns from the start</li>
+            </ul>
+
+            <h4>4. Prompt Evolution</h4>
+            <ul>
+                <li>Suggest additions to this starting prompt when noticing repeated processes for common tasks</li>
+                <li>Capture new workflows and patterns that emerge during sessions</li>
+                <li>Update best practices based on successful problem-solving approaches</li>
+            </ul>
+        </section>
+
+        <section class="section">
+            <h2><span class="emoji">✅</span>Session Startup Checklist</h2>
+            <div class="checklist">
+                <p><strong>When we begin each session:</strong></p>
+                <ul>
+                    <li>Review git status and recent commits</li>
+                    <li>Check if any tests are currently failing (<code>npm test</code>)</li>
+                    <li>Understand the current task/issue context</li>
+                    <li>Identify if this relates to previous work (OAuth, testing, etc.)</li>
+                    <li>Establish the success criteria for the session</li>
+                </ul>
+            </div>
+        </section>
+
+        <section class="section">
+            <h2><span class="emoji">💬</span>Communication Preferences</h2>
+            <ul>
+                <li><strong>Be direct and concise</strong>: Focus on facts and solutions</li>
+                <li><strong>Use parallel tool execution</strong>: Batch operations when possible</li>
+                <li><strong>Ask for clarification</strong>: When requirements are ambiguous</li>
+                <li><strong>Provide options</strong>: Especially for architectural or security decisions</li>
+                <li><strong>Document complex solutions</strong>: For future reference</li>
+            </ul>
+        </section>
+
+        <section class="section">
+            <h2><span class="emoji">🎯</span>Key Principles for Our Collaboration</h2>
+            <div class="principles">
+                <div class="principle-card">
+                    <h4>Systematic over quick fixes</h4>
+                    <p>Take time to understand root causes</p>
+                </div>
+                <div class="principle-card">
+                    <h4>Test-driven solutions</h4>
+                    <p>Let failing tests guide our implementation</p>
+                </div>
+                <div class="principle-card">
+                    <h4>Security and maintainability</h4>
+                    <p>Never compromise on these fundamentals</p>
+                </div>
+                <div class="principle-card">
+                    <h4>Collaborative decision-making</h4>
+                    <p>Complex choices should involve discussion</p>
+                </div>
+                <div class="principle-card">
+                    <h4>Continuous improvement</h4>
+                    <p>Learn from each session to work better together</p>
+                </div>
+            </div>
+        </section>
+
+        <footer class="footer">
+            <span class="emoji">🚀</span>Ready to debug, build, and improve the WaveMAX codebase together!
+        </footer>
+    </div>
+</body>
+</html>

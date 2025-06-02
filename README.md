@@ -20,6 +20,19 @@ The WaveMAX Affiliate Program enables individuals to register as affiliates, onb
 
 ## Recent Improvements (June 2025)
 
+### AI Development Collaboration Framework
+- **Created Interactive Starting Prompt**: Developed comprehensive `init.prompt` file documenting proven collaborative processes
+  - Systematic investigation approaches for debugging complex issues
+  - Testing philosophy emphasizing tests as source of truth
+  - Code quality standards and git workflow best practices
+  - Lessons learned from OAuth integration, password security, and administrator management sessions
+  - Communication patterns and prompt evolution strategies
+- **Published HTML Version**: Created developer-friendly HTML presentation of the collaboration framework
+  - Available at `/public/wavemax-development-prompt.html` for easy sharing
+  - Tweet-friendly formatting with social media meta tags
+  - Visual hierarchy with emojis, colors, and organized sections for different aspects
+  - Mobile responsive design showcasing AI-assisted development best practices
+
 ### Enhanced OAuth Integration & User Experience
 - **Unified OAuth Strategy**: Implemented comprehensive OAuth authentication for both affiliates and customers
   - Single Google strategy with context detection for customer vs affiliate registration
