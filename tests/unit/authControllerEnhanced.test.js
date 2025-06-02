@@ -640,7 +640,10 @@ describe('Enhanced Auth Controller - OAuth Methods', () => {
       expect(OAuthSession.consumeSession).toHaveBeenCalledWith('test-session-123');
       expect(res.json).toHaveBeenCalledWith({
         success: true,
-        result: mockSessionData
+        result: {
+          socialToken: 'social-jwt-token',
+          userData: mockSessionData
+        }
       });
     });
 
