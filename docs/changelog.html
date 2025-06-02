@@ -243,12 +243,86 @@
             <div class="version-nav">
                 <h3>Quick Navigation</h3>
                 <ul>
+                    <li><a href="#v1.4.0">v1.4.0 - OAuth Integration & Account Conflict Resolution</a></li>
                     <li><a href="#v1.3.1">v1.3.1 - Affiliate Customer Filtering</a></li>
                     <li><a href="#v1.3.0">v1.3.0 - Test Suite Achievement</a></li>
                     <li><a href="#v1.2.1">v1.2.1 - Customer Flow Fixes</a></li>
                     <li><a href="#v1.2.0">v1.2.0 - Documentation System</a></li>
                     <li><a href="#v1.1.0">v1.1.0 - CSRF Protection</a></li>
                     <li><a href="#v1.0.0">v1.0.0 - Initial Release</a></li>
+                </ul>
+            </div>
+
+            <div id="v1.4.0" class="release">
+                <h2>Version 1.4.0 <span class="tag new">Latest</span></h2>
+                <div class="release-date">Released on June 2, 2025</div>
+                
+                <h3>🚀 Major OAuth Integration</h3>
+                <ul>
+                    <li><span class="tag new">NEW</span> <strong>Comprehensive OAuth Authentication:</strong> Full Google, Facebook, and LinkedIn OAuth 2.0 integration for both affiliates and customers</li>
+                    <li><span class="tag new">NEW</span> <strong>Database-Based Session Polling:</strong> Reliable OAuth session management that works in embedded iframe contexts</li>
+                    <li><span class="tag new">NEW</span> <strong>Account Conflict Resolution:</strong> Intelligent handling when users attempt to register with social accounts already linked to different user types</li>
+                    <li><span class="tag new">NEW</span> <strong>Social Account Linking:</strong> Existing users can link social accounts to their profiles for alternative login methods</li>
+                </ul>
+
+                <h3>🔐 Enhanced Security & User Experience</h3>
+                <ul>
+                    <li><span class="tag improved">IMPROVED</span> <strong>Conditional Model Validation:</strong> Customer model now supports OAuth registrations without requiring password fields</li>
+                    <li><span class="tag improved">IMPROVED</span> <strong>Cross-User-Type Conflict Detection:</strong> Prevents duplicate social accounts across affiliate and customer user types</li>
+                    <li><span class="tag improved">IMPROVED</span> <strong>Modal Conflict Resolution:</strong> Professional UI dialogs for resolving account conflicts with clear user choices</li>
+                    <li><span class="tag improved">IMPROVED</span> <strong>Registration Method Tracking:</strong> All users now have registrationMethod field tracking how they signed up</li>
+                </ul>
+
+                <h3>🛠️ API Enhancements</h3>
+                <ul>
+                    <li><span class="tag new">NEW</span> <strong>OAuth Endpoints:</strong> Added complete OAuth API including registration, login, and session polling</li>
+                    <li><span class="tag new">NEW</span> <code>/api/v1/auth/social/register</code> - Complete affiliate social registration</li>
+                    <li><span class="tag new">NEW</span> <code>/api/v1/auth/customer/social/register</code> - Complete customer social registration</li>
+                    <li><span class="tag new">NEW</span> <code>/api/v1/auth/oauth-session/:sessionId</code> - Poll OAuth session results</li>
+                    <li><span class="tag new">NEW</span> <code>/api/v1/auth/social/link</code> - Link social accounts to existing users</li>
+                </ul>
+
+                <h3>✅ Comprehensive Testing</h3>
+                <ul>
+                    <li><span class="tag new">NEW</span> <strong>OAuth Integration Tests:</strong> 26 comprehensive OAuth flow tests covering all scenarios</li>
+                    <li><span class="tag new">NEW</span> <strong>Enhanced Auth Controller Tests:</strong> 31 unit tests for OAuth functionality</li>
+                    <li><span class="tag new">NEW</span> <strong>Account Conflict Tests:</strong> Complete test coverage for social account conflict resolution</li>
+                    <li><span class="tag improved">IMPROVED</span> <strong>Customer Model Tests:</strong> Validation tests for conditional password requirements</li>
+                </ul>
+
+                <h3>📚 Documentation Updates</h3>
+                <ul>
+                    <li><span class="tag improved">IMPROVED</span> <strong>README.md:</strong> Comprehensive OAuth setup guide and API documentation</li>
+                    <li><span class="tag improved">IMPROVED</span> <strong>API Reference:</strong> Complete OAuth endpoint documentation with examples</li>
+                    <li><span class="tag improved">IMPROVED</span> <strong>Environment Configuration:</strong> Detailed OAuth provider setup instructions</li>
+                    <li><span class="tag new">NEW</span> <strong>OAuth Security Features:</strong> Documentation of OAuth-specific security implementations</li>
+                </ul>
+
+                <h3>🔧 Technical Improvements</h3>
+                <ul>
+                    <li><span class="tag improved">IMPROVED</span> <strong>Customer Model Schema:</strong> Added conditional validation for OAuth vs traditional registrations</li>
+                    <li><span class="tag improved">IMPROVED</span> <strong>Social Account Data Structure:</strong> Standardized social account storage across all user types</li>
+                    <li><span class="tag improved">IMPROVED</span> <strong>Username Generation:</strong> Automatic unique username generation for OAuth users</li>
+                    <li><span class="tag improved">IMPROVED</span> <strong>Token Management:</strong> Secure JWT token handling for OAuth authentication flows</li>
+                </ul>
+
+                <h3>🎯 Quality Assurance</h3>
+                <ul>
+                    <li><span class="tag new">ACHIEVEMENT</span> <strong>All OAuth Tests Passing:</strong> 100% success rate on OAuth integration and unit tests</li>
+                    <li><span class="tag new">ACHIEVEMENT</span> <strong>Model Validation Working:</strong> OAuth customers can register without password fields</li>
+                    <li><span class="tag new">ACHIEVEMENT</span> <strong>Cross-Platform Compatibility:</strong> OAuth flows work in embedded iframe contexts</li>
+                    <li><span class="tag new">ACHIEVEMENT</span> <strong>Security Compliance:</strong> OAuth implementation follows industry best practices</li>
+                </ul>
+            </div>
+
+            <div id="v1.3.1" class="release">
+                <h2>Version 1.3.1</h2>
+                <div class="release-date">Released on May 31, 2025</div>
+                
+                <h3>✨ New Features</h3>
+                <ul>
+                    <li><span class="tag new">NEW</span> <strong>Affiliate Customer Filtering:</strong> Enhanced affiliate dashboard with customer filtering capabilities for better customer management</li>
+                    <li><span class="tag new">NEW</span> <strong>Smart Email Links:</strong> Customer email links now include filtering parameters for seamless dashboard navigation</li>
                 </ul>
             </div>
 

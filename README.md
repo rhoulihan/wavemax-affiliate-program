@@ -52,6 +52,11 @@ The WaveMAX Affiliate Program enables individuals to register as affiliates, onb
   - Database-based OAuth result polling instead of postMessage
   - Works reliably in embedded iframe contexts
   - Automatic cleanup of OAuth sessions with proper timeout handling
+- **Account Conflict Resolution**: Comprehensive handling for social account conflicts
+  - Customer model conditional validation for OAuth registrations
+  - OAuth customers don't require password fields when `registrationMethod` is social
+  - Account conflict modals for existing users attempting OAuth registration
+  - Seamless cross-user-type conflict detection and resolution
 
 ### Strong Password Security & Social Media Authentication  
 - **Enhanced Password Security**: Implemented comprehensive strong password requirements
@@ -215,6 +220,11 @@ The WaveMAX Affiliate Program enables individuals to register as affiliates, onb
   - Administrator: System administrators with permissions and audit trail
   - Operator: Laundry operators with shift and performance tracking
   - SystemConfig: Dynamic system configuration management
+- **Enhanced OAuth Support**: Updated Customer and Affiliate models for OAuth authentication
+  - Conditional validation for password fields based on registration method
+  - Social account data storage (Google, Facebook, LinkedIn)
+  - Registration method tracking (traditional vs social)
+  - OAuth accounts don't require password fields for security compliance
 
 ### Customer Registration Simplification
 - **Removed Schedule Preferences**: Simplified registration by removing preferred day/time selection
@@ -1140,12 +1150,24 @@ GET /api/auth/google/callback
 GET /api/auth/facebook/callback
 GET /api/auth/linkedin/callback
 
-# Link OAuth account to existing user
-POST /api/auth/link
+# Complete social registration for affiliates
+POST /api/v1/auth/social/register
+Body: { socialToken: 'string', phone: 'string', businessName: 'string', address: 'string', city: 'string', state: 'string', zipCode: 'string', serviceArea: 'string', deliveryFee: number, paymentMethod: 'string' }
+
+# Complete social registration for customers
+POST /api/v1/auth/customer/social/register
+Body: { socialToken: 'string', affiliateId: 'string', phone: 'string', address: 'string', city: 'string', state: 'string', zipCode: 'string', serviceFrequency: 'string' }
+
+# Social login for existing users
+POST /api/v1/auth/social/callback
 Body: { provider: 'google|facebook|linkedin', socialId: 'string' }
 
-# Unlink OAuth account
-DELETE /api/auth/unlink/:provider
+# Poll OAuth session results
+GET /api/v1/auth/oauth-session/:sessionId
+
+# Link OAuth account to existing user
+POST /api/v1/auth/social/link
+Body: { provider: 'google|facebook|linkedin', socialToken: 'string' }
 ```
 
 ### OAuth Frontend Integration
