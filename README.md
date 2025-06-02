@@ -28,7 +28,7 @@ The WaveMAX Affiliate Program enables individuals to register as affiliates, onb
   - Lessons learned from OAuth integration, password security, and administrator management sessions
   - Communication patterns and prompt evolution strategies
 - **Published HTML Version**: Created developer-friendly HTML presentation of the collaboration framework
-  - Available at `/public/wavemax-development-prompt.html` for easy sharing
+  - Available at `/wavemax-development-prompt.html` for easy sharing
   - Tweet-friendly formatting with social media meta tags
   - Visual hierarchy with emojis, colors, and organized sections for different aspects
   - Mobile responsive design showcasing AI-assisted development best practices
