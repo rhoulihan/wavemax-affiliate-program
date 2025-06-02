@@ -272,6 +272,224 @@
         .copy-icon {
             font-size: 18px;
         }
+
+        /* Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal {
+            background: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            transform: translateY(-20px);
+            transition: transform 0.3s ease;
+        }
+
+        .modal-overlay.active .modal {
+            transform: translateY(0);
+        }
+
+        .modal-header {
+            padding: 24px 24px 0;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 24px;
+        }
+
+        .modal-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--primary-color);
+            margin-bottom: 8px;
+        }
+
+        .modal-subtitle {
+            color: var(--text-secondary);
+            font-size: 14px;
+            margin-bottom: 16px;
+        }
+
+        .modal-progress {
+            display: flex;
+            gap: 4px;
+            margin-bottom: 16px;
+        }
+
+        .progress-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--border-color);
+            transition: background 0.3s ease;
+        }
+
+        .progress-dot.active {
+            background: var(--primary-color);
+        }
+
+        .progress-dot.completed {
+            background: var(--success-color);
+        }
+
+        .modal-body {
+            padding: 0 24px 24px;
+        }
+
+        .option-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .option-card {
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            padding: 16px 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: var(--card-bg);
+        }
+
+        .option-card:hover {
+            border-color: var(--accent-color);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(14, 165, 233, 0.2);
+        }
+
+        .option-card.selected {
+            border-color: var(--primary-color);
+            background: linear-gradient(135deg, #eff6ff, #dbeafe);
+        }
+
+        .option-card .option-icon {
+            font-size: 24px;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .option-card .option-name {
+            font-weight: 600;
+            font-size: 14px;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+
+        .option-card .option-desc {
+            font-size: 12px;
+            color: var(--text-secondary);
+            line-height: 1.3;
+        }
+
+        .custom-input-section {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .custom-input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 14px;
+            margin-bottom: 12px;
+            transition: border-color 0.3s ease;
+        }
+
+        .custom-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        .modal-footer {
+            padding: 0 24px 24px;
+            display: flex;
+            gap: 12px;
+            justify-content: space-between;
+        }
+
+        .modal-btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            flex: 1;
+        }
+
+        .modal-btn.secondary {
+            background: var(--border-color);
+            color: var(--text-primary);
+        }
+
+        .modal-btn.secondary:hover {
+            background: var(--secondary-color);
+            color: white;
+        }
+
+        .modal-btn.primary {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .modal-btn.primary:hover {
+            background: #1d4ed8;
+            transform: translateY(-1px);
+        }
+
+        .modal-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        .selection-summary {
+            background: var(--code-bg);
+            border-radius: 6px;
+            padding: 16px;
+            margin-bottom: 20px;
+        }
+
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .summary-label {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .summary-value {
+            color: var(--text-secondary);
+        }
     </style>
 </head>
 <body>
@@ -449,21 +667,361 @@
         </footer>
     </div>
 
+    <!-- Project Context Modal -->
+    <div class="modal-overlay" id="projectModal">
+        <div class="modal">
+            <div class="modal-header">
+                <div class="modal-title" id="modalTitle">Project Setup</div>
+                <div class="modal-subtitle" id="modalSubtitle">Let's customize the development prompt for your project</div>
+                <div class="modal-progress" id="modalProgress">
+                    <div class="progress-dot active"></div>
+                    <div class="progress-dot"></div>
+                    <div class="progress-dot"></div>
+                    <div class="progress-dot"></div>
+                    <div class="progress-dot"></div>
+                    <div class="progress-dot"></div>
+                </div>
+            </div>
+            <div class="modal-body" id="modalBody">
+                <!-- Dynamic content will be inserted here -->
+            </div>
+            <div class="modal-footer">
+                <button class="modal-btn secondary" id="modalBackBtn" style="display: none;">Back</button>
+                <button class="modal-btn secondary" id="modalSkipBtn">Skip</button>
+                <button class="modal-btn primary" id="modalNextBtn">Next</button>
+            </div>
+        </div>
+    </div>
+
     <script>
+        // Project context configuration
+        const projectSteps = [
+            {
+                title: "Programming Languages",
+                subtitle: "Select the primary languages used in your project",
+                type: "multiple",
+                options: [
+                    { id: "javascript", icon: "📜", name: "JavaScript", desc: "Frontend & Backend" },
+                    { id: "typescript", icon: "📘", name: "TypeScript", desc: "Type-safe JavaScript" },
+                    { id: "python", icon: "🐍", name: "Python", desc: "Backend & ML" },
+                    { id: "java", icon: "☕", name: "Java", desc: "Enterprise backend" },
+                    { id: "csharp", icon: "🔷", name: "C#", desc: ".NET applications" },
+                    { id: "php", icon: "🐘", name: "PHP", desc: "Web development" },
+                    { id: "go", icon: "🐹", name: "Go", desc: "Fast backend services" },
+                    { id: "rust", icon: "🦀", name: "Rust", desc: "Systems programming" },
+                    { id: "ruby", icon: "💎", name: "Ruby", desc: "Web development" },
+                    { id: "swift", icon: "🦉", name: "Swift", desc: "iOS development" },
+                    { id: "kotlin", icon: "🎯", name: "Kotlin", desc: "Android & JVM" },
+                    { id: "dart", icon: "🎯", name: "Dart", desc: "Flutter apps" }
+                ]
+            },
+            {
+                title: "Frontend Frameworks",
+                subtitle: "Choose your frontend technology stack",
+                type: "multiple",
+                options: [
+                    { id: "react", icon: "⚛️", name: "React", desc: "Component library" },
+                    { id: "vue", icon: "💚", name: "Vue.js", desc: "Progressive framework" },
+                    { id: "angular", icon: "🅰️", name: "Angular", desc: "Full framework" },
+                    { id: "svelte", icon: "🧡", name: "Svelte", desc: "Compile-time framework" },
+                    { id: "nextjs", icon: "▲", name: "Next.js", desc: "React framework" },
+                    { id: "nuxtjs", icon: "💚", name: "Nuxt.js", desc: "Vue framework" },
+                    { id: "vanilla", icon: "🍦", name: "Vanilla JS", desc: "No framework" },
+                    { id: "jquery", icon: "📚", name: "jQuery", desc: "Classic library" },
+                    { id: "bootstrap", icon: "🅱️", name: "Bootstrap", desc: "CSS framework" },
+                    { id: "tailwind", icon: "🌊", name: "Tailwind CSS", desc: "Utility framework" }
+                ]
+            },
+            {
+                title: "Backend Technologies",
+                subtitle: "Select your backend framework and runtime",
+                type: "multiple",
+                options: [
+                    { id: "nodejs", icon: "🟢", name: "Node.js", desc: "JavaScript runtime" },
+                    { id: "express", icon: "🚀", name: "Express.js", desc: "Node.js framework" },
+                    { id: "nestjs", icon: "🐱", name: "NestJS", desc: "Scalable Node.js" },
+                    { id: "django", icon: "🎸", name: "Django", desc: "Python framework" },
+                    { id: "flask", icon: "🌶️", name: "Flask", desc: "Micro Python framework" },
+                    { id: "fastapi", icon: "⚡", name: "FastAPI", desc: "Modern Python API" },
+                    { id: "spring", icon: "🍃", name: "Spring Boot", desc: "Java framework" },
+                    { id: "dotnet", icon: "🔷", name: ".NET Core", desc: "Microsoft framework" },
+                    { id: "rails", icon: "🛤️", name: "Ruby on Rails", desc: "Ruby framework" },
+                    { id: "laravel", icon: "🎨", name: "Laravel", desc: "PHP framework" }
+                ]
+            },
+            {
+                title: "Database & Storage",
+                subtitle: "Choose your data storage solutions",
+                type: "multiple",
+                options: [
+                    { id: "mongodb", icon: "🍃", name: "MongoDB", desc: "NoSQL document DB" },
+                    { id: "postgresql", icon: "🐘", name: "PostgreSQL", desc: "Advanced SQL DB" },
+                    { id: "mysql", icon: "🐬", name: "MySQL", desc: "Popular SQL DB" },
+                    { id: "redis", icon: "🔴", name: "Redis", desc: "In-memory cache" },
+                    { id: "sqlite", icon: "🪶", name: "SQLite", desc: "Lightweight SQL" },
+                    { id: "elasticsearch", icon: "🔍", name: "Elasticsearch", desc: "Search engine" },
+                    { id: "firebase", icon: "🔥", name: "Firebase", desc: "Google cloud DB" },
+                    { id: "supabase", icon: "⚡", name: "Supabase", desc: "Open source Firebase" },
+                    { id: "dynamodb", icon: "📊", name: "DynamoDB", desc: "AWS NoSQL" },
+                    { id: "cassandra", icon: "🏛️", name: "Cassandra", desc: "Distributed DB" }
+                ]
+            },
+            {
+                title: "Deployment & Infrastructure",
+                subtitle: "Select your deployment and hosting platforms",
+                type: "multiple",
+                options: [
+                    { id: "docker", icon: "🐳", name: "Docker", desc: "Containerization" },
+                    { id: "aws", icon: "☁️", name: "AWS", desc: "Amazon cloud" },
+                    { id: "gcp", icon: "🌤️", name: "Google Cloud", desc: "Google cloud platform" },
+                    { id: "azure", icon: "☁️", name: "Azure", desc: "Microsoft cloud" },
+                    { id: "vercel", icon: "▲", name: "Vercel", desc: "Frontend hosting" },
+                    { id: "netlify", icon: "🌐", name: "Netlify", desc: "JAMstack hosting" },
+                    { id: "heroku", icon: "💜", name: "Heroku", desc: "Platform as a service" },
+                    { id: "digitalocean", icon: "🌊", name: "DigitalOcean", desc: "Cloud hosting" },
+                    { id: "kubernetes", icon: "⚙️", name: "Kubernetes", desc: "Container orchestration" },
+                    { id: "pm2", icon: "🔄", name: "PM2", desc: "Process manager" }
+                ]
+            },
+            {
+                title: "Testing & Tools",
+                subtitle: "Choose your testing frameworks and development tools",
+                type: "multiple",
+                options: [
+                    { id: "jest", icon: "🃏", name: "Jest", desc: "JavaScript testing" },
+                    { id: "mocha", icon: "☕", name: "Mocha", desc: "JS test framework" },
+                    { id: "cypress", icon: "🌲", name: "Cypress", desc: "E2E testing" },
+                    { id: "playwright", icon: "🎭", name: "Playwright", desc: "Browser testing" },
+                    { id: "pytest", icon: "🧪", name: "Pytest", desc: "Python testing" },
+                    { id: "junit", icon: "☕", name: "JUnit", desc: "Java testing" },
+                    { id: "eslint", icon: "📏", name: "ESLint", desc: "Code linting" },
+                    { id: "prettier", icon: "💅", name: "Prettier", desc: "Code formatting" },
+                    { id: "webpack", icon: "📦", name: "Webpack", desc: "Module bundler" },
+                    { id: "vite", icon: "⚡", name: "Vite", desc: "Fast build tool" }
+                ]
+            }
+        ];
+
+        let currentStep = 0;
+        let projectContext = {};
+
         document.addEventListener('DOMContentLoaded', function() {
-            document.getElementById('copyPromptBtn').addEventListener('click', copyGenericPrompt);
+            document.getElementById('copyPromptBtn').addEventListener('click', startProjectWizard);
+            document.getElementById('modalNextBtn').addEventListener('click', handleNext);
+            document.getElementById('modalBackBtn').addEventListener('click', handleBack);
+            document.getElementById('modalSkipBtn').addEventListener('click', handleSkip);
+            
+            // Close modal when clicking overlay
+            document.getElementById('projectModal').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    closeModal();
+                }
+            });
         });
 
-        function copyGenericPrompt() {
-            const genericPrompt = `# Development Session - Claude Starting Prompt
+        function startProjectWizard() {
+            currentStep = 0;
+            projectContext = {};
+            showModal();
+            renderStep();
+        }
+
+        function showModal() {
+            document.getElementById('projectModal').classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal() {
+            document.getElementById('projectModal').classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        function renderStep() {
+            if (currentStep >= projectSteps.length) {
+                renderSummary();
+                return;
+            }
+
+            const step = projectSteps[currentStep];
+            const modal = document.getElementById('projectModal');
+            
+            // Update header
+            document.getElementById('modalTitle').textContent = step.title;
+            document.getElementById('modalSubtitle').textContent = step.subtitle;
+            
+            // Update progress
+            updateProgress();
+            
+            // Update buttons
+            const backBtn = document.getElementById('modalBackBtn');
+            const nextBtn = document.getElementById('modalNextBtn');
+            const skipBtn = document.getElementById('modalSkipBtn');
+            
+            backBtn.style.display = currentStep > 0 ? 'block' : 'none';
+            nextBtn.textContent = currentStep === projectSteps.length - 1 ? 'Review' : 'Next';
+            skipBtn.style.display = 'block';
+            
+            // Render options
+            renderStepContent(step);
+        }
+
+        function renderStepContent(step) {
+            const body = document.getElementById('modalBody');
+            const stepKey = getStepKey(currentStep);
+            const selectedValues = projectContext[stepKey] || [];
+
+            body.innerHTML = `
+                <div class="option-grid">
+                    ${step.options.map(option => `
+                        <div class="option-card ${selectedValues.includes(option.id) ? 'selected' : ''}" 
+                             data-option-id="${option.id}">
+                            <span class="option-icon">${option.icon}</span>
+                            <div class="option-name">${option.name}</div>
+                            <div class="option-desc">${option.desc}</div>
+                        </div>
+                    `).join('')}
+                </div>
+                <div class="custom-input-section">
+                    <label style="font-weight: 600; margin-bottom: 8px; display: block;">Other (specify):</label>
+                    <input type="text" class="custom-input" id="customInput" 
+                           placeholder="Enter additional ${step.title.toLowerCase()}..." 
+                           value="${projectContext[stepKey + '_custom'] || ''}">
+                </div>
+            `;
+
+            // Add event listeners
+            body.querySelectorAll('.option-card').forEach(card => {
+                card.addEventListener('click', function() {
+                    const optionId = this.dataset.optionId;
+                    toggleSelection(stepKey, optionId, this);
+                });
+            });
+
+            document.getElementById('customInput').addEventListener('input', function() {
+                projectContext[stepKey + '_custom'] = this.value;
+            });
+        }
+
+        function toggleSelection(stepKey, optionId, element) {
+            if (!projectContext[stepKey]) {
+                projectContext[stepKey] = [];
+            }
+
+            const index = projectContext[stepKey].indexOf(optionId);
+            if (index > -1) {
+                projectContext[stepKey].splice(index, 1);
+                element.classList.remove('selected');
+            } else {
+                projectContext[stepKey].push(optionId);
+                element.classList.add('selected');
+            }
+        }
+
+        function getStepKey(stepIndex) {
+            const keys = ['languages', 'frontend', 'backend', 'database', 'deployment', 'testing'];
+            return keys[stepIndex];
+        }
+
+        function updateProgress() {
+            const dots = document.querySelectorAll('.progress-dot');
+            dots.forEach((dot, index) => {
+                dot.classList.remove('active', 'completed');
+                if (index < currentStep) {
+                    dot.classList.add('completed');
+                } else if (index === currentStep) {
+                    dot.classList.add('active');
+                }
+            });
+        }
+
+        function handleNext() {
+            if (currentStep < projectSteps.length) {
+                currentStep++;
+                renderStep();
+            } else {
+                generateAndCopyPrompt();
+            }
+        }
+
+        function handleBack() {
+            if (currentStep > 0) {
+                currentStep--;
+                renderStep();
+            }
+        }
+
+        function handleSkip() {
+            // Skip current step (clear any selections)
+            const stepKey = getStepKey(currentStep);
+            delete projectContext[stepKey];
+            delete projectContext[stepKey + '_custom'];
+            
+            if (currentStep < projectSteps.length - 1) {
+                currentStep++;
+                renderStep();
+            } else {
+                generateAndCopyPrompt();
+            }
+        }
+
+        function renderSummary() {
+            document.getElementById('modalTitle').textContent = 'Project Summary';
+            document.getElementById('modalSubtitle').textContent = 'Review your selections and generate your custom prompt';
+            
+            const body = document.getElementById('modalBody');
+            const summaryItems = [];
+
+            projectSteps.forEach((step, index) => {
+                const stepKey = getStepKey(index);
+                const selections = projectContext[stepKey] || [];
+                const custom = projectContext[stepKey + '_custom'] || '';
+                
+                if (selections.length > 0 || custom) {
+                    const selectedNames = selections.map(id => {
+                        const option = step.options.find(opt => opt.id === id);
+                        return option ? option.name : id;
+                    }).join(', ');
+                    
+                    const value = [selectedNames, custom].filter(Boolean).join(', ');
+                    summaryItems.push({ label: step.title, value });
+                }
+            });
+
+            body.innerHTML = `
+                <div class="selection-summary">
+                    ${summaryItems.map(item => `
+                        <div class="summary-item">
+                            <span class="summary-label">${item.label}:</span>
+                            <span class="summary-value">${item.value}</span>
+                        </div>
+                    `).join('')}
+                </div>
+                <p style="color: var(--text-secondary); font-size: 14px; margin-bottom: 16px;">
+                    Your custom development prompt will be copied to clipboard and ready to paste in a new Claude session.
+                </p>
+            `;
+
+            // Update buttons
+            document.getElementById('modalBackBtn').style.display = 'block';
+            document.getElementById('modalNextBtn').textContent = 'Copy Custom Prompt';
+            document.getElementById('modalSkipBtn').style.display = 'none';
+            
+            // Update progress
+            updateProgress();
+        }
+
+        function generateAndCopyPrompt() {
+            const projectContextText = generateProjectContextText();
+            
+            const customPrompt = `# Development Session - Claude Starting Prompt
 
 ## Project Context
-You are working on a Node.js/Express application with comprehensive features including authentication, user management, and robust testing. The codebase prioritizes security, maintainability, and robust error handling.
+${projectContextText}
 
 ## Our Proven Problem-Solving Process
 
 ### 1. Systematic Investigation Approach
-- **Always start with facts**: Use \`git status\`, \`npm test\`, logs to understand current state
+- **Always start with facts**: Use \`git status\`, project-specific test commands, logs to understand current state
 - **Trace the root cause**: Don't fix symptoms - find the underlying issue
 - **Use multiple tools in parallel**: Batch \`Read\`, \`Grep\`, \`Bash\` calls for efficiency
 - **Document findings**: Track discoveries and decisions for complex multi-step problems
@@ -485,7 +1043,7 @@ You are working on a Node.js/Express application with comprehensive features inc
 - **Document thoroughly**: Include both what changed and why
 - **Test before committing**: Ensure all tests pass before creating commits
 
-## Lessons Learned from Our Sessions
+## Lessons Learned from Development Sessions
 
 ### Complex Debugging Strategies
 1. **Test Mock Issues**: When tests pass individually but fail together, investigate mock isolation, \`clearMocks\` configuration, and require cache clearing
@@ -525,7 +1083,7 @@ You are working on a Node.js/Express application with comprehensive features inc
 ## Session Startup Checklist
 When we begin each session:
 - [ ] Review git status and recent commits
-- [ ] Check if any tests are currently failing (\`npm test\`)
+- [ ] Check if any tests are currently failing (run project test command)
 - [ ] Understand the current task/issue context
 - [ ] Identify if this relates to previous work (authentication, testing, etc.)
 - [ ] Establish the success criteria for the session
@@ -548,39 +1106,109 @@ When we begin each session:
 
 **Ready to debug, build, and improve the codebase together! What are we working on today?**`;
 
-            navigator.clipboard.writeText(genericPrompt).then(() => {
-                const button = document.querySelector('.copy-prompt-btn');
-                const originalText = button.innerHTML;
-                
-                button.classList.add('success');
-                button.innerHTML = '<span class="copy-icon">✅</span>Copied!';
-                
-                setTimeout(() => {
-                    button.classList.remove('success');
-                    button.innerHTML = originalText;
-                }, 2000);
+            // Copy to clipboard
+            navigator.clipboard.writeText(customPrompt).then(() => {
+                showCopySuccess();
+                closeModal();
             }).catch(err => {
                 console.error('Failed to copy: ', err);
                 
                 // Fallback for older browsers
                 const textArea = document.createElement('textarea');
-                textArea.value = genericPrompt;
+                textArea.value = customPrompt;
                 document.body.appendChild(textArea);
                 textArea.select();
                 document.execCommand('copy');
                 document.body.removeChild(textArea);
                 
-                const button = document.querySelector('.copy-prompt-btn');
-                const originalText = button.innerHTML;
-                
-                button.classList.add('success');
-                button.innerHTML = '<span class="copy-icon">✅</span>Copied!';
-                
-                setTimeout(() => {
-                    button.classList.remove('success');
-                    button.innerHTML = originalText;
-                }, 2000);
+                showCopySuccess();
+                closeModal();
             });
+        }
+
+        function generateProjectContextText() {
+            const contextLines = [];
+            
+            // Build technology stack description
+            const techStack = [];
+            
+            // Languages
+            const languages = getSelectedTechnologies('languages', 0);
+            if (languages.length > 0) {
+                techStack.push(`**Languages**: ${languages.join(', ')}`);
+            }
+            
+            // Frontend
+            const frontend = getSelectedTechnologies('frontend', 1);
+            if (frontend.length > 0) {
+                techStack.push(`**Frontend**: ${frontend.join(', ')}`);
+            }
+            
+            // Backend
+            const backend = getSelectedTechnologies('backend', 2);
+            if (backend.length > 0) {
+                techStack.push(`**Backend**: ${backend.join(', ')}`);
+            }
+            
+            // Database
+            const database = getSelectedTechnologies('database', 3);
+            if (database.length > 0) {
+                techStack.push(`**Database**: ${database.join(', ')}`);
+            }
+            
+            // Deployment
+            const deployment = getSelectedTechnologies('deployment', 4);
+            if (deployment.length > 0) {
+                techStack.push(`**Infrastructure**: ${deployment.join(', ')}`);
+            }
+            
+            // Testing
+            const testing = getSelectedTechnologies('testing', 5);
+            if (testing.length > 0) {
+                techStack.push(`**Testing**: ${testing.join(', ')}`);
+            }
+
+            if (techStack.length > 0) {
+                contextLines.push("You are working on a software project with the following technology stack:");
+                contextLines.push("");
+                contextLines.push(...techStack);
+                contextLines.push("");
+                contextLines.push("The codebase prioritizes security, maintainability, and robust error handling.");
+            } else {
+                contextLines.push("You are working on a software development project. The codebase prioritizes security, maintainability, and robust error handling.");
+            }
+
+            return contextLines.join('\n');
+        }
+
+        function getSelectedTechnologies(stepKey, stepIndex) {
+            const selections = projectContext[stepKey] || [];
+            const custom = projectContext[stepKey + '_custom'] || '';
+            const step = projectSteps[stepIndex];
+            
+            const selectedNames = selections.map(id => {
+                const option = step.options.find(opt => opt.id === id);
+                return option ? option.name : id;
+            });
+            
+            if (custom) {
+                selectedNames.push(custom);
+            }
+            
+            return selectedNames;
+        }
+
+        function showCopySuccess() {
+            const button = document.getElementById('copyPromptBtn');
+            const originalText = button.innerHTML;
+            
+            button.classList.add('success');
+            button.innerHTML = '<span class="copy-icon">✅</span>Custom Prompt Copied!';
+            
+            setTimeout(() => {
+                button.classList.remove('success');
+                button.innerHTML = originalText;
+            }, 3000);
         }
     </script>
 </body>
