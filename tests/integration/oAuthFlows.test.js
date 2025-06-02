@@ -864,4 +864,136 @@ describe('OAuth Authentication Integration Tests', () => {
       expect(shouldExist.result.email).toBe('fresh@example.com');
     });
   });
+
+  describe('OAuth Account Conflict Scenarios', () => {
+    test('should create social-auth-account-conflict session for customer trying to register with affiliate Google account', async () => {
+      // First create an affiliate with social account
+      const existingAffiliate = new Affiliate({
+        affiliateId: 'AFF123456',
+        firstName: 'John',
+        lastName: 'Affiliate',
+        email: 'john.affiliate@example.com',
+        phone: '+1234567890',
+        businessName: 'Johns Business',
+        address: '123 Business St',
+        city: 'Austin',
+        state: 'TX',
+        zipCode: '78701',
+        serviceArea: 'Downtown',
+        deliveryFee: 5.99,
+        username: 'johnaffiliate',
+        passwordHash: 'hashedpassword',
+        passwordSalt: 'salt',
+        paymentMethod: 'check',
+        socialAccounts: {
+          google: {
+            id: 'google-conflict-123',
+            email: 'john.affiliate@example.com'
+          }
+        },
+        registrationMethod: 'google'
+      });
+
+      await existingAffiliate.save();
+
+      // Create OAuth session for account conflict
+      const conflictSessionData = {
+        type: 'social-auth-account-conflict',
+        message: 'This social media account is already associated with an affiliate account. Would you like to login as an affiliate instead?',
+        provider: 'google',
+        accountType: 'affiliate',
+        affiliateData: {
+          affiliateId: 'AFF123456',
+          firstName: 'John',
+          lastName: 'Affiliate',
+          email: 'john.affiliate@example.com',
+          businessName: 'Johns Business'
+        }
+      };
+
+      await OAuthSession.createSession('conflict-test-session-123', conflictSessionData);
+
+      // Poll for session and verify conflict data structure
+      const response = await agent
+        .get('/api/v1/auth/oauth-session/conflict-test-session-123')
+        .expect(200);
+
+      expect(response.body.success).toBe(true);
+      expect(response.body.result.type).toBe('social-auth-account-conflict');
+      expect(response.body.result.provider).toBe('google');
+      expect(response.body.result.accountType).toBe('affiliate');
+      expect(response.body.result.affiliateData.affiliateId).toBe('AFF123456');
+      expect(response.body.result.affiliateData.firstName).toBe('John');
+      expect(response.body.result.affiliateData.lastName).toBe('Affiliate');
+      expect(response.body.result.message).toContain('already associated with an affiliate account');
+
+      // Verify session was consumed
+      const consumedSession = await OAuthSession.findOne({ sessionId: 'conflict-test-session-123' });
+      expect(consumedSession).toBeNull();
+    });
+
+    test('should create social-auth-account-conflict session for affiliate trying to register with customer Google account', async () => {
+      // First create a customer with social account
+      const Customer = require('../../server/models/Customer');
+      const existingCustomer = new Customer({
+        customerId: 'CUST001',
+        firstName: 'Jane',
+        lastName: 'Customer',
+        email: 'jane.customer@example.com',
+        phone: '+0987654321',
+        address: '456 Customer Ave',
+        city: 'Austin',
+        state: 'TX',
+        zipCode: '78702',
+        affiliateId: 'AFF123456',
+        username: 'janecustomer',
+        passwordHash: 'dummyhash',
+        passwordSalt: 'dummysalt',
+        socialAccounts: {
+          google: {
+            id: 'google-customer-conflict-456',
+            email: 'jane.customer@example.com'
+          }
+        },
+        registrationMethod: 'google'
+      });
+
+      await existingCustomer.save();
+
+      // Create OAuth session for customer account conflict
+      const conflictSessionData = {
+        type: 'social-auth-account-conflict',
+        message: 'This social media account is already associated with a customer account. Would you like to login as a customer instead?',
+        provider: 'google',
+        accountType: 'customer',
+        customerData: {
+          firstName: 'Jane',
+          lastName: 'Customer',
+          email: 'jane.customer@example.com'
+        }
+      };
+
+      await OAuthSession.createSession('customer-conflict-session-456', conflictSessionData);
+
+      // Poll for session and verify conflict data structure
+      const response = await agent
+        .get('/api/v1/auth/oauth-session/customer-conflict-session-456')
+        .expect(200);
+
+      expect(response.body.success).toBe(true);
+      expect(response.body.result.type).toBe('social-auth-account-conflict');
+      expect(response.body.result.provider).toBe('google');
+      expect(response.body.result.accountType).toBe('customer');
+      expect(response.body.result.customerData.firstName).toBe('Jane');
+      expect(response.body.result.customerData.lastName).toBe('Customer');
+      expect(response.body.result.message).toContain('already associated with a customer account');
+
+      // Verify session was consumed
+      const consumedSession = await OAuthSession.findOne({ sessionId: 'customer-conflict-session-456' });
+      expect(consumedSession).toBeNull();
+
+      // Clean up customer
+      await Customer.deleteMany({ customerId: 'CUST001' });
+    });
+  });
 });

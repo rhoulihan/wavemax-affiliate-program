@@ -24,8 +24,18 @@ const customerSchema = new mongoose.Schema({
   specialInstructions: String,
   affiliateSpecialInstructions: String,
   username: { type: String, required: true, unique: true },
-  passwordSalt: { type: String, required: true },
-  passwordHash: { type: String, required: true },
+  passwordSalt: { 
+    type: String, 
+    required: function() { 
+      return this.registrationMethod === 'traditional' || !this.registrationMethod;
+    }
+  },
+  passwordHash: { 
+    type: String, 
+    required: function() { 
+      return this.registrationMethod === 'traditional' || !this.registrationMethod;
+    }
+  },
   // Social authentication accounts
   socialAccounts: {
     google: {

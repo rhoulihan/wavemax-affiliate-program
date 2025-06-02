@@ -686,6 +686,56 @@ describe('Enhanced Auth Controller - OAuth Methods', () => {
       });
     });
 
+    test('should return social-auth-account-conflict session data for affiliate conflict', async () => {
+      const mockSessionData = {
+        type: 'social-auth-account-conflict',
+        message: 'This social media account is already associated with an affiliate account. Would you like to login as an affiliate instead?',
+        provider: 'google',
+        accountType: 'affiliate',
+        affiliateData: {
+          affiliateId: 'AFF123456',
+          firstName: 'John',
+          lastName: 'Affiliate',
+          email: 'john@example.com',
+          businessName: 'Johns Business'
+        }
+      };
+
+      OAuthSession.consumeSession = jest.fn().mockResolvedValue(mockSessionData);
+
+      await authController.pollOAuthSession(req, res);
+
+      expect(OAuthSession.consumeSession).toHaveBeenCalledWith('test-session-123');
+      expect(res.json).toHaveBeenCalledWith({
+        success: true,
+        result: mockSessionData
+      });
+    });
+
+    test('should return social-auth-account-conflict session data for customer conflict', async () => {
+      const mockSessionData = {
+        type: 'social-auth-account-conflict',
+        message: 'This social media account is already associated with a customer account. Would you like to login as a customer instead?',
+        provider: 'google',
+        accountType: 'customer',
+        customerData: {
+          firstName: 'Jane',
+          lastName: 'Customer',
+          email: 'jane@example.com'
+        }
+      };
+
+      OAuthSession.consumeSession = jest.fn().mockResolvedValue(mockSessionData);
+
+      await authController.pollOAuthSession(req, res);
+
+      expect(OAuthSession.consumeSession).toHaveBeenCalledWith('test-session-123');
+      expect(res.json).toHaveBeenCalledWith({
+        success: true,
+        result: mockSessionData
+      });
+    });
+
     test('should return pending status when session not ready', async () => {
       OAuthSession.consumeSession = jest.fn().mockResolvedValue(null);
 
