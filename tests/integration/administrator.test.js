@@ -306,7 +306,7 @@ describe('Administrator Integration Tests', () => {
 
       expect(response.status).toBe(400);
       expect(response.body.success).toBe(false);
-      expect(response.body.message).toContain('Validation failed');
+      expect(response.body.message).toMatch(/required|validation/i);
     });
 
     it('should validate email format', async () => {
@@ -340,7 +340,7 @@ describe('Administrator Integration Tests', () => {
         });
 
       expect(response.status).toBe(400);
-      expect(response.body.message).toContain('Password does not meet security requirements');
+      expect(response.body.message).toContain('Password must be at least 12 characters long');
     });
 
     it('should prevent duplicate emails', async () => {

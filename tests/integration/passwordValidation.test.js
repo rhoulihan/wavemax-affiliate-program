@@ -198,8 +198,8 @@ describe('Password Validation Integration Tests', () => {
       const sequentialPasswords = [
         'ValidPassword123!', // Contains '123'
         'Password456Strong!', // Contains '456'
-        'PasswordABCStrong!', // Contains 'ABC'
-        'StrongDefPassword!' // Contains 'def'
+        'PasswordABC1Strong!', // Contains 'ABC'
+        'Strongdef1Password!' // Contains 'def' (lowercase)
       ];
 
       for (let i = 0; i < sequentialPasswords.length; i++) {
@@ -370,7 +370,7 @@ describe('Password Validation Integration Tests', () => {
     });
 
     test('should enforce strong passwords for administrator creation', async () => {
-      const weakPassword = 'WeakPass87!';
+      const weakPassword = 'WeakPass!';
       const adminData = {
         firstName: 'Administrator',
         lastName: 'User',
@@ -451,7 +451,7 @@ describe('Password Validation Integration Tests', () => {
     });
 
     test('should enforce strong passwords for operator creation', async () => {
-      const weakPassword = 'WeakPass77!';
+      const weakPassword = 'WeakPass!';
       const operatorData = {
         firstName: 'Worker',
         lastName: 'Person',
@@ -484,7 +484,7 @@ describe('Password Validation Integration Tests', () => {
     });
 
     test('should accept strong passwords for operator creation', async () => {
-      const strongPassword = 'StrongWorker88#';
+      const strongPassword = 'StrongWorker59#';
       const operatorData = {
         firstName: 'Worker',
         lastName: 'Person',
@@ -725,10 +725,10 @@ describe('Password Validation Integration Tests', () => {
       expect(response.body.success).toBe(false);
       // Check for either message or errors array
       if (response.body.message) {
-        expect(response.body.message).toContain('consecutive identical characters');
+        expect(response.body.message).toContain('more than 2 consecutive identical characters');
       } else if (response.body.errors) {
         expect(Array.isArray(response.body.errors)).toBe(true);
-        expect(response.body.errors.some(err => err.msg && err.msg.includes('consecutive identical characters'))).toBe(true);
+        expect(response.body.errors.some(err => err.msg && err.msg.includes('more than 2 consecutive identical characters'))).toBe(true);
       }
     });
 

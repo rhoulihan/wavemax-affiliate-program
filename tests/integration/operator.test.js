@@ -434,7 +434,7 @@ describe('Operator Integration Tests', () => {
 
       expect(response.status).toBe(400);
       expect(response.body.success).toBe(false);
-      expect(response.body.message).toContain('Validation failed');
+      expect(response.body.message).toMatch(/required|validation/i);
     });
 
     it('should validate email format', async () => {

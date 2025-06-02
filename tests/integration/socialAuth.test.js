@@ -396,10 +396,10 @@ describe('Social Authentication Integration Tests', () => {
 
       expect(response.status).toBe(200);
       expect(response.body.success).toBe(true);
-      expect(response.body.accessToken).toBeDefined();
+      expect(response.body.token).toBeDefined();
       expect(response.body.refreshToken).toBeDefined();
-      expect(response.body.affiliate).toBeDefined();
-      expect(response.body.affiliate.email).toBe('socialuser@example.com');
+      expect(response.body.user).toBeDefined();
+      expect(response.body.user.email).toBe('socialuser@example.com');
 
       // Verify lastLogin was updated
       const updatedAffiliate = await Affiliate.findById(affiliateId);

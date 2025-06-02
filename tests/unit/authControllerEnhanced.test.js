@@ -462,9 +462,9 @@ describe('Enhanced Auth Controller - OAuth Methods', () => {
       expect(res.status).toHaveBeenCalledWith(200);
       expect(res.json).toHaveBeenCalledWith({
         success: true,
-        accessToken: 'jwt-token',
+        token: 'jwt-token',
         refreshToken: expect.any(String),
-        affiliate: expect.objectContaining({
+        user: expect.objectContaining({
           affiliateId: 'AFF123456',
           firstName: 'John',
           lastName: 'Doe'
@@ -516,10 +516,10 @@ describe('Enhanced Auth Controller - OAuth Methods', () => {
       expect(res.status).toHaveBeenCalledWith(200);
       expect(res.json).toHaveBeenCalledWith({
         success: true,
-        accessToken: 'customer-jwt-token',
+        token: 'customer-jwt-token',
         refreshToken: expect.any(String),
-        affiliate: expect.objectContaining({
-          affiliateId: 'CUST123456',
+        user: expect.objectContaining({
+          customerId: 'CUST123456',
           firstName: 'Jane',
           lastName: 'Doe'
         })

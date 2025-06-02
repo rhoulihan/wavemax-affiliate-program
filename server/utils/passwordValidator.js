@@ -61,20 +61,27 @@ const validatePasswordStrength = (password, options = {}) => {
   }
   
   // Check if password contains username or email
-  if (username && password.toLowerCase().includes(username.toLowerCase())) {
+  const containsUsername = username && password.toLowerCase().includes(username.toLowerCase());
+  const containsEmailUser = email && password.toLowerCase().includes(email.split('@')[0].toLowerCase());
+  
+  if (containsUsername || containsEmailUser) {
     errors.push('Password cannot contain your username or email');
   }
   
-  // Check if password contains email (without domain)
-  if (email) {
-    const emailUser = email.split('@')[0];
-    if (password.toLowerCase().includes(emailUser.toLowerCase())) {
-      errors.push('Password cannot contain your username or email');
+  // Check for sequential characters (3+ consecutive characters in sequence)
+  const hasSequential = (() => {
+    const sequences = ['0123456789', 'abcdefghijklmnopqrstuvwxyz', 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'];
+    for (const seq of sequences) {
+      for (let i = 0; i <= seq.length - 3; i++) {
+        if (password.includes(seq.substring(i, i + 3))) {
+          return true;
+        }
+      }
     }
-  }
+    return false;
+  })();
   
-  // Check for sequential characters (123, abc, etc.)
-  if (/123|234|345|456|567|678|789|890|abc|bcd|cde|def|efg|fgh|ghi|hij|ijk|jkl|klm|lmn|mno|nop|opq|pqr|qrs|rst|stu|tuv|uvw|vwx|wxy|xyz/i.test(password)) {
+  if (hasSequential) {
     errors.push('Password cannot contain sequential characters (e.g., 123, abc)');
   }
   
@@ -133,7 +140,7 @@ const customPasswordValidator = (options = {}) => {
     if (!req) {
       const validation = validatePasswordStrength(value);
       if (!validation.success) {
-        throw new Error(validation.errors.join('; '));
+        throw new Error(validation.errors[0]); // Throw the first error only
       }
       return true;
     }
@@ -151,7 +158,7 @@ const customPasswordValidator = (options = {}) => {
     });
     
     if (!validation.success) {
-      throw new Error(validation.errors.join('; '));
+      throw new Error(validation.errors[0]); // Throw the first error only
     }
     
     return true;

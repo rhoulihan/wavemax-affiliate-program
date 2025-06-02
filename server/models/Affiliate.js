@@ -38,8 +38,16 @@ const affiliateSchema = new mongoose.Schema({
   // Encrypted payment fields
   paymentMethod: {
     type: String,
-    required: true,
-    enum: ['directDeposit', 'check', 'paypal']
+    required: function() {
+      return this.registrationMethod === 'traditional' || !this.registrationMethod;
+    },
+    enum: ['directDeposit', 'check', 'paypal'],
+    default: function() {
+      if (this.registrationMethod && this.registrationMethod !== 'traditional') {
+        return 'check'; // Default for social registrations
+      }
+      return undefined;
+    }
   },
   accountNumber: {
     type: mongoose.Schema.Types.Mixed,
@@ -90,7 +98,12 @@ const affiliateSchema = new mongoose.Schema({
   },
   // Password reset fields
   resetToken: String,
-  resetTokenExpiry: Date
+  resetTokenExpiry: Date,
+  // Virtual password field for input (gets hashed into passwordSalt/passwordHash)
+  password: {
+    type: String,
+    required: false // Will be hashed and removed in pre-save middleware
+  }
 }, { 
   timestamps: true,
   toObject: { virtuals: true },
@@ -100,6 +113,19 @@ const affiliateSchema = new mongoose.Schema({
 // Virtual field for full name
 affiliateSchema.virtual('name').get(function() {
   return `${this.firstName} ${this.lastName}`;
+});
+
+// Middleware for password hashing before saving
+affiliateSchema.pre('save', function(next) {
+  // Hash password if it's modified and provided as plain text, but only if passwordHash is not already set
+  if (this.isModified('password') && this.password && !this.passwordHash) {
+    const { salt, hash } = encryptionUtil.hashPassword(this.password);
+    this.passwordSalt = salt;
+    this.passwordHash = hash;
+    this.password = undefined; // Remove plain text password
+  }
+  
+  next();
 });
 
 // Middleware for encrypting sensitive payment data before saving

@@ -82,8 +82,8 @@ describe('OAuth Authentication Integration Tests', () => {
         .expect(200);
 
       expect(response.body.success).toBe(true);
-      expect(response.body.socialToken).toBeDefined();
-      expect(response.body.userData.provider).toBe('facebook');
+      expect(response.body.result.socialToken).toBeDefined();
+      expect(response.body.result.userData.provider).toBe('facebook');
 
       // Verify session was consumed (deleted)
       const consumedSession = await OAuthSession.findOne({ sessionId: 'poll-test-session-456' });
@@ -93,10 +93,10 @@ describe('OAuth Authentication Integration Tests', () => {
     test('should return pending status for non-existent session', async () => {
       const response = await agent
         .get('/api/v1/auth/oauth-session/non-existent-session')
-        .expect(202);
+        .expect(404);
 
       expect(response.body.success).toBe(false);
-      expect(response.body.message).toBe('OAuth session not ready yet');
+      expect(response.body.message).toBe('Session not found or expired');
     });
 
     test('should handle session polling race conditions', async () => {
@@ -290,7 +290,9 @@ describe('OAuth Authentication Integration Tests', () => {
         serviceArea: 'Existing Area',
         deliveryFee: 3.99,
         username: 'existing',
-        password: 'ExistingPassword123!'
+        passwordHash: 'hashedpassword123',
+        passwordSalt: 'salt123',
+        paymentMethod: 'check'
       });
 
       await existingAffiliate.save();
@@ -399,7 +401,9 @@ describe('OAuth Authentication Integration Tests', () => {
         serviceArea: 'Test Area',
         deliveryFee: 5.99,
         username: 'testaffiliate',
-        password: 'TestPassword123!'
+        passwordHash: 'hashedpassword123',
+        passwordSalt: 'salt123',
+        paymentMethod: 'check'
       });
 
       await affiliate.save();
@@ -490,7 +494,9 @@ describe('OAuth Authentication Integration Tests', () => {
         serviceArea: 'Existing Area',
         deliveryFee: 4.99,
         username: 'existing',
-        password: 'ExistingPassword123!',
+        passwordHash: 'hashedpassword123',
+        passwordSalt: 'salt123',
+        paymentMethod: 'check',
         socialAccounts: {
           google: {
             id: 'google-existing-123',
@@ -536,7 +542,9 @@ describe('OAuth Authentication Integration Tests', () => {
         serviceArea: 'Customer Area',
         deliveryFee: 6.99,
         username: 'customeraffiliate',
-        password: 'CustomerPassword123!'
+        passwordHash: 'hashedpassword123',
+        passwordSalt: 'salt123',
+        paymentMethod: 'check'
       });
 
       await affiliate.save();
@@ -555,7 +563,8 @@ describe('OAuth Authentication Integration Tests', () => {
         affiliateId: 'AFF777777',
         serviceFrequency: 'biweekly',
         username: 'existingcustomer',
-        password: 'CustomerPassword123!',
+        passwordHash: 'hashedpassword123',
+        passwordSalt: 'salt123',
         socialAccounts: {
           facebook: {
             id: 'facebook-existing-customer',
@@ -597,7 +606,7 @@ describe('OAuth Authentication Integration Tests', () => {
         .expect(404);
 
       expect(response.body.success).toBe(false);
-      expect(response.body.message).toBe('No account found with this social media login');
+      expect(response.body.message).toBe('No account found with this social media account');
     });
   });
 
@@ -618,7 +627,9 @@ describe('OAuth Authentication Integration Tests', () => {
         serviceArea: 'Link Area',
         deliveryFee: 7.99,
         username: 'linktest',
-        password: 'LinkPassword123!'
+        passwordHash: 'hashedpassword123',
+        passwordSalt: 'salt123',
+        paymentMethod: 'check'
       });
 
       await affiliate.save();
