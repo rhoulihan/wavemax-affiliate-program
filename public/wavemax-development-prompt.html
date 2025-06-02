@@ -289,7 +289,7 @@
         </header>
 
         <div class="copy-prompt-container">
-            <button class="copy-prompt-btn" onclick="copyGenericPrompt()">
+            <button class="copy-prompt-btn" id="copyPromptBtn">
                 <span class="copy-icon">📋</span>
                 Copy Generic Development Prompt
             </button>
@@ -450,6 +450,10 @@
     </div>
 
     <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('copyPromptBtn').addEventListener('click', copyGenericPrompt);
+        });
+
         function copyGenericPrompt() {
             const genericPrompt = `# Development Session - Claude Starting Prompt
 
