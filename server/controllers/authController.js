@@ -1276,7 +1276,8 @@ exports.completeSocialRegistration = async (req, res) => {
     
     res.status(201).json({
       success: true,
-      message: 'Registration completed successfully',
+      message: 'Social registration completed successfully',
+      affiliateId: affiliate.affiliateId,
       affiliate: {
         id: affiliate._id,
         affiliateId: affiliate.affiliateId,
@@ -1548,9 +1549,21 @@ exports.pollOAuthSession = async (req, res) => {
       });
     }
     
+    // Create social token for frontend
+    const socialToken = generateToken({
+      provider: sessionResult.provider,
+      socialId: sessionResult.socialId,
+      email: sessionResult.email,
+      firstName: sessionResult.firstName,
+      lastName: sessionResult.lastName
+    }, '15m');
+    
     const response = {
       success: true,
-      result: sessionResult
+      result: {
+        socialToken,
+        userData: sessionResult
+      }
     };
     
     console.log('Sending OAuth response:', response);
@@ -2054,7 +2067,8 @@ exports.completeSocialCustomerRegistration = async (req, res) => {
     
     res.status(201).json({
       success: true,
-      message: 'Customer registration completed successfully',
+      message: 'Customer social registration completed successfully',
+      customerId: customer.customerId,
       customer: {
         id: customer._id,
         customerId: customer.customerId,
