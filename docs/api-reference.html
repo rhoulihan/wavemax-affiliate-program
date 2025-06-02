@@ -427,6 +427,150 @@
 }</code></pre>
             </div>
 
+            <h3 id="oauth-endpoints">OAuth Endpoints</h3>
+
+            <div class="endpoint">
+                <h4>Initiate OAuth Flow</h4>
+                <span class="method get">GET</span> <code>/api/auth/{provider}</code>
+                <p>Supported providers: <code>google</code>, <code>facebook</code>, <code>linkedin</code></p>
+                
+                <h5>Query Parameters:</h5>
+                <pre><code>state=oauth_{sessionId}  // Required for popup flows
+context=customer         // Optional: for customer registration flow</code></pre>
+            </div>
+
+            <div class="endpoint">
+                <h4>Complete Social Registration (Affiliate)</h4>
+                <span class="method post">POST</span> <code>/api/v1/auth/social/register</code>
+                
+                <h5>Request Body:</h5>
+                <pre><code>{
+    "socialToken": "jwt_token_from_oauth",
+    "phone": "+1234567890",
+    "businessName": "Business Name",
+    "address": "123 Main St",
+    "city": "Austin",
+    "state": "TX",
+    "zipCode": "78701",
+    "serviceArea": "Downtown",
+    "deliveryFee": 5.99,
+    "paymentMethod": "check"
+}</code></pre>
+                
+                <h5>Response:</h5>
+                <pre><code>{
+    "success": true,
+    "message": "Social registration completed successfully",
+    "affiliateId": "AFF000001",
+    "token": "jwt_access_token",
+    "refreshToken": "refresh_token"
+}</code></pre>
+            </div>
+
+            <div class="endpoint">
+                <h4>Complete Social Registration (Customer)</h4>
+                <span class="method post">POST</span> <code>/api/v1/auth/customer/social/register</code>
+                
+                <h5>Request Body:</h5>
+                <pre><code>{
+    "socialToken": "jwt_token_from_oauth",
+    "affiliateId": "AFF123456",
+    "phone": "+1234567890",
+    "address": "456 Customer St",
+    "city": "Austin",
+    "state": "TX",
+    "zipCode": "78702",
+    "serviceFrequency": "weekly"
+}</code></pre>
+                
+                <h5>Response:</h5>
+                <pre><code>{
+    "success": true,
+    "message": "Customer social registration completed successfully",
+    "customerId": "CUST000001",
+    "token": "jwt_access_token",
+    "refreshToken": "refresh_token"
+}</code></pre>
+            </div>
+
+            <div class="endpoint">
+                <h4>Social Login</h4>
+                <span class="method post">POST</span> <code>/api/v1/auth/social/callback</code>
+                
+                <h5>Request Body:</h5>
+                <pre><code>{
+    "provider": "google",
+    "socialId": "google_user_id"
+}</code></pre>
+                
+                <h5>Response:</h5>
+                <pre><code>{
+    "success": true,
+    "token": "jwt_access_token",
+    "refreshToken": "refresh_token",
+    "user": {
+        "affiliateId": "AFF123456",
+        "firstName": "John",
+        "lastName": "Doe",
+        "email": "john@example.com"
+    }
+}</code></pre>
+            </div>
+
+            <div class="endpoint">
+                <h4>Poll OAuth Session</h4>
+                <span class="method get">GET</span> <code>/api/v1/auth/oauth-session/:sessionId</code>
+                
+                <h5>Response Types:</h5>
+                <pre><code>// Success (new user registration)
+{
+    "success": true,
+    "result": {
+        "type": "social-auth-success",
+        "socialToken": "jwt_token",
+        "provider": "google"
+    }
+}
+
+// Existing user login
+{
+    "success": true,
+    "result": {
+        "type": "social-auth-login",
+        "token": "jwt_access_token",
+        "refreshToken": "refresh_token",
+        "affiliate": {...}
+    }
+}
+
+// Account conflict
+{
+    "success": true,
+    "result": {
+        "type": "social-auth-account-conflict",
+        "message": "This social account is already registered...",
+        "provider": "google",
+        "accountType": "affiliate",
+        "affiliateData": {...}
+    }
+}</code></pre>
+            </div>
+
+            <div class="endpoint">
+                <h4>Link Social Account</h4>
+                <span class="method post">POST</span> <code>/api/v1/auth/social/link</code>
+                
+                <h5>Headers:</h5>
+                <pre><code>Authorization: Bearer {jwt_token}
+X-CSRF-Token: {csrf_token}</code></pre>
+                
+                <h5>Request Body:</h5>
+                <pre><code>{
+    "provider": "google",
+    "socialToken": "jwt_token_from_oauth"
+}</code></pre>
+            </div>
+
             <h2 id="affiliate-endpoints">Affiliate Endpoints</h2>
 
             <div class="endpoint">

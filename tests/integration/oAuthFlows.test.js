@@ -947,8 +947,6 @@ describe('OAuth Authentication Integration Tests', () => {
         zipCode: '78702',
         affiliateId: 'AFF123456',
         username: 'janecustomer',
-        passwordHash: 'dummyhash',
-        passwordSalt: 'dummysalt',
         socialAccounts: {
           google: {
             id: 'google-customer-conflict-456',
