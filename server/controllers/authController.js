@@ -1549,21 +1549,10 @@ exports.pollOAuthSession = async (req, res) => {
       });
     }
     
-    // Create social token for frontend
-    const socialToken = generateToken({
-      provider: sessionResult.provider,
-      socialId: sessionResult.socialId,
-      email: sessionResult.email,
-      firstName: sessionResult.firstName,
-      lastName: sessionResult.lastName
-    }, '15m');
-    
+    // Return the complete session result which includes the type field
     const response = {
       success: true,
-      result: {
-        socialToken,
-        userData: sessionResult
-      }
+      result: sessionResult
     };
     
     console.log('Sending OAuth response:', response);
