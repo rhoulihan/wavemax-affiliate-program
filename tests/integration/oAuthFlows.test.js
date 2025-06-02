@@ -62,19 +62,19 @@ describe('OAuth Authentication Integration Tests', () => {
       expect(storedSession.result.email).toBe('oauth@example.com');
     });
 
-    test('should poll for OAuth session results', async () => {
-      // Create OAuth session
+    test('should poll for OAuth session results with complete data structure', async () => {
+      // Create OAuth session with real OAuth result structure
       const sessionData = {
-        sessionId: 'poll-test-session-456',
+        type: 'social-auth-success',
+        socialToken: 'mock-social-jwt-token',
         provider: 'facebook',
         socialId: 'facebook-user-456',
         email: 'poll@example.com',
         firstName: 'Poll',
-        lastName: 'Test',
-        context: 'affiliate'
+        lastName: 'Test'
       };
 
-      await OAuthSession.createSession(sessionData.sessionId, sessionData);
+      await OAuthSession.createSession('poll-test-session-456', sessionData);
 
       // Poll for session (should consume it)
       const response = await agent
@@ -82,11 +82,46 @@ describe('OAuth Authentication Integration Tests', () => {
         .expect(200);
 
       expect(response.body.success).toBe(true);
-      expect(response.body.result.socialToken).toBeDefined();
-      expect(response.body.result.userData.provider).toBe('facebook');
+      expect(response.body.result).toEqual(sessionData);
+      expect(response.body.result.type).toBe('social-auth-success');
+      expect(response.body.result.provider).toBe('facebook');
+      expect(response.body.result.socialToken).toBe('mock-social-jwt-token');
 
       // Verify session was consumed (deleted)
       const consumedSession = await OAuthSession.findOne({ sessionId: 'poll-test-session-456' });
+      expect(consumedSession).toBeNull();
+    });
+
+    test('should poll for OAuth login session results', async () => {
+      // Create OAuth session for existing user login
+      const sessionData = {
+        type: 'social-auth-login',
+        token: 'jwt-auth-token',
+        refreshToken: 'refresh-token',
+        affiliate: {
+          affiliateId: 'AFF123',
+          id: 'affiliate-id',
+          firstName: 'John',
+          lastName: 'Doe',
+          email: 'john@example.com',
+          businessName: 'Test Business'
+        }
+      };
+
+      await OAuthSession.createSession('login-test-session-789', sessionData);
+
+      // Poll for session
+      const response = await agent
+        .get('/api/v1/auth/oauth-session/login-test-session-789')
+        .expect(200);
+
+      expect(response.body.success).toBe(true);
+      expect(response.body.result).toEqual(sessionData);
+      expect(response.body.result.type).toBe('social-auth-login');
+      expect(response.body.result.affiliate.affiliateId).toBe('AFF123');
+
+      // Verify session was consumed
+      const consumedSession = await OAuthSession.findOne({ sessionId: 'login-test-session-789' });
       expect(consumedSession).toBeNull();
     });
 

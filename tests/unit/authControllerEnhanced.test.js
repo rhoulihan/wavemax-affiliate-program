@@ -621,29 +621,68 @@ describe('Enhanced Auth Controller - OAuth Methods', () => {
       req.params = { sessionId: 'test-session-123' };
     });
 
-    test('should return session data when available', async () => {
+    test('should return complete session data when available', async () => {
       const mockSessionData = {
-        sessionId: 'test-session-123',
+        type: 'social-auth-success',
         provider: 'google',
+        socialToken: 'social-jwt-token',
         socialId: 'google123',
         email: 'test@example.com',
         firstName: 'John',
-        lastName: 'Doe',
-        context: 'affiliate'
+        lastName: 'Doe'
       };
 
       OAuthSession.consumeSession = jest.fn().mockResolvedValue(mockSessionData);
-      jwt.sign = jest.fn().mockReturnValue('social-jwt-token');
 
       await authController.pollOAuthSession(req, res);
 
       expect(OAuthSession.consumeSession).toHaveBeenCalledWith('test-session-123');
       expect(res.json).toHaveBeenCalledWith({
         success: true,
-        result: {
-          socialToken: 'social-jwt-token',
-          userData: mockSessionData
+        result: mockSessionData
+      });
+    });
+
+    test('should return social-auth-login session data', async () => {
+      const mockSessionData = {
+        type: 'social-auth-login',
+        token: 'jwt-token',
+        refreshToken: 'refresh-token',
+        affiliate: {
+          affiliateId: 'AFF001',
+          id: 'affiliate-id',
+          firstName: 'John',
+          lastName: 'Doe',
+          email: 'john@example.com',
+          businessName: 'Test Business'
         }
+      };
+
+      OAuthSession.consumeSession = jest.fn().mockResolvedValue(mockSessionData);
+
+      await authController.pollOAuthSession(req, res);
+
+      expect(OAuthSession.consumeSession).toHaveBeenCalledWith('test-session-123');
+      expect(res.json).toHaveBeenCalledWith({
+        success: true,
+        result: mockSessionData
+      });
+    });
+
+    test('should return social-auth-error session data', async () => {
+      const mockSessionData = {
+        type: 'social-auth-error',
+        message: 'Social authentication failed'
+      };
+
+      OAuthSession.consumeSession = jest.fn().mockResolvedValue(mockSessionData);
+
+      await authController.pollOAuthSession(req, res);
+
+      expect(OAuthSession.consumeSession).toHaveBeenCalledWith('test-session-123');
+      expect(res.json).toHaveBeenCalledWith({
+        success: true,
+        result: mockSessionData
       });
     });
 
