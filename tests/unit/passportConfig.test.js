@@ -37,11 +37,12 @@ describe('Enhanced Passport Configuration', () => {
   });
 
   beforeEach(() => {
-    // Reset mocks
+    // Reset mocks completely
     GoogleStrategy.mockClear();
     FacebookStrategy.mockClear();
     LinkedInStrategy.mockClear();
     jest.clearAllMocks();
+    jest.resetAllMocks();
     
     // Mock passport.use
     passport.use = jest.fn();
@@ -96,8 +97,14 @@ describe('Enhanced Passport Configuration', () => {
     test('should handle Google OAuth callback correctly', () => {
       require('../../server/config/passport-config');
 
+      // Ensure Google strategy was called
+      expect(GoogleStrategy).toHaveBeenCalled();
+      
       // Get the callback function passed to GoogleStrategy
       const googleStrategyCall = GoogleStrategy.mock.calls[0];
+      expect(googleStrategyCall).toBeDefined();
+      expect(googleStrategyCall.length).toBeGreaterThan(1);
+      
       const googleCallback = googleStrategyCall[1];
 
       // Just verify the callback function exists and is callable
@@ -146,8 +153,14 @@ describe('Enhanced Passport Configuration', () => {
     test('should handle Facebook OAuth callback correctly', () => {
       require('../../server/config/passport-config');
 
+      // Ensure Facebook strategy was called
+      expect(FacebookStrategy).toHaveBeenCalled();
+      
       // Get the callback function passed to FacebookStrategy
       const facebookStrategyCall = FacebookStrategy.mock.calls[0];
+      expect(facebookStrategyCall).toBeDefined();
+      expect(facebookStrategyCall.length).toBeGreaterThan(1);
+      
       const facebookCallback = facebookStrategyCall[1];
 
       // Just verify the callback function exists and is callable
@@ -195,8 +208,14 @@ describe('Enhanced Passport Configuration', () => {
     test('should handle LinkedIn OAuth callback correctly', () => {
       require('../../server/config/passport-config');
 
+      // Ensure LinkedIn strategy was called
+      expect(LinkedInStrategy).toHaveBeenCalled();
+      
       // Get the callback function passed to LinkedInStrategy
       const linkedinStrategyCall = LinkedInStrategy.mock.calls[0];
+      expect(linkedinStrategyCall).toBeDefined();
+      expect(linkedinStrategyCall.length).toBeGreaterThan(1);
+      
       const linkedinCallback = linkedinStrategyCall[1];
 
       // Just verify the callback function exists and is callable
@@ -217,20 +236,35 @@ describe('Enhanced Passport Configuration', () => {
 
   describe('Callback URL Configuration', () => {
     test('should use custom callback URI when provided', () => {
+      // Reset all environment variables to ensure OAuth credentials are available
+      process.env.GOOGLE_CLIENT_ID = 'test-google-client-id';
+      process.env.GOOGLE_CLIENT_SECRET = 'test-google-client-secret';
+      process.env.FACEBOOK_APP_ID = 'test-facebook-app-id';
+      process.env.FACEBOOK_APP_SECRET = 'test-facebook-app-secret';
+      process.env.LINKEDIN_CLIENT_ID = 'test-linkedin-client-id';
+      process.env.LINKEDIN_CLIENT_SECRET = 'test-linkedin-client-secret';
       process.env.OAUTH_CALLBACK_URI = 'https://custom.domain.com';
+      
+      // Clear mocks and require cache
+      GoogleStrategy.mockClear();
+      FacebookStrategy.mockClear();
+      LinkedInStrategy.mockClear();
       delete require.cache[require.resolve('../../server/config/passport-config')];
 
       require('../../server/config/passport-config');
 
       // Check Google strategy callback URL
+      expect(GoogleStrategy).toHaveBeenCalled();
       const googleConfig = GoogleStrategy.mock.calls[0][0];
       expect(googleConfig.callbackURL).toBe('https://custom.domain.com/api/v1/auth/google/callback');
 
       // Check Facebook strategy callback URL
+      expect(FacebookStrategy).toHaveBeenCalled();
       const facebookConfig = FacebookStrategy.mock.calls[0][0];
       expect(facebookConfig.callbackURL).toBe('https://custom.domain.com/api/v1/auth/facebook/callback');
 
       // Check LinkedIn strategy callback URL
+      expect(LinkedInStrategy).toHaveBeenCalled();
       const linkedinConfig = LinkedInStrategy.mock.calls[0][0];
       expect(linkedinConfig.callbackURL).toBe('https://custom.domain.com/api/v1/auth/linkedin/callback');
     });
@@ -275,8 +309,15 @@ describe('Enhanced Passport Configuration', () => {
 
   describe('Profile Data Handling', () => {
     test('should have Google callback with proper signature', () => {
+      // Clear mocks and require cache
+      GoogleStrategy.mockClear();
+      FacebookStrategy.mockClear();
+      LinkedInStrategy.mockClear();
+      delete require.cache[require.resolve('../../server/config/passport-config')];
+      
       require('../../server/config/passport-config');
 
+      expect(GoogleStrategy).toHaveBeenCalled();
       const googleCallback = GoogleStrategy.mock.calls[0][1];
       
       // Verify callback function signature
@@ -285,8 +326,15 @@ describe('Enhanced Passport Configuration', () => {
     });
 
     test('should have Facebook callback with proper signature', () => {
+      // Clear mocks and require cache
+      GoogleStrategy.mockClear();
+      FacebookStrategy.mockClear();
+      LinkedInStrategy.mockClear();
+      delete require.cache[require.resolve('../../server/config/passport-config')];
+      
       require('../../server/config/passport-config');
 
+      expect(FacebookStrategy).toHaveBeenCalled();
       const facebookCallback = FacebookStrategy.mock.calls[0][1];
       
       // Verify callback function signature
@@ -297,8 +345,15 @@ describe('Enhanced Passport Configuration', () => {
 
   describe('Error Handling', () => {
     test('should have async callbacks for database operations', () => {
+      // Clear mocks and require cache
+      GoogleStrategy.mockClear();
+      FacebookStrategy.mockClear();
+      LinkedInStrategy.mockClear();
+      delete require.cache[require.resolve('../../server/config/passport-config')];
+      
       require('../../server/config/passport-config');
 
+      expect(GoogleStrategy).toHaveBeenCalled();
       const googleCallback = GoogleStrategy.mock.calls[0][1];
       const facebookCallback = FacebookStrategy.mock.calls[0][1];
       const linkedinCallback = LinkedInStrategy.mock.calls[0][1];
@@ -372,8 +427,15 @@ describe('Enhanced Passport Configuration', () => {
 
   describe('Strategy Scope and Permissions', () => {
     test('should configure Google strategy with appropriate scope', () => {
+      // Clear mocks and require cache
+      GoogleStrategy.mockClear();
+      FacebookStrategy.mockClear();
+      LinkedInStrategy.mockClear();
+      delete require.cache[require.resolve('../../server/config/passport-config')];
+      
       require('../../server/config/passport-config');
 
+      expect(GoogleStrategy).toHaveBeenCalled();
       const googleConfig = GoogleStrategy.mock.calls[0][0];
       
       // Google strategy scope is typically handled by the route, not the strategy config
@@ -384,16 +446,30 @@ describe('Enhanced Passport Configuration', () => {
     });
 
     test('should configure Facebook strategy with profile fields', () => {
+      // Clear mocks and require cache
+      GoogleStrategy.mockClear();
+      FacebookStrategy.mockClear();
+      LinkedInStrategy.mockClear();
+      delete require.cache[require.resolve('../../server/config/passport-config')];
+      
       require('../../server/config/passport-config');
 
+      expect(FacebookStrategy).toHaveBeenCalled();
       const facebookConfig = FacebookStrategy.mock.calls[0][0];
       
       expect(facebookConfig.profileFields).toEqual(['id', 'emails', 'name', 'picture.type(large)']);
     });
 
     test('should configure LinkedIn strategy with correct scope', () => {
+      // Clear mocks and require cache
+      GoogleStrategy.mockClear();
+      FacebookStrategy.mockClear();
+      LinkedInStrategy.mockClear();
+      delete require.cache[require.resolve('../../server/config/passport-config')];
+      
       require('../../server/config/passport-config');
 
+      expect(LinkedInStrategy).toHaveBeenCalled();
       const linkedinConfig = LinkedInStrategy.mock.calls[0][0];
       
       expect(linkedinConfig.scope).toEqual(['r_emailaddress', 'r_liteprofile']);
@@ -402,8 +478,15 @@ describe('Enhanced Passport Configuration', () => {
 
   describe('State Parameter Handling', () => {
     test('should support state parameter for context detection', () => {
+      // Clear mocks and require cache
+      GoogleStrategy.mockClear();
+      FacebookStrategy.mockClear();
+      LinkedInStrategy.mockClear();
+      delete require.cache[require.resolve('../../server/config/passport-config')];
+      
       require('../../server/config/passport-config');
 
+      expect(GoogleStrategy).toHaveBeenCalled();
       // Verify Google strategy supports req parameter for state handling
       const googleConfig = GoogleStrategy.mock.calls[0][0];
       expect(googleConfig.passReqToCallback).toBe(true);

@@ -123,8 +123,10 @@ exports.createAdministrator = async (req, res) => {
     // Check for validation errors
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
+      const errorMessages = errors.array().map(error => error.msg);
       return res.status(400).json({
         success: false,
+        message: errorMessages[0],
         errors: errors.array()
       });
     }
@@ -181,6 +183,23 @@ exports.createAdministrator = async (req, res) => {
 
   } catch (error) {
     console.error('Error creating administrator:', error);
+    
+    // Handle validation errors from model pre-save hooks
+    if (error.name === 'ValidationError') {
+      return res.status(400).json({
+        success: false,
+        message: error.message
+      });
+    }
+    
+    // Handle duplicate key errors
+    if (error.code === 11000) {
+      return res.status(409).json({
+        success: false,
+        message: 'Email already exists'
+      });
+    }
+    
     res.status(500).json({
       success: false,
       message: 'Failed to create administrator'
@@ -466,8 +485,10 @@ exports.createOperator = async (req, res) => {
     // Check for validation errors
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
+      const errorMessages = errors.array().map(error => error.msg);
       return res.status(400).json({
         success: false,
+        message: errorMessages[0],
         errors: errors.array()
       });
     }
@@ -535,6 +556,23 @@ exports.createOperator = async (req, res) => {
 
   } catch (error) {
     console.error('Error creating operator:', error);
+    
+    // Handle validation errors from model pre-save hooks
+    if (error.name === 'ValidationError') {
+      return res.status(400).json({
+        success: false,
+        message: error.message
+      });
+    }
+    
+    // Handle duplicate key errors
+    if (error.code === 11000) {
+      return res.status(409).json({
+        success: false,
+        message: 'Email already exists'
+      });
+    }
+    
     res.status(500).json({
       success: false,
       message: 'Failed to create operator'

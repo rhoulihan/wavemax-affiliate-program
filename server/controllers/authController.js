@@ -1448,10 +1448,10 @@ exports.socialLogin = async (req, res) => {
       
       return res.status(200).json({
         success: true,
-        accessToken: token,
+        token: token,
         refreshToken: refreshTokenValue,
-        affiliate: {
-          affiliateId: customer.customerId,
+        user: {
+          customerId: customer.customerId,
           firstName: customer.firstName,
           lastName: customer.lastName,
           email: customer.email
@@ -1499,9 +1499,9 @@ exports.socialLogin = async (req, res) => {
     
     res.status(200).json({
       success: true,
-      accessToken: token,
+      token: token,
       refreshToken: refreshTokenValue,
-      affiliate: {
+      user: {
         affiliateId: affiliate.affiliateId,
         firstName: affiliate.firstName,
         lastName: affiliate.lastName,

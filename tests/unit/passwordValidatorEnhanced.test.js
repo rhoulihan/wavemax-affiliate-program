@@ -160,7 +160,7 @@ describe('Enhanced Password Validator', () => {
           'ValidPass123!',
           'MyPassword456@',
           'TestPass789#',
-          'SecurePass890$'
+          'SecurePass012$'
         ];
 
         sequentialNumberPasswords.forEach(password => {
@@ -433,7 +433,7 @@ describe('Enhanced Password Validator', () => {
     test('should include admin-specific validation when userType is admin', () => {
       const validator = customPasswordValidator();
       
-      const mockValue = 'testuser123!'; // Contains username
+      const mockValue = 'TestuserSecure9!'; // Contains username but passes other validation
       const mockReq = {
         body: {
           username: 'testuser',
@@ -449,7 +449,7 @@ describe('Enhanced Password Validator', () => {
     test('should include admin-specific validation when userType is operator', () => {
       const validator = customPasswordValidator();
       
-      const mockValue = 'testuser123!'; // Contains username
+      const mockValue = 'TestuserSecure9!'; // Contains username but passes other validation
       const mockReq = {
         body: {
           username: 'testuser',
