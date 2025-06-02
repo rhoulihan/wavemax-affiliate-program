@@ -350,8 +350,8 @@ describe('Password Validation Integration Tests', () => {
         adminId: 'ADMIN001',
         firstName: 'Test',
         lastName: 'Admin',
-        email: 'testadmin@example.com',
-        password: 'TestAdminPass123!',
+        email: 'setup@example.com',
+        password: 'SecureM@ster7!9K',
         permissions: ['administrators.create'],
         isActive: true
       });
@@ -362,19 +362,19 @@ describe('Password Validation Integration Tests', () => {
         .post('/api/v1/auth/administrator/login')
         .set('x-csrf-token', csrfToken)
         .send({
-          email: 'testadmin@example.com',
-          password: 'TestAdminPass123!'
+          email: 'setup@example.com',
+          password: 'SecureM@ster7!9K'
         });
       
       adminToken = loginResponse.body.token;
     });
 
     test('should enforce strong passwords for administrator creation', async () => {
-      const weakPassword = 'WeakPass!';
+      const weakPassword = 'Zq8#Rv2%'; // 8 chars - fails minimum 12 requirement
       const adminData = {
         firstName: 'Administrator',
         lastName: 'User',
-        email: 'adminuser@example.com',
+        email: 'user@test.com',
         password: weakPassword,
         permissions: ['administrators.read', 'system_config']
       };
@@ -402,11 +402,11 @@ describe('Password Validation Integration Tests', () => {
     });
 
     test('should accept strong passwords for administrator creation', async () => {
-      const strongPassword = 'StrongSecure99#';
+      const strongPassword = 'SecureM@ster7!9K'; // Master password - all requirements met
       const adminData = {
         firstName: 'Administrator',
         lastName: 'User',
-        email: 'adminuser2@example.com',
+        email: 'newuser@example.com',
         password: strongPassword,
         permissions: ['administrators.read', 'system_config']
       };
@@ -431,8 +431,8 @@ describe('Password Validation Integration Tests', () => {
         adminId: 'ADMIN002',
         firstName: 'Test',
         lastName: 'Admin',
-        email: 'testadmin2@example.com',
-        password: 'TestAdminPass123!',
+        email: 'opsetup@example.com',
+        password: 'SecureM@ster7!9K',
         permissions: ['operators.create'],
         isActive: true
       });
@@ -443,19 +443,19 @@ describe('Password Validation Integration Tests', () => {
         .post('/api/v1/auth/administrator/login')
         .set('x-csrf-token', csrfToken)
         .send({
-          email: 'testadmin2@example.com',
-          password: 'TestAdminPass123!'
+          email: 'opsetup@example.com',
+          password: 'SecureM@ster7!9K'
         });
       
       adminToken = loginResponse.body.token;
     });
 
     test('should enforce strong passwords for operator creation', async () => {
-      const weakPassword = 'WeakPass!';
+      const weakPassword = 'Short1!'; // 7 characters - fails minimum 12 requirement
       const operatorData = {
         firstName: 'Worker',
         lastName: 'Person',
-        email: 'workerperson@example.com',
+        email: 'operator@example.com',
         password: weakPassword,
         role: 'pickup_delivery',
         assignedRoutes: ['route1']
@@ -484,11 +484,11 @@ describe('Password Validation Integration Tests', () => {
     });
 
     test('should accept strong passwords for operator creation', async () => {
-      const strongPassword = 'StrongWorker59#';
+      const strongPassword = 'SecureM@ster7!9K'; // Master password - all requirements met
       const operatorData = {
         firstName: 'Worker',
         lastName: 'Person',
-        email: 'workerperson2@example.com',
+        email: 'newoperator@example.com',
         password: strongPassword,
         role: 'pickup_delivery',
         assignedRoutes: ['route1']
@@ -696,7 +696,7 @@ describe('Password Validation Integration Tests', () => {
 
   describe('Password Strength Edge Cases', () => {
     test('should reject passwords with only special characters at the end', async () => {
-      const weakPassword = 'Password123!!!!'; // Ends with repeated special chars
+      const weakPassword = 'SecureM@ster7!9K!!!'; // Master password + 3 consecutive ! chars
       
       const registrationData = {
         firstName: 'Edge',
