@@ -226,6 +226,52 @@
             font-weight: 600;
             text-align: center;
         }
+
+        /* Copy prompt button */
+        .copy-prompt-container {
+            position: sticky;
+            top: 20px;
+            z-index: 100;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .copy-prompt-btn {
+            background: linear-gradient(135deg, var(--success-color), #10b981);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3);
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .copy-prompt-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(5, 150, 105, 0.4);
+        }
+
+        .copy-prompt-btn:active {
+            transform: translateY(0);
+        }
+
+        .copy-prompt-btn.success {
+            background: linear-gradient(135deg, #059669, #047857);
+        }
+
+        .copy-prompt-btn.success::after {
+            content: " ✓";
+        }
+
+        .copy-icon {
+            font-size: 18px;
+        }
     </style>
 </head>
 <body>
@@ -241,6 +287,13 @@
                 <span class="badge">Jest</span>
             </div>
         </header>
+
+        <div class="copy-prompt-container">
+            <button class="copy-prompt-btn" onclick="copyGenericPrompt()">
+                <span class="copy-icon">📋</span>
+                Copy Generic Development Prompt
+            </button>
+        </div>
 
         <div class="tweet-highlight">
             <span class="emoji">💡</span>A proven framework for collaborative AI development sessions
@@ -392,8 +445,139 @@
         </section>
 
         <footer class="footer">
-            <span class="emoji">🚀</span>Ready to debug, build, and improve the WaveMAX codebase together!
+            <span class="emoji">🚀</span>Ready to debug, build, and improve the codebase together!
         </footer>
     </div>
+
+    <script>
+        function copyGenericPrompt() {
+            const genericPrompt = `# Development Session - Claude Starting Prompt
+
+## Project Context
+You are working on a Node.js/Express application with comprehensive features including authentication, user management, and robust testing. The codebase prioritizes security, maintainability, and robust error handling.
+
+## Our Proven Problem-Solving Process
+
+### 1. Systematic Investigation Approach
+- **Always start with facts**: Use \`git status\`, \`npm test\`, logs to understand current state
+- **Trace the root cause**: Don't fix symptoms - find the underlying issue
+- **Use multiple tools in parallel**: Batch \`Read\`, \`Grep\`, \`Bash\` calls for efficiency
+- **Document findings**: Track discoveries and decisions for complex multi-step problems
+
+### 2. Testing Philosophy
+- **Tests are the source of truth**: When tests fail, understand exactly what they expect vs. what's happening
+- **Fix the code, not the tests**: Unless test expectations are genuinely wrong
+- **Run individual tests first**: Isolate issues before running full suites
+- **Verify fixes incrementally**: Test each fix before moving to the next
+
+### 3. Code Quality Standards
+- **Follow existing patterns**: Study neighboring code before implementing changes
+- **Maintain backward compatibility**: Add new fields alongside existing ones when possible
+- **Security first**: Never expose sensitive data, validate all inputs
+- **No magic numbers/strings**: Use meaningful constants and clear variable names
+
+### 4. Git Workflow
+- **Commit frequently**: Logical, atomic commits with descriptive messages
+- **Document thoroughly**: Include both what changed and why
+- **Test before committing**: Ensure all tests pass before creating commits
+
+## Lessons Learned from Our Sessions
+
+### Complex Debugging Strategies
+1. **Test Mock Issues**: When tests pass individually but fail together, investigate mock isolation, \`clearMocks\` configuration, and require cache clearing
+2. **Authentication Issues**: Always verify environment variables, token structures, and response formats match test expectations
+3. **Database Issues**: Check model validations, unique constraints, and ensure test data cleanup between runs
+4. **Response Structure Mismatches**: Tests often expect top-level fields that controllers return nested - add both for compatibility
+
+### Effective Communication Patterns
+- **Be explicit about assumptions**: State what you think is happening and ask for confirmation
+- **Propose multiple solutions**: Offer 2-3 approaches with trade-offs
+- **Ask for input on complex decisions**: Architecture changes, security implications, test strategies
+- **Summarize progress regularly**: Especially in long debugging sessions
+
+## Improvement Opportunities
+
+### For Future Sessions
+1. **Proactive Error Prevention**: 
+   - Check test expectations before implementing features
+   - Verify environment setup early in external service work
+   - Run quick smoke tests after major changes
+
+2. **Better Documentation**:
+   - Create inline comments for complex logic (authentication flows, validation rules)
+   - Maintain decision logs for architectural choices
+   - Document test patterns for future reference
+
+3. **Enhanced Debugging**:
+   - Create debugging utilities (test data factories, mock helpers)
+   - Build comprehensive error logging for complex flows
+   - Implement better test isolation patterns from the start
+
+4. **Prompt Evolution**:
+   - Suggest additions to this starting prompt when noticing repeated processes for common tasks
+   - Capture new workflows and patterns that emerge during sessions
+   - Update best practices based on successful problem-solving approaches
+
+## Session Startup Checklist
+When we begin each session:
+- [ ] Review git status and recent commits
+- [ ] Check if any tests are currently failing (\`npm test\`)
+- [ ] Understand the current task/issue context
+- [ ] Identify if this relates to previous work (authentication, testing, etc.)
+- [ ] Establish the success criteria for the session
+
+## Communication Preferences
+- **Be direct and concise**: Focus on facts and solutions
+- **Use parallel tool execution**: Batch operations when possible
+- **Ask for clarification**: When requirements are ambiguous
+- **Provide options**: Especially for architectural or security decisions
+- **Document complex solutions**: For future reference
+
+## Key Principles for Our Collaboration
+1. **Systematic over quick fixes**: Take time to understand root causes
+2. **Test-driven solutions**: Let failing tests guide our implementation
+3. **Security and maintainability**: Never compromise on these fundamentals
+4. **Collaborative decision-making**: Complex choices should involve discussion
+5. **Continuous improvement**: Learn from each session to work better together
+
+---
+
+**Ready to debug, build, and improve the codebase together! What are we working on today?**`;
+
+            navigator.clipboard.writeText(genericPrompt).then(() => {
+                const button = document.querySelector('.copy-prompt-btn');
+                const originalText = button.innerHTML;
+                
+                button.classList.add('success');
+                button.innerHTML = '<span class="copy-icon">✅</span>Copied!';
+                
+                setTimeout(() => {
+                    button.classList.remove('success');
+                    button.innerHTML = originalText;
+                }, 2000);
+            }).catch(err => {
+                console.error('Failed to copy: ', err);
+                
+                // Fallback for older browsers
+                const textArea = document.createElement('textarea');
+                textArea.value = genericPrompt;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                
+                const button = document.querySelector('.copy-prompt-btn');
+                const originalText = button.innerHTML;
+                
+                button.classList.add('success');
+                button.innerHTML = '<span class="copy-icon">✅</span>Copied!';
+                
+                setTimeout(() => {
+                    button.classList.remove('success');
+                    button.innerHTML = originalText;
+                }, 2000);
+            });
+        }
+    </script>
 </body>
 </html>
