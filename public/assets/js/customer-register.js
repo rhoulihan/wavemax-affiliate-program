@@ -14,6 +14,79 @@
   const baseUrl = window.EMBED_CONFIG?.baseUrl || (window.location.protocol + '//' + window.location.host);
   const isEmbedded = window.EMBED_CONFIG?.isEmbedded || false;
 
+  // Function to show account conflict modal for existing affiliate accounts
+  function showAccountConflictModal(result) {
+    const affiliateData = result.affiliateData;
+    const affiliateName = `${affiliateData.firstName} ${affiliateData.lastName}`;
+    
+    // Create modal HTML - positioned at top of viewport for iframe visibility
+    const modalHTML = `
+      <div id="accountConflictModal" class="fixed inset-0 bg-black bg-opacity-50 z-50" style="z-index: 9999; position: fixed; top: 0; left: 0; width: 100%; height: 100vh; display: flex; align-items: flex-start; justify-content: center; padding-top: 20px;">
+        <div class="bg-white rounded-lg p-6 max-w-md mx-4 shadow-xl" style="margin-top: 0; position: relative;">
+          <div class="text-center mb-6">
+            <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-orange-100 mb-4">
+              <svg class="h-6 w-6 text-orange-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+            </div>
+            <h3 class="text-lg font-medium text-gray-900 mb-2">Account Conflict</h3>
+            <p class="text-sm text-gray-500 mb-4">
+              This Google account is already associated with an affiliate account for <strong>${affiliateName}</strong> (ID: <strong>${affiliateData.affiliateId}</strong>).
+            </p>
+            <p class="text-sm text-gray-500 mb-6">
+              Would you like to login as an affiliate instead, or use a different account for customer registration?
+            </p>
+          </div>
+          
+          <div class="flex flex-col space-y-3">
+            <button id="loginAsAffiliate" class="w-full bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+              Login as Affiliate
+            </button>
+            <button id="chooseAnotherAccount" class="w-full bg-gray-200 text-gray-800 px-4 py-2 rounded-md text-sm font-medium hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2">
+              Use Different Account
+            </button>
+          </div>
+        </div>
+      </div>
+    `;
+    
+    // Add modal to DOM
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+    
+    // Add event listeners
+    document.getElementById('loginAsAffiliate').addEventListener('click', function() {
+      console.log('User chose to login as affiliate');
+      // Close modal
+      document.getElementById('accountConflictModal').remove();
+      
+      // Navigate to affiliate login with the account already connected
+      if (isEmbedded) {
+        window.parent.postMessage({
+          type: 'navigate',
+          data: { url: '/affiliate-login' }
+        }, '*');
+      } else {
+        window.location.href = '/embed-app.html?route=/affiliate-login';
+      }
+    });
+    
+    document.getElementById('chooseAnotherAccount').addEventListener('click', function() {
+      console.log('User chose to use different account');
+      // Close modal and let user try another method
+      document.getElementById('accountConflictModal').remove();
+      
+      // Show a message about using a different account
+      alert('Please try logging in with a different Google account or use the email/password registration method.');
+    });
+    
+    // Close modal when clicking outside
+    document.getElementById('accountConflictModal').addEventListener('click', function(e) {
+      if (e.target === this) {
+        this.remove();
+      }
+    });
+  }
+
   // Function to initialize the registration form
   function initializeRegistrationForm() {
   console.log('Initializing registration form');
@@ -411,6 +484,9 @@
                 } else {
                   window.location.href = `/embed-app.html?route=/customer-dashboard&token=${data.result.token}&refreshToken=${data.result.refreshToken}`;
                 }
+              } else if (data.result.type === 'social-auth-account-conflict') {
+                console.log('Processing customer social-auth-account-conflict from database');
+                showAccountConflictModal(data.result);
               } else if (data.result.type === 'social-auth-error') {
                 console.log('Processing customer social-auth-error from database');
                 alert(data.result.message || 'Social authentication failed');
