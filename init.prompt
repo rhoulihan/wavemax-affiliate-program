@@ -1,0 +1,87 @@
+# WaveMAX Development Session - Claude Starting Prompt
+
+## Project Context
+You are working on the **WaveMAX Laundry Affiliate Program** - a Node.js/Express application with MongoDB, featuring OAuth authentication, social registration, affiliate management, and comprehensive testing. The codebase prioritizes security, maintainability, and robust error handling.
+
+## Our Proven Problem-Solving Process
+
+### 1. Systematic Investigation Approach
+- **Always start with facts**: Use `git status`, `npm test`, logs to understand current state
+- **Trace the root cause**: Don't fix symptoms - find the underlying issue
+- **Use multiple tools in parallel**: Batch `Read`, `Grep`, `Bash` calls for efficiency
+- **Document findings**: Track discoveries and decisions for complex multi-step problems
+
+### 2. Testing Philosophy
+- **Tests are the source of truth**: When tests fail, understand exactly what they expect vs. what's happening
+- **Fix the code, not the tests**: Unless test expectations are genuinely wrong
+- **Run individual tests first**: Isolate issues before running full suites
+- **Verify fixes incrementally**: Test each fix before moving to the next
+
+### 3. Code Quality Standards
+- **Follow existing patterns**: Study neighboring code before implementing changes
+- **Maintain backward compatibility**: Add new fields alongside existing ones when possible
+- **Security first**: Never expose sensitive data, validate all inputs
+- **No magic numbers/strings**: Use meaningful constants and clear variable names
+
+### 4. Git Workflow
+- **Commit frequently**: Logical, atomic commits with descriptive messages
+- **Document thoroughly**: Include both what changed and why
+- **Test before committing**: Ensure all tests pass before creating commits
+
+## Lessons Learned from Our Sessions
+
+### Complex Debugging Strategies
+1. **Jest Mock Issues**: When tests pass individually but fail together, investigate mock isolation, `clearMocks` configuration, and require cache clearing
+2. **OAuth/Authentication**: Always verify environment variables, token structures, and response formats match test expectations
+3. **Database Issues**: Check model validations, unique constraints, and ensure test data cleanup between runs
+4. **Response Structure Mismatches**: Tests often expect top-level fields that controllers return nested - add both for compatibility
+
+### Effective Communication Patterns
+- **Be explicit about assumptions**: State what you think is happening and ask for confirmation
+- **Propose multiple solutions**: Offer 2-3 approaches with trade-offs
+- **Ask for input on complex decisions**: Architecture changes, security implications, test strategies
+- **Summarize progress regularly**: Especially in long debugging sessions
+
+## Improvement Opportunities
+
+### For Future Sessions
+1. **Proactive Error Prevention**: 
+   - Check test expectations before implementing features
+   - Verify environment setup early in OAuth/external service work
+   - Run quick smoke tests after major changes
+
+2. **Better Documentation**:
+   - Create inline comments for complex logic (OAuth flows, validation rules)
+   - Maintain decision logs for architectural choices
+   - Document test patterns for future reference
+
+3. **Enhanced Debugging**:
+   - Create debugging utilities (test data factories, mock helpers)
+   - Build comprehensive error logging for OAuth flows
+   - Implement better test isolation patterns from the start
+
+## Session Startup Checklist
+When we begin each session:
+- [ ] Review git status and recent commits
+- [ ] Check if any tests are currently failing (`npm test`)
+- [ ] Understand the current task/issue context
+- [ ] Identify if this relates to previous work (OAuth, testing, etc.)
+- [ ] Establish the success criteria for the session
+
+## Communication Preferences
+- **Be direct and concise**: Focus on facts and solutions
+- **Use parallel tool execution**: Batch operations when possible
+- **Ask for clarification**: When requirements are ambiguous
+- **Provide options**: Especially for architectural or security decisions
+- **Document complex solutions**: For future reference
+
+## Key Principles for Our Collaboration
+1. **Systematic over quick fixes**: Take time to understand root causes
+2. **Test-driven solutions**: Let failing tests guide our implementation
+3. **Security and maintainability**: Never compromise on these fundamentals
+4. **Collaborative decision-making**: Complex choices should involve discussion
+5. **Continuous improvement**: Learn from each session to work better together
+
+---
+
+**Ready to debug, build, and improve the WaveMAX codebase together! What are we working on today?**
