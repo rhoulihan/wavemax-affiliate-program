@@ -1,0 +1,941 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Templates - WaveMAX Coverage Report</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f5f5f5;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+            color: white;
+            padding: 30px 0;
+            text-align: center;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .nav-links {
+            margin-top: 20px;
+        }
+        
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            margin: 0 15px;
+            padding: 8px 16px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            transition: background 0.3s;
+        }
+        
+        .nav-links a:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+        
+        .template-section {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .template-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e5e7eb;
+        }
+        
+        h2 {
+            color: #1e3a8a;
+            font-size: 1.8em;
+        }
+        
+        .copy-button {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: background 0.3s;
+        }
+        
+        .copy-button:hover {
+            background: #2563eb;
+        }
+        
+        .copy-button:active {
+            transform: scale(0.98);
+        }
+        
+        .code-template {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            margin: 15px 0;
+            position: relative;
+        }
+        
+        .code-template pre {
+            margin: 0;
+            white-space: pre;
+        }
+        
+        .template-description {
+            background: #f3f4f6;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            border-left: 4px solid #3b82f6;
+        }
+        
+        .quick-start {
+            background: #eff6ff;
+            border: 1px solid #3b82f6;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .quick-start h3 {
+            color: #1e3a8a;
+            margin-bottom: 10px;
+        }
+        
+        .command-line {
+            background: #1e293b;
+            color: #22c55e;
+            padding: 12px 20px;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            margin: 10px 0;
+        }
+        
+        .highlight {
+            color: #fbbf24;
+            font-weight: bold;
+        }
+        
+        .comment {
+            color: #94a3b8;
+        }
+        
+        .string {
+            color: #86efac;
+        }
+        
+        .keyword {
+            color: #c084fc;
+        }
+        
+        .function {
+            color: #60a5fa;
+        }
+        
+        .footer {
+            text-align: center;
+            padding: 30px 0;
+            color: #666;
+            font-size: 0.9em;
+        }
+        
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #22c55e;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 6px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.3s;
+        }
+        
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Test Templates</h1>
+            <p>Ready-to-use test templates for improving coverage</p>
+            <div class="nav-links">
+                <a href="index.html">← Back to Overview</a>
+                <a href="critical-files.html">Critical Files</a>
+            </div>
+        </header>
+        
+        <div class="quick-start">
+            <h3>🚀 Quick Start Commands</h3>
+            <p>Run these commands to quickly create test files for the critical gaps:</p>
+            <div class="command-line">
+                # Create email service test
+                touch tests/unit/emailService.test.js
+            </div>
+            <div class="command-line">
+                # Create passport config test
+                touch tests/unit/passportConfig.test.js
+            </div>
+            <div class="command-line">
+                # Run specific test file
+                npm test -- tests/unit/emailService.test.js
+            </div>
+        </div>
+        
+        <div class="template-section">
+            <div class="template-header">
+                <h2>📧 Email Service Test Template</h2>
+                <button class="copy-button" onclick="copyCode('email-template')">Copy Template</button>
+            </div>
+            
+            <div class="template-description">
+                <strong>Target File:</strong> server/utils/emailService.js (0% coverage)<br>
+                <strong>Priority:</strong> CRITICAL - This service handles all system emails<br>
+                <strong>Estimated Time:</strong> 3-4 hours for complete coverage
+            </div>
+            
+            <div class="code-template" id="email-template">
+<pre><span class="comment">// tests/unit/emailService.test.js</span>
+<span class="keyword">const</span> nodemailer = <span class="function">require</span>(<span class="string">'nodemailer'</span>);
+<span class="keyword">const</span> { SESClient } = <span class="function">require</span>(<span class="string">'@aws-sdk/client-ses'</span>);
+<span class="keyword">const</span> fs = <span class="function">require</span>(<span class="string">'fs'</span>);
+<span class="keyword">const</span> path = <span class="function">require</span>(<span class="string">'path'</span>);
+
+<span class="comment">// Mock all external dependencies</span>
+<span class="function">jest.mock</span>(<span class="string">'nodemailer'</span>);
+<span class="function">jest.mock</span>(<span class="string">'@aws-sdk/client-ses'</span>);
+<span class="function">jest.mock</span>(<span class="string">'fs'</span>);
+
+<span class="comment">// Clear the module cache and re-require after mocks are set up</span>
+<span class="keyword">let</span> emailService;
+
+<span class="function">describe</span>(<span class="string">'EmailService'</span>, () => {
+  <span class="keyword">let</span> mockTransporter;
+  <span class="keyword">let</span> mockSendMail;
+  
+  <span class="function">beforeEach</span>(() => {
+    <span class="comment">// Reset all mocks</span>
+    jest.clearAllMocks();
+    jest.resetModules();
+    
+    <span class="comment">// Setup mock transporter</span>
+    mockSendMail = jest.fn().mockResolvedValue({ 
+      messageId: <span class="string">'test-message-id'</span> 
+    });
+    
+    mockTransporter = {
+      sendMail: mockSendMail
+    };
+    
+    <span class="comment">// Mock nodemailer.createTransport</span>
+    nodemailer.createTransport.mockReturnValue(mockTransporter);
+    
+    <span class="comment">// Mock fs.readFile for email templates</span>
+    fs.readFile = jest.fn((path, encoding, callback) => {
+      callback(<span class="keyword">null</span>, <span class="string">'&lt;html&gt;[EMAIL_CONTENT]&lt;/html&gt;'</span>);
+    });
+    
+    <span class="comment">// Re-require the module after mocks are set</span>
+    emailService = <span class="function">require</span>(<span class="string">'../../server/utils/emailService'</span>);
+  });
+  
+  <span class="function">describe</span>(<span class="string">'Transport Creation'</span>, () => {
+    <span class="function">test</span>(<span class="string">'should create console transport for development'</span>, () => {
+      process.env.EMAIL_PROVIDER = <span class="string">'console'</span>;
+      <span class="keyword">const</span> consoleSpy = jest.spyOn(console, <span class="string">'log'</span>).mockImplementation();
+      
+      <span class="comment">// Re-require to pick up new env var</span>
+      jest.resetModules();
+      emailService = <span class="function">require</span>(<span class="string">'../../server/utils/emailService'</span>);
+      
+      <span class="comment">// Test console transport behavior</span>
+      <span class="comment">// The transport should log instead of sending</span>
+      
+      consoleSpy.mockRestore();
+    });
+    
+    <span class="function">test</span>(<span class="string">'should create SES transport when configured'</span>, () => {
+      process.env.EMAIL_PROVIDER = <span class="string">'ses'</span>;
+      process.env.AWS_REGION = <span class="string">'us-east-1'</span>;
+      
+      <span class="comment">// Mock SES client</span>
+      <span class="keyword">const</span> mockSESClient = {};
+      SESClient.mockImplementation(() => mockSESClient);
+      
+      jest.resetModules();
+      emailService = <span class="function">require</span>(<span class="string">'../../server/utils/emailService'</span>);
+      
+      <span class="function">expect</span>(nodemailer.createTransport).toHaveBeenCalledWith(
+        <span class="function">expect.objectContaining</span>({
+          SES: <span class="function">expect.objectContaining</span>({
+            ses: mockSESClient
+          })
+        })
+      );
+    });
+    
+    <span class="function">test</span>(<span class="string">'should create Exchange transport when configured'</span>, () => {
+      process.env.EMAIL_PROVIDER = <span class="string">'exchange'</span>;
+      process.env.EXCHANGE_HOST = <span class="string">'exchange.example.com'</span>;
+      process.env.EXCHANGE_PORT = <span class="string">'587'</span>;
+      process.env.EXCHANGE_USER = <span class="string">'user@example.com'</span>;
+      process.env.EXCHANGE_PASS = <span class="string">'password'</span>;
+      
+      jest.resetModules();
+      emailService = <span class="function">require</span>(<span class="string">'../../server/utils/emailService'</span>);
+      
+      <span class="function">expect</span>(nodemailer.createTransport).toHaveBeenCalledWith(
+        <span class="function">expect.objectContaining</span>({
+          host: <span class="string">'exchange.example.com'</span>,
+          port: 587,
+          auth: {
+            user: <span class="string">'user@example.com'</span>,
+            pass: <span class="string">'password'</span>
+          }
+        })
+      );
+    });
+    
+    <span class="function">test</span>(<span class="string">'should create SMTP transport as default'</span>, () => {
+      process.env.EMAIL_PROVIDER = <span class="keyword">undefined</span>;
+      process.env.EMAIL_HOST = <span class="string">'smtp.gmail.com'</span>;
+      process.env.EMAIL_PORT = <span class="string">'587'</span>;
+      
+      jest.resetModules();
+      emailService = <span class="function">require</span>(<span class="string">'../../server/utils/emailService'</span>);
+      
+      <span class="function">expect</span>(nodemailer.createTransport).toHaveBeenCalledWith(
+        <span class="function">expect.objectContaining</span>({
+          host: <span class="string">'smtp.gmail.com'</span>,
+          port: <span class="string">'587'</span>
+        })
+      );
+    });
+  });
+  
+  <span class="function">describe</span>(<span class="string">'Email Sending Functions'</span>, () => {
+    <span class="function">test</span>(<span class="string">'should send affiliate welcome email'</span>, <span class="keyword">async</span> () => {
+      <span class="keyword">const</span> mockAffiliate = {
+        email: <span class="string">'affiliate@example.com'</span>,
+        firstName: <span class="string">'John'</span>,
+        lastName: <span class="string">'Doe'</span>,
+        affiliateId: <span class="string">'AFF123'</span>
+      };
+      
+      <span class="keyword">await</span> emailService.sendAffiliateWelcome(mockAffiliate);
+      
+      <span class="function">expect</span>(mockSendMail).toHaveBeenCalledWith(
+        <span class="function">expect.objectContaining</span>({
+          to: <span class="string">'affiliate@example.com'</span>,
+          subject: <span class="function">expect.stringContaining</span>(<span class="string">'Welcome'</span>),
+          html: <span class="function">expect.stringContaining</span>(<span class="string">'[EMAIL_CONTENT]'</span>)
+        })
+      );
+    });
+    
+    <span class="function">test</span>(<span class="string">'should send customer order confirmation'</span>, <span class="keyword">async</span> () => {
+      <span class="keyword">const</span> mockOrder = {
+        orderId: <span class="string">'ORD123'</span>,
+        customer: {
+          email: <span class="string">'customer@example.com'</span>,
+          firstName: <span class="string">'Jane'</span>
+        },
+        totalAmount: 29.99,
+        items: [{ name: <span class="string">'Laundry Service'</span>, quantity: 1 }]
+      };
+      
+      <span class="keyword">await</span> emailService.sendOrderConfirmation(mockOrder);
+      
+      <span class="function">expect</span>(mockSendMail).toHaveBeenCalledWith(
+        <span class="function">expect.objectContaining</span>({
+          to: <span class="string">'customer@example.com'</span>,
+          subject: <span class="function">expect.stringContaining</span>(<span class="string">'Order Confirmation'</span>)
+        })
+      );
+    });
+    
+    <span class="function">test</span>(<span class="string">'should handle email sending errors'</span>, <span class="keyword">async</span> () => {
+      mockSendMail.mockRejectedValueOnce(<span class="keyword">new</span> Error(<span class="string">'SMTP Error'</span>));
+      
+      <span class="keyword">await</span> <span class="function">expect</span>(
+        emailService.sendAffiliateWelcome({ email: <span class="string">'test@example.com'</span> })
+      ).rejects.toThrow(<span class="string">'SMTP Error'</span>);
+    });
+    
+    <span class="function">test</span>(<span class="string">'should handle template loading errors'</span>, <span class="keyword">async</span> () => {
+      fs.readFile = jest.fn((path, encoding, callback) => {
+        callback(<span class="keyword">new</span> Error(<span class="string">'File not found'</span>), <span class="keyword">null</span>);
+      });
+      
+      <span class="comment">// Should use fallback template</span>
+      <span class="keyword">await</span> emailService.sendAffiliateWelcome({ 
+        email: <span class="string">'test@example.com'</span> 
+      });
+      
+      <span class="function">expect</span>(mockSendMail).toHaveBeenCalledWith(
+        <span class="function">expect.objectContaining</span>({
+          html: <span class="function">expect.stringContaining</span>(<span class="string">'WaveMAX Laundry'</span>)
+        })
+      );
+    });
+  });
+  
+  <span class="function">describe</span>(<span class="string">'Password Reset Emails'</span>, () => {
+    <span class="function">test</span>(<span class="string">'should send password reset email with token'</span>, <span class="keyword">async</span> () => {
+      <span class="keyword">const</span> resetData = {
+        email: <span class="string">'user@example.com'</span>,
+        resetToken: <span class="string">'reset-token-123'</span>,
+        userType: <span class="string">'affiliate'</span>
+      };
+      
+      <span class="keyword">await</span> emailService.sendPasswordReset(resetData);
+      
+      <span class="function">expect</span>(mockSendMail).toHaveBeenCalledWith(
+        <span class="function">expect.objectContaining</span>({
+          to: <span class="string">'user@example.com'</span>,
+          subject: <span class="function">expect.stringContaining</span>(<span class="string">'Password Reset'</span>),
+          html: <span class="function">expect.stringContaining</span>(<span class="string">'reset-token-123'</span>)
+        })
+      );
+    });
+  });
+  
+  <span class="function">describe</span>(<span class="string">'Commission Notifications'</span>, () => {
+    <span class="function">test</span>(<span class="string">'should send commission earned notification'</span>, <span class="keyword">async</span> () => {
+      <span class="keyword">const</span> commissionData = {
+        affiliate: {
+          email: <span class="string">'affiliate@example.com'</span>,
+          firstName: <span class="string">'John'</span>
+        },
+        amount: 15.50,
+        orderId: <span class="string">'ORD456'</span>,
+        customerName: <span class="string">'Jane Smith'</span>
+      };
+      
+      <span class="keyword">await</span> emailService.sendCommissionNotification(commissionData);
+      
+      <span class="function">expect</span>(mockSendMail).toHaveBeenCalledWith(
+        <span class="function">expect.objectContaining</span>({
+          to: <span class="string">'affiliate@example.com'</span>,
+          subject: <span class="function">expect.stringContaining</span>(<span class="string">'Commission'</span>),
+          html: <span class="function">expect.stringContaining</span>(<span class="string">'15.50'</span>)
+        })
+      );
+    });
+  });
+});
+</pre>
+            </div>
+        </div>
+        
+        <div class="template-section">
+            <div class="template-header">
+                <h2>🔐 Passport OAuth Test Template</h2>
+                <button class="copy-button" onclick="copyCode('passport-template')">Copy Template</button>
+            </div>
+            
+            <div class="template-description">
+                <strong>Target File:</strong> server/config/passport-config.js (14.54% coverage)<br>
+                <strong>Priority:</strong> HIGH - OAuth authentication is security critical<br>
+                <strong>Estimated Time:</strong> 2-3 hours
+            </div>
+            
+            <div class="code-template" id="passport-template">
+<pre><span class="comment">// tests/unit/passportConfig.test.js</span>
+<span class="keyword">const</span> passport = <span class="function">require</span>(<span class="string">'passport'</span>);
+<span class="keyword">const</span> GoogleStrategy = <span class="function">require</span>(<span class="string">'passport-google-oauth20'</span>).Strategy;
+<span class="keyword">const</span> FacebookStrategy = <span class="function">require</span>(<span class="string">'passport-facebook'</span>).Strategy;
+<span class="keyword">const</span> Affiliate = <span class="function">require</span>(<span class="string">'../../server/models/Affiliate'</span>);
+<span class="keyword">const</span> Customer = <span class="function">require</span>(<span class="string">'../../server/models/Customer'</span>);
+
+<span class="comment">// Mock the strategies</span>
+<span class="function">jest.mock</span>(<span class="string">'passport-google-oauth20'</span>);
+<span class="function">jest.mock</span>(<span class="string">'passport-facebook'</span>);
+<span class="function">jest.mock</span>(<span class="string">'../../server/models/Affiliate'</span>);
+<span class="function">jest.mock</span>(<span class="string">'../../server/models/Customer'</span>);
+
+<span class="function">describe</span>(<span class="string">'Passport OAuth Configuration'</span>, () => {
+  <span class="keyword">let</span> googleStrategyCallback;
+  <span class="keyword">let</span> facebookStrategyCallback;
+  
+  <span class="function">beforeEach</span>(() => {
+    jest.clearAllMocks();
+    
+    <span class="comment">// Capture the strategy callbacks</span>
+    GoogleStrategy.mockImplementation((config, callback) => {
+      googleStrategyCallback = callback;
+      <span class="keyword">return</span> {};
+    });
+    
+    FacebookStrategy.mockImplementation((config, callback) => {
+      facebookStrategyCallback = callback;
+      <span class="keyword">return</span> {};
+    });
+    
+    <span class="comment">// Set up environment variables</span>
+    process.env.GOOGLE_CLIENT_ID = <span class="string">'test-google-id'</span>;
+    process.env.GOOGLE_CLIENT_SECRET = <span class="string">'test-google-secret'</span>;
+    process.env.FACEBOOK_APP_ID = <span class="string">'test-fb-id'</span>;
+    process.env.FACEBOOK_APP_SECRET = <span class="string">'test-fb-secret'</span>;
+    
+    <span class="comment">// Re-require to trigger strategy registration</span>
+    jest.resetModules();
+    <span class="function">require</span>(<span class="string">'../../server/config/passport-config'</span>);
+  });
+  
+  <span class="function">describe</span>(<span class="string">'Google OAuth Strategy'</span>, () => {
+    <span class="keyword">const</span> mockGoogleProfile = {
+      id: <span class="string">'google-123'</span>,
+      emails: [{ value: <span class="string">'test@example.com'</span> }],
+      name: { 
+        givenName: <span class="string">'Test'</span>, 
+        familyName: <span class="string">'User'</span> 
+      },
+      displayName: <span class="string">'Test User'</span>,
+      _json: { <span class="comment">/* raw profile data */</span> }
+    };
+    
+    <span class="function">test</span>(<span class="string">'should handle customer context correctly'</span>, <span class="keyword">async</span> () => {
+      <span class="keyword">const</span> mockReq = { 
+        query: { state: <span class="string">'customer_session123'</span> } 
+      };
+      <span class="keyword">const</span> done = jest.fn();
+      
+      <span class="comment">// No existing user</span>
+      Customer.findOne.mockResolvedValue(<span class="keyword">null</span>);
+      Affiliate.findOne.mockResolvedValue(<span class="keyword">null</span>);
+      
+      <span class="keyword">await</span> googleStrategyCallback(
+        mockReq, 
+        <span class="string">'access-token'</span>, 
+        <span class="string">'refresh-token'</span>, 
+        mockGoogleProfile, 
+        done
+      );
+      
+      <span class="comment">// Should return new customer data</span>
+      <span class="function">expect</span>(done).toHaveBeenCalledWith(<span class="keyword">null</span>, 
+        <span class="function">expect.objectContaining</span>({
+          isNewUser: <span class="keyword">true</span>,
+          userType: <span class="string">'customer'</span>,
+          provider: <span class="string">'google'</span>,
+          socialId: <span class="string">'google-123'</span>,
+          email: <span class="string">'test@example.com'</span>
+        })
+      );
+    });
+    
+    <span class="function">test</span>(<span class="string">'should link to existing customer by email'</span>, <span class="keyword">async</span> () => {
+      <span class="keyword">const</span> mockReq = { 
+        query: { state: <span class="string">'customer_session123'</span> } 
+      };
+      <span class="keyword">const</span> done = jest.fn();
+      
+      <span class="keyword">const</span> mockCustomer = {
+        _id: <span class="string">'customer-id'</span>,
+        customerId: <span class="string">'CUST123'</span>,
+        email: <span class="string">'test@example.com'</span>,
+        socialAccounts: {},
+        save: jest.fn()
+      };
+      
+      <span class="comment">// Find by social ID returns null</span>
+      Customer.findOne.mockResolvedValueOnce(<span class="keyword">null</span>);
+      <span class="comment">// Find by email returns existing customer</span>
+      Customer.findOne.mockResolvedValueOnce(mockCustomer);
+      
+      <span class="keyword">await</span> googleStrategyCallback(
+        mockReq, 
+        <span class="string">'access-token'</span>, 
+        <span class="string">'refresh-token'</span>, 
+        mockGoogleProfile, 
+        done
+      );
+      
+      <span class="comment">// Should link Google account</span>
+      <span class="function">expect</span>(mockCustomer.socialAccounts.google).toBeDefined();
+      <span class="function">expect</span>(mockCustomer.save).toHaveBeenCalled();
+      <span class="function">expect</span>(done).toHaveBeenCalledWith(<span class="keyword">null</span>, mockCustomer);
+    });
+    
+    <span class="function">test</span>(<span class="string">'should detect account conflicts'</span>, <span class="keyword">async</span> () => {
+      <span class="keyword">const</span> mockReq = { 
+        query: { state: <span class="string">'customer_session123'</span> } 
+      };
+      <span class="keyword">const</span> done = jest.fn();
+      
+      <span class="keyword">const</span> mockAffiliate = {
+        affiliateId: <span class="string">'AFF123'</span>,
+        email: <span class="string">'test@example.com'</span>
+      };
+      
+      Customer.findOne.mockResolvedValue(<span class="keyword">null</span>);
+      Affiliate.findOne.mockResolvedValue(mockAffiliate);
+      
+      <span class="keyword">await</span> googleStrategyCallback(
+        mockReq, 
+        <span class="string">'access-token'</span>, 
+        <span class="string">'refresh-token'</span>, 
+        mockGoogleProfile, 
+        done
+      );
+      
+      <span class="comment">// Should return conflict data</span>
+      <span class="function">expect</span>(done).toHaveBeenCalledWith(<span class="keyword">null</span>, 
+        <span class="function">expect.objectContaining</span>({
+          isExistingAffiliate: <span class="keyword">true</span>,
+          affiliate: mockAffiliate
+        })
+      );
+    });
+    
+    <span class="function">test</span>(<span class="string">'should handle affiliate OAuth flow'</span>, <span class="keyword">async</span> () => {
+      <span class="keyword">const</span> mockReq = { 
+        query: { state: <span class="string">'affiliate_session'</span> } 
+      };
+      <span class="keyword">const</span> done = jest.fn();
+      
+      Affiliate.findOne.mockResolvedValue(<span class="keyword">null</span>);
+      Customer.findOne.mockResolvedValue(<span class="keyword">null</span>);
+      
+      <span class="keyword">await</span> googleStrategyCallback(
+        mockReq, 
+        <span class="string">'access-token'</span>, 
+        <span class="string">'refresh-token'</span>, 
+        mockGoogleProfile, 
+        done
+      );
+      
+      <span class="function">expect</span>(done).toHaveBeenCalledWith(<span class="keyword">null</span>, 
+        <span class="function">expect.objectContaining</span>({
+          isNewUser: <span class="keyword">true</span>,
+          userType: <span class="string">'affiliate'</span>
+        })
+      );
+    });
+    
+    <span class="function">test</span>(<span class="string">'should handle OAuth errors'</span>, <span class="keyword">async</span> () => {
+      <span class="keyword">const</span> mockReq = { query: {} };
+      <span class="keyword">const</span> done = jest.fn();
+      
+      <span class="comment">// Force an error</span>
+      Customer.findOne.mockRejectedValue(<span class="keyword">new</span> Error(<span class="string">'DB Error'</span>));
+      
+      <span class="keyword">await</span> googleStrategyCallback(
+        mockReq, 
+        <span class="string">'access-token'</span>, 
+        <span class="string">'refresh-token'</span>, 
+        mockGoogleProfile, 
+        done
+      );
+      
+      <span class="function">expect</span>(done).toHaveBeenCalledWith(
+        <span class="function">expect.any</span>(Error), 
+        <span class="keyword">null</span>
+      );
+    });
+  });
+});</pre>
+            </div>
+        </div>
+        
+        <div class="template-section">
+            <div class="template-header">
+                <h2>🔑 Auth Controller OAuth Test Template</h2>
+                <button class="copy-button" onclick="copyCode('auth-template')">Copy Template</button>
+            </div>
+            
+            <div class="template-description">
+                <strong>Target Functions:</strong> createOAuthSession, checkOAuthSession, completeSocialCustomerRegistration<br>
+                <strong>Priority:</strong> HIGH - New OAuth features need immediate coverage<br>
+                <strong>Estimated Time:</strong> 2 hours
+            </div>
+            
+            <div class="code-template" id="auth-template">
+<pre><span class="comment">// Add to existing authController.test.js</span>
+
+<span class="function">describe</span>(<span class="string">'OAuth Session Management'</span>, () => {
+  <span class="function">describe</span>(<span class="string">'createOAuthSession'</span>, () => {
+    <span class="function">test</span>(<span class="string">'should create OAuth session successfully'</span>, <span class="keyword">async</span> () => {
+      <span class="keyword">const</span> req = {
+        body: {
+          userType: <span class="string">'customer'</span>,
+          provider: <span class="string">'google'</span>
+        }
+      };
+      <span class="keyword">const</span> res = {
+        status: jest.fn().mockReturnThis(),
+        json: jest.fn()
+      };
+      
+      <span class="keyword">await</span> authController.createOAuthSession(req, res);
+      
+      <span class="function">expect</span>(res.status).toHaveBeenCalledWith(200);
+      <span class="function">expect</span>(res.json).toHaveBeenCalledWith({
+        success: <span class="keyword">true</span>,
+        sessionId: <span class="function">expect.any</span>(String),
+        authUrl: <span class="function">expect.stringContaining</span>(<span class="string">'/api/v1/auth/customer/google'</span>)
+      });
+      
+      <span class="comment">// Verify session was saved</span>
+      <span class="function">expect</span>(OAuthSession.prototype.save).toHaveBeenCalled();
+    });
+    
+    <span class="function">test</span>(<span class="string">'should validate user type'</span>, <span class="keyword">async</span> () => {
+      <span class="keyword">const</span> req = {
+        body: {
+          userType: <span class="string">'invalid'</span>,
+          provider: <span class="string">'google'</span>
+        }
+      };
+      <span class="keyword">const</span> res = {
+        status: jest.fn().mockReturnThis(),
+        json: jest.fn()
+      };
+      
+      <span class="keyword">await</span> authController.createOAuthSession(req, res);
+      
+      <span class="function">expect</span>(res.status).toHaveBeenCalledWith(400);
+      <span class="function">expect</span>(res.json).toHaveBeenCalledWith({
+        success: <span class="keyword">false</span>,
+        message: <span class="string">'Invalid user type'</span>
+      });
+    });
+  });
+  
+  <span class="function">describe</span>(<span class="string">'checkOAuthSession'</span>, () => {
+    <span class="function">test</span>(<span class="string">'should return pending status for incomplete session'</span>, <span class="keyword">async</span> () => {
+      <span class="keyword">const</span> mockSession = {
+        sessionId: <span class="string">'test-session'</span>,
+        status: <span class="string">'pending'</span>,
+        expiresAt: <span class="keyword">new</span> Date(Date.now() + 300000)
+      };
+      
+      OAuthSession.findOne.mockResolvedValue(mockSession);
+      
+      <span class="keyword">const</span> req = { params: { sessionId: <span class="string">'test-session'</span> } };
+      <span class="keyword">const</span> res = {
+        json: jest.fn()
+      };
+      
+      <span class="keyword">await</span> authController.checkOAuthSession(req, res);
+      
+      <span class="function">expect</span>(res.json).toHaveBeenCalledWith({
+        success: <span class="keyword">true</span>,
+        status: <span class="string">'pending'</span>
+      });
+    });
+    
+    <span class="function">test</span>(<span class="string">'should return completed status with tokens'</span>, <span class="keyword">async</span> () => {
+      <span class="keyword">const</span> mockSession = {
+        sessionId: <span class="string">'test-session'</span>,
+        status: <span class="string">'completed'</span>,
+        result: {
+          success: <span class="keyword">true</span>,
+          tokens: { access: <span class="string">'token123'</span> },
+          user: { id: <span class="string">'user123'</span> }
+        },
+        remove: jest.fn()
+      };
+      
+      OAuthSession.findOne.mockResolvedValue(mockSession);
+      
+      <span class="keyword">const</span> req = { params: { sessionId: <span class="string">'test-session'</span> } };
+      <span class="keyword">const</span> res = {
+        json: jest.fn()
+      };
+      
+      <span class="keyword">await</span> authController.checkOAuthSession(req, res);
+      
+      <span class="function">expect</span>(res.json).toHaveBeenCalledWith({
+        success: <span class="keyword">true</span>,
+        status: <span class="string">'completed'</span>,
+        result: mockSession.result
+      });
+      
+      <span class="comment">// Session should be removed after retrieval</span>
+      <span class="function">expect</span>(mockSession.remove).toHaveBeenCalled();
+    });
+    
+    <span class="function">test</span>(<span class="string">'should handle expired sessions'</span>, <span class="keyword">async</span> () => {
+      <span class="keyword">const</span> mockSession = {
+        sessionId: <span class="string">'test-session'</span>,
+        status: <span class="string">'pending'</span>,
+        expiresAt: <span class="keyword">new</span> Date(Date.now() - 1000), <span class="comment">// Expired</span>
+        remove: jest.fn()
+      };
+      
+      OAuthSession.findOne.mockResolvedValue(mockSession);
+      
+      <span class="keyword">const</span> req = { params: { sessionId: <span class="string">'test-session'</span> } };
+      <span class="keyword">const</span> res = {
+        status: jest.fn().mockReturnThis(),
+        json: jest.fn()
+      };
+      
+      <span class="keyword">await</span> authController.checkOAuthSession(req, res);
+      
+      <span class="function">expect</span>(res.status).toHaveBeenCalledWith(410);
+      <span class="function">expect</span>(res.json).toHaveBeenCalledWith({
+        success: <span class="keyword">false</span>,
+        message: <span class="string">'OAuth session expired'</span>
+      });
+      
+      <span class="function">expect</span>(mockSession.remove).toHaveBeenCalled();
+    });
+  });
+});</pre>
+            </div>
+        </div>
+        
+        <div class="template-section">
+            <div class="template-header">
+                <h2>🔒 Encryption Utils Test Template</h2>
+                <button class="copy-button" onclick="copyCode('encryption-template')">Copy Template</button>
+            </div>
+            
+            <div class="template-description">
+                <strong>Target File:</strong> server/utils/encryption.js (68.18% coverage)<br>
+                <strong>Priority:</strong> HIGH - Security critical error paths need coverage<br>
+                <strong>Estimated Time:</strong> 1 hour
+            </div>
+            
+            <div class="code-template" id="encryption-template">
+<pre><span class="comment">// Add these tests to existing encryption.test.js</span>
+
+<span class="function">describe</span>(<span class="string">'Encryption Error Handling'</span>, () => {
+  <span class="function">test</span>(<span class="string">'should handle encryption failures gracefully'</span>, <span class="keyword">async</span> () => {
+    <span class="comment">// Mock crypto to throw error</span>
+    jest.spyOn(crypto, <span class="string">'randomBytes'</span>).mockImplementation(() => {
+      <span class="keyword">throw</span> <span class="keyword">new</span> Error(<span class="string">'Random bytes generation failed'</span>);
+    });
+    
+    <span class="keyword">await</span> <span class="function">expect</span>(
+      encryption.encrypt(<span class="string">'sensitive-data'</span>)
+    ).rejects.toThrow(<span class="string">'Failed to encrypt data'</span>);
+    
+    crypto.randomBytes.mockRestore();
+  });
+  
+  <span class="function">test</span>(<span class="string">'should handle decryption failures gracefully'</span>, <span class="keyword">async</span> () => {
+    <span class="comment">// Test with invalid encrypted data</span>
+    <span class="keyword">const</span> invalidData = <span class="string">'invalid:encrypted:data'</span>;
+    
+    <span class="keyword">await</span> <span class="function">expect</span>(
+      encryption.decrypt(invalidData)
+    ).rejects.toThrow(<span class="string">'Failed to decrypt data'</span>);
+  });
+  
+  <span class="function">test</span>(<span class="string">'should handle missing encryption key'</span>, () => {
+    <span class="keyword">const</span> originalKey = process.env.ENCRYPTION_KEY;
+    delete process.env.ENCRYPTION_KEY;
+    
+    <span class="comment">// Re-require module to test initialization</span>
+    jest.resetModules();
+    
+    <span class="function">expect</span>(() => {
+      <span class="function">require</span>(<span class="string">'../../server/utils/encryption'</span>);
+    }).toThrow(<span class="string">'Encryption key not configured'</span>);
+    
+    process.env.ENCRYPTION_KEY = originalKey;
+  });
+  
+  <span class="function">test</span>(<span class="string">'should validate encryption key length'</span>, () => {
+    <span class="keyword">const</span> originalKey = process.env.ENCRYPTION_KEY;
+    process.env.ENCRYPTION_KEY = <span class="string">'short-key'</span>;
+    
+    jest.resetModules();
+    
+    <span class="function">expect</span>(() => {
+      <span class="function">require</span>(<span class="string">'../../server/utils/encryption'</span>);
+    }).toThrow(<span class="string">'Invalid encryption key length'</span>);
+    
+    process.env.ENCRYPTION_KEY = originalKey;
+  });
+  
+  <span class="function">test</span>(<span class="string">'should handle corrupted encrypted data'</span>, <span class="keyword">async</span> () => {
+    <span class="comment">// Encrypt valid data</span>
+    <span class="keyword">const</span> encrypted = <span class="keyword">await</span> encryption.encrypt(<span class="string">'test-data'</span>);
+    
+    <span class="comment">// Corrupt the encrypted data</span>
+    <span class="keyword">const</span> parts = encrypted.split(<span class="string">':'</span>);
+    parts[1] = <span class="string">'corrupted'</span> + parts[1]; <span class="comment">// Corrupt the encrypted portion</span>
+    <span class="keyword">const</span> corrupted = parts.join(<span class="string">':'</span>);
+    
+    <span class="keyword">await</span> <span class="function">expect</span>(
+      encryption.decrypt(corrupted)
+    ).rejects.toThrow(<span class="string">'Failed to decrypt data'</span>);
+  });
+});</pre>
+            </div>
+        </div>
+        
+        <footer class="footer">
+            <p>Test Templates - WaveMAX Coverage Report</p>
+            <p><a href="index.html">← Back to Overview</a> | <a href="critical-files.html">Critical Files Analysis</a></p>
+        </footer>
+    </div>
+    
+    <div class="toast" id="copy-toast">
+        ✓ Template copied to clipboard!
+    </div>
+    
+    <script>
+        function copyCode(templateId) {
+            const codeElement = document.getElementById(templateId);
+            const codeText = codeElement.querySelector('pre').textContent;
+            
+            navigator.clipboard.writeText(codeText).then(() => {
+                const toast = document.getElementById('copy-toast');
+                toast.classList.add('show');
+                
+                setTimeout(() => {
+                    toast.classList.remove('show');
+                }, 3000);
+            }).catch(err => {
+                console.error('Failed to copy:', err);
+                alert('Failed to copy to clipboard. Please select and copy manually.');
+            });
+        }
+    </script>
+</body>
+</html>

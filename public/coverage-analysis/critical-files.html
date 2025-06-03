@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Critical Files Analysis - WaveMAX Coverage Report</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f5f5f5;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
+            color: white;
+            padding: 30px 0;
+            text-align: center;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .nav-links {
+            margin-top: 20px;
+        }
+        
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            margin: 0 15px;
+            padding: 8px 16px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            transition: background 0.3s;
+        }
+        
+        .nav-links a:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+        
+        .critical-file {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            border-left: 5px solid #dc2626;
+        }
+        
+        .file-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .file-title {
+            font-size: 1.5em;
+            color: #1e3a8a;
+        }
+        
+        .severity-badge {
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+        
+        .severity-critical {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+        
+        .severity-high {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        
+        .code-analysis {
+            background: #f9fafb;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border: 1px solid #e5e7eb;
+        }
+        
+        .code-block {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 15px;
+            border-radius: 6px;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            margin: 10px 0;
+        }
+        
+        .line-uncovered {
+            background: rgba(239, 68, 68, 0.2);
+            display: block;
+            margin: 2px 0;
+            padding: 2px 5px;
+        }
+        
+        .line-covered {
+            background: rgba(34, 197, 94, 0.1);
+            display: block;
+            margin: 2px 0;
+            padding: 2px 5px;
+        }
+        
+        .test-suggestion {
+            background: #eff6ff;
+            border: 1px solid #3b82f6;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .test-suggestion h3 {
+            color: #1e3a8a;
+            margin-bottom: 10px;
+        }
+        
+        .test-code {
+            background: #f3f4f6;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            padding: 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            overflow-x: auto;
+            margin: 10px 0;
+        }
+        
+        .impact-section {
+            background: #fef3c7;
+            border: 1px solid #fbbf24;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .impact-section h3 {
+            color: #92400e;
+            margin-bottom: 10px;
+        }
+        
+        .checklist {
+            list-style: none;
+            margin: 15px 0;
+        }
+        
+        .checklist li {
+            padding: 8px 0;
+            padding-left: 30px;
+            position: relative;
+        }
+        
+        .checklist li:before {
+            content: "☐";
+            position: absolute;
+            left: 0;
+            font-size: 1.2em;
+        }
+        
+        .checklist li.done:before {
+            content: "☑";
+            color: #22c55e;
+        }
+        
+        .footer {
+            text-align: center;
+            padding: 30px 0;
+            color: #666;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Critical Files Analysis</h1>
+            <p>Deep dive into files requiring immediate attention</p>
+            <div class="nav-links">
+                <a href="index.html">← Back to Overview</a>
+                <a href="test-templates.html">Test Templates →</a>
+            </div>
+        </header>
+        
+        <div class="critical-file">
+            <div class="file-header">
+                <h2 class="file-title">📧 server/utils/emailService.js</h2>
+                <span class="severity-badge severity-critical">CRITICAL - 0% Coverage</span>
+            </div>
+            
+            <div class="impact-section">
+                <h3>⚠️ Business Impact</h3>
+                <ul>
+                    <li>• Email notifications are core to the affiliate program</li>
+                    <li>• Affects customer onboarding and order confirmations</li>
+                    <li>• Critical for password resets and security notifications</li>
+                    <li>• Impacts commission notifications to affiliates</li>
+                </ul>
+            </div>
+            
+            <div class="code-analysis">
+                <h3>Uncovered Critical Functions</h3>
+                <div class="code-block">
+<span class="line-uncovered">// Lines 13-71: createTransport() - Completely untested</span>
+<span class="line-uncovered">const createTransport = () => {</span>
+<span class="line-uncovered">  if (process.env.EMAIL_PROVIDER === 'console') { ... }</span>
+<span class="line-uncovered">  else if (process.env.EMAIL_PROVIDER === 'ses') { ... }</span>
+<span class="line-uncovered">  else if (process.env.EMAIL_PROVIDER === 'exchange') { ... }</span>
+<span class="line-uncovered">  else { /* SMTP */ }</span>
+<span class="line-uncovered">};</span>
+
+<span class="line-uncovered">// Lines 120-150: sendAffiliateWelcome() - No coverage</span>
+<span class="line-uncovered">// Lines 180-210: sendCustomerOrderConfirmation() - No coverage</span>
+<span class="line-uncovered">// Lines 240-270: sendPasswordReset() - No coverage</span>
+<span class="line-uncovered">// Lines 300-330: sendCommissionNotification() - No coverage</span>
+                </div>
+            </div>
+            
+            <div class="test-suggestion">
+                <h3>🧪 Recommended Test Structure</h3>
+                <div class="test-code">
+describe('EmailService', () => {
+  let mockTransporter;
+  
+  beforeEach(() => {
+    mockTransporter = {
+      sendMail: jest.fn().mockResolvedValue({ messageId: 'test-123' })
+    };
+    jest.spyOn(nodemailer, 'createTransport').mockReturnValue(mockTransporter);
+  });
+  
+  describe('createTransport', () => {
+    test('should create console transport for development', () => {
+      process.env.EMAIL_PROVIDER = 'console';
+      const transport = createTransport();
+      // Test console logging behavior
+    });
+    
+    test('should create SES transport when configured', () => {
+      process.env.EMAIL_PROVIDER = 'ses';
+      // Mock AWS SES client
+      // Test SES configuration
+    });
+    
+    test('should handle Exchange server configuration', () => {
+      process.env.EMAIL_PROVIDER = 'exchange';
+      // Test Exchange settings
+    });
+  });
+  
+  describe('Email Sending Functions', () => {
+    test('should send affiliate welcome email', async () => {
+      await sendAffiliateWelcome(mockAffiliate);
+      expect(mockTransporter.sendMail).toHaveBeenCalledWith(
+        expect.objectContaining({
+          to: mockAffiliate.email,
+          subject: expect.stringContaining('Welcome')
+        })
+      );
+    });
+  });
+});</div>
+            </div>
+            
+            <div class="checklist-section">
+                <h3>✅ Testing Checklist</h3>
+                <ul class="checklist">
+                    <li>Test all email provider configurations (console, SES, Exchange, SMTP)</li>
+                    <li>Mock nodemailer and AWS SDK properly</li>
+                    <li>Test email template loading and fallback behavior</li>
+                    <li>Cover all email types (15+ different email functions)</li>
+                    <li>Test error handling and retry logic</li>
+                    <li>Verify email content and formatting</li>
+                    <li>Test attachment handling</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="critical-file">
+            <div class="file-header">
+                <h2 class="file-title">🔐 server/config/passport-config.js</h2>
+                <span class="severity-badge severity-critical">CRITICAL - 14.54% Coverage</span>
+            </div>
+            
+            <div class="impact-section">
+                <h3>⚠️ Security Impact</h3>
+                <ul>
+                    <li>• OAuth authentication is a primary login method</li>
+                    <li>• Affects both affiliate and customer authentication</li>
+                    <li>• Security vulnerabilities in OAuth can compromise accounts</li>
+                    <li>• New customer OAuth flow is completely untested</li>
+                </ul>
+            </div>
+            
+            <div class="code-analysis">
+                <h3>Uncovered OAuth Strategies</h3>
+                <div class="code-block">
+<span class="line-uncovered">// Lines 21-199: Google Strategy - Main logic untested</span>
+<span class="line-uncovered">passport.use(new GoogleStrategy({...}, async (req, accessToken, refreshToken, profile, done) => {</span>
+<span class="line-uncovered">  // Customer context checking - UNTESTED</span>
+<span class="line-uncovered">  const isCustomerContext = req.query.state?.startsWith('customer');</span>
+<span class="line-uncovered">  </span>
+<span class="line-uncovered">  if (isCustomerContext) {</span>
+<span class="line-uncovered">    // Entire customer OAuth flow - NO COVERAGE</span>
+<span class="line-uncovered">    // Account conflict detection - NO COVERAGE</span>
+<span class="line-uncovered">  } else {</span>
+<span class="line-uncovered">    // Affiliate OAuth flow - MINIMAL COVERAGE</span>
+<span class="line-uncovered">  }</span>
+<span class="line-uncovered">}));</span>
+
+<span class="line-uncovered">// Lines 206-263: Facebook Strategy - Completely untested</span>
+<span class="line-uncovered">// Lines 269-329: LinkedIn Strategy - Completely untested</span>
+                </div>
+            </div>
+            
+            <div class="test-suggestion">
+                <h3>🧪 OAuth Testing Strategy</h3>
+                <div class="test-code">
+describe('Passport OAuth Configuration', () => {
+  let mockStrategy;
+  
+  beforeEach(() => {
+    // Mock the OAuth strategies
+    jest.mock('passport-google-oauth20');
+    jest.mock('passport-facebook');
+    jest.mock('passport-linkedin-oauth2');
+  });
+  
+  describe('Google OAuth Strategy', () => {
+    test('should handle customer context correctly', async () => {
+      const mockProfile = {
+        id: 'google-123',
+        emails: [{ value: 'test@example.com' }],
+        name: { givenName: 'Test', familyName: 'User' }
+      };
+      
+      const mockReq = { query: { state: 'customer_session123' } };
+      
+      // Test customer OAuth flow
+      const result = await googleStrategyCallback(
+        mockReq, 'accessToken', 'refreshToken', mockProfile, jest.fn()
+      );
+      
+      expect(result.userType).toBe('customer');
+    });
+    
+    test('should detect account conflicts', async () => {
+      // Mock existing affiliate with same email
+      Affiliate.findOne.mockResolvedValue(mockAffiliate);
+      
+      // Test conflict detection
+    });
+  });
+});</div>
+            </div>
+        </div>
+        
+        <div class="critical-file">
+            <div class="file-header">
+                <h2 class="file-title">🔑 server/controllers/authController.js</h2>
+                <span class="severity-badge severity-high">HIGH - 71.26% Coverage</span>
+            </div>
+            
+            <div class="impact-section">
+                <h3>⚠️ Authentication Gaps</h3>
+                <ul>
+                    <li>• New OAuth session handling functions lack coverage</li>
+                    <li>• Customer social registration is untested</li>
+                    <li>• Account conflict resolution has no tests</li>
+                    <li>• OAuth session polling mechanism needs testing</li>
+                </ul>
+            </div>
+            
+            <div class="code-analysis">
+                <h3>Critical Untested Functions</h3>
+                <div class="code-block">
+<span class="line-uncovered">// Lines 1596-1640: createOAuthSession() - NEW FEATURE, NO TESTS</span>
+<span class="line-uncovered">exports.createOAuthSession = async (req, res) => {</span>
+<span class="line-uncovered">  // Session creation logic for OAuth popup flow</span>
+<span class="line-uncovered">};</span>
+
+<span class="line-uncovered">// Lines 1661-1724: checkOAuthSession() - UNTESTED</span>
+<span class="line-uncovered">exports.checkOAuthSession = async (req, res) => {</span>
+<span class="line-uncovered">  // Polling mechanism for OAuth completion</span>
+<span class="line-uncovered">};</span>
+
+<span class="line-uncovered">// Lines 1729-1775: completeSocialCustomerRegistration() - UNTESTED</span>
+<span class="line-uncovered">// Lines 1839-1877: handleAccountConflict() - NO COVERAGE</span>
+                </div>
+            </div>
+            
+            <div class="test-suggestion">
+                <h3>🧪 Priority Test Cases</h3>
+                <ol style="margin-left: 20px;">
+                    <li><strong>OAuth Session Creation:</strong> Test session creation, expiry, and validation</li>
+                    <li><strong>OAuth Polling:</strong> Test successful completion, timeout, and error states</li>
+                    <li><strong>Customer Registration:</strong> Test social registration with all providers</li>
+                    <li><strong>Account Conflicts:</strong> Test conflict detection and resolution flows</li>
+                    <li><strong>Error Scenarios:</strong> Test network failures, invalid tokens, etc.</li>
+                </ol>
+            </div>
+        </div>
+        
+        <div class="critical-file">
+            <div class="file-header">
+                <h2 class="file-title">🔒 server/utils/encryption.js</h2>
+                <span class="severity-badge severity-high">HIGH - 68.18% Coverage</span>
+            </div>
+            
+            <div class="impact-section">
+                <h3>⚠️ Security Critical</h3>
+                <ul>
+                    <li>• Handles sensitive data encryption (SSNs, bank accounts)</li>
+                    <li>• Error paths in encryption could leak sensitive data</li>
+                    <li>• Failed decryption handling is untested</li>
+                    <li>• Key rotation scenarios need coverage</li>
+                </ul>
+            </div>
+            
+            <div class="code-analysis">
+                <h3>Uncovered Security Paths</h3>
+                <div class="code-block">
+<span class="line-uncovered">// Lines 37-38: Encryption error handling</span>
+<span class="line-uncovered">} catch (error) {</span>
+<span class="line-uncovered">  console.error('Encryption failed:', error);</span>
+<span class="line-uncovered">  throw new Error('Failed to encrypt data');</span>
+<span class="line-uncovered">}</span>
+
+<span class="line-uncovered">// Lines 96-97: Decryption error handling</span>
+<span class="line-uncovered">} catch (error) {</span>
+<span class="line-uncovered">  console.error('Decryption failed:', error);</span>
+<span class="line-uncovered">  throw new Error('Failed to decrypt data');</span>
+<span class="line-uncovered">}</span>
+
+<span class="line-uncovered">// Lines 142-145: Key validation failures</span>
+                </div>
+            </div>
+        </div>
+        
+        <footer class="footer">
+            <p>Critical Files Analysis - WaveMAX Coverage Report</p>
+            <p><a href="index.html">← Back to Overview</a> | <a href="test-templates.html">View Test Templates →</a></p>
+        </footer>
+    </div>
+</body>
+</html>
