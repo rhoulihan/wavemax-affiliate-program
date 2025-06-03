@@ -32,13 +32,13 @@ The WaveMAX Affiliate Program enables individuals to register as affiliates, onb
   - Tweet-friendly formatting with social media meta tags
   - Visual hierarchy with emojis, colors, and organized sections for different aspects
   - Mobile responsive design showcasing AI-assisted development best practices
-- **Enhanced AI Development Persona**: Added comprehensive expertise profile to `init.prompt`
-  - Expert Node.js/Express developer specialization with deep MongoDB and Mongoose experience
+- **Enhanced AI Assistant Persona**: Added comprehensive expertise profile to `init.prompt`
+  - Defines AI assistant's operating persona as expert Node.js/Express developer
+  - Filters knowledge and decision-making through project-specific expertise
   - Proficiency in authentication systems including JWT, OAuth 2.0, and Passport.js strategies
-  - Test-Driven Development (TDD) expertise with Jest, Supertest, and comprehensive testing patterns
-  - Security best practices including CSRF protection, encryption, and vulnerability prevention
-  - Specific category expertise in affiliate program implementation and commission structures
-  - Production-ready code standards with error handling, logging, and performance optimization
+  - Test-Driven Development (TDD) expertise shapes code analysis and recommendations
+  - Security-first approach to analyzing code and suggesting solutions
+  - Specific expertise in affiliate program patterns influences implementation decisions
 
 ### Enhanced OAuth Integration & User Experience
 - **Unified OAuth Strategy**: Implemented comprehensive OAuth authentication for both affiliates and customers
