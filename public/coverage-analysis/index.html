@@ -288,35 +288,35 @@
     <div class="container">
         <header>
             <h1>WaveMAX Coverage Analysis Report</h1>
-            <p class="subtitle">Generated on December 6, 2024</p>
+            <p class="subtitle">Generated on January 6, 2025</p>
         </header>
         
         <div class="summary-grid">
             <div class="summary-card">
                 <div class="metric-label">Overall Coverage</div>
-                <div class="metric-value warning">75.04%</div>
+                <div class="metric-value warning">77.4%</div>
                 <div class="progress-bar">
-                    <div class="progress-fill" style="width: 75.04%"></div>
+                    <div class="progress-fill" style="width: 77.4%"></div>
                 </div>
             </div>
             <div class="summary-card">
                 <div class="metric-label">Branch Coverage</div>
-                <div class="metric-value danger">68.2%</div>
+                <div class="metric-value danger">69.68%</div>
                 <div class="progress-bar">
-                    <div class="progress-fill" style="width: 68.2%"></div>
+                    <div class="progress-fill" style="width: 69.68%"></div>
                 </div>
             </div>
             <div class="summary-card">
                 <div class="metric-label">Function Coverage</div>
-                <div class="metric-value good">82.05%</div>
+                <div class="metric-value good">82.19%</div>
                 <div class="progress-bar">
-                    <div class="progress-fill" style="width: 82.05%"></div>
+                    <div class="progress-fill" style="width: 82.19%"></div>
                 </div>
             </div>
             <div class="summary-card">
                 <div class="metric-label">Total Tests</div>
-                <div class="metric-value good">1051</div>
-                <div class="metric-label">48 Test Suites</div>
+                <div class="metric-value good">1130</div>
+                <div class="metric-label">51 Test Suites</div>
             </div>
         </div>
         
@@ -324,9 +324,9 @@
             <h4>⚠️ Coverage Thresholds Not Met</h4>
             <p>The project requires 80% coverage across all metrics. Current gaps:</p>
             <ul style="margin-left: 20px; margin-top: 10px;">
-                <li>Statements: 4.96% below threshold</li>
-                <li>Branches: 11.8% below threshold</li>
-                <li>Lines: 5.08% below threshold</li>
+                <li>Statements: 2.6% below threshold</li>
+                <li>Branches: 10.32% below threshold</li>
+                <li>Lines: 2.72% below threshold</li>
             </ul>
         </div>
         
@@ -339,7 +339,7 @@
                     <div class="category-stats">
                         <div class="stat-item">
                             <span class="stat-label">Files:</span>
-                            <span class="stat-value">2</span>
+                            <span class="stat-value">3</span>
                         </div>
                     </div>
                 </div>
@@ -368,23 +368,22 @@
                 
                 <div class="file-analysis">
                     <div class="file-header">
-                        <span class="file-name">server/config/passport-config.js</span>
-                        <span class="coverage-badge danger">14.54% Coverage</span>
+                        <span class="file-name">server/routes/coverageRoutes.js</span>
+                        <span class="coverage-badge danger">42.42% Coverage</span>
                     </div>
                     <div class="uncovered-lines">
-                        Uncovered Lines: 22-197, 212-260, 275-326, 336, 343-347
+                        Uncovered Lines: 11-25, 30-76, 88-90, 96, 100, 104, 108, 113
                     </div>
                     <div class="recommendation">
-                        <div class="recommendation-title">📋 Recommendation: MEDIUM PRIORITY</div>
-                        <p><strong>Status:</strong> OAuth strategies are largely untested. Most of the Google, Facebook, and LinkedIn authentication flows lack coverage.</p>
+                        <div class="recommendation-title">📋 Recommendation: LOW PRIORITY</div>
+                        <p><strong>Status:</strong> Coverage reporting routes lack test coverage. This is a meta-issue - coverage routes showing coverage of coverage.</p>
                         <p><strong>Action Required:</strong></p>
                         <ul style="margin-left: 20px; margin-top: 5px;">
-                            <li>Test OAuth strategies with mocked passport strategies</li>
-                            <li>Cover both affiliate and customer OAuth flows</li>
-                            <li>Test error handling and edge cases</li>
-                            <li>Consider if all OAuth providers are still needed</li>
+                            <li>Consider if testing coverage routes is necessary</li>
+                            <li>These are development-only routes, not production features</li>
+                            <li>May be candidates for exclusion from coverage requirements</li>
                         </ul>
-                        <p style="margin-top: 10px;"><strong>Note:</strong> Facebook and LinkedIn strategies might be deprecated - verify if they're still in use.</p>
+                        <p style="margin-top: 10px;"><strong>Note:</strong> These routes are likely only used in development environments.</p>
                     </div>
                 </div>
             </div>
@@ -395,7 +394,7 @@
                     <div class="category-stats">
                         <div class="stat-item">
                             <span class="stat-label">Files:</span>
-                            <span class="stat-value">9</span>
+                            <span class="stat-value">7</span>
                         </div>
                     </div>
                 </div>
@@ -492,16 +491,16 @@
                 
                 <div class="file-analysis">
                     <div class="file-header">
-                        <span class="file-name">server/utils/encryption.js</span>
-                        <span class="coverage-badge warning">68.18% Coverage</span>
+                        <span class="file-name">server/routes/systemConfigRoutes.js</span>
+                        <span class="coverage-badge warning">63.82% Coverage</span>
                     </div>
                     <div class="uncovered-lines">
-                        Uncovered Lines: 37-38, 67-68, 96-97, 122-123, 133, 142-145
+                        Uncovered Lines: 23-24, 40-50, 65, 72-73, 79-95, 105-106
                     </div>
                     <div class="recommendation">
-                        <div class="recommendation-title">📋 Recommendation: HIGH PRIORITY</div>
-                        <p><strong>Critical:</strong> Encryption utility error paths need coverage for security assurance.</p>
-                        <p><strong>Action:</strong> Add tests for encryption/decryption failures and edge cases.</p>
+                        <div class="recommendation-title">📋 Recommendation: MEDIUM PRIORITY</div>
+                        <p><strong>Status:</strong> System configuration routes lack test coverage, especially initialization and admin-only endpoints.</p>
+                        <p><strong>Action:</strong> Add tests for route-level authorization checks and initialization endpoints.</p>
                     </div>
                 </div>
             </div>
@@ -553,6 +552,18 @@
                             <td>Branch coverage gaps only</td>
                             <td>Very Low</td>
                         </tr>
+                        <tr>
+                            <td>server/utils/encryption.js</td>
+                            <td><span class="coverage-badge good">100%</span></td>
+                            <td>Fully covered ✅</td>
+                            <td>None</td>
+                        </tr>
+                        <tr>
+                            <td>server/config/passport-config.js</td>
+                            <td><span class="coverage-badge good">100%</span></td>
+                            <td>Some branch coverage gaps</td>
+                            <td>Very Low</td>
+                        </tr>
                     </tbody>
                 </table>
             </div>
@@ -564,15 +575,15 @@
             <h3>🔥 Immediate Priority (This Sprint)</h3>
             <ol style="margin-left: 20px;">
                 <li><strong>Email Service Tests:</strong> Create comprehensive test suite for emailService.js (0% → 80%+)</li>
-                <li><strong>OAuth Coverage:</strong> Test the new OAuth session handling in authController.js</li>
-                <li><strong>Encryption Tests:</strong> Add error path coverage for security-critical encryption.js</li>
+                <li><strong>Branch Coverage Focus:</strong> Target high-impact files with low branch coverage to meet 80% threshold</li>
+                <li><strong>System Config Tests:</strong> Fix failing systemConfig integration tests (9 failures noted)</li>
             </ol>
             
             <h3>📅 Next Sprint</h3>
             <ol style="margin-left: 20px;">
-                <li><strong>Passport Config:</strong> Mock and test OAuth strategies or remove unused providers</li>
-                <li><strong>Admin Controller:</strong> Cover error scenarios and audit logging branches</li>
-                <li><strong>Social Auth Routes:</strong> Test configuration validation and customer OAuth paths</li>
+                <li><strong>Auth Controller:</strong> Cover OAuth session handling gaps (71.26% → 80%+)</li>
+                <li><strong>Admin Controller:</strong> Cover error scenarios and audit logging branches (68.3% → 80%+)</li>
+                <li><strong>Social Auth Routes:</strong> Test configuration validation and customer OAuth paths (56.25% → 80%+)</li>
             </ol>
             
             <h3>🔍 Investigation Required</h3>
@@ -596,10 +607,13 @@
             
             <h3>Positive Observations</h3>
             <ul style="margin-left: 20px;">
-                <li>✅ All models have excellent coverage (90%+)</li>
+                <li>✅ All models have excellent coverage (95.2% overall)</li>
                 <li>✅ Middleware is well-tested (96.95% overall)</li>
                 <li>✅ Core business logic has good coverage</li>
-                <li>✅ 1051 tests provide strong foundation</li>
+                <li>✅ 1130 tests provide strong foundation (79 new tests added)</li>
+                <li>✅ Encryption.js now has 100% coverage (improved from 68.18%)</li>
+                <li>✅ Passport-config.js now has 100% statement coverage</li>
+                <li>✅ Overall coverage improved from 75.04% to 77.4%</li>
             </ul>
         </div>
         
@@ -622,7 +636,7 @@
         
         <footer class="footer">
             <p>Coverage Analysis Report - WaveMAX Laundry Affiliate Program</p>
-            <p>Generated with Jest Coverage Data | Target: 80% Coverage</p>
+            <p>Generated with Jest Coverage Data | Target: 80% Coverage | Last Updated: January 6, 2025</p>
         </footer>
     </div>
 </body>
