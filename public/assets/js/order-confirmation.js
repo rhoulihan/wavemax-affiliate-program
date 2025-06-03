@@ -186,6 +186,13 @@ function initializeOrderConfirmation() {
 
       // Fetch WDF rate from system config or use default
       const wdfRate = await fetchWdfRate();
+      
+      // Update WDF rate display
+      const wdfRateDisplay = document.getElementById('wdfRateDisplay');
+      if (wdfRateDisplay) {
+        wdfRateDisplay.textContent = `$${wdfRate.toFixed(2)} per pound`;
+      }
+      
       const estimatedWdfTotal = estimatedWeight * wdfRate;
       const estimatedTotal = estimatedWdfTotal + deliveryFee;
 

@@ -63,8 +63,17 @@ const mongoOptions = {
 // Connect to MongoDB with consistent options (skip in test environment)
 if (process.env.NODE_ENV !== 'test') {
   mongoose.connect(process.env.MONGODB_URI, mongoOptions)
-    .then(() => {
+    .then(async () => {
       logger.info('Connected to MongoDB');
+      
+      // Initialize system configuration defaults
+      try {
+        const SystemConfig = require('./server/models/SystemConfig');
+        await SystemConfig.initializeDefaults();
+        logger.info('System configuration defaults initialized');
+      } catch (error) {
+        logger.error('Error initializing system config:', { error: error.message });
+      }
     })
     .catch(err => {
       logger.error('MongoDB connection error:', { error: err.message });

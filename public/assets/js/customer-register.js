@@ -177,6 +177,23 @@
         alert('Unable to load affiliate information. Please try again.');
         window.location.href = '/embed-app.html?login=customer';
       });
+
+    // Fetch WDF rate from system configuration
+    fetch(`${baseUrl}/api/v1/system/config/public`)
+      .then(response => response.json())
+      .then(configs => {
+        const wdfConfig = configs.find(c => c.key === 'wdf_base_rate_per_pound');
+        if (wdfConfig && wdfConfig.currentValue) {
+          const wdfRateDisplay = document.getElementById('wdfRateDisplay');
+          if (wdfRateDisplay) {
+            wdfRateDisplay.textContent = `$${wdfConfig.currentValue.toFixed(2)}/lb (includes service fees)`;
+          }
+        }
+      })
+      .catch(error => {
+        console.error('Error fetching WDF rate:', error);
+        // Keep the placeholder text if fetch fails
+      });
   } else {
     // Redirect if no affiliate ID is provided
     alert('No affiliate ID provided. Please use a valid registration link.');
