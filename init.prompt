@@ -91,6 +91,7 @@ When we begin each session:
 - [ ] Review git status and recent commits
 - [ ] **CRITICAL: Review all uncommitted changes and determine if they are still relevant or need to be rolled back**
 - [ ] Check if any tests are currently failing (`npm test`)
+- [ ] Review the backlog queue in `BACKLOG.md` for pending work items
 - [ ] Understand the current task/issue context
 - [ ] Identify if this relates to previous work (OAuth, testing, etc.)
 - [ ] Establish the success criteria for the session
@@ -105,6 +106,14 @@ When implementing new features or enhancements:
 - [ ] **Commit changes with descriptive commit messages**
 - [ ] **Push to repository**
 - [ ] **Restart server with PM2 to apply changes**
+
+## Backlog Queue Management
+The project maintains a `BACKLOG.md` file for tracking pending work items:
+- **Purpose**: Store tasks and issues identified during sessions for future work
+- **Structure**: Items organized by priority (High, Medium, Low) with context
+- **Usage**: Review at session start to pick work when no specific task is requested
+- **Updates**: Add new items as discovered, move completed items to completed section
+- **Reference**: Say "review the backlog queue" to see pending work items
 
 ## Communication Preferences
 - **Be direct and concise**: Focus on facts and solutions
