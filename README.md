@@ -51,6 +51,8 @@ The WaveMAX Affiliate Program enables individuals to register as affiliates, onb
 - **Operating Best Practices**: Created `OPERATING_BEST_PRACTICES.md` documenting:
   - PM2 debugging workarounds and known issues
   - CSP compliance requirements (no inline scripts)
+  - Dynamic page loading script initialization patterns
+  - Multiple initialization strategies for dynamically loaded content
   - Common debugging patterns and solutions
   - Environment-specific configurations
 

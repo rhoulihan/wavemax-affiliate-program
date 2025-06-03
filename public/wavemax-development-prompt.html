@@ -680,6 +680,7 @@
             <ul>
                 <li><strong>PM2 and Logging</strong>: Known issues with PM2 logs command timeouts and alternative approaches for viewing logs</li>
                 <li><strong>JavaScript and CSP Best Practices</strong>: Critical guidance on avoiding inline scripts for iframe compatibility</li>
+                <li><strong>Dynamic Page Loading Patterns</strong>: Script initialization strategies for dynamically loaded content in embed-app.html</li>
                 <li><strong>Common Debugging Patterns</strong>: Solutions for 502 Bad Gateway errors, CSRF token issues, and startup problems</li>
                 <li><strong>Testing Best Practices</strong>: Memory optimization strategies and test running techniques</li>
                 <li><strong>Git Workflow</strong>: Pre-change verification procedures</li>
@@ -696,6 +697,7 @@
                 <li><strong>PM2 Logs Timeout</strong>: Use <code>tail -n 50 /root/.pm2/logs/wavemax-error.log</code> instead of <code>pm2 logs</code></li>
                 <li><strong>502 Bad Gateway</strong>: Start app manually with <code>node server.js</code> to see actual error messages</li>
                 <li><strong>CSP Issues</strong>: Always use external JavaScript files, never inline scripts</li>
+                <li><strong>Dynamic Content Loading</strong>: Scripts need to be registered in <code>pageScripts</code> mapping and use multiple initialization strategies</li>
             </ul>
         </section>
 
