@@ -60,6 +60,20 @@ This document contains important operational knowledge and workarounds discovere
    - Easier debugging and maintenance
    - Consistent with security best practices
 
+### Dynamic Page Loading in embed-app.html
+1. **Issue**: Scripts in dynamically loaded pages are stripped out
+   - The embed-app.html router removes script tags when loading page content
+   - Scripts must be registered in the `pageScripts` mapping
+   
+2. **Solution**: Add page-specific scripts to embed-app.html
+   ```javascript
+   const pageScripts = {
+       '/': ['/assets/js/revenue-calculator.js'],
+       '/landing': ['/assets/js/revenue-calculator.js'],
+       // ... other routes
+   };
+   ```
+
 ## Common Debugging Patterns
 
 ### Application Won't Start (502 Bad Gateway)
