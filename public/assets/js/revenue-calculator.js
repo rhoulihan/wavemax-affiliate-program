@@ -1,7 +1,10 @@
 // Revenue Calculator for Affiliate Landing Page
 
-// Initialize calculator when DOM is ready
-document.addEventListener('DOMContentLoaded', async function() {
+console.log('Revenue calculator script loaded');
+
+// Function to initialize the calculator
+async function initializeCalculator() {
+    console.log('Initializing revenue calculator...');
     let wdfRate = 1.25; // Default rate
     
     // Calculate earnings function
@@ -54,6 +57,9 @@ document.addEventListener('DOMContentLoaded', async function() {
     calcWeight.addEventListener('input', calculateEarnings);
     calcDelivery.addEventListener('input', calculateEarnings);
     
+    // Mark as initialized to prevent duplicate initialization
+    calcCustomers.setAttribute('data-calculator-initialized', 'true');
+    
     // Run initial calculation with default values
     console.log('Running initial calculation...');
     calculateEarnings();
@@ -83,4 +89,47 @@ document.addEventListener('DOMContentLoaded', async function() {
     } catch (error) {
         console.error('Error fetching WDF rate:', error);
     }
+}
+
+// Try multiple initialization strategies
+// 1. If DOM is already loaded (for dynamic content)
+if (document.readyState === 'complete' || document.readyState === 'interactive') {
+    console.log('DOM already ready, initializing immediately');
+    setTimeout(initializeCalculator, 100); // Small delay to ensure elements are rendered
+}
+
+// 2. Listen for DOMContentLoaded (for direct page load)
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOMContentLoaded fired, initializing calculator');
+    initializeCalculator();
 });
+
+// 3. Also try on window load as fallback
+window.addEventListener('load', function() {
+    console.log('Window load fired, checking if calculator needs initialization');
+    // Check if calculator is already initialized by checking if event listeners are attached
+    const calcCustomers = document.getElementById('calc-customers');
+    if (calcCustomers && !calcCustomers.hasAttribute('data-calculator-initialized')) {
+        initializeCalculator();
+    }
+});
+
+// 4. For embed-app dynamic loading, also check periodically
+let initAttempts = 0;
+const initInterval = setInterval(function() {
+    initAttempts++;
+    const calcCustomers = document.getElementById('calc-customers');
+    console.log(`Checking for calculator elements (attempt ${initAttempts})...`);
+    
+    if (calcCustomers && !calcCustomers.hasAttribute('data-calculator-initialized')) {
+        console.log('Found calculator elements, initializing...');
+        initializeCalculator();
+        clearInterval(initInterval);
+    } else if (calcCustomers && calcCustomers.hasAttribute('data-calculator-initialized')) {
+        console.log('Calculator already initialized');
+        clearInterval(initInterval);
+    } else if (initAttempts > 20) { // Stop after 10 seconds
+        console.log('Calculator elements not found after 20 attempts');
+        clearInterval(initInterval);
+    }
+}, 500);
