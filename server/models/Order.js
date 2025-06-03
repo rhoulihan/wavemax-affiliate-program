@@ -1,6 +1,7 @@
 // Order Model for WaveMAX Laundry Affiliate Program
 
 const mongoose = require('mongoose');
+const SystemConfig = require('./SystemConfig');
 
 // Order Schema
 const orderSchema = new mongoose.Schema({
@@ -99,7 +100,12 @@ const orderSchema = new mongoose.Schema({
 }, { timestamps: true });
 
 // Middleware for calculating estimated total before saving
-orderSchema.pre('save', function(next) {
+orderSchema.pre('save', async function(next) {
+  // Fetch current WDF rate from system config if not explicitly set
+  if (this.isNew && !this.baseRate) {
+    this.baseRate = await SystemConfig.getValue('wdf_base_rate_per_pound', 1.89);
+  }
+  
   if (this.isNew || this.isModified('estimatedSize') || this.isModified('baseRate') || this.isModified('deliveryFee')) {
     // Calculate estimated weight based on size
     let estimatedWeight = 0;

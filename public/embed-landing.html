@@ -213,6 +213,65 @@
                 font-size: 0.9rem;
             }
         }
+        /* Revenue Calculator Styles */
+        .revenue-calculator-card {
+            background: white;
+            border-radius: 16px;
+            padding: 40px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            border: 1px solid #e5e7eb;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .revenue-calculator-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #3b82f6 0%, #1e3a8a 100%);
+        }
+        
+        .calculator-inputs, .calculator-results {
+            padding: 20px;
+        }
+        
+        .calculator-results {
+            background: #f8f9fa;
+            border-radius: 12px;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        
+        .earnings-display h3 {
+            font-weight: 700;
+        }
+        
+        .earnings-breakdown {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            font-size: 0.9rem;
+        }
+        
+        .earnings-breakdown > div {
+            padding: 5px 0;
+        }
+        
+        @media (max-width: 768px) {
+            .revenue-calculator-card {
+                padding: 25px 15px;
+            }
+            
+            .calculator-inputs, .calculator-results {
+                padding: 15px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -326,6 +385,78 @@
                     </div>
                     <h5>Earn Commissions</h5>
                     <p class="text-muted small">Get paid monthly via direct deposit</p>
+                </div>
+            </div>
+
+            <!-- Revenue Calculator Section -->
+            <div class="row mb-5">
+                <div class="col-12">
+                    <h2 class="text-center mb-4">Calculate Your Potential Earnings</h2>
+                </div>
+                <div class="col-lg-8 offset-lg-2">
+                    <div class="revenue-calculator-card">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="calculator-inputs">
+                                    <h5 class="mb-3">Your Business Potential</h5>
+                                    <div class="mb-3">
+                                        <label class="form-label">Customers per week</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text"><i class="fas fa-users"></i></span>
+                                            <input type="number" class="form-control" id="calc-customers" value="10" min="1" max="100">
+                                        </div>
+                                        <small class="text-muted">How many customers you can serve weekly</small>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Average laundry weight (lbs)</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text"><i class="fas fa-weight"></i></span>
+                                            <input type="number" class="form-control" id="calc-weight" value="25" min="10" max="50">
+                                        </div>
+                                        <small class="text-muted">Typical load is 20-30 lbs</small>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Your delivery fee</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text">$</span>
+                                            <input type="number" class="form-control" id="calc-delivery" value="10" min="5" max="25" step="0.01">
+                                        </div>
+                                        <small class="text-muted">You keep 100% of delivery fees</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="calculator-results">
+                                    <h5 class="mb-3">Your Estimated Earnings</h5>
+                                    <div class="earnings-display">
+                                        <div class="mb-3">
+                                            <small class="text-muted">Weekly earnings</small>
+                                            <h3 class="text-primary mb-0">$<span id="weekly-earnings">147.25</span></h3>
+                                        </div>
+                                        <div class="mb-3">
+                                            <small class="text-muted">Monthly earnings</small>
+                                            <h3 class="text-success mb-0">$<span id="monthly-earnings">589.00</span></h3>
+                                        </div>
+                                        <div class="earnings-breakdown">
+                                            <small class="text-muted">Earnings breakdown:</small>
+                                            <div class="d-flex justify-content-between">
+                                                <span>WDF commission (10%):</span>
+                                                <span>$<span id="wdf-commission">47.25</span>/week</span>
+                                            </div>
+                                            <div class="d-flex justify-content-between">
+                                                <span>Delivery fees (100%):</span>
+                                                <span>$<span id="delivery-earnings">100.00</span>/week</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="alert alert-info mt-3">
+                                        <i class="fas fa-info-circle"></i> 
+                                        <small>WDF rate: $<span id="wdf-rate-display">1.89</span>/lb</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -454,6 +585,59 @@
     
     <!-- External navigation handler for CSP compliance -->
     <script src="https://wavemax.promo/assets/js/embed-navigation.js"></script>
+    
+    <!-- Revenue Calculator Script -->
+    <script>
+        // Initialize calculator when DOM is ready
+        document.addEventListener('DOMContentLoaded', async function() {
+            let wdfRate = 1.89; // Default rate
+            
+            // Fetch WDF rate from API
+            try {
+                const response = await fetch('https://wavemax.promo/api/v1/system/config/public');
+                if (response.ok) {
+                    const configs = await response.json();
+                    const wdfConfig = configs.find(c => c.key === 'wdf_base_rate_per_pound');
+                    if (wdfConfig) {
+                        wdfRate = wdfConfig.currentValue;
+                        document.getElementById('wdf-rate-display').textContent = wdfRate.toFixed(2);
+                    }
+                }
+            } catch (error) {
+                console.error('Error fetching WDF rate:', error);
+            }
+            
+            // Calculate earnings function
+            function calculateEarnings() {
+                const customers = parseFloat(document.getElementById('calc-customers').value) || 0;
+                const weight = parseFloat(document.getElementById('calc-weight').value) || 0;
+                const deliveryFee = parseFloat(document.getElementById('calc-delivery').value) || 0;
+                
+                // Calculate weekly earnings
+                const weeklyWdfRevenue = customers * weight * wdfRate;
+                const weeklyWdfCommission = weeklyWdfRevenue * 0.10; // 10% commission
+                const weeklyDeliveryEarnings = customers * deliveryFee;
+                const weeklyTotal = weeklyWdfCommission + weeklyDeliveryEarnings;
+                
+                // Calculate monthly earnings (4 weeks)
+                const monthlyTotal = weeklyTotal * 4;
+                
+                // Update display
+                document.getElementById('weekly-earnings').textContent = weeklyTotal.toFixed(2);
+                document.getElementById('monthly-earnings').textContent = monthlyTotal.toFixed(2);
+                document.getElementById('wdf-commission').textContent = weeklyWdfCommission.toFixed(2);
+                document.getElementById('delivery-earnings').textContent = weeklyDeliveryEarnings.toFixed(2);
+            }
+            
+            // Add event listeners
+            document.getElementById('calc-customers').addEventListener('input', calculateEarnings);
+            document.getElementById('calc-weight').addEventListener('input', calculateEarnings);
+            document.getElementById('calc-delivery').addEventListener('input', calculateEarnings);
+            
+            // Initial calculation
+            calculateEarnings();
+        });
+    </script>
     
 </body>
 </html>

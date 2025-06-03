@@ -231,6 +231,18 @@ systemConfigSchema.statics.initializeDefaults = async function() {
       validation: { min: 15, max: 120 }
     },
     
+    // Pricing settings
+    {
+      key: 'wdf_base_rate_per_pound',
+      value: 1.89,
+      defaultValue: 1.89,
+      description: 'Base rate per pound for Wash Dry Fold service',
+      category: 'payment',
+      dataType: 'number',
+      validation: { min: 0.50, max: 10.00 },
+      isPublic: true
+    },
+    
     // System settings
     {
       key: 'maintenance_mode',

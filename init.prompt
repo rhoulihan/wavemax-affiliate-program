@@ -92,6 +92,10 @@ When we begin each session:
 - [ ] **CRITICAL: Review all uncommitted changes and determine if they are still relevant or need to be rolled back**
 - [ ] Check if any tests are currently failing (`npm test`)
 - [ ] Review the backlog queue in `BACKLOG.md` for pending work items
+- [ ] **Check for recent project logs in `/project-logs/`**:
+  - Look for logs with status "IN PROGRESS"
+  - If found, ask: "Found in-progress task: [task name]. Would you like to continue where we left off?"
+  - Review the log to understand context and completed steps
 - [ ] Understand the current task/issue context
 - [ ] Identify if this relates to previous work (OAuth, testing, etc.)
 - [ ] Establish the success criteria for the session
