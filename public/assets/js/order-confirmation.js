@@ -70,8 +70,24 @@ function initializeOrderConfirmation() {
     }
   }
 
+  // Fetch WDF rate from system config
+  async function fetchWdfRate() {
+    try {
+      const baseUrl = window.EMBED_CONFIG?.baseUrl || 'https://wavemax.promo';
+      const response = await fetch(`${baseUrl}/api/v1/system/config/public`);
+      if (response.ok) {
+        const configs = await response.json();
+        const wdfConfig = configs.find(c => c.key === 'wdf_base_rate_per_pound');
+        return wdfConfig ? wdfConfig.currentValue : 1.89;
+      }
+    } catch (error) {
+      console.error('Error fetching WDF rate:', error);
+    }
+    return 1.89; // Default fallback
+  }
+
   // Function to display order data
-  function displayOrderData(order) {
+  async function displayOrderData(order) {
     console.log('Displaying order data:', order);
 
     // Set order date
@@ -168,7 +184,8 @@ function initializeOrderConfirmation() {
         estimatedWeight = 35; // approximate for 31+ lbs
       }
 
-      const wdfRate = 1.89; // per pound
+      // Fetch WDF rate from system config or use default
+      const wdfRate = await fetchWdfRate();
       const estimatedWdfTotal = estimatedWeight * wdfRate;
       const estimatedTotal = estimatedWdfTotal + deliveryFee;
 

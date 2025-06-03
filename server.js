@@ -25,6 +25,8 @@ const orderRoutes = require('./server/routes/orderRoutes');
 const bagRoutes = require('./server/routes/bagRoutes');
 const administratorRoutes = require('./server/routes/administratorRoutes');
 const operatorRoutes = require('./server/routes/operatorRoutes');
+const coverageRoutes = require('./server/routes/coverageRoutes');
+const systemConfigRoutes = require('./server/routes/systemConfigRoutes');
 const affiliateController = require('./server/controllers/affiliateController');
 const customerController = require('./server/controllers/customerController');
 
@@ -249,6 +251,9 @@ if (process.env.SHOW_DOCS === 'true') {
   });
 }
 
+// Mount coverage analysis reports (separate from embedded app)
+// This is mounted before CSRF to avoid CSRF token requirements
+app.use('/coverage', coverageRoutes);
 
 // Apply CSRF protection with new configuration
 app.use(conditionalCsrf);
@@ -298,6 +303,7 @@ apiV1Router.use('/orders', orderRoutes);
 apiV1Router.use('/bags', bagRoutes);
 apiV1Router.use('/administrators', administratorRoutes);
 apiV1Router.use('/operators', operatorRoutes);
+apiV1Router.use('/system/config', systemConfigRoutes);
 
 // Environment endpoint
 apiV1Router.get('/environment', (req, res) => {
