@@ -592,9 +592,6 @@
         document.addEventListener('DOMContentLoaded', async function() {
             let wdfRate = 1.25; // Default rate
             
-            // Run initial calculation with default values
-            calculateEarnings();
-            
             // Calculate earnings function
             function calculateEarnings() {
                 const customers = parseFloat(document.getElementById('calc-customers').value) || 0;
@@ -621,6 +618,9 @@
             document.getElementById('calc-customers').addEventListener('input', calculateEarnings);
             document.getElementById('calc-weight').addEventListener('input', calculateEarnings);
             document.getElementById('calc-delivery').addEventListener('input', calculateEarnings);
+            
+            // Run initial calculation with default values
+            calculateEarnings();
             
             // Fetch WDF rate from API and recalculate if needed
             try {
