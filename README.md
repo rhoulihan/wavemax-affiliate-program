@@ -35,6 +35,7 @@ The WaveMAX Affiliate Program enables individuals to register as affiliates, onb
   - Code quality standards and git workflow best practices
   - Lessons learned from OAuth integration, password security, and administrator management sessions
   - Communication patterns and prompt evolution strategies
+  - **References `OPERATING_BEST_PRACTICES.md`** for known issues and workarounds
 - **Published HTML Version**: Created developer-friendly HTML presentation of the collaboration framework
   - Available at `/wavemax-development-prompt.html` for easy sharing
   - Tweet-friendly formatting with social media meta tags
@@ -47,6 +48,11 @@ The WaveMAX Affiliate Program enables individuals to register as affiliates, onb
   - Test-Driven Development (TDD) expertise shapes code analysis and recommendations
   - Security-first approach to analyzing code and suggesting solutions
   - Specific expertise in affiliate program patterns influences implementation decisions
+- **Operating Best Practices**: Created `OPERATING_BEST_PRACTICES.md` documenting:
+  - PM2 debugging workarounds and known issues
+  - CSP compliance requirements (no inline scripts)
+  - Common debugging patterns and solutions
+  - Environment-specific configurations
 
 ### Enhanced OAuth Integration & User Experience
 - **Unified OAuth Strategy**: Implemented comprehensive OAuth authentication for both affiliates and customers

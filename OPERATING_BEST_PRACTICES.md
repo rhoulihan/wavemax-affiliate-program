@@ -35,6 +35,31 @@ This document contains important operational knowledge and workarounds discovere
    pm2 start server.js --no-daemon
    ```
 
+## JavaScript and CSP Best Practices
+
+### ❌ Never Use Inline Scripts
+1. **Issue**: Inline `<script>` tags are blocked by Content Security Policy (CSP) when pages are embedded in iframes
+   - **Discovered**: 2025-01-06 - Revenue calculator failed in embedded context
+   - **Symptoms**: JavaScript functionality works in direct access but fails when embedded
+
+### ✅ Always Use External JavaScript Files
+1. **For all client-side JavaScript**:
+   ```html
+   <!-- Good -->
+   <script src="/assets/js/feature.js"></script>
+   
+   <!-- Bad -->
+   <script>
+     // Inline code will be blocked by CSP
+   </script>
+   ```
+
+2. **Benefits**:
+   - CSP compliant for iframe embedding
+   - Better caching and performance
+   - Easier debugging and maintenance
+   - Consistent with security best practices
+
 ## Common Debugging Patterns
 
 ### Application Won't Start (502 Bad Gateway)
