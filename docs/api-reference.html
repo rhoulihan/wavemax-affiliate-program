@@ -1037,6 +1037,93 @@ X-CSRF-Token: {csrf_token}</code></pre>
 }</code></pre>
             </div>
 
+            <h2 id="system-configuration">System Configuration</h2>
+            
+            <p>The System Configuration API allows management of dynamic system values like pricing, limits, and feature flags.</p>
+            
+            <div class="endpoint">
+                <h4>Get Public Configurations</h4>
+                <span class="method get">GET</span> <code>/api/v1/system/config/public</code>
+                
+                <p>No authentication required. Returns all public configuration values.</p>
+                
+                <h5>Response:</h5>
+                <pre><code>[
+    {
+        "key": "wdf_base_rate_per_pound",
+        "currentValue": 1.25,
+        "defaultValue": 1.25,
+        "description": "Base rate per pound for Wash Dry Fold service",
+        "category": "payment",
+        "isPublic": true
+    }
+]</code></pre>
+            </div>
+
+            <div class="endpoint">
+                <h4>Get Specific Public Configuration</h4>
+                <span class="method get">GET</span> <code>/api/v1/system/config/public/:key</code>
+                
+                <p>No authentication required. Returns a specific public configuration value.</p>
+                
+                <h5>Response:</h5>
+                <pre><code>{
+    "key": "wdf_base_rate_per_pound",
+    "currentValue": 1.25,
+    "defaultValue": 1.25,
+    "description": "Base rate per pound for Wash Dry Fold service",
+    "category": "payment",
+    "isPublic": true
+}</code></pre>
+            </div>
+
+            <div class="endpoint">
+                <h4>Get All Configurations (Admin)</h4>
+                <span class="method get">GET</span> <code>/api/v1/system/config</code>
+                
+                <p>Requires administrator authentication. Returns all system configurations.</p>
+                
+                <h5>Query Parameters:</h5>
+                <ul>
+                    <li><code>category</code> - Filter by category (optional)</li>
+                </ul>
+            </div>
+
+            <div class="endpoint">
+                <h4>Update Configuration Value (Admin)</h4>
+                <span class="method put">PUT</span> <code>/api/v1/system/config/:key</code>
+                
+                <p>Requires administrator authentication with <code>system_config</code> permission.</p>
+                
+                <h5>Request Body:</h5>
+                <pre><code>{
+    "value": 2.50
+}</code></pre>
+                
+                <h5>Response:</h5>
+                <pre><code>{
+    "success": true,
+    "config": {
+        "key": "wdf_base_rate_per_pound",
+        "value": 2.50,
+        "updatedBy": "507f1f77bcf86cd799439011",
+        "updatedAt": "2025-06-03T12:00:00.000Z"
+    }
+}</code></pre>
+            </div>
+
+            <div class="endpoint">
+                <h4>Initialize Default Configurations (Admin)</h4>
+                <span class="method post">POST</span> <code>/api/v1/system/config/initialize</code>
+                
+                <p>Requires administrator authentication. Initializes any missing default configurations.</p>
+                
+                <h5>Response:</h5>
+                <pre><code>{
+    "message": "Default configurations initialized"
+}</code></pre>
+            </div>
+
             <h2 id="error-handling">Error Handling</h2>
             
             <p>All API errors follow a consistent format:</p>

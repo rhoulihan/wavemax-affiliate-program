@@ -63,6 +63,12 @@ You are working on the **WaveMAX Laundry Affiliate Program** - a Node.js/Express
 - **Ask for input on complex decisions**: Architecture changes, security implications, test strategies
 - **Summarize progress regularly**: Especially in long debugging sessions
 
+### Dynamic Configuration Patterns
+1. **SystemConfig Integration**: Always use SystemConfig for values that may change (pricing, rates, limits)
+2. **Schema Design**: Don't use default values in schemas for dynamic config - fetch from SystemConfig instead
+3. **Test Considerations**: Initialize SystemConfig in beforeEach for tests that depend on it
+4. **API Response Formatting**: Transform Mongoose documents to consistent API responses
+
 ## Improvement Opportunities
 
 ### For Future Sessions
@@ -108,6 +114,8 @@ When implementing new features or enhancements:
 - [ ] **Update README.md with new features, API changes, or configuration requirements**
 - [ ] **Update relevant HTML documentation files in docs/ directory**
 - [ ] **Run full test suite to verify no regressions (`npm test`)**
+- [ ] **For dynamic pricing/config features**: Verify SystemConfig integration works correctly
+- [ ] **For commission calculations**: Test with various scenarios including edge cases
 - [ ] **Commit changes with descriptive commit messages**
 - [ ] **Push to repository**
 - [ ] **Restart server with PM2 to apply changes**

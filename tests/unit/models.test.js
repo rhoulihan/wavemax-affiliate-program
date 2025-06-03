@@ -188,7 +188,7 @@ describe('Model Tests', () => {
       expect(saved._id).toBeDefined();
       expect(saved.orderId).toMatch(/^ORD\d{6}$/);
       expect(saved.status).toBe('scheduled');
-      expect(saved.baseRate).toBe(1.89);
+      expect(saved.baseRate).toBe(1.25);
       expect(saved.paymentStatus).toBe('pending');
     });
 
@@ -206,8 +206,8 @@ describe('Model Tests', () => {
 
       await order.save();
 
-      // Medium size estimate: 23 lbs * $1.89 + $5.99 delivery
-      expect(order.estimatedTotal).toBeCloseTo(49.46, 2);
+      // Medium size estimate: 23 lbs * $1.25 + $5.99 delivery
+      expect(order.estimatedTotal).toBeCloseTo(34.74, 2);
     });
 
     it('should calculate actual total and commission when weight is set', async () => {
@@ -225,10 +225,10 @@ describe('Model Tests', () => {
 
       await order.save();
 
-      // 30 lbs * $1.89 + $5.99 delivery = $62.69
-      expect(order.actualTotal).toBeCloseTo(62.69, 2);
-      // Commission: 10% of wash cost (30 * $1.89 * 0.1) + delivery fee ($5.99) = $11.66
-      expect(order.affiliateCommission).toBeCloseTo(11.66, 2);
+      // 30 lbs * $1.25 + $5.99 delivery = $43.49
+      expect(order.actualTotal).toBeCloseTo(43.49, 2);
+      // Commission: 10% of wash cost (30 * $1.25 * 0.1) + delivery fee ($5.99) = $9.74
+      expect(order.affiliateCommission).toBeCloseTo(9.74, 2);
     });
 
     it('should update timestamps for status changes', async () => {

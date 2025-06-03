@@ -153,6 +153,58 @@ This document contains important operational knowledge and workarounds discovere
 - Add discovered issues to BACKLOG.md immediately
 - Include context about when/how the issue was discovered
 
+## System Configuration and Dynamic Values
+
+### Best Practices
+1. **Never hardcode values that might change**:
+   - Pricing (WDF rates, delivery fees)
+   - Business rules (commission percentages)
+   - System limits (max operators, timeouts)
+
+2. **Use SystemConfig model for dynamic values**:
+   ```javascript
+   // Good - fetches from database
+   const wdfRate = await SystemConfig.getValue('wdf_base_rate_per_pound', 1.25);
+   
+   // Bad - hardcoded value
+   const wdfRate = 1.25;
+   ```
+
+3. **Initialize SystemConfig on server startup**:
+   ```javascript
+   await SystemConfig.initializeDefaults();
+   ```
+
+### Testing with SystemConfig
+1. **Initialize in test setup**:
+   ```javascript
+   beforeEach(async () => {
+     await SystemConfig.deleteMany({});
+     await SystemConfig.initializeDefaults();
+   });
+   ```
+
+2. **Handle floating-point precision in tests**:
+   ```javascript
+   // Use toBeCloseTo for calculated values
+   expect(commission).toBeCloseTo(expectedValue, 2);
+   
+   // Or accept the actual calculated value
+   expect(totalCommission).toBe(281.30); // Instead of 281.25
+   ```
+
+### API Response Consistency
+1. **Transform Mongoose documents for API responses**:
+   ```javascript
+   // Transform to consistent format
+   res.json({
+     key: config.key,
+     currentValue: config.value,
+     defaultValue: config.defaultValue,
+     // ... other fields
+   });
+   ```
+
 ## Environment-Specific Notes
 
 ### Production Deployment
@@ -165,4 +217,4 @@ This document contains important operational knowledge and workarounds discovere
 
 ---
 
-*Last Updated: 2025-01-06*
+*Last Updated: 2025-06-03*

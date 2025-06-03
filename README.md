@@ -163,6 +163,23 @@ The WaveMAX Affiliate Program enables individuals to register as affiliates, onb
   - Automatic token refresh on 403 responses
   - Support for both cookie and header-based token transmission
 
+### Dynamic Pricing and Revenue Features
+- **Dynamic WDF Pricing**: Implemented SystemConfig-based pricing
+  - WDF (Wash, Dry, Fold) rates now managed through SystemConfig model
+  - Configurable per-pound pricing with min/max validation ($0.50 - $10.00)
+  - Public API endpoint for fetching current rates
+  - Automatic rate application on order creation
+- **Revenue Calculator**: Enhanced affiliate earnings calculator
+  - Updated default delivery fee from $10 to $25
+  - Real-time commission calculation: 10% of WDF service + 100% delivery fees
+  - Accurate monthly and yearly projections
+  - CSP-compliant external JavaScript implementation
+- **Commission System**: Precise affiliate commission tracking
+  - Automatic commission calculation on order completion
+  - Handles edge cases (zero delivery fee, high-volume orders)
+  - Floating-point precision handling for accurate payouts
+  - Comprehensive test coverage for commission scenarios
+
 ### Data Management Features
 - **Delete Data Functionality**: Enhanced delete all data feature
   - Now controlled by ENABLE_DELETE_DATA_FEATURE environment variable
