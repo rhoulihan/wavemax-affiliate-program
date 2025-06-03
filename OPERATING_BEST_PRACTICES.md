@@ -64,6 +64,7 @@ This document contains important operational knowledge and workarounds discovere
 1. **Issue**: Scripts in dynamically loaded pages are stripped out
    - The embed-app.html router removes script tags when loading page content
    - Scripts must be registered in the `pageScripts` mapping
+   - Standard DOMContentLoaded events may not fire for dynamically loaded content
    
 2. **Solution**: Add page-specific scripts to embed-app.html
    ```javascript
@@ -73,6 +74,35 @@ This document contains important operational knowledge and workarounds discovere
        // ... other routes
    };
    ```
+
+3. **Script Initialization Best Practices for Dynamic Content**:
+   - **Use multiple initialization strategies**:
+     ```javascript
+     // 1. Check if DOM is already loaded
+     if (document.readyState === 'complete' || document.readyState === 'interactive') {
+         setTimeout(initFunction, 100); // Delay for rendering
+     }
+     
+     // 2. Standard DOMContentLoaded
+     document.addEventListener('DOMContentLoaded', initFunction);
+     
+     // 3. Periodic checking for dynamic content
+     const interval = setInterval(() => {
+         if (document.getElementById('target-element')) {
+             initFunction();
+             clearInterval(interval);
+         }
+     }, 500);
+     ```
+   
+   - **Prevent duplicate initialization**:
+     ```javascript
+     element.setAttribute('data-initialized', 'true');
+     ```
+   
+   - **Add comprehensive logging** for debugging initialization flow
+   
+4. **Key Learning**: When content is loaded dynamically via fetch() and innerHTML, scripts need special handling to ensure DOM elements exist before initialization
 
 ## Common Debugging Patterns
 
