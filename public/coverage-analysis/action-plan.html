@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Action Plan - WaveMAX Coverage Report</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f5f5f5;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            color: white;
+            padding: 30px 0;
+            text-align: center;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .nav-links {
+            margin-top: 20px;
+        }
+        
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            margin: 0 15px;
+            padding: 8px 16px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            transition: background 0.3s;
+        }
+        
+        .nav-links a:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+        
+        .action-section {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        h2 {
+            color: #1e3a8a;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e5e7eb;
+        }
+        
+        .priority-list {
+            list-style: none;
+            margin: 20px 0;
+        }
+        
+        .priority-item {
+            display: flex;
+            align-items: flex-start;
+            padding: 15px;
+            margin-bottom: 15px;
+            background: #f9fafb;
+            border-radius: 8px;
+            border-left: 4px solid #3b82f6;
+        }
+        
+        .priority-item.critical {
+            border-left-color: #dc2626;
+            background: #fef2f2;
+        }
+        
+        .priority-item.high {
+            border-left-color: #f59e0b;
+            background: #fffbeb;
+        }
+        
+        .priority-item.medium {
+            border-left-color: #3b82f6;
+            background: #eff6ff;
+        }
+        
+        .priority-number {
+            font-size: 2em;
+            font-weight: bold;
+            color: #6366f1;
+            margin-right: 20px;
+            min-width: 40px;
+        }
+        
+        .priority-content h3 {
+            color: #1e3a8a;
+            margin-bottom: 8px;
+        }
+        
+        .priority-content p {
+            color: #4b5563;
+            margin-bottom: 10px;
+        }
+        
+        .effort-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        
+        .effort-low {
+            background: #dcfce7;
+            color: #166534;
+        }
+        
+        .effort-medium {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        
+        .effort-high {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+        
+        .coverage-impact {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            background: #e0e7ff;
+            color: #3730a3;
+        }
+        
+        .timeline-section {
+            background: #f3f4f6;
+            padding: 25px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        
+        .timeline-header {
+            font-weight: bold;
+            color: #1e3a8a;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+        
+        .sprint-box {
+            background: white;
+            padding: 20px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            border: 1px solid #e5e7eb;
+        }
+        
+        .sprint-title {
+            font-weight: bold;
+            color: #374151;
+            margin-bottom: 10px;
+        }
+        
+        .task-list {
+            list-style: none;
+            margin-left: 20px;
+        }
+        
+        .task-list li {
+            padding: 5px 0;
+            position: relative;
+            padding-left: 25px;
+        }
+        
+        .task-list li:before {
+            content: "→";
+            position: absolute;
+            left: 0;
+            color: #6366f1;
+            font-weight: bold;
+        }
+        
+        .command-box {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 15px 20px;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            margin: 10px 0;
+            overflow-x: auto;
+        }
+        
+        .footer {
+            text-align: center;
+            padding: 30px 0;
+            color: #666;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Coverage Improvement Action Plan</h1>
+            <p>Systematic approach to reach 80% coverage threshold</p>
+            <div class="nav-links">
+                <a href="index.html">← Overview</a>
+                <a href="critical-files.html">Critical Files</a>
+                <a href="test-templates.html">Test Templates</a>
+            </div>
+        </header>
+        
+        <div class="action-section">
+            <h2>🎯 Current Status & Goal</h2>
+            <div class="timeline-section">
+                <p><strong>Current Coverage:</strong> 75.04% statements, 68.2% branches, 74.92% lines</p>
+                <p><strong>Target Coverage:</strong> 80% across all metrics</p>
+                <p><strong>Gap to Close:</strong> ~5% statements, ~12% branches, ~5% lines</p>
+                <p><strong>Estimated Total Effort:</strong> 15-20 hours of focused testing work</p>
+            </div>
+        </div>
+        
+        <div class="action-section">
+            <h2>📋 Prioritized Action Items</h2>
+            
+            <ul class="priority-list">
+                <li class="priority-item critical">
+                    <div class="priority-number">1</div>
+                    <div class="priority-content">
+                        <h3>Email Service Testing</h3>
+                        <p>Create comprehensive test suite for server/utils/emailService.js</p>
+                        <div>
+                            <span class="effort-badge effort-high">3-4 hours</span>
+                            <span class="coverage-impact">+5% overall coverage</span>
+                        </div>
+                        <div class="command-box">
+                            npm test -- tests/unit/emailService.test.js --coverage
+                        </div>
+                    </div>
+                </li>
+                
+                <li class="priority-item critical">
+                    <div class="priority-number">2</div>
+                    <div class="priority-content">
+                        <h3>OAuth Session Functions</h3>
+                        <p>Test new OAuth session handling in authController.js (lines 1596-1877)</p>
+                        <div>
+                            <span class="effort-badge effort-medium">2-3 hours</span>
+                            <span class="coverage-impact">+2% overall coverage</span>
+                        </div>
+                    </div>
+                </li>
+                
+                <li class="priority-item high">
+                    <div class="priority-number">3</div>
+                    <div class="priority-content">
+                        <h3>Passport OAuth Strategies</h3>
+                        <p>Mock and test OAuth providers in passport-config.js</p>
+                        <div>
+                            <span class="effort-badge effort-medium">2-3 hours</span>
+                            <span class="coverage-impact">+3% overall coverage</span>
+                        </div>
+                    </div>
+                </li>
+                
+                <li class="priority-item high">
+                    <div class="priority-number">4</div>
+                    <div class="priority-content">
+                        <h3>Encryption Error Paths</h3>
+                        <p>Cover error handling in encryption.js for security assurance</p>
+                        <div>
+                            <span class="effort-badge effort-low">1 hour</span>
+                            <span class="coverage-impact">+0.5% overall coverage</span>
+                        </div>
+                    </div>
+                </li>
+                
+                <li class="priority-item medium">
+                    <div class="priority-number">5</div>
+                    <div class="priority-content">
+                        <h3>Admin Controller Error Handling</h3>
+                        <p>Test error scenarios and audit logging in administratorController.js</p>
+                        <div>
+                            <span class="effort-badge effort-medium">2 hours</span>
+                            <span class="coverage-impact">+1% overall coverage</span>
+                        </div>
+                    </div>
+                </li>
+            </ul>
+        </div>
+        
+        <div class="action-section">
+            <h2>📅 Sprint Planning</h2>
+            
+            <div class="timeline-section">
+                <div class="timeline-header">Sprint 1 (This Week) - Critical Gaps</div>
+                
+                <div class="sprint-box">
+                    <div class="sprint-title">Day 1-2: Email Service</div>
+                    <ul class="task-list">
+                        <li>Set up email service mocks</li>
+                        <li>Test all email provider configurations</li>
+                        <li>Cover all email sending functions</li>
+                        <li>Test error handling and retries</li>
+                    </ul>
+                </div>
+                
+                <div class="sprint-box">
+                    <div class="sprint-title">Day 3: OAuth Sessions</div>
+                    <ul class="task-list">
+                        <li>Test createOAuthSession function</li>
+                        <li>Test checkOAuthSession polling</li>
+                        <li>Test account conflict resolution</li>
+                        <li>Cover timeout and error scenarios</li>
+                    </ul>
+                </div>
+                
+                <div class="sprint-box">
+                    <div class="sprint-title">Day 4-5: Passport & Security</div>
+                    <ul class="task-list">
+                        <li>Mock OAuth strategies</li>
+                        <li>Test customer vs affiliate flows</li>
+                        <li>Cover encryption error paths</li>
+                        <li>Run coverage report and verify progress</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="timeline-section">
+                <div class="timeline-header">Sprint 2 (Next Week) - Remaining Gaps</div>
+                
+                <div class="sprint-box">
+                    <div class="sprint-title">Secondary Priority Files</div>
+                    <ul class="task-list">
+                        <li>Admin controller error scenarios</li>
+                        <li>Social auth route validations</li>
+                        <li>Customer controller edge cases</li>
+                        <li>Operator controller error paths</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <div class="action-section">
+            <h2>🔍 Investigation Tasks</h2>
+            
+            <div class="timeline-section">
+                <p><strong>Before investing time in certain areas, investigate:</strong></p>
+                <ul class="task-list">
+                    <li>Are Facebook and LinkedIn OAuth still actively used? Check analytics/logs</li>
+                    <li>Is the bag management system still required? Review recent usage</li>
+                    <li>Which operator features are actually in production?</li>
+                </ul>
+                <p style="margin-top: 15px;"><strong>Recommendation:</strong> If features are deprecated, consider removing them instead of adding tests.</p>
+            </div>
+        </div>
+        
+        <div class="action-section">
+            <h2>✅ Success Criteria</h2>
+            
+            <div class="timeline-section">
+                <ul class="task-list">
+                    <li>All metrics reach 80% coverage threshold</li>
+                    <li>Critical security paths (encryption, auth) have 90%+ coverage</li>
+                    <li>All new OAuth features are fully tested</li>
+                    <li>Email service has comprehensive test suite</li>
+                    <li>No untested error handling in critical paths</li>
+                </ul>
+            </div>
+            
+            <div class="command-box">
+                # Run full test suite with coverage
+                npm test -- --coverage
+                
+                # Generate detailed HTML coverage report
+                npm test -- --coverage --coverageReporters=html
+                
+                # Open coverage report in browser
+                open coverage/lcov-report/index.html
+            </div>
+        </div>
+        
+        <footer class="footer">
+            <p>Coverage Action Plan - WaveMAX Laundry Affiliate Program</p>
+            <p><a href="index.html">← Back to Overview</a> | Generated December 6, 2024</p>
+        </footer>
+    </div>
+</body>
+</html>

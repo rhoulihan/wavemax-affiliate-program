@@ -96,6 +96,7 @@ When we begin each session:
   - Look for logs with status "IN PROGRESS"
   - If found, ask: "Found in-progress task: [task name]. Would you like to continue where we left off?"
   - Review the log to understand context and completed steps
+- [ ] **Review `OPERATING_BEST_PRACTICES.md` for known issues and workarounds**
 - [ ] Understand the current task/issue context
 - [ ] Identify if this relates to previous work (OAuth, testing, etc.)
 - [ ] Establish the success criteria for the session

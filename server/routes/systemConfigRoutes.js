@@ -3,7 +3,8 @@
 const express = require('express');
 const router = express.Router();
 const SystemConfig = require('../models/SystemConfig');
-const { authenticateToken, verifyRole } = require('../middleware/auth');
+const { authenticateToken } = require('../middleware/auth');
+const { checkRole } = require('../middleware/rbac');
 
 // Get all public configurations (no authentication required)
 router.get('/public', async (req, res) => {
@@ -37,7 +38,7 @@ router.get('/public/:key', async (req, res) => {
 
 // Admin routes below this point require authentication
 router.use(authenticateToken);
-router.use(verifyRole(['administrator']));
+router.use(checkRole(['administrator']));
 
 // Get all configurations (admin only)
 router.get('/', async (req, res) => {
