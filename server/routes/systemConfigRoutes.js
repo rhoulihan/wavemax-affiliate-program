@@ -4,13 +4,21 @@ const express = require('express');
 const router = express.Router();
 const SystemConfig = require('../models/SystemConfig');
 const { authenticate } = require('../middleware/auth');
-const { checkRole } = require('../middleware/rbac');
+const { checkRole, checkAdminPermission } = require('../middleware/rbac');
 
 // Get all public configurations (no authentication required)
 router.get('/public', async (req, res) => {
   try {
     const configs = await SystemConfig.getPublicConfigs();
-    res.json(configs);
+    const formattedConfigs = configs.map(config => ({
+      key: config.key,
+      currentValue: config.value,
+      defaultValue: config.defaultValue,
+      description: config.description,
+      category: config.category,
+      isPublic: config.isPublic
+    }));
+    res.json(formattedConfigs);
   } catch (error) {
     console.error('Error fetching public configs:', error);
     res.status(500).json({ error: 'Failed to fetch public configurations' });
@@ -29,7 +37,14 @@ router.get('/public/:key', async (req, res) => {
       return res.status(404).json({ error: 'Configuration not found' });
     }
     
-    res.json(config);
+    res.json({
+      key: config.key,
+      currentValue: config.value,
+      defaultValue: config.defaultValue,
+      description: config.description,
+      category: config.category,
+      isPublic: config.isPublic
+    });
   } catch (error) {
     console.error('Error fetching config:', error);
     res.status(500).json({ error: 'Failed to fetch configuration' });
@@ -59,14 +74,22 @@ router.get('/', async (req, res) => {
   }
 });
 
-// Update configuration value (admin only)
-router.put('/:key', async (req, res) => {
+// Update configuration value (admin only with system_config permission)
+router.put('/:key', checkAdminPermission('system_config'), async (req, res) => {
   try {
     const { value } = req.body;
-    const adminId = req.user.userId;
+    const adminId = req.user.id;
     
     const config = await SystemConfig.setValue(req.params.key, value, adminId);
-    res.json(config);
+    res.json({
+      success: true,
+      config: {
+        key: config.key,
+        value: config.value,
+        updatedBy: config.updatedBy,
+        updatedAt: config.updatedAt
+      }
+    });
   } catch (error) {
     console.error('Error updating config:', error);
     res.status(400).json({ error: error.message });

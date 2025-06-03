@@ -243,6 +243,7 @@
             <div class="version-nav">
                 <h3>Quick Navigation</h3>
                 <ul>
+                    <li><a href="#v1.5.0">v1.5.0 - Dynamic Pricing & Revenue Features</a></li>
                     <li><a href="#v1.4.0">v1.4.0 - OAuth Integration & Account Conflict Resolution</a></li>
                     <li><a href="#v1.3.1">v1.3.1 - Affiliate Customer Filtering</a></li>
                     <li><a href="#v1.3.0">v1.3.0 - Test Suite Achievement</a></li>
@@ -253,8 +254,54 @@
                 </ul>
             </div>
 
+            <div id="v1.5.0" class="release">
+                <h2>Version 1.5.0 <span class="tag new">Latest</span></h2>
+                <div class="release-date">Released on June 3, 2025</div>
+                
+                <h3>💰 Dynamic Pricing & Revenue Features</h3>
+                <ul>
+                    <li><span class="tag new">NEW</span> <strong>SystemConfig Model:</strong> Dynamic configuration management for pricing, limits, and system settings</li>
+                    <li><span class="tag new">NEW</span> <strong>Dynamic WDF Pricing:</strong> Wash, Dry, Fold rates now managed through SystemConfig instead of hardcoded values</li>
+                    <li><span class="tag new">NEW</span> <strong>Public Configuration API:</strong> Public endpoints for fetching current pricing without authentication</li>
+                    <li><span class="tag improved">IMPROVED</span> <strong>Revenue Calculator:</strong> Updated default delivery fee from $10 to $25 to reflect market rates</li>
+                    <li><span class="tag improved">IMPROVED</span> <strong>Commission System:</strong> Precise calculation with 10% of WDF service + 100% delivery fees</li>
+                </ul>
+
+                <h3>🔧 Technical Improvements</h3>
+                <ul>
+                    <li><span class="tag improved">IMPROVED</span> <strong>Order Model:</strong> Now fetches baseRate from SystemConfig on creation</li>
+                    <li><span class="tag improved">IMPROVED</span> <strong>Commission Calculation:</strong> Handles edge cases including zero delivery fees and high-volume orders</li>
+                    <li><span class="tag fixed">FIXED</span> <strong>Floating-Point Precision:</strong> Proper handling of commission calculations to avoid rounding errors</li>
+                    <li><span class="tag improved">IMPROVED</span> <strong>Test Coverage:</strong> Added comprehensive tests for SystemConfig integration and commission calculations</li>
+                </ul>
+
+                <h3>🛠️ API Enhancements</h3>
+                <ul>
+                    <li><span class="tag new">NEW</span> <code>/api/v1/system/config/public</code> - Get all public configurations</li>
+                    <li><span class="tag new">NEW</span> <code>/api/v1/system/config/public/:key</code> - Get specific public configuration</li>
+                    <li><span class="tag new">NEW</span> <code>/api/v1/system/config</code> - Admin endpoint for all configurations</li>
+                    <li><span class="tag new">NEW</span> <code>/api/v1/system/config/:key</code> - Update configuration value (admin only)</li>
+                    <li><span class="tag new">NEW</span> <code>/api/v1/system/config/initialize</code> - Initialize default configurations</li>
+                </ul>
+
+                <h3>✅ Testing & Quality</h3>
+                <ul>
+                    <li><span class="tag new">NEW</span> <strong>SystemConfig Tests:</strong> Complete test suite for configuration management</li>
+                    <li><span class="tag new">NEW</span> <strong>Commission Calculation Tests:</strong> Extensive tests covering various pricing scenarios</li>
+                    <li><span class="tag improved">IMPROVED</span> <strong>Order Model Tests:</strong> Updated to use dynamic pricing from SystemConfig</li>
+                    <li><span class="tag fixed">FIXED</span> <strong>Test Precision:</strong> Handled floating-point arithmetic issues in commission tests</li>
+                </ul>
+
+                <h3>📚 Documentation Updates</h3>
+                <ul>
+                    <li><span class="tag improved">IMPROVED</span> <strong>API Reference:</strong> Added SystemConfig endpoints documentation</li>
+                    <li><span class="tag improved">IMPROVED</span> <strong>Operating Best Practices:</strong> Added section on SystemConfig usage and testing</li>
+                    <li><span class="tag improved">IMPROVED</span> <strong>Init Prompt:</strong> Updated with dynamic configuration patterns and learnings</li>
+                </ul>
+            </div>
+
             <div id="v1.4.0" class="release">
-                <h2>Version 1.4.0 <span class="tag new">Latest</span></h2>
+                <h2>Version 1.4.0</h2>
                 <div class="release-date">Released on June 2, 2025</div>
                 
                 <h3>🚀 Major OAuth Integration</h3>
