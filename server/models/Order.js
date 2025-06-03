@@ -45,7 +45,7 @@ const orderSchema = new mongoose.Schema({
   bagIDs: [String],
   washInstructions: String,
   // Payment information
-  baseRate: { type: Number, default: 1.89 }, // Per pound WDF rate
+  baseRate: { type: Number, default: 1.25 }, // Per pound WDF rate
   deliveryFee: { type: Number, required: true },
   estimatedTotal: Number,
   actualTotal: Number,
@@ -103,7 +103,7 @@ const orderSchema = new mongoose.Schema({
 orderSchema.pre('save', async function(next) {
   // Fetch current WDF rate from system config if not explicitly set
   if (this.isNew && !this.baseRate) {
-    this.baseRate = await SystemConfig.getValue('wdf_base_rate_per_pound', 1.89);
+    this.baseRate = await SystemConfig.getValue('wdf_base_rate_per_pound', 1.25);
   }
   
   if (this.isNew || this.isModified('estimatedSize') || this.isModified('baseRate') || this.isModified('deliveryFee')) {
