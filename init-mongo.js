@@ -143,7 +143,7 @@ db.orders.insertOne({
   'deliveryTime': 'afternoon',
   'specialDeliveryInstructions': 'Leave at front door',
   'status': 'scheduled',
-  'baseRate': 1.89,
+  'baseRate': 1.25,
   'deliveryFee': 5.99,
   'estimatedTotal': 49.46,
   'paymentStatus': 'pending',

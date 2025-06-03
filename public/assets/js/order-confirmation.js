@@ -78,12 +78,12 @@ function initializeOrderConfirmation() {
       if (response.ok) {
         const configs = await response.json();
         const wdfConfig = configs.find(c => c.key === 'wdf_base_rate_per_pound');
-        return wdfConfig ? wdfConfig.currentValue : 1.89;
+        return wdfConfig ? wdfConfig.currentValue : 1.25;
       }
     } catch (error) {
       console.error('Error fetching WDF rate:', error);
     }
-    return 1.89; // Default fallback
+    return 1.25; // Default fallback
   }
 
   // Function to display order data
