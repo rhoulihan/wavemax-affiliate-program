@@ -195,6 +195,24 @@ async function loadCustomerIntoForm(customer, token) {
       console.error('Customer profile request failed:', profileResponse.status, profileResponse.statusText);
     }
 
+    // Fetch WDF rate from system configuration
+    try {
+      const wdfResponse = await fetch(`${baseUrl}/api/v1/system/config/public`);
+      if (wdfResponse.ok) {
+        const configs = await wdfResponse.json();
+        const wdfConfig = configs.find(c => c.key === 'wdf_base_rate_per_pound');
+        if (wdfConfig && wdfConfig.currentValue) {
+          const wdfRateDisplay = document.getElementById('wdfRateDisplay');
+          if (wdfRateDisplay) {
+            wdfRateDisplay.textContent = `$${wdfConfig.currentValue.toFixed(2)} per pound`;
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching WDF rate:', error);
+      // Keep the placeholder text if fetch fails
+    }
+
     // Setup date fields
     setupDateFields();
 
