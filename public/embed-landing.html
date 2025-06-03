@@ -431,21 +431,21 @@
                                     <div class="earnings-display">
                                         <div class="mb-3">
                                             <small class="text-muted">Weekly earnings</small>
-                                            <h3 class="text-primary mb-0">$<span id="weekly-earnings">147.25</span></h3>
+                                            <h3 class="text-primary mb-0">$<span id="weekly-earnings">0.00</span></h3>
                                         </div>
                                         <div class="mb-3">
                                             <small class="text-muted">Monthly earnings</small>
-                                            <h3 class="text-success mb-0">$<span id="monthly-earnings">589.00</span></h3>
+                                            <h3 class="text-success mb-0">$<span id="monthly-earnings">0.00</span></h3>
                                         </div>
                                         <div class="earnings-breakdown">
                                             <small class="text-muted">Earnings breakdown:</small>
                                             <div class="d-flex justify-content-between">
                                                 <span>WDF commission (10%):</span>
-                                                <span>$<span id="wdf-commission">47.25</span>/week</span>
+                                                <span>$<span id="wdf-commission">0.00</span>/week</span>
                                             </div>
                                             <div class="d-flex justify-content-between">
                                                 <span>Delivery fees (100%):</span>
-                                                <span>$<span id="delivery-earnings">100.00</span>/week</span>
+                                                <span>$<span id="delivery-earnings">0.00</span>/week</span>
                                             </div>
                                         </div>
                                     </div>
@@ -592,21 +592,6 @@
         document.addEventListener('DOMContentLoaded', async function() {
             let wdfRate = 1.25; // Default rate
             
-            // Fetch WDF rate from API
-            try {
-                const response = await fetch('https://wavemax.promo/api/v1/system/config/public');
-                if (response.ok) {
-                    const configs = await response.json();
-                    const wdfConfig = configs.find(c => c.key === 'wdf_base_rate_per_pound');
-                    if (wdfConfig) {
-                        wdfRate = wdfConfig.currentValue;
-                        document.getElementById('wdf-rate-display').textContent = wdfRate.toFixed(2);
-                    }
-                }
-            } catch (error) {
-                console.error('Error fetching WDF rate:', error);
-            }
-            
             // Calculate earnings function
             function calculateEarnings() {
                 const customers = parseFloat(document.getElementById('calc-customers').value) || 0;
@@ -633,6 +618,21 @@
             document.getElementById('calc-customers').addEventListener('input', calculateEarnings);
             document.getElementById('calc-weight').addEventListener('input', calculateEarnings);
             document.getElementById('calc-delivery').addEventListener('input', calculateEarnings);
+            
+            // Fetch WDF rate from API
+            try {
+                const response = await fetch('https://wavemax.promo/api/v1/system/config/public');
+                if (response.ok) {
+                    const configs = await response.json();
+                    const wdfConfig = configs.find(c => c.key === 'wdf_base_rate_per_pound');
+                    if (wdfConfig) {
+                        wdfRate = wdfConfig.currentValue;
+                        document.getElementById('wdf-rate-display').textContent = wdfRate.toFixed(2);
+                    }
+                }
+            } catch (error) {
+                console.error('Error fetching WDF rate:', error);
+            }
             
             // Initial calculation
             calculateEarnings();
