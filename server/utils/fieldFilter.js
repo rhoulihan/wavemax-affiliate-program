@@ -79,13 +79,6 @@ const fieldDefinitions = {
       'processedAt', 'readyForDeliveryAt', 'deliveredAt', 'cancelledAt']
   },
 
-  // Bag fields visible to different roles
-  bag: {
-    customer: ['bagId', 'barcode', 'status'],
-    affiliate: ['bagId', 'barcode', 'customerId', 'status', 'issueDate', 'lastUsedDate'],
-    admin: ['_id', 'bagId', 'barcode', 'customerId', 'affiliateId', 'status',
-      'issueDate', 'lastUsedDate', 'lostReportedDate', 'notes']
-  },
 
   // Administrator fields visible to different roles
   administrator: {
@@ -114,7 +107,7 @@ const fieldDefinitions = {
 
 /**
  * Get filtered data based on user role and data type
- * @param {String} dataType - Type of data (affiliate, customer, order, bag)
+ * @param {String} dataType - Type of data (affiliate, customer, order)
  * @param {Object|Array} data - Data to filter
  * @param {String} userRole - Role of the requesting user (admin, affiliate, customer, public)
  * @param {Object} context - Additional context (e.g., userId for self checks)
@@ -209,8 +202,6 @@ const fieldFilter = (data, role) => {
     dataType = 'customer';
   } else if (data.orderId !== undefined && data.pickupDate !== undefined) {
     dataType = 'order';
-  } else if (data.bagId !== undefined && data.barcode !== undefined) {
-    dataType = 'bag';
   }
   
   if (!dataType) return data;

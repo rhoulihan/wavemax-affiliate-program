@@ -26,12 +26,6 @@ router.post('/register', [
   body('password').custom(customPasswordValidator())
 ], customerController.registerCustomer);
 
-/**
- * @route   POST /api/customers/report-lost-bag
- * @desc    Report a lost bag (alternative route)
- * @access  Private (self, affiliated affiliate, or admin)
- */
-router.post('/report-lost-bag', authenticate, customerController.reportLostBag);
 
 /**
  * @route   GET /api/customers/:customerId/profile
@@ -91,19 +85,7 @@ router.put('/:customerId/password', authenticate, [
   body('newPassword').isLength({ min: 8 }).withMessage('New password must be at least 8 characters long')
 ], customerController.updateCustomerPassword);
 
-/**
- * @route   GET /api/customers/:customerId/bags
- * @desc    Get customer bags
- * @access  Private (self, affiliated affiliate, or admin)
- */
-router.get('/:customerId/bags', authenticate, customerController.getCustomerBags);
 
-/**
- * @route   POST /api/customers/:customerId/bags/:bagId/report-lost
- * @desc    Report a lost bag
- * @access  Private (self, affiliated affiliate, or admin)
- */
-router.post('/:customerId/bags/:bagId/report-lost', authenticate, customerController.reportLostBag);
 
 /**
  * @route   PUT /api/customers/:customerId/payment

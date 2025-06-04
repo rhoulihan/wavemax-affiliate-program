@@ -292,35 +292,6 @@ exports.sendAffiliateCommissionEmail = async (affiliate, order, customer) => {
   }
 };
 
-/**
- * Send lost bag notification to affiliate
- */
-exports.sendAffiliateLostBagEmail = async (affiliate, customer, bagBarcode) => {
-  try {
-    const template = await loadTemplate('affiliate-lost-bag');
-
-    const data = {
-      affiliate_first_name: affiliate.firstName,
-      customer_name: `${customer.firstName} ${customer.lastName}`,
-      customer_id: customer.customerId,
-      customer_email: customer.email,
-      customer_phone: customer.phone,
-      bag_barcode: bagBarcode,
-      dashboard_url: 'https://www.wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program?login=affiliate',
-      current_year: new Date().getFullYear()
-    };
-
-    const html = fillTemplate(template, data);
-
-    await sendEmail(
-      affiliate.email,
-      'Customer Reported Lost Laundry Bag',
-      html
-    );
-  } catch (error) {
-    console.error('Error sending lost bag notification email:', error);
-  }
-};
 
 /**
  * Send order cancellation notification to affiliate

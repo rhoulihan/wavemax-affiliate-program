@@ -115,11 +115,7 @@ const CSRF_CONFIG = {
     '/api/v1/customers/:customerId',
     '/api/v1/customers/:customerId/profile',
     '/api/v1/customers/:customerId/payment',
-    '/api/v1/affiliates/:affiliateId',
-    
-    // Bag management
-    '/api/v1/customers/:customerId/bags',
-    '/api/v1/customers/:customerId/bags/:bagId/report-lost'
+    '/api/v1/affiliates/:affiliateId'
   ],
 
   // READ-ONLY endpoints that can remain without CSRF
