@@ -144,7 +144,8 @@ describe('Field Filter Utility', () => {
       expect(fieldDefinitions.affiliate).toBeDefined();
       expect(fieldDefinitions.customer).toBeDefined();
       expect(fieldDefinitions.order).toBeDefined();
-      expect(fieldDefinitions.bag).toBeDefined();
+      expect(fieldDefinitions.administrator).toBeDefined();
+      expect(fieldDefinitions.operator).toBeDefined();
     });
 
     it('should have different field sets for different roles', () => {
