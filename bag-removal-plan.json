@@ -217,7 +217,7 @@
     {
       "phase": 6,
       "name": "Database Cleanup",
-      "status": "ready",
+      "status": "completed",
       "tasks": [
         {
           "id": "6.1",
@@ -262,8 +262,8 @@
   },
   "progress": {
     "total_tasks": 29,
-    "completed_tasks": 26,
-    "current_phase": 5,
-    "last_updated": "2025-06-04T00:00:00Z"
+    "completed_tasks": 29,
+    "current_phase": 6,
+    "last_updated": "2025-06-04T01:00:00Z"
   }
 }
