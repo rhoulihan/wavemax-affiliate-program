@@ -7,6 +7,11 @@ yarn-error.log*
 lerna-debug.log*
 .pnpm-debug.log*
 
+# PM2 logs
+.pm2/logs/
+pm2.log
+pm2-*.log
+
 # Test output files
 test-*.log
 test-*.out
@@ -14,6 +19,17 @@ test_*.log
 test_*.txt
 *_test_results.*
 admin_test_results.*
+
+# Coverage output files
+/tmp/coverage*.txt
+/tmp/unit-coverage.txt
+coverage-output.txt
+coverage-final.txt
+
+# Temporary files
+*.tmp
+*.temp
+/tmp/*.txt
 
 # Diagnostic reports (https://nodejs.org/api/report.html)
 report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
