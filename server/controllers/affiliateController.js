@@ -903,22 +903,13 @@ exports.deleteAffiliateData = async (req, res) => {
       ]
     });
 
-    // 2. Delete all bags for these customers
-    const Bag = require('../models/Bag');
-    await Bag.deleteMany({
-      $or: [
-        { affiliate: affiliate._id },
-        { customer: { $in: customerObjectIds } }
-      ]
-    });
-
-    // 3. Delete all transactions for this affiliate
+    // 2. Delete all transactions for this affiliate
     await Transaction.deleteMany({ affiliateId });
 
-    // 4. Delete all customers
+    // 3. Delete all customers
     await Customer.deleteMany({ affiliateId });
 
-    // 5. Delete the affiliate
+    // 4. Delete the affiliate
     await Affiliate.deleteOne({ affiliateId });
 
     res.status(200).json({
@@ -928,7 +919,6 @@ exports.deleteAffiliateData = async (req, res) => {
         affiliate: 1,
         customers: customers.length,
         orders: 'All related orders deleted',
-        bags: 'All related bags deleted',
         transactions: 'All transactions deleted'
       }
     });

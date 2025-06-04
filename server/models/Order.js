@@ -42,7 +42,6 @@ const orderSchema = new mongoose.Schema({
   },
   // Laundry details
   actualWeight: Number,
-  bagIDs: [String],
   washInstructions: String,
   // Payment information
   baseRate: { type: Number }, // Per pound WDF rate - fetched from SystemConfig

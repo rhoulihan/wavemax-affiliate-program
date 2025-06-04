@@ -191,7 +191,6 @@ exports.getOrderDetails = async (req, res) => {
         baseRate: order.baseRate,
         deliveryFee: order.deliveryFee,
         actualWeight: order.actualWeight,
-        bagIDs: order.bagIDs,
         washInstructions: order.washInstructions,
         estimatedTotal: order.estimatedTotal,
         actualTotal: order.actualTotal,

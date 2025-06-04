@@ -14,7 +14,7 @@
           "action": "remove",
           "target": "bagIDs field (line 45)",
           "description": "Remove bagIDs array from Order schema",
-          "status": "pending"
+          "status": "completed"
         },
         {
           "id": "1.2",
@@ -22,7 +22,7 @@
           "action": "modify",
           "target": "Any references to order.bagIDs",
           "description": "Remove any logic that populates or uses bagIDs",
-          "status": "pending"
+          "status": "completed"
         },
         {
           "id": "1.3",
