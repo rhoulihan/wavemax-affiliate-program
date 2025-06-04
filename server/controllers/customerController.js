@@ -48,8 +48,7 @@ exports.registerCustomer = async (req, res) => {
       expiryDate,
       cvv,
       billingZip,
-      savePaymentInfo,
-      numberOfBags
+      savePaymentInfo
     } = req.body;
 
     // Verify affiliate exists
@@ -103,37 +102,10 @@ exports.registerCustomer = async (req, res) => {
 
     await newCustomer.save();
 
-    // Create bags based on customer's selection
-    const numBags = parseInt(numberOfBags) || 1;
-    const bagFee = parseFloat(process.env.BAG_FEE || 10.00);
-    const createdBags = [];
-
-    for (let i = 0; i < numBags; i++) {
-      // Generate a unique bag barcode
-      const bagBarcode = 'WM-' + uuidv4().substring(0, 8).toUpperCase();
-
-      // Create a new bag and assign to customer
-      const newBag = new Bag({
-        barcode: bagBarcode,
-        customer: newCustomer._id,
-        affiliate: affiliate._id,
-        type: 'laundry',
-        status: 'pending',
-        creditStatus: 'pending',
-        creditAmount: bagFee
-      });
-
-      await newBag.save();
-      createdBags.push(bagBarcode);
-    }
-
-    // Use the first bag barcode for backward compatibility
-    const bagBarcode = createdBags[0];
-
     // Send welcome emails
     try {
-      await emailService.sendCustomerWelcomeEmail(newCustomer, bagBarcode, affiliate);
-      await emailService.sendAffiliateNewCustomerEmail(affiliate, newCustomer, bagBarcode);
+      await emailService.sendCustomerWelcomeEmail(newCustomer, affiliate);
+      await emailService.sendAffiliateNewCustomerEmail(affiliate, newCustomer);
       // Email sent successfully - no need to check result
     } catch (emailError) {
       console.warn('Welcome email(s) could not be sent:', emailError);
@@ -143,7 +115,6 @@ exports.registerCustomer = async (req, res) => {
     res.status(201).json({
       success: true,
       customerId: newCustomer.customerId,
-      bagBarcode: bagBarcode,
       customerData: {
         firstName: newCustomer.firstName,
         lastName: newCustomer.lastName,
@@ -198,9 +169,6 @@ exports.getCustomerProfile = async (req, res) => {
     // Get affiliate details
     const affiliate = await Affiliate.findOne({ affiliateId: customer.affiliateId });
 
-    // Get customer's bag information
-    const bags = await Bag.find({ customer: customer._id });
-
     // Determine user role and if viewing own profile
     const userRole = req.user ? req.user.role : 'public';
     const isSelf = req.user && (req.user.customerId === customerId || req.user.role === 'admin');
@@ -211,11 +179,6 @@ exports.getCustomerProfile = async (req, res) => {
     // Add affiliate info if authorized
     if (userRole === 'admin' || userRole === 'affiliate' || isSelf) {
       filteredCustomer.affiliate = affiliate ? getFilteredData('affiliate', affiliate.toObject(), 'public') : null;
-    }
-
-    // Add bag details based on role
-    if (userRole === 'admin' || userRole === 'affiliate' || isSelf) {
-      filteredCustomer.bagDetails = getFilteredData('bag', bags.map(b => b.toObject()), userRole);
     }
 
     res.status(200).json({
@@ -475,18 +438,6 @@ exports.getCustomerDashboardStats = async (req, res) => {
     const lastOrder = completedOrders.length > 0 ? completedOrders[0] : null;
     const lastOrderDate = lastOrder ? lastOrder.deliveredAt || lastOrder.updatedAt : null;
     
-    // Calculate bag credits
-    const bags = await Bag.find({ 
-      customer: customer._id, 
-      creditStatus: 'pending',
-      isActive: true
-    });
-    
-    let totalBagCredits = 0;
-    bags.forEach(bag => {
-      totalBagCredits += bag.creditAmount || 0;
-    });
-    
     res.status(200).json({
       success: true,
       dashboard: {
@@ -496,7 +447,6 @@ exports.getCustomerDashboardStats = async (req, res) => {
           activeOrders: activeOrdersCount,
           totalSpent,
           averageOrderValue,
-          bagCredits: totalBagCredits,
           ...(lastOrderDate && { lastOrderDate })
         },
         recentOrders,
@@ -524,97 +474,6 @@ exports.getCustomerDashboardStats = async (req, res) => {
   }
 };
 
-/**
- * Report a lost bag
- */
-exports.reportLostBag = async (req, res) => {
-  try {
-    // Handle both route formats
-    let { customerId, bagId } = req.params;
-    let bagBarcode = req.body.bagBarcode;
-    
-    // If using the alternate route, get data from body
-    if (!customerId || !bagId) {
-      customerId = req.body.customerId || req.user?.customerId;
-      bagId = req.body.bagId;
-    }
-
-    // Verify customer exists
-    const customer = await Customer.findOne({ customerId });
-
-    if (!customer) {
-      return res.status(404).json({
-        success: false,
-        message: 'Customer not found'
-      });
-    }
-
-    // Check authorization (admin, affiliate, or self)
-    const isAuthorized =
-      req.user.role === 'admin' ||
-      req.user.customerId === customerId ||
-      (req.user.role === 'affiliate' && req.user.affiliateId === customer.affiliateId);
-
-    if (!isAuthorized) {
-      return res.status(403).json({
-        success: false,
-        message: 'Unauthorized'
-      });
-    }
-
-    // Find the bag by ID or barcode
-    let bag;
-    if (bagId) {
-      bag = await Bag.findOne({ bagId, customer: customer._id });
-    } else if (bagBarcode) {
-      bag = await Bag.findOne({ barcode: bagBarcode }).populate('customer');
-      
-      // If found by barcode, verify it belongs to the customer
-      if (bag) {
-        if (!bag.customer || bag.customer.customerId !== customerId) {
-          return res.status(403).json({
-            success: false,
-            message: 'Unauthorized'
-          });
-        }
-      }
-    }
-
-    if (!bag) {
-      return res.status(404).json({
-        success: false,
-        message: 'Bag not found'
-      });
-    }
-
-    // Update bag status
-    bag.status = 'lost';
-    await bag.save();
-
-    // No need to update customer record as bags are managed separately
-
-    // Notify affiliate
-    const affiliate = await Affiliate.findOne({ affiliateId: customer.affiliateId });
-    if (affiliate) {
-      await emailService.sendAffiliateLostBagEmail(
-        affiliate,
-        customer,
-        bag.barcode
-      );
-    }
-
-    res.status(200).json({
-      success: true,
-      message: 'Lost bag report submitted successfully'
-    });
-  } catch (error) {
-    console.error('Report lost bag error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'An error occurred while reporting lost bag'
-    });
-  }
-};
 
 /**
  * Update customer payment information
@@ -706,8 +565,6 @@ exports.deleteCustomerData = async (req, res) => {
     // 1. Delete all orders for this customer
     const deletedOrders = await Order.deleteMany({ customerId });
 
-    // 2. Delete all bags for this customer
-    const deletedBags = await Bag.deleteMany({ customer: customer._id });
 
     // 3. Delete the customer
     await Customer.deleteOne({ customerId });
@@ -717,8 +574,7 @@ exports.deleteCustomerData = async (req, res) => {
       message: 'All data has been deleted successfully',
       deletedData: {
         customer: 1,
-        orders: deletedOrders.deletedCount || 0,
-        bags: deletedBags.deletedCount || 0
+        orders: deletedOrders.deletedCount || 0
       }
     });
   } catch (error) {
@@ -802,66 +658,6 @@ exports.updateCustomerPassword = async (req, res) => {
   }
 };
 
-/**
- * Get customer bags
- */
-exports.getCustomerBags = async (req, res) => {
-  try {
-    const { customerId } = req.params;
-    const { status } = req.query;
-
-    // Verify customer exists
-    const customer = await Customer.findOne({ customerId });
-
-    if (!customer) {
-      return res.status(404).json({
-        success: false,
-        message: 'Customer not found'
-      });
-    }
-
-    // Check authorization (admin, affiliate, or self)
-    const isAuthorized =
-      req.user.role === 'admin' ||
-      req.user.customerId === customerId ||
-      (req.user.role === 'affiliate' && req.user.affiliateId === customer.affiliateId);
-
-    if (!isAuthorized) {
-      return res.status(403).json({
-        success: false,
-        message: 'Unauthorized'
-      });
-    }
-
-    // Build query
-    const query = { customer: customer._id };
-    
-    // Add status filter if provided
-    if (status) {
-      query.status = status;
-    }
-
-    // Get bags
-    const bags = await Bag.find(query).sort({ createdAt: -1 });
-
-    // Determine user role
-    const userRole = req.user ? req.user.role : 'public';
-    
-    // Filter bags based on role
-    const filteredBags = getFilteredData('bag', bags.map(b => b.toObject()), userRole);
-
-    res.status(200).json({
-      success: true,
-      bags: filteredBags
-    });
-  } catch (error) {
-    console.error('Get customer bags error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'An error occurred while retrieving bags'
-    });
-  }
-};
 
 
 module.exports = exports;

@@ -257,7 +257,6 @@
                     <li><a href="#order-endpoints">Order Endpoints</a></li>
                     <li><a href="#administrator-endpoints">Administrator Endpoints</a></li>
                     <li><a href="#operator-endpoints">Operator Endpoints</a></li>
-                    <li><a href="#bag-endpoints">Bag Endpoints</a></li>
                     <li><a href="#error-handling">Error Handling</a></li>
                     <li><a href="#rate-limiting">Rate Limiting</a></li>
                 </ul>
@@ -993,49 +992,6 @@ X-CSRF-Token: {csrf_token}</code></pre>
 }</code></pre>
             </div>
 
-            <h2 id="bag-endpoints">Bag Management Endpoints</h2>
-
-            <div class="endpoint">
-                <h4>Create Bag</h4>
-                <span class="method post">POST</span> <code>/api/v1/bags</code>
-                
-                <h5>Request Body:</h5>
-                <pre><code>{
-    "customerId": "CUST123",
-    "type": "standard",  // or "delicate", "heavy_duty"
-    "size": "large"  // small, medium, large
-}</code></pre>
-            </div>
-
-            <div class="endpoint">
-                <h4>Get Bag by Barcode</h4>
-                <span class="method get">GET</span> <code>/api/v1/bags/:barcode</code>
-                
-                <h5>Response:</h5>
-                <pre><code>{
-    "success": true,
-    "bag": {
-        "id": "5f7b1a2b3c4d5e6f7g8h9i0j",
-        "barcode": "BAG123456",
-        "customerId": "CUST123",
-        "status": "in_use",
-        "type": "standard",
-        "size": "large",
-        "createdAt": "2025-01-15T10:00:00.000Z"
-    }
-}</code></pre>
-            </div>
-
-            <div class="endpoint">
-                <h4>Update Bag Status</h4>
-                <span class="method put">PUT</span> <code>/api/v1/bags/:bagId</code>
-                
-                <h5>Request Body:</h5>
-                <pre><code>{
-    "status": "lost",  // in_use, returned, damaged, lost
-    "notes": "Customer reported bag missing"
-}</code></pre>
-            </div>
 
             <h2 id="system-configuration">System Configuration</h2>
             

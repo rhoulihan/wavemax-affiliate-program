@@ -125,7 +125,6 @@ async function loadDashboardData() {
         document.getElementById('activeOrders').textContent = stats.activeOrders || 0;
         document.getElementById('completedOrders').textContent = stats.completedOrders || 0;
         document.getElementById('totalSpent').textContent = `$${(stats.totalSpent || 0).toFixed(2)}`;
-        document.getElementById('bagCredits').textContent = `$${(stats.bagCredits || 0).toFixed(2)}`;
       }
     } else {
       console.error('Failed to fetch dashboard stats:', statsResponse.status, statsResponse.statusText);
@@ -140,7 +139,6 @@ async function loadDashboardData() {
     document.getElementById('activeOrders').textContent = '0';
     document.getElementById('completedOrders').textContent = '0';
     document.getElementById('totalSpent').textContent = '$0.00';
-    document.getElementById('bagCredits').textContent = '$0.00';
   }
 }
 
@@ -268,7 +266,6 @@ async function loadProfile(editMode = false) {
                     <ul class="list-disc list-inside text-red-700 mb-4">
                         <li>Your customer account</li>
                         <li>All your orders</li>
-                        <li>All your bag assignments</li>
                     </ul>
                     <p class="text-red-800 font-bold mb-4">This action cannot be undone!</p>
                     <button type="button" id="deleteAllDataBtn" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition">

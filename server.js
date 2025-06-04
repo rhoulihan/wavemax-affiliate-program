@@ -22,7 +22,6 @@ const socialAuthRoutes = require('./server/routes/socialAuthRoutes');
 const affiliateRoutes = require('./server/routes/affiliateRoutes');
 const customerRoutes = require('./server/routes/customerRoutes');
 const orderRoutes = require('./server/routes/orderRoutes');
-const bagRoutes = require('./server/routes/bagRoutes');
 const administratorRoutes = require('./server/routes/administratorRoutes');
 const operatorRoutes = require('./server/routes/operatorRoutes');
 const coverageRoutes = require('./server/routes/coverageRoutes');
@@ -309,7 +308,6 @@ apiV1Router.use('/auth', socialAuthRoutes);  // Social auth routes
 apiV1Router.use('/affiliates', affiliateRoutes);
 apiV1Router.use('/customers', customerRoutes);
 apiV1Router.use('/orders', orderRoutes);
-apiV1Router.use('/bags', bagRoutes);
 apiV1Router.use('/administrators', administratorRoutes);
 apiV1Router.use('/operators', operatorRoutes);
 apiV1Router.use('/system/config', systemConfigRoutes);
@@ -322,13 +320,6 @@ apiV1Router.get('/environment', (req, res) => {
   });
 });
 
-// Configuration endpoints
-apiV1Router.get('/config/bag-fee', (req, res) => {
-  res.json({
-    success: true,
-    bagFee: process.env.BAG_FEE || '10.00'
-  });
-});
 
 // Mount versioned API
 app.use('/api/v1', apiV1Router);

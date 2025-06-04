@@ -2,7 +2,6 @@ const mongoose = require('mongoose');
 const Affiliate = require('../../server/models/Affiliate');
 const Customer = require('../../server/models/Customer');
 const Order = require('../../server/models/Order');
-const Bag = require('../../server/models/Bag');
 const Transaction = require('../../server/models/Transaction');
 const RefreshToken = require('../../server/models/RefreshToken');
 
@@ -267,43 +266,6 @@ describe('Model Tests', () => {
     });
   });
 
-  describe('Bag Model', () => {
-    it('should create a valid bag', async () => {
-      const bag = new Bag({
-        barcode: 'WM-' + Math.random().toString(36).substring(2, 10).toUpperCase(),
-        customer: new mongoose.Types.ObjectId(),
-        affiliate: new mongoose.Types.ObjectId(),
-        type: 'laundry'
-      });
-
-      const saved = await bag.save();
-
-      expect(saved._id).toBeDefined();
-      expect(saved.bagId).toMatch(/^BG[A-Z0-9]+$/);
-      expect(saved.status).toBe('pending');
-      expect(saved.type).toBe('laundry');
-    });
-
-    it('should generate unique barcodes', async () => {
-      const bag1 = new Bag({
-        barcode: 'WM-' + Math.random().toString(36).substring(2, 10).toUpperCase(),
-        customer: new mongoose.Types.ObjectId(),
-        affiliate: new mongoose.Types.ObjectId(),
-        type: 'laundry'
-      });
-      const bag2 = new Bag({
-        barcode: 'WM-' + Math.random().toString(36).substring(2, 10).toUpperCase(),
-        customer: new mongoose.Types.ObjectId(),
-        affiliate: new mongoose.Types.ObjectId(),
-        type: 'laundry'
-      });
-
-      await bag1.save();
-      await bag2.save();
-
-      expect(bag1.barcode).not.toBe(bag2.barcode);
-    });
-  });
 
   describe('Transaction Model', () => {
     it('should create a valid transaction', async () => {
