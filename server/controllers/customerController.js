@@ -4,7 +4,6 @@
 const Affiliate = require('../models/Affiliate');
 const Customer = require('../models/Customer');
 const Order = require('../models/Order');
-const Bag = require('../models/Bag');
 const encryptionUtil = require('../utils/encryption');
 const emailService = require('../utils/emailService');
 const jwt = require('jsonwebtoken');

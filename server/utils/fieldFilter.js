@@ -75,7 +75,7 @@ const fieldDefinitions = {
       'deliveryDate', 'deliveryTime', 'status', 'estimatedSize', 'actualWeight',
       'baseRate', 'deliveryFee', 'estimatedTotal', 'actualTotal', 'affiliateCommission',
       'paymentStatus', 'specialPickupInstructions', 'specialDeliveryInstructions',
-      'serviceNotes', 'washInstructions', 'bagIDs', 'createdAt', 'pickedUpAt',
+      'serviceNotes', 'washInstructions', 'createdAt', 'pickedUpAt',
       'processedAt', 'readyForDeliveryAt', 'deliveredAt', 'cancelledAt']
   },
 
