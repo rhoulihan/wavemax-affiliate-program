@@ -393,6 +393,8 @@ function initializeAffiliateRegistration() {
       if (usernameField) usernameField.removeAttribute('required');
       if (passwordField) passwordField.removeAttribute('required');
       if (confirmPasswordField) confirmPasswordField.removeAttribute('required');
+      
+      // Terms checkbox remains visible and required
     }
 
     // Store social token for form submission
