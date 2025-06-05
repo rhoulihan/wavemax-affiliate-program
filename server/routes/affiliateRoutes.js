@@ -23,7 +23,8 @@ router.post('/register', [
   body('state').notEmpty().withMessage('State is required'),
   body('zipCode').notEmpty().withMessage('ZIP code is required'),
   body('serviceArea').notEmpty().withMessage('Service area is required'),
-  body('deliveryFee').isNumeric().withMessage('Delivery fee must be a number'),
+  body('minimumDeliveryFee').optional().isNumeric().withMessage('Minimum delivery fee must be a number'),
+  body('perBagDeliveryFee').optional().isNumeric().withMessage('Per-bag delivery fee must be a number'),
   body('username').notEmpty().withMessage('Username is required'),
   body('password').custom(customPasswordValidator()),
   body('paymentMethod').isIn(['directDeposit', 'check', 'paypal']).withMessage('Invalid payment method')

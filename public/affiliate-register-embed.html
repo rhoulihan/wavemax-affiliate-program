@@ -159,38 +159,42 @@
                             <h4 class="text-lg font-semibold mb-3">Delivery Fee Structure</h4>
                             <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
                                 <p class="text-sm text-gray-700 mb-2">
-                                    <strong>New Fee Structure:</strong> You can now set a minimum delivery fee and a per-bag fee. 
-                                    Customers will pay whichever is higher.
+                                    <strong>Dynamic Pricing:</strong> Set a minimum delivery fee and a per-bag fee. 
+                                    Customers pay whichever is higher. You keep 100% of delivery fees.
                                 </p>
-                                <p class="text-sm text-gray-600">
-                                    Example: Min $10, Per-bag $2 → 1-5 bags = $10, 6 bags = $12, 10 bags = $20
-                                </p>
+                                <div id="feeCalculator" class="mt-3 p-3 bg-white rounded border border-blue-300">
+                                    <p class="text-sm font-semibold text-gray-700 mb-2">Live Fee Calculator:</p>
+                                    <div class="grid grid-cols-4 gap-2 text-xs">
+                                        <div class="text-center">
+                                            <span class="font-semibold">1 bag</span><br>
+                                            <span id="calc1bag" class="text-blue-600">$25</span>
+                                        </div>
+                                        <div class="text-center">
+                                            <span class="font-semibold">3 bags</span><br>
+                                            <span id="calc3bags" class="text-blue-600">$25</span>
+                                        </div>
+                                        <div class="text-center">
+                                            <span class="font-semibold">5 bags</span><br>
+                                            <span id="calc5bags" class="text-blue-600">$25</span>
+                                        </div>
+                                        <div class="text-center">
+                                            <span class="font-semibold">10 bags</span><br>
+                                            <span id="calc10bags" class="text-blue-600">$50</span>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                             
                             <div class="grid md:grid-cols-2 gap-4">
                                 <div>
-                                    <label for="minimumDeliveryFee" class="block text-gray-700 mb-2">Minimum Delivery Fee ($)</label>
-                                    <input type="number" id="minimumDeliveryFee" name="minimumDeliveryFee" min="0" step="0.01" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="10.00">
-                                    <p class="text-xs text-gray-500 mt-1">Leave blank to use system default ($10)</p>
+                                    <label for="minimumDeliveryFee" class="block text-gray-700 mb-2">Minimum Delivery Fee ($) *</label>
+                                    <input type="number" id="minimumDeliveryFee" name="minimumDeliveryFee" min="0" step="1" required class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" value="25">
                                 </div>
                                 
                                 <div>
-                                    <label for="perBagDeliveryFee" class="block text-gray-700 mb-2">Per-Bag Fee ($)</label>
-                                    <input type="number" id="perBagDeliveryFee" name="perBagDeliveryFee" min="0" step="0.01" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="2.00">
-                                    <p class="text-xs text-gray-500 mt-1">Leave blank to use system default ($2/bag)</p>
+                                    <label for="perBagDeliveryFee" class="block text-gray-700 mb-2">Per-Bag Fee ($) *</label>
+                                    <input type="number" id="perBagDeliveryFee" name="perBagDeliveryFee" min="0" step="1" required class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" value="5">
                                 </div>
-                            </div>
-                            
-                            <div class="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded">
-                                <p class="text-sm text-gray-700">
-                                    <strong>Legacy Option:</strong> For simple flat-rate pricing, use the field below:
-                                </p>
-                            </div>
-                            
-                            <div class="mt-4">
-                                <label for="deliveryFee" class="block text-gray-700 mb-2">Fixed Delivery Fee ($) - Legacy *</label>
-                                <input type="number" id="deliveryFee" name="deliveryFee" min="0" step="0.01" required class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" value="10.00">
-                                <p class="text-sm text-gray-500 mt-1">This sets both minimum and per-bag to the same value. You keep 100% of delivery fees.</p>
                             </div>
                         </div>
                     </div>
