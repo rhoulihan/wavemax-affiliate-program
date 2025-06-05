@@ -821,44 +821,6 @@ exports.getAffiliateDashboardStats = async (req, res) => {
   }
 };
 
-/**
- * Get public affiliate information (for customer registration)
- */
-exports.getPublicAffiliateInfo = async (req, res) => {
-  try {
-    const { affiliateId } = req.params;
-
-    // Find affiliate
-    const affiliate = await Affiliate.findOne({ affiliateId });
-
-    if (!affiliate) {
-      return res.status(404).json({
-        success: false,
-        message: 'Affiliate not found'
-      });
-    }
-
-    // Return only public information
-    res.status(200).json({
-      success: true,
-      affiliate: {
-        affiliateId: affiliate.affiliateId,
-        firstName: affiliate.firstName,
-        lastName: affiliate.lastName,
-        businessName: affiliate.businessName,
-        minimumDeliveryFee: affiliate.minimumDeliveryFee,
-        perBagDeliveryFee: affiliate.perBagDeliveryFee,
-        serviceArea: affiliate.serviceArea
-      }
-    });
-  } catch (error) {
-    console.error('Get public affiliate info error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'An error occurred while retrieving affiliate information'
-    });
-  }
-};
 
 /**
  * Delete all data for an affiliate (development/test only)

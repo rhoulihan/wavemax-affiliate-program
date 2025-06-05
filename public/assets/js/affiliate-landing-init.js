@@ -96,12 +96,15 @@
             loginLink.href = `${baseUrl}/embed-app.html?route=/customer-login&affid=${affiliateCode}`;
         }
 
-        // Add affiliate code to all internal links for tracking
+        // Add affiliate code to internal links for tracking (excluding navigation links)
         document.querySelectorAll('a[href^="/"]').forEach(link => {
-            const url = new URL(link.href, window.location.origin);
-            if (!url.searchParams.has('affiliateCode')) {
-                url.searchParams.set('affiliateCode', affiliateCode);
-                link.href = url.toString();
+            // Skip links that use data-navigate attribute (they're handled by embed-navigation.js)
+            if (!link.hasAttribute('data-navigate')) {
+                const url = new URL(link.href, window.location.origin);
+                if (!url.searchParams.has('affid') && !url.searchParams.has('affiliateCode')) {
+                    url.searchParams.set('affid', affiliateCode);
+                    link.href = url.toString();
+                }
             }
         });
     }
