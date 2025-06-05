@@ -127,7 +127,7 @@ async function fetchSystemFeeConfig() {
           // Update WDF rate display
           const wdfRateElement = document.getElementById('wdfRate');
           if (wdfRateElement) {
-            wdfRateElement.textContent = `$${wdfRate.toFixed(2)}`;
+            wdfRateElement.textContent = `$${wdfRate.toFixed(2)} per pound`;
           }
         }
       });
@@ -299,7 +299,7 @@ async function loadCustomerIntoForm(customer, token) {
           }
           const wdfRateElement = document.getElementById('wdfRate');
           if (wdfRateElement) {
-            wdfRateElement.textContent = `$${wdfConfig.currentValue.toFixed(2)}`;
+            wdfRateElement.textContent = `$${wdfConfig.currentValue.toFixed(2)} per pound`;
           }
           calculateEstimate(); // Recalculate with new rate
         }
