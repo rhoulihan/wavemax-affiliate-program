@@ -134,7 +134,7 @@
 
     // Fetch affiliate info from the server
     const baseUrl = window.EMBED_CONFIG?.baseUrl || 'https://wavemax.promo';
-    const apiUrl = `${baseUrl}/api/v1/affiliates/${affiliateId}/public`;
+    const apiUrl = `${baseUrl}/api/v1/affiliates/public/${affiliateId}`;
     console.log('Fetching affiliate info from:', apiUrl);
 
     fetch(apiUrl)

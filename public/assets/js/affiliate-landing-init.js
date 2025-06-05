@@ -20,7 +20,8 @@
         }
 
         // Fetch affiliate information
-        fetch(`/api/v1/affiliates/public/${affiliateCode}`)
+        const baseUrl = window.location.origin;
+        fetch(`${baseUrl}/api/v1/affiliates/public/${affiliateCode}`)
             .then(response => {
                 if (!response.ok) {
                     throw new Error('Failed to fetch affiliate information');
