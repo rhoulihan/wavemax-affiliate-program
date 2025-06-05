@@ -31,11 +31,11 @@ router.post('/register', [
 ], affiliateController.registerAffiliate);
 
 /**
- * @route   GET /api/affiliates/:affiliateId/public
+ * @route   GET /api/affiliates/public/:affiliateCode
  * @desc    Get public affiliate information (for customer registration)
  * @access  Public
  */
-router.get('/:affiliateId/public', affiliateController.getPublicAffiliateInfo);
+router.get('/public/:affiliateCode', affiliateController.getPublicAffiliateInfo);
 
 /**
  * @route   GET /api/affiliates/:affiliateId

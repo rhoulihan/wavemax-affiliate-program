@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Premium Laundry Services - WaveMAX</title>
+    
+    <!-- Inter font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8f9fa;
+        }
+        
+        .hero-section {
+            background: linear-gradient(135deg, #0F5EF7 0%, #0A47C2 100%);
+            color: white;
+            padding: 60px 0;
+            margin-bottom: 40px;
+        }
+        
+        .hero-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+        
+        .hero-subtitle {
+            font-size: 1.25rem;
+            opacity: 0.9;
+            margin-bottom: 2rem;
+        }
+        
+        .affiliate-badge {
+            background-color: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 8px 16px;
+            border-radius: 20px;
+            display: inline-block;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+        }
+        
+        .pricing-card {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            margin-bottom: 20px;
+            height: 100%;
+        }
+        
+        .pricing-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .pricing-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #0F5EF7;
+        }
+        
+        .pricing-unit {
+            font-size: 1rem;
+            color: #666;
+            font-weight: 400;
+        }
+        
+        .feature-list {
+            list-style: none;
+            padding: 0;
+            margin: 20px 0;
+        }
+        
+        .feature-list li {
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .feature-list li:last-child {
+            border-bottom: none;
+        }
+        
+        .feature-list i {
+            color: #28a745;
+            margin-right: 10px;
+        }
+        
+        .cta-section {
+            background-color: #f8f9fa;
+            padding: 40px 0;
+            text-align: center;
+        }
+        
+        .btn-primary {
+            background-color: #0F5EF7;
+            border-color: #0F5EF7;
+            padding: 12px 30px;
+            font-weight: 500;
+            font-size: 1.1rem;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover {
+            background-color: #0A47C2;
+            border-color: #0A47C2;
+            transform: translateY(-2px);
+        }
+        
+        .btn-outline-primary {
+            border-color: white;
+            color: white;
+            padding: 12px 30px;
+            font-weight: 500;
+            font-size: 1.1rem;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-outline-primary:hover {
+            background-color: white;
+            color: #0F5EF7;
+            border-color: white;
+        }
+        
+        .service-card {
+            text-align: center;
+            padding: 30px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            height: 100%;
+            transition: transform 0.3s ease;
+        }
+        
+        .service-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .service-icon {
+            font-size: 3rem;
+            color: #0F5EF7;
+            margin-bottom: 20px;
+        }
+        
+        .how-it-works {
+            background-color: white;
+            padding: 60px 0;
+        }
+        
+        .step-number {
+            width: 50px;
+            height: 50px;
+            background-color: #0F5EF7;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.5rem;
+            margin: 0 auto 20px;
+        }
+        
+        .testimonial-card {
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+        
+        .testimonial-stars {
+            color: #ffc107;
+            margin-bottom: 15px;
+        }
+        
+        .testimonial-text {
+            font-style: italic;
+            color: #666;
+            margin-bottom: 15px;
+        }
+        
+        .testimonial-author {
+            font-weight: 600;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-6">
+                    <div class="affiliate-badge">
+                        <i class="bi bi-shield-check me-2"></i>
+                        Trusted Local Partner
+                    </div>
+                    <h1 class="hero-title">Premium Laundry & Dry Cleaning Services</h1>
+                    <p class="hero-subtitle">Professional care for your garments, delivered with convenience by <span id="affiliateName">your local WaveMAX partner</span></p>
+                    <div class="mt-4">
+                        <a href="#" id="registerLink" class="btn btn-outline-primary me-3">Get Started</a>
+                        <a href="#" id="loginLink" class="btn btn-light">Customer Login</a>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="row">
+                        <div class="col-6 mb-3">
+                            <div class="pricing-card">
+                                <div class="pricing-title">WDF Service</div>
+                                <div class="pricing-value">$1.25 <span class="pricing-unit">/ lb</span></div>
+                                <div class="text-muted mt-2">Wash, Dry & Fold</div>
+                            </div>
+                        </div>
+                        <div class="col-6 mb-3">
+                            <div class="pricing-card">
+                                <div class="pricing-title">Delivery</div>
+                                <div class="pricing-value">$<span id="minimumFee">25</span> <span class="pricing-unit">min</span></div>
+                                <div class="text-muted mt-2">+ $<span id="perBagFee">5</span>/bag</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Services Section -->
+    <section class="py-5">
+        <div class="container">
+            <h2 class="text-center mb-5">Our Services</h2>
+            <div class="row">
+                <div class="col-md-4 mb-4">
+                    <div class="service-card">
+                        <div class="service-icon">
+                            <i class="bi bi-droplet"></i>
+                        </div>
+                        <h4>Wash, Dry & Fold</h4>
+                        <p>Professional laundering service for your everyday clothes. Quick turnaround and careful handling.</p>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <div class="service-card">
+                        <div class="service-icon">
+                            <i class="bi bi-gem"></i>
+                        </div>
+                        <h4>Dry Cleaning</h4>
+                        <p>Expert care for delicate fabrics and formal wear. Stain removal and pressing included.</p>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <div class="service-card">
+                        <div class="service-icon">
+                            <i class="bi bi-truck"></i>
+                        </div>
+                        <h4>Pickup & Delivery</h4>
+                        <p>Convenient door-to-door service. Schedule pickups that fit your busy lifestyle.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works -->
+    <section class="how-it-works">
+        <div class="container">
+            <h2 class="text-center mb-5">How It Works</h2>
+            <div class="row">
+                <div class="col-md-3 text-center mb-4">
+                    <div class="step-number">1</div>
+                    <h5>Sign Up</h5>
+                    <p>Create your account in less than a minute</p>
+                </div>
+                <div class="col-md-3 text-center mb-4">
+                    <div class="step-number">2</div>
+                    <h5>Schedule Pickup</h5>
+                    <p>Choose a convenient time for pickup</p>
+                </div>
+                <div class="col-md-3 text-center mb-4">
+                    <div class="step-number">3</div>
+                    <h5>We Clean</h5>
+                    <p>Professional cleaning with care</p>
+                </div>
+                <div class="col-md-3 text-center mb-4">
+                    <div class="step-number">4</div>
+                    <h5>Delivery</h5>
+                    <p>Fresh, clean clothes delivered to you</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="py-5">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-6">
+                    <h2 class="mb-4">Why Choose WaveMAX?</h2>
+                    <ul class="feature-list">
+                        <li><i class="bi bi-check-circle-fill"></i> Professional quality cleaning</li>
+                        <li><i class="bi bi-check-circle-fill"></i> Eco-friendly cleaning products</li>
+                        <li><i class="bi bi-check-circle-fill"></i> Same-day service available</li>
+                        <li><i class="bi bi-check-circle-fill"></i> Transparent pricing with no hidden fees</li>
+                        <li><i class="bi bi-check-circle-fill"></i> Satisfaction guaranteed</li>
+                        <li><i class="bi bi-check-circle-fill"></i> Easy online scheduling</li>
+                    </ul>
+                </div>
+                <div class="col-lg-6">
+                    <div class="testimonial-card">
+                        <div class="testimonial-stars">
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star-fill"></i>
+                        </div>
+                        <p class="testimonial-text">"WaveMAX has been a game-changer for our busy family. The pickup and delivery service is incredibly convenient, and our clothes always come back perfectly clean and folded."</p>
+                        <div class="testimonial-author">- Sarah M.</div>
+                    </div>
+                    <div class="testimonial-card">
+                        <div class="testimonial-stars">
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star-fill"></i>
+                        </div>
+                        <p class="testimonial-text">"Professional service at a fair price. I've been using them for my business attire and couldn't be happier with the results."</p>
+                        <div class="testimonial-author">- Michael R.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta-section">
+        <div class="container">
+            <h2 class="mb-4">Ready to Experience Premium Laundry Service?</h2>
+            <p class="lead mb-4">Join thousands of satisfied customers who trust WaveMAX with their laundry needs</p>
+            <a href="#" id="registerLinkBottom" class="btn btn-primary btn-lg">Sign Up Today</a>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white py-4 mt-5">
+        <div class="container text-center">
+            <p class="mb-0">© 2025 WaveMAX Laundry. Service provided by <span id="affiliateNameFooter">your local partner</span></p>
+        </div>
+    </footer>
+
+    <script src="/assets/js/affiliate-landing-init.js"></script>
+</body>
+</html>

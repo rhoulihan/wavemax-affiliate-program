@@ -172,12 +172,14 @@ exports.sendAffiliateWelcomeEmail = async (affiliate) => {
   try {
     const template = await loadTemplate('affiliate-welcome');
     const registrationUrl = `https://www.wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program?affid=${affiliate.affiliateId}`;
+    const landingPageUrl = `https://www.wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program?route=/affiliate-landing&code=${affiliate.affiliateId}`;
 
     const data = {
       first_name: affiliate.firstName,
       last_name: affiliate.lastName,
       affiliate_id: affiliate.affiliateId,
       registration_url: registrationUrl,
+      landing_page_url: landingPageUrl,
       login_url: `https://www.wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program?login=affiliate`,
       dashboard_url: `https://www.wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program?login=affiliate`,
       current_year: new Date().getFullYear()

@@ -190,6 +190,14 @@ function initializeAffiliateDashboard() {
     });
   }
 
+  // Copy landing page link button
+  const copyLandingBtn = document.getElementById('copyLandingPageLinkBtn');
+  if (copyLandingBtn) {
+    copyLandingBtn.addEventListener('click', function() {
+      copyLandingPageLink();
+    });
+  }
+
   // Settings form edit mode
   const editBtn = document.getElementById('editBtn');
   const cancelBtn = document.getElementById('cancelBtn');
@@ -323,6 +331,11 @@ async function loadAffiliateData(affiliateId) {
       const registrationLink = `https://www.wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program?affid=${affiliateId}`;
       const linkElement = document.getElementById('registrationLink');
       if (linkElement) linkElement.value = registrationLink;
+
+      // Generate and display landing page link
+      const landingPageLink = `https://www.wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program?route=/affiliate-landing&code=${affiliateId}`;
+      const landingPageElement = document.getElementById('landingPageLink');
+      if (landingPageElement) landingPageElement.value = landingPageLink;
     }
   } catch (error) {
     console.error('Error loading affiliate data:', error);
@@ -650,6 +663,36 @@ function showManualCopyPrompt(text) {
 }
 
 // Show copy success feedback
+function copyLandingPageLink() {
+  const linkInput = document.getElementById('landingPageLink');
+  const copyBtn = document.getElementById('copyLandingPageLinkBtn');
+
+  // Use setTimeout to ensure our code runs in a clean call stack
+  setTimeout(() => {
+    // Focus the input first
+    linkInput.focus();
+    linkInput.select();
+
+    try {
+      // Use execCommand which works better in iframes
+      const successful = document.execCommand('copy');
+      if (successful) {
+        showCopySuccess(copyBtn);
+        // Blur the input after successful copy
+        linkInput.blur();
+      } else {
+        // If copy fails, show the text for manual copying
+        linkInput.blur();
+        showManualCopyPrompt(linkInput.value);
+      }
+    } catch (err) {
+      console.error('Unable to copy:', err);
+      linkInput.blur();
+      showManualCopyPrompt(linkInput.value);
+    }
+  }, 100);
+}
+
 function showCopySuccess(button) {
   const originalText = button.textContent;
   button.textContent = 'Copied!';
@@ -721,6 +764,11 @@ async function loadSettingsData(affiliateId) {
         // Generate and display registration link with wavemaxlaundry.com format
         const registrationLink = `https://www.wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program?affid=${affiliateId}`;
         if (registrationLinkField) registrationLinkField.value = registrationLink;
+
+        // Set landing page link
+        const landingPageLinkField = document.getElementById('landingPageLink');
+        const landingPageLink = `https://www.wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program?route=/affiliate-landing&code=${affiliateId}`;
+        if (landingPageLinkField) landingPageLinkField.value = landingPageLink;
 
         console.log('Settings fields populated');
       }, 100);

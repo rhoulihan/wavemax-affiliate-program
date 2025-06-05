@@ -935,4 +935,44 @@ exports.deleteAffiliateData = async (req, res) => {
   }
 };
 
+/**
+ * Get public affiliate information by affiliate code
+ * No authentication required - for customer landing pages
+ */
+exports.getPublicAffiliateInfo = async (req, res) => {
+  try {
+    const { affiliateCode } = req.params;
+
+    // Find affiliate by code
+    const affiliate = await Affiliate.findOne({ affiliateId: affiliateCode })
+      .select('firstName lastName businessName minimumDeliveryFee perBagDeliveryFee serviceArea city state');
+
+    if (!affiliate) {
+      return res.status(404).json({
+        success: false,
+        message: 'Affiliate not found'
+      });
+    }
+
+    // Return public information only
+    res.status(200).json({
+      success: true,
+      firstName: affiliate.firstName,
+      lastName: affiliate.lastName,
+      businessName: affiliate.businessName,
+      minimumDeliveryFee: affiliate.minimumDeliveryFee,
+      perBagDeliveryFee: affiliate.perBagDeliveryFee,
+      serviceArea: affiliate.serviceArea,
+      city: affiliate.city,
+      state: affiliate.state
+    });
+  } catch (error) {
+    console.error('Get public affiliate info error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'An error occurred while retrieving affiliate information'
+    });
+  }
+};
+
 module.exports = exports;
