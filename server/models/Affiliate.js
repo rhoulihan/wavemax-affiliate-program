@@ -20,8 +20,23 @@ const affiliateSchema = new mongoose.Schema({
   address: { type: String, required: true },
   city: { type: String, required: true },
   state: { type: String, required: true },
-  zipCode: { type: String, required: true },
-  serviceArea: { type: String, required: true },
+  zipCode: { type: String, required: true }, // Keep required for now - can geocode later
+  // Location fields for map-based service area
+  serviceLocation: {
+    type: {
+      type: String,
+      enum: ['Point'],
+      default: 'Point'
+    },
+    coordinates: {
+      type: [Number], // [longitude, latitude]
+      required: false,
+      default: undefined
+    }
+  },
+  serviceLatitude: { type: Number, required: true },
+  serviceLongitude: { type: Number, required: true },
+  serviceRadius: { type: Number, required: true, default: 5, min: 1, max: 50 }, // Service radius in miles
   // Delivery fee structure
   minimumDeliveryFee: { 
     type: Number, 
@@ -157,6 +172,21 @@ affiliateSchema.pre('save', function(next) {
     this.paypalEmail = encryptionUtil.encrypt(this.paypalEmail);
   }
 
+  next();
+});
+
+// Create 2dsphere index for location-based queries
+affiliateSchema.index({ serviceLocation: '2dsphere' });
+
+// Update serviceLocation when lat/lng changes
+affiliateSchema.pre('save', function(next) {
+  // Update serviceLocation from lat/lng if they exist
+  if (this.serviceLatitude && this.serviceLongitude && (this.isModified('serviceLatitude') || this.isModified('serviceLongitude'))) {
+    this.serviceLocation = {
+      type: 'Point',
+      coordinates: [this.serviceLongitude, this.serviceLatitude]
+    };
+  }
   next();
 });
 

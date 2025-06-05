@@ -115,11 +115,19 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
       let affiliate = await Affiliate.findOne({ 'socialAccounts.google.id': profile.id });
       
       if (affiliate) {
-        // Update last login and social account info
-        affiliate.socialAccounts.google.accessToken = accessToken;
-        affiliate.socialAccounts.google.refreshToken = refreshToken;
-        affiliate.lastLogin = new Date();
-        await affiliate.save();
+        // Update last login and social account info using selective update to avoid validation issues
+        await Affiliate.findByIdAndUpdate(
+          affiliate._id,
+          {
+            'socialAccounts.google.accessToken': accessToken,
+            'socialAccounts.google.refreshToken': refreshToken,
+            'lastLogin': new Date()
+          },
+          { runValidators: false }
+        );
+        
+        // Fetch the updated affiliate
+        affiliate = await Affiliate.findById(affiliate._id);
         
         console.log('Found existing affiliate by Google ID:', affiliate.affiliateId);
         return done(null, affiliate);
@@ -129,17 +137,25 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
       affiliate = await Affiliate.findOne({ email: profile.emails[0].value });
       
       if (affiliate) {
-        // Link Google account to existing affiliate
-        affiliate.socialAccounts.google = {
-          id: profile.id,
-          accessToken,
-          refreshToken,
-          email: profile.emails[0].value,
-          name: profile.displayName,
-          linkedAt: new Date()
-        };
-        affiliate.lastLogin = new Date();
-        await affiliate.save();
+        // Link Google account to existing affiliate using selective update
+        await Affiliate.findByIdAndUpdate(
+          affiliate._id,
+          {
+            'socialAccounts.google': {
+              id: profile.id,
+              accessToken,
+              refreshToken,
+              email: profile.emails[0].value,
+              name: profile.displayName,
+              linkedAt: new Date()
+            },
+            'lastLogin': new Date()
+          },
+          { runValidators: false }
+        );
+        
+        // Fetch the updated affiliate
+        affiliate = await Affiliate.findById(affiliate._id);
         
         console.log('Linked Google account to existing affiliate:', affiliate.affiliateId);
         return done(null, affiliate);
@@ -214,10 +230,18 @@ if (process.env.FACEBOOK_APP_ID && process.env.FACEBOOK_APP_SECRET) {
     let affiliate = await Affiliate.findOne({ 'socialAccounts.facebook.id': profile.id });
     
     if (affiliate) {
-      // Update last login and social account info
-      affiliate.socialAccounts.facebook.accessToken = accessToken;
-      affiliate.lastLogin = new Date();
-      await affiliate.save();
+      // Update last login and social account info using selective update
+      await Affiliate.findByIdAndUpdate(
+        affiliate._id,
+        {
+          'socialAccounts.facebook.accessToken': accessToken,
+          'lastLogin': new Date()
+        },
+        { runValidators: false }
+      );
+      
+      // Fetch the updated affiliate
+      affiliate = await Affiliate.findById(affiliate._id);
       
       return done(null, affiliate);
     }
@@ -228,16 +252,24 @@ if (process.env.FACEBOOK_APP_ID && process.env.FACEBOOK_APP_SECRET) {
       affiliate = await Affiliate.findOne({ email });
       
       if (affiliate) {
-        // Link Facebook account to existing affiliate
-        affiliate.socialAccounts.facebook = {
-          id: profile.id,
-          accessToken,
-          email,
-          name: profile.displayName,
-          linkedAt: new Date()
-        };
-        affiliate.lastLogin = new Date();
-        await affiliate.save();
+        // Link Facebook account to existing affiliate using selective update
+        await Affiliate.findByIdAndUpdate(
+          affiliate._id,
+          {
+            'socialAccounts.facebook': {
+              id: profile.id,
+              accessToken,
+              email,
+              name: profile.displayName,
+              linkedAt: new Date()
+            },
+            'lastLogin': new Date()
+          },
+          { runValidators: false }
+        );
+        
+        // Fetch the updated affiliate
+        affiliate = await Affiliate.findById(affiliate._id);
         
         return done(null, affiliate);
       }
@@ -277,11 +309,19 @@ if (process.env.LINKEDIN_CLIENT_ID && process.env.LINKEDIN_CLIENT_SECRET) {
     let affiliate = await Affiliate.findOne({ 'socialAccounts.linkedin.id': profile.id });
     
     if (affiliate) {
-      // Update last login and social account info
-      affiliate.socialAccounts.linkedin.accessToken = accessToken;
-      affiliate.socialAccounts.linkedin.refreshToken = refreshToken;
-      affiliate.lastLogin = new Date();
-      await affiliate.save();
+      // Update last login and social account info using selective update
+      await Affiliate.findByIdAndUpdate(
+        affiliate._id,
+        {
+          'socialAccounts.linkedin.accessToken': accessToken,
+          'socialAccounts.linkedin.refreshToken': refreshToken,
+          'lastLogin': new Date()
+        },
+        { runValidators: false }
+      );
+      
+      // Fetch the updated affiliate
+      affiliate = await Affiliate.findById(affiliate._id);
       
       return done(null, affiliate);
     }
@@ -292,17 +332,25 @@ if (process.env.LINKEDIN_CLIENT_ID && process.env.LINKEDIN_CLIENT_SECRET) {
       affiliate = await Affiliate.findOne({ email });
       
       if (affiliate) {
-        // Link LinkedIn account to existing affiliate
-        affiliate.socialAccounts.linkedin = {
-          id: profile.id,
-          accessToken,
-          refreshToken,
-          email,
-          name: profile.displayName,
-          linkedAt: new Date()
-        };
-        affiliate.lastLogin = new Date();
-        await affiliate.save();
+        // Link LinkedIn account to existing affiliate using selective update
+        await Affiliate.findByIdAndUpdate(
+          affiliate._id,
+          {
+            'socialAccounts.linkedin': {
+              id: profile.id,
+              accessToken,
+              refreshToken,
+              email,
+              name: profile.displayName,
+              linkedAt: new Date()
+            },
+            'lastLogin': new Date()
+          },
+          { runValidators: false }
+        );
+        
+        // Fetch the updated affiliate
+        affiliate = await Affiliate.findById(affiliate._id);
         
         return done(null, affiliate);
       }
