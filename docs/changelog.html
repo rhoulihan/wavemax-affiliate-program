@@ -243,6 +243,7 @@
             <div class="version-nav">
                 <h3>Quick Navigation</h3>
                 <ul>
+                    <li><a href="#v1.6.0">v1.6.0 - Bag Tracking Removal & Dynamic Delivery Fees</a></li>
                     <li><a href="#v1.5.0">v1.5.0 - Dynamic Pricing & Revenue Features</a></li>
                     <li><a href="#v1.4.0">v1.4.0 - OAuth Integration & Account Conflict Resolution</a></li>
                     <li><a href="#v1.3.1">v1.3.1 - Affiliate Customer Filtering</a></li>
@@ -254,9 +255,91 @@
                 </ul>
             </div>
 
+            <div id="v1.6.0" class="release">
+                <h2>Version 1.6.0 <span class="tag new">Latest</span> <span class="tag breaking">Breaking Change</span></h2>
+                <div class="release-date">Released on January 6, 2025</div>
+                
+                <div class="breaking">
+                    <h4>⚠️ Breaking Changes</h4>
+                    <ul>
+                        <li>Bag tracking functionality has been completely removed from the system</li>
+                        <li>Delivery fee structure changed from flat rate to dynamic minimum + per-bag pricing</li>
+                        <li>Customer and Administrator IDs now use UUID format for new records</li>
+                    </ul>
+                </div>
+
+                <h3>🎯 Major System Simplification</h3>
+                <ul>
+                    <li><span class="tag breaking">REMOVED</span> <strong>Bag Tracking System:</strong> Complete removal of all bag-related functionality
+                        <ul>
+                            <li>No more physical bag requirements or barcode generation</li>
+                            <li>Simplified customer onboarding without bag purchases</li>
+                            <li>Streamlined order processing without bag assignments</li>
+                            <li>Updated all user interfaces and email templates</li>
+                            <li>Maintained order history integrity during migration</li>
+                        </ul>
+                    </li>
+                </ul>
+
+                <h3>💰 Dynamic Delivery Fee Structure</h3>
+                <ul>
+                    <li><span class="tag new">NEW</span> <strong>Flexible Pricing Model:</strong> Minimum + per-bag delivery pricing
+                        <ul>
+                            <li>Affiliates set minimum delivery fee (default $25)</li>
+                            <li>Affiliates set per-bag fee (default $5)</li>
+                            <li>Customers pay whichever is higher: minimum or calculated per-bag rate</li>
+                            <li>Round-trip pricing automatically calculated</li>
+                        </ul>
+                    </li>
+                    <li><span class="tag new">NEW</span> <strong>Live Fee Calculator:</strong> Real-time pricing preview
+                        <ul>
+                            <li>Shows pricing for 1, 3, 5, and 10 bags during registration</li>
+                            <li>Visual indicators when minimum fee applies</li>
+                            <li>Updates dynamically as affiliates adjust pricing</li>
+                        </ul>
+                    </li>
+                    <li><span class="tag new">NEW</span> <strong>Fee Management:</strong> Affiliates can update fees in dashboard settings</li>
+                </ul>
+
+                <h3>🔐 Enhanced Security Features</h3>
+                <ul>
+                    <li><span class="tag security">SECURITY</span> <strong>UUID Implementation:</strong> Enhanced ID generation
+                        <ul>
+                            <li>Customer IDs: <code>CUST-xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx</code></li>
+                            <li>Administrator IDs: <code>ADM-xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx</code></li>
+                            <li>Maintains backward compatibility with existing sequential IDs</li>
+                        </ul>
+                    </li>
+                    <li><span class="tag security">SECURITY</span> <strong>Password Validation:</strong> Stronger requirements
+                        <ul>
+                            <li>Enhanced validation across all user types</li>
+                            <li>Real-time feedback during registration</li>
+                            <li>Prevention of common patterns and user data in passwords</li>
+                        </ul>
+                    </li>
+                </ul>
+
+                <h3>✨ User Experience Improvements</h3>
+                <ul>
+                    <li><span class="tag improved">IMPROVED</span> <strong>Customer Dashboard:</strong> Now displays bag credit information properly</li>
+                    <li><span class="tag improved">IMPROVED</span> <strong>Affiliate Dashboard:</strong> Added delivery fee editing in settings</li>
+                    <li><span class="tag improved">IMPROVED</span> <strong>Registration Forms:</strong> Simplified without bag selection</li>
+                    <li><span class="tag improved">IMPROVED</span> <strong>Order Processing:</strong> Streamlined without bag assignments</li>
+                </ul>
+
+                <h3>🛠️ Technical Changes</h3>
+                <ul>
+                    <li><span class="tag improved">IMPROVED</span> Updated Affiliate model to require fee fields with defaults</li>
+                    <li><span class="tag improved">IMPROVED</span> Modified all controllers to remove bag-related operations</li>
+                    <li><span class="tag improved">IMPROVED</span> Updated email templates to remove bag references</li>
+                    <li><span class="tag new">NEW</span> Added migration scripts for existing data</li>
+                    <li><span class="tag fixed">FIXED</span> Delivery fee persistence in affiliate registration</li>
+                </ul>
+            </div>
+
             <div id="v1.5.0" class="release">
-                <h2>Version 1.5.0 <span class="tag new">Latest</span></h2>
-                <div class="release-date">Released on June 3, 2025</div>
+                <h2>Version 1.5.0</h2>
+                <div class="release-date">Released on June 3, 2024</div>
                 
                 <h3>💰 Dynamic Pricing & Revenue Features</h3>
                 <ul>
