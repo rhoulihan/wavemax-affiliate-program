@@ -40,7 +40,7 @@
 
     // Function to update page content with affiliate data
     function updatePageContent(affiliate, affiliateCode) {
-        // Update affiliate name
+        // Update affiliate name - prioritize business name if available
         const affiliateName = affiliate.businessName || `${affiliate.firstName} ${affiliate.lastName}`;
         
         // Update all affiliate name references
@@ -48,8 +48,7 @@
             'affiliateName',
             'affiliateNameFooter',
             'affiliateNameService1',
-            'affiliateNameStep1',
-            'affiliateNameStep2',
+            'affiliateNameStep2',  // Removed Step1 since it's now app-based
             'affiliateNameStep4',
             'affiliateNameFeature',
             'affiliateNameCTA'
@@ -87,14 +86,14 @@
         
         registerLinks.forEach(link => {
             if (link) {
-                link.href = `${baseUrl}/customer-register-embed.html?affiliateCode=${affiliateCode}`;
+                link.href = `${baseUrl}/embed-app.html?route=/customer-register&affid=${affiliateCode}`;
             }
         });
 
         // Update login link
         const loginLink = document.getElementById('loginLink');
         if (loginLink) {
-            loginLink.href = `${baseUrl}/customer-login-embed.html?affiliateCode=${affiliateCode}`;
+            loginLink.href = `${baseUrl}/embed-app.html?route=/customer-login&affid=${affiliateCode}`;
         }
 
         // Add affiliate code to all internal links for tracking
