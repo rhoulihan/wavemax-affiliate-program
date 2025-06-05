@@ -43,8 +43,24 @@
         // Update affiliate name
         const affiliateName = affiliate.businessName || `${affiliate.firstName} ${affiliate.lastName}`;
         
-        document.getElementById('affiliateName').textContent = affiliateName;
-        document.getElementById('affiliateNameFooter').textContent = affiliateName;
+        // Update all affiliate name references
+        const affiliateNameElements = [
+            'affiliateName',
+            'affiliateNameFooter',
+            'affiliateNameService1',
+            'affiliateNameStep1',
+            'affiliateNameStep2',
+            'affiliateNameStep4',
+            'affiliateNameFeature',
+            'affiliateNameCTA'
+        ];
+        
+        affiliateNameElements.forEach(id => {
+            const element = document.getElementById(id);
+            if (element) {
+                element.textContent = affiliateName;
+            }
+        });
 
         // Update pricing if available
         if (affiliate.minimumDeliveryFee) {
