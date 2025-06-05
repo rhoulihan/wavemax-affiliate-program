@@ -147,8 +147,8 @@
       })
       .then(data => {
         console.log('Affiliate data received:', data);
-        if (data.success && data.affiliate) {
-          const affiliate = data.affiliate;
+        if (data.success) {
+          const affiliate = data;  // The affiliate data is at the top level
           const affiliateIntro = document.getElementById('affiliateIntro');
           if (affiliateIntro) {
             const name = affiliate.businessName || `${affiliate.firstName} ${affiliate.lastName}`;
