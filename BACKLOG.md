@@ -57,7 +57,36 @@ This file maintains a prioritized list of tasks and issues to be addressed in fu
 
 ### Low Priority
 
-#### 1. Implement Excel Export for Orders
+#### 1. Internationalization (i18n) Support
+- **Added**: 2025-01-06
+- **Status**: Pending
+- **Context**: Add multi-language support for global accessibility
+- **Details**:
+  - Implement i18n framework (e.g., i18next) for both frontend and backend
+  - Create language files for common languages (Spanish, French, etc.)
+  - Add language selector to all user interfaces
+  - Translate email templates for different languages
+  - Support RTL (right-to-left) languages
+  - Store user language preferences in profiles
+  - Consider locale-specific formatting (dates, currency, numbers)
+
+#### 2. ADA Compliance and Accessibility
+- **Added**: 2025-01-06
+- **Status**: Pending
+- **Context**: Ensure full ADA compliance for users with disabilities
+- **Details**:
+  - Add proper ARIA labels to all interactive elements
+  - Ensure keyboard navigation works throughout the application
+  - Implement proper focus management and skip links
+  - Add alt text to all images and icons
+  - Ensure color contrast meets WCAG 2.1 AA standards
+  - Add screen reader announcements for dynamic content
+  - Test with accessibility tools (axe, WAVE, NVDA/JAWS)
+  - Create accessibility statement page
+  - Ensure forms have proper labels and error messages
+  - Add captions/transcripts for any video content
+
+#### 3. Implement Excel Export for Orders
 - **Added**: 2025-06-03
 - **Status**: Pending
 - **Context**: Excel export endpoint returns 501 Not Implemented
@@ -66,7 +95,7 @@ This file maintains a prioritized list of tasks and issues to be addressed in fu
   - Need to implement Excel export functionality using a library like xlsx
   - Endpoint exists at `/api/v1/orders/export?format=excel`
 
-#### 2. Add Admin UI for SystemConfig Management
+#### 4. Add Admin UI for SystemConfig Management
 - **Added**: 2025-06-03
 - **Status**: Pending
 - **Context**: Currently SystemConfig can only be managed via API
