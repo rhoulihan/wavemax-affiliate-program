@@ -692,6 +692,8 @@ async function loadSettingsData(affiliateId) {
         const businessNameField = document.getElementById('settingsBusinessName');
         const serviceAreaField = document.getElementById('settingsServiceArea');
         const registrationLinkField = document.getElementById('registrationLink');
+        const minimumDeliveryFeeField = document.getElementById('settingsMinimumDeliveryFee');
+        const perBagDeliveryFeeField = document.getElementById('settingsPerBagDeliveryFee');
 
         console.log('Setting field values:', {
           firstName: data.firstName,
@@ -699,7 +701,9 @@ async function loadSettingsData(affiliateId) {
           email: data.email,
           phone: data.phone,
           businessName: data.businessName,
-          serviceArea: data.serviceArea
+          serviceArea: data.serviceArea,
+          minimumDeliveryFee: data.minimumDeliveryFee,
+          perBagDeliveryFee: data.perBagDeliveryFee
         });
 
         if (firstNameField) firstNameField.value = data.firstName || '';
@@ -708,6 +712,11 @@ async function loadSettingsData(affiliateId) {
         if (phoneField) phoneField.value = data.phone || '';
         if (businessNameField) businessNameField.value = data.businessName || '';
         if (serviceAreaField) serviceAreaField.value = data.serviceArea || '';
+        if (minimumDeliveryFeeField) minimumDeliveryFeeField.value = data.minimumDeliveryFee || 25;
+        if (perBagDeliveryFeeField) perBagDeliveryFeeField.value = data.perBagDeliveryFee || 5;
+        
+        // Update fee calculator preview
+        updateFeeCalculatorPreview();
 
         // Generate and display registration link with wavemaxlaundry.com format
         const registrationLink = `https://www.wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program?affid=${affiliateId}`;
@@ -725,7 +734,7 @@ async function loadSettingsData(affiliateId) {
 
 // Enable edit mode
 function enableEditMode() {
-  const inputs = document.querySelectorAll('#settingsForm input[type="text"], #settingsForm input[type="email"], #settingsForm input[type="tel"]');
+  const inputs = document.querySelectorAll('#settingsForm input[type="text"], #settingsForm input[type="email"], #settingsForm input[type="tel"], #settingsForm input[type="number"]');
   inputs.forEach(input => {
     // Skip the registration link field
     if (input.id !== 'registrationLink') {
@@ -740,7 +749,7 @@ function enableEditMode() {
 
 // Disable edit mode
 function disableEditMode() {
-  const inputs = document.querySelectorAll('#settingsForm input[type="text"], #settingsForm input[type="email"], #settingsForm input[type="tel"]');
+  const inputs = document.querySelectorAll('#settingsForm input[type="text"], #settingsForm input[type="email"], #settingsForm input[type="tel"], #settingsForm input[type="number"]');
   inputs.forEach(input => {
     if (input.id !== 'registrationLink') {
       input.setAttribute('readonly', true);
@@ -923,9 +932,65 @@ async function deleteAllData(affiliateId) {
   }
 }
 
+// Fee calculator preview function
+function updateFeeCalculatorPreview() {
+  const minFeeInput = document.getElementById('settingsMinimumDeliveryFee');
+  const perBagInput = document.getElementById('settingsPerBagDeliveryFee');
+  
+  if (!minFeeInput || !perBagInput) return;
+  
+  const minFee = parseFloat(minFeeInput.value) || 25;
+  const perBag = parseFloat(perBagInput.value) || 5;
+  
+  // Calculate fees for different bag quantities (round trip = x2)
+  const bags = [1, 3, 5, 10];
+  bags.forEach(qty => {
+    const calculated = qty * perBag * 2; // Round trip
+    const total = Math.max(minFee * 2, calculated); // Round trip minimum
+    const elem = document.getElementById(`preview${qty}bag${qty > 1 ? 's' : ''}`);
+    if (elem) {
+      elem.textContent = `$${total}`;
+      // Add visual indicator if minimum applies
+      if (total === minFee * 2 && calculated < minFee * 2) {
+        elem.classList.add('font-bold');
+        elem.title = 'Minimum fee applies';
+      } else {
+        elem.classList.remove('font-bold');
+        elem.title = `${qty} × $${perBag} × 2 trips = $${calculated}`;
+      }
+    }
+  });
+}
+
 // Initialize when DOM is ready or immediately if already ready
 if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', initializeAffiliateDashboard);
+  document.addEventListener('DOMContentLoaded', function() {
+    initializeAffiliateDashboard();
+    
+    // Add event listeners for fee inputs
+    const minFeeInput = document.getElementById('settingsMinimumDeliveryFee');
+    const perBagInput = document.getElementById('settingsPerBagDeliveryFee');
+    
+    if (minFeeInput) {
+      minFeeInput.addEventListener('input', updateFeeCalculatorPreview);
+    }
+    
+    if (perBagInput) {
+      perBagInput.addEventListener('input', updateFeeCalculatorPreview);
+    }
+  });
 } else {
   initializeAffiliateDashboard();
+  
+  // Add event listeners for fee inputs
+  const minFeeInput = document.getElementById('settingsMinimumDeliveryFee');
+  const perBagInput = document.getElementById('settingsPerBagDeliveryFee');
+  
+  if (minFeeInput) {
+    minFeeInput.addEventListener('input', updateFeeCalculatorPreview);
+  }
+  
+  if (perBagInput) {
+    perBagInput.addEventListener('input', updateFeeCalculatorPreview);
+  }
 }
