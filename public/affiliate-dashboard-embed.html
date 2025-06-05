@@ -263,16 +263,28 @@
                     <form id="settingsForm">
                         <input type="hidden" name="_csrf" value="{{csrfToken}}">
 
-                        <!-- Registration Link Section -->
+                        <!-- Marketing Links Section -->
                         <div class="mb-6">
-                            <h3 class="text-lg font-bold mb-4">Customer Registration Link</h3>
+                            <h3 class="text-lg font-bold mb-4">Marketing Links</h3>
+                            
+                            <!-- Landing Page Link -->
                             <div class="mb-4">
-                                <label for="registrationLink" class="block text-gray-700 mb-2">Your Custom Registration URL</label>
+                                <label for="landingPageLink" class="block text-gray-700 mb-2">Customer Landing Page</label>
+                                <div class="flex">
+                                    <input type="text" id="landingPageLink" class="w-full px-4 py-2 border rounded-l-lg bg-gray-100" readonly>
+                                    <button type="button" id="copyLandingPageLinkBtn" class="bg-blue-600 text-white px-4 py-2 rounded-r-lg hover:bg-blue-700 transition">Copy</button>
+                                </div>
+                                <p class="text-sm text-gray-600 mt-1">Professional landing page to showcase your services and pricing to potential customers</p>
+                            </div>
+                            
+                            <!-- Registration Link -->
+                            <div class="mb-4">
+                                <label for="registrationLink" class="block text-gray-700 mb-2">Direct Registration URL</label>
                                 <div class="flex">
                                     <input type="text" id="registrationLink" class="w-full px-4 py-2 border rounded-l-lg bg-gray-100" readonly>
                                     <button type="button" id="copyRegistrationLinkBtn" class="bg-blue-600 text-white px-4 py-2 rounded-r-lg hover:bg-blue-700 transition">Copy</button>
                                 </div>
-                                <p class="text-sm text-gray-600 mt-1">Share this link with customers to register under your affiliate account</p>
+                                <p class="text-sm text-gray-600 mt-1">Direct link for customers to register under your affiliate account</p>
                             </div>
                         </div>
 
