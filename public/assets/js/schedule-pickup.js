@@ -9,6 +9,15 @@
     console.error('CSRF utilities not loaded. Please include csrf-utils.js before this script.');
   }
 
+  // State variables for pricing
+  let wdfRate = 1.25; // Default rate
+  let deliveryFeeAmount = 0;
+  let deliveryFeeBreakdown = null; // Store fee calculation details
+  let systemFeeConfig = {
+    minimumFee: 10.00,
+    perBagFee: 2.00
+  };
+
 // Function to initialize the page
 async function initializeSchedulePickup() {
   console.log('Initializing schedule pickup page');
@@ -69,9 +78,16 @@ async function initializeSchedulePickup() {
 
     // Load customer data into the form
     await loadCustomerIntoForm(customer, token);
+    
+    // Fetch system config for delivery fees
+    await fetchSystemFeeConfig();
 
     // Setup form submission handler
     setupFormSubmission(token);
+
+    // Initialize payment fields and dynamic calculation
+    initializePaymentFields();
+    setupDynamicCalculation();
 
   } catch (error) {
     console.error('Error initializing schedule pickup:', error);
@@ -87,6 +103,39 @@ if (document.readyState === 'loading') {
 } else {
   console.log('DOM already loaded, initializing immediately');
   initializeSchedulePickup();
+}
+
+// Function to fetch system fee configuration
+async function fetchSystemFeeConfig() {
+  try {
+    const baseUrl = window.EMBED_CONFIG?.baseUrl || 'https://wavemax.promo';
+    const response = await fetch(`${baseUrl}/api/v1/system/config/public`);
+    
+    if (response.ok) {
+      const configs = await response.json();
+      
+      // Find delivery fee configs
+      configs.forEach(config => {
+        if (config.key === 'delivery_minimum_fee') {
+          systemFeeConfig.minimumFee = config.currentValue || config.value;
+          console.log('System minimum delivery fee:', systemFeeConfig.minimumFee);
+        } else if (config.key === 'delivery_per_bag_fee') {
+          systemFeeConfig.perBagFee = config.currentValue || config.value;
+          console.log('System per-bag delivery fee:', systemFeeConfig.perBagFee);
+        } else if (config.key === 'wdf_base_rate_per_pound') {
+          wdfRate = config.currentValue || config.value;
+          // Update WDF rate display
+          const wdfRateElement = document.getElementById('wdfRate');
+          if (wdfRateElement) {
+            wdfRateElement.textContent = `$${wdfRate.toFixed(2)}`;
+          }
+        }
+      });
+    }
+  } catch (error) {
+    console.error('Error fetching system config:', error);
+    // Use defaults if fetch fails
+  }
 }
 
 // Function to load customer data into the pickup form
@@ -142,7 +191,9 @@ async function loadCustomerIntoForm(customer, token) {
       console.log('Using affiliate delivery fee from login data:', customer.affiliate.deliveryFee);
       const deliveryFeeField = document.getElementById('deliveryFee');
       if (deliveryFeeField) {
-        deliveryFeeField.textContent = `$${parseFloat(customer.affiliate.deliveryFee).toFixed(2)}`;
+        deliveryFeeAmount = parseFloat(customer.affiliate.deliveryFee);
+        deliveryFeeField.textContent = `$${deliveryFeeAmount.toFixed(2)}`;
+        calculateEstimate(); // Recalculate with delivery fee
       }
     }
 
@@ -183,7 +234,9 @@ async function loadCustomerIntoForm(customer, token) {
         if (deliveryFeeField && deliveryFeeField.textContent === '$0.00') {
           if (fullCustomer.affiliate && fullCustomer.affiliate.deliveryFee) {
             console.log('Setting delivery fee from customer profile:', fullCustomer.affiliate.deliveryFee);
-            deliveryFeeField.textContent = `$${parseFloat(fullCustomer.affiliate.deliveryFee).toFixed(2)}`;
+            deliveryFeeAmount = parseFloat(fullCustomer.affiliate.deliveryFee);
+            deliveryFeeField.textContent = `$${deliveryFeeAmount.toFixed(2)}`;
+            calculateEstimate(); // Recalculate with delivery fee
           } else {
             console.log('No affiliate delivery fee in customer profile, fetching directly');
             // Try to fetch affiliate data directly
@@ -202,10 +255,16 @@ async function loadCustomerIntoForm(customer, token) {
         const configs = await wdfResponse.json();
         const wdfConfig = configs.find(c => c.key === 'wdf_base_rate_per_pound');
         if (wdfConfig && wdfConfig.currentValue) {
+          wdfRate = wdfConfig.currentValue; // Update global rate
           const wdfRateDisplay = document.getElementById('wdfRateDisplay');
           if (wdfRateDisplay) {
             wdfRateDisplay.textContent = `$${wdfConfig.currentValue.toFixed(2)} per pound`;
           }
+          const wdfRateElement = document.getElementById('wdfRate');
+          if (wdfRateElement) {
+            wdfRateElement.textContent = `$${wdfConfig.currentValue.toFixed(2)}`;
+          }
+          calculateEstimate(); // Recalculate with new rate
         }
       }
     } catch (error) {
@@ -248,10 +307,13 @@ async function fetchAffiliateDeliveryFee(affiliateId) {
       console.log('Affiliate data:', data);
 
       if (data.success && data.affiliate && data.affiliate.deliveryFee) {
-        deliveryFeeField.textContent = `$${parseFloat(data.affiliate.deliveryFee).toFixed(2)}`;
+        deliveryFeeAmount = parseFloat(data.affiliate.deliveryFee);
+        deliveryFeeField.textContent = `$${deliveryFeeAmount.toFixed(2)}`;
       } else {
+        deliveryFeeAmount = 5.99;
         deliveryFeeField.textContent = '$5.99';
       }
+      calculateEstimate(); // Recalculate with delivery fee
     } else {
       deliveryFeeField.textContent = '$5.99';
     }
@@ -328,6 +390,13 @@ function setupFormSubmission(token) {
         }
       }
     });
+
+    // Add payment data (remove spaces from card number)
+    pickupData.cardNumber = pickupData.cardNumber?.replace(/\s/g, '');
+    
+    // Add calculated amounts
+    pickupData.estimatedTotal = parseFloat(document.getElementById('estimatedTotal')?.textContent.replace('$', '') || '0');
+    pickupData.authorizationAmount = parseFloat(document.getElementById('authorizationAmount')?.textContent.replace('$', '') || '0');
 
     console.log('Submitting pickup order:', JSON.stringify(pickupData, null, 2));
 
@@ -407,6 +476,164 @@ function setupFormSubmission(token) {
       alert('An error occurred while scheduling your pickup. Please try again.');
     }
   });
+}
+
+// Initialize payment field formatting
+function initializePaymentFields() {
+  const cardNumberInput = document.getElementById('cardNumber');
+  if (cardNumberInput) {
+    cardNumberInput.addEventListener('input', function(e) {
+      let value = e.target.value.replace(/\D/g, '');
+      if (value.length > 16) value = value.slice(0, 16);
+      
+      // Format with spaces
+      const parts = [];
+      for (let i = 0; i < value.length; i += 4) {
+        parts.push(value.slice(i, i + 4));
+      }
+      e.target.value = parts.join(' ');
+    });
+  }
+
+  const expiryInput = document.getElementById('expiryDate');
+  if (expiryInput) {
+    expiryInput.addEventListener('input', function(e) {
+      let value = e.target.value.replace(/\D/g, '');
+      if (value.length > 4) value = value.slice(0, 4);
+      
+      if (value.length >= 2) {
+        value = value.slice(0, 2) + '/' + value.slice(2);
+      }
+      e.target.value = value;
+    });
+  }
+
+  const cvvInput = document.getElementById('cvv');
+  if (cvvInput) {
+    cvvInput.addEventListener('input', function(e) {
+      let value = e.target.value.replace(/\D/g, '');
+      if (value.length > 4) value = value.slice(0, 4);
+      e.target.value = value;
+    });
+  }
+
+  const billingZipInput = document.getElementById('billingZip');
+  if (billingZipInput) {
+    billingZipInput.addEventListener('input', function(e) {
+      let value = e.target.value.replace(/\D/g, '');
+      if (value.length > 5) value = value.slice(0, 5);
+      e.target.value = value;
+    });
+  }
+}
+
+// Setup dynamic calculation for authorization amount
+// Function to calculate delivery fee based on bags
+function calculateDeliveryFee(numberOfBags, affiliate = null) {
+  // Use affiliate overrides if available
+  const minimumFee = affiliate?.minimumDeliveryFee ?? systemFeeConfig.minimumFee;
+  const perBagFee = affiliate?.perBagDeliveryFee ?? systemFeeConfig.perBagFee;
+  
+  // Calculate fees
+  const calculatedFee = numberOfBags * perBagFee;
+  const oneWayFee = Math.max(minimumFee, calculatedFee);
+  const roundTripFee = oneWayFee * 2;
+  
+  return {
+    numberOfBags,
+    minimumFee,
+    perBagFee,
+    calculatedFee,
+    oneWayFee,
+    roundTripFee,
+    minimumApplied: oneWayFee === minimumFee
+  };
+}
+
+// Function to update delivery fee display
+function updateDeliveryFeeDisplay() {
+  const numberOfBagsSelect = document.getElementById('numberOfBags');
+  const deliveryFeeElement = document.getElementById('deliveryFee');
+  const deliveryFeeBreakdownElement = document.getElementById('deliveryFeeBreakdown');
+  
+  if (!numberOfBagsSelect || !deliveryFeeElement) return;
+  
+  const numberOfBags = parseInt(numberOfBagsSelect.value) || 1;
+  
+  // Get current customer's affiliate info if available
+  const customerStr = localStorage.getItem('currentCustomer');
+  const customer = customerStr ? JSON.parse(customerStr) : {};
+  const affiliate = customer.affiliate || null;
+  
+  // Calculate fee
+  deliveryFeeBreakdown = calculateDeliveryFee(numberOfBags, affiliate);
+  deliveryFeeAmount = deliveryFeeBreakdown.oneWayFee;
+  
+  // Update display
+  deliveryFeeElement.textContent = `$${deliveryFeeBreakdown.roundTripFee.toFixed(2)}`;
+  
+  // Show breakdown
+  if (deliveryFeeBreakdownElement) {
+    if (deliveryFeeBreakdown.minimumApplied) {
+      deliveryFeeBreakdownElement.textContent = `(Minimum fee: $${deliveryFeeBreakdown.oneWayFee.toFixed(2)} × 2 trips)`;
+    } else {
+      deliveryFeeBreakdownElement.textContent = `(${numberOfBags} bags × $${deliveryFeeBreakdown.perBagFee.toFixed(2)}/bag × 2 trips)`;
+    }
+  }
+  
+  // Recalculate totals
+  calculateEstimate();
+}
+
+function setupDynamicCalculation() {
+  // Update fee when number of bags changes
+  const numberOfBagsSelect = document.getElementById('numberOfBags');
+  if (numberOfBagsSelect) {
+    numberOfBagsSelect.addEventListener('change', updateDeliveryFeeDisplay);
+  }
+  
+  // Update estimate when weight changes
+  const estimatedWeightInput = document.getElementById('estimatedWeight');
+  if (estimatedWeightInput) {
+    estimatedWeightInput.addEventListener('input', calculateEstimate);
+    estimatedWeightInput.addEventListener('change', calculateEstimate);
+  }
+  
+  // Initial calculation
+  updateDeliveryFeeDisplay();
+}
+
+// Calculate estimate and authorization amount
+function calculateEstimate() {
+  const weightInput = document.getElementById('estimatedWeight');
+  const weight = parseFloat(weightInput?.value) || 0;
+
+  // Update weight display
+  const weightDisplay = document.getElementById('estimatedWeightDisplay');
+  if (weightDisplay) {
+    weightDisplay.textContent = weight;
+  }
+
+  // Use the calculated delivery fee breakdown
+  if (!deliveryFeeBreakdown) {
+    updateDeliveryFeeDisplay();
+  }
+
+  // Calculate costs
+  const laundryTotal = weight * wdfRate;
+  const estimatedTotal = laundryTotal + (deliveryFeeBreakdown ? deliveryFeeBreakdown.roundTripFee : 0);
+  const authorizationAmount = estimatedTotal * 1.10; // 10% over estimate
+
+  // Update displays
+  const estimatedTotalElement = document.getElementById('estimatedTotal');
+  if (estimatedTotalElement) {
+    estimatedTotalElement.textContent = `$${estimatedTotal.toFixed(2)}`;
+  }
+
+  const authorizationAmountElement = document.getElementById('authorizationAmount');
+  if (authorizationAmountElement) {
+    authorizationAmountElement.textContent = `$${authorizationAmount.toFixed(2)}`;
+  }
 }
 
 })(); // End IIFE

@@ -203,7 +203,7 @@
                                 <ul class="space-y-1 ml-4">
                                     <li id="req-length" class="flex items-center">
                                         <span class="w-4 h-4 mr-2">⚪</span>
-                                        <span>At least 12 characters</span>
+                                        <span>At least 8 characters</span>
                                     </li>
                                     <li id="req-uppercase" class="flex items-center">
                                         <span class="w-4 h-4 mr-2">⚪</span>
@@ -220,6 +220,10 @@
                                     <li id="req-special" class="flex items-center">
                                         <span class="w-4 h-4 mr-2">⚪</span>
                                         <span>One special character (!@#$%^&*)</span>
+                                    </li>
+                                    <li id="req-match" class="flex items-center">
+                                        <span class="w-4 h-4 mr-2">⚪</span>
+                                        <span>Passwords match</span>
                                     </li>
                                 </ul>
                             </div>
@@ -288,7 +292,8 @@
                     <div class="bg-gray-50 p-4 rounded-lg">
                         <div class="mb-2">
                             <span class="font-bold">Delivery Fee:</span>
-                            <span id="deliveryFee">$0.00</span> per pickup/delivery
+                            <span id="deliveryFee">$0.00</span>
+                            <span id="deliveryFeeStructure" class="text-sm text-gray-600"></span>
                         </div>
                         <div>
                             <span class="font-bold">Wash, Dry, Fold Service:</span>

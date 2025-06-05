@@ -43,9 +43,21 @@ const orderSchema = new mongoose.Schema({
   // Laundry details
   actualWeight: Number,
   washInstructions: String,
+  // Bag information
+  numberOfBags: { type: Number, default: 1, min: 1 },
   // Payment information
   baseRate: { type: Number }, // Per pound WDF rate - fetched from SystemConfig
-  deliveryFee: { type: Number, required: true },
+  deliveryFee: { type: Number, required: true }, // Legacy field - total delivery fee
+  // New fee breakdown structure
+  deliveryFeeBreakdown: {
+    numberOfBags: Number,
+    minimumFee: Number,
+    perBagFee: Number,
+    calculatedFee: Number,
+    oneWayFee: Number,
+    roundTripFee: Number,
+    minimumApplied: Boolean
+  },
   estimatedTotal: Number,
   actualTotal: Number,
   affiliateCommission: { type: Number, default: 0 },

@@ -82,6 +82,10 @@ const customerSchema = new mongoose.Schema({
   },
   billingZip: String,
   savePaymentInfo: { type: Boolean, default: false },
+  // Bag information
+  numberOfBags: { type: Number, default: 1 },
+  bagCredit: { type: Number, default: 0 }, // Credit to be applied on first order
+  bagCreditApplied: { type: Boolean, default: false }, // Track if credit has been used
   isActive: { type: Boolean, default: true },
   registrationDate: { type: Date, default: Date.now },
   lastLogin: Date

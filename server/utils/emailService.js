@@ -198,9 +198,11 @@ exports.sendAffiliateWelcomeEmail = async (affiliate) => {
 /**
  * Send new customer notification to affiliate
  */
-exports.sendAffiliateNewCustomerEmail = async (affiliate, customer, bagBarcode) => {
+exports.sendAffiliateNewCustomerEmail = async (affiliate, customer, bagInfo = {}) => {
   try {
     const template = await loadTemplate('affiliate-new-customer');
+
+    const numberOfBags = bagInfo.numberOfBags || 1;
 
     const data = {
       affiliate_first_name: affiliate.firstName,
@@ -213,7 +215,7 @@ exports.sendAffiliateNewCustomerEmail = async (affiliate, customer, bagBarcode) 
       customer_phone: customer.phone,
       customer_address: `${customer.address}, ${customer.city}, ${customer.state} ${customer.zipCode}`,
       service_frequency: customer.serviceFrequency,
-      bag_barcode: bagBarcode,
+      number_of_bags: numberOfBags,
       dashboard_url: `https://www.wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program?login=affiliate&customer=${customer.customerId}`,
       current_year: new Date().getFullYear()
     };
@@ -357,18 +359,36 @@ exports.sendAffiliatePasswordResetEmail = async (affiliate, resetUrl) => {
 /**
  * Send welcome email to a new customer
  */
-exports.sendCustomerWelcomeEmail = async (customer, bagBarcode, affiliate) => {
+exports.sendCustomerWelcomeEmail = async (customer, affiliate, bagInfo = {}) => {
   try {
+    // Validate inputs
+    if (!customer || !affiliate) {
+      console.error('Missing customer or affiliate data for welcome email');
+      return;
+    }
+
     const template = await loadTemplate('customer-welcome');
 
+    // Build affiliate name with fallback
+    const affiliateName = affiliate.businessName || 
+      `${affiliate.firstName || ''} ${affiliate.lastName || ''}`.trim() || 
+      'Your WaveMAX Partner';
+
+    // Extract bag information with defaults
+    const numberOfBags = bagInfo.numberOfBags || 1;
+    const bagFee = bagInfo.bagFee || 10.00;
+    const totalCredit = bagInfo.totalCredit || (numberOfBags * bagFee);
+
     const data = {
-      first_name: customer.firstName,
-      last_name: customer.lastName,
-      customer_id: customer.customerId,
-      affiliate_name: `${affiliate.firstName} ${affiliate.lastName}`,
-      affiliate_phone: affiliate.phone,
-      affiliate_email: affiliate.email,
-      bag_barcode: bagBarcode,
+      first_name: customer.firstName || '',
+      last_name: customer.lastName || '',
+      customer_id: customer.customerId || '',
+      affiliate_name: affiliateName,
+      affiliate_phone: affiliate.phone || 'Contact for details',
+      affiliate_email: affiliate.email || 'support@wavemax.promo',
+      number_of_bags: numberOfBags,
+      bag_fee: bagFee.toFixed(2),
+      total_credit: totalCredit.toFixed(2),
       login_url: `https://www.wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program?login=customer`,
       schedule_url: `https://www.wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program?login=customer&pickup=true`,
       current_year: new Date().getFullYear()
@@ -381,8 +401,11 @@ exports.sendCustomerWelcomeEmail = async (customer, bagBarcode, affiliate) => {
       'Welcome to WaveMAX Laundry Service',
       html
     );
+    
+    console.log('Customer welcome email sent successfully to:', customer.email);
   } catch (error) {
     console.error('Error sending customer welcome email:', error);
+    throw error; // Re-throw to let the controller handle it
   }
 };
 

@@ -80,14 +80,17 @@
                 
                 <!-- Laundry Bag Information -->
                 <div>
-                    <h3 class="text-xl font-bold mb-4">Your Laundry Bag</h3>
+                    <h3 class="text-xl font-bold mb-4">Your Laundry Bags</h3>
                     <div class="bg-gray-50 p-4 rounded-lg">
-                        <p class="mb-4">Your dedicated laundry bag with a unique barcode will be delivered to you shortly by your service provider.</p>
+                        <p class="mb-4">Your service provider will deliver your laundry bags to you shortly.</p>
                         <div class="mb-2">
-                            <span class="font-bold">Bag Barcode:</span>
-                            <span id="bagBarcode">Will be assigned upon delivery</span>
+                            <span class="font-bold">Number of Bags:</span>
+                            <span id="bagsPurchased">1</span>
                         </div>
-                        <p class="text-sm text-gray-500">Please use this bag for all your laundry pickup orders.</p>
+                        <div class="bg-blue-50 border border-blue-200 text-blue-800 rounded p-3 mt-3">
+                            <p class="text-sm font-semibold">Important: A credit of <span id="bagCreditAmount">$10.00</span> will be applied to your first laundry order.</p>
+                        </div>
+                        <p class="text-sm text-gray-500 mt-3">Please use these bags for all your laundry pickup orders.</p>
                     </div>
                 </div>
                 
@@ -132,18 +135,60 @@
 
         // Load customer information
         document.addEventListener('DOMContentLoaded', function() {
-            // Try to get customer info from localStorage
-            const customer = localStorage.getItem('currentCustomer');
+            // Try to get customer info from sessionStorage first (for registration flow)
+            const registrationData = sessionStorage.getItem('registrationData');
+            let customerData = null;
             
-            if (customer) {
+            if (registrationData) {
                 try {
-                    const customerData = JSON.parse(customer);
+                    customerData = JSON.parse(registrationData);
+                    // Clear registration data after use
+                    sessionStorage.removeItem('registrationData');
+                } catch (e) {
+                    console.error('Error parsing registration data:', e);
+                }
+            }
+            
+            // Fall back to localStorage if no registration data
+            if (!customerData) {
+                const customer = localStorage.getItem('currentCustomer');
+                if (customer) {
+                    try {
+                        customerData = JSON.parse(customer);
+                    } catch (e) {
+                        console.error('Error parsing customer data:', e);
+                    }
+                }
+            }
+            
+            if (customerData) {
+                // Display customer information
+                document.getElementById('customerId').textContent = customerData.customerId;
+                document.getElementById('customerName').textContent = 
+                    `${customerData.firstName} ${customerData.lastName}`;
+                document.getElementById('customerEmail').textContent = customerData.email;
+                
+                // Display bags purchased (default to 1 if not specified)
+                const bagCount = customerData.bagsPurchased || 1;
+                document.getElementById('bagsPurchased').textContent = bagCount;
                     
-                    // Display customer information
-                    document.getElementById('customerId').textContent = customerData.customerId;
-                    document.getElementById('customerName').textContent = 
-                        `${customerData.firstName} ${customerData.lastName}`;
-                    document.getElementById('customerEmail').textContent = customerData.email;
+                    // Fetch bag fee from system config to calculate credit
+                    fetch('https://wavemax.promo/api/v1/system/config/public', {
+                        credentials: 'include'
+                    })
+                    .then(response => response.json())
+                    .then(configs => {
+                        const bagFeeConfig = configs.find(c => c.key === 'laundry_bag_fee');
+                        if (bagFeeConfig && bagFeeConfig.currentValue) {
+                            const bagFee = bagFeeConfig.currentValue;
+                            const totalCredit = bagFee * bagCount;
+                            document.getElementById('bagCreditAmount').textContent = `$${totalCredit.toFixed(2)}`;
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error fetching bag fee:', error);
+                        // Keep default $10.00 if fetch fails
+                    });
                     
                     // Load affiliate information if available
                     if (customerData.affiliateId) {
@@ -157,10 +202,6 @@
                         customerId: customerData.customerId,
                         affiliateId: customerData.affiliateId
                     });
-                } catch (e) {
-                    console.error('Error parsing customer data:', e);
-                    showFallbackContent();
-                }
             } else {
                 showFallbackContent();
             }
@@ -203,6 +244,7 @@
             document.getElementById('customerId').textContent = 'Your unique ID will be provided shortly';
             document.getElementById('customerName').textContent = 'Your information is being processed';
             document.getElementById('customerEmail').textContent = 'Check your email for confirmation';
+            document.getElementById('bagsPurchased').textContent = '1';
             showFallbackAffiliateInfo();
         }
     </script>

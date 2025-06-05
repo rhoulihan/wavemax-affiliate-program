@@ -119,8 +119,33 @@
         <h3>Your Account Information</h3>
         <p><strong>Customer ID:</strong> [CUSTOMER_ID]</p>
         <p><strong>Service Provider:</strong> [AFFILIATE_NAME]</p>
-        <p>Your service provider will be delivering a laundry bag with a unique barcode shortly. Please use this bag for all your laundry pickups.</p>
-        <p><strong>Bag Barcode:</strong> [BAG_BARCODE]</p>
+      </div>
+      
+      <div class="service-box" style="background-color: #f0f7ff; border: 1px solid #3b82f6;">
+        <h3>Important: Laundry Bag Information</h3>
+        <p>Your service provider will deliver your laundry bags shortly. Please use these bags for all your laundry pickups.</p>
+        
+        <div style="background-color: #ffffff; border: 1px solid #e0e0e0; border-radius: 6px; padding: 15px; margin: 15px 0;">
+          <h4 style="margin-top: 0; color: #1e3a8a;">Bag Fee Credit Breakdown:</h4>
+          <table style="width: 100%; border-collapse: collapse;">
+            <tr>
+              <td style="padding: 5px 0;">Number of bags purchased:</td>
+              <td style="text-align: right; font-weight: bold;">[NUMBER_OF_BAGS]</td>
+            </tr>
+            <tr>
+              <td style="padding: 5px 0;">Cost per bag:</td>
+              <td style="text-align: right;">$[BAG_FEE]</td>
+            </tr>
+            <tr style="border-top: 2px solid #e0e0e0;">
+              <td style="padding: 8px 0; font-weight: bold; color: #1e3a8a;">Total credit on first order:</td>
+              <td style="text-align: right; font-weight: bold; color: #1e3a8a; font-size: 18px;">$[TOTAL_CREDIT]</td>
+            </tr>
+          </table>
+        </div>
+        
+        <p style="font-size: 14px; color: #666; margin-top: 10px;">
+          <strong>Note:</strong> This credit will automatically be applied when you schedule your first laundry pickup. You'll see it clearly itemized on your invoice.
+        </p>
       </div>
       
       <div class="service-box">
@@ -165,6 +190,7 @@
         <div style="text-align: center; margin: 20px 0;">
           <a href="[SCHEDULE_URL]" class="button">Schedule Pickup</a>
         </div>
+        <p style="text-align: center; color: #1e3a8a; font-style: italic;">Remember: Your bag fees will be credited on this first order!</p>
       </div>
       
       <div class="section">

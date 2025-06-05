@@ -155,14 +155,37 @@
             affiliateIntro.textContent = `Sign up for premium laundry pickup and delivery service with ${name}.`;
           }
 
-          // Set delivery fee based on affiliate's rate
+          // Set delivery fee based on affiliate's rate structure
           const deliveryFeeElement = document.getElementById('deliveryFee');
+          const deliveryFeeStructureElement = document.getElementById('deliveryFeeStructure');
+          
           if (deliveryFeeElement) {
-            // Ensure deliveryFee exists and is a valid number
-            const affiliateFee = affiliate.deliveryFee || 0;
-            const fee = parseFloat(affiliateFee).toFixed(2);
-            console.log('Affiliate delivery fee:', affiliate.deliveryFee, '-> Formatted:', fee);
-            deliveryFeeElement.textContent = `$${fee}`;
+            // Check if affiliate has new fee structure
+            if (affiliate.minimumDeliveryFee !== null && affiliate.perBagDeliveryFee !== null) {
+              // Use new fee structure
+              const minFee = parseFloat(affiliate.minimumDeliveryFee);
+              const perBagFee = parseFloat(affiliate.perBagDeliveryFee);
+              
+              // Show minimum fee as the base rate
+              deliveryFeeElement.textContent = `Starting at $${minFee.toFixed(2)}`;
+              
+              if (deliveryFeeStructureElement) {
+                deliveryFeeStructureElement.textContent = `(Min: $${minFee.toFixed(2)}, then $${perBagFee.toFixed(2)}/bag)`;
+              }
+              
+              console.log('Affiliate uses new fee structure:', { minFee, perBagFee });
+            } else {
+              // Use legacy flat fee
+              const affiliateFee = affiliate.deliveryFee || 0;
+              const fee = parseFloat(affiliateFee).toFixed(2);
+              deliveryFeeElement.textContent = `$${fee}`;
+              
+              if (deliveryFeeStructureElement) {
+                deliveryFeeStructureElement.textContent = '(per pickup/delivery)';
+              }
+              
+              console.log('Affiliate uses legacy fee:', fee);
+            }
           } else {
             console.error('deliveryFee element not found');
           }
@@ -204,16 +227,18 @@
   // Password validation function
   function validatePassword() {
     const password = document.getElementById('password').value;
+    const confirmPassword = document.getElementById('confirmPassword').value;
     const username = document.getElementById('username').value;
     const email = document.getElementById('email').value;
 
     // Check requirements
     const requirements = {
-      length: password.length >= 12,
+      length: password.length >= 8,
       uppercase: /[A-Z]/.test(password),
       lowercase: /[a-z]/.test(password),
       number: /\d/.test(password),
-      special: /[!@#$%^&*()_+\-=\[\]{}|;:,.<>?]/.test(password)
+      special: /[!@#$%^&*()_+\-=\[\]{}|;:,.<>?]/.test(password),
+      match: password !== '' && password === confirmPassword
     };
 
     // Check if password contains username or email
@@ -238,17 +263,19 @@
     updateReq('req-lowercase', requirements.lowercase);
     updateReq('req-number', requirements.number);
     updateReq('req-special', requirements.special);
+    updateReq('req-match', requirements.match);
 
     // Update strength indicator
     const strengthElement = document.getElementById('passwordStrength');
     if (strengthElement) {
       if (password.length === 0) {
         strengthElement.innerHTML = '';
-      } else if (Object.values(requirements).every(r => r) && !containsUsername && !containsEmailUser) {
+      } else if (requirements.length && requirements.uppercase && requirements.lowercase && 
+                 requirements.number && requirements.special && !containsUsername && !containsEmailUser) {
         strengthElement.innerHTML = '<span class="text-green-600 font-medium">✅ Strong password</span>';
       } else {
         const missing = [];
-        if (!requirements.length) missing.push('12+ characters');
+        if (!requirements.length) missing.push('8+ characters');
         if (!requirements.uppercase) missing.push('uppercase letter');
         if (!requirements.lowercase) missing.push('lowercase letter');
         if (!requirements.number) missing.push('number');
@@ -259,17 +286,23 @@
       }
     }
 
-    return Object.values(requirements).every(r => r) && !containsUsername && !containsEmailUser;
+    // Return true if all password strength requirements are met (excluding match for strength)
+    return requirements.length && requirements.uppercase && requirements.lowercase && 
+           requirements.number && requirements.special && !containsUsername && !containsEmailUser;
   }
 
   // Add password validation event listeners
   const passwordInput = document.getElementById('password');
+  const confirmPasswordInput = document.getElementById('confirmPassword');
   const usernameInput = document.getElementById('username');
   const emailInput = document.getElementById('email');
 
   if (passwordInput) {
     passwordInput.addEventListener('input', validatePassword);
     passwordInput.addEventListener('focus', validatePassword);
+  }
+  if (confirmPasswordInput) {
+    confirmPasswordInput.addEventListener('input', validatePassword);
   }
   if (usernameInput) {
     usernameInput.addEventListener('input', validatePassword);
@@ -358,7 +391,8 @@
             email: data.customerData.email,
             affiliateId: data.customerData.affiliateId,
             affiliateName: data.customerData.affiliateName,
-            deliveryFee: data.customerData.deliveryFee
+            deliveryFee: data.customerData.deliveryFee,
+            bagsPurchased: formData.get('numberOfBags') || '1'
           };
           console.log('Storing registration data:', registrationData);
           sessionStorage.setItem('registrationData', JSON.stringify(registrationData));

@@ -22,7 +22,20 @@ const affiliateSchema = new mongoose.Schema({
   state: { type: String, required: true },
   zipCode: { type: String, required: true },
   serviceArea: { type: String, required: true },
-  deliveryFee: { type: Number, required: true },
+  deliveryFee: { type: Number, required: true }, // Legacy field for backward compatibility
+  // New delivery fee structure (optional overrides)
+  minimumDeliveryFee: { 
+    type: Number, 
+    default: null, // null means use system default
+    min: 0,
+    max: 100
+  },
+  perBagDeliveryFee: { 
+    type: Number, 
+    default: null, // null means use system default
+    min: 0,
+    max: 20
+  },
   username: { type: String, required: true, unique: true },
   passwordSalt: { 
     type: String, 

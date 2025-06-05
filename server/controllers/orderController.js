@@ -4,9 +4,50 @@
 const Affiliate = require('../models/Affiliate');
 const Customer = require('../models/Customer');
 const Order = require('../models/Order');
+const SystemConfig = require('../models/SystemConfig');
 const encryptionUtil = require('../utils/encryption');
 const emailService = require('../utils/emailService');
 const jwt = require('jsonwebtoken');
+
+// ============================================================================
+// Helper Functions
+// ============================================================================
+
+/**
+ * Calculate delivery fee based on number of bags and affiliate settings
+ * @param {Number} numberOfBags - Number of bags for the order
+ * @param {Object} affiliate - Affiliate object with fee overrides
+ * @returns {Object} Fee calculation breakdown
+ */
+async function calculateDeliveryFee(numberOfBags, affiliate = null) {
+  // Get system defaults
+  const systemMinimumFee = await SystemConfig.getValue('delivery_minimum_fee', 10.00);
+  const systemPerBagFee = await SystemConfig.getValue('delivery_per_bag_fee', 2.00);
+  
+  // Use affiliate overrides if available, otherwise use system defaults
+  const minimumFee = affiliate?.minimumDeliveryFee ?? systemMinimumFee;
+  const perBagFee = affiliate?.perBagDeliveryFee ?? systemPerBagFee;
+  
+  // Calculate fee based on bags
+  const calculatedFee = numberOfBags * perBagFee;
+  const oneWayFee = Math.max(minimumFee, calculatedFee);
+  const roundTripFee = oneWayFee * 2; // Pickup + delivery
+  
+  return {
+    numberOfBags,
+    minimumFee,
+    perBagFee,
+    calculatedFee,
+    oneWayFee,
+    roundTripFee,
+    minimumApplied: oneWayFee === minimumFee,
+    breakdown: {
+      pickup: oneWayFee,
+      delivery: oneWayFee,
+      total: roundTripFee
+    }
+  };
+}
 
 // ============================================================================
 // Order Controllers
@@ -41,7 +82,8 @@ exports.createOrder = async (req, res) => {
       serviceNotes,
       deliveryDate,
       deliveryTime,
-      specialDeliveryInstructions
+      specialDeliveryInstructions,
+      numberOfBags
     } = req.body;
 
     // Verify customer exists
@@ -83,6 +125,10 @@ exports.createOrder = async (req, res) => {
       });
     }
 
+    // Calculate delivery fee based on number of bags
+    const bagCount = parseInt(numberOfBags) || 1; // Default to 1 bag if not specified
+    const feeCalculation = await calculateDeliveryFee(bagCount, affiliate);
+    
     // Create new order
     const newOrder = new Order({
       customerId,
@@ -95,7 +141,17 @@ exports.createOrder = async (req, res) => {
       deliveryDate,
       deliveryTime,
       specialDeliveryInstructions,
-      deliveryFee: affiliate.deliveryFee,
+      numberOfBags: bagCount,
+      deliveryFee: feeCalculation.roundTripFee, // Total for pickup + delivery
+      deliveryFeeBreakdown: {
+        numberOfBags: feeCalculation.numberOfBags,
+        minimumFee: feeCalculation.minimumFee,
+        perBagFee: feeCalculation.perBagFee,
+        calculatedFee: feeCalculation.calculatedFee,
+        oneWayFee: feeCalculation.oneWayFee,
+        roundTripFee: feeCalculation.roundTripFee,
+        minimumApplied: feeCalculation.minimumApplied
+      },
       status: 'scheduled'
     });
 

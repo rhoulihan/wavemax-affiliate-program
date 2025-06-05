@@ -50,14 +50,16 @@ const fieldDefinitions = {
     self: ['customerId', 'firstName', 'lastName', 'email', 'phone', 'address',
       'city', 'state', 'zipCode', 'serviceFrequency',
       'specialInstructions', 'affiliateSpecialInstructions', 'lastFourDigits',
-      'savePaymentInfo', 'isActive', 'registrationDate', 'lastLogin'],
+      'savePaymentInfo', 'isActive', 'registrationDate', 'lastLogin',
+      'numberOfBags', 'bagCredit', 'bagCreditApplied'],
     affiliate: ['customerId', 'firstName', 'lastName', 'email', 'phone', 'address',
-      'city', 'state', 'zipCode', 'serviceFrequency', 'specialInstructions', 'affiliateSpecialInstructions', 'isActive', 'registrationDate'],
+      'city', 'state', 'zipCode', 'serviceFrequency', 'specialInstructions', 'affiliateSpecialInstructions', 'isActive', 'registrationDate',
+      'numberOfBags', 'bagCredit', 'bagCreditApplied'],
     admin: ['_id', 'customerId', 'affiliateId', 'firstName', 'lastName', 'email',
       'phone', 'address', 'city', 'state', 'zipCode', 'serviceFrequency',
       'specialInstructions', 'affiliateSpecialInstructions',
       'username', 'lastFourDigits', 'billingZip', 'savePaymentInfo', 'isActive',
-      'registrationDate', 'lastLogin']
+      'registrationDate', 'lastLogin', 'numberOfBags', 'bagCredit', 'bagCreditApplied']
   },
 
   // Order fields visible to different roles
