@@ -82,7 +82,7 @@ router.get('/:customerId/dashboard', authenticate, customerController.getCustome
  */
 router.put('/:customerId/password', authenticate, [
   body('currentPassword').notEmpty().withMessage('Current password is required'),
-  body('newPassword').isLength({ min: 8 }).withMessage('New password must be at least 8 characters long')
+  body('newPassword').custom(customPasswordValidator())
 ], customerController.updateCustomerPassword);
 
 

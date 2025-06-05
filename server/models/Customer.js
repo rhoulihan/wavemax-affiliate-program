@@ -1,13 +1,14 @@
 // Customer Model for WaveMAX Laundry Affiliate Program
 
 const mongoose = require('mongoose');
+const { v4: uuidv4 } = require('uuid');
 const encryptionUtil = require('../utils/encryption');
 
 // Customer Schema
 const customerSchema = new mongoose.Schema({
   customerId: {
     type: String,
-    default: () => 'CUST' + Math.floor(100000 + Math.random() * 900000),
+    default: () => 'CUST-' + uuidv4(),
     unique: true
   },
   affiliateId: { type: String, required: true, ref: 'Affiliate' },
