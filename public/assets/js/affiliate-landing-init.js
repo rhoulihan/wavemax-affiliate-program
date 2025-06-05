@@ -110,21 +110,29 @@
         });
     }
 
+    // Track if already initialized
+    let initialized = false;
+
     // Initialize when DOM is ready
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', initializeLandingPage);
-    } else {
-        initializeLandingPage();
+    function tryInitialize() {
+        if (!initialized && document.getElementById('affiliateName')) {
+            initialized = true;
+            initializeLandingPage();
+        }
     }
 
-    // Also check periodically in case of dynamic loading
+    // For normal page load
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', tryInitialize);
+    } else {
+        tryInitialize();
+    }
+
+    // For dynamic loading in embed-app.html
     const checkInterval = setInterval(function() {
         if (document.getElementById('affiliateName')) {
             clearInterval(checkInterval);
-            if (!document.getElementById('affiliateName').getAttribute('data-initialized')) {
-                document.getElementById('affiliateName').setAttribute('data-initialized', 'true');
-                initializeLandingPage();
-            }
+            tryInitialize();
         }
     }, 100);
 
