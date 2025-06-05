@@ -69,7 +69,7 @@ describe('Customer Controller', () => {
         username: 'janesmith',
         password: 'securepassword123',
         affiliateId: 'AFF123',
-        numberOfBags: '2'
+        numberOfBags: 2
       };
 
       const mockCustomer = {

@@ -177,7 +177,8 @@ describe('Model Tests', () => {
         pickupTime: 'morning',
         deliveryDate: new Date('2025-05-27'),
         deliveryTime: 'afternoon',
-        estimatedSize: 'medium',
+        estimatedWeight: 30,
+        numberOfBags: 2,
         deliveryFee: 5.99
       };
 
@@ -199,14 +200,15 @@ describe('Model Tests', () => {
         pickupTime: 'morning',
         deliveryDate: new Date(),
         deliveryTime: 'afternoon',
-        estimatedSize: 'medium',
+        estimatedWeight: 30,
+        numberOfBags: 2,
         deliveryFee: 5.99
       });
 
       await order.save();
 
-      // Medium size estimate: 23 lbs * $1.25 + $5.99 delivery
-      expect(order.estimatedTotal).toBeCloseTo(34.74, 2);
+      // 30 lbs * $1.25 + $5.99 delivery
+      expect(order.estimatedTotal).toBeCloseTo(43.49, 2);
     });
 
     it('should calculate actual total and commission when weight is set', async () => {
@@ -217,7 +219,8 @@ describe('Model Tests', () => {
         pickupTime: 'morning',
         deliveryDate: new Date(),
         deliveryTime: 'afternoon',
-        estimatedSize: 'large',
+        estimatedWeight: 50,
+        numberOfBags: 3,
         deliveryFee: 5.99,
         actualWeight: 30
       });
@@ -238,7 +241,8 @@ describe('Model Tests', () => {
         pickupTime: 'morning',
         deliveryDate: new Date(),
         deliveryTime: 'afternoon',
-        estimatedSize: 'small',
+        estimatedWeight: 15,
+        numberOfBags: 1,
         deliveryFee: 5.99
       });
 

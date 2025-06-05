@@ -624,7 +624,8 @@ describe('Affiliate Controller', () => {
           customerId: 'CUST001',
           pickupDate: new Date(),
           status: 'scheduled',
-          estimatedSize: 'medium',
+          estimatedWeight: 30,
+          numberOfBags: 2,
           createdAt: new Date()
         }
       ];

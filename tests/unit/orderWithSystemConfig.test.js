@@ -11,7 +11,8 @@ function createOrderData(overrides = {}) {
     pickupTime: 'morning',
     deliveryDate: new Date(),
     deliveryTime: 'afternoon',
-    estimatedSize: 'medium',
+    estimatedWeight: 30,
+    numberOfBags: 2,
     deliveryFee: 5.00,
     ...overrides
   };
@@ -36,7 +37,8 @@ describe('Order Model with SystemConfig Integration', () => {
       await SystemConfig.setValue('wdf_base_rate_per_pound', 2.50);
 
       const order = new Order(createOrderData({
-        estimatedSize: 'medium',
+        estimatedWeight: 30,
+    numberOfBags: 2,
         deliveryFee: 10.00
         // Note: NOT setting baseRate so it fetches from SystemConfig
       }));
@@ -52,7 +54,8 @@ describe('Order Model with SystemConfig Integration', () => {
       await SystemConfig.deleteOne({ key: 'wdf_base_rate_per_pound' });
 
       const order = new Order(createOrderData({
-        estimatedSize: 'small',
+        estimatedWeight: 15,
+        numberOfBags: 1,
         deliveryFee: 5.00
       }));
 
@@ -69,21 +72,23 @@ describe('Order Model with SystemConfig Integration', () => {
       await SystemConfig.setValue('wdf_base_rate_per_pound', 2.00);
 
       const order = new Order(createOrderData({
-        estimatedSize: 'medium', // 23 lbs estimate
+        estimatedWeight: 30,
+    numberOfBags: 2,
         deliveryFee: 15.00
       }));
 
       await order.save();
 
-      // Medium size: 23 lbs * $2.00 + $15.00 delivery = $61.00
-      expect(order.estimatedTotal).toBeCloseTo(61.00, 2);
+      // 30 lbs * $2.00 + $15.00 delivery = $75.00
+      expect(order.estimatedTotal).toBeCloseTo(75.00, 2);
     });
 
     it('should calculate actual total using SystemConfig rate', async () => {
       await SystemConfig.setValue('wdf_base_rate_per_pound', 1.75);
 
       const order = new Order(createOrderData({
-        estimatedSize: 'large',
+        estimatedWeight: 50,
+        numberOfBags: 3,
         deliveryFee: 20.00,
         actualWeight: 25
       }));
@@ -102,7 +107,8 @@ describe('Order Model with SystemConfig Integration', () => {
       const order = new Order(createOrderData({
         customerId: 'CUST123',
         affiliateId: 'AFF123',
-        estimatedSize: 'medium',
+        estimatedWeight: 30,
+    numberOfBags: 2,
         deliveryFee: 25.00,
         actualWeight: 20
       }));
@@ -120,7 +126,8 @@ describe('Order Model with SystemConfig Integration', () => {
       const order = new Order(createOrderData({
         customerId: 'CUST123',
         affiliateId: 'AFF123',
-        estimatedSize: 'small',
+        estimatedWeight: 15,
+        numberOfBags: 1,
         deliveryFee: 0,
         actualWeight: 10
       }));
@@ -138,7 +145,8 @@ describe('Order Model with SystemConfig Integration', () => {
       const order = new Order(createOrderData({
         customerId: 'CUST123',
         affiliateId: 'AFF123',
-        estimatedSize: 'large',
+        estimatedWeight: 50,
+        numberOfBags: 3,
         deliveryFee: 30.00,
         actualWeight: 100 // Very large order
       }));
@@ -158,7 +166,8 @@ describe('Order Model with SystemConfig Integration', () => {
       const order = new Order(createOrderData({
         customerId: 'CUST123',
         affiliateId: 'AFF123',
-        estimatedSize: 'large', // 35 lbs estimate
+        estimatedWeight: 50,
+        numberOfBags: 3,
         deliveryFee: 15.00
         // No actualWeight set
       }));
@@ -176,7 +185,8 @@ describe('Order Model with SystemConfig Integration', () => {
       const order = new Order(createOrderData({
         customerId: 'CUST123',
         affiliateId: 'AFF123',
-        estimatedSize: 'medium',
+        estimatedWeight: 30,
+    numberOfBags: 2,
         deliveryFee: 10.00
       }));
 
@@ -190,7 +200,8 @@ describe('Order Model with SystemConfig Integration', () => {
       const newOrder = new Order(createOrderData({
         customerId: 'CUST124',
         affiliateId: 'AFF124',
-        estimatedSize: 'medium',
+        estimatedWeight: 30,
+    numberOfBags: 2,
         deliveryFee: 10.00
       }));
 
@@ -237,7 +248,8 @@ describe('Order Model with SystemConfig Integration', () => {
         const order = new Order(createOrderData({
           customerId: `CUST${i}`,
           affiliateId: 'AFF123',
-          estimatedSize: 'medium',
+          estimatedWeight: 30,
+    numberOfBags: 2,
           deliveryFee: 25.00,
           actualWeight: 25
         }));
@@ -265,7 +277,8 @@ describe('Order Model with SystemConfig Integration', () => {
       const order = new Order(createOrderData({
         customerId: 'CUST001',
         affiliateId: 'AFF123',
-        estimatedSize: 'large',
+        estimatedWeight: 50,
+        numberOfBags: 3,
         deliveryFee: 15.00,
         actualWeight: 30
       }));

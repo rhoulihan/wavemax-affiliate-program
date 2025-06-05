@@ -249,7 +249,8 @@ exports.sendAffiliateNewOrderEmail = async (affiliate, customer, order) => {
       customer_address: `${customer.address}, ${customer.city}, ${customer.state} ${customer.zipCode}`,
       pickup_date: new Date(order.pickupDate).toLocaleDateString(),
       pickup_time: formatTimeSlot(order.pickupTime),
-      estimated_size: formatSize(order.estimatedSize),
+      estimated_weight: order.estimatedWeight ? `${order.estimatedWeight} lbs` : 'To be determined',
+      number_of_bags: order.numberOfBags || 1,
       special_instructions: order.specialPickupInstructions || 'None',
       dashboard_url: 'https://www.wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program?login=affiliate',
       current_year: new Date().getFullYear()

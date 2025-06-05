@@ -403,7 +403,8 @@ describe('System Config API Tests', () => {
         pickupTime: 'morning',
         deliveryDate: new Date(Date.now() + 86400000),
         deliveryTime: 'afternoon',
-        estimatedSize: 'medium',
+        estimatedWeight: 30,
+        numberOfBags: 2,
         deliveryFee: 5.00,
         paymentMethod: 'card' // Based on the Order model enum
       });

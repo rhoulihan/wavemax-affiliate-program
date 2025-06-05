@@ -100,7 +100,8 @@ describe('Order Integration Tests', () => {
           pickupDate: '2025-05-25',
           pickupTime: 'morning',
           specialPickupInstructions: 'Ring doorbell',
-          estimatedSize: 'medium',
+          estimatedWeight: 30,
+          numberOfBags: 2,
           serviceNotes: 'Handle with care',
           deliveryDate: '2025-05-27',
           deliveryTime: 'afternoon',
@@ -134,7 +135,8 @@ describe('Order Integration Tests', () => {
           affiliateId: 'AFF123',
           pickupDate: '2025-05-25',
           pickupTime: 'morning',
-          estimatedSize: 'small',
+          estimatedWeight: 15,
+          numberOfBags: 1,
           deliveryDate: '2025-05-27',
           deliveryTime: 'evening'
         });
@@ -153,7 +155,8 @@ describe('Order Integration Tests', () => {
           affiliateId: 'AFF123',
           pickupDate: '2025-05-25',
           pickupTime: 'morning',
-          estimatedSize: 'medium',
+          estimatedWeight: 30,
+          numberOfBags: 2,
           deliveryDate: '2025-05-27',
           deliveryTime: 'afternoon'
         });
@@ -175,7 +178,8 @@ describe('Order Integration Tests', () => {
           affiliateId: 'INVALID',
           pickupDate: '2025-05-25',
           pickupTime: 'morning',
-          estimatedSize: 'medium',
+          estimatedWeight: 30,
+          numberOfBags: 2,
           deliveryDate: '2025-05-27',
           deliveryTime: 'afternoon'
         });
@@ -216,7 +220,8 @@ describe('Order Integration Tests', () => {
           affiliateId: 'AFF123',
           pickupDate: '2025-05-25',
           pickupTime: 'morning',
-          estimatedSize: 'medium',
+          estimatedWeight: 30,
+          numberOfBags: 2,
           deliveryDate: '2025-05-27',
           deliveryTime: 'afternoon'
         });
@@ -256,7 +261,8 @@ describe('Order Integration Tests', () => {
         deliveryDate: new Date('2025-05-27'),
         deliveryTime: 'afternoon',
         status: 'processing',
-        estimatedSize: 'medium',
+        estimatedWeight: 30,
+        numberOfBags: 2,
         baseRate: 1.89,
         deliveryFee: 5.99
       });
@@ -341,7 +347,8 @@ describe('Order Integration Tests', () => {
         deliveryDate: new Date('2025-05-27'),
         deliveryTime: 'afternoon',
         status: 'scheduled',
-        estimatedSize: 'medium',
+        estimatedWeight: 30,
+        numberOfBags: 2,
         baseRate: 1.89,
         deliveryFee: 5.99
       });
@@ -465,7 +472,8 @@ describe('Order Integration Tests', () => {
         deliveryDate: new Date('2025-05-27'),
         deliveryTime: 'afternoon',
         status: 'scheduled',
-        estimatedSize: 'medium',
+        estimatedWeight: 30,
+        numberOfBags: 2,
         baseRate: 1.89,
         deliveryFee: 5.99
       });
@@ -556,7 +564,8 @@ describe('Order Integration Tests', () => {
           deliveryDate: new Date('2025-05-27'),
           deliveryTime: 'afternoon',
           status: 'scheduled',
-          estimatedSize: 'medium',
+          estimatedWeight: 30,
+          numberOfBags: 2,
           baseRate: 1.89,
           deliveryFee: 5.99
         },
@@ -569,7 +578,8 @@ describe('Order Integration Tests', () => {
           deliveryDate: new Date('2025-05-27'),
           deliveryTime: 'afternoon',
           status: 'scheduled',
-          estimatedSize: 'large',
+          estimatedWeight: 50,
+          numberOfBags: 3,
           baseRate: 1.89,
           deliveryFee: 5.99
         },
@@ -582,7 +592,8 @@ describe('Order Integration Tests', () => {
           deliveryDate: new Date('2025-05-28'),
           deliveryTime: 'morning',
           status: 'scheduled',
-          estimatedSize: 'small',
+          estimatedWeight: 15,
+          numberOfBags: 1,
           baseRate: 1.89,
           deliveryFee: 5.99
         }
@@ -678,7 +689,8 @@ describe('Order Integration Tests', () => {
           deliveryDate: new Date(`2025-05-${String(i + 2).padStart(2, '0')}`),
           deliveryTime: 'afternoon',
           status: i <= 10 ? 'delivered' : 'processing',
-          estimatedSize: i % 3 === 0 ? 'small' : i % 3 === 1 ? 'medium' : 'large',
+          estimatedWeight: i % 3 === 0 ? 15 : i % 3 === 1 ? 30 : 50,
+          numberOfBags: i % 3 === 0 ? 1 : i % 3 === 1 ? 2 : 3,
           actualWeight: i <= 10 ? 20 + i : null,
           baseRate: 1.89,
           deliveryFee: 5.99,
@@ -780,7 +792,8 @@ describe('Order Integration Tests', () => {
         deliveryDate: new Date('2025-05-27'),
         deliveryTime: 'afternoon',
         status: 'delivered',
-        estimatedSize: 'medium',
+        estimatedWeight: 30,
+        numberOfBags: 2,
         actualWeight: 25.5,
         baseRate: 1.89,
         deliveryFee: 5.99,
@@ -915,7 +928,8 @@ describe('Order Integration Tests', () => {
           deliveryDate: new Date('2025-05-22'),
           deliveryTime: 'afternoon',
           status: 'delivered',
-          estimatedSize: 'medium',
+          estimatedWeight: 30,
+          numberOfBags: 2,
           actualWeight: 25.5,
           baseRate: 1.89,
           deliveryFee: 5.99,
@@ -930,7 +944,8 @@ describe('Order Integration Tests', () => {
           deliveryDate: new Date('2025-05-23'),
           deliveryTime: 'morning',
           status: 'processing',
-          estimatedSize: 'large',
+          estimatedWeight: 50,
+          numberOfBags: 3,
           baseRate: 1.89,
           deliveryFee: 5.99
         },
@@ -943,7 +958,8 @@ describe('Order Integration Tests', () => {
           deliveryDate: new Date('2025-05-27'),
           deliveryTime: 'evening',
           status: 'scheduled',
-          estimatedSize: 'small',
+          estimatedWeight: 15,
+          numberOfBags: 1,
           baseRate: 1.89,
           deliveryFee: 5.99
         }
@@ -1043,10 +1059,10 @@ describe('Order Integration Tests', () => {
           },
           totalRevenue: 54.19,
           averageOrderValue: 54.19,
-          ordersBySize: {
-            small: 1,
-            medium: 1,
-            large: 1
+          ordersByWeight: {
+            '0-20': 1,
+            '21-40': 1,
+            '41+': 1
           }
         }
       });
@@ -1074,7 +1090,8 @@ describe('Order Integration Tests', () => {
           affiliateId: 'AFF123',
           pickupDate: '2025-05-25',
           pickupTime: 'morning',
-          estimatedSize: 'medium',
+          estimatedWeight: 30,
+          numberOfBags: 2,
           deliveryDate: '2025-05-27',
           deliveryTime: 'afternoon'
         });
@@ -1117,7 +1134,8 @@ describe('Order Integration Tests', () => {
           affiliateId: 'AFF123',
           pickupDate: '2025-05-26',
           pickupTime: 'morning',
-          estimatedSize: 'large',
+          estimatedWeight: 50,
+          numberOfBags: 3,
           deliveryDate: '2025-05-28',
           deliveryTime: 'evening'
         });
@@ -1165,7 +1183,8 @@ describe('Order Integration Tests', () => {
             affiliateId: 'AFF123',
             pickupDate: '2025-05-25',
             pickupTime: 'morning',
-            estimatedSize: 'medium',
+            estimatedWeight: 30,
+          numberOfBags: 2,
             deliveryDate: '2025-05-27',
             deliveryTime: 'afternoon'
           });
@@ -1204,7 +1223,8 @@ describe('Order Integration Tests', () => {
           affiliateId: 'AFF123',
           pickupDate: '2025-05-26',
           pickupTime: 'morning',
-          estimatedSize: 'small',
+          estimatedWeight: 15,
+          numberOfBags: 1,
           deliveryDate: '2025-05-28',
           deliveryTime: 'afternoon'
         });
