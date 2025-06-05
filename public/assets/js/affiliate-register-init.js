@@ -448,7 +448,7 @@ function initializeAffiliateRegistration() {
   // Password strength validation
   function validatePasswordStrength(password, username = '', email = '') {
     const requirements = {
-      length: password.length >= 12,
+      length: password.length >= 8,
       uppercase: /[A-Z]/.test(password),
       lowercase: /[a-z]/.test(password),
       number: /\d/.test(password),
@@ -473,6 +473,10 @@ function initializeAffiliateRegistration() {
   function updatePasswordRequirements(password, username = '', email = '') {
     const validation = validatePasswordStrength(password, username, email);
     const requirements = validation.requirements;
+    const confirmPassword = document.getElementById('confirmPassword').value;
+    
+    // Add password match requirement
+    requirements.match = password !== '' && password === confirmPassword;
 
     // Update requirement indicators
     const updateReq = (id, met) => {
@@ -489,6 +493,7 @@ function initializeAffiliateRegistration() {
     updateReq('req-lowercase', requirements.lowercase);
     updateReq('req-number', requirements.number);
     updateReq('req-special', requirements.special);
+    updateReq('req-match', requirements.match);
 
     // Update strength indicator
     const strengthElement = document.getElementById('passwordStrength');
@@ -499,7 +504,7 @@ function initializeAffiliateRegistration() {
         strengthElement.innerHTML = '<span class="text-green-600 font-medium">✅ Strong password</span>';
       } else {
         const missing = [];
-        if (!requirements.length) missing.push('12+ characters');
+        if (!requirements.length) missing.push('8+ characters');
         if (!requirements.uppercase) missing.push('uppercase letter');
         if (!requirements.lowercase) missing.push('lowercase letter');
         if (!requirements.number) missing.push('number');
@@ -514,6 +519,7 @@ function initializeAffiliateRegistration() {
 
   // Add password validation event listeners
   const passwordField = document.getElementById('password');
+  const confirmPasswordField = document.getElementById('confirmPassword');
   const usernameField = document.getElementById('username');
   const emailField = document.getElementById('email');
 
@@ -546,6 +552,18 @@ function initializeAffiliateRegistration() {
           passwordField.value, 
           usernameField?.value || '', 
           this.value
+        );
+      }
+    });
+  }
+
+  if (confirmPasswordField) {
+    confirmPasswordField.addEventListener('input', function() {
+      if (passwordField?.value) {
+        updatePasswordRequirements(
+          passwordField.value, 
+          usernameField?.value || '', 
+          emailField?.value || ''
         );
       }
     });

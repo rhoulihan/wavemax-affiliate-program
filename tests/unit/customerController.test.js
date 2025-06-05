@@ -1,17 +1,19 @@
 const customerController = require('../../server/controllers/customerController');
 const Customer = require('../../server/models/Customer');
 const Affiliate = require('../../server/models/Affiliate');
-const Bag = require('../../server/models/Bag');
 const Order = require('../../server/models/Order');
+const SystemConfig = require('../../server/models/SystemConfig');
 const encryptionUtil = require('../../server/utils/encryption');
 const emailService = require('../../server/utils/emailService');
 const { getFilteredData } = require('../../server/utils/fieldFilter');
+const { validationResult } = require('express-validator');
 
 // Mock dependencies
 jest.mock('../../server/models/Customer');
 jest.mock('../../server/models/Affiliate');
-jest.mock('../../server/models/Bag');
 jest.mock('../../server/models/Order');
+jest.mock('../../server/models/SystemConfig');
+jest.mock('express-validator');
 jest.mock('../../server/utils/encryption', () => ({
   generateUniqueCustomerId: jest.fn(),
   hashPassword: jest.fn(),
@@ -38,6 +40,14 @@ describe('Customer Controller', () => {
   });
 
   describe('registerCustomer', () => {
+    beforeEach(() => {
+      // Mock validation result to return no errors
+      validationResult.mockReturnValue({
+        isEmpty: () => true,
+        array: () => []
+      });
+    });
+
     it('should successfully register a new customer', async () => {
       const mockAffiliate = {
         affiliateId: 'AFF123',
@@ -58,7 +68,8 @@ describe('Customer Controller', () => {
         serviceFrequency: 'weekly',
         username: 'janesmith',
         password: 'securepassword123',
-        affiliateId: 'AFF123'
+        affiliateId: 'AFF123',
+        numberOfBags: '2'
       };
 
       const mockCustomer = {
@@ -70,9 +81,6 @@ describe('Customer Controller', () => {
         save: jest.fn().mockResolvedValue(true)
       };
 
-      const mockBag = {
-        save: jest.fn().mockResolvedValue(true)
-      };
 
       Affiliate.findOne.mockResolvedValue(mockAffiliate);
       Customer.findOne.mockResolvedValue(null);
@@ -84,7 +92,9 @@ describe('Customer Controller', () => {
 
       // Mock the Customer constructor to return our mockCustomer
       Customer.mockImplementation(() => mockCustomer);
-      Bag.mockImplementation(() => mockBag);
+      
+      // Mock SystemConfig for bag fee
+      SystemConfig.getValue.mockResolvedValue(10.00);
 
       emailService.sendCustomerWelcomeEmail.mockResolvedValue();
       emailService.sendAffiliateNewCustomerEmail.mockResolvedValue();
@@ -99,7 +109,6 @@ describe('Customer Controller', () => {
       expect(res.json).toHaveBeenCalledWith({
         success: true,
         customerId: 'CUST123456',
-        bagBarcode: expect.stringMatching(/^WM-/),
         customerData: expect.objectContaining({
           firstName: 'Jane',
           lastName: 'Smith',
@@ -184,14 +193,12 @@ describe('Customer Controller', () => {
         toObject: jest.fn().mockReturnValue(mockAffiliateData)
       };
 
-      const mockBags = [];
 
       req.params.customerId = 'CUST123';
       req.user = { role: 'customer', customerId: 'CUST123' };
 
       Customer.findOne.mockResolvedValue(mockCustomer);
       Affiliate.findOne.mockResolvedValue(mockAffiliate);
-      Bag.find.mockResolvedValue(mockBags);
 
       // Mock getFilteredData to return expected data
       getFilteredData.mockImplementation((type, data, role, options) => {
@@ -386,93 +393,6 @@ describe('Customer Controller', () => {
     });
   });
 
-  describe('reportLostBag', () => {
-    it('should successfully report a lost bag', async () => {
-      const mockBag = {
-        bagId: 'BAG123',
-        customer: 'customer_id',
-        status: 'active',
-        save: jest.fn()
-      };
-
-      const mockAffiliate = {
-        affiliateId: 'AFF123',
-        email: 'affiliate@example.com',
-        firstName: 'John',
-        lastName: 'Doe'
-      };
-
-      const mockCustomer = {
-        _id: 'customer_id',
-        customerId: 'CUST123',
-        affiliateId: 'AFF123',
-        firstName: 'Jane',
-        lastName: 'Smith'
-      };
-
-      req.params = { customerId: 'CUST123', bagId: 'BAG123' };
-      req.user = { role: 'customer', customerId: 'CUST123' };
-
-      Customer.findOne.mockResolvedValue(mockCustomer);
-      Bag.findOne.mockResolvedValue(mockBag);
-      Affiliate.findOne.mockResolvedValue(mockAffiliate);
-      emailService.sendAffiliateLostBagEmail.mockResolvedValue();
-
-      await customerController.reportLostBag(req, res);
-
-      expect(Customer.findOne).toHaveBeenCalledWith({ customerId: 'CUST123' });
-      expect(Bag.findOne).toHaveBeenCalledWith({ bagId: 'BAG123', customer: mockCustomer._id });
-      expect(mockBag.status).toBe('lost');
-      expect(mockBag.save).toHaveBeenCalled();
-      expect(emailService.sendAffiliateLostBagEmail).toHaveBeenCalled();
-      expect(res.status).toHaveBeenCalledWith(200);
-      expect(res.json).toHaveBeenCalledWith({
-        success: true,
-        message: 'Lost bag report submitted successfully'
-      });
-    });
-
-    it('should return 404 for non-existent bag', async () => {
-      const mockCustomer = {
-        customerId: 'CUST123',
-        affiliateId: 'AFF123'
-      };
-
-      req.params = { customerId: 'CUST123', bagId: 'NONEXISTENT' };
-      req.user = { role: 'customer', customerId: 'CUST123' };
-
-      Customer.findOne.mockResolvedValue(mockCustomer);
-      Bag.findOne.mockResolvedValue(null);
-
-      await customerController.reportLostBag(req, res);
-
-      expect(res.status).toHaveBeenCalledWith(404);
-      expect(res.json).toHaveBeenCalledWith({
-        success: false,
-        message: 'Bag not found'
-      });
-    });
-
-    it('should return 403 for unauthorized bag report', async () => {
-      const mockCustomer = {
-        customerId: 'CUST456',
-        affiliateId: 'AFF456'
-      };
-
-      req.params = { customerId: 'CUST456', bagId: 'BAG123' };
-      req.user = { role: 'customer', customerId: 'CUST123' };  // Different customer
-
-      Customer.findOne.mockResolvedValue(mockCustomer);
-
-      await customerController.reportLostBag(req, res);
-
-      expect(res.status).toHaveBeenCalledWith(403);
-      expect(res.json).toHaveBeenCalledWith({
-        success: false,
-        message: 'Unauthorized'
-      });
-    });
-  });
 
   describe('deleteCustomerData', () => {
     beforeEach(() => {
@@ -486,13 +406,11 @@ describe('Customer Controller', () => {
 
       Customer.findOne.mockResolvedValue(mockCustomer);
       Order.deleteMany.mockResolvedValue({ deletedCount: 3 });
-      Bag.deleteMany.mockResolvedValue({ deletedCount: 1 });
       Customer.deleteOne.mockResolvedValue({ deletedCount: 1 });
 
       await customerController.deleteCustomerData(req, res);
 
       expect(Order.deleteMany).toHaveBeenCalledWith({ customerId: 'CUST123' });
-      expect(Bag.deleteMany).toHaveBeenCalledWith({ customer: 'customer_id' });
       expect(Customer.deleteOne).toHaveBeenCalledWith({ customerId: 'CUST123' });
 
       expect(res.status).toHaveBeenCalledWith(200);
@@ -501,8 +419,7 @@ describe('Customer Controller', () => {
         message: 'All data has been deleted successfully',
         deletedData: {
           customer: 1,
-          orders: 3,
-          bags: 1
+          orders: 3
         }
       });
     });

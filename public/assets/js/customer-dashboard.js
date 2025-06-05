@@ -125,6 +125,14 @@ async function loadDashboardData() {
         document.getElementById('activeOrders').textContent = stats.activeOrders || 0;
         document.getElementById('completedOrders').textContent = stats.completedOrders || 0;
         document.getElementById('totalSpent').textContent = `$${(stats.totalSpent || 0).toFixed(2)}`;
+        
+        // Display bag credit
+        if (statsResult.dashboard.bagCredit) {
+          const bagCredit = statsResult.dashboard.bagCredit;
+          const bagCreditAmount = bagCredit.amount || 0;
+          document.getElementById('bagCredits').textContent = `$${bagCreditAmount.toFixed(2)}`;
+          console.log('Bag credit displayed:', bagCreditAmount);
+        }
       }
     } else {
       console.error('Failed to fetch dashboard stats:', statsResponse.status, statsResponse.statusText);
@@ -139,6 +147,7 @@ async function loadDashboardData() {
     document.getElementById('activeOrders').textContent = '0';
     document.getElementById('completedOrders').textContent = '0';
     document.getElementById('totalSpent').textContent = '$0.00';
+    document.getElementById('bagCredits').textContent = '$0.00';
   }
 }
 

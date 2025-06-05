@@ -34,6 +34,8 @@ exports.registerAffiliate = async (req, res) => {
       zipCode,
       serviceArea,
       deliveryFee,
+      minimumDeliveryFee,
+      perBagDeliveryFee,
       username,
       password,
       paymentMethod,
@@ -70,6 +72,9 @@ exports.registerAffiliate = async (req, res) => {
       zipCode,
       serviceArea,
       deliveryFee: parseFloat(deliveryFee),
+      // New fee structure fields (optional)
+      minimumDeliveryFee: minimumDeliveryFee ? parseFloat(minimumDeliveryFee) : null,
+      perBagDeliveryFee: perBagDeliveryFee ? parseFloat(perBagDeliveryFee) : null,
       username,
       passwordSalt: salt,
       passwordHash: hash,
@@ -212,7 +217,7 @@ exports.updateAffiliateProfile = async (req, res) => {
     const updatableFields = [
       'firstName', 'lastName', 'phone', 'businessName',
       'address', 'city', 'state', 'zipCode', 'serviceArea',
-      'deliveryFee', 'paymentMethod'
+      'deliveryFee', 'minimumDeliveryFee', 'perBagDeliveryFee', 'paymentMethod'
     ];
 
     // Update fields
@@ -844,6 +849,8 @@ exports.getPublicAffiliateInfo = async (req, res) => {
         lastName: affiliate.lastName,
         businessName: affiliate.businessName,
         deliveryFee: affiliate.deliveryFee,
+        minimumDeliveryFee: affiliate.minimumDeliveryFee,
+        perBagDeliveryFee: affiliate.perBagDeliveryFee,
         serviceArea: affiliate.serviceArea
       }
     });

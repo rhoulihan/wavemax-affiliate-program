@@ -4,6 +4,7 @@
 const Affiliate = require('../models/Affiliate');
 const Customer = require('../models/Customer');
 const Order = require('../models/Order');
+const SystemConfig = require('../models/SystemConfig');
 const encryptionUtil = require('../utils/encryption');
 const emailService = require('../utils/emailService');
 const jwt = require('jsonwebtoken');
@@ -48,7 +49,8 @@ exports.registerCustomer = async (req, res) => {
       expiryDate,
       cvv,
       billingZip,
-      savePaymentInfo
+      savePaymentInfo,
+      numberOfBags
     } = req.body;
 
     // Verify affiliate exists
@@ -76,7 +78,12 @@ exports.registerCustomer = async (req, res) => {
     // Hash password
     const { salt, hash } = encryptionUtil.hashPassword(password);
 
-    // Create new customer
+    // Get bag fee from system config
+    const bagFee = await SystemConfig.getValue('laundry_bag_fee', 10.00);
+    const bagCount = parseInt(numberOfBags) || 1;
+    const totalBagCredit = bagFee * bagCount;
+
+    // Create new customer with bag information
     const newCustomer = new Customer({
       affiliateId,
       firstName,
@@ -97,15 +104,25 @@ exports.registerCustomer = async (req, res) => {
       lastFourDigits: cardNumber && savePaymentInfo ? cardNumber.slice(-4) : null,
       expiryDate: savePaymentInfo ? expiryDate : null,
       billingZip: savePaymentInfo ? billingZip : null,
-      savePaymentInfo: !!savePaymentInfo
+      savePaymentInfo: !!savePaymentInfo,
+      // Bag information
+      numberOfBags: bagCount,
+      bagCredit: totalBagCredit,
+      bagCreditApplied: false
     });
 
     await newCustomer.save();
 
-    // Send welcome emails
+    // Send welcome emails with bag information
     try {
-      await emailService.sendCustomerWelcomeEmail(newCustomer, affiliate);
-      await emailService.sendAffiliateNewCustomerEmail(affiliate, newCustomer);
+      await emailService.sendCustomerWelcomeEmail(newCustomer, affiliate, {
+        numberOfBags: bagCount,
+        bagFee: bagFee,
+        totalCredit: totalBagCredit
+      });
+      await emailService.sendAffiliateNewCustomerEmail(affiliate, newCustomer, {
+        numberOfBags: bagCount
+      });
       // Email sent successfully - no need to check result
     } catch (emailError) {
       console.warn('Welcome email(s) could not be sent:', emailError);
@@ -462,7 +479,12 @@ exports.getCustomerDashboardStats = async (req, res) => {
           firstName: affiliate.firstName,
           lastName: affiliate.lastName,
           deliveryFee: affiliate.deliveryFee
-        } : null
+        } : null,
+        bagCredit: {
+          amount: customer.bagCredit || 0,
+          applied: customer.bagCreditApplied || false,
+          numberOfBags: customer.numberOfBags || 0
+        }
       }
     });
   } catch (error) {

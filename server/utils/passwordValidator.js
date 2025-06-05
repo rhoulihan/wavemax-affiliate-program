@@ -30,9 +30,9 @@ const validatePasswordStrength = (password, options = {}) => {
     return { success: false, errors };
   }
   
-  // Check minimum length (12 characters)
-  if (password.length < 12) {
-    errors.push('Password must be at least 12 characters long');
+  // Check minimum length (8 characters)
+  if (password.length < 8) {
+    errors.push('Password must be at least 8 characters long');
   }
   
   // Check for uppercase letters
@@ -206,8 +206,9 @@ const getPasswordStrength = (password) => {
   let score = 0;
   
   // Length scoring (max 30 points)
-  if (password.length >= 12) score += 20;
-  if (password.length >= 16) score += 10;
+  if (password.length >= 8) score += 15;
+  if (password.length >= 12) score += 10;
+  if (password.length >= 16) score += 5;
   
   // Character variety (max 40 points)
   if (/[a-z]/.test(password)) score += 10;

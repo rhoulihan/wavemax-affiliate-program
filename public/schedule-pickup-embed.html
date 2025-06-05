@@ -95,18 +95,27 @@
                         </div>
                     </div>
                     
-                    <!-- Estimated Order Size -->
+                    <!-- Laundry Details -->
                     <div>
-                        <h3 class="text-xl font-bold mb-4">Estimated Order Size</h3>
+                        <h3 class="text-xl font-bold mb-4">Laundry Details</h3>
                         <div class="grid md:grid-cols-2 gap-4">
-                            <div class="md:col-span-2">
-                                <label for="estimatedSize" class="block text-gray-700 mb-2">Estimated Laundry Size *</label>
-                                <select id="estimatedSize" name="estimatedSize" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                                    <option value="">Select an option</option>
-                                    <option value="small">Small (1-2 bags, approx. 10-15 lbs)</option>
-                                    <option value="medium">Medium (3-4 bags, approx. 16-30 lbs)</option>
-                                    <option value="large">Large (5+ bags, approx. 31+ lbs)</option>
+                            <div>
+                                <label for="numberOfBags" class="block text-gray-700 mb-2">Number of Bags *</label>
+                                <select id="numberOfBags" name="numberOfBags" required class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <option value="">Select number of bags</option>
+                                    <option value="1">1 bag</option>
+                                    <option value="2">2 bags</option>
+                                    <option value="3">3 bags</option>
+                                    <option value="4">4 bags</option>
+                                    <option value="5">5 bags</option>
+                                    <option value="6">6+ bags</option>
                                 </select>
+                            </div>
+                            
+                            <div>
+                                <label for="estimatedWeight" class="block text-gray-700 mb-2">Estimated Weight (lbs) *</label>
+                                <input type="number" id="estimatedWeight" name="estimatedWeight" required min="10" max="200" step="5" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="e.g., 25">
+                                <p class="text-sm text-gray-600 mt-1">Typical bag weighs 10-15 lbs</p>
                             </div>
                             
                             <div class="md:col-span-2">
@@ -142,19 +151,62 @@
                         </div>
                     </div>
                     
+                    <!-- Payment Information -->
+                    <div>
+                        <h3 class="text-xl font-bold mb-4">Payment Information</h3>
+                        <p class="text-sm text-gray-600 mb-4">Payment information is required for each order.</p>
+                        <div class="grid md:grid-cols-2 gap-4">
+                            <div class="md:col-span-2">
+                                <label for="cardholderName" class="block text-gray-700 mb-2">Cardholder Name *</label>
+                                <input type="text" id="cardholderName" name="cardholderName" required class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            </div>
+                            
+                            <div class="md:col-span-2">
+                                <label for="cardNumber" class="block text-gray-700 mb-2">Card Number *</label>
+                                <input type="text" id="cardNumber" name="cardNumber" required class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="•••• •••• •••• ••••">
+                            </div>
+                            
+                            <div>
+                                <label for="expiryDate" class="block text-gray-700 mb-2">Expiry Date *</label>
+                                <input type="text" id="expiryDate" name="expiryDate" required class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="MM/YY">
+                            </div>
+                            
+                            <div>
+                                <label for="cvv" class="block text-gray-700 mb-2">CVV *</label>
+                                <input type="text" id="cvv" name="cvv" required class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="•••">
+                            </div>
+                            
+                            <div class="md:col-span-2">
+                                <label for="billingZip" class="block text-gray-700 mb-2">Billing ZIP Code *</label>
+                                <input type="text" id="billingZip" name="billingZip" required class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            </div>
+                        </div>
+                    </div>
+                    
                     <!-- Service and Pricing Summary -->
                     <div class="border-t pt-6">
-                        <h3 class="text-xl font-bold mb-4">Order Summary</h3>
+                        <h3 class="text-xl font-bold mb-4">Order Summary & Authorization</h3>
                         <div class="bg-gray-50 p-4 rounded-lg">
                             <div class="mb-2">
                                 <span class="font-bold">Delivery Fee:</span>
-                                <span id="deliveryFee">$0.00</span> per pickup/delivery
+                                <span id="deliveryFee">$0.00</span> 
+                                <span id="deliveryFeeBreakdown" class="text-sm text-gray-600"></span>
                             </div>
-                            <div>
+                            <div class="mb-2">
                                 <span class="font-bold">Wash, Dry, Fold Service:</span>
-                                <span id="wdfRateDisplay">$-.-- per pound</span>
+                                <span id="wdfRate">$0.00</span> per pound
                             </div>
-                            <p class="text-sm text-gray-500 mt-2">Final cost will depend on the weight of your laundry.</p>
+                            <div class="mb-3">
+                                <span class="font-bold">Estimated Weight:</span>
+                                <span id="estimatedWeightDisplay">0</span> lbs
+                            </div>
+                            <div class="border-t pt-3 mb-3">
+                                <div class="font-bold text-lg">Estimated Total: <span id="estimatedTotal">$0.00</span></div>
+                            </div>
+                            <div class="bg-blue-50 border border-blue-200 p-3 rounded">
+                                <p class="text-sm font-bold text-blue-800 mb-1">Authorization Amount: <span id="authorizationAmount" class="text-lg">$0.00</span></p>
+                                <p class="text-xs text-blue-600">We will authorize your card for 10% above the estimated total to account for weight variations. You will only be charged for the actual weight of your laundry.</p>
+                            </div>
                         </div>
                     </div>
                     
@@ -357,5 +409,7 @@
             sendMessageToParent('iframe-loaded', { page: 'schedule-pickup' });
         });
     </script>
+    <script src="/assets/js/csrf-utils.js"></script>
+    <script src="/assets/js/schedule-pickup.js"></script>
 </body>
 </html>

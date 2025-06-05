@@ -12,7 +12,6 @@ function initializeSuccessPage() {
     // Check URL parameters as fallback (for backward compatibility)
     const urlParams = new URLSearchParams(window.location.search);
     const customerId = urlParams.get('id');
-    const bagBarcode = urlParams.get('barcode');
 
     if (!customerId) {
       alert('No registration data found. Please register first.');
@@ -34,7 +33,7 @@ function initializeSuccessPage() {
             affiliateId: customer.affiliateId,
             affiliateName: customer.affiliate ? customer.affiliate.name : 'WaveMAX Affiliate Partner',
             deliveryFee: customer.affiliate ? customer.affiliate.deliveryFee : '5.99',
-            bagBarcode: bagBarcode || (customer.bags && customer.bags.length > 0 ? customer.bags[0].barcode : 'Will be assigned upon delivery')
+            bagsPurchased: customer.bagsPurchased || '1'
           });
         } else {
           console.error('Failed to load customer data:', data.message);
@@ -108,8 +107,23 @@ function displayCustomerData(data) {
     };
   }
 
-  // Set bag barcode
-  if (data.bagBarcode) {
-    document.getElementById('bagBarcode').textContent = data.bagBarcode;
-  }
+  // Set bags purchased (default to 1)
+  const bagCount = data.bagsPurchased || 1;
+  document.getElementById('bagsPurchased').textContent = bagCount;
+  
+  // Fetch bag fee from system config to calculate credit
+  fetch('/api/v1/system/config/public')
+    .then(response => response.json())
+    .then(configs => {
+      const bagFeeConfig = configs.find(c => c.key === 'laundry_bag_fee');
+      if (bagFeeConfig && bagFeeConfig.currentValue) {
+        const bagFee = bagFeeConfig.currentValue;
+        const totalCredit = bagFee * bagCount;
+        document.getElementById('bagCreditAmount').textContent = `$${totalCredit.toFixed(2)}`;
+      }
+    })
+    .catch(error => {
+      console.error('Error fetching bag fee:', error);
+      // Keep default $10.00 if fetch fails
+    });
 }
