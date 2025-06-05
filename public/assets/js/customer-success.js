@@ -32,7 +32,8 @@ function initializeSuccessPage() {
             email: customer.email,
             affiliateId: customer.affiliateId,
             affiliateName: customer.affiliate ? customer.affiliate.name : 'WaveMAX Affiliate Partner',
-            deliveryFee: customer.affiliate ? customer.affiliate.deliveryFee : '5.99',
+            minimumDeliveryFee: customer.affiliate ? customer.affiliate.minimumDeliveryFee : '25.00',
+            perBagDeliveryFee: customer.affiliate ? customer.affiliate.perBagDeliveryFee : '5.00',
             bagsPurchased: customer.bagsPurchased || '1'
           });
         } else {
@@ -73,7 +74,17 @@ function displayCustomerData(data) {
   // Set affiliate information
   document.getElementById('affiliateName').textContent = data.affiliateName;
   document.getElementById('serviceArea').textContent = 'Austin, TX area';
-  document.getElementById('deliveryFee').textContent = `$${parseFloat(data.deliveryFee).toFixed(2)} per pickup/delivery`;
+  // Display delivery fee structure
+  if (data.minimumDeliveryFee !== undefined && data.perBagDeliveryFee !== undefined) {
+    const minFee = parseFloat(data.minimumDeliveryFee);
+    const perBag = parseFloat(data.perBagDeliveryFee);
+    document.getElementById('deliveryFee').textContent = `Starting at $${minFee.toFixed(2)} (min) or $${perBag.toFixed(2)}/bag`;
+  } else if (data.deliveryFee !== undefined) {
+    // Fallback for legacy data
+    document.getElementById('deliveryFee').textContent = `$${parseFloat(data.deliveryFee).toFixed(2)} per pickup/delivery`;
+  } else {
+    document.getElementById('deliveryFee').textContent = 'Contact for pricing';
+  }
 
   // Update button links to use direct navigation
   const schedulePickupBtn = document.getElementById('schedulePickupBtn');

@@ -111,7 +111,8 @@ router.post('/social/register', [
   body('state').notEmpty().withMessage('State is required'),
   body('zipCode').notEmpty().withMessage('ZIP code is required'),
   body('serviceArea').notEmpty().withMessage('Service area is required'),
-  body('deliveryFee').isNumeric().withMessage('Delivery fee must be a number'),
+  body('minimumDeliveryFee').optional().isNumeric().withMessage('Minimum delivery fee must be a number'),
+  body('perBagDeliveryFee').optional().isNumeric().withMessage('Per-bag delivery fee must be a number'),
   body('paymentMethod').isIn(['directDeposit', 'check', 'paypal']).withMessage('Invalid payment method'),
   // Username and password are NOT required for social registrations - OAuth provides authentication
   // These fields will be auto-generated if not provided

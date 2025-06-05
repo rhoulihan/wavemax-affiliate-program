@@ -186,13 +186,35 @@ async function loadCustomerIntoForm(customer, token) {
     console.log('Customer affiliateId:', customer.affiliateId);
     console.log('Customer data has affiliate info:', customer.affiliate);
 
-    // Check if we already have affiliate data with delivery fee from login
-    if (customer.affiliate && customer.affiliate.deliveryFee) {
-      console.log('Using affiliate delivery fee from login data:', customer.affiliate.deliveryFee);
+    // Check if we already have affiliate data with fee structure from login
+    if (customer.affiliate) {
+      console.log('Using affiliate fee data from login:', customer.affiliate);
       const deliveryFeeField = document.getElementById('deliveryFee');
       if (deliveryFeeField) {
-        deliveryFeeAmount = parseFloat(customer.affiliate.deliveryFee);
-        deliveryFeeField.textContent = `$${deliveryFeeAmount.toFixed(2)}`;
+        // Calculate fee based on number of bags
+        const bagsInput = document.querySelector('input[name="estimatedSize"]:checked');
+        const numberOfBags = bagsInput ? parseInt(bagsInput.dataset.bags || 1) : 1;
+        
+        if (customer.affiliate.minimumDeliveryFee !== undefined && customer.affiliate.perBagDeliveryFee !== undefined) {
+          const minFee = parseFloat(customer.affiliate.minimumDeliveryFee);
+          const perBagFee = parseFloat(customer.affiliate.perBagDeliveryFee);
+          const calculatedFee = numberOfBags * perBagFee;
+          deliveryFeeAmount = Math.max(minFee, calculatedFee);
+          deliveryFeeBreakdown = {
+            numberOfBags,
+            perBagFee,
+            calculatedFee,
+            minimumFee: minFee,
+            appliedFee: deliveryFeeAmount
+          };
+          
+          deliveryFeeField.textContent = `$${deliveryFeeAmount.toFixed(2)}`;
+          console.log('Calculated delivery fee:', deliveryFeeBreakdown);
+        } else {
+          // Fallback for missing fee structure
+          deliveryFeeAmount = 25.00;
+          deliveryFeeField.textContent = `$${deliveryFeeAmount.toFixed(2)}`;
+        }
         calculateEstimate(); // Recalculate with delivery fee
       }
     }
@@ -232,13 +254,28 @@ async function loadCustomerIntoForm(customer, token) {
         // Set delivery fee if available and not already set
         const deliveryFeeField = document.getElementById('deliveryFee');
         if (deliveryFeeField && deliveryFeeField.textContent === '$0.00') {
-          if (fullCustomer.affiliate && fullCustomer.affiliate.deliveryFee) {
-            console.log('Setting delivery fee from customer profile:', fullCustomer.affiliate.deliveryFee);
-            deliveryFeeAmount = parseFloat(fullCustomer.affiliate.deliveryFee);
+          if (fullCustomer.affiliate && fullCustomer.affiliate.minimumDeliveryFee !== undefined) {
+            console.log('Setting delivery fee from customer profile:', fullCustomer.affiliate);
+            // Calculate fee based on number of bags
+            const bagsInput = document.querySelector('input[name="estimatedSize"]:checked');
+            const numberOfBags = bagsInput ? parseInt(bagsInput.dataset.bags || 1) : 1;
+            
+            const minFee = parseFloat(fullCustomer.affiliate.minimumDeliveryFee);
+            const perBagFee = parseFloat(fullCustomer.affiliate.perBagDeliveryFee);
+            const calculatedFee = numberOfBags * perBagFee;
+            deliveryFeeAmount = Math.max(minFee, calculatedFee);
+            deliveryFeeBreakdown = {
+              numberOfBags,
+              perBagFee,
+              calculatedFee,
+              minimumFee: minFee,
+              appliedFee: deliveryFeeAmount
+            };
+            
             deliveryFeeField.textContent = `$${deliveryFeeAmount.toFixed(2)}`;
             calculateEstimate(); // Recalculate with delivery fee
           } else {
-            console.log('No affiliate delivery fee in customer profile, fetching directly');
+            console.log('No affiliate fee structure in customer profile, fetching directly');
             // Try to fetch affiliate data directly
             await fetchAffiliateDeliveryFee(customer.affiliateId);
           }
@@ -306,12 +343,34 @@ async function fetchAffiliateDeliveryFee(affiliateId) {
       const data = await response.json();
       console.log('Affiliate data:', data);
 
-      if (data.success && data.affiliate && data.affiliate.deliveryFee) {
-        deliveryFeeAmount = parseFloat(data.affiliate.deliveryFee);
-        deliveryFeeField.textContent = `$${deliveryFeeAmount.toFixed(2)}`;
+      if (data.success && data.affiliate) {
+        // Calculate fee based on number of bags
+        const bagsInput = document.querySelector('input[name="estimatedSize"]:checked');
+        const numberOfBags = bagsInput ? parseInt(bagsInput.dataset.bags || 1) : 1;
+        
+        if (data.affiliate.minimumDeliveryFee !== undefined && data.affiliate.perBagDeliveryFee !== undefined) {
+          const minFee = parseFloat(data.affiliate.minimumDeliveryFee);
+          const perBagFee = parseFloat(data.affiliate.perBagDeliveryFee);
+          const calculatedFee = numberOfBags * perBagFee;
+          deliveryFeeAmount = Math.max(minFee, calculatedFee);
+          deliveryFeeBreakdown = {
+            numberOfBags,
+            perBagFee,
+            calculatedFee,
+            minimumFee: minFee,
+            appliedFee: deliveryFeeAmount
+          };
+          
+          deliveryFeeField.textContent = `$${deliveryFeeAmount.toFixed(2)}`;
+          console.log('Calculated delivery fee from affiliate:', deliveryFeeBreakdown);
+        } else {
+          // Fallback for missing fee structure
+          deliveryFeeAmount = 25.00;
+          deliveryFeeField.textContent = '$25.00';
+        }
       } else {
-        deliveryFeeAmount = 5.99;
-        deliveryFeeField.textContent = '$5.99';
+        deliveryFeeAmount = 25.00;
+        deliveryFeeField.textContent = '$25.00';
       }
       calculateEstimate(); // Recalculate with delivery fee
     } else {
@@ -456,7 +515,8 @@ function setupFormSubmission(token) {
           specialDeliveryInstructions: pickupData.specialDeliveryInstructions || '',
           serviceNotes: pickupData.serviceNotes || '',
           estimatedTotal: data.estimatedTotal,
-          deliveryFee: customer.affiliate?.deliveryFee || 5.99, // Get from customer's affiliate data
+          deliveryFee: deliveryFeeAmount || 25.00, // Use calculated delivery fee
+          deliveryFeeBreakdown: deliveryFeeBreakdown, // Include fee breakdown
           createdAt: new Date().toISOString()
         };
 

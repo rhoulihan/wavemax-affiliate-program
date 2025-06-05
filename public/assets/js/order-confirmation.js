@@ -147,9 +147,33 @@ function initializeOrderConfirmation() {
     document.getElementById('affiliateName').textContent = 'Your WaveMAX Affiliate';
     document.getElementById('affiliateContact').textContent = 'Contact information will be provided soon';
 
-    // Use the delivery fee from the order data
-    const deliveryFee = order.deliveryFee || 5.99;
-    document.getElementById('deliveryFee').textContent = `$${parseFloat(deliveryFee).toFixed(2)}`;
+    // Display delivery fee information
+    const deliveryFeeElement = document.getElementById('deliveryFee');
+    let deliveryFee = 25.00; // Default
+    
+    if (order.deliveryFeeBreakdown) {
+      // Use the breakdown info if available
+      const breakdown = order.deliveryFeeBreakdown;
+      deliveryFee = breakdown.roundTripFee || breakdown.appliedFee * 2 || order.deliveryFee || 25.00;
+      
+      if (deliveryFeeElement) {
+        deliveryFeeElement.textContent = `$${parseFloat(deliveryFee).toFixed(2)}`;
+        // Optionally show breakdown
+        const parent = deliveryFeeElement.parentElement;
+        if (parent && breakdown.minimumApplied) {
+          const note = document.createElement('small');
+          note.className = 'text-gray-500 block';
+          note.textContent = `(Minimum fee applies)`;
+          parent.appendChild(note);
+        }
+      }
+    } else {
+      // Fallback to simple fee
+      deliveryFee = order.deliveryFee || 25.00;
+      if (deliveryFeeElement) {
+        deliveryFeeElement.textContent = `$${parseFloat(deliveryFee).toFixed(2)}`;
+      }
+    }
 
     // Update order link with affiliate ID - redirect to main site with pickup flag
     const scheduleAnotherBtn = document.getElementById('scheduleAnotherBtn');

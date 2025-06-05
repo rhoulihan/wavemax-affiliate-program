@@ -33,7 +33,6 @@ exports.registerAffiliate = async (req, res) => {
       state,
       zipCode,
       serviceArea,
-      deliveryFee,
       minimumDeliveryFee,
       perBagDeliveryFee,
       username,
@@ -71,10 +70,8 @@ exports.registerAffiliate = async (req, res) => {
       state,
       zipCode,
       serviceArea,
-      deliveryFee: parseFloat(deliveryFee),
-      // New fee structure fields (optional)
-      minimumDeliveryFee: minimumDeliveryFee ? parseFloat(minimumDeliveryFee) : null,
-      perBagDeliveryFee: perBagDeliveryFee ? parseFloat(perBagDeliveryFee) : null,
+      minimumDeliveryFee: parseFloat(minimumDeliveryFee) || 25,
+      perBagDeliveryFee: parseFloat(perBagDeliveryFee) || 5,
       username,
       passwordSalt: salt,
       passwordHash: hash,
@@ -153,7 +150,8 @@ exports.getAffiliateProfile = async (req, res) => {
       state: affiliate.state,
       zipCode: affiliate.zipCode,
       serviceArea: affiliate.serviceArea,
-      deliveryFee: affiliate.deliveryFee,
+      minimumDeliveryFee: affiliate.minimumDeliveryFee,
+      perBagDeliveryFee: affiliate.perBagDeliveryFee,
       paymentMethod: affiliate.paymentMethod,
       isActive: affiliate.isActive,
       dateRegistered: affiliate.dateRegistered,
@@ -217,7 +215,7 @@ exports.updateAffiliateProfile = async (req, res) => {
     const updatableFields = [
       'firstName', 'lastName', 'phone', 'businessName',
       'address', 'city', 'state', 'zipCode', 'serviceArea',
-      'deliveryFee', 'minimumDeliveryFee', 'perBagDeliveryFee', 'paymentMethod'
+      'minimumDeliveryFee', 'perBagDeliveryFee', 'paymentMethod'
     ];
 
     // Update fields
@@ -848,7 +846,6 @@ exports.getPublicAffiliateInfo = async (req, res) => {
         firstName: affiliate.firstName,
         lastName: affiliate.lastName,
         businessName: affiliate.businessName,
-        deliveryFee: affiliate.deliveryFee,
         minimumDeliveryFee: affiliate.minimumDeliveryFee,
         perBagDeliveryFee: affiliate.perBagDeliveryFee,
         serviceArea: affiliate.serviceArea

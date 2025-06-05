@@ -141,7 +141,8 @@ function initializeAffiliateRegistration() {
       { id: 'state', name: 'State' },
       { id: 'zipCode', name: 'ZIP Code' },
       { id: 'serviceArea', name: 'Service Area' },
-      { id: 'deliveryFee', name: 'Delivery Fee' },
+      { id: 'minimumDeliveryFee', name: 'Minimum Delivery Fee' },
+      { id: 'perBagDeliveryFee', name: 'Per-Bag Delivery Fee' },
       { id: 'paymentMethod', name: 'Payment Method' }
     );
 
@@ -746,6 +747,48 @@ function initializeAffiliateRegistration() {
       }
     });
     resizeObserver.observe(document.body);
+    
+    // Initialize fee calculator
+    initializeFeeCalculator();
+  }
+
+  // Fee calculator functionality
+  function initializeFeeCalculator() {
+    const minFeeInput = document.getElementById('minimumDeliveryFee');
+    const perBagInput = document.getElementById('perBagDeliveryFee');
+    
+    if (!minFeeInput || !perBagInput) return;
+    
+    function updateCalculator() {
+      const minFee = parseFloat(minFeeInput.value) || 25;
+      const perBag = parseFloat(perBagInput.value) || 5;
+      
+      // Calculate fees for different bag quantities
+      const bags = [1, 3, 5, 10];
+      bags.forEach(qty => {
+        const calculated = qty * perBag;
+        const total = Math.max(minFee, calculated);
+        const elem = document.getElementById(`calc${qty}bag${qty > 1 ? 's' : ''}`);
+        if (elem) {
+          elem.textContent = `$${total}`;
+          // Add visual indicator if minimum applies
+          if (total === minFee && calculated < minFee) {
+            elem.classList.add('font-bold');
+            elem.title = 'Minimum fee applies';
+          } else {
+            elem.classList.remove('font-bold');
+            elem.title = `${qty} × $${perBag} = $${calculated}`;
+          }
+        }
+      });
+    }
+    
+    // Update on input change
+    minFeeInput.addEventListener('input', updateCalculator);
+    perBagInput.addEventListener('input', updateCalculator);
+    
+    // Initial calculation
+    updateCalculator();
     
     // Clean up observer before navigation
     window.addEventListener('beforeunload', function() {

@@ -175,16 +175,13 @@
               
               console.log('Affiliate uses new fee structure:', { minFee, perBagFee });
             } else {
-              // Use legacy flat fee
-              const affiliateFee = affiliate.deliveryFee || 0;
-              const fee = parseFloat(affiliateFee).toFixed(2);
-              deliveryFeeElement.textContent = `$${fee}`;
+              // No fee structure found - shouldn't happen with updated model
+              console.error('No fee structure found for affiliate');
+              deliveryFeeElement.textContent = 'Contact for pricing';
               
               if (deliveryFeeStructureElement) {
-                deliveryFeeStructureElement.textContent = '(per pickup/delivery)';
+                deliveryFeeStructureElement.textContent = '';
               }
-              
-              console.log('Affiliate uses legacy fee:', fee);
             }
           } else {
             console.error('deliveryFee element not found');

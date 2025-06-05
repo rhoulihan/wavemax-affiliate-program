@@ -307,8 +307,17 @@ async function loadAffiliateData(affiliateId) {
       const serviceAreaElement = document.getElementById('serviceArea');
       if (serviceAreaElement) serviceAreaElement.textContent = data.serviceArea;
 
+      // Display delivery fee structure
       const deliveryFeeElement = document.getElementById('deliveryFee');
-      if (deliveryFeeElement) deliveryFeeElement.textContent = `$${data.deliveryFee.toFixed(2)}`;
+      if (deliveryFeeElement) {
+        if (data.minimumDeliveryFee !== undefined && data.perBagDeliveryFee !== undefined) {
+          const minFee = parseFloat(data.minimumDeliveryFee);
+          const perBag = parseFloat(data.perBagDeliveryFee);
+          deliveryFeeElement.textContent = `$${minFee.toFixed(2)} min, $${perBag.toFixed(2)}/bag`;
+        } else {
+          deliveryFeeElement.textContent = 'Contact support';
+        }
+      }
 
       // Generate and display registration link with wavemaxlaundry.com format
       const registrationLink = `https://www.wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program?affid=${affiliateId}`;
