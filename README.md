@@ -11,16 +11,48 @@ The WaveMAX Affiliate Program enables individuals to register as affiliates, onb
 - **Affiliate Registration & Management**: Complete onboarding and management system for affiliates
 - **Customer Registration**: Allow affiliates to register customers using unique affiliate links
 - **Order Management**: Schedule pickups, track order status, and manage deliveries
-- **Laundry Bag Tracking**: Track customer bags with barcodes for accurate order processing
+- **Flexible Delivery Pricing**: Dynamic delivery fee structure with minimum + per-bag pricing
 - **Secure Payments**: Encrypted payment processing with PCI-compliant storage
 - **Dashboard Analytics**: Comprehensive metrics for both affiliates and customers with visual charts
 - **Email Notifications**: Automated emails for all important events in the lifecycle
 - **Advanced Security**: Industry-standard security features including JWT, CSRF protection, and audit logging
 - **API Versioning**: Future-proof API design with version management
 
-## Recent Improvements (June 2025)
+## Recent Major Updates
 
-### Development Backlog Queue System
+### Bag Tracking Removal (January 2025)
+- **Complete System Simplification**: Removed all bag tracking functionality
+  - Eliminated physical bag requirements and barcode generation
+  - Simplified customer onboarding - no bag purchase needed
+  - Streamlined order processing without bag assignments
+  - Maintained order history integrity during migration
+  - Updated all user interfaces and email templates
+
+### Dynamic Delivery Fee Structure (January 2025)
+- **Flexible Pricing Model**: Implemented minimum + per-bag delivery pricing
+  - Affiliates set minimum delivery fee (default $25) and per-bag fee (default $5)
+  - Customers pay whichever is higher: minimum or calculated per-bag rate
+  - Live fee calculator in registration showing pricing for 1, 3, 5, and 10 bags
+  - Fee management in affiliate dashboard settings
+  - Round-trip pricing automatically calculated
+
+### Enhanced Security Features (January 2025)
+- **UUID Implementation**: Enhanced security with UUID generation
+  - Customer IDs: CUST-xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx format
+  - Administrator IDs: ADM-xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx format
+  - Maintains backward compatibility with existing sequential IDs
+- **Stronger Password Validation**: Enhanced requirements across all user types
+  - Real-time validation feedback during registration
+  - Prevention of common patterns and user data in passwords
+  - Consistent security standards for all user roles
+
+## Key Features
+
+For a detailed history of all changes, see [CHANGELOG.md](CHANGELOG.md).
+
+### Development Process Improvements
+
+#### Development Backlog Queue System
 - **Introduced Backlog Management**: Created `BACKLOG.md` for tracking pending work items
   - Organized by priority levels (High, Medium, Low) with detailed context
   - Maintains history of when items were added and their current status
@@ -212,144 +244,35 @@ The WaveMAX Affiliate Program enables individuals to register as affiliates, onb
 - **JavaScript Errors**: Fixed duplicate declaration errors in embedded forms
 - **API Consistency**: Standardized dashboard endpoints and data structures
 
-## Recent Improvements (May 2025 - Earlier Updates)
+## System Architecture
 
-### Administrator & Operator Management System
-- **New Role-Based Access Control**: Added administrator and operator roles with granular permissions
-  - Administrators: Full system access, operator management, analytics, configuration
-  - Operators: Order processing, quality checks, workstation management
-- **Administrator Features**:
-  - System configuration management
-  - Operator lifecycle management (create, update, deactivate)
-  - Comprehensive analytics dashboard
-  - Order and affiliate reporting
-  - System health monitoring
-- **Operator Features**:
-  - Personal dashboard with active orders and performance metrics
-  - Order queue management by workstation
-  - Quality check workflow
-  - Shift management and status updates
-  - Customer note management
-- **Security Enhancements**:
-  - Separate authentication endpoints for administrators and operators
-  - Permission-based access control middleware
-  - Account lockout after failed login attempts
-  - Password reset functionality for both roles
+### Role-Based Access Control
 
-### Testing Infrastructure Improvements
-- **MongoDB Connection**: Migrated from in-memory MongoDB to real database connection for tests
-  - Uses separate test database (wavemax_test) to avoid conflicts
-  - Improved test reliability and reduced timeout issues
-  - Proper cleanup between tests without permission errors
-- **Test Coverage Expansion**:
-  - Added comprehensive unit tests for administrator controller
-  - Added comprehensive unit tests for operator controller
-  - Updated integration tests for new authentication endpoints
-  - Fixed duplicate index warnings in Mongoose schemas
-- **Test Configuration**:
-  - Increased Jest timeout to 60 seconds for database operations
-  - Updated test setup to use environment variables
-  - Added proper test data cleanup logic
+The system implements a comprehensive role-based access control (RBAC) system with four distinct user types:
 
-### Database Schema Improvements
-- **Fixed Duplicate Index Warnings**: Removed redundant index definitions in:
-  - Administrator model (adminId field)
-  - Operator model (operatorId field)
-  - SystemConfig model (key and category fields)
-- **New Models**:
-  - Administrator: System administrators with permissions and audit trail
-  - Operator: Laundry operators with shift and performance tracking
-  - SystemConfig: Dynamic system configuration management
-- **Enhanced OAuth Support**: Updated Customer and Affiliate models for OAuth authentication
-  - Conditional validation for password fields based on registration method
-  - Social account data storage (Google, Facebook, LinkedIn)
-  - Registration method tracking (traditional vs social)
-  - OAuth accounts don't require password fields for security compliance
+1. **Affiliates**: Independent contractors who manage customer relationships and logistics
+   - Register customers using unique affiliate links
+   - Manage pickup and delivery schedules
+   - Track earnings and commissions
+   - Set custom delivery fee structures
 
-### Customer Registration Simplification
-- **Removed Schedule Preferences**: Simplified registration by removing preferred day/time selection
-- **Service Frequency Removed**: Eliminated service frequency requirement from registration
-- **Enhanced Special Instructions**: Added separate fields for laundry and affiliate-specific instructions
-- **Updated Pricing Display**: Changed to "$1.25/lb (includes service fees)" for clarity
+2. **Customers**: End users who use the laundry service
+   - Register through affiliate-specific links
+   - Schedule pickups and deliveries
+   - Track order status and history
+   - Manage account and payment information
 
-### Development Tools
-- **Delete Data Functionality**: Added delete all data feature for development/test environments
-  - Available in affiliate settings and customer profile sections
-  - Only visible when NODE_ENV is development or test
-  - Requires double confirmation before deletion
-  - Affiliates can delete all related customers, orders, bags, and transactions
-  - Customers can delete their account and all related data
-- **Environment Endpoint**: Added `/api/v1/environment` endpoint for checking current environment
+3. **Administrators**: System administrators with full access
+   - System configuration management
+   - Operator lifecycle management
+   - Analytics and reporting
+   - Affiliate management
 
-### Email Service Enhancements
-- **Microsoft Exchange Support**: Added support for Microsoft Exchange Server email provider
-  - Compatible with Exchange 2013, 2016, 2019, and Exchange Online
-  - Support for Office 365 SMTP configuration
-  - Configurable SSL certificate validation for development environments
-
-### Testing & Quality Assurance
-- **Integration Test Fixes**: Updated all integration tests to properly handle CSRF tokens
-- **Test Coverage**: Skipped tests for non-existent endpoints with TODO markers for future implementation
-- **Rate Limiting**: Fixed rate limiting tests to match actual configuration (20 attempts)
-- **Helper Scripts**: Added test maintenance utilities for CSRF token management
-- **API Server Improvements**: Added informative root endpoint and blocked WordPress scanning attempts
-- **Delete Functionality Tests**: Added comprehensive unit and integration tests for data deletion
-
-## Recent Improvements (January 2025)
-
-### Embedded-Only Deployment
-- **Simplified Architecture**: Converted to embedded-only deployment, removing all standalone HTML files
-- **Single Entry Point**: All functionality now operates through `embed-app.html` with route-based navigation
-- **Consistent CSP Compliance**: All navigation uses postMessage API for compatibility with strict CSP environments
-- **Reduced Codebase**: Eliminated duplicate standalone/embedded versions, reducing maintenance overhead
-- **Unified User Experience**: Single, consistent interface for all users regardless of deployment context
-
-### Security Enhancements
-- **Enhanced Authentication**: JWT tokens reduced from 7 days to 1 hour with secure refresh token rotation
-- **Input Sanitization**: Added XSS and NoSQL injection prevention middleware
-- **CSRF Protection**: Enabled for all state-changing API operations
-- **Password Security**: Increased PBKDF2 iterations from 10,000 to 100,000
-- **Audit Logging**: Comprehensive security event logging for compliance
-- **Field-Level Access Control**: Role-based API response filtering
-- **Error Handling**: Secure error messages that don't expose internal details
-
-### Infrastructure Improvements
-- **API Versioning**: Implemented /api/v1/ structure for backward compatibility
-- **HTTPS Enforcement**: Automatic redirect in production environments
-- **Security Headers**: Added HSTS, X-Frame-Options, and strict CSP
-- **Rate Limiting**: Enhanced protection on authentication endpoints
-- **CORS Security**: Restricted to specific allowed origins only
-- **AWS SDK v3**: Upgraded to latest AWS SDK for improved performance and security
-
-### Code Quality
-- **Dead Code Removal**: Removed all standalone HTML/JS files, cleaning up 4000+ lines of code
-- **Dependency Updates**: Added express-mongo-sanitize and xss packages
-- **Validation**: Added comprehensive input validation on all endpoints
-- **Error Handling**: Centralized error handling with proper logging
-- **Route-Based Navigation**: Updated all internal navigation to use routes instead of file paths
-- **Test Suite Improvements**:
-  - Fixed MongoDB connection conflicts in test environment
-  - Added comprehensive test coverage for all controllers
-  - Implemented proper test isolation with MongoDB Memory Server
-  - Added unit tests for security middleware and utilities
-  - Achieved 80%+ code coverage across the application
-  - Fixed all failing tests (auth, affiliate, transaction models)
-  - Added memory optimization for resource-constrained environments
-  - Created custom test sequencer for efficient test execution
-
-### Feature Updates
-- **Landing Page Update**: Changed "5 Stars on Google" to "$0 Startup Cost" in promotional messaging
-- **Customer Dashboard**: Fixed API endpoints and CSP violations
-- **Customer Profile**: Added inline edit functionality for customer information updates
-- **Order Management**: 
-  - Added service notes section to order confirmation for special instructions
-  - Fixed active orders count calculation on dashboard
-  - Improved date handling with ISO8601 format conversion
-  - Enhanced delivery fee calculation with better error handling
-- **Payment Security**: Enhanced encryption for payment information storage
-- **Refresh Tokens**: Proper implementation with 30-day expiry and rotation
-- **Customer Model**: Removed redundant bags array field
-- **CSP Compliance**: Moved all inline scripts to external files for security compliance
+4. **Operators**: Laundry facility staff
+   - Process orders at workstations
+   - Perform quality checks
+   - Update order status
+   - Manage shift schedules
 
 ## Project Structure
 
