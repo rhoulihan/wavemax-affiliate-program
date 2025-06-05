@@ -20,10 +20,10 @@ const orderSchema = new mongoose.Schema({
     required: true
   },
   specialPickupInstructions: String,
-  estimatedSize: {
-    type: String,
-    enum: ['small', 'medium', 'large'],
-    required: true
+  estimatedWeight: {
+    type: Number,
+    required: true,
+    min: 0.1
   },
   serviceNotes: String,
   // Delivery information
@@ -122,19 +122,9 @@ orderSchema.pre('save', async function(next) {
     }
   }
   
-  if (this.isNew || this.isModified('estimatedSize') || this.isModified('baseRate') || this.isModified('deliveryFee')) {
-    // Calculate estimated weight based on size
-    let estimatedWeight = 0;
-    if (this.estimatedSize === 'small') {
-      estimatedWeight = 12.5; // average of 10-15 lbs
-    } else if (this.estimatedSize === 'medium') {
-      estimatedWeight = 23; // average of 16-30 lbs
-    } else if (this.estimatedSize === 'large') {
-      estimatedWeight = 35; // approximate for 31+ lbs
-    }
-
-    // Calculate estimated total
-    this.estimatedTotal = parseFloat((estimatedWeight * this.baseRate + this.deliveryFee).toFixed(2));
+  if (this.isNew || this.isModified('estimatedWeight') || this.isModified('baseRate') || this.isModified('deliveryFee')) {
+    // Calculate estimated total using the provided estimated weight
+    this.estimatedTotal = parseFloat((this.estimatedWeight * this.baseRate + this.deliveryFee).toFixed(2));
   }
 
   // Calculate actual total if actual weight is available

@@ -344,7 +344,8 @@ describe('Customer Integration Tests', () => {
           deliveryDate: new Date('2025-05-27'),
           deliveryTime: 'afternoon',
           status: 'delivered',
-          estimatedSize: 'medium',
+          estimatedWeight: 30,
+          numberOfBags: 2,
           actualWeight: 23.5,
           baseRate: 1.89,
           deliveryFee: 5.99
@@ -358,7 +359,8 @@ describe('Customer Integration Tests', () => {
           deliveryDate: new Date('2025-05-28'),
           deliveryTime: 'morning',
           status: 'processing',
-          estimatedSize: 'large',
+          estimatedWeight: 50,
+          numberOfBags: 3,
           baseRate: 1.89,
           deliveryFee: 5.99
         }
@@ -625,7 +627,8 @@ describe('Customer Integration Tests', () => {
           deliveryDate: new Date('2025-05-03'),
           deliveryTime: 'afternoon',
           status: 'delivered',
-          estimatedSize: 'medium',
+          estimatedWeight: 30,
+          numberOfBags: 2,
           actualWeight: 23.5,
           baseRate: 1.89,
           deliveryFee: 5.99,
@@ -641,7 +644,8 @@ describe('Customer Integration Tests', () => {
           deliveryDate: new Date('2025-05-12'),
           deliveryTime: 'morning',
           status: 'delivered',
-          estimatedSize: 'large',
+          estimatedWeight: 50,
+          numberOfBags: 3,
           actualWeight: 35.0,
           baseRate: 1.89,
           deliveryFee: 5.99,
@@ -657,7 +661,8 @@ describe('Customer Integration Tests', () => {
           deliveryDate: new Date('2025-05-22'),
           deliveryTime: 'evening',
           status: 'processing',
-          estimatedSize: 'small',
+          estimatedWeight: 15,
+          numberOfBags: 1,
           baseRate: 1.89,
           deliveryFee: 5.99
         }
@@ -739,7 +744,8 @@ describe('Customer Integration Tests', () => {
         deliveryDate: new Date(),
         deliveryTime: 'afternoon',
         status: 'scheduled',
-        estimatedSize: 'medium',
+        estimatedWeight: 30,
+        numberOfBags: 2,
         deliveryFee: 20
       });
 

@@ -52,7 +52,8 @@ describe('Order Controller', () => {
         pickupDate: '2025-05-25',
         pickupTime: 'morning',
         specialPickupInstructions: 'Ring doorbell',
-        estimatedSize: 'medium',
+        estimatedWeight: 30,
+        numberOfBags: 2,
         serviceNotes: 'Handle with care',
         deliveryDate: '2025-05-27',
         deliveryTime: 'afternoon',
@@ -97,7 +98,8 @@ describe('Order Controller', () => {
         affiliateId: 'AFF123',
         pickupDate: '2025-05-25',
         pickupTime: 'morning',
-        estimatedSize: 'medium',
+        estimatedWeight: 30,
+        numberOfBags: 2,
         deliveryDate: '2025-05-27',
         deliveryTime: 'afternoon'
       };

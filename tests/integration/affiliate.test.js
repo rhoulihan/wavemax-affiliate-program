@@ -199,7 +199,8 @@ describe('Affiliate API', () => {
         deliveryDate: new Date('2025-05-27'),
         deliveryTime: 'afternoon',
         status: 'delivered',
-        estimatedSize: 'medium',
+        estimatedWeight: 30,
+        numberOfBags: 2,
         actualWeight: 23.5,
         baseRate: 1.89,
         deliveryFee: 5.99,
@@ -215,7 +216,8 @@ describe('Affiliate API', () => {
         deliveryDate: new Date('2025-05-28'),
         deliveryTime: 'morning',
         status: 'processing',
-        estimatedSize: 'large',
+        estimatedWeight: 50,
+        numberOfBags: 3,
         baseRate: 1.89,
         deliveryFee: 5.99
       }
@@ -345,7 +347,8 @@ describe('Affiliate API', () => {
       deliveryDate: new Date(),
       deliveryTime: 'afternoon',
       status: 'scheduled',
-      estimatedSize: 'medium',
+      estimatedWeight: 30,
+      numberOfBags: 2,
       deliveryFee: 20
     });
 

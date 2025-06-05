@@ -16,7 +16,8 @@ router.post('/', [
   body('affiliateId').notEmpty().withMessage('Affiliate ID is required'),
   body('pickupDate').isISO8601().withMessage('Valid pickup date is required'),
   body('pickupTime').isIn(['morning', 'afternoon', 'evening']).withMessage('Invalid pickup time'),
-  body('estimatedSize').isIn(['small', 'medium', 'large']).withMessage('Invalid size'),
+  body('numberOfBags').isInt({ min: 1 }).withMessage('Number of bags must be at least 1'),
+  body('estimatedWeight').isFloat({ min: 0.1 }).withMessage('Estimated weight must be a positive number'),
   body('deliveryDate').isISO8601().withMessage('Valid delivery date is required'),
   body('deliveryTime').isIn(['morning', 'afternoon', 'evening']).withMessage('Invalid delivery time')
 ], authenticate, orderController.createOrder);

@@ -78,7 +78,7 @@ exports.createOrder = async (req, res) => {
       pickupDate,
       pickupTime,
       specialPickupInstructions,
-      estimatedSize,
+      estimatedWeight,
       serviceNotes,
       deliveryDate,
       deliveryTime,
@@ -136,7 +136,7 @@ exports.createOrder = async (req, res) => {
       pickupDate,
       pickupTime,
       specialPickupInstructions,
-      estimatedSize,
+      estimatedWeight,
       serviceNotes,
       deliveryDate,
       deliveryTime,
@@ -237,7 +237,7 @@ exports.getOrderDetails = async (req, res) => {
         pickupDate: order.pickupDate,
         pickupTime: order.pickupTime,
         specialPickupInstructions: order.specialPickupInstructions,
-        estimatedSize: order.estimatedSize,
+        estimatedWeight: order.estimatedWeight,
         serviceNotes: order.serviceNotes,
         deliveryDate: order.deliveryDate,
         deliveryTime: order.deliveryTime,
@@ -676,7 +676,7 @@ exports.exportOrders = async (req, res) => {
         'Customer Email',
         'Affiliate ID',
         'Status',
-        'Estimated Size',
+        'Estimated Weight',
         'Actual Weight',
         'Estimated Total',
         'Actual Total',
@@ -694,7 +694,7 @@ exports.exportOrders = async (req, res) => {
           customer ? customer.email : '',
           order.affiliateId,
           order.status,
-          order.estimatedSize,
+          order.estimatedWeight || '',
           order.actualWeight || '',
           order.estimatedTotal || '',
           order.actualTotal || '',
@@ -728,7 +728,7 @@ exports.exportOrders = async (req, res) => {
             } : null,
             affiliateId: order.affiliateId,
             status: order.status,
-            estimatedSize: order.estimatedSize,
+            estimatedWeight: order.estimatedWeight,
             actualWeight: order.actualWeight,
             estimatedTotal: order.estimatedTotal,
             actualTotal: order.actualTotal,
@@ -933,7 +933,7 @@ exports.searchOrders = async (req, res) => {
           } : null,
           affiliateId: order.affiliateId,
           status: order.status,
-          estimatedSize: order.estimatedSize,
+          estimatedWeight: order.estimatedWeight,
           actualWeight: order.actualWeight,
           estimatedTotal: order.estimatedTotal,
           actualTotal: order.actualTotal,
@@ -1000,13 +1000,8 @@ exports.getOrderStatistics = async (req, res) => {
 
     let totalRevenue = 0;
     let deliveredCount = 0;
-
-    // Orders by size
-    const ordersBySize = {
-      small: 0,
-      medium: 0,
-      large: 0
-    };
+    let totalEstimatedWeight = 0;
+    let orderWithWeightCount = 0;
 
     orders.forEach(order => {
       // Count by status
@@ -1020,20 +1015,22 @@ exports.getOrderStatistics = async (req, res) => {
         deliveredCount++;
       }
 
-      // Count by size
-      if (order.estimatedSize && ordersBySize.hasOwnProperty(order.estimatedSize)) {
-        ordersBySize[order.estimatedSize]++;
+      // Calculate average weight
+      if (order.estimatedWeight) {
+        totalEstimatedWeight += order.estimatedWeight;
+        orderWithWeightCount++;
       }
     });
 
     const averageOrderValue = deliveredCount > 0 ? totalRevenue / deliveredCount : 0;
+    const averageEstimatedWeight = orderWithWeightCount > 0 ? totalEstimatedWeight / orderWithWeightCount : 0;
 
     const statistics = {
       totalOrders,
       ordersByStatus,
       totalRevenue,
       averageOrderValue,
-      ordersBySize
+      averageEstimatedWeight
     };
 
     res.status(200).json({
