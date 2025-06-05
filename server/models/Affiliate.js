@@ -2,13 +2,14 @@
 
 const mongoose = require('mongoose');
 const crypto = require('crypto');
+const { v4: uuidv4 } = require('uuid');
 const encryptionUtil = require('../utils/encryption');
 
 // Affiliate Schema
 const affiliateSchema = new mongoose.Schema({
   affiliateId: {
     type: String,
-    default: () => 'AFF' + Math.floor(100000 + Math.random() * 900000),
+    default: () => 'AFF-' + uuidv4(),
     unique: true
   },
   firstName: { type: String, required: true },

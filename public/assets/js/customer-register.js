@@ -201,6 +201,83 @@
   }
 
 
+  // Password validation function
+  function validatePassword() {
+    const password = document.getElementById('password').value;
+    const username = document.getElementById('username').value;
+    const email = document.getElementById('email').value;
+
+    // Check requirements
+    const requirements = {
+      length: password.length >= 12,
+      uppercase: /[A-Z]/.test(password),
+      lowercase: /[a-z]/.test(password),
+      number: /\d/.test(password),
+      special: /[!@#$%^&*()_+\-=\[\]{}|;:,.<>?]/.test(password)
+    };
+
+    // Check if password contains username or email
+    const containsUsername = username && password.toLowerCase().includes(username.toLowerCase());
+    const containsEmailUser = email && password.toLowerCase().includes(email.split('@')[0].toLowerCase());
+
+    // Update requirement indicators
+    function updateReq(id, met) {
+      const element = document.getElementById(id);
+      if (element) {
+        const indicator = element.querySelector('span:first-child');
+        if (indicator) {
+          indicator.textContent = met ? '✅' : '⚪';
+        }
+        element.classList.toggle('text-green-700', met);
+        element.classList.toggle('text-gray-600', !met);
+      }
+    }
+
+    updateReq('req-length', requirements.length);
+    updateReq('req-uppercase', requirements.uppercase);
+    updateReq('req-lowercase', requirements.lowercase);
+    updateReq('req-number', requirements.number);
+    updateReq('req-special', requirements.special);
+
+    // Update strength indicator
+    const strengthElement = document.getElementById('passwordStrength');
+    if (strengthElement) {
+      if (password.length === 0) {
+        strengthElement.innerHTML = '';
+      } else if (Object.values(requirements).every(r => r) && !containsUsername && !containsEmailUser) {
+        strengthElement.innerHTML = '<span class="text-green-600 font-medium">✅ Strong password</span>';
+      } else {
+        const missing = [];
+        if (!requirements.length) missing.push('12+ characters');
+        if (!requirements.uppercase) missing.push('uppercase letter');
+        if (!requirements.lowercase) missing.push('lowercase letter');
+        if (!requirements.number) missing.push('number');
+        if (!requirements.special) missing.push('special character');
+        if (containsUsername || containsEmailUser) missing.push('cannot contain username/email');
+        
+        strengthElement.innerHTML = `<span class="text-red-600">❌ Missing: ${missing.join(', ')}</span>`;
+      }
+    }
+
+    return Object.values(requirements).every(r => r) && !containsUsername && !containsEmailUser;
+  }
+
+  // Add password validation event listeners
+  const passwordInput = document.getElementById('password');
+  const usernameInput = document.getElementById('username');
+  const emailInput = document.getElementById('email');
+
+  if (passwordInput) {
+    passwordInput.addEventListener('input', validatePassword);
+    passwordInput.addEventListener('focus', validatePassword);
+  }
+  if (usernameInput) {
+    usernameInput.addEventListener('input', validatePassword);
+  }
+  if (emailInput) {
+    emailInput.addEventListener('input', validatePassword);
+  }
+
   // Form submission
   const form = document.getElementById('customerRegistrationForm');
 
@@ -211,13 +288,20 @@
     const formData = new FormData(form);
     const isSocialRegistration = formData.get('socialToken');
 
-    // Check if passwords match (only for non-social registration)
+    // Check if passwords match and validate strength (only for non-social registration)
     if (!isSocialRegistration) {
       const password = document.getElementById('password').value;
       const confirmPassword = document.getElementById('confirmPassword').value;
 
       if (password !== confirmPassword) {
         alert('Passwords do not match!');
+        return;
+      }
+
+      // Validate password strength
+      if (!validatePassword()) {
+        alert('Please ensure your password meets all the security requirements listed below the password field.');
+        document.getElementById('password').focus();
         return;
       }
     }
@@ -325,32 +409,37 @@
   });
 
   // Handle bag selection
-  const bagFee = 10.00; // Default bag fee, will be updated from server
+  let bagFee = 10.00; // Default bag fee, will be updated from server
   const numberOfBagsSelect = document.getElementById('numberOfBags');
   const totalBagFeeDisplay = document.getElementById('totalBagFee');
   const bagFeeSummary = document.getElementById('bagFeeSummary');
   const bagFeeSummaryAmount = document.getElementById('bagFeeSummaryAmount');
 
-  // Fetch bag fee from server configuration
+  // Fetch bag fee from system configuration
   const baseUrl = window.EMBED_CONFIG?.baseUrl || 'https://wavemax.promo';
-  fetch(`${baseUrl}/api/v1/config/bag-fee`)
+  fetch(`${baseUrl}/api/v1/system/config/public`)
     .then(response => response.json())
-    .then(data => {
-      if (data.success && data.bagFee) {
-        const serverBagFee = parseFloat(data.bagFee);
+    .then(configs => {
+      const bagFeeConfig = configs.find(c => c.key === 'laundry_bag_fee');
+      if (bagFeeConfig && bagFeeConfig.currentValue) {
+        bagFee = parseFloat(bagFeeConfig.currentValue);
         // Update all bag fee displays
-        document.getElementById('bagFeeDisplay').textContent = `$${serverBagFee.toFixed(2)}`;
+        const bagFeeDisplay = document.getElementById('bagFeeDisplay');
+        if (bagFeeDisplay) {
+          bagFeeDisplay.textContent = `$${bagFee.toFixed(2)}`;
+        }
         // Update select options
         for (let i = 1; i <= 5; i++) {
           const option = numberOfBagsSelect.querySelector(`option[value="${i}"]`);
           if (option) {
-            option.textContent = `${i} bag${i > 1 ? 's' : ''} - $${(i * serverBagFee).toFixed(2)}`;
+            option.textContent = `${i} bag${i > 1 ? 's' : ''} - $${(i * bagFee).toFixed(2)}`;
           }
         }
       }
     })
     .catch(error => {
       console.error('Error fetching bag fee:', error);
+      // Keep using default fee
     });
 
   numberOfBagsSelect.addEventListener('change', function() {
