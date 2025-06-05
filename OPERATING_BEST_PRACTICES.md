@@ -215,6 +215,24 @@ This document contains important operational knowledge and workarounds discovere
 - Check NODE_ENV setting when debugging environment-specific issues
 - Some features (like documentation) may be environment-gated
 
+## Legal and Branding Guidelines
+
+### Copyright Notices
+- **Always use**: `© [YEAR] CRHS Enterprises, LLC` in all copyright labels
+- **Never use**: `© WaveMAX` or other variations
+- **Example**: `© 2025 CRHS Enterprises, LLC. All rights reserved.`
+- This applies to:
+  - Footer copyright notices
+  - Email templates
+  - Documentation
+  - Terms of service
+  - Any legal notices
+
+### Company Information
+- **Legal Entity**: CRHS Enterprises, LLC
+- **DBA**: WaveMAX Laundry
+- **Standard Footer Format**: `© [YEAR] CRHS Enterprises, LLC. All rights reserved.`
+
 ---
 
-*Last Updated: 2025-06-03*
+*Last Updated: 2025-01-06*
