@@ -139,8 +139,6 @@ function initializeAffiliateRegistration() {
       { id: 'address', name: 'Address' },
       { id: 'city', name: 'City' },
       { id: 'state', name: 'State' },
-      { id: 'zipCode', name: 'ZIP Code' },
-      { id: 'serviceArea', name: 'Service Area' },
       { id: 'minimumDeliveryFee', name: 'Minimum Delivery Fee' },
       { id: 'perBagDeliveryFee', name: 'Per-Bag Delivery Fee' },
       { id: 'paymentMethod', name: 'Payment Method' }
@@ -160,6 +158,13 @@ function initializeAffiliateRegistration() {
       if (!element || !element.value.trim()) {
         missingFields.push(field.name);
       }
+    }
+    
+    // Check service area separately (stored in hidden fields)
+    const serviceLatitude = document.getElementById('serviceLatitude');
+    const serviceLongitude = document.getElementById('serviceLongitude');
+    if (!serviceLatitude?.value || !serviceLongitude?.value) {
+      missingFields.push('Service Area (Please click on the map to set your service location)');
     }
 
     // Check payment method specific fields
@@ -227,6 +232,15 @@ function initializeAffiliateRegistration() {
           // Poll the database for result
           const response = await csrfFetch(`${baseUrl}/api/v1/auth/oauth-session/${sessionId}`);
           
+          // Handle 404 specifically - it's expected while waiting for OAuth completion
+          if (response.status === 404) {
+            // Session doesn't exist yet, continue polling
+            if (pollCount % 10 === 0) {
+              console.log('Waiting for OAuth authentication to complete...');
+            }
+            return;
+          }
+          
           console.log('🔍 Polling response:', {
             ok: response.ok,
             status: response.status,
@@ -289,9 +303,13 @@ function initializeAffiliateRegistration() {
           }
           
         } catch (error) {
-          // 404 means no result yet, continue polling
+          // 404 is expected - it means the OAuth session hasn't been created yet
+          // This happens while the user is still on Google's auth page
           if (error.message && error.message.includes('404')) {
-            // Result not ready yet, continue polling
+            // Session not created yet, this is normal - continue polling
+            if (pollCount % 10 === 0) {
+              console.log('Waiting for user to complete OAuth authentication...');
+            }
             return;
           }
           
@@ -815,6 +833,195 @@ function initializeAffiliateRegistration() {
       }
     });
   }
+
+  // Delivery fee calculator update
+  function updateFeeCalculator() {
+    const minimumFee = parseFloat(document.getElementById('minimumDeliveryFee')?.value) || 0;
+    const perBagFee = parseFloat(document.getElementById('perBagDeliveryFee')?.value) || 0;
+    
+    // Update all example calculations
+    [1, 3, 5, 10].forEach(bags => {
+      const calculatedFee = bags * perBagFee;
+      const oneWayFee = Math.max(minimumFee, calculatedFee);
+      const roundTripFee = oneWayFee * 2; // Pickup + delivery
+      
+      const element = document.getElementById(`calc${bags}bag${bags > 1 ? 's' : ''}`);
+      if (element) {
+        element.textContent = `$${roundTripFee}`;
+      }
+    });
+  }
+
+  // Attach event listeners to fee inputs
+  document.getElementById('minimumDeliveryFee')?.addEventListener('input', updateFeeCalculator);
+  document.getElementById('perBagDeliveryFee')?.addEventListener('input', updateFeeCalculator);
+  
+  // Initial calculation
+  updateFeeCalculator();
+
+  // Initialize service area map
+  let serviceAreaMap = null;
+  let serviceMarker = null;
+  let serviceCircle = null;
+  let mapInitialized = false;
+
+  function initializeServiceAreaMap() {
+    // Prevent duplicate initialization
+    if (mapInitialized || serviceAreaMap) {
+      console.log('Map already initialized, skipping');
+      return;
+    }
+    
+    // Default to Austin, TX coordinates
+    const defaultLat = 30.2672;
+    const defaultLng = -97.7431;
+    
+    try {
+      // Initialize map
+      serviceAreaMap = L.map('serviceAreaMap').setView([defaultLat, defaultLng], 11);
+      mapInitialized = true;
+      console.log('Map initialized successfully');
+    } catch (error) {
+      console.error('Error initializing map:', error);
+      return;
+    }
+    
+    // Add OpenStreetMap tiles
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+      maxZoom: 19
+    }).addTo(serviceAreaMap);
+    
+    // Get radius slider and value display
+    const radiusSlider = document.getElementById('radiusSlider');
+    const radiusValue = document.getElementById('radiusValue');
+    const serviceRadius = document.getElementById('serviceRadius');
+    
+    // Function to update service area
+    function updateServiceArea(lat, lng, radius) {
+      // Update hidden fields
+      document.getElementById('serviceLatitude').value = lat.toFixed(6);
+      document.getElementById('serviceLongitude').value = lng.toFixed(6);
+      serviceRadius.value = radius;
+      
+      // Remove existing marker and circle
+      if (serviceMarker) {
+        serviceAreaMap.removeLayer(serviceMarker);
+      }
+      if (serviceCircle) {
+        serviceAreaMap.removeLayer(serviceCircle);
+      }
+      
+      // Add new marker
+      serviceMarker = L.marker([lat, lng], {
+        title: 'Service Center',
+        draggable: true
+      }).addTo(serviceAreaMap);
+      
+      // Add circle to show service area
+      serviceCircle = L.circle([lat, lng], {
+        color: '#3b82f6',
+        fillColor: '#93c5fd',
+        fillOpacity: 0.3,
+        radius: radius * 1609.34 // Convert miles to meters
+      }).addTo(serviceAreaMap);
+      
+      // Update info display
+      document.getElementById('serviceAreaInfo').classList.remove('hidden');
+      document.getElementById('centerLocation').textContent = `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+      document.getElementById('coverageArea').textContent = `${radius} mile radius`;
+      
+      // Handle marker drag
+      serviceMarker.on('dragend', function(event) {
+        const position = event.target.getLatLng();
+        updateServiceArea(position.lat, position.lng, parseInt(radiusSlider.value));
+      });
+    }
+    
+    // Handle map click
+    serviceAreaMap.on('click', function(e) {
+      updateServiceArea(e.latlng.lat, e.latlng.lng, parseInt(radiusSlider.value));
+    });
+    
+    // Handle radius slider change
+    radiusSlider.addEventListener('input', function() {
+      const radius = parseInt(this.value);
+      radiusValue.textContent = radius;
+      
+      // Update circle if marker exists
+      if (serviceMarker) {
+        const position = serviceMarker.getLatLng();
+        updateServiceArea(position.lat, position.lng, radius);
+      }
+    });
+    
+    // Try to get user's location
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        function(position) {
+          serviceAreaMap.setView([position.coords.latitude, position.coords.longitude], 12);
+        },
+        function(error) {
+          console.log('Geolocation error:', error);
+          // Keep default location
+        }
+      );
+    }
+  }
+  
+  // Initialize map when container is visible and Leaflet is loaded
+  function waitForLeafletAndInitialize() {
+    const mapContainer = document.getElementById('serviceAreaMap');
+    
+    if (!mapContainer) {
+      console.log('Map container not found, skipping map initialization');
+      return;
+    }
+    
+    // Check if Leaflet is loaded
+    if (typeof L === 'undefined') {
+      console.log('Leaflet not loaded yet, waiting...');
+      // Try to load Leaflet dynamically if not present
+      if (!document.querySelector('script[src*="leaflet"]')) {
+        console.log('Loading Leaflet dynamically...');
+        
+        // Add Leaflet CSS
+        if (!document.querySelector('link[href*="leaflet"]')) {
+          const leafletCSS = document.createElement('link');
+          leafletCSS.rel = 'stylesheet';
+          leafletCSS.href = 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css';
+          document.head.appendChild(leafletCSS);
+        }
+        
+        // Add Leaflet JS
+        const leafletJS = document.createElement('script');
+        leafletJS.src = 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js';
+        leafletJS.onload = function() {
+          console.log('Leaflet loaded dynamically');
+          waitForLeafletAndInitialize();
+        };
+        document.body.appendChild(leafletJS);
+        return;
+      }
+      setTimeout(waitForLeafletAndInitialize, 500);
+      return;
+    }
+    
+    // Check if container has dimensions
+    const rect = mapContainer.getBoundingClientRect();
+    if (rect.width === 0 || rect.height === 0) {
+      console.log('Map container has no dimensions yet, waiting...');
+      setTimeout(waitForLeafletAndInitialize, 500);
+      return;
+    }
+    
+    console.log('Leaflet loaded and container ready, initializing map');
+    console.log('Leaflet version:', L.version);
+    initializeServiceAreaMap();
+  }
+  
+  // Start the initialization process
+  waitForLeafletAndInitialize();
 }
 
 // Initialize immediately when script loads

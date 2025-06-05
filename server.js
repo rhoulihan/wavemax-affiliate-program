@@ -99,7 +99,7 @@ app.use(helmet({
       defaultSrc: ['\'self\''],
       scriptSrc: ['\'self\'', 'https://cdnjs.cloudflare.com', 'https://cdn.jsdelivr.net', '\'unsafe-inline\''], // Added unsafe-inline for embed pages
       styleSrc: ['\'self\'', 'https://cdnjs.cloudflare.com', 'https://cdn.jsdelivr.net', '\'unsafe-inline\''], // unsafe-inline needed for Tailwind
-      imgSrc: ['\'self\'', 'data:', 'https://www.wavemax.promo'],
+      imgSrc: ['\'self\'', 'data:', 'https://www.wavemax.promo', 'https://*.tile.openstreetmap.org', 'https://tile.openstreetmap.org', 'https://cdnjs.cloudflare.com'],
       connectSrc: ['\'self\'', 'https://wavemax.promo'],
       fontSrc: ['\'self\'', 'https://cdnjs.cloudflare.com', 'https://cdnjs.cloudflare.com'],
       objectSrc: ['\'none\''],
