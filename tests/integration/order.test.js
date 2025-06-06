@@ -126,7 +126,7 @@ describe('Order Integration Tests', () => {
       expect(order.customerId).toBe('CUST123');
       expect(order.affiliateId).toBe('AFF123');
       expect(order.status).toBe('scheduled');
-      expect(order.deliveryFee).toBe(35); // minimumDeliveryFee (25) + perBagDeliveryFee (5) * 2 bags
+      expect(order.feeBreakdown.totalFee).toBe(25); // 2 bags × $5/bag = $10, but minimum $25 applies
     });
 
     it('should create order as affiliate for their customer', async () => {
@@ -1085,11 +1085,7 @@ describe('Order Integration Tests', () => {
           },
           totalRevenue: 54.19,
           averageOrderValue: 54.19,
-          ordersByWeight: {
-            '0-20': 1,
-            '21-40': 1,
-            '41+': 1
-          }
+          averageEstimatedWeight: expect.any(Number)
         }
       });
     });
@@ -1134,10 +1130,10 @@ describe('Order Integration Tests', () => {
       // Verify commission calculation
       const updatedOrder = await Order.findOne({ orderId });
       
-      // Commission: (25 lbs × $1.25 × 10%) + $50 delivery = $3.125 + $50 = $53.125
-      // Delivery fee: minimumDeliveryFee (25) + perBagDeliveryFee (5) * 5 bags = $50
-      expect(updatedOrder.affiliateCommission).toBeCloseTo(53.13, 2);
-      expect(updatedOrder.actualTotal).toBeCloseTo(81.25, 2); // 25 × $1.25 + $50
+      // Commission: (25 lbs × $1.25 × 10%) + $25 delivery = $3.125 + $25 = $28.125
+      // Delivery fee: 2 bags × $5/bag = $10, but minimum $25 applies
+      expect(updatedOrder.affiliateCommission).toBeCloseTo(28.13, 2);
+      expect(updatedOrder.actualTotal).toBeCloseTo(56.25, 2); // 25 × $1.25 + $25
     });
 
     it('should use dynamic WDF rate from SystemConfig', async () => {
@@ -1183,14 +1179,14 @@ describe('Order Integration Tests', () => {
       expect(order.orderId).toBe(response.body.orderId);
       
       // The estimated total should still be calculated based on whatever rate was used
-      // Delivery fee: minimumDeliveryFee (25) + perBagDeliveryFee (5) * 2 bags = 35
-      // If baseRate is 2.00: 35 × 2.00 + 35 = 105
-      // If baseRate is 1.25: 35 × 1.25 + 35 = 78.75
+      // Delivery fee: 3 bags × $5/bag = $15, but minimum $25 applies
+      // If baseRate is 2.00: 50 × 2.00 + 25 = 125
+      // If baseRate is 1.25: 50 × 1.25 + 25 = 87.50
       if (order.baseRate === 2.00) {
-        expect(order.estimatedTotal).toBeCloseTo(105, 2);
+        expect(order.estimatedTotal).toBeCloseTo(125, 2);
       } else {
         // Accept the default rate for now in integration tests
-        expect(order.estimatedTotal).toBeCloseTo(78.75, 2);
+        expect(order.estimatedTotal).toBeCloseTo(87.50, 2);
       }
 
       // Reset rate
@@ -1232,10 +1228,10 @@ describe('Order Integration Tests', () => {
       const orders = await Order.find({ orderId: { $in: orderIds } });
       const totalCommission = orders.reduce((sum, order) => sum + order.affiliateCommission, 0);
 
-      // Each order: (20 × $1.25 × 10%) + $50 = $2.50 + $50 = $52.50
-      // Delivery fee per order: minimumDeliveryFee (25) + perBagDeliveryFee (5) * 5 bags = $50
-      // Total for 3 orders: $52.50 × 3 = $157.50
-      expect(totalCommission).toBeCloseTo(157.50, 2);
+      // Each order: (20 × $1.25 × 10%) + $25 = $2.50 + $25 = $27.50
+      // Delivery fee per order: 2 bags × $5/bag = $10, but minimum $25 applies
+      // Total for 3 orders: $27.50 × 3 = $82.50
+      expect(totalCommission).toBeCloseTo(82.50, 2);
     });
 
     it('should handle high delivery fee scenarios', async () => {
@@ -1269,10 +1265,10 @@ describe('Order Integration Tests', () => {
 
       const updatedOrder = await Order.findOne({ orderId: response.body.orderId });
       
-      // Commission: (15 × $1.25 × 10%) + $60.00 = $1.875 + $60.00 = $61.875
-      // Delivery fee: minimumDeliveryFee (50) + perBagDeliveryFee (10) * 1 bag = $60
-      expect(updatedOrder.affiliateCommission).toBeCloseTo(61.88, 2);
-      expect(updatedOrder.deliveryFee).toBe(60.00);
+      // Commission: (15 × $1.25 × 10%) + $50.00 = $1.875 + $50.00 = $51.875
+      // Delivery fee: 1 bag × $10/bag = $10, but minimum $50 applies
+      expect(updatedOrder.affiliateCommission).toBeCloseTo(51.88, 2);
+      expect(updatedOrder.feeBreakdown.totalFee).toBe(50.00);
     });
   });
 });

@@ -198,43 +198,51 @@ describe('Affiliate API', () => {
 
   test('should get affiliate\'s orders', async () => {
     const Order = require('../../server/models/Order');
-    await Order.create([
-      {
-        orderId: 'ORD001',
-        customerId: 'CUST001',
-        affiliateId: testAffiliate.affiliateId,
-        pickupDate: new Date('2025-05-25'),
-        pickupTime: 'morning',
-        deliveryDate: new Date('2025-05-27'),
-        deliveryTime: 'afternoon',
-        status: 'delivered',
-        estimatedWeight: 30,
+    // Create orders with proper fee structure
+    const order1 = new Order({
+      orderId: 'ORD001',
+      customerId: 'CUST001',
+      affiliateId: testAffiliate.affiliateId,
+      pickupDate: new Date('2025-05-25'),
+      pickupTime: 'morning',
+      deliveryDate: new Date('2025-05-27'),
+      deliveryTime: 'afternoon',
+      status: 'delivered',
+      estimatedWeight: 30,
+      numberOfBags: 2,
+      actualWeight: 23.5,
+      baseRate: 1.89,
+      feeBreakdown: {
         numberOfBags: 2,
-        actualWeight: 23.5,
-        baseRate: 1.89,
-        minimumDeliveryFee: 25,
-        perBagDeliveryFee: 5,
-        deliveryFee: 25,
-        actualTotal: 50.40,
-        affiliateCommission: 44.41
-      },
-      {
-        orderId: 'ORD002',
-        customerId: 'CUST002',
-        affiliateId: testAffiliate.affiliateId,
-        pickupDate: new Date('2025-05-26'),
-        pickupTime: 'afternoon',
-        deliveryDate: new Date('2025-05-28'),
-        deliveryTime: 'morning',
-        status: 'processing',
-        estimatedWeight: 50,
-        numberOfBags: 3,
-        baseRate: 1.89,
-        minimumDeliveryFee: 25,
-        perBagDeliveryFee: 5,
-        deliveryFee: 25
+        minimumFee: 25,
+        perBagFee: 5,
+        totalFee: 25,
+        minimumApplied: true
       }
-    ]);
+    });
+    await order1.save();
+
+    const order2 = new Order({
+      orderId: 'ORD002',
+      customerId: 'CUST002',
+      affiliateId: testAffiliate.affiliateId,
+      pickupDate: new Date('2025-05-26'),
+      pickupTime: 'afternoon',
+      deliveryDate: new Date('2025-05-28'),
+      deliveryTime: 'morning',
+      status: 'processing',
+      estimatedWeight: 50,
+      numberOfBags: 3,
+      baseRate: 1.89,
+      feeBreakdown: {
+        numberOfBags: 3,
+        minimumFee: 25,
+        perBagFee: 5,
+        totalFee: 25,
+        minimumApplied: true
+      }
+    });
+    await order2.save();
 
     const res = await agent
       .get(`/api/v1/affiliates/${testAffiliate.affiliateId}/orders`)

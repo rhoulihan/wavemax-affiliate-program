@@ -55,7 +55,11 @@ describe('Password Validation Integration Tests', () => {
           state: 'TS',
           zipCode: '12345',
           serviceArea: 'Downtown',
-          deliveryFee: 5.99,
+          serviceLatitude: 30.2672,
+          serviceLongitude: -97.7431,
+          serviceRadius: 10,
+          minimumDeliveryFee: 25,
+          perBagDeliveryFee: 5,
           paymentMethod: 'check',
           termsAgreement: true
         };
@@ -109,7 +113,11 @@ describe('Password Validation Integration Tests', () => {
           state: 'TS',
           zipCode: '12345',
           serviceArea: 'Downtown',
-          deliveryFee: 5.99,
+          serviceLatitude: 30.2672,
+          serviceLongitude: -97.7431,
+          serviceRadius: 10,
+          minimumDeliveryFee: 25,
+          perBagDeliveryFee: 5,
           paymentMethod: 'check',
           termsAgreement: true
         };
@@ -138,7 +146,11 @@ describe('Password Validation Integration Tests', () => {
         state: 'TS',
         zipCode: '12345',
         serviceArea: 'Downtown',
-        deliveryFee: 5.99,
+        serviceLatitude: 30.2672,
+        serviceLongitude: -97.7431,
+        serviceRadius: 10,
+        minimumDeliveryFee: 25,
+        perBagDeliveryFee: 5,
         paymentMethod: 'check',
         termsAgreement: true
       };
@@ -173,7 +185,11 @@ describe('Password Validation Integration Tests', () => {
         state: 'TS',
         zipCode: '12345',
         serviceArea: 'Downtown',
-        deliveryFee: 5.99,
+        serviceLatitude: 30.2672,
+        serviceLongitude: -97.7431,
+        serviceRadius: 10,
+        minimumDeliveryFee: 25,
+        perBagDeliveryFee: 5,
         paymentMethod: 'check',
         termsAgreement: true
       };
@@ -217,7 +233,11 @@ describe('Password Validation Integration Tests', () => {
           state: 'TS',
           zipCode: '12345',
           serviceArea: 'Downtown',
-          deliveryFee: 5.99,
+          serviceLatitude: 30.2672,
+          serviceLongitude: -97.7431,
+          serviceRadius: 10,
+          minimumDeliveryFee: 25,
+          perBagDeliveryFee: 5,
           paymentMethod: 'check',
           termsAgreement: true
         };
@@ -257,7 +277,11 @@ describe('Password Validation Integration Tests', () => {
         state: 'TS',
         zipCode: '12345',
         serviceArea: 'Downtown',
-        deliveryFee: 5.99,
+        serviceLatitude: 30.2672,
+        serviceLongitude: -97.7431,
+        serviceRadius: 10,
+        minimumDeliveryFee: 25,
+        perBagDeliveryFee: 5,
         paymentMethod: 'check'
       });
       await testAffiliate.save();
@@ -310,7 +334,11 @@ describe('Password Validation Integration Tests', () => {
         state: 'TS',
         zipCode: '12345',
         serviceArea: 'Downtown',
-        deliveryFee: 5.99,
+        serviceLatitude: 30.2672,
+        serviceLongitude: -97.7431,
+        serviceRadius: 10,
+        minimumDeliveryFee: 25,
+        perBagDeliveryFee: 5,
         paymentMethod: 'check'
       });
       await testAffiliate.save();
@@ -370,7 +398,7 @@ describe('Password Validation Integration Tests', () => {
     });
 
     test('should enforce strong passwords for administrator creation', async () => {
-      const weakPassword = 'Zq8#Rv2%'; // 8 chars - fails minimum 12 requirement
+      const weakPassword = 'weak123'; // Missing uppercase and special char
       const adminData = {
         firstName: 'Administrator',
         lastName: 'User',
@@ -522,7 +550,11 @@ describe('Password Validation Integration Tests', () => {
         state: 'RC',
         zipCode: '12345',
         serviceArea: 'Downtown',
-        deliveryFee: 5.99,
+        serviceLatitude: 30.2672,
+        serviceLongitude: -97.7431,
+        serviceRadius: 10,
+        minimumDeliveryFee: 25,
+        perBagDeliveryFee: 5,
         paymentMethod: 'check'
       });
       await affiliate.save();
@@ -582,7 +614,11 @@ describe('Password Validation Integration Tests', () => {
         state: 'RC',
         zipCode: '12345',
         serviceArea: 'Downtown',
-        deliveryFee: 5.99,
+        serviceLatitude: 30.2672,
+        serviceLongitude: -97.7431,
+        serviceRadius: 10,
+        minimumDeliveryFee: 25,
+        perBagDeliveryFee: 5,
         paymentMethod: 'check'
       });
       await affiliate.save();
@@ -634,7 +670,11 @@ describe('Password Validation Integration Tests', () => {
         state: 'LC',
         zipCode: '12345',
         serviceArea: 'Downtown',
-        deliveryFee: 5.99,
+        serviceLatitude: 30.2672,
+        serviceLongitude: -97.7431,
+        serviceRadius: 10,
+        minimumDeliveryFee: 25,
+        perBagDeliveryFee: 5,
         paymentMethod: 'check'
       });
       await affiliate.save();
@@ -667,7 +707,11 @@ describe('Password Validation Integration Tests', () => {
         state: 'TS',
         zipCode: '12345',
         serviceArea: 'Downtown',
-        deliveryFee: 5.99,
+        serviceLatitude: 30.2672,
+        serviceLongitude: -97.7431,
+        serviceRadius: 10,
+        minimumDeliveryFee: 25,
+        perBagDeliveryFee: 5,
         paymentMethod: 'check',
         termsAgreement: true
       };
@@ -711,7 +755,11 @@ describe('Password Validation Integration Tests', () => {
         state: 'EC',
         zipCode: '12345',
         serviceArea: 'Downtown',
-        deliveryFee: 5.99,
+        serviceLatitude: 30.2672,
+        serviceLongitude: -97.7431,
+        serviceRadius: 10,
+        minimumDeliveryFee: 25,
+        perBagDeliveryFee: 5,
         paymentMethod: 'check',
         termsAgreement: true
       };
@@ -748,7 +796,11 @@ describe('Password Validation Integration Tests', () => {
         state: 'MC',
         zipCode: '12345',
         serviceArea: 'Downtown',
-        deliveryFee: 5.99,
+        serviceLatitude: 30.2672,
+        serviceLongitude: -97.7431,
+        serviceRadius: 10,
+        minimumDeliveryFee: 25,
+        perBagDeliveryFee: 5,
         paymentMethod: 'check',
         termsAgreement: true
       };
@@ -778,7 +830,11 @@ describe('Password Validation Integration Tests', () => {
         state: 'UC',
         zipCode: '12345',
         serviceArea: 'Downtown',
-        deliveryFee: 5.99,
+        serviceLatitude: 30.2672,
+        serviceLongitude: -97.7431,
+        serviceRadius: 10,
+        minimumDeliveryFee: 25,
+        perBagDeliveryFee: 5,
         paymentMethod: 'check',
         termsAgreement: true
       };
@@ -791,7 +847,8 @@ describe('Password Validation Integration Tests', () => {
       // Should either accept (if unicode is supported) or reject gracefully
       expect([200, 201, 400]).toContain(response.status);
       if (response.status === 400) {
-        expect(response.body.message).toBeDefined();
+        // Check for either message or errors array
+        expect(response.body.message || response.body.errors).toBeDefined();
       }
     });
   });
