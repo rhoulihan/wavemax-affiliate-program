@@ -148,6 +148,9 @@
                                     <span>Pickup/Delivery Fee:</span>
                                     <span id="deliveryFee">$0.00</span>
                                 </div>
+                                <div class="text-sm text-gray-600 mt-1">
+                                    <span id="feeBreakdown"></span>
+                                </div>
                             </div>
                             <div class="pt-3 font-bold">
                                 <div class="flex justify-between">
@@ -259,10 +262,20 @@
                     
                     // Order Summary
                     document.getElementById('estimatedSize').textContent = sizeMapping[order.estimatedSize] || order.estimatedSize;
-                    document.getElementById('deliveryFee').textContent = `$${(order.deliveryFee || 0).toFixed(2)}`;
                     
-                    if (order.totalAmount) {
-                        document.getElementById('estimatedTotal').textContent = `$${order.totalAmount.toFixed(2)}`;
+                    // Display fee breakdown
+                    if (order.feeBreakdown) {
+                        const fee = order.feeBreakdown;
+                        document.getElementById('deliveryFee').textContent = `$${fee.roundTripFee.toFixed(2)}`;
+                        const breakdownText = `${fee.numberOfBags} bag${fee.numberOfBags > 1 ? 's' : ''} × $${fee.perBagFee}/bag = $${fee.calculatedFee} ${fee.minimumApplied ? `(minimum $${fee.minimumFee} applies)` : ''} × 2 trips`;
+                        document.getElementById('feeBreakdown').textContent = breakdownText;
+                    } else {
+                        // Fallback for old orders
+                        document.getElementById('deliveryFee').textContent = `$${(order.deliveryFee || 0).toFixed(2)}`;
+                    }
+                    
+                    if (order.estimatedTotal) {
+                        document.getElementById('estimatedTotal').textContent = `$${order.estimatedTotal.toFixed(2)}`;
                     }
                     
                     // Load affiliate info if available

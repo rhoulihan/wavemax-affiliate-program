@@ -142,8 +142,7 @@ exports.createOrder = async (req, res) => {
       deliveryTime,
       specialDeliveryInstructions,
       numberOfBags: bagCount,
-      deliveryFee: feeCalculation.roundTripFee, // Total for pickup + delivery
-      deliveryFeeBreakdown: {
+      feeBreakdown: {
         numberOfBags: feeCalculation.numberOfBags,
         minimumFee: feeCalculation.minimumFee,
         perBagFee: feeCalculation.perBagFee,
@@ -244,7 +243,7 @@ exports.getOrderDetails = async (req, res) => {
         specialDeliveryInstructions: order.specialDeliveryInstructions,
         status: order.status,
         baseRate: order.baseRate,
-        deliveryFee: order.deliveryFee,
+        feeBreakdown: order.feeBreakdown,
         actualWeight: order.actualWeight,
         washInstructions: order.washInstructions,
         estimatedTotal: order.estimatedTotal,
