@@ -465,7 +465,7 @@ exports.customerLogin = async (req, res) => {
     const affiliate = await Affiliate.findOne({ affiliateId: customer.affiliateId });
     console.log('Customer affiliateId:', customer.affiliateId);
     console.log('Found affiliate:', affiliate ? affiliate.affiliateId : 'null');
-    console.log('Affiliate delivery fee:', affiliate ? affiliate.deliveryFee : 'null');
+    console.log('Affiliate fees:', affiliate ? `min: ${affiliate.minimumDeliveryFee}, per-bag: ${affiliate.perBagDeliveryFee}` : 'null');
 
     // Generate token
     const token = generateToken({
@@ -492,7 +492,8 @@ exports.customerLogin = async (req, res) => {
         affiliate: affiliate ? {
           affiliateId: affiliate.affiliateId,
           name: `${affiliate.firstName} ${affiliate.lastName}`,
-          deliveryFee: affiliate.deliveryFee
+          minimumDeliveryFee: affiliate.minimumDeliveryFee,
+          perBagDeliveryFee: affiliate.perBagDeliveryFee
         } : null
       }
     };
@@ -1132,7 +1133,8 @@ exports.completeSocialRegistration = async (req, res) => {
       serviceLatitude,
       serviceLongitude,
       serviceRadius,
-      deliveryFee,
+      minimumDeliveryFee,
+      perBagDeliveryFee,
       username,
       password,
       paymentMethod,
@@ -1218,7 +1220,8 @@ exports.completeSocialRegistration = async (req, res) => {
       serviceLatitude,
       serviceLongitude,
       serviceRadius,
-      deliveryFee,
+      minimumDeliveryFee: minimumDeliveryFee || 25,
+      perBagDeliveryFee: perBagDeliveryFee || 5,
       username: generatedUsername,
       password: generatedPassword, // This will be hashed by the model's pre-save middleware
       paymentMethod,

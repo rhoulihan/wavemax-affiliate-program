@@ -138,7 +138,8 @@ exports.registerCustomer = async (req, res) => {
         email: newCustomer.email,
         affiliateId: newCustomer.affiliateId,
         affiliateName: affiliate.businessName || `${affiliate.firstName} ${affiliate.lastName}`,
-        deliveryFee: affiliate.deliveryFee
+        minimumDeliveryFee: affiliate.minimumDeliveryFee,
+        perBagDeliveryFee: affiliate.perBagDeliveryFee
       },
       message: 'Customer registered successfully!'
     });
@@ -478,7 +479,8 @@ exports.getCustomerDashboardStats = async (req, res) => {
           affiliateId: affiliate.affiliateId,
           firstName: affiliate.firstName,
           lastName: affiliate.lastName,
-          deliveryFee: affiliate.deliveryFee
+          minimumDeliveryFee: affiliate.minimumDeliveryFee,
+          perBagDeliveryFee: affiliate.perBagDeliveryFee
         } : null,
         bagCredit: {
           amount: customer.bagCredit || 0,

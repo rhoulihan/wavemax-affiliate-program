@@ -793,6 +793,17 @@ function enableEditMode() {
 
   document.getElementById('editBtn').style.display = 'none';
   document.getElementById('formButtons').style.display = 'block';
+  
+  // Add event listeners for fee fields to update preview
+  const minFeeInput = document.getElementById('settingsMinimumDeliveryFee');
+  const perBagInput = document.getElementById('settingsPerBagDeliveryFee');
+  
+  if (minFeeInput) {
+    minFeeInput.addEventListener('input', updateFeeCalculatorPreview);
+  }
+  if (perBagInput) {
+    perBagInput.addEventListener('input', updateFeeCalculatorPreview);
+  }
 }
 
 // Disable edit mode
@@ -807,6 +818,17 @@ function disableEditMode() {
 
   document.getElementById('editBtn').style.display = 'block';
   document.getElementById('formButtons').style.display = 'none';
+  
+  // Remove event listeners for fee fields
+  const minFeeInput = document.getElementById('settingsMinimumDeliveryFee');
+  const perBagInput = document.getElementById('settingsPerBagDeliveryFee');
+  
+  if (minFeeInput) {
+    minFeeInput.removeEventListener('input', updateFeeCalculatorPreview);
+  }
+  if (perBagInput) {
+    perBagInput.removeEventListener('input', updateFeeCalculatorPreview);
+  }
 }
 
 // Save settings
@@ -819,7 +841,9 @@ async function saveSettings(affiliateId) {
       email: formData.get('email'),
       phone: formData.get('phone'),
       businessName: formData.get('businessName'),
-      serviceArea: formData.get('serviceArea')
+      serviceArea: formData.get('serviceArea'),
+      minimumDeliveryFee: parseFloat(formData.get('minimumDeliveryFee')) || null,
+      perBagDeliveryFee: parseFloat(formData.get('perBagDeliveryFee')) || null
     };
 
     const response = await authenticatedFetch(`/api/v1/affiliates/${affiliateId}`, {
