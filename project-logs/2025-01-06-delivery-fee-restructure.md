@@ -113,7 +113,15 @@ For round trip (pickup + delivery), these amounts would be doubled.
 
 ## Progress Tracking
 
-### Current Step: Phase 3 - Frontend Implementation
+### Current Step: COMPLETED
+
+### Update (2025-01-07): Removed Legacy deliveryFee Concept
+- Removed all references to old `deliveryFee` field throughout the system
+- Renamed `deliveryFeeBreakdown` to `feeBreakdown` in Order model
+- Updated all controllers to use only the new fee structure
+- Updated client-side JavaScript to use new fee fields
+- All API responses now return `feeBreakdown` instead of `deliveryFee`
+- This is a BREAKING CHANGE for any external integrations using the old field
 - [x] Analyzed current system
 - [x] Designed new fee structure
 - [x] Created detailed implementation plan

@@ -7,17 +7,15 @@ const SystemConfig = require('../server/models/SystemConfig');
 
 async function calculateDeliveryFee(numberOfBags, minimumFee = 10, perBagFee = 2) {
   const calculatedFee = numberOfBags * perBagFee;
-  const oneWayFee = Math.max(minimumFee, calculatedFee);
-  const roundTripFee = oneWayFee * 2;
+  const totalFee = Math.max(minimumFee, calculatedFee);
   
   return {
     numberOfBags,
     minimumFee,
     perBagFee,
     calculatedFee,
-    oneWayFee,
-    roundTripFee,
-    minimumApplied: oneWayFee === minimumFee
+    totalFee,
+    minimumApplied: totalFee === minimumFee
   };
 }
 
@@ -31,8 +29,8 @@ async function testFeeCalculations() {
     const result = await calculateDeliveryFee(bags);
     console.log(`${bags} bag(s):`);
     console.log(`  - Calculated: ${bags} × $${result.perBagFee} = $${result.calculatedFee}`);
-    console.log(`  - One-way fee: $${result.oneWayFee} ${result.minimumApplied ? '(minimum applied)' : '(per-bag calculation)'}`);
-    console.log(`  - Round trip: $${result.roundTripFee} (pickup + delivery)\n`);
+    console.log(`  - Total fee: $${result.totalFee} ${result.minimumApplied ? '(minimum applied)' : '(per-bag calculation)'}`);
+    console.log(`  - Affiliate commission: 10% of WDF + $${result.totalFee} fee\n`);
   }
   
   // Test with custom affiliate rates
@@ -42,8 +40,8 @@ async function testFeeCalculations() {
     const result = await calculateDeliveryFee(bags, 25, 5);
     console.log(`${bags} bag(s):`);
     console.log(`  - Calculated: ${bags} × $${result.perBagFee} = $${result.calculatedFee}`);
-    console.log(`  - One-way fee: $${result.oneWayFee} ${result.minimumApplied ? '(minimum applied)' : '(per-bag calculation)'}`);
-    console.log(`  - Round trip: $${result.roundTripFee} (pickup + delivery)\n`);
+    console.log(`  - Total fee: $${result.totalFee} ${result.minimumApplied ? '(minimum applied)' : '(per-bag calculation)'}`);
+    console.log(`  - Affiliate commission: 10% of WDF + $${result.totalFee} fee\n`);
   }
 }
 

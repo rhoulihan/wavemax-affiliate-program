@@ -4,6 +4,12 @@ const SystemConfig = require('../../server/models/SystemConfig');
 
 // Helper function to create valid order data
 function createOrderData(overrides = {}) {
+  const numberOfBags = overrides.numberOfBags || 2;
+  const minimumFee = overrides.minimumFee || 10;
+  const perBagFee = overrides.perBagFee || 2;
+  const calculatedFee = numberOfBags * perBagFee;
+  const totalFee = Math.max(minimumFee, calculatedFee);
+  
   return {
     customerId: overrides.customerId || 'CUST' + Math.floor(100000 + Math.random() * 900000),
     affiliateId: overrides.affiliateId || 'AFF' + Math.floor(100000 + Math.random() * 900000),
@@ -12,8 +18,14 @@ function createOrderData(overrides = {}) {
     deliveryDate: new Date(),
     deliveryTime: 'afternoon',
     estimatedWeight: 30,
-    numberOfBags: 2,
-    deliveryFee: 5.00,
+    numberOfBags: numberOfBags,
+    feeBreakdown: overrides.feeBreakdown || {
+      numberOfBags,
+      minimumFee,
+      perBagFee,
+      totalFee,
+      minimumApplied: totalFee === minimumFee
+    },
     ...overrides
   };
 }
@@ -38,8 +50,7 @@ describe('Order Model with SystemConfig Integration', () => {
 
       const order = new Order(createOrderData({
         estimatedWeight: 30,
-    numberOfBags: 2,
-        deliveryFee: 10.00
+        numberOfBags: 2
         // Note: NOT setting baseRate so it fetches from SystemConfig
       }));
 
@@ -73,14 +84,14 @@ describe('Order Model with SystemConfig Integration', () => {
 
       const order = new Order(createOrderData({
         estimatedWeight: 30,
-    numberOfBags: 2,
-        deliveryFee: 15.00
+        numberOfBags: 2,
+        // Using default fee breakdown from helper
       }));
 
       await order.save();
 
-      // 30 lbs * $2.00 + $15.00 delivery = $75.00
-      expect(order.estimatedTotal).toBeCloseTo(75.00, 2);
+      // 30 lbs * $2.00 + $10.00 fee = $70.00
+      expect(order.estimatedTotal).toBeCloseTo(70.00, 2);
     });
 
     it('should calculate actual total using SystemConfig rate', async () => {
@@ -89,14 +100,14 @@ describe('Order Model with SystemConfig Integration', () => {
       const order = new Order(createOrderData({
         estimatedWeight: 50,
         numberOfBags: 3,
-        deliveryFee: 20.00,
+        // Using default fee breakdown from helper
         actualWeight: 25
       }));
 
       await order.save();
 
-      // 25 lbs * $1.75 + $20.00 delivery = $63.75
-      expect(order.actualTotal).toBeCloseTo(63.75, 2);
+      // 25 lbs * $1.75 + $10.00 fee = $53.75
+      expect(order.actualTotal).toBeCloseTo(53.75, 2);
     });
   });
 
@@ -116,8 +127,8 @@ describe('Order Model with SystemConfig Integration', () => {
       await order.save();
 
       // WDF total: 20 lbs * $3.00 = $60.00
-      // Commission: 10% of $60.00 + $25.00 delivery = $6.00 + $25.00 = $31.00
-      expect(order.affiliateCommission).toBeCloseTo(31.00, 2);
+      // Commission: 10% of $60.00 + $10.00 fee = $6.00 + $10.00 = $16.00
+      expect(order.affiliateCommission).toBeCloseTo(16.00, 2);
     });
 
     it('should calculate commission for zero delivery fee', async () => {
@@ -128,7 +139,13 @@ describe('Order Model with SystemConfig Integration', () => {
         affiliateId: 'AFF123',
         estimatedWeight: 15,
         numberOfBags: 1,
-        deliveryFee: 0,
+        feeBreakdown: {
+          numberOfBags: 1,
+          minimumFee: 0,
+          perBagFee: 0,
+          totalFee: 0,
+          minimumApplied: false
+        },
         actualWeight: 10
       }));
 
@@ -146,15 +163,16 @@ describe('Order Model with SystemConfig Integration', () => {
         customerId: 'CUST123',
         affiliateId: 'AFF123',
         estimatedWeight: 50,
-        numberOfBags: 3,
-        deliveryFee: 30.00,
+        numberOfBags: 6,
+        perBagFee: 5,
         actualWeight: 100 // Very large order
       }));
 
       await order.save();
 
       // WDF total: 100 lbs * $1.50 = $150.00
-      // Commission: 10% of $150.00 + $30.00 delivery = $15.00 + $30.00 = $45.00
+      // Fee: 6 bags × $5 = $30 (calculated is greater than minimum $10)
+      // Commission: 10% of $150.00 + $30.00 fee = $15.00 + $30.00 = $45.00
       expect(order.affiliateCommission).toBeCloseTo(45.00, 2);
     });
   });
@@ -249,8 +267,9 @@ describe('Order Model with SystemConfig Integration', () => {
           customerId: `CUST${i}`,
           affiliateId: 'AFF123',
           estimatedWeight: 30,
-    numberOfBags: 2,
-          deliveryFee: 25.00,
+          numberOfBags: 3,
+          minimumFee: 25,
+          perBagFee: 5,
           actualWeight: 25
         }));
         await order.save();
@@ -261,13 +280,13 @@ describe('Order Model with SystemConfig Integration', () => {
       const totalCommission = orders.reduce((sum, order) => sum + order.affiliateCommission, 0);
 
       // Expected: 10 customers × 25 lbs × $1.25 × 10% = $31.25 WDF commission
-      // Plus: 10 customers × $25 delivery = $250 delivery earnings
-      // Total: $281.25 per week (actual: $281.30 due to rounding)
-      expect(totalCommission).toBe(281.30);
+      // Plus: 10 customers × $25 fee (minimum applies since 3 bags × $5 = $15) = $250 delivery earnings
+      // Total: $281.25 per week
+      expect(totalCommission).toBeCloseTo(281.30, 2); // Slight rounding difference
 
       // Monthly earnings (4 weeks)
       const monthlyEarnings = totalCommission * 4;
-      expect(monthlyEarnings).toBe(1125.20);
+      expect(monthlyEarnings).toBeCloseTo(1125.20, 2);
     });
 
     it('should match revenue calculator with different parameters', async () => {
@@ -279,13 +298,14 @@ describe('Order Model with SystemConfig Integration', () => {
         affiliateId: 'AFF123',
         estimatedWeight: 50,
         numberOfBags: 3,
-        deliveryFee: 15.00,
+        minimumFee: 15,
+        perBagFee: 5,
         actualWeight: 30
       }));
 
       await order.save();
 
-      // Per customer: 30 lbs × $1.25 × 10% = $3.75 WDF + $15 delivery = $18.75
+      // Per customer: 30 lbs × $1.25 × 10% = $3.75 WDF + $15 fee (3 bags × $5 = $15, equals minimum) = $18.75
       expect(order.affiliateCommission).toBeCloseTo(18.75, 2);
 
       // For 20 customers per week: $375

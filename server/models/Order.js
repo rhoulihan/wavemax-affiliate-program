@@ -52,9 +52,7 @@ const orderSchema = new mongoose.Schema({
     numberOfBags: Number,
     minimumFee: Number,
     perBagFee: Number,
-    calculatedFee: Number,
-    oneWayFee: Number,
-    roundTripFee: Number,
+    totalFee: Number, // The actual fee charged (greater of minimum or calculated)
     minimumApplied: Boolean
   },
   estimatedTotal: Number,
@@ -123,16 +121,16 @@ orderSchema.pre('save', async function(next) {
   
   if (this.isNew || this.isModified('estimatedWeight') || this.isModified('baseRate') || this.isModified('feeBreakdown')) {
     // Calculate estimated total using the provided estimated weight
-    const roundTripFee = this.feeBreakdown?.roundTripFee || 0;
-    this.estimatedTotal = parseFloat((this.estimatedWeight * this.baseRate + roundTripFee).toFixed(2));
+    const totalFee = this.feeBreakdown?.totalFee || 0;
+    this.estimatedTotal = parseFloat((this.estimatedWeight * this.baseRate + totalFee).toFixed(2));
   }
 
   // Calculate actual total if actual weight is available
   if (this.isModified('actualWeight') && this.actualWeight) {
-    const roundTripFee = this.feeBreakdown?.roundTripFee || 0;
-    this.actualTotal = parseFloat((this.actualWeight * this.baseRate + roundTripFee).toFixed(2));
-    // Calculate affiliate commission (10% of WDF + all delivery fee)
-    this.affiliateCommission = parseFloat((this.actualWeight * this.baseRate * 0.1 + roundTripFee).toFixed(2));
+    const totalFee = this.feeBreakdown?.totalFee || 0;
+    this.actualTotal = parseFloat((this.actualWeight * this.baseRate + totalFee).toFixed(2));
+    // Calculate affiliate commission (10% of WDF + delivery fee)
+    this.affiliateCommission = parseFloat((this.actualWeight * this.baseRate * 0.1 + totalFee).toFixed(2));
   }
 
   // Update status timestamps
