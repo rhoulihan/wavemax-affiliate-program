@@ -178,40 +178,14 @@
 
         debugAlert('Hiding chrome...');
         
-        // Try multiple selectors
-        const headerSelectors = [
-            'header', '.header', '#header', '.navbar',
-            '.site-header', '.main-header', '.top-header',
-            'nav', '.navigation', '.nav-wrapper'
-        ];
+        // WaveMAX specific selectors
+        const header = document.querySelector('.navbar');
+        const pageHeader = document.querySelector('.page-header');
+        const footer = document.querySelector('.footer');
         
-        const footerSelectors = [
-            'footer', '.footer', '#footer',
-            '.site-footer', '.main-footer', '.bottom-footer'
-        ];
-        
-        let header = null;
-        let footer = null;
-        
-        // Find header
-        for (const selector of headerSelectors) {
-            const el = document.querySelector(selector);
-            if (el && el.offsetHeight > 20) {
-                header = el;
-                debugAlert('Header: ' + selector);
-                break;
-            }
-        }
-        
-        // Find footer
-        for (const selector of footerSelectors) {
-            const el = document.querySelector(selector);
-            if (el && el.offsetHeight > 20) {
-                footer = el;
-                debugAlert('Footer: ' + selector);
-                break;
-            }
-        }
+        if (header) debugAlert('Header found: .navbar');
+        if (pageHeader) debugAlert('Page header found: .page-header');
+        if (footer) debugAlert('Footer found: .footer');
         
         if (!header) debugAlert('NO HEADER FOUND');
         if (!footer) debugAlert('NO FOOTER FOUND');
@@ -221,6 +195,12 @@
             header.style.transition = 'transform 0.3s ease-in-out';
             header.style.transform = 'translateY(-100%)';
             header.setAttribute('data-mobile-hidden', 'true');
+        }
+
+        // Hide page header
+        if (pageHeader) {
+            pageHeader.style.display = 'none';
+            pageHeader.setAttribute('data-mobile-hidden', 'true');
         }
 
         // Hide footer

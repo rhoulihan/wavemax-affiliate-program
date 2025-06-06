@@ -10,6 +10,7 @@
         // Find elements
         var navbar = document.querySelector('.navbar');
         var footer = document.querySelector('.footer');
+        var pageHeader = document.querySelector('.page-header');
         var iframe = document.querySelector('iframe');
         
         if (!navbar || !footer) {
@@ -27,6 +28,11 @@
         footer.style.transform = 'translateY(100%)';
         footer.style.position = 'relative';
         footer.style.zIndex = '1';
+        
+        // Hide page header
+        if (pageHeader) {
+            pageHeader.style.display = 'none';
+        }
         
         // Adjust iframe container if exists
         if (iframe && iframe.parentElement) {

@@ -18,6 +18,7 @@
             // Find elements
             var navbar = document.querySelector('.navbar');
             var footer = document.querySelector('.footer');
+            var pageHeader = document.querySelector('.page-header');
             var iframe = document.querySelector('iframe');
             
             if (!navbar || !footer) {
@@ -32,6 +33,11 @@
             
             // Hide footer
             footer.style.cssText = 'transform: translateY(100%) !important; transition: transform 0.3s ease-in-out !important; position: relative !important; z-index: 1 !important;';
+            
+            // Hide page header
+            if (pageHeader) {
+                pageHeader.style.cssText = 'display: none !important;';
+            }
             
             // Adjust iframe container if exists
             if (iframe && iframe.parentElement) {
