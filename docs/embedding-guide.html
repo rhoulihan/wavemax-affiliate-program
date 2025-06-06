@@ -525,37 +525,57 @@ window.addEventListener('message', function(event) {
 });
 &lt;/script&gt;</code></pre>
 
-            <h2>Mobile App Integration</h2>
-
-            <p>If you have a mobile app, you can open the affiliate program in a WebView:</p>
+            <h2>Mobile-Friendly Implementation</h2>
             
-            <h3>iOS (Swift)</h3>
-            <pre><code>import WebKit
-
-class AffiliateViewController: UIViewController {
-    @IBOutlet weak var webView: WKWebView!
-    
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        
-        if let url = URL(string: "https://wavemax.promo/embed-app.html") {
-            let request = URLRequest(url: url)
-            webView.load(request)
-        }
-    }
-}</code></pre>
-
-            <h3>Android (Kotlin)</h3>
-            <pre><code>class AffiliateActivity : AppCompatActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_affiliate)
-        
-        val webView = findViewById&lt;WebView&gt;(R.id.webView)
-        webView.settings.javaScriptEnabled = true
-        webView.loadUrl("https://wavemax.promo/embed-app.html")
-    }
-}</code></pre>
+            <p>The WaveMAX Affiliate Program includes advanced mobile support with automatic header/footer management for a seamless full-screen experience on mobile devices.</p>
+            
+            <h3>Parent Page Integration</h3>
+            
+            <p>Add the parent-iframe bridge script to your page to enable mobile features:</p>
+            
+            <pre><code>&lt;script src="https://affiliate.wavemax.promo/assets/js/parent-iframe-bridge.js"&gt;&lt;/script&gt;</code></pre>
+            
+            <h3>Features</h3>
+            
+            <div class="implementation-box">
+                <h4>Automatic Mobile Detection</h4>
+                <ul>
+                    <li>Detects mobile devices (&lt; 768px), tablets (768-1024px), and desktop (&gt; 1024px)</li>
+                    <li>Sends viewport information to iframe automatically</li>
+                    <li>Updates on orientation changes</li>
+                </ul>
+                
+                <h4>Dynamic Chrome Management</h4>
+                <ul>
+                    <li>Hides parent page headers/footers on mobile for full-screen experience</li>
+                    <li>Smooth transitions when showing/hiding chrome</li>
+                    <li>Automatically shows chrome when navigating to forms</li>
+                    <li>Landing pages and dashboards use full-screen mode</li>
+                </ul>
+                
+                <h4>Communication Protocol</h4>
+                <ul>
+                    <li>Secure postMessage API with origin validation</li>
+                    <li>Bidirectional communication between parent and iframe</li>
+                    <li>Real-time viewport updates</li>
+                    <li>Automatic height adjustments</li>
+                </ul>
+            </div>
+            
+            <h3>Advanced Configuration</h3>
+            
+            <p>If your header/footer use custom selectors, modify the parent-iframe-bridge.js:</p>
+            
+            <pre><code>// Update selectors in hideChrome function
+const header = document.querySelector('.your-custom-header');
+const footer = document.querySelector('.your-custom-footer');</code></pre>
+            
+            <p>For security, update allowed origins:</p>
+            
+            <pre><code>const ALLOWED_ORIGINS = [
+    'https://affiliate.wavemax.promo',
+    'https://your-domain.com'
+];</code></pre>
 
             <h2>Testing Checklist</h2>
 
