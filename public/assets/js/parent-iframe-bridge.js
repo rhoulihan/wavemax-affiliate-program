@@ -158,7 +158,9 @@
 
         console.log('[Parent-Iframe Bridge] Hiding header/footer');
         
-        // Find header, page header, and footer elements - WaveMAX CMS specific selectors
+        // Find all elements to hide - WaveMAX CMS specific selectors
+        const topbar = document.querySelector('.topbar');
+        const wrapper = document.querySelector('.wrapper');
         const header = document.querySelector('.navbar');
         const pageHeader = document.querySelector('.page-header');
         const footer = document.querySelector('.footer');
@@ -166,8 +168,18 @@
         // Store scroll position
         lastScrollPosition = window.pageYOffset;
 
-        // Hide header
-        if (header) {
+        // Hide topbar
+        if (topbar) {
+            topbar.style.display = 'none';
+            topbar.setAttribute('data-mobile-hidden', 'true');
+        }
+
+        // Hide wrapper (contains navbar) or navbar directly
+        if (wrapper) {
+            wrapper.style.display = 'none';
+            wrapper.setAttribute('data-mobile-hidden', 'true');
+        } else if (header) {
+            // Fallback if wrapper not found
             header.style.transition = 'transform 0.3s ease-in-out';
             header.style.transform = 'translateY(-100%)';
             header.setAttribute('data-mobile-hidden', 'true');
@@ -218,13 +230,24 @@
 
         console.log('[Parent-Iframe Bridge] Showing header/footer');
         
-        // Find header, page header, and footer elements
+        // Find all hidden elements
+        const topbar = document.querySelector('.topbar[data-mobile-hidden="true"]');
+        const wrapper = document.querySelector('.wrapper[data-mobile-hidden="true"]');
         const header = document.querySelector('.navbar[data-mobile-hidden="true"]');
         const pageHeader = document.querySelector('.page-header[data-mobile-hidden="true"]');
         const footer = document.querySelector('.footer[data-mobile-hidden="true"]');
 
-        // Show header
-        if (header) {
+        // Show topbar
+        if (topbar) {
+            topbar.style.display = '';
+            topbar.removeAttribute('data-mobile-hidden');
+        }
+
+        // Show wrapper or header
+        if (wrapper) {
+            wrapper.style.display = '';
+            wrapper.removeAttribute('data-mobile-hidden');
+        } else if (header) {
             header.style.transform = 'translateY(0)';
             setTimeout(() => {
                 header.removeAttribute('data-mobile-hidden');

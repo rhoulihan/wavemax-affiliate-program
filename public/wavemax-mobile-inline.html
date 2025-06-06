@@ -16,27 +16,34 @@
         // Add a small delay to ensure everything is rendered
         setTimeout(function() {
             // Find elements
+            var topbar = document.querySelector('.topbar');
+            var wrapper = document.querySelector('.wrapper');
             var navbar = document.querySelector('.navbar');
             var footer = document.querySelector('.footer');
             var pageHeader = document.querySelector('.page-header');
             var iframe = document.querySelector('iframe');
             
-            if (!navbar || !footer) {
-                if (window.innerWidth < 768) {
-                    alert('Mobile Bridge: Could not find navbar or footer');
-                }
-                return;
+            // Hide topbar
+            if (topbar) {
+                topbar.style.cssText = 'display: none !important;';
             }
             
-            // Hide navbar
-            navbar.style.cssText = 'transform: translateY(-100%) !important; transition: transform 0.3s ease-in-out !important; position: relative !important; z-index: 1 !important;';
-            
-            // Hide footer
-            footer.style.cssText = 'transform: translateY(100%) !important; transition: transform 0.3s ease-in-out !important; position: relative !important; z-index: 1 !important;';
+            // Hide wrapper/navbar section
+            if (wrapper) {
+                wrapper.style.cssText = 'display: none !important;';
+            } else if (navbar) {
+                // Fallback if wrapper not found
+                navbar.style.cssText = 'transform: translateY(-100%) !important; transition: transform 0.3s ease-in-out !important; position: relative !important; z-index: 1 !important;';
+            }
             
             // Hide page header
             if (pageHeader) {
                 pageHeader.style.cssText = 'display: none !important;';
+            }
+            
+            // Hide footer
+            if (footer) {
+                footer.style.cssText = 'transform: translateY(100%) !important; transition: transform 0.3s ease-in-out !important; position: relative !important; z-index: 1 !important;';
             }
             
             // Adjust iframe container if exists
