@@ -3,7 +3,6 @@ const Affiliate = require('../../server/models/Affiliate');
 const Customer = require('../../server/models/Customer');
 const Order = require('../../server/models/Order');
 const Transaction = require('../../server/models/Transaction');
-const Bag = require('../../server/models/Bag');
 const encryptionUtil = require('../../server/utils/encryption');
 const emailService = require('../../server/utils/emailService');
 const { validationResult } = require('express-validator');
@@ -13,7 +12,6 @@ jest.mock('../../server/models/Affiliate');
 jest.mock('../../server/models/Customer');
 jest.mock('../../server/models/Order');
 jest.mock('../../server/models/Transaction');
-jest.mock('../../server/models/Bag');
 jest.mock('../../server/utils/encryption');
 jest.mock('../../server/utils/emailService');
 jest.mock('express-validator');
@@ -299,7 +297,8 @@ describe('Affiliate Controller', () => {
       req.body = {
         firstName: 'Jane',
         phone: '987-654-3210',
-        deliveryFee: 7.99
+        minimumDeliveryFee: 25,
+        perBagDeliveryFee: 5
       };
 
       Affiliate.findOne.mockResolvedValue(mockAffiliate);
@@ -308,7 +307,8 @@ describe('Affiliate Controller', () => {
 
       expect(mockAffiliate.firstName).toBe('Jane');
       expect(mockAffiliate.phone).toBe('987-654-3210');
-      expect(mockAffiliate.deliveryFee).toBe(7.99);
+      expect(mockAffiliate.minimumDeliveryFee).toBe(25);
+      expect(mockAffiliate.perBagDeliveryFee).toBe(5);
       expect(mockAffiliate.save).toHaveBeenCalled();
       expect(res.status).toHaveBeenCalledWith(200);
       expect(res.json).toHaveBeenCalledWith({
@@ -846,42 +846,45 @@ describe('Affiliate Controller', () => {
   describe('getPublicAffiliateInfo', () => {
     it('should return only public affiliate information', async () => {
       const mockAffiliate = {
-        affiliateId: 'AFF123',
         firstName: 'John',
         lastName: 'Doe',
         businessName: 'Johns Laundry',
-        deliveryFee: 5.99,
-        serviceArea: '10 miles',
-        email: 'private@example.com',
-        phone: '123-456-7890',
-        accountNumber: 'PRIVATE'
+        minimumDeliveryFee: 25,
+        perBagDeliveryFee: 5,
+        serviceLatitude: 40.7128,
+        serviceLongitude: -74.0060,
+        serviceRadius: 10,
+        city: 'New York',
+        state: 'NY'
       };
 
       req.params.affiliateId = 'AFF123';
 
-      Affiliate.findOne.mockResolvedValue(mockAffiliate);
+      Affiliate.findOne.mockReturnValue({
+        select: jest.fn().mockResolvedValue(mockAffiliate)
+      });
 
       await affiliateController.getPublicAffiliateInfo(req, res);
 
       expect(res.status).toHaveBeenCalledWith(200);
       const response = res.json.mock.calls[0][0];
-      expect(response.affiliate).toEqual({
-        affiliateId: 'AFF123',
-        firstName: 'John',
-        lastName: 'Doe',
-        businessName: 'Johns Laundry',
-        deliveryFee: 5.99,
-        serviceArea: '10 miles'
-      });
-      expect(response.affiliate.email).toBeUndefined();
-      expect(response.affiliate.phone).toBeUndefined();
-      expect(response.affiliate.accountNumber).toBeUndefined();
+      expect(response.success).toBe(true);
+      expect(response.firstName).toBe('John');
+      expect(response.lastName).toBe('Doe');
+      expect(response.businessName).toBe('Johns Laundry');
+      expect(response.minimumDeliveryFee).toBe(25);
+      expect(response.perBagDeliveryFee).toBe(5);
+      expect(response.email).toBeUndefined();
+      expect(response.phone).toBeUndefined();
+      expect(response.accountNumber).toBeUndefined();
     });
 
     it('should return 404 for non-existent affiliate', async () => {
       req.params.affiliateId = 'NONEXISTENT';
 
-      Affiliate.findOne.mockResolvedValue(null);
+      Affiliate.findOne.mockReturnValue({
+        select: jest.fn().mockResolvedValue(null)
+      });
 
       await affiliateController.getPublicAffiliateInfo(req, res);
 
@@ -928,7 +931,6 @@ describe('Affiliate Controller', () => {
       Affiliate.findOne.mockResolvedValue(mockAffiliate);
       Customer.find.mockResolvedValue(mockCustomers);
       Order.deleteMany = jest.fn().mockResolvedValue({ deletedCount: 5 });
-      Bag.deleteMany = jest.fn().mockResolvedValue({ deletedCount: 2 });
       Transaction.deleteMany.mockResolvedValue({ deletedCount: 3 });
       Customer.deleteMany.mockResolvedValue({ deletedCount: 2 });
       Affiliate.deleteOne.mockResolvedValue({ deletedCount: 1 });
@@ -939,12 +941,6 @@ describe('Affiliate Controller', () => {
         $or: [
           { affiliateId: 'AFF123' },
           { customerId: { $in: ['CUST1', 'CUST2'] } }
-        ]
-      });
-      expect(Bag.deleteMany).toHaveBeenCalledWith({
-        $or: [
-          { affiliate: 'affiliate-object-id' },
-          { customer: { $in: ['customer-object-id-1', 'customer-object-id-2'] } }
         ]
       });
       expect(Transaction.deleteMany).toHaveBeenCalledWith({ affiliateId: 'AFF123' });
@@ -959,7 +955,6 @@ describe('Affiliate Controller', () => {
           affiliate: 1,
           customers: 2,
           orders: 'All related orders deleted',
-          bags: 'All related bags deleted',
           transactions: 'All transactions deleted'
         }
       });

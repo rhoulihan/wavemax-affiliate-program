@@ -2,13 +2,11 @@ const request = require('supertest');
 const app = require('../../server');
 const Affiliate = require('../../server/models/Affiliate');
 const Customer = require('../../server/models/Customer');
-const Bag = require('../../server/models/Bag');
 const encryptionUtil = require('../../server/utils/encryption');
 
 describe('Affiliate Customer Filtering Integration Tests', () => {
   let testAffiliate;
   let testCustomer;
-  let testBag;
   let affiliateToken;
 
   beforeEach(async () => {
@@ -28,7 +26,11 @@ describe('Affiliate Customer Filtering Integration Tests', () => {
       state: 'TX',
       zipCode: '78701',
       serviceArea: 'Downtown',
-      deliveryFee: 5.00,
+      serviceLatitude: 30.2672,
+      serviceLongitude: -97.7431,
+      serviceRadius: 10,
+      minimumDeliveryFee: 25,
+      perBagDeliveryFee: 5,
       username: 'john@testaffiliate.com',
       passwordSalt: salt,
       passwordHash: hash,
@@ -60,14 +62,6 @@ describe('Affiliate Customer Filtering Integration Tests', () => {
     });
     await testCustomer.save();
 
-    // Create test bag for customer
-    testBag = new Bag({
-      customer: testCustomer._id,
-      affiliate: testAffiliate._id,
-      type: 'laundry',
-      status: 'delivered'
-    });
-    await testBag.save();
 
     // Get affiliate authentication token
     const loginResponse = await request(app)
@@ -87,7 +81,7 @@ describe('Affiliate Customer Filtering Integration Tests', () => {
       
       expect(dashboardURL).toContain(`customer=${testCustomer.customerId}`);
       expect(dashboardURL).toContain('login=affiliate');
-      expect(dashboardURL).toMatch(/customer=CUST\d+/);
+      expect(dashboardURL).toMatch(/customer=CUST-[a-f0-9-]+/);
     });
   });
 
@@ -247,8 +241,8 @@ describe('Affiliate Customer Filtering Integration Tests', () => {
         lastName: testAffiliate.lastName,
         email: testAffiliate.email,
         businessName: testAffiliate.businessName,
-        serviceArea: testAffiliate.serviceArea,
-        deliveryFee: testAffiliate.deliveryFee
+        minimumDeliveryFee: testAffiliate.minimumDeliveryFee,
+        perBagDeliveryFee: testAffiliate.perBagDeliveryFee
       });
     });
 

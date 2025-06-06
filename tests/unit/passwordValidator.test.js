@@ -23,7 +23,7 @@ describe('Password Validator Utility', () => {
         const validResult = validatePasswordStrength(validLength);
         
         expect(shortResult.success).toBe(false);
-        expect(shortResult.errors).toContain('Password must be at least 12 characters long');
+        expect(shortResult.errors).toContain('Password must be at least 8 characters long');
         
         expect(validResult.success).toBe(true);
         expect(validResult.errors).toHaveLength(0);
@@ -88,13 +88,13 @@ describe('Password Validator Utility', () => {
           'password',        // In common list
           'wavemax',        // Domain-specific in common list  
           'qwerty',         // In common list
-          'admin123456'     // admin is in common list, would also trigger length
+          'admin123'        // In common list
         ];
         
         commonPasswordTests.forEach(password => {
           const result = validatePasswordStrength(password);
           expect(result.success).toBe(false);
-          expect(result.errors.some(error => error.includes('common') || error.includes('12 characters'))).toBe(true);
+          expect(result.errors.some(error => error.includes('common'))).toBe(true);
         });
       });
 
@@ -232,7 +232,7 @@ describe('Password Validator Utility', () => {
         validator(invalidPassword, { req: mockReq });
         throw new Error('Should have thrown an error');
       } catch (error) {
-        expect(error.message).toContain('Password must be at least 12 characters long');
+        expect(error.message).toContain('Password must be at least 8 characters long');
       }
     });
   });
@@ -278,7 +278,7 @@ describe('Password Validator Utility', () => {
         success: false,
         message: 'Password validation failed',
         errors: expect.arrayContaining([
-          expect.stringContaining('12 characters')
+          expect.stringContaining('8 characters')
         ]),
         strength: expect.objectContaining({
           score: expect.any(Number),
