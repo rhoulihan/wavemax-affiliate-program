@@ -872,13 +872,13 @@ function initializeAffiliateRegistration() {
       return;
     }
     
-    // Default to Austin, TX coordinates
-    const defaultLat = 30.2672;
-    const defaultLng = -97.7431;
+    // Default to WaveMAX store location: 825 E Rundberg Lane, Austin, TX 78753
+    const defaultLat = 30.3524;
+    const defaultLng = -97.6841;
     
     try {
       // Initialize map
-      serviceAreaMap = L.map('serviceAreaMap').setView([defaultLat, defaultLng], 11);
+      serviceAreaMap = L.map('serviceAreaMap').setView([defaultLat, defaultLng], 13);
       mapInitialized = true;
       console.log('Map initialized successfully');
     } catch (error) {
