@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Mobile Bridge Debug Test</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+    <h1>Mobile Bridge Debug Test</h1>
+    <p>Open browser console and run these commands to debug:</p>
+    
+    <pre>
+// 1. Check if bridge is loaded
+console.log('Bridge loaded:', typeof window.WaveMaxBridge);
+
+// 2. Get current state
+if (window.WaveMaxBridge) {
+    console.log('Viewport info:', window.WaveMaxBridge.getViewportInfo());
+    window.WaveMaxBridge.debug();
+}
+
+// 3. Find iframe
+const iframe = document.querySelector('iframe');
+console.log('Iframe found:', iframe);
+console.log('Iframe src:', iframe ? iframe.src : 'none');
+
+// 4. Test header/footer selectors
+const possibleSelectors = [
+    'header', '.header', '#header', '.navbar',
+    '.site-header', '.main-header', '.page-header',
+    'footer', '.footer', '#footer',
+    '.site-footer', '.main-footer', '.page-footer'
+];
+
+console.log('Testing selectors:');
+possibleSelectors.forEach(sel => {
+    const el = document.querySelector(sel);
+    if (el) {
+        console.log(`✓ ${sel}:`, el.tagName, el.className);
+    }
+});
+
+// 5. Test manual chrome hiding (mobile only)
+if (window.innerWidth < 768) {
+    console.log('Testing manual hide...');
+    window.WaveMaxBridge.hideChrome();
+}
+
+// 6. Check for iframe messages
+window.addEventListener('message', (e) => {
+    console.log('Message received:', e.origin, e.data);
+});
+    </pre>
+    
+    <h2>Quick Fixes to Try:</h2>
+    
+    <h3>1. If the iframe isn't found:</h3>
+    <pre>
+// Find the actual iframe
+const allIframes = document.querySelectorAll('iframe');
+console.log('All iframes:', allIframes.length);
+allIframes.forEach((f, i) => console.log(i, f.src));
+    </pre>
+    
+    <h3>2. If header/footer selectors don't match:</h3>
+    <p>Update the script with the actual selectors found on your site.</p>
+    
+    <h3>3. Force hide chrome on mobile:</h3>
+    <pre>
+// Run this in console on mobile
+if (window.WaveMaxBridge && window.innerWidth < 768) {
+    window.WaveMaxBridge.hideChrome();
+}
+    </pre>
+    
+    <h3>4. Send test message to iframe:</h3>
+    <pre>
+// Send viewport info manually
+const iframe = document.querySelector('iframe');
+if (iframe) {
+    iframe.contentWindow.postMessage({
+        type: 'viewport-info',
+        data: {
+            isMobile: window.innerWidth < 768,
+            width: window.innerWidth,
+            height: window.innerHeight
+        }
+    }, '*');
+}
+    </pre>
+</body>
+</html>

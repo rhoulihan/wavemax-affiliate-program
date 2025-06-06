@@ -1,11 +1,12 @@
 /**
- * Parent-Iframe Communication Bridge
- * Handles communication between parent page and embedded WaveMAX iframe
- * Provides mobile-responsive features including header/footer management
+ * Parent-Iframe Communication Bridge - DEBUG VERSION
+ * This version includes extensive console logging to diagnose issues
  */
 
 (function() {
     'use strict';
+
+    console.log('[WaveMAX Bridge] Script starting...');
 
     // Configuration
     const MOBILE_BREAKPOINT = 768;
@@ -25,30 +26,39 @@
 
     // Initialize when DOM is ready
     if (document.readyState === 'loading') {
+        console.log('[WaveMAX Bridge] Waiting for DOM to load...');
         document.addEventListener('DOMContentLoaded', init);
     } else {
+        console.log('[WaveMAX Bridge] DOM already loaded, initializing...');
         init();
     }
-    
-    // Also try to initialize after window load (for iframe readiness)
-    window.addEventListener('load', function() {
-        if (!iframe) {
-            console.log('[Parent-Iframe Bridge] Retrying initialization after window load');
-            init();
-        }
-    });
 
     function init() {
-        console.log('[Parent-Iframe Bridge] Initializing...');
+        console.log('[WaveMAX Bridge] Initializing...');
+        
+        // Debug: Log all iframes on the page
+        const allIframes = document.querySelectorAll('iframe');
+        console.log('[WaveMAX Bridge] Found', allIframes.length, 'iframes on page:');
+        allIframes.forEach((frame, index) => {
+            console.log(`  [${index}] src:`, frame.src);
+            console.log(`  [${index}] id:`, frame.id);
+        });
         
         // Find the iframe
         iframe = document.querySelector('iframe[src*="affiliate.wavemax.promo"]') || 
-                 document.querySelector('iframe#wavemax-affiliate-iframe');
+                 document.querySelector('iframe#wavemax-affiliate-iframe') ||
+                 document.querySelector('iframe[src*="wavemax.promo"]');
         
         if (!iframe) {
-            console.warn('[Parent-Iframe Bridge] No WaveMAX iframe found');
+            console.error('[WaveMAX Bridge] ❌ No WaveMAX iframe found!');
+            console.log('[WaveMAX Bridge] Looked for:');
+            console.log('  - iframe[src*="affiliate.wavemax.promo"]');
+            console.log('  - iframe#wavemax-affiliate-iframe');
+            console.log('  - iframe[src*="wavemax.promo"]');
             return;
         }
+
+        console.log('[WaveMAX Bridge] ✅ Found iframe:', iframe.src);
 
         // Set up viewport detection
         detectViewport();
@@ -57,16 +67,23 @@
 
         // Set up message listener
         window.addEventListener('message', handleMessage);
+        console.log('[WaveMAX Bridge] Message listener added');
 
         // Send initial viewport info to iframe
-        sendViewportInfo();
+        // Wait a bit for iframe to load
+        setTimeout(() => {
+            console.log('[WaveMAX Bridge] Sending initial viewport info...');
+            sendViewportInfo();
+        }, 1000);
         
-        // Send viewport info multiple times to ensure iframe receives it
-        setTimeout(() => sendViewportInfo(), 500);
-        setTimeout(() => sendViewportInfo(), 1000);
-        setTimeout(() => sendViewportInfo(), 2000);
+        console.log('[WaveMAX Bridge] ✅ Initialized successfully');
         
-        console.log('[Parent-Iframe Bridge] Initialized successfully');
+        // Log current state
+        console.log('[WaveMAX Bridge] Current state:');
+        console.log('  - Window width:', window.innerWidth);
+        console.log('  - Is mobile:', isMobile);
+        console.log('  - Is tablet:', isTablet);
+        console.log('  - Has touch:', 'ontouchstart' in window);
     }
 
     function detectViewport() {
@@ -77,19 +94,29 @@
         isMobile = width < MOBILE_BREAKPOINT;
         isTablet = width >= MOBILE_BREAKPOINT && width < TABLET_BREAKPOINT;
 
+        console.log('[WaveMAX Bridge] Viewport detected:');
+        console.log('  - Width:', width);
+        console.log('  - Is mobile:', isMobile);
+        console.log('  - Is tablet:', isTablet);
+
         // If viewport category changed, update iframe
         if (oldMobile !== isMobile || oldTablet !== isTablet) {
+            console.log('[WaveMAX Bridge] Viewport category changed, updating iframe...');
             sendViewportInfo();
             
             // Show chrome again if switching from mobile to desktop
             if (oldMobile && !isMobile && chromeHidden) {
+                console.log('[WaveMAX Bridge] Switching to desktop, showing chrome...');
                 showChrome();
             }
         }
     }
 
     function sendViewportInfo() {
-        if (!iframe) return;
+        if (!iframe) {
+            console.error('[WaveMAX Bridge] Cannot send viewport info - no iframe');
+            return;
+        }
 
         const info = {
             type: 'viewport-info',
@@ -104,47 +131,66 @@
             }
         };
 
+        console.log('[WaveMAX Bridge] Sending viewport info:', info);
+
         // Try to send to iframe
         try {
             iframe.contentWindow.postMessage(info, '*');
+            console.log('[WaveMAX Bridge] ✅ Viewport info sent successfully');
         } catch (e) {
-            console.error('[Parent-Iframe Bridge] Failed to send viewport info:', e);
+            console.error('[WaveMAX Bridge] ❌ Failed to send viewport info:', e);
         }
     }
 
     function handleMessage(event) {
+        console.log('[WaveMAX Bridge] Received message from:', event.origin);
+        console.log('[WaveMAX Bridge] Message data:', event.data);
+        
         // Security check
-        if (!ALLOWED_ORIGINS.some(origin => event.origin.includes(origin.replace(/^https?:\/\//, '')))) {
+        const isAllowedOrigin = ALLOWED_ORIGINS.some(origin => event.origin.includes(origin.replace(/^https?:\/\//, '')));
+        
+        if (!isAllowedOrigin) {
+            console.warn('[WaveMAX Bridge] ⚠️ Message from untrusted origin:', event.origin);
             return;
         }
 
-        if (!event.data || !event.data.type) return;
+        if (!event.data || !event.data.type) {
+            console.log('[WaveMAX Bridge] Invalid message format');
+            return;
+        }
 
-        console.log('[Parent-Iframe Bridge] Received message:', event.data.type);
+        console.log('[WaveMAX Bridge] Processing message type:', event.data.type);
 
         switch (event.data.type) {
             case 'hide-chrome':
+                console.log('[WaveMAX Bridge] Hide chrome requested');
                 if (isMobile || isTablet) {
                     hideChrome();
+                } else {
+                    console.log('[WaveMAX Bridge] Not hiding chrome - not on mobile/tablet');
                 }
                 break;
                 
             case 'show-chrome':
+                console.log('[WaveMAX Bridge] Show chrome requested');
                 showChrome();
                 break;
                 
             case 'resize':
                 // Existing resize functionality
                 if (event.data.data && event.data.data.height) {
+                    console.log('[WaveMAX Bridge] Resize requested:', event.data.data.height);
                     resizeIframe(event.data.data.height);
                 }
                 break;
                 
             case 'scroll-to-top':
+                console.log('[WaveMAX Bridge] Scroll to top requested');
                 smoothScrollToTop();
                 break;
                 
             case 'route-changed':
+                console.log('[WaveMAX Bridge] Route changed:', event.data.data);
                 // Reset chrome visibility on route change
                 if (chromeHidden && !isMobile) {
                     showChrome();
@@ -154,19 +200,53 @@
     }
 
     function hideChrome() {
-        if (chromeHidden) return;
+        if (chromeHidden) {
+            console.log('[WaveMAX Bridge] Chrome already hidden');
+            return;
+        }
 
-        console.log('[Parent-Iframe Bridge] Hiding header/footer');
+        console.log('[WaveMAX Bridge] Hiding header/footer...');
         
-        // Find header and footer elements (expanded selectors for better compatibility)
-        const header = document.querySelector('header, .header, #header, .navbar, .site-header, .main-header, .page-header, nav.navbar, .top-header');
-        const footer = document.querySelector('footer, .footer, #footer, .site-footer, .main-footer, .page-footer, .bottom-footer');
+        // Find header and footer elements
+        const headerSelectors = ['header', '.header', '#header', '.navbar'];
+        const footerSelectors = ['footer', '.footer', '#footer'];
+        
+        let header = null;
+        let footer = null;
+        
+        // Try each selector
+        for (const selector of headerSelectors) {
+            header = document.querySelector(selector);
+            if (header) {
+                console.log('[WaveMAX Bridge] Found header with selector:', selector);
+                break;
+            }
+        }
+        
+        for (const selector of footerSelectors) {
+            footer = document.querySelector(selector);
+            if (footer) {
+                console.log('[WaveMAX Bridge] Found footer with selector:', selector);
+                break;
+            }
+        }
+        
+        if (!header) {
+            console.error('[WaveMAX Bridge] ❌ No header element found!');
+            console.log('[WaveMAX Bridge] Tried selectors:', headerSelectors);
+        }
+        
+        if (!footer) {
+            console.error('[WaveMAX Bridge] ❌ No footer element found!');
+            console.log('[WaveMAX Bridge] Tried selectors:', footerSelectors);
+        }
         
         // Store scroll position
         lastScrollPosition = window.pageYOffset;
 
         // Hide header
         if (header) {
+            console.log('[WaveMAX Bridge] Hiding header...');
             header.style.transition = 'transform 0.3s ease-in-out';
             header.style.transform = 'translateY(-100%)';
             header.setAttribute('data-mobile-hidden', 'true');
@@ -174,6 +254,7 @@
 
         // Hide footer
         if (footer) {
+            console.log('[WaveMAX Bridge] Hiding footer...');
             footer.style.transition = 'transform 0.3s ease-in-out';
             footer.style.transform = 'translateY(100%)';
             footer.setAttribute('data-mobile-hidden', 'true');
@@ -181,6 +262,7 @@
 
         // Adjust iframe container to full viewport
         if (iframe) {
+            console.log('[WaveMAX Bridge] Adjusting iframe container...');
             const container = iframe.parentElement;
             if (container) {
                 container.style.transition = 'all 0.3s ease-in-out';
@@ -194,6 +276,7 @@
         }
 
         chromeHidden = true;
+        console.log('[WaveMAX Bridge] ✅ Chrome hidden');
 
         // Notify iframe that chrome is hidden
         setTimeout(() => {
@@ -207,9 +290,12 @@
     }
 
     function showChrome() {
-        if (!chromeHidden) return;
+        if (!chromeHidden) {
+            console.log('[WaveMAX Bridge] Chrome already visible');
+            return;
+        }
 
-        console.log('[Parent-Iframe Bridge] Showing header/footer');
+        console.log('[WaveMAX Bridge] Showing header/footer...');
         
         // Find header and footer elements
         const header = document.querySelector('[data-mobile-hidden="true"]');
@@ -244,6 +330,7 @@
         }
 
         chromeHidden = false;
+        console.log('[WaveMAX Bridge] ✅ Chrome shown');
 
         // Notify iframe that chrome is visible
         setTimeout(() => {
@@ -262,6 +349,7 @@
         // Add some padding to prevent cutoff
         const newHeight = parseInt(height) + 20;
         iframe.style.height = newHeight + 'px';
+        console.log('[WaveMAX Bridge] Iframe resized to:', newHeight);
         
         // If in mobile mode with hidden chrome, ensure minimum viewport height
         if (chromeHidden && (isMobile || isTablet)) {
@@ -299,7 +387,25 @@
             isTablet: isTablet,
             isDesktop: !isMobile && !isTablet,
             chromeHidden: chromeHidden
-        })
+        }),
+        debug: () => {
+            console.log('[WaveMAX Bridge] Debug info:');
+            console.log('  - Iframe:', iframe);
+            console.log('  - Is mobile:', isMobile);
+            console.log('  - Is tablet:', isTablet);
+            console.log('  - Chrome hidden:', chromeHidden);
+            console.log('  - Window width:', window.innerWidth);
+            
+            // Try to find header/footer
+            const testSelectors = ['header', '.header', '#header', '.navbar', 'footer', '.footer', '#footer'];
+            console.log('  - Testing selectors:');
+            testSelectors.forEach(sel => {
+                const el = document.querySelector(sel);
+                console.log(`    - ${sel}:`, el ? 'Found' : 'Not found');
+            });
+        }
     };
+
+    console.log('[WaveMAX Bridge] Script loaded. Use window.WaveMaxBridge.debug() for debugging info.');
 
 })();
