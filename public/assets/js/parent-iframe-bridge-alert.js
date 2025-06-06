@@ -179,10 +179,14 @@
         debugAlert('Hiding chrome...');
         
         // WaveMAX specific selectors
+        const topbar = document.querySelector('.topbar');
+        const wrapper = document.querySelector('.wrapper');
         const header = document.querySelector('.navbar');
         const pageHeader = document.querySelector('.page-header');
         const footer = document.querySelector('.footer');
         
+        if (topbar) debugAlert('Topbar found: .topbar');
+        if (wrapper) debugAlert('Wrapper found: .wrapper');
         if (header) debugAlert('Header found: .navbar');
         if (pageHeader) debugAlert('Page header found: .page-header');
         if (footer) debugAlert('Footer found: .footer');
@@ -190,8 +194,17 @@
         if (!header) debugAlert('NO HEADER FOUND');
         if (!footer) debugAlert('NO FOOTER FOUND');
         
-        // Hide header
-        if (header) {
+        // Hide topbar
+        if (topbar) {
+            topbar.style.display = 'none';
+            topbar.setAttribute('data-mobile-hidden', 'true');
+        }
+
+        // Hide wrapper or header
+        if (wrapper) {
+            wrapper.style.display = 'none';
+            wrapper.setAttribute('data-mobile-hidden', 'true');
+        } else if (header) {
             header.style.transition = 'transform 0.3s ease-in-out';
             header.style.transform = 'translateY(-100%)';
             header.setAttribute('data-mobile-hidden', 'true');
