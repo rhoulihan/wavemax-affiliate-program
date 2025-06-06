@@ -1,0 +1,2 @@
+- Always review init.prompt and our best practices if they exist in the current directory
+- Always review the last compact when starting
