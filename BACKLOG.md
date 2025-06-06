@@ -57,7 +57,24 @@ This file maintains a prioritized list of tasks and issues to be addressed in fu
 
 ### Low Priority
 
-#### 1. Internationalization (i18n) Support
+#### 1. Code Cleanup - Remove Unused Code
+- **Added**: 2025-01-07
+- **Status**: Pending
+- **Context**: Comprehensive code audit identified ~1,500 lines of unused code
+- **Details**: See CODE_AUDIT_REPORT.md for full details
+  - Remove 4 unused npm packages (crypto-js, joi, multer, @aws-sdk/credential-provider-ini)
+  - Remove 15 unused imports across various files
+  - Remove 17 unused functions (~300 lines of dead code)
+  - Remove 5 orphaned files that are never referenced
+  - Clean up 500+ console.log statements (security concern with OAuth data logging)
+  - Fix missing scripts/seed.js reference in package.json
+- **Implementation Plan**:
+  - Phase 1: Remove unused dependencies and orphaned files (low risk)
+  - Phase 2: Remove unused functions and imports (medium risk)
+  - Phase 3: Replace console.log with proper logging (medium risk)
+- **Testing Required**: Full test suite after each phase
+
+#### 2. Internationalization (i18n) Support
 - **Added**: 2025-01-06
 - **Status**: Pending
 - **Context**: Add multi-language support for global accessibility
@@ -70,7 +87,7 @@ This file maintains a prioritized list of tasks and issues to be addressed in fu
   - Store user language preferences in profiles
   - Consider locale-specific formatting (dates, currency, numbers)
 
-#### 2. ADA Compliance and Accessibility
+#### 3. ADA Compliance and Accessibility
 - **Added**: 2025-01-06
 - **Status**: Pending
 - **Context**: Ensure full ADA compliance for users with disabilities
@@ -86,7 +103,7 @@ This file maintains a prioritized list of tasks and issues to be addressed in fu
   - Ensure forms have proper labels and error messages
   - Add captions/transcripts for any video content
 
-#### 3. Implement Excel Export for Orders
+#### 4. Implement Excel Export for Orders
 - **Added**: 2025-06-03
 - **Status**: Pending
 - **Context**: Excel export endpoint returns 501 Not Implemented
@@ -95,7 +112,7 @@ This file maintains a prioritized list of tasks and issues to be addressed in fu
   - Need to implement Excel export functionality using a library like xlsx
   - Endpoint exists at `/api/v1/orders/export?format=excel`
 
-#### 4. Add Admin UI for SystemConfig Management
+#### 5. Add Admin UI for SystemConfig Management
 - **Added**: 2025-06-03
 - **Status**: Pending
 - **Context**: Currently SystemConfig can only be managed via API
