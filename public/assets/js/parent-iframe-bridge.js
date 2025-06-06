@@ -158,8 +158,9 @@
 
         console.log('[Parent-Iframe Bridge] Hiding header/footer');
         
-        // Find header and footer elements - WaveMAX CMS specific selectors
+        // Find header, page header, and footer elements - WaveMAX CMS specific selectors
         const header = document.querySelector('.navbar');
+        const pageHeader = document.querySelector('.page-header');
         const footer = document.querySelector('.footer');
         
         // Store scroll position
@@ -170,6 +171,12 @@
             header.style.transition = 'transform 0.3s ease-in-out';
             header.style.transform = 'translateY(-100%)';
             header.setAttribute('data-mobile-hidden', 'true');
+        }
+
+        // Hide page header
+        if (pageHeader) {
+            pageHeader.style.display = 'none';
+            pageHeader.setAttribute('data-mobile-hidden', 'true');
         }
 
         // Hide footer
@@ -211,9 +218,10 @@
 
         console.log('[Parent-Iframe Bridge] Showing header/footer');
         
-        // Find header and footer elements
-        const header = document.querySelector('[data-mobile-hidden="true"]');
-        const footer = document.querySelector('footer[data-mobile-hidden="true"], .footer[data-mobile-hidden="true"]');
+        // Find header, page header, and footer elements
+        const header = document.querySelector('.navbar[data-mobile-hidden="true"]');
+        const pageHeader = document.querySelector('.page-header[data-mobile-hidden="true"]');
+        const footer = document.querySelector('.footer[data-mobile-hidden="true"]');
 
         // Show header
         if (header) {
@@ -221,6 +229,12 @@
             setTimeout(() => {
                 header.removeAttribute('data-mobile-hidden');
             }, 300);
+        }
+
+        // Show page header
+        if (pageHeader) {
+            pageHeader.style.display = '';
+            pageHeader.removeAttribute('data-mobile-hidden');
         }
 
         // Show footer  
