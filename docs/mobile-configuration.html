@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mobile Configuration Guide - WaveMAX Affiliate Program</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f8f9fa;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+            color: white;
+            padding: 30px 0;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        header h1 {
+            font-size: 2rem;
+            margin-bottom: 5px;
+        }
+        
+        header .breadcrumb {
+            opacity: 0.9;
+        }
+        
+        header .breadcrumb a {
+            color: white;
+            text-decoration: none;
+        }
+        
+        .content {
+            background: white;
+            border-radius: 8px;
+            padding: 40px;
+            margin-top: 30px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+        
+        h2 {
+            color: #1e3a8a;
+            margin-top: 30px;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+        
+        h3 {
+            color: #333;
+            margin-top: 25px;
+            margin-bottom: 15px;
+        }
+        
+        h4 {
+            color: #555;
+            margin-top: 20px;
+            margin-bottom: 10px;
+        }
+        
+        .quick-start {
+            background: #e0f2fe;
+            border: 2px solid #0284c7;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .info-box {
+            background: #f0f9ff;
+            border-left: 4px solid #3b82f6;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        
+        .warning-box {
+            background: #fef3c7;
+            border-left: 4px solid #f59e0b;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        
+        .success-box {
+            background: #d1fae5;
+            border-left: 4px solid #10b981;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        
+        code {
+            background: #f4f4f4;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+        
+        pre {
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 6px;
+            overflow-x: auto;
+            margin: 15px 0;
+        }
+        
+        pre code {
+            background: none;
+            padding: 0;
+            color: inherit;
+        }
+        
+        ul, ol {
+            margin-left: 30px;
+            margin-top: 10px;
+            margin-bottom: 10px;
+        }
+        
+        li {
+            margin-bottom: 5px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        
+        th, td {
+            border: 1px solid #e0e0e0;
+            padding: 12px;
+            text-align: left;
+        }
+        
+        th {
+            background: #f8f9fa;
+            font-weight: 600;
+        }
+        
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        .feature-card {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            border: 1px solid #e0e0e0;
+        }
+        
+        .feature-card h4 {
+            color: #1e3a8a;
+            margin-bottom: 10px;
+        }
+        
+        .troubleshooting-item {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 15px 0;
+        }
+        
+        .troubleshooting-item h4 {
+            color: #dc2626;
+            margin-bottom: 10px;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .content {
+                padding: 20px;
+            }
+            
+            pre {
+                padding: 15px;
+                font-size: 0.85em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="breadcrumb">
+                <a href="index.html">Documentation</a> &gt; Mobile Configuration Guide
+            </div>
+            <h1>Mobile Configuration Guide</h1>
+            <p>Complete guide for implementing mobile-friendly features in the WaveMAX Affiliate Program</p>
+        </div>
+    </header>
+    
+    <div class="container">
+        <div class="content">
+            <h2>Overview</h2>
+            <p>This guide explains how to implement and configure the mobile-friendly features for parent pages hosting the WaveMAX Affiliate Program iframe. The system provides automatic viewport detection, dynamic header/footer management, and seamless mobile user experience.</p>
+            
+            <div class="quick-start">
+                <h3>🚀 Quick Start</h3>
+                <p>Add this script to your parent page to enable all mobile features:</p>
+                <pre><code>&lt;script src="https://affiliate.wavemax.promo/assets/js/parent-iframe-bridge.js"&gt;&lt;/script&gt;</code></pre>
+                <p>That's it! The script automatically handles mobile detection, communication, and UI adjustments.</p>
+            </div>
+            
+            <h2>How It Works</h2>
+            
+            <h3>1. Automatic Iframe Detection</h3>
+            <p>The bridge script automatically finds your WaveMAX iframe by looking for:</p>
+            <ul>
+                <li><code>iframe[src*="affiliate.wavemax.promo"]</code></li>
+                <li><code>iframe#wavemax-affiliate-iframe</code></li>
+            </ul>
+            
+            <h3>2. Viewport Detection</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Device Type</th>
+                        <th>Viewport Width</th>
+                        <th>Behavior</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Mobile</td>
+                        <td>&lt; 768px</td>
+                        <td>Chrome hiding available</td>
+                    </tr>
+                    <tr>
+                        <td>Tablet</td>
+                        <td>768px - 1024px</td>
+                        <td>Chrome hiding available</td>
+                    </tr>
+                    <tr>
+                        <td>Desktop</td>
+                        <td>&gt; 1024px</td>
+                        <td>Chrome always visible</td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <h3>3. Communication Protocol</h3>
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <h4>Parent → Iframe Messages</h4>
+                    <ul>
+                        <li><strong>viewport-info</strong>: Device and viewport data</li>
+                        <li><strong>chrome-hidden</strong>: Chrome visibility status</li>
+                    </ul>
+                </div>
+                <div class="feature-card">
+                    <h4>Iframe → Parent Messages</h4>
+                    <ul>
+                        <li><strong>hide-chrome</strong>: Request to hide header/footer</li>
+                        <li><strong>show-chrome</strong>: Request to show header/footer</li>
+                        <li><strong>resize</strong>: Update iframe height</li>
+                        <li><strong>scroll-to-top</strong>: Smooth scroll request</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <h3>4. Automatic Chrome Management</h3>
+            <p>On mobile devices, certain pages automatically hide the parent page's header and footer for a full-screen experience:</p>
+            
+            <div class="info-box">
+                <h4>Full-Screen Pages (Chrome Hidden)</h4>
+                <ul>
+                    <li>Landing page (<code>/</code>, <code>/landing</code>)</li>
+                    <li>Affiliate Dashboard (<code>/affiliate-dashboard</code>)</li>
+                    <li>Customer Dashboard (<code>/customer-dashboard</code>)</li>
+                </ul>
+                
+                <h4>Regular Pages (Chrome Visible)</h4>
+                <ul>
+                    <li>Registration forms</li>
+                    <li>Login pages</li>
+                    <li>Order forms</li>
+                    <li>All other pages</li>
+                </ul>
+            </div>
+            
+            <h2>Advanced Configuration</h2>
+            
+            <h3>Custom Header/Footer Selectors</h3>
+            <p>If your site uses custom class names or IDs for headers and footers, update the selectors in the script:</p>
+            
+            <pre><code>// In parent-iframe-bridge.js, modify the hideChrome function:
+const header = document.querySelector('.your-custom-header');
+const footer = document.querySelector('.your-custom-footer');</code></pre>
+            
+            <h3>Security Configuration</h3>
+            <p>Update the allowed origins list to match your domains:</p>
+            
+            <pre><code>const ALLOWED_ORIGINS = [
+    'https://affiliate.wavemax.promo',
+    'http://affiliate.wavemax.promo',  // Development
+    'https://your-staging-domain.com'
+];</code></pre>
+            
+            <h3>Custom CSS Transitions</h3>
+            <p>Add custom styling for smooth transitions:</p>
+            
+            <pre><code>/* Smooth header/footer transitions */
+[data-mobile-hidden="true"] {
+    transform: translateY(-100%);
+    transition: transform 0.3s ease-in-out;
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* Full-height iframe container */
+.iframe-container {
+    transition: all 0.3s ease-in-out;
+}
+
+/* Prevent content jumping */
+body {
+    min-height: 100vh;
+    overflow-x: hidden;
+}</code></pre>
+            
+            <h2>Complete Implementation Example</h2>
+            
+            <pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang="en"&gt;
+&lt;head&gt;
+    &lt;meta charset="UTF-8"&gt;
+    &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
+    &lt;title&gt;WaveMAX Affiliate Program&lt;/title&gt;
+    &lt;style&gt;
+        .header { 
+            background: #333; 
+            color: white; 
+            padding: 20px;
+            position: relative;
+            z-index: 100;
+            transition: transform 0.3s ease-in-out;
+        }
+        
+        .footer { 
+            background: #333; 
+            color: white; 
+            padding: 20px;
+            position: relative;
+            z-index: 100;
+            transition: transform 0.3s ease-in-out;
+        }
+        
+        .iframe-wrapper {
+            width: 100%;
+            position: relative;
+            min-height: 600px;
+        }
+        
+        iframe {
+            width: 100%;
+            border: none;
+            display: block;
+        }
+        
+        /* Mobile optimizations */
+        @media (max-width: 768px) {
+            body {
+                margin: 0;
+                padding: 0;
+            }
+            
+            .iframe-wrapper {
+                min-height: 100vh;
+            }
+        }
+    &lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;header class="header"&gt;
+        &lt;h1&gt;WaveMAX Laundry&lt;/h1&gt;
+        &lt;nav&gt;Navigation Menu&lt;/nav&gt;
+    &lt;/header&gt;
+    
+    &lt;div class="iframe-wrapper"&gt;
+        &lt;iframe 
+            id="wavemax-affiliate-iframe"
+            src="https://affiliate.wavemax.promo/embed-app.html"
+            width="100%"
+            height="800"
+            loading="lazy"&gt;
+        &lt;/iframe&gt;
+    &lt;/div&gt;
+    
+    &lt;footer class="footer"&gt;
+        &lt;p&gt;&copy; 2025 CRHS Enterprises, LLC. All rights reserved.&lt;/p&gt;
+    &lt;/footer&gt;
+    
+    &lt;!-- Mobile bridge script --&gt;
+    &lt;script src="https://affiliate.wavemax.promo/assets/js/parent-iframe-bridge.js"&gt;&lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+            
+            <h2>Testing Your Implementation</h2>
+            
+            <h3>Desktop Browser Testing</h3>
+            <ol>
+                <li>Open Chrome DevTools (F12)</li>
+                <li>Toggle device toolbar (Ctrl+Shift+M or Cmd+Shift+M)</li>
+                <li>Select a mobile device preset (e.g., iPhone 12)</li>
+                <li>Refresh the page</li>
+                <li>Navigate through different pages to test chrome hiding/showing</li>
+                <li>Test orientation changes (portrait/landscape)</li>
+            </ol>
+            
+            <h3>Real Device Testing</h3>
+            <div class="success-box">
+                <h4>Expected Behavior on Mobile:</h4>
+                <ul>
+                    <li>✅ Landing page loads with headers/footers hidden</li>
+                    <li>✅ Navigation to login/register shows headers/footers</li>
+                    <li>✅ Dashboard pages hide chrome for full-screen view</li>
+                    <li>✅ Smooth transitions between states</li>
+                    <li>✅ No horizontal scrolling</li>
+                    <li>✅ Touch interactions work smoothly</li>
+                </ul>
+            </div>
+            
+            <h3>Debug Mode</h3>
+            <p>Enable console logging by adding <code>?debug=true</code> to your URL:</p>
+            <pre><code>https://www.wavemaxlaundry.com/affiliate-program?debug=true</code></pre>
+            
+            <h2>Troubleshooting</h2>
+            
+            <div class="troubleshooting-item">
+                <h4>Headers/Footers Not Hiding</h4>
+                <ol>
+                    <li>Verify the script is loading: Check Network tab in DevTools</li>
+                    <li>Check viewport width: Must be &lt; 768px for mobile</li>
+                    <li>Verify selectors: Ensure your header/footer match expected selectors</li>
+                    <li>Check console for errors: Look for "Parent-Iframe Bridge" messages</li>
+                    <li>Verify you're on a full-screen page (landing or dashboard)</li>
+                </ol>
+            </div>
+            
+            <div class="troubleshooting-item">
+                <h4>Iframe Not Resizing</h4>
+                <ol>
+                    <li>Check iframe ID or src attribute matches expected patterns</li>
+                    <li>Verify no CSS <code>max-height</code> constraints on iframe</li>
+                    <li>Ensure parent container allows dynamic height</li>
+                    <li>Look for resize messages in console</li>
+                </ol>
+            </div>
+            
+            <div class="troubleshooting-item">
+                <h4>Communication Errors</h4>
+                <ol>
+                    <li>Check browser console for CORS errors</li>
+                    <li>Verify origins match in allowed list</li>
+                    <li>Ensure no Content Security Policy blocks <code>frame-src</code></li>
+                    <li>Test with <code>?debug=true</code> for detailed logs</li>
+                </ol>
+            </div>
+            
+            <h2>Performance Optimization</h2>
+            
+            <ul>
+                <li><strong>Script Size:</strong> ~5KB minified (minimal impact)</li>
+                <li><strong>No Dependencies:</strong> Pure JavaScript, no libraries required</li>
+                <li><strong>Debounced Events:</strong> Resize events throttled to prevent excessive calls</li>
+                <li><strong>CSS Transitions:</strong> Hardware-accelerated transforms for smooth animations</li>
+                <li><strong>Lazy Loading:</strong> Use <code>loading="lazy"</code> on iframe for faster initial page load</li>
+            </ul>
+            
+            <h2>Browser Support</h2>
+            
+            <table>
+                <thead>
+                    <tr>
+                        <th>Browser</th>
+                        <th>Support Level</th>
+                        <th>Notes</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Chrome/Edge</td>
+                        <td>✅ Full Support</td>
+                        <td>Version 80+</td>
+                    </tr>
+                    <tr>
+                        <td>Safari/iOS</td>
+                        <td>✅ Full Support</td>
+                        <td>Version 13+, includes -webkit prefixes</td>
+                    </tr>
+                    <tr>
+                        <td>Firefox</td>
+                        <td>✅ Full Support</td>
+                        <td>Version 75+</td>
+                    </tr>
+                    <tr>
+                        <td>Internet Explorer</td>
+                        <td>❌ Not Supported</td>
+                        <td>Use Edge instead</td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <h2>Security Considerations</h2>
+            
+            <div class="warning-box">
+                <h4>Important Security Features:</h4>
+                <ul>
+                    <li>Origin validation prevents XSS attacks</li>
+                    <li>No arbitrary code execution from messages</li>
+                    <li>Chrome hiding restricted to mobile viewports only</li>
+                    <li>All messages are sanitized and validated</li>
+                    <li>HTTPS required for production deployment</li>
+                </ul>
+            </div>
+            
+            <h2>API Reference</h2>
+            
+            <h3>Global Object: <code>window.WaveMaxBridge</code></h3>
+            
+            <h4>Methods</h4>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Method</th>
+                        <th>Description</th>
+                        <th>Parameters</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>hideChrome()</code></td>
+                        <td>Manually hide header/footer</td>
+                        <td>None</td>
+                    </tr>
+                    <tr>
+                        <td><code>showChrome()</code></td>
+                        <td>Manually show header/footer</td>
+                        <td>None</td>
+                    </tr>
+                    <tr>
+                        <td><code>sendViewportInfo()</code></td>
+                        <td>Send current viewport data to iframe</td>
+                        <td>None</td>
+                    </tr>
+                    <tr>
+                        <td><code>getViewportInfo()</code></td>
+                        <td>Get current viewport state</td>
+                        <td>None</td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <h4>Example Usage</h4>
+            <pre><code>// Manually control chrome visibility
+if (window.WaveMaxBridge) {
+    // Hide chrome on mobile
+    if (window.WaveMaxBridge.getViewportInfo().isMobile) {
+        window.WaveMaxBridge.hideChrome();
+    }
+    
+    // Get current state
+    const state = window.WaveMaxBridge.getViewportInfo();
+    console.log('Is mobile:', state.isMobile);
+    console.log('Chrome hidden:', state.chromeHidden);
+}</code></pre>
+            
+            <h2>Future Enhancements</h2>
+            
+            <p>Planned features for upcoming releases:</p>
+            <ul>
+                <li>Touch gesture support (swipe to show/hide chrome)</li>
+                <li>Progressive Web App (PWA) integration</li>
+                <li>Offline support with service workers</li>
+                <li>Advanced animation options</li>
+                <li>Customizable breakpoints</li>
+                <li>Native app deep linking</li>
+            </ul>
+            
+            <h2>Support</h2>
+            
+            <p>For technical assistance:</p>
+            <ul>
+                <li>Review browser console for detailed error messages</li>
+                <li>Enable debug mode for verbose logging</li>
+                <li>Check this guide for common solutions</li>
+                <li>Contact: tech@wavemaxlaundry.com</li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>
