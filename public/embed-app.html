@@ -11,6 +11,9 @@
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
+    <!-- Mobile Utils -->
+    <script src="/assets/js/mobile-utils.js"></script>
+    
     <style>
         * {
             margin: 0;
@@ -58,6 +61,41 @@
             margin: 20px;
             text-align: center;
         }
+        
+        /* Mobile-specific styles */
+        @media (max-width: 767px) {
+            body {
+                font-size: 16px; /* Prevent zoom on iOS */
+            }
+            
+            #app-container {
+                min-height: 100vh;
+                padding: 0;
+                margin: 0;
+            }
+            
+            /* Ensure full width on mobile */
+            #app-container > * {
+                max-width: 100vw;
+                overflow-x: hidden;
+            }
+        }
+        
+        /* When chrome is hidden, take full viewport */
+        body.chrome-hidden {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            overflow: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        body.chrome-hidden #app-container {
+            min-height: 100vh;
+            height: 100%;
+        }
     </style>
 </head>
 <body>
@@ -72,6 +110,9 @@
         // Single page embedded application
         const BASE_URL = window.location.protocol + '//' + window.location.host;
         
+        // Mobile and parent communication state
+        let viewportInfo = null;
+        let chromeHidden = false;
         
         const EMBED_PAGES = {
             '/': '/embed-landing.html',
@@ -245,6 +286,16 @@
                         type: 'route-changed',
                         data: { route: route }
                     }, '*');
+                    
+                    // Check if we should hide chrome on mobile for this route
+                    if (viewportInfo && viewportInfo.isMobile) {
+                        const fullscreenRoutes = ['/', '/landing', '/affiliate-dashboard', '/customer-dashboard'];
+                        if (fullscreenRoutes.includes(route)) {
+                            requestChromeHide();
+                        } else {
+                            requestChromeShow();
+                        }
+                    }
                 }
                 
                 // Scroll iframe content to top immediately
@@ -480,7 +531,7 @@
             }
         }
         
-        // Handle messages from embedded pages
+        // Handle messages from embedded pages AND parent window
         window.addEventListener('message', function(event) {
             console.log('=== Message Received in embed-app.html ===');
             console.log('Full event:', event);
@@ -509,29 +560,78 @@
             console.log('Extracted message type:', messageType);
             console.log('Extracted message data:', messageData);
             
-            if (messageType === 'navigate') {
-                console.log('Processing navigation message');
-                console.log('Full messageData structure:', JSON.stringify(messageData, null, 2));
-                
-                // Handle navigation request
-                if (messageData.url) {
-                    // Old format with just URL
-                    const route = messageData.url.startsWith('/') ? messageData.url : '/' + messageData.url;
-                    console.log('Navigating to route (old format):', route);
-                    navigateTo(route);
-                } else if (messageData.page) {
-                    // New format with page and optional params
-                    const route = messageData.page.startsWith('/') ? messageData.page : '/' + messageData.page;
-                    console.log('Navigating to route (new format):', route, 'with params:', messageData.params);
-                    navigateTo(route, messageData.params || {});
-                } else {
-                    console.log('No valid navigation target found in message data');
-                    console.log('Available keys in messageData:', Object.keys(messageData));
-                }
-            } else {
-                console.log('Not a navigation message. Type:', messageType);
+            // Handle different message types
+            switch(messageType) {
+                case 'navigate':
+                    console.log('Processing navigation message');
+                    console.log('Full messageData structure:', JSON.stringify(messageData, null, 2));
+                    
+                    // Handle navigation request
+                    if (messageData.url) {
+                        // Old format with just URL
+                        const route = messageData.url.startsWith('/') ? messageData.url : '/' + messageData.url;
+                        console.log('Navigating to route (old format):', route);
+                        navigateTo(route);
+                    } else if (messageData.page) {
+                        // New format with page and optional params
+                        const route = messageData.page.startsWith('/') ? messageData.page : '/' + messageData.page;
+                        console.log('Navigating to route (new format):', route, 'with params:', messageData.params);
+                        navigateTo(route, messageData.params || {});
+                    } else {
+                        console.log('No valid navigation target found in message data');
+                        console.log('Available keys in messageData:', Object.keys(messageData));
+                    }
+                    break;
+                    
+                case 'viewport-info':
+                    // Parent window sending viewport information
+                    console.log('Received viewport info from parent:', messageData);
+                    viewportInfo = messageData;
+                    
+                    // Apply mobile classes
+                    if (window.MobileUtils) {
+                        window.MobileUtils.addBodyClasses();
+                    }
+                    
+                    // Auto-hide chrome on mobile when landing page loads
+                    if (messageData.isMobile && currentRoute === '/' && !chromeHidden) {
+                        requestChromeHide();
+                    }
+                    break;
+                    
+                case 'chrome-hidden':
+                    // Parent notifying us that chrome visibility changed
+                    chromeHidden = messageData.hidden;
+                    document.body.classList.toggle('chrome-hidden', chromeHidden);
+                    
+                    // Recalculate height after chrome change
+                    setTimeout(() => sendHeight(true), 350);
+                    break;
+                    
+                default:
+                    console.log('Unknown message type:', messageType);
             }
         });
+        
+        // Request parent to hide chrome (header/footer)
+        function requestChromeHide() {
+            if (window.parent !== window) {
+                window.parent.postMessage({
+                    type: 'hide-chrome',
+                    data: {}
+                }, '*');
+            }
+        }
+        
+        // Request parent to show chrome (header/footer)
+        function requestChromeShow() {
+            if (window.parent !== window) {
+                window.parent.postMessage({
+                    type: 'show-chrome',
+                    data: {}
+                }, '*');
+            }
+        }
         
         // Handle browser back/forward
         window.addEventListener('popstate', function() {
