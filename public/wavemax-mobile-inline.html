@@ -1,0 +1,48 @@
+<!-- WaveMAX Mobile Bridge - Inline Version -->
+<!-- Copy and paste this script tag at the end of your page, before </body> -->
+
+<script>
+(function() {
+    'use strict';
+    
+    // Wait for page to fully load
+    window.addEventListener('load', function() {
+        // Only run on mobile
+        if (window.innerWidth >= 768) {
+            console.log('Not mobile, skipping');
+            return;
+        }
+        
+        // Add a small delay to ensure everything is rendered
+        setTimeout(function() {
+            // Find elements
+            var navbar = document.querySelector('.navbar');
+            var footer = document.querySelector('.footer');
+            var iframe = document.querySelector('iframe');
+            
+            if (!navbar || !footer) {
+                if (window.innerWidth < 768) {
+                    alert('Mobile Bridge: Could not find navbar or footer');
+                }
+                return;
+            }
+            
+            // Hide navbar
+            navbar.style.cssText = 'transform: translateY(-100%) !important; transition: transform 0.3s ease-in-out !important; position: relative !important; z-index: 1 !important;';
+            
+            // Hide footer
+            footer.style.cssText = 'transform: translateY(100%) !important; transition: transform 0.3s ease-in-out !important; position: relative !important; z-index: 1 !important;';
+            
+            // Adjust iframe container if exists
+            if (iframe && iframe.parentElement) {
+                iframe.parentElement.style.cssText = 'min-height: 100vh !important; padding: 0 !important; margin: 0 !important;';
+                iframe.style.cssText = 'min-height: 100vh !important; width: 100% !important;';
+            }
+            
+            // Debug alert (comment out in production)
+            // alert('Mobile Bridge: Header and footer hidden');
+            
+        }, 1000); // 1 second delay to ensure page is fully loaded
+    });
+})();
+</script>

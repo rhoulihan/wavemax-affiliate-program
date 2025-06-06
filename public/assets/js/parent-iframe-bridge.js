@@ -158,9 +158,9 @@
 
         console.log('[Parent-Iframe Bridge] Hiding header/footer');
         
-        // Find header and footer elements (expanded selectors for better compatibility)
-        const header = document.querySelector('header, .header, #header, .navbar, .site-header, .main-header, .page-header, nav.navbar, .top-header');
-        const footer = document.querySelector('footer, .footer, #footer, .site-footer, .main-footer, .page-footer, .bottom-footer');
+        // Find header and footer elements - WaveMAX CMS specific selectors
+        const header = document.querySelector('.navbar');
+        const footer = document.querySelector('.footer');
         
         // Store scroll position
         lastScrollPosition = window.pageYOffset;
