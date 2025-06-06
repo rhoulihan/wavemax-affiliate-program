@@ -586,6 +586,7 @@
                 case 'viewport-info':
                     // Parent window sending viewport information
                     console.log('Received viewport info from parent:', messageData);
+                    console.log('Current route:', currentRoute);
                     viewportInfo = messageData;
                     
                     // Apply mobile classes
@@ -593,8 +594,10 @@
                         window.MobileUtils.addBodyClasses();
                     }
                     
-                    // Auto-hide chrome on mobile when landing page loads
-                    if (messageData.isMobile && currentRoute === '/' && !chromeHidden) {
+                    // Auto-hide chrome on mobile for full-screen routes
+                    const fullscreenRoutes = ['/', '/landing', '/affiliate-dashboard', '/customer-dashboard'];
+                    if (messageData.isMobile && fullscreenRoutes.includes(currentRoute) && !chromeHidden) {
+                        console.log('Mobile detected on fullscreen route, requesting chrome hide');
                         requestChromeHide();
                     }
                     break;
