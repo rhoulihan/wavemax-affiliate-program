@@ -266,8 +266,9 @@
                     // Display fee breakdown
                     if (order.feeBreakdown) {
                         const fee = order.feeBreakdown;
-                        document.getElementById('deliveryFee').textContent = `$${fee.roundTripFee.toFixed(2)}`;
-                        const breakdownText = `${fee.numberOfBags} bag${fee.numberOfBags > 1 ? 's' : ''} × $${fee.perBagFee}/bag = $${fee.calculatedFee} ${fee.minimumApplied ? `(minimum $${fee.minimumFee} applies)` : ''} × 2 trips`;
+                        document.getElementById('deliveryFee').textContent = `$${fee.totalFee.toFixed(2)}`;
+                        const calculatedFee = fee.numberOfBags * fee.perBagFee;
+                        const breakdownText = `${fee.numberOfBags} bag${fee.numberOfBags > 1 ? 's' : ''} × $${fee.perBagFee}/bag = $${calculatedFee.toFixed(2)} ${fee.minimumApplied ? `(minimum $${fee.minimumFee} applies)` : ''}`;
                         document.getElementById('feeBreakdown').textContent = breakdownText;
                     } else {
                         // Fallback for old orders

@@ -115,7 +115,8 @@ describe('Customer Controller', () => {
           email: 'jane@example.com',
           affiliateId: 'AFF123',
           affiliateName: 'John Doe',
-          deliveryFee: 5.99
+          minimumDeliveryFee: undefined,
+          perBagDeliveryFee: undefined
         }),
         message: 'Customer registered successfully!'
       });

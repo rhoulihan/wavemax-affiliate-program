@@ -167,7 +167,8 @@ describe('Auth Controller', () => {
             firstName: 'Jane',
             lastName: 'Smith',
             affiliate: expect.objectContaining({
-              deliveryFee: 5.99
+              minimumDeliveryFee: undefined,
+              perBagDeliveryFee: undefined
             })
           })
         })

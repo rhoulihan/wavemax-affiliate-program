@@ -216,13 +216,19 @@ describe('Model Tests', () => {
         deliveryTime: 'afternoon',
         estimatedWeight: 30,
         numberOfBags: 2,
-        deliveryFee: 5.99
+        feeBreakdown: {
+          numberOfBags: 2,
+          minimumFee: 10,
+          perBagFee: 2,
+          totalFee: 10,
+          minimumApplied: true
+        }
       });
 
       await order.save();
 
-      // 30 lbs * $1.25 + $5.99 delivery
-      expect(order.estimatedTotal).toBeCloseTo(43.49, 2);
+      // 30 lbs * $1.25 + $10 fee
+      expect(order.estimatedTotal).toBeCloseTo(47.50, 2);
     });
 
     it('should calculate actual total and commission when weight is set', async () => {
@@ -235,16 +241,22 @@ describe('Model Tests', () => {
         deliveryTime: 'afternoon',
         estimatedWeight: 50,
         numberOfBags: 3,
-        deliveryFee: 5.99,
+        feeBreakdown: {
+          numberOfBags: 3,
+          minimumFee: 10,
+          perBagFee: 2,
+          totalFee: 10,
+          minimumApplied: true
+        },
         actualWeight: 30
       });
 
       await order.save();
 
-      // 30 lbs * $1.25 + $5.99 delivery = $43.49
-      expect(order.actualTotal).toBeCloseTo(43.49, 2);
-      // Commission: 10% of wash cost (30 * $1.25 * 0.1) + delivery fee ($5.99) = $9.74
-      expect(order.affiliateCommission).toBeCloseTo(9.74, 2);
+      // 30 lbs * $1.25 + $10 fee = $47.50
+      expect(order.actualTotal).toBeCloseTo(47.50, 2);
+      // Commission: 10% of wash cost (30 * $1.25 * 0.1) + fee ($10) = $13.75
+      expect(order.affiliateCommission).toBeCloseTo(13.75, 2);
     });
 
     it('should update timestamps for status changes', async () => {

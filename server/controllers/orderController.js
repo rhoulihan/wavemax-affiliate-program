@@ -30,22 +30,14 @@ async function calculateDeliveryFee(numberOfBags, affiliate = null) {
   
   // Calculate fee based on bags
   const calculatedFee = numberOfBags * perBagFee;
-  const oneWayFee = Math.max(minimumFee, calculatedFee);
-  const roundTripFee = oneWayFee * 2; // Pickup + delivery
+  const totalFee = Math.max(minimumFee, calculatedFee);
   
   return {
     numberOfBags,
     minimumFee,
     perBagFee,
-    calculatedFee,
-    oneWayFee,
-    roundTripFee,
-    minimumApplied: oneWayFee === minimumFee,
-    breakdown: {
-      pickup: oneWayFee,
-      delivery: oneWayFee,
-      total: roundTripFee
-    }
+    totalFee,
+    minimumApplied: totalFee === minimumFee
   };
 }
 
@@ -146,9 +138,7 @@ exports.createOrder = async (req, res) => {
         numberOfBags: feeCalculation.numberOfBags,
         minimumFee: feeCalculation.minimumFee,
         perBagFee: feeCalculation.perBagFee,
-        calculatedFee: feeCalculation.calculatedFee,
-        oneWayFee: feeCalculation.oneWayFee,
-        roundTripFee: feeCalculation.roundTripFee,
+        totalFee: feeCalculation.totalFee,
         minimumApplied: feeCalculation.minimumApplied
       },
       status: 'scheduled'
