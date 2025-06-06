@@ -897,6 +897,11 @@ function initializeAffiliateRegistration() {
     const radiusValue = document.getElementById('radiusValue');
     const serviceRadius = document.getElementById('serviceRadius');
     
+    // Set default location values immediately (Austin, TX)
+    document.getElementById('serviceLatitude').value = defaultLat.toFixed(6);
+    document.getElementById('serviceLongitude').value = defaultLng.toFixed(6);
+    document.getElementById('serviceRadius').value = radiusSlider ? radiusSlider.value : 5;
+    
     // Function to update service area
     function updateServiceArea(lat, lng, radius) {
       // Update hidden fields
@@ -954,6 +959,9 @@ function initializeAffiliateRegistration() {
         updateServiceArea(position.lat, position.lng, radius);
       }
     });
+    
+    // Set initial marker and circle at default location
+    updateServiceArea(defaultLat, defaultLng, parseInt(radiusSlider ? radiusSlider.value : 5));
     
     // Try to get user's location
     if (navigator.geolocation) {
