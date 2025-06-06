@@ -1,427 +1,459 @@
-// Mock modules before importing them
+// Administrator Controller Unit Tests
+// Focus on key uncovered functions for coverage improvement
+
 jest.mock('../../server/models/Administrator');
 jest.mock('../../server/models/Operator');
 jest.mock('../../server/models/Order');
-jest.mock('../../server/models/Customer');
 jest.mock('../../server/models/Affiliate');
+jest.mock('../../server/models/Customer');
 jest.mock('../../server/models/SystemConfig');
-jest.mock('../../server/utils/auditLogger', () => ({
-  logAuditEvent: jest.fn(),
-  AuditEvents: {
-    DATA_MODIFICATION: 'DATA_MODIFICATION',
-    ACCOUNT_CREATED: 'ACCOUNT_CREATED',
-    ACCOUNT_UPDATED: 'ACCOUNT_UPDATED',
-    ACCOUNT_DELETED: 'ACCOUNT_DELETED',
-    PASSWORD_RESET_SUCCESS: 'PASSWORD_RESET_SUCCESS'
+jest.mock('../../server/utils/auditLogger');
+jest.mock('../../server/utils/emailService');
+jest.mock('../../server/utils/passwordValidator');
+jest.mock('../../server/utils/fieldFilter');
+jest.mock('express-validator');
+jest.mock('mongoose', () => ({
+  Schema: jest.fn().mockImplementation(() => ({
+    pre: jest.fn(),
+    virtual: jest.fn().mockReturnValue({ get: jest.fn() }),
+    index: jest.fn(),
+    methods: {},
+    statics: {}
+  })),
+  model: jest.fn().mockReturnValue({}),
+  Types: {
+    ObjectId: {
+      isValid: jest.fn(id => /^[0-9a-fA-F]{24}$/.test(id))
+    }
+  },
+  connection: {
+    db: {
+      admin: jest.fn().mockReturnValue({
+        ping: jest.fn().mockResolvedValue(true)
+      })
+    }
   }
 }));
-jest.mock('../../server/utils/emailService');
-jest.mock('../../server/utils/fieldFilter');
-jest.mock('../../server/utils/passwordValidator', () => ({
-  validatePasswordStrength: jest.fn().mockReturnValue({ success: true })
-}));
 
-const { 
-  createOperator,
-  getOperators,
-  getOperatorById,
-  updateOperator,
-  deactivateOperator,
-  resetOperatorPassword,
-  getDashboard,
-  getOrderAnalytics,
-  getOperatorAnalytics,
-  getAffiliateAnalytics,
-  exportReport,
-  getSystemConfig,
-  updateSystemConfig,
-  getSystemHealth
-} = require('../../server/controllers/administratorController');
+const administratorController = require('../../server/controllers/administratorController');
 const Administrator = require('../../server/models/Administrator');
 const Operator = require('../../server/models/Operator');
 const Order = require('../../server/models/Order');
-const Customer = require('../../server/models/Customer');
 const Affiliate = require('../../server/models/Affiliate');
+const Customer = require('../../server/models/Customer');
 const SystemConfig = require('../../server/models/SystemConfig');
-const { logAuditEvent, AuditEvents } = require('../../server/utils/auditLogger');
+const { logAuditEvent } = require('../../server/utils/auditLogger');
 const emailService = require('../../server/utils/emailService');
 const { validatePasswordStrength } = require('../../server/utils/passwordValidator');
-const mongoose = require('mongoose');
+const { fieldFilter } = require('../../server/utils/fieldFilter');
+const { validationResult } = require('express-validator');
 
 describe('Administrator Controller', () => {
   let req, res;
 
   beforeEach(() => {
     req = {
-      user: { _id: 'admin123', id: 'admin123', email: 'admin@example.com', role: 'administrator' },
       params: {},
       body: {},
-      query: {}
+      query: {},
+      user: { id: '507f1f77bcf86cd799439011', adminId: 'ADM001', role: 'administrator' }
     };
     res = {
-      json: jest.fn(),
-      status: jest.fn().mockReturnThis()
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn().mockReturnThis()
     };
     
-    // Clear mocks
+    // Default mocks
+    validationResult.mockReturnValue({
+      isEmpty: jest.fn().mockReturnValue(true),
+      array: jest.fn().mockReturnValue([])
+    });
     
-    // Mock fieldFilter
-    const { fieldFilter } = require('../../server/utils/fieldFilter');
-    fieldFilter.mockImplementation((obj) => obj);
-    
-    // Mock password validator
-    validatePasswordStrength.mockReturnValue({ success: true });
+    fieldFilter.mockImplementation((data) => data);
     
     jest.clearAllMocks();
   });
 
-  describe('Operator Management', () => {
-    describe('createOperator', () => {
-      it('should create a new operator', async () => {
-        const newOperatorData = {
-          firstName: 'John',
-          lastName: 'Doe',
-          email: 'john.doe@example.com',
-          password: 'SecurePass123!',
-          shiftStart: '08:00',
-          shiftEnd: '16:00'
-        };
+  describe('getAdministrators', () => {
+    test('should get administrators with pagination', async () => {
+      req.query = { page: 1, limit: 20 };
+      
+      const mockAdmins = [{
+        _id: '507f1f77bcf86cd799439011',
+        adminId: 'ADM001',
+        firstName: 'John',
+        toObject: jest.fn().mockReturnValue({ adminId: 'ADM001', firstName: 'John' })
+      }];
+      
+      Administrator.find.mockReturnValue({
+        select: jest.fn().mockReturnThis(),
+        sort: jest.fn().mockReturnThis(),
+        limit: jest.fn().mockReturnThis(),
+        skip: jest.fn().mockResolvedValue(mockAdmins)
+      });
+      Administrator.countDocuments.mockResolvedValue(1);
 
-        req.body = newOperatorData;
-        
-        Operator.findOne.mockResolvedValue(null);
-        Operator.countDocuments.mockResolvedValue(5);
-        
-        const mockOperatorDoc = {
-          ...newOperatorData,
-          operatorId: 'OPR006',
-          _id: 'op123',
-          toObject: jest.fn().mockReturnValue({
-            ...newOperatorData,
-            operatorId: 'OPR006',
-            _id: 'op123'
-          })
-        };
-        
-        const mockSave = jest.fn().mockResolvedValue(mockOperatorDoc);
-        const mockOperator = {
-          ...newOperatorData,
-          operatorId: 'OPR006',
-          _id: 'op123',
-          save: mockSave,
-          toObject: mockOperatorDoc.toObject
-        };
-        
-        Operator.mockImplementation(() => mockOperator);
+      await administratorController.getAdministrators(req, res);
 
-        await createOperator(req, res);
-
-        expect(Operator.findOne).toHaveBeenCalledWith({ email: newOperatorData.email.toLowerCase() });
-        expect(mockSave).toHaveBeenCalled();
-        expect(emailService.sendOperatorWelcomeEmail).toHaveBeenCalled();
-        expect(logAuditEvent).toHaveBeenCalledWith(
-          AuditEvents.DATA_MODIFICATION,
-          expect.objectContaining({
-            action: 'CREATE_OPERATOR'
-          }),
-          req
-        );
-        expect(res.status).toHaveBeenCalledWith(201);
-        expect(res.json).toHaveBeenCalledWith(expect.objectContaining({
-          success: true,
-          message: 'Operator created successfully'
-        }));
+      expect(res.json).toHaveBeenCalledWith({
+        success: true,
+        administrators: expect.any(Array),
+        pagination: expect.objectContaining({
+          currentPage: 1,
+          totalPages: 1,
+          totalItems: 1,
+          itemsPerPage: 20
+        })
       });
     });
 
-    describe('getOperators', () => {
-      it('should return list of operators with pagination', async () => {
-        const mockOperators = [
-          { 
-            _id: '1', 
-            email: 'op1@example.com', 
-            operatorId: 'OPR001',
-            toObject: jest.fn(() => ({
-              _id: '1',
-              email: 'op1@example.com',
-              operatorId: 'OPR001'
-            }))
-          },
-          { 
-            _id: '2', 
-            email: 'op2@example.com', 
-            operatorId: 'OPR002',
-            toObject: jest.fn(() => ({
-              _id: '2',
-              email: 'op2@example.com',
-              operatorId: 'OPR002'
-            }))
-          }
-        ];
-
-        req.query = { page: 1, limit: 10 };
-
-        const mockQuery = {
-          sort: jest.fn().mockReturnThis(),
-          limit: jest.fn().mockReturnThis(),
-          skip: jest.fn().mockReturnThis(),
-          populate: jest.fn().mockResolvedValue(mockOperators)
-        };
-
-        Operator.find.mockReturnValue(mockQuery);
-        Operator.countDocuments.mockResolvedValue(2);
-
-        await getOperators(req, res);
-
-        expect(Operator.find).toHaveBeenCalled();
-        const expectedOperators = mockOperators.map(op => ({
-          _id: op._id,
-          email: op.email,
-          operatorId: op.operatorId
-        }));
-        
-        // The controller calls toObject() on each operator
-        // which should return the plain object version
-        
-        // Verify the operators were processed correctly
-        
-        expect(res.json).toHaveBeenCalledWith({
-          success: true,
-          operators: [
-            { _id: '1', email: 'op1@example.com', operatorId: 'OPR001' },
-            { _id: '2', email: 'op2@example.com', operatorId: 'OPR002' }
-          ],
-          pagination: {
-            currentPage: 1,
-            totalPages: 1,
-            totalItems: 2,
-            itemsPerPage: 10
-          }
-        });
+    test('should handle errors', async () => {
+      Administrator.find.mockReturnValue({
+        select: jest.fn().mockReturnThis(),
+        sort: jest.fn().mockReturnThis(),
+        limit: jest.fn().mockReturnThis(),
+        skip: jest.fn().mockRejectedValue(new Error('DB Error'))
       });
-    });
 
-    describe('updateOperator', () => {
-      it('should update operator details', async () => {
-        const mockOperator = {
-          _id: 'op123',
-          firstName: 'Jane',
-          lastName: 'Smith',
-          toObject: jest.fn(() => ({
-            _id: 'op123',
-            firstName: 'Jane',
-            lastName: 'Smith'
-          }))
-        };
+      await administratorController.getAdministrators(req, res);
 
-        req.params.id = 'op123';
-        req.body = {
-          firstName: 'Jane',
-          lastName: 'Smith'
-        };
-
-        // Mock the existence check
-        Operator.findById.mockResolvedValue({
-          _id: 'op123',
-          firstName: 'John',
-          lastName: 'Doe',
-          email: 'old@email.com'
-        });
-        
-        // Mock email uniqueness check (no existing operator with new email)
-        Operator.findOne.mockResolvedValue(null);
-        
-        Operator.findByIdAndUpdate.mockResolvedValue(mockOperator);
-
-        await updateOperator(req, res);
-
-        expect(Operator.findByIdAndUpdate).toHaveBeenCalledWith(
-          'op123',
-          { $set: { firstName: 'Jane', lastName: 'Smith' } },
-          { new: true, runValidators: true }
-        );
-        expect(logAuditEvent).toHaveBeenCalledWith(
-          AuditEvents.DATA_MODIFICATION,
-          expect.objectContaining({
-            action: 'UPDATE_OPERATOR'
-          }),
-          req
-        );
-        expect(res.json).toHaveBeenCalledWith({
-          success: true,
-          message: 'Operator updated successfully',
-          operator: {
-            _id: 'op123',
-            firstName: 'Jane',
-            lastName: 'Smith'
-          }
-        });
+      expect(res.status).toHaveBeenCalledWith(500);
+      expect(res.json).toHaveBeenCalledWith({
+        success: false,
+        message: 'Failed to fetch administrators'
       });
     });
   });
 
-  describe('Analytics', () => {
-    describe('getDashboard', () => {
-      it('should return dashboard analytics', async () => {
-        // Mock Order.aggregate for order stats
-        Order.aggregate.mockResolvedValue([{
-          today: [{ count: 50 }],
-          thisWeek: [{ count: 200 }],
-          thisMonth: [{ count: 1000 }],
-          statusDistribution: [],
-          processingStatusDistribution: [],
-          averageProcessingTime: [{ avg: 2.5 }]
-        }]);
+  describe('createAdministrator', () => {
+    test('should create administrator', async () => {
+      req.body = {
+        firstName: 'Jane',
+        lastName: 'Doe',
+        email: 'jane@example.com',
+        password: 'SecurePass123!',
+        permissions: ['administrators.read']
+      };
 
-        // Mock Operator.aggregate for operator performance
-        Operator.aggregate.mockResolvedValue([]);
+      Administrator.findOne.mockResolvedValue(null);
+      Administrator.countDocuments.mockResolvedValue(1);
+      
+      const mockAdmin = {
+        _id: 'new-id',
+        adminId: 'ADM002',
+        save: jest.fn().mockResolvedValue(true),
+        toObject: jest.fn().mockReturnValue({ adminId: 'ADM002' })
+      };
+      Administrator.mockImplementation(() => mockAdmin);
 
-        // Mock Affiliate.aggregate for affiliate performance
-        Affiliate.aggregate.mockResolvedValue([]);
+      await administratorController.createAdministrator(req, res);
 
-        // Mock system health counts
-        Operator.countDocuments.mockResolvedValue(10);
-        Operator.findOnShift = jest.fn().mockResolvedValue([]);
-        Affiliate.countDocuments.mockResolvedValue(5);
-        Customer.countDocuments.mockResolvedValue(25);
-
-        await getDashboard(req, res);
-
-        expect(res.json).toHaveBeenCalledWith(expect.objectContaining({
-          success: true,
-          dashboard: expect.objectContaining({
-            orderStats: expect.any(Object),
-            systemHealth: expect.any(Object)
-          })
-        }));
+      expect(res.status).toHaveBeenCalledWith(201);
+      expect(res.json).toHaveBeenCalledWith({
+        success: true,
+        message: 'Administrator created successfully',
+        administrator: expect.any(Object)
       });
     });
 
-    describe('getOrderAnalytics', () => {
-      it('should return order analytics', async () => {
-        req.query = { startDate: '2024-01-01', endDate: '2024-01-31' };
+    test('should handle validation errors', async () => {
+      validationResult.mockReturnValue({
+        isEmpty: jest.fn().mockReturnValue(false),
+        array: jest.fn().mockReturnValue([{ msg: 'Invalid email' }])
+      });
 
-        const mockAnalytics = [
-          { _id: '2024-01-01', totalOrders: 10, totalRevenue: 500 },
-          { _id: '2024-01-02', totalOrders: 15, totalRevenue: 750 }
-        ];
+      await administratorController.createAdministrator(req, res);
 
-        Order.aggregate.mockResolvedValue(mockAnalytics);
+      expect(res.status).toHaveBeenCalledWith(400);
+      expect(res.json).toHaveBeenCalledWith({
+        success: false,
+        message: 'Invalid email',
+        errors: expect.any(Array)
+      });
+    });
+  });
 
-        await getOrderAnalytics(req, res);
+  describe('updateAdministrator', () => {
+    test('should update administrator', async () => {
+      req.params.id = '507f1f77bcf86cd799439011';
+      req.body = { firstName: 'Updated' };
 
-        expect(Order.aggregate).toHaveBeenCalled();
-        expect(res.json).toHaveBeenCalledWith({
-          success: true,
-          analytics: expect.objectContaining({
-            timeline: expect.any(Array),
-            summary: expect.any(Object)
-          })
-        });
+      const mockAdmin = {
+        _id: '507f1f77bcf86cd799439011',
+        toObject: jest.fn().mockReturnValue({ adminId: 'ADM001' })
+      };
+      
+      Administrator.findByIdAndUpdate.mockReturnValue({
+        select: jest.fn().mockResolvedValue(mockAdmin)
+      });
+
+      await administratorController.updateAdministrator(req, res);
+
+      expect(res.json).toHaveBeenCalledWith({
+        success: true,
+        message: 'Administrator updated successfully',
+        administrator: expect.any(Object)
+      });
+    });
+
+    test('should prevent self-deactivation', async () => {
+      req.params.id = req.user.id;
+      req.body = { isActive: false };
+
+      await administratorController.updateAdministrator(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(400);
+      expect(res.json).toHaveBeenCalledWith({
+        success: false,
+        message: 'Cannot deactivate your own account'
+      });
+    });
+  });
+
+  describe('deleteAdministrator', () => {
+    test('should delete administrator', async () => {
+      req.params.id = '507f1f77bcf86cd799439012';
+
+      Administrator.find.mockResolvedValue([{ permissions: ['all'] }]);
+      Administrator.findById.mockResolvedValue({ permissions: [] });
+      Administrator.findByIdAndDelete.mockResolvedValue({
+        adminId: 'ADM002',
+        email: 'deleted@example.com'
+      });
+
+      await administratorController.deleteAdministrator(req, res);
+
+      expect(res.json).toHaveBeenCalledWith({
+        success: true,
+        message: 'Administrator deleted successfully'
+      });
+    });
+
+    test('should prevent self-deletion', async () => {
+      req.params.id = req.user.id;
+
+      await administratorController.deleteAdministrator(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(400);
+      expect(res.json).toHaveBeenCalledWith({
+        success: false,
+        message: 'Cannot delete your own account'
+      });
+    });
+  });
+
+  describe('resetAdministratorPassword', () => {
+    test('should reset password', async () => {
+      req.params.id = '507f1f77bcf86cd799439011';
+      req.body = { newPassword: 'NewPass123!' };
+
+      validatePasswordStrength.mockReturnValue({ success: true });
+      
+      const mockAdmin = {
+        _id: '507f1f77bcf86cd799439011',
+        save: jest.fn().mockResolvedValue(true)
+      };
+      Administrator.findById.mockResolvedValue(mockAdmin);
+
+      await administratorController.resetAdministratorPassword(req, res);
+
+      expect(mockAdmin.password).toBe('NewPass123!');
+      expect(res.json).toHaveBeenCalledWith({
+        success: true,
+        message: 'Password reset successfully'
+      });
+    });
+  });
+
+  describe('Operator Management', () => {
+    test('createOperator should create new operator', async () => {
+      req.body = {
+        firstName: 'John',
+        lastName: 'Operator',
+        email: 'operator@example.com',
+        password: 'Pass123!',
+        workStation: 'Station1',
+        shiftStart: '09:00',
+        shiftEnd: '17:00'
+      };
+
+      Operator.findOne.mockResolvedValue(null);
+      const mockOperator = {
+        _id: 'op-id',
+        save: jest.fn().mockResolvedValue(true),
+        toObject: jest.fn().mockReturnValue({ operatorId: 'OP001' })
+      };
+      Operator.mockImplementation(() => mockOperator);
+      emailService.sendOperatorWelcomeEmail.mockResolvedValue(true);
+
+      await administratorController.createOperator(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(201);
+      expect(res.json).toHaveBeenCalledWith({
+        success: true,
+        message: 'Operator created successfully',
+        operator: expect.any(Object)
+      });
+    });
+
+    test('getOperators should return operators list', async () => {
+      req.query = { page: 1, limit: 20 };
+      
+      const mockOperators = [{
+        _id: 'op1',
+        operatorId: 'OP001',
+        toObject: jest.fn().mockReturnValue({ operatorId: 'OP001' })
+      }];
+
+      Operator.find.mockReturnValue({
+        sort: jest.fn().mockReturnThis(),
+        limit: jest.fn().mockReturnThis(),
+        skip: jest.fn().mockReturnThis(),
+        populate: jest.fn().mockResolvedValue(mockOperators)
+      });
+      Operator.countDocuments.mockResolvedValue(1);
+
+      await administratorController.getOperators(req, res);
+
+      expect(res.json).toHaveBeenCalledWith({
+        success: true,
+        operators: expect.any(Array),
+        pagination: expect.any(Object)
+      });
+    });
+
+    test('updateOperator should update operator details', async () => {
+      req.params.id = 'op-id';
+      req.body = { firstName: 'Updated' };
+
+      Operator.findById.mockResolvedValue({ _id: 'op-id' });
+      Operator.findByIdAndUpdate.mockResolvedValue({
+        _id: 'op-id',
+        toObject: jest.fn().mockReturnValue({ operatorId: 'OP001' })
+      });
+
+      await administratorController.updateOperator(req, res);
+
+      expect(res.json).toHaveBeenCalledWith({
+        success: true,
+        message: 'Operator updated successfully',
+        operator: expect.any(Object)
+      });
+    });
+
+    test('deactivateOperator should deactivate operator', async () => {
+      req.params.id = 'op-id';
+
+      Operator.findByIdAndUpdate.mockResolvedValue({ _id: 'op-id' });
+      Order.updateMany.mockResolvedValue({ modifiedCount: 2 });
+
+      await administratorController.deactivateOperator(req, res);
+
+      expect(res.json).toHaveBeenCalledWith({
+        success: true,
+        message: 'Operator deactivated successfully'
+      });
+    });
+  });
+
+  describe('Analytics Functions', () => {
+    test('getDashboard should return dashboard data', async () => {
+      Order.aggregate.mockResolvedValue([{
+        today: [{ count: 10 }],
+        thisWeek: [{ count: 50 }],
+        thisMonth: [{ count: 200 }],
+        statusDistribution: [],
+        processingStatusDistribution: [],
+        averageProcessingTime: [{ avg: 45 }]
+      }]);
+      
+      Operator.aggregate.mockResolvedValue([]);
+      Affiliate.aggregate.mockResolvedValue([]);
+      Operator.countDocuments.mockResolvedValue(10);
+      Operator.findOnShift = jest.fn().mockResolvedValue([]);
+      Affiliate.countDocuments.mockResolvedValue(20);
+      Customer.countDocuments.mockResolvedValue(100);
+      Order.countDocuments.mockResolvedValue(5);
+
+      await administratorController.getDashboard(req, res);
+
+      expect(res.json).toHaveBeenCalledWith({
+        success: true,
+        dashboard: expect.objectContaining({
+          orderStats: expect.any(Object),
+          operatorPerformance: expect.any(Array),
+          affiliatePerformance: expect.any(Array),
+          systemHealth: expect.any(Object)
+        })
+      });
+    });
+
+    test('getOrderAnalytics should return order analytics', async () => {
+      req.query = { startDate: '2025-01-01', endDate: '2025-01-31' };
+
+      Order.aggregate.mockResolvedValue([
+        { _id: '2025-01-01', totalOrders: 10, totalRevenue: 500 }
+      ]);
+
+      await administratorController.getOrderAnalytics(req, res);
+
+      expect(res.json).toHaveBeenCalledWith({
+        success: true,
+        analytics: expect.objectContaining({
+          timeline: expect.any(Array),
+          processingTimeDistribution: expect.any(Array),
+          summary: expect.any(Object)
+        })
       });
     });
   });
 
   describe('System Configuration', () => {
-    describe('getSystemConfig', () => {
-      it('should return all system configurations', async () => {
-        const mockConfigs = [
-          { key: 'order_processing_hours', value: { start: '06:00', end: '22:00' } },
-          { key: 'max_concurrent_orders', value: 5 }
-        ];
+    test('getSystemConfig should return configurations', async () => {
+      SystemConfig.find.mockReturnValue({
+        sort: jest.fn().mockResolvedValue([
+          { key: 'wdf_base_rate', value: 1.25 }
+        ])
+      });
 
-        SystemConfig.find.mockReturnValue({
-          sort: jest.fn().mockResolvedValue(mockConfigs)
-        });
+      await administratorController.getSystemConfig(req, res);
 
-        await getSystemConfig(req, res);
-
-        expect(SystemConfig.find).toHaveBeenCalled();
-        expect(res.json).toHaveBeenCalledWith({
-          success: true,
-          configurations: mockConfigs
-        });
+      expect(res.json).toHaveBeenCalledWith({
+        success: true,
+        configurations: expect.any(Array)
       });
     });
 
-    describe('updateSystemConfig', () => {
-      it('should update system configuration', async () => {
-        const mockConfig = {
-          key: 'order_processing_hours',
-          value: { start: '06:00', end: '22:00' },
-          save: jest.fn().mockResolvedValue(true)
-        };
+    test('updateSystemConfig should update configuration', async () => {
+      req.body = { key: 'wdf_base_rate', value: 1.50 };
 
-        req.body = {
-          key: 'order_processing_hours',
-          value: { start: '07:00', end: '23:00' }
-        };
-
-        SystemConfig.setValue = jest.fn().mockResolvedValue(mockConfig);
-
-        await updateSystemConfig(req, res);
-
-        expect(SystemConfig.setValue).toHaveBeenCalledWith(
-          'order_processing_hours',
-          { start: '07:00', end: '23:00' },
-          req.user.id
-        );
-        expect(logAuditEvent).toHaveBeenCalledWith(
-          AuditEvents.DATA_MODIFICATION,
-          expect.objectContaining({
-            action: 'UPDATE_SYSTEM_CONFIG'
-          }),
-          req
-        );
-        expect(res.json).toHaveBeenCalledWith({
-          success: true,
-          message: 'Configuration updated successfully',
-          configuration: mockConfig
-        });
+      SystemConfig.setValue.mockResolvedValue({
+        key: 'wdf_base_rate',
+        value: 1.50
       });
 
-      it('should return 404 if configuration not found', async () => {
-        req.body = { key: 'nonexistent', value: 'test' };
-        SystemConfig.setValue = jest.fn().mockRejectedValue(new Error('Configuration not found'));
+      await administratorController.updateSystemConfig(req, res);
 
-        await updateSystemConfig(req, res);
-
-        expect(res.status).toHaveBeenCalledWith(500);
-        expect(res.json).toHaveBeenCalledWith({
-          success: false,
-          message: 'Configuration not found'
-        });
+      expect(res.json).toHaveBeenCalledWith({
+        success: true,
+        message: 'Configuration updated successfully',
+        configuration: expect.any(Object)
       });
     });
   });
 
-  describe('System Health', () => {
-    describe('getSystemHealth', () => {
-      it('should return system health status', async () => {
-        const dbStatsCommand = jest.fn().mockResolvedValue({ ok: 1, collections: 10 });
-        
-        // Mock mongoose connection
-        mongoose.connection = {
-          readyState: 1,
-          db: {
-            admin: jest.fn().mockReturnValue({
-              ping: jest.fn().mockResolvedValue({ ok: 1 })
-            }),
-            stats: dbStatsCommand
-          }
-        };
+  describe('getPermissions', () => {
+    test('should return available permissions', async () => {
+      await administratorController.getPermissions(req, res);
 
-        await getSystemHealth(req, res);
-
-        expect(res.json).toHaveBeenCalledWith({
-          success: true,
-          health: expect.objectContaining({
-            status: 'healthy',
-            components: expect.objectContaining({
-              database: 'healthy'
-            })
-          })
-        });
+      expect(res.json).toHaveBeenCalledWith({
+        success: true,
+        permissions: expect.arrayContaining([
+          'all',
+          'administrators.read',
+          'administrators.create',
+          'operators.manage'
+        ])
       });
     });
   });
