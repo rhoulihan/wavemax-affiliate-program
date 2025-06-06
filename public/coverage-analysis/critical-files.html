@@ -57,6 +57,11 @@
             background: rgba(255, 255, 255, 0.3);
         }
         
+        .nav-links a.active {
+            background: rgba(255, 255, 255, 0.3);
+            font-weight: bold;
+        }
+        
         .critical-file {
             background: white;
             padding: 30px;
@@ -202,8 +207,11 @@
             <h1>Critical Files Analysis</h1>
             <p>Deep dive into files requiring immediate attention</p>
             <div class="nav-links">
-                <a href="index.html">← Back to Overview</a>
-                <a href="test-templates.html">Test Templates →</a>
+                <a href="index.html">Coverage Overview</a>
+                <a href="critical-files.html" class="active">Critical Files</a>
+                <a href="test-templates.html">Test Templates</a>
+                <a href="action-plan.html">Action Plan</a>
+                <a href="test-results-summary.html">Latest Test Results</a>
             </div>
         </header>
         

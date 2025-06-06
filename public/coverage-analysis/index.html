@@ -282,14 +282,57 @@
                 flex-wrap: wrap;
             }
         }
+        .nav-section {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        .nav-link {
+            display: inline-block;
+            padding: 10px 20px;
+            background: #3b82f6;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            transition: background 0.3s ease;
+        }
+        
+        .nav-link:hover {
+            background: #1e3a8a;
+        }
+        
+        .nav-link.active {
+            background: #1e3a8a;
+        }
+        
     </style>
 </head>
 <body>
     <div class="container">
         <header>
             <h1>WaveMAX Coverage Analysis Report</h1>
-            <p class="subtitle">Generated on January 6, 2025</p>
+            <p class="subtitle">Updated on January 7, 2025</p>
         </header>
+        
+        <div class="nav-section">
+            <div class="nav-links">
+                <a href="index.html" class="nav-link active">Coverage Overview</a>
+                <a href="critical-files.html" class="nav-link">Critical Files</a>
+                <a href="test-templates.html" class="nav-link">Test Templates</a>
+                <a href="action-plan.html" class="nav-link">Action Plan</a>
+                <a href="test-results-summary.html" class="nav-link">Latest Test Results</a>
+            </div>
+        </div>
         
         <div class="summary-grid">
             <div class="summary-card">
@@ -315,8 +358,8 @@
             </div>
             <div class="summary-card">
                 <div class="metric-label">Total Tests</div>
-                <div class="metric-value good">1059</div>
-                <div class="metric-label">49 Test Suites</div>
+                <div class="metric-value good">1181</div>
+                <div class="metric-label">52 Test Suites</div>
             </div>
         </div>
         
