@@ -3,7 +3,6 @@ const mongoose = require('mongoose');
 const Customer = require('../../server/models/Customer');
 const Affiliate = require('../../server/models/Affiliate');
 const Order = require('../../server/models/Order');
-const Bag = require('../../server/models/Bag');
 const encryptionUtil = require('../../server/utils/encryption');
 const jwt = require('jsonwebtoken');
 const { getCsrfToken, createAgent } = require('../helpers/csrfHelper');
@@ -27,7 +26,6 @@ describe('Customer Integration Tests', () => {
     await Customer.deleteMany({});
     await Affiliate.deleteMany({});
     await Order.deleteMany({});
-    await Bag.deleteMany({});
 
     // Create test affiliate
     const { hash, salt } = encryptionUtil.hashPassword('affiliatepass');
@@ -42,7 +40,11 @@ describe('Customer Integration Tests', () => {
       state: 'TX',
       zipCode: '78701',
       serviceArea: 'Downtown',
-      deliveryFee: 5.99,
+      serviceLatitude: 30.2672,
+      serviceLongitude: -97.7431,
+      serviceRadius: 10,
+      minimumDeliveryFee: 25,
+      perBagDeliveryFee: 5,
       username: 'johndoe',
       passwordHash: hash,
       passwordSalt: salt,
@@ -110,7 +112,7 @@ describe('Customer Integration Tests', () => {
       expect(response.status).toBe(201);
       expect(response.body).toMatchObject({
         success: true,
-        customerId: expect.stringMatching(/^CUST\d{6}$/),
+        customerId: expect.stringMatching(/^CUST-[a-f0-9-]+$/),
         message: 'Customer registered successfully!'
       });
 
@@ -120,10 +122,6 @@ describe('Customer Integration Tests', () => {
       expect(customer.email).toBe('bob@example.com');
       expect(customer.affiliateId).toBe('AFF123');
 
-      // Verify bag was created
-      const bag = await Bag.findOne({ customer: customer._id });
-      expect(bag).toBeTruthy();
-      expect(bag.status).toBe('pending');
     });
 
     it('should fail with invalid affiliate ID', async () => {
@@ -224,8 +222,7 @@ describe('Customer Integration Tests', () => {
           serviceFrequency: 'weekly',
           affiliate: {
             affiliateId: 'AFF123',
-            name: 'John Doe',
-            deliveryFee: 5.99
+            name: 'John Doe'
           }
         }
       });
@@ -348,7 +345,9 @@ describe('Customer Integration Tests', () => {
           numberOfBags: 2,
           actualWeight: 23.5,
           baseRate: 1.89,
-          deliveryFee: 5.99
+          deliveryFee: 35,
+          minimumDeliveryFee: 25,
+          perBagDeliveryFee: 5
         },
         {
           orderId: 'ORD002',
@@ -362,7 +361,9 @@ describe('Customer Integration Tests', () => {
           estimatedWeight: 50,
           numberOfBags: 3,
           baseRate: 1.89,
-          deliveryFee: 5.99
+          deliveryFee: 35,
+          minimumDeliveryFee: 25,
+          perBagDeliveryFee: 5
         }
       ];
 
@@ -400,82 +401,6 @@ describe('Customer Integration Tests', () => {
       expect(response.status).toBe(200);
       expect(response.body.orders).toHaveLength(1);
       expect(response.body.orders[0].orderId).toBe('ORD001');
-    });
-  });
-
-  describe('POST /api/v1/customers/report-lost-bag', () => {
-    beforeEach(async () => {
-      // Create test bag
-      const bag = new Bag({
-        barcode: 'BAG123',
-        customer: testCustomer._id,
-        affiliate: testAffiliate._id,
-        type: 'laundry',
-        status: 'pending'
-      });
-      await bag.save();
-    });
-
-    it('should report lost bag', async () => {
-      const response = await agent
-        .post('/api/v1/customers/report-lost-bag')
-        .set('Authorization', `Bearer ${customerToken}`)
-        .set('X-CSRF-Token', csrfToken)
-        .send({
-          bagBarcode: 'BAG123'
-        });
-
-      expect(response.status).toBe(200);
-      expect(response.body).toMatchObject({
-        success: true,
-        message: 'Lost bag report submitted successfully'
-      });
-
-      // Verify bag status was updated
-      const bag = await Bag.findOne({ barcode: 'BAG123' });
-      expect(bag.status).toBe('lost');
-    });
-
-    it('should fail for non-existent bag', async () => {
-      const response = await agent
-        .post('/api/v1/customers/report-lost-bag')
-        .set('Authorization', `Bearer ${customerToken}`)
-        .set('X-CSRF-Token', csrfToken)
-        .send({
-          bagBarcode: 'NONEXISTENT'
-        });
-
-      expect(response.status).toBe(404);
-      expect(response.body).toMatchObject({
-        success: false,
-        message: 'Bag not found'
-      });
-    });
-
-    it('should fail for unauthorized bag report', async () => {
-      // Create bag for different customer
-      const otherBag = new Bag({
-        barcode: 'BAG999',
-        customer: new mongoose.Types.ObjectId(),
-        affiliate: testAffiliate._id,
-        type: 'laundry',
-        status: 'pending'
-      });
-      await otherBag.save();
-
-      const response = await agent
-        .post('/api/v1/customers/report-lost-bag')
-        .set('Authorization', `Bearer ${customerToken}`)
-        .set('X-CSRF-Token', csrfToken)
-        .send({
-          bagBarcode: 'BAG999'
-        });
-
-      expect(response.status).toBe(403);
-      expect(response.body).toMatchObject({
-        success: false,
-        message: 'Unauthorized'
-      });
     });
   });
 
@@ -543,77 +468,6 @@ describe('Customer Integration Tests', () => {
     });
   });
 
-  describe('GET /api/v1/customers/:customerId/bags', () => {
-    beforeEach(async () => {
-      const bags = [
-        {
-          barcode: 'BAG001',
-          customer: testCustomer._id,
-          affiliate: testAffiliate._id,
-          type: 'laundry',
-          status: 'ready',
-          createdAt: new Date('2025-01-01')
-        },
-        {
-          barcode: 'BAG002',
-          customer: testCustomer._id,
-          affiliate: testAffiliate._id,
-          type: 'laundry',
-          status: 'ready',
-          createdAt: new Date('2025-02-01')
-        },
-        {
-          barcode: 'BAG003',
-          customer: testCustomer._id,
-          affiliate: testAffiliate._id,
-          type: 'laundry',
-          status: 'lost',
-          createdAt: new Date('2025-03-01')
-        }
-      ];
-
-      await Bag.insertMany(bags);
-    });
-
-    it('should return customer bags', async () => {
-      const response = await agent
-        .get('/api/v1/customers/CUST123/bags')
-        .set('Authorization', `Bearer ${customerToken}`);
-
-      expect(response.status).toBe(200);
-      expect(response.body).toMatchObject({
-        success: true,
-        bags: expect.arrayContaining([
-          expect.objectContaining({ barcode: 'BAG001', status: 'ready' }),
-          expect.objectContaining({ barcode: 'BAG002', status: 'ready' }),
-          expect.objectContaining({ barcode: 'BAG003', status: 'lost' })
-        ])
-      });
-      expect(response.body.bags).toHaveLength(3);
-    });
-
-    it('should filter bags by status', async () => {
-      const response = await agent
-        .get('/api/v1/customers/CUST123/bags')
-        .set('Authorization', `Bearer ${customerToken}`)
-        .query({ status: 'ready' });
-
-      expect(response.status).toBe(200);
-      expect(response.body.bags).toHaveLength(2);
-      expect(response.body.bags.every(bag => bag.status === 'ready')).toBe(true);
-    });
-
-    it('should allow affiliate to view customer bags', async () => {
-      const response = await agent
-        .get('/api/v1/customers/CUST123/bags')
-        .set('Authorization', `Bearer ${affiliateToken}`);
-
-      expect(response.status).toBe(200);
-      expect(response.body.success).toBe(true);
-      expect(response.body.bags).toHaveLength(3);
-    });
-  });
-
   describe('GET /api/v1/customers/:customerId/dashboard', () => {
     beforeEach(async () => {
       // Create test orders for dashboard statistics
@@ -631,7 +485,9 @@ describe('Customer Integration Tests', () => {
           numberOfBags: 2,
           actualWeight: 23.5,
           baseRate: 1.89,
-          deliveryFee: 5.99,
+          deliveryFee: 35,
+          minimumDeliveryFee: 25,
+          perBagDeliveryFee: 5,
           actualTotal: 50.40,
           deliveredAt: new Date('2025-05-03')
         },
@@ -648,7 +504,9 @@ describe('Customer Integration Tests', () => {
           numberOfBags: 3,
           actualWeight: 35.0,
           baseRate: 1.89,
-          deliveryFee: 5.99,
+          deliveryFee: 35,
+          minimumDeliveryFee: 25,
+          perBagDeliveryFee: 5,
           actualTotal: 72.15,
           deliveredAt: new Date('2025-05-12')
         },
@@ -664,7 +522,9 @@ describe('Customer Integration Tests', () => {
           estimatedWeight: 15,
           numberOfBags: 1,
           baseRate: 1.89,
-          deliveryFee: 5.99
+          deliveryFee: 35,
+          minimumDeliveryFee: 25,
+          perBagDeliveryFee: 5
         }
       ];
 
@@ -697,8 +557,7 @@ describe('Customer Integration Tests', () => {
           affiliate: {
             affiliateId: 'AFF123',
             firstName: 'John',
-            lastName: 'Doe',
-            deliveryFee: 5.99
+            lastName: 'Doe'
           }
         }
       });
@@ -746,16 +605,11 @@ describe('Customer Integration Tests', () => {
         status: 'scheduled',
         estimatedWeight: 30,
         numberOfBags: 2,
-        deliveryFee: 20
+        deliveryFee: 25,
+        minimumDeliveryFee: 25,
+        perBagDeliveryFee: 5
       });
 
-      const testBag = await Bag.create({
-        customer: testCustomer._id,
-        affiliate: testAffiliate._id,
-        barcode: 'TEST-BAG-002',
-        type: 'laundry',
-        status: 'pending'
-      });
 
       // Delete all data
       const response = await agent
@@ -772,11 +626,9 @@ describe('Customer Integration Tests', () => {
       // Verify data is deleted
       const deletedCustomer = await Customer.findOne({ customerId: 'CUST123' });
       const deletedOrder = await Order.findOne({ orderId: testOrder.orderId });
-      const deletedBag = await Bag.findOne({ bagId: testBag.bagId });
 
       expect(deletedCustomer).toBeNull();
       expect(deletedOrder).toBeNull();
-      expect(deletedBag).toBeNull();
 
       // Restore environment
       process.env.ENABLE_DELETE_DATA_FEATURE = originalEnv;

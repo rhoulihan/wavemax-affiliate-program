@@ -139,7 +139,7 @@ describe('Create Admin Script Tests', () => {
         'PASSWORD417!', // Missing lowercase
         'password417!', // Missing uppercase
         'Password!',    // Missing number
-        'Pass417!'      // Too short
+        'Pass41!'       // Too short (7 chars)
       ];
 
       for (const weakPassword of weakPasswords) {
@@ -153,7 +153,7 @@ describe('Create Admin Script Tests', () => {
         });
 
         // Should fail validation or be rejected by password validator
-        await expect(admin.save()).rejects.toThrow();
+        await expect(admin.save()).rejects.toThrow(/password|Password/);
       }
     });
 

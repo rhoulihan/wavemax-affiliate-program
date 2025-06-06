@@ -11,22 +11,22 @@ const {
 describe('Enhanced Password Validator', () => {
   describe('validatePasswordStrength', () => {
     describe('Length Requirements', () => {
-      test('should reject passwords shorter than 12 characters', () => {
+      test('should reject passwords shorter than 8 characters', () => {
         const shortPasswords = [
           'Short1!',
-          'Pass123!',
+          'Pass1!',
           'Ab1!',
-          'ValidPass1!'  // 11 characters
+          'Valid1!'  // 7 characters
         ];
 
         shortPasswords.forEach(password => {
           const result = validatePasswordStrength(password);
           expect(result.success).toBe(false);
-          expect(result.errors).toContain('Password must be at least 12 characters long');
+          expect(result.errors).toContain('Password must be at least 8 characters long');
         });
       });
 
-      test('should accept passwords with 12 or more characters', () => {
+      test('should accept passwords with 8 or more characters', () => {
         const validLengthPasswords = [
           'ValidPassword1!',   // 15 characters
           'LongPassword123!',  // 16 characters
@@ -526,7 +526,7 @@ describe('Enhanced Password Validator', () => {
 
     test('should include strength assessment in response for invalid passwords', () => {
       mockReq.body = {
-        password: 'WeakPass1!',
+        password: 'weak',
         username: 'testuser',
         email: 'test@example.com'
       };

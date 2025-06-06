@@ -73,7 +73,8 @@ describe('Passport Configuration Tests', () => {
     
     jest.doMock('../../server/models/Affiliate', () => ({
       findOne: jest.fn(),
-      findById: jest.fn()
+      findById: jest.fn(),
+      findByIdAndUpdate: jest.fn()
     }));
     
     jest.doMock('../../server/models/Customer', () => ({
@@ -293,17 +294,25 @@ describe('Passport Configuration Tests', () => {
         const mockAffiliate = {
           _id: 'affiliate123',
           affiliateId: 'AFF000001',
-          socialAccounts: { google: { id: 'google123' } },
-          save: jest.fn().mockResolvedValue(true)
+          socialAccounts: { google: { id: 'google123' } }
         };
         
         Affiliate.findOne.mockResolvedValue(mockAffiliate);
+        Affiliate.findByIdAndUpdate.mockResolvedValue(mockAffiliate);
+        Affiliate.findById.mockResolvedValue(mockAffiliate);
         
         const done = jest.fn();
         await googleVerify(mockReq, 'access-token', 'refresh-token', mockProfile, done);
         
         expect(Affiliate.findOne).toHaveBeenCalledWith({ 'socialAccounts.google.id': 'google123' });
-        expect(mockAffiliate.save).toHaveBeenCalled();
+        expect(Affiliate.findByIdAndUpdate).toHaveBeenCalledWith(
+          'affiliate123',
+          expect.objectContaining({
+            'socialAccounts.google.accessToken': 'access-token',
+            'socialAccounts.google.refreshToken': 'refresh-token'
+          }),
+          { runValidators: false }
+        );
         expect(done).toHaveBeenCalledWith(null, mockAffiliate);
       });
       
@@ -328,27 +337,47 @@ describe('Passport Configuration Tests', () => {
         const mockAffiliate = {
           _id: 'affiliate123',
           affiliateId: 'AFF000001',
-          socialAccounts: {},
-          save: jest.fn().mockResolvedValue(true)
+          socialAccounts: {}
+        };
+        
+        const updatedAffiliate = {
+          ...mockAffiliate,
+          socialAccounts: {
+            google: {
+              id: 'google123',
+              accessToken: 'access-token',
+              refreshToken: 'refresh-token',
+              email: 'affiliate@example.com',
+              name: 'Jane Smith',
+              linkedAt: new Date()
+            }
+          }
         };
         
         Affiliate.findOne
           .mockResolvedValueOnce(null) // No affiliate with Google ID
           .mockResolvedValueOnce(mockAffiliate); // Affiliate with same email
         
+        Affiliate.findByIdAndUpdate.mockResolvedValue(updatedAffiliate);
+        Affiliate.findById.mockResolvedValue(updatedAffiliate);
+        
         const done = jest.fn();
         await googleVerify(mockReq, 'access-token', 'refresh-token', mockProfile, done);
         
-        expect(mockAffiliate.socialAccounts.google).toEqual({
-          id: 'google123',
-          accessToken: 'access-token',
-          refreshToken: 'refresh-token',
-          email: 'affiliate@example.com',
-          name: 'Jane Smith',
-          linkedAt: expect.any(Date)
-        });
-        expect(mockAffiliate.save).toHaveBeenCalled();
-        expect(done).toHaveBeenCalledWith(null, mockAffiliate);
+        expect(Affiliate.findByIdAndUpdate).toHaveBeenCalledWith(
+          'affiliate123',
+          expect.objectContaining({
+            'socialAccounts.google': expect.objectContaining({
+              id: 'google123',
+              accessToken: 'access-token',
+              refreshToken: 'refresh-token',
+              email: 'affiliate@example.com',
+              name: 'Jane Smith'
+            })
+          }),
+          { runValidators: false }
+        );
+        expect(done).toHaveBeenCalledWith(null, updatedAffiliate);
       });
       
       test('should return new affiliate user data', async () => {
@@ -403,11 +432,12 @@ describe('Passport Configuration Tests', () => {
     test('should handle existing affiliate', async () => {
       const mockAffiliate = {
         _id: 'affiliate123',
-        socialAccounts: { facebook: { id: 'fb123' } },
-        save: jest.fn().mockResolvedValue(true)
+        socialAccounts: { facebook: { id: 'fb123' } }
       };
       
       Affiliate.findOne.mockResolvedValue(mockAffiliate);
+      Affiliate.findByIdAndUpdate.mockResolvedValue(mockAffiliate);
+      Affiliate.findById.mockResolvedValue(mockAffiliate);
       
       const done = jest.fn();
       await facebookVerify(
@@ -446,13 +476,28 @@ describe('Passport Configuration Tests', () => {
     test('should link Facebook account to existing affiliate', async () => {
       const mockAffiliate = {
         _id: 'affiliate123',
-        socialAccounts: {},
-        save: jest.fn().mockResolvedValue(true)
+        socialAccounts: {}
+      };
+      
+      const updatedAffiliate = {
+        ...mockAffiliate,
+        socialAccounts: {
+          facebook: {
+            id: 'fb123',
+            accessToken: 'access-token',
+            email: 'test@example.com',
+            name: 'Bob Johnson',
+            linkedAt: new Date()
+          }
+        }
       };
       
       Affiliate.findOne
         .mockResolvedValueOnce(null) // No affiliate with Facebook ID
         .mockResolvedValueOnce(mockAffiliate); // Affiliate with same email
+      
+      Affiliate.findByIdAndUpdate.mockResolvedValue(updatedAffiliate);
+      Affiliate.findById.mockResolvedValue(updatedAffiliate);
       
       const done = jest.fn();
       await facebookVerify(
@@ -468,15 +513,19 @@ describe('Passport Configuration Tests', () => {
         done
       );
       
-      expect(mockAffiliate.socialAccounts.facebook).toEqual({
-        id: 'fb123',
-        accessToken: 'access-token',
-        email: 'test@example.com',
-        name: 'Bob Johnson',
-        linkedAt: expect.any(Date)
-      });
-      expect(mockAffiliate.save).toHaveBeenCalled();
-      expect(done).toHaveBeenCalledWith(null, mockAffiliate);
+      expect(Affiliate.findByIdAndUpdate).toHaveBeenCalledWith(
+        'affiliate123',
+        expect.objectContaining({
+          'socialAccounts.facebook': expect.objectContaining({
+            id: 'fb123',
+            accessToken: 'access-token',
+            email: 'test@example.com',
+            name: 'Bob Johnson'
+          })
+        }),
+        { runValidators: false }
+      );
+      expect(done).toHaveBeenCalledWith(null, updatedAffiliate);
     });
     
     test('should handle Facebook error', async () => {
@@ -513,11 +562,12 @@ describe('Passport Configuration Tests', () => {
     test('should handle existing affiliate', async () => {
       const mockAffiliate = {
         _id: 'affiliate123',
-        socialAccounts: { linkedin: { id: 'li123' } },
-        save: jest.fn().mockResolvedValue(true)
+        socialAccounts: { linkedin: { id: 'li123' } }
       };
       
       Affiliate.findOne.mockResolvedValue(mockAffiliate);
+      Affiliate.findByIdAndUpdate.mockResolvedValue(mockAffiliate);
+      Affiliate.findById.mockResolvedValue(mockAffiliate);
       
       const done = jest.fn();
       await linkedinVerify(
@@ -533,13 +583,29 @@ describe('Passport Configuration Tests', () => {
     test('should link LinkedIn account to existing affiliate', async () => {
       const mockAffiliate = {
         _id: 'affiliate123',
-        socialAccounts: {},
-        save: jest.fn().mockResolvedValue(true)
+        socialAccounts: {}
+      };
+      
+      const updatedAffiliate = {
+        ...mockAffiliate,
+        socialAccounts: {
+          linkedin: {
+            id: 'li123',
+            accessToken: 'access-token',
+            refreshToken: 'refresh-token',
+            email: 'test@example.com',
+            name: 'Alice Williams',
+            linkedAt: new Date()
+          }
+        }
       };
       
       Affiliate.findOne
         .mockResolvedValueOnce(null) // No affiliate with LinkedIn ID
         .mockResolvedValueOnce(mockAffiliate); // Affiliate with same email
+      
+      Affiliate.findByIdAndUpdate.mockResolvedValue(updatedAffiliate);
+      Affiliate.findById.mockResolvedValue(updatedAffiliate);
       
       const done = jest.fn();
       await linkedinVerify(
@@ -555,16 +621,20 @@ describe('Passport Configuration Tests', () => {
         done
       );
       
-      expect(mockAffiliate.socialAccounts.linkedin).toEqual({
-        id: 'li123',
-        accessToken: 'access-token',
-        refreshToken: 'refresh-token',
-        email: 'test@example.com',
-        name: 'Alice Williams',
-        linkedAt: expect.any(Date)
-      });
-      expect(mockAffiliate.save).toHaveBeenCalled();
-      expect(done).toHaveBeenCalledWith(null, mockAffiliate);
+      expect(Affiliate.findByIdAndUpdate).toHaveBeenCalledWith(
+        'affiliate123',
+        expect.objectContaining({
+          'socialAccounts.linkedin': expect.objectContaining({
+            id: 'li123',
+            accessToken: 'access-token',
+            refreshToken: 'refresh-token',
+            email: 'test@example.com',
+            name: 'Alice Williams'
+          })
+        }),
+        { runValidators: false }
+      );
+      expect(done).toHaveBeenCalledWith(null, updatedAffiliate);
     });
     
     test('should return new LinkedIn user data', async () => {

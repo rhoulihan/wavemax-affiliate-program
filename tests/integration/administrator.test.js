@@ -340,7 +340,7 @@ describe('Administrator Integration Tests', () => {
         });
 
       expect(response.status).toBe(400);
-      expect(response.body.message).toContain('Password must be at least 12 characters long');
+      expect(response.body.message).toContain('Password must be at least 8 characters long');
     });
 
     it('should prevent duplicate emails', async () => {

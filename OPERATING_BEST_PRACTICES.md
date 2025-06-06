@@ -130,9 +130,14 @@ This document contains important operational knowledge and workarounds discovere
 ## Testing Best Practices
 
 ### Running Tests
-1. **Memory issues**: Use `npm run test:memory` instead of `npm test` for large test suites
-2. **Individual test files**: `npm test -- path/to/test.js`
-3. **Watch for hanging tests**: Use `--detectOpenHandles` flag
+1. **Timeout issues**: The `npm test` command requires extended timeout
+   - **Issue**: Default Bash tool timeout (2 minutes) is insufficient for full test suite
+   - **Solution**: Use 12-minute timeout when running tests
+   - **Command**: When running via Bash tool, specify timeout: 720000 (12 minutes)
+   - **Discovered**: 2025-01-07
+2. **Memory issues**: Use `npm run test:memory` instead of `npm test` for large test suites
+3. **Individual test files**: `npm test -- path/to/test.js`
+4. **Watch for hanging tests**: Use `--detectOpenHandles` flag
 
 ## Git Workflow
 
@@ -235,4 +240,4 @@ This document contains important operational knowledge and workarounds discovere
 
 ---
 
-*Last Updated: 2025-01-06*
+*Last Updated: 2025-01-07*

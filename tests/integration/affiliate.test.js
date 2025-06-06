@@ -2,7 +2,6 @@ const app = require('../../server');
 const Affiliate = require('../../server/models/Affiliate');
 const Customer = require('../../server/models/Customer');
 const Order = require('../../server/models/Order');
-const Bag = require('../../server/models/Bag');
 const jwt = require('jsonwebtoken');
 const { getCsrfToken, createAgent } = require('../helpers/csrfHelper');
 const { getStrongPassword } = require('../helpers/testPasswords');
@@ -31,7 +30,11 @@ describe('Affiliate API', () => {
       state: 'TX',
       zipCode: '12345',
       serviceArea: 'Test Area',
-      deliveryFee: 5.99,
+      serviceLatitude: 30.2672,
+      serviceLongitude: -97.7431,
+      serviceRadius: 10,
+      minimumDeliveryFee: 25,
+      perBagDeliveryFee: 5,
       username: 'testaffiliate',
       passwordSalt: 'testsalt',
       passwordHash: 'testhash',
@@ -66,7 +69,11 @@ describe('Affiliate API', () => {
         state: 'TX',
         zipCode: '12345',
         serviceArea: 'Test Area',
-        deliveryFee: 5.99,
+        serviceLatitude: 30.2672,
+        serviceLongitude: -97.7431,
+        serviceRadius: 10,
+        minimumDeliveryFee: 25,
+      perBagDeliveryFee: 5,
         username: 'newaffiliate',
         password: getStrongPassword('affiliate', 1),
         paymentMethod: 'directDeposit'
@@ -95,7 +102,8 @@ describe('Affiliate API', () => {
       .set('X-CSRF-Token', csrfToken)
       .send({
         firstName: 'Updated',
-        deliveryFee: 6.99
+        minimumDeliveryFee: 30,
+        perBagDeliveryFee: 6
       });
 
     expect(res.statusCode).toEqual(200);
@@ -104,7 +112,8 @@ describe('Affiliate API', () => {
     // Verify the update
     const updatedAffiliate = await Affiliate.findOne({ affiliateId: testAffiliate.affiliateId });
     expect(updatedAffiliate.firstName).toBe('Updated');
-    expect(updatedAffiliate.deliveryFee).toBe(6.99);
+    expect(updatedAffiliate.minimumDeliveryFee).toBe(30);
+    expect(updatedAffiliate.perBagDeliveryFee).toBe(6);
   });
 
   test('should login affiliate', async () => {
@@ -203,7 +212,9 @@ describe('Affiliate API', () => {
         numberOfBags: 2,
         actualWeight: 23.5,
         baseRate: 1.89,
-        deliveryFee: 5.99,
+        minimumDeliveryFee: 25,
+        perBagDeliveryFee: 5,
+        deliveryFee: 25,
         actualTotal: 50.40,
         affiliateCommission: 44.41
       },
@@ -219,7 +230,9 @@ describe('Affiliate API', () => {
         estimatedWeight: 50,
         numberOfBags: 3,
         baseRate: 1.89,
-        deliveryFee: 5.99
+        minimumDeliveryFee: 25,
+        perBagDeliveryFee: 5,
+        deliveryFee: 25
       }
     ]);
 
@@ -233,7 +246,7 @@ describe('Affiliate API', () => {
     expect(res.body).toHaveProperty('orders');
     expect(res.body.orders).toHaveLength(2);
     expect(res.body).toHaveProperty('pagination');
-    expect(res.body).toHaveProperty('totalEarnings', 10.43);
+    expect(res.body).toHaveProperty('totalEarnings', 29.44);
   });
 
   test('should get affiliate\'s earnings/transactions', async () => {
@@ -352,13 +365,6 @@ describe('Affiliate API', () => {
       deliveryFee: 20
     });
 
-    const testBag = await Bag.create({
-      customer: testCustomer._id,
-      affiliate: testAffiliate._id,
-      type: 'laundry',
-      barcode: 'TEST-BAG-001',
-      status: 'pending'
-    });
 
     // Delete all data
     const res = await agent
@@ -374,12 +380,10 @@ describe('Affiliate API', () => {
     const deletedAffiliate = await Affiliate.findOne({ affiliateId: testAffiliate.affiliateId });
     const deletedCustomer = await Customer.findOne({ customerId: testCustomer.customerId });
     const deletedOrder = await Order.findOne({ orderId: testOrder.orderId });
-    const deletedBag = await Bag.findOne({ bagId: testBag.bagId });
 
     expect(deletedAffiliate).toBeNull();
     expect(deletedCustomer).toBeNull();
     expect(deletedOrder).toBeNull();
-    expect(deletedBag).toBeNull();
 
     // Restore environment
     process.env.ENABLE_DELETE_DATA_FEATURE = originalEnv;

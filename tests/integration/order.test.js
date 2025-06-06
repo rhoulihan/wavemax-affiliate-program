@@ -41,7 +41,11 @@ describe('Order Integration Tests', () => {
       state: 'TX',
       zipCode: '78701',
       serviceArea: 'Downtown',
-      deliveryFee: 5.99,
+      serviceLatitude: 30.2672,
+      serviceLongitude: -97.7431,
+      serviceRadius: 10,
+      minimumDeliveryFee: 25,
+      perBagDeliveryFee: 5,
       username: 'johndoe',
       passwordHash: hash,
       passwordSalt: salt,
@@ -122,7 +126,7 @@ describe('Order Integration Tests', () => {
       expect(order.customerId).toBe('CUST123');
       expect(order.affiliateId).toBe('AFF123');
       expect(order.status).toBe('scheduled');
-      expect(order.deliveryFee).toBe(5.99);
+      expect(order.deliveryFee).toBe(35); // minimumDeliveryFee (25) + perBagDeliveryFee (5) * 2 bags
     });
 
     it('should create order as affiliate for their customer', async () => {
@@ -264,7 +268,9 @@ describe('Order Integration Tests', () => {
         estimatedWeight: 30,
         numberOfBags: 2,
         baseRate: 1.89,
-        deliveryFee: 5.99
+        deliveryFee: 35,
+        minimumDeliveryFee: 25,
+        perBagDeliveryFee: 5
       });
       await testOrder.save();
     });
@@ -350,7 +356,9 @@ describe('Order Integration Tests', () => {
         estimatedWeight: 30,
         numberOfBags: 2,
         baseRate: 1.89,
-        deliveryFee: 5.99
+        deliveryFee: 35,
+        minimumDeliveryFee: 25,
+        perBagDeliveryFee: 5
       });
       await testOrder.save();
     });
@@ -475,7 +483,9 @@ describe('Order Integration Tests', () => {
         estimatedWeight: 30,
         numberOfBags: 2,
         baseRate: 1.89,
-        deliveryFee: 5.99
+        deliveryFee: 35,
+        minimumDeliveryFee: 25,
+        perBagDeliveryFee: 5
       });
       await testOrder.save();
     });
@@ -567,7 +577,9 @@ describe('Order Integration Tests', () => {
           estimatedWeight: 30,
           numberOfBags: 2,
           baseRate: 1.89,
-          deliveryFee: 5.99
+          deliveryFee: 35,
+        minimumDeliveryFee: 25,
+        perBagDeliveryFee: 5
         },
         {
           orderId: 'ORD002',
@@ -581,7 +593,9 @@ describe('Order Integration Tests', () => {
           estimatedWeight: 50,
           numberOfBags: 3,
           baseRate: 1.89,
-          deliveryFee: 5.99
+          deliveryFee: 35,
+        minimumDeliveryFee: 25,
+        perBagDeliveryFee: 5
         },
         {
           orderId: 'ORD003',
@@ -595,7 +609,9 @@ describe('Order Integration Tests', () => {
           estimatedWeight: 15,
           numberOfBags: 1,
           baseRate: 1.89,
-          deliveryFee: 5.99
+          deliveryFee: 35,
+        minimumDeliveryFee: 25,
+        perBagDeliveryFee: 5
         }
       ];
 
@@ -693,7 +709,9 @@ describe('Order Integration Tests', () => {
           numberOfBags: i % 3 === 0 ? 1 : i % 3 === 1 ? 2 : 3,
           actualWeight: i <= 10 ? 20 + i : null,
           baseRate: 1.89,
-          deliveryFee: 5.99,
+          deliveryFee: 35,
+        minimumDeliveryFee: 25,
+        perBagDeliveryFee: 5,
           actualTotal: i <= 10 ? (20 + i) * 1.89 + 5.99 : null,
           createdAt: new Date(`2025-05-${String(i).padStart(2, '0')}`)
         });
@@ -796,7 +814,9 @@ describe('Order Integration Tests', () => {
         numberOfBags: 2,
         actualWeight: 25.5,
         baseRate: 1.89,
-        deliveryFee: 5.99,
+        deliveryFee: 35,
+        minimumDeliveryFee: 25,
+        perBagDeliveryFee: 5,
         actualTotal: 54.19,
         deliveredAt: new Date('2025-05-27'),
         paymentStatus: 'pending'
@@ -932,7 +952,9 @@ describe('Order Integration Tests', () => {
           numberOfBags: 2,
           actualWeight: 25.5,
           baseRate: 1.89,
-          deliveryFee: 5.99,
+          deliveryFee: 35,
+        minimumDeliveryFee: 25,
+        perBagDeliveryFee: 5,
           actualTotal: 54.19
         },
         {
@@ -947,7 +969,9 @@ describe('Order Integration Tests', () => {
           estimatedWeight: 50,
           numberOfBags: 3,
           baseRate: 1.89,
-          deliveryFee: 5.99
+          deliveryFee: 35,
+        minimumDeliveryFee: 25,
+        perBagDeliveryFee: 5
         },
         {
           orderId: 'ORD003',
@@ -961,7 +985,9 @@ describe('Order Integration Tests', () => {
           estimatedWeight: 15,
           numberOfBags: 1,
           baseRate: 1.89,
-          deliveryFee: 5.99
+          deliveryFee: 35,
+        minimumDeliveryFee: 25,
+        perBagDeliveryFee: 5
         }
       ];
 
@@ -1108,9 +1134,10 @@ describe('Order Integration Tests', () => {
       // Verify commission calculation
       const updatedOrder = await Order.findOne({ orderId });
       
-      // Commission: (25 lbs × $1.25 × 10%) + $5.99 delivery = $3.125 + $5.99 = $9.115
-      expect(updatedOrder.affiliateCommission).toBeCloseTo(9.12, 2);
-      expect(updatedOrder.actualTotal).toBeCloseTo(37.24, 2); // 25 × $1.25 + $5.99
+      // Commission: (25 lbs × $1.25 × 10%) + $50 delivery = $3.125 + $50 = $53.125
+      // Delivery fee: minimumDeliveryFee (25) + perBagDeliveryFee (5) * 5 bags = $50
+      expect(updatedOrder.affiliateCommission).toBeCloseTo(53.13, 2);
+      expect(updatedOrder.actualTotal).toBeCloseTo(81.25, 2); // 25 × $1.25 + $50
     });
 
     it('should use dynamic WDF rate from SystemConfig', async () => {
@@ -1156,13 +1183,14 @@ describe('Order Integration Tests', () => {
       expect(order.orderId).toBe(response.body.orderId);
       
       // The estimated total should still be calculated based on whatever rate was used
-      // If baseRate is 1.25: 35 × 1.25 + 5.99 = 49.74
-      // If baseRate is 2.00: 35 × 2.00 + 5.99 = 75.99
+      // Delivery fee: minimumDeliveryFee (25) + perBagDeliveryFee (5) * 2 bags = 35
+      // If baseRate is 2.00: 35 × 2.00 + 35 = 105
+      // If baseRate is 1.25: 35 × 1.25 + 35 = 78.75
       if (order.baseRate === 2.00) {
-        expect(order.estimatedTotal).toBeCloseTo(75.99, 2);
+        expect(order.estimatedTotal).toBeCloseTo(105, 2);
       } else {
         // Accept the default rate for now in integration tests
-        expect(order.estimatedTotal).toBeCloseTo(49.74, 2);
+        expect(order.estimatedTotal).toBeCloseTo(78.75, 2);
       }
 
       // Reset rate
@@ -1204,14 +1232,16 @@ describe('Order Integration Tests', () => {
       const orders = await Order.find({ orderId: { $in: orderIds } });
       const totalCommission = orders.reduce((sum, order) => sum + order.affiliateCommission, 0);
 
-      // Each order: (20 × $1.25 × 10%) + $5.99 = $2.50 + $5.99 = $8.49
-      // Total for 3 orders: $25.47
-      expect(totalCommission).toBeCloseTo(25.47, 2);
+      // Each order: (20 × $1.25 × 10%) + $50 = $2.50 + $50 = $52.50
+      // Delivery fee per order: minimumDeliveryFee (25) + perBagDeliveryFee (5) * 5 bags = $50
+      // Total for 3 orders: $52.50 × 3 = $157.50
+      expect(totalCommission).toBeCloseTo(157.50, 2);
     });
 
     it('should handle high delivery fee scenarios', async () => {
-      // Update affiliate's delivery fee
-      testAffiliate.deliveryFee = 25.00;
+      // Update affiliate's delivery fee structure
+      testAffiliate.minimumDeliveryFee = 50.00;
+      testAffiliate.perBagDeliveryFee = 10.00;
       await testAffiliate.save();
 
       const response = await agent
@@ -1239,9 +1269,10 @@ describe('Order Integration Tests', () => {
 
       const updatedOrder = await Order.findOne({ orderId: response.body.orderId });
       
-      // Commission: (15 × $1.25 × 10%) + $25.00 = $1.875 + $25.00 = $26.875
-      expect(updatedOrder.affiliateCommission).toBeCloseTo(26.88, 2);
-      expect(updatedOrder.deliveryFee).toBe(25.00);
+      // Commission: (15 × $1.25 × 10%) + $60.00 = $1.875 + $60.00 = $61.875
+      // Delivery fee: minimumDeliveryFee (50) + perBagDeliveryFee (10) * 1 bag = $60
+      expect(updatedOrder.affiliateCommission).toBeCloseTo(61.88, 2);
+      expect(updatedOrder.deliveryFee).toBe(60.00);
     });
   });
 });

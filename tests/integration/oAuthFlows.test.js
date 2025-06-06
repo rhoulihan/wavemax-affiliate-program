@@ -99,7 +99,7 @@ describe('OAuth Authentication Integration Tests', () => {
         token: 'jwt-auth-token',
         refreshToken: 'refresh-token',
         affiliate: {
-          affiliateId: 'AFF123',
+          affiliateId: 'AFF-123e4567-e89b-12d3-a456-426614174000',
           id: 'affiliate-id',
           firstName: 'John',
           lastName: 'Doe',
@@ -118,7 +118,7 @@ describe('OAuth Authentication Integration Tests', () => {
       expect(response.body.success).toBe(true);
       expect(response.body.result).toEqual(sessionData);
       expect(response.body.result.type).toBe('social-auth-login');
-      expect(response.body.result.affiliate.affiliateId).toBe('AFF123');
+      expect(response.body.result.affiliate.affiliateId).toBe('AFF-123e4567-e89b-12d3-a456-426614174000');
 
       // Verify session was consumed
       const consumedSession = await OAuthSession.findOne({ sessionId: 'login-test-session-789' });
@@ -187,7 +187,11 @@ describe('OAuth Authentication Integration Tests', () => {
         state: 'SC',
         zipCode: '12345',
         serviceArea: 'Downtown',
-        deliveryFee: 5.99,
+        serviceLatitude: 30.2672,
+        serviceLongitude: -97.7431,
+        serviceRadius: 10,
+        minimumDeliveryFee: 25,
+        perBagDeliveryFee: 5,
         paymentMethod: 'check'
       };
 
@@ -198,7 +202,7 @@ describe('OAuth Authentication Integration Tests', () => {
         .expect(201);
 
       expect(response.body.success).toBe(true);
-      expect(response.body.affiliateId).toMatch(/^AFF\d{6}$/);
+      expect(response.body.affiliateId).toMatch(/^AFF-[a-f0-9-]+$/);
       expect(response.body.message).toBe('Social registration completed successfully');
 
       // Verify affiliate was created in database
@@ -228,7 +232,11 @@ describe('OAuth Authentication Integration Tests', () => {
         state: 'TC',
         zipCode: '12345',
         serviceArea: 'Downtown',
-        deliveryFee: 5.99,
+        serviceLatitude: 30.2672,
+        serviceLongitude: -97.7431,
+        serviceRadius: 10,
+        minimumDeliveryFee: 25,
+        perBagDeliveryFee: 5,
         paymentMethod: 'check'
       };
 
@@ -265,7 +273,11 @@ describe('OAuth Authentication Integration Tests', () => {
         state: 'FC',
         zipCode: '11111',
         serviceArea: 'First Area',
-        deliveryFee: 4.99,
+        serviceLatitude: 30.2672,
+        serviceLongitude: -97.7431,
+        serviceRadius: 10,
+        minimumDeliveryFee: 25,
+        perBagDeliveryFee: 4.99,
         paymentMethod: 'check'
       };
 
@@ -293,7 +305,11 @@ describe('OAuth Authentication Integration Tests', () => {
         state: 'SC',
         zipCode: '22222',
         serviceArea: 'Second Area',
-        deliveryFee: 6.99,
+        serviceLatitude: 30.2672,
+        serviceLongitude: -97.7431,
+        serviceRadius: 10,
+        minimumDeliveryFee: 25,
+        perBagDeliveryFee: 6.99,
         paymentMethod: 'directDeposit',
         accountNumber: '1234567890',
         routingNumber: '987654321'
@@ -312,7 +328,7 @@ describe('OAuth Authentication Integration Tests', () => {
     test('should prevent duplicate email registration', async () => {
       // Create affiliate with regular registration first
       const existingAffiliate = new Affiliate({
-        affiliateId: 'AFF000001',
+        affiliateId: 'AFF-000e4567-e89b-12d3-a456-426614174001',
         firstName: 'Existing',
         lastName: 'User',
         email: 'duplicate@example.com',
@@ -323,7 +339,11 @@ describe('OAuth Authentication Integration Tests', () => {
         state: 'EC',
         zipCode: '10000',
         serviceArea: 'Existing Area',
-        deliveryFee: 3.99,
+        serviceLatitude: 30.2672,
+        serviceLongitude: -97.7431,
+        serviceRadius: 10,
+        minimumDeliveryFee: 25,
+        perBagDeliveryFee: 3.99,
         username: 'existing',
         passwordHash: 'hashedpassword123',
         passwordSalt: 'salt123',
@@ -350,7 +370,11 @@ describe('OAuth Authentication Integration Tests', () => {
         state: 'SC',
         zipCode: '33333',
         serviceArea: 'Social Area',
-        deliveryFee: 7.99,
+        serviceLatitude: 30.2672,
+        serviceLongitude: -97.7431,
+        serviceRadius: 10,
+        minimumDeliveryFee: 25,
+        perBagDeliveryFee: 7.99,
         paymentMethod: 'paypal',
         paypalEmail: 'social@paypal.com'
       };
@@ -394,7 +418,11 @@ describe('OAuth Authentication Integration Tests', () => {
           state: 'JC',
           zipCode: `1000${i}`,
           serviceArea: `Area ${i + 1}`,
-          deliveryFee: 5.99 + i,
+          serviceLatitude: 30.2672,
+        serviceLongitude: -97.7431,
+        serviceRadius: 10,
+        minimumDeliveryFee: 25,
+        perBagDeliveryFee: 5.99 + i,
           paymentMethod: 'check'
         };
 
@@ -434,7 +462,11 @@ describe('OAuth Authentication Integration Tests', () => {
         state: 'TC',
         zipCode: '99999',
         serviceArea: 'Test Area',
-        deliveryFee: 5.99,
+        serviceLatitude: 30.2672,
+        serviceLongitude: -97.7431,
+        serviceRadius: 10,
+        minimumDeliveryFee: 25,
+        perBagDeliveryFee: 5,
         username: 'testaffiliate',
         passwordHash: 'hashedpassword123',
         passwordSalt: 'salt123',
@@ -469,7 +501,7 @@ describe('OAuth Authentication Integration Tests', () => {
         .expect(201);
 
       expect(response.body.success).toBe(true);
-      expect(response.body.customerId).toMatch(/^CUST\d{6}$/);
+      expect(response.body.customerId).toMatch(/^CUST-[a-f0-9-]+$/);
       expect(response.body.message).toBe('Customer social registration completed successfully');
 
       // Verify customer was created in database
@@ -527,7 +559,11 @@ describe('OAuth Authentication Integration Tests', () => {
         state: 'EC',
         zipCode: '88888',
         serviceArea: 'Existing Area',
-        deliveryFee: 4.99,
+        serviceLatitude: 30.2672,
+        serviceLongitude: -97.7431,
+        serviceRadius: 10,
+        minimumDeliveryFee: 25,
+        perBagDeliveryFee: 4.99,
         username: 'existing',
         passwordHash: 'hashedpassword123',
         passwordSalt: 'salt123',
@@ -575,7 +611,11 @@ describe('OAuth Authentication Integration Tests', () => {
         state: 'CC',
         zipCode: '77777',
         serviceArea: 'Customer Area',
-        deliveryFee: 6.99,
+        serviceLatitude: 30.2672,
+        serviceLongitude: -97.7431,
+        serviceRadius: 10,
+        minimumDeliveryFee: 25,
+        perBagDeliveryFee: 6.99,
         username: 'customeraffiliate',
         passwordHash: 'hashedpassword123',
         passwordSalt: 'salt123',
@@ -660,7 +700,11 @@ describe('OAuth Authentication Integration Tests', () => {
         state: 'LC',
         zipCode: '66666',
         serviceArea: 'Link Area',
-        deliveryFee: 7.99,
+        serviceLatitude: 30.2672,
+        serviceLongitude: -97.7431,
+        serviceRadius: 10,
+        minimumDeliveryFee: 25,
+        perBagDeliveryFee: 7.99,
         username: 'linktest',
         passwordHash: 'hashedpassword123',
         passwordSalt: 'salt123',
@@ -716,7 +760,11 @@ describe('OAuth Authentication Integration Tests', () => {
         state: 'CS',
         zipCode: '12345',
         serviceArea: 'CSRF Area',
-        deliveryFee: 5.99,
+        serviceLatitude: 30.2672,
+        serviceLongitude: -97.7431,
+        serviceRadius: 10,
+        minimumDeliveryFee: 25,
+        perBagDeliveryFee: 5,
         paymentMethod: 'check'
       };
 
@@ -727,7 +775,7 @@ describe('OAuth Authentication Integration Tests', () => {
         .expect(201);
 
       expect(response.body.success).toBe(true);
-      expect(response.body.affiliateId).toMatch(/^AFF\d{6}$/);
+      expect(response.body.affiliateId).toMatch(/^AFF-[a-f0-9-]+$/);
     });
 
     test('should handle expired JWT tokens gracefully', async () => {
@@ -749,7 +797,11 @@ describe('OAuth Authentication Integration Tests', () => {
         state: 'EX',
         zipCode: '12345',
         serviceArea: 'Expired Area',
-        deliveryFee: 5.99,
+        serviceLatitude: 30.2672,
+        serviceLongitude: -97.7431,
+        serviceRadius: 10,
+        minimumDeliveryFee: 25,
+        perBagDeliveryFee: 5,
         paymentMethod: 'check'
       };
 
@@ -773,7 +825,11 @@ describe('OAuth Authentication Integration Tests', () => {
         state: 'IV',
         zipCode: '12345',
         serviceArea: 'Invalid Area',
-        deliveryFee: 5.99,
+        serviceLatitude: 30.2672,
+        serviceLongitude: -97.7431,
+        serviceRadius: 10,
+        minimumDeliveryFee: 25,
+        perBagDeliveryFee: 5,
         paymentMethod: 'check'
       };
 
@@ -880,7 +936,11 @@ describe('OAuth Authentication Integration Tests', () => {
         state: 'TX',
         zipCode: '78701',
         serviceArea: 'Downtown',
-        deliveryFee: 5.99,
+        serviceLatitude: 30.2672,
+        serviceLongitude: -97.7431,
+        serviceRadius: 10,
+        minimumDeliveryFee: 25,
+        perBagDeliveryFee: 5,
         username: 'johnaffiliate',
         passwordHash: 'hashedpassword',
         passwordSalt: 'salt',

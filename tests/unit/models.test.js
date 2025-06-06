@@ -19,7 +19,11 @@ describe('Model Tests', () => {
         state: 'TX',
         zipCode: '78701',
         serviceArea: 'Downtown Austin',
-        deliveryFee: 5.99,
+        minimumDeliveryFee: 25,
+        perBagDeliveryFee: 5,
+        serviceLatitude: 30.2672,
+        serviceLongitude: -97.7431,
+        serviceRadius: 10,
         username: 'johndoe',
         passwordHash: 'hashedpassword',
         passwordSalt: 'salt',
@@ -30,7 +34,7 @@ describe('Model Tests', () => {
       const saved = await affiliate.save();
 
       expect(saved._id).toBeDefined();
-      expect(saved.affiliateId).toMatch(/^AFF\d{6}$/); // Auto-generated ID
+      expect(saved.affiliateId).toMatch(/^AFF-[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/); // UUID format
       expect(saved.email).toBe('john@example.com');
       expect(saved.isActive).toBe(true); // Default value
       expect(saved.paymentMethod).toBe('directDeposit');
@@ -52,6 +56,8 @@ describe('Model Tests', () => {
       expect(error.errors.email).toBeDefined();
       expect(error.errors.phone).toBeDefined();
       expect(error.errors.username).toBeDefined();
+      expect(error.errors.serviceLatitude).toBeDefined();
+      expect(error.errors.serviceLongitude).toBeDefined();
     });
 
     it('should enforce unique constraints', async () => {
@@ -71,7 +77,11 @@ describe('Model Tests', () => {
         state: 'TX',
         zipCode: '78701',
         serviceArea: 'Downtown',
-        deliveryFee: 5.99,
+        minimumDeliveryFee: 25,
+        perBagDeliveryFee: 5,
+        serviceLatitude: 30.2672,
+        serviceLongitude: -97.7431,
+        serviceRadius: 10,
         paymentMethod: 'directDeposit'
       };
 
@@ -128,7 +138,11 @@ describe('Model Tests', () => {
         state: 'TX',
         zipCode: '78701',
         serviceArea: 'Downtown',
-        deliveryFee: 5.99,
+        minimumDeliveryFee: 25,
+        perBagDeliveryFee: 5,
+        serviceLatitude: 30.2672,
+        serviceLongitude: -97.7431,
+        serviceRadius: 10,
         paymentMethod: 'paypal',
         paypalEmail: 'paypal@example.com'
       });
@@ -161,7 +175,7 @@ describe('Model Tests', () => {
       const saved = await customer.save();
 
       expect(saved._id).toBeDefined();
-      expect(saved.customerId).toMatch(/^CUST\d{6}$/);
+      expect(saved.customerId).toMatch(/^CUST-[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/);
       expect(saved.email).toBe('jane@example.com');
       expect(saved.isActive).toBe(true); // Default value
     });
