@@ -50,9 +50,6 @@
             return;
         }
 
-        // Hide chrome (header/footer) immediately when iframe is detected
-        hideChrome();
-
         // Set up viewport detection
         detectViewport();
         window.addEventListener('resize', debounce(detectViewport, 250));
@@ -152,11 +149,6 @@
                 if (chromeHidden && !isMobile) {
                     showChrome();
                 }
-                break;
-                
-            case 'hide-page-header':
-                // Use the existing hideChrome function regardless of device type
-                hideChrome();
                 break;
         }
     }
@@ -339,7 +331,6 @@
         hideChrome: hideChrome,
         showChrome: showChrome,
         sendViewportInfo: sendViewportInfo,
-        hidePageHeader: hideChrome, // Alias to hideChrome for compatibility
         getViewportInfo: () => ({
             isMobile: isMobile,
             isTablet: isTablet,
