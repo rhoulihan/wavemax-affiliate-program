@@ -680,6 +680,9 @@
                         if (targetLang) {
                             console.log('[Parent-Iframe Bridge] Google Translate language changed to:', targetLang);
                             
+                            // Update the main flag display
+                            updateMainFlagDisplay(targetLang);
+                            
                             // Save to localStorage
                             localStorage.setItem('wavemax-language', targetLang);
                             
@@ -693,6 +696,60 @@
                         }
                     };
                     console.log('[Parent-Iframe Bridge] Successfully hooked into doGTranslate');
+                }
+                
+                // Function to update the main flag display
+                function updateMainFlagDisplay(lang) {
+                    const mainFlag = document.querySelector('.imgTranslation');
+                    if (mainFlag) {
+                        let flagSrc;
+                        switch(lang) {
+                            case 'en':
+                                flagSrc = '/assets/WaveMax/images/country.png';
+                                break;
+                            case 'es':
+                                flagSrc = '/assets/WaveMax/images/mexico.png';
+                                break;
+                            case 'pt':
+                                // Try to use Brazil flag if available
+                                flagSrc = '/assets/WaveMax/images/brazil.png';
+                                break;
+                            case 'de':
+                                // Try to use German flag if available
+                                flagSrc = '/assets/WaveMax/images/germany.png';
+                                break;
+                            default:
+                                flagSrc = '/assets/WaveMax/images/country.png';
+                        }
+                        
+                        // Update the flag with fallback
+                        const originalSrc = mainFlag.src;
+                        mainFlag.src = flagSrc;
+                        
+                        // If custom flags don't exist, use fallback images
+                        mainFlag.onerror = function() {
+                            console.log('[Parent-Iframe Bridge] Flag not found, using fallback');
+                            // Try alternative sources
+                            switch(lang) {
+                                case 'pt':
+                                    this.src = 'https://flagcdn.com/24x18/br.png';
+                                    break;
+                                case 'de':
+                                    this.src = 'https://flagcdn.com/24x18/de.png';
+                                    break;
+                                default:
+                                    this.src = originalSrc; // Restore original
+                            }
+                            
+                            // If external source also fails, restore original
+                            this.onerror = function() {
+                                this.src = originalSrc;
+                                this.onerror = null;
+                            };
+                        };
+                        
+                        console.log('[Parent-Iframe Bridge] Updated main flag display for language:', lang);
+                    }
                 }
                 
                 // Also add click listeners to the images for extra safety
@@ -726,6 +783,9 @@
                         window.doGTranslate(`en|${savedLanguage}`);
                     }, 500);
                 }
+                
+                // Update main flag display for saved language
+                updateMainFlagDisplay(savedLanguage);
                 
                 // Also style the parent container to ensure proper dropdown behavior
                 const dropdownContainer = document.querySelector('.country.cs-country');
