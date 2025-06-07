@@ -12,7 +12,9 @@
             defaultLanguage: 'en',
             supportedLanguages: ['en', 'es', 'pt'],
             fallbackLanguage: 'en',
-            translationsPath: '/locales',
+            translationsPath: window.location.hostname === 'localhost' || window.location.hostname.includes('wavemax.promo')
+                ? '/locales'
+                : 'https://wavemax.promo/locales',
             storageKey: 'wavemax-language',
             debugMode: false
         },
