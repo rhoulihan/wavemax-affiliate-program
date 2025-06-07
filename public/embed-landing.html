@@ -605,7 +605,10 @@
     <script>
         // Initialize i18n
         document.addEventListener('DOMContentLoaded', async function() {
-            await window.i18n.init({ debugMode: false });
+            console.log('Initializing i18n...');
+            await window.i18n.init({ debugMode: true });
+            console.log('i18n initialized, current language:', window.i18n.currentLanguage);
+            console.log('Testing translation:', window.i18n.t('landing.header.title'));
             window.LanguageSwitcher.createSwitcher('language-switcher-container', {
                 style: 'dropdown',
                 showLabel: false
