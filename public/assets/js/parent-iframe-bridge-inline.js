@@ -564,81 +564,99 @@
         
         // Wait a bit for the page's language selector to be ready
         setTimeout(() => {
-            // Find the existing language selector on the page
-            // Common selectors for language dropdowns
-            const existingSelector = document.querySelector('select[name="language"]') || 
-                                   document.querySelector('select#language') ||
-                                   document.querySelector('.language-selector select') ||
-                                   document.querySelector('[data-language-selector]') ||
-                                   document.querySelector('select[data-switcher-options]') ||
-                                   document.querySelector('.wpml-ls-legacy-dropdown select') ||
-                                   document.querySelector('.qtranxs_language_chooser');
+            // Find the dropdown list
+            const dropdownList = document.querySelector('.dropdown-cs');
             
-            if (existingSelector) {
-                console.log('[Parent-Iframe Bridge] Found existing language selector:', existingSelector);
+            if (dropdownList) {
+                console.log('[Parent-Iframe Bridge] Found Google Translate dropdown:', dropdownList);
                 
-                // Check if Portuguese and German options already exist
-                const options = Array.from(existingSelector.options);
-                const hasPortuguese = options.some(opt => opt.value === 'pt' || opt.value === 'pt-BR' || opt.value === 'pt_BR');
-                const hasGerman = options.some(opt => opt.value === 'de' || opt.value === 'de-DE' || opt.value === 'de_DE');
+                // Check existing language options
+                const existingItems = dropdownList.querySelectorAll('li');
+                const hasPortuguese = Array.from(existingItems).some(item => {
+                    const onclick = item.querySelector('img')?.getAttribute('onclick') || '';
+                    return onclick.includes('|pt');
+                });
+                const hasGerman = Array.from(existingItems).some(item => {
+                    const onclick = item.querySelector('img')?.getAttribute('onclick') || '';
+                    return onclick.includes('|de');
+                });
                 
                 // Add Portuguese if not present
                 if (!hasPortuguese) {
-                    const ptOption = document.createElement('option');
-                    ptOption.value = 'pt';
-                    ptOption.textContent = 'Português';
-                    existingSelector.appendChild(ptOption);
+                    const ptItem = document.createElement('li');
+                    const ptImg = document.createElement('img');
+                    ptImg.src = '/assets/WaveMax/images/brazil.png'; // Use Brazil flag for Portuguese
+                    ptImg.alt = 'Portuguese';
+                    ptImg.setAttribute('onclick', "doGTranslate('en|pt');FixBodyTop();return false;");
+                    ptImg.style.cursor = 'pointer';
+                    ptItem.appendChild(ptImg);
+                    dropdownList.appendChild(ptItem);
                     console.log('[Parent-Iframe Bridge] Added Portuguese option');
                 }
                 
                 // Add German if not present
                 if (!hasGerman) {
-                    const deOption = document.createElement('option');
-                    deOption.value = 'de';
-                    deOption.textContent = 'Deutsch';
-                    existingSelector.appendChild(deOption);
+                    const deItem = document.createElement('li');
+                    const deImg = document.createElement('img');
+                    deImg.src = '/assets/WaveMax/images/germany.png'; // Use Germany flag
+                    deImg.alt = 'German';
+                    deImg.setAttribute('onclick', "doGTranslate('en|de');FixBodyTop();return false;");
+                    deImg.style.cursor = 'pointer';
+                    deItem.appendChild(deImg);
+                    dropdownList.appendChild(deItem);
                     console.log('[Parent-Iframe Bridge] Added German option');
                 }
                 
-                // Get current language from localStorage
-                const currentLanguage = localStorage.getItem('wavemax-language') || 'en';
-                
-                // Try to set the current language in the selector
-                if (existingSelector.value !== currentLanguage) {
-                    // Try different possible values
-                    const possibleValues = [currentLanguage, currentLanguage.toUpperCase(), currentLanguage + '-' + currentLanguage.toUpperCase()];
-                    for (const val of possibleValues) {
-                        const option = Array.from(existingSelector.options).find(opt => opt.value === val);
-                        if (option) {
-                            existingSelector.value = val;
-                            break;
+                // Hook into the doGTranslate function to capture language changes
+                const originalDoGTranslate = window.doGTranslate;
+                if (originalDoGTranslate) {
+                    window.doGTranslate = function(pair) {
+                        // Call the original function
+                        originalDoGTranslate(pair);
+                        
+                        // Extract the target language from the pair (e.g., 'en|es' -> 'es')
+                        const targetLang = pair.split('|')[1];
+                        if (targetLang) {
+                            console.log('[Parent-Iframe Bridge] Google Translate language changed to:', targetLang);
+                            
+                            // Save to localStorage
+                            localStorage.setItem('wavemax-language', targetLang);
+                            
+                            // Send language change to iframe
+                            sendLanguageChange(targetLang);
+                            
+                            // Dispatch custom event
+                            window.dispatchEvent(new CustomEvent('languageChanged', {
+                                detail: { language: targetLang }
+                            }));
                         }
-                    }
+                    };
+                    console.log('[Parent-Iframe Bridge] Successfully hooked into doGTranslate');
                 }
                 
-                // Hook into the existing selector's change event
-                existingSelector.addEventListener('change', function(e) {
-                    // Normalize the language code (handle variations like en-US, en_US, EN, etc.)
-                    let langCode = e.target.value.toLowerCase();
-                    langCode = langCode.split('-')[0].split('_')[0]; // Get just the language part
-                    
-                    console.log('[Parent-Iframe Bridge] Existing selector changed to:', langCode);
-                    
-                    // Save to localStorage
-                    localStorage.setItem('wavemax-language', langCode);
-                    
-                    // Send language change to iframe
-                    sendLanguageChange(langCode);
-                    
-                    // Dispatch custom event
-                    window.dispatchEvent(new CustomEvent('languageChanged', {
-                        detail: { language: langCode }
-                    }));
+                // Also add click listeners to the images for extra safety
+                dropdownList.querySelectorAll('img').forEach(img => {
+                    img.addEventListener('click', function() {
+                        const onclick = this.getAttribute('onclick') || '';
+                        const match = onclick.match(/doGTranslate\('en\|(\w+)'\)/);
+                        if (match && match[1]) {
+                            const lang = match[1];
+                            console.log('[Parent-Iframe Bridge] Language clicked:', lang);
+                            
+                            setTimeout(() => {
+                                // Save to localStorage
+                                localStorage.setItem('wavemax-language', lang);
+                                
+                                // Send language change to iframe
+                                sendLanguageChange(lang);
+                            }, 100); // Small delay to let Google Translate process
+                        }
+                    });
                 });
                 
-                console.log('[Parent-Iframe Bridge] Successfully integrated with existing language selector');
+                console.log('[Parent-Iframe Bridge] Successfully integrated with Google Translate dropdown');
             } else {
-                console.log('[Parent-Iframe Bridge] No existing language selector found on page');
+                console.log('[Parent-Iframe Bridge] Google Translate dropdown not found, will try again');
                 
                 // Try again in case it loads later
                 setTimeout(() => {
@@ -646,6 +664,63 @@
                 }, 2000);
             }
         }, 500);
+    }
+    
+    function createSimpleLanguageSelector() {
+        // Only create if not already exists
+        if (document.getElementById('wavemax-simple-language-selector')) {
+            return;
+        }
+        
+        console.log('[Parent-Iframe Bridge] Creating simple language selector');
+        
+        const selector = document.createElement('select');
+        selector.id = 'wavemax-simple-language-selector';
+        selector.style.cssText = `
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            z-index: 9999;
+            padding: 5px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background: white;
+        `;
+        
+        const languages = [
+            { code: 'en', name: 'English' },
+            { code: 'es', name: 'Español' },
+            { code: 'pt', name: 'Português' },
+            { code: 'de', name: 'Deutsch' }
+        ];
+        
+        const currentLang = localStorage.getItem('wavemax-language') || 'en';
+        
+        languages.forEach(lang => {
+            const option = document.createElement('option');
+            option.value = lang.code;
+            option.textContent = lang.name;
+            option.selected = lang.code === currentLang;
+            selector.appendChild(option);
+        });
+        
+        selector.addEventListener('change', function(e) {
+            const langCode = e.target.value;
+            console.log('[Parent-Iframe Bridge] Language changed to:', langCode);
+            
+            // Save to localStorage
+            localStorage.setItem('wavemax-language', langCode);
+            
+            // Send language change to iframe
+            sendLanguageChange(langCode);
+            
+            // Dispatch custom event
+            window.dispatchEvent(new CustomEvent('languageChanged', {
+                detail: { language: langCode }
+            }));
+        });
+        
+        document.body.appendChild(selector);
     }
     
     function setupLanguageMonitoring() {
@@ -662,20 +737,10 @@
                 console.log('[Parent-Iframe Bridge] Language change detected:', newLanguage);
                 sendLanguageChange(newLanguage);
                 
-                // Update existing selector if it exists
-                const existingSelector = document.querySelector('select[name="language"]') || 
-                                       document.querySelector('select#language') ||
-                                       document.querySelector('.language-selector select') ||
-                                       document.querySelector('[data-language-selector]') ||
-                                       document.querySelector('select[data-switcher-options]');
-                if (existingSelector) {
-                    // Try to find and select the matching option
-                    const option = Array.from(existingSelector.options).find(opt => 
-                        opt.value.toLowerCase().startsWith(newLanguage)
-                    );
-                    if (option) {
-                        existingSelector.value = option.value;
-                    }
+                // Update simple selector if it exists
+                const simpleSelector = document.getElementById('wavemax-simple-language-selector');
+                if (simpleSelector && simpleSelector.value !== newLanguage) {
+                    simpleSelector.value = newLanguage;
                 }
             }
         }, 500);
@@ -687,20 +752,10 @@
                 console.log('[Parent-Iframe Bridge] Language changed via storage event:', newLanguage);
                 sendLanguageChange(newLanguage);
                 
-                // Update existing selector if it exists
-                const existingSelector = document.querySelector('select[name="language"]') || 
-                                       document.querySelector('select#language') ||
-                                       document.querySelector('.language-selector select') ||
-                                       document.querySelector('[data-language-selector]') ||
-                                       document.querySelector('select[data-switcher-options]');
-                if (existingSelector) {
-                    // Try to find and select the matching option
-                    const option = Array.from(existingSelector.options).find(opt => 
-                        opt.value.toLowerCase().startsWith(newLanguage)
-                    );
-                    if (option) {
-                        existingSelector.value = option.value;
-                    }
+                // Update simple selector if it exists
+                const simpleSelector = document.getElementById('wavemax-simple-language-selector');
+                if (simpleSelector && simpleSelector.value !== newLanguage) {
+                    simpleSelector.value = newLanguage;
                 }
             }
         });
