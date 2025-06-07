@@ -52,6 +52,19 @@
             padding-top: 0 !important;
         }
         
+        /* Specifically target sections that might be loaded */
+        #app-container > section:first-child,
+        #app-container > .hero-section {
+            margin-top: 0 !important;
+            padding-top: 0 !important;
+        }
+        
+        /* Override any inline styles that might be added */
+        #app-container > style + * {
+            margin-top: 0 !important;
+            padding-top: 0 !important;
+        }
+        
         .loading {
             display: flex;
             justify-content: center;
@@ -207,6 +220,11 @@
                 // This will be caught by scripts that set up observers
                 window.dispatchEvent(new CustomEvent('disconnect-observers'));
             }
+            
+            // Remove route-specific styles from previous page
+            document.querySelectorAll('style[data-route]').forEach(style => {
+                style.remove();
+            });
         }
         
         // Load page content
@@ -280,8 +298,16 @@
                         }
                     });
                     
-                    // Combine styles and body content
-                    html = styles.join('\n') + bodyContent;
+                    // Add styles to document head instead of body
+                    styles.forEach(style => {
+                        const styleElement = document.createElement('style');
+                        styleElement.innerHTML = style.replace(/<style[^>]*>|<\/style>/gi, '');
+                        styleElement.setAttribute('data-route', route);
+                        document.head.appendChild(styleElement);
+                    });
+                    
+                    // Only set body content
+                    html = bodyContent;
                 }
                 
                 container.innerHTML = html;
