@@ -1,0 +1,542 @@
+{
+  "common": {
+    "buttons": {
+      "getStarted": "Loslegen",
+      "signUp": "Registrieren",
+      "signIn": "Anmelden",
+      "login": "Login",
+      "logout": "Abmelden",
+      "submit": "Absenden",
+      "cancel": "Abbrechen",
+      "save": "Speichern",
+      "delete": "Löschen",
+      "edit": "Bearbeiten",
+      "back": "Zurück",
+      "next": "Weiter",
+      "previous": "Zurück",
+      "close": "Schließen",
+      "register": "Registrieren",
+      "learnMore": "Mehr erfahren",
+      "customerLogin": "Kundenlogin",
+      "signUpToday": "Heute registrieren",
+      "registerNow": "Jetzt registrieren"
+    },
+    "labels": {
+      "username": "Benutzername",
+      "password": "Passwort",
+      "email": "E-Mail",
+      "firstName": "Vorname",
+      "lastName": "Nachname",
+      "phoneNumber": "Telefonnummer",
+      "address": "Adresse",
+      "city": "Stadt",
+      "state": "Bundesstaat",
+      "zipCode": "Postleitzahl",
+      "rememberMe": "Angemeldet bleiben",
+      "forgotPassword": "Passwort vergessen?",
+      "termsAndConditions": "Allgemeine Geschäftsbedingungen",
+      "privacyPolicy": "Datenschutzerklärung",
+      "allRightsReserved": "Alle Rechte vorbehalten",
+      "lastUpdated": "Zuletzt aktualisiert:"
+    },
+    "messages": {
+      "welcome": "Willkommen",
+      "loading": "Wird geladen...",
+      "error": "Fehler",
+      "success": "Erfolg",
+      "warning": "Warnung",
+      "info": "Information",
+      "noData": "Keine Daten verfügbar",
+      "confirmAction": "Sind Sie sicher, dass Sie fortfahren möchten?",
+      "loginFailed": "Anmeldung fehlgeschlagen. Bitte überprüfen Sie Ihre Anmeldedaten und versuchen Sie es erneut.",
+      "loginSuccess": "Anmeldung erfolgreich!",
+      "logoutSuccess": "Sie wurden erfolgreich abgemeldet.",
+      "registrationSuccess": "Registrierung erfolgreich!",
+      "registrationFailed": "Registrierung fehlgeschlagen. Bitte versuchen Sie es erneut.",
+      "passwordResetSuccess": "Passwort erfolgreich zurückgesetzt!",
+      "passwordResetFailed": "Passwort-Zurücksetzung fehlgeschlagen. Bitte versuchen Sie es erneut.",
+      "popupBlocked": "Das Popup-Fenster wurde blockiert. Bitte erlauben Sie Popups für diese Website und versuchen Sie es erneut.",
+      "authenticationFailed": "Authentifizierung fehlgeschlagen",
+      "authenticationTimeout": "Authentifizierung abgelaufen. Bitte versuchen Sie es erneut.",
+      "accountNotFound": "Konto nicht gefunden. Sie werden zur Registrierung weitergeleitet, um ein neues Konto zu erstellen.",
+      "processingError": "Fehler bei der Verarbeitung des Authentifizierungsergebnisses"
+    }
+  },
+  "landing": {
+    "header": {
+      "title": "Werden Sie Teil des WaveMAX Partnerprogramms",
+      "subtitle": "Partnern Sie mit Austins führendem Wäscheservice und verdienen Sie wiederkehrende Provisionen, während Sie Ihrer Community helfen, Zeit zu sparen",
+      "loginTooltip": "Melden Sie sich bei Ihrem bestehenden Partnerkonto an",
+      "registerTooltip": "Erstellen Sie ein neues Partnerkonto und beginnen Sie zu verdienen"
+    },
+    "mainHeader": {
+      "title": "Werden Sie Teil des WaveMAX Partnerprogramms",
+      "subtitle": "Partnern Sie mit Austins führendem Wäscheservice und verdienen Sie wiederkehrende Provisionen, während Sie Ihrer Community helfen, Zeit zu sparen"
+    },
+    "stats": {
+      "setFees": "Legen Sie Ihre eigenen Gebühren fest",
+      "commission": "Provisionssatz",
+      "startup": "Startkosten",
+      "dashboard": "Dashboard-Zugang"
+    },
+    "hero": {
+      "badge": "Ihr lokaler WaveMAX Partner",
+      "title": "Premium Wäscheabhol- und Lieferservice",
+      "subtitle": {
+        "full": "Bequemer Tür-zu-Tür-Service von {{affiliateName}}, mit professioneller Wäsche durch WaveMAX",
+        "part1": "Bequemer Tür-zu-Tür-Service von",
+        "part2": ", mit professioneller Wäsche durch WaveMAX"
+      }
+    },
+    "pricing": {
+      "wdf": {
+        "title": "WDF-Service",
+        "value": "$1.25",
+        "unit": "/ lb",
+        "description": "Waschen, Trocknen & Falten"
+      },
+      "delivery": {
+        "title": "Lieferung",
+        "value": "${{perBagFee}}",
+        "unit": "/ Tasche",
+        "minimum": "${{minimumFee}} Minimum"
+      }
+    },
+    "howItWorks": {
+      "title": "So funktioniert unser Service",
+      "subtitle": "Einfacher Prozess",
+      "steps": {
+        "doorToDoor": {
+          "title": "Tür-zu-Tür-Service",
+          "description": {
+            "part1": "{{affiliateName}}",
+            "part2": "bietet bequeme Abholung und Lieferung direkt vor Ihrer Haustür, nach Ihrem Zeitplan."
+          }
+        },
+        "professional": {
+          "title": "Professionelle WDF-Verarbeitung",
+          "description": "WaveMAX übernimmt das Waschen mit modernster Electrolux 450G Ausrüstung und Omni LUX UV-Wasseraufbereitung in einer qualitätskontrollierten Einrichtung."
+        },
+        "fastTurnaround": {
+          "title": "Schnelle Bearbeitung",
+          "description": "Ihre Kleidung wird professionell gereinigt und frisch, gefaltet und tragfertig zurückgegeben - normalerweise innerhalb von 24-48 Stunden."
+        }
+      },
+      "step1": {
+        "title": "Registrieren",
+        "description": "Erstellen Sie Ihr Partnerkonto in wenigen Minuten"
+      },
+      "step2": {
+        "title": "Teilen Sie Ihren Link",
+        "description": "Erhalten Sie Ihren einzigartigen Empfehlungslink und Werbematerialien"
+      },
+      "step3": {
+        "title": "Kunden registrieren sich",
+        "description": "Ihre Empfehlungen registrieren sich und planen Abholungen"
+      },
+      "step4": {
+        "title": "Provisionen verdienen",
+        "description": "Erhalten Sie monatliche Zahlungen per Überweisung"
+      }
+    },
+    "process": {
+      "step1": {
+        "title": "Abholung planen",
+        "description": "Nutzen Sie unsere einfache App, um eine Abholzeit zu planen, die zu Ihrem Zeitplan passt"
+      },
+      "step2": {
+        "title": "Abholung an Ihrer Tür",
+        "description": {
+          "part1": "{{affiliateName}}",
+          "part2": "holt Ihre Wäsche ab und transportiert sie zu WaveMAX"
+        }
+      },
+      "step3": {
+        "title": "Professionelle Reinigung",
+        "description": "WaveMAX wäscht, trocknet und faltet fachmännisch mit Premium-Ausrüstung"
+      },
+      "step4": {
+        "title": "Lieferung zu Ihnen",
+        "description": {
+          "part1": "{{affiliateName}}",
+          "part2": "liefert frische, saubere Wäsche zurück an Ihre Tür"
+        }
+      }
+    },
+    "features": {
+      "title": "Warum diesen Service wählen?",
+      "list": {
+        "convenience": {
+          "part1": "Bequeme Abholung & Lieferung durch",
+          "part2": "{{affiliateName}}"
+        },
+        "professional": "Professionelles Waschen mit Electrolux 450G Ausrüstung",
+        "purification": "Omni LUX UV-Wasseraufbereitung für sauberste Ergebnisse",
+        "quality": "Qualitätskontrollierte Umgebung in der WaveMAX-Einrichtung",
+        "ecoFriendly": "Umweltfreundliche Reinigungsprodukte",
+        "transparent": "Transparente Preise - zahlen Sie für Bequemlichkeit & Qualität"
+      },
+      "recurring": {
+        "title": "Verdienen Sie wiederkehrende Einnahmen",
+        "description": "Erhalten Sie 10% Provision auf jede Bestellung von Kunden, die Sie empfehlen, solange sie aktiv bleiben"
+      },
+      "tracking": {
+        "title": "Verfolgen Sie Ihren Erfolg",
+        "description": "Echtzeit-Dashboard zeigt Ihre Kunden, Bestellungen und Einnahmen mit detaillierten Analysen"
+      },
+      "community": {
+        "title": "Helfen Sie Ihrer Community",
+        "description": "Bieten Sie Ihrem Netzwerk Mehrwert, indem Sie ihnen einen bequemen, zuverlässigen Wäscheservice vorstellen"
+      }
+    },
+    "quality": {
+      "title": "Der WaveMAX Qualitätsunterschied",
+      "subtitle": "Ihre Wäsche wird in der hochmodernen WaveMAX-Einrichtung verarbeitet",
+      "electrolux": {
+        "title": "Electrolux 450G Ausrüstung",
+        "description": "Professionelle Waschmaschinen und Trockner sorgen für gründliche Reinigung und schonende Pflege für alle Stoffarten"
+      },
+      "omniLux": {
+        "title": "Omni LUX UV-Aufbereitung",
+        "description": "Fortschrittliches UV-Wasseraufbereitungssystem eliminiert 99,9% der Bakterien und Viren für die sauberste Wäsche"
+      },
+      "qualityControl": {
+        "title": "Qualitätskontrolle",
+        "description": "Strenge Qualitätskontrollprozesse gewährleisten konsistente Ergebnisse und ordnungsgemäße Handhabung jedes Kleidungsstücks"
+      }
+    },
+    "calculator": {
+      "title": "Berechnen Sie Ihre potenziellen Einnahmen",
+      "businessPotential": "Ihr Geschäftspotenzial",
+      "customersPerWeek": "Kunden pro Woche",
+      "customersPerWeekHelp": "Wie viele Kunden Sie wöchentlich bedienen können",
+      "averageWeight": "Durchschnittliches Wäschegewicht (lbs)",
+      "averageWeightHelp": "Typische Ladung ist 20-30 lbs",
+      "deliveryFee": "Ihre Liefergebühr",
+      "deliveryFeeHelp": "Sie behalten 100% der Liefergebühren",
+      "estimatedEarnings": "Ihre geschätzten Einnahmen",
+      "weeklyEarnings": "Wöchentliche Einnahmen",
+      "monthlyEarnings": "Monatliche Einnahmen",
+      "earningsBreakdown": "Einnahmenaufschlüsselung:",
+      "wdfCommission": "WDF-Provision (10%):",
+      "deliveryEarnings": "Liefergebühren (100%):",
+      "wdfRate": "WDF-Tarif: ${{rate}}/lb",
+      "wdfRate.prefix": "WDF-Tarif:",
+      "wdfRateLabel": "WDF-Tarif:"
+    },
+    "faq": {
+      "title": "Häufig gestellte Fragen",
+      "earnings": {
+        "question": "Wie viel kann ich verdienen?",
+        "answer": "Sie verdienen 10% Provision auf jede Bestellung. Die meisten aktiven Partner verdienen $150-500 pro Monat, Top-Performer verdienen mehr."
+      },
+      "cost": {
+        "question": "Gibt es Kosten für die Teilnahme?",
+        "answer": "Nein! Das Partnerprogramm ist völlig kostenlos. Es gibt keine Gebühren oder Mindestanforderungen."
+      },
+      "payment": {
+        "question": "Wann werde ich bezahlt?",
+        "answer": "Provisionen werden monatlich per Überweisung oder PayPal ausgezahlt, normalerweise bis zum 10. jedes Monats."
+      },
+      "materials": {
+        "question": "Welche Marketingmaterialien stellen Sie zur Verfügung?",
+        "answer": "Wir stellen Flyer, Visitenkarten, Social-Media-Grafiken und E-Mail-Vorlagen zur Verfügung, um Ihnen bei der effektiven Werbung zu helfen."
+      }
+    },
+    "testimonials": {
+      "title": "Was unsere Partner sagen",
+      "sarah": {
+        "quote": "Das WaveMAX Partnerprogramm war eine großartige Quelle für passives Einkommen. Meine Immobilienverwaltungskunden lieben den Service!",
+        "name": "Sarah M.",
+        "title": "Immobilienverwalterin, Austin"
+      },
+      "mike": {
+        "quote": "Es ist einfach, alles über das Dashboard zu verfolgen. Ich habe 15 Kunden empfohlen und die Provisionen kommen weiter!",
+        "name": "Mike T.",
+        "title": "Lokaler Geschäftsinhaber"
+      }
+    },
+    "contact": {
+      "text": "Fragen? Senden Sie uns eine E-Mail an",
+      "orCall": "oder rufen Sie an"
+    },
+    "cta": {
+      "title": "Bereit zu verdienen?",
+      "description": "Schließen Sie sich Hunderten von Austin-Partnern an, die wiederkehrende Einnahmen erzielen, während sie ihrer Community helfen, Zeit bei der Wäsche zu sparen.",
+      "createAccount": "Partnerkonto erstellen",
+      "login": "Partner-Login",
+      "subtitle": {
+        "full": "Lassen Sie {{affiliateName}} die Abholung und Lieferung übernehmen, während WaveMAX die professionelle Reinigung sicherstellt",
+        "part1": "Lassen Sie",
+        "part2": "die Abholung und Lieferung übernehmen, während WaveMAX die professionelle Reinigung sicherstellt"
+      }
+    },
+    "footer": {
+      "administratorLogin": "Administrator-Login",
+      "operatorLogin": "Operator-Login",
+      "copyright": "© 2025 CRHS Enterprises, LLC. Alle Rechte vorbehalten."
+    },
+    "page": {
+      "title": "WaveMAX Wäscherei Partnerprogramm - Austin TX"
+    }
+  },
+  "affiliate": {
+    "login": {
+      "title": "Partner-Login",
+      "subtitle": "Melden Sie sich an, um auf Ihr Partner-Dashboard zuzugreifen",
+      "socialLogin": "Mit Ihrem Social-Media-Konto anmelden",
+      "orEmail": "Oder mit Benutzername und Passwort anmelden",
+      "noAccount": "Haben Sie noch kein Partnerkonto?"
+    },
+    "register": {
+      "title": "Werden Sie WaveMAX Partner",
+      "subtitle": "Treten Sie unserem Netzwerk bei und verdienen Sie Provisionen für Wäscheservices",
+      "businessInfo": "Geschäftsinformationen",
+      "personalInfo": "Persönliche Informationen",
+      "accountInfo": "Kontoinformationen",
+      "termsAgree": "Ich stimme den",
+      "alreadyHaveAccount": "Haben Sie bereits ein Konto?"
+    },
+    "dashboard": {
+      "title": "Partner-Dashboard",
+      "welcome": "Willkommen zurück, {{name}}!",
+      "overview": "Übersicht",
+      "customers": "Kunden",
+      "orders": "Bestellungen",
+      "commissions": "Provisionen",
+      "reports": "Berichte",
+      "settings": "Einstellungen",
+      "metrics": {
+        "totalCustomers": "Kunden gesamt",
+        "activeCustomers": "Aktive Kunden",
+        "totalOrders": "Bestellungen gesamt",
+        "totalRevenue": "Gesamtumsatz",
+        "totalCommissions": "Provisionen gesamt",
+        "pendingCommissions": "Ausstehende Provisionen"
+      }
+    }
+  },
+  "customer": {
+    "login": {
+      "title": "Kunden-Login",
+      "subtitle": "Melden Sie sich an, um Ihren Wäscheservice zu verwalten",
+      "socialLogin": "Mit Ihrem Social-Media-Konto anmelden",
+      "orEmail": "Oder mit E-Mail und Passwort anmelden",
+      "noAccount": "Haben Sie noch kein Konto?"
+    },
+    "register": {
+      "title": "Erstellen Sie Ihr Konto",
+      "subtitle": "Registrieren Sie sich für bequeme Wäscheabholung & Lieferung",
+      "personalInfo": "Persönliche Informationen",
+      "contactInfo": "Kontaktinformationen",
+      "accountInfo": "Kontoinformationen",
+      "referralCode": "Empfehlungscode (Optional)",
+      "termsAgree": "Ich stimme den",
+      "alreadyHaveAccount": "Haben Sie bereits ein Konto?"
+    },
+    "dashboard": {
+      "title": "Kunden-Dashboard",
+      "welcome": "Willkommen zurück, {{name}}!",
+      "schedulePickup": "Abholung planen",
+      "activeOrders": "Aktive Bestellungen",
+      "orderHistory": "Bestellverlauf",
+      "accountSettings": "Kontoeinstellungen",
+      "metrics": {
+        "totalOrders": "Bestellungen gesamt",
+        "totalSpent": "Ausgaben gesamt",
+        "averageOrder": "Durchschnittliche Bestellung",
+        "lastOrder": "Letzte Bestellung"
+      }
+    }
+  },
+  "operator": {
+    "login": {
+      "title": "Operator-Portal",
+      "subtitle": "Geben Sie Ihre 4-stellige PIN ein, um auf das System zuzugreifen",
+      "pinPlaceholder": "4-stellige PIN eingeben",
+      "invalidPin": "Ungültige PIN. Bitte versuchen Sie es erneut."
+    },
+    "dashboard": {
+      "title": "Operator-Dashboard",
+      "welcome": "Willkommen, {{name}}!",
+      "todaysPickups": "Heutige Abholungen",
+      "todaysDeliveries": "Heutige Lieferungen",
+      "processOrder": "Bestellung verarbeiten",
+      "scanBarcode": "Barcode scannen",
+      "metrics": {
+        "pickupsCompleted": "Abholungen abgeschlossen",
+        "deliveriesCompleted": "Lieferungen abgeschlossen",
+        "ordersProcessed": "Bestellungen verarbeitet",
+        "efficiency": "Effizienzrate"
+      }
+    }
+  },
+  "administrator": {
+    "login": {
+      "title": "Administrator-Login",
+      "subtitle": "Zugriff auf das Verwaltungs-Dashboard",
+      "noAccount": "Kontaktieren Sie den Systemadministrator für Zugang"
+    },
+    "dashboard": {
+      "title": "Administrator-Dashboard",
+      "welcome": "Willkommen, {{name}}",
+      "systemOverview": "Systemübersicht",
+      "userManagement": "Benutzerverwaltung",
+      "affiliateManagement": "Partnerverwaltung",
+      "orderManagement": "Bestellverwaltung",
+      "reports": "Berichte",
+      "settings": "Systemeinstellungen",
+      "metrics": {
+        "totalUsers": "Benutzer gesamt",
+        "totalAffiliates": "Partner gesamt",
+        "totalOrders": "Bestellungen gesamt",
+        "systemRevenue": "Systemumsatz",
+        "activeOperators": "Aktive Operatoren",
+        "systemHealth": "Systemzustand"
+      }
+    }
+  },
+  "orders": {
+    "status": {
+      "pending": "Ausstehend",
+      "scheduled": "Geplant",
+      "pickedUp": "Abgeholt",
+      "processing": "In Bearbeitung",
+      "readyForDelivery": "Lieferbereit",
+      "outForDelivery": "In Zustellung",
+      "delivered": "Geliefert",
+      "cancelled": "Storniert"
+    },
+    "schedule": {
+      "title": "Abholung planen",
+      "selectDate": "Datum wählen",
+      "selectTime": "Zeit wählen",
+      "pickupAddress": "Abholadresse",
+      "deliveryAddress": "Lieferadresse",
+      "sameAsPickup": "Gleich wie Abholadresse",
+      "specialInstructions": "Besondere Anweisungen (Optional)",
+      "estimatedBags": "Geschätzte Anzahl Taschen",
+      "confirmPickup": "Abholung bestätigen"
+    },
+    "confirmation": {
+      "title": "Bestellbestätigung",
+      "orderNumber": "Bestellnummer",
+      "pickupScheduled": "Abholung geplant",
+      "estimatedDelivery": "Voraussichtliche Lieferung",
+      "totalEstimate": "Geschätzter Gesamtbetrag",
+      "trackOrder": "Bestellung verfolgen",
+      "viewDetails": "Details anzeigen"
+    }
+  },
+  "emails": {
+    "greeting": "Hallo {{name}},",
+    "footer": "Vielen Dank, dass Sie sich für WaveMAX Laundry Services entschieden haben.",
+    "unsubscribe": "Von diesen E-Mails abmelden",
+    "viewInBrowser": "Diese E-Mail im Browser anzeigen",
+    "passwordReset": {
+      "title": "Passwort-Zurücksetzungsanfrage",
+      "adminMessage": "Wir haben eine Anfrage erhalten, Ihr Administrator-Passwort zurückzusetzen.",
+      "resetButton": "Passwort zurücksetzen",
+      "ignoreMessage": "Wenn Sie dies nicht angefordert haben, ignorieren Sie bitte diese E-Mail."
+    },
+    "welcome": {
+      "adminTitle": "Willkommen beim WaveMAX Administrator-Portal",
+      "adminMessage": "Ihr Administrator-Konto wurde erfolgreich erstellt.",
+      "affiliateTitle": "Willkommen beim WaveMAX Partnerprogramm",
+      "affiliateMessage": "Willkommen beim WaveMAX Partnerprogramm! Wir freuen uns, Sie als unseren Partner zu haben.",
+      "affiliateId": "Ihre Partner-ID:",
+      "customerTitle": "Willkommen bei WaveMAX Laundry Services",
+      "customerMessage": "Willkommen bei WaveMAX! Wir freuen uns sehr, Sie als unseren Kunden zu haben.",
+      "operatorTitle": "Willkommen beim WaveMAX Team",
+      "operatorMessage": "Willkommen beim WaveMAX Team! Ihr Operator-Konto wurde erstellt.",
+      "operatorPin": "Ihre PIN:",
+      "accessPortal": "Portal aufrufen",
+      "accessDashboard": "Auf Ihr Dashboard zugreifen",
+      "schedulePickup": "Planen Sie Ihre erste Abholung"
+    },
+    "commission": {
+      "title": "Provisionszahlungsbenachrichtigung",
+      "processed": "Ihre Provisionszahlung wurde bearbeitet.",
+      "amount": "Betrag:",
+      "paymentMethod": "Zahlungsmethode:",
+      "reference": "Referenz:",
+      "viewDashboard": "Dashboard anzeigen"
+    },
+    "newCustomer": {
+      "title": "Neue Kundenregistrierung",
+      "message": "Großartige Neuigkeiten! Ein neuer Kunde hat sich über Ihren Empfehlungslink registriert.",
+      "customerName": "Kundenname:",
+      "registrationDate": "Registrierungsdatum:",
+      "viewDetails": "Kundendetails anzeigen"
+    },
+    "newOrder": {
+      "title": "Neue Bestellungsbenachrichtigung",
+      "affiliateMessage": "Einer Ihrer Kunden hat eine neue Bestellung aufgegeben.",
+      "orderDetails": "Bestelldetails:",
+      "orderNumber": "Bestellnummer:",
+      "customer": "Kunde:",
+      "orderValue": "Bestellwert:",
+      "commission": "Ihre Provision:",
+      "viewOrder": "Bestellung anzeigen"
+    },
+    "orderCancelled": {
+      "title": "Bestellstornierungshinweis",
+      "customerTitle": "Bestellstornierungsbestätigung",
+      "affiliateMessage": "Eine Bestellung eines Ihrer Kunden wurde storniert.",
+      "customerMessage": "Ihre Bestellung wurde wie gewünscht storniert.",
+      "orderNumber": "Bestellnummer:",
+      "customer": "Kunde:",
+      "reason": "Stornierungsgrund:",
+      "date": "Stornierungsdatum:",
+      "questions": "Bei Fragen kontaktieren Sie uns bitte."
+    },
+    "orderConfirmation": {
+      "title": "Bestellbestätigung",
+      "message": "Vielen Dank für Ihre Bestellung! Ihre Abholung wurde geplant.",
+      "orderNumber": "Bestellnummer:",
+      "pickupDate": "Abholdatum:",
+      "pickupTime": "Abholzeit:",
+      "pickupAddress": "Abholadresse:",
+      "trackOrder": "Bestellung verfolgen"
+    },
+    "orderStatus": {
+      "title": "Bestellstatus-Update",
+      "message": "Der Status Ihrer Bestellung wurde aktualisiert.",
+      "orderNumber": "Bestellnummer:",
+      "currentStatus": "Aktueller Status:",
+      "trackOrder": "Bestellung verfolgen"
+    },
+    "pinReset": {
+      "title": "PIN-Zurücksetzungsbenachrichtigung",
+      "message": "Ihre Operator-PIN wurde zurückgesetzt.",
+      "newPin": "Ihre neue PIN:",
+      "changeMessage": "Bitte ändern Sie diese PIN nach Ihrer ersten Anmeldung."
+    },
+    "shiftReminder": {
+      "title": "Schichterinnerung",
+      "message": "Dies ist eine Erinnerung an Ihre bevorstehende Schicht.",
+      "date": "Schichtdatum:",
+      "time": "Schichtzeit:"
+    }
+  },
+  "errors": {
+    "generic": "Ein Fehler ist aufgetreten. Bitte versuchen Sie es erneut.",
+    "network": "Netzwerkfehler. Bitte überprüfen Sie Ihre Verbindung.",
+    "validation": "Bitte überprüfen Sie das Formular und korrigieren Sie alle Fehler.",
+    "unauthorized": "Sie sind nicht berechtigt, auf diese Ressource zuzugreifen.",
+    "notFound": "Die angeforderte Ressource wurde nicht gefunden.",
+    "serverError": "Serverfehler. Bitte versuchen Sie es später erneut."
+  },
+  "navigation": {
+    "home": "Startseite",
+    "about": "Über uns",
+    "services": "Dienstleistungen",
+    "pricing": "Preise",
+    "contact": "Kontakt",
+    "dashboard": "Dashboard",
+    "profile": "Profil",
+    "settings": "Einstellungen",
+    "help": "Hilfe",
+    "logout": "Abmelden"
+  }
+}

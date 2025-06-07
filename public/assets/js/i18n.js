@@ -10,7 +10,7 @@
         // Default configuration
         config: {
             defaultLanguage: 'en',
-            supportedLanguages: ['en', 'es', 'pt'],
+            supportedLanguages: ['en', 'es', 'pt', 'de'],
             fallbackLanguage: 'en',
             translationsPath: window.location.hostname === 'localhost' || window.location.hostname.includes('wavemax.promo')
                 ? '/locales'
@@ -339,7 +339,8 @@
             const localeMap = {
                 'en': 'en-US',
                 'es': 'es-ES',
-                'pt': 'pt-BR'
+                'pt': 'pt-BR',
+                'de': 'de-DE'
             };
             return localeMap[this.currentLanguage] || 'en-US';
         },
