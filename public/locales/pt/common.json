@@ -218,7 +218,8 @@
       "earningsBreakdown": "Detalhamento de ganhos:",
       "wdfCommission": "Comissão WDF (10%):",
       "deliveryEarnings": "Taxas de entrega (100%):",
-      "wdfRate": "Taxa WDF: ${{rate}}/lb"
+      "wdfRate": "Taxa WDF: ${{rate}}/lb",
+      "wdfRate.prefix": "Taxa WDF:"
     },
     "faq": {
       "title": "Perguntas Frequentes",
