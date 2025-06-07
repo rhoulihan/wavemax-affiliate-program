@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Internationalization (i18n) - WaveMAX Documentation</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f8f9fa;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+            color: white;
+            padding: 40px 0;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        
+        header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        
+        .breadcrumb {
+            margin: 20px 0;
+            color: #666;
+        }
+        
+        .breadcrumb a {
+            color: #3b82f6;
+            text-decoration: none;
+        }
+        
+        .breadcrumb a:hover {
+            text-decoration: underline;
+        }
+        
+        .content {
+            background: white;
+            border-radius: 8px;
+            padding: 30px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+        
+        h2 {
+            color: #1e3a8a;
+            margin-top: 30px;
+            margin-bottom: 15px;
+            font-size: 1.8rem;
+            border-bottom: 2px solid #e5e7eb;
+            padding-bottom: 10px;
+        }
+        
+        h3 {
+            color: #374151;
+            margin-top: 25px;
+            margin-bottom: 10px;
+            font-size: 1.4rem;
+        }
+        
+        h4 {
+            color: #4b5563;
+            margin-top: 20px;
+            margin-bottom: 8px;
+            font-size: 1.2rem;
+        }
+        
+        code {
+            background: #f3f4f6;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+        
+        pre {
+            background: #1f2937;
+            color: #e5e7eb;
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 15px 0;
+        }
+        
+        pre code {
+            background: none;
+            padding: 0;
+            color: inherit;
+        }
+        
+        ul, ol {
+            margin: 15px 0;
+            padding-left: 30px;
+        }
+        
+        li {
+            margin: 8px 0;
+        }
+        
+        .alert {
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        
+        .alert-info {
+            background: #dbeafe;
+            border: 1px solid #60a5fa;
+            color: #1e40af;
+        }
+        
+        .alert-warning {
+            background: #fed7aa;
+            border: 1px solid #fb923c;
+            color: #92400e;
+        }
+        
+        .alert-success {
+            background: #d1fae5;
+            border: 1px solid #34d399;
+            color: #065f46;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border: 1px solid #e5e7eb;
+        }
+        
+        th {
+            background: #f9fafb;
+            font-weight: 600;
+            color: #374151;
+        }
+        
+        .nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #e5e7eb;
+        }
+        
+        .nav-buttons a {
+            color: #3b82f6;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .nav-buttons a:hover {
+            text-decoration: underline;
+        }
+        
+        .toc {
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .toc h3 {
+            margin-top: 0;
+            margin-bottom: 15px;
+            color: #1e3a8a;
+        }
+        
+        .toc ul {
+            list-style: none;
+            padding-left: 0;
+        }
+        
+        .toc ul ul {
+            padding-left: 20px;
+        }
+        
+        .toc a {
+            color: #4b5563;
+            text-decoration: none;
+        }
+        
+        .toc a:hover {
+            color: #3b82f6;
+        }
+        
+        .flag-icon {
+            width: 24px;
+            height: 18px;
+            display: inline-block;
+            vertical-align: middle;
+            margin-right: 8px;
+            border: 1px solid #e5e7eb;
+            border-radius: 2px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>Internationalization (i18n)</h1>
+            <p>Multi-language support for the WaveMAX Affiliate Program</p>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="breadcrumb">
+            <a href="index.html">Documentation</a> &gt; Internationalization (i18n)
+        </div>
+
+        <div class="content">
+            <div class="toc">
+                <h3>Table of Contents</h3>
+                <ul>
+                    <li><a href="#overview">Overview</a></li>
+                    <li><a href="#supported-languages">Supported Languages</a></li>
+                    <li><a href="#implementation">Implementation Details</a>
+                        <ul>
+                            <li><a href="#client-side">Client-Side Translation</a></li>
+                            <li><a href="#language-detection">Language Detection</a></li>
+                            <li><a href="#email-templates">Email Templates</a></li>
+                        </ul>
+                    </li>
+                    <li><a href="#configuration">Configuration</a></li>
+                    <li><a href="#usage">Usage Guide</a></li>
+                    <li><a href="#adding-languages">Adding New Languages</a></li>
+                    <li><a href="#best-practices">Best Practices</a></li>
+                </ul>
+            </div>
+
+            <h2 id="overview">Overview</h2>
+            <p>The WaveMAX Affiliate Program includes comprehensive internationalization support, enabling deployment in multiple languages and regions. The system automatically detects user language preferences and provides a localized experience throughout the application.</p>
+
+            <div class="alert alert-success">
+                <strong>✅ Key Features:</strong>
+                <ul>
+                    <li>Automatic browser language detection</li>
+                    <li>Persistent language preferences in user profiles</li>
+                    <li>Real-time language switching without page reload</li>
+                    <li>Localized email communications</li>
+                    <li>Parent-iframe language synchronization</li>
+                </ul>
+            </div>
+
+            <h2 id="supported-languages">Supported Languages</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Language</th>
+                        <th>Code</th>
+                        <th>Coverage</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><span class="flag-icon" style="background: linear-gradient(180deg, #b22234 50%, #fff 50%);">🇺🇸</span> English</td>
+                        <td><code>en</code></td>
+                        <td>100%</td>
+                        <td>✅ Default</td>
+                    </tr>
+                    <tr>
+                        <td><span class="flag-icon" style="background: linear-gradient(180deg, #aa151b 33.33%, #f1bf00 33.33%, #f1bf00 66.66%, #aa151b 66.66%);">🇪🇸</span> Spanish</td>
+                        <td><code>es</code></td>
+                        <td>100%</td>
+                        <td>✅ Complete</td>
+                    </tr>
+                    <tr>
+                        <td><span class="flag-icon" style="background: linear-gradient(135deg, #009b3a 25%, #fedf00 25%, #fedf00 75%, #009b3a 75%);">🇧🇷</span> Portuguese</td>
+                        <td><code>pt</code></td>
+                        <td>100%</td>
+                        <td>✅ Complete</td>
+                    </tr>
+                    <tr>
+                        <td><span class="flag-icon" style="background: linear-gradient(180deg, #000 33.33%, #dd0000 33.33%, #dd0000 66.66%, #ffce00 66.66%);">🇩🇪</span> German</td>
+                        <td><code>de</code></td>
+                        <td>100%</td>
+                        <td>✅ Complete</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h2 id="implementation">Implementation Details</h2>
+
+            <h3 id="client-side">Client-Side Translation</h3>
+            <p>The i18n system is implemented using a custom JavaScript library that provides real-time translation without page reloads.</p>
+
+            <h4>Core Library</h4>
+            <pre><code>// Located at: /public/assets/js/i18n.js
+window.i18n = {
+    supportedLanguages: ['en', 'es', 'pt', 'de'],
+    currentLanguage: 'en',
+    translations: {},
+    
+    // Set language
+    setLanguage: function(lang) {
+        // Implementation
+    },
+    
+    // Translate a key
+    t: function(key, params) {
+        // Implementation with parameter interpolation
+    },
+    
+    // Get current language
+    getCurrentLanguage: function() {
+        return this.currentLanguage;
+    }
+};</code></pre>
+
+            <h4>HTML Implementation</h4>
+            <pre><code>&lt;!-- Static text translation --&gt;
+&lt;h1 data-i18n="landing.header.title"&gt;Welcome to WaveMAX&lt;/h1&gt;
+
+&lt;!-- Dynamic content with parameters --&gt;
+&lt;p data-i18n="landing.commission.description" 
+   data-i18n-params='{"rate": "10"}'&gt;
+   Earn 10% commission on all orders
+&lt;/p&gt;</code></pre>
+
+            <h3 id="language-detection">Language Detection</h3>
+            <p>The system uses a hierarchical approach to determine the user's preferred language:</p>
+
+            <ol>
+                <li><strong>Saved Preference</strong> - localStorage value from previous sessions</li>
+                <li><strong>URL Parameter</strong> - <code>?lang=es</code> in the URL</li>
+                <li><strong>Browser Language</strong> - Navigator language API</li>
+                <li><strong>Default Language</strong> - English (en)</li>
+            </ol>
+
+            <h4>Registration Language Capture</h4>
+            <pre><code>// Automatically captures browser language during registration
+const browserLang = navigator.language || navigator.userLanguage || 'en';
+const langCode = browserLang.substring(0, 2).toLowerCase();
+const supportedLanguages = ['en', 'es', 'pt', 'de'];
+const languagePreference = supportedLanguages.includes(langCode) ? langCode : 'en';
+
+// Stored in database models
+{
+    languagePreference: {
+        type: String,
+        enum: ['en', 'es', 'pt', 'de'],
+        default: 'en'
+    }
+}</code></pre>
+
+            <h3 id="email-templates">Email Template Localization</h3>
+            <p>Email templates are organized by language for personalized communications:</p>
+
+            <h4>Directory Structure</h4>
+            <pre><code>server/templates/emails/
+├── affiliate-welcome.html         # Default English template
+├── customer-welcome.html
+├── es/                           # Spanish translations
+│   ├── affiliate-welcome.html
+│   └── customer-welcome.html
+├── pt/                           # Portuguese translations
+│   ├── affiliate-welcome.html
+│   └── customer-welcome.html
+└── de/                           # German translations
+    ├── affiliate-welcome.html
+    └── customer-welcome.html</code></pre>
+
+            <h4>Email Service Implementation</h4>
+            <pre><code>// Email service automatically uses user's language preference
+exports.sendAffiliateWelcomeEmail = async (affiliate) => {
+    const language = affiliate.languagePreference || 'en';
+    const template = await loadTemplate('affiliate-welcome', language);
+    
+    // Translated subjects
+    const subjects = {
+        en: 'Welcome to WaveMAX Laundry Affiliate Program',
+        es: 'Bienvenido al Programa de Afiliados de WaveMAX Laundry',
+        pt: 'Bem-vindo ao Programa de Afiliados WaveMAX Laundry',
+        de: 'Willkommen beim WaveMAX Laundry Affiliate-Programm'
+    };
+    
+    await sendEmail(affiliate.email, subjects[language], html);
+};</code></pre>
+
+            <h2 id="configuration">Configuration</h2>
+
+            <h3>Translation Files</h3>
+            <p>Translation files are stored in JSON format at <code>/public/locales/[lang]/common.json</code>:</p>
+
+            <pre><code>{
+    "landing": {
+        "header": {
+            "title": "Become a WaveMAX Affiliate Partner",
+            "subtitle": "Earn commissions by referring customers"
+        },
+        "commission": {
+            "title": "Earn {{rate}}% Commission",
+            "description": "Get {{rate}}% of every order"
+        }
+    }
+}</code></pre>
+
+            <h3>Language Switcher Integration</h3>
+            <p>For embedded deployments, the language switcher integrates with the parent page's Google Translate widget:</p>
+
+            <pre><code>// Parent page integration
+&lt;script src="parent-iframe-bridge-inline.js"&gt;&lt;/script&gt;
+
+// Automatically syncs with Google Translate selections
+// Adds Portuguese and German options to existing dropdown
+// Saves preference to localStorage</code></pre>
+
+            <h2 id="usage">Usage Guide</h2>
+
+            <h3>For Developers</h3>
+            <h4>Adding Translatable Content</h4>
+            <pre><code>&lt;!-- HTML --&gt;
+&lt;button data-i18n="common.buttons.submit"&gt;Submit&lt;/button&gt;
+
+// JavaScript
+const message = i18n.t('common.messages.success');
+alert(message);</code></pre>
+
+            <h4>Using Parameters</h4>
+            <pre><code>&lt;!-- HTML with parameters --&gt;
+&lt;p data-i18n="welcome.greeting" 
+   data-i18n-params='{"name": "John"}'&gt;
+   Welcome, John!
+&lt;/p&gt;
+
+// JavaScript with parameters
+const greeting = i18n.t('welcome.greeting', { name: 'John' });
+// Output: "Welcome, John!" (or localized equivalent)</code></pre>
+
+            <h3>For End Users</h3>
+            <ul>
+                <li><strong>First Visit</strong>: System automatically detects browser language</li>
+                <li><strong>Language Selection</strong>: Use the language dropdown on any page</li>
+                <li><strong>Persistence</strong>: Selection is saved for future visits</li>
+                <li><strong>Emails</strong>: Received in the language selected during registration</li>
+            </ul>
+
+            <h2 id="adding-languages">Adding New Languages</h2>
+
+            <div class="alert alert-info">
+                <strong>Step-by-Step Guide to Add a New Language</strong>
+            </div>
+
+            <ol>
+                <li>
+                    <h4>Update Supported Languages</h4>
+                    <p>Edit <code>/public/assets/js/i18n.js</code>:</p>
+                    <pre><code>supportedLanguages: ['en', 'es', 'pt', 'de', 'fr'], // Add 'fr' for French</code></pre>
+                </li>
+
+                <li>
+                    <h4>Create Translation File</h4>
+                    <p>Create <code>/public/locales/fr/common.json</code>:</p>
+                    <pre><code>{
+    "landing": {
+        "header": {
+            "title": "Devenez Partenaire Affilié WaveMAX",
+            "subtitle": "Gagnez des commissions en référant des clients"
+        }
+        // ... complete translations
+    }
+}</code></pre>
+                </li>
+
+                <li>
+                    <h4>Update Database Models</h4>
+                    <p>Update enum in both Affiliate.js and Customer.js:</p>
+                    <pre><code>languagePreference: {
+    type: String,
+    enum: ['en', 'es', 'pt', 'de', 'fr'], // Add 'fr'
+    default: 'en'
+}</code></pre>
+                </li>
+
+                <li>
+                    <h4>Add Email Templates</h4>
+                    <p>Create email templates in <code>/server/templates/emails/fr/</code></p>
+                </li>
+
+                <li>
+                    <h4>Update Email Service</h4>
+                    <p>Add translated subjects in emailService.js:</p>
+                    <pre><code>const subjects = {
+    en: 'Welcome to WaveMAX',
+    es: 'Bienvenido a WaveMAX',
+    pt: 'Bem-vindo ao WaveMAX',
+    de: 'Willkommen bei WaveMAX',
+    fr: 'Bienvenue chez WaveMAX'  // Add French
+};</code></pre>
+                </li>
+
+                <li>
+                    <h4>Update Parent Bridge Script</h4>
+                    <p>Add flag image sources for the new language if using dropdown integration</p>
+                </li>
+            </ol>
+
+            <h2 id="best-practices">Best Practices</h2>
+
+            <h3>Translation Guidelines</h3>
+            <ul>
+                <li><strong>Consistency</strong>: Use consistent terminology across all translations</li>
+                <li><strong>Context</strong>: Consider cultural context, not just literal translation</li>
+                <li><strong>Length</strong>: Account for text expansion (German ~30% longer than English)</li>
+                <li><strong>Testing</strong>: Test UI with longest translations to ensure proper layout</li>
+            </ul>
+
+            <h3>Development Tips</h3>
+            <ul>
+                <li><strong>Key Naming</strong>: Use descriptive, hierarchical keys (e.g., <code>landing.header.title</code>)</li>
+                <li><strong>Fallbacks</strong>: Always provide English fallback for missing translations</li>
+                <li><strong>Parameters</strong>: Use parameters for dynamic values instead of concatenation</li>
+                <li><strong>HTML Safety</strong>: Escape user input to prevent XSS attacks</li>
+            </ul>
+
+            <h3>Common Pitfalls to Avoid</h3>
+            <ul>
+                <li>❌ Don't put <code>data-i18n</code> on elements with dynamic children (IDs will be lost)</li>
+                <li>❌ Don't hardcode language-specific text in JavaScript</li>
+                <li>❌ Don't forget to update email templates when adding new languages</li>
+                <li>❌ Don't assume text direction (prepare for RTL languages)</li>
+            </ul>
+
+            <div class="alert alert-warning">
+                <strong>⚠️ Important Note:</strong> When using <code>data-i18n</code> attributes, the entire content of the element will be replaced. Do not use on parent elements that contain dynamic content or elements with IDs that JavaScript needs to reference.
+            </div>
+
+            <div class="nav-buttons">
+                <a href="mobile-configuration.html">← Mobile Configuration</a>
+                <a href="development-guide.html">Development Guide →</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

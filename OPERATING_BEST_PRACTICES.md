@@ -291,6 +291,16 @@ When the command "run coverage test" is issued, the system performs the followin
 - **DBA**: WaveMAX Laundry
 - **Standard Footer Format**: `© [YEAR] CRHS Enterprises, LLC. All rights reserved.`
 
+## Internationalization (i18n) Guidelines
+
+### Translation Requirements
+- **Always maintain translations**: When updating or adding HTML content, ensure translations are updated for:
+  - Portuguese (pt)
+  - Spanish (es)  
+  - German (de)
+- **Email templates**: Create language-specific versions in `/server/templates/emails/[language]/`
+- **Language preference**: Stored in Affiliate and Customer models, captured during registration from browser language
+
 ---
 
-*Last Updated: 2025-06-06*
+*Last Updated: 2025-07-06*
