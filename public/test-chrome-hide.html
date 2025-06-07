@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Chrome Hide Script</title>
+    <meta charset="UTF-8">
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .test-button { 
+            background: #007acc; 
+            color: white; 
+            border: none; 
+            padding: 10px 20px; 
+            margin: 10px;
+            cursor: pointer; 
+            border-radius: 4px;
+        }
+        .code-block {
+            background: #f0f0f0;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            white-space: pre-wrap;
+            font-family: monospace;
+            font-size: 14px;
+        }
+        .status { 
+            padding: 10px; 
+            margin: 10px 0; 
+            border-radius: 4px;
+            background: #e0f0ff;
+        }
+    </style>
+</head>
+<body>
+    <h1>Chrome Hide Script for WaveMAX Laundry Site</h1>
+    
+    <p>Add this script to your WaveMAX Laundry pages that contain the affiliate iframe:</p>
+    
+    <div class="code-block">&lt;script&gt;
+// Auto-hide page header when WaveMAX affiliate iframe is present
+(function() {
+    'use strict';
+    
+    function hidePageHeaderOnly() {
+        // Only hide the page header, not all chrome
+        const pageHeader = document.querySelector('.page-header');
+        if (pageHeader) {
+            pageHeader.style.display = 'none';
+            pageHeader.setAttribute('data-wavemax-hidden', 'true');
+            console.log('[WaveMAX] Page header hidden');
+            return true;
+        }
+        return false;
+    }
+    
+    // Check if WaveMAX iframe exists
+    function hasWaveMaxIframe() {
+        return document.querySelector('iframe[src*="affiliate.wavemax.promo"]') || 
+               document.querySelector('iframe#wavemax-affiliate-iframe');
+    }
+    
+    // Only hide if iframe is present
+    function conditionalHide() {
+        if (hasWaveMaxIframe()) {
+            hidePageHeaderOnly();
+        }
+    }
+    
+    // Try multiple times to catch dynamic loading
+    conditionalHide();
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', conditionalHide);
+    }
+    window.addEventListener('load', conditionalHide);
+    setTimeout(conditionalHide, 100);
+    setTimeout(conditionalHide, 500);
+    setTimeout(conditionalHide, 1000);
+})();
+&lt;/script&gt;</div>
+
+    <h2>Or use this version to hide ALL chrome (header, footer, topbar):</h2>
+    
+    <div class="code-block">&lt;script&gt;
+// Auto-hide all chrome when WaveMAX affiliate iframe is present
+(function() {
+    'use strict';
+    
+    let chromeHidden = false;
+    
+    function hideAllChrome() {
+        if (chromeHidden) return;
+        
+        // Hide all chrome elements
+        const elements = {
+            '.topbar': 'none',
+            '.wrapper': 'none', 
+            '.navbar': 'none',
+            '.page-header': 'none',
+            '.footer': 'none'
+        };
+        
+        let hiddenCount = 0;
+        Object.entries(elements).forEach(([selector, display]) => {
+            const element = document.querySelector(selector);
+            if (element) {
+                element.style.display = display;
+                element.setAttribute('data-wavemax-hidden', 'true');
+                hiddenCount++;
+            }
+        });
+        
+        if (hiddenCount > 0) {
+            chromeHidden = true;
+            console.log(`[WaveMAX] Hidden ${hiddenCount} chrome elements`);
+            
+            // Make iframe container full height
+            const iframe = document.querySelector('iframe[src*="affiliate.wavemax.promo"]');
+            if (iframe && iframe.parentElement) {
+                iframe.parentElement.style.minHeight = '100vh';
+                iframe.style.minHeight = '100vh';
+            }
+        }
+    }
+    
+    // Check if WaveMAX iframe exists
+    function hasWaveMaxIframe() {
+        return document.querySelector('iframe[src*="affiliate.wavemax.promo"]') || 
+               document.querySelector('iframe#wavemax-affiliate-iframe');
+    }
+    
+    // Only hide if iframe is present
+    function conditionalHide() {
+        if (hasWaveMaxIframe()) {
+            hideAllChrome();
+        }
+    }
+    
+    // Try multiple times
+    conditionalHide();
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', conditionalHide);
+    }
+    window.addEventListener('load', conditionalHide);
+    setTimeout(conditionalHide, 100);
+    setTimeout(conditionalHide, 500);
+    setTimeout(conditionalHide, 1000);
+})();
+&lt;/script&gt;</div>
+
+    <div class="status">
+        <h3>Instructions:</h3>
+        <ol>
+            <li>Choose which version you want (hide page header only vs hide all chrome)</li>
+            <li>Copy the script code above</li>
+            <li>Add it to your WaveMAX Laundry pages, preferably right after the iframe element</li>
+            <li>The script will automatically detect the iframe and hide the appropriate elements</li>
+        </ol>
+    </div>
+
+    <div class="status" style="background: #fff0e0;">
+        <h3>Testing:</h3>
+        <p>Open your browser's Developer Console (F12) and look for messages starting with [WaveMAX] to confirm the script is working.</p>
+    </div>
+
+</body>
+</html>
