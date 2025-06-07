@@ -386,21 +386,21 @@
             const pageScripts = {
                 '/': ['/assets/js/revenue-calculator.js'], // Landing page
                 '/landing': ['/assets/js/revenue-calculator.js'], // Landing page alternate route
-                '/affiliate-register': ['/assets/js/errorHandler.js', '/assets/js/csrf-utils.js', '/assets/js/affiliate-register-init.js'],
-                '/affiliate-login': ['/assets/js/errorHandler.js', '/assets/js/csrf-utils.js', '/assets/js/affiliate-login-init.js'],
-                '/affiliate-dashboard': ['/assets/js/errorHandler.js', '/assets/js/csrf-utils.js', '/assets/js/affiliate-dashboard-init.js'],
+                '/affiliate-register': ['/assets/js/modal-utils.js', '/assets/js/errorHandler.js', '/assets/js/csrf-utils.js', '/assets/js/affiliate-register-init.js'],
+                '/affiliate-login': ['/assets/js/modal-utils.js', '/assets/js/errorHandler.js', '/assets/js/csrf-utils.js', '/assets/js/affiliate-login-init.js'],
+                '/affiliate-dashboard': ['/assets/js/modal-utils.js', '/assets/js/errorHandler.js', '/assets/js/csrf-utils.js', '/assets/js/affiliate-dashboard-init.js'],
                 '/affiliate-success': ['/assets/js/affiliate-success-init.js'],
                 '/affiliate-landing': ['/assets/js/affiliate-landing-init.js'],
-                '/customer-register': ['/assets/js/errorHandler.js', '/assets/js/csrf-utils.js', '/assets/js/customer-register.js'],
-                '/customer-login': ['/assets/js/errorHandler.js', '/assets/js/csrf-utils.js', '/assets/js/customer-login-embed.js'],
-                '/customer-dashboard': ['/assets/js/errorHandler.js', '/assets/js/csrf-utils.js', '/assets/js/customer-dashboard.js'],
+                '/customer-register': ['/assets/js/modal-utils.js', '/assets/js/errorHandler.js', '/assets/js/csrf-utils.js', '/assets/js/customer-register.js'],
+                '/customer-login': ['/assets/js/modal-utils.js', '/assets/js/errorHandler.js', '/assets/js/csrf-utils.js', '/assets/js/customer-login-embed.js'],
+                '/customer-dashboard': ['/assets/js/modal-utils.js', '/assets/js/errorHandler.js', '/assets/js/csrf-utils.js', '/assets/js/customer-dashboard.js'],
                 '/customer-success': ['/assets/js/customer-success.js'],
-                '/schedule-pickup': ['/assets/js/errorHandler.js', '/assets/js/csrf-utils.js', '/assets/js/schedule-pickup.js'],
-                '/order-confirmation': ['/assets/js/errorHandler.js', '/assets/js/order-confirmation.js'],
-                '/administrator-login': ['/assets/js/errorHandler.js', '/assets/js/csrf-utils.js', '/assets/js/administrator-login-init.js'],
-                '/administrator-dashboard': ['/assets/js/errorHandler.js', '/assets/js/csrf-utils.js', '/assets/js/administrator-dashboard-init.js'],
-                '/operator-login': ['/assets/js/errorHandler.js', '/assets/js/csrf-utils.js', '/assets/js/operator-login-init.js'],
-                '/operator-dashboard': ['/assets/js/errorHandler.js', '/assets/js/csrf-utils.js', '/assets/js/operator-dashboard-init.js']
+                '/schedule-pickup': ['/assets/js/modal-utils.js', '/assets/js/errorHandler.js', '/assets/js/csrf-utils.js', '/assets/js/schedule-pickup.js'],
+                '/order-confirmation': ['/assets/js/modal-utils.js', '/assets/js/errorHandler.js', '/assets/js/order-confirmation.js'],
+                '/administrator-login': ['/assets/js/modal-utils.js', '/assets/js/errorHandler.js', '/assets/js/csrf-utils.js', '/assets/js/administrator-login-init.js'],
+                '/administrator-dashboard': ['/assets/js/modal-utils.js', '/assets/js/errorHandler.js', '/assets/js/csrf-utils.js', '/assets/js/administrator-dashboard-init.js'],
+                '/operator-login': ['/assets/js/modal-utils.js', '/assets/js/errorHandler.js', '/assets/js/csrf-utils.js', '/assets/js/operator-login-init.js'],
+                '/operator-dashboard': ['/assets/js/modal-utils.js', '/assets/js/errorHandler.js', '/assets/js/csrf-utils.js', '/assets/js/operator-dashboard-init.js']
             };
             
             const scripts = pageScripts[currentRoute] || [];
@@ -418,7 +418,7 @@
                     const scriptPath = scripts[scriptIndex];
                     
                     // Check if utility scripts are already loaded
-                    const isUtilityScript = scriptPath.includes('csrf-utils.js') || scriptPath.includes('errorHandler.js');
+                    const isUtilityScript = scriptPath.includes('csrf-utils.js') || scriptPath.includes('errorHandler.js') || scriptPath.includes('modal-utils.js');
                     const scriptAlreadyLoaded = document.querySelector(`script[src*="${scriptPath}"]`);
                     
                     if (isUtilityScript && scriptAlreadyLoaded) {

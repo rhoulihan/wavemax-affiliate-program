@@ -45,7 +45,11 @@
       });
       
       if (!popup || popup.closed) {
-        alert('Popup was blocked. Please allow popups for this site and try again.');
+        if (window.ModalSystem) {
+            window.ModalSystem.error('Popup was blocked. Please allow popups for this site and try again.', 'Popup Blocked');
+        } else {
+            alert('Popup was blocked. Please allow popups for this site and try again.');
+        }
         return;
       }
       
@@ -104,7 +108,11 @@
                   // Navigate to affiliate dashboard - affiliate data should always be present
                   if (!data.result.affiliate || !data.result.affiliate.affiliateId) {
                     console.error('OAuth login successful but affiliate data is missing:', data.result);
-                    alert('Login successful but affiliate information is missing. Please contact support.');
+                    if (window.ModalSystem) {
+                        window.ModalSystem.error('Login successful but affiliate information is missing. Please contact support.', 'Missing Information');
+                    } else {
+                        alert('Login successful but affiliate information is missing. Please contact support.');
+                    }
                     return;
                   }
                   
@@ -115,7 +123,11 @@
                 } else if (data.result.type === 'social-auth-success') {
                   console.log('Affiliate does not exist, redirecting to registration');
                   // New affiliate - redirect to registration with social token
-                  alert('Account not found. You will be redirected to registration to create a new affiliate account.');
+                  if (window.ModalSystem) {
+                      window.ModalSystem.alert('Account not found. You will be redirected to registration to create a new affiliate account.', 'Account Not Found');
+                  } else {
+                      alert('Account not found. You will be redirected to registration to create a new affiliate account.');
+                  }
                   window.location.href = `/embed-app.html?route=/affiliate-register&socialToken=${data.result.socialToken}&provider=${data.result.provider}`;
                   
                 } else if (data.result.type === 'social-auth-account-conflict') {
@@ -132,19 +144,31 @@
                       window.location.href = `/embed-app.html?route=/customer-login`;
                     }
                   } else {
-                    alert(message);
+                    if (window.ModalSystem) {
+                        window.ModalSystem.error(message, 'Login Error');
+                    } else {
+                        alert(message);
+                    }
                   }
                   
                 } else if (data.result.type === 'social-auth-error') {
                   console.log('Processing affiliate social-auth-error from database');
-                  alert(data.result.message || 'Social authentication failed');
+                  if (window.ModalSystem) {
+                      window.ModalSystem.error(data.result.message || 'Social authentication failed', 'Authentication Failed');
+                  } else {
+                      alert(data.result.message || 'Social authentication failed');
+                  }
                   
                 } else {
                   console.log('Unknown affiliate login result type:', data.result.type);
                 }
               } catch (resultError) {
                 console.error('Error processing Affiliate Login OAuth result:', resultError);
-                alert('Error processing authentication result');
+                if (window.ModalSystem) {
+                    window.ModalSystem.error('Error processing authentication result', 'Processing Error');
+                } else {
+                    alert('Error processing authentication result');
+                }
               }
               return;
             }
@@ -157,7 +181,11 @@
             if (popup && !popup.closed) {
               popup.close();
             }
-            alert('Authentication timed out. Please try again.');
+            if (window.ModalSystem) {
+                window.ModalSystem.error('Authentication timed out. Please try again.', 'Authentication Timeout');
+            } else {
+                alert('Authentication timed out. Please try again.');
+            }
             return;
           }
           
@@ -279,12 +307,20 @@
           console.log('Redirecting to:', redirectUrl);
           window.location.href = redirectUrl;
         } else {
-          alert(data.message || 'Login failed. Please check your credentials and try again.');
+          if (window.ModalSystem) {
+              window.ModalSystem.error(data.message || 'Login failed. Please check your credentials and try again.', 'Login Failed');
+          } else {
+              alert(data.message || 'Login failed. Please check your credentials and try again.');
+          }
         }
       })
       .catch(error => {
         console.error('Login error:', error);
-        alert('Login failed. Please check your credentials and try again.');
+        if (window.ModalSystem) {
+            window.ModalSystem.error('Login failed. Please check your credentials and try again.', 'Login Error');
+        } else {
+            alert('Login failed. Please check your credentials and try again.');
+        }
       });
   });
   }

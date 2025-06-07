@@ -126,7 +126,11 @@
             sendMessageToParent('login-error', {
               error: error.message
             });
-            alert(error.message || 'Invalid username or password');
+            if (window.ModalSystem) {
+                window.ModalSystem.error(error.message || 'Invalid username or password', 'Login Failed');
+            } else {
+                alert(error.message || 'Invalid username or password');
+            }
           });
       });
     } else {
@@ -161,7 +165,11 @@
       });
       
       if (!popup || popup.closed) {
-        alert('Popup was blocked. Please allow popups for this site and try again.');
+        if (window.ModalSystem) {
+            window.ModalSystem.error('Popup was blocked. Please allow popups for this site and try again.', 'Popup Blocked');
+        } else {
+            alert('Popup was blocked. Please allow popups for this site and try again.');
+        }
         return;
       }
       
@@ -214,7 +222,11 @@
                   // Store customer data if available
                   if (!data.result.customer || !data.result.customer.customerId) {
                     console.error('OAuth login successful but customer data is missing:', data.result);
-                    alert('Login successful but customer information is missing. Please contact support.');
+                    if (window.ModalSystem) {
+                        window.ModalSystem.error('Login successful but customer information is missing. Please contact support.', 'Missing Information');
+                    } else {
+                        alert('Login successful but customer information is missing. Please contact support.');
+                    }
                     return;
                   }
                   
@@ -251,7 +263,11 @@
                 } else if (data.result.type === 'social-auth-success') {
                   console.log('Customer does not exist, redirecting to registration');
                   // New customer - redirect to registration with social token
-                  alert('Account not found. You will be redirected to registration to create a new customer account.');
+                  if (window.ModalSystem) {
+                      window.ModalSystem.alert('Account not found. You will be redirected to registration to create a new customer account.', 'Account Not Found');
+                  } else {
+                      alert('Account not found. You will be redirected to registration to create a new customer account.');
+                  }
                   window.location.href = `/customer-register-embed.html?socialToken=${data.result.socialToken}&provider=${data.result.provider}`;
                   
                 } else if (data.result.type === 'social-auth-account-conflict') {
@@ -269,19 +285,31 @@
                       window.location.href = `/embed-app.html?route=/affiliate-login`;
                     }
                   } else {
-                    alert(message);
+                    if (window.ModalSystem) {
+                        window.ModalSystem.error(message, 'Login Error');
+                    } else {
+                        alert(message);
+                    }
                   }
                   
                 } else if (data.result.type === 'social-auth-error') {
                   console.log('Processing customer social-auth-error from database');
-                  alert(data.result.message || 'Social authentication failed');
+                  if (window.ModalSystem) {
+                      window.ModalSystem.error(data.result.message || 'Social authentication failed', 'Authentication Failed');
+                  } else {
+                      alert(data.result.message || 'Social authentication failed');
+                  }
                   
                 } else {
                   console.log('Unknown customer login result type:', data.result.type);
                 }
               } catch (resultError) {
                 console.error('Error processing Customer Login OAuth result:', resultError);
-                alert('Error processing authentication result');
+                if (window.ModalSystem) {
+                    window.ModalSystem.error('Error processing authentication result', 'Processing Error');
+                } else {
+                    alert('Error processing authentication result');
+                }
               }
               return;
             }
@@ -294,7 +322,11 @@
             if (popup && !popup.closed) {
               popup.close();
             }
-            alert('Authentication timed out. Please try again.');
+            if (window.ModalSystem) {
+                window.ModalSystem.error('Authentication timed out. Please try again.', 'Authentication Timeout');
+            } else {
+                alert('Authentication timed out. Please try again.');
+            }
             return;
           }
           

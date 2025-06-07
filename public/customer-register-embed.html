@@ -374,7 +374,7 @@
                 const confirmPassword = document.getElementById('confirmPassword').value;
                 
                 if (password !== confirmPassword) {
-                    alert('Passwords do not match!');
+                    modalAlert('Passwords do not match!', 'Validation Error');
                     sendMessageToParent('form-error', { 
                         form: 'customer-register',
                         error: 'Passwords do not match'
@@ -426,7 +426,7 @@
                         sendMessageToParent('registration-error', {
                             message: data.message || 'Registration failed'
                         });
-                        alert(data.message || 'Registration failed. Please try again.');
+                        modalAlert(data.message || 'Registration failed. Please try again.', 'Registration Error');
                     }
                 })
                 .catch(error => {
@@ -434,7 +434,7 @@
                     sendMessageToParent('registration-error', {
                         message: 'Registration failed. Please try again.'
                     });
-                    alert('Registration failed. Please try again.');
+                    modalAlert('Registration failed. Please try again.', 'Registration Error');
                 });
             });
         });
@@ -451,6 +451,7 @@
             isEmbedded: true
         };
     </script>
+    <script src="/assets/js/modal-utils.js"></script>
     <script src="/assets/js/errorHandler.js"></script>
     <script src="/assets/js/csrf-utils.js"></script>
     <script src="/assets/js/customer-register.js"></script>
