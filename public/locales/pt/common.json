@@ -221,7 +221,8 @@
       "wdfCommission": "Comissão WDF (10%):",
       "deliveryEarnings": "Taxas de entrega (100%):",
       "wdfRate": "Taxa WDF: ${{rate}}/lb",
-      "wdfRate.prefix": "Taxa WDF:"
+      "wdfRate.prefix": "Taxa WDF:",
+      "wdfRateLabel": "Taxa WDF:"
     },
     "faq": {
       "title": "Perguntas Frequentes",
