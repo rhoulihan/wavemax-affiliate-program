@@ -1,0 +1,542 @@
+/**
+ * WaveMAX Embed Master Stylesheet
+ * Contains all styles for embedded pages
+ */
+
+/* ===================================
+   1. Base Styles
+   =================================== */
+
+/* Force full-width layout */
+html, body {
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow-x: hidden;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: #f8f9fa;
+    -webkit-text-size-adjust: 100%;
+    -ms-text-size-adjust: 100%;
+}
+
+/* Remove all container padding */
+.container,
+.container-fluid,
+.container-sm,
+.container-md,
+.container-lg,
+.container-xl,
+.container-xxl {
+    max-width: 100% !important;
+    width: 100% !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+}
+
+/* Ensure sections extend full width */
+section {
+    width: 100% !important;
+    max-width: 100% !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+}
+
+/* Remove Bootstrap's negative margins on rows */
+.row {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+}
+
+/* Add padding directly to columns for content spacing */
+.col,
+[class*="col-"] {
+    padding-left: 15px;
+    padding-right: 15px;
+}
+
+@media (min-width: 768px) {
+    .col,
+    [class*="col-"] {
+        padding-left: 30px;
+        padding-right: 30px;
+    }
+}
+
+/* ===================================
+   2. Hero Section
+   =================================== */
+
+.hero-section {
+    background: linear-gradient(135deg, #0F5EF7 0%, #0A47C2 100%);
+    color: white;
+    padding: 60px 0;
+    margin-bottom: 40px;
+    min-height: 500px;
+    display: flex;
+    align-items: center;
+}
+
+/* Hero section special column styling */
+.hero-section .col,
+.hero-section [class*="col-"] {
+    padding-left: 20px;
+    padding-right: 20px;
+}
+
+@media (min-width: 768px) {
+    .hero-section .col,
+    .hero-section [class*="col-"] {
+        padding-left: 40px;
+        padding-right: 40px;
+    }
+}
+
+.hero-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+}
+
+.hero-subtitle {
+    font-size: 1.25rem;
+    opacity: 0.9;
+    margin-bottom: 2rem;
+}
+
+/* ===================================
+   3. Components
+   =================================== */
+
+/* Affiliate Badge */
+.affiliate-badge {
+    background-color: rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    padding: 8px 16px;
+    border-radius: 20px;
+    display: inline-block;
+    margin-bottom: 20px;
+    font-size: 0.9rem;
+    width: auto;
+    white-space: nowrap;
+}
+
+/* Pricing Cards */
+.pricing-card {
+    background: white;
+    border-radius: 12px;
+    padding: 30px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    margin-bottom: 20px;
+    height: 100%;
+}
+
+.pricing-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+.pricing-value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #0F5EF7;
+}
+
+.pricing-unit {
+    font-size: 1rem;
+    color: #666;
+    font-weight: 400;
+}
+
+/* Feature List */
+.feature-list {
+    list-style: none;
+    padding: 0;
+    margin: 20px 0;
+}
+
+.feature-list li {
+    padding: 10px 0;
+    border-bottom: 1px solid #eee;
+}
+
+.feature-list li:last-child {
+    border-bottom: none;
+}
+
+.feature-list i {
+    color: #28a745;
+    margin-right: 10px;
+}
+
+/* Service Cards */
+.service-card {
+    text-align: center;
+    padding: 30px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    height: 100%;
+    transition: transform 0.3s ease;
+}
+
+.service-card:hover {
+    transform: translateY(-5px);
+}
+
+.service-icon {
+    font-size: 3rem;
+    color: #0F5EF7;
+    margin-bottom: 20px;
+    animation: iconPulse 3s ease-in-out infinite;
+}
+
+/* How It Works */
+.how-it-works {
+    background-color: white;
+    padding: 60px 0;
+}
+
+.step-icon {
+    width: 80px;
+    height: 80px;
+    background-color: #e8f0ff;
+    color: #0F5EF7;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.5rem;
+    margin: 0 auto 20px;
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.step-icon:hover {
+    background-color: #0F5EF7;
+    color: white;
+    transform: scale(1.1);
+}
+
+.step-number {
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    width: 30px;
+    height: 30px;
+    background-color: #0F5EF7;
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.9rem;
+    border: 3px solid white;
+}
+
+.step-icon:hover .step-number {
+    background-color: white;
+    color: #0F5EF7;
+}
+
+.step-wrapper {
+    position: relative;
+}
+
+.step-connector {
+    position: absolute;
+    top: 40px;
+    left: 50%;
+    width: 100%;
+    height: 2px;
+    background: linear-gradient(to right, #e8f0ff 0%, #0F5EF7 50%, #e8f0ff 100%);
+    z-index: -1;
+}
+
+/* Testimonials */
+.testimonial-card {
+    background: #f8f9fa;
+    padding: 30px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+}
+
+.testimonial-stars {
+    color: #ffc107;
+    margin-bottom: 15px;
+}
+
+.testimonial-text {
+    font-style: italic;
+    color: #666;
+    margin-bottom: 15px;
+}
+
+.testimonial-author {
+    font-weight: 600;
+    color: #333;
+}
+
+/* CTA Section */
+.cta-section {
+    background-color: #f8f9fa;
+    padding: 40px 0;
+    text-align: center;
+}
+
+/* ===================================
+   4. Buttons
+   =================================== */
+
+.btn-primary {
+    background-color: #0F5EF7;
+    border-color: #0F5EF7;
+    padding: 12px 30px;
+    font-weight: 500;
+    font-size: 1.1rem;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+    background-color: #0A47C2;
+    border-color: #0A47C2;
+    transform: translateY(-2px);
+}
+
+.btn-outline-primary {
+    border-color: white;
+    color: white;
+    padding: 12px 30px;
+    font-weight: 500;
+    font-size: 1.1rem;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.btn-outline-primary:hover {
+    background-color: white;
+    color: #0F5EF7;
+    border-color: white;
+}
+
+/* ===================================
+   5. Animations
+   =================================== */
+
+/* Alert icon animation */
+.alert-icon {
+    animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); opacity: 0.8; }
+    50% { transform: scale(1.05); opacity: 1; }
+    100% { transform: scale(1); opacity: 0.8; }
+}
+
+/* Service icon animation */
+@keyframes iconPulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+/* Gradient backgrounds for service icons */
+.service-icon.gradient-1 {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.service-icon.gradient-2 {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.service-icon.gradient-3 {
+    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* ===================================
+   6. Utility Classes
+   =================================== */
+
+.content-wrapper {
+    max-width: 500px;
+}
+
+.icon-wrapper {
+    margin: 0 auto 15px;
+}
+
+/* ===================================
+   7. Mobile Responsive
+   =================================== */
+
+@media (max-width: 767px) {
+    .hero-title {
+        font-size: 1.75rem;
+    }
+    
+    .hero-subtitle {
+        font-size: 1rem;
+    }
+    
+    .hero-section {
+        padding: 40px 0;
+    }
+    
+    .pricing-card {
+        padding: 20px;
+        margin-bottom: 15px;
+    }
+    
+    .pricing-title {
+        font-size: 1.25rem;
+    }
+    
+    .pricing-value {
+        font-size: 1.5rem;
+    }
+    
+    .service-card {
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+    
+    .service-icon {
+        font-size: 2rem;
+        width: 60px;
+        height: 60px;
+    }
+    
+    .step-number {
+        width: 50px;
+        height: 50px;
+        font-size: 1.25rem;
+    }
+    
+    .step-connector {
+        display: none;
+    }
+    
+    .testimonial-card {
+        padding: 20px;
+    }
+    
+    .cta-section {
+        padding: 40px 0;
+    }
+    
+    .cta-section h2 {
+        font-size: 1.75rem;
+    }
+    
+    /* Button adjustments for mobile */
+    .btn {
+        padding: 10px 20px;
+        font-size: 0.95rem;
+    }
+    
+    .btn-lg {
+        padding: 12px 24px;
+        font-size: 1rem;
+    }
+    
+    /* Stack buttons vertically on mobile */
+    .hero-section .btn {
+        display: block;
+        width: 100%;
+        margin-bottom: 15px;
+    }
+    
+    .hero-section .btn:last-child {
+        margin-bottom: 0;
+    }
+    
+    /* Add extra spacing between buttons and pricing cards on mobile */
+    .hero-section .col-lg-6:first-child {
+        margin-bottom: 40px;
+    }
+    
+    /* Ensure pricing cards have proper spacing from content above */
+    .hero-section .pricing-card {
+        margin-top: 10px;
+    }
+    
+    /* Adjust column padding on mobile */
+    .col,
+    [class*="col-"] {
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+    
+    .hero-section .col,
+    .hero-section [class*="col-"] {
+        padding-left: 15px;
+        padding-right: 15px;
+    }
+    
+    /* Ensure sections have proper spacing */
+    section {
+        padding: 40px 0;
+    }
+    
+    section.hero-section {
+        padding: 30px 0;
+    }
+    
+    /* Make affiliate badge smaller on mobile */
+    .affiliate-badge {
+        font-size: 0.8rem;
+        padding: 6px 12px;
+    }
+    
+    /* Adjust feature list for mobile */
+    .feature-list li {
+        padding: 8px 0;
+        font-size: 0.95rem;
+    }
+    
+    /* Error state mobile adjustments */
+    .alert-icon i {
+        font-size: 3rem !important;
+    }
+}
+
+/* ===================================
+   8. Tablet Responsive
+   =================================== */
+
+@media (min-width: 768px) and (max-width: 991px) {
+    .hero-title {
+        font-size: 2rem;
+    }
+    
+    .hero-subtitle {
+        font-size: 1.1rem;
+    }
+    
+    .pricing-value {
+        font-size: 1.75rem;
+    }
+    
+    .step-connector {
+        display: none;
+    }
+}

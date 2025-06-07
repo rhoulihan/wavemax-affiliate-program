@@ -99,7 +99,8 @@
             'affiliateNameStep2',  // Removed Step1 since it's now app-based
             'affiliateNameStep4',
             'affiliateNameFeature',
-            'affiliateNameCTA'
+            'affiliateNameCTA',
+            'affiliateBadgeName'  // Add the badge name element
         ];
         
         affiliateNameElements.forEach(id => {
