@@ -95,6 +95,10 @@
         // Set up message listener
         window.addEventListener('message', handleMessage);
 
+        // Set up language selector and monitoring
+        setupLanguageSelector();
+        setupLanguageMonitoring();
+
         // Send initial viewport info to iframe
         sendViewportInfo();
         
@@ -268,6 +272,9 @@
             return;
         }
 
+        // Get current language from localStorage or default
+        const currentLanguage = localStorage.getItem('wavemax-language') || 'en';
+
         const info = {
             type: 'viewport-info',
             data: {
@@ -277,7 +284,8 @@
                 isTablet: isTablet,
                 isDesktop: !isMobile && !isTablet,
                 hasTouch: 'ontouchstart' in window,
-                orientation: window.innerWidth > window.innerHeight ? 'landscape' : 'portrait'
+                orientation: window.innerWidth > window.innerHeight ? 'landscape' : 'portrait',
+                language: currentLanguage
             }
         };
         
@@ -551,17 +559,175 @@
         };
     }
 
+    function setupLanguageSelector() {
+        console.log('[Parent-Iframe Bridge] Setting up language selector');
+        
+        // Check if language selector already exists
+        if (document.getElementById('wavemax-language-selector')) {
+            console.log('[Parent-Iframe Bridge] Language selector already exists');
+            return;
+        }
+        
+        // Create language selector container
+        const selectorContainer = document.createElement('div');
+        selectorContainer.id = 'wavemax-language-selector';
+        selectorContainer.style.cssText = `
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            z-index: 10000;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        `;
+        
+        // Create select element
+        const select = document.createElement('select');
+        select.id = 'wavemax-language-select';
+        select.style.cssText = `
+            padding: 5px 10px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            font-size: 14px;
+        `;
+        
+        // Add language options
+        const languages = [
+            { code: 'en', name: 'English', flag: '🇺🇸' },
+            { code: 'es', name: 'Español', flag: '🇪🇸' },
+            { code: 'pt', name: 'Português', flag: '🇧🇷' },
+            { code: 'de', name: 'Deutsch', flag: '🇩🇪' }
+        ];
+        
+        // Get current language
+        const currentLanguage = localStorage.getItem('wavemax-language') || 'en';
+        
+        languages.forEach(lang => {
+            const option = document.createElement('option');
+            option.value = lang.code;
+            option.textContent = `${lang.flag} ${lang.name}`;
+            option.selected = lang.code === currentLanguage;
+            select.appendChild(option);
+        });
+        
+        // Add change event listener
+        select.addEventListener('change', function(e) {
+            const newLanguage = e.target.value;
+            console.log('[Parent-Iframe Bridge] Language changed to:', newLanguage);
+            
+            // Save to localStorage
+            localStorage.setItem('wavemax-language', newLanguage);
+            
+            // Send language change to iframe
+            sendLanguageChange(newLanguage);
+            
+            // Dispatch custom event
+            window.dispatchEvent(new CustomEvent('languageChanged', {
+                detail: { language: newLanguage }
+            }));
+        });
+        
+        selectorContainer.appendChild(select);
+        document.body.appendChild(selectorContainer);
+        
+        console.log('[Parent-Iframe Bridge] Language selector added to page');
+    }
+    
+    function setupLanguageMonitoring() {
+        console.log('[Parent-Iframe Bridge] Setting up language monitoring');
+        
+        // Monitor localStorage for language changes
+        let currentLanguage = localStorage.getItem('wavemax-language') || 'en';
+        
+        // Check for language changes periodically
+        setInterval(() => {
+            const newLanguage = localStorage.getItem('wavemax-language') || 'en';
+            if (newLanguage !== currentLanguage) {
+                currentLanguage = newLanguage;
+                console.log('[Parent-Iframe Bridge] Language change detected:', newLanguage);
+                sendLanguageChange(newLanguage);
+                
+                // Update selector if it exists
+                const select = document.getElementById('wavemax-language-select');
+                if (select && select.value !== newLanguage) {
+                    select.value = newLanguage;
+                }
+            }
+        }, 500);
+        
+        // Also listen for storage events (cross-tab changes)
+        window.addEventListener('storage', function(e) {
+            if (e.key === 'wavemax-language') {
+                const newLanguage = e.newValue || 'en';
+                console.log('[Parent-Iframe Bridge] Language changed via storage event:', newLanguage);
+                sendLanguageChange(newLanguage);
+                
+                // Update selector if it exists
+                const select = document.getElementById('wavemax-language-select');
+                if (select && select.value !== newLanguage) {
+                    select.value = newLanguage;
+                }
+            }
+        });
+        
+        // Listen for custom language change events
+        window.addEventListener('languageChanged', function(e) {
+            const language = e.detail?.language || localStorage.getItem('wavemax-language') || 'en';
+            console.log('[Parent-Iframe Bridge] Language changed via custom event:', language);
+            sendLanguageChange(language);
+        });
+    }
+    
+    function sendLanguageChange(language) {
+        if (!iframe) {
+            console.log('[Parent-Iframe Bridge] sendLanguageChange: No iframe found');
+            return;
+        }
+
+        const info = {
+            type: 'language-change',
+            data: {
+                language: language
+            }
+        };
+
+        // Try to send to iframe
+        try {
+            iframe.contentWindow.postMessage(info, '*');
+            console.log('[Parent-Iframe Bridge] Language change sent successfully:', language);
+        } catch (e) {
+            console.error('[Parent-Iframe Bridge] Failed to send language change:', e);
+        }
+    }
+
     // Public API
     window.WaveMaxBridge = {
         hideChrome: hideChrome,
         showChrome: showChrome,
         sendViewportInfo: sendViewportInfo,
+        sendLanguageChange: sendLanguageChange,
         getViewportInfo: () => ({
             isMobile: isMobile,
             isTablet: isTablet,
             isDesktop: !isMobile && !isTablet,
             chromeHidden: chromeHidden
-        })
+        }),
+        setLanguage: (language) => {
+            localStorage.setItem('wavemax-language', language);
+            sendLanguageChange(language);
+            // Update selector if it exists
+            const select = document.getElementById('wavemax-language-select');
+            if (select) {
+                select.value = language;
+            }
+            // Dispatch custom event
+            window.dispatchEvent(new CustomEvent('languageChanged', {
+                detail: { language: language }
+            }));
+        }
     };
 
 })();
