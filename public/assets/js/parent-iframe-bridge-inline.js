@@ -713,56 +713,24 @@
                                     flagSrc = '/assets/WaveMax/images/mexico.png';
                                     break;
                                 case 'pt':
-                                    // Try to use Brazil flag if available
-                                    flagSrc = '/assets/WaveMax/images/brazil.png';
+                                    // Use CDN directly since local file doesn't exist
+                                    flagSrc = 'https://flagcdn.com/24x18/br.png';
                                     break;
                                 case 'de':
-                                    // Try to use German flag if available
-                                    flagSrc = '/assets/WaveMax/images/germany.png';
+                                    // Use CDN directly since local file doesn't exist
+                                    flagSrc = 'https://flagcdn.com/24x18/de.png';
                                     break;
                                 default:
                                     flagSrc = '/assets/WaveMax/images/country.png';
                             }
                             
-                            // Update the flag with fallback
-                            const originalSrc = mainFlag.src;
-                            mainFlag.src = flagSrc;
-                            
                             // Add data attribute to track which language is set
                             mainFlag.setAttribute('data-lang', lang);
                             
-                            // If custom flags don't exist, use fallback images
-                            mainFlag.onerror = function() {
-                                console.log('[Parent-Iframe Bridge] Flag not found, using fallback');
-                                // Try alternative sources
-                                switch(lang) {
-                                    case 'pt':
-                                        this.src = 'https://flagcdn.com/24x18/br.png';
-                                        break;
-                                    case 'de':
-                                        this.src = 'https://flagcdn.com/24x18/de.png';
-                                        break;
-                                    default:
-                                        this.src = originalSrc; // Restore original
-                                }
-                                
-                                // If external source also fails, restore original
-                                this.onerror = function() {
-                                    this.src = originalSrc;
-                                    this.onerror = null;
-                                };
-                            };
+                            // Update the flag
+                            mainFlag.src = flagSrc;
                             
                             console.log('[Parent-Iframe Bridge] Updated main flag display for language:', lang);
-                            
-                            // Force update again after a longer delay to combat any resets
-                            setTimeout(() => {
-                                const flag = document.querySelector('.imgTranslation');
-                                if (flag && flag.getAttribute('data-lang') === lang && flag.src !== flagSrc) {
-                                    console.log('[Parent-Iframe Bridge] Re-applying flag update');
-                                    flag.src = flagSrc;
-                                }
-                            }, 1000);
                         }
                     }, 100);
                 }
@@ -777,18 +745,18 @@
                             
                             // If the flag doesn't match our saved language, update it
                             if (flagLang !== currentLang) {
-                                console.log('[Parent-Iframe Bridge] Flag mismatch detected, correcting...');
+                                console.log('[Parent-Iframe Bridge] Flag language mismatch detected, correcting...');
                                 updateMainFlagDisplay(currentLang);
                             }
                         }
                     });
                     
-                    // Observe changes to the flag image
+                    // Observe changes to the flag element attributes
                     const flagElement = document.querySelector('.imgTranslation');
                     if (flagElement) {
                         observer.observe(flagElement, {
                             attributes: true,
-                            attributeFilter: ['src']
+                            attributeFilter: ['data-lang'] // Only watch for language changes, not src
                         });
                     }
                     
@@ -814,11 +782,8 @@
                             const lang = match[1];
                             console.log('[Parent-Iframe Bridge] Language clicked:', lang);
                             
-                            // Update flag multiple times to combat resets
-                            setTimeout(() => updateMainFlagDisplay(lang), 100);
-                            setTimeout(() => updateMainFlagDisplay(lang), 500);
-                            setTimeout(() => updateMainFlagDisplay(lang), 1500);
-                            setTimeout(() => updateMainFlagDisplay(lang), 3000);
+                            // Update flag once after a small delay
+                            setTimeout(() => updateMainFlagDisplay(lang), 200);
                             
                             setTimeout(() => {
                                 // Save to localStorage
@@ -860,8 +825,10 @@
                     }, 500);
                 }
                 
-                // Update main flag display for saved language
-                updateMainFlagDisplay(savedLanguage);
+                // Update main flag display for saved language after a delay
+                setTimeout(() => {
+                    updateMainFlagDisplay(savedLanguage);
+                }, 1000);
                 
                 // Also style the parent container to ensure proper dropdown behavior
                 const dropdownContainer = document.querySelector('.country.cs-country');
