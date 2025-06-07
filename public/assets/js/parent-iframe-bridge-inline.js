@@ -698,31 +698,13 @@
                     console.log('[Parent-Iframe Bridge] Successfully hooked into doGTranslate');
                 }
                 
-                // Track which flags have failed to prevent repeated 404s
-                const failedFlags = new Set();
-                const workingFlagUrls = new Map();
-                
                 // Function to update the main flag display
                 function updateMainFlagDisplay(lang) {
                     // Use a slight delay to ensure it happens after Google Translate updates
                     setTimeout(() => {
                         const mainFlag = document.querySelector('.imgTranslation');
-                        if (!mainFlag) return;
-                        
-                        // Always set the data attribute
-                        mainFlag.setAttribute('data-lang', lang);
-                        
-                        // Check if we already have a working URL for this language
-                        if (workingFlagUrls.has(lang)) {
-                            const cachedUrl = workingFlagUrls.get(lang);
-                            mainFlag.src = cachedUrl;
-                            console.log('[Parent-Iframe Bridge] Applied cached flag URL for language:', lang);
-                            return;
-                        }
-                            
+                        if (mainFlag) {
                             let flagSrc;
-                            let fallbackSrc;
-                            
                             switch(lang) {
                                 case 'en':
                                     flagSrc = '/assets/WaveMax/images/country.png';
@@ -731,83 +713,72 @@
                                     flagSrc = '/assets/WaveMax/images/mexico.png';
                                     break;
                                 case 'pt':
-                                    // Skip local URL if we know it fails
-                                    if (failedFlags.has('/assets/WaveMax/images/brazil.png')) {
-                                        flagSrc = 'https://flagcdn.com/24x18/br.png';
-                                    } else {
-                                        flagSrc = '/assets/WaveMax/images/brazil.png';
-                                        fallbackSrc = 'https://flagcdn.com/24x18/br.png';
-                                    }
+                                    // Try to use Brazil flag if available
+                                    flagSrc = '/assets/WaveMax/images/brazil.png';
                                     break;
                                 case 'de':
-                                    // Skip local URL if we know it fails
-                                    if (failedFlags.has('/assets/WaveMax/images/germany.png')) {
-                                        flagSrc = 'https://flagcdn.com/24x18/de.png';
-                                    } else {
-                                        flagSrc = '/assets/WaveMax/images/germany.png';
-                                        fallbackSrc = 'https://flagcdn.com/24x18/de.png';
-                                    }
+                                    // Try to use German flag if available
+                                    flagSrc = '/assets/WaveMax/images/germany.png';
                                     break;
                                 default:
                                     flagSrc = '/assets/WaveMax/images/country.png';
                             }
                             
-                            
-                            // Clear any existing error handlers
-                            mainFlag.onerror = null;
-                            
-                            // Set up new error handler only if we have a fallback
-                            if (fallbackSrc) {
-                                mainFlag.onerror = function() {
-                                    console.log('[Parent-Iframe Bridge] Primary flag not found, using fallback');
-                                    failedFlags.add(flagSrc);
-                                    this.onerror = null; // Clear error handler to prevent loops
-                                    this.src = fallbackSrc;
-                                    
-                                    // Cache the working URL
-                                    if (!this.onerror) {
-                                        workingFlagUrls.set(lang, fallbackSrc);
-                                    }
-                                };
-                            }
-                            
-                            // Update the flag
+                            // Update the flag with fallback
+                            const originalSrc = mainFlag.src;
                             mainFlag.src = flagSrc;
                             
-                            // Cache the working URL if no error occurs
-                            mainFlag.onload = function() {
-                                workingFlagUrls.set(lang, this.src);
-                                console.log('[Parent-Iframe Bridge] Flag loaded successfully for language:', lang);
+                            // Add data attribute to track which language is set
+                            mainFlag.setAttribute('data-lang', lang);
+                            
+                            // If custom flags don't exist, use fallback images
+                            mainFlag.onerror = function() {
+                                console.log('[Parent-Iframe Bridge] Flag not found, using fallback');
+                                // Try alternative sources
+                                switch(lang) {
+                                    case 'pt':
+                                        this.src = 'https://flagcdn.com/24x18/br.png';
+                                        break;
+                                    case 'de':
+                                        this.src = 'https://flagcdn.com/24x18/de.png';
+                                        break;
+                                    default:
+                                        this.src = originalSrc; // Restore original
+                                }
+                                
+                                // If external source also fails, restore original
+                                this.onerror = function() {
+                                    this.src = originalSrc;
+                                    this.onerror = null;
+                                };
                             };
                             
                             console.log('[Parent-Iframe Bridge] Updated main flag display for language:', lang);
+                            
+                            // Force update again after a longer delay to combat any resets
+                            setTimeout(() => {
+                                const flag = document.querySelector('.imgTranslation');
+                                if (flag && flag.getAttribute('data-lang') === lang && flag.src !== flagSrc) {
+                                    console.log('[Parent-Iframe Bridge] Re-applying flag update');
+                                    flag.src = flagSrc;
+                                }
+                            }, 1000);
                         }
                     }, 100);
                 }
                 
                 // Monitor for flag changes and reapply if needed
                 function monitorFlagChanges() {
-                    let isUpdating = false;
-                    
                     const observer = new MutationObserver((mutations) => {
-                        // Skip if we're already updating to prevent loops
-                        if (isUpdating) return;
-                        
                         const mainFlag = document.querySelector('.imgTranslation');
                         if (mainFlag) {
                             const currentLang = localStorage.getItem('wavemax-language') || 'en';
                             const flagLang = mainFlag.getAttribute('data-lang');
                             
-                            // Only update if the flag was changed by something else (not us)
-                            if (flagLang && flagLang !== currentLang) {
+                            // If the flag doesn't match our saved language, update it
+                            if (flagLang !== currentLang) {
                                 console.log('[Parent-Iframe Bridge] Flag mismatch detected, correcting...');
-                                isUpdating = true;
                                 updateMainFlagDisplay(currentLang);
-                                
-                                // Reset flag after a delay
-                                setTimeout(() => {
-                                    isUpdating = false;
-                                }, 500);
                             }
                         }
                     });
@@ -817,7 +788,7 @@
                     if (flagElement) {
                         observer.observe(flagElement, {
                             attributes: true,
-                            attributeFilter: ['src', 'data-lang']
+                            attributeFilter: ['src']
                         });
                     }
                     
@@ -843,8 +814,11 @@
                             const lang = match[1];
                             console.log('[Parent-Iframe Bridge] Language clicked:', lang);
                             
-                            // Update flag once with a slight delay
-                            setTimeout(() => updateMainFlagDisplay(lang), 200);
+                            // Update flag multiple times to combat resets
+                            setTimeout(() => updateMainFlagDisplay(lang), 100);
+                            setTimeout(() => updateMainFlagDisplay(lang), 500);
+                            setTimeout(() => updateMainFlagDisplay(lang), 1500);
+                            setTimeout(() => updateMainFlagDisplay(lang), 3000);
                             
                             setTimeout(() => {
                                 // Save to localStorage
