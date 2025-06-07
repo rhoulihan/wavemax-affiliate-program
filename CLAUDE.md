@@ -1,2 +1,3 @@
 - Always review init.prompt and our best practices if they exist in the current directory
 - Always review the last compact when starting
+- Always maintain Portuguese, Spanish, and German translations when updating or adding HTML content

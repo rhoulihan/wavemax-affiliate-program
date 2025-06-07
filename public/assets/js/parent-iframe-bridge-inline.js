@@ -585,10 +585,32 @@
                 if (!hasPortuguese) {
                     const ptItem = document.createElement('li');
                     const ptImg = document.createElement('img');
-                    ptImg.src = '/assets/WaveMax/images/brazil.png'; // Use Brazil flag for Portuguese
+                    
+                    // Try multiple sources for the Brazil flag
+                    const brazilFlagSources = [
+                        '/assets/WaveMax/images/brazil.png',
+                        'https://flagcdn.com/24x18/br.png',
+                        'https://www.countryflags.io/br/flat/32.png',
+                        'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 14"%3E%3Crect width="20" height="14" fill="%23009b3a"/%3E%3Cpath d="M10 2L2 7l8 5 8-5z" fill="%23fedf00"/%3E%3Ccircle cx="10" cy="7" r="2.5" fill="%23002776"/%3E%3C/svg%3E'
+                    ];
+                    
+                    // Set initial source
+                    ptImg.src = brazilFlagSources[0];
+                    
+                    // Handle image load error by trying alternative sources
+                    let sourceIndex = 0;
+                    ptImg.onerror = function() {
+                        sourceIndex++;
+                        if (sourceIndex < brazilFlagSources.length) {
+                            this.src = brazilFlagSources[sourceIndex];
+                        }
+                    };
+                    
                     ptImg.alt = 'Portuguese';
                     ptImg.setAttribute('onclick', "doGTranslate('en|pt');FixBodyTop();return false;");
                     ptImg.style.cursor = 'pointer';
+                    ptImg.style.width = '24px';
+                    ptImg.style.height = 'auto';
                     ptItem.appendChild(ptImg);
                     dropdownList.appendChild(ptItem);
                     console.log('[Parent-Iframe Bridge] Added Portuguese option');
@@ -598,10 +620,32 @@
                 if (!hasGerman) {
                     const deItem = document.createElement('li');
                     const deImg = document.createElement('img');
-                    deImg.src = '/assets/WaveMax/images/germany.png'; // Use Germany flag
+                    
+                    // Try multiple sources for the German flag
+                    const germanFlagSources = [
+                        '/assets/WaveMax/images/germany.png',
+                        'https://flagcdn.com/24x18/de.png',
+                        'https://www.countryflags.io/de/flat/32.png',
+                        'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 14"%3E%3Crect width="20" height="4.67" fill="%23000"/%3E%3Crect y="4.67" width="20" height="4.67" fill="%23d00"/%3E%3Crect y="9.33" width="20" height="4.67" fill="%23ffce00"/%3E%3C/svg%3E'
+                    ];
+                    
+                    // Set initial source
+                    deImg.src = germanFlagSources[0];
+                    
+                    // Handle image load error by trying alternative sources
+                    let sourceIndex = 0;
+                    deImg.onerror = function() {
+                        sourceIndex++;
+                        if (sourceIndex < germanFlagSources.length) {
+                            this.src = germanFlagSources[sourceIndex];
+                        }
+                    };
+                    
                     deImg.alt = 'German';
                     deImg.setAttribute('onclick', "doGTranslate('en|de');FixBodyTop();return false;");
                     deImg.style.cursor = 'pointer';
+                    deImg.style.width = '24px';
+                    deImg.style.height = 'auto';
                     deItem.appendChild(deImg);
                     dropdownList.appendChild(deItem);
                     console.log('[Parent-Iframe Bridge] Added German option');
