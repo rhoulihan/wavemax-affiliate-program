@@ -570,6 +570,23 @@
             if (dropdownList) {
                 console.log('[Parent-Iframe Bridge] Found Google Translate dropdown:', dropdownList);
                 
+                // Fix dropdown positioning and ensure it's not cut off
+                dropdownList.style.cssText += `
+                    position: absolute !important;
+                    z-index: 9999 !important;
+                    min-width: 120px !important;
+                    overflow: visible !important;
+                `;
+                
+                // Standardize size for all existing flag images
+                const existingImages = dropdownList.querySelectorAll('img');
+                existingImages.forEach(img => {
+                    img.style.width = '24px';
+                    img.style.height = 'auto';
+                    img.style.display = 'inline-block';
+                    img.style.verticalAlign = 'middle';
+                });
+                
                 // Check existing language options
                 const existingItems = dropdownList.querySelectorAll('li');
                 const hasPortuguese = Array.from(existingItems).some(item => {
@@ -699,6 +716,33 @@
                 });
                 
                 console.log('[Parent-Iframe Bridge] Successfully integrated with Google Translate dropdown');
+                
+                // Also style the parent container to ensure proper dropdown behavior
+                const dropdownContainer = document.querySelector('.country.cs-country');
+                if (dropdownContainer) {
+                    dropdownContainer.style.position = 'relative';
+                    dropdownContainer.style.overflow = 'visible';
+                }
+                
+                // Add some styling to make all list items consistent
+                const style = document.createElement('style');
+                style.textContent = `
+                    .dropdown-cs li {
+                        padding: 5px 10px !important;
+                        cursor: pointer !important;
+                        list-style: none !important;
+                    }
+                    .dropdown-cs li:hover {
+                        background-color: #f0f0f0 !important;
+                    }
+                    .dropdown-cs img {
+                        width: 24px !important;
+                        height: auto !important;
+                        display: inline-block !important;
+                        vertical-align: middle !important;
+                    }
+                `;
+                document.head.appendChild(style);
             } else {
                 console.log('[Parent-Iframe Bridge] Google Translate dropdown not found, will try again');
                 
