@@ -132,23 +132,48 @@
                 display: block !important;
             `;
             
-            // Only modify the immediate parent of the iframe
-            const iframeParent = iframe.parentElement;
-            if (iframeParent) {
-                iframeParent.style.cssText += `
-                    padding: 0 !important;
-                    margin: 0 !important;
-                    max-width: 100% !important;
-                    width: 100% !important;
-                `;
+            // Walk up the DOM tree from iframe to remove padding, but only within reason
+            let currentElement = iframe.parentElement;
+            let levelsUp = 0;
+            const maxLevels = 5; // Only go up 5 levels max
+            
+            while (currentElement && levelsUp < maxLevels) {
+                // Check if this element has padding or is a container
+                const computedStyle = window.getComputedStyle(currentElement);
+                const hasHorizontalPadding = parseFloat(computedStyle.paddingLeft) > 0 || parseFloat(computedStyle.paddingRight) > 0;
+                const isContainer = currentElement.classList.contains('container') || 
+                                  currentElement.classList.contains('container-fluid') ||
+                                  currentElement.classList.contains('container-lg') ||
+                                  currentElement.classList.contains('container-xl');
+                
+                // Only modify if it has padding or is a Bootstrap container
+                if (hasHorizontalPadding || isContainer) {
+                    currentElement.style.cssText += `
+                        padding-left: 0 !important;
+                        padding-right: 0 !important;
+                        max-width: 100% !important;
+                        width: 100% !important;
+                    `;
+                    console.log('[Parent-Iframe Bridge] Removed padding from element:', currentElement.className || currentElement.tagName);
+                }
+                
+                // Stop if we hit the main content area or body
+                if (currentElement.tagName === 'BODY' || 
+                    currentElement.classList.contains('main') ||
+                    currentElement.id === 'main') {
+                    break;
+                }
+                
+                currentElement = currentElement.parentElement;
+                levelsUp++;
             }
         }
         
-        // Inject minimal CSS to ensure full-width display
+        // Inject targeted CSS for common Bootstrap containers and Porto theme elements
         const styleTag = document.createElement('style');
         styleTag.id = 'wavemax-iframe-overrides';
         styleTag.innerHTML = `
-            /* Target only the iframe and its immediate container */
+            /* Target the iframe */
             #wavemax-iframe {
                 width: 100% !important;
                 max-width: 100% !important;
@@ -158,21 +183,56 @@
                 display: block !important;
             }
             
-            /* Remove padding only from iframe's direct parent */
-            #wavemax-iframe:only-child {
-                margin: 0 !important;
+            /* Target containers that contain our iframe - more specific selectors */
+            #wavemax-iframe,
+            *:has(> #wavemax-iframe) {
+                max-width: 100% !important;
+                width: 100% !important;
             }
             
-            /* If iframe parent has container class, make it full width */
-            .container:has(> #wavemax-iframe),
-            .container-fluid:has(> #wavemax-iframe) {
+            /* Remove padding from any parent containers up to 3 levels */
+            *:has(> #wavemax-iframe),
+            *:has(> *:has(> #wavemax-iframe)),
+            *:has(> *:has(> *:has(> #wavemax-iframe))) {
+                padding-left: 0 !important;
+                padding-right: 0 !important;
+            }
+            
+            /* Target common Bootstrap container classes when they contain our iframe */
+            .container:has(#wavemax-iframe),
+            .container-fluid:has(#wavemax-iframe),
+            .container-lg:has(#wavemax-iframe),
+            .container-xl:has(#wavemax-iframe),
+            .container-xxl:has(#wavemax-iframe) {
                 max-width: 100% !important;
+                padding-left: 0 !important;
+                padding-right: 0 !important;
+                margin-left: 0 !important;
+                margin-right: 0 !important;
+            }
+            
+            /* Porto theme specific - target their content wrapper */
+            .page-wrapper:has(#wavemax-iframe) .main,
+            .page-wrapper:has(#wavemax-iframe) .main .container,
+            .page-wrapper:has(#wavemax-iframe) .main .container-fluid {
+                max-width: 100% !important;
+                padding-left: 0 !important;
+                padding-right: 0 !important;
+            }
+            
+            /* Remove padding from row elements that might contain our iframe */
+            .row:has(#wavemax-iframe) {
+                margin-left: 0 !important;
+                margin-right: 0 !important;
+            }
+            
+            .row:has(#wavemax-iframe) > [class*="col-"] {
                 padding-left: 0 !important;
                 padding-right: 0 !important;
             }
         `;
         document.head.appendChild(styleTag);
-        console.log('[Parent-Iframe Bridge] Injected minimal override styles');
+        console.log('[Parent-Iframe Bridge] Injected targeted override styles');
     }
 
     function detectViewport() {
