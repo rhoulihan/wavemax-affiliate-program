@@ -1,5 +1,15 @@
 # Recent Major Updates
 
+## Internationalization (i18n) Support (January 2025)
+- **Multi-Language Platform**: Complete internationalization implementation
+  - Support for English, Spanish, Portuguese, and German
+  - Automatic browser language detection during registration
+  - Language preferences stored in user profiles
+  - Real-time language switching without page reload
+  - Localized email communications based on user preference
+  - Parent page language synchronization for embedded content
+  - Comprehensive translation coverage for all UI elements
+
 ## Bag Tracking Removal (January 2025)
 - **Complete System Simplification**: Removed all bag tracking functionality
   - Eliminated physical bag requirements and barcode generation

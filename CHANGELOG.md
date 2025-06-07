@@ -5,6 +5,15 @@ All notable changes to the WaveMAX Laundry Affiliate Program will be documented 
 ## [Unreleased]
 
 ### Added
+- Internationalization (i18n) support for multi-language deployment
+  - Support for English, Spanish, Portuguese, and German languages
+  - Automatic browser language detection during user registration
+  - Language preference fields added to Affiliate and Customer models
+  - Localized email templates with language-specific content
+  - Real-time language switching in the user interface
+  - Parent page language synchronization for embedded content
+  - Translation management system with JSON-based language files
+  - Email subject line translations for all supported languages
 - Dynamic delivery fee structure with minimum fee + per-bag pricing
   - Affiliates can set minimum delivery fee (default $25) and per-bag fee (default $5)
   - Customers pay whichever is higher: minimum fee or calculated per-bag rate

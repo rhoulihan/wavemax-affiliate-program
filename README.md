@@ -20,6 +20,8 @@ The WaveMAX Affiliate Program enables individuals to register as affiliates, onb
 - **Mobile-Responsive Embedding**: Full mobile support with automatic chrome hiding and responsive layouts
 - **Affiliate Landing Pages**: Customizable landing pages with affiliate information and error handling
 - **Zero-Padding Embeds**: Full-width embedded content with no side padding for seamless integration
+- **Internationalization (i18n)**: Multi-language support for English, Spanish, Portuguese, and German
+- **Language Preference**: Automatic browser language detection and personalized email communications
 
 ## Recent Updates
 
@@ -697,6 +699,72 @@ The WaveMAX Affiliate Program supports social media login for affiliates through
 1. **Google OAuth 2.0** - Most trusted and widely used
 2. **Facebook Login** - High user adoption for business accounts  
 3. **LinkedIn OAuth** - Professional network, ideal for affiliate businesses
+
+## Internationalization (i18n)
+
+The WaveMAX Affiliate Program includes comprehensive internationalization support for global deployment.
+
+### Supported Languages
+
+- **English (en)** - Default language
+- **Spanish (es)** - Full translation coverage
+- **Portuguese (pt)** - Full translation coverage  
+- **German (de)** - Full translation coverage
+
+### Features
+
+#### Automatic Language Detection
+- Browser language detection during registration
+- Language preference stored in user profiles
+- Persistent language selection across sessions
+- Parent page language synchronization for embedded content
+
+#### Translated Content
+- All user interface elements
+- Form labels and validation messages
+- Dashboard content and metrics
+- Success/error messages
+- Navigation elements
+
+#### Email Communications
+- Language-specific email templates
+- Translated email subjects
+- Personalized content based on user preference
+- Automatic fallback to English if translation unavailable
+
+### Implementation Details
+
+#### Client-Side Translation
+```javascript
+// Language detection and switching
+window.i18n.setLanguage('es'); // Switch to Spanish
+window.i18n.getCurrentLanguage(); // Get current language
+```
+
+#### Registration Language Capture
+- Hidden form field captures browser language
+- Supported languages: en, es, pt, de
+- Default to English if unsupported language detected
+
+#### Email Template Structure
+```
+server/templates/emails/
+├── affiliate-welcome.html (default English)
+├── es/
+│   └── affiliate-welcome.html (Spanish)
+├── pt/
+│   └── affiliate-welcome.html (Portuguese)
+└── de/
+    └── affiliate-welcome.html (German)
+```
+
+### Adding New Languages
+
+1. Add language code to supported languages in `/public/assets/js/i18n.js`
+2. Create translation file at `/public/locales/[lang]/common.json`
+3. Update language preference enums in Affiliate and Customer models
+4. Add email template translations in `/server/templates/emails/[lang]/`
+5. Update parent-iframe-bridge script for language selector integration
 
 ### Setting Up OAuth Providers
 
