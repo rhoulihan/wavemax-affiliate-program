@@ -40,6 +40,7 @@
     let chromeHidden = false;
     let lastScrollPosition = 0;
     let iframe = null;
+    let lastIframeHeight = 0;
 
     // Initialize when DOM is ready
     if (document.readyState === 'loading') {
@@ -380,9 +381,17 @@
     function resizeIframe(height) {
         if (!iframe) return;
         
-        // Add some padding to prevent cutoff
-        const newHeight = parseInt(height) + 20;
-        iframe.style.height = newHeight + 'px';
+        // Don't add padding here - the iframe already includes padding
+        const newHeight = parseInt(height);
+        
+        // Only update if height actually changed (with 5px tolerance)
+        if (Math.abs(newHeight - lastIframeHeight) > 5) {
+            console.log('[Parent-Iframe Bridge] Setting iframe height to:', newHeight, '(was:', lastIframeHeight, ')');
+            lastIframeHeight = newHeight;
+            iframe.style.height = newHeight + 'px';
+        } else {
+            console.log('[Parent-Iframe Bridge] Ignoring resize - height unchanged');
+        }
         
         // If in mobile mode with hidden chrome, ensure minimum viewport height
         if (chromeHidden && (isMobile || isTablet)) {
