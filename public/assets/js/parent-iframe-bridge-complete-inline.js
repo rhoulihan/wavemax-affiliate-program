@@ -121,35 +121,134 @@
         if (iframe) {
             let parent = iframe.parentElement;
             while (parent && parent !== document.body) {
-                // Remove padding and set full width
-                parent.style.padding = '0';
-                parent.style.paddingLeft = '0';
-                parent.style.paddingRight = '0';
-                parent.style.margin = '0';
-                parent.style.marginLeft = '0';
-                parent.style.marginRight = '0';
-                parent.style.maxWidth = '100%';
-                parent.style.width = '100%';
+                // Remove padding and set full width with !important
+                parent.style.cssText += `
+                    padding: 0 !important;
+                    padding-left: 0 !important;
+                    padding-right: 0 !important;
+                    margin: 0 !important;
+                    margin-left: 0 !important;
+                    margin-right: 0 !important;
+                    max-width: 100% !important;
+                    width: 100% !important;
+                `;
                 
-                // Check for specific container classes
-                if (parent.classList.contains('container') || 
-                    parent.classList.contains('container-fluid') ||
-                    parent.id === 'main-container' ||
-                    parent.classList.contains('col-12')) {
-                    console.log('[Parent-Iframe Bridge] Removed padding from:', parent.className || parent.id);
-                }
+                // Log what we're modifying
+                console.log('[Parent-Iframe Bridge] Removed padding from:', 
+                    parent.id || parent.className || 'unnamed element');
                 
                 parent = parent.parentElement;
             }
+            
+            // Also remove padding from body
+            document.body.style.cssText += `
+                padding: 0 !important;
+                margin: 0 !important;
+            `;
         }
         
-        // Also style the iframe itself
+        // Style the iframe itself
         if (iframe) {
-            iframe.style.width = '100%';
-            iframe.style.maxWidth = '100%';
-            iframe.style.margin = '0';
-            iframe.style.padding = '0';
+            iframe.style.cssText += `
+                width: 100% !important;
+                max-width: 100% !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                border: none !important;
+            `;
         }
+        
+        // Target specific containers that might have padding
+        const containers = document.querySelectorAll('.container, .container-fluid, .row, .col-12, #main-container, #wavemax-affiliate-container');
+        containers.forEach(container => {
+            // First remove any inline styles
+            container.style.removeProperty('max-width');
+            container.style.removeProperty('padding-left');
+            container.style.removeProperty('padding-right');
+            container.style.removeProperty('margin-left');
+            container.style.removeProperty('margin-right');
+            
+            // Then apply our styles
+            container.style.cssText += `
+                padding-left: 0 !important;
+                padding-right: 0 !important;
+                margin-left: 0 !important;
+                margin-right: 0 !important;
+                max-width: 100% !important;
+                width: 100% !important;
+            `;
+            
+            // Force reflow to ensure styles are applied
+            container.offsetHeight;
+        });
+        
+        // Also inject a style tag to override any CSS rules
+        const styleTag = document.createElement('style');
+        styleTag.innerHTML = `
+            /* Force full-width for affiliate landing */
+            body .container,
+            body .container-fluid,
+            body .row,
+            body .col-12,
+            body #main-container,
+            body #wavemax-affiliate-container,
+            body section.main-container {
+                padding-left: 0 !important;
+                padding-right: 0 !important;
+                margin-left: 0 !important;
+                margin-right: 0 !important;
+                margin: 0 !important;
+                max-width: 100% !important;
+                width: 100% !important;
+            }
+            
+            /* Override Bootstrap's auto margins that center containers */
+            body .container,
+            body .container-fluid {
+                margin-left: 0 !important;
+                margin-right: 0 !important;
+                margin: 0 auto !important;
+                margin: 0 !important;
+            }
+            
+            /* Ensure all parent elements are full width */
+            body, 
+            body > *,
+            body section,
+            body main {
+                margin: 0 !important;
+                padding: 0 !important;
+                max-width: 100% !important;
+                width: 100% !important;
+            }
+            
+            body #wavemax-iframe {
+                width: 100% !important;
+                max-width: 100% !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                display: block !important;
+            }
+            
+            /* Override any max-width on containers */
+            @media (min-width: 576px) {
+                body .container, body .container-sm { max-width: 100% !important; }
+            }
+            @media (min-width: 768px) {
+                body .container, body .container-sm, body .container-md { max-width: 100% !important; }
+            }
+            @media (min-width: 992px) {
+                body .container, body .container-sm, body .container-md, body .container-lg { max-width: 100% !important; }
+            }
+            @media (min-width: 1200px) {
+                body .container, body .container-sm, body .container-md, body .container-lg, body .container-xl { max-width: 100% !important; }
+            }
+            @media (min-width: 1400px) {
+                body .container, body .container-sm, body .container-md, body .container-lg, body .container-xl, body .container-xxl { max-width: 100% !important; }
+            }
+        `;
+        document.head.appendChild(styleTag);
+        console.log('[Parent-Iframe Bridge] Injected override styles');
     }
 
     function detectViewport() {
