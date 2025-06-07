@@ -1,13 +1,13 @@
 <script>
 /**
- * Parent-Iframe Communication Bridge - Inline Version
+ * Parent-Iframe Communication Bridge - Complete Inline Version
  * Complete script for embedding directly in parent page HTML
  * Includes all features: mobile detection, language sync, auto-resize
  * 
  * Usage: Copy this entire script and paste it directly on your page
  */
 
-// WaveMAX Parent-Iframe Bridge - Inline Version
+// WaveMAX Parent-Iframe Bridge - Complete Inline Version
 (function() {
     'use strict';
 
@@ -219,7 +219,7 @@
 
         console.log('[Parent-Iframe Bridge] Hiding header/footer');
         
-        // Find all elements to hide - adjust selectors for your site
+        // Find all elements to hide - WaveMAX CMS specific selectors
         const topbar = document.querySelector('.topbar');
         const wrapper = document.querySelector('.wrapper');
         const header = document.querySelector('.navbar, header');
@@ -304,7 +304,7 @@
             topbar.removeAttribute('data-mobile-hidden');
         }
 
-        // Show wrapper or navbar
+        // Show wrapper or header
         if (wrapper) {
             wrapper.style.display = '';
             wrapper.removeAttribute('data-mobile-hidden');
@@ -321,7 +321,7 @@
             pageHeader.removeAttribute('data-mobile-hidden');
         }
 
-        // Show footer
+        // Show footer  
         if (footer) {
             footer.style.transform = 'translateY(0)';
             setTimeout(() => {
@@ -346,7 +346,7 @@
         // Restore scroll position
         window.scrollTo(0, lastScrollPosition);
 
-        // Notify iframe that chrome is shown
+        // Notify iframe that chrome is visible
         setTimeout(() => {
             if (iframe) {
                 iframe.contentWindow.postMessage({
@@ -379,7 +379,7 @@
         });
     }
 
-    // Utility function: Debounce
+    // Utility function for debouncing
     function debounce(func, wait) {
         let timeout;
         return function executedFunction(...args) {
