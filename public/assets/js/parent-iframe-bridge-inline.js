@@ -1,9 +1,12 @@
 /**
  * Parent-Iframe Communication Bridge - Inline Version
- * This is the full inline version of parent-iframe-bridge.js
- * Copy and paste this entire script into your HTML page after the iframe element
+ * Complete script for embedding directly in parent page HTML
+ * Includes all features: mobile detection, language sync, auto-resize
+ * 
+ * Usage: Copy this entire script and paste it in a <script> tag on your page
  */
 
+// WaveMAX Parent-Iframe Bridge - Inline Version
 (function() {
     'use strict';
 
@@ -13,6 +16,8 @@
     const ALLOWED_ORIGINS = [
         'https://affiliate.wavemax.promo',
         'http://affiliate.wavemax.promo',
+        'https://wavemax.promo',
+        'http://wavemax.promo',
         'http://localhost:3000'
     ];
 
@@ -41,9 +46,10 @@
     function init() {
         console.log('[Parent-Iframe Bridge] Initializing...');
         
-        // Find the iframe
-        iframe = document.querySelector('iframe[src*="affiliate.wavemax.promo"]') || 
-                 document.querySelector('iframe#wavemax-affiliate-iframe');
+        // Find the iframe - adjust selector as needed for your page
+        iframe = document.querySelector('iframe[src*="wavemax.promo"]') || 
+                 document.querySelector('iframe#wavemax-iframe') ||
+                 document.querySelector('iframe[src*="affiliate.wavemax.promo"]');
         
         if (!iframe) {
             console.warn('[Parent-Iframe Bridge] No WaveMAX iframe found');
@@ -57,6 +63,9 @@
 
         // Set up message listener
         window.addEventListener('message', handleMessage);
+
+        // Set up language change monitoring
+        setupLanguageMonitoring();
 
         // Send initial viewport info to iframe
         sendViewportInfo();
@@ -91,6 +100,9 @@
     function sendViewportInfo() {
         if (!iframe) return;
 
+        // Get current language from localStorage or default
+        const currentLanguage = localStorage.getItem('wavemax-language') || 'en';
+
         const info = {
             type: 'viewport-info',
             data: {
@@ -100,7 +112,8 @@
                 isTablet: isTablet,
                 isDesktop: !isMobile && !isTablet,
                 hasTouch: 'ontouchstart' in window,
-                orientation: window.innerWidth > window.innerHeight ? 'landscape' : 'portrait'
+                orientation: window.innerWidth > window.innerHeight ? 'landscape' : 'portrait',
+                language: currentLanguage
             }
         };
 
@@ -110,6 +123,52 @@
         } catch (e) {
             console.error('[Parent-Iframe Bridge] Failed to send viewport info:', e);
         }
+    }
+
+    function sendLanguageChange(language) {
+        if (!iframe) return;
+
+        const info = {
+            type: 'language-change',
+            data: {
+                language: language
+            }
+        };
+
+        // Try to send to iframe
+        try {
+            iframe.contentWindow.postMessage(info, '*');
+            console.log('[Parent-Iframe Bridge] Sent language change:', language);
+        } catch (e) {
+            console.error('[Parent-Iframe Bridge] Failed to send language change:', e);
+        }
+    }
+
+    function setupLanguageMonitoring() {
+        // Monitor localStorage for language changes
+        let currentLanguage = localStorage.getItem('wavemax-language') || 'en';
+        
+        // Check for language changes periodically
+        setInterval(() => {
+            const newLanguage = localStorage.getItem('wavemax-language') || 'en';
+            if (newLanguage !== currentLanguage) {
+                currentLanguage = newLanguage;
+                sendLanguageChange(newLanguage);
+            }
+        }, 500);
+
+        // Also listen for storage events (cross-tab changes)
+        window.addEventListener('storage', function(e) {
+            if (e.key === 'wavemax-language') {
+                sendLanguageChange(e.newValue || 'en');
+            }
+        });
+
+        // Listen for custom language change events
+        window.addEventListener('languageChanged', function(e) {
+            const language = e.detail?.language || localStorage.getItem('wavemax-language') || 'en';
+            sendLanguageChange(language);
+        });
     }
 
     function handleMessage(event) {
@@ -134,7 +193,7 @@
                 break;
                 
             case 'resize':
-                // Existing resize functionality
+                // Auto-resize iframe height
                 if (event.data.data && event.data.data.height) {
                     resizeIframe(event.data.data.height);
                 }
@@ -158,12 +217,12 @@
 
         console.log('[Parent-Iframe Bridge] Hiding header/footer');
         
-        // Find all elements to hide - WaveMAX CMS specific selectors
+        // Find all elements to hide - adjust selectors for your site
         const topbar = document.querySelector('.topbar');
         const wrapper = document.querySelector('.wrapper');
-        const header = document.querySelector('.navbar');
+        const header = document.querySelector('.navbar, header');
         const pageHeader = document.querySelector('.page-header');
-        const footer = document.querySelector('.footer');
+        const footer = document.querySelector('.footer, footer');
         
         // Store scroll position
         lastScrollPosition = window.pageYOffset;
@@ -233,9 +292,9 @@
         // Find all hidden elements
         const topbar = document.querySelector('.topbar[data-mobile-hidden="true"]');
         const wrapper = document.querySelector('.wrapper[data-mobile-hidden="true"]');
-        const header = document.querySelector('.navbar[data-mobile-hidden="true"]');
+        const header = document.querySelector('.navbar[data-mobile-hidden="true"], header[data-mobile-hidden="true"]');
         const pageHeader = document.querySelector('.page-header[data-mobile-hidden="true"]');
-        const footer = document.querySelector('.footer[data-mobile-hidden="true"]');
+        const footer = document.querySelector('.footer[data-mobile-hidden="true"], footer[data-mobile-hidden="true"]');
 
         // Show topbar
         if (topbar) {
@@ -243,15 +302,13 @@
             topbar.removeAttribute('data-mobile-hidden');
         }
 
-        // Show wrapper or header
+        // Show wrapper or navbar
         if (wrapper) {
             wrapper.style.display = '';
             wrapper.removeAttribute('data-mobile-hidden');
         } else if (header) {
-            header.style.transform = 'translateY(0)';
-            setTimeout(() => {
-                header.removeAttribute('data-mobile-hidden');
-            }, 300);
+            header.style.transform = '';
+            header.removeAttribute('data-mobile-hidden');
         }
 
         // Show page header
@@ -260,12 +317,10 @@
             pageHeader.removeAttribute('data-mobile-hidden');
         }
 
-        // Show footer  
+        // Show footer
         if (footer) {
-            footer.style.transform = 'translateY(0)';
-            setTimeout(() => {
-                footer.removeAttribute('data-mobile-hidden');
-            }, 300);
+            footer.style.transform = '';
+            footer.removeAttribute('data-mobile-hidden');
         }
 
         // Reset iframe container
@@ -276,13 +331,14 @@
                 container.style.paddingTop = '';
                 container.style.paddingBottom = '';
             }
-            
-            iframe.style.minHeight = '';
         }
 
         chromeHidden = false;
 
-        // Notify iframe that chrome is visible
+        // Restore scroll position
+        window.scrollTo(0, lastScrollPosition);
+
+        // Notify iframe that chrome is shown
         setTimeout(() => {
             if (iframe) {
                 iframe.contentWindow.postMessage({
@@ -297,13 +353,10 @@
         if (!iframe) return;
         
         // Add some padding to prevent cutoff
-        const newHeight = parseInt(height) + 20;
-        iframe.style.height = newHeight + 'px';
+        const paddedHeight = parseInt(height) + 20;
+        iframe.style.height = paddedHeight + 'px';
         
-        // If in mobile mode with hidden chrome, ensure minimum viewport height
-        if (chromeHidden && (isMobile || isTablet)) {
-            iframe.style.minHeight = '100vh';
-        }
+        console.log('[Parent-Iframe Bridge] Resized iframe to:', paddedHeight);
     }
 
     function smoothScrollToTop() {
@@ -313,7 +366,7 @@
         });
     }
 
-    // Utility function for debouncing
+    // Utility function: Debounce
     function debounce(func, wait) {
         let timeout;
         return function executedFunction(...args) {
@@ -325,18 +378,5 @@
             timeout = setTimeout(later, wait);
         };
     }
-
-    // Public API
-    window.WaveMaxBridge = {
-        hideChrome: hideChrome,
-        showChrome: showChrome,
-        sendViewportInfo: sendViewportInfo,
-        getViewportInfo: () => ({
-            isMobile: isMobile,
-            isTablet: isTablet,
-            isDesktop: !isMobile && !isTablet,
-            chromeHidden: chromeHidden
-        })
-    };
 
 })();
