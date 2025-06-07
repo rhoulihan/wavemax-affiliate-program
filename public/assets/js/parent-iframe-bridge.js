@@ -13,6 +13,8 @@
     const ALLOWED_ORIGINS = [
         'https://affiliate.wavemax.promo',
         'http://affiliate.wavemax.promo',
+        'https://wavemax.promo',
+        'http://wavemax.promo',
         'http://localhost:3000'
     ];
 
@@ -43,7 +45,8 @@
         
         // Find the iframe
         iframe = document.querySelector('iframe[src*="affiliate.wavemax.promo"]') || 
-                 document.querySelector('iframe#wavemax-affiliate-iframe');
+                 document.querySelector('iframe#wavemax-affiliate-iframe') ||
+                 document.querySelector('iframe[src*="wavemax.promo"]');
         
         if (!iframe) {
             console.warn('[Parent-Iframe Bridge] No WaveMAX iframe found');
@@ -57,6 +60,9 @@
 
         // Set up message listener
         window.addEventListener('message', handleMessage);
+
+        // Set up language change monitoring
+        setupLanguageMonitoring();
 
         // Send initial viewport info to iframe
         sendViewportInfo();
@@ -91,6 +97,9 @@
     function sendViewportInfo() {
         if (!iframe) return;
 
+        // Get current language from localStorage or default
+        const currentLanguage = localStorage.getItem('wavemax-language') || 'en';
+
         const info = {
             type: 'viewport-info',
             data: {
@@ -100,7 +109,8 @@
                 isTablet: isTablet,
                 isDesktop: !isMobile && !isTablet,
                 hasTouch: 'ontouchstart' in window,
-                orientation: window.innerWidth > window.innerHeight ? 'landscape' : 'portrait'
+                orientation: window.innerWidth > window.innerHeight ? 'landscape' : 'portrait',
+                language: currentLanguage
             }
         };
 
@@ -110,6 +120,52 @@
         } catch (e) {
             console.error('[Parent-Iframe Bridge] Failed to send viewport info:', e);
         }
+    }
+
+    function sendLanguageChange(language) {
+        if (!iframe) return;
+
+        const info = {
+            type: 'language-change',
+            data: {
+                language: language
+            }
+        };
+
+        // Try to send to iframe
+        try {
+            iframe.contentWindow.postMessage(info, '*');
+            console.log('[Parent-Iframe Bridge] Sent language change:', language);
+        } catch (e) {
+            console.error('[Parent-Iframe Bridge] Failed to send language change:', e);
+        }
+    }
+
+    function setupLanguageMonitoring() {
+        // Monitor localStorage for language changes
+        let currentLanguage = localStorage.getItem('wavemax-language') || 'en';
+        
+        // Check for language changes periodically
+        setInterval(() => {
+            const newLanguage = localStorage.getItem('wavemax-language') || 'en';
+            if (newLanguage !== currentLanguage) {
+                currentLanguage = newLanguage;
+                sendLanguageChange(newLanguage);
+            }
+        }, 500);
+
+        // Also listen for storage events (cross-tab changes)
+        window.addEventListener('storage', function(e) {
+            if (e.key === 'wavemax-language') {
+                sendLanguageChange(e.newValue || 'en');
+            }
+        });
+
+        // Listen for custom language change events
+        window.addEventListener('languageChanged', function(e) {
+            const language = e.detail?.language || localStorage.getItem('wavemax-language') || 'en';
+            sendLanguageChange(language);
+        });
     }
 
     function handleMessage(event) {
