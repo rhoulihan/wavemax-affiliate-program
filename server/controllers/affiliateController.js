@@ -42,7 +42,8 @@ exports.registerAffiliate = async (req, res) => {
       paymentMethod,
       accountNumber,
       routingNumber,
-      paypalEmail
+      paypalEmail,
+      languagePreference
     } = req.body;
 
     // Check if email or username already exists
@@ -79,7 +80,8 @@ exports.registerAffiliate = async (req, res) => {
       username,
       passwordSalt: salt,
       passwordHash: hash,
-      paymentMethod
+      paymentMethod,
+      languagePreference: languagePreference || 'en'
     });
 
     // Add payment information if provided

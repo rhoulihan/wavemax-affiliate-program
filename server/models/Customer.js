@@ -88,7 +88,13 @@ const customerSchema = new mongoose.Schema({
   bagCreditApplied: { type: Boolean, default: false }, // Track if credit has been used
   isActive: { type: Boolean, default: true },
   registrationDate: { type: Date, default: Date.now },
-  lastLogin: Date
+  lastLogin: Date,
+  // Language preference for communications
+  languagePreference: {
+    type: String,
+    enum: ['en', 'es', 'pt', 'de'],
+    default: 'en'
+  }
 }, { timestamps: true });
 
 // Middleware for encrypting sensitive payment data before saving
