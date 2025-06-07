@@ -12,28 +12,6 @@ jest.mock('../../server/utils/emailService');
 jest.mock('../../server/utils/passwordValidator');
 jest.mock('../../server/utils/fieldFilter');
 jest.mock('express-validator');
-jest.mock('mongoose', () => ({
-  Schema: jest.fn().mockImplementation(() => ({
-    pre: jest.fn(),
-    virtual: jest.fn().mockReturnValue({ get: jest.fn() }),
-    index: jest.fn(),
-    methods: {},
-    statics: {}
-  })),
-  model: jest.fn().mockReturnValue({}),
-  Types: {
-    ObjectId: {
-      isValid: jest.fn(id => /^[0-9a-fA-F]{24}$/.test(id))
-    }
-  },
-  connection: {
-    db: {
-      admin: jest.fn().mockReturnValue({
-        ping: jest.fn().mockResolvedValue(true)
-      })
-    }
-  }
-}));
 
 const administratorController = require('../../server/controllers/administratorController');
 const Administrator = require('../../server/models/Administrator');

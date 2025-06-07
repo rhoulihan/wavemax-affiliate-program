@@ -139,6 +139,7 @@ function initializeAffiliateRegistration() {
       { id: 'address', name: 'Address' },
       { id: 'city', name: 'City' },
       { id: 'state', name: 'State' },
+      { id: 'zipCode', name: 'ZIP Code' },
       { id: 'minimumDeliveryFee', name: 'Minimum Delivery Fee' },
       { id: 'perBagDeliveryFee', name: 'Per-Bag Delivery Fee' },
       { id: 'paymentMethod', name: 'Payment Method' }
@@ -631,6 +632,11 @@ function initializeAffiliateRegistration() {
         formData.forEach((value, key) => {
           affiliateData[key] = value;
         });
+        
+        // Debug logging to verify all fields are present
+        console.log('Form submission data:', affiliateData);
+        console.log('Has zipCode?', !!affiliateData.zipCode, affiliateData.zipCode);
+        console.log('Is social registration?', isSocialRegistration);
 
         // Determine endpoint based on whether this is a social registration
         const endpoint = isSocialRegistration 
@@ -647,6 +653,24 @@ function initializeAffiliateRegistration() {
           body: JSON.stringify(affiliateData)
         });
 
+        if (!response.ok) {
+          console.error('Registration failed with status:', response.status);
+          const errorText = await response.text();
+          console.error('Error response:', errorText);
+          
+          try {
+            const errorData = JSON.parse(errorText);
+            if (errorData.errors && Array.isArray(errorData.errors)) {
+              console.error('Validation errors:');
+              errorData.errors.forEach(err => {
+                console.error(`- ${err.param || err.path}: ${err.msg}`);
+              });
+            }
+          } catch (e) {
+            // Not JSON error
+          }
+        }
+        
         await window.ErrorHandler.handleFetchError(response);
         const data = await response.json();
 

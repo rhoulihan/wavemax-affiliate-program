@@ -160,9 +160,33 @@
             padding: 60px 0;
         }
         
+        .step-icon {
+            width: 80px;
+            height: 80px;
+            background-color: #e8f0ff;
+            color: #0F5EF7;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            margin: 0 auto 20px;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        
+        .step-icon:hover {
+            background-color: #0F5EF7;
+            color: white;
+            transform: scale(1.1);
+        }
+        
         .step-number {
-            width: 50px;
-            height: 50px;
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            width: 30px;
+            height: 30px;
             background-color: #0F5EF7;
             color: white;
             border-radius: 50%;
@@ -170,8 +194,13 @@
             align-items: center;
             justify-content: center;
             font-weight: 700;
-            font-size: 1.5rem;
-            margin: 0 auto 20px;
+            font-size: 0.9rem;
+            border: 3px solid white;
+        }
+        
+        .step-icon:hover .step-number {
+            background-color: white;
+            color: #0F5EF7;
         }
         
         .testimonial-card {
@@ -195,6 +224,54 @@
         .testimonial-author {
             font-weight: 600;
             color: #333;
+        }
+        
+        /* Add connecting line between steps */
+        .step-connector {
+            position: absolute;
+            top: 40px;
+            left: 50%;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(to right, #e8f0ff 0%, #0F5EF7 50%, #e8f0ff 100%);
+            z-index: -1;
+        }
+        
+        .step-wrapper {
+            position: relative;
+        }
+        
+        /* Animated gradient for service icons */
+        @keyframes iconPulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        .service-icon {
+            animation: iconPulse 3s ease-in-out infinite;
+        }
+        
+        /* Add gradient backgrounds to icons */
+        .service-icon.gradient-1 {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .service-icon.gradient-2 {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .service-icon.gradient-3 {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
     </style>
 </head>
@@ -244,8 +321,8 @@
             <div class="row">
                 <div class="col-md-4 mb-4">
                     <div class="service-card">
-                        <div class="service-icon">
-                            <i class="bi bi-house-door"></i>
+                        <div class="service-icon gradient-1">
+                            <i class="bi bi-truck"></i>
                         </div>
                         <h4>Door-to-Door Service</h4>
                         <p><span id="affiliateNameService1">Your local partner</span> provides convenient pickup and delivery right at your doorstep, on your schedule.</p>
@@ -253,8 +330,8 @@
                 </div>
                 <div class="col-md-4 mb-4">
                     <div class="service-card">
-                        <div class="service-icon">
-                            <i class="bi bi-award"></i>
+                        <div class="service-icon gradient-2">
+                            <i class="bi bi-stars"></i>
                         </div>
                         <h4>Professional WDF Processing</h4>
                         <p>WaveMAX handles the washing with state-of-the-art Electrolux 450G equipment and Omni LUX UV water purification in a quality-controlled facility.</p>
@@ -262,8 +339,8 @@
                 </div>
                 <div class="col-md-4 mb-4">
                     <div class="service-card">
-                        <div class="service-icon">
-                            <i class="bi bi-clock-history"></i>
+                        <div class="service-icon gradient-3">
+                            <i class="bi bi-lightning-charge-fill"></i>
                         </div>
                         <h4>Fast Turnaround</h4>
                         <p>Your clothes are professionally cleaned and returned fresh, folded, and ready to wear - typically within 24-48 hours.</p>
@@ -279,22 +356,34 @@
             <h2 class="text-center mb-5">Simple Process</h2>
             <div class="row">
                 <div class="col-md-3 text-center mb-4">
-                    <div class="step-number">1</div>
+                    <div class="step-icon">
+                        <i class="bi bi-calendar-check"></i>
+                        <div class="step-number">1</div>
+                    </div>
                     <h5>Schedule Pickup</h5>
                     <p>Use our easy app to schedule a pickup time that works for your schedule</p>
                 </div>
                 <div class="col-md-3 text-center mb-4">
-                    <div class="step-number">2</div>
+                    <div class="step-icon">
+                        <i class="bi bi-box-seam"></i>
+                        <div class="step-number">2</div>
+                    </div>
                     <h5>Pickup at Your Door</h5>
                     <p><span id="affiliateNameStep2">Your partner</span> collects your laundry and transports it to WaveMAX</p>
                 </div>
                 <div class="col-md-3 text-center mb-4">
-                    <div class="step-number">3</div>
+                    <div class="step-icon">
+                        <i class="bi bi-droplet-half"></i>
+                        <div class="step-number">3</div>
+                    </div>
                     <h5>Professional Cleaning</h5>
                     <p>WaveMAX expertly washes, dries, and folds using premium equipment</p>
                 </div>
                 <div class="col-md-3 text-center mb-4">
-                    <div class="step-number">4</div>
+                    <div class="step-icon">
+                        <i class="bi bi-check-circle"></i>
+                        <div class="step-number">4</div>
+                    </div>
                     <h5>Delivery to You</h5>
                     <p><span id="affiliateNameStep4">Your partner</span> delivers fresh, clean laundry back to your door</p>
                 </div>
@@ -356,7 +445,9 @@
                 <div class="col-md-4 mb-4">
                     <div class="text-center">
                         <div class="mb-3">
-                            <i class="bi bi-gear-fill text-primary" style="font-size: 3rem;"></i>
+                            <div class="step-icon" style="margin: 0 auto 15px;">
+                                <i class="bi bi-gear-wide-connected"></i>
+                            </div>
                         </div>
                         <h5>Electrolux 450G Equipment</h5>
                         <p>Professional-grade washers and dryers ensure thorough cleaning and gentle care for all fabric types</p>
@@ -365,7 +456,9 @@
                 <div class="col-md-4 mb-4">
                     <div class="text-center">
                         <div class="mb-3">
-                            <i class="bi bi-shield-fill-check text-primary" style="font-size: 3rem;"></i>
+                            <div class="step-icon" style="margin: 0 auto 15px;">
+                                <i class="bi bi-shield-fill-plus"></i>
+                            </div>
                         </div>
                         <h5>Omni LUX UV Purification</h5>
                         <p>Advanced UV water purification system eliminates 99.9% of bacteria and viruses for the cleanest wash possible</p>
@@ -374,7 +467,9 @@
                 <div class="col-md-4 mb-4">
                     <div class="text-center">
                         <div class="mb-3">
-                            <i class="bi bi-award-fill text-primary" style="font-size: 3rem;"></i>
+                            <div class="step-icon" style="margin: 0 auto 15px;">
+                                <i class="bi bi-patch-check-fill"></i>
+                            </div>
                         </div>
                         <h5>Quality Controlled</h5>
                         <p>Strict quality control processes ensure consistent results and proper handling of every garment</p>

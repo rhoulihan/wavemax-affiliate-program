@@ -287,6 +287,12 @@
                         data: { route: route }
                     }, '*');
                     
+                    // Hide parent page header when embedded content loads
+                    window.parent.postMessage({
+                        type: 'hide-page-header',
+                        data: {}
+                    }, '*');
+                    
                     // Check if we should hide chrome on mobile for this route
                     if (viewportInfo && viewportInfo.isMobile) {
                         const fullscreenRoutes = ['/', '/landing', '/affiliate-dashboard', '/customer-dashboard'];

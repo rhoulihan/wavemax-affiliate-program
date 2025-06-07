@@ -139,6 +139,40 @@ This document contains important operational knowledge and workarounds discovere
 3. **Individual test files**: `npm test -- path/to/test.js`
 4. **Watch for hanging tests**: Use `--detectOpenHandles` flag
 
+### Automated Coverage Testing and Reporting
+When the command "run coverage test" is issued, the system performs the following automated workflow:
+
+1. **Run Full Test Suite with Coverage**:
+   - Sets bash timeout to 12 minutes (720000ms)
+   - Executes: `npm run test:coverage 2>&1 | tee test-coverage-results.txt`
+   - Captures all output including coverage data
+
+2. **Parse Test Results**:
+   - Extracts test statistics (passed, failed, skipped)
+   - Identifies failing test suites and specific test cases
+   - Captures coverage percentages for each category
+
+3. **Update HTML Documentation**:
+   - Updates `/public/coverage-analysis/test-results-summary.html` with:
+     - Current test pass/fail statistics
+     - Coverage percentages by category
+     - List of failing tests with details
+     - Timestamp of test run
+   - Maintains historical data for trend analysis
+
+4. **Benefits**:
+   - Single command for complete coverage analysis
+   - Automated documentation updates
+   - Historical tracking of test coverage improvements
+   - No manual parsing of test output required
+
+5. **Implementation Details**:
+   - **Discovered**: 2025-01-06
+   - **Purpose**: Streamline the test coverage improvement workflow
+   - **Output Files**:
+     - `test-coverage-results.txt`: Raw test output
+     - `/public/coverage-analysis/test-results-summary.html`: Updated HTML report
+
 ## Git Workflow
 
 ### Before Major Changes
@@ -240,4 +274,4 @@ This document contains important operational knowledge and workarounds discovere
 
 ---
 
-*Last Updated: 2025-01-07*
+*Last Updated: 2025-06-06*
