@@ -152,20 +152,8 @@
                 parent = parent.parentElement;
             }
             
-            // Also remove padding from body and html
-            document.body.style.cssText += `
-                padding: 0 !important;
-                margin: 0 !important;
-                padding-top: 0 !important;
-                margin-top: 0 !important;
-            `;
-            
-            document.documentElement.style.cssText += `
-                padding: 0 !important;
-                margin: 0 !important;
-                padding-top: 0 !important;
-                margin-top: 0 !important;
-            `;
+            // Note: We're NOT removing padding from body and html anymore
+            // as this was too aggressive and affected the host page
         }
         
         // Style the iframe itself
@@ -199,8 +187,16 @@
             }
         }
         
-        // Target specific containers that might have padding or borders
-        const containers = document.querySelectorAll('.container, .container-fluid, .row, .col-12, #main-container, #wavemax-affiliate-container, .card, .panel, .box, section, main, article, .page-wrapper, .content-wrapper, .main-wrapper');
+        // Target only containers that are direct parents of the iframe
+        const iframeContainers = [];
+        let temp = iframe ? iframe.parentElement : null;
+        while (temp && temp !== document.body) {
+            iframeContainers.push(temp);
+            temp = temp.parentElement;
+        }
+        
+        // Only process containers that are actually parents of the iframe
+        const containers = iframeContainers;
         containers.forEach(container => {
             // First remove any inline styles
             container.style.removeProperty('max-width');
@@ -246,20 +242,20 @@
         const styleTag = document.createElement('style');
         styleTag.id = 'wavemax-iframe-overrides';
         styleTag.innerHTML = `
-            /* Force full-width and remove borders for all embedded content */
-            body .container,
-            body .container-fluid,
-            body .row,
-            body .col-12,
-            body #main-container,
-            body #wavemax-affiliate-container,
-            body section.main-container,
-            body .card,
-            body .panel,
-            body .box,
-            body section,
-            body main,
-            body article {
+            /* Force full-width and remove borders ONLY for iframe containers */
+            #wavemax-iframe {
+                margin: 0 !important;
+                padding: 0 !important;
+                border: none !important;
+                width: 100% !important;
+                max-width: 100% !important;
+                display: block !important;
+            }
+            
+            /* Target only direct parent containers of the iframe */
+            :has(> #wavemax-iframe),
+            :has(> :has(> #wavemax-iframe)),
+            :has(> :has(> :has(> #wavemax-iframe))) {
                 padding: 0 !important;
                 padding-left: 0 !important;
                 padding-right: 0 !important;
@@ -279,40 +275,17 @@
                 box-shadow: none !important;
             }
             
-            /* Override Bootstrap's auto margins that center containers */
-            body .container,
-            body .container-fluid {
-                margin-left: 0 !important;
-                margin-right: 0 !important;
-                margin: 0 auto !important;
-                margin: 0 !important;
+            /* Remove any margin/padding specifically from iframe's immediate parent */
+            #wavemax-iframe:first-child {
+                margin-top: 0 !important;
             }
             
-            /* Ensure all parent elements are full width and no top spacing */
-            body, 
-            body > *,
-            body section,
-            body main,
-            body article,
-            body > div,
-            body .main-container,
-            body #main {
-                margin: 0 !important;
-                padding: 0 !important;
-                margin-top: 0 !important;
-                padding-top: 0 !important;
+            /* Only target containers that are ancestors of the iframe */
+            .container:has(#wavemax-iframe),
+            .container-fluid:has(#wavemax-iframe) {
+                padding-left: 0 !important;
+                padding-right: 0 !important;
                 max-width: 100% !important;
-                width: 100% !important;
-            }
-            
-            /* Target common page wrapper patterns */
-            body .page-wrapper,
-            body .content-wrapper,
-            body .main-wrapper,
-            body #content,
-            body #page {
-                margin-top: 0 !important;
-                padding-top: 0 !important;
             }
             
             body #wavemax-iframe {
@@ -326,76 +299,10 @@
                 box-shadow: none !important;
             }
             
-            /* Remove borders from all elements around iframe */
-            body #wavemax-iframe,
-            body #wavemax-iframe *,
-            body [id*="wavemax"] *,
-            body [class*="wavemax"] * {
+            /* Remove borders from iframe itself */
+            #wavemax-iframe {
                 border: none !important;
-                border-width: 0 !important;
                 box-shadow: none !important;
-            }
-            
-            /* Target Porto theme specific containers */
-            body .porto-container,
-            body .page-content,
-            body .main-content,
-            body .content-area,
-            body .site-content,
-            body .entry-content,
-            body .porto-wrap-container,
-            body .container-fluid.main-content-wrap {
-                padding-top: 0 !important;
-                margin-top: 0 !important;
-            }
-            
-            /* Remove spacing from common CMS patterns */
-            body > div > div > div {
-                padding-top: 0 !important;
-                margin-top: 0 !important;
-            }
-            
-            /* Target any element that contains the iframe */
-            body:has(#wavemax-iframe) * {
-                padding-top: 0 !important;
-                margin-top: 0 !important;
-            }
-            
-            /* Aggressive iframe parent targeting */
-            #wavemax-iframe,
-            #wavemax-iframe:first-child {
-                margin-top: 0 !important;
-                padding-top: 0 !important;
-                position: relative !important;
-                top: 0 !important;
-            }
-            
-            /* Remove any ::before or ::after pseudo elements that might add space */
-            body *::before,
-            body *::after {
-                margin-top: 0 !important;
-                padding-top: 0 !important;
-            }
-            
-            /* More specific targeting for elements containing iframe */
-            body :has(> #wavemax-iframe) {
-                padding-top: 0 !important;
-                margin-top: 0 !important;
-                padding: 0 !important;
-                margin: 0 !important;
-            }
-            
-            /* Target first child of any container */
-            body * > :first-child {
-                margin-top: 0 !important;
-                padding-top: 0 !important;
-            }
-            
-            /* Override inline styles with stronger specificity */
-            body [style*="padding"],
-            body [style*="margin"] {
-                padding-top: 0 !important;
-                margin-top: 0 !important;
             }
             
             /* Override any max-width on containers */
@@ -418,40 +325,19 @@
         document.head.appendChild(styleTag);
         console.log('[Parent-Iframe Bridge] Injected override styles');
         
-        // Additional aggressive padding removal after styles are injected
+        // Only remove top spacing from iframe's immediate parent after styles are injected
         setTimeout(() => {
-            if (iframe) {
-                // Walk up the DOM tree and remove all top spacing
-                let element = iframe;
-                while (element && element !== document.body) {
-                    const computed = window.getComputedStyle(element);
-                    const paddingTop = computed.paddingTop;
-                    const marginTop = computed.marginTop;
-                    
-                    if (paddingTop !== '0px' || marginTop !== '0px') {
-                        console.log('[Parent-Iframe Bridge] Found spacing on:', element, 'padding-top:', paddingTop, 'margin-top:', marginTop);
-                        element.style.setProperty('padding-top', '0', 'important');
-                        element.style.setProperty('margin-top', '0', 'important');
-                    }
-                    
-                    element = element.parentElement;
-                }
+            if (iframe && iframe.parentElement) {
+                const parent = iframe.parentElement;
+                const computed = window.getComputedStyle(parent);
+                const paddingTop = computed.paddingTop;
+                const marginTop = computed.marginTop;
                 
-                // Also check for any container with padding between body and iframe
-                const allParents = [];
-                let current = iframe.parentElement;
-                while (current && current !== document.body) {
-                    allParents.push(current);
-                    current = current.parentElement;
-                }
-                
-                // Remove padding/margin from all parents
-                allParents.forEach(parent => {
+                if (paddingTop !== '0px' || marginTop !== '0px') {
+                    console.log('[Parent-Iframe Bridge] Found spacing on iframe parent:', parent, 'padding-top:', paddingTop, 'margin-top:', marginTop);
                     parent.style.setProperty('padding-top', '0', 'important');
                     parent.style.setProperty('margin-top', '0', 'important');
-                    parent.style.setProperty('padding', '0', 'important');
-                    parent.style.setProperty('margin', '0', 'important');
-                });
+                }
             }
         }, 100);
     }
