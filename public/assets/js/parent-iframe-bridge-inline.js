@@ -717,12 +717,52 @@
                 
                 console.log('[Parent-Iframe Bridge] Successfully integrated with Google Translate dropdown');
                 
+                // Apply saved language to the host page
+                const savedLanguage = localStorage.getItem('wavemax-language') || 'en';
+                if (savedLanguage !== 'en' && window.doGTranslate) {
+                    console.log('[Parent-Iframe Bridge] Applying saved language to host page:', savedLanguage);
+                    // Small delay to ensure Google Translate is ready
+                    setTimeout(() => {
+                        window.doGTranslate(`en|${savedLanguage}`);
+                    }, 500);
+                }
+                
                 // Also style the parent container to ensure proper dropdown behavior
                 const dropdownContainer = document.querySelector('.country.cs-country');
                 if (dropdownContainer) {
                     dropdownContainer.style.position = 'relative';
                     dropdownContainer.style.overflow = 'visible';
                 }
+                
+                // Add visual indicator for current language
+                const updateLanguageIndicator = (lang) => {
+                    dropdownList.querySelectorAll('li').forEach(item => {
+                        const img = item.querySelector('img');
+                        if (img) {
+                            const onclick = img.getAttribute('onclick') || '';
+                            if (onclick.includes(`|${lang}`)) {
+                                item.style.backgroundColor = '#e3f2fd';
+                                item.style.borderLeft = '3px solid #1976d2';
+                            } else {
+                                item.style.backgroundColor = '';
+                                item.style.borderLeft = '';
+                            }
+                        }
+                    });
+                };
+                
+                // Set initial indicator
+                updateLanguageIndicator(savedLanguage);
+                
+                // Update indicator when language changes
+                const originalDoGTranslateWithIndicator = window.doGTranslate;
+                window.doGTranslate = function(pair) {
+                    originalDoGTranslateWithIndicator.call(this, pair);
+                    const targetLang = pair.split('|')[1];
+                    if (targetLang) {
+                        updateLanguageIndicator(targetLang);
+                    }
+                };
                 
                 // Add some styling to make all list items consistent
                 const style = document.createElement('style');
@@ -731,6 +771,8 @@
                         padding: 5px 10px !important;
                         cursor: pointer !important;
                         list-style: none !important;
+                        transition: all 0.2s ease !important;
+                        border-left: 3px solid transparent !important;
                     }
                     .dropdown-cs li:hover {
                         background-color: #f0f0f0 !important;
@@ -740,6 +782,7 @@
                         height: auto !important;
                         display: inline-block !important;
                         vertical-align: middle !important;
+                        margin-right: 5px !important;
                     }
                 `;
                 document.head.appendChild(style);
