@@ -1,0 +1,415 @@
+{
+  "common": {
+    "buttons": {
+      "getStarted": "Começar",
+      "signUp": "Inscrever-se",
+      "signIn": "Entrar",
+      "login": "Login",
+      "logout": "Sair",
+      "submit": "Enviar",
+      "cancel": "Cancelar",
+      "save": "Salvar",
+      "delete": "Excluir",
+      "edit": "Editar",
+      "back": "Voltar",
+      "next": "Próximo",
+      "previous": "Anterior",
+      "close": "Fechar",
+      "register": "Registrar",
+      "learnMore": "Saiba Mais",
+      "customerLogin": "Login do Cliente",
+      "signUpToday": "Inscreva-se Hoje",
+      "registerNow": "Registre-se agora"
+    },
+    "labels": {
+      "username": "Nome de Usuário",
+      "password": "Senha",
+      "email": "E-mail",
+      "firstName": "Nome",
+      "lastName": "Sobrenome",
+      "phoneNumber": "Número de Telefone",
+      "address": "Endereço",
+      "city": "Cidade",
+      "state": "Estado",
+      "zipCode": "CEP",
+      "rememberMe": "Lembrar-me",
+      "forgotPassword": "Esqueceu a senha?",
+      "termsAndConditions": "Termos e Condições",
+      "privacyPolicy": "Política de Privacidade",
+      "allRightsReserved": "Todos os direitos reservados",
+      "lastUpdated": "Última atualização:"
+    },
+    "messages": {
+      "welcome": "Bem-vindo",
+      "loading": "Carregando...",
+      "error": "Erro",
+      "success": "Sucesso",
+      "warning": "Aviso",
+      "info": "Informação",
+      "noData": "Nenhum dado disponível",
+      "confirmAction": "Tem certeza de que deseja continuar?",
+      "loginFailed": "Falha no login. Por favor, verifique suas credenciais e tente novamente.",
+      "loginSuccess": "Login realizado com sucesso!",
+      "logoutSuccess": "Você saiu com sucesso.",
+      "registrationSuccess": "Registro realizado com sucesso!",
+      "registrationFailed": "Falha no registro. Por favor, tente novamente.",
+      "passwordResetSuccess": "Redefinição de senha bem-sucedida!",
+      "passwordResetFailed": "Falha na redefinição de senha. Por favor, tente novamente.",
+      "popupBlocked": "A janela pop-up foi bloqueada. Por favor, permita pop-ups para este site e tente novamente.",
+      "authenticationFailed": "Falha na autenticação",
+      "authenticationTimeout": "Tempo de autenticação esgotado. Por favor, tente novamente.",
+      "accountNotFound": "Conta não encontrada. Você será redirecionado para o registro para criar uma nova conta.",
+      "processingError": "Erro ao processar o resultado da autenticação"
+    }
+  },
+  "landing": {
+    "hero": {
+      "badge": "Seu Parceiro WaveMAX Local",
+      "title": "Serviço Premium de Coleta e Entrega de Lavanderia",
+      "subtitle": "Serviço conveniente porta a porta por {{affiliateName}}, com lavagem profissional pela WaveMAX"
+    },
+    "pricing": {
+      "wdf": {
+        "title": "Serviço WDF",
+        "value": "$1.25",
+        "unit": "/ lb",
+        "description": "Lavar, Secar e Dobrar"
+      },
+      "delivery": {
+        "title": "Entrega",
+        "value": "${{perBagFee}}",
+        "unit": "/ sacola",
+        "minimum": "${{minimumFee}} mínimo"
+      }
+    },
+    "howItWorks": {
+      "title": "Como Funciona Nosso Serviço",
+      "subtitle": "Processo Simples",
+      "steps": {
+        "doorToDoor": {
+          "title": "Serviço Porta a Porta",
+          "description": "{{affiliateName}} oferece coleta e entrega conveniente diretamente na sua porta, no seu horário."
+        },
+        "professional": {
+          "title": "Processamento WDF Profissional",
+          "description": "A WaveMAX cuida da lavagem com equipamentos Electrolux 450G de última geração e purificação de água UV Omni LUX em uma instalação com controle de qualidade."
+        },
+        "fastTurnaround": {
+          "title": "Entrega Rápida",
+          "description": "Suas roupas são limpas profissionalmente e devolvidas frescas, dobradas e prontas para usar - normalmente dentro de 24-48 horas."
+        }
+      }
+    },
+    "process": {
+      "step1": {
+        "title": "Agende a Coleta",
+        "description": "Use nosso aplicativo fácil para agendar um horário de coleta que funcione com sua agenda"
+      },
+      "step2": {
+        "title": "Coleta na Sua Porta",
+        "description": "{{affiliateName}} coleta sua roupa e a transporta para a WaveMAX"
+      },
+      "step3": {
+        "title": "Limpeza Profissional",
+        "description": "A WaveMAX lava, seca e dobra com expertise usando equipamentos premium"
+      },
+      "step4": {
+        "title": "Entrega para Você",
+        "description": "{{affiliateName}} entrega a roupa limpa e fresca de volta à sua porta"
+      }
+    },
+    "features": {
+      "title": "Por Que Escolher Este Serviço?",
+      "list": {
+        "convenience": "Coleta e entrega conveniente por {{affiliateName}}",
+        "professional": "Lavagem profissional com equipamentos Electrolux 450G",
+        "purification": "Purificação de água UV Omni LUX para resultados mais limpos",
+        "quality": "Ambiente com controle de qualidade nas instalações da WaveMAX",
+        "ecoFriendly": "Produtos de limpeza ecológicos",
+        "transparent": "Preços transparentes - pague por conveniência e qualidade"
+      }
+    },
+    "quality": {
+      "title": "A Diferença de Qualidade WaveMAX",
+      "subtitle": "Sua roupa é processada nas instalações de última geração da WaveMAX",
+      "electrolux": {
+        "title": "Equipamentos Electrolux 450G",
+        "description": "Lavadoras e secadoras de nível profissional garantem limpeza completa e cuidado suave para todos os tipos de tecido"
+      },
+      "omniLux": {
+        "title": "Purificação UV Omni LUX",
+        "description": "Sistema avançado de purificação de água UV elimina 99,9% de bactérias e vírus para a lavagem mais limpa possível"
+      },
+      "qualityControl": {
+        "title": "Controle de Qualidade",
+        "description": "Processos rigorosos de controle de qualidade garantem resultados consistentes e manuseio adequado de cada peça"
+      }
+    },
+    "cta": {
+      "title": "Pronto para Experimentar o Serviço Premium de Lavanderia?",
+      "subtitle": "Deixe {{affiliateName}} cuidar da coleta e entrega enquanto a WaveMAX garante a limpeza profissional"
+    },
+    "footer": {
+      "copyright": "© {{year}} CRHS Enterprises, LLC. Serviço fornecido por {{affiliateName}}"
+    }
+  },
+  "affiliate": {
+    "login": {
+      "title": "Login de Afiliado",
+      "subtitle": "Entre para acessar seu painel de afiliado",
+      "socialLogin": "Entre com sua conta de mídia social",
+      "orEmail": "Ou entre com nome de usuário e senha",
+      "noAccount": "Não tem uma conta de afiliado?"
+    },
+    "register": {
+      "title": "Torne-se um Parceiro Afiliado WaveMAX",
+      "subtitle": "Junte-se à nossa rede e ganhe comissões em serviços de lavanderia",
+      "businessInfo": "Informações do Negócio",
+      "personalInfo": "Informações Pessoais",
+      "accountInfo": "Informações da Conta",
+      "termsAgree": "Eu concordo com os",
+      "alreadyHaveAccount": "Já tem uma conta?"
+    },
+    "dashboard": {
+      "title": "Painel do Afiliado",
+      "welcome": "Bem-vindo de volta, {{name}}!",
+      "overview": "Visão Geral",
+      "customers": "Clientes",
+      "orders": "Pedidos",
+      "commissions": "Comissões",
+      "reports": "Relatórios",
+      "settings": "Configurações",
+      "metrics": {
+        "totalCustomers": "Total de Clientes",
+        "activeCustomers": "Clientes Ativos",
+        "totalOrders": "Total de Pedidos",
+        "totalRevenue": "Receita Total",
+        "totalCommissions": "Comissões Totais",
+        "pendingCommissions": "Comissões Pendentes"
+      }
+    }
+  },
+  "customer": {
+    "login": {
+      "title": "Login do Cliente",
+      "subtitle": "Entre para gerenciar seu serviço de lavanderia",
+      "socialLogin": "Entre com sua conta de mídia social",
+      "orEmail": "Ou entre com e-mail e senha",
+      "noAccount": "Não tem uma conta?"
+    },
+    "register": {
+      "title": "Crie Sua Conta",
+      "subtitle": "Inscreva-se para coleta e entrega conveniente de lavanderia",
+      "personalInfo": "Informações Pessoais",
+      "contactInfo": "Informações de Contato",
+      "accountInfo": "Informações da Conta",
+      "referralCode": "Código de Indicação (Opcional)",
+      "termsAgree": "Eu concordo com os",
+      "alreadyHaveAccount": "Já tem uma conta?"
+    },
+    "dashboard": {
+      "title": "Painel do Cliente",
+      "welcome": "Bem-vindo de volta, {{name}}!",
+      "schedulePickup": "Agendar Coleta",
+      "activeOrders": "Pedidos Ativos",
+      "orderHistory": "Histórico de Pedidos",
+      "accountSettings": "Configurações da Conta",
+      "metrics": {
+        "totalOrders": "Total de Pedidos",
+        "totalSpent": "Total Gasto",
+        "averageOrder": "Pedido Médio",
+        "lastOrder": "Último Pedido"
+      }
+    }
+  },
+  "operator": {
+    "login": {
+      "title": "Portal do Operador",
+      "subtitle": "Digite seu PIN de 4 dígitos para acessar o sistema",
+      "pinPlaceholder": "Digite o PIN de 4 dígitos",
+      "invalidPin": "PIN inválido. Por favor, tente novamente."
+    },
+    "dashboard": {
+      "title": "Painel do Operador",
+      "welcome": "Bem-vindo, {{name}}!",
+      "todaysPickups": "Coletas de Hoje",
+      "todaysDeliveries": "Entregas de Hoje",
+      "processOrder": "Processar Pedido",
+      "scanBarcode": "Escanear Código de Barras",
+      "metrics": {
+        "pickupsCompleted": "Coletas Concluídas",
+        "deliveriesCompleted": "Entregas Concluídas",
+        "ordersProcessed": "Pedidos Processados",
+        "efficiency": "Taxa de Eficiência"
+      }
+    }
+  },
+  "administrator": {
+    "login": {
+      "title": "Login do Administrador",
+      "subtitle": "Acesse o painel administrativo",
+      "noAccount": "Entre em contato com o administrador do sistema para acesso"
+    },
+    "dashboard": {
+      "title": "Painel do Administrador",
+      "welcome": "Bem-vindo, {{name}}",
+      "systemOverview": "Visão Geral do Sistema",
+      "userManagement": "Gerenciamento de Usuários",
+      "affiliateManagement": "Gerenciamento de Afiliados",
+      "orderManagement": "Gerenciamento de Pedidos",
+      "reports": "Relatórios",
+      "settings": "Configurações do Sistema",
+      "metrics": {
+        "totalUsers": "Total de Usuários",
+        "totalAffiliates": "Total de Afiliados",
+        "totalOrders": "Total de Pedidos",
+        "systemRevenue": "Receita do Sistema",
+        "activeOperators": "Operadores Ativos",
+        "systemHealth": "Saúde do Sistema"
+      }
+    }
+  },
+  "orders": {
+    "status": {
+      "pending": "Pendente",
+      "scheduled": "Agendado",
+      "pickedUp": "Coletado",
+      "processing": "Processando",
+      "readyForDelivery": "Pronto para Entrega",
+      "outForDelivery": "Saiu para Entrega",
+      "delivered": "Entregue",
+      "cancelled": "Cancelado"
+    },
+    "schedule": {
+      "title": "Agendar Coleta",
+      "selectDate": "Selecionar Data",
+      "selectTime": "Selecionar Horário",
+      "pickupAddress": "Endereço de Coleta",
+      "deliveryAddress": "Endereço de Entrega",
+      "sameAsPickup": "Mesmo endereço de coleta",
+      "specialInstructions": "Instruções Especiais (Opcional)",
+      "estimatedBags": "Número Estimado de Sacolas",
+      "confirmPickup": "Confirmar Coleta"
+    },
+    "confirmation": {
+      "title": "Confirmação do Pedido",
+      "orderNumber": "Número do Pedido",
+      "pickupScheduled": "Coleta Agendada",
+      "estimatedDelivery": "Entrega Estimada",
+      "totalEstimate": "Total Estimado",
+      "trackOrder": "Rastrear Seu Pedido",
+      "viewDetails": "Ver Detalhes"
+    }
+  },
+  "emails": {
+    "greeting": "Olá {{name}},",
+    "footer": "Obrigado por escolher WaveMAX Laundry Services.",
+    "unsubscribe": "Cancelar inscrição destes e-mails",
+    "viewInBrowser": "Ver este e-mail no seu navegador",
+    "passwordReset": {
+      "title": "Solicitação de Redefinição de Senha",
+      "adminMessage": "Recebemos uma solicitação para redefinir sua senha de administrador.",
+      "resetButton": "Redefinir Senha",
+      "ignoreMessage": "Se você não solicitou isso, por favor ignore este e-mail."
+    },
+    "welcome": {
+      "adminTitle": "Bem-vindo ao Portal do Administrador WaveMAX",
+      "adminMessage": "Sua conta de administrador foi criada com sucesso.",
+      "affiliateTitle": "Bem-vindo ao Programa de Afiliados WaveMAX",
+      "affiliateMessage": "Bem-vindo ao Programa de Afiliados WaveMAX! Estamos animados em tê-lo como nosso parceiro.",
+      "affiliateId": "Seu ID de afiliado:",
+      "customerTitle": "Bem-vindo ao WaveMAX Laundry Services",
+      "customerMessage": "Bem-vindo ao WaveMAX! Estamos muito felizes em tê-lo como nosso cliente.",
+      "operatorTitle": "Bem-vindo à Equipe WaveMAX",
+      "operatorMessage": "Bem-vindo à equipe WaveMAX! Sua conta de operador foi criada.",
+      "operatorPin": "Seu PIN:",
+      "accessPortal": "Acessar Portal",
+      "accessDashboard": "Acessar Seu Painel",
+      "schedulePickup": "Agende Sua Primeira Coleta"
+    },
+    "commission": {
+      "title": "Notificação de Pagamento de Comissão",
+      "processed": "Seu pagamento de comissão foi processado.",
+      "amount": "Valor:",
+      "paymentMethod": "Método de Pagamento:",
+      "reference": "Referência:",
+      "viewDashboard": "Ver Painel"
+    },
+    "newCustomer": {
+      "title": "Novo Registro de Cliente",
+      "message": "Ótimas notícias! Um novo cliente se registrou usando seu link de indicação.",
+      "customerName": "Nome do Cliente:",
+      "registrationDate": "Data de Registro:",
+      "viewDetails": "Ver Detalhes do Cliente"
+    },
+    "newOrder": {
+      "title": "Notificação de Novo Pedido",
+      "affiliateMessage": "Um de seus clientes fez um novo pedido.",
+      "orderDetails": "Detalhes do Pedido:",
+      "orderNumber": "Número do Pedido:",
+      "customer": "Cliente:",
+      "orderValue": "Valor do Pedido:",
+      "commission": "Sua Comissão:",
+      "viewOrder": "Ver Pedido"
+    },
+    "orderCancelled": {
+      "title": "Aviso de Cancelamento de Pedido",
+      "customerTitle": "Confirmação de Cancelamento de Pedido",
+      "affiliateMessage": "Um pedido de um de seus clientes foi cancelado.",
+      "customerMessage": "Seu pedido foi cancelado conforme solicitado.",
+      "orderNumber": "Número do Pedido:",
+      "customer": "Cliente:",
+      "reason": "Motivo do Cancelamento:",
+      "date": "Data do Cancelamento:",
+      "questions": "Se você tiver alguma dúvida, entre em contato conosco."
+    },
+    "orderConfirmation": {
+      "title": "Confirmação do Pedido",
+      "message": "Obrigado pelo seu pedido! Sua coleta foi agendada.",
+      "orderNumber": "Número do Pedido:",
+      "pickupDate": "Data da Coleta:",
+      "pickupTime": "Horário da Coleta:",
+      "pickupAddress": "Endereço de Coleta:",
+      "trackOrder": "Rastrear Seu Pedido"
+    },
+    "orderStatus": {
+      "title": "Atualização do Status do Pedido",
+      "message": "O status do seu pedido foi atualizado.",
+      "orderNumber": "Número do Pedido:",
+      "currentStatus": "Status Atual:",
+      "trackOrder": "Rastrear Seu Pedido"
+    },
+    "pinReset": {
+      "title": "Notificação de Redefinição de PIN",
+      "message": "Seu PIN de operador foi redefinido.",
+      "newPin": "Seu novo PIN:",
+      "changeMessage": "Por favor, altere este PIN após seu primeiro login."
+    },
+    "shiftReminder": {
+      "title": "Lembrete de Turno",
+      "message": "Este é um lembrete sobre seu próximo turno.",
+      "date": "Data do Turno:",
+      "time": "Horário do Turno:"
+    }
+  },
+  "errors": {
+    "generic": "Ocorreu um erro. Por favor, tente novamente.",
+    "network": "Erro de rede. Por favor, verifique sua conexão.",
+    "validation": "Por favor, verifique o formulário e corrija quaisquer erros.",
+    "unauthorized": "Você não está autorizado a acessar este recurso.",
+    "notFound": "O recurso solicitado não foi encontrado.",
+    "serverError": "Erro do servidor. Por favor, tente novamente mais tarde."
+  },
+  "navigation": {
+    "home": "Início",
+    "about": "Sobre",
+    "services": "Serviços",
+    "pricing": "Preços",
+    "contact": "Contato",
+    "dashboard": "Painel",
+    "profile": "Perfil",
+    "settings": "Configurações",
+    "help": "Ajuda",
+    "logout": "Sair"
+  }
+}

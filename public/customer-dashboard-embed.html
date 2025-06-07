@@ -19,6 +19,14 @@
             margin: 0;
             padding: 16px;
         }
+    
+        /* Language switcher positioning */
+        #language-switcher-container {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            z-index: 1000;
+        }
     </style>
 </head>
 <body class="bg-white">
@@ -31,14 +39,14 @@
                     <h2 class="text-2xl font-bold mb-2" id="welcomeMessage">Welcome!</h2>
                     <p class="text-gray-600" id="customerInfo">Loading...</p>
                 </div>
-                <button id="logoutBtn" class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition">Logout</button>
+                <button id="logoutBtn" class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition" data-i18n="common.buttons.logout">Logout</button>
             </div>
         </div>
 
         <!-- Stats Grid -->
         <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
             <div class="bg-white rounded-lg shadow-md p-6">
-                <h3 class="text-lg font-semibold text-gray-600 mb-2">Active Orders</h3>
+                <h3 class="text-lg font-semibold text-gray-600 mb-2" data-i18n="customer.dashboard.activeOrders">Active Orders</h3>
                 <p class="text-3xl font-bold text-blue-600" id="activeOrders">0</p>
             </div>
             <div class="bg-white rounded-lg shadow-md p-6">

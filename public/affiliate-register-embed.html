@@ -82,6 +82,14 @@
         .slider:hover::-moz-range-thumb {
             background: #2563eb;
         }
+    
+        /* Language switcher positioning */
+        #language-switcher-container {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            z-index: 1000;
+        }
     </style>
 </head>
 <body class="font-sans">
@@ -142,7 +150,7 @@
 
                 <!-- Personal Information -->
                 <div id="personalInfoSection">
-                    <h3 class="text-xl font-bold mb-4">Personal Information</h3>
+                    <h3 class="text-xl font-bold mb-4" data-i18n="affiliate.register.personalInfo">Personal Information</h3>
                     <div class="grid md:grid-cols-2 gap-4">
                         <div>
                             <label for="firstName" class="block text-gray-700 mb-2">First Name *</label>
@@ -168,7 +176,7 @@
                 
                 <!-- Business Information -->
                 <div>
-                    <h3 class="text-xl font-bold mb-4">Business Information</h3>
+                    <h3 class="text-xl font-bold mb-4" data-i18n="affiliate.register.businessInfo">Business Information</h3>
                     <div class="grid md:grid-cols-2 gap-4">
                         <div class="md:col-span-2">
                             <label for="businessName" class="block text-gray-700 mb-2">Business Name (if applicable)</label>
@@ -373,7 +381,7 @@
                         <div class="flex items-start">
                             <input type="checkbox" id="termsAgreement" name="termsAgreement" required class="mt-1 mr-2">
                             <label for="termsAgreement" class="text-sm text-gray-700">
-                                I agree to the <a href="#" data-navigate="/terms-of-service" class="text-blue-600 hover:underline">Terms of Service</a> and 
+                                <span data-i18n="affiliate.register.termsAgree">I agree to the</span> <a href="#" data-navigate="/terms-of-service" class="text-blue-600 hover:underline">Terms of Service</a> and 
                                 <a href="#" data-navigate="/privacy-policy" class="text-blue-600 hover:underline">Privacy Policy</a> *
                             </label>
                         </div>
@@ -418,6 +426,9 @@
     </div>
 
     <!-- Embedded version specific scripts -->
+        <!-- i18n Scripts -->
+    <script src="/assets/js/i18n.js"></script>
+    <script src="/assets/js/language-switcher.js"></script>
     <script>
         // Configuration for embedded environment
         window.EMBED_CONFIG = {
@@ -431,5 +442,16 @@
     <script src="/assets/js/errorHandler.js"></script>
     <script src="/assets/js/csrf-utils.js"></script>
     <script src="/assets/js/affiliate-register-init.js"></script>
+    <script>
+        // Initialize i18n
+        document.addEventListener('DOMContentLoaded', async function() {
+            await window.i18n.init({ debugMode: false });
+            window.LanguageSwitcher.createSwitcher('language-switcher-container', {
+                style: 'dropdown',
+                showLabel: false
+            });
+        });
+    </script>
+
 </body>
 </html>

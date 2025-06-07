@@ -23,21 +23,30 @@
             margin: 0;
             padding: 16px;
         }
+        /* Language switcher positioning */
+        #language-switcher-container {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            z-index: 1000;
+        }
     </style>
 </head>
 <body class="bg-white font-sans">
+    <!-- Language Switcher -->
+    <div id="language-switcher-container"></div>
     <!-- Login Form -->
     <div class="embed-container">
         <div class="max-w-md mx-auto bg-white rounded-lg shadow-md overflow-hidden">
             <div class="wavemax-blue text-white p-6">
-                <h2 class="text-2xl font-bold">Customer Login</h2>
-                <p class="mt-2">Sign in to access your WaveMAX Laundry account</p>
+                <h2 class="text-2xl font-bold" data-i18n="customer.login.title">Customer Login</h2>
+                <p class="mt-2" data-i18n="customer.login.subtitle">Sign in to access your WaveMAX Laundry account</p>
             </div>
             
             <!-- Social Login Section -->
             <div class="p-6 pb-0">
                 <div class="bg-gray-50 p-4 rounded-lg mb-6">
-                    <p class="text-gray-600 mb-4 text-center">Sign in with your social media account</p>
+                    <p class="text-gray-600 mb-4 text-center" data-i18n="customer.login.socialLogin">Sign in with your social media account</p>
                     <div class="grid grid-cols-3 gap-3">
                         <button type="button" id="googleLogin" class="flex items-center justify-center px-4 py-2 border border-gray-300 rounded-lg bg-white hover:bg-gray-50 transition">
                             <svg class="w-5 h-5" viewBox="0 0 24 24">
@@ -67,7 +76,7 @@
                                 <div class="w-full border-t border-gray-300"></div>
                             </div>
                             <div class="relative flex justify-center text-sm">
-                                <span class="px-2 bg-gray-50 text-gray-500">Or sign in with username and password</span>
+                                <span class="px-2 bg-gray-50 text-gray-500" data-i18n="customer.login.orEmail">Or sign in with email and password</span>
                             </div>
                         </div>
                     </div>
@@ -79,25 +88,25 @@
                 <input type="hidden" name="_csrf" value="{{csrfToken}}">
                 
                 <div class="mb-4">
-                    <label for="username" class="block text-gray-700 mb-2">Username</label>
-                    <input type="text" id="username" name="username" required class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <label for="email" class="block text-gray-700 mb-2" data-i18n="common.labels.email">Email</label>
+                    <input type="email" id="email" name="email" required class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
                 </div>
                 
                 <div class="mb-4">
-                    <label for="password" class="block text-gray-700 mb-2">Password</label>
+                    <label for="password" class="block text-gray-700 mb-2" data-i18n="common.labels.password">Password</label>
                     <input type="password" id="password" name="password" required class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
                 </div>
                 
                 <div class="flex items-center justify-between mb-4">
                     <div class="flex items-center">
                         <input type="checkbox" id="remember" name="remember" class="h-4 w-4 text-blue-600">
-                        <label for="remember" class="ml-2 text-sm text-gray-700">Remember me</label>
+                        <label for="remember" class="ml-2 text-sm text-gray-700" data-i18n="common.labels.rememberMe">Remember me</label>
                     </div>
-                    <a href="#" class="text-sm text-blue-600 hover:underline" onclick="navigateParent('forgot-password'); return false;">Forgot password?</a>
+                    <a href="#" class="text-sm text-blue-600 hover:underline" onclick="navigateParent('forgot-password'); return false;" data-i18n="common.labels.forgotPassword">Forgot password?</a>
                 </div>
                 
                 <div>
-                    <button type="submit" class="w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-blue-700 transition">Sign In</button>
+                    <button type="submit" class="w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-blue-700 transition" data-i18n="common.buttons.signIn">Sign In</button>
                 </div>
             </form>
             
@@ -114,8 +123,21 @@
         };
     </script>
     <script src="/assets/js/csrf-utils.js"></script>
+    <!-- i18n Scripts -->
+    <script src="/assets/js/i18n.js"></script>
+    <script src="/assets/js/language-switcher.js"></script>
     <script src="/assets/js/modal-utils.js"></script>
     <script src="/assets/js/errorHandler.js"></script>
     <script src="/assets/js/customer-login-embed.js"></script>
+    <script>
+        // Initialize i18n
+        document.addEventListener('DOMContentLoaded', async function() {
+            await window.i18n.init({ debugMode: false });
+            window.LanguageSwitcher.createSwitcher('language-switcher-container', {
+                style: 'dropdown',
+                showLabel: false
+            });
+        });
+    </script>
 </body>
 </html>
