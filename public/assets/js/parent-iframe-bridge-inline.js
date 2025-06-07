@@ -700,57 +700,110 @@
                 
                 // Function to update the main flag display
                 function updateMainFlagDisplay(lang) {
-                    const mainFlag = document.querySelector('.imgTranslation');
-                    if (mainFlag) {
-                        let flagSrc;
-                        switch(lang) {
-                            case 'en':
-                                flagSrc = '/assets/WaveMax/images/country.png';
-                                break;
-                            case 'es':
-                                flagSrc = '/assets/WaveMax/images/mexico.png';
-                                break;
-                            case 'pt':
-                                // Try to use Brazil flag if available
-                                flagSrc = '/assets/WaveMax/images/brazil.png';
-                                break;
-                            case 'de':
-                                // Try to use German flag if available
-                                flagSrc = '/assets/WaveMax/images/germany.png';
-                                break;
-                            default:
-                                flagSrc = '/assets/WaveMax/images/country.png';
-                        }
-                        
-                        // Update the flag with fallback
-                        const originalSrc = mainFlag.src;
-                        mainFlag.src = flagSrc;
-                        
-                        // If custom flags don't exist, use fallback images
-                        mainFlag.onerror = function() {
-                            console.log('[Parent-Iframe Bridge] Flag not found, using fallback');
-                            // Try alternative sources
+                    // Use a slight delay to ensure it happens after Google Translate updates
+                    setTimeout(() => {
+                        const mainFlag = document.querySelector('.imgTranslation');
+                        if (mainFlag) {
+                            let flagSrc;
                             switch(lang) {
+                                case 'en':
+                                    flagSrc = '/assets/WaveMax/images/country.png';
+                                    break;
+                                case 'es':
+                                    flagSrc = '/assets/WaveMax/images/mexico.png';
+                                    break;
                                 case 'pt':
-                                    this.src = 'https://flagcdn.com/24x18/br.png';
+                                    // Try to use Brazil flag if available
+                                    flagSrc = '/assets/WaveMax/images/brazil.png';
                                     break;
                                 case 'de':
-                                    this.src = 'https://flagcdn.com/24x18/de.png';
+                                    // Try to use German flag if available
+                                    flagSrc = '/assets/WaveMax/images/germany.png';
                                     break;
                                 default:
-                                    this.src = originalSrc; // Restore original
+                                    flagSrc = '/assets/WaveMax/images/country.png';
                             }
                             
-                            // If external source also fails, restore original
-                            this.onerror = function() {
-                                this.src = originalSrc;
-                                this.onerror = null;
+                            // Update the flag with fallback
+                            const originalSrc = mainFlag.src;
+                            mainFlag.src = flagSrc;
+                            
+                            // Add data attribute to track which language is set
+                            mainFlag.setAttribute('data-lang', lang);
+                            
+                            // If custom flags don't exist, use fallback images
+                            mainFlag.onerror = function() {
+                                console.log('[Parent-Iframe Bridge] Flag not found, using fallback');
+                                // Try alternative sources
+                                switch(lang) {
+                                    case 'pt':
+                                        this.src = 'https://flagcdn.com/24x18/br.png';
+                                        break;
+                                    case 'de':
+                                        this.src = 'https://flagcdn.com/24x18/de.png';
+                                        break;
+                                    default:
+                                        this.src = originalSrc; // Restore original
+                                }
+                                
+                                // If external source also fails, restore original
+                                this.onerror = function() {
+                                    this.src = originalSrc;
+                                    this.onerror = null;
+                                };
                             };
-                        };
-                        
-                        console.log('[Parent-Iframe Bridge] Updated main flag display for language:', lang);
+                            
+                            console.log('[Parent-Iframe Bridge] Updated main flag display for language:', lang);
+                            
+                            // Force update again after a longer delay to combat any resets
+                            setTimeout(() => {
+                                const flag = document.querySelector('.imgTranslation');
+                                if (flag && flag.getAttribute('data-lang') === lang && flag.src !== flagSrc) {
+                                    console.log('[Parent-Iframe Bridge] Re-applying flag update');
+                                    flag.src = flagSrc;
+                                }
+                            }, 1000);
+                        }
+                    }, 100);
+                }
+                
+                // Monitor for flag changes and reapply if needed
+                function monitorFlagChanges() {
+                    const observer = new MutationObserver((mutations) => {
+                        const mainFlag = document.querySelector('.imgTranslation');
+                        if (mainFlag) {
+                            const currentLang = localStorage.getItem('wavemax-language') || 'en';
+                            const flagLang = mainFlag.getAttribute('data-lang');
+                            
+                            // If the flag doesn't match our saved language, update it
+                            if (flagLang !== currentLang) {
+                                console.log('[Parent-Iframe Bridge] Flag mismatch detected, correcting...');
+                                updateMainFlagDisplay(currentLang);
+                            }
+                        }
+                    });
+                    
+                    // Observe changes to the flag image
+                    const flagElement = document.querySelector('.imgTranslation');
+                    if (flagElement) {
+                        observer.observe(flagElement, {
+                            attributes: true,
+                            attributeFilter: ['src']
+                        });
+                    }
+                    
+                    // Also observe the parent container for any replacements
+                    const container = document.querySelector('.dropdown-toggle-cs');
+                    if (container) {
+                        observer.observe(container, {
+                            childList: true,
+                            subtree: true
+                        });
                     }
                 }
+                
+                // Start monitoring after setup
+                setTimeout(monitorFlagChanges, 1000);
                 
                 // Also add click listeners to the images for extra safety
                 dropdownList.querySelectorAll('img').forEach(img => {
@@ -760,6 +813,12 @@
                         if (match && match[1]) {
                             const lang = match[1];
                             console.log('[Parent-Iframe Bridge] Language clicked:', lang);
+                            
+                            // Update flag multiple times to combat resets
+                            setTimeout(() => updateMainFlagDisplay(lang), 100);
+                            setTimeout(() => updateMainFlagDisplay(lang), 500);
+                            setTimeout(() => updateMainFlagDisplay(lang), 1500);
+                            setTimeout(() => updateMainFlagDisplay(lang), 3000);
                             
                             setTimeout(() => {
                                 // Save to localStorage
@@ -771,6 +830,23 @@
                         }
                     });
                 });
+                
+                // Override FixBodyTop if it exists to prevent flag reset
+                if (window.FixBodyTop) {
+                    const originalFixBodyTop = window.FixBodyTop;
+                    window.FixBodyTop = function() {
+                        const currentLang = localStorage.getItem('wavemax-language') || 'en';
+                        const result = originalFixBodyTop.apply(this, arguments);
+                        
+                        // Reapply flag after FixBodyTop
+                        setTimeout(() => {
+                            updateMainFlagDisplay(currentLang);
+                        }, 50);
+                        
+                        return result;
+                    };
+                    console.log('[Parent-Iframe Bridge] Successfully wrapped FixBodyTop function');
+                }
                 
                 console.log('[Parent-Iframe Bridge] Successfully integrated with Google Translate dropdown');
                 
