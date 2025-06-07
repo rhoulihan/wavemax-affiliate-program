@@ -218,7 +218,8 @@
       "earningsBreakdown": "Earnings breakdown:",
       "wdfCommission": "WDF commission (10%):",
       "deliveryEarnings": "Delivery fees (100%):",
-      "wdfRate": "WDF rate: ${{rate}}/lb"
+      "wdfRate": "WDF rate: ${{rate}}/lb",
+      "wdfRate.prefix": "WDF rate:"
     },
     "faq": {
       "title": "Frequently Asked Questions",
