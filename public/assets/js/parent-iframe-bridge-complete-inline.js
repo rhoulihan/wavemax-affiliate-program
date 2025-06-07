@@ -28,6 +28,8 @@
     const ALLOWED_ORIGINS = [
         'https://affiliate.wavemax.promo',
         'http://affiliate.wavemax.promo',
+        'https://wavemax.promo',
+        'http://wavemax.promo',
         'http://localhost:3000'
     ];
 
