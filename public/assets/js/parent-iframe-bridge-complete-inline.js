@@ -73,6 +73,9 @@
         }
         
         console.log('[Parent-Iframe Bridge] Found iframe:', iframe.id, iframe.src);
+        
+        // Always hide the page header element immediately
+        hidePageHeader();
 
         // Set up viewport detection
         detectViewport();
@@ -91,6 +94,18 @@
         setTimeout(() => sendViewportInfo(), 2000);
         
         console.log('[Parent-Iframe Bridge] Initialized successfully');
+    }
+
+    function hidePageHeader() {
+        // Find and hide the specific page header element
+        const pageHeader = document.querySelector('section.page-header.page-header-modern.bg-color-light-scale-1.page-header-sm');
+        if (pageHeader) {
+            console.log('[Parent-Iframe Bridge] Hiding page header element');
+            pageHeader.style.display = 'none';
+            pageHeader.setAttribute('data-permanently-hidden', 'true');
+        } else {
+            console.log('[Parent-Iframe Bridge] Page header element not found');
+        }
     }
 
     function detectViewport() {
@@ -303,7 +318,7 @@
         const topbar = document.querySelector('.topbar[data-mobile-hidden="true"]');
         const wrapper = document.querySelector('.wrapper[data-mobile-hidden="true"]');
         const header = document.querySelector('.navbar[data-mobile-hidden="true"]');
-        const pageHeader = document.querySelector('.page-header[data-mobile-hidden="true"]');
+        const pageHeader = document.querySelector('.page-header[data-mobile-hidden="true"]:not([data-permanently-hidden="true"])');
         const footer = document.querySelector('.footer[data-mobile-hidden="true"]');
 
         // Show topbar
