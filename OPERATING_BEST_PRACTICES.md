@@ -8,6 +8,7 @@ This document contains important operational knowledge and workarounds discovere
 1. **PM2 logs command timeout**: The command `pm2 logs wavemax --lines 50` frequently times out
    - **Issue**: Command hangs and requires user interruption
    - **Discovered**: 2025-01-06
+   - **Note**: This command is problematic and will timeout - avoid using it
 
 ### ✅ Alternative Approaches
 1. **For viewing recent logs**:

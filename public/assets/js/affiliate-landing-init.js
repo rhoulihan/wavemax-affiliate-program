@@ -134,6 +134,12 @@
             document.getElementById('perBagFee').textContent = affiliate.perBagDeliveryFee;
         }
 
+        // Update year in footer
+        const yearElement = document.getElementById('yearFooter');
+        if (yearElement) {
+            yearElement.textContent = new Date().getFullYear();
+        }
+
         // Update links
         updateLinks(affiliateCode, affiliate);
     }
