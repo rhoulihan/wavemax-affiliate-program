@@ -20,6 +20,47 @@
             background-color: #f8f9fa;
         }
         
+        /* Remove side padding for full-width experience */
+        .container {
+            max-width: 100%;
+            padding-left: 0;
+            padding-right: 0;
+        }
+        
+        /* Ensure sections extend full width */
+        section {
+            padding-left: 0;
+            padding-right: 0;
+        }
+        
+        /* Add padding to row elements for content spacing */
+        .row {
+            margin-left: 0;
+            margin-right: 0;
+            padding-left: 15px;
+            padding-right: 15px;
+        }
+        
+        @media (min-width: 768px) {
+            .row {
+                padding-left: 30px;
+                padding-right: 30px;
+            }
+        }
+        
+        /* Hero section special styling */
+        .hero-section .row {
+            padding-left: 20px;
+            padding-right: 20px;
+        }
+        
+        @media (min-width: 768px) {
+            .hero-section .row {
+                padding-left: 40px;
+                padding-right: 40px;
+            }
+        }
+        
         .hero-section {
             background: linear-gradient(135deg, #0F5EF7 0%, #0A47C2 100%);
             color: white;
