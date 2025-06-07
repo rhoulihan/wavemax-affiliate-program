@@ -131,7 +131,7 @@
     <div class="container">
         <div class="header">
             <h1>WaveMAX Affiliate Program - Test Coverage Results</h1>
-            <div class="timestamp">Generated on: January 7, 2025</div>
+            <div class="timestamp">Generated on: June 6, 2025 at 10:51 PM</div>
         </div>
 
         <div class="summary-grid">
@@ -143,14 +143,14 @@
                 </div>
                 <div class="stats">
                     <span class="stats-label">Passed</span>
-                    <span class="stats-value success">48</span>
+                    <span class="stats-value success">50</span>
                 </div>
                 <div class="stats">
                     <span class="stats-label">Failed</span>
-                    <span class="stats-value error">4</span>
+                    <span class="stats-value error">2</span>
                 </div>
                 <div class="progress-bar">
-                    <div class="progress-fill" style="width: 92.3%; background: #27ae60;"></div>
+                    <div class="progress-fill" style="width: 96.2%; background: #27ae60;"></div>
                 </div>
             </div>
 
@@ -162,18 +162,18 @@
                 </div>
                 <div class="stats">
                     <span class="stats-label">Passed</span>
-                    <span class="stats-value success">1,130</span>
+                    <span class="stats-value success">1,145</span>
                 </div>
                 <div class="stats">
                     <span class="stats-label">Failed</span>
-                    <span class="stats-value error">45</span>
+                    <span class="stats-value error">14</span>
                 </div>
                 <div class="stats">
                     <span class="stats-label">Skipped</span>
-                    <span class="stats-value warning">6</span>
+                    <span class="stats-value warning">22</span>
                 </div>
                 <div class="progress-bar">
-                    <div class="progress-fill" style="width: 95.7%; background: #27ae60;"></div>
+                    <div class="progress-fill" style="width: 97.0%; background: #27ae60;"></div>
                 </div>
             </div>
 
@@ -197,27 +197,15 @@
             <h2>Failed Test Suites</h2>
             <ul class="details-list">
                 <li>
-                    Coverage Routes <span class="badge badge-error">4 failed</span>
+                    Administrator Controller <span class="badge badge-error">7 failed</span>
                     <div style="color: #7f8c8d; margin-top: 5px; font-size: 0.9em;">
-                        Cache header expectations need adjustment for production environment
+                        Mock implementation differences and response format mismatches
                     </div>
                 </li>
                 <li>
-                    Administrator Routes <span class="badge badge-error">9 failed</span>
+                    Auth Controller <span class="badge badge-error">7 failed</span>
                     <div style="color: #7f8c8d; margin-top: 5px; font-size: 0.9em;">
-                        Mock implementation differences in test environment
-                    </div>
-                </li>
-                <li>
-                    Affiliate Routes <span class="badge badge-error">9 failed</span>
-                    <div style="color: #7f8c8d; margin-top: 5px; font-size: 0.9em;">
-                        Mock implementation differences in test environment
-                    </div>
-                </li>
-                <li>
-                    Administrator Controller Enhanced <span class="badge badge-error">23 failed</span>
-                    <div style="color: #7f8c8d; margin-top: 5px; font-size: 0.9em;">
-                        Response code expectations need updates (409 vs 400)
+                        Token refresh and OAuth flow test expectations need adjustment
                     </div>
                 </li>
             </ul>
@@ -251,7 +239,7 @@
 
         <div class="details-section">
             <h2>Summary</h2>
-            <p>The test suite has been significantly improved with <strong>~150 new tests</strong> added across critical components. While 45 tests are currently failing due to environment-specific expectations and mock differences, the overall test coverage has been substantially enhanced.</p>
+            <p>The test suite continues to perform excellently with <strong>1,145 passing tests</strong> out of 1,181 total tests. Only 14 tests are currently failing due to mock implementation differences and OAuth flow expectations, representing excellent overall test health.</p>
             <p>Key achievements include:</p>
             <ul>
                 <li>Fixed all 26 originally failing tests related to fee structure migration</li>

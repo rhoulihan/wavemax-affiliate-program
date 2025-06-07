@@ -129,8 +129,11 @@ orderSchema.pre('save', async function(next) {
   if (this.isModified('actualWeight') && this.actualWeight) {
     const totalFee = this.feeBreakdown?.totalFee || 0;
     this.actualTotal = parseFloat((this.actualWeight * this.baseRate + totalFee).toFixed(2));
-    // Calculate affiliate commission (10% of WDF + delivery fee)
-    this.affiliateCommission = parseFloat((this.actualWeight * this.baseRate * 0.1 + totalFee).toFixed(2));
+    // Calculate affiliate commission (10% of WDF + full delivery fee)
+    // Commission = (WDF amount × 10%) + delivery fee
+    const wdfAmount = this.actualWeight * this.baseRate;
+    const wdfCommission = wdfAmount * 0.1;
+    this.affiliateCommission = parseFloat((wdfCommission + totalFee).toFixed(2));
   }
 
   // Update status timestamps
