@@ -204,10 +204,63 @@
       }
     },
     "calculator": {
-      "title": "Calcule Seus Ganhos Potenciais"
+      "title": "Calcule Seus Ganhos Potenciais",
+      "businessPotential": "Seu Potencial de Negócios",
+      "customersPerWeek": "Clientes por semana",
+      "customersPerWeekHelp": "Quantos clientes você pode atender semanalmente",
+      "averageWeight": "Peso médio de roupa (lbs)",
+      "averageWeightHelp": "A carga típica é de 20-30 lbs",
+      "deliveryFee": "Sua taxa de entrega",
+      "deliveryFeeHelp": "Você fica com 100% das taxas de entrega",
+      "estimatedEarnings": "Seus Ganhos Estimados",
+      "weeklyEarnings": "Ganhos semanais",
+      "monthlyEarnings": "Ganhos mensais",
+      "earningsBreakdown": "Detalhamento de ganhos:",
+      "wdfCommission": "Comissão WDF (10%):",
+      "deliveryEarnings": "Taxas de entrega (100%):",
+      "wdfRate": "Taxa WDF: ${{rate}}/lb"
+    },
+    "faq": {
+      "title": "Perguntas Frequentes",
+      "earnings": {
+        "question": "Quanto posso ganhar?",
+        "answer": "Você ganha 10% de comissão em cada pedido. A maioria dos afiliados ativos ganha $150-500 por mês, com os melhores ganhando mais."
+      },
+      "cost": {
+        "question": "Existe algum custo para participar?",
+        "answer": "Não! O programa de afiliados é completamente gratuito. Não há taxas ou requisitos mínimos."
+      },
+      "payment": {
+        "question": "Quando sou pago?",
+        "answer": "As comissões são pagas mensalmente via depósito direto ou PayPal, geralmente até o dia 10 de cada mês."
+      },
+      "materials": {
+        "question": "Que materiais de marketing vocês fornecem?",
+        "answer": "Fornecemos folhetos, cartões de visita, gráficos para redes sociais e modelos de e-mail para ajudá-lo a promover efetivamente."
+      }
+    },
+    "testimonials": {
+      "title": "O Que Nossos Afiliados Dizem",
+      "sarah": {
+        "quote": "O programa de afiliados da WaveMAX tem sido uma ótima fonte de renda passiva. Meus clientes de gestão de propriedades adoram o serviço!",
+        "name": "Sarah M.",
+        "title": "Gestora de Propriedades, Austin"
+      },
+      "mike": {
+        "quote": "É fácil acompanhar tudo através do painel. Indiquei 15 clientes e as comissões continuam chegando!",
+        "name": "Mike T.",
+        "title": "Proprietário de Negócio Local"
+      }
+    },
+    "contact": {
+      "text": "Dúvidas? Envie um e-mail para",
+      "orCall": "ou ligue para"
     },
     "cta": {
-      "title": "Pronto para Experimentar o Serviço Premium de Lavanderia?",
+      "title": "Pronto para Começar a Ganhar?",
+      "description": "Junte-se a centenas de afiliados de Austin que estão ganhando renda recorrente enquanto ajudam sua comunidade a economizar tempo com lavanderia.",
+      "createAccount": "Criar Conta de Afiliado",
+      "login": "Login de Afiliado",
       "subtitle": {
         "full": "Deixe {{affiliateName}} cuidar da coleta e entrega enquanto a WaveMAX garante a limpeza profissional",
         "part1": "Deixe",
@@ -215,7 +268,16 @@
       }
     },
     "footer": {
-      "copyright": "© {{year}} CRHS Enterprises, LLC. Serviço fornecido por {{affiliateName}}"
+      "administratorLogin": "Login de Administrador",
+      "operatorLogin": "Login de Operador",
+      "copyright": "© 2025 CRHS Enterprises, LLC. Todos os direitos reservados."
+    },
+    "page": {
+      "title": "Programa de Afiliados WaveMAX Laundry - Austin TX"
+    },
+    "header": {
+      "loginTooltip": "Entre na sua conta de afiliado existente",
+      "registerTooltip": "Crie uma nova conta de afiliado e comece a ganhar"
     }
   },
   "affiliate": {
