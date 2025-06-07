@@ -1,3 +1,4 @@
+<script>
 /**
  * Parent-Iframe Communication Bridge - Complete Inline Version
  * This is the COMPLETE script that should REPLACE the current script on wavemaxlaundry.com
@@ -408,3 +409,4 @@
     };
 
 })();
+</script>
