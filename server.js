@@ -290,6 +290,17 @@ const apiVersioning = (req, res, next) => {
 // Apply API versioning
 app.use(apiVersioning);
 
+// Serve static files from public directory
+app.use(express.static(path.join(__dirname, 'public'), {
+  setHeaders: (res, path) => {
+    // Add CORS headers for translation files
+    if (path.includes('/locales/')) {
+      res.setHeader('Access-Control-Allow-Origin', '*');
+      res.setHeader('Access-Control-Allow-Methods', 'GET');
+    }
+  }
+}));
+
 // API Routes with versioning
 const apiV1Router = express.Router();
 
