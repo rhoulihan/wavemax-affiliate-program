@@ -1,9 +1,10 @@
+<script>
 /**
  * Parent-Iframe Communication Bridge - Inline Version
  * Complete script for embedding directly in parent page HTML
  * Includes all features: mobile detection, language sync, auto-resize
  * 
- * Usage: Copy this entire script and paste it in a <script> tag on your page
+ * Usage: Copy this entire script and paste it directly on your page
  */
 
 // WaveMAX Parent-Iframe Bridge - Inline Version
@@ -380,3 +381,4 @@
     }
 
 })();
+</script>
