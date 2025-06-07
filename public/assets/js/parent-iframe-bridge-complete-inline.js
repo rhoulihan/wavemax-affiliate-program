@@ -77,6 +77,11 @@
         
         // Always hide the page header element immediately
         hidePageHeader();
+        
+        // Remove padding from iframe container for affiliate landing pages
+        if (window.location.search.includes('affiliate-landing')) {
+            removeContainerPadding();
+        }
 
         // Set up viewport detection
         detectViewport();
@@ -106,6 +111,44 @@
             pageHeader.setAttribute('data-permanently-hidden', 'true');
         } else {
             console.log('[Parent-Iframe Bridge] Page header element not found');
+        }
+    }
+    
+    function removeContainerPadding() {
+        console.log('[Parent-Iframe Bridge] Removing container padding for affiliate landing page');
+        
+        // Find the iframe's parent containers
+        if (iframe) {
+            let parent = iframe.parentElement;
+            while (parent && parent !== document.body) {
+                // Remove padding and set full width
+                parent.style.padding = '0';
+                parent.style.paddingLeft = '0';
+                parent.style.paddingRight = '0';
+                parent.style.margin = '0';
+                parent.style.marginLeft = '0';
+                parent.style.marginRight = '0';
+                parent.style.maxWidth = '100%';
+                parent.style.width = '100%';
+                
+                // Check for specific container classes
+                if (parent.classList.contains('container') || 
+                    parent.classList.contains('container-fluid') ||
+                    parent.id === 'main-container' ||
+                    parent.classList.contains('col-12')) {
+                    console.log('[Parent-Iframe Bridge] Removed padding from:', parent.className || parent.id);
+                }
+                
+                parent = parent.parentElement;
+            }
+        }
+        
+        // Also style the iframe itself
+        if (iframe) {
+            iframe.style.width = '100%';
+            iframe.style.maxWidth = '100%';
+            iframe.style.margin = '0';
+            iframe.style.padding = '0';
         }
     }
 

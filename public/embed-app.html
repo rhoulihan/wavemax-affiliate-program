@@ -27,6 +27,7 @@
             min-height: 100vh;
             margin: 0;
             padding: 0;
+            overflow-x: hidden;
         }
         
         #app-container {
@@ -34,6 +35,15 @@
             min-height: 600px;
             margin: 0;
             padding: 0;
+            overflow-x: hidden;
+        }
+        
+        /* Remove any Bootstrap container padding for affiliate landing */
+        body[data-route="/affiliate-landing"] .container,
+        body[data-route="/affiliate-landing"] .container-fluid {
+            padding-left: 0 !important;
+            padding-right: 0 !important;
+            max-width: 100% !important;
         }
         
         /* Remove any top margins/padding from first child elements */
@@ -276,6 +286,9 @@
                 
                 container.innerHTML = html;
                 currentRoute = route;
+                
+                // Set data-route attribute on body for route-specific styling
+                document.body.setAttribute('data-route', route);
                 
                 // Initialize navigation for the loaded content
                 initializeNavigation();

@@ -20,42 +20,70 @@
             background-color: #f8f9fa;
         }
         
-        /* Remove side padding for full-width experience */
-        .container {
-            max-width: 100%;
-            padding-left: 0;
-            padding-right: 0;
+        /* Force full-width layout */
+        html, body {
+            margin: 0 !important;
+            padding: 0 !important;
+            overflow-x: hidden;
+        }
+        
+        /* Remove all container padding */
+        .container,
+        .container-fluid,
+        .container-sm,
+        .container-md,
+        .container-lg,
+        .container-xl,
+        .container-xxl {
+            max-width: 100% !important;
+            width: 100% !important;
+            padding-left: 0 !important;
+            padding-right: 0 !important;
+            margin-left: 0 !important;
+            margin-right: 0 !important;
         }
         
         /* Ensure sections extend full width */
         section {
-            padding-left: 0;
-            padding-right: 0;
+            width: 100% !important;
+            max-width: 100% !important;
+            padding-left: 0 !important;
+            padding-right: 0 !important;
+            margin-left: 0 !important;
+            margin-right: 0 !important;
         }
         
-        /* Add padding to row elements for content spacing */
+        /* Remove Bootstrap's negative margins on rows */
         .row {
-            margin-left: 0;
-            margin-right: 0;
+            margin-left: 0 !important;
+            margin-right: 0 !important;
+        }
+        
+        /* Add padding directly to columns for content spacing */
+        .col,
+        [class*="col-"] {
             padding-left: 15px;
             padding-right: 15px;
         }
         
         @media (min-width: 768px) {
-            .row {
+            .col,
+            [class*="col-"] {
                 padding-left: 30px;
                 padding-right: 30px;
             }
         }
         
         /* Hero section special styling */
-        .hero-section .row {
+        .hero-section .col,
+        .hero-section [class*="col-"] {
             padding-left: 20px;
             padding-right: 20px;
         }
         
         @media (min-width: 768px) {
-            .hero-section .row {
+            .hero-section .col,
+            .hero-section [class*="col-"] {
                 padding-left: 40px;
                 padding-right: 40px;
             }
