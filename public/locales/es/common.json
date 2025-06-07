@@ -204,10 +204,63 @@
       }
     },
     "calculator": {
-      "title": "Calcula Tus Ganancias Potenciales"
+      "title": "Calcula Tus Ganancias Potenciales",
+      "businessPotential": "Tu Potencial de Negocio",
+      "customersPerWeek": "Clientes por semana",
+      "customersPerWeekHelp": "Cuántos clientes puedes atender semanalmente",
+      "averageWeight": "Peso promedio de ropa (lbs)",
+      "averageWeightHelp": "La carga típica es de 20-30 lbs",
+      "deliveryFee": "Tu tarifa de entrega",
+      "deliveryFeeHelp": "Conservas el 100% de las tarifas de entrega",
+      "estimatedEarnings": "Tus Ganancias Estimadas",
+      "weeklyEarnings": "Ganancias semanales",
+      "monthlyEarnings": "Ganancias mensuales",
+      "earningsBreakdown": "Desglose de ganancias:",
+      "wdfCommission": "Comisión WDF (10%):",
+      "deliveryEarnings": "Tarifas de entrega (100%):",
+      "wdfRate": "Tarifa WDF: ${{rate}}/lb"
+    },
+    "faq": {
+      "title": "Preguntas Frecuentes",
+      "earnings": {
+        "question": "¿Cuánto puedo ganar?",
+        "answer": "Ganas 10% de comisión en cada pedido. La mayoría de los afiliados activos ganan $150-500 por mes, con los mejores ganando más."
+      },
+      "cost": {
+        "question": "¿Hay algún costo para unirse?",
+        "answer": "¡No! El programa de afiliados es completamente gratuito. No hay tarifas ni requisitos mínimos."
+      },
+      "payment": {
+        "question": "¿Cuándo me pagan?",
+        "answer": "Las comisiones se pagan mensualmente mediante depósito directo o PayPal, generalmente antes del día 10 de cada mes."
+      },
+      "materials": {
+        "question": "¿Qué materiales de marketing proporcionan?",
+        "answer": "Proporcionamos volantes, tarjetas de presentación, gráficos para redes sociales y plantillas de correo electrónico para ayudarte a promocionar efectivamente."
+      }
+    },
+    "testimonials": {
+      "title": "Lo Que Dicen Nuestros Afiliados",
+      "sarah": {
+        "quote": "El programa de afiliados de WaveMAX ha sido una gran fuente de ingresos pasivos. ¡A mis clientes de administración de propiedades les encanta el servicio!",
+        "name": "Sarah M.",
+        "title": "Administradora de Propiedades, Austin"
+      },
+      "mike": {
+        "quote": "Es fácil rastrear todo a través del panel. ¡He referido a 15 clientes y las comisiones siguen llegando!",
+        "name": "Mike T.",
+        "title": "Propietario de Negocio Local"
+      }
+    },
+    "contact": {
+      "text": "¿Preguntas? Envíanos un correo a",
+      "orCall": "o llama al"
     },
     "cta": {
-      "title": "¿Listo para Experimentar el Servicio Premium de Lavandería?",
+      "title": "¿Listo para Comenzar a Ganar?",
+      "description": "Únete a cientos de afiliados de Austin que están ganando ingresos recurrentes mientras ayudan a su comunidad a ahorrar tiempo en la lavandería.",
+      "createAccount": "Crear Cuenta de Afiliado",
+      "login": "Acceso de Afiliado",
       "subtitle": {
         "full": "Deja que {{affiliateName}} maneje la recogida y entrega mientras WaveMAX asegura la limpieza profesional",
         "part1": "Deja que",
@@ -215,7 +268,16 @@
       }
     },
     "footer": {
-      "copyright": "© {{year}} CRHS Enterprises, LLC. Servicio proporcionado por {{affiliateName}}"
+      "administratorLogin": "Acceso de Administrador",
+      "operatorLogin": "Acceso de Operador",
+      "copyright": "© 2025 CRHS Enterprises, LLC. Todos los derechos reservados."
+    },
+    "page": {
+      "title": "Programa de Afiliados WaveMAX Laundry - Austin TX"
+    },
+    "header": {
+      "loginTooltip": "Inicia sesión en tu cuenta de afiliado existente",
+      "registerTooltip": "Crea una nueva cuenta de afiliado y comienza a ganar"
     }
   },
   "affiliate": {
