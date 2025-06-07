@@ -17,6 +17,9 @@ The WaveMAX Affiliate Program enables individuals to register as affiliates, onb
 - **Email Notifications**: Automated emails for all important events in the lifecycle
 - **Advanced Security**: Industry-standard security features including JWT, CSRF protection, and audit logging
 - **API Versioning**: Future-proof API design with version management
+- **Mobile-Responsive Embedding**: Full mobile support with automatic chrome hiding and responsive layouts
+- **Affiliate Landing Pages**: Customizable landing pages with affiliate information and error handling
+- **Zero-Padding Embeds**: Full-width embedded content with no side padding for seamless integration
 
 ## Recent Updates
 

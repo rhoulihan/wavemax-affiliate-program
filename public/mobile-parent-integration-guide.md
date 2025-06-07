@@ -4,17 +4,21 @@ This guide explains how to integrate the mobile-friendly features on your parent
 
 ## Quick Start
 
-Add the following script tag to your parent page (wavemaxlaundry.com):
+Add the following inline script to your parent page (wavemaxlaundry.com):
 
 ```html
-<script src="https://affiliate.wavemax.promo/assets/js/parent-iframe-bridge.js"></script>
+<script src="https://wavemax.promo/assets/js/parent-iframe-bridge-complete-inline.js"></script>
 ```
+
+Or copy the contents of that file directly into your page within `<script>` tags.
 
 That's it! The script will automatically:
 - Detect mobile devices and viewport sizes
 - Handle communication with the iframe
-- Hide/show headers and footers on mobile when requested
+- Hide/show headers and footers on mobile for ALL content
 - Manage smooth transitions and scrolling
+- Remove padding for full-width affiliate landing pages
+- Always hide the page header element
 
 ## How It Works
 
