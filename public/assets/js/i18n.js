@@ -89,7 +89,6 @@
 
             try {
                 const url = `${this.config.translationsPath}/${lang}/common.json`;
-                console.log(`Loading translations from: ${url}`);
                 const response = await fetch(url);
                 if (!response.ok) {
                     throw new Error(`Failed to load translations for ${lang}: ${response.status} ${response.statusText}`);
@@ -98,10 +97,6 @@
                 const translations = await response.json();
                 this.translations[lang] = translations;
                 this.loadedLanguages.add(lang);
-                
-                // Always log what we loaded to debug the issue
-                console.log(`Loaded translations for ${lang}:`, translations);
-                console.log('Header translations:', translations?.landing?.header);
 
                 if (this.config.debugMode) {
                     console.log(`Loaded translations for ${lang}:`, translations);
