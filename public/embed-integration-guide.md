@@ -6,15 +6,17 @@ This guide explains how to integrate WaveMAX embedded pages into your website us
 
 ## Available Embedded Pages
 
-1. **affiliate-login-embed.html** - Affiliate partner login
-2. **customer-register-embed.html** - Customer registration form
-3. **customer-login-embed.html** - Customer login
-4. **schedule-pickup-embed.html** - Schedule laundry pickup
-5. **affiliate-dashboard-embed.html** - Affiliate management dashboard
-6. **customer-dashboard-embed.html** - Customer account dashboard
-7. **order-confirmation-embed.html** - Order confirmation details
-8. **affiliate-success-embed.html** - Affiliate registration success
-9. **customer-success-embed.html** - Customer registration success
+1. **embed-app.html** - Main application (single entry point for all pages)
+2. **affiliate-landing-embed.html** - Affiliate landing page with service information
+3. **affiliate-login-embed.html** - Affiliate partner login
+4. **customer-register-embed.html** - Customer registration form
+5. **customer-login-embed.html** - Customer login
+6. **schedule-pickup-embed.html** - Schedule laundry pickup
+7. **affiliate-dashboard-embed.html** - Affiliate management dashboard
+8. **customer-dashboard-embed.html** - Customer account dashboard
+9. **order-confirmation-embed.html** - Order confirmation details
+10. **affiliate-success-embed.html** - Affiliate registration success
+11. **customer-success-embed.html** - Customer registration success
 
 ## Basic Integration
 
@@ -122,14 +124,53 @@ Some pages accept URL parameters:
 
 See `embed-demo.html` for a complete working example of parent window implementation.
 
+## Mobile Integration
+
+### Parent-Iframe Bridge Script
+
+To enable mobile-responsive features and automatic chrome hiding, include the parent-iframe bridge script:
+
+```html
+<script src="https://wavemax.promo/assets/js/parent-iframe-bridge-complete-inline.js"></script>
+```
+
+This script provides:
+- **Automatic mobile detection** - Detects viewport size and device type
+- **Chrome hiding** - Automatically hides parent page header/footer on mobile
+- **Viewport communication** - Sends viewport info to iframe for responsive behavior
+- **Full-width support** - Removes container padding for affiliate landing pages
+- **Height management** - Automatic iframe resizing based on content
+
+### Mobile Features
+
+1. **Automatic Chrome Hiding**: On mobile devices (<768px), the parent page's header and footer are automatically hidden to maximize screen space
+2. **Responsive Layouts**: All embedded pages are fully mobile-responsive
+3. **Touch-Friendly**: Buttons and interactive elements are sized for touch
+4. **Full-Width Landing Pages**: Affiliate landing pages display edge-to-edge with no padding
+
+### Message Types for Mobile
+
+**Type:** `viewport-info`
+**Data:** `{ width, height, isMobile, isTablet, isDesktop, hasTouch, orientation }`
+**Description:** Parent sends viewport information to iframe
+
+**Type:** `hide-chrome`
+**Data:** `{}`
+**Description:** Iframe requests parent to hide header/footer (mobile only)
+
+**Type:** `show-chrome`
+**Data:** `{}`
+**Description:** Iframe requests parent to show header/footer
+
 ## Styling Considerations
 
 The embedded pages use:
-- Tailwind CSS for styling
-- Minimal, iframe-friendly layouts
+- Bootstrap 5 for responsive styling
+- Mobile-first design approach
 - No fixed headers/footers
 - Transparent backgrounds
-- Responsive design
+- Responsive typography and spacing
+- Touch-optimized controls
 
 ## API Integration
 
