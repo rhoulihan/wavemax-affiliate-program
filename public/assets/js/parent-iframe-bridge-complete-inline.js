@@ -87,6 +87,12 @@
         detectViewport();
         window.addEventListener('resize', debounce(detectViewport, 250));
         window.addEventListener('orientationchange', detectViewport);
+        
+        // If mobile is detected on init, hide chrome immediately
+        if (isMobile || isTablet) {
+            console.log('[Parent-Iframe Bridge] Mobile/tablet detected on init, hiding chrome');
+            hideChrome();
+        }
 
         // Set up message listener
         window.addEventListener('message', handleMessage);
@@ -358,8 +364,14 @@
                 
             case 'route-changed':
                 console.log('[Parent-Iframe Bridge] Route changed. chromeHidden:', chromeHidden, 'isMobile:', isMobile);
-                // Reset chrome visibility on route change
-                if (chromeHidden && !isMobile) {
+                // On mobile, always keep chrome hidden
+                if (isMobile && !chromeHidden) {
+                    console.log('[Parent-Iframe Bridge] Route changed on mobile, hiding chrome');
+                    hideChrome();
+                }
+                // On desktop, show chrome if it was hidden
+                else if (!isMobile && chromeHidden) {
+                    console.log('[Parent-Iframe Bridge] Route changed on desktop, showing chrome');
                     showChrome();
                 }
                 break;
