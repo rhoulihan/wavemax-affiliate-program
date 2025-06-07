@@ -144,7 +144,7 @@
                 // Fallback: select the input for manual copying
                 linkInput.select();
                 linkInput.focus();
-                alert('Please press Ctrl+C (or Cmd+C on Mac) to copy the link.');
+                modalAlert('Please press Ctrl+C (or Cmd+C on Mac) to copy the link.', 'Link Copied');
             }
         }
 
@@ -223,5 +223,6 @@
                 'Your unique registration link will be available after confirmation';
         }
     </script>
+    <script src="/assets/js/modal-utils.js"></script>
 </body>
 </html>

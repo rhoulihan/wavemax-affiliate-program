@@ -247,7 +247,7 @@
             const password = document.getElementById('loginPassword').value;
 
             if (!username || !password) {
-                alert('Please enter both username and password');
+                modalAlert('Please enter both username and password', 'Missing Information');
                 return;
             }
 
@@ -297,7 +297,7 @@
                         message: data.message || 'Login failed',
                         context: 'schedule-pickup'
                     });
-                    alert(data.message || 'Login failed. Please check your credentials.');
+                    modalAlert(data.message || 'Login failed. Please check your credentials.', 'Login Failed');
                 }
             })
             .catch(error => {
@@ -306,7 +306,7 @@
                     message: 'Login failed. Please try again.',
                     context: 'schedule-pickup'
                 });
-                alert('Login failed. Please try again.');
+                modalAlert('Login failed. Please try again.', 'Login Error');
             });
         });
 
@@ -319,7 +319,7 @@
             const deliveryDate = new Date(document.getElementById('deliveryDate').value);
             
             if (deliveryDate <= pickupDate) {
-                alert('Delivery date must be after pickup date');
+                modalAlert('Delivery date must be after pickup date', 'Invalid Dates');
                 return;
             }
 
@@ -366,7 +366,7 @@
                     sendMessageToParent('order-error', {
                         message: data.message || 'Failed to schedule pickup'
                     });
-                    alert(data.message || 'Failed to schedule pickup. Please try again.');
+                    modalAlert(data.message || 'Failed to schedule pickup. Please try again.', 'Scheduling Failed');
                 }
             })
             .catch(error => {
@@ -374,7 +374,7 @@
                 sendMessageToParent('order-error', {
                     message: 'Failed to schedule pickup. Please try again.'
                 });
-                alert('Failed to schedule pickup. Please try again.');
+                modalAlert('Failed to schedule pickup. Please try again.', 'Scheduling Error');
             });
         });
 
@@ -409,6 +409,7 @@
             sendMessageToParent('iframe-loaded', { page: 'schedule-pickup' });
         });
     </script>
+    <script src="/assets/js/modal-utils.js"></script>
     <script src="/assets/js/csrf-utils.js"></script>
     <script src="/assets/js/schedule-pickup.js"></script>
 </body>

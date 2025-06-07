@@ -76,7 +76,7 @@
       document.getElementById('accountConflictModal').remove();
       
       // Show a message about using a different account
-      alert('Please try logging in with a different Google account or use the email/password registration method.');
+      modalAlert('Please try logging in with a different Google account or use the email/password registration method.', 'Account Already Exists');
     });
     
     // Close modal when clicking outside
@@ -188,13 +188,13 @@
           }
         } else {
           console.error('Invalid affiliate data:', data);
-          alert('Invalid affiliate ID. Please use a valid registration link.');
+          modalAlert('Invalid affiliate ID. Please use a valid registration link.', 'Invalid Affiliate');
           window.location.href = '/embed-app.html?login=customer';
         }
       })
       .catch(error => {
         console.error('Error fetching affiliate info:', error);
-        alert('Unable to load affiliate information. Please try again.');
+        modalAlert('Unable to load affiliate information. Please try again.', 'Loading Error');
         window.location.href = '/embed-app.html?login=customer';
       });
 
@@ -216,7 +216,7 @@
       });
   } else {
     // Redirect if no affiliate ID is provided
-    alert('No affiliate ID provided. Please use a valid registration link.');
+    modalAlert('No affiliate ID provided. Please use a valid registration link.', 'Missing Affiliate ID');
     window.location.href = '/embed-app.html?login=customer';
   }
 
@@ -324,13 +324,13 @@
       const confirmPassword = document.getElementById('confirmPassword').value;
 
       if (password !== confirmPassword) {
-        alert('Passwords do not match!');
+        modalAlert('Passwords do not match!', 'Password Mismatch');
         return;
       }
 
       // Validate password strength
       if (!validatePassword()) {
-        alert('Please ensure your password meets all the security requirements listed below the password field.');
+        modalAlert('Please ensure your password meets all the security requirements listed below the password field.', 'Password Requirements');
         document.getElementById('password').focus();
         return;
       }
@@ -339,7 +339,7 @@
     // Validate required fields
     const missingFields = validateFormFields(isSocialRegistration);
     if (missingFields.length > 0) {
-      alert(`Please fill in the following required fields: ${missingFields.join(', ')}`);
+      modalAlert(`Please fill in the following required fields: ${missingFields.join(', ')}`, 'Missing Required Fields');
       return;
     }
 
@@ -397,12 +397,12 @@
           // Redirect to success page
           window.location.href = '/embed-app.html?route=/customer-success';
         } else {
-          alert(data.message || 'Registration failed. Please try again.');
+          modalAlert(data.message || 'Registration failed. Please try again.', 'Registration Failed');
         }
       })
       .catch(error => {
         console.error('Registration error:', error);
-        alert('An error occurred during registration. Please try again.');
+        modalAlert('An error occurred during registration. Please try again.', 'Registration Error');
       });
   });
 
@@ -560,7 +560,7 @@
       });
       
       if (!popup || popup.closed) {
-        alert('Popup was blocked. Please allow popups for this site and try again.');
+        modalAlert('Popup was blocked. Please allow popups for this site and try again.', 'Popup Blocked');
         return;
       }
       
@@ -626,13 +626,13 @@
                 showAccountConflictModal(data.result);
               } else if (data.result.type === 'social-auth-error') {
                 console.log('Processing customer social-auth-error from database');
-                alert(data.result.message || 'Social authentication failed');
+                modalAlert(data.result.message || 'Social authentication failed', 'Authentication Failed');
               } else {
                 console.log('Unknown customer result type:', data.result.type);
               }
               } catch (resultError) {
                 console.error('Error processing Customer OAuth result:', resultError);
-                alert('Error processing authentication result');
+                modalAlert('Error processing authentication result', 'Processing Error');
               }
               return;
             }
@@ -645,7 +645,7 @@
             if (popup && !popup.closed) {
               popup.close();
             }
-            alert('Authentication timed out. Please try again.');
+            modalAlert('Authentication timed out. Please try again.', 'Authentication Timeout');
             return;
           }
           
@@ -710,7 +710,7 @@
           errorMessage = 'An error occurred during social authentication. Please try again.';
           break;
       }
-      alert(errorMessage);
+      modalAlert(errorMessage, 'Error');
       return;
     }
 

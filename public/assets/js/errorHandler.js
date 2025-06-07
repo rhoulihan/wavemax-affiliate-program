@@ -32,15 +32,21 @@ if (typeof ErrorHandler === 'undefined') {
     }
 
     showError(message, timeout = 5000) {
-      const errorMessage = document.getElementById('errorMessage');
-      errorMessage.textContent = message;
-      this.errorContainer.classList.remove('hidden');
+      // Use modal system if available
+      if (window.ModalSystem) {
+        window.ModalSystem.error(message, 'Error');
+      } else {
+        // Fallback to original toast notification
+        const errorMessage = document.getElementById('errorMessage');
+        errorMessage.textContent = message;
+        this.errorContainer.classList.remove('hidden');
 
-      // Automatically hide after timeout
-      if (timeout > 0) {
-        setTimeout(() => {
-          this.hideError();
-        }, timeout);
+        // Automatically hide after timeout
+        if (timeout > 0) {
+          setTimeout(() => {
+            this.hideError();
+          }, timeout);
+        }
       }
     }
 

@@ -314,7 +314,7 @@ async function loadCustomerIntoForm(customer, token) {
 
   } catch (error) {
     console.error('Error loading customer data:', error);
-    alert('Error loading customer information. Please try logging in again.');
+    modalAlert('Error loading customer information. Please try logging in again.', 'Loading Error');
     window.location.href = '/embed-app.html?login=customer&pickup=true';
   }
 }
@@ -529,11 +529,11 @@ function setupFormSubmission(token) {
         window.location.href = '/embed-app.html?route=/order-confirmation&id=' + data.orderId;
       } else {
         console.error('Order submission failed:', data);
-        alert(data.message || 'Failed to schedule pickup. Please try again.');
+        modalAlert(data.message || 'Failed to schedule pickup. Please try again.', 'Scheduling Failed');
       }
     } catch (error) {
       console.error('Order submission error:', error);
-      alert('An error occurred while scheduling your pickup. Please try again.');
+      modalAlert('An error occurred while scheduling your pickup. Please try again.', 'Scheduling Error');
     }
   });
 }
