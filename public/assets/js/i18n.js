@@ -98,6 +98,10 @@
                 const translations = await response.json();
                 this.translations[lang] = translations;
                 this.loadedLanguages.add(lang);
+                
+                // Always log what we loaded to debug the issue
+                console.log(`Loaded translations for ${lang}:`, translations);
+                console.log('Header translations:', translations?.landing?.header);
 
                 if (this.config.debugMode) {
                     console.log(`Loaded translations for ${lang}:`, translations);

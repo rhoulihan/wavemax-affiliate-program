@@ -65,7 +65,9 @@
   "landing": {
     "header": {
       "title": "Junte-se ao Programa de Afiliados WaveMAX",
-      "subtitle": "Seja parceiro do principal serviço de lavanderia de Austin e ganhe comissões recorrentes enquanto ajuda sua comunidade a economizar tempo"
+      "subtitle": "Seja parceiro do principal serviço de lavanderia de Austin e ganhe comissões recorrentes enquanto ajuda sua comunidade a economizar tempo",
+      "loginTooltip": "Faça login em sua conta de afiliado existente",
+      "registerTooltip": "Crie uma nova conta de afiliado e comece a ganhar"
     },
     "mainHeader": {
       "title": "Junte-se ao Programa de Afiliados WaveMAX",

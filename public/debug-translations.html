@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Translation Debug</title>
+</head>
+<body>
+    <h1>Translation Debug Tool</h1>
+    <div id="debug-output"></div>
+
+    <!-- Load i18n library -->
+    <script src="/assets/js/i18n.js"></script>
+    
+    <script>
+        const output = document.getElementById('debug-output');
+        
+        function log(message, data = null) {
+            const entry = document.createElement('div');
+            entry.style.marginBottom = '10px';
+            entry.style.padding = '10px';
+            entry.style.background = '#f0f0f0';
+            entry.style.fontFamily = 'monospace';
+            
+            if (data) {
+                entry.innerHTML = `<strong>${message}:</strong><br><pre>${JSON.stringify(data, null, 2)}</pre>`;
+            } else {
+                entry.innerHTML = `<strong>${message}</strong>`;
+            }
+            
+            output.appendChild(entry);
+        }
+
+        // Enable debug mode
+        window.i18n.config.debugMode = true;
+
+        // Test translation loading
+        async function debugTranslations() {
+            log('Starting translation debug...');
+            
+            // Check if i18n is available
+            log('i18n object available', !!window.i18n);
+            
+            // Check current configuration
+            log('i18n configuration', window.i18n.config);
+            
+            // Try to load translations manually
+            try {
+                const url = `${window.i18n.config.translationsPath}/en/common.json`;
+                log(`Attempting to fetch translations from: ${url}`);
+                
+                const response = await fetch(url);
+                log('Fetch response status', {
+                    status: response.status,
+                    statusText: response.statusText,
+                    headers: Object.fromEntries(response.headers.entries())
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    log('Translation data loaded successfully');
+                    
+                    // Check for landing.header
+                    log('landing.header exists', !!data.landing?.header);
+                    if (data.landing?.header) {
+                        log('landing.header content', data.landing.header);
+                    }
+                    
+                    // Check current i18n translations
+                    log('Current i18n.translations', window.i18n.translations);
+                    
+                    // Try to access translation using i18n.t
+                    await window.i18n.init();
+                    
+                    const testKeys = [
+                        'landing.header.title',
+                        'landing.header.subtitle',
+                        'landing.header.loginTooltip',
+                        'landing.header.registerTooltip'
+                    ];
+                    
+                    testKeys.forEach(key => {
+                        const value = window.i18n.t(key);
+                        log(`i18n.t('${key}')`, value);
+                    });
+                    
+                } else {
+                    log('Failed to fetch translations', {
+                        status: response.status,
+                        statusText: response.statusText
+                    });
+                }
+            } catch (error) {
+                log('Error during fetch', {
+                    message: error.message,
+                    stack: error.stack
+                });
+            }
+            
+            // Check if running in iframe
+            log('Running in iframe', window.self !== window.top);
+            
+            // Check for CORS errors in console
+            log('Check browser console for CORS errors');
+        }
+
+        // Run debug when page loads
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', debugTranslations);
+        } else {
+            debugTranslations();
+        }
+    </script>
+</body>
+</html>
