@@ -63,6 +63,16 @@
     }
   },
   "landing": {
+    "mainHeader": {
+      "title": "Únete al Programa de Afiliados WaveMAX",
+      "subtitle": "Asóciate con el principal servicio de lavandería de Austin y gana comisiones recurrentes mientras ayudas a tu comunidad a ahorrar tiempo"
+    },
+    "stats": {
+      "setFees": "Establece Tus Propias Tarifas",
+      "commission": "Tasa de Comisión",
+      "startup": "Costo de Inicio",
+      "dashboard": "Acceso al Panel"
+    },
     "hero": {
       "badge": "Tu Socio Local de WaveMAX",
       "title": "Servicio Premium de Recogida y Entrega de Lavandería",
@@ -105,6 +115,22 @@
           "title": "Entrega Rápida",
           "description": "Tu ropa se limpia profesionalmente y se devuelve fresca, doblada y lista para usar - típicamente dentro de 24-48 horas."
         }
+      },
+      "step1": {
+        "title": "Regístrate",
+        "description": "Crea tu cuenta de afiliado en minutos"
+      },
+      "step2": {
+        "title": "Comparte Tu Enlace",
+        "description": "Obtén tu enlace de referencia único y materiales promocionales"
+      },
+      "step3": {
+        "title": "Los Clientes se Registran",
+        "description": "Tus referidos se registran y programan recogidas"
+      },
+      "step4": {
+        "title": "Gana Comisiones",
+        "description": "Recibe pagos mensuales por depósito directo"
       }
     },
     "process": {
@@ -143,6 +169,18 @@
         "quality": "Ambiente con control de calidad en las instalaciones de WaveMAX",
         "ecoFriendly": "Productos de limpieza ecológicos",
         "transparent": "Precios transparentes - paga por conveniencia y calidad"
+      },
+      "recurring": {
+        "title": "Gana Ingresos Recurrentes",
+        "description": "Obtén 10% de comisión en cada pedido de los clientes que refieras, mientras permanezcan activos"
+      },
+      "tracking": {
+        "title": "Rastrea Tu Éxito",
+        "description": "El panel en tiempo real muestra tus clientes, pedidos y ganancias con análisis detallados"
+      },
+      "community": {
+        "title": "Ayuda a Tu Comunidad",
+        "description": "Proporciona valor a tu red al presentarles un servicio de lavandería conveniente y confiable"
       }
     },
     "quality": {
@@ -160,6 +198,9 @@
         "title": "Control de Calidad",
         "description": "Procesos estrictos de control de calidad aseguran resultados consistentes y manejo adecuado de cada prenda"
       }
+    },
+    "calculator": {
+      "title": "Calcula Tus Ganancias Potenciales"
     },
     "cta": {
       "title": "¿Listo para Experimentar el Servicio Premium de Lavandería?",

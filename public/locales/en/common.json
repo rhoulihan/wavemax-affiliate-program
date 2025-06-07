@@ -63,6 +63,16 @@
     }
   },
   "landing": {
+    "mainHeader": {
+      "title": "Join the WaveMAX Affiliate Program",
+      "subtitle": "Partner with Austin's premier laundry service and earn recurring commissions while helping your community save time"
+    },
+    "stats": {
+      "setFees": "Set Your Own Fees",
+      "commission": "Commission Rate",
+      "startup": "Startup Cost",
+      "dashboard": "Dashboard Access"
+    },
     "hero": {
       "badge": "Your Local WaveMAX Partner",
       "title": "Premium Laundry Pickup & Delivery Service",
@@ -105,6 +115,22 @@
           "title": "Fast Turnaround",
           "description": "Your clothes are professionally cleaned and returned fresh, folded, and ready to wear - typically within 24-48 hours."
         }
+      },
+      "step1": {
+        "title": "Sign Up",
+        "description": "Create your affiliate account in minutes"
+      },
+      "step2": {
+        "title": "Share Your Link",
+        "description": "Get your unique referral link and promo materials"
+      },
+      "step3": {
+        "title": "Customers Sign Up",
+        "description": "Your referrals register and schedule pickups"
+      },
+      "step4": {
+        "title": "Earn Commissions",
+        "description": "Get paid monthly via direct deposit"
       }
     },
     "process": {
@@ -143,6 +169,18 @@
         "quality": "Quality-controlled environment at WaveMAX facility",
         "ecoFriendly": "Eco-friendly cleaning products",
         "transparent": "Transparent pricing - pay for convenience & quality"
+      },
+      "recurring": {
+        "title": "Earn Recurring Income",
+        "description": "Get 10% commission on every order from customers you refer, for as long as they remain active"
+      },
+      "tracking": {
+        "title": "Track Your Success",
+        "description": "Real-time dashboard shows your customers, orders, and earnings with detailed analytics"
+      },
+      "community": {
+        "title": "Help Your Community",
+        "description": "Provide value to your network by introducing them to convenient, reliable laundry service"
       }
     },
     "quality": {
@@ -160,6 +198,9 @@
         "title": "Quality Controlled",
         "description": "Strict quality control processes ensure consistent results and proper handling of every garment"
       }
+    },
+    "calculator": {
+      "title": "Calculate Your Potential Earnings"
     },
     "cta": {
       "title": "Ready to Experience Premium Laundry Service?",
