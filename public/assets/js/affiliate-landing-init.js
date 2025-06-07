@@ -6,6 +6,50 @@
         const urlParams = new URLSearchParams(window.location.search);
         return urlParams.get(name);
     }
+    
+    // Function to show affiliate not found message
+    function showAffiliateNotFoundMessage() {
+        // Find the main content area
+        const heroSection = document.querySelector('.hero-section .container');
+        if (heroSection) {
+            heroSection.innerHTML = `
+                <div class="row align-items-center text-center">
+                    <div class="col-12">
+                        <div class="alert-icon mb-4">
+                            <i class="bi bi-exclamation-triangle-fill" style="font-size: 4rem; color: #ffc107;"></i>
+                        </div>
+                        <h1 class="hero-title mb-4">Affiliate Not Found</h1>
+                        <p class="hero-subtitle mb-4">
+                            We couldn't find the delivery partner associated with this link.
+                        </p>
+                        <p class="lead mb-4">
+                            Please verify the link with your delivery partner or contact them directly for the correct registration link.
+                        </p>
+                        <div class="mt-4">
+                            <a href="https://www.wavemaxlaundry.com" class="btn btn-light btn-lg">
+                                <i class="bi bi-house-door me-2"></i>Visit WaveMAX Laundry
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // Hide other sections that depend on affiliate data
+        const sectionsToHide = [
+            '.py-5', // Services and other info sections
+            '.cta-section' // Bottom CTA
+        ];
+        
+        sectionsToHide.forEach(selector => {
+            const elements = document.querySelectorAll(selector);
+            elements.forEach(el => {
+                if (!el.classList.contains('hero-section')) {
+                    el.style.display = 'none';
+                }
+            });
+        });
+    }
 
     // Function to initialize the landing page
     function initializeLandingPage() {
@@ -24,6 +68,9 @@
         fetch(`${baseUrl}/api/v1/affiliates/public/${affiliateCode}`)
             .then(response => {
                 if (!response.ok) {
+                    if (response.status === 404) {
+                        showAffiliateNotFoundMessage();
+                    }
                     throw new Error('Failed to fetch affiliate information');
                 }
                 return response.json();
