@@ -707,14 +707,18 @@
                     // Use a slight delay to ensure it happens after Google Translate updates
                     setTimeout(() => {
                         const mainFlag = document.querySelector('.imgTranslation');
-                        if (mainFlag) {
-                            // Check if we already have a working URL for this language
-                            if (workingFlagUrls.has(lang)) {
-                                mainFlag.src = workingFlagUrls.get(lang);
-                                mainFlag.setAttribute('data-lang', lang);
-                                console.log('[Parent-Iframe Bridge] Using cached flag URL for language:', lang);
-                                return;
-                            }
+                        if (!mainFlag) return;
+                        
+                        // Always set the data attribute
+                        mainFlag.setAttribute('data-lang', lang);
+                        
+                        // Check if we already have a working URL for this language
+                        if (workingFlagUrls.has(lang)) {
+                            const cachedUrl = workingFlagUrls.get(lang);
+                            mainFlag.src = cachedUrl;
+                            console.log('[Parent-Iframe Bridge] Applied cached flag URL for language:', lang);
+                            return;
+                        }
                             
                             let flagSrc;
                             let fallbackSrc;
@@ -748,14 +752,6 @@
                                     flagSrc = '/assets/WaveMax/images/country.png';
                             }
                             
-                            // Don't update if it's already the correct flag
-                            if (mainFlag.src === flagSrc || mainFlag.src === fallbackSrc) {
-                                mainFlag.setAttribute('data-lang', lang);
-                                return;
-                            }
-                            
-                            // Add data attribute to track which language is set
-                            mainFlag.setAttribute('data-lang', lang);
                             
                             // Clear any existing error handlers
                             mainFlag.onerror = null;
