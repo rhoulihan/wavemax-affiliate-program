@@ -184,3 +184,17 @@ If interrupted, use this log to:
 2. **Testing**: Verify all translations work correctly in embedded iframe context
 3. **Language Persistence**: Ensure language preference persists across sessions
 4. **Performance**: Consider lazy-loading translations based on selected language
+
+## Issues Resolved
+
+1. **Affiliate Name Not Loading** (2025-01-07)
+   - **Issue**: i18n was replacing entire content of elements, removing nested elements with IDs
+   - **Solution**: Removed i18n attributes from parent elements containing dynamic content
+   - **Prevention**: Created i18n-best-practices.md to document proper patterns
+
+## Best Practices Established
+
+1. Apply i18n to smallest possible elements
+2. Keep dynamic content elements separate from translated text
+3. Use parameter interpolation for dynamic values within translations
+4. Document patterns in i18n-best-practices.md for future development

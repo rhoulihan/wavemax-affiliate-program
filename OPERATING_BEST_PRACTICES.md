@@ -255,6 +255,24 @@ When the command "run coverage test" is issued, the system performs the followin
 - Check NODE_ENV setting when debugging environment-specific issues
 - Some features (like documentation) may be environment-gated
 
+## Internationalization (i18n) Best Practices
+
+### Critical Rule: Avoid Nested Elements with IDs inside i18n Elements
+1. **Issue**: Elements with `data-i18n` attributes replace their entire content during translation
+   - **Discovered**: 2025-01-07 - Affiliate names not loading on landing page
+   - **Symptom**: JavaScript cannot find elements with IDs that were nested inside i18n elements
+   
+2. **Solution**: Keep dynamic content elements separate from translated text
+   ```html
+   <!-- Bad - ID will be lost -->
+   <p data-i18n="greeting">Hello <span id="userName">Guest</span></p>
+   
+   <!-- Good - ID preserved -->
+   <p>Hello <span id="userName">Guest</span></p>
+   ```
+
+3. **For detailed i18n guidelines**: See `i18n-best-practices.md`
+
 ## Legal and Branding Guidelines
 
 ### Copyright Notices
