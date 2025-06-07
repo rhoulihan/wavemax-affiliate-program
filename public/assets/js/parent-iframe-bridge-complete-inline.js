@@ -78,10 +78,8 @@
         // Always hide the page header element immediately
         hidePageHeader();
         
-        // Remove padding from iframe container for affiliate landing pages
-        if (window.location.search.includes('affiliate-landing')) {
-            removeContainerPadding();
-        }
+        // Remove padding and borders from iframe container for all embedded content
+        removeContainerPaddingAndBorders();
 
         // Set up viewport detection
         detectViewport();
@@ -120,14 +118,14 @@
         }
     }
     
-    function removeContainerPadding() {
-        console.log('[Parent-Iframe Bridge] Removing container padding for affiliate landing page');
+    function removeContainerPaddingAndBorders() {
+        console.log('[Parent-Iframe Bridge] Removing container padding and borders for all embedded content');
         
         // Find the iframe's parent containers
         if (iframe) {
             let parent = iframe.parentElement;
             while (parent && parent !== document.body) {
-                // Remove padding and set full width with !important
+                // Remove padding, borders and set full width with !important
                 parent.style.cssText += `
                     padding: 0 !important;
                     padding-left: 0 !important;
@@ -137,10 +135,14 @@
                     margin-right: 0 !important;
                     max-width: 100% !important;
                     width: 100% !important;
+                    border: none !important;
+                    border-width: 0 !important;
+                    border-style: none !important;
+                    box-shadow: none !important;
                 `;
                 
                 // Log what we're modifying
-                console.log('[Parent-Iframe Bridge] Removed padding from:', 
+                console.log('[Parent-Iframe Bridge] Removed padding and borders from:', 
                     parent.id || parent.className || 'unnamed element');
                 
                 parent = parent.parentElement;
@@ -164,8 +166,8 @@
             `;
         }
         
-        // Target specific containers that might have padding
-        const containers = document.querySelectorAll('.container, .container-fluid, .row, .col-12, #main-container, #wavemax-affiliate-container');
+        // Target specific containers that might have padding or borders
+        const containers = document.querySelectorAll('.container, .container-fluid, .row, .col-12, #main-container, #wavemax-affiliate-container, .card, .panel, .box');
         containers.forEach(container => {
             // First remove any inline styles
             container.style.removeProperty('max-width');
@@ -173,6 +175,9 @@
             container.style.removeProperty('padding-right');
             container.style.removeProperty('margin-left');
             container.style.removeProperty('margin-right');
+            container.style.removeProperty('border');
+            container.style.removeProperty('border-width');
+            container.style.removeProperty('box-shadow');
             
             // Then apply our styles
             container.style.cssText += `
@@ -182,6 +187,10 @@
                 margin-right: 0 !important;
                 max-width: 100% !important;
                 width: 100% !important;
+                border: none !important;
+                border-width: 0 !important;
+                border-style: none !important;
+                box-shadow: none !important;
             `;
             
             // Force reflow to ensure styles are applied
@@ -191,14 +200,17 @@
         // Also inject a style tag to override any CSS rules
         const styleTag = document.createElement('style');
         styleTag.innerHTML = `
-            /* Force full-width for affiliate landing */
+            /* Force full-width and remove borders for all embedded content */
             body .container,
             body .container-fluid,
             body .row,
             body .col-12,
             body #main-container,
             body #wavemax-affiliate-container,
-            body section.main-container {
+            body section.main-container,
+            body .card,
+            body .panel,
+            body .box {
                 padding-left: 0 !important;
                 padding-right: 0 !important;
                 margin-left: 0 !important;
@@ -206,6 +218,11 @@
                 margin: 0 !important;
                 max-width: 100% !important;
                 width: 100% !important;
+                border: none !important;
+                border-width: 0 !important;
+                border-style: none !important;
+                border-color: transparent !important;
+                box-shadow: none !important;
             }
             
             /* Override Bootstrap's auto margins that center containers */
@@ -234,6 +251,19 @@
                 margin: 0 !important;
                 padding: 0 !important;
                 display: block !important;
+                border: none !important;
+                border-width: 0 !important;
+                box-shadow: none !important;
+            }
+            
+            /* Remove borders from all elements around iframe */
+            body #wavemax-iframe,
+            body #wavemax-iframe *,
+            body [id*="wavemax"] *,
+            body [class*="wavemax"] * {
+                border: none !important;
+                border-width: 0 !important;
+                box-shadow: none !important;
             }
             
             /* Override any max-width on containers */
