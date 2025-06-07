@@ -23,21 +23,31 @@
             margin: 0;
             padding: 16px;
         }
+        /* Language switcher positioning */
+        #language-switcher-container {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            z-index: 1000;
+        }
     </style>
 </head>
 <body class="bg-white font-sans">
+    <!-- Language Switcher -->
+    <div id="language-switcher-container"></div>
+    
     <!-- Login Form -->
     <div class="embed-container">
         <div class="max-w-md mx-auto bg-white rounded-lg shadow-md overflow-hidden">
             <div class="wavemax-blue text-white p-6">
-                <h2 class="text-2xl font-bold">Affiliate Login</h2>
-                <p class="mt-2">Sign in to access your affiliate dashboard</p>
+                <h2 class="text-2xl font-bold" data-i18n="affiliate.login.title">Affiliate Login</h2>
+                <p class="mt-2" data-i18n="affiliate.login.subtitle">Sign in to access your affiliate dashboard</p>
             </div>
             
             <!-- Social Login Section -->
             <div class="p-6 pb-0">
                 <div class="bg-gray-50 p-4 rounded-lg mb-6">
-                    <p class="text-gray-600 mb-4 text-center">Sign in with your social media account</p>
+                    <p class="text-gray-600 mb-4 text-center" data-i18n="affiliate.login.socialLogin">Sign in with your social media account</p>
                     <div class="grid grid-cols-3 gap-3">
                         <button type="button" id="googleLogin" class="flex items-center justify-center px-4 py-2 border border-gray-300 rounded-lg bg-white hover:bg-gray-50 transition">
                             <svg class="w-5 h-5" viewBox="0 0 24 24">
@@ -67,7 +77,7 @@
                                 <div class="w-full border-t border-gray-300"></div>
                             </div>
                             <div class="relative flex justify-center text-sm">
-                                <span class="px-2 bg-gray-50 text-gray-500">Or sign in with username and password</span>
+                                <span class="px-2 bg-gray-50 text-gray-500" data-i18n="affiliate.login.orEmail">Or sign in with username and password</span>
                             </div>
                         </div>
                     </div>
@@ -77,40 +87,52 @@
             <form id="affiliateLoginForm" class="p-6 pt-0 space-y-6">
                 
                 <div class="mb-4">
-                    <label for="username" class="block text-gray-700 mb-2">Username</label>
+                    <label for="username" class="block text-gray-700 mb-2" data-i18n="common.labels.username">Username</label>
                     <input type="text" id="username" name="username" required class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
                 </div>
                 
                 <div class="mb-4">
-                    <label for="password" class="block text-gray-700 mb-2">Password</label>
+                    <label for="password" class="block text-gray-700 mb-2" data-i18n="common.labels.password">Password</label>
                     <input type="password" id="password" name="password" required class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
                 </div>
                 
                 <div class="flex items-center justify-between mb-4">
                     <div class="flex items-center">
                         <input type="checkbox" id="remember" name="remember" class="h-4 w-4 text-blue-600">
-                        <label for="remember" class="ml-2 text-sm text-gray-700">Remember me</label>
+                        <label for="remember" class="ml-2 text-sm text-gray-700" data-i18n="common.labels.rememberMe">Remember me</label>
                     </div>
-                    <a href="#" class="text-sm text-blue-600 hover:underline" onclick="navigateParent('forgot-password'); return false;">Forgot password?</a>
+                    <a href="#" class="text-sm text-blue-600 hover:underline" onclick="navigateParent('forgot-password'); return false;" data-i18n="common.labels.forgotPassword">Forgot password?</a>
                 </div>
                 
                 <div>
-                    <button type="submit" class="w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-blue-700 transition">Sign In</button>
+                    <button type="submit" class="w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-blue-700 transition" data-i18n="common.buttons.signIn">Sign In</button>
                 </div>
             </form>
             
             <div class="bg-gray-50 p-6 border-t">
                 <p class="text-sm text-gray-700 text-center">
-                    Don't have an affiliate account? 
-                    <a href="#" class="text-blue-600 hover:underline" onclick="navigateParent('affiliate-register'); return false;">Register now</a>
+                    <span data-i18n="affiliate.login.noAccount">Don't have an affiliate account?</span> 
+                    <a href="#" class="text-blue-600 hover:underline" onclick="navigateParent('affiliate-register'); return false;" data-i18n="common.buttons.registerNow">Register now</a>
                 </p>
             </div>
         </div>
     </div>
 
+    <!-- i18n Scripts -->
+    <script src="/assets/js/i18n.js"></script>
+    <script src="/assets/js/language-switcher.js"></script>
     <script src="/assets/js/modal-utils.js"></script>
     <script src="/assets/js/csrf-utils.js"></script>
     <script>
+        // Initialize i18n
+        document.addEventListener('DOMContentLoaded', async function() {
+            await window.i18n.init({ debugMode: false });
+            window.LanguageSwitcher.createSwitcher('language-switcher-container', {
+                style: 'dropdown',
+                showLabel: false
+            });
+        });
+        
         console.log('🚀 Affiliate login script starting...');
         // PostMessage communication with parent window
         function sendMessageToParent(type, data) {
@@ -165,7 +187,7 @@
                 });
                 
                 if (!popup || popup.closed) {
-                    modalAlert('Popup was blocked. Please allow popups for this site and try again.', 'Popup Blocked');
+                    modalAlert(window.i18n ? window.i18n.t('common.messages.popupBlocked') : 'Popup was blocked. Please allow popups for this site and try again.', 'Popup Blocked');
                     return;
                 }
                 
@@ -227,19 +249,19 @@
                                     } else if (data.result.type === 'social-auth-success') {
                                         console.log('Affiliate does not exist, redirecting to registration');
                                         // New affiliate - redirect to registration with social token
-                                        modalAlert('Account not found. You will be redirected to registration to create a new affiliate account.', 'Account Not Found');
+                                        modalAlert(window.i18n ? window.i18n.t('common.messages.accountNotFound') : 'Account not found. You will be redirected to registration to create a new affiliate account.', 'Account Not Found');
                                         window.location.href = `/affiliate-register-embed.html?socialToken=${data.result.socialToken}&provider=${data.result.provider}`;
                                         
                                     } else if (data.result.type === 'social-auth-error') {
                                         console.log('Processing affiliate social-auth-error from database');
-                                        modalAlert(data.result.message || 'Social authentication failed', 'Authentication Failed');
+                                        modalAlert(data.result.message || (window.i18n ? window.i18n.t('common.messages.authenticationFailed') : 'Social authentication failed'), window.i18n ? window.i18n.t('common.messages.authenticationFailed') : 'Authentication Failed');
                                         
                                     } else {
                                         console.log('Unknown affiliate login result type:', data.result.type);
                                     }
                                 } catch (resultError) {
                                     console.error('Error processing Affiliate Login OAuth result:', resultError);
-                                    modalAlert('Error processing authentication result', 'Processing Error');
+                                    modalAlert(window.i18n ? window.i18n.t('common.messages.processingError') : 'Error processing authentication result', 'Processing Error');
                                 }
                                 return;
                             }
@@ -252,7 +274,7 @@
                             if (popup && !popup.closed) {
                                 popup.close();
                             }
-                            modalAlert('Authentication timed out. Please try again.', 'Authentication Timeout');
+                            modalAlert(window.i18n ? window.i18n.t('common.messages.authenticationTimeout') : 'Authentication timed out. Please try again.', window.i18n ? window.i18n.t('common.messages.authenticationTimeout') : 'Authentication Timeout');
                             return;
                         }
                         
@@ -360,7 +382,7 @@
                     sendMessageToParent('login-error', {
                         message: data.message || 'Login failed'
                     });
-                    modalAlert(data.message || 'Login failed. Please check your credentials and try again.', 'Login Failed');
+                    modalAlert(data.message || (window.i18n ? window.i18n.t('common.messages.loginFailed') : 'Login failed. Please check your credentials and try again.'), window.i18n ? window.i18n.t('common.messages.loginFailed') : 'Login Failed');
                 }
             })
             .catch(error => {
@@ -368,7 +390,7 @@
                 sendMessageToParent('login-error', {
                     message: 'Login failed. Please check your credentials and try again.'
                 });
-                modalAlert('Login failed. Please check your credentials and try again.', 'Login Error');
+                modalAlert(window.i18n ? window.i18n.t('common.messages.loginFailed') : 'Login failed. Please check your credentials and try again.', window.i18n ? window.i18n.t('common.messages.error') : 'Login Error');
             });
         });
 

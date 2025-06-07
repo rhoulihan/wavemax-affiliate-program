@@ -100,15 +100,23 @@
             font-weight: 600;
             color: #1e3a8a;
         }
+    
+        /* Language switcher positioning */
+        #language-switcher-container {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            z-index: 1000;
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Terms of Service</h1>
+        <h1 data-i18n="common.labels.termsAndConditions">Terms of Service</h1>
         
         <div class="effective-date">
             <strong>Effective Date:</strong> May 31, 2025<br>
-            <strong>Last Updated:</strong> May 31, 2025
+            <strong data-i18n="common.labels.lastUpdated">Last Updated:</strong> May 31, 2025
         </div>
 
         <div class="important-notice">

@@ -486,6 +486,14 @@
                 font-size: 16px;
             }
         }
+    
+        /* Language switcher positioning */
+        #language-switcher-container {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            z-index: 1000;
+        }
     </style>
 </head>
 <body>
@@ -617,7 +625,21 @@
         </div>
     </div>
 
+        <!-- i18n Scripts -->
+    <script src="/assets/js/i18n.js"></script>
+    <script src="/assets/js/language-switcher.js"></script>
     <script src="/assets/js/csrf-utils.js"></script>
     <script src="/assets/js/operator-dashboard-init.js"></script>
+    <script>
+        // Initialize i18n
+        document.addEventListener('DOMContentLoaded', async function() {
+            await window.i18n.init({ debugMode: false });
+            window.LanguageSwitcher.createSwitcher('language-switcher-container', {
+                style: 'dropdown',
+                showLabel: false
+            });
+        });
+    </script>
+
 </body>
 </html>

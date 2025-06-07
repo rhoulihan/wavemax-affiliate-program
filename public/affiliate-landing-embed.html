@@ -18,7 +18,20 @@
     <link rel="stylesheet" href="/assets/css/wavemax-embed.css">
     
     <style>
-        /* Page-specific overrides can go here if needed */
+        /* Language switcher positioning */
+        #language-switcher-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+        
+        @media (max-width: 768px) {
+            #language-switcher-container {
+                top: 10px;
+                right: 10px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -31,6 +44,10 @@
             document.head.appendChild(viewport);
         }
     </script>
+    
+    <!-- Language Switcher -->
+    <div id="language-switcher-container"></div>
+    
     <!-- Hero Section -->
     <section class="hero-section">
         <div class="container">
@@ -39,30 +56,30 @@
                     <div>
                         <div class="affiliate-badge">
                             <i class="bi bi-patch-check-fill me-2"></i>
-                            <strong id="affiliateBadgeName">Loading...</strong> - Your Local WaveMAX Partner
+                            <strong id="affiliateBadgeName">Loading...</strong> - <span data-i18n="landing.hero.badge">Your Local WaveMAX Partner</span>
                         </div>
                     </div>
-                    <h1 class="hero-title">Premium Laundry Pickup & Delivery Service</h1>
-                    <p class="hero-subtitle">Convenient door-to-door service by <span id="affiliateName">your local partner</span>, with professional washing by WaveMAX</p>
+                    <h1 class="hero-title" data-i18n="landing.hero.title">Premium Laundry Pickup & Delivery Service</h1>
+                    <p class="hero-subtitle"><span data-i18n="landing.hero.subtitle" data-i18n-param-affiliateName="your local partner">Convenient door-to-door service by <span id="affiliateName">your local partner</span>, with professional washing by WaveMAX</span></p>
                     <div class="mt-4">
-                        <a href="#" id="registerLink" class="btn btn-outline-primary me-3">Get Started</a>
-                        <a href="#" id="loginLink" class="btn btn-light">Customer Login</a>
+                        <a href="#" id="registerLink" class="btn btn-outline-primary me-3" data-i18n="common.buttons.getStarted">Get Started</a>
+                        <a href="#" id="loginLink" class="btn btn-light" data-i18n="common.buttons.customerLogin">Customer Login</a>
                     </div>
                 </div>
                 <div class="col-lg-6 d-flex align-items-center">
                     <div class="row w-100 justify-content-center">
                         <div class="col-6 mb-3">
                             <div class="pricing-card">
-                                <div class="pricing-title">WDF Service</div>
-                                <div class="pricing-value">$1.25 <span class="pricing-unit">/ lb</span></div>
-                                <div class="text-muted mt-2">Wash, Dry & Fold</div>
+                                <div class="pricing-title" data-i18n="landing.pricing.wdf.title">WDF Service</div>
+                                <div class="pricing-value">$1.25 <span class="pricing-unit" data-i18n="landing.pricing.wdf.unit">/ lb</span></div>
+                                <div class="text-muted mt-2" data-i18n="landing.pricing.wdf.description">Wash, Dry & Fold</div>
                             </div>
                         </div>
                         <div class="col-6 mb-3">
                             <div class="pricing-card">
-                                <div class="pricing-title">Delivery</div>
-                                <div class="pricing-value">$<span id="perBagFee">5</span> <span class="pricing-unit">/ bag</span></div>
-                                <div class="text-muted mt-2">$<span id="minimumFee">25</span> minimum</div>
+                                <div class="pricing-title" data-i18n="landing.pricing.delivery.title">Delivery</div>
+                                <div class="pricing-value">$<span id="perBagFee">5</span> <span class="pricing-unit" data-i18n="landing.pricing.delivery.unit">/ bag</span></div>
+                                <div class="text-muted mt-2">$<span id="minimumFee">25</span> <span data-i18n="landing.pricing.delivery.minimum" data-i18n-exclude="true">minimum</span></div>
                             </div>
                         </div>
                     </div>
@@ -74,15 +91,15 @@
     <!-- Services Section -->
     <section class="py-5">
         <div class="container">
-            <h2 class="text-center mb-5">How Our Service Works</h2>
+            <h2 class="text-center mb-5" data-i18n="landing.howItWorks.title">How Our Service Works</h2>
             <div class="row">
                 <div class="col-md-4 mb-4">
                     <div class="service-card">
                         <div class="service-icon gradient-1">
                             <i class="bi bi-truck"></i>
                         </div>
-                        <h4>Door-to-Door Service</h4>
-                        <p><span id="affiliateNameService1">Your local partner</span> provides convenient pickup and delivery right at your doorstep, on your schedule.</p>
+                        <h4 data-i18n="landing.howItWorks.steps.doorToDoor.title">Door-to-Door Service</h4>
+                        <p><span data-i18n="landing.howItWorks.steps.doorToDoor.description" data-i18n-param-affiliateName="Your local partner"><span id="affiliateNameService1">Your local partner</span> provides convenient pickup and delivery right at your doorstep, on your schedule.</span></p>
                     </div>
                 </div>
                 <div class="col-md-4 mb-4">
@@ -90,8 +107,8 @@
                         <div class="service-icon gradient-2">
                             <i class="bi bi-stars"></i>
                         </div>
-                        <h4>Professional WDF Processing</h4>
-                        <p>WaveMAX handles the washing with state-of-the-art Electrolux 450G equipment and Omni LUX UV water purification in a quality-controlled facility.</p>
+                        <h4 data-i18n="landing.howItWorks.steps.professional.title">Professional WDF Processing</h4>
+                        <p data-i18n="landing.howItWorks.steps.professional.description">WaveMAX handles the washing with state-of-the-art Electrolux 450G equipment and Omni LUX UV water purification in a quality-controlled facility.</p>
                     </div>
                 </div>
                 <div class="col-md-4 mb-4">
@@ -99,8 +116,8 @@
                         <div class="service-icon gradient-3">
                             <i class="bi bi-lightning-charge-fill"></i>
                         </div>
-                        <h4>Fast Turnaround</h4>
-                        <p>Your clothes are professionally cleaned and returned fresh, folded, and ready to wear - typically within 24-48 hours.</p>
+                        <h4 data-i18n="landing.howItWorks.steps.fastTurnaround.title">Fast Turnaround</h4>
+                        <p data-i18n="landing.howItWorks.steps.fastTurnaround.description">Your clothes are professionally cleaned and returned fresh, folded, and ready to wear - typically within 24-48 hours.</p>
                     </div>
                 </div>
             </div>
@@ -110,39 +127,39 @@
     <!-- How It Works -->
     <section class="how-it-works">
         <div class="container">
-            <h2 class="text-center mb-5">Simple Process</h2>
+            <h2 class="text-center mb-5" data-i18n="landing.howItWorks.subtitle">Simple Process</h2>
             <div class="row">
                 <div class="col-md-3 text-center mb-4">
                     <div class="step-icon">
                         <i class="bi bi-calendar-check"></i>
                         <div class="step-number">1</div>
                     </div>
-                    <h5>Schedule Pickup</h5>
-                    <p>Use our easy app to schedule a pickup time that works for your schedule</p>
+                    <h5 data-i18n="landing.process.step1.title">Schedule Pickup</h5>
+                    <p data-i18n="landing.process.step1.description">Use our easy app to schedule a pickup time that works for your schedule</p>
                 </div>
                 <div class="col-md-3 text-center mb-4">
                     <div class="step-icon">
                         <i class="bi bi-box-seam"></i>
                         <div class="step-number">2</div>
                     </div>
-                    <h5>Pickup at Your Door</h5>
-                    <p><span id="affiliateNameStep2">Your partner</span> collects your laundry and transports it to WaveMAX</p>
+                    <h5 data-i18n="landing.process.step2.title">Pickup at Your Door</h5>
+                    <p><span data-i18n="landing.process.step2.description" data-i18n-param-affiliateName="Your partner"><span id="affiliateNameStep2">Your partner</span> collects your laundry and transports it to WaveMAX</span></p>
                 </div>
                 <div class="col-md-3 text-center mb-4">
                     <div class="step-icon">
                         <i class="bi bi-droplet-half"></i>
                         <div class="step-number">3</div>
                     </div>
-                    <h5>Professional Cleaning</h5>
-                    <p>WaveMAX expertly washes, dries, and folds using premium equipment</p>
+                    <h5 data-i18n="landing.process.step3.title">Professional Cleaning</h5>
+                    <p data-i18n="landing.process.step3.description">WaveMAX expertly washes, dries, and folds using premium equipment</p>
                 </div>
                 <div class="col-md-3 text-center mb-4">
                     <div class="step-icon">
                         <i class="bi bi-check-circle"></i>
                         <div class="step-number">4</div>
                     </div>
-                    <h5>Delivery to You</h5>
-                    <p><span id="affiliateNameStep4">Your partner</span> delivers fresh, clean laundry back to your door</p>
+                    <h5 data-i18n="landing.process.step4.title">Delivery to You</h5>
+                    <p><span data-i18n="landing.process.step4.description" data-i18n-param-affiliateName="Your partner"><span id="affiliateNameStep4">Your partner</span> delivers fresh, clean laundry back to your door</span></p>
                 </div>
             </div>
         </div>
@@ -154,14 +171,14 @@
             <div class="row align-items-center">
                 <div class="col-lg-6 d-flex flex-column justify-content-center align-items-center">
                     <div class="w-100 content-wrapper">
-                        <h2 class="mb-4 text-center">Why Choose This Service?</h2>
+                        <h2 class="mb-4 text-center" data-i18n="landing.features.title">Why Choose This Service?</h2>
                         <ul class="feature-list">
-                            <li><i class="bi bi-check-circle-fill"></i> Convenient pickup & delivery by <span id="affiliateNameFeature">your local partner</span></li>
-                            <li><i class="bi bi-check-circle-fill"></i> Professional washing with Electrolux 450G equipment</li>
-                            <li><i class="bi bi-check-circle-fill"></i> Omni LUX UV water purification for cleanest results</li>
-                            <li><i class="bi bi-check-circle-fill"></i> Quality-controlled environment at WaveMAX facility</li>
-                            <li><i class="bi bi-check-circle-fill"></i> Eco-friendly cleaning products</li>
-                            <li><i class="bi bi-check-circle-fill"></i> Transparent pricing - pay for convenience & quality</li>
+                            <li><i class="bi bi-check-circle-fill"></i> <span data-i18n="landing.features.list.convenience" data-i18n-param-affiliateName="your local partner">Convenient pickup & delivery by <span id="affiliateNameFeature">your local partner</span></span></li>
+                            <li><i class="bi bi-check-circle-fill"></i> <span data-i18n="landing.features.list.professional">Professional washing with Electrolux 450G equipment</span></li>
+                            <li><i class="bi bi-check-circle-fill"></i> <span data-i18n="landing.features.list.purification">Omni LUX UV water purification for cleanest results</span></li>
+                            <li><i class="bi bi-check-circle-fill"></i> <span data-i18n="landing.features.list.quality">Quality-controlled environment at WaveMAX facility</span></li>
+                            <li><i class="bi bi-check-circle-fill"></i> <span data-i18n="landing.features.list.ecoFriendly">Eco-friendly cleaning products</span></li>
+                            <li><i class="bi bi-check-circle-fill"></i> <span data-i18n="landing.features.list.transparent">Transparent pricing - pay for convenience & quality</span></li>
                         </ul>
                     </div>
                 </div>
@@ -174,8 +191,8 @@
                             <i class="bi bi-star-fill"></i>
                             <i class="bi bi-star-fill"></i>
                         </div>
-                        <p class="testimonial-text">"WaveMAX has been a game-changer for our busy family. The pickup and delivery service is incredibly convenient, and our clothes always come back perfectly clean and folded."</p>
-                        <div class="testimonial-author">- Sarah M.</div>
+                        <p class="testimonial-text" data-i18n-exclude="true">"WaveMAX has been a game-changer for our busy family. The pickup and delivery service is incredibly convenient, and our clothes always come back perfectly clean and folded."</p>
+                        <div class="testimonial-author" data-i18n-exclude="true">- Sarah M.</div>
                     </div>
                     <div class="testimonial-card">
                         <div class="testimonial-stars">
@@ -185,8 +202,8 @@
                             <i class="bi bi-star-fill"></i>
                             <i class="bi bi-star-fill"></i>
                         </div>
-                        <p class="testimonial-text">"Professional service at a fair price. I've been using them for my business attire and couldn't be happier with the results."</p>
-                        <div class="testimonial-author">- Michael R.</div>
+                        <p class="testimonial-text" data-i18n-exclude="true">"Professional service at a fair price. I've been using them for my business attire and couldn't be happier with the results."</p>
+                        <div class="testimonial-author" data-i18n-exclude="true">- Michael R.</div>
                     </div>
                 </div>
             </div>
@@ -197,8 +214,8 @@
     <section class="py-5 bg-light">
         <div class="container">
             <div class="text-center mb-5">
-                <h2 class="mb-3">The WaveMAX Quality Difference</h2>
-                <p class="lead">Your laundry is processed at WaveMAX's state-of-the-art facility</p>
+                <h2 class="mb-3" data-i18n="landing.quality.title">The WaveMAX Quality Difference</h2>
+                <p class="lead" data-i18n="landing.quality.subtitle">Your laundry is processed at WaveMAX's state-of-the-art facility</p>
             </div>
             <div class="row">
                 <div class="col-md-4 mb-4">
@@ -208,8 +225,8 @@
                                 <i class="bi bi-gear-wide-connected"></i>
                             </div>
                         </div>
-                        <h5>Electrolux 450G Equipment</h5>
-                        <p>Professional-grade washers and dryers ensure thorough cleaning and gentle care for all fabric types</p>
+                        <h5 data-i18n="landing.quality.electrolux.title">Electrolux 450G Equipment</h5>
+                        <p data-i18n="landing.quality.electrolux.description">Professional-grade washers and dryers ensure thorough cleaning and gentle care for all fabric types</p>
                     </div>
                 </div>
                 <div class="col-md-4 mb-4">
@@ -219,8 +236,8 @@
                                 <i class="bi bi-shield-fill-plus"></i>
                             </div>
                         </div>
-                        <h5>Omni LUX UV Purification</h5>
-                        <p>Advanced UV water purification system eliminates 99.9% of bacteria and viruses for the cleanest wash possible</p>
+                        <h5 data-i18n="landing.quality.omniLux.title">Omni LUX UV Purification</h5>
+                        <p data-i18n="landing.quality.omniLux.description">Advanced UV water purification system eliminates 99.9% of bacteria and viruses for the cleanest wash possible</p>
                     </div>
                 </div>
                 <div class="col-md-4 mb-4">
@@ -230,8 +247,8 @@
                                 <i class="bi bi-patch-check-fill"></i>
                             </div>
                         </div>
-                        <h5>Quality Controlled</h5>
-                        <p>Strict quality control processes ensure consistent results and proper handling of every garment</p>
+                        <h5 data-i18n="landing.quality.qualityControl.title">Quality Controlled</h5>
+                        <p data-i18n="landing.quality.qualityControl.description">Strict quality control processes ensure consistent results and proper handling of every garment</p>
                     </div>
                 </div>
             </div>
@@ -241,19 +258,59 @@
     <!-- CTA Section -->
     <section class="cta-section">
         <div class="container">
-            <h2 class="mb-4">Ready to Experience Premium Laundry Service?</h2>
-            <p class="lead mb-4">Let <span id="affiliateNameCTA">your local partner</span> handle the pickup and delivery while WaveMAX ensures professional cleaning</p>
-            <a href="#" id="registerLinkBottom" class="btn btn-primary btn-lg">Sign Up Today</a>
+            <h2 class="mb-4" data-i18n="landing.cta.title">Ready to Experience Premium Laundry Service?</h2>
+            <p class="lead mb-4"><span data-i18n="landing.cta.subtitle" data-i18n-param-affiliateName="your local partner">Let <span id="affiliateNameCTA">your local partner</span> handle the pickup and delivery while WaveMAX ensures professional cleaning</span></p>
+            <a href="#" id="registerLinkBottom" class="btn btn-primary btn-lg" data-i18n="common.buttons.signUpToday">Sign Up Today</a>
         </div>
     </section>
 
     <!-- Footer -->
     <footer class="bg-dark text-white py-4">
         <div class="container text-center">
-            <p class="mb-0">© 2025 CRHS Enterprises, LLC. Service provided by <span id="affiliateNameFooter">your local partner</span></p>
+            <p class="mb-0"><span data-i18n="landing.footer.copyright" data-i18n-param-year="2025" data-i18n-param-affiliateName="your local partner">© 2025 CRHS Enterprises, LLC. Service provided by <span id="affiliateNameFooter">your local partner</span></span></p>
         </div>
     </footer>
 
+    <!-- i18n Scripts -->
+    <script src="/assets/js/i18n.js"></script>
+    <script src="/assets/js/language-switcher.js"></script>
     <script src="/assets/js/affiliate-landing-init.js"></script>
+    
+    <script>
+        // Initialize i18n and language switcher
+        document.addEventListener('DOMContentLoaded', async function() {
+            // Initialize i18n
+            await window.i18n.init({
+                debugMode: false
+            });
+            
+            // Create language switcher
+            window.LanguageSwitcher.createSwitcher('language-switcher-container', {
+                style: 'dropdown',
+                showLabel: true
+            });
+            
+            // Update affiliate name parameters when language changes
+            window.addEventListener('languageChanged', function() {
+                updateAffiliateNameParameters();
+            });
+            
+            // Function to update affiliate name in i18n parameters
+            function updateAffiliateNameParameters() {
+                const affiliateName = document.getElementById('affiliateName')?.textContent || 'your local partner';
+                
+                // Update all elements with affiliate name parameters
+                document.querySelectorAll('[data-i18n-param-affiliateName]').forEach(el => {
+                    el.setAttribute('data-i18n-param-affiliateName', affiliateName);
+                });
+                
+                // Re-translate the page
+                window.i18n.translatePage();
+            }
+            
+            // Call once after affiliate name is loaded
+            setTimeout(updateAffiliateNameParameters, 1000);
+        });
+    </script>
 </body>
 </html>

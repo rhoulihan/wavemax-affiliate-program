@@ -57,6 +57,7 @@
 
         // Get affiliate code from URL
         const affiliateCode = getUrlParameter('code');
+        console.log('Affiliate code from URL:', affiliateCode);
         
         if (!affiliateCode) {
             console.error('No affiliate code provided');
@@ -64,18 +65,25 @@
         }
 
         // Fetch affiliate information
-        const baseUrl = window.location.origin;
-        fetch(`${baseUrl}/api/v1/affiliates/public/${affiliateCode}`)
+        // Use the actual API server URL instead of iframe origin
+        const apiUrl = 'https://wavemax.promo';
+        const fetchUrl = `${apiUrl}/api/v1/affiliates/public/${affiliateCode}`;
+        console.log('Fetching affiliate data from:', fetchUrl);
+        
+        fetch(fetchUrl)
             .then(response => {
+                console.log('Fetch response status:', response.status);
                 if (!response.ok) {
                     if (response.status === 404) {
+                        console.log('Affiliate not found (404)');
                         showAffiliateNotFoundMessage();
                     }
-                    throw new Error('Failed to fetch affiliate information');
+                    throw new Error(`Failed to fetch affiliate information: ${response.status}`);
                 }
                 return response.json();
             })
             .then(data => {
+                console.log('Affiliate data received:', data);
                 // Update page with affiliate information
                 updatePageContent(data, affiliateCode);
             })
@@ -109,6 +117,13 @@
                 element.textContent = affiliateName;
             }
         });
+
+        // Update i18n parameters for dynamic content
+        if (window.i18n && window.i18n.updateParams) {
+            window.i18n.updateParams({
+                affiliateName: affiliateName
+            });
+        }
 
         // Update pricing if available
         if (affiliate.minimumDeliveryFee) {
@@ -163,27 +178,38 @@
 
     // Initialize when DOM is ready
     function tryInitialize() {
+        console.log('tryInitialize called, initialized:', initialized, 'affiliateName element:', document.getElementById('affiliateName'));
         if (!initialized && document.getElementById('affiliateName')) {
             initialized = true;
             initializeLandingPage();
         }
     }
 
+    // Log script loading
+    console.log('affiliate-landing-init.js loaded, document.readyState:', document.readyState);
+
     // For normal page load
     if (document.readyState === 'loading') {
+        console.log('Adding DOMContentLoaded listener');
         document.addEventListener('DOMContentLoaded', tryInitialize);
     } else {
+        console.log('DOM already loaded, trying to initialize');
         tryInitialize();
     }
 
     // For dynamic loading in embed-app.html
+    console.log('Starting interval check for affiliateName element');
     const checkInterval = setInterval(function() {
         if (document.getElementById('affiliateName')) {
+            console.log('affiliateName element found via interval check');
             clearInterval(checkInterval);
             tryInitialize();
         }
     }, 100);
 
     // Clear interval after 5 seconds to prevent infinite checking
-    setTimeout(() => clearInterval(checkInterval), 5000);
+    setTimeout(() => {
+        console.log('Clearing interval check after 5 seconds');
+        clearInterval(checkInterval);
+    }, 5000);
 })();

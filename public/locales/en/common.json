@@ -1,0 +1,415 @@
+{
+  "common": {
+    "buttons": {
+      "getStarted": "Get Started",
+      "signUp": "Sign Up",
+      "signIn": "Sign In",
+      "login": "Login",
+      "logout": "Logout",
+      "submit": "Submit",
+      "cancel": "Cancel",
+      "save": "Save",
+      "delete": "Delete",
+      "edit": "Edit",
+      "back": "Back",
+      "next": "Next",
+      "previous": "Previous",
+      "close": "Close",
+      "register": "Register",
+      "learnMore": "Learn More",
+      "customerLogin": "Customer Login",
+      "signUpToday": "Sign Up Today",
+      "registerNow": "Register now"
+    },
+    "labels": {
+      "username": "Username",
+      "password": "Password",
+      "email": "Email",
+      "firstName": "First Name",
+      "lastName": "Last Name",
+      "phoneNumber": "Phone Number",
+      "address": "Address",
+      "city": "City",
+      "state": "State",
+      "zipCode": "Zip Code",
+      "rememberMe": "Remember me",
+      "forgotPassword": "Forgot password?",
+      "termsAndConditions": "Terms and Conditions",
+      "privacyPolicy": "Privacy Policy",
+      "allRightsReserved": "All rights reserved",
+      "lastUpdated": "Last Updated:"
+    },
+    "messages": {
+      "welcome": "Welcome",
+      "loading": "Loading...",
+      "error": "Error",
+      "success": "Success",
+      "warning": "Warning",
+      "info": "Information",
+      "noData": "No data available",
+      "confirmAction": "Are you sure you want to continue?",
+      "loginFailed": "Login failed. Please check your credentials and try again.",
+      "loginSuccess": "Login successful!",
+      "logoutSuccess": "You have been logged out successfully.",
+      "registrationSuccess": "Registration successful!",
+      "registrationFailed": "Registration failed. Please try again.",
+      "passwordResetSuccess": "Password reset successful!",
+      "passwordResetFailed": "Password reset failed. Please try again.",
+      "popupBlocked": "Popup was blocked. Please allow popups for this site and try again.",
+      "authenticationFailed": "Authentication failed",
+      "authenticationTimeout": "Authentication timed out. Please try again.",
+      "accountNotFound": "Account not found. You will be redirected to registration to create a new account.",
+      "processingError": "Error processing authentication result"
+    }
+  },
+  "landing": {
+    "hero": {
+      "badge": "Your Local WaveMAX Partner",
+      "title": "Premium Laundry Pickup & Delivery Service",
+      "subtitle": "Convenient door-to-door service by {{affiliateName}}, with professional washing by WaveMAX"
+    },
+    "pricing": {
+      "wdf": {
+        "title": "WDF Service",
+        "value": "$1.25",
+        "unit": "/ lb",
+        "description": "Wash, Dry & Fold"
+      },
+      "delivery": {
+        "title": "Delivery",
+        "value": "${{perBagFee}}",
+        "unit": "/ bag",
+        "minimum": "${{minimumFee}} minimum"
+      }
+    },
+    "howItWorks": {
+      "title": "How Our Service Works",
+      "subtitle": "Simple Process",
+      "steps": {
+        "doorToDoor": {
+          "title": "Door-to-Door Service",
+          "description": "{{affiliateName}} provides convenient pickup and delivery right at your doorstep, on your schedule."
+        },
+        "professional": {
+          "title": "Professional WDF Processing",
+          "description": "WaveMAX handles the washing with state-of-the-art Electrolux 450G equipment and Omni LUX UV water purification in a quality-controlled facility."
+        },
+        "fastTurnaround": {
+          "title": "Fast Turnaround",
+          "description": "Your clothes are professionally cleaned and returned fresh, folded, and ready to wear - typically within 24-48 hours."
+        }
+      }
+    },
+    "process": {
+      "step1": {
+        "title": "Schedule Pickup",
+        "description": "Use our easy app to schedule a pickup time that works for your schedule"
+      },
+      "step2": {
+        "title": "Pickup at Your Door",
+        "description": "{{affiliateName}} collects your laundry and transports it to WaveMAX"
+      },
+      "step3": {
+        "title": "Professional Cleaning",
+        "description": "WaveMAX expertly washes, dries, and folds using premium equipment"
+      },
+      "step4": {
+        "title": "Delivery to You",
+        "description": "{{affiliateName}} delivers fresh, clean laundry back to your door"
+      }
+    },
+    "features": {
+      "title": "Why Choose This Service?",
+      "list": {
+        "convenience": "Convenient pickup & delivery by {{affiliateName}}",
+        "professional": "Professional washing with Electrolux 450G equipment",
+        "purification": "Omni LUX UV water purification for cleanest results",
+        "quality": "Quality-controlled environment at WaveMAX facility",
+        "ecoFriendly": "Eco-friendly cleaning products",
+        "transparent": "Transparent pricing - pay for convenience & quality"
+      }
+    },
+    "quality": {
+      "title": "The WaveMAX Quality Difference",
+      "subtitle": "Your laundry is processed at WaveMAX's state-of-the-art facility",
+      "electrolux": {
+        "title": "Electrolux 450G Equipment",
+        "description": "Professional-grade washers and dryers ensure thorough cleaning and gentle care for all fabric types"
+      },
+      "omniLux": {
+        "title": "Omni LUX UV Purification",
+        "description": "Advanced UV water purification system eliminates 99.9% of bacteria and viruses for the cleanest wash possible"
+      },
+      "qualityControl": {
+        "title": "Quality Controlled",
+        "description": "Strict quality control processes ensure consistent results and proper handling of every garment"
+      }
+    },
+    "cta": {
+      "title": "Ready to Experience Premium Laundry Service?",
+      "subtitle": "Let {{affiliateName}} handle the pickup and delivery while WaveMAX ensures professional cleaning"
+    },
+    "footer": {
+      "copyright": "© {{year}} CRHS Enterprises, LLC. Service provided by {{affiliateName}}"
+    }
+  },
+  "affiliate": {
+    "login": {
+      "title": "Affiliate Login",
+      "subtitle": "Sign in to access your affiliate dashboard",
+      "socialLogin": "Sign in with your social media account",
+      "orEmail": "Or sign in with username and password",
+      "noAccount": "Don't have an affiliate account?"
+    },
+    "register": {
+      "title": "Become a WaveMAX Affiliate Partner",
+      "subtitle": "Join our network and earn commissions on laundry services",
+      "businessInfo": "Business Information",
+      "personalInfo": "Personal Information",
+      "accountInfo": "Account Information",
+      "termsAgree": "I agree to the",
+      "alreadyHaveAccount": "Already have an account?"
+    },
+    "dashboard": {
+      "title": "Affiliate Dashboard",
+      "welcome": "Welcome back, {{name}}!",
+      "overview": "Overview",
+      "customers": "Customers",
+      "orders": "Orders",
+      "commissions": "Commissions",
+      "reports": "Reports",
+      "settings": "Settings",
+      "metrics": {
+        "totalCustomers": "Total Customers",
+        "activeCustomers": "Active Customers",
+        "totalOrders": "Total Orders",
+        "totalRevenue": "Total Revenue",
+        "totalCommissions": "Total Commissions",
+        "pendingCommissions": "Pending Commissions"
+      }
+    }
+  },
+  "customer": {
+    "login": {
+      "title": "Customer Login",
+      "subtitle": "Sign in to manage your laundry service",
+      "socialLogin": "Sign in with your social media account",
+      "orEmail": "Or sign in with email and password",
+      "noAccount": "Don't have an account?"
+    },
+    "register": {
+      "title": "Create Your Account",
+      "subtitle": "Sign up for convenient laundry pickup & delivery",
+      "personalInfo": "Personal Information",
+      "contactInfo": "Contact Information",
+      "accountInfo": "Account Information",
+      "referralCode": "Referral Code (Optional)",
+      "termsAgree": "I agree to the",
+      "alreadyHaveAccount": "Already have an account?"
+    },
+    "dashboard": {
+      "title": "Customer Dashboard",
+      "welcome": "Welcome back, {{name}}!",
+      "schedulePickup": "Schedule Pickup",
+      "activeOrders": "Active Orders",
+      "orderHistory": "Order History",
+      "accountSettings": "Account Settings",
+      "metrics": {
+        "totalOrders": "Total Orders",
+        "totalSpent": "Total Spent",
+        "averageOrder": "Average Order",
+        "lastOrder": "Last Order"
+      }
+    }
+  },
+  "operator": {
+    "login": {
+      "title": "Operator Portal",
+      "subtitle": "Enter your 4-digit PIN to access the system",
+      "pinPlaceholder": "Enter 4-digit PIN",
+      "invalidPin": "Invalid PIN. Please try again."
+    },
+    "dashboard": {
+      "title": "Operator Dashboard",
+      "welcome": "Welcome, {{name}}!",
+      "todaysPickups": "Today's Pickups",
+      "todaysDeliveries": "Today's Deliveries",
+      "processOrder": "Process Order",
+      "scanBarcode": "Scan Barcode",
+      "metrics": {
+        "pickupsCompleted": "Pickups Completed",
+        "deliveriesCompleted": "Deliveries Completed",
+        "ordersProcessed": "Orders Processed",
+        "efficiency": "Efficiency Rate"
+      }
+    }
+  },
+  "administrator": {
+    "login": {
+      "title": "Administrator Login",
+      "subtitle": "Access the administrative dashboard",
+      "noAccount": "Contact system administrator for access"
+    },
+    "dashboard": {
+      "title": "Administrator Dashboard",
+      "welcome": "Welcome, {{name}}",
+      "systemOverview": "System Overview",
+      "userManagement": "User Management",
+      "affiliateManagement": "Affiliate Management",
+      "orderManagement": "Order Management",
+      "reports": "Reports",
+      "settings": "System Settings",
+      "metrics": {
+        "totalUsers": "Total Users",
+        "totalAffiliates": "Total Affiliates",
+        "totalOrders": "Total Orders",
+        "systemRevenue": "System Revenue",
+        "activeOperators": "Active Operators",
+        "systemHealth": "System Health"
+      }
+    }
+  },
+  "orders": {
+    "status": {
+      "pending": "Pending",
+      "scheduled": "Scheduled",
+      "pickedUp": "Picked Up",
+      "processing": "Processing",
+      "readyForDelivery": "Ready for Delivery",
+      "outForDelivery": "Out for Delivery",
+      "delivered": "Delivered",
+      "cancelled": "Cancelled"
+    },
+    "schedule": {
+      "title": "Schedule Pickup",
+      "selectDate": "Select Date",
+      "selectTime": "Select Time",
+      "pickupAddress": "Pickup Address",
+      "deliveryAddress": "Delivery Address",
+      "sameAsPickup": "Same as pickup address",
+      "specialInstructions": "Special Instructions (Optional)",
+      "estimatedBags": "Estimated Number of Bags",
+      "confirmPickup": "Confirm Pickup"
+    },
+    "confirmation": {
+      "title": "Order Confirmation",
+      "orderNumber": "Order Number",
+      "pickupScheduled": "Pickup Scheduled",
+      "estimatedDelivery": "Estimated Delivery",
+      "totalEstimate": "Total Estimate",
+      "trackOrder": "Track Your Order",
+      "viewDetails": "View Details"
+    }
+  },
+  "emails": {
+    "greeting": "Hello {{name}},",
+    "footer": "Thank you for choosing WaveMAX Laundry Services.",
+    "unsubscribe": "Unsubscribe from these emails",
+    "viewInBrowser": "View this email in your browser",
+    "passwordReset": {
+      "title": "Password Reset Request",
+      "adminMessage": "We received a request to reset your administrator password.",
+      "resetButton": "Reset Password",
+      "ignoreMessage": "If you didn't request this, please ignore this email."
+    },
+    "welcome": {
+      "adminTitle": "Welcome to WaveMAX Administrator Portal",
+      "adminMessage": "Your administrator account has been created successfully.",
+      "affiliateTitle": "Welcome to WaveMAX Affiliate Program",
+      "affiliateMessage": "Welcome to the WaveMAX Affiliate Program! We're excited to have you as our partner.",
+      "affiliateId": "Your affiliate ID:",
+      "customerTitle": "Welcome to WaveMAX Laundry Services",
+      "customerMessage": "Welcome to WaveMAX! We're thrilled to have you as our customer.",
+      "operatorTitle": "Welcome to WaveMAX Team",
+      "operatorMessage": "Welcome to the WaveMAX team! Your operator account has been created.",
+      "operatorPin": "Your PIN:",
+      "accessPortal": "Access Portal",
+      "accessDashboard": "Access Your Dashboard",
+      "schedulePickup": "Schedule Your First Pickup"
+    },
+    "commission": {
+      "title": "Commission Payment Notification",
+      "processed": "Your commission payment has been processed.",
+      "amount": "Amount:",
+      "paymentMethod": "Payment Method:",
+      "reference": "Reference:",
+      "viewDashboard": "View Dashboard"
+    },
+    "newCustomer": {
+      "title": "New Customer Registration",
+      "message": "Great news! A new customer has registered using your referral link.",
+      "customerName": "Customer Name:",
+      "registrationDate": "Registration Date:",
+      "viewDetails": "View Customer Details"
+    },
+    "newOrder": {
+      "title": "New Order Notification",
+      "affiliateMessage": "One of your customers has placed a new order.",
+      "orderDetails": "Order Details:",
+      "orderNumber": "Order Number:",
+      "customer": "Customer:",
+      "orderValue": "Order Value:",
+      "commission": "Your Commission:",
+      "viewOrder": "View Order"
+    },
+    "orderCancelled": {
+      "title": "Order Cancellation Notice",
+      "customerTitle": "Order Cancellation Confirmation",
+      "affiliateMessage": "An order from one of your customers has been cancelled.",
+      "customerMessage": "Your order has been cancelled as requested.",
+      "orderNumber": "Order Number:",
+      "customer": "Customer:",
+      "reason": "Cancellation Reason:",
+      "date": "Cancellation Date:",
+      "questions": "If you have any questions, please contact us."
+    },
+    "orderConfirmation": {
+      "title": "Order Confirmation",
+      "message": "Thank you for your order! Your pickup has been scheduled.",
+      "orderNumber": "Order Number:",
+      "pickupDate": "Pickup Date:",
+      "pickupTime": "Pickup Time:",
+      "pickupAddress": "Pickup Address:",
+      "trackOrder": "Track Your Order"
+    },
+    "orderStatus": {
+      "title": "Order Status Update",
+      "message": "Your order status has been updated.",
+      "orderNumber": "Order Number:",
+      "currentStatus": "Current Status:",
+      "trackOrder": "Track Your Order"
+    },
+    "pinReset": {
+      "title": "PIN Reset Notification",
+      "message": "Your operator PIN has been reset.",
+      "newPin": "Your new PIN:",
+      "changeMessage": "Please change this PIN after your first login."
+    },
+    "shiftReminder": {
+      "title": "Shift Reminder",
+      "message": "This is a reminder about your upcoming shift.",
+      "date": "Shift Date:",
+      "time": "Shift Time:"
+    }
+  },
+  "errors": {
+    "generic": "An error occurred. Please try again.",
+    "network": "Network error. Please check your connection.",
+    "validation": "Please check the form and correct any errors.",
+    "unauthorized": "You are not authorized to access this resource.",
+    "notFound": "The requested resource was not found.",
+    "serverError": "Server error. Please try again later."
+  },
+  "navigation": {
+    "home": "Home",
+    "about": "About",
+    "services": "Services",
+    "pricing": "Pricing",
+    "contact": "Contact",
+    "dashboard": "Dashboard",
+    "profile": "Profile",
+    "settings": "Settings",
+    "help": "Help",
+    "logout": "Logout"
+  }
+}

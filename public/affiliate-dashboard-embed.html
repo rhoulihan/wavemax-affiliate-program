@@ -29,6 +29,14 @@
             margin: 0;
             padding: 16px;
         }
+    
+        /* Language switcher positioning */
+        #language-switcher-container {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            z-index: 1000;
+        }
     </style>
 </head>
 <body class="bg-white font-sans">
@@ -41,7 +49,7 @@
                     <p class="text-gray-600" id="affiliateId">Loading affiliate information...</p>
                 </div>
                 <div class="mt-4 md:mt-0">
-                    <button id="logoutBtn" class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition">Logout</button>
+                    <button id="logoutBtn" class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition" data-i18n="common.buttons.logout">Logout</button>
                 </div>
             </div>
         </div>
@@ -440,6 +448,9 @@
         </div>
     </div>
 
+        <!-- i18n Scripts -->
+    <script src="/assets/js/i18n.js"></script>
+    <script src="/assets/js/language-switcher.js"></script>
     <script src="/assets/js/affiliate-dashboard-init.js"></script>
     <script>
         // PostMessage communication with parent window
@@ -510,5 +521,16 @@
             };
         }
     </script>
+    <script>
+        // Initialize i18n
+        document.addEventListener('DOMContentLoaded', async function() {
+            await window.i18n.init({ debugMode: false });
+            window.LanguageSwitcher.createSwitcher('language-switcher-container', {
+                style: 'dropdown',
+                showLabel: false
+            });
+        });
+    </script>
+
 </body>
 </html>

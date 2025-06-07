@@ -23,6 +23,14 @@
             margin: 0;
             padding: 16px;
         }
+    
+        /* Language switcher positioning */
+        #language-switcher-container {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            z-index: 1000;
+        }
     </style>
 </head>
 <body class="bg-white font-sans">
@@ -30,7 +38,7 @@
     <div class="embed-container">
         <div class="max-w-3xl mx-auto bg-white rounded-lg shadow-md overflow-hidden">
             <div class="wavemax-blue text-white p-6">
-                <h2 class="text-2xl font-bold">Order Confirmation</h2>
+                <h2 class="text-2xl font-bold" data-i18n="orders.confirmation.title">Order Confirmation</h2>
                 <p class="mt-2">Your laundry pickup has been scheduled successfully!</p>
             </div>
             
@@ -177,13 +185,16 @@
                 
                 <!-- Actions -->
                 <div class="flex justify-center space-x-4">
-                    <a href="#" id="viewOrdersBtn" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition">Go to Dashboard</a>
+                    <a href="#" id="viewOrdersBtn" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition" data-i18n="common.navigation.dashboard">Go to Dashboard</a>
                     <a href="#" id="scheduleAnotherBtn" class="bg-gray-600 text-white px-6 py-2 rounded-lg hover:bg-gray-700 transition">Schedule Another Pickup</a>
                 </div>
             </div>
         </div>
     </div>
 
+        <!-- i18n Scripts -->
+    <script src="/assets/js/i18n.js"></script>
+    <script src="/assets/js/language-switcher.js"></script>
     <script>
         // PostMessage communication with parent window
         function sendMessageToParent(type, data) {
@@ -331,5 +342,16 @@
             sendMessageToParent('iframe-loaded', { page: 'order-confirmation' });
         });
     </script>
+    <script>
+        // Initialize i18n
+        document.addEventListener('DOMContentLoaded', async function() {
+            await window.i18n.init({ debugMode: false });
+            window.LanguageSwitcher.createSwitcher('language-switcher-container', {
+                style: 'dropdown',
+                showLabel: false
+            });
+        });
+    </script>
+
 </body>
 </html>

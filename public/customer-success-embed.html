@@ -23,6 +23,14 @@
             margin: 0;
             padding: 16px;
         }
+    
+        /* Language switcher positioning */
+        #language-switcher-container {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            z-index: 1000;
+        }
     </style>
 </head>
 <body class="bg-white font-sans">
@@ -108,7 +116,7 @@
                 <!-- Actions -->
                 <div class="pt-4 border-t">
                     <div class="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-4">
-                        <a href="#" id="schedulePickupBtn" class="bg-blue-600 text-white text-center font-bold py-3 px-4 rounded-lg hover:bg-blue-700 transition" onclick="navigateParent('schedule-pickup'); return false;">Schedule Your First Pickup</a>
+                        <a href="#" id="schedulePickupBtn" class="bg-blue-600 text-white text-center font-bold py-3 px-4 rounded-lg hover:bg-blue-700 transition" onclick="navigateParent('schedule-pickup'); return false;" data-i18n="customer.dashboard.schedulePickup">Schedule Your First Pickup</a>
                         <a href="#" id="customerDashboardBtn" class="border border-blue-600 text-blue-600 text-center font-bold py-3 px-4 rounded-lg hover:bg-blue-50 transition" onclick="navigateParent('customer-dashboard'); return false;">Go to Customer Dashboard</a>
                     </div>
                 </div>
@@ -116,6 +124,9 @@
         </div>
     </div>
 
+        <!-- i18n Scripts -->
+    <script src="/assets/js/i18n.js"></script>
+    <script src="/assets/js/language-switcher.js"></script>
     <script>
         // PostMessage communication with parent window
         function sendMessageToParent(type, data) {
@@ -248,5 +259,16 @@
             showFallbackAffiliateInfo();
         }
     </script>
+    <script>
+        // Initialize i18n
+        document.addEventListener('DOMContentLoaded', async function() {
+            await window.i18n.init({ debugMode: false });
+            window.LanguageSwitcher.createSwitcher('language-switcher-container', {
+                style: 'dropdown',
+                showLabel: false
+            });
+        });
+    </script>
+
 </body>
 </html>
