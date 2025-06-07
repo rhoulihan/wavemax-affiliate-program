@@ -610,6 +610,17 @@
                 style: 'dropdown',
                 showLabel: false
             });
+            
+            // Listen for language changes from parent frame
+            window.addEventListener('message', function(event) {
+                if (event.data && event.data.type === 'language-change' && event.data.data) {
+                    const language = event.data.data.language;
+                    if (language && window.i18n && window.i18n.setLanguage) {
+                        console.log('[embed-landing] Setting language from parent:', language);
+                        window.i18n.setLanguage(language);
+                    }
+                }
+            });
         });
     </script>
 

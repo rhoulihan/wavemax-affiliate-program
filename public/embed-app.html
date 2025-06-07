@@ -652,6 +652,20 @@
                     } else {
                         console.log('[EMBED-APP] Desktop mode, chrome visible');
                     }
+                    
+                    // Handle language if provided
+                    if (messageData.language && window.i18n && window.i18n.setLanguage) {
+                        console.log('[EMBED-APP] Setting language from parent:', messageData.language);
+                        window.i18n.setLanguage(messageData.language);
+                    }
+                    break;
+                    
+                case 'language-change':
+                    // Handle language change from parent
+                    if (messageData.language && window.i18n && window.i18n.setLanguage) {
+                        console.log('[EMBED-APP] Received language change from parent:', messageData.language);
+                        window.i18n.setLanguage(messageData.language);
+                    }
                     break;
                     
                 case 'chrome-hidden':
