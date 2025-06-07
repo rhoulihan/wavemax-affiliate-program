@@ -57,6 +57,8 @@
 
     function init() {
         console.log('[Parent-Iframe Bridge] Initializing...');
+        console.log('[Parent-Iframe Bridge] Current URL:', window.location.href);
+        console.log('[Parent-Iframe Bridge] Viewport width:', window.innerWidth);
         
         // Find the iframe - updated to match their iframe ID
         iframe = document.getElementById('wavemax-iframe') ||
@@ -65,8 +67,11 @@
         
         if (!iframe) {
             console.warn('[Parent-Iframe Bridge] No WaveMAX iframe found');
+            console.log('[Parent-Iframe Bridge] Available iframes:', document.querySelectorAll('iframe'));
             return;
         }
+        
+        console.log('[Parent-Iframe Bridge] Found iframe:', iframe.id, iframe.src);
 
         // Set up viewport detection
         detectViewport();
@@ -94,9 +99,17 @@
 
         isMobile = width < MOBILE_BREAKPOINT;
         isTablet = width >= MOBILE_BREAKPOINT && width < TABLET_BREAKPOINT;
+        
+        console.log('[Parent-Iframe Bridge] Viewport detected:', {
+            width: width,
+            isMobile: isMobile,
+            isTablet: isTablet,
+            isDesktop: !isMobile && !isTablet
+        });
 
         // If viewport category changed, update iframe
         if (oldMobile !== isMobile || oldTablet !== isTablet) {
+            console.log('[Parent-Iframe Bridge] Viewport category changed, sending update');
             sendViewportInfo();
             
             // Show chrome again if switching from mobile to desktop
@@ -107,7 +120,10 @@
     }
 
     function sendViewportInfo() {
-        if (!iframe) return;
+        if (!iframe) {
+            console.log('[Parent-Iframe Bridge] sendViewportInfo: No iframe found');
+            return;
+        }
 
         const info = {
             type: 'viewport-info',
@@ -121,60 +137,86 @@
                 orientation: window.innerWidth > window.innerHeight ? 'landscape' : 'portrait'
             }
         };
+        
+        console.log('[Parent-Iframe Bridge] Sending viewport info:', info.data);
 
         // Try to send to iframe
         try {
             iframe.contentWindow.postMessage(info, '*');
+            console.log('[Parent-Iframe Bridge] Viewport info sent successfully');
         } catch (e) {
             console.error('[Parent-Iframe Bridge] Failed to send viewport info:', e);
         }
     }
 
     function handleMessage(event) {
+        console.log('[Parent-Iframe Bridge] Message received from:', event.origin);
+        console.log('[Parent-Iframe Bridge] Message data:', event.data);
+        
         // Security check
-        if (!ALLOWED_ORIGINS.some(origin => event.origin.includes(origin.replace(/^https?:\/\//, '')))) {
+        const originCheck = ALLOWED_ORIGINS.some(origin => event.origin.includes(origin.replace(/^https?:\/\//, '')));
+        console.log('[Parent-Iframe Bridge] Origin allowed?', originCheck, 'checking against:', ALLOWED_ORIGINS);
+        
+        if (!originCheck) {
+            console.log('[Parent-Iframe Bridge] Message rejected - origin not allowed');
             return;
         }
 
-        if (!event.data || !event.data.type) return;
+        if (!event.data || !event.data.type) {
+            console.log('[Parent-Iframe Bridge] Message rejected - no data or type');
+            return;
+        }
 
-        console.log('[Parent-Iframe Bridge] Received message:', event.data.type);
+        console.log('[Parent-Iframe Bridge] Processing message type:', event.data.type);
 
         switch (event.data.type) {
             case 'hide-chrome':
+                console.log('[Parent-Iframe Bridge] Hide chrome requested. isMobile:', isMobile, 'isTablet:', isTablet);
                 if (isMobile || isTablet) {
                     hideChrome();
+                } else {
+                    console.log('[Parent-Iframe Bridge] Hide chrome ignored - not mobile/tablet');
                 }
                 break;
                 
             case 'show-chrome':
+                console.log('[Parent-Iframe Bridge] Show chrome requested');
                 showChrome();
                 break;
                 
             case 'resize':
                 // Existing resize functionality
                 if (event.data.data && event.data.data.height) {
+                    console.log('[Parent-Iframe Bridge] Resize requested:', event.data.data.height);
                     resizeIframe(event.data.data.height);
                 }
                 break;
                 
             case 'scroll-to-top':
+                console.log('[Parent-Iframe Bridge] Scroll to top requested');
                 smoothScrollToTop();
                 break;
                 
             case 'route-changed':
+                console.log('[Parent-Iframe Bridge] Route changed. chromeHidden:', chromeHidden, 'isMobile:', isMobile);
                 // Reset chrome visibility on route change
                 if (chromeHidden && !isMobile) {
                     showChrome();
                 }
                 break;
+                
+            default:
+                console.log('[Parent-Iframe Bridge] Unknown message type:', event.data.type);
         }
     }
 
     function hideChrome() {
-        if (chromeHidden) return;
+        if (chromeHidden) {
+            console.log('[Parent-Iframe Bridge] hideChrome: Already hidden, skipping');
+            return;
+        }
 
-        console.log('[Parent-Iframe Bridge] Hiding header/footer');
+        console.log('[Parent-Iframe Bridge] hideChrome: Starting to hide header/footer');
         
         // Find all elements to hide - WaveMAX CMS specific selectors
         const topbar = document.querySelector('.topbar');
@@ -182,6 +224,14 @@
         const header = document.querySelector('.navbar');
         const pageHeader = document.querySelector('.page-header');
         const footer = document.querySelector('.footer');
+        
+        console.log('[Parent-Iframe Bridge] Elements found:', {
+            topbar: !!topbar,
+            wrapper: !!wrapper,
+            navbar: !!header,
+            pageHeader: !!pageHeader,
+            footer: !!footer
+        });
         
         // Store scroll position
         lastScrollPosition = window.pageYOffset;
