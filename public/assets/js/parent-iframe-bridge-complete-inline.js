@@ -130,9 +130,13 @@
                     padding: 0 !important;
                     padding-left: 0 !important;
                     padding-right: 0 !important;
+                    padding-top: 0 !important;
+                    padding-bottom: 0 !important;
                     margin: 0 !important;
                     margin-left: 0 !important;
                     margin-right: 0 !important;
+                    margin-top: 0 !important;
+                    margin-bottom: 0 !important;
                     max-width: 100% !important;
                     width: 100% !important;
                     border: none !important;
@@ -148,10 +152,19 @@
                 parent = parent.parentElement;
             }
             
-            // Also remove padding from body
+            // Also remove padding from body and html
             document.body.style.cssText += `
                 padding: 0 !important;
                 margin: 0 !important;
+                padding-top: 0 !important;
+                margin-top: 0 !important;
+            `;
+            
+            document.documentElement.style.cssText += `
+                padding: 0 !important;
+                margin: 0 !important;
+                padding-top: 0 !important;
+                margin-top: 0 !important;
             `;
         }
         
@@ -161,30 +174,62 @@
                 width: 100% !important;
                 max-width: 100% !important;
                 margin: 0 !important;
+                margin-top: 0 !important;
+                margin-bottom: 0 !important;
                 padding: 0 !important;
                 border: none !important;
+                display: block !important;
             `;
+            
+            // Special handling for iframe's immediate parent
+            const iframeParent = iframe.parentElement;
+            if (iframeParent) {
+                iframeParent.style.cssText += `
+                    padding-top: 0 !important;
+                    margin-top: 0 !important;
+                    line-height: 0 !important;
+                    font-size: 0 !important;
+                `;
+                
+                // Reset after a moment to not affect other content
+                setTimeout(() => {
+                    iframeParent.style.lineHeight = '';
+                    iframeParent.style.fontSize = '';
+                }, 100);
+            }
         }
         
         // Target specific containers that might have padding or borders
-        const containers = document.querySelectorAll('.container, .container-fluid, .row, .col-12, #main-container, #wavemax-affiliate-container, .card, .panel, .box');
+        const containers = document.querySelectorAll('.container, .container-fluid, .row, .col-12, #main-container, #wavemax-affiliate-container, .card, .panel, .box, section, main, article, .page-wrapper, .content-wrapper, .main-wrapper');
         containers.forEach(container => {
             // First remove any inline styles
             container.style.removeProperty('max-width');
+            container.style.removeProperty('padding');
             container.style.removeProperty('padding-left');
             container.style.removeProperty('padding-right');
+            container.style.removeProperty('padding-top');
+            container.style.removeProperty('padding-bottom');
+            container.style.removeProperty('margin');
             container.style.removeProperty('margin-left');
             container.style.removeProperty('margin-right');
+            container.style.removeProperty('margin-top');
+            container.style.removeProperty('margin-bottom');
             container.style.removeProperty('border');
             container.style.removeProperty('border-width');
             container.style.removeProperty('box-shadow');
             
             // Then apply our styles
             container.style.cssText += `
+                padding: 0 !important;
                 padding-left: 0 !important;
                 padding-right: 0 !important;
+                padding-top: 0 !important;
+                padding-bottom: 0 !important;
+                margin: 0 !important;
                 margin-left: 0 !important;
                 margin-right: 0 !important;
+                margin-top: 0 !important;
+                margin-bottom: 0 !important;
                 max-width: 100% !important;
                 width: 100% !important;
                 border: none !important;
@@ -210,12 +255,20 @@
             body section.main-container,
             body .card,
             body .panel,
-            body .box {
+            body .box,
+            body section,
+            body main,
+            body article {
+                padding: 0 !important;
                 padding-left: 0 !important;
                 padding-right: 0 !important;
+                padding-top: 0 !important;
+                padding-bottom: 0 !important;
+                margin: 0 !important;
                 margin-left: 0 !important;
                 margin-right: 0 !important;
-                margin: 0 !important;
+                margin-top: 0 !important;
+                margin-bottom: 0 !important;
                 max-width: 100% !important;
                 width: 100% !important;
                 border: none !important;
@@ -234,15 +287,31 @@
                 margin: 0 !important;
             }
             
-            /* Ensure all parent elements are full width */
+            /* Ensure all parent elements are full width and no top spacing */
             body, 
             body > *,
             body section,
-            body main {
+            body main,
+            body article,
+            body > div,
+            body .main-container,
+            body #main {
                 margin: 0 !important;
                 padding: 0 !important;
+                margin-top: 0 !important;
+                padding-top: 0 !important;
                 max-width: 100% !important;
                 width: 100% !important;
+            }
+            
+            /* Target common page wrapper patterns */
+            body .page-wrapper,
+            body .content-wrapper,
+            body .main-wrapper,
+            body #content,
+            body #page {
+                margin-top: 0 !important;
+                padding-top: 0 !important;
             }
             
             body #wavemax-iframe {
