@@ -560,80 +560,92 @@
     }
 
     function setupLanguageSelector() {
-        console.log('[Parent-Iframe Bridge] Setting up language selector');
+        console.log('[Parent-Iframe Bridge] Setting up language selector integration');
         
-        // Check if language selector already exists
-        if (document.getElementById('wavemax-language-selector')) {
-            console.log('[Parent-Iframe Bridge] Language selector already exists');
-            return;
-        }
-        
-        // Create language selector container
-        const selectorContainer = document.createElement('div');
-        selectorContainer.id = 'wavemax-language-selector';
-        selectorContainer.style.cssText = `
-            position: fixed;
-            top: 10px;
-            right: 10px;
-            z-index: 10000;
-            background: white;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            padding: 5px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        `;
-        
-        // Create select element
-        const select = document.createElement('select');
-        select.id = 'wavemax-language-select';
-        select.style.cssText = `
-            padding: 5px 10px;
-            border: none;
-            background: transparent;
-            cursor: pointer;
-            font-size: 14px;
-        `;
-        
-        // Add language options
-        const languages = [
-            { code: 'en', name: 'English', flag: '🇺🇸' },
-            { code: 'es', name: 'Español', flag: '🇪🇸' },
-            { code: 'pt', name: 'Português', flag: '🇧🇷' },
-            { code: 'de', name: 'Deutsch', flag: '🇩🇪' }
-        ];
-        
-        // Get current language
-        const currentLanguage = localStorage.getItem('wavemax-language') || 'en';
-        
-        languages.forEach(lang => {
-            const option = document.createElement('option');
-            option.value = lang.code;
-            option.textContent = `${lang.flag} ${lang.name}`;
-            option.selected = lang.code === currentLanguage;
-            select.appendChild(option);
-        });
-        
-        // Add change event listener
-        select.addEventListener('change', function(e) {
-            const newLanguage = e.target.value;
-            console.log('[Parent-Iframe Bridge] Language changed to:', newLanguage);
+        // Wait a bit for the page's language selector to be ready
+        setTimeout(() => {
+            // Find the existing language selector on the page
+            // Common selectors for language dropdowns
+            const existingSelector = document.querySelector('select[name="language"]') || 
+                                   document.querySelector('select#language') ||
+                                   document.querySelector('.language-selector select') ||
+                                   document.querySelector('[data-language-selector]') ||
+                                   document.querySelector('select[data-switcher-options]') ||
+                                   document.querySelector('.wpml-ls-legacy-dropdown select') ||
+                                   document.querySelector('.qtranxs_language_chooser');
             
-            // Save to localStorage
-            localStorage.setItem('wavemax-language', newLanguage);
-            
-            // Send language change to iframe
-            sendLanguageChange(newLanguage);
-            
-            // Dispatch custom event
-            window.dispatchEvent(new CustomEvent('languageChanged', {
-                detail: { language: newLanguage }
-            }));
-        });
-        
-        selectorContainer.appendChild(select);
-        document.body.appendChild(selectorContainer);
-        
-        console.log('[Parent-Iframe Bridge] Language selector added to page');
+            if (existingSelector) {
+                console.log('[Parent-Iframe Bridge] Found existing language selector:', existingSelector);
+                
+                // Check if Portuguese and German options already exist
+                const options = Array.from(existingSelector.options);
+                const hasPortuguese = options.some(opt => opt.value === 'pt' || opt.value === 'pt-BR' || opt.value === 'pt_BR');
+                const hasGerman = options.some(opt => opt.value === 'de' || opt.value === 'de-DE' || opt.value === 'de_DE');
+                
+                // Add Portuguese if not present
+                if (!hasPortuguese) {
+                    const ptOption = document.createElement('option');
+                    ptOption.value = 'pt';
+                    ptOption.textContent = 'Português';
+                    existingSelector.appendChild(ptOption);
+                    console.log('[Parent-Iframe Bridge] Added Portuguese option');
+                }
+                
+                // Add German if not present
+                if (!hasGerman) {
+                    const deOption = document.createElement('option');
+                    deOption.value = 'de';
+                    deOption.textContent = 'Deutsch';
+                    existingSelector.appendChild(deOption);
+                    console.log('[Parent-Iframe Bridge] Added German option');
+                }
+                
+                // Get current language from localStorage
+                const currentLanguage = localStorage.getItem('wavemax-language') || 'en';
+                
+                // Try to set the current language in the selector
+                if (existingSelector.value !== currentLanguage) {
+                    // Try different possible values
+                    const possibleValues = [currentLanguage, currentLanguage.toUpperCase(), currentLanguage + '-' + currentLanguage.toUpperCase()];
+                    for (const val of possibleValues) {
+                        const option = Array.from(existingSelector.options).find(opt => opt.value === val);
+                        if (option) {
+                            existingSelector.value = val;
+                            break;
+                        }
+                    }
+                }
+                
+                // Hook into the existing selector's change event
+                existingSelector.addEventListener('change', function(e) {
+                    // Normalize the language code (handle variations like en-US, en_US, EN, etc.)
+                    let langCode = e.target.value.toLowerCase();
+                    langCode = langCode.split('-')[0].split('_')[0]; // Get just the language part
+                    
+                    console.log('[Parent-Iframe Bridge] Existing selector changed to:', langCode);
+                    
+                    // Save to localStorage
+                    localStorage.setItem('wavemax-language', langCode);
+                    
+                    // Send language change to iframe
+                    sendLanguageChange(langCode);
+                    
+                    // Dispatch custom event
+                    window.dispatchEvent(new CustomEvent('languageChanged', {
+                        detail: { language: langCode }
+                    }));
+                });
+                
+                console.log('[Parent-Iframe Bridge] Successfully integrated with existing language selector');
+            } else {
+                console.log('[Parent-Iframe Bridge] No existing language selector found on page');
+                
+                // Try again in case it loads later
+                setTimeout(() => {
+                    setupLanguageSelector();
+                }, 2000);
+            }
+        }, 500);
     }
     
     function setupLanguageMonitoring() {
@@ -650,10 +662,20 @@
                 console.log('[Parent-Iframe Bridge] Language change detected:', newLanguage);
                 sendLanguageChange(newLanguage);
                 
-                // Update selector if it exists
-                const select = document.getElementById('wavemax-language-select');
-                if (select && select.value !== newLanguage) {
-                    select.value = newLanguage;
+                // Update existing selector if it exists
+                const existingSelector = document.querySelector('select[name="language"]') || 
+                                       document.querySelector('select#language') ||
+                                       document.querySelector('.language-selector select') ||
+                                       document.querySelector('[data-language-selector]') ||
+                                       document.querySelector('select[data-switcher-options]');
+                if (existingSelector) {
+                    // Try to find and select the matching option
+                    const option = Array.from(existingSelector.options).find(opt => 
+                        opt.value.toLowerCase().startsWith(newLanguage)
+                    );
+                    if (option) {
+                        existingSelector.value = option.value;
+                    }
                 }
             }
         }, 500);
@@ -665,10 +687,20 @@
                 console.log('[Parent-Iframe Bridge] Language changed via storage event:', newLanguage);
                 sendLanguageChange(newLanguage);
                 
-                // Update selector if it exists
-                const select = document.getElementById('wavemax-language-select');
-                if (select && select.value !== newLanguage) {
-                    select.value = newLanguage;
+                // Update existing selector if it exists
+                const existingSelector = document.querySelector('select[name="language"]') || 
+                                       document.querySelector('select#language') ||
+                                       document.querySelector('.language-selector select') ||
+                                       document.querySelector('[data-language-selector]') ||
+                                       document.querySelector('select[data-switcher-options]');
+                if (existingSelector) {
+                    // Try to find and select the matching option
+                    const option = Array.from(existingSelector.options).find(opt => 
+                        opt.value.toLowerCase().startsWith(newLanguage)
+                    );
+                    if (option) {
+                        existingSelector.value = option.value;
+                    }
                 }
             }
         });
@@ -718,10 +750,20 @@
         setLanguage: (language) => {
             localStorage.setItem('wavemax-language', language);
             sendLanguageChange(language);
-            // Update selector if it exists
-            const select = document.getElementById('wavemax-language-select');
-            if (select) {
-                select.value = language;
+            // Update existing selector if it exists
+            const existingSelector = document.querySelector('select[name="language"]') || 
+                                   document.querySelector('select#language') ||
+                                   document.querySelector('.language-selector select') ||
+                                   document.querySelector('[data-language-selector]') ||
+                                   document.querySelector('select[data-switcher-options]');
+            if (existingSelector) {
+                // Try to find and select the matching option
+                const option = Array.from(existingSelector.options).find(opt => 
+                    opt.value.toLowerCase().startsWith(language)
+                );
+                if (option) {
+                    existingSelector.value = option.value;
+                }
             }
             // Dispatch custom event
             window.dispatchEvent(new CustomEvent('languageChanged', {
