@@ -585,20 +585,38 @@
                     
                 case 'viewport-info':
                     // Parent window sending viewport information
-                    console.log('Received viewport info from parent:', messageData);
-                    console.log('Current route:', currentRoute);
+                    console.log('[EMBED-APP] Received viewport info from parent:', messageData);
+                    console.log('[EMBED-APP] Current route:', currentRoute);
+                    console.log('[EMBED-APP] Is mobile?', messageData.isMobile);
+                    console.log('[EMBED-APP] Chrome hidden?', chromeHidden);
                     viewportInfo = messageData;
                     
                     // Apply mobile classes
                     if (window.MobileUtils) {
+                        console.log('[EMBED-APP] Applying mobile classes via MobileUtils');
                         window.MobileUtils.addBodyClasses();
+                    } else {
+                        console.log('[EMBED-APP] MobileUtils not found');
                     }
                     
                     // Auto-hide chrome on mobile for full-screen routes
                     const fullscreenRoutes = ['/', '/landing', '/affiliate-dashboard', '/customer-dashboard'];
+                    console.log('[EMBED-APP] Fullscreen route check:', {
+                        isMobile: messageData.isMobile,
+                        currentRoute: currentRoute,
+                        isFullscreenRoute: fullscreenRoutes.includes(currentRoute),
+                        chromeHidden: chromeHidden
+                    });
+                    
                     if (messageData.isMobile && fullscreenRoutes.includes(currentRoute) && !chromeHidden) {
-                        console.log('Mobile detected on fullscreen route, requesting chrome hide');
+                        console.log('[EMBED-APP] Mobile detected on fullscreen route, requesting chrome hide');
                         requestChromeHide();
+                    } else if (messageData.isMobile && fullscreenRoutes.includes(currentRoute)) {
+                        console.log('[EMBED-APP] Mobile on fullscreen route but chrome already hidden');
+                    } else if (messageData.isMobile) {
+                        console.log('[EMBED-APP] Mobile detected but not on fullscreen route');
+                    } else {
+                        console.log('[EMBED-APP] Not mobile device');
                     }
                     break;
                     
@@ -618,21 +636,29 @@
         
         // Request parent to hide chrome (header/footer)
         function requestChromeHide() {
+            console.log('[EMBED-APP] requestChromeHide called');
             if (window.parent !== window) {
+                console.log('[EMBED-APP] Sending hide-chrome message to parent');
                 window.parent.postMessage({
                     type: 'hide-chrome',
                     data: {}
                 }, '*');
+            } else {
+                console.log('[EMBED-APP] Not in iframe, cannot hide chrome');
             }
         }
         
         // Request parent to show chrome (header/footer)
         function requestChromeShow() {
+            console.log('[EMBED-APP] requestChromeShow called');
             if (window.parent !== window) {
+                console.log('[EMBED-APP] Sending show-chrome message to parent');
                 window.parent.postMessage({
                     type: 'show-chrome',
                     data: {}
                 }, '*');
+            } else {
+                console.log('[EMBED-APP] Not in iframe, cannot show chrome');
             }
         }
         
