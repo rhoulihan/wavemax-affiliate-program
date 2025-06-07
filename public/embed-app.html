@@ -300,14 +300,10 @@
                         data: { route: route }
                     }, '*');
                     
-                    // Check if we should hide chrome on mobile for this route
+                    // Always hide chrome on mobile for any route
                     if (viewportInfo && viewportInfo.isMobile) {
-                        const fullscreenRoutes = ['/', '/landing', '/affiliate-dashboard', '/customer-dashboard'];
-                        if (fullscreenRoutes.includes(route)) {
-                            requestChromeHide();
-                        } else {
-                            requestChromeShow();
-                        }
+                        console.log('[EMBED-APP] Mobile device on route change, hiding chrome');
+                        requestChromeHide();
                     }
                 }
                 
@@ -612,24 +608,23 @@
                         console.log('[EMBED-APP] MobileUtils not found');
                     }
                     
-                    // Auto-hide chrome on mobile for full-screen routes
-                    const fullscreenRoutes = ['/', '/landing', '/affiliate-dashboard', '/customer-dashboard'];
-                    console.log('[EMBED-APP] Fullscreen route check:', {
+                    // Auto-hide chrome on mobile for ALL routes
+                    console.log('[EMBED-APP] Mobile check:', {
                         isMobile: messageData.isMobile,
                         currentRoute: currentRoute,
-                        isFullscreenRoute: fullscreenRoutes.includes(currentRoute),
                         chromeHidden: chromeHidden
                     });
                     
-                    if (messageData.isMobile && fullscreenRoutes.includes(currentRoute) && !chromeHidden) {
-                        console.log('[EMBED-APP] Mobile detected on fullscreen route, requesting chrome hide');
+                    if (messageData.isMobile && !chromeHidden) {
+                        console.log('[EMBED-APP] Mobile detected, requesting chrome hide for ALL content');
                         requestChromeHide();
-                    } else if (messageData.isMobile && fullscreenRoutes.includes(currentRoute)) {
-                        console.log('[EMBED-APP] Mobile on fullscreen route but chrome already hidden');
-                    } else if (messageData.isMobile) {
-                        console.log('[EMBED-APP] Mobile detected but not on fullscreen route');
+                    } else if (messageData.isMobile && chromeHidden) {
+                        console.log('[EMBED-APP] Mobile detected but chrome already hidden');
+                    } else if (!messageData.isMobile && chromeHidden) {
+                        console.log('[EMBED-APP] Desktop detected, showing chrome');
+                        requestChromeShow();
                     } else {
-                        console.log('[EMBED-APP] Not mobile device');
+                        console.log('[EMBED-APP] Desktop mode, chrome visible');
                     }
                     break;
                     
