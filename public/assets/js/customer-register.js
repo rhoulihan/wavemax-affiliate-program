@@ -90,6 +90,24 @@
   // Function to initialize the registration form
   function initializeRegistrationForm() {
   console.log('Initializing registration form');
+  
+  // Set language preference based on browser language
+  const languagePreferenceField = document.getElementById('languagePreference');
+  if (languagePreferenceField) {
+    // Get browser language
+    let browserLang = navigator.language || navigator.userLanguage || 'en';
+    // Extract just the language code (e.g., 'en' from 'en-US')
+    browserLang = browserLang.substring(0, 2).toLowerCase();
+    
+    // Check if it's one of our supported languages
+    const supportedLanguages = ['en', 'es', 'pt', 'de'];
+    const languagePreference = supportedLanguages.includes(browserLang) ? browserLang : 'en';
+    
+    // Set the value
+    languagePreferenceField.value = languagePreference;
+    console.log('Language preference set to:', languagePreference);
+  }
+  
   // Extract affiliate ID from URL query parameter
   // When loaded via embed-app.html, we need to check the actual page URL, not the base URL
   let urlParams = new URLSearchParams(window.location.search);

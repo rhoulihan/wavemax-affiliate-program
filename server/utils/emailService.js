@@ -71,11 +71,21 @@ const createTransport = () => {
 };
 
 // Load email template
-const loadTemplate = async (templateName) => {
+const loadTemplate = async (templateName, language = 'en') => {
   try {
-    const templatePath = path.join(__dirname, '../templates/emails', `${templateName}.html`);
-    const template = await readFile(templatePath, 'utf8');
-    return template;
+    // First try to load language-specific template
+    const langTemplatePath = path.join(__dirname, '../templates/emails', language, `${templateName}.html`);
+    
+    try {
+      const template = await readFile(langTemplatePath, 'utf8');
+      return template;
+    } catch (langError) {
+      // If language-specific template doesn't exist, fall back to default English template
+      console.log(`Language-specific template not found for ${language}/${templateName}, using default`);
+      const templatePath = path.join(__dirname, '../templates/emails', `${templateName}.html`);
+      const template = await readFile(templatePath, 'utf8');
+      return template;
+    }
   } catch (error) {
     console.error(`Error loading email template ${templateName}:`, error);
     // Return a basic template as fallback
@@ -170,7 +180,8 @@ const sendEmail = async (to, subject, html) => {
  */
 exports.sendAffiliateWelcomeEmail = async (affiliate) => {
   try {
-    const template = await loadTemplate('affiliate-welcome');
+    const language = affiliate.languagePreference || 'en';
+    const template = await loadTemplate('affiliate-welcome', language);
     const registrationUrl = `https://www.wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program?affid=${affiliate.affiliateId}`;
     const landingPageUrl = `https://www.wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program?route=/affiliate-landing&code=${affiliate.affiliateId}`;
 
@@ -186,10 +197,19 @@ exports.sendAffiliateWelcomeEmail = async (affiliate) => {
     };
 
     const html = fillTemplate(template, data);
+    
+    // Translate subject based on language
+    const subjects = {
+      en: 'Welcome to WaveMAX Laundry Affiliate Program',
+      es: 'Bienvenido al Programa de Afiliados de WaveMAX Laundry',
+      pt: 'Bem-vindo ao Programa de Afiliados WaveMAX Laundry',
+      de: 'Willkommen beim WaveMAX Laundry Affiliate-Programm'
+    };
+    const subject = subjects[language] || subjects.en;
 
     await sendEmail(
       affiliate.email,
-      'Welcome to WaveMAX Laundry Affiliate Program',
+      subject,
       html
     );
   } catch (error) {
@@ -370,7 +390,8 @@ exports.sendCustomerWelcomeEmail = async (customer, affiliate, bagInfo = {}) => 
       return;
     }
 
-    const template = await loadTemplate('customer-welcome');
+    const language = customer.languagePreference || 'en';
+    const template = await loadTemplate('customer-welcome', language);
 
     // Build affiliate name with fallback
     const affiliateName = affiliate.businessName || 
@@ -399,9 +420,18 @@ exports.sendCustomerWelcomeEmail = async (customer, affiliate, bagInfo = {}) => 
 
     const html = fillTemplate(template, data);
 
+    // Translate subject based on language
+    const subjects = {
+      en: 'Welcome to WaveMAX Laundry Service',
+      es: 'Bienvenido al Servicio de Lavandería WaveMAX',
+      pt: 'Bem-vindo ao Serviço de Lavanderia WaveMAX',
+      de: 'Willkommen beim WaveMAX Wäscheservice'
+    };
+    const subject = subjects[language] || subjects.en;
+
     await sendEmail(
       customer.email,
-      'Welcome to WaveMAX Laundry Service',
+      subject,
       html
     );
     

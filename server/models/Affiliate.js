@@ -133,6 +133,12 @@ const affiliateSchema = new mongoose.Schema({
   password: {
     type: String,
     required: false // Will be hashed and removed in pre-save middleware
+  },
+  // Language preference for communications
+  languagePreference: {
+    type: String,
+    enum: ['en', 'es', 'pt', 'de'],
+    default: 'en'
   }
 }, { 
   timestamps: true,

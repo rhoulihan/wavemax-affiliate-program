@@ -50,7 +50,8 @@ exports.registerCustomer = async (req, res) => {
       cvv,
       billingZip,
       savePaymentInfo,
-      numberOfBags
+      numberOfBags,
+      languagePreference
     } = req.body;
 
     // Verify affiliate exists
@@ -108,7 +109,8 @@ exports.registerCustomer = async (req, res) => {
       // Bag information
       numberOfBags: bagCount,
       bagCredit: totalBagCredit,
-      bagCreditApplied: false
+      bagCreditApplied: false,
+      languagePreference: languagePreference || 'en'
     });
 
     await newCustomer.save();
