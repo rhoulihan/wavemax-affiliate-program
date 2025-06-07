@@ -27,7 +27,8 @@
             const languages = [
                 { code: 'en', name: 'English', flag: '🇺🇸' },
                 { code: 'es', name: 'Español', flag: '🇪🇸' },
-                { code: 'pt', name: 'Português', flag: '🇧🇷' }
+                { code: 'pt', name: 'Português', flag: '🇧🇷' },
+                { code: 'de', name: 'Deutsch', flag: '🇩🇪' }
             ];
 
             const currentLang = window.i18n ? window.i18n.getLanguage() : 'en';
@@ -157,7 +158,8 @@
                     const languages = [
                         { code: 'en', name: 'English', flag: '🇺🇸' },
                         { code: 'es', name: 'Español', flag: '🇪🇸' },
-                        { code: 'pt', name: 'Português', flag: '🇧🇷' }
+                        { code: 'pt', name: 'Português', flag: '🇧🇷' },
+                        { code: 'de', name: 'Deutsch', flag: '🇩🇪' }
                     ];
                     const currentLanguage = languages.find(l => l.code === lang);
                     if (currentLanguage) {
