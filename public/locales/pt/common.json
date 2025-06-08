@@ -334,6 +334,8 @@
       "minimumFeeDesc": "A taxa mínima cobrada independentemente do número de sacolas",
       "perBagFee": "Taxa por Sacola ($) *",
       "perBagFeeDesc": "Taxa cobrada por cada sacola de roupa",
+      "validateAddress": "Validar Endereço e Definir Local de Serviço",
+      "validateAddressHelp": "Clique para verificar seu endereço e definir automaticamente o centro da sua área de serviço no mapa abaixo",
       "livePricingPreview": "Visualização de Preços ao Vivo:",
       "1bag": "1 sacola",
       "3bags": "3 sacolas",
