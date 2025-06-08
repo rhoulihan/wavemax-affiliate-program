@@ -26,6 +26,7 @@ const administratorRoutes = require('./server/routes/administratorRoutes');
 const operatorRoutes = require('./server/routes/operatorRoutes');
 const coverageRoutes = require('./server/routes/coverageRoutes');
 const systemConfigRoutes = require('./server/routes/systemConfigRoutes');
+const geocodingRoutes = require('./server/routes/geocodingRoutes');
 const affiliateController = require('./server/controllers/affiliateController');
 const customerController = require('./server/controllers/customerController');
 
@@ -322,6 +323,7 @@ apiV1Router.use('/orders', orderRoutes);
 apiV1Router.use('/administrators', administratorRoutes);
 apiV1Router.use('/operators', operatorRoutes);
 apiV1Router.use('/system/config', systemConfigRoutes);
+apiV1Router.use('/geocoding', geocodingRoutes);
 
 // Environment endpoint
 apiV1Router.get('/environment', (req, res) => {
