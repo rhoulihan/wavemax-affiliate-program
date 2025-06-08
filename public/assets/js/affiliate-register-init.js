@@ -969,6 +969,9 @@ function initializeAffiliateRegistration() {
       });
     }
     
+    // Make updateServiceArea globally accessible
+    window.updateServiceArea = updateServiceArea;
+    
     // Handle map click
     serviceAreaMap.on('click', function(e) {
       updateServiceArea(e.latlng.lat, e.latlng.lng, parseInt(radiusSlider.value));
@@ -1029,90 +1032,6 @@ function initializeAffiliateRegistration() {
     
     // Set initial marker and circle at default location
     updateServiceArea(defaultLat, defaultLng, parseInt(radiusSlider ? radiusSlider.value : 5));
-    
-    // Monitor address fields and geocode when complete
-    function checkAndGeocodeFormAddress() {
-      const address = document.getElementById('address')?.value?.trim();
-      const city = document.getElementById('city')?.value?.trim();
-      const state = document.getElementById('state')?.value?.trim();
-      const zipCode = document.getElementById('zipCode')?.value?.trim();
-      
-      // Check if all required fields are filled
-      if (address && city && state) {
-        const fullAddress = `${address}, ${city}, ${state}${zipCode ? ' ' + zipCode : ''}, USA`;
-        console.log('[Service Area Map] Geocoding form address:', fullAddress);
-        
-        // Use the geocoding function to get coordinates
-        if (window.parent !== window) {
-          // Use bridge method when in iframe
-          const requestId = 'form_address_' + Date.now();
-          
-          // Set up one-time handler for this specific request
-          window.handleFormGeocodeResponse = function(data) {
-            if (data.requestId === requestId && data.results && data.results.length > 0) {
-              const result = data.results[0];
-              const lat = parseFloat(result.lat);
-              const lng = parseFloat(result.lon);
-              console.log('[Service Area Map] Form address geocoded:', lat, lng);
-              
-              // Update map center and marker
-              updateServiceArea(lat, lng, parseInt(radiusSlider.value));
-              serviceAreaMap.setView([lat, lng], 14);
-            }
-          };
-          
-          // Store the handler temporarily
-          const originalHandler = window.handleGeocodeResponse;
-          window.handleGeocodeResponse = function(data) {
-            window.handleFormGeocodeResponse(data);
-            // Restore original handler
-            window.handleGeocodeResponse = originalHandler;
-          };
-          
-          // Request from parent
-          if (window.requestGeocodeForward) {
-            window.requestGeocodeForward(fullAddress, requestId);
-          }
-        } else {
-          // Direct Nominatim call when not in iframe
-          const AUSTIN_BOUNDS = {
-            minLat: 29.5451,
-            maxLat: 30.9889,
-            minLon: -98.6687,
-            maxLon: -96.8175
-          };
-          
-          fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(fullAddress)}&limit=1&accept-language=en&viewbox=${AUSTIN_BOUNDS.minLon},${AUSTIN_BOUNDS.minLat},${AUSTIN_BOUNDS.maxLon},${AUSTIN_BOUNDS.maxLat}&bounded=1&countrycodes=us`)
-            .then(response => response.json())
-            .then(results => {
-              if (results.length > 0) {
-                const lat = parseFloat(results[0].lat);
-                const lng = parseFloat(results[0].lon);
-                console.log('[Service Area Map] Form address geocoded:', lat, lng);
-                
-                // Update map center and marker
-                updateServiceArea(lat, lng, parseInt(radiusSlider.value));
-                serviceAreaMap.setView([lat, lng], 14);
-              }
-            })
-            .catch(error => {
-              console.error('Geocoding error:', error);
-            });
-        }
-      }
-    }
-    
-    // Add event listeners to address fields
-    const addressFields = ['address', 'city', 'state', 'zipCode'];
-    addressFields.forEach(fieldId => {
-      const field = document.getElementById(fieldId);
-      if (field) {
-        field.addEventListener('blur', checkAndGeocodeFormAddress);
-      }
-    });
-    
-    // Check on initialization in case fields are already filled (e.g., from OAuth)
-    setTimeout(checkAndGeocodeFormAddress, 1000);
   }
   
   // Initialize map when container is visible and Leaflet is loaded
@@ -1168,6 +1087,119 @@ function initializeAffiliateRegistration() {
   
   // Start the initialization process
   waitForLeafletAndInitialize();
+  
+  // Set up address field monitoring after a delay to ensure map is initialized
+  setTimeout(() => {
+    // Monitor address fields and geocode when complete
+    function checkAndGeocodeFormAddress() {
+      const address = document.getElementById('address')?.value?.trim();
+      const city = document.getElementById('city')?.value?.trim();
+      const state = document.getElementById('state')?.value?.trim();
+      const zipCode = document.getElementById('zipCode')?.value?.trim();
+      
+      console.log('[Service Area Map] Checking form address:', { address, city, state, zipCode });
+      
+      // Check if all required fields are filled and map is initialized
+      if (address && city && state && serviceAreaMap) {
+        const fullAddress = `${address}, ${city}, ${state}${zipCode ? ' ' + zipCode : ''}, USA`;
+        console.log('[Service Area Map] Geocoding form address:', fullAddress);
+        
+        // Get radius slider value
+        const radiusSlider = document.getElementById('radiusSlider');
+        const radiusValue = radiusSlider ? parseInt(radiusSlider.value) : 5;
+        
+        // Use the geocoding function to get coordinates
+        if (window.parent !== window) {
+          // Use bridge method when in iframe
+          const requestId = 'form_address_' + Date.now();
+          
+          // Request from parent
+          window.parent.postMessage({
+            type: 'geocode-forward',
+            data: {
+              query: fullAddress,
+              requestId: requestId
+            }
+          }, '*');
+          
+          // Set up one-time handler for this specific request
+          const handleResponse = function(event) {
+            if (event.data && event.data.type === 'geocode-forward-response' && 
+                event.data.data && event.data.data.requestId === requestId) {
+              console.log('[Service Area Map] Received geocoding response:', event.data.data);
+              
+              if (event.data.data.results && event.data.data.results.length > 0) {
+                const result = event.data.data.results[0];
+                const lat = parseFloat(result.lat);
+                const lng = parseFloat(result.lon);
+                console.log('[Service Area Map] Form address geocoded:', lat, lng);
+                
+                // Update map center and marker
+                if (window.updateServiceArea) {
+                  window.updateServiceArea(lat, lng, radiusValue);
+                }
+                if (serviceAreaMap) {
+                  serviceAreaMap.setView([lat, lng], 14);
+                }
+              }
+              
+              // Remove this handler
+              window.removeEventListener('message', handleResponse);
+            }
+          };
+          
+          window.addEventListener('message', handleResponse);
+        } else {
+          // Direct Nominatim call when not in iframe
+          const AUSTIN_BOUNDS = {
+            minLat: 29.5451,
+            maxLat: 30.9889,
+            minLon: -98.6687,
+            maxLon: -96.8175
+          };
+          
+          fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(fullAddress)}&limit=1&accept-language=en&viewbox=${AUSTIN_BOUNDS.minLon},${AUSTIN_BOUNDS.minLat},${AUSTIN_BOUNDS.maxLon},${AUSTIN_BOUNDS.maxLat}&bounded=1&countrycodes=us`)
+            .then(response => response.json())
+            .then(results => {
+              console.log('[Service Area Map] Nominatim results:', results);
+              if (results.length > 0) {
+                const lat = parseFloat(results[0].lat);
+                const lng = parseFloat(results[0].lon);
+                console.log('[Service Area Map] Form address geocoded:', lat, lng);
+                
+                // Update map center and marker
+                if (window.updateServiceArea) {
+                  window.updateServiceArea(lat, lng, radiusValue);
+                }
+                if (serviceAreaMap) {
+                  serviceAreaMap.setView([lat, lng], 14);
+                }
+              }
+            })
+            .catch(error => {
+              console.error('Geocoding error:', error);
+            });
+        }
+      }
+    }
+    
+    // Make it globally accessible
+    window.checkAndGeocodeFormAddress = checkAndGeocodeFormAddress;
+    
+    // Add event listeners to address fields
+    const addressFields = ['address', 'city', 'state', 'zipCode'];
+    addressFields.forEach(fieldId => {
+      const field = document.getElementById(fieldId);
+      if (field) {
+        console.log('[Service Area Map] Adding blur listener to:', fieldId);
+        field.addEventListener('blur', checkAndGeocodeFormAddress);
+        field.addEventListener('change', checkAndGeocodeFormAddress);
+      }
+    });
+    
+    // Check on initialization in case fields are already filled (e.g., from OAuth)
+    setTimeout(checkAndGeocodeFormAddress, 2000);
+  }, 1500); // Wait for map to be initialized
 }
 
 // Initialize immediately when script loads
