@@ -380,19 +380,27 @@
                     fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5&accept-language=en&viewbox=${AUSTIN_BOUNDS.minLon},${AUSTIN_BOUNDS.minLat},${AUSTIN_BOUNDS.maxLon},${AUSTIN_BOUNDS.maxLat}&bounded=1&countrycodes=us`)
                         .then(response => response.json())
                         .then(results => {
-                            // Send results back to iframe
+                            // Filter results to ensure they're within bounds
+                            const filteredResults = results.filter(item => {
+                                const lat = parseFloat(item.lat);
+                                const lon = parseFloat(item.lon);
+                                return lat >= AUSTIN_BOUNDS.minLat && lat <= AUSTIN_BOUNDS.maxLat &&
+                                       lon >= AUSTIN_BOUNDS.minLon && lon <= AUSTIN_BOUNDS.maxLon;
+                            });
+                            
+                            // Send filtered results back to iframe
                             iframe.contentWindow.postMessage({
                                 type: 'geocode-forward-response',
                                 data: {
                                     requestId: requestId,
-                                    results: results.map(item => ({
+                                    results: filteredResults.map(item => ({
                                         display_name: item.display_name,
                                         lat: item.lat,
                                         lon: item.lon
                                     }))
                                 }
                             }, '*');
-                            console.log('[Parent-Iframe Bridge] Sent geocoding results:', results.length);
+                            console.log('[Parent-Iframe Bridge] Sent geocoding results:', filteredResults.length, '(filtered from', results.length + ')');
                         })
                         .catch(error => {
                             console.error('[Parent-Iframe Bridge] Geocoding error:', error);
