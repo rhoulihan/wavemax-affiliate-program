@@ -397,25 +397,46 @@
                                 <div>
                                     <div id="feeCalculator" class="p-4 bg-white rounded-lg border border-gray-300">
                                         <p class="text-sm font-semibold text-gray-700 mb-3" data-i18n="affiliate.register.livePricingPreview">Live Pricing Preview:</p>
-                                        <div class="space-y-3">
-                                            <div class="flex justify-between items-center py-2 border-b border-gray-100">
-                                                <span class="text-sm text-gray-600" data-i18n="affiliate.register.1bag">1 bag</span>
-                                                <span id="calc1bag" class="text-lg font-semibold text-blue-600">$50</span>
-                                            </div>
-                                            <div class="flex justify-between items-center py-2 border-b border-gray-100">
-                                                <span class="text-sm text-gray-600" data-i18n="affiliate.register.3bags">3 bags</span>
-                                                <span id="calc3bags" class="text-lg font-semibold text-blue-600">$60</span>
-                                            </div>
-                                            <div class="flex justify-between items-center py-2 border-b border-gray-100">
-                                                <span class="text-sm text-gray-600" data-i18n="affiliate.register.5bags">5 bags</span>
-                                                <span id="calc5bags" class="text-lg font-semibold text-blue-600">$100</span>
-                                            </div>
-                                            <div class="flex justify-between items-center py-2">
-                                                <span class="text-sm text-gray-600" data-i18n="affiliate.register.10bags">10 bags</span>
-                                                <span id="calc10bags" class="text-lg font-semibold text-blue-600">$200</span>
-                                            </div>
+                                        
+                                        <!-- Customer Pricing Table -->
+                                        <div class="mb-4">
+                                            <table class="w-full text-sm">
+                                                <thead>
+                                                    <tr class="border-b border-gray-200">
+                                                        <th class="text-left py-2 text-gray-600" data-i18n="affiliate.register.bags">Bags</th>
+                                                        <th class="text-right py-2 text-gray-600" data-i18n="affiliate.register.deliveryFee">Delivery</th>
+                                                        <th class="text-right py-2 text-gray-600" data-i18n="affiliate.register.yourCommission">Your Commission</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr class="border-b border-gray-100">
+                                                        <td class="py-2 text-gray-600">1</td>
+                                                        <td class="text-right py-2 font-semibold text-blue-600" id="calc1bag">$25</td>
+                                                        <td class="text-right py-2 text-green-600" id="comm1bag">$3.75</td>
+                                                    </tr>
+                                                    <tr class="border-b border-gray-100">
+                                                        <td class="py-2 text-gray-600">3</td>
+                                                        <td class="text-right py-2 font-semibold text-blue-600" id="calc3bags">$30</td>
+                                                        <td class="text-right py-2 text-green-600" id="comm3bags">$11.25</td>
+                                                    </tr>
+                                                    <tr class="border-b border-gray-100">
+                                                        <td class="py-2 text-gray-600">5</td>
+                                                        <td class="text-right py-2 font-semibold text-blue-600" id="calc5bags">$50</td>
+                                                        <td class="text-right py-2 text-green-600" id="comm5bags">$18.75</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td class="py-2 text-gray-600">10</td>
+                                                        <td class="text-right py-2 font-semibold text-blue-600" id="calc10bags">$100</td>
+                                                        <td class="text-right py-2 text-green-600" id="comm10bags">$37.50</td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
                                         </div>
-                                        <p class="text-xs text-gray-500 mt-3 text-center" data-i18n="affiliate.register.roundTripPricing">Prices shown are for round-trip service</p>
+                                        
+                                        <div class="text-xs text-gray-500 space-y-1">
+                                            <p data-i18n="affiliate.register.pricingNote">* Delivery fee: Minimum or per-bag rate (whichever is higher)</p>
+                                            <p data-i18n="affiliate.register.commissionNote">* Commission: 10% of WDF service (30 lbs × $1.25/lb per bag)</p>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
