@@ -962,9 +962,25 @@ function initializeAffiliateRegistration() {
       window.affiliateServiceCircle = serviceCircle;
       
       // Update info display
-      document.getElementById('serviceAreaInfo').classList.remove('hidden');
-      document.getElementById('centerLocation').textContent = `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
-      document.getElementById('coverageArea').textContent = `${radius} mile radius`;
+      const serviceAreaInfo = document.getElementById('serviceAreaInfo');
+      if (serviceAreaInfo) {
+        serviceAreaInfo.classList.remove('hidden');
+      }
+      
+      // Display the confirmed address if available, otherwise show coordinates
+      const centerLocationElement = document.getElementById('centerLocation');
+      if (centerLocationElement) {
+        if (window.confirmedServiceAddress) {
+          centerLocationElement.textContent = window.confirmedServiceAddress;
+        } else {
+          centerLocationElement.textContent = `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+        }
+      }
+      
+      const coverageAreaElement = document.getElementById('coverageArea');
+      if (coverageAreaElement) {
+        coverageAreaElement.textContent = `${radius} mile radius`;
+      }
       
       // Handle marker drag
       serviceMarker.on('dragend', function(event) {
@@ -1313,10 +1329,12 @@ function initializeAffiliateRegistration() {
       }
       
       // Create modal HTML
-      const modalTitle = results.length > 1 ? 'Select Your Service Location' : 'Confirm Your Service Location';
+      const modalTitle = results.length > 1 
+        ? (window.i18next ? window.i18next.t('affiliate.register.selectServiceLocation') : 'Select Your Service Location')
+        : (window.i18next ? window.i18next.t('affiliate.register.confirmServiceLocation') : 'Confirm Your Service Location');
       const modalDesc = results.length > 1 
-        ? 'We found multiple possible locations. Please select the correct one:' 
-        : 'Please confirm this is the correct address for your service area:';
+        ? (window.i18next ? window.i18next.t('affiliate.register.selectCorrectLocation') : 'We found multiple possible locations. Please select the correct one:')
+        : (window.i18next ? window.i18next.t('affiliate.register.confirmCorrectAddress') : 'Please confirm this is the correct address for your service area:');
       
       const modalHTML = `
         <div id="addressSelectionModal" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0, 0, 0, 0.5); z-index: 9999; overflow-y: auto;">
@@ -1375,8 +1393,8 @@ function initializeAffiliateRegistration() {
                   }).join('')}
                 </div>
                 <div class="mt-4 flex justify-end space-x-2">
-                  <button id="cancelAddressSelection" class="px-4 py-2 text-gray-600 hover:text-gray-800 border border-gray-300 rounded-lg">Cancel</button>
-                  ${results.length === 1 ? `<button class="confirm-single-address px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700" data-lat="${results[0].lat}" data-lon="${results[0].lon}">Confirm</button>` : ''}
+                  <button id="cancelAddressSelection" class="px-4 py-2 text-gray-600 hover:text-gray-800 border border-gray-300 rounded-lg">${window.i18next ? window.i18next.t('common.buttons.cancel') : 'Cancel'}</button>
+                  ${results.length === 1 ? `<button class="confirm-single-address px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700" data-lat="${results[0].lat}" data-lon="${results[0].lon}">${window.i18next ? window.i18next.t('affiliate.register.confirm') : 'Confirm'}</button>` : ''}
                 </div>
               </div>
             </div>
@@ -1403,8 +1421,41 @@ function initializeAffiliateRegistration() {
       }
       
       // Add event listeners
-      const selectAddress = function(lat, lon) {
-        console.log('[Service Area Map] Address confirmed:', lat, lon);
+      const selectAddress = function(lat, lon, addressText) {
+        console.log('[Service Area Map] Address confirmed:', lat, lon, addressText);
+        
+        // Get the actual form address for display
+        const formAddress = document.getElementById('address')?.value?.trim() || '';
+        const formCity = document.getElementById('city')?.value?.trim() || '';
+        const formState = document.getElementById('state')?.value?.trim() || '';
+        const formZip = document.getElementById('zipCode')?.value?.trim() || '';
+        
+        // Build full address display
+        let fullAddress = formAddress;
+        if (formCity) fullAddress += ', ' + formCity;
+        if (formState) fullAddress += ', ' + formState;
+        if (formZip) fullAddress += ' ' + formZip;
+        
+        // Store the address for service area display
+        window.confirmedServiceAddress = fullAddress || addressText || 'Location set';
+        
+        // Update service area info with address
+        const centerLocationElement = document.getElementById('centerLocation');
+        if (centerLocationElement) {
+          centerLocationElement.textContent = window.confirmedServiceAddress;
+        }
+        
+        // Show service area info
+        const serviceAreaInfo = document.getElementById('serviceAreaInfo');
+        if (serviceAreaInfo) {
+          serviceAreaInfo.classList.remove('hidden');
+        }
+        
+        // Update coverage area
+        const coverageAreaElement = document.getElementById('coverageArea');
+        if (coverageAreaElement) {
+          coverageAreaElement.textContent = `${radiusValue} mile radius`;
+        }
         
         // Update map center and marker (map might be initialized later)
         if (window.updateServiceArea) {
@@ -1427,11 +1478,14 @@ function initializeAffiliateRegistration() {
           businessInfoSection.style.display = 'none';
         }
         
-        // Show all hidden sections
+        // Show all hidden sections EXCEPT service area (we'll show that after address confirmation)
         const hiddenSections = document.querySelectorAll('.form-section-hidden');
         hiddenSections.forEach(section => {
-          section.classList.remove('form-section-hidden');
-          section.style.display = '';
+          // Skip service area section for now
+          if (section.id !== 'serviceAreaSection') {
+            section.classList.remove('form-section-hidden');
+            section.style.display = '';
+          }
         });
         
         // If OAuth user, hide account setup section again
@@ -1442,17 +1496,20 @@ function initializeAffiliateRegistration() {
           }
         }
         
-        // Force a reflow to ensure DOM has updated
+        // NOW show the service area section after address has been confirmed
         const serviceAreaSection = document.getElementById('serviceAreaSection');
         if (serviceAreaSection) {
+          serviceAreaSection.classList.remove('form-section-hidden');
+          serviceAreaSection.style.display = '';
+          
           // Force reflow by accessing offsetHeight
           serviceAreaSection.offsetHeight;
+          
+          // Now trigger map initialization
+          console.log('[Service Area Map] Service area section shown, triggering map initialization');
+          window.dispatchEvent(new Event('dom-sections-ready'));
+          window.dispatchEvent(new Event('init-service-area-map'));
         }
-        
-        // Now trigger map initialization
-        console.log('[Service Area Map] DOM updated, triggering map initialization');
-        window.dispatchEvent(new Event('dom-sections-ready'));
-        window.dispatchEvent(new Event('init-service-area-map'));
         
         // Scroll to service area section
         setTimeout(() => {
@@ -1471,7 +1528,8 @@ function initializeAffiliateRegistration() {
         button.addEventListener('click', function() {
           const lat = parseFloat(this.dataset.lat);
           const lon = parseFloat(this.dataset.lon);
-          selectAddress(lat, lon);
+          const addressText = this.querySelector('.font-semibold').textContent;
+          selectAddress(lat, lon, addressText);
         });
       });
       
@@ -1481,7 +1539,8 @@ function initializeAffiliateRegistration() {
         confirmButton.addEventListener('click', function() {
           const lat = parseFloat(this.dataset.lat);
           const lon = parseFloat(this.dataset.lon);
-          selectAddress(lat, lon);
+          const addressText = document.querySelector('.address-option .font-semibold')?.textContent || '';
+          selectAddress(lat, lon, addressText);
         });
       }
       
