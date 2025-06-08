@@ -862,23 +862,39 @@ function initializeAffiliateRegistration() {
     const minimumFee = parseFloat(document.getElementById('minimumDeliveryFee')?.value) || 25;
     const perBagFee = parseFloat(document.getElementById('perBagDeliveryFee')?.value) || 10;
     
+    // Constants for commission calculation
+    const WDF_RATE = 1.25; // $1.25 per pound
+    const LBS_PER_BAG = 30; // 30 lbs per bag average
+    const COMMISSION_RATE = 0.10; // 10% commission
+    
     // Update all example calculations
     [1, 3, 5, 10].forEach(bags => {
       const calculatedFee = bags * perBagFee;
-      const oneWayFee = Math.max(minimumFee, calculatedFee);
-      const roundTripFee = oneWayFee * 2; // Pickup + delivery
+      const deliveryFee = Math.max(minimumFee, calculatedFee); // Already round trip
       
-      const element = document.getElementById(`calc${bags}bag${bags > 1 ? 's' : ''}`);
-      if (element) {
-        element.textContent = `$${roundTripFee}`;
+      // Calculate WDF commission
+      const wdfRevenue = bags * LBS_PER_BAG * WDF_RATE;
+      const commission = wdfRevenue * COMMISSION_RATE;
+      
+      // Update delivery fee display
+      const feeElement = document.getElementById(`calc${bags}bag${bags > 1 ? 's' : ''}`);
+      if (feeElement) {
+        feeElement.textContent = `$${deliveryFee}`;
         // Add visual indicator if minimum applies
-        if (oneWayFee === minimumFee && calculatedFee < minimumFee) {
-          element.classList.add('font-bold');
-          element.title = 'Minimum fee applies (x2 for round trip)';
+        if (deliveryFee === minimumFee && calculatedFee < minimumFee) {
+          feeElement.classList.add('font-bold');
+          feeElement.title = 'Minimum fee applies';
         } else {
-          element.classList.remove('font-bold');
-          element.title = `${bags} × $${perBagFee} = $${calculatedFee} (x2 for round trip)`;
+          feeElement.classList.remove('font-bold');
+          feeElement.title = `${bags} bags × $${perBagFee}/bag = $${calculatedFee}`;
         }
+      }
+      
+      // Update commission display
+      const commElement = document.getElementById(`comm${bags}bag${bags > 1 ? 's' : ''}`);
+      if (commElement) {
+        commElement.textContent = `$${commission.toFixed(2)}`;
+        commElement.title = `${bags} bags × ${LBS_PER_BAG} lbs × $${WDF_RATE}/lb × ${COMMISSION_RATE * 100}% = $${commission.toFixed(2)}`;
       }
     });
   }
@@ -1543,16 +1559,16 @@ function initializeAffiliateRegistration() {
       
       // Create modal HTML
       const modalTitle = results.length > 1 
-        ? (window.i18next ? window.i18next.t('affiliate.register.selectServiceLocation') : 'Select Your Service Location')
-        : (window.i18next ? window.i18next.t('affiliate.register.confirmServiceLocation') : 'Confirm Your Service Location');
+        ? (window.i18next && window.i18next.isInitialized ? window.i18next.t('affiliate.register.selectServiceLocation') : 'Select Your Service Location')
+        : (window.i18next && window.i18next.isInitialized ? window.i18next.t('affiliate.register.confirmServiceLocation') : 'Confirm Your Service Location');
       const modalDesc = results.length > 1 
-        ? (window.i18next ? window.i18next.t('affiliate.register.selectCorrectLocation') : 'We found multiple possible locations. Please select the correct one:')
-        : (window.i18next ? window.i18next.t('affiliate.register.confirmCorrectAddress') : 'Please confirm this is the correct address for your service area:');
+        ? (window.i18next && window.i18next.isInitialized ? window.i18next.t('affiliate.register.selectCorrectLocation') : 'We found multiple possible locations. Please select the correct one:')
+        : (window.i18next && window.i18next.isInitialized ? window.i18next.t('affiliate.register.confirmCorrectAddress') : 'Please confirm this is the correct address for your service area:');
       
       const modalHTML = `
         <div id="addressSelectionModal" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0, 0, 0, 0.5); z-index: 9999; overflow-y: auto;">
-          <div style="display: flex; align-items: center; justify-content: center; min-height: 100%; padding: 1rem;">
-            <div class="bg-white rounded-lg w-full" style="max-width: 32rem; max-height: 90vh; overflow: hidden; margin: auto;">
+          <div style="display: flex; align-items: flex-start; justify-content: center; min-height: 100%; padding-top: 2rem; padding-left: 1rem; padding-right: 1rem;">
+            <div class="bg-white rounded-lg w-full" style="max-width: 32rem; max-height: 90vh; overflow: hidden; margin-top: 0;">
               <div class="p-6">
                 <h3 class="text-lg font-semibold mb-4">${modalTitle}</h3>
                 <p class="text-sm text-gray-600 mb-4">${modalDesc}</p>
@@ -1607,8 +1623,8 @@ function initializeAffiliateRegistration() {
                   }).join('')}
                 </div>
                 <div class="mt-4 flex justify-end space-x-2">
-                  <button id="cancelAddressSelection" class="px-4 py-2 text-gray-600 hover:text-gray-800 border border-gray-300 rounded-lg">${window.i18next ? window.i18next.t('common.buttons.cancel') : 'Cancel'}</button>
-                  ${results.length === 1 ? `<button class="confirm-single-address px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700" data-lat="${results[0].lat}" data-lon="${results[0].lon}">${window.i18next ? window.i18next.t('affiliate.register.confirm') : 'Confirm'}</button>` : ''}
+                  <button id="cancelAddressSelection" class="px-4 py-2 text-gray-600 hover:text-gray-800 border border-gray-300 rounded-lg">${window.i18next && window.i18next.isInitialized ? window.i18next.t('common.buttons.cancel') : 'Cancel'}</button>
+                  ${results.length === 1 ? `<button class="confirm-single-address px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700" data-lat="${results[0].lat}" data-lon="${results[0].lon}">${window.i18next && window.i18next.isInitialized ? window.i18next.t('common.buttons.confirm') : 'Confirm'}</button>` : ''}
                 </div>
               </div>
             </div>
