@@ -1053,30 +1053,83 @@ function initializeAffiliateRegistration() {
               const parts = event.data.data.address.split(',').map(p => p.trim());
               let displayAddress = '';
               
-              // Try to build address in proper format
-              if (parts.length >= 3) {
-                // Format: "streetNumber streetName, city, state zipcode"
-                // Usually parts[0] = street, parts[1] = city, parts[2] = state/zip
-                displayAddress = parts[0]; // Street
-                if (parts[1]) {
-                  displayAddress += ', ' + parts[1]; // City
-                }
-                if (parts[2]) {
-                  // Check if state and zip are in same part
-                  const stateZip = parts[2];
-                  if (stateZip.match(/\d{5}/)) {
-                    // Has zip code, format as "state zipcode"
-                    displayAddress += ', ' + stateZip;
-                  } else if (parts[3] && parts[3].match(/\d{5}/)) {
-                    // State and zip are separate
-                    displayAddress += ', ' + stateZip + ' ' + parts[3];
-                  } else {
-                    // Just state
-                    displayAddress += ', ' + stateZip;
+              // Extract components we want
+              let street = '';
+              let city = '';
+              let state = '';
+              let zipcode = '';
+              
+              // Nominatim format often includes: house_number, street, neighborhood, city, county, state, zip, country
+              // We want: street (no comma after number), city, state zipcode
+              
+              if (parts.length >= 2) {
+                // First part might be house number, second is street, or first is full street
+                if (parts[0].match(/^\d+$/)) {
+                  // First part is just a number, combine with street
+                  street = parts[0] + ' ' + parts[1];
+                  let startIdx = 2;
+                  
+                  // Skip neighborhood/suburb names by looking for the city
+                  // Cities usually come after neighborhoods but before county
+                  for (let i = startIdx; i < parts.length; i++) {
+                    const part = parts[i];
+                    // Skip if it looks like a neighborhood or county
+                    if (part.toLowerCase().includes('county') || 
+                        part.toLowerCase().includes('township')) {
+                      continue;
+                    }
+                    // Check if this is a state abbreviation
+                    if (part.match(/^[A-Z]{2}$/)) {
+                      state = part;
+                    } else if (part.match(/\d{5}/)) {
+                      // This is a zipcode
+                      zipcode = part.match(/\d{5}/)[0];
+                    } else if (!city && !state && !part.match(/USA|United States/i)) {
+                      // This is likely the city
+                      city = part;
+                    }
+                  }
+                } else {
+                  // First part is the full street
+                  street = parts[0];
+                  
+                  // Process remaining parts
+                  for (let i = 1; i < parts.length; i++) {
+                    const part = parts[i];
+                    // Skip if it looks like a neighborhood or county
+                    if (part.toLowerCase().includes('county') || 
+                        part.toLowerCase().includes('township')) {
+                      continue;
+                    }
+                    // Check if this is a state abbreviation
+                    if (part.match(/^[A-Z]{2}$/)) {
+                      state = part;
+                    } else if (part.match(/\d{5}/)) {
+                      // This is a zipcode
+                      zipcode = part.match(/\d{5}/)[0];
+                    } else if (!city && !state && !part.match(/USA|United States/i)) {
+                      // This is likely the city
+                      city = part;
+                    }
                   }
                 }
-              } else {
-                displayAddress = event.data.data.address;
+              }
+              
+              // Build the formatted address
+              displayAddress = street;
+              if (city) {
+                displayAddress += ', ' + city;
+              }
+              if (state) {
+                displayAddress += ', ' + state;
+                if (zipcode) {
+                  displayAddress += ' ' + zipcode;
+                }
+              }
+              
+              // Fallback if we couldn't parse properly
+              if (!street || !city) {
+                displayAddress = parts.slice(0, 3).join(', ');
               }
               
               centerLocationElement.textContent = displayAddress;
@@ -1102,30 +1155,83 @@ function initializeAffiliateRegistration() {
               const parts = data.display_name.split(',').map(p => p.trim());
               let displayAddress = '';
               
-              // Try to build address in proper format
-              if (parts.length >= 3) {
-                // Format: "streetNumber streetName, city, state zipcode"
-                // Usually parts[0] = street, parts[1] = city, parts[2] = state/zip
-                displayAddress = parts[0]; // Street
-                if (parts[1]) {
-                  displayAddress += ', ' + parts[1]; // City
-                }
-                if (parts[2]) {
-                  // Check if state and zip are in same part
-                  const stateZip = parts[2];
-                  if (stateZip.match(/\d{5}/)) {
-                    // Has zip code, format as "state zipcode"
-                    displayAddress += ', ' + stateZip;
-                  } else if (parts[3] && parts[3].match(/\d{5}/)) {
-                    // State and zip are separate
-                    displayAddress += ', ' + stateZip + ' ' + parts[3];
-                  } else {
-                    // Just state
-                    displayAddress += ', ' + stateZip;
+              // Extract components we want
+              let street = '';
+              let city = '';
+              let state = '';
+              let zipcode = '';
+              
+              // Nominatim format often includes: house_number, street, neighborhood, city, county, state, zip, country
+              // We want: street (no comma after number), city, state zipcode
+              
+              if (parts.length >= 2) {
+                // First part might be house number, second is street, or first is full street
+                if (parts[0].match(/^\d+$/)) {
+                  // First part is just a number, combine with street
+                  street = parts[0] + ' ' + parts[1];
+                  let startIdx = 2;
+                  
+                  // Skip neighborhood/suburb names by looking for the city
+                  // Cities usually come after neighborhoods but before county
+                  for (let i = startIdx; i < parts.length; i++) {
+                    const part = parts[i];
+                    // Skip if it looks like a neighborhood or county
+                    if (part.toLowerCase().includes('county') || 
+                        part.toLowerCase().includes('township')) {
+                      continue;
+                    }
+                    // Check if this is a state abbreviation
+                    if (part.match(/^[A-Z]{2}$/)) {
+                      state = part;
+                    } else if (part.match(/\d{5}/)) {
+                      // This is a zipcode
+                      zipcode = part.match(/\d{5}/)[0];
+                    } else if (!city && !state && !part.match(/USA|United States/i)) {
+                      // This is likely the city
+                      city = part;
+                    }
+                  }
+                } else {
+                  // First part is the full street
+                  street = parts[0];
+                  
+                  // Process remaining parts
+                  for (let i = 1; i < parts.length; i++) {
+                    const part = parts[i];
+                    // Skip if it looks like a neighborhood or county
+                    if (part.toLowerCase().includes('county') || 
+                        part.toLowerCase().includes('township')) {
+                      continue;
+                    }
+                    // Check if this is a state abbreviation
+                    if (part.match(/^[A-Z]{2}$/)) {
+                      state = part;
+                    } else if (part.match(/\d{5}/)) {
+                      // This is a zipcode
+                      zipcode = part.match(/\d{5}/)[0];
+                    } else if (!city && !state && !part.match(/USA|United States/i)) {
+                      // This is likely the city
+                      city = part;
+                    }
                   }
                 }
-              } else {
-                displayAddress = data.display_name;
+              }
+              
+              // Build the formatted address
+              displayAddress = street;
+              if (city) {
+                displayAddress += ', ' + city;
+              }
+              if (state) {
+                displayAddress += ', ' + state;
+                if (zipcode) {
+                  displayAddress += ' ' + zipcode;
+                }
+              }
+              
+              // Fallback if we couldn't parse properly
+              if (!street || !city) {
+                displayAddress = parts.slice(0, 3).join(', ');
               }
               
               centerLocationElement.textContent = displayAddress;
