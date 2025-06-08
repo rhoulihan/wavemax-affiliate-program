@@ -325,6 +325,7 @@
       "serviceAreaDetails": "Service Area Details",
       "serviceCenter": "Service Center:",
       "coverageArea": "Coverage Area:",
+      "coordinates": "Coordinates:",
       "notSet": "Not set",
       "serviceInfo": "Service Information",
       "deliveryFeeStructure": "Delivery Fee Structure",
