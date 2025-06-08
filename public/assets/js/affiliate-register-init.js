@@ -967,14 +967,20 @@ function initializeAffiliateRegistration() {
         serviceAreaInfo.classList.remove('hidden');
       }
       
-      // Display the confirmed address if available, otherwise show coordinates
+      // Display the address
       const centerLocationElement = document.getElementById('centerLocation');
       if (centerLocationElement) {
         if (window.confirmedServiceAddress) {
           centerLocationElement.textContent = window.confirmedServiceAddress;
         } else {
-          centerLocationElement.textContent = `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+          centerLocationElement.textContent = 'Loading address...';
         }
+      }
+      
+      // Always display coordinates
+      const centerCoordinatesElement = document.getElementById('centerCoordinates');
+      if (centerCoordinatesElement) {
+        centerCoordinatesElement.textContent = `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
       }
       
       const coverageAreaElement = document.getElementById('coverageArea');
@@ -986,8 +992,8 @@ function initializeAffiliateRegistration() {
       serviceMarker.on('dragend', function(event) {
         const position = event.target.getLatLng();
         updateServiceArea(position.lat, position.lng, parseInt(radiusSlider.value));
-        // Update address field with coordinates
-        reverseGeocode(position.lat, position.lng);
+        // Reverse geocode to get address
+        reverseGeocodeForServiceArea(position.lat, position.lng);
       });
     }
     
@@ -997,43 +1003,92 @@ function initializeAffiliateRegistration() {
     // Handle map click
     serviceAreaMap.on('click', function(e) {
       updateServiceArea(e.latlng.lat, e.latlng.lng, parseInt(radiusSlider.value));
-      // Update address field with coordinates
-      reverseGeocode(e.latlng.lat, e.latlng.lng);
+      // Reverse geocode to get address
+      reverseGeocodeForServiceArea(e.latlng.lat, e.latlng.lng);
     });
     
-    // Geocoding functions - always use bridge method
-    function reverseGeocode(lat, lng) {
-      const addressField = document.getElementById('serviceAddress');
-      if (!addressField) return;
+    // Reverse geocode for service area - updates the display address
+    function reverseGeocodeForServiceArea(lat, lng) {
+      const centerLocationElement = document.getElementById('centerLocation');
+      if (!centerLocationElement) return;
+      
+      // Show loading state
+      centerLocationElement.textContent = 'Loading address...';
       
       if (window.parent !== window) {
         // Use bridge method when in iframe
-        const requestId = 'reverse_' + Date.now();
-        console.log('[Affiliate Registration] Using bridge for reverse geocoding');
+        const requestId = 'service_area_reverse_' + Date.now();
+        console.log('[Service Area Map] Using bridge for reverse geocoding');
+        
+        // Request from parent
+        window.parent.postMessage({
+          type: 'geocode-reverse',
+          data: {
+            lat: lat,
+            lng: lng,
+            requestId: requestId
+          }
+        }, '*');
         
         // Set up one-time handler for this specific request
-        window.handleReverseGeocodeResponse = function(data) {
-          if (data.requestId === requestId && data.address) {
-            addressField.value = data.address;
+        const handleResponse = function(event) {
+          if (event.data && event.data.type === 'geocode-reverse-response' && 
+              event.data.data && event.data.data.requestId === requestId) {
+            console.log('[Service Area Map] Received reverse geocoding response:', event.data.data);
+            
+            if (event.data.data.address) {
+              // Parse the address to extract street information
+              const parts = event.data.data.address.split(',').map(p => p.trim());
+              let displayAddress = '';
+              
+              // Try to build a reasonable address from the parts
+              if (parts.length >= 3) {
+                // Take first 3 parts which usually contain street, city, state
+                displayAddress = parts.slice(0, 3).join(', ');
+              } else {
+                displayAddress = event.data.data.address;
+              }
+              
+              centerLocationElement.textContent = displayAddress;
+              window.confirmedServiceAddress = displayAddress;
+            } else {
+              centerLocationElement.textContent = 'Address not found';
+            }
+            
+            // Remove this handler
+            window.removeEventListener('message', handleResponse);
           }
         };
         
-        // Request from parent
-        if (window.requestGeocodeReverse) {
-          window.requestGeocodeReverse(lat, lng, requestId);
-        }
+        window.addEventListener('message', handleResponse);
       } else {
         // Direct Nominatim call when not in iframe
-        console.log('[Affiliate Registration] Direct Nominatim call for reverse geocoding');
+        console.log('[Service Area Map] Direct Nominatim call for reverse geocoding');
         fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&accept-language=en`)
           .then(response => response.json())
           .then(data => {
             if (data.display_name) {
-              addressField.value = data.display_name;
+              // Parse the address to extract street information
+              const parts = data.display_name.split(',').map(p => p.trim());
+              let displayAddress = '';
+              
+              // Try to build a reasonable address from the parts
+              if (parts.length >= 3) {
+                // Take first 3 parts which usually contain street, city, state
+                displayAddress = parts.slice(0, 3).join(', ');
+              } else {
+                displayAddress = data.display_name;
+              }
+              
+              centerLocationElement.textContent = displayAddress;
+              window.confirmedServiceAddress = displayAddress;
+            } else {
+              centerLocationElement.textContent = 'Address not found';
             }
           })
           .catch(error => {
             console.error('Reverse geocoding error:', error);
+            centerLocationElement.textContent = 'Address lookup failed';
           });
       }
     }
@@ -1062,6 +1117,10 @@ function initializeAffiliateRegistration() {
     } else {
       // Set initial marker and circle at default location
       updateServiceArea(defaultLat, defaultLng, parseInt(radiusSlider ? radiusSlider.value : 5));
+      // Perform reverse geocoding for default location if no address is set
+      if (!window.confirmedServiceAddress) {
+        reverseGeocodeForServiceArea(defaultLat, defaultLng);
+      }
     }
   }
   
@@ -1443,6 +1502,12 @@ function initializeAffiliateRegistration() {
         const centerLocationElement = document.getElementById('centerLocation');
         if (centerLocationElement) {
           centerLocationElement.textContent = window.confirmedServiceAddress;
+        }
+        
+        // Update coordinates display
+        const centerCoordinatesElement = document.getElementById('centerCoordinates');
+        if (centerCoordinatesElement) {
+          centerCoordinatesElement.textContent = `${lat.toFixed(6)}, ${lon.toFixed(6)}`;
         }
         
         // Show service area info
