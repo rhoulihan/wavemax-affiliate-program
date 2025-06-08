@@ -1093,21 +1093,44 @@ function initializeAffiliateRegistration() {
   // Start the initialization process
   waitForLeafletAndInitialize();
   
-  // Set up address field monitoring after a delay to ensure map is initialized
-  function setupAddressMonitoring() {
+  // Set up address validation button
+  function setupAddressValidation() {
+    const validateButton = document.getElementById('validateAddress');
+    if (validateButton) {
+      validateButton.addEventListener('click', function() {
+        validateAndSetAddress();
+      });
+    }
+    
     // Monitor address fields and geocode when complete
-    function checkAndGeocodeFormAddress() {
+    function validateAndSetAddress() {
       const address = document.getElementById('address')?.value?.trim();
       const city = document.getElementById('city')?.value?.trim();
       const state = document.getElementById('state')?.value?.trim();
       const zipCode = document.getElementById('zipCode')?.value?.trim();
       
-      console.log('[Service Area Map] Checking form address:', { address, city, state, zipCode });
-      console.log('[Service Area Map] Map initialized?', !!serviceAreaMap);
-      console.log('[Service Area Map] Window updateServiceArea available?', !!window.updateServiceArea);
+      console.log('[Service Area Map] Validating address:', { address, city, state, zipCode });
       
-      // Check if we have at least city and state to do a search
-      if (city && state && serviceAreaMap) {
+      // Validate required fields
+      if (!address || !city || !state) {
+        alert('Please fill in all required address fields (Address, City, State) before validating.');
+        return;
+      }
+      
+      // Check if map is initialized
+      if (!serviceAreaMap) {
+        alert('Please wait for the map to initialize before validating the address.');
+        return;
+      }
+      
+      // Show loading state on button
+      const validateButton = document.getElementById('validateAddress');
+      const originalText = validateButton.innerHTML;
+      validateButton.innerHTML = '<svg class="animate-spin h-5 w-5 mr-2 inline" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>Validating...';
+      validateButton.disabled = true;
+      
+      // Always search for the address
+      if (true) {
         // Build search queries from most specific to least specific
         const searchQueries = [];
         
@@ -1136,15 +1159,22 @@ function initializeAffiliateRegistration() {
         console.log('[Service Area Map] Will try multiple search queries:', searchQueries);
         
         // Try geocoding with fallback
-        geocodeWithFallback(searchQueries, 0);
+        geocodeWithFallback(searchQueries, 0, originalText);
         
       }
     }
     
     // Function to try multiple geocoding queries with fallback
-    function geocodeWithFallback(searchQueries, queryIndex) {
+    function geocodeWithFallback(searchQueries, queryIndex, originalButtonText) {
       if (queryIndex >= searchQueries.length) {
         console.log('[Service Area Map] All geocoding queries failed');
+        // Reset button state
+        const validateButton = document.getElementById('validateAddress');
+        if (validateButton && originalButtonText) {
+          validateButton.innerHTML = originalButtonText;
+          validateButton.disabled = false;
+        }
+        alert('Unable to find the address. Please check your address and try again.');
         return;
       }
       
@@ -1175,28 +1205,12 @@ function initializeAffiliateRegistration() {
             console.log('[Service Area Map] Received geocoding response:', event.data.data);
             
             if (event.data.data.results && event.data.data.results.length > 0) {
-              // Show address selection modal if multiple results
-              if (event.data.data.results.length > 1 || queryIndex > 0) {
-                showAddressSelectionModal(event.data.data.results, radiusValue);
-              } else {
-                // Single result, use it directly
-                const result = event.data.data.results[0];
-                const lat = parseFloat(result.lat);
-                const lng = parseFloat(result.lon);
-                console.log('[Service Area Map] Form address geocoded:', lat, lng);
-                
-                // Update map center and marker
-                if (window.updateServiceArea) {
-                  window.updateServiceArea(lat, lng, radiusValue);
-                }
-                if (serviceAreaMap) {
-                  serviceAreaMap.setView([lat, lng], 14);
-                }
-              }
+              // Always show address confirmation modal
+              showAddressConfirmationModal(event.data.data.results, radiusValue, originalButtonText);
             } else {
               // No results, try next query
               console.log('[Service Area Map] No results for query, trying next...');
-              geocodeWithFallback(searchQueries, queryIndex + 1);
+              geocodeWithFallback(searchQueries, queryIndex + 1, originalButtonText);
             }
             
             // Remove this handler
@@ -1219,40 +1233,32 @@ function initializeAffiliateRegistration() {
           .then(results => {
             console.log('[Service Area Map] Nominatim results:', results);
             if (results.length > 0) {
-              // Show address selection modal if multiple results
-              if (results.length > 1 || queryIndex > 0) {
-                showAddressSelectionModal(results, radiusValue);
-              } else {
-                // Single result, use it directly
-                const lat = parseFloat(results[0].lat);
-                const lng = parseFloat(results[0].lon);
-                console.log('[Service Area Map] Form address geocoded:', lat, lng);
-                
-                // Update map center and marker
-                if (window.updateServiceArea) {
-                  window.updateServiceArea(lat, lng, radiusValue);
-                }
-                if (serviceAreaMap) {
-                  serviceAreaMap.setView([lat, lng], 14);
-                }
-              }
+              // Always show address confirmation modal
+              showAddressConfirmationModal(results, radiusValue, originalButtonText);
             } else {
               // No results, try next query
               console.log('[Service Area Map] No results for query, trying next...');
-              geocodeWithFallback(searchQueries, queryIndex + 1);
+              geocodeWithFallback(searchQueries, queryIndex + 1, originalButtonText);
             }
           })
           .catch(error => {
             console.error('Geocoding error:', error);
             // Try next query on error
-            geocodeWithFallback(searchQueries, queryIndex + 1);
+            geocodeWithFallback(searchQueries, queryIndex + 1, originalButtonText);
           });
       }
     }
     
-    // Function to show address selection modal
-    function showAddressSelectionModal(results, radiusValue) {
-      console.log('[Service Area Map] Showing address selection modal with results:', results);
+    // Function to show address confirmation modal
+    function showAddressConfirmationModal(results, radiusValue, originalButtonText) {
+      console.log('[Service Area Map] Showing address confirmation modal with results:', results);
+      
+      // Reset button state
+      const validateButton = document.getElementById('validateAddress');
+      if (validateButton && originalButtonText) {
+        validateButton.innerHTML = originalButtonText;
+        validateButton.disabled = false;
+      }
       
       // Remove any existing modal
       const existingModal = document.getElementById('addressSelectionModal');
@@ -1261,26 +1267,40 @@ function initializeAffiliateRegistration() {
       }
       
       // Create modal HTML
+      const modalTitle = results.length > 1 ? 'Select Your Service Location' : 'Confirm Your Service Location';
+      const modalDesc = results.length > 1 
+        ? 'We found multiple possible locations. Please select the correct one:' 
+        : 'Please confirm this is the correct location for your service area:';
+      
       const modalHTML = `
         <div id="addressSelectionModal" class="fixed inset-0 bg-black bg-opacity-50 z-50" style="z-index: 9999;">
           <div class="flex items-center justify-center h-full p-4">
             <div class="bg-white rounded-lg max-w-lg w-full max-h-[80vh] overflow-hidden">
               <div class="p-6">
-                <h3 class="text-lg font-semibold mb-4">Select Your Service Location</h3>
-                <p class="text-sm text-gray-600 mb-4">We found multiple possible locations. Please select the correct one:</p>
+                <h3 class="text-lg font-semibold mb-4">${modalTitle}</h3>
+                <p class="text-sm text-gray-600 mb-4">${modalDesc}</p>
                 <div class="space-y-2 max-h-[50vh] overflow-y-auto">
-                  ${results.map((result, index) => `
-                    <button class="address-option w-full text-left p-4 border rounded-lg hover:bg-blue-50 hover:border-blue-300 transition" 
-                            data-lat="${result.lat}" 
-                            data-lon="${result.lon}"
-                            data-index="${index}">
-                      <div class="font-medium">${result.display_name.split(',')[0]}</div>
-                      <div class="text-sm text-gray-600">${result.display_name}</div>
-                    </button>
-                  `).join('')}
+                  ${results.map((result, index) => {
+                    // Parse the display name to show more readable format
+                    const parts = result.display_name.split(',').map(p => p.trim());
+                    const streetAddress = parts[0];
+                    const cityStateZip = parts.slice(1, 4).join(', ');
+                    
+                    return `
+                      <button class="address-option w-full text-left p-4 border rounded-lg hover:bg-blue-50 hover:border-blue-300 transition" 
+                              data-lat="${result.lat}" 
+                              data-lon="${result.lon}"
+                              data-index="${index}">
+                        <div class="font-medium">${streetAddress}</div>
+                        <div class="text-sm text-gray-600">${cityStateZip}</div>
+                        <div class="text-xs text-gray-500 mt-1">Coordinates: ${parseFloat(result.lat).toFixed(6)}, ${parseFloat(result.lon).toFixed(6)}</div>
+                      </button>
+                    `;
+                  }).join('')}
                 </div>
-                <div class="mt-4 flex justify-end">
-                  <button id="cancelAddressSelection" class="px-4 py-2 text-gray-600 hover:text-gray-800">Cancel</button>
+                <div class="mt-4 flex justify-end space-x-2">
+                  <button id="cancelAddressSelection" class="px-4 py-2 text-gray-600 hover:text-gray-800 border border-gray-300 rounded-lg">Cancel</button>
+                  ${results.length === 1 ? `<button class="confirm-single-address px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700" data-lat="${results[0].lat}" data-lon="${results[0].lon}">Confirm</button>` : ''}
                 </div>
               </div>
             </div>
@@ -1292,25 +1312,45 @@ function initializeAffiliateRegistration() {
       document.body.insertAdjacentHTML('beforeend', modalHTML);
       
       // Add event listeners
+      const selectAddress = function(lat, lon) {
+        console.log('[Service Area Map] Address confirmed:', lat, lon);
+        
+        // Update map center and marker
+        if (window.updateServiceArea) {
+          window.updateServiceArea(lat, lon, radiusValue);
+        }
+        if (serviceAreaMap) {
+          serviceAreaMap.setView([lat, lon], 14);
+        }
+        
+        // Scroll to service area section
+        const serviceAreaSection = document.querySelector('#serviceAreaMap').closest('.md\\:col-span-2');
+        if (serviceAreaSection) {
+          serviceAreaSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+        
+        // Remove modal
+        document.getElementById('addressSelectionModal').remove();
+      };
+      
+      // Add click handlers for address options
       document.querySelectorAll('.address-option').forEach(button => {
         button.addEventListener('click', function() {
           const lat = parseFloat(this.dataset.lat);
           const lon = parseFloat(this.dataset.lon);
-          
-          console.log('[Service Area Map] Address selected:', lat, lon);
-          
-          // Update map center and marker
-          if (window.updateServiceArea) {
-            window.updateServiceArea(lat, lon, radiusValue);
-          }
-          if (serviceAreaMap) {
-            serviceAreaMap.setView([lat, lon], 14);
-          }
-          
-          // Remove modal
-          document.getElementById('addressSelectionModal').remove();
+          selectAddress(lat, lon);
         });
       });
+      
+      // Add handler for single address confirm button
+      const confirmButton = document.querySelector('.confirm-single-address');
+      if (confirmButton) {
+        confirmButton.addEventListener('click', function() {
+          const lat = parseFloat(this.dataset.lat);
+          const lon = parseFloat(this.dataset.lon);
+          selectAddress(lat, lon);
+        });
+      }
       
       // Cancel button
       document.getElementById('cancelAddressSelection').addEventListener('click', function() {
@@ -1325,36 +1365,16 @@ function initializeAffiliateRegistration() {
       });
     }
     
-    // Make it globally accessible
-    window.checkAndGeocodeFormAddress = checkAndGeocodeFormAddress;
-    
-    // Add event listeners to address fields
-    const addressFields = ['address', 'city', 'state', 'zipCode'];
-    addressFields.forEach(fieldId => {
-      const field = document.getElementById(fieldId);
-      if (field) {
-        console.log('[Service Area Map] Adding blur listener to:', fieldId);
-        field.addEventListener('blur', () => {
-          console.log(`[Service Area Map] Blur event fired on ${fieldId}`);
-          checkAndGeocodeFormAddress();
-        });
-        field.addEventListener('change', () => {
-          console.log(`[Service Area Map] Change event fired on ${fieldId}`);
-          checkAndGeocodeFormAddress();
-        });
-      }
-    });
-    
-    // Check on initialization in case fields are already filled (e.g., from OAuth)
-    setTimeout(checkAndGeocodeFormAddress, 2000);
+    // Make validation function globally accessible
+    window.validateAndSetAddress = validateAndSetAddress;
   }
   
-  // Wait for map to be initialized before setting up monitoring
+  // Wait for map to be initialized before setting up validation
   const mapWaitInterval = setInterval(() => {
     if (serviceAreaMap && window.updateServiceArea) {
-      console.log('[Service Area Map] Map is ready, setting up address monitoring');
+      console.log('[Service Area Map] Map is ready, setting up address validation');
       clearInterval(mapWaitInterval);
-      setupAddressMonitoring();
+      setupAddressValidation();
     } else {
       console.log('[Service Area Map] Waiting for map initialization...');
     }
