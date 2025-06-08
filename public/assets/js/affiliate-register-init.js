@@ -1037,14 +1037,32 @@ function initializeAffiliateRegistration() {
             console.log('[Service Area Map] Received reverse geocoding response:', event.data.data);
             
             if (event.data.data.address) {
-              // Parse the address to extract street information
+              // Parse and format the address properly
               const parts = event.data.data.address.split(',').map(p => p.trim());
               let displayAddress = '';
               
-              // Try to build a reasonable address from the parts
+              // Try to build address in proper format
               if (parts.length >= 3) {
-                // Take first 3 parts which usually contain street, city, state
-                displayAddress = parts.slice(0, 3).join(', ');
+                // Format: "streetNumber streetName, city, state zipcode"
+                // Usually parts[0] = street, parts[1] = city, parts[2] = state/zip
+                displayAddress = parts[0]; // Street
+                if (parts[1]) {
+                  displayAddress += ', ' + parts[1]; // City
+                }
+                if (parts[2]) {
+                  // Check if state and zip are in same part
+                  const stateZip = parts[2];
+                  if (stateZip.match(/\d{5}/)) {
+                    // Has zip code, format as "state zipcode"
+                    displayAddress += ', ' + stateZip;
+                  } else if (parts[3] && parts[3].match(/\d{5}/)) {
+                    // State and zip are separate
+                    displayAddress += ', ' + stateZip + ' ' + parts[3];
+                  } else {
+                    // Just state
+                    displayAddress += ', ' + stateZip;
+                  }
+                }
               } else {
                 displayAddress = event.data.data.address;
               }
@@ -1068,14 +1086,32 @@ function initializeAffiliateRegistration() {
           .then(response => response.json())
           .then(data => {
             if (data.display_name) {
-              // Parse the address to extract street information
+              // Parse and format the address properly
               const parts = data.display_name.split(',').map(p => p.trim());
               let displayAddress = '';
               
-              // Try to build a reasonable address from the parts
+              // Try to build address in proper format
               if (parts.length >= 3) {
-                // Take first 3 parts which usually contain street, city, state
-                displayAddress = parts.slice(0, 3).join(', ');
+                // Format: "streetNumber streetName, city, state zipcode"
+                // Usually parts[0] = street, parts[1] = city, parts[2] = state/zip
+                displayAddress = parts[0]; // Street
+                if (parts[1]) {
+                  displayAddress += ', ' + parts[1]; // City
+                }
+                if (parts[2]) {
+                  // Check if state and zip are in same part
+                  const stateZip = parts[2];
+                  if (stateZip.match(/\d{5}/)) {
+                    // Has zip code, format as "state zipcode"
+                    displayAddress += ', ' + stateZip;
+                  } else if (parts[3] && parts[3].match(/\d{5}/)) {
+                    // State and zip are separate
+                    displayAddress += ', ' + stateZip + ' ' + parts[3];
+                  } else {
+                    // Just state
+                    displayAddress += ', ' + stateZip;
+                  }
+                }
               } else {
                 displayAddress = data.display_name;
               }
@@ -1428,16 +1464,17 @@ function initializeAffiliateRegistration() {
                       }
                     }
                     
-                    // Build full address display
+                    // Build full address display with proper formatting
+                    // Format: "streetNumber streetName, city, state zipcode"
                     let fullDisplay = displayAddress;
                     if (formCity || (parts.length > 1 && parts[1])) {
                       fullDisplay += ', ' + (formCity || parts[1]);
                     }
                     if (formState || (parts.length > 2 && parts[2])) {
                       fullDisplay += ', ' + (formState || parts[2]);
-                    }
-                    if (formZip) {
-                      fullDisplay += ' ' + formZip;
+                      if (formZip) {
+                        fullDisplay += ' ' + formZip;
+                      }
                     }
                     
                     return `
@@ -1489,11 +1526,18 @@ function initializeAffiliateRegistration() {
         const formState = document.getElementById('state')?.value?.trim() || '';
         const formZip = document.getElementById('zipCode')?.value?.trim() || '';
         
-        // Build full address display
+        // Build full address display with proper formatting
+        // Format: "streetNumber streetName, city, state zipcode"
         let fullAddress = formAddress;
-        if (formCity) fullAddress += ', ' + formCity;
-        if (formState) fullAddress += ', ' + formState;
-        if (formZip) fullAddress += ' ' + formZip;
+        if (formCity) {
+          fullAddress += ', ' + formCity;
+        }
+        if (formState) {
+          fullAddress += ', ' + formState;
+          if (formZip) {
+            fullAddress += ' ' + formZip;
+          }
+        }
         
         // Store the address for service area display
         window.confirmedServiceAddress = fullAddress || addressText || 'Location set';
