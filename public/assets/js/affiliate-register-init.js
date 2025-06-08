@@ -1013,137 +1013,7 @@ function initializeAffiliateRegistration() {
       }
     }
     
-    // Address autocomplete setup
-    const addressInput = document.getElementById('serviceAddress');
-    if (addressInput) {
-      let searchTimeout;
-      let autocompleteContainer;
-      
-      // Create autocomplete dropdown container
-      autocompleteContainer = document.createElement('div');
-      autocompleteContainer.className = 'absolute z-50 w-full bg-white border border-gray-300 rounded-lg shadow-lg mt-1 hidden';
-      addressInput.parentNode.style.position = 'relative';
-      addressInput.parentNode.appendChild(autocompleteContainer);
-      
-      addressInput.addEventListener('input', function() {
-        const query = this.value.trim();
-        
-        // Clear previous timeout
-        clearTimeout(searchTimeout);
-        
-        if (query.length < 3) {
-          autocompleteContainer.classList.add('hidden');
-          return;
-        }
-        
-        // Debounce the search
-        searchTimeout = setTimeout(() => {
-          if (window.parent !== window) {
-            // Use bridge method when in iframe
-            const requestId = 'forward_' + Date.now();
-            console.log('[Affiliate Registration] Using bridge for forward geocoding');
-            
-            // Set up one-time handler for this specific request
-            window.handleGeocodeResponse = function(data) {
-              if (data.requestId === requestId && data.results) {
-                processGeocodeResults(data.results);
-              }
-            };
-            
-            // Request from parent
-            if (window.requestGeocodeForward) {
-              window.requestGeocodeForward(query, requestId);
-            }
-          } else {
-            // Direct Nominatim call when not in iframe
-            console.log('[Affiliate Registration] Direct Nominatim call for forward geocoding');
-            
-            // Parse address for better results
-            const streetPattern = /^\d+\s+\w+/;
-            if (!streetPattern.test(query.trim())) {
-              autocompleteContainer.classList.add('hidden');
-              return;
-            }
-            
-            // Austin area bounds
-            const AUSTIN_BOUNDS = {
-              minLat: 29.5451,
-              maxLat: 30.9889,
-              minLon: -98.6687,
-              maxLon: -96.8175
-            };
-            
-            fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5&accept-language=en&viewbox=${AUSTIN_BOUNDS.minLon},${AUSTIN_BOUNDS.minLat},${AUSTIN_BOUNDS.maxLon},${AUSTIN_BOUNDS.maxLat}&bounded=1&countrycodes=us`)
-              .then(response => response.json())
-              .then(results => {
-                // Filter results within bounds
-                const filteredResults = results.filter(item => {
-                  const lat = parseFloat(item.lat);
-                  const lon = parseFloat(item.lon);
-                  return lat >= AUSTIN_BOUNDS.minLat && lat <= AUSTIN_BOUNDS.maxLat &&
-                         lon >= AUSTIN_BOUNDS.minLon && lon <= AUSTIN_BOUNDS.maxLon;
-                });
-                processGeocodeResults(filteredResults);
-              })
-              .catch(error => {
-                console.error('Geocoding error:', error);
-                autocompleteContainer.classList.add('hidden');
-              });
-          }
-        }, 300); // 300ms debounce
-      });
-      
-      // Process geocoding results
-      function processGeocodeResults(results) {
-        autocompleteContainer.innerHTML = '';
-        
-        if (results.length === 0) {
-          autocompleteContainer.classList.add('hidden');
-          return;
-        }
-        
-        results.forEach(result => {
-          const item = document.createElement('div');
-          item.className = 'px-4 py-2 hover:bg-gray-100 cursor-pointer text-sm';
-          item.textContent = result.display_name;
-          
-          item.addEventListener('click', function() {
-            addressInput.value = result.display_name;
-            const lat = parseFloat(result.lat);
-            const lng = parseFloat(result.lon);
-            
-            // Update map and marker
-            updateServiceArea(lat, lng, parseInt(radiusSlider.value));
-            serviceAreaMap.setView([lat, lng], 14);
-            
-            // Hide autocomplete
-            autocompleteContainer.classList.add('hidden');
-          });
-          
-          autocompleteContainer.appendChild(item);
-        });
-        
-        autocompleteContainer.classList.remove('hidden');
-      }
-      
-      // Hide autocomplete when clicking outside
-      document.addEventListener('click', function(e) {
-        if (!addressInput.contains(e.target) && !autocompleteContainer.contains(e.target)) {
-          autocompleteContainer.classList.add('hidden');
-        }
-      });
-      
-      // Handle Enter key
-      addressInput.addEventListener('keydown', function(e) {
-        if (e.key === 'Enter') {
-          e.preventDefault();
-          const firstItem = autocompleteContainer.querySelector('div');
-          if (firstItem) {
-            firstItem.click();
-          }
-        }
-      });
-    }
+    // Address autocomplete removed - using form fields instead
     
     // Handle radius slider change
     radiusSlider.addEventListener('input', function() {
@@ -1159,21 +1029,90 @@ function initializeAffiliateRegistration() {
     
     // Set initial marker and circle at default location
     updateServiceArea(defaultLat, defaultLng, parseInt(radiusSlider ? radiusSlider.value : 5));
-    // Get address for default location
-    reverseGeocode(defaultLat, defaultLng);
     
-    // Try to get user's location
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        function(position) {
-          serviceAreaMap.setView([position.coords.latitude, position.coords.longitude], 12);
-        },
-        function(error) {
-          console.log('Geolocation error:', error);
-          // Keep default location
+    // Monitor address fields and geocode when complete
+    function checkAndGeocodeFormAddress() {
+      const address = document.getElementById('address')?.value?.trim();
+      const city = document.getElementById('city')?.value?.trim();
+      const state = document.getElementById('state')?.value?.trim();
+      const zipCode = document.getElementById('zipCode')?.value?.trim();
+      
+      // Check if all required fields are filled
+      if (address && city && state) {
+        const fullAddress = `${address}, ${city}, ${state}${zipCode ? ' ' + zipCode : ''}, USA`;
+        console.log('[Service Area Map] Geocoding form address:', fullAddress);
+        
+        // Use the geocoding function to get coordinates
+        if (window.parent !== window) {
+          // Use bridge method when in iframe
+          const requestId = 'form_address_' + Date.now();
+          
+          // Set up one-time handler for this specific request
+          window.handleFormGeocodeResponse = function(data) {
+            if (data.requestId === requestId && data.results && data.results.length > 0) {
+              const result = data.results[0];
+              const lat = parseFloat(result.lat);
+              const lng = parseFloat(result.lon);
+              console.log('[Service Area Map] Form address geocoded:', lat, lng);
+              
+              // Update map center and marker
+              updateServiceArea(lat, lng, parseInt(radiusSlider.value));
+              serviceAreaMap.setView([lat, lng], 14);
+            }
+          };
+          
+          // Store the handler temporarily
+          const originalHandler = window.handleGeocodeResponse;
+          window.handleGeocodeResponse = function(data) {
+            window.handleFormGeocodeResponse(data);
+            // Restore original handler
+            window.handleGeocodeResponse = originalHandler;
+          };
+          
+          // Request from parent
+          if (window.requestGeocodeForward) {
+            window.requestGeocodeForward(fullAddress, requestId);
+          }
+        } else {
+          // Direct Nominatim call when not in iframe
+          const AUSTIN_BOUNDS = {
+            minLat: 29.5451,
+            maxLat: 30.9889,
+            minLon: -98.6687,
+            maxLon: -96.8175
+          };
+          
+          fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(fullAddress)}&limit=1&accept-language=en&viewbox=${AUSTIN_BOUNDS.minLon},${AUSTIN_BOUNDS.minLat},${AUSTIN_BOUNDS.maxLon},${AUSTIN_BOUNDS.maxLat}&bounded=1&countrycodes=us`)
+            .then(response => response.json())
+            .then(results => {
+              if (results.length > 0) {
+                const lat = parseFloat(results[0].lat);
+                const lng = parseFloat(results[0].lon);
+                console.log('[Service Area Map] Form address geocoded:', lat, lng);
+                
+                // Update map center and marker
+                updateServiceArea(lat, lng, parseInt(radiusSlider.value));
+                serviceAreaMap.setView([lat, lng], 14);
+              }
+            })
+            .catch(error => {
+              console.error('Geocoding error:', error);
+            });
         }
-      );
+      }
     }
+    
+    // Add event listeners to address fields
+    const addressFields = ['address', 'city', 'state', 'zipCode'];
+    addressFields.forEach(fieldId => {
+      const field = document.getElementById(fieldId);
+      if (field) {
+        field.addEventListener('blur', checkAndGeocodeFormAddress);
+      }
+    });
+    
+    // Check on initialization in case fields are already filled (e.g., from OAuth)
+    setTimeout(checkAndGeocodeFormAddress, 1000);
   }
   
   // Initialize map when container is visible and Leaflet is loaded
