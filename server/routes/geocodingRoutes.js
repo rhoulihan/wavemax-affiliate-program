@@ -23,6 +23,64 @@ const AUSTIN_BOUNDS = {
   maxLon: AUSTIN_CENTER.lon + SEARCH_RADIUS_DEGREES.lon
 };
 
+// Helper function to parse natural address format
+function parseAddress(input) {
+  // Expected format: "addressNumber street, city, state zipCode"
+  // But we need to be flexible for partial inputs
+  
+  const trimmed = input.trim();
+  
+  // Check if we have at least a street number and name (minimum for search)
+  const streetPattern = /^\d+\s+\w+/;
+  if (!streetPattern.test(trimmed)) {
+    return null; // Not enough info to search
+  }
+  
+  // Try to parse the full format
+  const parts = trimmed.split(',').map(p => p.trim());
+  
+  let streetAddress = parts[0];
+  let city = '';
+  let stateZip = '';
+  
+  if (parts.length > 1) {
+    // Check if second part is city or city + state/zip
+    const lastPart = parts[parts.length - 1];
+    const stateZipPattern = /\s+(TX|Texas)\s*(\d{5})?$/i;
+    const stateZipMatch = lastPart.match(stateZipPattern);
+    
+    if (stateZipMatch) {
+      // Last part contains state/zip
+      city = lastPart.replace(stateZipPattern, '').trim();
+      stateZip = stateZipMatch[0].trim();
+    } else if (parts.length === 2) {
+      // Just street and city
+      city = lastPart;
+    } else if (parts.length === 3) {
+      // Street, city, state/zip
+      city = parts[1];
+      stateZip = parts[2];
+    }
+  }
+  
+  // Build search query focusing on Austin area
+  let searchQuery = streetAddress;
+  if (city) {
+    searchQuery += ', ' + city;
+  }
+  if (stateZip) {
+    searchQuery += ', ' + stateZip;
+  } else {
+    // Default to Texas if no state specified
+    searchQuery += ', TX';
+  }
+  
+  // Always append USA for better results
+  searchQuery += ', USA';
+  
+  return searchQuery;
+}
+
 // Forward geocoding (address to coordinates)
 router.get('/search', async (req, res) => {
   try {
@@ -32,11 +90,17 @@ router.get('/search', async (req, res) => {
       return res.json([]);
     }
     
+    // Parse the address
+    const searchQuery = parseAddress(q);
+    if (!searchQuery) {
+      return res.json([]); // Not enough info to search
+    }
+    
     // Use Nominatim API with viewbox to limit results to Austin area
     const response = await axios.get('https://nominatim.openstreetmap.org/search', {
       params: {
         format: 'json',
-        q: q,
+        q: searchQuery,  // Use parsed query instead of raw input
         limit: 5,
         'accept-language': 'en',
         // Limit search to Austin area

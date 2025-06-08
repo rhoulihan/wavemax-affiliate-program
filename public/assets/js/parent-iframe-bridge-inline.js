@@ -368,6 +368,65 @@
                 if (event.data.data && event.data.data.query && iframe) {
                     const { query, requestId } = event.data.data;
                     
+                    // Helper function to parse natural address format
+                    function parseAddress(input) {
+                        const trimmed = input.trim();
+                        
+                        // Check if we have at least a street number and name
+                        const streetPattern = /^\d+\s+\w+/;
+                        if (!streetPattern.test(trimmed)) {
+                            return null;
+                        }
+                        
+                        // Parse the input
+                        const parts = trimmed.split(',').map(p => p.trim());
+                        let streetAddress = parts[0];
+                        let city = '';
+                        let stateZip = '';
+                        
+                        if (parts.length > 1) {
+                            const lastPart = parts[parts.length - 1];
+                            const stateZipPattern = /\s+(TX|Texas)\s*(\d{5})?$/i;
+                            const stateZipMatch = lastPart.match(stateZipPattern);
+                            
+                            if (stateZipMatch) {
+                                city = lastPart.replace(stateZipPattern, '').trim();
+                                stateZip = stateZipMatch[0].trim();
+                            } else if (parts.length === 2) {
+                                city = lastPart;
+                            } else if (parts.length === 3) {
+                                city = parts[1];
+                                stateZip = parts[2];
+                            }
+                        }
+                        
+                        // Build search query
+                        let searchQuery = streetAddress;
+                        if (city) searchQuery += ', ' + city;
+                        if (stateZip) {
+                            searchQuery += ', ' + stateZip;
+                        } else {
+                            searchQuery += ', TX';
+                        }
+                        searchQuery += ', USA';
+                        
+                        return searchQuery;
+                    }
+                    
+                    // Parse the address
+                    const searchQuery = parseAddress(query);
+                    if (!searchQuery) {
+                        // Not enough info, return empty results
+                        iframe.contentWindow.postMessage({
+                            type: 'geocode-forward-response',
+                            data: {
+                                requestId: requestId,
+                                results: []
+                            }
+                        }, '*');
+                        return;
+                    }
+                    
                     // Austin area bounds (50 mile radius)
                     const AUSTIN_BOUNDS = {
                         minLat: 29.5451,  // 30.2672 - 0.7217
@@ -377,7 +436,7 @@
                     };
                     
                     // Perform forward geocoding using Nominatim with Austin area bounds
-                    fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5&accept-language=en&viewbox=${AUSTIN_BOUNDS.minLon},${AUSTIN_BOUNDS.minLat},${AUSTIN_BOUNDS.maxLon},${AUSTIN_BOUNDS.maxLat}&bounded=1&countrycodes=us`)
+                    fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchQuery)}&limit=5&accept-language=en&viewbox=${AUSTIN_BOUNDS.minLon},${AUSTIN_BOUNDS.minLat},${AUSTIN_BOUNDS.maxLon},${AUSTIN_BOUNDS.maxLat}&bounded=1&countrycodes=us`)
                         .then(response => response.json())
                         .then(results => {
                             // Filter results to ensure they're within bounds
