@@ -902,8 +902,9 @@ function initializeAffiliateRegistration() {
     const defaultLng = -97.6841;
     
     try {
-      // Initialize map
-      serviceAreaMap = L.map('serviceAreaMap').setView([defaultLat, defaultLng], 13);
+      // Initialize map with a zoom level that will show a typical service area
+      // Start with zoom 12 which shows about 10-15 mile radius well
+      serviceAreaMap = L.map('serviceAreaMap').setView([defaultLat, defaultLng], 12);
       mapInitialized = true;
       // Store globally to prevent re-initialization
       window.affiliateServiceAreaMap = serviceAreaMap;
@@ -981,6 +982,17 @@ function initializeAffiliateRegistration() {
       const centerCoordinatesElement = document.getElementById('centerCoordinates');
       if (centerCoordinatesElement) {
         centerCoordinatesElement.textContent = `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+      }
+      
+      // Ensure the entire service area is visible on the map
+      // Only zoom out if necessary to show the full circle
+      const bounds = serviceCircle.getBounds();
+      const currentBounds = serviceAreaMap.getBounds();
+      
+      // Check if the circle extends beyond current view
+      if (!currentBounds.contains(bounds.getNorthEast()) || !currentBounds.contains(bounds.getSouthWest())) {
+        // Fit the map to show the entire circle with some padding
+        serviceAreaMap.fitBounds(bounds, { padding: [50, 50] });
       }
       
       const coverageAreaElement = document.getElementById('coverageArea');
@@ -1147,7 +1159,7 @@ function initializeAffiliateRegistration() {
     if (window.pendingMapCenter) {
       console.log('[Service Area Map] Using pending map center from address validation');
       updateServiceArea(window.pendingMapCenter.lat, window.pendingMapCenter.lon, window.pendingMapCenter.radius);
-      serviceAreaMap.setView([window.pendingMapCenter.lat, window.pendingMapCenter.lon], 14);
+      // Don't set a fixed zoom - let updateServiceArea handle it to show the full circle
       // Clear the pending center
       delete window.pendingMapCenter;
     } else {
