@@ -445,19 +445,6 @@
                 </div>
                 
                 
-                <!-- Terms and Conditions (Always visible) (Initially Hidden) -->
-                <div id="termsSection" class="form-section-hidden" style="display: none;">
-                    <div class="bg-gray-50 p-4 rounded-lg">
-                        <div class="flex items-start">
-                            <input type="checkbox" id="termsAgreement" name="termsAgreement" required class="mt-1 mr-2">
-                            <label for="termsAgreement" class="text-sm text-gray-700">
-                                <span data-i18n="affiliate.register.termsAgree">I agree to the</span> <a href="#" data-navigate="/terms-of-service" class="text-blue-600 hover:underline">Terms of Service</a> and 
-                                <a href="#" data-navigate="/privacy-policy" class="text-blue-600 hover:underline">Privacy Policy</a> *
-                            </label>
-                        </div>
-                    </div>
-                </div>
-
                 <!-- Payment Information (Initially Hidden) -->
                 <div class="form-section-hidden" style="display: none;">
                     <h3 class="text-xl font-bold mb-4" data-i18n="affiliate.register.paymentInfo">Payment Information</h3>
@@ -486,10 +473,25 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- Terms and Conditions (Always visible) (Initially Hidden) -->
+                <div id="termsSection" class="form-section-hidden" style="display: none;">
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <div class="flex items-start">
+                            <input type="checkbox" id="termsAgreement" name="termsAgreement" required class="mt-1 mr-2">
+                            <label for="termsAgreement" class="text-sm text-gray-700">
+                                <span data-i18n="affiliate.register.termsAgree">I agree to the</span> <a href="#" data-navigate="/terms-of-service" class="text-blue-600 hover:underline">Terms of Service</a> and 
+                                <a href="#" data-navigate="/privacy-policy" class="text-blue-600 hover:underline">Privacy Policy</a> *
+                            </label>
+                        </div>
+                    </div>
+                </div>
                 
                 <!-- Submit Button (Initially Hidden) -->
                 <div class="form-section-hidden" style="display: none;">
-                    <button type="submit" class="w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-blue-700 transition" data-i18n="affiliate.register.submitButton">Register as an Affiliate</button>
+                    <div class="mt-6">
+                        <button type="submit" class="w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-blue-700 transition" data-i18n="affiliate.register.submitButton">Register as an Affiliate</button>
+                    </div>
                 </div>
             </form>
         </div>
