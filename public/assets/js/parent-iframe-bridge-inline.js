@@ -372,65 +372,26 @@
                     function parseAddress(input) {
                         const trimmed = input.trim();
                         
-                        // Check if we have at least a street number and name
-                        const streetPattern = /^\d+\s+\w+/;
-                        if (!streetPattern.test(trimmed)) {
+                        // Remove any commas the user might have typed
+                        const cleaned = trimmed.replace(/,/g, ' ').replace(/\s+/g, ' ').trim();
+                        
+                        // Check if we have at least a street number and partial street name
+                        const streetPattern = /^\d+\s+\w+/; // Need at least number + one word (partial street name)
+                        if (!streetPattern.test(cleaned)) {
                             return null;
                         }
                         
-                        // Parse expected format: "streetAddress streetName, city, state zip"
-                        const parts = trimmed.split(',').map(p => p.trim());
-                        
-                        if (parts.length === 1) {
-                            // Just street address, no city/state yet
-                            return null;
-                        }
-                        
-                        let streetAddress = parts[0];
-                        let city = '';
-                        let state = '';
-                        let zip = '';
-                        
-                        if (parts.length === 2) {
-                            // "street, city" - assume Texas
-                            city = parts[1];
-                            state = 'TX';
-                        } else if (parts.length === 3) {
-                            // "street, city, state zip"
-                            city = parts[1];
-                            
-                            // Parse state and zip from last part
-                            const stateZipPart = parts[2];
-                            const stateZipMatch = stateZipPart.match(/^([A-Z]{2}|\w+)\s+(\d{5})$/i);
-                            
-                            if (stateZipMatch) {
-                                state = stateZipMatch[1].toUpperCase();
-                                zip = stateZipMatch[2];
-                            } else {
-                                // Might be just state or just zip
-                                if (/^[A-Z]{2}$/i.test(stateZipPart)) {
-                                    state = stateZipPart.toUpperCase();
-                                } else if (/^\d{5}$/.test(stateZipPart)) {
-                                    zip = stateZipPart;
-                                    state = 'TX'; // Assume Texas if only zip
-                                } else {
-                                    state = stateZipPart; // Assume it's a state name
-                                }
-                            }
-                        }
-                        
-                        // Build search query
-                        let searchQuery = streetAddress + ', ' + city;
-                        if (state) searchQuery += ', ' + state;
-                        if (zip) searchQuery += ' ' + zip;
-                        searchQuery += ', USA';
-                        
-                        return searchQuery;
+                        // Return the cleaned query without assuming location
+                        // Let Nominatim search within the bounded area
+                        return cleaned;
                     }
                     
                     // Parse the address
                     const searchQuery = parseAddress(query);
+                    console.log('[Parent-Iframe Bridge] Parsed query:', query, ' => ', searchQuery);
+                    
                     if (!searchQuery) {
+                        console.log('[Parent-Iframe Bridge] Query did not pass validation, returning empty results');
                         // Not enough info, return empty results
                         iframe.contentWindow.postMessage({
                             type: 'geocode-forward-response',
@@ -451,9 +412,13 @@
                     };
                     
                     // Perform forward geocoding using Nominatim with Austin area bounds
-                    fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchQuery)}&limit=5&accept-language=en&viewbox=${AUSTIN_BOUNDS.minLon},${AUSTIN_BOUNDS.minLat},${AUSTIN_BOUNDS.maxLon},${AUSTIN_BOUNDS.maxLat}&bounded=1&countrycodes=us`)
+                    const geocodeUrl = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchQuery)}&limit=5&accept-language=en&viewbox=${AUSTIN_BOUNDS.minLon},${AUSTIN_BOUNDS.minLat},${AUSTIN_BOUNDS.maxLon},${AUSTIN_BOUNDS.maxLat}&bounded=1&countrycodes=us`;
+                    console.log('[Parent-Iframe Bridge] Geocoding URL:', geocodeUrl);
+                    
+                    fetch(geocodeUrl)
                         .then(response => response.json())
                         .then(results => {
+                            console.log('[Parent-Iframe Bridge] Raw geocoding results:', results);
                             // Helper function to format address in natural format
                             function formatNaturalAddress(displayName) {
                                 // Nominatim returns format like: "825, East Rundberg Lane, Windsor Hills, Austin, Travis County, Texas, 78753, United States"
@@ -462,41 +427,59 @@
                                 const parts = displayName.split(',').map(p => p.trim());
                                 if (parts.length < 3) return displayName;
                                 
-                                let streetNumber = '';
-                                let streetName = '';
+                                let street = '';
                                 let city = '';
                                 let state = '';
                                 let zip = '';
                                 
-                                // First part might be street number
+                                // Common Austin area cities
+                                const austinCities = ['Austin', 'Round Rock', 'Cedar Park', 'Pflugerville', 'Georgetown', 
+                                                     'Leander', 'Hutto', 'Manor', 'Buda', 'Kyle', 'Dripping Springs'];
+                                
+                                // First 1-2 parts are usually street
                                 if (/^\d+$/.test(parts[0])) {
-                                    streetNumber = parts[0];
-                                    streetName = parts[1] || '';
-                                } else {
-                                    // Street number and name might be together
-                                    const streetMatch = parts[0].match(/^(\d+)\s+(.+)$/);
-                                    if (streetMatch) {
-                                        streetNumber = streetMatch[1];
-                                        streetName = streetMatch[2];
-                                    } else {
-                                        streetName = parts[0];
-                                    }
+                                    // First part is just number, combine with second part
+                                    street = parts[0] + ' ' + (parts[1] || '');
+                                } else if (/^\d+\s+\w+/.test(parts[0])) {
+                                    // First part already has number and street name
+                                    street = parts[0];
+                                } else if (/^\d+/.test(parts[0]) && parts[1]) {
+                                    // Handle cases like "3401" followed by street name
+                                    street = parts[0] + ' ' + parts[1];
                                 }
                                 
-                                // Find city, state, and zip in remaining parts
-                                for (let i = 2; i < parts.length; i++) {
+                                // Look for city, state and zip in remaining parts
+                                for (let i = 1; i < parts.length; i++) {
                                     const part = parts[i];
+                                    
+                                    // Skip if this was already used for street name
+                                    if (i === 1 && /^\d+$/.test(parts[0])) continue;
+                                    
+                                    // Check for zip code
                                     if (/^\d{5}$/.test(part)) {
                                         zip = part;
-                                    } else if (part === 'Austin' || part === 'Round Rock' || part === 'Cedar Park' || part === 'Pflugerville') {
-                                        city = part;
-                                    } else if (part === 'Texas') {
+                                    }
+                                    // Check for state
+                                    else if (part === 'Texas' || part === 'TX') {
                                         state = 'TX';
+                                    }
+                                    // Check for known cities
+                                    else if (austinCities.some(c => part.includes(c))) {
+                                        city = austinCities.find(c => part.includes(c));
+                                    }
+                                    // Skip common non-city parts
+                                    else if (part === 'United States' || part.includes('County') || 
+                                             part === 'USA' || parts.indexOf(part) === parts.length - 1) {
+                                        continue;
                                     }
                                 }
                                 
+                                // If no city found, use Austin as default
+                                if (!city) city = 'Austin';
+                                if (!state) state = 'TX';
+                                
                                 // Build natural format
-                                let formatted = streetNumber ? streetNumber + ' ' + streetName : streetName;
+                                let formatted = street;
                                 if (city) formatted += ', ' + city;
                                 if (state) formatted += ', ' + state;
                                 if (zip) formatted += ' ' + zip;
@@ -508,9 +491,14 @@
                             const filteredResults = results.filter(item => {
                                 const lat = parseFloat(item.lat);
                                 const lon = parseFloat(item.lon);
-                                return lat >= AUSTIN_BOUNDS.minLat && lat <= AUSTIN_BOUNDS.maxLat &&
+                                const inBounds = lat >= AUSTIN_BOUNDS.minLat && lat <= AUSTIN_BOUNDS.maxLat &&
                                        lon >= AUSTIN_BOUNDS.minLon && lon <= AUSTIN_BOUNDS.maxLon;
+                                if (!inBounds) {
+                                    console.log('[Parent-Iframe Bridge] Filtered out result outside bounds:', item.display_name, 'lat:', lat, 'lon:', lon);
+                                }
+                                return inBounds;
                             });
+                            console.log('[Parent-Iframe Bridge] Filtered results:', filteredResults);
                             
                             // Send filtered results back to iframe with formatted addresses
                             iframe.contentWindow.postMessage({
