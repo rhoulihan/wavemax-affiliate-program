@@ -976,16 +976,13 @@ function initializeAffiliateRegistration() {
       reverseGeocode(e.latlng.lat, e.latlng.lng);
     });
     
-    // Check if bridge geocoding is enabled
-    let useBridgeGeocoding = localStorage.getItem('useBridgeGeocoding') === 'true';
-    
-    // Geocoding functions
+    // Geocoding functions - always use bridge method
     function reverseGeocode(lat, lng) {
       const addressField = document.getElementById('serviceAddress');
       if (!addressField) return;
       
-      if (useBridgeGeocoding && window.parent !== window) {
-        // Use bridge method
+      if (window.parent !== window) {
+        // Use bridge method when in iframe
         const requestId = 'reverse_' + Date.now();
         console.log('[Affiliate Registration] Using bridge for reverse geocoding');
         
@@ -1001,9 +998,9 @@ function initializeAffiliateRegistration() {
           window.requestGeocodeReverse(lat, lng, requestId);
         }
       } else {
-        // Use server endpoint for reverse geocoding
-        console.log('[Affiliate Registration] Using server for reverse geocoding');
-        csrfFetch(`${baseUrl}/api/v1/geocoding/reverse?lat=${lat}&lon=${lng}`)
+        // Direct Nominatim call when not in iframe
+        console.log('[Affiliate Registration] Direct Nominatim call for reverse geocoding');
+        fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&accept-language=en`)
           .then(response => response.json())
           .then(data => {
             if (data.display_name) {
@@ -1041,8 +1038,8 @@ function initializeAffiliateRegistration() {
         
         // Debounce the search
         searchTimeout = setTimeout(() => {
-          if (useBridgeGeocoding && window.parent !== window) {
-            // Use bridge method
+          if (window.parent !== window) {
+            // Use bridge method when in iframe
             const requestId = 'forward_' + Date.now();
             console.log('[Affiliate Registration] Using bridge for forward geocoding');
             
@@ -1058,12 +1055,35 @@ function initializeAffiliateRegistration() {
               window.requestGeocodeForward(query, requestId);
             }
           } else {
-            // Search using our server endpoint
-            console.log('[Affiliate Registration] Using server for forward geocoding');
-            csrfFetch(`${baseUrl}/api/v1/geocoding/search?q=${encodeURIComponent(query)}`)
+            // Direct Nominatim call when not in iframe
+            console.log('[Affiliate Registration] Direct Nominatim call for forward geocoding');
+            
+            // Parse address for better results
+            const streetPattern = /^\d+\s+\w+/;
+            if (!streetPattern.test(query.trim())) {
+              autocompleteContainer.classList.add('hidden');
+              return;
+            }
+            
+            // Austin area bounds
+            const AUSTIN_BOUNDS = {
+              minLat: 29.5451,
+              maxLat: 30.9889,
+              minLon: -98.6687,
+              maxLon: -96.8175
+            };
+            
+            fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query + ', TX, USA')}&limit=5&accept-language=en&viewbox=${AUSTIN_BOUNDS.minLon},${AUSTIN_BOUNDS.minLat},${AUSTIN_BOUNDS.maxLon},${AUSTIN_BOUNDS.maxLat}&bounded=1&countrycodes=us`)
               .then(response => response.json())
               .then(results => {
-                processGeocodeResults(results);
+                // Filter results within bounds
+                const filteredResults = results.filter(item => {
+                  const lat = parseFloat(item.lat);
+                  const lon = parseFloat(item.lon);
+                  return lat >= AUSTIN_BOUNDS.minLat && lat <= AUSTIN_BOUNDS.maxLat &&
+                         lon >= AUSTIN_BOUNDS.minLon && lon <= AUSTIN_BOUNDS.maxLon;
+                });
+                processGeocodeResults(filteredResults);
               })
               .catch(error => {
                 console.error('Geocoding error:', error);
@@ -1141,23 +1161,6 @@ function initializeAffiliateRegistration() {
     updateServiceArea(defaultLat, defaultLng, parseInt(radiusSlider ? radiusSlider.value : 5));
     // Get address for default location
     reverseGeocode(defaultLat, defaultLng);
-    
-    // Set up geocoding toggle
-    const geocodingToggle = document.getElementById('geocodingToggle');
-    if (geocodingToggle) {
-      // Set initial state from localStorage
-      geocodingToggle.checked = localStorage.getItem('useBridgeGeocoding') === 'true';
-      
-      // Handle toggle changes
-      geocodingToggle.addEventListener('change', function() {
-        const useBridge = this.checked;
-        localStorage.setItem('useBridgeGeocoding', useBridge);
-        console.log('[Affiliate Registration] Geocoding method changed to:', useBridge ? 'Bridge' : 'Server');
-        
-        // Update the useBridgeGeocoding variable
-        useBridgeGeocoding = useBridge;
-      });
-    }
     
     // Try to get user's location
     if (navigator.geolocation) {
