@@ -412,7 +412,8 @@
                     };
                     
                     // Perform forward geocoding using Nominatim with Austin area bounds
-                    const geocodeUrl = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchQuery)}&limit=5&accept-language=en&viewbox=${AUSTIN_BOUNDS.minLon},${AUSTIN_BOUNDS.minLat},${AUSTIN_BOUNDS.maxLon},${AUSTIN_BOUNDS.maxLat}&bounded=1&countrycodes=us`;
+                    // Use bounded=0 to prefer results within viewbox but allow results outside if needed
+                    const geocodeUrl = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchQuery)}&limit=5&accept-language=en&viewbox=${AUSTIN_BOUNDS.minLon},${AUSTIN_BOUNDS.minLat},${AUSTIN_BOUNDS.maxLon},${AUSTIN_BOUNDS.maxLat}&bounded=0&countrycodes=us`;
                     console.log('[Parent-Iframe Bridge] Geocoding URL:', geocodeUrl);
                     
                     fetch(geocodeUrl)
