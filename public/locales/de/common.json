@@ -297,6 +297,9 @@
       "continueWithGoogle": "Mit Google fortfahren",
       "continueWithFacebook": "Mit Facebook fortfahren",
       "continueWithLinkedIn": "Mit LinkedIn fortfahren",
+      "socialAccountConnected": "Social-Media-Konto verbunden!",
+      "successfullyConnectedWith": "Erfolgreich verbunden mit {{provider}}",
+      "autoFilledMessage": "Ihre Informationen wurden automatisch unten ausgefüllt. Vervollständigen Sie die restlichen Felder, um Ihre Registrierung abzuschließen.",
       "businessInfo": "Geschäftsinformationen",
       "personalInfo": "Persönliche Informationen",
       "accountInfo": "Kontoinformationen",
@@ -394,7 +397,10 @@
       "accountInfo": "Kontoinformationen",
       "referralCode": "Empfehlungscode (Optional)",
       "termsAgree": "Ich stimme den",
-      "alreadyHaveAccount": "Haben Sie bereits ein Konto?"
+      "alreadyHaveAccount": "Haben Sie bereits ein Konto?",
+      "socialAccountConnected": "Social-Media-Konto verbunden!",
+      "successfullyConnectedWith": "Erfolgreich verbunden mit {{provider}}",
+      "autoFilledMessage": "Ihre Informationen wurden automatisch unten ausgefüllt. Vervollständigen Sie die restlichen Felder, um Ihre Registrierung abzuschließen."
     },
     "dashboard": {
       "title": "Kunden-Dashboard",
