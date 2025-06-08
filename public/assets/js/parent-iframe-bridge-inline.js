@@ -375,14 +375,13 @@
                         // Remove any commas the user might have typed
                         const cleaned = trimmed.replace(/,/g, ' ').replace(/\s+/g, ' ').trim();
                         
-                        // Check if we have at least a street number and partial street name
-                        const streetPattern = /^\d+\s+\w+/; // Need at least number + one word (partial street name)
-                        if (!streetPattern.test(cleaned)) {
-                            return null;
+                        // Don't require street pattern - let Nominatim handle various formats
+                        // This allows for partial addresses, landmarks, etc.
+                        if (cleaned.length < 3) {
+                            return null; // Too short to be meaningful
                         }
                         
-                        // Return the cleaned query without assuming location
-                        // Let Nominatim search within the bounded area
+                        // Return the cleaned query
                         return cleaned;
                     }
                     
