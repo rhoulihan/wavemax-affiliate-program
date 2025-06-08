@@ -1270,30 +1270,52 @@ function initializeAffiliateRegistration() {
       const modalTitle = results.length > 1 ? 'Select Your Service Location' : 'Confirm Your Service Location';
       const modalDesc = results.length > 1 
         ? 'We found multiple possible locations. Please select the correct one:' 
-        : 'Please confirm this is the correct location for your service area:';
+        : 'Please confirm this is the correct address for your service area:';
       
       const modalHTML = `
-        <div id="addressSelectionModal" class="fixed inset-0 bg-black bg-opacity-50 z-50" style="z-index: 9999;">
-          <div class="flex items-center justify-center h-full p-4">
-            <div class="bg-white rounded-lg max-w-lg w-full max-h-[80vh] overflow-hidden">
+        <div id="addressSelectionModal" class="fixed inset-0 bg-black bg-opacity-50 z-50" style="z-index: 9999; overflow-y: auto;">
+          <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="bg-white rounded-lg max-w-lg w-full my-8 relative" style="max-height: calc(100vh - 4rem);">
               <div class="p-6">
                 <h3 class="text-lg font-semibold mb-4">${modalTitle}</h3>
                 <p class="text-sm text-gray-600 mb-4">${modalDesc}</p>
-                <div class="space-y-2 max-h-[50vh] overflow-y-auto">
+                <div class="space-y-2 overflow-y-auto" style="max-height: calc(100vh - 20rem);">
                   ${results.map((result, index) => {
                     // Parse the display name to show more readable format
                     const parts = result.display_name.split(',').map(p => p.trim());
-                    const streetAddress = parts[0];
-                    const cityStateZip = parts.slice(1, 4).join(', ');
+                    let streetAddress = '';
+                    let cityStateZip = '';
+                    
+                    // Better address parsing
+                    if (parts.length >= 3) {
+                      // Check if first part is a house number
+                      if (/^\d+/.test(parts[0])) {
+                        // Likely a full street address
+                        streetAddress = parts.slice(0, 2).join(', ');
+                        cityStateZip = parts.slice(2, 5).join(', ');
+                      } else {
+                        // Likely a landmark or city-level result
+                        streetAddress = parts[0];
+                        cityStateZip = parts.slice(1, 4).join(', ');
+                      }
+                    } else {
+                      streetAddress = parts[0] || 'Unknown Address';
+                      cityStateZip = parts.slice(1).join(', ');
+                    }
                     
                     return `
-                      <button class="address-option w-full text-left p-4 border rounded-lg hover:bg-blue-50 hover:border-blue-300 transition" 
+                      <button class="address-option w-full text-left p-4 border-2 border-gray-200 rounded-lg hover:bg-blue-50 hover:border-blue-400 transition-all duration-200 shadow-sm hover:shadow-md" 
                               data-lat="${result.lat}" 
                               data-lon="${result.lon}"
                               data-index="${index}">
-                        <div class="font-medium">${streetAddress}</div>
-                        <div class="text-sm text-gray-600">${cityStateZip}</div>
-                        <div class="text-xs text-gray-500 mt-1">Coordinates: ${parseFloat(result.lat).toFixed(6)}, ${parseFloat(result.lon).toFixed(6)}</div>
+                        <div class="font-semibold text-gray-800">${streetAddress}</div>
+                        <div class="text-sm text-gray-600 mt-1">${cityStateZip}</div>
+                        <div class="text-xs text-gray-400 mt-2 flex items-center">
+                          <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd" />
+                          </svg>
+                          ${parseFloat(result.lat).toFixed(6)}, ${parseFloat(result.lon).toFixed(6)}
+                        </div>
                       </button>
                     `;
                   }).join('')}
@@ -1310,6 +1332,21 @@ function initializeAffiliateRegistration() {
       
       // Add modal to page
       document.body.insertAdjacentHTML('beforeend', modalHTML);
+      
+      // Ensure modal is visible by scrolling to top
+      const modal = document.getElementById('addressSelectionModal');
+      if (modal) {
+        modal.scrollTop = 0;
+        // Also try to scroll the window to top if in iframe
+        try {
+          window.scrollTo(0, 0);
+          if (window.parent && window.parent !== window) {
+            window.parent.postMessage({ type: 'scroll-to-top' }, '*');
+          }
+        } catch (e) {
+          // Ignore cross-origin errors
+        }
+      }
       
       // Add event listeners
       const selectAddress = function(lat, lon) {
