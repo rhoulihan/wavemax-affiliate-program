@@ -166,9 +166,11 @@
                         <!-- Left Column: All Account Fields -->
                         <div class="space-y-4">
                             <div>
-                                <label for="username" class="block text-gray-700 mb-2" data-i18n="affiliate.register.username">Username *</label>
+                                <label for="username" class="block text-gray-700 mb-2">
+                                    <span data-i18n="affiliate.register.username">Username *</span>
+                                    <span class="text-xs text-gray-500 font-normal">(<span data-i18n="affiliate.register.usernameDesc">Your unique login identifier</span>)</span>
+                                </label>
                                 <input type="text" id="username" name="username" required class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                                <p class="text-xs text-gray-500 mt-1" data-i18n="affiliate.register.usernameDesc">Your unique login identifier</p>
                             </div>
                             
                             <div>
