@@ -1036,8 +1036,17 @@ function initializeAffiliateRegistration() {
       }
     });
     
-    // Set initial marker and circle at default location
-    updateServiceArea(defaultLat, defaultLng, parseInt(radiusSlider ? radiusSlider.value : 5));
+    // Check if we have pending map center from address validation
+    if (window.pendingMapCenter) {
+      console.log('[Service Area Map] Using pending map center from address validation');
+      updateServiceArea(window.pendingMapCenter.lat, window.pendingMapCenter.lon, window.pendingMapCenter.radius);
+      serviceAreaMap.setView([window.pendingMapCenter.lat, window.pendingMapCenter.lon], 14);
+      // Clear the pending center
+      delete window.pendingMapCenter;
+    } else {
+      // Set initial marker and circle at default location
+      updateServiceArea(defaultLat, defaultLng, parseInt(radiusSlider ? radiusSlider.value : 5));
+    }
   }
   
   // Initialize map when container is visible and Leaflet is loaded
@@ -1069,20 +1078,23 @@ function initializeAffiliateRegistration() {
         leafletJS.src = 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js';
         leafletJS.onload = function() {
           console.log('Leaflet loaded dynamically');
-          waitForLeafletAndInitialize();
+          // Wait for trigger event instead of immediate retry
+          window.addEventListener('init-service-area-map', waitForLeafletAndInitialize, { once: true });
         };
         document.body.appendChild(leafletJS);
         return;
       }
-      setTimeout(waitForLeafletAndInitialize, 500);
+      // Wait for trigger event instead of timeout
+      window.addEventListener('init-service-area-map', waitForLeafletAndInitialize, { once: true });
       return;
     }
     
     // Check if container has dimensions
     const rect = mapContainer.getBoundingClientRect();
     if (rect.width === 0 || rect.height === 0) {
-      console.log('Map container has no dimensions yet, waiting...');
-      setTimeout(waitForLeafletAndInitialize, 500);
+      console.log('Map container has no dimensions yet, waiting for trigger event...');
+      // Wait for trigger event instead of timeout
+      window.addEventListener('init-service-area-map', waitForLeafletAndInitialize, { once: true });
       return;
     }
     
@@ -1091,8 +1103,17 @@ function initializeAffiliateRegistration() {
     initializeServiceAreaMap();
   }
   
-  // Start the initialization process
-  waitForLeafletAndInitialize();
+  // Listen for trigger event to initialize map
+  window.addEventListener('init-service-area-map', waitForLeafletAndInitialize, { once: true });
+  
+  // Try initial initialization in case section is already visible
+  if (document.getElementById('serviceAreaMap')) {
+    const container = document.getElementById('serviceAreaMap').closest('.form-section-hidden');
+    if (!container || container.style.display !== 'none') {
+      // Section is visible, try to initialize
+      waitForLeafletAndInitialize();
+    }
+  }
   
   // Set up address validation button
   function setupAddressValidation() {
@@ -1118,11 +1139,8 @@ function initializeAffiliateRegistration() {
         return;
       }
       
-      // Check if map is initialized
-      if (!serviceAreaMap) {
-        alert('Please wait for the map to initialize before validating the address.');
-        return;
-      }
+      // Map might not be initialized yet if section is hidden - that's OK
+      console.log('[Service Area Map] Map initialized?', !!serviceAreaMap);
       
       // Show loading state on button
       const validateButton = document.getElementById('validateAddress');
@@ -1361,12 +1379,16 @@ function initializeAffiliateRegistration() {
       const selectAddress = function(lat, lon) {
         console.log('[Service Area Map] Address confirmed:', lat, lon);
         
-        // Update map center and marker
+        // Update map center and marker (map might be initialized later)
         if (window.updateServiceArea) {
           window.updateServiceArea(lat, lon, radiusValue);
         }
         if (serviceAreaMap) {
           serviceAreaMap.setView([lat, lon], 14);
+        } else {
+          // Store coordinates for when map initializes
+          window.pendingMapCenter = { lat, lon, radius: radiusValue };
+          console.log('[Service Area Map] Stored pending map center for later initialization');
         }
         
         // Mark address as validated
@@ -1392,6 +1414,10 @@ function initializeAffiliateRegistration() {
             accountSetup.style.display = 'none';
           }
         }
+        
+        // Trigger map initialization now that section is visible
+        console.log('[Service Area Map] Triggering map initialization after showing sections');
+        window.dispatchEvent(new Event('init-service-area-map'));
         
         // Scroll to service area section
         setTimeout(() => {
@@ -1441,16 +1467,8 @@ function initializeAffiliateRegistration() {
     window.validateAndSetAddress = validateAndSetAddress;
   }
   
-  // Wait for map to be initialized before setting up validation
-  const mapWaitInterval = setInterval(() => {
-    if (serviceAreaMap && window.updateServiceArea) {
-      console.log('[Service Area Map] Map is ready, setting up address validation');
-      clearInterval(mapWaitInterval);
-      setupAddressValidation();
-    } else {
-      console.log('[Service Area Map] Waiting for map initialization...');
-    }
-  }, 500);
+  // Set up address validation immediately - don't wait for map
+  setupAddressValidation();
 }
 
 // Initialize immediately when script loads
