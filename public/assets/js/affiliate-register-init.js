@@ -420,23 +420,19 @@ function initializeAffiliateRegistration() {
       }
     }
 
-    // Hide the account setup section since OAuth handles authentication
-    const accountSetupSection = document.getElementById('accountSetupSection');
-    if (accountSetupSection) {
-      accountSetupSection.style.display = 'none';
-      console.log('✅ Hidden account setup section for OAuth user');
-      
-      // Remove required attributes from username/password fields since they're hidden
-      const usernameField = document.getElementById('username');
-      const passwordField = document.getElementById('password');
-      const confirmPasswordField = document.getElementById('confirmPassword');
-      
-      if (usernameField) usernameField.removeAttribute('required');
-      if (passwordField) passwordField.removeAttribute('required');
-      if (confirmPasswordField) confirmPasswordField.removeAttribute('required');
-      
-      // Terms checkbox remains visible and required
-    }
+    // Note: Account setup section will be hidden initially with other sections
+    // and shown after address validation. For OAuth users, we'll hide it again
+    // after address validation
+    window.isOAuthUser = true;
+    
+    // Remove required attributes from username/password fields for OAuth users
+    const usernameField = document.getElementById('username');
+    const passwordField = document.getElementById('password');
+    const confirmPasswordField = document.getElementById('confirmPassword');
+    
+    if (usernameField) usernameField.removeAttribute('required');
+    if (passwordField) passwordField.removeAttribute('required');
+    if (confirmPasswordField) confirmPasswordField.removeAttribute('required');
 
     // Store social token for form submission
     const form = document.getElementById('affiliateRegistrationForm');
@@ -1273,34 +1269,48 @@ function initializeAffiliateRegistration() {
         : 'Please confirm this is the correct address for your service area:';
       
       const modalHTML = `
-        <div id="addressSelectionModal" class="fixed inset-0 bg-black bg-opacity-50 z-50" style="z-index: 9999; overflow-y: auto;">
-          <div class="flex items-center justify-center min-h-screen p-4">
-            <div class="bg-white rounded-lg max-w-lg w-full my-8 relative" style="max-height: calc(100vh - 4rem);">
+        <div id="addressSelectionModal" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0, 0, 0, 0.5); z-index: 9999; overflow-y: auto;">
+          <div style="display: flex; align-items: center; justify-content: center; min-height: 100%; padding: 1rem;">
+            <div class="bg-white rounded-lg w-full" style="max-width: 32rem; max-height: 90vh; overflow: hidden; margin: auto;">
               <div class="p-6">
                 <h3 class="text-lg font-semibold mb-4">${modalTitle}</h3>
                 <p class="text-sm text-gray-600 mb-4">${modalDesc}</p>
-                <div class="space-y-2 overflow-y-auto" style="max-height: calc(100vh - 20rem);">
+                <div class="space-y-2 overflow-y-auto" style="max-height: 50vh;">
                   ${results.map((result, index) => {
-                    // Parse the display name to show more readable format
-                    const parts = result.display_name.split(',').map(p => p.trim());
-                    let streetAddress = '';
-                    let cityStateZip = '';
+                    // Get the form address to compare
+                    const formAddress = document.getElementById('address')?.value?.trim() || '';
+                    const formCity = document.getElementById('city')?.value?.trim() || '';
+                    const formState = document.getElementById('state')?.value?.trim() || '';
+                    const formZip = document.getElementById('zipCode')?.value?.trim() || '';
                     
-                    // Better address parsing
-                    if (parts.length >= 3) {
-                      // Check if first part is a house number
+                    // Parse the display name
+                    const parts = result.display_name.split(',').map(p => p.trim());
+                    let displayAddress = '';
+                    
+                    // Try to extract the street address from the result
+                    if (parts.length > 0) {
+                      // If the first part looks like a street address (starts with number)
                       if (/^\d+/.test(parts[0])) {
-                        // Likely a full street address
-                        streetAddress = parts.slice(0, 2).join(', ');
-                        cityStateZip = parts.slice(2, 5).join(', ');
+                        displayAddress = parts[0];
+                      } else if (formAddress) {
+                        // Use the form address if we don't have a street address in results
+                        displayAddress = formAddress;
                       } else {
-                        // Likely a landmark or city-level result
-                        streetAddress = parts[0];
-                        cityStateZip = parts.slice(1, 4).join(', ');
+                        // Fall back to first part of result
+                        displayAddress = parts[0];
                       }
-                    } else {
-                      streetAddress = parts[0] || 'Unknown Address';
-                      cityStateZip = parts.slice(1).join(', ');
+                    }
+                    
+                    // Build full address display
+                    let fullDisplay = displayAddress;
+                    if (formCity || (parts.length > 1 && parts[1])) {
+                      fullDisplay += ', ' + (formCity || parts[1]);
+                    }
+                    if (formState || (parts.length > 2 && parts[2])) {
+                      fullDisplay += ', ' + (formState || parts[2]);
+                    }
+                    if (formZip) {
+                      fullDisplay += ' ' + formZip;
                     }
                     
                     return `
@@ -1308,14 +1318,8 @@ function initializeAffiliateRegistration() {
                               data-lat="${result.lat}" 
                               data-lon="${result.lon}"
                               data-index="${index}">
-                        <div class="font-semibold text-gray-800">${streetAddress}</div>
-                        <div class="text-sm text-gray-600 mt-1">${cityStateZip}</div>
-                        <div class="text-xs text-gray-400 mt-2 flex items-center">
-                          <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd" />
-                          </svg>
-                          ${parseFloat(result.lat).toFixed(6)}, ${parseFloat(result.lon).toFixed(6)}
-                        </div>
+                        <div class="font-semibold text-gray-800 text-base">${fullDisplay}</div>
+                        <div class="text-xs text-gray-500 mt-2">${result.display_name}</div>
                       </button>
                     `;
                   }).join('')}
@@ -1360,11 +1364,37 @@ function initializeAffiliateRegistration() {
           serviceAreaMap.setView([lat, lon], 14);
         }
         
-        // Scroll to service area section
-        const serviceAreaSection = document.querySelector('#serviceAreaMap').closest('.md\\:col-span-2');
-        if (serviceAreaSection) {
-          serviceAreaSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        // Mark address as validated
+        window.addressValidated = true;
+        
+        // Hide business info section and show remaining form sections
+        const businessInfoSection = document.querySelector('#businessInfoSection');
+        if (businessInfoSection) {
+          businessInfoSection.style.display = 'none';
         }
+        
+        // Show all hidden sections
+        const hiddenSections = document.querySelectorAll('.form-section-hidden');
+        hiddenSections.forEach(section => {
+          section.classList.remove('form-section-hidden');
+          section.style.display = '';
+        });
+        
+        // If OAuth user, hide account setup section again
+        if (window.isOAuthUser) {
+          const accountSetup = document.getElementById('accountSetupSection');
+          if (accountSetup) {
+            accountSetup.style.display = 'none';
+          }
+        }
+        
+        // Scroll to service area section
+        setTimeout(() => {
+          const serviceAreaSection = document.querySelector('#serviceAreaMap').closest('.md\\:col-span-2');
+          if (serviceAreaSection) {
+            serviceAreaSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }
+        }, 100);
         
         // Remove modal
         document.getElementById('addressSelectionModal').remove();
