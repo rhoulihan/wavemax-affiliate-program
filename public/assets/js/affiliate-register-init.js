@@ -884,10 +884,10 @@ function initializeAffiliateRegistration() {
 
 
   // Initialize service area map
-  let serviceAreaMap = null;
-  let serviceMarker = null;
-  let serviceCircle = null;
-  let mapInitialized = false;
+  let serviceAreaMap = window.affiliateServiceAreaMap || null;
+  let serviceMarker = window.affiliateServiceMarker || null;
+  let serviceCircle = window.affiliateServiceCircle || null;
+  let mapInitialized = window.affiliateMapInitialized || false;
 
   function initializeServiceAreaMap() {
     // Prevent duplicate initialization
@@ -904,6 +904,9 @@ function initializeAffiliateRegistration() {
       // Initialize map
       serviceAreaMap = L.map('serviceAreaMap').setView([defaultLat, defaultLng], 13);
       mapInitialized = true;
+      // Store globally to prevent re-initialization
+      window.affiliateServiceAreaMap = serviceAreaMap;
+      window.affiliateMapInitialized = true;
       console.log('Map initialized successfully');
     } catch (error) {
       console.error('Error initializing map:', error);
@@ -946,6 +949,7 @@ function initializeAffiliateRegistration() {
         title: 'Service Center',
         draggable: true
       }).addTo(serviceAreaMap);
+      window.affiliateServiceMarker = serviceMarker;
       
       // Add circle to show service area
       serviceCircle = L.circle([lat, lng], {
@@ -954,6 +958,7 @@ function initializeAffiliateRegistration() {
         fillOpacity: 0.3,
         radius: radius * 1609.34 // Convert miles to meters
       }).addTo(serviceAreaMap);
+      window.affiliateServiceCircle = serviceCircle;
       
       // Update info display
       document.getElementById('serviceAreaInfo').classList.remove('hidden');
@@ -1089,7 +1094,7 @@ function initializeAffiliateRegistration() {
   waitForLeafletAndInitialize();
   
   // Set up address field monitoring after a delay to ensure map is initialized
-  setTimeout(() => {
+  function setupAddressMonitoring() {
     // Monitor address fields and geocode when complete
     function checkAndGeocodeFormAddress() {
       const address = document.getElementById('address')?.value?.trim();
@@ -1098,6 +1103,8 @@ function initializeAffiliateRegistration() {
       const zipCode = document.getElementById('zipCode')?.value?.trim();
       
       console.log('[Service Area Map] Checking form address:', { address, city, state, zipCode });
+      console.log('[Service Area Map] Map initialized?', !!serviceAreaMap);
+      console.log('[Service Area Map] Window updateServiceArea available?', !!window.updateServiceArea);
       
       // Check if all required fields are filled and map is initialized
       if (address && city && state && serviceAreaMap) {
@@ -1158,7 +1165,7 @@ function initializeAffiliateRegistration() {
             maxLon: -96.8175
           };
           
-          fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(fullAddress)}&limit=1&accept-language=en&viewbox=${AUSTIN_BOUNDS.minLon},${AUSTIN_BOUNDS.minLat},${AUSTIN_BOUNDS.maxLon},${AUSTIN_BOUNDS.maxLat}&bounded=1&countrycodes=us`)
+          fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(fullAddress)}&limit=1&accept-language=en&viewbox=${AUSTIN_BOUNDS.minLon},${AUSTIN_BOUNDS.minLat},${AUSTIN_BOUNDS.maxLon},${AUSTIN_BOUNDS.maxLat}&bounded=0&countrycodes=us`)
             .then(response => response.json())
             .then(results => {
               console.log('[Service Area Map] Nominatim results:', results);
@@ -1192,14 +1199,31 @@ function initializeAffiliateRegistration() {
       const field = document.getElementById(fieldId);
       if (field) {
         console.log('[Service Area Map] Adding blur listener to:', fieldId);
-        field.addEventListener('blur', checkAndGeocodeFormAddress);
-        field.addEventListener('change', checkAndGeocodeFormAddress);
+        field.addEventListener('blur', () => {
+          console.log(`[Service Area Map] Blur event fired on ${fieldId}`);
+          checkAndGeocodeFormAddress();
+        });
+        field.addEventListener('change', () => {
+          console.log(`[Service Area Map] Change event fired on ${fieldId}`);
+          checkAndGeocodeFormAddress();
+        });
       }
     });
     
     // Check on initialization in case fields are already filled (e.g., from OAuth)
     setTimeout(checkAndGeocodeFormAddress, 2000);
-  }, 1500); // Wait for map to be initialized
+  }
+  
+  // Wait for map to be initialized before setting up monitoring
+  const mapWaitInterval = setInterval(() => {
+    if (serviceAreaMap && window.updateServiceArea) {
+      console.log('[Service Area Map] Map is ready, setting up address monitoring');
+      clearInterval(mapWaitInterval);
+      setupAddressMonitoring();
+    } else {
+      console.log('[Service Area Map] Waiting for map initialization...');
+    }
+  }, 500);
 }
 
 // Initialize immediately when script loads
