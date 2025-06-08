@@ -298,7 +298,7 @@
       "continueWithFacebook": "Continuar con Facebook",
       "continueWithLinkedIn": "Continuar con LinkedIn",
       "socialAccountConnected": "¡Cuenta de Redes Sociales Conectada!",
-      "successfullyConnectedWith": "Conectado Exitosamente con {{provider}}",
+      "successfullyConnectedWith": "Conectado exitosamente con {{provider}}",
       "autoFilledMessage": "Su información se ha completado automáticamente a continuación. Complete los campos restantes para finalizar su registro.",
       "businessInfo": "Información Empresarial",
       "personalInfo": "Información Personal",
@@ -402,7 +402,7 @@
       "termsAgree": "Acepto los",
       "alreadyHaveAccount": "¿Ya tienes una cuenta?",
       "socialAccountConnected": "¡Cuenta de Redes Sociales Conectada!",
-      "successfullyConnectedWith": "Conectado Exitosamente con {{provider}}",
+      "successfullyConnectedWith": "Conectado exitosamente con {{provider}}",
       "autoFilledMessage": "Su información se ha completado automáticamente a continuación. Complete los campos restantes para finalizar su registro."
     },
     "dashboard": {
