@@ -1106,36 +1106,80 @@ function initializeAffiliateRegistration() {
       console.log('[Service Area Map] Map initialized?', !!serviceAreaMap);
       console.log('[Service Area Map] Window updateServiceArea available?', !!window.updateServiceArea);
       
-      // Check if all required fields are filled and map is initialized
-      if (address && city && state && serviceAreaMap) {
-        const fullAddress = `${address}, ${city}, ${state}${zipCode ? ' ' + zipCode : ''}, USA`;
-        console.log('[Service Area Map] Geocoding form address:', fullAddress);
+      // Check if we have at least city and state to do a search
+      if (city && state && serviceAreaMap) {
+        // Build search queries from most specific to least specific
+        const searchQueries = [];
         
-        // Get radius slider value
-        const radiusSlider = document.getElementById('radiusSlider');
-        const radiusValue = radiusSlider ? parseInt(radiusSlider.value) : 5;
+        // Full address with zip
+        if (address && zipCode) {
+          searchQueries.push({
+            query: `${address}, ${city}, ${state} ${zipCode}, USA`,
+            description: `${address}, ${city}, ${state} ${zipCode}`
+          });
+        }
         
-        // Use the geocoding function to get coordinates
-        if (window.parent !== window) {
-          // Use bridge method when in iframe
-          const requestId = 'form_address_' + Date.now();
-          
-          // Request from parent
-          window.parent.postMessage({
-            type: 'geocode-forward',
-            data: {
-              query: fullAddress,
-              requestId: requestId
-            }
-          }, '*');
-          
-          // Set up one-time handler for this specific request
-          const handleResponse = function(event) {
-            if (event.data && event.data.type === 'geocode-forward-response' && 
-                event.data.data && event.data.data.requestId === requestId) {
-              console.log('[Service Area Map] Received geocoding response:', event.data.data);
-              
-              if (event.data.data.results && event.data.data.results.length > 0) {
+        // Full address without zip
+        if (address) {
+          searchQueries.push({
+            query: `${address}, ${city}, ${state}, USA`,
+            description: `${address}, ${city}, ${state}`
+          });
+        }
+        
+        // Just city and state
+        searchQueries.push({
+          query: `${city}, ${state}, USA`,
+          description: `${city}, ${state} (City Center)`
+        });
+        
+        console.log('[Service Area Map] Will try multiple search queries:', searchQueries);
+        
+        // Try geocoding with fallback
+        geocodeWithFallback(searchQueries, 0);
+        
+      }
+    }
+    
+    // Function to try multiple geocoding queries with fallback
+    function geocodeWithFallback(searchQueries, queryIndex) {
+      if (queryIndex >= searchQueries.length) {
+        console.log('[Service Area Map] All geocoding queries failed');
+        return;
+      }
+      
+      const currentQuery = searchQueries[queryIndex];
+      console.log(`[Service Area Map] Trying geocoding query ${queryIndex + 1}/${searchQueries.length}:`, currentQuery.query);
+      
+      // Get radius slider value
+      const radiusSlider = document.getElementById('radiusSlider');
+      const radiusValue = radiusSlider ? parseInt(radiusSlider.value) : 5;
+      
+      if (window.parent !== window) {
+        // Use bridge method when in iframe
+        const requestId = 'form_address_' + Date.now() + '_' + queryIndex;
+        
+        // Request from parent
+        window.parent.postMessage({
+          type: 'geocode-forward',
+          data: {
+            query: currentQuery.query,
+            requestId: requestId
+          }
+        }, '*');
+        
+        // Set up one-time handler for this specific request
+        const handleResponse = function(event) {
+          if (event.data && event.data.type === 'geocode-forward-response' && 
+              event.data.data && event.data.data.requestId === requestId) {
+            console.log('[Service Area Map] Received geocoding response:', event.data.data);
+            
+            if (event.data.data.results && event.data.data.results.length > 0) {
+              // Show address selection modal if multiple results
+              if (event.data.data.results.length > 1 || queryIndex > 0) {
+                showAddressSelectionModal(event.data.data.results, radiusValue);
+              } else {
+                // Single result, use it directly
                 const result = event.data.data.results[0];
                 const lat = parseFloat(result.lat);
                 const lng = parseFloat(result.lon);
@@ -1149,27 +1193,37 @@ function initializeAffiliateRegistration() {
                   serviceAreaMap.setView([lat, lng], 14);
                 }
               }
-              
-              // Remove this handler
-              window.removeEventListener('message', handleResponse);
+            } else {
+              // No results, try next query
+              console.log('[Service Area Map] No results for query, trying next...');
+              geocodeWithFallback(searchQueries, queryIndex + 1);
             }
-          };
-          
-          window.addEventListener('message', handleResponse);
-        } else {
-          // Direct Nominatim call when not in iframe
-          const AUSTIN_BOUNDS = {
-            minLat: 29.5451,
-            maxLat: 30.9889,
-            minLon: -98.6687,
-            maxLon: -96.8175
-          };
-          
-          fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(fullAddress)}&limit=1&accept-language=en&viewbox=${AUSTIN_BOUNDS.minLon},${AUSTIN_BOUNDS.minLat},${AUSTIN_BOUNDS.maxLon},${AUSTIN_BOUNDS.maxLat}&bounded=0&countrycodes=us`)
-            .then(response => response.json())
-            .then(results => {
-              console.log('[Service Area Map] Nominatim results:', results);
-              if (results.length > 0) {
+            
+            // Remove this handler
+            window.removeEventListener('message', handleResponse);
+          }
+        };
+        
+        window.addEventListener('message', handleResponse);
+      } else {
+        // Direct Nominatim call when not in iframe
+        const AUSTIN_BOUNDS = {
+          minLat: 29.5451,
+          maxLat: 30.9889,
+          minLon: -98.6687,
+          maxLon: -96.8175
+        };
+        
+        fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(currentQuery.query)}&limit=5&accept-language=en&viewbox=${AUSTIN_BOUNDS.minLon},${AUSTIN_BOUNDS.minLat},${AUSTIN_BOUNDS.maxLon},${AUSTIN_BOUNDS.maxLat}&bounded=0&countrycodes=us`)
+          .then(response => response.json())
+          .then(results => {
+            console.log('[Service Area Map] Nominatim results:', results);
+            if (results.length > 0) {
+              // Show address selection modal if multiple results
+              if (results.length > 1 || queryIndex > 0) {
+                showAddressSelectionModal(results, radiusValue);
+              } else {
+                // Single result, use it directly
                 const lat = parseFloat(results[0].lat);
                 const lng = parseFloat(results[0].lon);
                 console.log('[Service Area Map] Form address geocoded:', lat, lng);
@@ -1182,12 +1236,93 @@ function initializeAffiliateRegistration() {
                   serviceAreaMap.setView([lat, lng], 14);
                 }
               }
-            })
-            .catch(error => {
-              console.error('Geocoding error:', error);
-            });
-        }
+            } else {
+              // No results, try next query
+              console.log('[Service Area Map] No results for query, trying next...');
+              geocodeWithFallback(searchQueries, queryIndex + 1);
+            }
+          })
+          .catch(error => {
+            console.error('Geocoding error:', error);
+            // Try next query on error
+            geocodeWithFallback(searchQueries, queryIndex + 1);
+          });
       }
+    }
+    
+    // Function to show address selection modal
+    function showAddressSelectionModal(results, radiusValue) {
+      console.log('[Service Area Map] Showing address selection modal with results:', results);
+      
+      // Remove any existing modal
+      const existingModal = document.getElementById('addressSelectionModal');
+      if (existingModal) {
+        existingModal.remove();
+      }
+      
+      // Create modal HTML
+      const modalHTML = `
+        <div id="addressSelectionModal" class="fixed inset-0 bg-black bg-opacity-50 z-50" style="z-index: 9999;">
+          <div class="flex items-center justify-center h-full p-4">
+            <div class="bg-white rounded-lg max-w-lg w-full max-h-[80vh] overflow-hidden">
+              <div class="p-6">
+                <h3 class="text-lg font-semibold mb-4">Select Your Service Location</h3>
+                <p class="text-sm text-gray-600 mb-4">We found multiple possible locations. Please select the correct one:</p>
+                <div class="space-y-2 max-h-[50vh] overflow-y-auto">
+                  ${results.map((result, index) => `
+                    <button class="address-option w-full text-left p-4 border rounded-lg hover:bg-blue-50 hover:border-blue-300 transition" 
+                            data-lat="${result.lat}" 
+                            data-lon="${result.lon}"
+                            data-index="${index}">
+                      <div class="font-medium">${result.display_name.split(',')[0]}</div>
+                      <div class="text-sm text-gray-600">${result.display_name}</div>
+                    </button>
+                  `).join('')}
+                </div>
+                <div class="mt-4 flex justify-end">
+                  <button id="cancelAddressSelection" class="px-4 py-2 text-gray-600 hover:text-gray-800">Cancel</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+      
+      // Add modal to page
+      document.body.insertAdjacentHTML('beforeend', modalHTML);
+      
+      // Add event listeners
+      document.querySelectorAll('.address-option').forEach(button => {
+        button.addEventListener('click', function() {
+          const lat = parseFloat(this.dataset.lat);
+          const lon = parseFloat(this.dataset.lon);
+          
+          console.log('[Service Area Map] Address selected:', lat, lon);
+          
+          // Update map center and marker
+          if (window.updateServiceArea) {
+            window.updateServiceArea(lat, lon, radiusValue);
+          }
+          if (serviceAreaMap) {
+            serviceAreaMap.setView([lat, lon], 14);
+          }
+          
+          // Remove modal
+          document.getElementById('addressSelectionModal').remove();
+        });
+      });
+      
+      // Cancel button
+      document.getElementById('cancelAddressSelection').addEventListener('click', function() {
+        document.getElementById('addressSelectionModal').remove();
+      });
+      
+      // Close on backdrop click
+      document.getElementById('addressSelectionModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+          this.remove();
+        }
+      });
     }
     
     // Make it globally accessible
