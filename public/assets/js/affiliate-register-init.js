@@ -420,9 +420,14 @@ function initializeAffiliateRegistration() {
       }
     }
 
-    // Note: Account setup section will be hidden initially with other sections
-    // and shown after address validation. For OAuth users, we'll hide it again
-    // after address validation
+    // Hide account setup section immediately for OAuth users
+    const accountSetupSection = document.getElementById('accountSetupSection');
+    if (accountSetupSection) {
+      accountSetupSection.style.display = 'none';
+      console.log('✅ Hidden account setup section for OAuth user');
+    }
+    
+    // Note: Account setup section will remain hidden for OAuth users
     window.isOAuthUser = true;
     
     // Remove required attributes from username/password fields for OAuth users
