@@ -421,11 +421,9 @@
                             console.log('[Parent-Iframe Bridge] Raw geocoding results:', results);
                             // Helper function to format address in natural format
                             function formatNaturalAddress(displayName) {
-                                // Nominatim returns format like: "825, East Rundberg Lane, Windsor Hills, Austin, Travis County, Texas, 78753, United States"
-                                // We want: "825 East Rundberg Lane, Austin, TX 78753"
-                                
+                                // Nominatim returns various formats, we need to extract the key parts
                                 const parts = displayName.split(',').map(p => p.trim());
-                                if (parts.length < 3) return displayName;
+                                if (parts.length < 2) return displayName;
                                 
                                 let street = '';
                                 let city = '';
@@ -436,24 +434,11 @@
                                 const austinCities = ['Austin', 'Round Rock', 'Cedar Park', 'Pflugerville', 'Georgetown', 
                                                      'Leander', 'Hutto', 'Manor', 'Buda', 'Kyle', 'Dripping Springs'];
                                 
-                                // First 1-2 parts are usually street
-                                if (/^\d+$/.test(parts[0])) {
-                                    // First part is just number, combine with second part
-                                    street = parts[0] + ' ' + (parts[1] || '');
-                                } else if (/^\d+\s+\w+/.test(parts[0])) {
-                                    // First part already has number and street name
-                                    street = parts[0];
-                                } else if (/^\d+/.test(parts[0]) && parts[1]) {
-                                    // Handle cases like "3401" followed by street name
-                                    street = parts[0] + ' ' + parts[1];
-                                }
+                                // Look through all parts to identify components
+                                let streetParts = [];
                                 
-                                // Look for city, state and zip in remaining parts
-                                for (let i = 1; i < parts.length; i++) {
+                                for (let i = 0; i < parts.length; i++) {
                                     const part = parts[i];
-                                    
-                                    // Skip if this was already used for street name
-                                    if (i === 1 && /^\d+$/.test(parts[0])) continue;
                                     
                                     // Check for zip code
                                     if (/^\d{5}$/.test(part)) {
@@ -464,23 +449,60 @@
                                         state = 'TX';
                                     }
                                     // Check for known cities
-                                    else if (austinCities.some(c => part.includes(c))) {
-                                        city = austinCities.find(c => part.includes(c));
+                                    else if (austinCities.some(c => part === c || part.includes(c))) {
+                                        city = austinCities.find(c => part === c || part.includes(c));
                                     }
-                                    // Skip common non-city parts
-                                    else if (part === 'United States' || part.includes('County') || 
-                                             part === 'USA' || parts.indexOf(part) === parts.length - 1) {
+                                    // Skip country and county
+                                    else if (part === 'United States' || part === 'USA' || 
+                                             part.includes('County') || part === 'US') {
                                         continue;
+                                    }
+                                    // If it's before we found a city and contains numbers or looks like a street
+                                    else if (!city && (
+                                        /\d/.test(part) || // Contains any number
+                                        /^(North|South|East|West|N|S|E|W)\s/i.test(part) || // Directional prefix
+                                        /(Street|St|Avenue|Ave|Road|Rd|Drive|Dr|Lane|Ln|Boulevard|Blvd|Circle|Cir|Court|Ct|Place|Pl|Trail|Trl|Parkway|Pkwy|Way)\b/i.test(part) // Street suffix
+                                    )) {
+                                        streetParts.push(part);
                                     }
                                 }
                                 
-                                // If no city found, use Austin as default
-                                if (!city) city = 'Austin';
+                                // Combine street parts
+                                if (streetParts.length > 0) {
+                                    street = streetParts.join(' ');
+                                    // Clean up street format
+                                    street = street.replace(/\s+/g, ' ').trim();
+                                }
+                                
+                                // If no street found but first part has a number, use first few parts
+                                if (!street && /\d/.test(parts[0])) {
+                                    // Take parts until we hit a city or state
+                                    for (let i = 0; i < Math.min(3, parts.length); i++) {
+                                        if (austinCities.some(c => parts[i].includes(c)) || 
+                                            parts[i] === 'Texas' || parts[i] === 'TX') {
+                                            break;
+                                        }
+                                        if (!/County|United States|USA/.test(parts[i])) {
+                                            street += (street ? ' ' : '') + parts[i];
+                                        }
+                                    }
+                                }
+                                
+                                // If still no street, check if this is a landmark/business result
+                                if (!street && parts[0]) {
+                                    // Use the first part as the name if it's not a city
+                                    if (!austinCities.some(c => parts[0].includes(c))) {
+                                        street = parts[0];
+                                    }
+                                }
+                                
+                                // Default city and state if not found
+                                if (!city && !street.includes('Austin')) city = 'Austin';
                                 if (!state) state = 'TX';
                                 
                                 // Build natural format
-                                let formatted = street;
-                                if (city) formatted += ', ' + city;
+                                let formatted = street || 'Austin area';
+                                if (city && street) formatted += ', ' + city;
                                 if (state) formatted += ', ' + state;
                                 if (zip) formatted += ' ' + zip;
                                 
@@ -501,15 +523,22 @@
                             console.log('[Parent-Iframe Bridge] Filtered results:', filteredResults);
                             
                             // Send filtered results back to iframe with formatted addresses
+                            const formattedResults = filteredResults.map(item => {
+                                console.log('[Parent-Iframe Bridge] Original display_name:', item.display_name);
+                                const formatted = formatNaturalAddress(item.display_name);
+                                console.log('[Parent-Iframe Bridge] Formatted display_name:', formatted);
+                                return {
+                                    display_name: formatted,
+                                    lat: item.lat,
+                                    lon: item.lon
+                                };
+                            });
+                            
                             iframe.contentWindow.postMessage({
                                 type: 'geocode-forward-response',
                                 data: {
                                     requestId: requestId,
-                                    results: filteredResults.map(item => ({
-                                        display_name: formatNaturalAddress(item.display_name),
-                                        lat: item.lat,
-                                        lon: item.lon
-                                    }))
+                                    results: formattedResults
                                 }
                             }, '*');
                             console.log('[Parent-Iframe Bridge] Sent geocoding results:', filteredResults.length, '(filtered from', results.length + ')');
