@@ -335,6 +335,8 @@
       "perBagFee": "Per-Bag Fee ($) *",
       "perBagFeeDesc": "Fee charged for each bag of laundry",
       "addressAutoFill": "The map will automatically center on your business address once all address fields are filled above.",
+      "validateAddress": "Validate Address & Set Service Location",
+      "validateAddressHelp": "Click to verify your address and automatically set your service area center on the map below",
       "livePricingPreview": "Live Pricing Preview:",
       "1bag": "1 bag",
       "3bags": "3 bags",
