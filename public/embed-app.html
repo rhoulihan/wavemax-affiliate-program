@@ -677,6 +677,22 @@
                     setTimeout(() => sendHeight(true), 350);
                     break;
                     
+                case 'geocode-forward-response':
+                    // Response from parent for forward geocoding
+                    console.log('[EMBED-APP] Received geocode forward response:', messageData);
+                    if (window.handleGeocodeResponse) {
+                        window.handleGeocodeResponse(messageData);
+                    }
+                    break;
+                    
+                case 'geocode-reverse-response':
+                    // Response from parent for reverse geocoding
+                    console.log('[EMBED-APP] Received geocode reverse response:', messageData);
+                    if (window.handleReverseGeocodeResponse) {
+                        window.handleReverseGeocodeResponse(messageData);
+                    }
+                    break;
+                    
                 default:
                     console.log('Unknown message type:', messageType);
             }
@@ -709,6 +725,43 @@
                 console.log('[EMBED-APP] Not in iframe, cannot show chrome');
             }
         }
+        
+        // Request geocoding from parent (forward geocoding - address to coordinates)
+        function requestGeocodeForward(query, requestId) {
+            console.log('[EMBED-APP] Requesting forward geocoding from parent:', query);
+            if (window.parent !== window) {
+                window.parent.postMessage({
+                    type: 'geocode-forward',
+                    data: {
+                        query: query,
+                        requestId: requestId
+                    }
+                }, '*');
+            } else {
+                console.log('[EMBED-APP] Not in iframe, cannot request geocoding');
+            }
+        }
+        
+        // Request reverse geocoding from parent (coordinates to address)
+        function requestGeocodeReverse(lat, lng, requestId) {
+            console.log('[EMBED-APP] Requesting reverse geocoding from parent:', lat, lng);
+            if (window.parent !== window) {
+                window.parent.postMessage({
+                    type: 'geocode-reverse',
+                    data: {
+                        lat: lat,
+                        lng: lng,
+                        requestId: requestId
+                    }
+                }, '*');
+            } else {
+                console.log('[EMBED-APP] Not in iframe, cannot request reverse geocoding');
+            }
+        }
+        
+        // Make geocoding functions available globally
+        window.requestGeocodeForward = requestGeocodeForward;
+        window.requestGeocodeReverse = requestGeocodeReverse;
         
         // Handle browser back/forward
         window.addEventListener('popstate', function() {

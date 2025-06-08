@@ -825,36 +825,12 @@ function initializeAffiliateRegistration() {
     
     if (!minFeeInput || !perBagInput) return;
     
-    function updateCalculator() {
-      const minFee = parseFloat(minFeeInput.value) || 25;
-      const perBag = parseFloat(perBagInput.value) || 5;
-      
-      // Calculate fees for different bag quantities
-      const bags = [1, 3, 5, 10];
-      bags.forEach(qty => {
-        const calculated = qty * perBag;
-        const total = Math.max(minFee, calculated);
-        const elem = document.getElementById(`calc${qty}bag${qty > 1 ? 's' : ''}`);
-        if (elem) {
-          elem.textContent = `$${total}`;
-          // Add visual indicator if minimum applies
-          if (total === minFee && calculated < minFee) {
-            elem.classList.add('font-bold');
-            elem.title = 'Minimum fee applies';
-          } else {
-            elem.classList.remove('font-bold');
-            elem.title = `${qty} × $${perBag} = $${calculated}`;
-          }
-        }
-      });
-    }
-    
     // Update on input change
-    minFeeInput.addEventListener('input', updateCalculator);
-    perBagInput.addEventListener('input', updateCalculator);
+    minFeeInput.addEventListener('input', updateFeeCalculator);
+    perBagInput.addEventListener('input', updateFeeCalculator);
     
     // Initial calculation
-    updateCalculator();
+    updateFeeCalculator();
     
     // Clean up observer before navigation
     window.addEventListener('beforeunload', function() {
@@ -882,8 +858,8 @@ function initializeAffiliateRegistration() {
 
   // Delivery fee calculator update
   function updateFeeCalculator() {
-    const minimumFee = parseFloat(document.getElementById('minimumDeliveryFee')?.value) || 0;
-    const perBagFee = parseFloat(document.getElementById('perBagDeliveryFee')?.value) || 0;
+    const minimumFee = parseFloat(document.getElementById('minimumDeliveryFee')?.value) || 25;
+    const perBagFee = parseFloat(document.getElementById('perBagDeliveryFee')?.value) || 10;
     
     // Update all example calculations
     [1, 3, 5, 10].forEach(bags => {
@@ -894,16 +870,18 @@ function initializeAffiliateRegistration() {
       const element = document.getElementById(`calc${bags}bag${bags > 1 ? 's' : ''}`);
       if (element) {
         element.textContent = `$${roundTripFee}`;
+        // Add visual indicator if minimum applies
+        if (oneWayFee === minimumFee && calculatedFee < minimumFee) {
+          element.classList.add('font-bold');
+          element.title = 'Minimum fee applies (x2 for round trip)';
+        } else {
+          element.classList.remove('font-bold');
+          element.title = `${bags} × $${perBagFee} = $${calculatedFee} (x2 for round trip)`;
+        }
       }
     });
   }
 
-  // Attach event listeners to fee inputs
-  document.getElementById('minimumDeliveryFee')?.addEventListener('input', updateFeeCalculator);
-  document.getElementById('perBagDeliveryFee')?.addEventListener('input', updateFeeCalculator);
-  
-  // Initial calculation
-  updateFeeCalculator();
 
   // Initialize service area map
   let serviceAreaMap = null;
@@ -986,13 +964,166 @@ function initializeAffiliateRegistration() {
       serviceMarker.on('dragend', function(event) {
         const position = event.target.getLatLng();
         updateServiceArea(position.lat, position.lng, parseInt(radiusSlider.value));
+        // Update address field with coordinates
+        reverseGeocode(position.lat, position.lng);
       });
     }
     
     // Handle map click
     serviceAreaMap.on('click', function(e) {
       updateServiceArea(e.latlng.lat, e.latlng.lng, parseInt(radiusSlider.value));
+      // Update address field with coordinates
+      reverseGeocode(e.latlng.lat, e.latlng.lng);
     });
+    
+    // Check if bridge geocoding is enabled
+    let useBridgeGeocoding = localStorage.getItem('useBridgeGeocoding') === 'true';
+    
+    // Geocoding functions
+    function reverseGeocode(lat, lng) {
+      const addressField = document.getElementById('serviceAddress');
+      if (!addressField) return;
+      
+      if (useBridgeGeocoding && window.parent !== window) {
+        // Use bridge method
+        const requestId = 'reverse_' + Date.now();
+        console.log('[Affiliate Registration] Using bridge for reverse geocoding');
+        
+        // Set up one-time handler for this specific request
+        window.handleReverseGeocodeResponse = function(data) {
+          if (data.requestId === requestId && data.address) {
+            addressField.value = data.address;
+          }
+        };
+        
+        // Request from parent
+        if (window.requestGeocodeReverse) {
+          window.requestGeocodeReverse(lat, lng, requestId);
+        }
+      } else {
+        // Use server endpoint for reverse geocoding
+        console.log('[Affiliate Registration] Using server for reverse geocoding');
+        csrfFetch(`${baseUrl}/api/v1/geocoding/reverse?lat=${lat}&lon=${lng}`)
+          .then(response => response.json())
+          .then(data => {
+            if (data.display_name) {
+              addressField.value = data.display_name;
+            }
+          })
+          .catch(error => {
+            console.error('Reverse geocoding error:', error);
+          });
+      }
+    }
+    
+    // Address autocomplete setup
+    const addressInput = document.getElementById('serviceAddress');
+    if (addressInput) {
+      let searchTimeout;
+      let autocompleteContainer;
+      
+      // Create autocomplete dropdown container
+      autocompleteContainer = document.createElement('div');
+      autocompleteContainer.className = 'absolute z-50 w-full bg-white border border-gray-300 rounded-lg shadow-lg mt-1 hidden';
+      addressInput.parentNode.style.position = 'relative';
+      addressInput.parentNode.appendChild(autocompleteContainer);
+      
+      addressInput.addEventListener('input', function() {
+        const query = this.value.trim();
+        
+        // Clear previous timeout
+        clearTimeout(searchTimeout);
+        
+        if (query.length < 3) {
+          autocompleteContainer.classList.add('hidden');
+          return;
+        }
+        
+        // Debounce the search
+        searchTimeout = setTimeout(() => {
+          if (useBridgeGeocoding && window.parent !== window) {
+            // Use bridge method
+            const requestId = 'forward_' + Date.now();
+            console.log('[Affiliate Registration] Using bridge for forward geocoding');
+            
+            // Set up one-time handler for this specific request
+            window.handleGeocodeResponse = function(data) {
+              if (data.requestId === requestId && data.results) {
+                processGeocodeResults(data.results);
+              }
+            };
+            
+            // Request from parent
+            if (window.requestGeocodeForward) {
+              window.requestGeocodeForward(query, requestId);
+            }
+          } else {
+            // Search using our server endpoint
+            console.log('[Affiliate Registration] Using server for forward geocoding');
+            csrfFetch(`${baseUrl}/api/v1/geocoding/search?q=${encodeURIComponent(query)}`)
+              .then(response => response.json())
+              .then(results => {
+                processGeocodeResults(results);
+              })
+              .catch(error => {
+                console.error('Geocoding error:', error);
+                autocompleteContainer.classList.add('hidden');
+              });
+          }
+        }, 300); // 300ms debounce
+      });
+      
+      // Process geocoding results
+      function processGeocodeResults(results) {
+        autocompleteContainer.innerHTML = '';
+        
+        if (results.length === 0) {
+          autocompleteContainer.classList.add('hidden');
+          return;
+        }
+        
+        results.forEach(result => {
+          const item = document.createElement('div');
+          item.className = 'px-4 py-2 hover:bg-gray-100 cursor-pointer text-sm';
+          item.textContent = result.display_name;
+          
+          item.addEventListener('click', function() {
+            addressInput.value = result.display_name;
+            const lat = parseFloat(result.lat);
+            const lng = parseFloat(result.lon);
+            
+            // Update map and marker
+            updateServiceArea(lat, lng, parseInt(radiusSlider.value));
+            serviceAreaMap.setView([lat, lng], 14);
+            
+            // Hide autocomplete
+            autocompleteContainer.classList.add('hidden');
+          });
+          
+          autocompleteContainer.appendChild(item);
+        });
+        
+        autocompleteContainer.classList.remove('hidden');
+      }
+      
+      // Hide autocomplete when clicking outside
+      document.addEventListener('click', function(e) {
+        if (!addressInput.contains(e.target) && !autocompleteContainer.contains(e.target)) {
+          autocompleteContainer.classList.add('hidden');
+        }
+      });
+      
+      // Handle Enter key
+      addressInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          const firstItem = autocompleteContainer.querySelector('div');
+          if (firstItem) {
+            firstItem.click();
+          }
+        }
+      });
+    }
     
     // Handle radius slider change
     radiusSlider.addEventListener('input', function() {
@@ -1008,6 +1139,25 @@ function initializeAffiliateRegistration() {
     
     // Set initial marker and circle at default location
     updateServiceArea(defaultLat, defaultLng, parseInt(radiusSlider ? radiusSlider.value : 5));
+    // Get address for default location
+    reverseGeocode(defaultLat, defaultLng);
+    
+    // Set up geocoding toggle
+    const geocodingToggle = document.getElementById('geocodingToggle');
+    if (geocodingToggle) {
+      // Set initial state from localStorage
+      geocodingToggle.checked = localStorage.getItem('useBridgeGeocoding') === 'true';
+      
+      // Handle toggle changes
+      geocodingToggle.addEventListener('change', function() {
+        const useBridge = this.checked;
+        localStorage.setItem('useBridgeGeocoding', useBridge);
+        console.log('[Affiliate Registration] Geocoding method changed to:', useBridge ? 'Bridge' : 'Server');
+        
+        // Update the useBridgeGeocoding variable
+        useBridgeGeocoding = useBridge;
+      });
+    }
     
     // Try to get user's location
     if (navigator.geolocation) {
