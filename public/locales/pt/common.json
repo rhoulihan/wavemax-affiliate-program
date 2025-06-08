@@ -297,6 +297,9 @@
       "continueWithGoogle": "Continuar com Google",
       "continueWithFacebook": "Continuar com Facebook",
       "continueWithLinkedIn": "Continuar com LinkedIn",
+      "socialAccountConnected": "Conta de Rede Social Conectada!",
+      "successfullyConnectedWith": "Conectado com Sucesso ao {{provider}}",
+      "autoFilledMessage": "Suas informações foram preenchidas automaticamente abaixo. Complete os campos restantes para finalizar seu registro.",
       "businessInfo": "Informações Empresariais",
       "personalInfo": "Informações Pessoais",
       "accountInfo": "Informações da Conta",
@@ -394,7 +397,10 @@
       "accountInfo": "Informações da Conta",
       "referralCode": "Código de Indicação (Opcional)",
       "termsAgree": "Eu concordo com os",
-      "alreadyHaveAccount": "Já tem uma conta?"
+      "alreadyHaveAccount": "Já tem uma conta?",
+      "socialAccountConnected": "Conta de Rede Social Conectada!",
+      "successfullyConnectedWith": "Conectado com Sucesso ao {{provider}}",
+      "autoFilledMessage": "Suas informações foram preenchidas automaticamente abaixo. Complete os campos restantes para finalizar seu registro."
     },
     "dashboard": {
       "title": "Painel do Cliente",

@@ -748,19 +748,24 @@
     if (socialAuthSection) {
       console.log('✅ Updating customer social auth section with success message');
       socialAuthSection.innerHTML = `
-        <h3 class="text-xl font-bold mb-4">Social Media Account Connected!</h3>
+        <h3 class="text-xl font-bold mb-4" data-i18n="customer.register.socialAccountConnected">Social Media Account Connected!</h3>
         <div class="bg-green-50 border border-green-200 rounded-lg p-6">
           <div class="flex items-center justify-center">
             <svg class="w-8 h-8 text-green-500 mr-3" fill="currentColor" viewBox="0 0 20 20">
               <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
             </svg>
             <div>
-              <h4 class="text-green-700 font-semibold text-lg">Successfully Connected with ${provider.charAt(0).toUpperCase() + provider.slice(1)}</h4>
-              <p class="text-green-600 text-sm mt-1">Your information has been automatically filled in below. Complete the remaining fields to finish your registration.</p>
+              <h4 class="text-green-700 font-semibold text-lg" data-i18n="customer.register.successfullyConnectedWith" data-i18n-options='{"provider": "${provider.charAt(0).toUpperCase() + provider.slice(1)}"}'>Successfully Connected with ${provider.charAt(0).toUpperCase() + provider.slice(1)}</h4>
+              <p class="text-green-600 text-sm mt-1" data-i18n="customer.register.autoFilledMessage">Your information has been automatically filled in below. Complete the remaining fields to finish your registration.</p>
             </div>
           </div>
         </div>
       `;
+      
+      // Trigger i18n update for the new content
+      if (window.i18next && window.i18next.isInitialized) {
+        window.i18n.updateContent();
+      }
     }
 
     // Hide the account setup section since OAuth handles authentication
