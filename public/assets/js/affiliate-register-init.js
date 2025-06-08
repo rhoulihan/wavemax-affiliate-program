@@ -882,12 +882,18 @@ function initializeAffiliateRegistration() {
         feeElement.textContent = `$${deliveryFee}`;
         // Add visual indicator if minimum applies
         if (deliveryFee === minimumFee && calculatedFee < minimumFee) {
-          feeElement.classList.add('font-bold');
           feeElement.title = 'Minimum fee applies';
         } else {
-          feeElement.classList.remove('font-bold');
           feeElement.title = `${bags} bags × $${perBagFee}/bag = $${calculatedFee}`;
         }
+      }
+      
+      // Calculate and update total (delivery + WDF)
+      const total = deliveryFee + wdfRevenue;
+      const totalElement = document.getElementById(`total${bags}bag${bags > 1 ? 's' : ''}`);
+      if (totalElement) {
+        totalElement.textContent = `$${total.toFixed(2)}`;
+        totalElement.title = `Delivery: $${deliveryFee} + WDF: $${wdfRevenue.toFixed(2)} = $${total.toFixed(2)}`;
       }
       
       // Update commission display
