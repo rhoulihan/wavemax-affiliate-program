@@ -1084,14 +1084,13 @@ function initializeAffiliateRegistration() {
         leafletJS.src = 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js';
         leafletJS.onload = function() {
           console.log('Leaflet loaded dynamically');
-          // Wait for trigger event instead of immediate retry
-          window.addEventListener('init-service-area-map', waitForLeafletAndInitialize, { once: true });
+          // Try to initialize again now that Leaflet is loaded
+          waitForLeafletAndInitialize();
         };
         document.body.appendChild(leafletJS);
         return;
       }
-      // Wait for trigger event instead of timeout
-      window.addEventListener('init-service-area-map', waitForLeafletAndInitialize, { once: true });
+      // Just return, Leaflet will call us back when loaded
       return;
     }
     
@@ -1100,13 +1099,22 @@ function initializeAffiliateRegistration() {
     console.log('[Service Area Map] Container dimensions:', { width: rect.width, height: rect.height });
     
     if (rect.width === 0 || rect.height === 0) {
-      console.log('[Service Area Map] Map container has no dimensions yet, waiting for trigger event...');
+      console.log('[Service Area Map] Map container has no dimensions yet');
       // Check if container is actually visible
       const section = document.getElementById('serviceAreaSection');
       console.log('[Service Area Map] Service area section display:', section ? section.style.display : 'section not found');
       
-      // Wait for trigger event instead of timeout
-      window.addEventListener('init-service-area-map', waitForLeafletAndInitialize, { once: true });
+      // Try one more time after a render frame
+      requestAnimationFrame(() => {
+        const rect2 = mapContainer.getBoundingClientRect();
+        console.log('[Service Area Map] Container dimensions after frame:', { width: rect2.width, height: rect2.height });
+        if (rect2.width > 0 && rect2.height > 0) {
+          console.log('[Service Area Map] Container now has dimensions, initializing map');
+          initializeServiceAreaMap();
+        } else {
+          console.log('[Service Area Map] Container still has no dimensions, giving up');
+        }
+      });
       return;
     }
     
