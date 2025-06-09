@@ -2134,41 +2134,52 @@ function initializeAffiliateRegistration() {
         
         // NOW show the service area section after address has been confirmed
         const serviceAreaSection = document.getElementById('serviceAreaSection');
+        console.log('[Service Area] Found service area section:', !!serviceAreaSection);
         if (serviceAreaSection) {
+          console.log('[Service Area] Current display:', serviceAreaSection.style.display);
+          console.log('[Service Area] Current classes:', serviceAreaSection.className);
           serviceAreaSection.classList.remove('form-section-hidden');
           serviceAreaSection.style.display = '';
+          console.log('[Service Area] After update - display:', serviceAreaSection.style.display);
           
           // Force reflow by accessing offsetHeight
           serviceAreaSection.offsetHeight;
           
           // Initialize the service area component with stored data
           console.log('[Service Area Map] Service area section shown, initializing component');
-          if (window.ServiceAreaComponent && window.selectedServiceAreaData) {
+          
+          // Delay component initialization to ensure it doesn't block
+          setTimeout(() => {
+            if (window.ServiceAreaComponent && window.selectedServiceAreaData) {
+              const data = window.selectedServiceAreaData;
+              window.registrationServiceArea = window.ServiceAreaComponent.init('registrationServiceAreaComponent', {
+                latitude: data.latitude,
+                longitude: data.longitude,
+                radius: data.radius,
+                address: data.address,
+                editable: true,
+                showMap: true,
+                showControls: true,
+                showInfo: true,
+                onUpdate: function(serviceData) {
+                  // Update hidden fields
+                  document.getElementById('serviceLatitude').value = serviceData.latitude;
+                  document.getElementById('serviceLongitude').value = serviceData.longitude;
+                  document.getElementById('serviceRadius').value = serviceData.radius;
+                  console.log('Service area updated:', serviceData);
+                }
+              });
+            } else {
+              console.error('ServiceAreaComponent or selectedServiceAreaData not available');
+            }
+          }, 100);
+          
+          // Update the hidden fields immediately with initial values (don't wait for component)
+          if (window.selectedServiceAreaData) {
             const data = window.selectedServiceAreaData;
-            window.registrationServiceArea = window.ServiceAreaComponent.init('registrationServiceAreaComponent', {
-              latitude: data.latitude,
-              longitude: data.longitude,
-              radius: data.radius,
-              address: data.address,
-              editable: true,
-              showMap: true,
-              showControls: true,
-              showInfo: true,
-              onUpdate: function(serviceData) {
-                // Update hidden fields
-                document.getElementById('serviceLatitude').value = serviceData.latitude;
-                document.getElementById('serviceLongitude').value = serviceData.longitude;
-                document.getElementById('serviceRadius').value = serviceData.radius;
-                console.log('Service area updated:', serviceData);
-              }
-            });
-            
-            // Also update the hidden fields immediately with initial values
             document.getElementById('serviceLatitude').value = data.latitude;
             document.getElementById('serviceLongitude').value = data.longitude;
             document.getElementById('serviceRadius').value = data.radius;
-          } else {
-            console.error('ServiceAreaComponent or selectedServiceAreaData not available');
           }
         }
         
@@ -2181,7 +2192,17 @@ function initializeAffiliateRegistration() {
         }, 100);
         
         // Remove modal
-        document.getElementById('addressSelectionModal').remove();
+        try {
+          const modal = document.getElementById('addressSelectionModal');
+          if (modal) {
+            modal.remove();
+            console.log('[Address Selection] Modal removed successfully');
+          } else {
+            console.error('[Address Selection] Modal not found to remove');
+          }
+        } catch (error) {
+          console.error('[Address Selection] Error removing modal:', error);
+        }
       };
       
       // Add click handlers for address options
