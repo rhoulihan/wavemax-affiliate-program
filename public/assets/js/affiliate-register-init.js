@@ -1138,6 +1138,29 @@ function initializeAffiliateRegistration() {
     
     if (!minFeeInput || !perBagInput) return;
     
+    // Prevent Enter key from submitting form in delivery fee fields
+    const preventEnterSubmit = function(event) {
+      if (event.key === 'Enter' || event.keyCode === 13) {
+        event.preventDefault();
+        event.stopPropagation();
+        
+        // Trigger input event to update pricing preview
+        this.dispatchEvent(new Event('input', { bubbles: true }));
+        this.dispatchEvent(new Event('change', { bubbles: true }));
+        
+        // Optional: Move focus to next input field
+        if (this.id === 'minimumDeliveryFee') {
+          perBagInput.focus();
+        }
+        
+        return false;
+      }
+    };
+    
+    // Add keydown event listeners to prevent form submission on Enter
+    minFeeInput.addEventListener('keydown', preventEnterSubmit);
+    perBagInput.addEventListener('keydown', preventEnterSubmit);
+    
     // Initialize the pricing preview component
     if (window.PricingPreviewComponent) {
       window.registrationPricingPreview = window.PricingPreviewComponent.init(
@@ -1159,28 +1182,31 @@ function initializeAffiliateRegistration() {
       updateFeeCalculator();
     }
     
-    // Clean up observer before navigation
-    window.addEventListener('beforeunload', function() {
+    // Clean up function to remove event listeners
+    const cleanupFeeCalculator = function() {
+      // Remove keydown event listeners
+      minFeeInput.removeEventListener('keydown', preventEnterSubmit);
+      perBagInput.removeEventListener('keydown', preventEnterSubmit);
+      
+      // Clean up pricing preview component if it exists
+      if (window.registrationPricingPreview && window.registrationPricingPreview.destroy) {
+        window.registrationPricingPreview.destroy();
+      }
+      
+      // Disconnect resize observer
       if (resizeObserver) {
         resizeObserver.disconnect();
         resizeObserver = null;
       }
-    });
+    };
+    
+    // Clean up before navigation
+    window.addEventListener('beforeunload', cleanupFeeCalculator);
     
     // Also clean up on custom events from parent
-    window.addEventListener('page-cleanup', function() {
-      if (resizeObserver) {
-        resizeObserver.disconnect();
-        resizeObserver = null;
-      }
-    });
+    window.addEventListener('page-cleanup', cleanupFeeCalculator);
     
-    window.addEventListener('disconnect-observers', function() {
-      if (resizeObserver) {
-        resizeObserver.disconnect();
-        resizeObserver = null;
-      }
-    });
+    window.addEventListener('disconnect-observers', cleanupFeeCalculator);
   }
 
   // Delivery fee calculator update

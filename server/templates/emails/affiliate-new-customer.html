@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{i18n "emails.newCustomer.title"}} - WaveMAX Laundry</title>
+    <title>[EMAIL_TITLE]</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -94,67 +94,61 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>{{i18n "emails.newCustomer.title"}}!</h1>
+            <h1>[EMAIL_HEADER]</h1>
         </div>
         
         <div class="content">
-            <h2>Congratulations, [AFFILIATE_NAME]!</h2>
+            <h2>[GREETING]</h2>
             
-            <p>Great news! A new customer has just registered through your affiliate link.</p>
+            <p>[NEW_CUSTOMER_MESSAGE]</p>
             
             <div class="info-box">
-                <strong>Action Required:</strong> Please deliver <strong>[NUMBER_OF_BAGS]</strong> laundry bag(s) to your new customer within 48 hours.
-                <br><small>Note: The customer has been charged for their bags. This fee will be credited on their first order.</small>
+                <strong>[ACTION_REQUIRED_LABEL]:</strong> [ACTION_REQUIRED_MESSAGE]
+                <br><small>[BAG_FEE_NOTE]</small>
             </div>
             
             <div class="customer-details">
-                <h3>Customer Information</h3>
+                <h3>[CUSTOMER_INFO_TITLE]</h3>
                 <div class="detail-row">
-                    <span class="detail-label">Customer ID:</span>
+                    <span class="detail-label">[CUSTOMER_ID_LABEL]:</span>
                     <span>[CUSTOMER_ID]</span>
                 </div>
                 <div class="detail-row">
-                    <span class="detail-label">Name:</span>
+                    <span class="detail-label">[NAME_LABEL]:</span>
                     <span>[CUSTOMER_NAME]</span>
                 </div>
                 <div class="detail-row">
-                    <span class="detail-label">Email:</span>
+                    <span class="detail-label">[EMAIL_LABEL]:</span>
                     <span>[CUSTOMER_EMAIL]</span>
                 </div>
                 <div class="detail-row">
-                    <span class="detail-label">Phone:</span>
+                    <span class="detail-label">[PHONE_LABEL]:</span>
                     <span>[CUSTOMER_PHONE]</span>
                 </div>
                 <div class="detail-row">
-                    <span class="detail-label">Address:</span>
+                    <span class="detail-label">[ADDRESS_LABEL]:</span>
                     <span>[CUSTOMER_ADDRESS]</span>
                 </div>
                 <div class="detail-row">
-                    <span class="detail-label">Service Frequency:</span>
+                    <span class="detail-label">[SERVICE_FREQUENCY_LABEL]:</span>
                     <span>[SERVICE_FREQUENCY]</span>
                 </div>
             </div>
             
-            <h3>Next Steps:</h3>
-            <ol>
-                <li>Contact the customer to arrange bag delivery</li>
-                <li>Deliver <strong>[NUMBER_OF_BAGS]</strong> laundry bag(s) they purchased during registration</li>
-                <li>Explain the pickup and delivery process</li>
-                <li>Schedule their first pickup if requested</li>
-                <li>Remind them that bag fees will be credited on their first order</li>
-            </ol>
+            <h3>[NEXT_STEPS_TITLE]</h3>
+            [NEXT_STEPS_LIST]
             
             <center>
-                <a href="[DASHBOARD_URL]" class="button">View Customer in Dashboard</a>
+                <a href="[DASHBOARD_URL]" class="button">[VIEW_CUSTOMER_BUTTON]</a>
             </center>
             
-            <p>Remember: Providing excellent service from the start helps ensure customer retention and positive reviews!</p>
+            <p>[REMINDER_MESSAGE]</p>
         </div>
         
         <div class="footer">
-            <p>This email was sent by WaveMAX Laundry Affiliate Program</p>
-            <p>Questions? Contact us at <a href="mailto:support@wavemax.promo">support@wavemax.promo</a></p>
-            <p>&copy; 2025 CRHS Enterprises, LLC. All rights reserved.</p>
+            <p>[FOOTER_SENT_BY]</p>
+            <p>[FOOTER_QUESTIONS] <a href="mailto:support@wavemax.promo">support@wavemax.promo</a></p>
+            <p>&copy; [CURRENT_YEAR] CRHS Enterprises, LLC. [FOOTER_RIGHTS]</p>
         </div>
     </div>
 </body>

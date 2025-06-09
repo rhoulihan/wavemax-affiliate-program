@@ -329,9 +329,108 @@ exports.sendAffiliateWelcomeEmail = async (affiliate) => {
  */
 exports.sendAffiliateNewCustomerEmail = async (affiliate, customer, bagInfo = {}) => {
   try {
-    const template = await loadTemplate('affiliate-new-customer');
+    const language = affiliate.languagePreference || 'en';
+    const template = await loadTemplate('affiliate-new-customer', language);
 
     const numberOfBags = bagInfo.numberOfBags || 1;
+
+    // Get translations for the email content
+    const translations = {
+      en: {
+        EMAIL_TITLE: 'New Customer Registration',
+        EMAIL_HEADER: 'New Customer Registration!',
+        GREETING: `Congratulations, ${affiliate.businessName || affiliate.firstName}!`,
+        NEW_CUSTOMER_MESSAGE: 'Great news! A new customer has just registered through your affiliate link.',
+        ACTION_REQUIRED_LABEL: 'Action Required',
+        ACTION_REQUIRED_MESSAGE: `Please deliver ${numberOfBags} laundry bag(s) to your new customer within 48 hours.`,
+        BAG_FEE_NOTE: 'Note: The customer has been charged for their bags. This fee will be credited on their first order.',
+        CUSTOMER_INFO_TITLE: 'Customer Information',
+        CUSTOMER_ID_LABEL: 'Customer ID',
+        NAME_LABEL: 'Name',
+        EMAIL_LABEL: 'Email',
+        PHONE_LABEL: 'Phone',
+        ADDRESS_LABEL: 'Address',
+        SERVICE_FREQUENCY_LABEL: 'Service Frequency',
+        NEXT_STEPS_TITLE: 'Next Steps:',
+        NEXT_STEPS_LIST: `<ol><li>Contact the customer to arrange bag delivery</li><li>Deliver <strong>${numberOfBags}</strong> laundry bag(s) they purchased during registration</li><li>Explain the pickup and delivery process</li><li>Schedule their first pickup if requested</li><li>Remind them that bag fees will be credited on their first order</li></ol>`,
+        VIEW_CUSTOMER_BUTTON: 'View Customer in Dashboard',
+        REMINDER_MESSAGE: 'Remember: Providing excellent service from the start helps ensure customer retention and positive reviews!',
+        FOOTER_SENT_BY: 'This email was sent by WaveMAX Laundry Affiliate Program',
+        FOOTER_QUESTIONS: 'Questions? Contact us at',
+        FOOTER_RIGHTS: 'All rights reserved.'
+      },
+      es: {
+        EMAIL_TITLE: 'Nuevo Registro de Cliente',
+        EMAIL_HEADER: '¡Nuevo Registro de Cliente!',
+        GREETING: `¡Felicitaciones, ${affiliate.businessName || affiliate.firstName}!`,
+        NEW_CUSTOMER_MESSAGE: '¡Excelentes noticias! Un nuevo cliente acaba de registrarse a través de su enlace de afiliado.',
+        ACTION_REQUIRED_LABEL: 'Acción Requerida',
+        ACTION_REQUIRED_MESSAGE: `Por favor entregue ${numberOfBags} bolsa(s) de lavandería a su nuevo cliente dentro de 48 horas.`,
+        BAG_FEE_NOTE: 'Nota: Al cliente se le ha cobrado por sus bolsas. Esta tarifa se acreditará en su primer pedido.',
+        CUSTOMER_INFO_TITLE: 'Información del Cliente',
+        CUSTOMER_ID_LABEL: 'ID del Cliente',
+        NAME_LABEL: 'Nombre',
+        EMAIL_LABEL: 'Correo Electrónico',
+        PHONE_LABEL: 'Teléfono',
+        ADDRESS_LABEL: 'Dirección',
+        SERVICE_FREQUENCY_LABEL: 'Frecuencia de Servicio',
+        NEXT_STEPS_TITLE: 'Próximos Pasos:',
+        NEXT_STEPS_LIST: `<ol><li>Contacte al cliente para coordinar la entrega de bolsas</li><li>Entregue <strong>${numberOfBags}</strong> bolsa(s) de lavandería que compraron durante el registro</li><li>Explique el proceso de recogida y entrega</li><li>Programe su primera recogida si lo solicitan</li><li>Recuérdeles que las tarifas de bolsas se acreditarán en su primer pedido</li></ol>`,
+        VIEW_CUSTOMER_BUTTON: 'Ver Cliente en el Panel',
+        REMINDER_MESSAGE: 'Recuerde: ¡Brindar un excelente servicio desde el principio ayuda a garantizar la retención de clientes y reseñas positivas!',
+        FOOTER_SENT_BY: 'Este correo fue enviado por el Programa de Afiliados WaveMAX Laundry',
+        FOOTER_QUESTIONS: '¿Preguntas? Contáctenos en',
+        FOOTER_RIGHTS: 'Todos los derechos reservados.'
+      },
+      pt: {
+        EMAIL_TITLE: 'Novo Registro de Cliente',
+        EMAIL_HEADER: 'Novo Registro de Cliente!',
+        GREETING: `Parabéns, ${affiliate.businessName || affiliate.firstName}!`,
+        NEW_CUSTOMER_MESSAGE: 'Ótimas notícias! Um novo cliente acabou de se registrar através do seu link de afiliado.',
+        ACTION_REQUIRED_LABEL: 'Ação Necessária',
+        ACTION_REQUIRED_MESSAGE: `Por favor, entregue ${numberOfBags} sacola(s) de lavanderia ao seu novo cliente dentro de 48 horas.`,
+        BAG_FEE_NOTE: 'Nota: O cliente foi cobrado pelas sacolas. Esta taxa será creditada no primeiro pedido.',
+        CUSTOMER_INFO_TITLE: 'Informações do Cliente',
+        CUSTOMER_ID_LABEL: 'ID do Cliente',
+        NAME_LABEL: 'Nome',
+        EMAIL_LABEL: 'E-mail',
+        PHONE_LABEL: 'Telefone',
+        ADDRESS_LABEL: 'Endereço',
+        SERVICE_FREQUENCY_LABEL: 'Frequência de Serviço',
+        NEXT_STEPS_TITLE: 'Próximos Passos:',
+        NEXT_STEPS_LIST: `<ol><li>Entre em contato com o cliente para organizar a entrega das sacolas</li><li>Entregue <strong>${numberOfBags}</strong> sacola(s) de lavanderia que compraram durante o registro</li><li>Explique o processo de coleta e entrega</li><li>Agende a primeira coleta se solicitado</li><li>Lembre-os de que as taxas das sacolas serão creditadas no primeiro pedido</li></ol>`,
+        VIEW_CUSTOMER_BUTTON: 'Ver Cliente no Painel',
+        REMINDER_MESSAGE: 'Lembre-se: Fornecer um excelente serviço desde o início ajuda a garantir a retenção de clientes e avaliações positivas!',
+        FOOTER_SENT_BY: 'Este e-mail foi enviado pelo Programa de Afiliados WaveMAX Laundry',
+        FOOTER_QUESTIONS: 'Dúvidas? Entre em contato conosco em',
+        FOOTER_RIGHTS: 'Todos os direitos reservados.'
+      },
+      de: {
+        EMAIL_TITLE: 'Neue Kundenregistrierung',
+        EMAIL_HEADER: 'Neue Kundenregistrierung!',
+        GREETING: `Herzlichen Glückwunsch, ${affiliate.businessName || affiliate.firstName}!`,
+        NEW_CUSTOMER_MESSAGE: 'Großartige Neuigkeiten! Ein neuer Kunde hat sich gerade über Ihren Affiliate-Link registriert.',
+        ACTION_REQUIRED_LABEL: 'Aktion erforderlich',
+        ACTION_REQUIRED_MESSAGE: `Bitte liefern Sie ${numberOfBags} Wäschesack/-säcke innerhalb von 48 Stunden an Ihren neuen Kunden.`,
+        BAG_FEE_NOTE: 'Hinweis: Dem Kunden wurden die Säcke berechnet. Diese Gebühr wird bei der ersten Bestellung gutgeschrieben.',
+        CUSTOMER_INFO_TITLE: 'Kundeninformationen',
+        CUSTOMER_ID_LABEL: 'Kunden-ID',
+        NAME_LABEL: 'Name',
+        EMAIL_LABEL: 'E-Mail',
+        PHONE_LABEL: 'Telefon',
+        ADDRESS_LABEL: 'Adresse',
+        SERVICE_FREQUENCY_LABEL: 'Service-Häufigkeit',
+        NEXT_STEPS_TITLE: 'Nächste Schritte:',
+        NEXT_STEPS_LIST: `<ol><li>Kontaktieren Sie den Kunden, um die Sacklieferung zu arrangieren</li><li>Liefern Sie <strong>${numberOfBags}</strong> Wäschesack/-säcke, die während der Registrierung gekauft wurden</li><li>Erklären Sie den Abhol- und Lieferprozess</li><li>Planen Sie die erste Abholung auf Anfrage</li><li>Erinnern Sie sie daran, dass die Sackgebühren bei der ersten Bestellung gutgeschrieben werden</li></ol>`,
+        VIEW_CUSTOMER_BUTTON: 'Kunde im Dashboard anzeigen',
+        REMINDER_MESSAGE: 'Denken Sie daran: Exzellenter Service von Anfang an hilft, Kundenbindung und positive Bewertungen zu gewährleisten!',
+        FOOTER_SENT_BY: 'Diese E-Mail wurde vom WaveMAX Laundry Affiliate-Programm gesendet',
+        FOOTER_QUESTIONS: 'Fragen? Kontaktieren Sie uns unter',
+        FOOTER_RIGHTS: 'Alle Rechte vorbehalten.'
+      }
+    };
+
+    const emailTranslations = translations[language] || translations.en;
 
     const data = {
       affiliate_first_name: affiliate.firstName,
@@ -346,14 +445,24 @@ exports.sendAffiliateNewCustomerEmail = async (affiliate, customer, bagInfo = {}
       service_frequency: customer.serviceFrequency,
       number_of_bags: numberOfBags,
       dashboard_url: `https://www.wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program?login=affiliate&customer=${customer.customerId}`,
-      current_year: new Date().getFullYear()
+      current_year: new Date().getFullYear(),
+      ...emailTranslations
     };
 
     const html = fillTemplate(template, data);
 
+    // Translate subject based on language
+    const subjects = {
+      en: 'New Customer Registration',
+      es: 'Nuevo Registro de Cliente',
+      pt: 'Novo Registro de Cliente',
+      de: 'Neue Kundenregistrierung'
+    };
+    const subject = subjects[language] || subjects.en;
+
     await sendEmail(
       affiliate.email,
-      'New Customer Registration',
+      subject,
       html
     );
   } catch (error) {
@@ -366,7 +475,98 @@ exports.sendAffiliateNewCustomerEmail = async (affiliate, customer, bagInfo = {}
  */
 exports.sendAffiliateNewOrderEmail = async (affiliate, customer, order) => {
   try {
-    const template = await loadTemplate('affiliate-new-order');
+    const language = affiliate.languagePreference || 'en';
+    const template = await loadTemplate('affiliate-new-order', language);
+
+    // Get translations for the email content
+    const translations = {
+      en: {
+        EMAIL_TITLE: 'New Laundry Pickup Order',
+        EMAIL_HEADER: 'New Laundry Pickup Order',
+        GREETING: `Hello ${affiliate.firstName},`,
+        NEW_ORDER_MESSAGE: 'You have a new laundry pickup order to process!',
+        ORDER_DETAILS_TITLE: 'Order Details',
+        ORDER_ID_LABEL: 'Order ID',
+        CUSTOMER_LABEL: 'Customer',
+        PHONE_LABEL: 'Phone',
+        ADDRESS_LABEL: 'Address',
+        PICKUP_DATE_LABEL: 'Pickup Date',
+        PICKUP_TIME_LABEL: 'Pickup Time',
+        ESTIMATED_WEIGHT_LABEL: 'Estimated Weight',
+        NUMBER_OF_BAGS_LABEL: 'Number of Bags',
+        SPECIAL_INSTRUCTIONS_LABEL: 'Special Instructions',
+        VIEW_ORDER_BUTTON: 'View in Dashboard',
+        PICKUP_REMINDER: 'Please ensure you pick up the laundry during the specified time window. The customer will be expecting you.',
+        CLOSING_MESSAGE: 'Best regards,<br>The WaveMAX Laundry Team',
+        FOOTER_RIGHTS: 'All rights reserved.',
+        FOOTER_AUTOMATED_MESSAGE: 'This is an automated message. Please do not reply to this email.'
+      },
+      es: {
+        EMAIL_TITLE: 'Nuevo Pedido de Recogida de Lavandería',
+        EMAIL_HEADER: 'Nuevo Pedido de Recogida de Lavandería',
+        GREETING: `Hola ${affiliate.firstName},`,
+        NEW_ORDER_MESSAGE: '¡Tiene un nuevo pedido de recogida de lavandería para procesar!',
+        ORDER_DETAILS_TITLE: 'Detalles del Pedido',
+        ORDER_ID_LABEL: 'ID del Pedido',
+        CUSTOMER_LABEL: 'Cliente',
+        PHONE_LABEL: 'Teléfono',
+        ADDRESS_LABEL: 'Dirección',
+        PICKUP_DATE_LABEL: 'Fecha de Recogida',
+        PICKUP_TIME_LABEL: 'Hora de Recogida',
+        ESTIMATED_WEIGHT_LABEL: 'Peso Estimado',
+        NUMBER_OF_BAGS_LABEL: 'Número de Bolsas',
+        SPECIAL_INSTRUCTIONS_LABEL: 'Instrucciones Especiales',
+        VIEW_ORDER_BUTTON: 'Ver en el Panel',
+        PICKUP_REMINDER: 'Por favor asegúrese de recoger la ropa durante la ventana de tiempo especificada. El cliente lo estará esperando.',
+        CLOSING_MESSAGE: 'Saludos cordiales,<br>El Equipo de WaveMAX Laundry',
+        FOOTER_RIGHTS: 'Todos los derechos reservados.',
+        FOOTER_AUTOMATED_MESSAGE: 'Este es un mensaje automatizado. Por favor no responda a este correo.'
+      },
+      pt: {
+        EMAIL_TITLE: 'Novo Pedido de Coleta de Lavanderia',
+        EMAIL_HEADER: 'Novo Pedido de Coleta de Lavanderia',
+        GREETING: `Olá ${affiliate.firstName},`,
+        NEW_ORDER_MESSAGE: 'Você tem um novo pedido de coleta de lavanderia para processar!',
+        ORDER_DETAILS_TITLE: 'Detalhes do Pedido',
+        ORDER_ID_LABEL: 'ID do Pedido',
+        CUSTOMER_LABEL: 'Cliente',
+        PHONE_LABEL: 'Telefone',
+        ADDRESS_LABEL: 'Endereço',
+        PICKUP_DATE_LABEL: 'Data de Coleta',
+        PICKUP_TIME_LABEL: 'Hora de Coleta',
+        ESTIMATED_WEIGHT_LABEL: 'Peso Estimado',
+        NUMBER_OF_BAGS_LABEL: 'Número de Sacolas',
+        SPECIAL_INSTRUCTIONS_LABEL: 'Instruções Especiais',
+        VIEW_ORDER_BUTTON: 'Ver no Painel',
+        PICKUP_REMINDER: 'Por favor, certifique-se de coletar a roupa durante a janela de tempo especificada. O cliente estará esperando por você.',
+        CLOSING_MESSAGE: 'Atenciosamente,<br>A Equipe WaveMAX Laundry',
+        FOOTER_RIGHTS: 'Todos os direitos reservados.',
+        FOOTER_AUTOMATED_MESSAGE: 'Esta é uma mensagem automatizada. Por favor, não responda a este e-mail.'
+      },
+      de: {
+        EMAIL_TITLE: 'Neue Wäscheabhol-Bestellung',
+        EMAIL_HEADER: 'Neue Wäscheabhol-Bestellung',
+        GREETING: `Hallo ${affiliate.firstName},`,
+        NEW_ORDER_MESSAGE: 'Sie haben eine neue Wäscheabhol-Bestellung zu bearbeiten!',
+        ORDER_DETAILS_TITLE: 'Bestelldetails',
+        ORDER_ID_LABEL: 'Bestell-ID',
+        CUSTOMER_LABEL: 'Kunde',
+        PHONE_LABEL: 'Telefon',
+        ADDRESS_LABEL: 'Adresse',
+        PICKUP_DATE_LABEL: 'Abholdatum',
+        PICKUP_TIME_LABEL: 'Abholzeit',
+        ESTIMATED_WEIGHT_LABEL: 'Geschätztes Gewicht',
+        NUMBER_OF_BAGS_LABEL: 'Anzahl der Säcke',
+        SPECIAL_INSTRUCTIONS_LABEL: 'Besondere Anweisungen',
+        VIEW_ORDER_BUTTON: 'Im Dashboard anzeigen',
+        PICKUP_REMINDER: 'Bitte stellen Sie sicher, dass Sie die Wäsche während des angegebenen Zeitfensters abholen. Der Kunde erwartet Sie.',
+        CLOSING_MESSAGE: 'Mit freundlichen Grüßen,<br>Das WaveMAX Laundry Team',
+        FOOTER_RIGHTS: 'Alle Rechte vorbehalten.',
+        FOOTER_AUTOMATED_MESSAGE: 'Dies ist eine automatisierte Nachricht. Bitte antworten Sie nicht auf diese E-Mail.'
+      }
+    };
+
+    const emailTranslations = translations[language] || translations.en;
 
     const data = {
       affiliate_first_name: affiliate.firstName,
@@ -376,18 +576,28 @@ exports.sendAffiliateNewOrderEmail = async (affiliate, customer, order) => {
       customer_address: `${customer.address}, ${customer.city}, ${customer.state} ${customer.zipCode}`,
       pickup_date: new Date(order.pickupDate).toLocaleDateString(),
       pickup_time: formatTimeSlot(order.pickupTime),
-      estimated_weight: order.estimatedWeight ? `${order.estimatedWeight} lbs` : 'To be determined',
+      estimated_weight: order.estimatedWeight ? `${order.estimatedWeight} lbs` : emailTranslations.TO_BE_DETERMINED || 'To be determined',
       number_of_bags: order.numberOfBags || 1,
-      special_instructions: order.specialPickupInstructions || 'None',
+      special_instructions: order.specialPickupInstructions || emailTranslations.NONE || 'None',
       dashboard_url: 'https://www.wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program?login=affiliate',
-      current_year: new Date().getFullYear()
+      current_year: new Date().getFullYear(),
+      ...emailTranslations
     };
 
     const html = fillTemplate(template, data);
 
+    // Translate subject based on language
+    const subjects = {
+      en: 'New Laundry Pickup Order',
+      es: 'Nuevo Pedido de Recogida de Lavandería',
+      pt: 'Novo Pedido de Coleta de Lavanderia',
+      de: 'Neue Wäscheabhol-Bestellung'
+    };
+    const subject = subjects[language] || subjects.en;
+
     await sendEmail(
       affiliate.email,
-      'New Laundry Pickup Order',
+      subject,
       html
     );
   } catch (error) {
@@ -400,7 +610,78 @@ exports.sendAffiliateNewOrderEmail = async (affiliate, customer, order) => {
  */
 exports.sendAffiliateCommissionEmail = async (affiliate, order, customer) => {
   try {
-    const template = await loadTemplate('affiliate-commission');
+    const language = affiliate.languagePreference || 'en';
+    const template = await loadTemplate('affiliate-commission', language);
+
+    // Get translations for the email content
+    const translations = {
+      en: {
+        EMAIL_TITLE: 'Commission Earned: Order Delivered',
+        EMAIL_HEADER: 'Commission Earned!',
+        GREETING: `Hello ${affiliate.firstName},`,
+        COMMISSION_MESSAGE: 'Great news! You\'ve earned a commission for a completed order.',
+        COMMISSION_DETAILS_TITLE: 'Commission Details',
+        ORDER_ID_LABEL: 'Order ID',
+        CUSTOMER_LABEL: 'Customer',
+        ORDER_TOTAL_LABEL: 'Order Total',
+        YOUR_COMMISSION_LABEL: 'Your Commission',
+        VIEW_DASHBOARD_BUTTON: 'View Dashboard',
+        PAYOUT_MESSAGE: 'This commission will be included in your next payout. Keep up the great work!',
+        CLOSING_MESSAGE: 'Best regards,<br>The WaveMAX Laundry Team',
+        FOOTER_RIGHTS: 'All rights reserved.',
+        FOOTER_AUTOMATED_MESSAGE: 'This is an automated message. Please do not reply to this email.'
+      },
+      es: {
+        EMAIL_TITLE: 'Comisión Ganada: Pedido Entregado',
+        EMAIL_HEADER: '¡Comisión Ganada!',
+        GREETING: `Hola ${affiliate.firstName},`,
+        COMMISSION_MESSAGE: '¡Excelentes noticias! Ha ganado una comisión por un pedido completado.',
+        COMMISSION_DETAILS_TITLE: 'Detalles de la Comisión',
+        ORDER_ID_LABEL: 'ID del Pedido',
+        CUSTOMER_LABEL: 'Cliente',
+        ORDER_TOTAL_LABEL: 'Total del Pedido',
+        YOUR_COMMISSION_LABEL: 'Su Comisión',
+        VIEW_DASHBOARD_BUTTON: 'Ver Panel',
+        PAYOUT_MESSAGE: 'Esta comisión se incluirá en su próximo pago. ¡Siga con el excelente trabajo!',
+        CLOSING_MESSAGE: 'Saludos cordiales,<br>El Equipo de WaveMAX Laundry',
+        FOOTER_RIGHTS: 'Todos los derechos reservados.',
+        FOOTER_AUTOMATED_MESSAGE: 'Este es un mensaje automatizado. Por favor no responda a este correo.'
+      },
+      pt: {
+        EMAIL_TITLE: 'Comissão Ganha: Pedido Entregue',
+        EMAIL_HEADER: 'Comissão Ganha!',
+        GREETING: `Olá ${affiliate.firstName},`,
+        COMMISSION_MESSAGE: 'Ótimas notícias! Você ganhou uma comissão por um pedido concluído.',
+        COMMISSION_DETAILS_TITLE: 'Detalhes da Comissão',
+        ORDER_ID_LABEL: 'ID do Pedido',
+        CUSTOMER_LABEL: 'Cliente',
+        ORDER_TOTAL_LABEL: 'Total do Pedido',
+        YOUR_COMMISSION_LABEL: 'Sua Comissão',
+        VIEW_DASHBOARD_BUTTON: 'Ver Painel',
+        PAYOUT_MESSAGE: 'Esta comissão será incluída em seu próximo pagamento. Continue com o ótimo trabalho!',
+        CLOSING_MESSAGE: 'Atenciosamente,<br>A Equipe WaveMAX Laundry',
+        FOOTER_RIGHTS: 'Todos os direitos reservados.',
+        FOOTER_AUTOMATED_MESSAGE: 'Esta é uma mensagem automatizada. Por favor, não responda a este e-mail.'
+      },
+      de: {
+        EMAIL_TITLE: 'Provision verdient: Bestellung geliefert',
+        EMAIL_HEADER: 'Provision verdient!',
+        GREETING: `Hallo ${affiliate.firstName},`,
+        COMMISSION_MESSAGE: 'Großartige Neuigkeiten! Sie haben eine Provision für eine abgeschlossene Bestellung verdient.',
+        COMMISSION_DETAILS_TITLE: 'Provisionsdetails',
+        ORDER_ID_LABEL: 'Bestell-ID',
+        CUSTOMER_LABEL: 'Kunde',
+        ORDER_TOTAL_LABEL: 'Bestellsumme',
+        YOUR_COMMISSION_LABEL: 'Ihre Provision',
+        VIEW_DASHBOARD_BUTTON: 'Dashboard anzeigen',
+        PAYOUT_MESSAGE: 'Diese Provision wird in Ihre nächste Auszahlung aufgenommen. Machen Sie weiter so!',
+        CLOSING_MESSAGE: 'Mit freundlichen Grüßen,<br>Das WaveMAX Laundry Team',
+        FOOTER_RIGHTS: 'Alle Rechte vorbehalten.',
+        FOOTER_AUTOMATED_MESSAGE: 'Dies ist eine automatisierte Nachricht. Bitte antworten Sie nicht auf diese E-Mail.'
+      }
+    };
+
+    const emailTranslations = translations[language] || translations.en;
 
     const data = {
       affiliate_first_name: affiliate.firstName,
@@ -409,14 +690,24 @@ exports.sendAffiliateCommissionEmail = async (affiliate, order, customer) => {
       order_total: order.actualTotal ? `$${order.actualTotal.toFixed(2)}` : 'N/A',
       commission_amount: order.affiliateCommission ? `$${order.affiliateCommission.toFixed(2)}` : 'N/A',
       dashboard_url: 'https://www.wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program?login=affiliate',
-      current_year: new Date().getFullYear()
+      current_year: new Date().getFullYear(),
+      ...emailTranslations
     };
 
     const html = fillTemplate(template, data);
 
+    // Translate subject based on language
+    const subjects = {
+      en: 'Commission Earned: Order Delivered',
+      es: 'Comisión Ganada: Pedido Entregado',
+      pt: 'Comissão Ganha: Pedido Entregue',
+      de: 'Provision verdient: Bestellung geliefert'
+    };
+    const subject = subjects[language] || subjects.en;
+
     await sendEmail(
       affiliate.email,
-      'Commission Earned: Order Delivered',
+      subject,
       html
     );
   } catch (error) {
@@ -430,7 +721,82 @@ exports.sendAffiliateCommissionEmail = async (affiliate, order, customer) => {
  */
 exports.sendAffiliateOrderCancellationEmail = async (affiliate, order, customer) => {
   try {
-    const template = await loadTemplate('affiliate-order-cancelled');
+    const language = affiliate.languagePreference || 'en';
+    const template = await loadTemplate('affiliate-order-cancelled', language);
+
+    // Get translations for the email content
+    const translations = {
+      en: {
+        EMAIL_TITLE: 'Order Cancelled',
+        EMAIL_HEADER: 'Order Cancelled',
+        GREETING: `Hello ${affiliate.firstName},`,
+        CANCELLATION_MESSAGE: 'We wanted to inform you that an order has been cancelled.',
+        CANCELLATION_DETAILS_TITLE: 'Cancellation Details',
+        ORDER_ID_LABEL: 'Order ID',
+        CUSTOMER_LABEL: 'Customer',
+        ORIGINAL_PICKUP_DATE_LABEL: 'Original Pickup Date',
+        PICKUP_TIME_LABEL: 'Pickup Time',
+        CANCELLED_AT_LABEL: 'Cancelled At',
+        VIEW_DASHBOARD_BUTTON: 'View Dashboard',
+        DO_NOT_PROCEED_MESSAGE: 'Please do not proceed with this pickup. The customer may reschedule at a later time.',
+        CLOSING_MESSAGE: 'Best regards,<br>The WaveMAX Laundry Team',
+        FOOTER_RIGHTS: 'All rights reserved.',
+        FOOTER_AUTOMATED_MESSAGE: 'This is an automated message. Please do not reply to this email.'
+      },
+      es: {
+        EMAIL_TITLE: 'Pedido Cancelado',
+        EMAIL_HEADER: 'Pedido Cancelado',
+        GREETING: `Hola ${affiliate.firstName},`,
+        CANCELLATION_MESSAGE: 'Queremos informarle que un pedido ha sido cancelado.',
+        CANCELLATION_DETAILS_TITLE: 'Detalles de Cancelación',
+        ORDER_ID_LABEL: 'ID del Pedido',
+        CUSTOMER_LABEL: 'Cliente',
+        ORIGINAL_PICKUP_DATE_LABEL: 'Fecha Original de Recogida',
+        PICKUP_TIME_LABEL: 'Hora de Recogida',
+        CANCELLED_AT_LABEL: 'Cancelado a las',
+        VIEW_DASHBOARD_BUTTON: 'Ver Panel',
+        DO_NOT_PROCEED_MESSAGE: 'Por favor no proceda con esta recogida. El cliente puede reprogramar en otro momento.',
+        CLOSING_MESSAGE: 'Saludos cordiales,<br>El Equipo de WaveMAX Laundry',
+        FOOTER_RIGHTS: 'Todos los derechos reservados.',
+        FOOTER_AUTOMATED_MESSAGE: 'Este es un mensaje automatizado. Por favor no responda a este correo.'
+      },
+      pt: {
+        EMAIL_TITLE: 'Pedido Cancelado',
+        EMAIL_HEADER: 'Pedido Cancelado',
+        GREETING: `Olá ${affiliate.firstName},`,
+        CANCELLATION_MESSAGE: 'Gostaríamos de informar que um pedido foi cancelado.',
+        CANCELLATION_DETAILS_TITLE: 'Detalhes do Cancelamento',
+        ORDER_ID_LABEL: 'ID do Pedido',
+        CUSTOMER_LABEL: 'Cliente',
+        ORIGINAL_PICKUP_DATE_LABEL: 'Data Original de Coleta',
+        PICKUP_TIME_LABEL: 'Hora de Coleta',
+        CANCELLED_AT_LABEL: 'Cancelado às',
+        VIEW_DASHBOARD_BUTTON: 'Ver Painel',
+        DO_NOT_PROCEED_MESSAGE: 'Por favor, não prossiga com esta coleta. O cliente pode reagendar posteriormente.',
+        CLOSING_MESSAGE: 'Atenciosamente,<br>A Equipe WaveMAX Laundry',
+        FOOTER_RIGHTS: 'Todos os direitos reservados.',
+        FOOTER_AUTOMATED_MESSAGE: 'Esta é uma mensagem automatizada. Por favor, não responda a este e-mail.'
+      },
+      de: {
+        EMAIL_TITLE: 'Bestellung storniert',
+        EMAIL_HEADER: 'Bestellung storniert',
+        GREETING: `Hallo ${affiliate.firstName},`,
+        CANCELLATION_MESSAGE: 'Wir möchten Sie darüber informieren, dass eine Bestellung storniert wurde.',
+        CANCELLATION_DETAILS_TITLE: 'Stornierungsdetails',
+        ORDER_ID_LABEL: 'Bestell-ID',
+        CUSTOMER_LABEL: 'Kunde',
+        ORIGINAL_PICKUP_DATE_LABEL: 'Ursprüngliches Abholdatum',
+        PICKUP_TIME_LABEL: 'Abholzeit',
+        CANCELLED_AT_LABEL: 'Storniert um',
+        VIEW_DASHBOARD_BUTTON: 'Dashboard anzeigen',
+        DO_NOT_PROCEED_MESSAGE: 'Bitte fahren Sie nicht mit dieser Abholung fort. Der Kunde kann zu einem späteren Zeitpunkt neu planen.',
+        CLOSING_MESSAGE: 'Mit freundlichen Grüßen,<br>Das WaveMAX Laundry Team',
+        FOOTER_RIGHTS: 'Alle Rechte vorbehalten.',
+        FOOTER_AUTOMATED_MESSAGE: 'Dies ist eine automatisierte Nachricht. Bitte antworten Sie nicht auf diese E-Mail.'
+      }
+    };
+
+    const emailTranslations = translations[language] || translations.en;
 
     const data = {
       affiliate_first_name: affiliate.firstName,
@@ -440,14 +806,24 @@ exports.sendAffiliateOrderCancellationEmail = async (affiliate, order, customer)
       pickup_time: formatTimeSlot(order.pickupTime),
       cancellation_time: new Date().toLocaleTimeString(),
       dashboard_url: 'https://www.wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program?login=affiliate',
-      current_year: new Date().getFullYear()
+      current_year: new Date().getFullYear(),
+      ...emailTranslations
     };
 
     const html = fillTemplate(template, data);
 
+    // Translate subject based on language
+    const subjects = {
+      en: 'Order Cancelled',
+      es: 'Pedido Cancelado',
+      pt: 'Pedido Cancelado',
+      de: 'Bestellung storniert'
+    };
+    const subject = subjects[language] || subjects.en;
+
     await sendEmail(
       affiliate.email,
-      'Order Cancelled',
+      subject,
       html
     );
   } catch (error) {
@@ -510,6 +886,172 @@ exports.sendCustomerWelcomeEmail = async (customer, affiliate, bagInfo = {}) => 
     const bagFee = bagInfo.bagFee || 10.00;
     const totalCredit = bagInfo.totalCredit || (numberOfBags * bagFee);
 
+    // Get translations for the email content
+    const translations = {
+      en: {
+        EMAIL_TITLE: 'Welcome to WaveMAX Laundry Service',
+        EMAIL_HEADER: 'Welcome to WaveMAX Laundry!',
+        GREETING: `Hi ${customer.firstName},`,
+        WELCOME_MESSAGE: 'Welcome to WaveMAX Laundry Service! Your account has been successfully created and you\'re ready to enjoy premium wash, dry, fold laundry services.',
+        YOUR_INFO_TITLE: 'Your Account Information',
+        CUSTOMER_ID_LABEL: 'Customer ID',
+        SERVICE_PROVIDER_LABEL: 'Your Service Provider',
+        BAG_INFO_TITLE: 'Your Laundry Bag Credit',
+        BAG_INFO_MESSAGE: 'We\'ve credited your account with prepaid laundry bags. These bags will be delivered to you by your service provider.',
+        BAG_CREDIT_TITLE: 'Account Credit Details',
+        BAGS_PURCHASED_LABEL: 'Bags Purchased',
+        COST_PER_BAG_LABEL: 'Cost per Bag',
+        TOTAL_CREDIT_LABEL: 'Total Account Credit',
+        NOTE_LABEL: 'Note',
+        CREDIT_NOTE_MESSAGE: 'This credit will be automatically applied to your first orders. Each bag holds approximately 20-25 lbs of laundry.',
+        HOW_IT_WORKS_TITLE: 'How It Works',
+        STEP_1_TITLE: 'Schedule a Pickup',
+        STEP_1_DESC: 'Login to your dashboard and schedule a convenient pickup time.',
+        STEP_2_TITLE: 'Prepare Your Laundry',
+        STEP_2_DESC: 'Place your laundry in the provided bags. Your service provider will pick them up.',
+        STEP_3_TITLE: 'We Do the Rest',
+        STEP_3_DESC: 'Your laundry is professionally washed, dried, and folded at our facility.',
+        STEP_4_TITLE: 'Delivery to Your Door',
+        STEP_4_DESC: 'Your clean, fresh laundry is delivered back to you, usually within 24-48 hours.',
+        READY_TO_SCHEDULE_TITLE: 'Ready to Schedule Your First Pickup?',
+        READY_TO_SCHEDULE_MESSAGE: 'Click the button below to access your dashboard and schedule your first pickup.',
+        SCHEDULE_BUTTON: 'Schedule Pickup',
+        CREDIT_REMINDER: 'Remember: Your account has been credited for your prepaid bags!',
+        QUESTIONS_TITLE: 'Questions?',
+        QUESTIONS_MESSAGE: 'Your service provider is here to help! Feel free to reach out:',
+        NAME_LABEL: 'Name',
+        PHONE_LABEL: 'Phone',
+        EMAIL_LABEL: 'Email',
+        DASHBOARD_MESSAGE: 'Access your customer dashboard anytime to manage orders and track deliveries.',
+        DASHBOARD_BUTTON: 'Go to Dashboard',
+        FOOTER_SUPPORT: 'If you have any questions, please contact our support team.',
+        FOOTER_RIGHTS: 'All rights reserved.',
+        FOOTER_ADDRESS: '123 Main Street, Austin, TX 78701'
+      },
+      es: {
+        EMAIL_TITLE: 'Bienvenido al Servicio de Lavandería WaveMAX',
+        EMAIL_HEADER: '¡Bienvenido a WaveMAX Laundry!',
+        GREETING: `Hola ${customer.firstName},`,
+        WELCOME_MESSAGE: '¡Bienvenido al Servicio de Lavandería WaveMAX! Su cuenta ha sido creada exitosamente y está listo para disfrutar de servicios premium de lavado, secado y doblado.',
+        YOUR_INFO_TITLE: 'Información de Su Cuenta',
+        CUSTOMER_ID_LABEL: 'ID de Cliente',
+        SERVICE_PROVIDER_LABEL: 'Su Proveedor de Servicio',
+        BAG_INFO_TITLE: 'Su Crédito de Bolsas de Lavandería',
+        BAG_INFO_MESSAGE: 'Hemos acreditado su cuenta con bolsas de lavandería prepagadas. Estas bolsas serán entregadas por su proveedor de servicio.',
+        BAG_CREDIT_TITLE: 'Detalles del Crédito de Cuenta',
+        BAGS_PURCHASED_LABEL: 'Bolsas Compradas',
+        COST_PER_BAG_LABEL: 'Costo por Bolsa',
+        TOTAL_CREDIT_LABEL: 'Crédito Total de Cuenta',
+        NOTE_LABEL: 'Nota',
+        CREDIT_NOTE_MESSAGE: 'Este crédito se aplicará automáticamente a sus primeros pedidos. Cada bolsa contiene aproximadamente 20-25 libras de ropa.',
+        HOW_IT_WORKS_TITLE: 'Cómo Funciona',
+        STEP_1_TITLE: 'Programe una Recogida',
+        STEP_1_DESC: 'Inicie sesión en su panel y programe un horario conveniente de recogida.',
+        STEP_2_TITLE: 'Prepare Su Ropa',
+        STEP_2_DESC: 'Coloque su ropa en las bolsas proporcionadas. Su proveedor de servicio las recogerá.',
+        STEP_3_TITLE: 'Nosotros Hacemos el Resto',
+        STEP_3_DESC: 'Su ropa es lavada, secada y doblada profesionalmente en nuestras instalaciones.',
+        STEP_4_TITLE: 'Entrega a Su Puerta',
+        STEP_4_DESC: 'Su ropa limpia y fresca es entregada, generalmente dentro de 24-48 horas.',
+        READY_TO_SCHEDULE_TITLE: '¿Listo para Programar Su Primera Recogida?',
+        READY_TO_SCHEDULE_MESSAGE: 'Haga clic en el botón a continuación para acceder a su panel y programar su primera recogida.',
+        SCHEDULE_BUTTON: 'Programar Recogida',
+        CREDIT_REMINDER: '¡Recuerde: Su cuenta ha sido acreditada por sus bolsas prepagadas!',
+        QUESTIONS_TITLE: '¿Preguntas?',
+        QUESTIONS_MESSAGE: '¡Su proveedor de servicio está aquí para ayudar! No dude en contactar:',
+        NAME_LABEL: 'Nombre',
+        PHONE_LABEL: 'Teléfono',
+        EMAIL_LABEL: 'Correo',
+        DASHBOARD_MESSAGE: 'Acceda a su panel de cliente en cualquier momento para gestionar pedidos y rastrear entregas.',
+        DASHBOARD_BUTTON: 'Ir al Panel',
+        FOOTER_SUPPORT: 'Si tiene alguna pregunta, contacte a nuestro equipo de soporte.',
+        FOOTER_RIGHTS: 'Todos los derechos reservados.',
+        FOOTER_ADDRESS: '123 Main Street, Austin, TX 78701'
+      },
+      pt: {
+        EMAIL_TITLE: 'Bem-vindo ao Serviço de Lavanderia WaveMAX',
+        EMAIL_HEADER: 'Bem-vindo ao WaveMAX Laundry!',
+        GREETING: `Olá ${customer.firstName},`,
+        WELCOME_MESSAGE: 'Bem-vindo ao Serviço de Lavanderia WaveMAX! Sua conta foi criada com sucesso e você está pronto para desfrutar de serviços premium de lavar, secar e dobrar roupas.',
+        YOUR_INFO_TITLE: 'Informações da Sua Conta',
+        CUSTOMER_ID_LABEL: 'ID do Cliente',
+        SERVICE_PROVIDER_LABEL: 'Seu Provedor de Serviço',
+        BAG_INFO_TITLE: 'Seu Crédito de Sacolas de Lavanderia',
+        BAG_INFO_MESSAGE: 'Creditamos sua conta com sacolas de lavanderia pré-pagas. Estas sacolas serão entregues pelo seu provedor de serviço.',
+        BAG_CREDIT_TITLE: 'Detalhes do Crédito da Conta',
+        BAGS_PURCHASED_LABEL: 'Sacolas Compradas',
+        COST_PER_BAG_LABEL: 'Custo por Sacola',
+        TOTAL_CREDIT_LABEL: 'Crédito Total da Conta',
+        NOTE_LABEL: 'Nota',
+        CREDIT_NOTE_MESSAGE: 'Este crédito será aplicado automaticamente aos seus primeiros pedidos. Cada sacola comporta aproximadamente 20-25 libras de roupa.',
+        HOW_IT_WORKS_TITLE: 'Como Funciona',
+        STEP_1_TITLE: 'Agende uma Coleta',
+        STEP_1_DESC: 'Faça login no seu painel e agende um horário conveniente para coleta.',
+        STEP_2_TITLE: 'Prepare Sua Roupa',
+        STEP_2_DESC: 'Coloque sua roupa nas sacolas fornecidas. Seu provedor de serviço as coletará.',
+        STEP_3_TITLE: 'Nós Fazemos o Resto',
+        STEP_3_DESC: 'Sua roupa é lavada, seca e dobrada profissionalmente em nossas instalações.',
+        STEP_4_TITLE: 'Entrega em Sua Porta',
+        STEP_4_DESC: 'Sua roupa limpa e fresca é entregue, geralmente dentro de 24-48 horas.',
+        READY_TO_SCHEDULE_TITLE: 'Pronto para Agendar Sua Primeira Coleta?',
+        READY_TO_SCHEDULE_MESSAGE: 'Clique no botão abaixo para acessar seu painel e agendar sua primeira coleta.',
+        SCHEDULE_BUTTON: 'Agendar Coleta',
+        CREDIT_REMINDER: 'Lembre-se: Sua conta foi creditada pelas suas sacolas pré-pagas!',
+        QUESTIONS_TITLE: 'Dúvidas?',
+        QUESTIONS_MESSAGE: 'Seu provedor de serviço está aqui para ajudar! Sinta-se à vontade para entrar em contato:',
+        NAME_LABEL: 'Nome',
+        PHONE_LABEL: 'Telefone',
+        EMAIL_LABEL: 'E-mail',
+        DASHBOARD_MESSAGE: 'Acesse seu painel de cliente a qualquer momento para gerenciar pedidos e rastrear entregas.',
+        DASHBOARD_BUTTON: 'Ir para o Painel',
+        FOOTER_SUPPORT: 'Se você tiver alguma dúvida, entre em contato com nossa equipe de suporte.',
+        FOOTER_RIGHTS: 'Todos os direitos reservados.',
+        FOOTER_ADDRESS: '123 Main Street, Austin, TX 78701'
+      },
+      de: {
+        EMAIL_TITLE: 'Willkommen beim WaveMAX Wäscheservice',
+        EMAIL_HEADER: 'Willkommen bei WaveMAX Laundry!',
+        GREETING: `Hallo ${customer.firstName},`,
+        WELCOME_MESSAGE: 'Willkommen beim WaveMAX Wäscheservice! Ihr Konto wurde erfolgreich erstellt und Sie können nun Premium-Wasch-, Trocken- und Faltservice genießen.',
+        YOUR_INFO_TITLE: 'Ihre Kontoinformationen',
+        CUSTOMER_ID_LABEL: 'Kunden-ID',
+        SERVICE_PROVIDER_LABEL: 'Ihr Dienstleister',
+        BAG_INFO_TITLE: 'Ihr Wäschesack-Guthaben',
+        BAG_INFO_MESSAGE: 'Wir haben Ihrem Konto vorausbezahlte Wäschesäcke gutgeschrieben. Diese Säcke werden von Ihrem Dienstleister geliefert.',
+        BAG_CREDIT_TITLE: 'Kontoguthaben Details',
+        BAGS_PURCHASED_LABEL: 'Gekaufte Säcke',
+        COST_PER_BAG_LABEL: 'Kosten pro Sack',
+        TOTAL_CREDIT_LABEL: 'Gesamtguthaben',
+        NOTE_LABEL: 'Hinweis',
+        CREDIT_NOTE_MESSAGE: 'Dieses Guthaben wird automatisch auf Ihre ersten Bestellungen angewendet. Jeder Sack fasst etwa 20-25 Pfund Wäsche.',
+        HOW_IT_WORKS_TITLE: 'So funktioniert es',
+        STEP_1_TITLE: 'Abholung planen',
+        STEP_1_DESC: 'Melden Sie sich in Ihrem Dashboard an und planen Sie eine passende Abholzeit.',
+        STEP_2_TITLE: 'Wäsche vorbereiten',
+        STEP_2_DESC: 'Legen Sie Ihre Wäsche in die bereitgestellten Säcke. Ihr Dienstleister holt sie ab.',
+        STEP_3_TITLE: 'Wir erledigen den Rest',
+        STEP_3_DESC: 'Ihre Wäsche wird professionell in unserer Einrichtung gewaschen, getrocknet und gefaltet.',
+        STEP_4_TITLE: 'Lieferung an Ihre Tür',
+        STEP_4_DESC: 'Ihre saubere, frische Wäsche wird geliefert, normalerweise innerhalb von 24-48 Stunden.',
+        READY_TO_SCHEDULE_TITLE: 'Bereit, Ihre erste Abholung zu planen?',
+        READY_TO_SCHEDULE_MESSAGE: 'Klicken Sie auf den Button unten, um auf Ihr Dashboard zuzugreifen und Ihre erste Abholung zu planen.',
+        SCHEDULE_BUTTON: 'Abholung planen',
+        CREDIT_REMINDER: 'Denken Sie daran: Ihrem Konto wurden Ihre vorausbezahlten Säcke gutgeschrieben!',
+        QUESTIONS_TITLE: 'Fragen?',
+        QUESTIONS_MESSAGE: 'Ihr Dienstleister ist hier, um zu helfen! Zögern Sie nicht, Kontakt aufzunehmen:',
+        NAME_LABEL: 'Name',
+        PHONE_LABEL: 'Telefon',
+        EMAIL_LABEL: 'E-Mail',
+        DASHBOARD_MESSAGE: 'Greifen Sie jederzeit auf Ihr Kunden-Dashboard zu, um Bestellungen zu verwalten und Lieferungen zu verfolgen.',
+        DASHBOARD_BUTTON: 'Zum Dashboard',
+        FOOTER_SUPPORT: 'Bei Fragen wenden Sie sich bitte an unser Support-Team.',
+        FOOTER_RIGHTS: 'Alle Rechte vorbehalten.',
+        FOOTER_ADDRESS: '123 Main Street, Austin, TX 78701'
+      }
+    };
+
+    const emailTranslations = translations[language] || translations.en;
+
     const data = {
       first_name: customer.firstName || '',
       last_name: customer.lastName || '',
@@ -522,7 +1064,8 @@ exports.sendCustomerWelcomeEmail = async (customer, affiliate, bagInfo = {}) => 
       total_credit: totalCredit.toFixed(2),
       login_url: `https://www.wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program?login=customer`,
       schedule_url: `https://www.wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program?login=customer&pickup=true`,
-      current_year: new Date().getFullYear()
+      current_year: new Date().getFullYear(),
+      ...emailTranslations
     };
 
     const html = fillTemplate(template, data);
@@ -554,7 +1097,110 @@ exports.sendCustomerWelcomeEmail = async (customer, affiliate, bagInfo = {}) => 
  */
 exports.sendCustomerOrderConfirmationEmail = async (customer, order, affiliate) => {
   try {
-    const template = await loadTemplate('customer-order-confirmation');
+    const language = customer.languagePreference || 'en';
+    const template = await loadTemplate('customer-order-confirmation', language);
+
+    // Get translations for the email content
+    const translations = {
+      en: {
+        EMAIL_TITLE: 'Your Laundry Pickup Confirmation',
+        EMAIL_HEADER: 'Your Laundry Pickup is Confirmed!',
+        GREETING: `Hello ${customer.firstName},`,
+        CONFIRMATION_MESSAGE: 'Thank you for scheduling your laundry pickup with WaveMAX Laundry. Your order has been confirmed and your affiliate partner has been notified.',
+        ORDER_SUMMARY_TITLE: 'Order Summary',
+        ORDER_ID_LABEL: 'Order ID',
+        PICKUP_DATE_LABEL: 'Pickup Date',
+        PICKUP_TIME_LABEL: 'Pickup Time',
+        DELIVERY_DATE_LABEL: 'Delivery Date',
+        DELIVERY_TIME_LABEL: 'Delivery Time',
+        ESTIMATED_TOTAL_LABEL: 'Estimated Total',
+        AFFILIATE_INFO_TITLE: 'Your Affiliate Partner',
+        NAME_LABEL: 'Name',
+        PHONE_LABEL: 'Phone',
+        EMAIL_LABEL: 'Email',
+        VIEW_ORDER_BUTTON: 'Login to View Your Order',
+        WHAT_HAPPENS_NEXT_TITLE: 'What happens next?',
+        WHAT_HAPPENS_NEXT_LIST: '<ul><li>Your affiliate partner will arrive during your selected pickup window</li><li>Please have your laundry ready in bags</li><li>You\'ll receive updates as your order progresses</li><li>Final pricing will be based on the actual weight of your laundry</li></ul>',
+        CHANGE_ORDER_MESSAGE: 'If you need to make any changes to your order, please contact your affiliate partner directly.',
+        CLOSING_MESSAGE: 'Best regards,<br>The WaveMAX Laundry Team',
+        FOOTER_RIGHTS: 'All rights reserved.',
+        FOOTER_AUTOMATED_MESSAGE: 'This is an automated message. Please do not reply to this email.'
+      },
+      es: {
+        EMAIL_TITLE: 'Confirmación de Recogida de Lavandería',
+        EMAIL_HEADER: '¡Su Recogida de Lavandería está Confirmada!',
+        GREETING: `Hola ${customer.firstName},`,
+        CONFIRMATION_MESSAGE: 'Gracias por programar su recogida de lavandería con WaveMAX Laundry. Su pedido ha sido confirmado y su socio afiliado ha sido notificado.',
+        ORDER_SUMMARY_TITLE: 'Resumen del Pedido',
+        ORDER_ID_LABEL: 'ID del Pedido',
+        PICKUP_DATE_LABEL: 'Fecha de Recogida',
+        PICKUP_TIME_LABEL: 'Hora de Recogida',
+        DELIVERY_DATE_LABEL: 'Fecha de Entrega',
+        DELIVERY_TIME_LABEL: 'Hora de Entrega',
+        ESTIMATED_TOTAL_LABEL: 'Total Estimado',
+        AFFILIATE_INFO_TITLE: 'Su Socio Afiliado',
+        NAME_LABEL: 'Nombre',
+        PHONE_LABEL: 'Teléfono',
+        EMAIL_LABEL: 'Correo Electrónico',
+        VIEW_ORDER_BUTTON: 'Iniciar Sesión para Ver Su Pedido',
+        WHAT_HAPPENS_NEXT_TITLE: '¿Qué sucede a continuación?',
+        WHAT_HAPPENS_NEXT_LIST: '<ul><li>Su socio afiliado llegará durante su ventana de recogida seleccionada</li><li>Por favor tenga su ropa lista en bolsas</li><li>Recibirá actualizaciones mientras su pedido progresa</li><li>El precio final se basará en el peso real de su ropa</li></ul>',
+        CHANGE_ORDER_MESSAGE: 'Si necesita hacer cambios a su pedido, contacte directamente a su socio afiliado.',
+        CLOSING_MESSAGE: 'Saludos cordiales,<br>El Equipo de WaveMAX Laundry',
+        FOOTER_RIGHTS: 'Todos los derechos reservados.',
+        FOOTER_AUTOMATED_MESSAGE: 'Este es un mensaje automatizado. Por favor no responda a este correo.'
+      },
+      pt: {
+        EMAIL_TITLE: 'Confirmação de Coleta de Lavanderia',
+        EMAIL_HEADER: 'Sua Coleta de Lavanderia está Confirmada!',
+        GREETING: `Olá ${customer.firstName},`,
+        CONFIRMATION_MESSAGE: 'Obrigado por agendar sua coleta de lavanderia com WaveMAX Laundry. Seu pedido foi confirmado e seu parceiro afiliado foi notificado.',
+        ORDER_SUMMARY_TITLE: 'Resumo do Pedido',
+        ORDER_ID_LABEL: 'ID do Pedido',
+        PICKUP_DATE_LABEL: 'Data de Coleta',
+        PICKUP_TIME_LABEL: 'Hora de Coleta',
+        DELIVERY_DATE_LABEL: 'Data de Entrega',
+        DELIVERY_TIME_LABEL: 'Hora de Entrega',
+        ESTIMATED_TOTAL_LABEL: 'Total Estimado',
+        AFFILIATE_INFO_TITLE: 'Seu Parceiro Afiliado',
+        NAME_LABEL: 'Nome',
+        PHONE_LABEL: 'Telefone',
+        EMAIL_LABEL: 'E-mail',
+        VIEW_ORDER_BUTTON: 'Faça Login para Ver Seu Pedido',
+        WHAT_HAPPENS_NEXT_TITLE: 'O que acontece a seguir?',
+        WHAT_HAPPENS_NEXT_LIST: '<ul><li>Seu parceiro afiliado chegará durante sua janela de coleta selecionada</li><li>Por favor, tenha sua roupa pronta em sacolas</li><li>Você receberá atualizações conforme seu pedido progride</li><li>O preço final será baseado no peso real de sua roupa</li></ul>',
+        CHANGE_ORDER_MESSAGE: 'Se precisar fazer alterações em seu pedido, entre em contato diretamente com seu parceiro afiliado.',
+        CLOSING_MESSAGE: 'Atenciosamente,<br>A Equipe WaveMAX Laundry',
+        FOOTER_RIGHTS: 'Todos os direitos reservados.',
+        FOOTER_AUTOMATED_MESSAGE: 'Esta é uma mensagem automatizada. Por favor, não responda a este e-mail.'
+      },
+      de: {
+        EMAIL_TITLE: 'Ihre Wäscheabholung Bestätigung',
+        EMAIL_HEADER: 'Ihre Wäscheabholung ist bestätigt!',
+        GREETING: `Hallo ${customer.firstName},`,
+        CONFIRMATION_MESSAGE: 'Vielen Dank für die Terminbuchung Ihrer Wäscheabholung bei WaveMAX Laundry. Ihre Bestellung wurde bestätigt und Ihr Affiliate-Partner wurde benachrichtigt.',
+        ORDER_SUMMARY_TITLE: 'Bestellübersicht',
+        ORDER_ID_LABEL: 'Bestell-ID',
+        PICKUP_DATE_LABEL: 'Abholdatum',
+        PICKUP_TIME_LABEL: 'Abholzeit',
+        DELIVERY_DATE_LABEL: 'Lieferdatum',
+        DELIVERY_TIME_LABEL: 'Lieferzeit',
+        ESTIMATED_TOTAL_LABEL: 'Geschätzter Gesamtbetrag',
+        AFFILIATE_INFO_TITLE: 'Ihr Affiliate-Partner',
+        NAME_LABEL: 'Name',
+        PHONE_LABEL: 'Telefon',
+        EMAIL_LABEL: 'E-Mail',
+        VIEW_ORDER_BUTTON: 'Anmelden um Ihre Bestellung anzusehen',
+        WHAT_HAPPENS_NEXT_TITLE: 'Was passiert als nächstes?',
+        WHAT_HAPPENS_NEXT_LIST: '<ul><li>Ihr Affiliate-Partner kommt während Ihres gewählten Abholzeitfensters</li><li>Bitte haben Sie Ihre Wäsche in Säcken bereit</li><li>Sie erhalten Updates während Ihre Bestellung bearbeitet wird</li><li>Die endgültige Preisgestaltung basiert auf dem tatsächlichen Gewicht Ihrer Wäsche</li></ul>',
+        CHANGE_ORDER_MESSAGE: 'Wenn Sie Änderungen an Ihrer Bestellung vornehmen müssen, kontaktieren Sie bitte direkt Ihren Affiliate-Partner.',
+        CLOSING_MESSAGE: 'Mit freundlichen Grüßen,<br>Das WaveMAX Laundry Team',
+        FOOTER_RIGHTS: 'Alle Rechte vorbehalten.',
+        FOOTER_AUTOMATED_MESSAGE: 'Dies ist eine automatisierte Nachricht. Bitte antworten Sie nicht auf diese E-Mail.'
+      }
+    };
+
+    const emailTranslations = translations[language] || translations.en;
 
     const data = {
       first_name: customer.firstName,
@@ -568,14 +1214,24 @@ exports.sendCustomerOrderConfirmationEmail = async (customer, order, affiliate) 
       affiliate_phone: affiliate.phone,
       affiliate_email: affiliate.email,
       login_url: `https://www.wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program?login=customer`,
-      current_year: new Date().getFullYear()
+      current_year: new Date().getFullYear(),
+      ...emailTranslations
     };
 
     const html = fillTemplate(template, data);
 
+    // Translate subject based on language
+    const subjects = {
+      en: 'Your Laundry Pickup Confirmation',
+      es: 'Confirmación de Recogida de Lavandería',
+      pt: 'Confirmação de Coleta de Lavanderia',
+      de: 'Ihre Wäscheabholung Bestätigung'
+    };
+    const subject = subjects[language] || subjects.en;
+
     await sendEmail(
       customer.email,
-      'Your Laundry Pickup Confirmation',
+      subject,
       html
     );
   } catch (error) {
@@ -588,37 +1244,146 @@ exports.sendCustomerOrderConfirmationEmail = async (customer, order, affiliate) 
  */
 exports.sendOrderStatusUpdateEmail = async (customer, order, status) => {
   try {
-    const template = await loadTemplate('customer-order-status');
+    const language = customer.languagePreference || 'en';
+    const template = await loadTemplate('customer-order-status', language);
 
-    const statusMessages = {
-      picked_up: 'Your laundry has been picked up',
-      processing: 'Your laundry is being processed',
-      ready_for_delivery: 'Your laundry is ready for delivery',
-      delivered: 'Your laundry has been delivered'
+    // Get translations for the email content
+    const translations = {
+      en: {
+        EMAIL_TITLE: 'Order Status Update',
+        EMAIL_HEADER: 'Order Status Update',
+        GREETING: `Hello ${customer.firstName},`,
+        UPDATE_MESSAGE: 'We have an update on your laundry order!',
+        STATUS_UPDATE_TITLE: 'Status Update',
+        ORDER_ID_LABEL: 'Order ID',
+        STATUS_LABEL: 'Status',
+        VIEW_ORDER_BUTTON: 'View Order Details',
+        THANK_YOU_MESSAGE: 'Thank you for choosing WaveMAX Laundry!',
+        CLOSING_MESSAGE: 'Best regards,<br>The WaveMAX Laundry Team',
+        FOOTER_RIGHTS: 'All rights reserved.',
+        FOOTER_AUTOMATED_MESSAGE: 'This is an automated message. Please do not reply to this email.',
+        STATUS_MESSAGES: {
+          picked_up: 'Your laundry has been picked up',
+          processing: 'Your laundry is being processed',
+          ready_for_delivery: 'Your laundry is ready for delivery',
+          delivered: 'Your laundry has been delivered'
+        },
+        STATUS_TITLES: {
+          picked_up: 'Laundry Picked Up',
+          processing: 'Laundry Processing',
+          ready_for_delivery: 'Ready for Delivery',
+          delivered: 'Laundry Delivered'
+        }
+      },
+      es: {
+        EMAIL_TITLE: 'Actualización del Estado del Pedido',
+        EMAIL_HEADER: 'Actualización del Estado del Pedido',
+        GREETING: `Hola ${customer.firstName},`,
+        UPDATE_MESSAGE: '¡Tenemos una actualización sobre su pedido de lavandería!',
+        STATUS_UPDATE_TITLE: 'Actualización de Estado',
+        ORDER_ID_LABEL: 'ID del Pedido',
+        STATUS_LABEL: 'Estado',
+        VIEW_ORDER_BUTTON: 'Ver Detalles del Pedido',
+        THANK_YOU_MESSAGE: '¡Gracias por elegir WaveMAX Laundry!',
+        CLOSING_MESSAGE: 'Saludos cordiales,<br>El Equipo de WaveMAX Laundry',
+        FOOTER_RIGHTS: 'Todos los derechos reservados.',
+        FOOTER_AUTOMATED_MESSAGE: 'Este es un mensaje automatizado. Por favor no responda a este correo.',
+        STATUS_MESSAGES: {
+          picked_up: 'Su ropa ha sido recogida',
+          processing: 'Su ropa está siendo procesada',
+          ready_for_delivery: 'Su ropa está lista para entrega',
+          delivered: 'Su ropa ha sido entregada'
+        },
+        STATUS_TITLES: {
+          picked_up: 'Ropa Recogida',
+          processing: 'Procesando Ropa',
+          ready_for_delivery: 'Lista para Entrega',
+          delivered: 'Ropa Entregada'
+        }
+      },
+      pt: {
+        EMAIL_TITLE: 'Atualização do Status do Pedido',
+        EMAIL_HEADER: 'Atualização do Status do Pedido',
+        GREETING: `Olá ${customer.firstName},`,
+        UPDATE_MESSAGE: 'Temos uma atualização sobre seu pedido de lavanderia!',
+        STATUS_UPDATE_TITLE: 'Atualização de Status',
+        ORDER_ID_LABEL: 'ID do Pedido',
+        STATUS_LABEL: 'Status',
+        VIEW_ORDER_BUTTON: 'Ver Detalhes do Pedido',
+        THANK_YOU_MESSAGE: 'Obrigado por escolher WaveMAX Laundry!',
+        CLOSING_MESSAGE: 'Atenciosamente,<br>A Equipe WaveMAX Laundry',
+        FOOTER_RIGHTS: 'Todos os direitos reservados.',
+        FOOTER_AUTOMATED_MESSAGE: 'Esta é uma mensagem automatizada. Por favor, não responda a este e-mail.',
+        STATUS_MESSAGES: {
+          picked_up: 'Sua roupa foi coletada',
+          processing: 'Sua roupa está sendo processada',
+          ready_for_delivery: 'Sua roupa está pronta para entrega',
+          delivered: 'Sua roupa foi entregue'
+        },
+        STATUS_TITLES: {
+          picked_up: 'Roupa Coletada',
+          processing: 'Processando Roupa',
+          ready_for_delivery: 'Pronta para Entrega',
+          delivered: 'Roupa Entregue'
+        }
+      },
+      de: {
+        EMAIL_TITLE: 'Bestellstatus-Update',
+        EMAIL_HEADER: 'Bestellstatus-Update',
+        GREETING: `Hallo ${customer.firstName},`,
+        UPDATE_MESSAGE: 'Wir haben ein Update zu Ihrer Wäschebestellung!',
+        STATUS_UPDATE_TITLE: 'Status-Update',
+        ORDER_ID_LABEL: 'Bestell-ID',
+        STATUS_LABEL: 'Status',
+        VIEW_ORDER_BUTTON: 'Bestelldetails anzeigen',
+        THANK_YOU_MESSAGE: 'Vielen Dank, dass Sie sich für WaveMAX Laundry entschieden haben!',
+        CLOSING_MESSAGE: 'Mit freundlichen Grüßen,<br>Das WaveMAX Laundry Team',
+        FOOTER_RIGHTS: 'Alle Rechte vorbehalten.',
+        FOOTER_AUTOMATED_MESSAGE: 'Dies ist eine automatisierte Nachricht. Bitte antworten Sie nicht auf diese E-Mail.',
+        STATUS_MESSAGES: {
+          picked_up: 'Ihre Wäsche wurde abgeholt',
+          processing: 'Ihre Wäsche wird bearbeitet',
+          ready_for_delivery: 'Ihre Wäsche ist bereit zur Lieferung',
+          delivered: 'Ihre Wäsche wurde geliefert'
+        },
+        STATUS_TITLES: {
+          picked_up: 'Wäsche abgeholt',
+          processing: 'Wäsche in Bearbeitung',
+          ready_for_delivery: 'Bereit zur Lieferung',
+          delivered: 'Wäsche geliefert'
+        }
+      }
     };
 
-    const statusTitles = {
-      picked_up: 'Laundry Picked Up',
-      processing: 'Laundry Processing',
-      ready_for_delivery: 'Ready for Delivery',
-      delivered: 'Laundry Delivered'
-    };
+    const emailTranslations = translations[language] || translations.en;
+    const statusMessages = emailTranslations.STATUS_MESSAGES;
+    const statusTitles = emailTranslations.STATUS_TITLES;
 
     const data = {
       first_name: customer.firstName,
       order_id: order.orderId,
       status_message: statusMessages[status],
-      weight_info: order.actualWeight ? `Your laundry weighs ${order.actualWeight} lbs.` : '',
-      total_info: order.actualTotal ? `Final total: $${order.actualTotal.toFixed(2)}` : '',
+      weight_info: order.actualWeight ? `<div class="detail-row"><span class="detail-label">${language === 'es' ? 'Peso' : language === 'pt' ? 'Peso' : language === 'de' ? 'Gewicht' : 'Weight'}:</span> ${order.actualWeight} lbs</div>` : '',
+      total_info: order.actualTotal ? `<div class="detail-row"><span class="detail-label">${language === 'es' ? 'Total Final' : language === 'pt' ? 'Total Final' : language === 'de' ? 'Endgültiger Betrag' : 'Final Total'}:</span> $${order.actualTotal.toFixed(2)}</div>` : '',
       dashboard_url: `https://www.wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program?login=customer`,
-      current_year: new Date().getFullYear()
+      current_year: new Date().getFullYear(),
+      ...emailTranslations
     };
 
     const html = fillTemplate(template, data);
 
+    // Translate subject based on language
+    const subjectPrefix = {
+      en: 'Order Update',
+      es: 'Actualización del Pedido',
+      pt: 'Atualização do Pedido',
+      de: 'Bestellaktualisierung'
+    };
+    const subject = `${subjectPrefix[language] || subjectPrefix.en}: ${statusTitles[status]}`;
+
     await sendEmail(
       customer.email,
-      `Order Update: ${statusTitles[status]}`,
+      subject,
       html
     );
   } catch (error) {
@@ -631,7 +1396,82 @@ exports.sendOrderStatusUpdateEmail = async (customer, order, status) => {
  */
 exports.sendOrderCancellationEmail = async (customer, order) => {
   try {
-    const template = await loadTemplate('customer-order-cancelled');
+    const language = customer.languagePreference || 'en';
+    const template = await loadTemplate('customer-order-cancelled', language);
+
+    // Get translations for the email content
+    const translations = {
+      en: {
+        EMAIL_TITLE: 'Your Order Has Been Cancelled',
+        EMAIL_HEADER: 'Order Cancelled',
+        GREETING: `Hello ${customer.firstName},`,
+        CANCELLATION_MESSAGE: 'Your laundry pickup order has been cancelled.',
+        CANCELLATION_DETAILS_TITLE: 'Cancellation Details',
+        ORDER_ID_LABEL: 'Order ID',
+        ORIGINAL_PICKUP_DATE_LABEL: 'Original Pickup Date',
+        CANCELLED_AT_LABEL: 'Cancelled At',
+        RESCHEDULE_MESSAGE: 'If you\'d like to schedule a new pickup, you can do so at any time:',
+        SCHEDULE_BUTTON: 'Schedule New Pickup',
+        VIEW_DASHBOARD_LINK: 'View Your Dashboard',
+        APOLOGY_MESSAGE: 'We\'re sorry for any inconvenience. If you have any questions, please contact your affiliate partner.',
+        CLOSING_MESSAGE: 'Best regards,<br>The WaveMAX Laundry Team',
+        FOOTER_RIGHTS: 'All rights reserved.',
+        FOOTER_AUTOMATED_MESSAGE: 'This is an automated message. Please do not reply to this email.'
+      },
+      es: {
+        EMAIL_TITLE: 'Su Pedido Ha Sido Cancelado',
+        EMAIL_HEADER: 'Pedido Cancelado',
+        GREETING: `Hola ${customer.firstName},`,
+        CANCELLATION_MESSAGE: 'Su pedido de recogida de lavandería ha sido cancelado.',
+        CANCELLATION_DETAILS_TITLE: 'Detalles de Cancelación',
+        ORDER_ID_LABEL: 'ID del Pedido',
+        ORIGINAL_PICKUP_DATE_LABEL: 'Fecha Original de Recogida',
+        CANCELLED_AT_LABEL: 'Cancelado a las',
+        RESCHEDULE_MESSAGE: 'Si desea programar una nueva recogida, puede hacerlo en cualquier momento:',
+        SCHEDULE_BUTTON: 'Programar Nueva Recogida',
+        VIEW_DASHBOARD_LINK: 'Ver Su Panel',
+        APOLOGY_MESSAGE: 'Lamentamos cualquier inconveniente. Si tiene preguntas, contacte a su socio afiliado.',
+        CLOSING_MESSAGE: 'Saludos cordiales,<br>El Equipo de WaveMAX Laundry',
+        FOOTER_RIGHTS: 'Todos los derechos reservados.',
+        FOOTER_AUTOMATED_MESSAGE: 'Este es un mensaje automatizado. Por favor no responda a este correo.'
+      },
+      pt: {
+        EMAIL_TITLE: 'Seu Pedido Foi Cancelado',
+        EMAIL_HEADER: 'Pedido Cancelado',
+        GREETING: `Olá ${customer.firstName},`,
+        CANCELLATION_MESSAGE: 'Seu pedido de coleta de lavanderia foi cancelado.',
+        CANCELLATION_DETAILS_TITLE: 'Detalhes do Cancelamento',
+        ORDER_ID_LABEL: 'ID do Pedido',
+        ORIGINAL_PICKUP_DATE_LABEL: 'Data Original de Coleta',
+        CANCELLED_AT_LABEL: 'Cancelado às',
+        RESCHEDULE_MESSAGE: 'Se você gostaria de agendar uma nova coleta, pode fazê-lo a qualquer momento:',
+        SCHEDULE_BUTTON: 'Agendar Nova Coleta',
+        VIEW_DASHBOARD_LINK: 'Ver Seu Painel',
+        APOLOGY_MESSAGE: 'Pedimos desculpas por qualquer inconveniente. Se tiver dúvidas, entre em contato com seu parceiro afiliado.',
+        CLOSING_MESSAGE: 'Atenciosamente,<br>A Equipe WaveMAX Laundry',
+        FOOTER_RIGHTS: 'Todos os direitos reservados.',
+        FOOTER_AUTOMATED_MESSAGE: 'Esta é uma mensagem automatizada. Por favor, não responda a este e-mail.'
+      },
+      de: {
+        EMAIL_TITLE: 'Ihre Bestellung wurde storniert',
+        EMAIL_HEADER: 'Bestellung storniert',
+        GREETING: `Hallo ${customer.firstName},`,
+        CANCELLATION_MESSAGE: 'Ihre Wäscheabholung wurde storniert.',
+        CANCELLATION_DETAILS_TITLE: 'Stornierungsdetails',
+        ORDER_ID_LABEL: 'Bestell-ID',
+        ORIGINAL_PICKUP_DATE_LABEL: 'Ursprüngliches Abholdatum',
+        CANCELLED_AT_LABEL: 'Storniert um',
+        RESCHEDULE_MESSAGE: 'Wenn Sie eine neue Abholung planen möchten, können Sie dies jederzeit tun:',
+        SCHEDULE_BUTTON: 'Neue Abholung planen',
+        VIEW_DASHBOARD_LINK: 'Ihr Dashboard anzeigen',
+        APOLOGY_MESSAGE: 'Wir entschuldigen uns für etwaige Unannehmlichkeiten. Bei Fragen kontaktieren Sie bitte Ihren Affiliate-Partner.',
+        CLOSING_MESSAGE: 'Mit freundlichen Grüßen,<br>Das WaveMAX Laundry Team',
+        FOOTER_RIGHTS: 'Alle Rechte vorbehalten.',
+        FOOTER_AUTOMATED_MESSAGE: 'Dies ist eine automatisierte Nachricht. Bitte antworten Sie nicht auf diese E-Mail.'
+      }
+    };
+
+    const emailTranslations = translations[language] || translations.en;
 
     const data = {
       first_name: customer.firstName,
@@ -640,14 +1480,24 @@ exports.sendOrderCancellationEmail = async (customer, order) => {
       cancellation_time: new Date().toLocaleTimeString(),
       dashboard_url: `https://www.wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program?login=customer`,
       schedule_url: `https://www.wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program?login=customer&pickup=true`,
-      current_year: new Date().getFullYear()
+      current_year: new Date().getFullYear(),
+      ...emailTranslations
     };
 
     const html = fillTemplate(template, data);
 
+    // Translate subject based on language
+    const subjects = {
+      en: 'Your Order Has Been Cancelled',
+      es: 'Su Pedido Ha Sido Cancelado',
+      pt: 'Seu Pedido Foi Cancelado',
+      de: 'Ihre Bestellung wurde storniert'
+    };
+    const subject = subjects[language] || subjects.en;
+
     await sendEmail(
       customer.email,
-      'Your Order Has Been Cancelled',
+      subject,
       html
     );
   } catch (error) {
@@ -691,7 +1541,86 @@ exports.sendCustomerPasswordResetEmail = async (customer, resetUrl) => {
  */
 exports.sendAdministratorWelcomeEmail = async (administrator) => {
   try {
-    const template = await loadTemplate('administrator-welcome');
+    const language = administrator.languagePreference || 'en';
+    const template = await loadTemplate('administrator-welcome', language);
+
+    // Get translations for the email content
+    const translations = {
+      en: {
+        EMAIL_TITLE: 'Welcome to WaveMAX Administrator Portal',
+        EMAIL_HEADER: 'WaveMAX Administrator Portal',
+        EMAIL_SUBHEADER: 'Welcome to the Management Team',
+        GREETING: `Welcome, ${administrator.firstName}!`,
+        WELCOME_MESSAGE: 'Your administrator account has been successfully created. You now have access to the WaveMAX Administrator Portal where you can manage operators, view analytics, and configure system settings.',
+        ADMIN_ID_LABEL: 'Administrator ID',
+        EMAIL_LABEL: 'Email',
+        ACCOUNT_STATUS_LABEL: 'Account Status',
+        ACCOUNT_STATUS: 'Active',
+        PERMISSIONS_TITLE: 'Your Permissions',
+        ACCESS_BUTTON: 'Access Admin Portal',
+        SECURITY_REMINDER_TITLE: 'Security Reminder',
+        SECURITY_REMINDER_TEXT: '• Use a strong password and change it regularly<br>• Never share your login credentials<br>• Always log out when finished<br>• Report any suspicious activity immediately',
+        SUPPORT_MESSAGE: 'If you have any questions or need assistance, please contact the system administrator.',
+        FOOTER_RIGHTS: 'All rights reserved.',
+        FOOTER_SECURITY_NOTE: 'This is a secure administrator account notification.'
+      },
+      es: {
+        EMAIL_TITLE: 'Bienvenido al Portal de Administrador WaveMAX',
+        EMAIL_HEADER: 'Portal de Administrador WaveMAX',
+        EMAIL_SUBHEADER: 'Bienvenido al Equipo de Gestión',
+        GREETING: `¡Bienvenido, ${administrator.firstName}!`,
+        WELCOME_MESSAGE: 'Su cuenta de administrador ha sido creada exitosamente. Ahora tiene acceso al Portal de Administrador WaveMAX donde puede gestionar operadores, ver análisis y configurar ajustes del sistema.',
+        ADMIN_ID_LABEL: 'ID de Administrador',
+        EMAIL_LABEL: 'Correo Electrónico',
+        ACCOUNT_STATUS_LABEL: 'Estado de Cuenta',
+        ACCOUNT_STATUS: 'Activa',
+        PERMISSIONS_TITLE: 'Sus Permisos',
+        ACCESS_BUTTON: 'Acceder al Portal Admin',
+        SECURITY_REMINDER_TITLE: 'Recordatorio de Seguridad',
+        SECURITY_REMINDER_TEXT: '• Use una contraseña fuerte y cámbiela regularmente<br>• Nunca comparta sus credenciales de acceso<br>• Siempre cierre sesión cuando termine<br>• Reporte cualquier actividad sospechosa inmediatamente',
+        SUPPORT_MESSAGE: 'Si tiene alguna pregunta o necesita asistencia, contacte al administrador del sistema.',
+        FOOTER_RIGHTS: 'Todos los derechos reservados.',
+        FOOTER_SECURITY_NOTE: 'Esta es una notificación segura de cuenta de administrador.'
+      },
+      pt: {
+        EMAIL_TITLE: 'Bem-vindo ao Portal de Administrador WaveMAX',
+        EMAIL_HEADER: 'Portal de Administrador WaveMAX',
+        EMAIL_SUBHEADER: 'Bem-vindo à Equipe de Gestão',
+        GREETING: `Bem-vindo, ${administrator.firstName}!`,
+        WELCOME_MESSAGE: 'Sua conta de administrador foi criada com sucesso. Agora você tem acesso ao Portal de Administrador WaveMAX onde pode gerenciar operadores, visualizar análises e configurar configurações do sistema.',
+        ADMIN_ID_LABEL: 'ID de Administrador',
+        EMAIL_LABEL: 'E-mail',
+        ACCOUNT_STATUS_LABEL: 'Status da Conta',
+        ACCOUNT_STATUS: 'Ativa',
+        PERMISSIONS_TITLE: 'Suas Permissões',
+        ACCESS_BUTTON: 'Acessar Portal Admin',
+        SECURITY_REMINDER_TITLE: 'Lembrete de Segurança',
+        SECURITY_REMINDER_TEXT: '• Use uma senha forte e mude-a regularmente<br>• Nunca compartilhe suas credenciais de login<br>• Sempre faça logout quando terminar<br>• Relate qualquer atividade suspeita imediatamente',
+        SUPPORT_MESSAGE: 'Se você tiver alguma dúvida ou precisar de assistência, entre em contato com o administrador do sistema.',
+        FOOTER_RIGHTS: 'Todos os direitos reservados.',
+        FOOTER_SECURITY_NOTE: 'Esta é uma notificação segura de conta de administrador.'
+      },
+      de: {
+        EMAIL_TITLE: 'Willkommen beim WaveMAX Administrator-Portal',
+        EMAIL_HEADER: 'WaveMAX Administrator-Portal',
+        EMAIL_SUBHEADER: 'Willkommen im Verwaltungsteam',
+        GREETING: `Willkommen, ${administrator.firstName}!`,
+        WELCOME_MESSAGE: 'Ihr Administratorkonto wurde erfolgreich erstellt. Sie haben jetzt Zugriff auf das WaveMAX Administrator-Portal, wo Sie Betreiber verwalten, Analysen anzeigen und Systemeinstellungen konfigurieren können.',
+        ADMIN_ID_LABEL: 'Administrator-ID',
+        EMAIL_LABEL: 'E-Mail',
+        ACCOUNT_STATUS_LABEL: 'Kontostatus',
+        ACCOUNT_STATUS: 'Aktiv',
+        PERMISSIONS_TITLE: 'Ihre Berechtigungen',
+        ACCESS_BUTTON: 'Admin-Portal aufrufen',
+        SECURITY_REMINDER_TITLE: 'Sicherheitserinnerung',
+        SECURITY_REMINDER_TEXT: '• Verwenden Sie ein starkes Passwort und ändern Sie es regelmäßig<br>• Teilen Sie niemals Ihre Anmeldedaten<br>• Melden Sie sich immer ab, wenn Sie fertig sind<br>• Melden Sie verdächtige Aktivitäten sofort',
+        SUPPORT_MESSAGE: 'Bei Fragen oder wenn Sie Hilfe benötigen, wenden Sie sich bitte an den Systemadministrator.',
+        FOOTER_RIGHTS: 'Alle Rechte vorbehalten.',
+        FOOTER_SECURITY_NOTE: 'Dies ist eine sichere Administratorkonto-Benachrichtigung.'
+      }
+    };
+
+    const emailTranslations = translations[language] || translations.en;
 
     const data = {
       FIRST_NAME: administrator.firstName,
@@ -700,14 +1629,24 @@ exports.sendAdministratorWelcomeEmail = async (administrator) => {
       EMAIL: administrator.email,
       LOGIN_URL: `${process.env.BASE_URL || 'https://wavemax.promo'}/embed-app.html?login=admin`,
       PERMISSIONS: administrator.permissions.join(', '),
-      CURRENT_YEAR: new Date().getFullYear()
+      CURRENT_YEAR: new Date().getFullYear(),
+      ...emailTranslations
     };
 
     const html = fillTemplate(template, data);
 
+    // Translate subject based on language
+    const subjects = {
+      en: 'Welcome to WaveMAX Administrator Portal',
+      es: 'Bienvenido al Portal de Administrador WaveMAX',
+      pt: 'Bem-vindo ao Portal de Administrador WaveMAX',
+      de: 'Willkommen beim WaveMAX Administrator-Portal'
+    };
+    const subject = subjects[language] || subjects.en;
+
     await sendEmail(
       administrator.email,
-      'Welcome to WaveMAX Administrator Portal',
+      subject,
       html
     );
   } catch (error) {
@@ -751,7 +1690,90 @@ exports.sendAdministratorPasswordResetEmail = async (administrator, resetUrl) =>
  */
 exports.sendOperatorWelcomeEmail = async (operator, temporaryPin) => {
   try {
-    const template = await loadTemplate('operator-welcome');
+    const language = operator.languagePreference || 'en';
+    const template = await loadTemplate('operator-welcome', language);
+
+    // Get translations for the email content
+    const translations = {
+      en: {
+        EMAIL_TITLE: 'Welcome to WaveMAX Operations Team',
+        EMAIL_HEADER: 'Welcome to WaveMAX Operations',
+        EMAIL_SUBHEADER: 'Your Operator Account is Ready',
+        GREETING: `Welcome aboard, ${operator.firstName}!`,
+        WELCOME_MESSAGE: 'We\'re excited to have you join the WaveMAX operations team. Your operator account has been created and you\'re ready to start processing orders.',
+        CREDENTIALS_TITLE: 'Your Login Credentials',
+        EMPLOYEE_ID_LABEL: 'Employee ID',
+        TEMPORARY_PIN_LABEL: 'Temporary PIN',
+        EMAIL_LABEL: 'Email',
+        SHIFT_HOURS_LABEL: 'Shift Hours',
+        SPECIALIZATIONS_LABEL: 'Specializations',
+        LOGIN_BUTTON: 'Login to Operator Portal',
+        IMPORTANT_INFO_TITLE: 'Important Information',
+        IMPORTANT_INFO_LIST: '<ul><li>Change your PIN on first login</li><li>You can only login during your assigned shift hours</li><li>Keep your PIN confidential - never share it with anyone</li><li>Clock in at the start of your shift and clock out when finished</li><li>Contact your supervisor if you have any questions</li></ul>',
+        SUPPORT_MESSAGE: 'If you need assistance or have questions about your account, please contact your supervisor or the administrator.',
+        FOOTER_RIGHTS: 'All rights reserved.',
+        FOOTER_SECURITY_NOTE: 'This email contains confidential login information. Please keep it secure.'
+      },
+      es: {
+        EMAIL_TITLE: 'Bienvenido al Equipo de Operaciones WaveMAX',
+        EMAIL_HEADER: 'Bienvenido a Operaciones WaveMAX',
+        EMAIL_SUBHEADER: 'Su Cuenta de Operador está Lista',
+        GREETING: `¡Bienvenido a bordo, ${operator.firstName}!`,
+        WELCOME_MESSAGE: 'Estamos emocionados de que se una al equipo de operaciones WaveMAX. Su cuenta de operador ha sido creada y está listo para comenzar a procesar pedidos.',
+        CREDENTIALS_TITLE: 'Sus Credenciales de Acceso',
+        EMPLOYEE_ID_LABEL: 'ID de Empleado',
+        TEMPORARY_PIN_LABEL: 'PIN Temporal',
+        EMAIL_LABEL: 'Correo Electrónico',
+        SHIFT_HOURS_LABEL: 'Horario de Turno',
+        SPECIALIZATIONS_LABEL: 'Especializaciones',
+        LOGIN_BUTTON: 'Ingresar al Portal de Operador',
+        IMPORTANT_INFO_TITLE: 'Información Importante',
+        IMPORTANT_INFO_LIST: '<ul><li>Cambie su PIN en el primer inicio de sesión</li><li>Solo puede iniciar sesión durante sus horas de turno asignadas</li><li>Mantenga su PIN confidencial - nunca lo comparta con nadie</li><li>Registre su entrada al inicio de su turno y su salida al finalizar</li><li>Contacte a su supervisor si tiene alguna pregunta</li></ul>',
+        SUPPORT_MESSAGE: 'Si necesita asistencia o tiene preguntas sobre su cuenta, contacte a su supervisor o al administrador.',
+        FOOTER_RIGHTS: 'Todos los derechos reservados.',
+        FOOTER_SECURITY_NOTE: 'Este correo contiene información de acceso confidencial. Por favor manténgala segura.'
+      },
+      pt: {
+        EMAIL_TITLE: 'Bem-vindo à Equipe de Operações WaveMAX',
+        EMAIL_HEADER: 'Bem-vindo às Operações WaveMAX',
+        EMAIL_SUBHEADER: 'Sua Conta de Operador está Pronta',
+        GREETING: `Bem-vindo a bordo, ${operator.firstName}!`,
+        WELCOME_MESSAGE: 'Estamos animados em tê-lo na equipe de operações WaveMAX. Sua conta de operador foi criada e você está pronto para começar a processar pedidos.',
+        CREDENTIALS_TITLE: 'Suas Credenciais de Login',
+        EMPLOYEE_ID_LABEL: 'ID do Funcionário',
+        TEMPORARY_PIN_LABEL: 'PIN Temporário',
+        EMAIL_LABEL: 'E-mail',
+        SHIFT_HOURS_LABEL: 'Horário do Turno',
+        SPECIALIZATIONS_LABEL: 'Especializações',
+        LOGIN_BUTTON: 'Entrar no Portal do Operador',
+        IMPORTANT_INFO_TITLE: 'Informações Importantes',
+        IMPORTANT_INFO_LIST: '<ul><li>Mude seu PIN no primeiro login</li><li>Você só pode fazer login durante seus horários de turno atribuídos</li><li>Mantenha seu PIN confidencial - nunca o compartilhe com ninguém</li><li>Registre entrada no início do seu turno e saída quando terminar</li><li>Entre em contato com seu supervisor se tiver alguma dúvida</li></ul>',
+        SUPPORT_MESSAGE: 'Se precisar de assistência ou tiver dúvidas sobre sua conta, entre em contato com seu supervisor ou o administrador.',
+        FOOTER_RIGHTS: 'Todos os direitos reservados.',
+        FOOTER_SECURITY_NOTE: 'Este e-mail contém informações de login confidenciais. Por favor, mantenha-o seguro.'
+      },
+      de: {
+        EMAIL_TITLE: 'Willkommen beim WaveMAX Operations Team',
+        EMAIL_HEADER: 'Willkommen bei WaveMAX Operations',
+        EMAIL_SUBHEADER: 'Ihr Betreiberkonto ist bereit',
+        GREETING: `Willkommen an Bord, ${operator.firstName}!`,
+        WELCOME_MESSAGE: 'Wir freuen uns, Sie im WaveMAX Operations Team begrüßen zu dürfen. Ihr Betreiberkonto wurde erstellt und Sie können mit der Bearbeitung von Aufträgen beginnen.',
+        CREDENTIALS_TITLE: 'Ihre Anmeldedaten',
+        EMPLOYEE_ID_LABEL: 'Mitarbeiter-ID',
+        TEMPORARY_PIN_LABEL: 'Temporäre PIN',
+        EMAIL_LABEL: 'E-Mail',
+        SHIFT_HOURS_LABEL: 'Schichtzeiten',
+        SPECIALIZATIONS_LABEL: 'Spezialisierungen',
+        LOGIN_BUTTON: 'Zum Betreiberportal anmelden',
+        IMPORTANT_INFO_TITLE: 'Wichtige Informationen',
+        IMPORTANT_INFO_LIST: '<ul><li>Ändern Sie Ihre PIN bei der ersten Anmeldung</li><li>Sie können sich nur während Ihrer zugewiesenen Schichtzeiten anmelden</li><li>Halten Sie Ihre PIN vertraulich - teilen Sie sie niemals mit anderen</li><li>Stempeln Sie zu Beginn Ihrer Schicht ein und am Ende aus</li><li>Kontaktieren Sie Ihren Vorgesetzten bei Fragen</li></ul>',
+        SUPPORT_MESSAGE: 'Wenn Sie Hilfe benötigen oder Fragen zu Ihrem Konto haben, wenden Sie sich bitte an Ihren Vorgesetzten oder den Administrator.',
+        FOOTER_RIGHTS: 'Alle Rechte vorbehalten.',
+        FOOTER_SECURITY_NOTE: 'Diese E-Mail enthält vertrauliche Anmeldeinformationen. Bitte bewahren Sie sie sicher auf.'
+      }
+    };
+
+    const emailTranslations = translations[language] || translations.en;
 
     const data = {
       first_name: operator.firstName,
@@ -762,14 +1784,24 @@ exports.sendOperatorWelcomeEmail = async (operator, temporaryPin) => {
       shift_hours: `${operator.shiftStart} - ${operator.shiftEnd}`,
       specializations: operator.specializations.join(', '),
       login_url: `${process.env.BASE_URL || 'https://wavemax.promo'}/embed-app.html?login=operator`,
-      current_year: new Date().getFullYear()
+      current_year: new Date().getFullYear(),
+      ...emailTranslations
     };
 
     const html = fillTemplate(template, data);
 
+    // Translate subject based on language
+    const subjects = {
+      en: 'Welcome to WaveMAX Operations Team',
+      es: 'Bienvenido al Equipo de Operaciones WaveMAX',
+      pt: 'Bem-vindo à Equipe de Operações WaveMAX',
+      de: 'Willkommen beim WaveMAX Operations Team'
+    };
+    const subject = subjects[language] || subjects.en;
+
     await sendEmail(
       operator.email,
-      'Welcome to WaveMAX Operations Team',
+      subject,
       html
     );
   } catch (error) {
@@ -782,21 +1814,110 @@ exports.sendOperatorWelcomeEmail = async (operator, temporaryPin) => {
  */
 exports.sendOperatorPinResetEmail = async (operator, newPin) => {
   try {
-    const template = await loadTemplate('operator-pin-reset');
+    const language = operator.languagePreference || 'en';
+    const template = await loadTemplate('operator-pin-reset', language);
+
+    // Get translations for the email content
+    const translations = {
+      en: {
+        EMAIL_TITLE: 'Your PIN Has Been Reset',
+        EMAIL_HEADER: 'PIN Reset Notification',
+        GREETING: `Hello ${operator.firstName},`,
+        RESET_MESSAGE: 'Your PIN has been reset by an administrator. Please use the new PIN below to access your account.',
+        SECURITY_ALERT_LABEL: 'Security Alert',
+        SECURITY_ALERT_MESSAGE: 'If you did not request this PIN reset, please contact your supervisor immediately.',
+        NEW_PIN_LABEL: 'Your New PIN',
+        EMPLOYEE_ID_LABEL: 'Employee ID',
+        RESET_TIME_LABEL: 'Reset Time',
+        RESET_TIME: 'Just now',
+        NEXT_STEPS_TITLE: 'Next Steps',
+        NEXT_STEPS_LIST: '<ol><li>Login using your Employee ID and the new PIN above</li><li>You will be prompted to change your PIN on first login</li><li>Choose a PIN that is easy for you to remember but hard for others to guess</li><li>Never share your PIN with anyone</li></ol>',
+        LOGIN_BUTTON: 'Login to Operator Portal',
+        SUPPORT_MESSAGE: 'If you have any issues logging in or questions about this reset, please contact your supervisor.',
+        FOOTER_RIGHTS: 'All rights reserved.',
+        FOOTER_SECURITY_NOTE: 'This email contains confidential login information. Please delete after use.'
+      },
+      es: {
+        EMAIL_TITLE: 'Su PIN Ha Sido Restablecido',
+        EMAIL_HEADER: 'Notificación de Restablecimiento de PIN',
+        GREETING: `Hola ${operator.firstName},`,
+        RESET_MESSAGE: 'Su PIN ha sido restablecido por un administrador. Por favor use el nuevo PIN a continuación para acceder a su cuenta.',
+        SECURITY_ALERT_LABEL: 'Alerta de Seguridad',
+        SECURITY_ALERT_MESSAGE: 'Si no solicitó este restablecimiento de PIN, contacte a su supervisor inmediatamente.',
+        NEW_PIN_LABEL: 'Su Nuevo PIN',
+        EMPLOYEE_ID_LABEL: 'ID de Empleado',
+        RESET_TIME_LABEL: 'Hora de Restablecimiento',
+        RESET_TIME: 'Ahora mismo',
+        NEXT_STEPS_TITLE: 'Próximos Pasos',
+        NEXT_STEPS_LIST: '<ol><li>Inicie sesión usando su ID de Empleado y el nuevo PIN anterior</li><li>Se le pedirá que cambie su PIN en el primer inicio de sesión</li><li>Elija un PIN que sea fácil de recordar pero difícil de adivinar para otros</li><li>Nunca comparta su PIN con nadie</li></ol>',
+        LOGIN_BUTTON: 'Ingresar al Portal de Operador',
+        SUPPORT_MESSAGE: 'Si tiene problemas para iniciar sesión o preguntas sobre este restablecimiento, contacte a su supervisor.',
+        FOOTER_RIGHTS: 'Todos los derechos reservados.',
+        FOOTER_SECURITY_NOTE: 'Este correo contiene información de acceso confidencial. Por favor elimínelo después de usarlo.'
+      },
+      pt: {
+        EMAIL_TITLE: 'Seu PIN Foi Redefinido',
+        EMAIL_HEADER: 'Notificação de Redefinição de PIN',
+        GREETING: `Olá ${operator.firstName},`,
+        RESET_MESSAGE: 'Seu PIN foi redefinido por um administrador. Por favor, use o novo PIN abaixo para acessar sua conta.',
+        SECURITY_ALERT_LABEL: 'Alerta de Segurança',
+        SECURITY_ALERT_MESSAGE: 'Se você não solicitou esta redefinição de PIN, entre em contato com seu supervisor imediatamente.',
+        NEW_PIN_LABEL: 'Seu Novo PIN',
+        EMPLOYEE_ID_LABEL: 'ID do Funcionário',
+        RESET_TIME_LABEL: 'Hora da Redefinição',
+        RESET_TIME: 'Agora mesmo',
+        NEXT_STEPS_TITLE: 'Próximos Passos',
+        NEXT_STEPS_LIST: '<ol><li>Faça login usando seu ID de Funcionário e o novo PIN acima</li><li>Você será solicitado a alterar seu PIN no primeiro login</li><li>Escolha um PIN que seja fácil de lembrar mas difícil para outros adivinharem</li><li>Nunca compartilhe seu PIN com ninguém</li></ol>',
+        LOGIN_BUTTON: 'Entrar no Portal do Operador',
+        SUPPORT_MESSAGE: 'Se tiver problemas para fazer login ou dúvidas sobre esta redefinição, entre em contato com seu supervisor.',
+        FOOTER_RIGHTS: 'Todos os direitos reservados.',
+        FOOTER_SECURITY_NOTE: 'Este e-mail contém informações de login confidenciais. Por favor, exclua após o uso.'
+      },
+      de: {
+        EMAIL_TITLE: 'Ihre PIN wurde zurückgesetzt',
+        EMAIL_HEADER: 'PIN-Zurücksetzung Benachrichtigung',
+        GREETING: `Hallo ${operator.firstName},`,
+        RESET_MESSAGE: 'Ihre PIN wurde von einem Administrator zurückgesetzt. Bitte verwenden Sie die unten stehende neue PIN, um auf Ihr Konto zuzugreifen.',
+        SECURITY_ALERT_LABEL: 'Sicherheitswarnung',
+        SECURITY_ALERT_MESSAGE: 'Wenn Sie diese PIN-Zurücksetzung nicht angefordert haben, kontaktieren Sie bitte sofort Ihren Vorgesetzten.',
+        NEW_PIN_LABEL: 'Ihre neue PIN',
+        EMPLOYEE_ID_LABEL: 'Mitarbeiter-ID',
+        RESET_TIME_LABEL: 'Zurücksetzungszeit',
+        RESET_TIME: 'Gerade eben',
+        NEXT_STEPS_TITLE: 'Nächste Schritte',
+        NEXT_STEPS_LIST: '<ol><li>Melden Sie sich mit Ihrer Mitarbeiter-ID und der neuen PIN oben an</li><li>Sie werden beim ersten Login aufgefordert, Ihre PIN zu ändern</li><li>Wählen Sie eine PIN, die für Sie leicht zu merken, aber für andere schwer zu erraten ist</li><li>Teilen Sie Ihre PIN niemals mit anderen</li></ol>',
+        LOGIN_BUTTON: 'Zum Betreiberportal anmelden',
+        SUPPORT_MESSAGE: 'Wenn Sie Probleme beim Anmelden haben oder Fragen zu dieser Zurücksetzung haben, kontaktieren Sie bitte Ihren Vorgesetzten.',
+        FOOTER_RIGHTS: 'Alle Rechte vorbehalten.',
+        FOOTER_SECURITY_NOTE: 'Diese E-Mail enthält vertrauliche Anmeldeinformationen. Bitte nach Gebrauch löschen.'
+      }
+    };
+
+    const emailTranslations = translations[language] || translations.en;
 
     const data = {
       first_name: operator.firstName,
       employee_id: operator.employeeId,
       new_pin: newPin,
       login_url: `${process.env.BASE_URL || 'https://wavemax.promo'}/embed-app.html?login=operator`,
-      current_year: new Date().getFullYear()
+      current_year: new Date().getFullYear(),
+      ...emailTranslations
     };
 
     const html = fillTemplate(template, data);
 
+    // Translate subject based on language
+    const subjects = {
+      en: 'Your PIN Has Been Reset',
+      es: 'Su PIN Ha Sido Restablecido',
+      pt: 'Seu PIN Foi Redefinido',
+      de: 'Ihre PIN wurde zurückgesetzt'
+    };
+    const subject = subjects[language] || subjects.en;
+
     await sendEmail(
       operator.email,
-      'Your PIN Has Been Reset',
+      subject,
       html
     );
   } catch (error) {
@@ -809,7 +1930,90 @@ exports.sendOperatorPinResetEmail = async (operator, newPin) => {
  */
 exports.sendOperatorShiftReminderEmail = async (operator) => {
   try {
-    const template = await loadTemplate('operator-shift-reminder');
+    const language = operator.languagePreference || 'en';
+    const template = await loadTemplate('operator-shift-reminder', language);
+
+    // Get translations for the email content
+    const translations = {
+      en: {
+        EMAIL_TITLE: 'Shift Reminder - Starting Soon',
+        EMAIL_HEADER: 'Shift Reminder',
+        GREETING: `Hi ${operator.firstName},`,
+        REMINDER_MESSAGE: 'This is a friendly reminder that your shift is starting soon!',
+        SHIFT_STARTS_LABEL: 'Your shift starts at',
+        SHIFT_ENDS_LABEL: 'and ends at',
+        EMPLOYEE_ID_LABEL: 'Employee ID',
+        DATE_LABEL: 'Date',
+        TODAY: 'Today',
+        EXPECTED_DURATION_LABEL: 'Expected Duration',
+        EXPECTED_DURATION: '8 hours',
+        REMEMBER_TO_TITLE: 'Remember to',
+        REMEMBER_TO_LIST: '<ul><li>Arrive a few minutes early to prepare</li><li>Clock in when you arrive</li><li>Check the order queue for priority items</li><li>Follow all safety protocols</li><li>Clock out at the end of your shift</li></ul>',
+        LOGIN_BUTTON: 'Login to Operator Portal',
+        CLOSING_MESSAGE: 'Have a great shift! If you cannot make your shift, please contact your supervisor as soon as possible.',
+        FOOTER_RIGHTS: 'All rights reserved.',
+        FOOTER_AUTOMATED_MESSAGE: 'This is an automated shift reminder.'
+      },
+      es: {
+        EMAIL_TITLE: 'Recordatorio de Turno - Comienza Pronto',
+        EMAIL_HEADER: 'Recordatorio de Turno',
+        GREETING: `Hola ${operator.firstName},`,
+        REMINDER_MESSAGE: '¡Este es un recordatorio amistoso de que su turno comienza pronto!',
+        SHIFT_STARTS_LABEL: 'Su turno comienza a las',
+        SHIFT_ENDS_LABEL: 'y termina a las',
+        EMPLOYEE_ID_LABEL: 'ID de Empleado',
+        DATE_LABEL: 'Fecha',
+        TODAY: 'Hoy',
+        EXPECTED_DURATION_LABEL: 'Duración Esperada',
+        EXPECTED_DURATION: '8 horas',
+        REMEMBER_TO_TITLE: 'Recuerde',
+        REMEMBER_TO_LIST: '<ul><li>Llegue unos minutos antes para prepararse</li><li>Registre su entrada cuando llegue</li><li>Revise la cola de pedidos para artículos prioritarios</li><li>Siga todos los protocolos de seguridad</li><li>Registre su salida al final de su turno</li></ul>',
+        LOGIN_BUTTON: 'Ingresar al Portal de Operador',
+        CLOSING_MESSAGE: '¡Que tenga un excelente turno! Si no puede asistir a su turno, contacte a su supervisor lo antes posible.',
+        FOOTER_RIGHTS: 'Todos los derechos reservados.',
+        FOOTER_AUTOMATED_MESSAGE: 'Este es un recordatorio de turno automatizado.'
+      },
+      pt: {
+        EMAIL_TITLE: 'Lembrete de Turno - Começando em Breve',
+        EMAIL_HEADER: 'Lembrete de Turno',
+        GREETING: `Oi ${operator.firstName},`,
+        REMINDER_MESSAGE: 'Este é um lembrete amigável de que seu turno está começando em breve!',
+        SHIFT_STARTS_LABEL: 'Seu turno começa às',
+        SHIFT_ENDS_LABEL: 'e termina às',
+        EMPLOYEE_ID_LABEL: 'ID do Funcionário',
+        DATE_LABEL: 'Data',
+        TODAY: 'Hoje',
+        EXPECTED_DURATION_LABEL: 'Duração Esperada',
+        EXPECTED_DURATION: '8 horas',
+        REMEMBER_TO_TITLE: 'Lembre-se de',
+        REMEMBER_TO_LIST: '<ul><li>Chegar alguns minutos antes para se preparar</li><li>Registrar entrada quando chegar</li><li>Verificar a fila de pedidos para itens prioritários</li><li>Seguir todos os protocolos de segurança</li><li>Registrar saída no final do turno</li></ul>',
+        LOGIN_BUTTON: 'Entrar no Portal do Operador',
+        CLOSING_MESSAGE: 'Tenha um ótimo turno! Se não puder comparecer ao seu turno, entre em contato com seu supervisor o mais rápido possível.',
+        FOOTER_RIGHTS: 'Todos os direitos reservados.',
+        FOOTER_AUTOMATED_MESSAGE: 'Este é um lembrete de turno automatizado.'
+      },
+      de: {
+        EMAIL_TITLE: 'Schichterinnerung - Beginnt bald',
+        EMAIL_HEADER: 'Schichterinnerung',
+        GREETING: `Hallo ${operator.firstName},`,
+        REMINDER_MESSAGE: 'Dies ist eine freundliche Erinnerung, dass Ihre Schicht bald beginnt!',
+        SHIFT_STARTS_LABEL: 'Ihre Schicht beginnt um',
+        SHIFT_ENDS_LABEL: 'und endet um',
+        EMPLOYEE_ID_LABEL: 'Mitarbeiter-ID',
+        DATE_LABEL: 'Datum',
+        TODAY: 'Heute',
+        EXPECTED_DURATION_LABEL: 'Erwartete Dauer',
+        EXPECTED_DURATION: '8 Stunden',
+        REMEMBER_TO_TITLE: 'Denken Sie daran',
+        REMEMBER_TO_LIST: '<ul><li>Kommen Sie ein paar Minuten früher zur Vorbereitung</li><li>Stempeln Sie ein, wenn Sie ankommen</li><li>Überprüfen Sie die Auftragswarteschlange auf Prioritätsartikel</li><li>Befolgen Sie alle Sicherheitsprotokolle</li><li>Stempeln Sie am Ende Ihrer Schicht aus</li></ul>',
+        LOGIN_BUTTON: 'Zum Betreiberportal anmelden',
+        CLOSING_MESSAGE: 'Haben Sie eine großartige Schicht! Wenn Sie Ihre Schicht nicht antreten können, kontaktieren Sie bitte so schnell wie möglich Ihren Vorgesetzten.',
+        FOOTER_RIGHTS: 'Alle Rechte vorbehalten.',
+        FOOTER_AUTOMATED_MESSAGE: 'Dies ist eine automatisierte Schichterinnerung.'
+      }
+    };
+
+    const emailTranslations = translations[language] || translations.en;
 
     const data = {
       first_name: operator.firstName,
@@ -817,14 +2021,24 @@ exports.sendOperatorShiftReminderEmail = async (operator) => {
       shift_start: operator.shiftStart,
       shift_end: operator.shiftEnd,
       login_url: `${process.env.BASE_URL || 'https://wavemax.promo'}/embed-app.html?login=operator`,
-      current_year: new Date().getFullYear()
+      current_year: new Date().getFullYear(),
+      ...emailTranslations
     };
 
     const html = fillTemplate(template, data);
 
+    // Translate subject based on language
+    const subjects = {
+      en: 'Shift Reminder - Starting Soon',
+      es: 'Recordatorio de Turno - Comienza Pronto',
+      pt: 'Lembrete de Turno - Começando em Breve',
+      de: 'Schichterinnerung - Beginnt bald'
+    };
+    const subject = subjects[language] || subjects.en;
+
     await sendEmail(
       operator.email,
-      'Shift Reminder - Starting Soon',
+      subject,
       html
     );
   } catch (error) {

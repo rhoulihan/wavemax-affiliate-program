@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>[EMAIL_TITLE]</title>
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
@@ -124,55 +127,52 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>WaveMAX Administrator Portal</h1>
-            <p>Welcome to the Management Team</p>
+            <h1>[EMAIL_HEADER]</h1>
+            <p>[EMAIL_SUBHEADER]</p>
         </div>
         
         <div class="content">
             <div class="greeting">
-                Welcome, [FIRST_NAME]!
+                [GREETING]
             </div>
             
-            <p>Your administrator account has been successfully created. You now have access to the WaveMAX Administrator Portal where you can manage operators, view analytics, and configure system settings.</p>
+            <p>[WELCOME_MESSAGE]</p>
             
             <div class="info-box">
                 <div class="info-item">
-                    <span class="info-label">Administrator ID:</span>
+                    <span class="info-label">[ADMIN_ID_LABEL]:</span>
                     <span class="info-value">[ADMIN_ID]</span>
                 </div>
                 <div class="info-item">
-                    <span class="info-label">Email:</span>
+                    <span class="info-label">[EMAIL_LABEL]:</span>
                     <span class="info-value">[EMAIL]</span>
                 </div>
                 <div class="info-item">
-                    <span class="info-label">Account Status:</span>
-                    <span class="info-value">Active</span>
+                    <span class="info-label">[ACCOUNT_STATUS_LABEL]:</span>
+                    <span class="info-value">[ACCOUNT_STATUS]</span>
                 </div>
             </div>
             
             <div class="permissions-box">
-                <div class="permissions-title">Your Permissions:</div>
+                <div class="permissions-title">[PERMISSIONS_TITLE]:</div>
                 <div>[PERMISSIONS]</div>
             </div>
             
             <div class="button-container">
-                <a href="[LOGIN_URL]" class="button">Access Admin Portal</a>
+                <a href="[LOGIN_URL]" class="button">[ACCESS_BUTTON]</a>
             </div>
             
             <div class="security-note">
-                <strong>Security Reminder:</strong>
-                • Use a strong password and change it regularly<br>
-                • Never share your login credentials<br>
-                • Always log out when finished<br>
-                • Report any suspicious activity immediately
+                <strong>[SECURITY_REMINDER_TITLE]:</strong>
+                [SECURITY_REMINDER_TEXT]
             </div>
             
-            <p>If you have any questions or need assistance, please contact the system administrator.</p>
+            <p>[SUPPORT_MESSAGE]</p>
         </div>
         
         <div class="footer">
-            <p>© [CURRENT_YEAR] CRHS Enterprises, LLC. All rights reserved.</p>
-            <p>This is a secure administrator account notification.</p>
+            <p>&copy; [CURRENT_YEAR] CRHS Enterprises, LLC. [FOOTER_RIGHTS]</p>
+            <p>[FOOTER_SECURITY_NOTE]</p>
         </div>
     </div>
 </body>

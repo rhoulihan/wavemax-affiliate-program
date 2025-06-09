@@ -70,15 +70,27 @@
                 </div>
                 
                 <div>
-                    <h3 class="text-xl font-bold mb-4" data-i18n="affiliate.success.linkTitle">Your Customer Registration Link</h3>
-                    <p class="mb-4" data-i18n="affiliate.success.linkDescription">Use this unique link to register customers for your laundry pickup and delivery service:</p>
+                    <h3 class="text-xl font-bold mb-4" data-i18n="affiliate.success.marketingLinkTitle">Your Customer Landing Page</h3>
+                    <p class="mb-4" data-i18n="affiliate.success.marketingLinkDescription">Share this professional landing page with potential customers to showcase your services and pricing:</p>
+                    <div class="bg-blue-50 p-4 rounded-lg mb-6 border border-blue-200">
+                        <div class="flex items-center mb-2">
+                            <input type="text" id="landingPageLink" readonly class="flex-1 p-2 border rounded-l-lg focus:outline-none bg-white" value="Loading...">
+                            <button id="copyLandingLinkBtn" class="bg-blue-600 text-white px-4 py-2 rounded-r-lg hover:bg-blue-700 transition" data-i18n="common.buttons.copy">Copy</button>
+                        </div>
+                        <p class="text-sm text-blue-700" data-i18n="affiliate.success.marketingLinkHelp">This page includes information about your services, pricing, and a registration form.</p>
+                    </div>
+                </div>
+                
+                <div>
+                    <h3 class="text-xl font-bold mb-4" data-i18n="affiliate.success.linkTitle">Direct Customer Registration Link</h3>
+                    <p class="mb-4" data-i18n="affiliate.success.linkDescription">Customers can also use this direct link to register:</p>
                     <div class="bg-gray-50 p-4 rounded-lg">
                         <div class="flex items-center">
                             <input type="text" id="registrationLink" readonly class="flex-1 p-2 border rounded-l-lg focus:outline-none" value="Loading...">
                             <button id="copyLinkBtn" class="bg-blue-600 text-white px-4 py-2 rounded-r-lg hover:bg-blue-700 transition" data-i18n="common.buttons.copy">Copy</button>
                         </div>
                     </div>
-                    <p class="text-sm text-gray-500 mt-2" data-i18n="affiliate.success.linkHelp">Share this link with potential customers to register them for your service.</p>
+                    <p class="text-sm text-gray-500 mt-2" data-i18n="affiliate.success.linkHelp">Each customer registered through your links will be associated with your account.</p>
                 </div>
                 
                 <div>
@@ -119,9 +131,9 @@
             sendMessageToParent('navigate', { page: page });
         }
 
-        // Copy link functionality
-        function copyLink() {
-            const linkInput = document.getElementById('registrationLink');
+        // Generic copy functionality
+        function copyToClipboard(inputId, buttonId, messageType) {
+            const linkInput = document.getElementById(inputId);
             
             // Create a temporary textarea to copy from (works better in iframes)
             const tempTextarea = document.createElement('textarea');
@@ -138,7 +150,7 @@
                 document.body.removeChild(tempTextarea);
                 
                 if (successful) {
-                    const btn = document.getElementById('copyLinkBtn');
+                    const btn = document.getElementById(buttonId);
                     const originalText = btn.textContent;
                     // Use i18n to get the "Copied!" text
                     const copiedText = (window.i18n && window.i18n.t) ? window.i18n.t('common.messages.copied') : 'Copied!';
@@ -150,7 +162,7 @@
                         btn.classList.remove('bg-green-600');
                     }, 2000);
                     
-                    sendMessageToParent('link-copied', { link: linkInput.value });
+                    sendMessageToParent(messageType, { link: linkInput.value });
                 } else {
                     throw new Error('Copy command failed');
                 }
@@ -161,6 +173,16 @@
                 linkInput.focus();
                 modalAlert('Please press Ctrl+C (or Cmd+C on Mac) to copy the link.', 'Link Copied');
             }
+        }
+
+        // Copy registration link functionality
+        function copyLink() {
+            copyToClipboard('registrationLink', 'copyLinkBtn', 'link-copied');
+        }
+
+        // Copy landing page link functionality
+        function copyLandingPageLink() {
+            copyToClipboard('landingPageLink', 'copyLandingLinkBtn', 'landing-link-copied');
         }
 
         // Load affiliate information
@@ -177,6 +199,10 @@
                     document.getElementById('affiliateName').textContent = 
                         `${affiliateData.firstName} ${affiliateData.lastName}`;
                     document.getElementById('affiliateEmail').textContent = affiliateData.email;
+                    
+                    // Generate landing page link
+                    const landingPageLink = `https://www.wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program?route=/affiliate-landing&code=${affiliateData.affiliateId}`;
+                    document.getElementById('landingPageLink').value = landingPageLink;
                     
                     // Generate registration link with wavemaxlaundry.com format
                     const registrationLink = `https://www.wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program?affid=${affiliateData.affiliateId}`;
@@ -201,12 +227,22 @@
                         };
                     }
                     
-                    // Set up copy button click handler
+                    // Set up copy button click handler for registration link
                     const copyBtn = document.getElementById('copyLinkBtn');
                     if (copyBtn) {
                         copyBtn.onclick = function(e) {
                             e.preventDefault();
                             copyLink();
+                            return false;
+                        };
+                    }
+                    
+                    // Set up copy button click handler for landing page link
+                    const copyLandingBtn = document.getElementById('copyLandingLinkBtn');
+                    if (copyLandingBtn) {
+                        copyLandingBtn.onclick = function(e) {
+                            e.preventDefault();
+                            copyLandingPageLink();
                             return false;
                         };
                     }
@@ -234,6 +270,8 @@
             document.getElementById('affiliateId').textContent = 'Your unique ID will be provided shortly';
             document.getElementById('affiliateName').textContent = 'Your information is being processed';
             document.getElementById('affiliateEmail').textContent = 'Check your email for confirmation';
+            document.getElementById('landingPageLink').value = 
+                'Your landing page link will be available after confirmation';
             document.getElementById('registrationLink').value = 
                 'Your unique registration link will be available after confirmation';
         }

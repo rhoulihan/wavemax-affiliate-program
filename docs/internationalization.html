@@ -377,38 +377,174 @@ const languagePreference = supportedLanguages.includes(langCode) ? langCode : 'e
 }</code></pre>
 
             <h3 id="email-templates">Email Template Localization</h3>
-            <p>Email templates are organized by language for personalized communications:</p>
+            <p>The email system has been fully internationalized with a placeholder-based template system that supports all four languages:</p>
 
-            <h4>Directory Structure</h4>
-            <pre><code>server/templates/emails/
-├── affiliate-welcome.html         # Default English template
-├── customer-welcome.html
-├── es/                           # Spanish translations
-│   ├── affiliate-welcome.html
-│   └── customer-welcome.html
-├── pt/                           # Portuguese translations
-│   ├── affiliate-welcome.html
-│   └── customer-welcome.html
-└── de/                           # German translations
-    ├── affiliate-welcome.html
-    └── customer-welcome.html</code></pre>
+            <div class="alert alert-success">
+                <strong>✅ New Email Translation System:</strong> All email templates now use a [PLACEHOLDER] system with complete translations for English, Spanish, Portuguese, and German.
+            </div>
+
+            <h4>Placeholder-Based Templates</h4>
+            <p>Email templates use placeholders that are replaced with language-specific content at runtime:</p>
+            <pre><code>&lt;!-- Email template with placeholders --&gt;
+&lt;h1&gt;[EMAIL_HEADER]&lt;/h1&gt;
+&lt;p&gt;[GREETING]&lt;/p&gt;
+&lt;p&gt;[WELCOME_MESSAGE]&lt;/p&gt;</code></pre>
 
             <h4>Email Service Implementation</h4>
-            <pre><code>// Email service automatically uses user's language preference
+            <pre><code>// Email service with full translation support
 exports.sendAffiliateWelcomeEmail = async (affiliate) => {
     const language = affiliate.languagePreference || 'en';
     const template = await loadTemplate('affiliate-welcome', language);
     
-    // Translated subjects
-    const subjects = {
-        en: 'Welcome to WaveMAX Laundry Affiliate Program',
-        es: 'Bienvenido al Programa de Afiliados de WaveMAX Laundry',
-        pt: 'Bem-vindo ao Programa de Afiliados WaveMAX Laundry',
-        de: 'Willkommen beim WaveMAX Laundry Affiliate-Programm'
+    // Complete translations for all languages
+    const translations = {
+        en: {
+            EMAIL_TITLE: 'Welcome to WaveMAX Laundry Affiliate Program',
+            EMAIL_HEADER: 'Welcome to WaveMAX Laundry Affiliate Program',
+            GREETING: `Hello ${affiliate.firstName},`,
+            WELCOME_MESSAGE: 'Welcome to our affiliate program!'
+            // ... all placeholders
+        },
+        es: {
+            EMAIL_TITLE: 'Bienvenido al Programa de Afiliados de WaveMAX Laundry',
+            // ... Spanish translations
+        },
+        pt: {
+            EMAIL_TITLE: 'Bem-vindo ao Programa de Afiliados WaveMAX Laundry',
+            // ... Portuguese translations
+        },
+        de: {
+            EMAIL_TITLE: 'Willkommen beim WaveMAX Laundry Affiliate-Programm',
+            // ... German translations
+        }
     };
     
-    await sendEmail(affiliate.email, subjects[language], html);
+    // Replace placeholders with translated content
+    const t = translations[language] || translations.en;
+    let html = template;
+    for (const [key, value] of Object.entries(t)) {
+        html = html.replace(new RegExp(`\\[${key}\\]`, 'g'), value);
+    }
+    
+    await sendEmail(affiliate.email, t.EMAIL_TITLE, html);
 };</code></pre>
+
+            <h4>Supported Email Templates</h4>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Email Type</th>
+                        <th>Template File</th>
+                        <th>Translation Support</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td colspan="3"><strong>Customer Emails</strong></td>
+                    </tr>
+                    <tr>
+                        <td>Welcome Email</td>
+                        <td>customer-welcome.html</td>
+                        <td>✅ Full (en, es, pt, de)</td>
+                    </tr>
+                    <tr>
+                        <td>Order Confirmation</td>
+                        <td>customer-order-confirmation.html</td>
+                        <td>✅ Full (en, es, pt, de)</td>
+                    </tr>
+                    <tr>
+                        <td>Order Status Update</td>
+                        <td>customer-order-status.html</td>
+                        <td>✅ Full (en, es, pt, de)</td>
+                    </tr>
+                    <tr>
+                        <td>Order Cancellation</td>
+                        <td>customer-order-cancelled.html</td>
+                        <td>✅ Full (en, es, pt, de)</td>
+                    </tr>
+                    <tr>
+                        <td colspan="3"><strong>Affiliate Emails</strong></td>
+                    </tr>
+                    <tr>
+                        <td>Welcome Email</td>
+                        <td>affiliate-welcome.html</td>
+                        <td>✅ Full (en, es, pt, de)</td>
+                    </tr>
+                    <tr>
+                        <td>New Customer Alert</td>
+                        <td>affiliate-new-customer.html</td>
+                        <td>✅ Full (en, es, pt, de)</td>
+                    </tr>
+                    <tr>
+                        <td>New Order Alert</td>
+                        <td>affiliate-new-order.html</td>
+                        <td>✅ Full (en, es, pt, de)</td>
+                    </tr>
+                    <tr>
+                        <td>Commission Earned</td>
+                        <td>affiliate-commission.html</td>
+                        <td>✅ Full (en, es, pt, de)</td>
+                    </tr>
+                    <tr>
+                        <td>Order Cancellation</td>
+                        <td>affiliate-order-cancelled.html</td>
+                        <td>✅ Full (en, es, pt, de)</td>
+                    </tr>
+                    <tr>
+                        <td colspan="3"><strong>Administrator Emails</strong></td>
+                    </tr>
+                    <tr>
+                        <td>Welcome Email</td>
+                        <td>administrator-welcome.html</td>
+                        <td>✅ Full (en, es, pt, de)</td>
+                    </tr>
+                    <tr>
+                        <td>Password Reset</td>
+                        <td>administrator-password-reset.html</td>
+                        <td>✅ Full (en, es, pt, de)</td>
+                    </tr>
+                    <tr>
+                        <td colspan="3"><strong>Operator Emails</strong></td>
+                    </tr>
+                    <tr>
+                        <td>Welcome Email</td>
+                        <td>operator-welcome.html</td>
+                        <td>✅ Full (en, es, pt, de)</td>
+                    </tr>
+                    <tr>
+                        <td>PIN Reset</td>
+                        <td>operator-pin-reset.html</td>
+                        <td>✅ Full (en, es, pt, de)</td>
+                    </tr>
+                    <tr>
+                        <td>Shift Reminder</td>
+                        <td>operator-shift-reminder.html</td>
+                        <td>✅ Full (en, es, pt, de)</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h4>Dynamic Content in Email Translations</h4>
+            <p>The translation system supports dynamic content interpolation:</p>
+            <pre><code>// Example: Order status emails with dynamic status
+const statusMessages = {
+    en: {
+        picked_up: 'Your order has been picked up',
+        processing: 'Your order is being processed',
+        ready_for_delivery: 'Your order is ready for delivery',
+        delivered: 'Your order has been delivered'
+    },
+    es: {
+        picked_up: 'Su pedido ha sido recogido',
+        processing: 'Su pedido está siendo procesado',
+        ready_for_delivery: 'Su pedido está listo para entrega',
+        delivered: 'Su pedido ha sido entregado'
+    }
+    // ... other languages
+};
+
+// Dynamic bag count in translations
+NEW_CUSTOMER_MESSAGE: `A new customer has registered with ${customer.numberOfBags} bag${customer.numberOfBags !== 1 ? 's' : ''}`</code></pre>
 
             <h2 id="configuration">Configuration</h2>
 
