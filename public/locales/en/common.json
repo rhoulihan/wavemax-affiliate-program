@@ -394,13 +394,21 @@
       "commissions": "Commissions",
       "reports": "Reports",
       "settings": "Settings",
+      "tabs": {
+        "pickups": "Pickups & Deliveries",
+        "customers": "Customers",
+        "earnings": "Earnings",
+        "settings": "Settings"
+      },
       "metrics": {
         "totalCustomers": "Total Customers",
         "activeCustomers": "Active Customers",
         "totalOrders": "Total Orders",
         "totalRevenue": "Total Revenue",
         "totalCommissions": "Total Commissions",
-        "pendingCommissions": "Pending Commissions"
+        "pendingCommissions": "Pending Commissions",
+        "activeOrders": "Active Orders",
+        "totalEarnings": "Total Earnings"
       }
     },
     "success": {

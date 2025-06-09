@@ -40,12 +40,15 @@
     </style>
 </head>
 <body class="bg-white font-sans">
+    <!-- Language Switcher -->
+    <div id="language-switcher-container"></div>
+    
     <!-- Dashboard Header -->
     <div class="embed-container">
         <div class="bg-white border-b pb-4 mb-4">
             <div class="flex flex-col md:flex-row justify-between items-start md:items-center">
                 <div>
-                    <h1 class="text-2xl font-bold" id="welcomeMessage">Affiliate Dashboard</h1>
+                    <h1 class="text-2xl font-bold" id="welcomeMessage" data-i18n="affiliate.dashboard.title">Affiliate Dashboard</h1>
                     <p class="text-gray-600" id="affiliateId">Loading affiliate information...</p>
                 </div>
                 <div class="mt-4 md:mt-0">
@@ -57,17 +60,17 @@
         <!-- Stats Cards -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
             <div class="bg-white rounded-lg shadow-md p-6">
-                <h3 class="text-lg font-bold text-gray-600 mb-2">Total Customers</h3>
+                <h3 class="text-lg font-bold text-gray-600 mb-2" data-i18n="affiliate.dashboard.metrics.totalCustomers">Total Customers</h3>
                 <p class="text-3xl font-bold" id="totalCustomers">0</p>
             </div>
             
             <div class="bg-white rounded-lg shadow-md p-6">
-                <h3 class="text-lg font-bold text-gray-600 mb-2">Active Orders</h3>
+                <h3 class="text-lg font-bold text-gray-600 mb-2" data-i18n="affiliate.dashboard.metrics.activeOrders">Active Orders</h3>
                 <p class="text-3xl font-bold" id="activeOrders">0</p>
             </div>
             
             <div class="bg-white rounded-lg shadow-md p-6">
-                <h3 class="text-lg font-bold text-gray-600 mb-2">Total Earnings</h3>
+                <h3 class="text-lg font-bold text-gray-600 mb-2" data-i18n="affiliate.dashboard.metrics.totalEarnings">Total Earnings</h3>
                 <p class="text-3xl font-bold" id="totalEarnings">$0.00</p>
             </div>
         </div>
@@ -75,10 +78,10 @@
         <!-- Dashboard Tabs -->
         <div class="mb-6 border-b">
             <div class="flex overflow-x-auto">
-                <button class="tab-btn px-6 py-3 font-bold border-b-2 border-blue-600 text-blue-600" data-tab="pickups">Pickups & Deliveries</button>
-                <button class="tab-btn px-6 py-3 font-bold border-b-2 border-transparent hover:text-blue-600" data-tab="customers">Customers</button>
-                <button class="tab-btn px-6 py-3 font-bold border-b-2 border-transparent hover:text-blue-600" data-tab="earnings">Earnings</button>
-                <button class="tab-btn px-6 py-3 font-bold border-b-2 border-transparent hover:text-blue-600" data-tab="settings">Settings</button>
+                <button class="tab-btn px-6 py-3 font-bold border-b-2 border-blue-600 text-blue-600" data-tab="pickups" data-i18n="affiliate.dashboard.tabs.pickups">Pickups & Deliveries</button>
+                <button class="tab-btn px-6 py-3 font-bold border-b-2 border-transparent hover:text-blue-600" data-tab="customers" data-i18n="affiliate.dashboard.tabs.customers">Customers</button>
+                <button class="tab-btn px-6 py-3 font-bold border-b-2 border-transparent hover:text-blue-600" data-tab="earnings" data-i18n="affiliate.dashboard.tabs.earnings">Earnings</button>
+                <button class="tab-btn px-6 py-3 font-bold border-b-2 border-transparent hover:text-blue-600" data-tab="settings" data-i18n="affiliate.dashboard.tabs.settings">Settings</button>
             </div>
         </div>
         
