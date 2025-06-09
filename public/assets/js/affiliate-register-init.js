@@ -208,12 +208,11 @@ function initializeAffiliateRegistration() {
     
     // These fields are always required
     requiredFields.push(
-      { id: 'serviceLatitude', name: 'Service Area Location' },
-      { id: 'serviceLongitude', name: 'Service Area Location' },
       { id: 'minimumDeliveryFee', name: 'Minimum Delivery Fee' },
       { id: 'perBagDeliveryFee', name: 'Per-Bag Delivery Fee' },
       { id: 'paymentMethod', name: 'Payment Method' }
     );
+    // Note: Service area fields are checked separately below with component-generated IDs
 
     // Only require username and password for traditional registration (NOT OAuth)
     // Check if this is OAuth by looking for socialToken or window.isOAuthUser
@@ -235,9 +234,9 @@ function initializeAffiliateRegistration() {
       }
     }
     
-    // Check service area separately (stored in hidden fields)
-    const serviceLatitude = document.getElementById('serviceLatitude');
-    const serviceLongitude = document.getElementById('serviceLongitude');
+    // Check service area separately (stored in hidden fields with component-generated IDs)
+    const serviceLatitude = document.getElementById('registrationServiceAreaComponent-latitude');
+    const serviceLongitude = document.getElementById('registrationServiceAreaComponent-longitude');
     if (!serviceLatitude?.value || !serviceLongitude?.value) {
       missingFields.push('Service Area (Please click on the map to set your service location)');
     }
