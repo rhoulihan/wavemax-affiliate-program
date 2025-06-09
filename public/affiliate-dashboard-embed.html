@@ -364,27 +364,8 @@
                                 
                                 <!-- Fee Calculator Preview Column -->
                                 <div>
-                                    <div id="feeCalculatorPreview" class="p-4 bg-white rounded-lg border border-gray-300">
-                                        <p class="text-sm font-semibold text-gray-700 mb-3" data-i18n="affiliate.dashboard.settings.pricingPreview">Pricing Preview (round trip):</p>
-                                        <div class="space-y-3">
-                                            <div class="flex justify-between items-center py-2 border-b border-gray-100">
-                                                <span class="text-sm text-gray-600" data-i18n="affiliate.register.1bag">1 bag</span>
-                                                <span id="preview1bag" class="text-lg font-semibold text-blue-600">$50</span>
-                                            </div>
-                                            <div class="flex justify-between items-center py-2 border-b border-gray-100">
-                                                <span class="text-sm text-gray-600" data-i18n="affiliate.register.3bags">3 bags</span>
-                                                <span id="preview3bags" class="text-lg font-semibold text-blue-600">$50</span>
-                                            </div>
-                                            <div class="flex justify-between items-center py-2 border-b border-gray-100">
-                                                <span class="text-sm text-gray-600" data-i18n="affiliate.register.5bags">5 bags</span>
-                                                <span id="preview5bags" class="text-lg font-semibold text-blue-600">$50</span>
-                                            </div>
-                                            <div class="flex justify-between items-center py-2">
-                                                <span class="text-sm text-gray-600" data-i18n="affiliate.register.10bags">10 bags</span>
-                                                <span id="preview10bags" class="text-lg font-semibold text-blue-600">$100</span>
-                                            </div>
-                                        </div>
-                                        <p class="text-xs text-gray-500 mt-3 text-center" data-i18n="affiliate.dashboard.settings.customerPrices">Customer prices for pickup & delivery</p>
+                                    <div id="settingsPricingPreview" class="p-4 bg-white rounded-lg border border-gray-300">
+                                        <!-- Pricing preview component will be inserted here -->
                                     </div>
                                 </div>
                             </div>
@@ -454,6 +435,7 @@
         <!-- i18n Scripts -->
     <script src="/assets/js/i18n.js"></script>
     <script src="/assets/js/language-switcher.js"></script>
+    <script src="/assets/js/pricing-preview-component.js"></script>
     <script src="/assets/js/affiliate-dashboard-init.js"></script>
     <script>
         // PostMessage communication with parent window

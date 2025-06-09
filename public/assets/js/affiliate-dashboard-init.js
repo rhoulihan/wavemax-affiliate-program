@@ -349,6 +349,36 @@ async function loadAffiliateData(affiliateId) {
           console.log('Hiding change password section for OAuth account:', data.registrationMethod);
         }
       }
+      
+      // Initialize pricing preview component if available
+      if (window.PricingPreviewComponent) {
+        // Initialize the pricing preview in the settings tab
+        window.settingsPricingPreview = window.PricingPreviewComponent.init(
+          'settingsPricingPreview',
+          'settingsMinimumDeliveryFee',
+          'settingsPerBagDeliveryFee',
+          {
+            titleText: 'Earnings Preview',
+            titleI18n: 'affiliate.dashboard.settings.earningsPreview',
+            showNotes: true
+          }
+        );
+        
+        // Set initial values
+        const minimumFee = parseFloat(data.minimumDeliveryFee) || 25;
+        const perBagFee = parseFloat(data.perBagDeliveryFee) || 10;
+        
+        // Update inputs
+        const minInput = document.getElementById('settingsMinimumDeliveryFee');
+        const perBagInput = document.getElementById('settingsPerBagDeliveryFee');
+        if (minInput) minInput.value = minimumFee;
+        if (perBagInput) perBagInput.value = perBagFee;
+        
+        // Trigger update
+        if (window.settingsPricingPreview) {
+          window.settingsPricingPreview.update();
+        }
+      }
     }
   } catch (error) {
     console.error('Error loading affiliate data:', error);
