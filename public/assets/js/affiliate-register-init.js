@@ -853,7 +853,6 @@ function initializeAffiliateRegistration() {
         const formFields = [
           'firstName', 'lastName', 'email', 'phone', 'businessName',
           'address', 'city', 'state', 'zipCode',
-          'serviceLatitude', 'serviceLongitude', 'serviceRadius',
           'minimumDeliveryFee', 'perBagDeliveryFee',
           'paymentMethod', 'accountNumber', 'routingNumber', 'paypalEmail',
           'languagePreference', 'termsAgreement', 'socialToken'
@@ -872,6 +871,15 @@ function initializeAffiliateRegistration() {
             affiliateData[fieldName] = element.value || '';
           }
         });
+        
+        // Handle service area fields with component-generated IDs
+        const serviceLatField = document.getElementById('registrationServiceAreaComponent-latitude');
+        const serviceLngField = document.getElementById('registrationServiceAreaComponent-longitude');
+        const serviceRadiusField = document.getElementById('registrationServiceAreaComponent-radius');
+        
+        if (serviceLatField) affiliateData['serviceLatitude'] = serviceLatField.value || '';
+        if (serviceLngField) affiliateData['serviceLongitude'] = serviceLngField.value || '';
+        if (serviceRadiusField) affiliateData['serviceRadius'] = serviceRadiusField.value || '';
         
         // If address fields are empty but we have validated address, use those values
         if (window.validatedAddress && window.addressValidated) {
@@ -1268,19 +1276,18 @@ function initializeAffiliateRegistration() {
     // Get radius slider and value display
     const radiusSlider = document.getElementById('radiusSlider');
     const radiusValue = document.getElementById('radiusValue');
-    const serviceRadius = document.getElementById('serviceRadius');
+    // NOTE: serviceRadius field is now created by component with ID: registrationServiceAreaComponent-radius
     
-    // Set default location values immediately (Austin, TX)
-    document.getElementById('serviceLatitude').value = defaultLat.toFixed(6);
-    document.getElementById('serviceLongitude').value = defaultLng.toFixed(6);
-    document.getElementById('serviceRadius').value = radiusSlider ? radiusSlider.value : 5;
+    // NOTE: Default values are now set by the service area component
+    // Old code that set serviceLatitude/serviceLongitude/serviceRadius directly is no longer needed
     
     // Function to update service area
     function updateServiceArea(lat, lng, radius) {
-      // Update hidden fields
-      document.getElementById('serviceLatitude').value = lat.toFixed(6);
-      document.getElementById('serviceLongitude').value = lng.toFixed(6);
-      serviceRadius.value = radius;
+      // NOTE: Hidden fields are now managed by the service area component
+      // The component creates fields with IDs like:
+      // - registrationServiceAreaComponent-latitude
+      // - registrationServiceAreaComponent-longitude  
+      // - registrationServiceAreaComponent-radius
       
       // Remove existing marker and circle
       if (serviceMarker) {
@@ -2159,18 +2166,26 @@ function initializeAffiliateRegistration() {
               showControls: true,
               showInfo: true,
               onUpdate: function(serviceData) {
-                // Update hidden fields
-                document.getElementById('serviceLatitude').value = serviceData.latitude;
-                document.getElementById('serviceLongitude').value = serviceData.longitude;
-                document.getElementById('serviceRadius').value = serviceData.radius;
+                // Update hidden fields - component creates fields with containerId prefix
+                const latField = document.getElementById('registrationServiceAreaComponent-latitude');
+                const lngField = document.getElementById('registrationServiceAreaComponent-longitude');
+                const radiusField = document.getElementById('registrationServiceAreaComponent-radius');
+                
+                if (latField) latField.value = serviceData.latitude;
+                if (lngField) lngField.value = serviceData.longitude;
+                if (radiusField) radiusField.value = serviceData.radius;
                 console.log('Service area updated:', serviceData);
               }
             });
             
             // Also update the hidden fields immediately with initial values
-            document.getElementById('serviceLatitude').value = data.latitude;
-            document.getElementById('serviceLongitude').value = data.longitude;
-            document.getElementById('serviceRadius').value = data.radius;
+            const latField = document.getElementById('registrationServiceAreaComponent-latitude');
+            const lngField = document.getElementById('registrationServiceAreaComponent-longitude');
+            const radiusField = document.getElementById('registrationServiceAreaComponent-radius');
+            
+            if (latField) latField.value = data.latitude;
+            if (lngField) lngField.value = data.longitude;
+            if (radiusField) radiusField.value = data.radius;
           } else {
             console.error('ServiceAreaComponent or selectedServiceAreaData not available');
           }
