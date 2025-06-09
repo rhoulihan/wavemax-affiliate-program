@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Welcome to WaveMAX Laundry Service</title>
+  <title>[EMAIL_TITLE]</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -105,78 +105,78 @@
 <body>
   <div class="container">
     <div class="header">
-      <img src="https://www.wavemax.promo/wp-content/themes/wavemax-laundry/assets/img/logo-white.png" alt="WaveMAX Laundry" class="logo">
-      <h1>Welcome to WaveMAX Laundry!</h1>
+      <img src="[BASE_URL]/wp-content/themes/wavemax-laundry/assets/img/logo-white.png" alt="WaveMAX Laundry" class="logo">
+      <h1>[EMAIL_HEADER]</h1>
     </div>
     
     <div class="content">
       <div class="section">
-        <h2>Hi [FIRST_NAME],</h2>
-        <p>Thank you for signing up for WaveMAX Laundry's premium wash, dry, fold service with convenient pickup and delivery! We're excited to make laundry day a breeze for you.</p>
+        <h2>[GREETING]</h2>
+        <p>[WELCOME_MESSAGE]</p>
       </div>
       
       <div class="highlight">
-        <h3>Your Account Information</h3>
-        <p><strong>Customer ID:</strong> [CUSTOMER_ID]</p>
-        <p><strong>Service Provider:</strong> [AFFILIATE_NAME]</p>
+        <h3>[YOUR_INFO_TITLE]</h3>
+        <p><strong>[CUSTOMER_ID_LABEL]:</strong> [CUSTOMER_ID]</p>
+        <p><strong>[SERVICE_PROVIDER_LABEL]:</strong> [AFFILIATE_NAME]</p>
       </div>
       
       <div class="service-box" style="background-color: #f0f7ff; border: 1px solid #3b82f6;">
-        <h3>Important: Laundry Bag Information</h3>
-        <p>Your service provider will deliver your laundry bags shortly. Please use these bags for all your laundry pickups.</p>
+        <h3>[BAG_INFO_TITLE]</h3>
+        <p>[BAG_INFO_MESSAGE]</p>
         
         <div style="background-color: #ffffff; border: 1px solid #e0e0e0; border-radius: 6px; padding: 15px; margin: 15px 0;">
-          <h4 style="margin-top: 0; color: #1e3a8a;">Bag Fee Credit Breakdown:</h4>
+          <h4 style="margin-top: 0; color: #1e3a8a;">[BAG_CREDIT_TITLE]</h4>
           <table style="width: 100%; border-collapse: collapse;">
             <tr>
-              <td style="padding: 5px 0;">Number of bags purchased:</td>
+              <td style="padding: 5px 0;">[BAGS_PURCHASED_LABEL]</td>
               <td style="text-align: right; font-weight: bold;">[NUMBER_OF_BAGS]</td>
             </tr>
             <tr>
-              <td style="padding: 5px 0;">Cost per bag:</td>
+              <td style="padding: 5px 0;">[COST_PER_BAG_LABEL]</td>
               <td style="text-align: right;">$[BAG_FEE]</td>
             </tr>
             <tr style="border-top: 2px solid #e0e0e0;">
-              <td style="padding: 8px 0; font-weight: bold; color: #1e3a8a;">Total credit on first order:</td>
+              <td style="padding: 8px 0; font-weight: bold; color: #1e3a8a;">[TOTAL_CREDIT_LABEL]</td>
               <td style="text-align: right; font-weight: bold; color: #1e3a8a; font-size: 18px;">$[TOTAL_CREDIT]</td>
             </tr>
           </table>
         </div>
         
         <p style="font-size: 14px; color: #666; margin-top: 10px;">
-          <strong>Note:</strong> This credit will automatically be applied when you schedule your first laundry pickup. You'll see it clearly itemized on your invoice.
+          <strong>[NOTE_LABEL]:</strong> [CREDIT_NOTE_MESSAGE]
         </p>
       </div>
       
       <div class="service-box">
-        <h3>How It Works</h3>
+        <h3>[HOW_IT_WORKS_TITLE]</h3>
         <div class="steps">
           <div class="step">
             <div class="step-number">1</div>
             <div class="step-content">
-              <strong>Schedule a Pickup</strong>
-              <p>Use our online portal to schedule a pickup at your convenience, or establish a regular pickup schedule.</p>
+              <strong>[STEP_1_TITLE]</strong>
+              <p>[STEP_1_DESC]</p>
             </div>
           </div>
           <div class="step">
             <div class="step-number">2</div>
             <div class="step-content">
-              <strong>Prepare Your Laundry</strong>
-              <p>Place your laundry in the provided bag on the scheduled pickup date.</p>
+              <strong>[STEP_2_TITLE]</strong>
+              <p>[STEP_2_DESC]</p>
             </div>
           </div>
           <div class="step">
             <div class="step-number">3</div>
             <div class="step-content">
-              <strong>Professional Cleaning</strong>
-              <p>Your laundry will be professionally washed, dried, and neatly folded at our facility.</p>
+              <strong>[STEP_3_TITLE]</strong>
+              <p>[STEP_3_DESC]</p>
             </div>
           </div>
           <div class="step">
             <div class="step-number">4</div>
             <div class="step-content">
-              <strong>Delivery</strong>
-              <p>Your clean laundry will be delivered back to you on the scheduled delivery date.</p>
+              <strong>[STEP_4_TITLE]</strong>
+              <p>[STEP_4_DESC]</p>
             </div>
           </div>
         </div>
@@ -185,32 +185,32 @@
       <div class="divider"></div>
       
       <div class="section">
-        <h3>Ready to {{i18n "emails.welcome.schedulePickup"}}?</h3>
-        <p>Click the button below to schedule your first laundry pickup:</p>
+        <h3>[READY_TO_SCHEDULE_TITLE]</h3>
+        <p>[READY_TO_SCHEDULE_MESSAGE]</p>
         <div style="text-align: center; margin: 20px 0;">
-          <a href="[SCHEDULE_URL]" class="button">Schedule Pickup</a>
+          <a href="[SCHEDULE_URL]" class="button">[SCHEDULE_BUTTON]</a>
         </div>
-        <p style="text-align: center; color: #1e3a8a; font-style: italic;">Remember: Your bag fees will be credited on this first order!</p>
+        <p style="text-align: center; color: #1e3a8a; font-style: italic;">[CREDIT_REMINDER]</p>
       </div>
       
       <div class="section">
-        <h3>Questions or Special Instructions?</h3>
-        <p>If you have any questions or special requests for your laundry service, please contact your service provider:</p>
-        <p><strong>Name:</strong> [AFFILIATE_NAME]<br>
-        <strong>Phone:</strong> [AFFILIATE_PHONE]<br>
-        <strong>Email:</strong> [AFFILIATE_EMAIL]</p>
+        <h3>[QUESTIONS_TITLE]</h3>
+        <p>[QUESTIONS_MESSAGE]</p>
+        <p><strong>[NAME_LABEL]:</strong> [AFFILIATE_NAME]<br>
+        <strong>[PHONE_LABEL]:</strong> [AFFILIATE_PHONE]<br>
+        <strong>[EMAIL_LABEL]:</strong> [AFFILIATE_EMAIL]</p>
       </div>
       
       <div class="section" style="text-align: center;">
-        <p>You can also manage your account, track orders, and schedule pickups through your customer dashboard.</p>
-        <a href="[LOGIN_URL]" class="button" style="background-color: #3b82f6;">Go to Dashboard</a>
+        <p>[DASHBOARD_MESSAGE]</p>
+        <a href="[LOGIN_URL]" class="button" style="background-color: #3b82f6;">[DASHBOARD_BUTTON]</a>
       </div>
     </div>
     
     <div class="footer">
-      <p>If you have any questions, please contact our support team at support@wavemax.promo</p>
-      <p>&copy; [CURRENT_YEAR] CRHS Enterprises, LLC. All rights reserved.</p>
-      <p>123 Main Street, Austin, TX 78701</p>
+      <p>[FOOTER_SUPPORT]</p>
+      <p>&copy; [CURRENT_YEAR] CRHS Enterprises, LLC. [FOOTER_RIGHTS]</p>
+      <p>[FOOTER_ADDRESS]</p>
     </div>
   </div>
 </body>

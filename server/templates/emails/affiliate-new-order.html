@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>[EMAIL_TITLE]</title>
     <style>
         body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
         .container { max-width: 600px; margin: 0 auto; padding: 20px; }
@@ -16,56 +19,55 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>New Laundry Pickup Order</h1>
+            <h1>[EMAIL_HEADER]</h1>
         </div>
         <div class="content">
-            <p>Hello [AFFILIATE_FIRST_NAME],</p>
+            <p>[GREETING]</p>
             
-            <p>You have a new laundry pickup order to process!</p>
+            <p>[NEW_ORDER_MESSAGE]</p>
             
             <div class="order-details">
-                <h2 style="color: #1e3a8a; margin-bottom: 15px;">Order Details</h2>
+                <h2 style="color: #1e3a8a; margin-bottom: 15px;">[ORDER_DETAILS_TITLE]</h2>
                 <div class="detail-row">
-                    <span class="detail-label">Order ID:</span> [ORDER_ID]
+                    <span class="detail-label">[ORDER_ID_LABEL]:</span> [ORDER_ID]
                 </div>
                 <div class="detail-row">
-                    <span class="detail-label">{{i18n "emails.newOrder.customer"}}</span> [CUSTOMER_NAME]
+                    <span class="detail-label">[CUSTOMER_LABEL]:</span> [CUSTOMER_NAME]
                 </div>
                 <div class="detail-row">
-                    <span class="detail-label">Phone:</span> [CUSTOMER_PHONE]
+                    <span class="detail-label">[PHONE_LABEL]:</span> [CUSTOMER_PHONE]
                 </div>
                 <div class="detail-row">
-                    <span class="detail-label">Address:</span> [CUSTOMER_ADDRESS]
+                    <span class="detail-label">[ADDRESS_LABEL]:</span> [CUSTOMER_ADDRESS]
                 </div>
                 <div class="detail-row">
-                    <span class="detail-label">Pickup Date:</span> [PICKUP_DATE]
+                    <span class="detail-label">[PICKUP_DATE_LABEL]:</span> [PICKUP_DATE]
                 </div>
                 <div class="detail-row">
-                    <span class="detail-label">Pickup Time:</span> [PICKUP_TIME]
+                    <span class="detail-label">[PICKUP_TIME_LABEL]:</span> [PICKUP_TIME]
                 </div>
                 <div class="detail-row">
-                    <span class="detail-label">Estimated Weight:</span> [ESTIMATED_WEIGHT]
+                    <span class="detail-label">[ESTIMATED_WEIGHT_LABEL]:</span> [ESTIMATED_WEIGHT]
                 </div>
                 <div class="detail-row">
-                    <span class="detail-label">Number of Bags:</span> [NUMBER_OF_BAGS]
+                    <span class="detail-label">[NUMBER_OF_BAGS_LABEL]:</span> [NUMBER_OF_BAGS]
                 </div>
                 <div class="detail-row">
-                    <span class="detail-label">Special Instructions:</span> [SPECIAL_INSTRUCTIONS]
+                    <span class="detail-label">[SPECIAL_INSTRUCTIONS_LABEL]:</span> [SPECIAL_INSTRUCTIONS]
                 </div>
             </div>
             
             <p style="text-align: center;">
-                <a href="[DASHBOARD_URL]" class="button">View in Dashboard</a>
+                <a href="[DASHBOARD_URL]" class="button">[VIEW_ORDER_BUTTON]</a>
             </p>
             
-            <p>Please ensure you pick up the laundry during the specified time window. The customer will be expecting you.</p>
+            <p>[PICKUP_REMINDER]</p>
             
-            <p>Best regards,<br>
-            The WaveMAX Laundry Team</p>
+            <p>[CLOSING_MESSAGE]</p>
         </div>
         <div class="footer">
-            <p>&copy; [CURRENT_YEAR] CRHS Enterprises, LLC. All rights reserved.</p>
-            <p>This is an automated message. Please do not reply to this email.</p>
+            <p>&copy; [CURRENT_YEAR] CRHS Enterprises, LLC. [FOOTER_RIGHTS]</p>
+            <p>[FOOTER_AUTOMATED_MESSAGE]</p>
         </div>
     </div>
 </body>

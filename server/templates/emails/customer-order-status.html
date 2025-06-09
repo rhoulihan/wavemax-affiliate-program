@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>[EMAIL_TITLE]</title>
     <style>
         body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
         .container { max-width: 600px; margin: 0 auto; padding: 20px; }
@@ -16,37 +19,36 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>{{i18n "emails.orderStatus.title"}}</h1>
+            <h1>[EMAIL_HEADER]</h1>
         </div>
         <div class="content">
-            <p>Hello [FIRST_NAME],</p>
+            <p>[GREETING]</p>
             
-            <p>We have an update on your laundry order!</p>
+            <p>[UPDATE_MESSAGE]</p>
             
             <div class="status-update">
-                <h2 style="color: #1976d2; margin-bottom: 15px;">Status Update</h2>
+                <h2 style="color: #1976d2; margin-bottom: 15px;">[STATUS_UPDATE_TITLE]</h2>
                 <div class="detail-row">
-                    <span class="detail-label">Order ID:</span> [ORDER_ID]
+                    <span class="detail-label">[ORDER_ID_LABEL]:</span> [ORDER_ID]
                 </div>
                 <div class="detail-row" style="font-size: 18px; color: #1976d2;">
-                    <span class="detail-label">Status:</span> [STATUS_MESSAGE]
+                    <span class="detail-label">[STATUS_LABEL]:</span> [STATUS_MESSAGE]
                 </div>
                 [WEIGHT_INFO]
                 [TOTAL_INFO]
             </div>
             
             <p style="text-align: center;">
-                <a href="[DASHBOARD_URL]" class="button">View Order Details</a>
+                <a href="[DASHBOARD_URL]" class="button">[VIEW_ORDER_BUTTON]</a>
             </p>
             
-            <p>Thank you for choosing WaveMAX Laundry!</p>
+            <p>[THANK_YOU_MESSAGE]</p>
             
-            <p>Best regards,<br>
-            The WaveMAX Laundry Team</p>
+            <p>[CLOSING_MESSAGE]</p>
         </div>
         <div class="footer">
-            <p>&copy; [CURRENT_YEAR] CRHS Enterprises, LLC. All rights reserved.</p>
-            <p>This is an automated message. Please do not reply to this email.</p>
+            <p>&copy; [CURRENT_YEAR] CRHS Enterprises, LLC. [FOOTER_RIGHTS]</p>
+            <p>[FOOTER_AUTOMATED_MESSAGE]</p>
         </div>
     </div>
 </body>

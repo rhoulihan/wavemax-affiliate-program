@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>[EMAIL_TITLE]</title>
     <style>
         body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
         .container { max-width: 600px; margin: 0 auto; padding: 20px; }
@@ -16,41 +19,40 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>Commission Earned!</h1>
+            <h1>[EMAIL_HEADER]</h1>
         </div>
         <div class="content">
-            <p>Hello [AFFILIATE_FIRST_NAME],</p>
+            <p>[GREETING]</p>
             
-            <p>Great news! You've earned a commission for a completed order.</p>
+            <p>[COMMISSION_MESSAGE]</p>
             
             <div class="commission-details">
-                <h2 style="color: #2e7d32; margin-bottom: 15px;">Commission Details</h2>
+                <h2 style="color: #2e7d32; margin-bottom: 15px;">[COMMISSION_DETAILS_TITLE]</h2>
                 <div class="detail-row">
-                    <span class="detail-label">Order ID:</span> [ORDER_ID]
+                    <span class="detail-label">[ORDER_ID_LABEL]:</span> [ORDER_ID]
                 </div>
                 <div class="detail-row">
-                    <span class="detail-label">Customer:</span> [CUSTOMER_NAME]
+                    <span class="detail-label">[CUSTOMER_LABEL]:</span> [CUSTOMER_NAME]
                 </div>
                 <div class="detail-row">
-                    <span class="detail-label">Order Total:</span> [ORDER_TOTAL]
+                    <span class="detail-label">[ORDER_TOTAL_LABEL]:</span> [ORDER_TOTAL]
                 </div>
                 <div class="detail-row" style="font-size: 18px; color: #2e7d32;">
-                    <span class="detail-label">Your Commission:</span> [COMMISSION_AMOUNT]
+                    <span class="detail-label">[YOUR_COMMISSION_LABEL]:</span> [COMMISSION_AMOUNT]
                 </div>
             </div>
             
             <p style="text-align: center;">
-                <a href="[DASHBOARD_URL]" class="button">{{i18n "emails.commission.viewDashboard"}}</a>
+                <a href="[DASHBOARD_URL]" class="button">[VIEW_DASHBOARD_BUTTON]</a>
             </p>
             
-            <p>This commission will be included in your next payout. Keep up the great work!</p>
+            <p>[PAYOUT_MESSAGE]</p>
             
-            <p>Best regards,<br>
-            The WaveMAX Laundry Team</p>
+            <p>[CLOSING_MESSAGE]</p>
         </div>
         <div class="footer">
-            <p>&copy; [CURRENT_YEAR] CRHS Enterprises, LLC. All rights reserved.</p>
-            <p>This is an automated message. Please do not reply to this email.</p>
+            <p>&copy; [CURRENT_YEAR] CRHS Enterprises, LLC. [FOOTER_RIGHTS]</p>
+            <p>[FOOTER_AUTOMATED_MESSAGE]</p>
         </div>
     </div>
 </body>
