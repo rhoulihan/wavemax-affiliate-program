@@ -1744,8 +1744,8 @@ function initializeAffiliateRegistration() {
         return;
       }
       
-      // Map might not be initialized yet if section is hidden - that's OK
-      console.log('[Service Area Map] Map initialized?', !!serviceAreaMap);
+      // Service area component will be initialized after address validation
+      console.log('[Service Area Map] Validating address for service area component');
       
       // Show loading state on button with swirl spinner
       const validateButton = document.getElementById('validateAddress');
