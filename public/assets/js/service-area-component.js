@@ -156,9 +156,49 @@
 
     // Check if Leaflet is available
     if (typeof L === 'undefined') {
-      console.log('Leaflet not available, waiting...');
-      // Try again after a delay
-      setTimeout(() => initializeMap(component), 500);
+      console.log('Leaflet not available, loading it dynamically...');
+      
+      // Check if we're already loading Leaflet
+      if (window.leafletLoading) {
+        console.log('Leaflet is already being loaded, waiting...');
+        setTimeout(() => initializeMap(component), 500);
+        return;
+      }
+      
+      // Mark that we're loading Leaflet
+      window.leafletLoading = true;
+      
+      // Check if Leaflet CSS is loaded
+      if (!document.querySelector('link[href*="leaflet"]')) {
+        const leafletCSS = document.createElement('link');
+        leafletCSS.rel = 'stylesheet';
+        leafletCSS.href = 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css';
+        leafletCSS.crossOrigin = 'anonymous';
+        document.head.appendChild(leafletCSS);
+        console.log('Added Leaflet CSS');
+      }
+      
+      // Check if Leaflet JS is being loaded
+      if (!document.querySelector('script[src*="leaflet"]')) {
+        const leafletJS = document.createElement('script');
+        leafletJS.src = 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js';
+        leafletJS.crossOrigin = 'anonymous';
+        leafletJS.onload = function() {
+          console.log('Leaflet loaded successfully');
+          window.leafletLoading = false;
+          // Try to initialize map again
+          initializeMap(component);
+        };
+        leafletJS.onerror = function() {
+          console.error('Failed to load Leaflet');
+          window.leafletLoading = false;
+        };
+        document.head.appendChild(leafletJS);
+        console.log('Loading Leaflet JS...');
+      } else {
+        // Script tag exists, just wait a bit more
+        setTimeout(() => initializeMap(component), 500);
+      }
       return;
     }
 
