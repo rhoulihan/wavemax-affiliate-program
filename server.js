@@ -26,6 +26,7 @@ const administratorRoutes = require('./server/routes/administratorRoutes');
 const operatorRoutes = require('./server/routes/operatorRoutes');
 const coverageRoutes = require('./server/routes/coverageRoutes');
 const systemConfigRoutes = require('./server/routes/systemConfigRoutes');
+const routingRoutes = require('./server/routes/routingRoutes');
 const affiliateController = require('./server/controllers/affiliateController');
 const customerController = require('./server/controllers/customerController');
 
@@ -100,7 +101,7 @@ app.use(helmet({
       scriptSrc: ['\'self\'', 'https://cdnjs.cloudflare.com', 'https://cdn.jsdelivr.net', '\'unsafe-inline\''], // Added unsafe-inline for embed pages
       styleSrc: ['\'self\'', 'https://cdnjs.cloudflare.com', 'https://cdn.jsdelivr.net', 'https://fonts.googleapis.com', '\'unsafe-inline\''], // unsafe-inline needed for Tailwind
       imgSrc: ['\'self\'', 'data:', 'https://www.wavemax.promo', 'https://*.tile.openstreetmap.org', 'https://tile.openstreetmap.org', 'https://cdnjs.cloudflare.com'],
-      connectSrc: ['\'self\'', 'https://wavemax.promo'],
+      connectSrc: ['\'self\'', 'https://wavemax.promo', 'https://router.project-osrm.org', 'https://graphhopper.com', 'https://api.openrouteservice.org', 'https://valhalla1.openstreetmap.de'],
       fontSrc: ['\'self\'', 'https://cdnjs.cloudflare.com', 'https://cdn.jsdelivr.net', 'https://fonts.gstatic.com'],
       objectSrc: ['\'none\''],
       mediaSrc: ['\'self\''],
@@ -322,6 +323,7 @@ apiV1Router.use('/orders', orderRoutes);
 apiV1Router.use('/administrators', administratorRoutes);
 apiV1Router.use('/operators', operatorRoutes);
 apiV1Router.use('/system/config', systemConfigRoutes);
+apiV1Router.use('/routing', routingRoutes);
 
 // Environment endpoint
 apiV1Router.get('/environment', (req, res) => {

@@ -55,14 +55,16 @@
         
         <div class="info">
             <h3>Parent Page Example</h3>
-            <p>This page demonstrates how to properly integrate the WaveMAX Affiliate Program iframe with automatic resizing and scroll-to-top functionality.</p>
+            <p>This page demonstrates how to properly integrate the WaveMAX Affiliate Program iframe with automatic resizing, scroll-to-top functionality, and mobile chrome hiding.</p>
             <p>Current iframe height: <code id="current-height">600px</code></p>
+            <p>Mobile Status: <code id="mobile-status">Checking...</code></p>
+            <p>Chrome Hidden: <code id="chrome-status">No</code></p>
         </div>
         
         <div class="iframe-container">
             <iframe 
                 id="wavemax-iframe"
-                src="https://wavemax.promo/embed-app.html" 
+                src="/embed-app.html" 
                 width="100%" 
                 height="600" 
                 frameborder="0" 
@@ -73,10 +75,18 @@
     </div>
 
     <script>
-        // Handle messages from the iframe
+        // Update status display
+        function updateStatus() {
+            const isMobile = window.innerWidth < 768;
+            document.getElementById('mobile-status').textContent = isMobile ? 'Mobile' : 'Desktop';
+        }
+        updateStatus();
+        window.addEventListener('resize', updateStatus);
+
+        // Handle messages from the iframe (basic version for comparison)
         window.addEventListener('message', function(event) {
-            // Only accept messages from the trusted domain
-            if (event.origin !== 'https://wavemax.promo') return;
+            // Accept messages from any origin during development
+            // In production, you should check: if (event.origin !== 'https://wavemax.promo') return;
             
             const iframe = document.getElementById('wavemax-iframe');
             const heightDisplay = document.getElementById('current-height');
