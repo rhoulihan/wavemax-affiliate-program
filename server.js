@@ -26,6 +26,7 @@ const administratorRoutes = require('./server/routes/administratorRoutes');
 const operatorRoutes = require('./server/routes/operatorRoutes');
 const coverageRoutes = require('./server/routes/coverageRoutes');
 const systemConfigRoutes = require('./server/routes/systemConfigRoutes');
+const routingRoutes = require('./server/routes/routingRoutes');
 const affiliateController = require('./server/controllers/affiliateController');
 const customerController = require('./server/controllers/customerController');
 
@@ -262,6 +263,9 @@ if (process.env.SHOW_DOCS === 'true') {
 // Mount coverage analysis reports (separate from embedded app)
 // This is mounted before CSRF to avoid CSRF token requirements
 app.use('/coverage', coverageRoutes);
+
+// Mount filmwalk routes
+app.use('/filmwalk', routingRoutes);
 
 // Apply CSRF protection with new configuration
 app.use(conditionalCsrf);
