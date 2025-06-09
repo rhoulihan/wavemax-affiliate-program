@@ -376,6 +376,24 @@ async function loadAffiliateData(affiliateId) {
       // Store affiliate data in localStorage for other uses
       localStorage.setItem('currentAffiliate', JSON.stringify(data));
       
+      // Initialize service area component if available
+      if (window.ServiceAreaComponent) {
+        console.log('Initializing service area component in loadAffiliateData');
+        window.settingsServiceArea = window.ServiceAreaComponent.init('settingsServiceAreaComponent', {
+          latitude: parseFloat(data.serviceLatitude) || 30.3524,
+          longitude: parseFloat(data.serviceLongitude) || -97.6841,
+          radius: parseInt(data.serviceRadius) || 5,
+          address: data.serviceArea || '',
+          readOnly: true, // Start in read-only mode
+          showInfo: true,
+          showMap: false, // Hide map initially
+          showControls: false, // Hide controls initially
+          onUpdate: function(serviceData) {
+            console.log('Service area updated:', serviceData);
+          }
+        });
+      }
+      
       // Check if this is an OAuth account and hide change password section if so
       if (data.registrationMethod && data.registrationMethod !== 'traditional') {
         // This is an OAuth account, hide the change password section
@@ -824,7 +842,6 @@ async function loadSettingsData(affiliateId) {
         const emailField = document.getElementById('settingsEmail');
         const phoneField = document.getElementById('settingsPhone');
         const businessNameField = document.getElementById('settingsBusinessName');
-        const serviceAreaField = document.getElementById('settingsServiceArea');
         const registrationLinkField = document.getElementById('registrationLink');
         const minimumDeliveryFeeField = document.getElementById('settingsMinimumDeliveryFee');
         const perBagDeliveryFeeField = document.getElementById('settingsPerBagDeliveryFee');
@@ -845,9 +862,33 @@ async function loadSettingsData(affiliateId) {
         if (emailField) emailField.value = data.email || '';
         if (phoneField) phoneField.value = data.phone || '';
         if (businessNameField) businessNameField.value = data.businessName || '';
-        if (serviceAreaField) serviceAreaField.value = data.serviceArea || '';
         if (minimumDeliveryFeeField) minimumDeliveryFeeField.value = data.minimumDeliveryFee || 25;
         if (perBagDeliveryFeeField) perBagDeliveryFeeField.value = data.perBagDeliveryFee || 5;
+        
+        // Initialize or update service area component
+        if (window.ServiceAreaComponent) {
+          if (window.settingsServiceArea) {
+            // Update existing component
+            window.ServiceAreaComponent.update('settingsServiceAreaComponent', {
+              latitude: parseFloat(data.serviceLatitude) || 30.3524,
+              longitude: parseFloat(data.serviceLongitude) || -97.6841,
+              radius: parseInt(data.serviceRadius) || 5,
+              address: data.serviceArea || ''
+            });
+          } else {
+            // Initialize new component
+            window.settingsServiceArea = window.ServiceAreaComponent.init('settingsServiceAreaComponent', {
+              latitude: parseFloat(data.serviceLatitude) || 30.3524,
+              longitude: parseFloat(data.serviceLongitude) || -97.6841,
+              radius: parseInt(data.serviceRadius) || 5,
+              address: data.serviceArea || '',
+              readOnly: true,
+              showInfo: true,
+              showMap: false,
+              showControls: false
+            });
+          }
+        }
         
         // Initialize pricing preview component
         if (window.PricingPreviewComponent) {
@@ -883,7 +924,7 @@ function enableEditMode() {
   const inputs = document.querySelectorAll('#settingsForm input[type="text"], #settingsForm input[type="email"], #settingsForm input[type="tel"], #settingsForm input[type="number"]');
   inputs.forEach(input => {
     // Skip the registration link field
-    if (input.id !== 'registrationLink') {
+    if (input.id !== 'registrationLink' && input.id !== 'landingPageLink') {
       input.removeAttribute('readonly');
       input.classList.remove('bg-gray-100');
     }
@@ -891,6 +932,16 @@ function enableEditMode() {
 
   document.getElementById('editBtn').style.display = 'none';
   document.getElementById('formButtons').style.display = 'block';
+  
+  // Enable service area editing
+  if (window.settingsServiceArea && window.ServiceAreaComponent) {
+    // Update the component to show map and controls
+    window.ServiceAreaComponent.update('settingsServiceAreaComponent', {
+      readOnly: false,
+      showMap: true,
+      showControls: true
+    });
+  }
   
   // The pricing preview component handles its own event listeners
   // No need to add additional listeners here
@@ -900,7 +951,7 @@ function enableEditMode() {
 function disableEditMode() {
   const inputs = document.querySelectorAll('#settingsForm input[type="text"], #settingsForm input[type="email"], #settingsForm input[type="tel"], #settingsForm input[type="number"]');
   inputs.forEach(input => {
-    if (input.id !== 'registrationLink') {
+    if (input.id !== 'registrationLink' && input.id !== 'landingPageLink') {
       input.setAttribute('readonly', true);
       input.classList.add('bg-gray-100');
     }
@@ -908,6 +959,16 @@ function disableEditMode() {
 
   document.getElementById('editBtn').style.display = 'block';
   document.getElementById('formButtons').style.display = 'none';
+  
+  // Disable service area editing
+  if (window.settingsServiceArea && window.ServiceAreaComponent) {
+    // Update the component to hide map and controls
+    window.ServiceAreaComponent.update('settingsServiceAreaComponent', {
+      readOnly: true,
+      showMap: false,
+      showControls: false
+    });
+  }
   
   // The pricing preview component handles its own event listeners
   // No need to remove listeners here
@@ -923,10 +984,20 @@ async function saveSettings(affiliateId) {
       email: formData.get('email'),
       phone: formData.get('phone'),
       businessName: formData.get('businessName'),
-      serviceArea: formData.get('serviceArea'),
       minimumDeliveryFee: parseFloat(formData.get('minimumDeliveryFee')) || null,
       perBagDeliveryFee: parseFloat(formData.get('perBagDeliveryFee')) || null
     };
+    
+    // Get service area data from component
+    if (window.settingsServiceArea && window.ServiceAreaComponent) {
+      const serviceAreaData = window.ServiceAreaComponent.getData('settingsServiceAreaComponent');
+      if (serviceAreaData) {
+        data.serviceArea = serviceAreaData.address;
+        data.serviceLatitude = serviceAreaData.latitude;
+        data.serviceLongitude = serviceAreaData.longitude;
+        data.serviceRadius = serviceAreaData.radius;
+      }
+    }
 
     const response = await authenticatedFetch(`/api/v1/affiliates/${affiliateId}`, {
       method: 'PUT',

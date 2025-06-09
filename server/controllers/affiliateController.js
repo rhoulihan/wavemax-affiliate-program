@@ -223,7 +223,7 @@ exports.updateAffiliateProfile = async (req, res) => {
     // Fields that can be updated
     const updatableFields = [
       'firstName', 'lastName', 'phone', 'businessName',
-      'address', 'city', 'state', 'zipCode', 'serviceLatitude', 'serviceLongitude', 'serviceRadius',
+      'address', 'city', 'state', 'zipCode', 'serviceArea', 'serviceLatitude', 'serviceLongitude', 'serviceRadius',
       'minimumDeliveryFee', 'perBagDeliveryFee', 'paymentMethod'
     ];
 
