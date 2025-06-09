@@ -408,6 +408,94 @@
         "pendingCommissions": "Comisiones Pendientes",
         "activeOrders": "Pedidos Activos",
         "totalEarnings": "Ganancias Totales"
+      },
+      "pickups": {
+        "title": "Próximas Recogidas y Entregas"
+      },
+      "filters": {
+        "status": "Filtrar por Estado",
+        "date": "Filtrar por Fecha",
+        "searchOrders": "Buscar Pedidos",
+        "searchPlaceholder": "Buscar por nombre de cliente o ID de pedido",
+        "allOrders": "Todos los Pedidos",
+        "allDates": "Todas las Fechas",
+        "today": "Hoy",
+        "tomorrow": "Mañana",
+        "thisWeek": "Esta Semana",
+        "thisMonth": "Este Mes"
+      },
+      "table": {
+        "orderId": "ID de Pedido",
+        "customer": "Cliente",
+        "customerId": "ID de Cliente",
+        "address": "Dirección",
+        "type": "Tipo",
+        "dateTime": "Fecha y Hora",
+        "date": "Fecha",
+        "status": "Estado",
+        "actions": "Acciones",
+        "name": "Nombre",
+        "contactInfo": "Información de Contacto",
+        "registrationDate": "Fecha de Registro",
+        "totalOrders": "Total de Pedidos",
+        "service": "Servicio",
+        "orderTotal": "Total del Pedido",
+        "yourCommission": "Tu Comisión"
+      },
+      "messages": {
+        "loadingOrders": "Cargando pedidos...",
+        "loadingCustomers": "Cargando clientes...",
+        "loadingTransactions": "Cargando transacciones..."
+      },
+      "pagination": {
+        "showing": "Mostrando",
+        "of": "de",
+        "orders": "pedidos"
+      },
+      "customers": {
+        "title": "Gestión de Clientes",
+        "searchLabel": "Buscar Clientes",
+        "searchPlaceholder": "Buscar por nombre, correo o teléfono",
+        "sortBy": "Ordenar Por",
+        "nameAsc": "Nombre (A-Z)",
+        "nameDesc": "Nombre (Z-A)",
+        "mostRecent": "Más Recientes",
+        "mostOrders": "Más Pedidos"
+      },
+      "earnings": {
+        "title": "Ganancias y Comisiones",
+        "thisMonth": "Este Mes",
+        "thisWeek": "Esta Semana",
+        "pendingPayment": "Pago Pendiente",
+        "from": "De",
+        "orders": "pedidos",
+        "nextPayout": "Próximo pago:",
+        "recentTransactions": "Transacciones Recientes"
+      },
+      "settings": {
+        "title": "Configuración de Cuenta",
+        "marketingLinks": "Enlaces de Marketing",
+        "customerLandingPage": "Página de Destino para Clientes",
+        "directRegistrationUrl": "URL de Registro Directo",
+        "landingPageDesc": "Página de destino profesional para mostrar tus servicios y precios a clientes potenciales",
+        "registrationLinkDesc": "Enlace directo para que los clientes se registren bajo tu cuenta de afiliado",
+        "personalInfo": "Información Personal",
+        "deliveryFeeStructure": "Estructura de Tarifas de Entrega",
+        "dynamicPricing": "Precios Dinámicos:",
+        "dynamicPricingDesc": "Tus clientes pagan lo que sea mayor: la tarifa mínima o la tarifa calculada por bolsa. Conservas el 100% de las tarifas de entrega.",
+        "minimumDeliveryFee": "Tarifa Mínima de Entrega ($)",
+        "minimumFeeDesc": "La tarifa mínima cobrada independientemente del número de bolsas",
+        "perBagFee": "Tarifa por Bolsa ($)",
+        "perBagFeeDesc": "Tarifa cobrada por cada bolsa de lavandería",
+        "pricingPreview": "Vista Previa de Precios (ida y vuelta):",
+        "customerPrices": "Precios para clientes por recogida y entrega",
+        "saveChanges": "Guardar Cambios",
+        "changePassword": "Cambiar Contraseña",
+        "currentPassword": "Contraseña Actual",
+        "newPassword": "Nueva Contraseña",
+        "passwordRequirement": "La contraseña debe tener al menos 8 caracteres",
+        "confirmNewPassword": "Confirmar Nueva Contraseña",
+        "changePasswordButton": "Cambiar Contraseña"
       }
     },
     "success": {

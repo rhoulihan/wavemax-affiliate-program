@@ -88,39 +88,39 @@
         <!-- Tab Content -->
         <div class="tab-content active" id="pickups-tab">
             <div class="flex justify-between items-center mb-6">
-                <h2 class="text-xl font-bold">Upcoming Pickups & Deliveries</h2>
+                <h2 class="text-xl font-bold" data-i18n="affiliate.dashboard.pickups.title">Upcoming Pickups & Deliveries</h2>
             </div>
             
             <!-- Filters & Search -->
             <div class="bg-white rounded-lg shadow-md p-4 mb-6">
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
-                        <label for="orderStatusFilter" class="block text-gray-700 mb-2">Filter by Status</label>
+                        <label for="orderStatusFilter" class="block text-gray-700 mb-2" data-i18n="affiliate.dashboard.filters.status">Filter by Status</label>
                         <select id="orderStatusFilter" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                            <option value="all">All Orders</option>
-                            <option value="scheduled" selected>Scheduled</option>
-                            <option value="picked_up">Picked Up</option>
-                            <option value="processing">Processing</option>
-                            <option value="ready_for_delivery">Ready for Delivery</option>
-                            <option value="delivered">Delivered</option>
-                            <option value="cancelled">Cancelled</option>
+                            <option value="all" data-i18n="affiliate.dashboard.filters.allOrders">All Orders</option>
+                            <option value="scheduled" selected data-i18n="orders.status.scheduled">Scheduled</option>
+                            <option value="picked_up" data-i18n="orders.status.pickedUp">Picked Up</option>
+                            <option value="processing" data-i18n="orders.status.processing">Processing</option>
+                            <option value="ready_for_delivery" data-i18n="orders.status.readyForDelivery">Ready for Delivery</option>
+                            <option value="delivered" data-i18n="orders.status.delivered">Delivered</option>
+                            <option value="cancelled" data-i18n="orders.status.cancelled">Cancelled</option>
                         </select>
                     </div>
                     
                     <div>
-                        <label for="dateFilter" class="block text-gray-700 mb-2">Filter by Date</label>
+                        <label for="dateFilter" class="block text-gray-700 mb-2" data-i18n="affiliate.dashboard.filters.date">Filter by Date</label>
                         <select id="dateFilter" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                            <option value="all">All Dates</option>
-                            <option value="today" selected>Today</option>
-                            <option value="tomorrow">Tomorrow</option>
-                            <option value="week">This Week</option>
-                            <option value="month">This Month</option>
+                            <option value="all" data-i18n="affiliate.dashboard.filters.allDates">All Dates</option>
+                            <option value="today" selected data-i18n="affiliate.dashboard.filters.today">Today</option>
+                            <option value="tomorrow" data-i18n="affiliate.dashboard.filters.tomorrow">Tomorrow</option>
+                            <option value="week" data-i18n="affiliate.dashboard.filters.thisWeek">This Week</option>
+                            <option value="month" data-i18n="affiliate.dashboard.filters.thisMonth">This Month</option>
                         </select>
                     </div>
                     
                     <div>
-                        <label for="orderSearch" class="block text-gray-700 mb-2">Search Orders</label>
-                        <input type="text" id="orderSearch" placeholder="Search by customer name or order ID" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <label for="orderSearch" class="block text-gray-700 mb-2" data-i18n="affiliate.dashboard.filters.searchOrders">Search Orders</label>
+                        <input type="text" id="orderSearch" placeholder="Search by customer name or order ID" data-i18n-placeholder="affiliate.dashboard.filters.searchPlaceholder" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
                     </div>
                 </div>
             </div>
@@ -131,27 +131,27 @@
                     <table class="w-full">
                         <thead class="bg-gray-50">
                             <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Order ID</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Address</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date & Time</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-i18n="affiliate.dashboard.table.orderId">Order ID</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-i18n="affiliate.dashboard.table.customer">Customer</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-i18n="affiliate.dashboard.table.address">Address</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-i18n="affiliate.dashboard.table.type">Type</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-i18n="affiliate.dashboard.table.dateTime">Date & Time</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-i18n="affiliate.dashboard.table.status">Status</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-i18n="affiliate.dashboard.table.actions">Actions</th>
                             </tr>
                         </thead>
                         <tbody id="ordersTableBody" class="divide-y divide-gray-200">
                             <tr class="text-center">
-                                <td colspan="7" class="px-6 py-4 text-gray-500">Loading orders...</td>
+                                <td colspan="7" class="px-6 py-4 text-gray-500" data-i18n="affiliate.dashboard.messages.loadingOrders">Loading orders...</td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
                 <div id="ordersPagination" class="px-6 py-3 flex justify-between items-center bg-gray-50">
-                    <p class="text-sm text-gray-700">Showing <span id="ordersShowing">0</span> of <span id="ordersTotal">0</span> orders</p>
+                    <p class="text-sm text-gray-700"><span data-i18n="affiliate.dashboard.pagination.showing">Showing</span> <span id="ordersShowing">0</span> <span data-i18n="affiliate.dashboard.pagination.of">of</span> <span id="ordersTotal">0</span> <span data-i18n="affiliate.dashboard.pagination.orders">orders</span></p>
                     <div class="flex space-x-2">
-                        <button id="prevOrdersPage" class="px-3 py-1 border rounded text-sm disabled:opacity-50">Previous</button>
-                        <button id="nextOrdersPage" class="px-3 py-1 border rounded text-sm disabled:opacity-50">Next</button>
+                        <button id="prevOrdersPage" class="px-3 py-1 border rounded text-sm disabled:opacity-50" data-i18n="common.buttons.previous">Previous</button>
+                        <button id="nextOrdersPage" class="px-3 py-1 border rounded text-sm disabled:opacity-50" data-i18n="common.buttons.next">Next</button>
                     </div>
                 </div>
             </div>
@@ -159,24 +159,24 @@
         
         <div class="tab-content" id="customers-tab">
             <div class="mb-6">
-                <h2 class="text-xl font-bold">Customer Management</h2>
+                <h2 class="text-xl font-bold" data-i18n="affiliate.dashboard.customers.title">Customer Management</h2>
             </div>
             
             <!-- Customer Search -->
             <div class="bg-white rounded-lg shadow-md p-4 mb-6">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                        <label for="customerSearch" class="block text-gray-700 mb-2">Search Customers</label>
-                        <input type="text" id="customerSearch" placeholder="Search by name, email, or phone" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <label for="customerSearch" class="block text-gray-700 mb-2" data-i18n="affiliate.dashboard.customers.searchLabel">Search Customers</label>
+                        <input type="text" id="customerSearch" placeholder="Search by name, email, or phone" data-i18n-placeholder="affiliate.dashboard.customers.searchPlaceholder" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
                     </div>
                     
                     <div>
-                        <label for="customerSort" class="block text-gray-700 mb-2">Sort By</label>
+                        <label for="customerSort" class="block text-gray-700 mb-2" data-i18n="affiliate.dashboard.customers.sortBy">Sort By</label>
                         <select id="customerSort" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                            <option value="name_asc">Name (A-Z)</option>
-                            <option value="name_desc">Name (Z-A)</option>
-                            <option value="recent">Most Recent</option>
-                            <option value="orders">Most Orders</option>
+                            <option value="name_asc" data-i18n="affiliate.dashboard.customers.nameAsc">Name (A-Z)</option>
+                            <option value="name_desc" data-i18n="affiliate.dashboard.customers.nameDesc">Name (Z-A)</option>
+                            <option value="recent" data-i18n="affiliate.dashboard.customers.mostRecent">Most Recent</option>
+                            <option value="orders" data-i18n="affiliate.dashboard.customers.mostOrders">Most Orders</option>
                         </select>
                     </div>
                 </div>
@@ -188,18 +188,18 @@
                     <table class="w-full">
                         <thead class="bg-gray-50">
                             <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer ID</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Contact Info</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Address</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Registration Date</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Orders</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-i18n="affiliate.dashboard.table.customerId">Customer ID</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-i18n="affiliate.dashboard.table.name">Name</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-i18n="affiliate.dashboard.table.contactInfo">Contact Info</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-i18n="affiliate.dashboard.table.address">Address</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-i18n="affiliate.dashboard.table.registrationDate">Registration Date</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-i18n="affiliate.dashboard.table.totalOrders">Total Orders</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-i18n="affiliate.dashboard.table.actions">Actions</th>
                             </tr>
                         </thead>
                         <tbody id="customersTableBody" class="divide-y divide-gray-200">
                             <tr class="text-center">
-                                <td colspan="7" class="px-6 py-4 text-gray-500">Loading customers...</td>
+                                <td colspan="7" class="px-6 py-4 text-gray-500" data-i18n="affiliate.dashboard.messages.loadingCustomers">Loading customers...</td>
                             </tr>
                         </tbody>
                     </table>
@@ -215,49 +215,49 @@
         </div>
         
         <div class="tab-content" id="earnings-tab">
-            <h2 class="text-xl font-bold mb-6">Earnings & Commission</h2>
+            <h2 class="text-xl font-bold mb-6" data-i18n="affiliate.dashboard.earnings.title">Earnings & Commission</h2>
             
             <!-- Earnings Summary Cards -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                 <div class="bg-white rounded-lg shadow-md p-6">
-                    <h3 class="text-lg font-bold text-gray-600 mb-2">This Month</h3>
+                    <h3 class="text-lg font-bold text-gray-600 mb-2" data-i18n="affiliate.dashboard.earnings.thisMonth">This Month</h3>
                     <p class="text-3xl font-bold" id="monthEarnings">$0.00</p>
-                    <p class="text-sm text-gray-500 mt-1">From <span id="monthOrderCount">0</span> orders</p>
+                    <p class="text-sm text-gray-500 mt-1"><span data-i18n="affiliate.dashboard.earnings.from">From</span> <span id="monthOrderCount">0</span> <span data-i18n="affiliate.dashboard.earnings.orders">orders</span></p>
                 </div>
                 
                 <div class="bg-white rounded-lg shadow-md p-6">
-                    <h3 class="text-lg font-bold text-gray-600 mb-2">This Week</h3>
+                    <h3 class="text-lg font-bold text-gray-600 mb-2" data-i18n="affiliate.dashboard.earnings.thisWeek">This Week</h3>
                     <p class="text-3xl font-bold" id="weekEarnings">$0.00</p>
-                    <p class="text-sm text-gray-500 mt-1">From <span id="weekOrderCount">0</span> orders</p>
+                    <p class="text-sm text-gray-500 mt-1"><span data-i18n="affiliate.dashboard.earnings.from">From</span> <span id="weekOrderCount">0</span> <span data-i18n="affiliate.dashboard.earnings.orders">orders</span></p>
                 </div>
                 
                 <div class="bg-white rounded-lg shadow-md p-6">
-                    <h3 class="text-lg font-bold text-gray-600 mb-2">Pending Payment</h3>
+                    <h3 class="text-lg font-bold text-gray-600 mb-2" data-i18n="affiliate.dashboard.earnings.pendingPayment">Pending Payment</h3>
                     <p class="text-3xl font-bold" id="pendingEarnings">$0.00</p>
-                    <p class="text-sm text-gray-500 mt-1">Next payout: <span id="nextPayoutDate">--</span></p>
+                    <p class="text-sm text-gray-500 mt-1"><span data-i18n="affiliate.dashboard.earnings.nextPayout">Next payout:</span> <span id="nextPayoutDate">--</span></p>
                 </div>
             </div>
             
             <!-- Recent Transactions -->
             <div class="bg-white rounded-lg shadow-md overflow-hidden">
                 <div class="px-6 py-4 border-b">
-                    <h3 class="text-lg font-bold">Recent Transactions</h3>
+                    <h3 class="text-lg font-bold" data-i18n="affiliate.dashboard.earnings.recentTransactions">Recent Transactions</h3>
                 </div>
                 <div class="overflow-x-auto">
                     <table class="w-full">
                         <thead class="bg-gray-50">
                             <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Order ID</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Service</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Order Total</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Your Commission</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-i18n="affiliate.dashboard.table.date">Date</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-i18n="affiliate.dashboard.table.orderId">Order ID</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-i18n="affiliate.dashboard.table.customer">Customer</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-i18n="affiliate.dashboard.table.service">Service</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-i18n="affiliate.dashboard.table.orderTotal">Order Total</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-i18n="affiliate.dashboard.table.yourCommission">Your Commission</th>
                             </tr>
                         </thead>
                         <tbody id="transactionsTableBody" class="divide-y divide-gray-200">
                             <tr class="text-center">
-                                <td colspan="6" class="px-6 py-4 text-gray-500">Loading transactions...</td>
+                                <td colspan="6" class="px-6 py-4 text-gray-500" data-i18n="affiliate.dashboard.messages.loadingTransactions">Loading transactions...</td>
                             </tr>
                         </tbody>
                     </table>
@@ -266,7 +266,7 @@
         </div>
         
         <div class="tab-content" id="settings-tab">
-            <h2 class="text-xl font-bold mb-6">Account Settings</h2>
+            <h2 class="text-xl font-bold mb-6" data-i18n="affiliate.dashboard.settings.title">Account Settings</h2>
             
             <!-- Settings Form -->
             <div class="bg-white rounded-lg shadow-md overflow-hidden">
@@ -276,62 +276,62 @@
 
                         <!-- Marketing Links Section -->
                         <div class="mb-6">
-                            <h3 class="text-lg font-bold mb-4">Marketing Links</h3>
+                            <h3 class="text-lg font-bold mb-4" data-i18n="affiliate.dashboard.settings.marketingLinks">Marketing Links</h3>
                             
                             <!-- Landing Page Link -->
                             <div class="mb-4">
-                                <label for="landingPageLink" class="block text-gray-700 mb-2">Customer Landing Page</label>
+                                <label for="landingPageLink" class="block text-gray-700 mb-2" data-i18n="affiliate.dashboard.settings.customerLandingPage">Customer Landing Page</label>
                                 <div class="flex">
                                     <input type="text" id="landingPageLink" class="w-full px-4 py-2 border rounded-l-lg bg-gray-100" readonly>
-                                    <button type="button" id="copyLandingPageLinkBtn" class="bg-blue-600 text-white px-4 py-2 rounded-r-lg hover:bg-blue-700 transition">Copy</button>
+                                    <button type="button" id="copyLandingPageLinkBtn" class="bg-blue-600 text-white px-4 py-2 rounded-r-lg hover:bg-blue-700 transition" data-i18n="common.buttons.copy">Copy</button>
                                 </div>
-                                <p class="text-sm text-gray-600 mt-1">Professional landing page to showcase your services and pricing to potential customers</p>
+                                <p class="text-sm text-gray-600 mt-1" data-i18n="affiliate.dashboard.settings.landingPageDesc">Professional landing page to showcase your services and pricing to potential customers</p>
                             </div>
                             
                             <!-- Registration Link -->
                             <div class="mb-4">
-                                <label for="registrationLink" class="block text-gray-700 mb-2">Direct Registration URL</label>
+                                <label for="registrationLink" class="block text-gray-700 mb-2" data-i18n="affiliate.dashboard.settings.directRegistrationUrl">Direct Registration URL</label>
                                 <div class="flex">
                                     <input type="text" id="registrationLink" class="w-full px-4 py-2 border rounded-l-lg bg-gray-100" readonly>
-                                    <button type="button" id="copyRegistrationLinkBtn" class="bg-blue-600 text-white px-4 py-2 rounded-r-lg hover:bg-blue-700 transition">Copy</button>
+                                    <button type="button" id="copyRegistrationLinkBtn" class="bg-blue-600 text-white px-4 py-2 rounded-r-lg hover:bg-blue-700 transition" data-i18n="common.buttons.copy">Copy</button>
                                 </div>
-                                <p class="text-sm text-gray-600 mt-1">Direct link for customers to register under your affiliate account</p>
+                                <p class="text-sm text-gray-600 mt-1" data-i18n="affiliate.dashboard.settings.registrationLinkDesc">Direct link for customers to register under your affiliate account</p>
                             </div>
                         </div>
 
                         <div class="mb-6">
                             <div class="flex justify-between items-center mb-4">
-                                <h3 class="text-lg font-bold">Personal Information</h3>
-                                <button type="button" id="editBtn" class="text-blue-600 hover:text-blue-700 font-medium">Edit</button>
+                                <h3 class="text-lg font-bold" data-i18n="affiliate.dashboard.settings.personalInfo">Personal Information</h3>
+                                <button type="button" id="editBtn" class="text-blue-600 hover:text-blue-700 font-medium" data-i18n="common.buttons.edit">Edit</button>
                             </div>
                             <div class="grid md:grid-cols-2 gap-4">
                                 <div>
-                                    <label for="settingsFirstName" class="block text-gray-700 mb-2">First Name</label>
+                                    <label for="settingsFirstName" class="block text-gray-700 mb-2" data-i18n="common.labels.firstName">First Name</label>
                                     <input type="text" id="settingsFirstName" name="firstName" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-100" readonly>
                                 </div>
                                 
                                 <div>
-                                    <label for="settingsLastName" class="block text-gray-700 mb-2">Last Name</label>
+                                    <label for="settingsLastName" class="block text-gray-700 mb-2" data-i18n="common.labels.lastName">Last Name</label>
                                     <input type="text" id="settingsLastName" name="lastName" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-100" readonly>
                                 </div>
                                 
                                 <div>
-                                    <label for="settingsEmail" class="block text-gray-700 mb-2">Email Address</label>
+                                    <label for="settingsEmail" class="block text-gray-700 mb-2" data-i18n="common.labels.email">Email Address</label>
                                     <input type="email" id="settingsEmail" name="email" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-100" readonly>
                                 </div>
                                 
                                 <div>
-                                    <label for="settingsPhone" class="block text-gray-700 mb-2">Phone Number</label>
+                                    <label for="settingsPhone" class="block text-gray-700 mb-2" data-i18n="common.labels.phoneNumber">Phone Number</label>
                                     <input type="tel" id="settingsPhone" name="phone" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-100" readonly>
                                 </div>
 
                                 <div>
-                                    <label for="settingsBusinessName" class="block text-gray-700 mb-2">Business Name</label>
+                                    <label for="settingsBusinessName" class="block text-gray-700 mb-2" data-i18n="affiliate.register.businessName">Business Name</label>
                                     <input type="text" id="settingsBusinessName" name="businessName" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-100" readonly>
                                 </div>
 
                                 <div>
-                                    <label for="settingsServiceArea" class="block text-gray-700 mb-2">Service Area</label>
+                                    <label for="settingsServiceArea" class="block text-gray-700 mb-2" data-i18n="affiliate.register.serviceArea">Service Area</label>
                                     <input type="text" id="settingsServiceArea" name="serviceArea" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-100" readonly>
                                 </div>
                             </div>
@@ -339,10 +339,10 @@
 
                         <!-- Delivery Fee Settings -->
                         <div class="mb-6">
-                            <h3 class="text-lg font-bold mb-4">Delivery Fee Structure</h3>
+                            <h3 class="text-lg font-bold mb-4" data-i18n="affiliate.dashboard.settings.deliveryFeeStructure">Delivery Fee Structure</h3>
                             <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
                                 <p class="text-sm text-gray-700">
-                                    <strong>Dynamic Pricing:</strong> Your customers pay whichever is higher: the minimum fee or the calculated per-bag rate. You keep 100% of delivery fees.
+                                    <strong data-i18n="affiliate.dashboard.settings.dynamicPricing">Dynamic Pricing:</strong> <span data-i18n="affiliate.dashboard.settings.dynamicPricingDesc">Your customers pay whichever is higher: the minimum fee or the calculated per-bag rate. You keep 100% of delivery fees.</span>
                                 </p>
                             </div>
                             
@@ -350,75 +350,75 @@
                                 <!-- Fee Inputs Column -->
                                 <div class="space-y-4">
                                     <div>
-                                        <label for="settingsMinimumDeliveryFee" class="block text-gray-700 mb-2">Minimum Delivery Fee ($)</label>
+                                        <label for="settingsMinimumDeliveryFee" class="block text-gray-700 mb-2" data-i18n="affiliate.dashboard.settings.minimumDeliveryFee">Minimum Delivery Fee ($)</label>
                                         <input type="number" id="settingsMinimumDeliveryFee" name="minimumDeliveryFee" min="0" step="1" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-100" readonly>
-                                        <p class="text-xs text-gray-500 mt-1">The minimum fee charged regardless of bag count</p>
+                                        <p class="text-xs text-gray-500 mt-1" data-i18n="affiliate.dashboard.settings.minimumFeeDesc">The minimum fee charged regardless of bag count</p>
                                     </div>
                                     
                                     <div>
-                                        <label for="settingsPerBagDeliveryFee" class="block text-gray-700 mb-2">Per-Bag Fee ($)</label>
+                                        <label for="settingsPerBagDeliveryFee" class="block text-gray-700 mb-2" data-i18n="affiliate.dashboard.settings.perBagFee">Per-Bag Fee ($)</label>
                                         <input type="number" id="settingsPerBagDeliveryFee" name="perBagDeliveryFee" min="0" step="1" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-100" readonly>
-                                        <p class="text-xs text-gray-500 mt-1">Fee charged for each bag of laundry</p>
+                                        <p class="text-xs text-gray-500 mt-1" data-i18n="affiliate.dashboard.settings.perBagFeeDesc">Fee charged for each bag of laundry</p>
                                     </div>
                                 </div>
                                 
                                 <!-- Fee Calculator Preview Column -->
                                 <div>
                                     <div id="feeCalculatorPreview" class="p-4 bg-white rounded-lg border border-gray-300">
-                                        <p class="text-sm font-semibold text-gray-700 mb-3">Pricing Preview (round trip):</p>
+                                        <p class="text-sm font-semibold text-gray-700 mb-3" data-i18n="affiliate.dashboard.settings.pricingPreview">Pricing Preview (round trip):</p>
                                         <div class="space-y-3">
                                             <div class="flex justify-between items-center py-2 border-b border-gray-100">
-                                                <span class="text-sm text-gray-600">1 bag</span>
+                                                <span class="text-sm text-gray-600" data-i18n="affiliate.register.1bag">1 bag</span>
                                                 <span id="preview1bag" class="text-lg font-semibold text-blue-600">$50</span>
                                             </div>
                                             <div class="flex justify-between items-center py-2 border-b border-gray-100">
-                                                <span class="text-sm text-gray-600">3 bags</span>
+                                                <span class="text-sm text-gray-600" data-i18n="affiliate.register.3bags">3 bags</span>
                                                 <span id="preview3bags" class="text-lg font-semibold text-blue-600">$50</span>
                                             </div>
                                             <div class="flex justify-between items-center py-2 border-b border-gray-100">
-                                                <span class="text-sm text-gray-600">5 bags</span>
+                                                <span class="text-sm text-gray-600" data-i18n="affiliate.register.5bags">5 bags</span>
                                                 <span id="preview5bags" class="text-lg font-semibold text-blue-600">$50</span>
                                             </div>
                                             <div class="flex justify-between items-center py-2">
-                                                <span class="text-sm text-gray-600">10 bags</span>
+                                                <span class="text-sm text-gray-600" data-i18n="affiliate.register.10bags">10 bags</span>
                                                 <span id="preview10bags" class="text-lg font-semibold text-blue-600">$100</span>
                                             </div>
                                         </div>
-                                        <p class="text-xs text-gray-500 mt-3 text-center">Customer prices for pickup & delivery</p>
+                                        <p class="text-xs text-gray-500 mt-3 text-center" data-i18n="affiliate.dashboard.settings.customerPrices">Customer prices for pickup & delivery</p>
                                     </div>
                                 </div>
                             </div>
                         </div>
                         
                         <div id="formButtons" style="display: none;">
-                            <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition mr-2">Save Changes</button>
-                            <button type="button" id="cancelBtn" class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition">Cancel</button>
+                            <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition mr-2" data-i18n="affiliate.dashboard.settings.saveChanges">Save Changes</button>
+                            <button type="button" id="cancelBtn" class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition" data-i18n="common.buttons.cancel">Cancel</button>
                         </div>
                     </form>
                     
                     <!-- Change Password Section -->
-                    <div class="mt-8 pt-6 border-t">
-                        <h3 class="text-lg font-bold mb-4">Change Password</h3>
+                    <div id="changePasswordSection" class="mt-8 pt-6 border-t">
+                        <h3 class="text-lg font-bold mb-4" data-i18n="affiliate.dashboard.settings.changePassword">Change Password</h3>
                         <form id="changePasswordForm">
                             <div class="grid md:grid-cols-1 gap-4 max-w-md">
                                 <div>
-                                    <label for="currentPassword" class="block text-gray-700 mb-2">Current Password</label>
+                                    <label for="currentPassword" class="block text-gray-700 mb-2" data-i18n="affiliate.dashboard.settings.currentPassword">Current Password</label>
                                     <input type="password" id="currentPassword" name="currentPassword" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required>
                                 </div>
                                 
                                 <div>
-                                    <label for="newPassword" class="block text-gray-700 mb-2">New Password</label>
+                                    <label for="newPassword" class="block text-gray-700 mb-2" data-i18n="affiliate.dashboard.settings.newPassword">New Password</label>
                                     <input type="password" id="newPassword" name="newPassword" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required>
-                                    <p class="text-sm text-gray-600 mt-1">Password must be at least 8 characters long</p>
+                                    <p class="text-sm text-gray-600 mt-1" data-i18n="affiliate.dashboard.settings.passwordRequirement">Password must be at least 8 characters long</p>
                                 </div>
                                 
                                 <div>
-                                    <label for="confirmPassword" class="block text-gray-700 mb-2">Confirm New Password</label>
+                                    <label for="confirmPassword" class="block text-gray-700 mb-2" data-i18n="affiliate.dashboard.settings.confirmNewPassword">Confirm New Password</label>
                                     <input type="password" id="confirmPassword" name="confirmPassword" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required>
                                 </div>
                                 
                                 <div>
-                                    <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition">Change Password</button>
+                                    <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition" data-i18n="affiliate.dashboard.settings.changePasswordButton">Change Password</button>
                                 </div>
                             </div>
                             
@@ -512,6 +512,25 @@
 
             // Notify parent that iframe is loaded
             sendMessageToParent('iframe-loaded', { page: 'affiliate-dashboard' });
+            
+            // Check if this is an OAuth account and hide change password section if so
+            const currentAffiliate = localStorage.getItem('currentAffiliate');
+            if (currentAffiliate) {
+                try {
+                    const affiliateData = JSON.parse(currentAffiliate);
+                    console.log('Checking OAuth status:', affiliateData.loginProvider);
+                    if (affiliateData.loginProvider) {
+                        // This is an OAuth account, hide the change password section
+                        const changePasswordSection = document.getElementById('changePasswordSection');
+                        if (changePasswordSection) {
+                            changePasswordSection.style.display = 'none';
+                            console.log('Hiding change password section for OAuth account');
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error parsing affiliate data:', error);
+                }
+            }
         });
 
         // Override API calls to use full URLs
