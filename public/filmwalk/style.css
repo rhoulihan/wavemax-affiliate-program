@@ -349,6 +349,12 @@ nav a:hover::after {
     color: var(--neon-cyan) !important;
 }
 
+/* Remove background from custom map markers */
+.custom-div-icon {
+    background: transparent !important;
+    border: none !important;
+}
+
 /* Route Overview Box */
 .route-overview-box {
     margin-top: 2rem;

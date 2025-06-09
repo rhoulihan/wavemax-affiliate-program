@@ -1014,7 +1014,8 @@ function initializeMap() {
                 html: `<div style="background: #ff2a6d; color: #0a0a0a; border-radius: 50%; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; font-weight: bold; border: 2px solid #ff2a6d; box-shadow: 0 0 20px #ff2a6d, 0 2px 10px rgba(0,0,0,0.8); font-family: 'Courier New', monospace;">${id}</div>`,
                 iconSize: [30, 30],
                 iconAnchor: [15, 15],
-                popupAnchor: [0, -15]
+                popupAnchor: [0, -15],
+                className: 'custom-div-icon'
             })
         }).addTo(map);
 
@@ -1048,7 +1049,8 @@ function initializeMap() {
                 html: `<div style="background: #d100d1; color: #0a0a0a; border-radius: 50%; width: 25px; height: 25px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: bold; border: 2px solid #d100d1; box-shadow: 0 0 15px #d100d1, 0 2px 8px rgba(0,0,0,0.8); font-family: 'Courier New', monospace;">B</div>`,
                 iconSize: [25, 25],
                 iconAnchor: [12.5, 12.5],
-                popupAnchor: [0, -12.5]
+                popupAnchor: [0, -12.5],
+                className: 'custom-div-icon'
             })
         }).addTo(map);
 
