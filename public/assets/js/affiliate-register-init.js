@@ -2147,39 +2147,32 @@ function initializeAffiliateRegistration() {
           
           // Initialize the service area component with stored data
           console.log('[Service Area Map] Service area section shown, initializing component');
-          
-          // Delay component initialization to ensure it doesn't block
-          setTimeout(() => {
-            if (window.ServiceAreaComponent && window.selectedServiceAreaData) {
-              const data = window.selectedServiceAreaData;
-              window.registrationServiceArea = window.ServiceAreaComponent.init('registrationServiceAreaComponent', {
-                latitude: data.latitude,
-                longitude: data.longitude,
-                radius: data.radius,
-                address: data.address,
-                editable: true,
-                showMap: true,
-                showControls: true,
-                showInfo: true,
-                onUpdate: function(serviceData) {
-                  // Update hidden fields
-                  document.getElementById('serviceLatitude').value = serviceData.latitude;
-                  document.getElementById('serviceLongitude').value = serviceData.longitude;
-                  document.getElementById('serviceRadius').value = serviceData.radius;
-                  console.log('Service area updated:', serviceData);
-                }
-              });
-            } else {
-              console.error('ServiceAreaComponent or selectedServiceAreaData not available');
-            }
-          }, 100);
-          
-          // Update the hidden fields immediately with initial values (don't wait for component)
-          if (window.selectedServiceAreaData) {
+          if (window.ServiceAreaComponent && window.selectedServiceAreaData) {
             const data = window.selectedServiceAreaData;
+            window.registrationServiceArea = window.ServiceAreaComponent.init('registrationServiceAreaComponent', {
+              latitude: data.latitude,
+              longitude: data.longitude,
+              radius: data.radius,
+              address: data.address,
+              editable: true,
+              showMap: true,
+              showControls: true,
+              showInfo: true,
+              onUpdate: function(serviceData) {
+                // Update hidden fields
+                document.getElementById('serviceLatitude').value = serviceData.latitude;
+                document.getElementById('serviceLongitude').value = serviceData.longitude;
+                document.getElementById('serviceRadius').value = serviceData.radius;
+                console.log('Service area updated:', serviceData);
+              }
+            });
+            
+            // Also update the hidden fields immediately with initial values
             document.getElementById('serviceLatitude').value = data.latitude;
             document.getElementById('serviceLongitude').value = data.longitude;
             document.getElementById('serviceRadius').value = data.radius;
+          } else {
+            console.error('ServiceAreaComponent or selectedServiceAreaData not available');
           }
         }
         
