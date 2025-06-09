@@ -43,6 +43,51 @@ async function authenticatedFetch(url, options = {}) {
   });
 }
 
+// Helper function to format address from Nominatim response
+function formatDashboardAddress(displayName) {
+  const parts = displayName.split(',').map(p => p.trim());
+  let street = '', city = '', state = '', zipcode = '';
+  
+  // Parse address components
+  if (parts.length >= 2) {
+    if (parts[0].match(/^\d+$/)) {
+      street = parts[0] + ' ' + parts[1];
+      for (let i = 2; i < parts.length; i++) {
+        const part = parts[i];
+        if (part.match(/^[A-Z]{2}$/)) {
+          state = part;
+        } else if (part.match(/\d{5}/)) {
+          zipcode = part.match(/\d{5}/)[0];
+        } else if (!city && !state && !part.match(/USA|United States|county|township/i)) {
+          city = part;
+        }
+      }
+    } else {
+      street = parts[0];
+      for (let i = 1; i < parts.length; i++) {
+        const part = parts[i];
+        if (part.match(/^[A-Z]{2}$/)) {
+          state = part;
+        } else if (part.match(/\d{5}/)) {
+          zipcode = part.match(/\d{5}/)[0];
+        } else if (!city && !state && !part.match(/USA|United States|county|township/i)) {
+          city = part;
+        }
+      }
+    }
+  }
+  
+  // Build formatted address
+  let formatted = street;
+  if (city) formatted += ', ' + city;
+  if (state) {
+    formatted += ', ' + state;
+    if (zipcode) formatted += ' ' + zipcode;
+  }
+  
+  return formatted || parts.slice(0, 3).join(', ');
+}
+
 // Affiliate dashboard functionality for embedded environment
 function initializeAffiliateDashboard() {
   const isEmbedded = window.EMBED_CONFIG?.isEmbedded || false;
@@ -379,9 +424,13 @@ async function loadAffiliateData(affiliateId) {
       // Initialize service area component if available
       if (window.ServiceAreaComponent) {
         console.log('Initializing service area component in loadAffiliateData');
+        const lat = parseFloat(data.serviceLatitude) || 30.3524;
+        const lng = parseFloat(data.serviceLongitude) || -97.6841;
+        const hasAddress = data.serviceArea && data.serviceArea.trim() !== '';
+        
         window.settingsServiceArea = window.ServiceAreaComponent.init('settingsServiceAreaComponent', {
-          latitude: parseFloat(data.serviceLatitude) || 30.3524,
-          longitude: parseFloat(data.serviceLongitude) || -97.6841,
+          latitude: lat,
+          longitude: lng,
           radius: parseInt(data.serviceRadius) || 5,
           address: data.serviceArea || '',
           readOnly: true, // Start in read-only mode
@@ -392,6 +441,45 @@ async function loadAffiliateData(affiliateId) {
             console.log('Service area updated:', serviceData);
           }
         });
+        
+        // If no address is stored, trigger reverse geocoding
+        if (!hasAddress && lat && lng) {
+          console.log('No address stored, triggering reverse geocoding for coordinates:', lat, lng);
+          // Trigger reverse geocoding through the component
+          if (window.parent !== window) {
+            const requestId = 'dashboard_init_' + Date.now();
+            
+            window.parent.postMessage({
+              type: 'geocode-reverse',
+              data: { lat, lng, requestId }
+            }, '*');
+            
+            // Set up one-time handler for the response
+            const handleResponse = function(event) {
+              if (event.data && event.data.type === 'geocode-reverse-response' && 
+                  event.data.data && event.data.data.requestId === requestId) {
+                
+                if (event.data.data.address) {
+                  // Format the address
+                  const formattedAddress = formatDashboardAddress(event.data.data.address);
+                  // Update the location element directly
+                  const locationElement = document.getElementById('settingsServiceAreaComponent-centerLocation');
+                  if (locationElement) {
+                    locationElement.textContent = formattedAddress;
+                  }
+                  // Update the component's config
+                  if (window.settingsServiceArea) {
+                    window.settingsServiceArea.config.address = formattedAddress;
+                  }
+                }
+                
+                window.removeEventListener('message', handleResponse);
+              }
+            };
+            
+            window.addEventListener('message', handleResponse);
+          }
+        }
       }
       
       // Check if this is an OAuth account and hide change password section if so
