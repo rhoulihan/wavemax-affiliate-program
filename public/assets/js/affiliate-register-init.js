@@ -2,11 +2,17 @@
 (function() {
   'use strict';
   
+  console.log('[affiliate-register-init] Script loading at:', new Date().toISOString());
+  console.log('[affiliate-register-init] SwirlSpinner available?', !!window.SwirlSpinner);
+  console.log('[affiliate-register-init] Document readyState:', document.readyState);
+  
   // Note: Registration endpoints currently don't require CSRF tokens
   // But we'll prepare for future implementation
   const csrfFetch = window.CsrfUtils && window.CsrfUtils.csrfFetch ? window.CsrfUtils.csrfFetch : fetch;
 
 function initializeAffiliateRegistration() {
+  console.log('[Init] Starting affiliate registration initialization');
+  
   // Configuration for embedded environment
   const baseUrl = window.EMBED_CONFIG?.baseUrl || 'https://wavemax.promo';
   const isEmbedded = window.EMBED_CONFIG?.isEmbedded || false;
@@ -150,20 +156,40 @@ function initializeAffiliateRegistration() {
       { id: 'email', name: 'Email' }
     );
     
+    // Check if address has been validated (business info section is hidden)
+    const businessInfoSection = document.querySelector('#businessInfoSection');
+    const addressValidated = window.addressValidated || (businessInfoSection && businessInfoSection.style.display === 'none');
+    
     // Common required fields for both registration types
     requiredFields.push(
-      { id: 'phone', name: 'Phone Number' },
-      { id: 'address', name: 'Address' },
-      { id: 'city', name: 'City' },
-      { id: 'state', name: 'State' },
-      { id: 'zipCode', name: 'ZIP Code' },
+      { id: 'phone', name: 'Phone Number' }
+    );
+    
+    // Only validate address fields if they haven't been validated yet
+    if (!addressValidated) {
+      requiredFields.push(
+        { id: 'address', name: 'Address' },
+        { id: 'city', name: 'City' },
+        { id: 'state', name: 'State' },
+        { id: 'zipCode', name: 'ZIP Code' }
+      );
+    }
+    
+    // These fields are always required
+    requiredFields.push(
+      { id: 'serviceLatitude', name: 'Service Area Location' },
+      { id: 'serviceLongitude', name: 'Service Area Location' },
       { id: 'minimumDeliveryFee', name: 'Minimum Delivery Fee' },
       { id: 'perBagDeliveryFee', name: 'Per-Bag Delivery Fee' },
       { id: 'paymentMethod', name: 'Payment Method' }
     );
 
     // Only require username and password for traditional registration (NOT OAuth)
-    if (!isSocialRegistration) {
+    // Check if this is OAuth by looking for socialToken or window.isOAuthUser
+    const formData = new FormData(document.getElementById('affiliateRegistrationForm'));
+    const hasSocialToken = formData.get('socialToken') || window.isOAuthUser;
+    
+    if (!isSocialRegistration && !hasSocialToken) {
       requiredFields.push(
         { id: 'username', name: 'Username' },
         { id: 'password', name: 'Password' }
@@ -204,6 +230,60 @@ function initializeAffiliateRegistration() {
     // No validation required before OAuth - the point is to authenticate first and auto-populate the form
     console.log(`🚀 Starting ${provider} OAuth authentication...`);
 
+    // Show large spinner centered on the OAuth section
+    const socialAuthSection = document.getElementById('socialAuthSection');
+    console.log('[OAuth] SwirlSpinner available?', !!window.SwirlSpinner);
+    console.log('[OAuth] SwirlSpinnerUtils available?', !!window.SwirlSpinnerUtils);
+    console.log('[OAuth] socialAuthSection found?', !!socialAuthSection);
+    
+    // Define spinner in outer scope so it's accessible in the polling function
+    let sectionSpinner = null;
+    
+    // Create function to hide spinner
+    const hideSpinner = function() {
+      if (sectionSpinner) {
+        console.log('[OAuth] Hiding spinner');
+        sectionSpinner.hide();
+        sectionSpinner = null;
+      }
+    };
+    
+    if (socialAuthSection) {
+      const rect = socialAuthSection.getBoundingClientRect();
+      console.log('[OAuth] Section dimensions:', { width: rect.width, height: rect.height });
+      console.log('[OAuth] Section position style:', window.getComputedStyle(socialAuthSection).position);
+      
+      // Use SwirlSpinner
+      if (window.SwirlSpinner) {
+        try {
+          console.log('[OAuth] Creating SwirlSpinner with overlay...');
+          // Get translated message
+          let connectingMessage = `Connecting with ${provider.charAt(0).toUpperCase() + provider.slice(1)}...`;
+          if (window.i18next && window.i18next.isInitialized) {
+            connectingMessage = window.i18next.t('spinner.connectingWith', { 
+              provider: provider.charAt(0).toUpperCase() + provider.slice(1) 
+            });
+          }
+          
+          sectionSpinner = new window.SwirlSpinner({
+            container: socialAuthSection,
+            size: 'large',
+            overlay: true,
+            message: connectingMessage
+          }).show();
+          console.log('[OAuth] SwirlSpinner created successfully');
+          
+          // Check if spinner element was actually added
+          const spinnerElements = socialAuthSection.querySelectorAll('.swirl-spinner-overlay');
+          console.log('[OAuth] Spinner overlay elements found:', spinnerElements.length);
+        } catch (error) {
+          console.error('[OAuth] Error creating SwirlSpinner:', error);
+        }
+      } else {
+        console.error('[OAuth] SwirlSpinner not available! This should not happen.');
+      }
+    }
+
     // For embedded context, use popup window to avoid iframe restrictions
     if (isEmbedded || window.self !== window.top) {
       // Generate unique session ID for database polling
@@ -228,6 +308,8 @@ function initializeAffiliateRegistration() {
       
       if (!popup || popup.closed) {
         window.ErrorHandler.showError('Popup was blocked. Please allow popups for this site and try again.');
+        // Hide spinner
+        hideSpinner();
         return;
       }
       
@@ -286,19 +368,29 @@ function initializeAffiliateRegistration() {
                     provider: data.result.provider
                   });
                   showSocialRegistrationCompletion(data.result.socialToken, data.result.provider);
+                  // Hide spinner
+                  hideSpinner();
                 } else if (data.result.type === 'social-auth-login') {
                 console.log('Processing social-auth-login from database');
                 // Show modal dialog asking user what they want to do
                 showExistingAffiliateModal(data.result);
+                // Hide spinner
+                hideSpinner();
               } else if (data.result.type === 'social-auth-error') {
                 console.log('Processing social-auth-error from database');
                 window.ErrorHandler.showError(data.result.message || 'Social authentication failed');
+                // Hide spinner
+                hideSpinner();
               } else {
                 console.log('Unknown result type:', data.result.type);
+                // Hide spinner
+                hideSpinner();
               }
               } catch (resultError) {
                 console.error('Error processing OAuth result:', resultError);
                 window.ErrorHandler.showError('Error processing authentication result');
+                // Hide spinner
+                hideSpinner();
               }
               return;
             }
@@ -312,6 +404,8 @@ function initializeAffiliateRegistration() {
               popup.close();
             }
             window.ErrorHandler.showError('Authentication timed out. Please try again.');
+            // Hide spinner
+            if (buttonSpinner) buttonSpinner.hide();
             return;
           }
           
@@ -345,6 +439,9 @@ function initializeAffiliateRegistration() {
     }
   }
 
+  // Attach OAuth handlers immediately - spinner will use fallback if needed
+  console.log('[Init] Attaching OAuth handlers (will use fallback spinner if needed)');
+  
   if (googleRegister) {
     googleRegister.addEventListener('click', function() {
       handleSocialAuth('google');
@@ -443,12 +540,21 @@ function initializeAffiliateRegistration() {
     const form = document.getElementById('affiliateRegistrationForm');
     console.log('📝 Found form:', form ? 'Yes' : 'No');
     if (form) {
-      const socialTokenInput = document.createElement('input');
-      socialTokenInput.type = 'hidden';
-      socialTokenInput.name = 'socialToken';
-      socialTokenInput.value = socialToken;
-      form.appendChild(socialTokenInput);
-      console.log('✅ Added social token to form');
+      // Check if social token input already exists
+      let socialTokenInput = document.getElementById('socialToken');
+      if (!socialTokenInput) {
+        socialTokenInput = document.createElement('input');
+        socialTokenInput.type = 'hidden';
+        socialTokenInput.name = 'socialToken';
+        socialTokenInput.id = 'socialToken';
+        socialTokenInput.value = socialToken;
+        form.appendChild(socialTokenInput);
+        console.log('✅ Added social token to form');
+      } else {
+        // Update existing token
+        socialTokenInput.value = socialToken;
+        console.log('✅ Updated existing social token in form');
+      }
     }
 
     // Auto-populate form fields from social token (decode JWT payload)
@@ -488,6 +594,10 @@ function initializeAffiliateRegistration() {
     } catch (e) {
       console.log('Could not decode social token for pre-filling:', e);
     }
+    
+    // Ensure form submit handler is attached after OAuth
+    console.log('✅ Attaching form submit handler after OAuth completion');
+    attachFormSubmitHandler();
   }
 
   // Password strength validation
@@ -617,24 +727,78 @@ function initializeAffiliateRegistration() {
   // Check for social registration callback on page load
   handleSocialRegistrationCallback();
 
-  // Form validation and submission
-  const form = document.getElementById('affiliateRegistrationForm');
-
-  if (form) {
+  // Function to attach form submit handler
+  function attachFormSubmitHandler() {
+    const form = document.getElementById('affiliateRegistrationForm');
+    console.log('[Form Init] Looking for form...');
+    console.log('[Form Init] Form found:', !!form);
+    
+    if (!form) {
+      console.log('[Form Init] Form not found, cannot attach handler');
+      return;
+    }
+    
+    // Check if handler already attached
+    if (form.dataset.handlerAttached === 'true') {
+      console.log('[Form Init] Submit handler already attached, checking if it works...');
+      // For debugging: let's force re-attach if coming from OAuth
+      if (!window.location.search.includes('socialToken')) {
+        return;
+      }
+      console.log('[Form Init] OAuth flow detected, re-attaching handler anyway');
+    }
+    
+    console.log('[Form Init] Attaching submit handler to form');
+    
+    // Check if there are any existing submit handlers
+    const existingHandlers = form.onsubmit;
+    console.log('[Form Init] Existing onsubmit handler:', existingHandlers);
+    
     form.addEventListener('submit', async function(e) {
+      console.log('[Form Submit] Form submission triggered');
       e.preventDefault();
+      e.stopPropagation();
+
+      // Show spinner on form
+      let processingMessage = 'Processing your registration...';
+      if (window.i18next && window.i18next.isInitialized) {
+        processingMessage = window.i18next.t('spinner.processingRegistration');
+      }
+      
+      const formSpinner = window.SwirlSpinnerUtils ? 
+        SwirlSpinnerUtils.showOnForm(form, {
+          message: processingMessage
+        }) : null;
 
       try {
         // Determine if this is a social registration first
         const formData = new FormData(form);
-        const isSocialRegistration = formData.get('socialToken');
+        const isSocialRegistration = formData.get('socialToken') || window.isOAuthUser;
 
         // Validate required fields
         const missingFields = validateFormFields(isSocialRegistration);
+        console.log('[Form Submit] Missing fields:', missingFields);
+        console.log('[Form Submit] Is OAuth user?', window.isOAuthUser);
+        console.log('[Form Submit] Has social token?', !!formData.get('socialToken'));
+        console.log('[Form Submit] Address validated?', window.addressValidated);
+        console.log('[Form Submit] Business info section display:', document.querySelector('#businessInfoSection')?.style.display);
+        
         if (missingFields.length > 0) {
           window.ErrorHandler.showError(
             `Please fill in the following required fields: ${missingFields.join(', ')}`
           );
+          // Hide spinner on validation error
+          if (formSpinner) formSpinner.hide();
+          return;
+        }
+        
+        // Additional validation for payment method
+        const paymentMethodValue = document.getElementById('paymentMethod')?.value;
+        console.log('[Form Submit] Payment method value:', paymentMethodValue);
+        if (!paymentMethodValue || paymentMethodValue === '') {
+          window.ErrorHandler.showError('Please select a payment method');
+          // Hide spinner
+          if (formSpinner) formSpinner.hide();
           return;
         }
 
@@ -645,6 +809,8 @@ function initializeAffiliateRegistration() {
 
           if (password !== confirmPassword) {
             window.ErrorHandler.showError('Passwords do not match!');
+            // Hide spinner
+            if (formSpinner) formSpinner.hide();
             return;
           }
         }
@@ -656,9 +822,97 @@ function initializeAffiliateRegistration() {
           affiliateData[key] = value;
         });
         
+        // Manually collect all form fields to ensure nothing is missed
+        // This is necessary because hidden sections may not be included in FormData
+        const formFields = [
+          'firstName', 'lastName', 'email', 'phone', 'businessName',
+          'address', 'city', 'state', 'zipCode',
+          'serviceLatitude', 'serviceLongitude', 'serviceRadius',
+          'minimumDeliveryFee', 'perBagDeliveryFee',
+          'paymentMethod', 'accountNumber', 'routingNumber', 'paypalEmail',
+          'languagePreference', 'termsAgreement', 'socialToken'
+        ];
+        
+        formFields.forEach(fieldName => {
+          let element = document.getElementById(fieldName);
+          
+          // Special handling for socialToken which might not have an ID
+          if (!element && fieldName === 'socialToken') {
+            element = form.querySelector('input[name="socialToken"]');
+          }
+          
+          if (element) {
+            // Always include the value, even if empty, so the server knows the field exists
+            affiliateData[fieldName] = element.value || '';
+          }
+        });
+        
+        // If address fields are empty but we have validated address, use those values
+        if (window.validatedAddress && window.addressValidated) {
+          if (!affiliateData.address && window.validatedAddress.address) {
+            affiliateData.address = window.validatedAddress.address;
+          }
+          if (!affiliateData.city && window.validatedAddress.city) {
+            affiliateData.city = window.validatedAddress.city;
+          }
+          if (!affiliateData.state && window.validatedAddress.state) {
+            affiliateData.state = window.validatedAddress.state;
+          }
+          if (!affiliateData.zipCode && window.validatedAddress.zipCode) {
+            affiliateData.zipCode = window.validatedAddress.zipCode;
+          }
+        }
+        
+        // Ensure checkbox values are properly captured
+        const termsCheckbox = document.getElementById('termsAgreement');
+        if (termsCheckbox) {
+          affiliateData.termsAgreement = termsCheckbox.checked;
+        }
+        
+        // Manually add payment fields if they're missing
+        if (!affiliateData.paymentMethod) {
+          const paymentMethodEl = document.getElementById('paymentMethod');
+          if (paymentMethodEl) {
+            affiliateData.paymentMethod = paymentMethodEl.value;
+          }
+        }
+        
+        if (!affiliateData.paypalEmail && affiliateData.paymentMethod === 'paypal') {
+          const paypalEmailEl = document.getElementById('paypalEmail');
+          if (paypalEmailEl) {
+            affiliateData.paypalEmail = paypalEmailEl.value;
+          }
+        }
+        
+        if (affiliateData.paymentMethod === 'directDeposit') {
+          if (!affiliateData.accountNumber) {
+            const accountNumberEl = document.getElementById('accountNumber');
+            if (accountNumberEl) {
+              affiliateData.accountNumber = accountNumberEl.value;
+            }
+          }
+          if (!affiliateData.routingNumber) {
+            const routingNumberEl = document.getElementById('routingNumber');
+            if (routingNumberEl) {
+              affiliateData.routingNumber = routingNumberEl.value;
+            }
+          }
+        }
+        
         // Debug logging to verify all fields are present
         console.log('Form submission data:', affiliateData);
-        console.log('Has zipCode?', !!affiliateData.zipCode, affiliateData.zipCode);
+        console.log('Has address fields:', {
+          address: affiliateData.address,
+          city: affiliateData.city,
+          state: affiliateData.state,
+          zipCode: affiliateData.zipCode
+        });
+        console.log('Payment info:', {
+          paymentMethod: affiliateData.paymentMethod,
+          paypalEmail: affiliateData.paypalEmail,
+          accountNumber: affiliateData.accountNumber,
+          routingNumber: affiliateData.routingNumber
+        });
         console.log('Is social registration?', isSocialRegistration);
 
         // Determine endpoint based on whether this is a social registration
@@ -705,6 +959,20 @@ function initializeAffiliateRegistration() {
           affiliateId: data.affiliateId
         }));
 
+        // Keep the spinner visible during redirect
+        // Don't hide the formSpinner here - let it stay visible
+        console.log('Registration successful, redirecting to success page...');
+        
+        // Update spinner message to indicate success
+        if (formSpinner && formSpinner.updateMessage) {
+          let successMessage = 'Registration successful! Redirecting...';
+          if (window.i18next && window.i18next.isInitialized) {
+            successMessage = window.i18next.t('messages.registrationSuccess') + ' ' + 
+                           window.i18next.t('messages.redirecting', { defaultValue: 'Redirecting...' });
+          }
+          formSpinner.updateMessage(successMessage);
+        }
+        
         // Handle redirect based on whether we're embedded
         if (isEmbedded) {
           // For embed-app, send navigation message
@@ -749,8 +1017,21 @@ function initializeAffiliateRegistration() {
             message: 'Unable to connect to registration server. Please try again later.'
           }, '*');
         }
+        
+        // Hide spinner
+        if (formSpinner) formSpinner.hide();
       }
     });
+    
+    // Mark form as having handler attached
+    form.dataset.handlerAttached = 'true';
+    console.log('[Form Init] Form submit handler attached successfully');
+  }
+  
+  // Call the function to attach handler
+  // Only call this on initial load, not after OAuth (OAuth calls it explicitly)
+  if (!window.location.search.includes('socialToken')) {
+    attachFormSubmitHandler();
   }
 
   // Listen for messages from parent window if embedded
@@ -888,12 +1169,12 @@ function initializeAffiliateRegistration() {
         }
       }
       
-      // Calculate and update total (delivery + WDF)
-      const total = deliveryFee + wdfRevenue;
+      // Calculate and update total earnings (delivery + commission)
+      const totalEarnings = deliveryFee + commission;
       const totalElement = document.getElementById(`total${bags}bag${bags > 1 ? 's' : ''}`);
       if (totalElement) {
-        totalElement.textContent = `$${total.toFixed(2)}`;
-        totalElement.title = `Delivery: $${deliveryFee} + WDF: $${wdfRevenue.toFixed(2)} = $${total.toFixed(2)}`;
+        totalElement.textContent = `$${totalEarnings.toFixed(2)}`;
+        totalElement.title = `Delivery: $${deliveryFee} + Commission: $${commission.toFixed(2)} = $${totalEarnings.toFixed(2)}`;
       }
       
       // Update commission display
@@ -1420,10 +1701,30 @@ function initializeAffiliateRegistration() {
       // Map might not be initialized yet if section is hidden - that's OK
       console.log('[Service Area Map] Map initialized?', !!serviceAreaMap);
       
-      // Show loading state on button
+      // Show loading state on button with swirl spinner
       const validateButton = document.getElementById('validateAddress');
       const originalText = validateButton.innerHTML;
-      validateButton.innerHTML = '<svg class="animate-spin h-5 w-5 mr-2 inline" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>Validating...';
+      
+      // Show spinner over the entire form while validating
+      const form = document.getElementById('affiliateRegistrationForm');
+      let formSpinner = null;
+      if (window.SwirlSpinner && form) {
+        // Get translated message
+        let validatingMessage = 'Validating your address...';
+        if (window.i18next && window.i18next.isInitialized) {
+          validatingMessage = window.i18next.t('spinner.validatingAddress');
+        }
+        
+        formSpinner = new window.SwirlSpinner({
+          container: form,
+          size: 'large',
+          overlay: true,
+          message: validatingMessage
+        }).show();
+      }
+      
+      // Also update button text
+      validateButton.innerHTML = 'Validating...';
       validateButton.disabled = true;
       
       // Always search for the address
@@ -1456,17 +1757,20 @@ function initializeAffiliateRegistration() {
         console.log('[Service Area Map] Will try multiple search queries:', searchQueries);
         
         // Try geocoding with fallback
-        geocodeWithFallback(searchQueries, 0, originalText);
+        geocodeWithFallback(searchQueries, 0, originalText, formSpinner);
         
       }
     }
     
     // Function to try multiple geocoding queries with fallback
-    function geocodeWithFallback(searchQueries, queryIndex, originalButtonText) {
+    function geocodeWithFallback(searchQueries, queryIndex, originalButtonText, formSpinner) {
       if (queryIndex >= searchQueries.length) {
         console.log('[Service Area Map] All geocoding queries failed');
-        // Reset button state
+        // Reset button state and hide spinner
         const validateButton = document.getElementById('validateAddress');
+        if (formSpinner) {
+          formSpinner.hide();
+        }
         if (validateButton && originalButtonText) {
           validateButton.innerHTML = originalButtonText;
           validateButton.disabled = false;
@@ -1503,11 +1807,11 @@ function initializeAffiliateRegistration() {
             
             if (event.data.data.results && event.data.data.results.length > 0) {
               // Always show address confirmation modal
-              showAddressConfirmationModal(event.data.data.results, radiusValue, originalButtonText);
+              showAddressConfirmationModal(event.data.data.results, radiusValue, originalButtonText, formSpinner);
             } else {
               // No results, try next query
               console.log('[Service Area Map] No results for query, trying next...');
-              geocodeWithFallback(searchQueries, queryIndex + 1, originalButtonText);
+              geocodeWithFallback(searchQueries, queryIndex + 1, originalButtonText, formSpinner);
             }
             
             // Remove this handler
@@ -1531,27 +1835,30 @@ function initializeAffiliateRegistration() {
             console.log('[Service Area Map] Nominatim results:', results);
             if (results.length > 0) {
               // Always show address confirmation modal
-              showAddressConfirmationModal(results, radiusValue, originalButtonText);
+              showAddressConfirmationModal(results, radiusValue, originalButtonText, formSpinner);
             } else {
               // No results, try next query
               console.log('[Service Area Map] No results for query, trying next...');
-              geocodeWithFallback(searchQueries, queryIndex + 1, originalButtonText);
+              geocodeWithFallback(searchQueries, queryIndex + 1, originalButtonText, formSpinner);
             }
           })
           .catch(error => {
             console.error('Geocoding error:', error);
             // Try next query on error
-            geocodeWithFallback(searchQueries, queryIndex + 1, originalButtonText);
+            geocodeWithFallback(searchQueries, queryIndex + 1, originalButtonText, formSpinner);
           });
       }
     }
     
     // Function to show address confirmation modal
-    function showAddressConfirmationModal(results, radiusValue, originalButtonText) {
+    function showAddressConfirmationModal(results, radiusValue, originalButtonText, formSpinner) {
       console.log('[Service Area Map] Showing address confirmation modal with results:', results);
       
-      // Reset button state
+      // Reset button state and hide spinner
       const validateButton = document.getElementById('validateAddress');
+      if (formSpinner) {
+        formSpinner.hide();
+      }
       if (validateButton && originalButtonText) {
         validateButton.innerHTML = originalButtonText;
         validateButton.disabled = false;
@@ -1563,21 +1870,38 @@ function initializeAffiliateRegistration() {
         existingModal.remove();
       }
       
-      // Create modal HTML
+      // Create modal HTML with proper i18n support
+      const i18n = window.i18next;
+      const isI18nReady = i18n && (i18n.isInitialized || i18n.isInitialized === undefined);
+      
+      console.log('[Service Area Map] i18next status:', {
+        i18n: !!i18n,
+        isInitialized: i18n ? i18n.isInitialized : 'no i18n',
+        isI18nReady,
+        language: i18n ? i18n.language : 'no i18n'
+      });
+      
       const modalTitle = results.length > 1 
-        ? (window.i18next && window.i18next.isInitialized ? window.i18next.t('affiliate.register.selectServiceLocation') : 'Select Your Service Location')
-        : (window.i18next && window.i18next.isInitialized ? window.i18next.t('affiliate.register.confirmServiceLocation') : 'Confirm Your Service Location');
+        ? (isI18nReady ? i18n.t('affiliate.register.selectServiceLocation') : 'Select Your Service Location')
+        : (isI18nReady ? i18n.t('affiliate.register.confirmServiceLocation') : 'Confirm Your Service Location');
       const modalDesc = results.length > 1 
-        ? (window.i18next && window.i18next.isInitialized ? window.i18next.t('affiliate.register.selectCorrectLocation') : 'We found multiple possible locations. Please select the correct one:')
-        : (window.i18next && window.i18next.isInitialized ? window.i18next.t('affiliate.register.confirmCorrectAddress') : 'Please confirm this is the correct address for your service area:');
+        ? (isI18nReady ? i18n.t('affiliate.register.selectCorrectLocation') : 'We found multiple possible locations. Please select the correct one:')
+        : (isI18nReady ? i18n.t('affiliate.register.confirmCorrectAddress') : 'Please confirm this is the correct address for your service area:');
+        
+      console.log('[Service Area Map] Modal translations:', {
+        modalTitle,
+        modalDesc,
+        cancelButton: isI18nReady ? i18n.t('common.buttons.cancel') : 'Cancel',
+        confirmButton: isI18nReady ? i18n.t('common.buttons.confirm') : 'Confirm'
+      });
       
       const modalHTML = `
         <div id="addressSelectionModal" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0, 0, 0, 0.5); z-index: 9999; overflow-y: auto;">
           <div style="display: flex; align-items: flex-start; justify-content: center; min-height: 100%; padding-top: 2rem; padding-left: 1rem; padding-right: 1rem;">
             <div class="bg-white rounded-lg w-full" style="max-width: 32rem; max-height: 90vh; overflow: hidden; margin-top: 0;">
               <div class="p-6">
-                <h3 class="text-lg font-semibold mb-4">${modalTitle}</h3>
-                <p class="text-sm text-gray-600 mb-4">${modalDesc}</p>
+                <h3 class="text-lg font-semibold mb-4" data-i18n="${results.length > 1 ? 'affiliate.register.selectServiceLocation' : 'affiliate.register.confirmServiceLocation'}">${modalTitle}</h3>
+                <p class="text-sm text-gray-600 mb-4" data-i18n="${results.length > 1 ? 'affiliate.register.selectCorrectLocation' : 'affiliate.register.confirmCorrectAddress'}">${modalDesc}</p>
                 <div class="space-y-2 overflow-y-auto" style="max-height: 50vh;">
                   ${results.map((result, index) => {
                     // Get the form address to compare
@@ -1629,8 +1953,8 @@ function initializeAffiliateRegistration() {
                   }).join('')}
                 </div>
                 <div class="mt-4 flex justify-end space-x-2">
-                  <button id="cancelAddressSelection" class="px-4 py-2 text-gray-600 hover:text-gray-800 border border-gray-300 rounded-lg">${window.i18next && window.i18next.isInitialized ? window.i18next.t('common.buttons.cancel') : 'Cancel'}</button>
-                  ${results.length === 1 ? `<button class="confirm-single-address px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700" data-lat="${results[0].lat}" data-lon="${results[0].lon}">${window.i18next && window.i18next.isInitialized ? window.i18next.t('common.buttons.confirm') : 'Confirm'}</button>` : ''}
+                  <button id="cancelAddressSelection" class="px-4 py-2 text-gray-600 hover:text-gray-800 border border-gray-300 rounded-lg" data-i18n="common.buttons.cancel">${isI18nReady ? i18n.t('common.buttons.cancel') : 'Cancel'}</button>
+                  ${results.length === 1 ? `<button class="confirm-single-address px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700" data-lat="${results[0].lat}" data-lon="${results[0].lon}" data-i18n="common.buttons.confirm">${isI18nReady ? i18n.t('common.buttons.confirm') : 'Confirm'}</button>` : ''}
                 </div>
               </div>
             </div>
@@ -1640,6 +1964,14 @@ function initializeAffiliateRegistration() {
       
       // Add modal to page
       document.body.insertAdjacentHTML('beforeend', modalHTML);
+      
+      // Apply translations after modal is added to DOM
+      if (window.i18n && window.i18n.updateContent) {
+        // Use a slight delay to ensure DOM is ready
+        setTimeout(() => {
+          window.i18n.updateContent();
+        }, 100);
+      }
       
       // Ensure modal is visible by scrolling to top
       const modal = document.getElementById('addressSelectionModal');
@@ -1681,6 +2013,14 @@ function initializeAffiliateRegistration() {
         
         // Store the address for service area display
         window.confirmedServiceAddress = fullAddress || addressText || 'Location set';
+        
+        // Store the validated address components globally so they're not lost when section is hidden
+        window.validatedAddress = {
+          address: formAddress,
+          city: formCity,
+          state: formState,
+          zipCode: formZip
+        };
         
         // Update service area info with address
         const centerLocationElement = document.getElementById('centerLocation');
@@ -1725,6 +2065,13 @@ function initializeAffiliateRegistration() {
         const businessInfoSection = document.querySelector('#businessInfoSection');
         if (businessInfoSection) {
           businessInfoSection.style.display = 'none';
+          
+          // Remove required attribute from fields in hidden section to allow form submission
+          const requiredFields = businessInfoSection.querySelectorAll('input[required]');
+          requiredFields.forEach(field => {
+            field.removeAttribute('required');
+            console.log('[Address Validation] Removed required attribute from:', field.id);
+          });
         }
         
         // Show all hidden sections EXCEPT service area (we'll show that after address confirmation)
@@ -1812,9 +2159,65 @@ function initializeAffiliateRegistration() {
   
   // Set up address validation immediately - don't wait for map
   setupAddressValidation();
+  
+  // Add click handler directly to submit button as a fallback
+  const submitButton = document.getElementById('registerSubmitButton');
+  if (submitButton) {
+    console.log('[Init] Adding click handler to submit button');
+    submitButton.addEventListener('click', function(e) {
+      console.log('[Submit Button] Click detected');
+      const form = document.getElementById('affiliateRegistrationForm');
+      if (form) {
+        // Trigger form submit programmatically
+        const submitEvent = new Event('submit', {
+          bubbles: true,
+          cancelable: true
+        });
+        form.dispatchEvent(submitEvent);
+      }
+    });
+  }
+}
+
+// Track language preference changes
+function setupLanguagePreferenceTracking() {
+  // Listen for language changes from i18n
+  if (window.i18n) {
+    const originalSetLanguage = window.i18n.setLanguage;
+    window.i18n.setLanguage = async function(lang) {
+      // Call original function
+      const result = await originalSetLanguage.call(this, lang);
+      
+      // Update hidden field
+      const languagePreferenceField = document.getElementById('languagePreference');
+      if (languagePreferenceField) {
+        languagePreferenceField.value = lang;
+        console.log('Updated language preference field to:', lang);
+      }
+      
+      return result;
+    };
+  }
+  
+  // Set initial value based on current language
+  const languagePreferenceField = document.getElementById('languagePreference');
+  if (languagePreferenceField && window.i18n) {
+    const currentLang = window.i18n.getLanguage() || 'en';
+    languagePreferenceField.value = currentLang;
+    console.log('Set initial language preference to:', currentLang);
+  }
 }
 
 // Initialize immediately when script loads
-initializeAffiliateRegistration();
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', () => {
+    initializeAffiliateRegistration();
+    setupLanguagePreferenceTracking();
+  });
+} else {
+  // DOM is already loaded
+  initializeAffiliateRegistration();
+  setupLanguagePreferenceTracking();
+}
 
 })(); // End IIFE

@@ -312,6 +312,10 @@
 
             <h3 id="client-side">Client-Side Translation</h3>
             <p>The i18n system is implemented using a custom JavaScript library that provides real-time translation without page reloads.</p>
+            
+            <div class="alert alert-info">
+                <strong>Recent Enhancement:</strong> All UI components including the new swirl spinner loading animations, address validation modals, and geocoding confirmation dialogs now support full internationalization.
+            </div>
 
             <h4>Core Library</h4>
             <pre><code>// Located at: /public/assets/js/i18n.js
@@ -532,6 +536,24 @@ const greeting = i18n.t('welcome.greeting', { name: 'John' });
                 <li><strong>Context</strong>: Consider cultural context, not just literal translation</li>
                 <li><strong>Length</strong>: Account for text expansion (German ~30% longer than English)</li>
                 <li><strong>Testing</strong>: Test UI with longest translations to ensure proper layout</li>
+            </ul>
+
+            <h3>UI Component Translations</h3>
+            <ul>
+                <li><strong>Loading Indicators</strong>: Swirl spinner messages are fully translatable
+                    <pre><code>// Example: Loading spinner with i18n
+SwirlSpinnerUtils.showOnForm(form, {
+    message: i18n.t('common.loading.submitting')
+});</code></pre>
+                </li>
+                <li><strong>Address Validation</strong>: All geocoding and validation messages support i18n
+                    <pre><code>// Confirmation modal with translated content
+showModal(i18n.t('address.validation.confirm'), content);</code></pre>
+                </li>
+                <li><strong>Dynamic Content</strong>: Use data attributes for complex interpolations
+                    <pre><code>&lt;div data-i18n="pricing.preview" 
+     data-i18n-params='{"bags": 5, "fee": "$45"}'&gt;&lt;/div&gt;</code></pre>
+                </li>
             </ul>
 
             <h3>Development Tips</h3>

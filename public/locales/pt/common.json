@@ -20,7 +20,8 @@
       "learnMore": "Saiba Mais",
       "customerLogin": "Login do Cliente",
       "signUpToday": "Inscreva-se Hoje",
-      "registerNow": "Registre-se agora"
+      "registerNow": "Registre-se agora",
+      "copy": "Copiar"
     },
     "labels": {
       "username": "Nome de Usuário",
@@ -56,11 +57,13 @@
       "registrationFailed": "Falha no registro. Por favor, tente novamente.",
       "passwordResetSuccess": "Redefinição de senha bem-sucedida!",
       "passwordResetFailed": "Falha na redefinição de senha. Por favor, tente novamente.",
+      "redirecting": "Redirecionando...",
       "popupBlocked": "A janela pop-up foi bloqueada. Por favor, permita pop-ups para este site e tente novamente.",
       "authenticationFailed": "Falha na autenticação",
       "authenticationTimeout": "Tempo de autenticação esgotado. Por favor, tente novamente.",
       "accountNotFound": "Conta não encontrada. Você será redirecionado para o registro para criar uma nova conta.",
-      "processingError": "Erro ao processar o resultado da autenticação"
+      "processingError": "Erro ao processar o resultado da autenticação",
+      "copied": "Copiado!"
     }
   },
   "landing": {
@@ -351,10 +354,11 @@
       "roundTripPricing": "Os preços mostrados são para serviço de ida e volta",
       "bags": "Sacolas",
       "deliveryFee": "Entrega",
-      "total": "Total",
+      "total": "Ganhos Totais",
       "yourCommission": "Sua Comissão",
-      "totalNote": "* Total: Taxa de entrega + serviço WDF ($1.25/lb × 30 lbs/sacola)",
-      "commissionNote": "* Comissão: 10% da receita do serviço WDF",
+      "deliveryNote": "* Entrega: 100% das taxas de entrega são suas",
+      "commissionNote": "* Comissão: 10% do serviço WDF (30 lbs × $1.25/lb por sacola)",
+      "totalNote": "* Ganhos Totais: Taxa de entrega + Comissão",
       "accountSetup": "Configuração da Conta",
       "username": "Nome de Usuário *",
       "usernameDesc": "Seu identificador único de login",
@@ -397,6 +401,26 @@
         "totalCommissions": "Comissões Totais",
         "pendingCommissions": "Comissões Pendentes"
       }
+    },
+    "success": {
+      "title": "Registro Bem-sucedido!",
+      "congratulations": "Parabéns!",
+      "submittedTitle": "Sua Inscrição Foi Enviada",
+      "welcomeMessage": "Bem-vindo ao Programa de Afiliados WaveMAX! Estamos animados em tê-lo como nosso parceiro.",
+      "yourInfoTitle": "Suas Informações",
+      "affiliateId": "ID de Afiliado",
+      "name": "Nome",
+      "email": "E-mail",
+      "linkTitle": "Seu Link de Indicação",
+      "linkDescription": "Compartilhe este link com sua rede para começar a ganhar comissões:",
+      "linkHelp": "Quando os clientes se registrarem usando seu link, eles serão automaticamente conectados à sua conta de afiliado.",
+      "nextStepsTitle": "Próximos Passos",
+      "nextStep1": "Verifique seu e-mail para sua mensagem de boas-vindas e credenciais de acesso",
+      "nextStep2": "Faça login no seu painel de afiliado para acessar materiais de marketing",
+      "nextStep3": "Compartilhe seu link de indicação exclusivo com amigos, família e clientes",
+      "nextStep4": "Acompanhe suas indicações e comissões em tempo real",
+      "nextStep5": "Receba pagamentos mensais através do seu método de pagamento preferido",
+      "loginToDashboard": "Fazer Login no Painel"
     }
   },
   "customer": {
@@ -624,5 +648,12 @@
     "settings": "Configurações",
     "help": "Ajuda",
     "logout": "Sair"
+  },
+  "spinner": {
+    "connectingWith": "Conectando com {{provider}}...",
+    "validatingAddress": "Validando seu endereço...",
+    "processingRegistration": "Processando seu registro...",
+    "loading": "Carregando...",
+    "pleaseWait": "Por favor, aguarde..."
   }
 }

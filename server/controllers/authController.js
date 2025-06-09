@@ -1140,7 +1140,8 @@ exports.completeSocialRegistration = async (req, res) => {
       paymentMethod,
       accountNumber,
       routingNumber,
-      paypalEmail
+      paypalEmail,
+      languagePreference
     } = req.body;
     
     // Verify social token
@@ -1228,6 +1229,7 @@ exports.completeSocialRegistration = async (req, res) => {
       accountNumber,
       routingNumber,
       paypalEmail,
+      languagePreference: languagePreference || 'en',
       registrationMethod: socialData.provider,
       socialAccounts: {
         [socialData.provider]: {

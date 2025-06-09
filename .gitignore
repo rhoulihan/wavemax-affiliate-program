@@ -166,3 +166,7 @@ process.log
 docs.out
 wavemax-affiliate-program@*
 jest
+
+# Session summary files
+SESSION_SUMMARY.md
+SESSION_SUMMARY_*.md

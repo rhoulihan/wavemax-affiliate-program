@@ -116,7 +116,7 @@
                 <input type="hidden" id="languagePreference" name="languagePreference" value="en">
                 
                 <!-- Social Registration (Top of Form) -->
-                <div id="socialAuthSection">
+                <div id="socialAuthSection" style="position: relative;">
                     <h3 class="text-xl font-bold mb-4" data-i18n="affiliate.register.quickRegistration">Quick Registration with Social Media</h3>
                     <div class="bg-gradient-to-r from-blue-50 to-indigo-50 p-6 rounded-lg border border-blue-200">
                         <p class="text-gray-700 mb-4 text-center" data-i18n="affiliate.register.socialSignupText">Sign up quickly using your social media account - we'll automatically fill in your information!</p>
@@ -405,42 +405,43 @@
                                                     <tr class="border-b border-gray-200">
                                                         <th class="text-left py-2 text-gray-600" data-i18n="affiliate.register.bags">Bags</th>
                                                         <th class="text-right py-2 text-gray-600" data-i18n="affiliate.register.deliveryFee">Delivery</th>
-                                                        <th class="text-right py-2 text-gray-600" data-i18n="affiliate.register.total">Total</th>
                                                         <th class="text-right py-2 text-gray-600" data-i18n="affiliate.register.yourCommission">Your Commission</th>
+                                                        <th class="text-right py-2 text-gray-600" data-i18n="affiliate.register.total">Total Earnings</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
                                                     <tr class="border-b border-gray-100">
                                                         <td class="py-2 text-gray-600">1</td>
                                                         <td class="text-right py-2 text-gray-600" id="calc1bag">$25</td>
-                                                        <td class="text-right py-2 font-semibold text-blue-600" id="total1bag">$62.50</td>
                                                         <td class="text-right py-2 text-green-600" id="comm1bag">$3.75</td>
+                                                        <td class="text-right py-2 font-semibold text-blue-600" id="total1bag">$28.75</td>
                                                     </tr>
                                                     <tr class="border-b border-gray-100">
                                                         <td class="py-2 text-gray-600">3</td>
                                                         <td class="text-right py-2 text-gray-600" id="calc3bags">$30</td>
-                                                        <td class="text-right py-2 font-semibold text-blue-600" id="total3bags">$142.50</td>
                                                         <td class="text-right py-2 text-green-600" id="comm3bags">$11.25</td>
+                                                        <td class="text-right py-2 font-semibold text-blue-600" id="total3bags">$41.25</td>
                                                     </tr>
                                                     <tr class="border-b border-gray-100">
                                                         <td class="py-2 text-gray-600">5</td>
                                                         <td class="text-right py-2 text-gray-600" id="calc5bags">$50</td>
-                                                        <td class="text-right py-2 font-semibold text-blue-600" id="total5bags">$237.50</td>
                                                         <td class="text-right py-2 text-green-600" id="comm5bags">$18.75</td>
+                                                        <td class="text-right py-2 font-semibold text-blue-600" id="total5bags">$68.75</td>
                                                     </tr>
                                                     <tr>
                                                         <td class="py-2 text-gray-600">10</td>
                                                         <td class="text-right py-2 text-gray-600" id="calc10bags">$100</td>
-                                                        <td class="text-right py-2 font-semibold text-blue-600" id="total10bags">$475.00</td>
                                                         <td class="text-right py-2 text-green-600" id="comm10bags">$37.50</td>
+                                                        <td class="text-right py-2 font-semibold text-blue-600" id="total10bags">$137.50</td>
                                                     </tr>
                                                 </tbody>
                                             </table>
                                         </div>
                                         
                                         <div class="text-xs text-gray-500 space-y-1">
-                                            <p data-i18n="affiliate.register.totalNote">* Total: Delivery fee + WDF service ($1.25/lb × 30 lbs/bag)</p>
-                                            <p data-i18n="affiliate.register.commissionNote">* Commission: 10% of WDF service revenue</p>
+                                            <p data-i18n="affiliate.register.deliveryNote">* Delivery: 100% of delivery fees go to you</p>
+                                            <p data-i18n="affiliate.register.commissionNote">* Commission: 10% of WDF service (30 lbs × $1.25/lb per bag)</p>
+                                            <p data-i18n="affiliate.register.totalNote">* Total Earnings: Delivery fee + Commission</p>
                                         </div>
                                     </div>
                                 </div>
@@ -495,7 +496,7 @@
                 <!-- Submit Button (Initially Hidden) -->
                 <div class="form-section-hidden" style="display: none;">
                     <div class="mt-6">
-                        <button type="submit" class="w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-blue-700 transition" data-i18n="affiliate.register.submitButton">Register as an Affiliate</button>
+                        <button type="submit" id="registerSubmitButton" class="w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-blue-700 transition" data-i18n="affiliate.register.submitButton">Register as an Affiliate</button>
                     </div>
                 </div>
             </form>
@@ -503,32 +504,19 @@
     </div>
 
     <!-- Embedded version specific scripts -->
-        <!-- i18n Scripts -->
+    <!-- Configuration must be set before other scripts -->
+    <script src="/assets/js/embed-config.js"></script>
+    <!-- i18n Scripts -->
     <script src="/assets/js/i18n.js"></script>
     <script src="/assets/js/language-switcher.js"></script>
-    <script>
-        // Configuration for embedded environment
-        window.EMBED_CONFIG = {
-            baseUrl: 'https://wavemax.promo',
-            isEmbedded: true
-        };
-    </script>
     <!-- Leaflet JS from CDN -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js" crossorigin="anonymous"></script>
     <script src="/assets/js/modal-utils.js"></script>
     <script src="/assets/js/errorHandler.js"></script>
     <script src="/assets/js/csrf-utils.js"></script>
+    <script src="/assets/js/swirl-spinner.js"></script>
     <script src="/assets/js/affiliate-register-init.js"></script>
-    <script>
-        // Initialize i18n
-        document.addEventListener('DOMContentLoaded', async function() {
-            await window.i18n.init({ debugMode: false });
-            window.LanguageSwitcher.createSwitcher('language-switcher-container', {
-                style: 'dropdown',
-                showLabel: false
-            });
-        });
-    </script>
+    <script src="/assets/js/affiliate-register-page-init.js"></script>
 
 </body>
 </html>

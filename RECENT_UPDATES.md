@@ -1,5 +1,24 @@
 # Recent Major Updates
 
+## Enhanced UI Components (January 2025)
+- **Swirl Spinner Implementation**: Custom loading spinner with WaveMAX branding
+  - Elliptical orbit animations for smooth, professional loading states
+  - Three size variants (small, default, large) for different contexts
+  - Speed controls (smooth, normal, fast) for animation timing
+  - Overlay support for form submission feedback
+  - Integrated with all asynchronous operations and form submissions
+  - Full i18n support for loading messages
+  
+## Advanced Address Validation (January 2025)
+- **Intelligent Geocoding System**: Enhanced address validation with multiple fallback strategies
+  - Primary Google Maps geocoding with iframe bridge support
+  - Manual address confirmation modal for validation
+  - Reverse geocoding to display confirmed addresses
+  - Smart address formatting to match form field requirements
+  - Automatic service area zoom adjustment on map display
+  - Live pricing preview with delivery fee calculations
+  - Commission calculator integration for affiliate earnings estimates
+
 ## Internationalization (i18n) Support (January 2025)
 - **Multi-Language Platform**: Complete internationalization implementation
   - Support for English, Spanish, Portuguese, and German
@@ -99,6 +118,8 @@
   - Options to login to existing account or try different authentication method
   - Seamless social media profile auto-population for new registrations
   - Professional UI feedback for OAuth success, errors, and conflicts
+  - Automatic account setup section hiding after successful OAuth authentication
+  - Improved form layout with username/password fields near OAuth controls
 - **Flexible Configuration**: Added environment-based OAuth and rate limiting controls
   - `OAUTH_CALLBACK_URI` setting for production deployment flexibility
   - `RELAX_RATE_LIMITING` flag for development and testing environments
@@ -112,6 +133,10 @@
   - OAuth customers don't require password fields when `registrationMethod` is social
   - Account conflict modals for existing users attempting OAuth registration
   - Seamless cross-user-type conflict detection and resolution
+- **Enhanced i18n Support**: Full internationalization of OAuth flows
+  - Translated success messages for all supported languages
+  - Provider name interpolation in success notifications
+  - Language-aware OAuth error messages
 
 ### Strong Password Security & Social Media Authentication  
 - **Enhanced Password Security**: Implemented comprehensive strong password requirements

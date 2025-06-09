@@ -20,7 +20,8 @@
       "learnMore": "Learn More",
       "customerLogin": "Customer Login",
       "signUpToday": "Sign Up Today",
-      "registerNow": "Register now"
+      "registerNow": "Register now",
+      "copy": "Copy"
     },
     "labels": {
       "username": "Username",
@@ -56,11 +57,13 @@
       "registrationFailed": "Registration failed. Please try again.",
       "passwordResetSuccess": "Password reset successful!",
       "passwordResetFailed": "Password reset failed. Please try again.",
+      "redirecting": "Redirecting...",
       "popupBlocked": "Popup was blocked. Please allow popups for this site and try again.",
       "authenticationFailed": "Authentication failed",
       "authenticationTimeout": "Authentication timed out. Please try again.",
       "accountNotFound": "Account not found. You will be redirected to registration to create a new account.",
-      "processingError": "Error processing authentication result"
+      "processingError": "Error processing authentication result",
+      "copied": "Copied!"
     }
   },
   "landing": {
@@ -352,10 +355,11 @@
       "roundTripPricing": "Prices shown are for round-trip service",
       "bags": "Bags",
       "deliveryFee": "Delivery",
-      "total": "Total",
+      "total": "Total Earnings",
       "yourCommission": "Your Commission",
-      "totalNote": "* Total: Delivery fee + WDF service ($1.25/lb × 30 lbs/bag)",
-      "commissionNote": "* Commission: 10% of WDF service revenue",
+      "deliveryNote": "* Delivery: 100% of delivery fees go to you",
+      "commissionNote": "* Commission: 10% of WDF service (30 lbs × $1.25/lb per bag)",
+      "totalNote": "* Total Earnings: Delivery fee + Commission",
       "accountSetup": "Account Setup",
       "username": "Username *",
       "usernameDesc": "Your unique login identifier",
@@ -398,6 +402,26 @@
         "totalCommissions": "Total Commissions",
         "pendingCommissions": "Pending Commissions"
       }
+    },
+    "success": {
+      "title": "Registration Successful!",
+      "congratulations": "Congratulations!",
+      "submittedTitle": "Your Application Has Been Submitted",
+      "welcomeMessage": "Welcome to the WaveMAX Affiliate Program! We're excited to have you as our partner.",
+      "yourInfoTitle": "Your Information",
+      "affiliateId": "Affiliate ID",
+      "name": "Name",
+      "email": "Email",
+      "linkTitle": "Your Referral Link",
+      "linkDescription": "Share this link with your network to start earning commissions:",
+      "linkHelp": "When customers sign up using your link, they'll be automatically connected to your affiliate account.",
+      "nextStepsTitle": "Next Steps",
+      "nextStep1": "Check your email for your welcome message and login credentials",
+      "nextStep2": "Log in to your affiliate dashboard to access marketing materials",
+      "nextStep3": "Share your unique referral link with friends, family, and customers",
+      "nextStep4": "Track your referrals and commissions in real-time",
+      "nextStep5": "Get paid monthly via your preferred payment method",
+      "loginToDashboard": "Login to Dashboard"
     }
   },
   "customer": {
@@ -625,5 +649,12 @@
     "settings": "Settings",
     "help": "Help",
     "logout": "Logout"
+  },
+  "spinner": {
+    "connectingWith": "Connecting with {{provider}}...",
+    "validatingAddress": "Validating your address...",
+    "processingRegistration": "Processing your registration...",
+    "loading": "Loading...",
+    "pleaseWait": "Please wait..."
   }
 }

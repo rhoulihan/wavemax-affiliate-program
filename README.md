@@ -22,6 +22,8 @@ The WaveMAX Affiliate Program enables individuals to register as affiliates, onb
 - **Zero-Padding Embeds**: Full-width embedded content with no side padding for seamless integration
 - **Internationalization (i18n)**: Multi-language support for English, Spanish, Portuguese, and German
 - **Language Preference**: Automatic browser language detection and personalized email communications
+- **Enhanced UI Components**: Custom swirl spinner with elliptical orbit animations for loading states
+- **Advanced Address Validation**: Intelligent geocoding with manual confirmation and reverse geocoding display
 
 ## Recent Updates
 
@@ -725,6 +727,8 @@ The WaveMAX Affiliate Program includes comprehensive internationalization suppor
 - Dashboard content and metrics
 - Success/error messages
 - Navigation elements
+- Loading spinners and progress indicators
+- Address validation and confirmation dialogs
 
 #### Email Communications
 - Language-specific email templates
