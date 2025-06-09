@@ -40,26 +40,6 @@
     // Create the HTML structure
     const html = `
       <div class="service-area-component">
-        ${config.showInfo ? `
-          <div id="${containerId}-info" class="service-area-info bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
-            <h4 class="font-semibold text-gray-800 mb-2" data-i18n="affiliate.register.serviceAreaDetails">Service Area Details</h4>
-            <div class="text-sm text-gray-700 space-y-2">
-              <div>
-                <strong data-i18n="affiliate.register.serviceCenter">Service Center:</strong>
-                <div id="${containerId}-centerLocation" class="text-gray-600 mt-1">${config.address || 'Not set'}</div>
-              </div>
-              <div>
-                <strong data-i18n="affiliate.register.coordinates">Coordinates:</strong>
-                <div id="${containerId}-centerCoordinates" class="text-gray-600 mt-1">${config.latitude.toFixed(6)}, ${config.longitude.toFixed(6)}</div>
-              </div>
-              <div>
-                <strong data-i18n="affiliate.register.coverageArea">Coverage Area:</strong>
-                <div id="${containerId}-coverageArea" class="text-gray-600 mt-1">${config.radius} mile radius</div>
-              </div>
-            </div>
-          </div>
-        ` : ''}
-        
         ${config.showMap ? `
           <div class="grid md:grid-cols-2 gap-6">
             <!-- Left side: Map -->
@@ -104,6 +84,46 @@
                   </div>
                 </div>
               ` : ''}
+              
+              ${config.showInfo ? `
+                <!-- Service Area Details -->
+                <div id="${containerId}-info" class="service-area-info bg-gray-50 p-4 rounded-lg border border-gray-200">
+                  <h4 class="font-semibold text-gray-800 mb-3" data-i18n="affiliate.register.locationInfo">Location Info</h4>
+                  <div class="text-sm space-y-2">
+                    <div>
+                      <span class="text-gray-600" data-i18n="affiliate.register.center">Center:</span>
+                      <div id="${containerId}-centerLocation" class="text-gray-800 font-medium mt-1">${config.address || 'Click on map to set location'}</div>
+                    </div>
+                    <div>
+                      <span class="text-gray-600" data-i18n="affiliate.register.coords">Coords:</span>
+                      <div id="${containerId}-centerCoordinates" class="text-gray-800 font-mono text-xs mt-1">${config.latitude.toFixed(6)}, ${config.longitude.toFixed(6)}</div>
+                    </div>
+                    <div>
+                      <span class="text-gray-600" data-i18n="affiliate.register.coverage">Coverage:</span>
+                      <div id="${containerId}-coverageArea" class="text-gray-800 font-medium mt-1">${config.radius} mile radius</div>
+                    </div>
+                  </div>
+                </div>
+              ` : ''}
+            </div>
+          </div>
+        ` : config.showInfo ? `
+          <!-- Service Area Info only (no map) -->
+          <div id="${containerId}-info" class="service-area-info bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <h4 class="font-semibold text-gray-800 mb-2" data-i18n="affiliate.register.serviceAreaDetails">Service Area Details</h4>
+            <div class="text-sm text-gray-700 space-y-2">
+              <div>
+                <strong data-i18n="affiliate.register.serviceCenter">Service Center:</strong>
+                <div id="${containerId}-centerLocation" class="text-gray-600 mt-1">${config.address || 'Not set'}</div>
+              </div>
+              <div>
+                <strong data-i18n="affiliate.register.coordinates">Coordinates:</strong>
+                <div id="${containerId}-centerCoordinates" class="text-gray-600 mt-1">${config.latitude.toFixed(6)}, ${config.longitude.toFixed(6)}</div>
+              </div>
+              <div>
+                <strong data-i18n="affiliate.register.coverageArea">Coverage Area:</strong>
+                <div id="${containerId}-coverageArea" class="text-gray-600 mt-1">${config.radius} mile radius</div>
+              </div>
             </div>
           </div>
         ` : ''}
