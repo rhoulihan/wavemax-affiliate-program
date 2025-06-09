@@ -1131,12 +1131,26 @@ function initializeAffiliateRegistration() {
     
     if (!minFeeInput || !perBagInput) return;
     
-    // Update on input change
-    minFeeInput.addEventListener('input', updateFeeCalculator);
-    perBagInput.addEventListener('input', updateFeeCalculator);
-    
-    // Initial calculation
-    updateFeeCalculator();
+    // Initialize the pricing preview component
+    if (window.PricingPreviewComponent) {
+      window.registrationPricingPreview = window.PricingPreviewComponent.init(
+        'registrationPricingPreview',
+        'minimumDeliveryFee',
+        'perBagDeliveryFee',
+        {
+          titleText: 'Live Pricing Preview',
+          titleI18n: 'affiliate.register.livePricingPreview',
+          showNotes: true
+        }
+      );
+      console.log('Pricing preview component initialized for registration form');
+    } else {
+      console.warn('PricingPreviewComponent not available, falling back to legacy calculator');
+      // Fallback to legacy functionality
+      minFeeInput.addEventListener('input', updateFeeCalculator);
+      perBagInput.addEventListener('input', updateFeeCalculator);
+      updateFeeCalculator();
+    }
     
     // Clean up observer before navigation
     window.addEventListener('beforeunload', function() {
