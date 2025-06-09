@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>London On Screen - Self-Guided Film & TV Walking Tour</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="header-content">
+            <h1>🎬 London On Screen</h1>
+            <nav>
+                <ul>
+                    <li><a href="#tour">The Tour</a></li>
+                    <li><a href="#locations">Locations</a></li>
+                    <li><a href="#bonus">Bonus Sites</a></li>
+                    <li><a href="#about">About</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <h2>Walk Through Cinema History</h2>
+        <p>Discover London's iconic film and TV locations on this self-guided walking tour through the Square Mile</p>
+        <a href="#tour" class="btn">Start Your Journey</a>
+    </section>
+
+    <!-- Tour Stats -->
+    <div class="tour-stats">
+        <div class="stat">
+            <div class="stat-number">10+12</div>
+            <div class="stat-label">Main + Bonus Sites</div>
+        </div>
+        <div class="stat">
+            <div class="stat-number">3.5</div>
+            <div class="stat-label">Miles (Main Route)</div>
+        </div>
+        <div class="stat">
+            <div class="stat-number">70+</div>
+            <div class="stat-label">Films & Shows</div>
+        </div>
+        <div class="stat">
+            <div class="stat-number">2-4</div>
+            <div class="stat-label">Hours Duration</div>
+        </div>
+    </div>
+
+    <!-- Interactive Map -->
+    <section id="tour" class="map-container">
+        <div class="interactive-map">
+            <h3 style="font-size: 1.8rem; margin-bottom: 1rem; color: var(--primary-color);">Interactive Walking Route</h3>
+            
+            <div class="map-wrapper">
+                <!-- Interactive map with route visualization -->
+                <div id="map-container" class="map-iframe">
+                    <p style="text-align: center; padding: 2rem; color: var(--smoke-white); opacity: 0.8;">Interactive map loading...</p>
+                </div>
+                <!-- Loading spinner overlay -->
+                <div class="map-loading-overlay" id="mapLoadingOverlay">
+                    <div class="map-spinner"></div>
+                    <div class="map-loading-text">Calculating route...</div>
+                </div>
+            </div>
+            
+            <div class="map-controls">
+                <button class="map-button" id="viewFullRouteBtn">View Full Route</button>
+                <button class="map-button" id="getDirectionsBtn">Get Directions</button>
+                <button class="map-button" id="downloadRouteBtn">Download GPX</button>
+            </div>
+            
+            <div id="directionsPanel" class="directions-panel">
+                <h4 style="margin-bottom: 1rem;">Walking Directions</h4>
+                <div class="route-info">
+                    <div class="route-stat">
+                        <div class="route-stat-value">3.5 mi</div>
+                        <div class="route-stat-label">Total Distance</div>
+                    </div>
+                    <div class="route-stat">
+                        <div class="route-stat-value">1h 15m</div>
+                        <div class="route-stat-label">Walking Time</div>
+                    </div>
+                    <div class="route-stat">
+                        <div class="route-stat-value">10</div>
+                        <div class="route-stat-label">Film Locations</div>
+                    </div>
+                </div>
+                <p style="margin-top: 1rem;">For turn-by-turn directions, we recommend using Google Maps or Apple Maps on your phone. Click below to open the route in your preferred app:</p>
+                <div style="margin-top: 1rem; display: flex; gap: 1rem; flex-wrap: wrap;">
+                    <a href="https://www.google.com/maps/dir/Millennium+Bridge,+London/St+Paul's+Cathedral,+London/Old+Bailey,+London/Postman's+Park,+London/Smithfield+Market,+London/St+Bartholomew+the+Great,+London/Barbican+Centre,+London/Bank+Junction,+London/Leadenhall+Market,+London/Tower+Bridge,+London" 
+                       target="_blank" 
+                       class="btn" 
+                       style="font-size: 0.9rem;">
+                        Open in Google Maps
+                    </a>
+                    <a href="https://maps.apple.com/?daddr=Millennium+Bridge,+London+to+St+Paul's+Cathedral,+London+to+Old+Bailey,+London+to+Postman's+Park,+London+to+Smithfield+Market,+London+to+St+Bartholomew+the+Great,+London+to+Barbican+Centre,+London+to+Bank+Junction,+London+to+Leadenhall+Market,+London+to+Tower+Bridge,+London" 
+                       class="btn" 
+                       style="font-size: 0.9rem;">
+                        Open in Apple Maps
+                    </a>
+                </div>
+            </div>
+            
+            <div class="route-overview-box">
+                <h4>Walking Route Overview</h4>
+                <ol class="route-list">
+                    <li><strong>Millennium Bridge</strong> → St Paul's Cathedral (5 min walk)</li>
+                    <li><strong>St Paul's Cathedral</strong> → Old Bailey (7 min walk)</li>
+                    <li><strong>Old Bailey</strong> → Postman's Park (5 min walk)</li>
+                    <li><strong>Postman's Park</strong> → Smithfield Market (8 min walk)</li>
+                    <li><strong>Smithfield Market</strong> → St Bartholomew the Great (3 min walk)</li>
+                    <li><strong>St Bartholomew the Great</strong> → Barbican Centre (10 min walk)</li>
+                    <li><strong>Barbican Centre</strong> → Cornhill & Royal Exchange (12 min walk)</li>
+                    <li><strong>Cornhill & Royal Exchange</strong> → Leadenhall Market (8 min walk)</li>
+                    <li><strong>Leadenhall Market</strong> → Tower Bridge (15 min walk)</li>
+                </ol>
+                <p class="pro-tip">
+                    <strong>Pro tip:</strong> The route is designed to be walked in order, but you can easily skip locations or add bonus sites. 
+                    Each location is well-connected by public transport if you need a break.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Locations -->
+    <section id="locations" class="locations">
+        <h3 style="font-size: 2rem; text-align: center; margin-bottom: 2rem; color: var(--primary-color);">Featured Locations</h3>
+        
+        <div class="location-grid">
+            <!-- Location 1 -->
+            <div class="location-card" data-location="1">
+                <div class="location-header">
+                    <span class="location-number">1</span>
+                    <span style="font-size: 1.2rem;">The Millennium Bridge</span>
+                </div>
+                <div class="location-content">
+                    <p>Start your journey at the Bankside entrance of this modern architectural marvel that's been destroyed on screen more times than we can count!</p>
+                    <ul class="film-list">
+                        <li class="film-item">
+                            <span class="film-title">Guardians of the Galaxy</span>
+                            <span class="film-year"> (2014)</span>
+                        </li>
+                        <li class="film-item">
+                            <span class="film-title">James Bond: Spectre</span>
+                            <span class="film-year"> (2015)</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Location 2 -->
+            <div class="location-card" data-location="2">
+                <div class="location-header">
+                    <span class="location-number">2</span>
+                    <span style="font-size: 1.2rem;">St Paul's Cathedral</span>
+                </div>
+                <div class="location-content">
+                    <p>This iconic dome has witnessed everything from alien invasions to superhero landings!</p>
+                    <ul class="film-list">
+                        <li class="film-item">
+                            <span class="film-title">Mission Impossible: Fallout</span>
+                            <span class="film-year"> (2018)</span>
+                        </li>
+                        <li class="film-item">
+                            <span class="film-title">Thor: The Dark World</span>
+                            <span class="film-year"> (2013)</span>
+                        </li>
+                        <li class="film-item">
+                            <span class="film-title">Paddington 2</span>
+                            <span class="film-year"> (2017)</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Location 3 -->
+            <div class="location-card" data-location="3">
+                <div class="location-header">
+                    <span class="location-number">3</span>
+                    <span style="font-size: 1.2rem;">The Old Bailey</span>
+                </div>
+                <div class="location-content">
+                    <p>Justice meets cinema at London's most famous criminal court.</p>
+                    <ul class="film-list">
+                        <li class="film-item">
+                            <span class="film-title">Justice League</span>
+                            <span class="film-year"> (2017)</span>
+                        </li>
+                        <li class="film-item">
+                            <span class="film-title">V for Vendetta</span>
+                            <span class="film-year"> (2005)</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Location 4 -->
+            <div class="location-card" data-location="4">
+                <div class="location-header">
+                    <span class="location-number">4</span>
+                    <span style="font-size: 1.2rem;">Postman's Park</span>
+                </div>
+                <div class="location-content">
+                    <p>A hidden gem featuring heroic memorials and romantic encounters.</p>
+                    <ul class="film-list">
+                        <li class="film-item">
+                            <span class="film-title">Closer</span>
+                            <span class="film-year"> (2004)</span>
+                        </li>
+                        <li class="film-item">
+                            <span class="film-title">Tomb Raider</span>
+                            <span class="film-year"> (2018)</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Location 5 -->
+            <div class="location-card" data-location="5">
+                <div class="location-header">
+                    <span class="location-number">5</span>
+                    <span style="font-size: 1.2rem;">Smithfield Market</span>
+                </div>
+                <div class="location-content">
+                    <p>Historic meat market hiding secret entrances to MI6!</p>
+                    <ul class="film-list">
+                        <li class="film-item">
+                            <span class="film-title">Skyfall</span>
+                            <span class="film-year"> (2012)</span>
+                        </li>
+                        <li class="film-item">
+                            <span class="film-title">I May Destroy You</span>
+                            <span class="film-year"> (2020)</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Location 6 -->
+            <div class="location-card" data-location="6">
+                <div class="location-header">
+                    <span class="location-number">6</span>
+                    <span style="font-size: 1.2rem;">St Bartholomew the Great</span>
+                </div>
+                <div class="location-content">
+                    <p>London's oldest church has hosted weddings, beheadings, and mysteries.</p>
+                    <ul class="film-list">
+                        <li class="film-item">
+                            <span class="film-title">Four Weddings and a Funeral</span>
+                            <span class="film-year"> (1994)</span>
+                        </li>
+                        <li class="film-item">
+                            <span class="film-title">Sherlock Holmes</span>
+                            <span class="film-year"> (2009)</span>
+                        </li>
+                        <li class="film-item">
+                            <span class="film-title">Shakespeare in Love</span>
+                            <span class="film-year"> (1998)</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Location 7 -->
+            <div class="location-card" data-location="7">
+                <div class="location-header">
+                    <span class="location-number">7</span>
+                    <span style="font-size: 1.2rem;">Barbican Centre</span>
+                </div>
+                <div class="location-content">
+                    <p>Brutalist architecture perfect for spy headquarters and music videos.</p>
+                    <ul class="film-list">
+                        <li class="film-item">
+                            <span class="film-title">Quantum of Solace</span>
+                            <span class="film-year"> (2008)</span>
+                        </li>
+                        <li class="film-item">
+                            <span class="film-title">Luther</span>
+                            <span class="film-year"> (2010)</span>
+                        </li>
+                        <li class="film-item">
+                            <span class="film-title">Skepta - Shutdown</span>
+                            <span class="film-year"> (2015)</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Location 8 -->
+            <div class="location-card" data-location="8">
+                <div class="location-header">
+                    <span class="location-number">8</span>
+                    <span style="font-size: 1.2rem;">Cornhill & Royal Exchange</span>
+                </div>
+                <div class="location-content">
+                    <p>The heart of the City has seen romance, action, and undead invasions!</p>
+                    <ul class="film-list">
+                        <li class="film-item">
+                            <span class="film-title">Bridget Jones's Diary</span>
+                            <span class="film-year"> (2001)</span>
+                        </li>
+                        <li class="film-item">
+                            <span class="film-title">London Has Fallen</span>
+                            <span class="film-year"> (2016)</span>
+                        </li>
+                        <li class="film-item">
+                            <span class="film-title">The Mummy Returns</span>
+                            <span class="film-year"> (2001)</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Location 9 -->
+            <div class="location-card" data-location="9">
+                <div class="location-header">
+                    <span class="location-number">9</span>
+                    <span style="font-size: 1.2rem;">Leadenhall Market</span>
+                </div>
+                <div class="location-content">
+                    <p>Step into the wizarding world at the real-life Diagon Alley!</p>
+                    <ul class="film-list">
+                        <li class="film-item">
+                            <span class="film-title">Harry Potter and the Philosopher's Stone</span>
+                            <span class="film-year"> (2001)</span>
+                        </li>
+                        <li class="film-item">
+                            <span class="film-title">Hereafter</span>
+                            <span class="film-year"> (2010)</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Location 10 -->
+            <div class="location-card" data-location="10">
+                <div class="location-header">
+                    <span class="location-number">10</span>
+                    <span style="font-size: 1.2rem;">Tower Bridge</span>
+                </div>
+                <div class="location-content">
+                    <p>End your tour at London's most photographed bridge and superhero battleground!</p>
+                    <ul class="film-list">
+                        <li class="film-item">
+                            <span class="film-title">Spider-Man: Far From Home</span>
+                            <span class="film-year"> (2019)</span>
+                        </li>
+                        <li class="film-item">
+                            <span class="film-title">Thor: The Dark World</span>
+                            <span class="film-year"> (2013)</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Bonus Locations -->
+    <section id="bonus" class="bonus-section">
+        <div class="locations">
+            <div class="bonus-header">
+                <h3>🌟 Bonus Film Locations Nearby</h3>
+                <p>Extend your tour with these additional cinematic spots from the original film walk!</p>
+            </div>
+            
+            <div class="bonus-card">
+                <h4>Temple Church</h4>
+                <p><strong>Between Locations 3 & 4 (10 min detour)</strong></p>
+                <p>Featured in: The Da Vinci Code (2006) - Tom Hanks searches among effigies for a knight's tomb. This 12th-century church was the headquarters of the Knights Templar.</p>
+            </div>
+            
+            <div class="bonus-card">
+                <h4>Fleet Street</h4>
+                <p><strong>Near Location 3</strong></p>
+                <p>Featured in: Children of Men (2006) - Clive Owen barely escapes a café explosion in the dramatic opening sequence. Sweeney Todd (2007) also features this historic street.</p>
+            </div>
+            
+            <div class="bonus-card">
+                <h4>College of Arms</h4>
+                <p><strong>Near St Paul's</strong></p>
+                <p>Featured in: On Her Majesty's Secret Service (1969) - George Lazenby's James Bond researches Blofeld's ancestry here. A chase scene was planned but cut for time.</p>
+            </div>
+            
+            <div class="bonus-card">
+                <h4>Liverpool Street Station</h4>
+                <p><strong>10 minutes from Location 7</strong></p>
+                <p>Featured in: Mission Impossible (1996) - Tom Cruise makes a tense phone call before meeting Jon Voight. Also in Hereafter (2010) and The Bourne Ultimatum (2007).</p>
+            </div>
+            
+            <div class="bonus-card">
+                <h4>The Gherkin (30 St Mary Axe)</h4>
+                <p><strong>Near Location 9</strong></p>
+                <p>Featured in: Basic Instinct 2 (2006), A Good Year (2006) with Russell Crowe, Match Point (2005), Thor: The Dark World (2013)</p>
+            </div>
+            
+            <div class="bonus-card">
+                <h4>Lloyd's Building</h4>
+                <p><strong>Near Leadenhall Market</strong></p>
+                <p>Featured in: Spy Game (2001) as US embassy in Hong Kong, Entrapment (1999) transformed into Malaysia with palm trees, Proof of Life (2000)</p>
+            </div>
+            
+            <div class="bonus-card">
+                <h4>Minster Court</h4>
+                <p><strong>Near Tower of London</strong></p>
+                <p>Featured in: 101 Dalmatians (1996) - This Gothic building served as Cruella de Vil's headquarters (though they showed her office overlooking St Paul's!)</p>
+            </div>
+            
+            <div class="bonus-card">
+                <h4>Mansion House</h4>
+                <p><strong>Near Bank Junction</strong></p>
+                <p>Featured in: The Golden Bowl (2000) - The Lord Mayor and Lady Mayoress appeared as extras in the sumptuous dance scene filmed in the Salon.</p>
+            </div>
+            
+            <div class="bonus-card">
+                <h4>Guildhall</h4>
+                <p><strong>5 minutes from Bank</strong></p>
+                <p>Featured in: Bean 2 (entrance as Parisian hotel), RKO 281 (1999) - the story behind Citizen Kane, featuring a banquet in the Great Hall.</p>
+            </div>
+            
+            <div class="bonus-card">
+                <h4>Broadgate Circle</h4>
+                <p><strong>Near Liverpool Street</strong></p>
+                <p>Featured in: Spiceworld (1997) - The Spice Girls movie where this location doubled as a venue in Milan.</p>
+            </div>
+            
+            <div class="bonus-card">
+                <h4>Citypoint</h4>
+                <p><strong>Near Barbican</strong></p>
+                <p>Featured in: Scoop (2006) - Woody Allen and Scarlett Johansson spy on Hugh Jackman, Batman Begins (2005), 28 Weeks Later (2007)</p>
+            </div>
+            
+            <div class="bonus-card">
+                <h4>Blackfriars Bridge</h4>
+                <p><strong>Visible from Millennium Bridge</strong></p>
+                <p>Featured in: The Imaginarium of Doctor Parnassus (2009) - Heath Ledger's final film, where his character is found hanging beneath the bridge. Also in Love Actually (2003).</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="about-section">
+        <h3>About This Tour</h3>
+        <p>This self-guided walking tour takes you through the Square Mile, London's historic heart, visiting locations that have appeared in blockbuster films and beloved TV shows. From superhero landings to wizard shopping trips, romantic encounters to explosive action sequences, you'll see the City through the lens of cinema.</p>
+        <p>The main route covers approximately 3.5 miles and takes 2-3 hours at a leisurely pace. Feel free to explore the bonus locations to extend your cinematic adventure!</p>
+        
+        <div class="tips-box">
+            <h4>Tips for Your Tour:</h4>
+            <ul>
+                <li>Start early to avoid crowds at popular spots</li>
+                <li>Bring a camera - these locations are incredibly photogenic!</li>
+                <li>Many locations are free to enter or view from outside</li>
+                <li>Check opening times for churches and markets</li>
+                <li>Wear comfortable walking shoes</li>
+            </ul>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <p>&copy; 2024 London On Screen Walking Tour. Educational use only.</p>
+            <p style="margin-top: 0.5rem; font-size: 0.9rem;">Based on the City of London's film location guide</p>
+        </div>
+    </footer>
+
+    <!-- Modal for detailed information -->
+    <div id="detailModal" class="modal">
+        <div class="modal-content">
+            <span class="close" id="modalCloseBtn">&times;</span>
+            <div id="modalContent"></div>
+        </div>
+    </div>
+
+    <!-- Leaflet JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+    <!-- Leaflet Routing Machine for walking paths -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet-routing-machine/3.2.12/leaflet-routing-machine.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
