@@ -1225,13 +1225,16 @@ function initializeAffiliateRegistration() {
   }
 
 
+  // OLD SERVICE AREA MAP IMPLEMENTATION - REPLACED BY SERVICE AREA COMPONENT
+  // Keeping for reference but commenting out to prevent conflicts
+  /*
   // Initialize service area map
   let serviceAreaMap = window.affiliateServiceAreaMap || null;
   let serviceMarker = window.affiliateServiceMarker || null;
   let serviceCircle = window.affiliateServiceCircle || null;
   let mapInitialized = window.affiliateMapInitialized || false;
 
-  function initializeServiceAreaMap() {
+  function initializeServiceAreaMap_OLD() {
     // Prevent duplicate initialization
     if (mapInitialized || serviceAreaMap) {
       console.log('Map already initialized, skipping');
@@ -1620,12 +1623,12 @@ function initializeAffiliateRegistration() {
   }
   
   // Initialize map when container is visible and Leaflet is loaded
-  function waitForLeafletAndInitialize() {
+  function waitForLeafletAndInitialize_OLD() {
     console.log('[Service Area Map] waitForLeafletAndInitialize called');
     
     // Remove any remaining event listeners to prevent duplicate calls
-    window.removeEventListener('init-service-area-map', waitForLeafletAndInitialize);
-    window.removeEventListener('dom-sections-ready', waitForLeafletAndInitialize);
+    window.removeEventListener('init-service-area-map', waitForLeafletAndInitialize_OLD);
+    window.removeEventListener('dom-sections-ready', waitForLeafletAndInitialize_OLD);
     
     const mapContainer = document.getElementById('serviceAreaMap');
     
@@ -1655,7 +1658,7 @@ function initializeAffiliateRegistration() {
         leafletJS.onload = function() {
           console.log('Leaflet loaded dynamically');
           // Try to initialize again now that Leaflet is loaded
-          waitForLeafletAndInitialize();
+          waitForLeafletAndInitialize_OLD();
         };
         document.body.appendChild(leafletJS);
         return;
@@ -1680,7 +1683,7 @@ function initializeAffiliateRegistration() {
         console.log('[Service Area Map] Container dimensions after frame:', { width: rect2.width, height: rect2.height });
         if (rect2.width > 0 && rect2.height > 0) {
           console.log('[Service Area Map] Container now has dimensions, initializing map');
-          initializeServiceAreaMap();
+          initializeServiceAreaMap_OLD();
         } else {
           console.log('[Service Area Map] Container still has no dimensions, giving up');
         }
@@ -1690,16 +1693,20 @@ function initializeAffiliateRegistration() {
     
     console.log('Leaflet loaded and container ready, initializing map');
     console.log('Leaflet version:', L.version);
-    initializeServiceAreaMap();
+    initializeServiceAreaMap_OLD();
   }
+  */
   
+  // OLD MAP INITIALIZATION - REPLACED BY SERVICE AREA COMPONENT
+  // Commenting out to prevent conflicts with new component
+  /*
   // Listen for trigger events to initialize map
   window.addEventListener('init-service-area-map', waitForLeafletAndInitialize, { once: true });
   window.addEventListener('dom-sections-ready', () => {
     console.log('[Service Area Map] DOM sections ready event received');
     // Give browser a chance to complete rendering
     requestAnimationFrame(() => {
-      waitForLeafletAndInitialize();
+      waitForLeafletAndInitialize_OLD();
     });
   }, { once: true });
   
@@ -1708,9 +1715,10 @@ function initializeAffiliateRegistration() {
     const container = document.getElementById('serviceAreaMap').closest('.form-section-hidden');
     if (!container || container.style.display !== 'none') {
       // Section is visible, try to initialize
-      waitForLeafletAndInitialize();
+      waitForLeafletAndInitialize_OLD();
     }
   }
+  */
   
   // Set up address validation button
   function setupAddressValidation() {
@@ -2136,15 +2144,34 @@ function initializeAffiliateRegistration() {
           // Force reflow by accessing offsetHeight
           serviceAreaSection.offsetHeight;
           
-          // Now trigger map initialization
-          console.log('[Service Area Map] Service area section shown, triggering map initialization');
-          window.dispatchEvent(new Event('dom-sections-ready'));
-          window.dispatchEvent(new Event('init-service-area-map'));
+          // Initialize the service area component
+          console.log('[Service Area Map] Service area section shown, initializing component');
+          if (window.ServiceAreaComponent) {
+            window.registrationServiceArea = window.ServiceAreaComponent.init('registrationServiceAreaComponent', {
+              latitude: selectedLat,
+              longitude: selectedLon,
+              radius: radiusValue || 5,
+              address: selectedAddress,
+              editable: true,
+              showMap: true,
+              showControls: true,
+              showInfo: true,
+              onUpdate: function(serviceData) {
+                // Update hidden fields
+                document.getElementById('serviceLatitude').value = serviceData.latitude;
+                document.getElementById('serviceLongitude').value = serviceData.longitude;
+                document.getElementById('serviceRadius').value = serviceData.radius;
+                console.log('Service area updated:', serviceData);
+              }
+            });
+          } else {
+            console.error('ServiceAreaComponent not available');
+          }
         }
         
         // Scroll to service area section
         setTimeout(() => {
-          const serviceAreaSection = document.querySelector('#serviceAreaMap').closest('.md\\:col-span-2');
+          const serviceAreaSection = document.getElementById('serviceAreaSection');
           if (serviceAreaSection) {
             serviceAreaSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
           }
