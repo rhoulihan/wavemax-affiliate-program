@@ -32,9 +32,6 @@ const CSRF_CONFIG = {
     '/api/health',
     '/api/v1/health',
     
-    // Public API proxies
-    '/api/v1/routing/directions',
-    
     // OAuth endpoints (GET only - these handle their own security)
     '/api/v1/auth/google',
     '/api/v1/auth/facebook',
