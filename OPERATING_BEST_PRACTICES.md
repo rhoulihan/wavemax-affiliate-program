@@ -76,6 +76,33 @@ This document contains important operational knowledge and workarounds discovere
    };
    ```
 
+3. **Critical Script Loading Order**:
+   - **Issue**: Scripts included in embedded HTML pages are NOT automatically loaded
+   - **Discovered**: 2025-01-09 - SwirlSpinner class not available in affiliate registration
+   - **Symptom**: JavaScript classes/functions undefined even though script tags exist in HTML
+   - **Solution**: Scripts must be added to BOTH locations:
+     1. In the HTML file's script tags (for direct access)
+     2. In embed-app.html's `pageScripts` mapping (for embedded access)
+   - **Example**:
+     ```javascript
+     // In embed-app.html
+     const pageScripts = {
+         '/affiliate-register': [
+             '/assets/js/i18n.js',
+             '/assets/js/language-switcher.js', 
+             '/assets/js/modal-utils.js',
+             '/assets/js/errorHandler.js',
+             '/assets/js/csrf-utils.js',
+             '/assets/js/swirl-spinner.js',  // Must be listed before scripts that use it
+             '/assets/js/affiliate-register-init.js'
+         ],
+     };
+     ```
+   - **Best Practice**: When adding new JavaScript libraries or utilities:
+     1. Add script tag to the HTML file
+     2. Add to pageScripts in embed-app.html in correct loading order
+     3. Test in both direct access AND embedded contexts
+
 3. **Script Initialization Best Practices for Dynamic Content**:
    - **Use multiple initialization strategies**:
      ```javascript
@@ -295,12 +322,36 @@ When the command "run coverage test" is issued, the system performs the followin
 
 ### Translation Requirements
 - **Always maintain translations**: When updating or adding HTML content, ensure translations are updated for:
+  - English (en) - Base language
+  - Spanish (es)
   - Portuguese (pt)
-  - Spanish (es)  
   - German (de)
 - **Email templates**: Create language-specific versions in `/server/templates/emails/[language]/`
 - **Language preference**: Stored in Affiliate and Customer models, captured during registration from browser language
 
+### Best Practices for Translations
+1. **Always translate ALL user-facing content**:
+   - UI labels and buttons
+   - Error messages and notifications
+   - Form placeholders and help text
+   - Dynamic messages (spinners, loading states)
+   - Email content
+   
+2. **Translation workflow**:
+   - When adding new text, immediately add translations for all 4 languages
+   - Use translation keys that clearly describe the content (e.g., `spinner.validatingAddress`)
+   - Test the interface in all languages to ensure proper display
+   
+3. **Dynamic content translations**:
+   - For JavaScript-generated content, use i18next: `window.i18next.t('key')`
+   - For content with variables, use interpolation: `t('key', { variable: value })`
+   - Example: `t('spinner.connectingWith', { provider: 'Google' })`
+   
+4. **Quality checks**:
+   - Verify text doesn't overflow UI elements in different languages
+   - Ensure proper character encoding for special characters
+   - Test right-to-left languages if added in the future
+
 ---
 
-*Last Updated: 2025-07-06*
+*Last Updated: 2025-01-09*

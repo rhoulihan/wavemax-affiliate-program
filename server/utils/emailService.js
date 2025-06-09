@@ -126,7 +126,7 @@ const fillTemplate = (template, data) => {
   data.BASE_URL = baseUrl;
   
   // Use a regex to find all placeholders and replace them in one operation
-  return template.replace(/\[([A-Z_]+)\]/g, (match, placeholder) => {
+  return template.replace(/\[([A-Z0-9_]+)\]/g, (match, placeholder) => {
     // First try the exact placeholder (uppercase), then try lowercase
     const upperKey = placeholder;
     const lowerKey = placeholder.toLowerCase();
@@ -185,6 +185,112 @@ exports.sendAffiliateWelcomeEmail = async (affiliate) => {
     const registrationUrl = `https://www.wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program?affid=${affiliate.affiliateId}`;
     const landingPageUrl = `https://www.wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program?route=/affiliate-landing&code=${affiliate.affiliateId}`;
 
+    // Get translations for the email content
+    const translations = {
+      en: {
+        EMAIL_TITLE: 'Welcome to WaveMAX Laundry Affiliate Program',
+        EMAIL_HEADER: 'Welcome to the Affiliate Program!',
+        GREETING: `Hi ${affiliate.firstName},`,
+        WELCOME_MESSAGE: 'Congratulations and welcome to the WaveMAX Laundry Affiliate Program! We\'re excited to have you join our network of affiliate partners.',
+        READY_MESSAGE: 'You\'re now ready to start offering premium wash, dry, fold laundry services to your customers, with pickup and delivery handled by you.',
+        YOUR_INFO_TITLE: 'Your Affiliate Information',
+        AFFILIATE_ID_LABEL: 'Affiliate ID',
+        LANDING_PAGE_LABEL: 'Customer Landing Page',
+        LANDING_PAGE_DESC: 'Share this professional landing page with potential customers to showcase your services and pricing.',
+        REGISTRATION_URL_LABEL: 'Direct Registration URL',
+        REGISTRATION_URL_DESC: 'Customers can also use this direct link to register. Each customer registered through your links will be associated with your account.',
+        GETTING_STARTED_TITLE: 'Getting Started',
+        STEP_1: 'Share your registration link with potential customers',
+        STEP_2: 'Receive laundry bags with unique barcodes for your customers',
+        STEP_3: 'Coordinate pickups and deliveries based on customer schedules',
+        STEP_4: 'Bring the laundry to our WaveMAX location for washing, drying, and folding',
+        STEP_5: 'Deliver clean laundry back to your customers',
+        STEP_6: 'Earn commissions on every order!',
+        COMMISSION_LABEL: 'COMMISSION ON WDF',
+        DELIVERY_FEES_LABEL: 'OF DELIVERY FEES',
+        STARTUP_COST_LABEL: 'STARTUP COST',
+        DASHBOARD_MESSAGE: 'Login to your dashboard to manage your affiliate account, track orders, and view your earnings.',
+        DASHBOARD_BUTTON: 'Go to Dashboard'
+      },
+      es: {
+        EMAIL_TITLE: 'Bienvenido al Programa de Afiliados de WaveMAX Laundry',
+        EMAIL_HEADER: '¡Bienvenido al Programa de Afiliados!',
+        GREETING: `Hola ${affiliate.firstName},`,
+        WELCOME_MESSAGE: '¡Felicitaciones y bienvenido al Programa de Afiliados de WaveMAX Laundry! Estamos emocionados de que se una a nuestra red de socios afiliados.',
+        READY_MESSAGE: 'Ahora está listo para comenzar a ofrecer servicios premium de lavado, secado y doblado de ropa, con recogida y entrega manejados por usted.',
+        YOUR_INFO_TITLE: 'Su Información de Afiliado',
+        AFFILIATE_ID_LABEL: 'ID de Afiliado',
+        LANDING_PAGE_LABEL: 'Página de Destino para Clientes',
+        LANDING_PAGE_DESC: 'Comparta esta página profesional con clientes potenciales para mostrar sus servicios y precios.',
+        REGISTRATION_URL_LABEL: 'URL de Registro Directo',
+        REGISTRATION_URL_DESC: 'Los clientes también pueden usar este enlace directo para registrarse. Cada cliente registrado a través de sus enlaces estará asociado con su cuenta.',
+        GETTING_STARTED_TITLE: 'Primeros Pasos',
+        STEP_1: 'Comparta su enlace de registro con clientes potenciales',
+        STEP_2: 'Reciba bolsas de lavandería con códigos de barras únicos para sus clientes',
+        STEP_3: 'Coordine recogidas y entregas según los horarios de los clientes',
+        STEP_4: 'Lleve la ropa a nuestra ubicación WaveMAX para lavar, secar y doblar',
+        STEP_5: 'Entregue la ropa limpia a sus clientes',
+        STEP_6: '¡Gane comisiones en cada pedido!',
+        COMMISSION_LABEL: 'COMISIÓN EN WDF',
+        DELIVERY_FEES_LABEL: 'DE TARIFAS DE ENTREGA',
+        STARTUP_COST_LABEL: 'COSTO INICIAL',
+        DASHBOARD_MESSAGE: 'Inicie sesión en su panel para administrar su cuenta de afiliado, rastrear pedidos y ver sus ganancias.',
+        DASHBOARD_BUTTON: 'Ir al Panel'
+      },
+      pt: {
+        EMAIL_TITLE: 'Bem-vindo ao Programa de Afiliados WaveMAX Laundry',
+        EMAIL_HEADER: 'Bem-vindo ao Programa de Afiliados!',
+        GREETING: `Olá ${affiliate.firstName},`,
+        WELCOME_MESSAGE: 'Parabéns e bem-vindo ao Programa de Afiliados WaveMAX Laundry! Estamos animados em tê-lo em nossa rede de parceiros afiliados.',
+        READY_MESSAGE: 'Você está pronto para começar a oferecer serviços premium de lavar, secar e dobrar roupas, com coleta e entrega gerenciadas por você.',
+        YOUR_INFO_TITLE: 'Suas Informações de Afiliado',
+        AFFILIATE_ID_LABEL: 'ID de Afiliado',
+        LANDING_PAGE_LABEL: 'Página de Destino para Clientes',
+        LANDING_PAGE_DESC: 'Compartilhe esta página profissional com clientes em potencial para mostrar seus serviços e preços.',
+        REGISTRATION_URL_LABEL: 'URL de Registro Direto',
+        REGISTRATION_URL_DESC: 'Os clientes também podem usar este link direto para se registrar. Cada cliente registrado através de seus links será associado à sua conta.',
+        GETTING_STARTED_TITLE: 'Primeiros Passos',
+        STEP_1: 'Compartilhe seu link de registro com clientes em potencial',
+        STEP_2: 'Receba sacolas de lavanderia com códigos de barras exclusivos para seus clientes',
+        STEP_3: 'Coordene coletas e entregas com base nos horários dos clientes',
+        STEP_4: 'Leve a roupa para nossa localização WaveMAX para lavar, secar e dobrar',
+        STEP_5: 'Entregue roupas limpas de volta aos seus clientes',
+        STEP_6: 'Ganhe comissões em cada pedido!',
+        COMMISSION_LABEL: 'COMISSÃO EM WDF',
+        DELIVERY_FEES_LABEL: 'DAS TAXAS DE ENTREGA',
+        STARTUP_COST_LABEL: 'CUSTO INICIAL',
+        DASHBOARD_MESSAGE: 'Faça login em seu painel para gerenciar sua conta de afiliado, rastrear pedidos e visualizar seus ganhos.',
+        DASHBOARD_BUTTON: 'Ir para o Painel'
+      },
+      de: {
+        EMAIL_TITLE: 'Willkommen beim WaveMAX Laundry Affiliate-Programm',
+        EMAIL_HEADER: 'Willkommen beim Affiliate-Programm!',
+        GREETING: `Hallo ${affiliate.firstName},`,
+        WELCOME_MESSAGE: 'Herzlichen Glückwunsch und willkommen beim WaveMAX Laundry Affiliate-Programm! Wir freuen uns, Sie in unserem Netzwerk von Affiliate-Partnern begrüßen zu dürfen.',
+        READY_MESSAGE: 'Sie sind jetzt bereit, Premium-Wasch-, Trocken- und Faltservice anzubieten, wobei Abholung und Lieferung von Ihnen übernommen werden.',
+        YOUR_INFO_TITLE: 'Ihre Affiliate-Informationen',
+        AFFILIATE_ID_LABEL: 'Affiliate-ID',
+        LANDING_PAGE_LABEL: 'Kunden-Landingpage',
+        LANDING_PAGE_DESC: 'Teilen Sie diese professionelle Landingpage mit potenziellen Kunden, um Ihre Dienstleistungen und Preise zu präsentieren.',
+        REGISTRATION_URL_LABEL: 'Direkte Registrierungs-URL',
+        REGISTRATION_URL_DESC: 'Kunden können auch diesen direkten Link zur Registrierung verwenden. Jeder über Ihre Links registrierte Kunde wird Ihrem Konto zugeordnet.',
+        GETTING_STARTED_TITLE: 'Erste Schritte',
+        STEP_1: 'Teilen Sie Ihren Registrierungslink mit potenziellen Kunden',
+        STEP_2: 'Erhalten Sie Wäschesäcke mit einzigartigen Barcodes für Ihre Kunden',
+        STEP_3: 'Koordinieren Sie Abholungen und Lieferungen basierend auf Kundenterminen',
+        STEP_4: 'Bringen Sie die Wäsche zu unserem WaveMAX-Standort zum Waschen, Trocknen und Falten',
+        STEP_5: 'Liefern Sie saubere Wäsche an Ihre Kunden zurück',
+        STEP_6: 'Verdienen Sie Provisionen bei jeder Bestellung!',
+        COMMISSION_LABEL: 'PROVISION AUF WDF',
+        DELIVERY_FEES_LABEL: 'DER LIEFERGEBÜHREN',
+        STARTUP_COST_LABEL: 'STARTKOSTEN',
+        DASHBOARD_MESSAGE: 'Melden Sie sich in Ihrem Dashboard an, um Ihr Affiliate-Konto zu verwalten, Bestellungen zu verfolgen und Ihre Einnahmen anzuzeigen.',
+        DASHBOARD_BUTTON: 'Zum Dashboard'
+      }
+    };
+
+    const emailTranslations = translations[language] || translations.en;
+
     const data = {
       first_name: affiliate.firstName,
       last_name: affiliate.lastName,
@@ -193,7 +299,8 @@ exports.sendAffiliateWelcomeEmail = async (affiliate) => {
       landing_page_url: landingPageUrl,
       login_url: `https://www.wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program?login=affiliate`,
       dashboard_url: `https://www.wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program?login=affiliate`,
-      current_year: new Date().getFullYear()
+      current_year: new Date().getFullYear(),
+      ...emailTranslations
     };
 
     const html = fillTemplate(template, data);

@@ -732,6 +732,103 @@ const users = await User.find()
 ]);</code></pre>
             </div>
 
+            <h2>UI Components</h2>
+
+            <div class="setup-section">
+                <h3>Swirl Spinner</h3>
+                <p>A custom loading spinner with WaveMAX branding that provides visual feedback during asynchronous operations.</p>
+                
+                <h4>Features</h4>
+                <ul>
+                    <li>Elliptical orbit animations for smooth, professional loading states</li>
+                    <li>Three size variants: small, default, large</li>
+                    <li>Speed controls: smooth, normal, fast</li>
+                    <li>Overlay support for form submissions</li>
+                    <li>Full i18n support for loading messages</li>
+                </ul>
+
+                <h4>Basic Usage</h4>
+                <pre><code>// Create and show a spinner
+const spinner = new SwirlSpinner({
+    size: 'default',
+    speed: 'normal',
+    container: document.getElementById('content'),
+    message: 'Loading...',
+    overlay: true
+});
+spinner.show();
+
+// Update and hide
+spinner.updateMessage('Almost done...');
+setTimeout(() => spinner.hide(), 2000);</code></pre>
+
+                <h4>Form Integration</h4>
+                <pre><code>// Show spinner on form submission
+const form = document.getElementById('myForm');
+form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const spinner = SwirlSpinnerUtils.showOnForm(form, {
+        message: i18n.t('common.loading.submitting')
+    });
+    
+    try {
+        await submitForm(form);
+    } finally {
+        spinner.hide();
+    }
+});</code></pre>
+
+                <h4>Button Integration</h4>
+                <pre><code>// Show spinner on button click
+const button = document.getElementById('submitBtn');
+button.addEventListener('click', async () => {
+    const spinner = SwirlSpinnerUtils.showOnButton(button);
+    
+    try {
+        await performAction();
+    } finally {
+        spinner.hide();
+    }
+});</code></pre>
+            </div>
+
+            <div class="setup-section">
+                <h3>Address Validation</h3>
+                <p>Intelligent geocoding system with manual confirmation and reverse geocoding display.</p>
+                
+                <h4>Features</h4>
+                <ul>
+                    <li>Google Maps geocoding with iframe bridge support</li>
+                    <li>Manual address confirmation modal</li>
+                    <li>Reverse geocoding for address display</li>
+                    <li>Smart address formatting</li>
+                    <li>Service area validation</li>
+                </ul>
+
+                <h4>Implementation</h4>
+                <pre><code>// Address validation with confirmation
+async function validateAddress(addressData) {
+    // Try geocoding
+    const result = await geocodeAddress(addressData);
+    
+    if (!result.confident) {
+        // Show confirmation modal
+        const confirmed = await showAddressConfirmationModal(
+            result.formattedAddress,
+            result.coordinates
+        );
+        
+        if (!confirmed) {
+            return false;
+        }
+    }
+    
+    // Validate service area
+    return isInServiceArea(result.coordinates);
+}</code></pre>
+            </div>
+
             <h2>Git Workflow</h2>
 
             <div class="setup-section">

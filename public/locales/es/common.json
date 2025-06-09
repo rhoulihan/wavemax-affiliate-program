@@ -20,7 +20,8 @@
       "learnMore": "Más Información",
       "customerLogin": "Acceso de Cliente",
       "signUpToday": "Regístrate Hoy",
-      "registerNow": "Regístrate ahora"
+      "registerNow": "Regístrate ahora",
+      "copy": "Copiar"
     },
     "labels": {
       "username": "Nombre de Usuario",
@@ -56,11 +57,13 @@
       "registrationFailed": "Error en el registro. Por favor intenta nuevamente.",
       "passwordResetSuccess": "¡Restablecimiento de contraseña exitoso!",
       "passwordResetFailed": "Error al restablecer la contraseña. Por favor intenta nuevamente.",
+      "redirecting": "Redirigiendo...",
       "popupBlocked": "La ventana emergente fue bloqueada. Por favor permite las ventanas emergentes para este sitio e intenta nuevamente.",
       "authenticationFailed": "Error de autenticación",
       "authenticationTimeout": "Se agotó el tiempo de autenticación. Por favor intenta nuevamente.",
       "accountNotFound": "Cuenta no encontrada. Serás redirigido al registro para crear una nueva cuenta.",
-      "processingError": "Error al procesar el resultado de autenticación"
+      "processingError": "Error al procesar el resultado de autenticación",
+      "copied": "¡Copiado!"
     }
   },
   "landing": {
@@ -351,10 +354,11 @@
       "roundTripPricing": "Los precios mostrados son para servicio de ida y vuelta",
       "bags": "Bolsas",
       "deliveryFee": "Entrega",
-      "total": "Total",
+      "total": "Ganancias Totales",
       "yourCommission": "Tu Comisión",
-      "totalNote": "* Total: Tarifa de entrega + servicio WDF ($1.25/lb × 30 lbs/bolsa)",
-      "commissionNote": "* Comisión: 10% de los ingresos del servicio WDF",
+      "deliveryNote": "* Entrega: 100% de las tarifas de entrega son para ti",
+      "commissionNote": "* Comisión: 10% del servicio WDF (30 lbs × $1.25/lb por bolsa)",
+      "totalNote": "* Ganancias Totales: Tarifa de entrega + Comisión",
       "accountSetup": "Configuración de Cuenta",
       "username": "Nombre de Usuario *",
       "usernameDesc": "Su identificador único de inicio de sesión",
@@ -397,6 +401,26 @@
         "totalCommissions": "Comisiones Totales",
         "pendingCommissions": "Comisiones Pendientes"
       }
+    },
+    "success": {
+      "title": "¡Registro Exitoso!",
+      "congratulations": "¡Felicitaciones!",
+      "submittedTitle": "Su Solicitud Ha Sido Enviada",
+      "welcomeMessage": "¡Bienvenido al Programa de Afiliados WaveMAX! Estamos emocionados de tenerlo como nuestro socio.",
+      "yourInfoTitle": "Su Información",
+      "affiliateId": "ID de Afiliado",
+      "name": "Nombre",
+      "email": "Correo Electrónico",
+      "linkTitle": "Su Enlace de Referencia",
+      "linkDescription": "Comparta este enlace con su red para comenzar a ganar comisiones:",
+      "linkHelp": "Cuando los clientes se registren usando su enlace, se conectarán automáticamente a su cuenta de afiliado.",
+      "nextStepsTitle": "Próximos Pasos",
+      "nextStep1": "Revise su correo electrónico para su mensaje de bienvenida y credenciales de acceso",
+      "nextStep2": "Inicie sesión en su panel de afiliado para acceder a materiales de marketing",
+      "nextStep3": "Comparta su enlace de referencia único con amigos, familia y clientes",
+      "nextStep4": "Rastree sus referencias y comisiones en tiempo real",
+      "nextStep5": "Reciba pagos mensuales a través de su método de pago preferido",
+      "loginToDashboard": "Iniciar Sesión en el Panel"
     }
   },
   "customer": {
@@ -624,5 +648,12 @@
     "settings": "Configuración",
     "help": "Ayuda",
     "logout": "Cerrar Sesión"
+  },
+  "spinner": {
+    "connectingWith": "Conectando con {{provider}}...",
+    "validatingAddress": "Validando tu dirección...",
+    "processingRegistration": "Procesando tu registro...",
+    "loading": "Cargando...",
+    "pleaseWait": "Por favor espera..."
   }
 }

@@ -20,7 +20,8 @@
       "learnMore": "Mehr erfahren",
       "customerLogin": "Kundenlogin",
       "signUpToday": "Heute registrieren",
-      "registerNow": "Jetzt registrieren"
+      "registerNow": "Jetzt registrieren",
+      "copy": "Kopieren"
     },
     "labels": {
       "username": "Benutzername",
@@ -56,11 +57,13 @@
       "registrationFailed": "Registrierung fehlgeschlagen. Bitte versuchen Sie es erneut.",
       "passwordResetSuccess": "Passwort erfolgreich zurückgesetzt!",
       "passwordResetFailed": "Passwort-Zurücksetzung fehlgeschlagen. Bitte versuchen Sie es erneut.",
+      "redirecting": "Weiterleitung...",
       "popupBlocked": "Das Popup-Fenster wurde blockiert. Bitte erlauben Sie Popups für diese Website und versuchen Sie es erneut.",
       "authenticationFailed": "Authentifizierung fehlgeschlagen",
       "authenticationTimeout": "Authentifizierung abgelaufen. Bitte versuchen Sie es erneut.",
       "accountNotFound": "Konto nicht gefunden. Sie werden zur Registrierung weitergeleitet, um ein neues Konto zu erstellen.",
-      "processingError": "Fehler bei der Verarbeitung des Authentifizierungsergebnisses"
+      "processingError": "Fehler bei der Verarbeitung des Authentifizierungsergebnisses",
+      "copied": "Kopiert!"
     }
   },
   "landing": {
@@ -351,10 +354,11 @@
       "roundTripPricing": "Die angezeigten Preise gelten für den Hin- und Rückservice",
       "bags": "Taschen",
       "deliveryFee": "Lieferung",
-      "total": "Gesamt",
+      "total": "Gesamteinnahmen",
       "yourCommission": "Ihre Provision",
-      "totalNote": "* Gesamt: Liefergebühr + WDF-Service ($1.25/lb × 30 lbs/Tasche)",
-      "commissionNote": "* Provision: 10% des WDF-Service-Umsatzes",
+      "deliveryNote": "* Lieferung: 100% der Liefergebühren gehören Ihnen",
+      "commissionNote": "* Provision: 10% des WDF-Service (30 lbs × $1.25/lb pro Tasche)",
+      "totalNote": "* Gesamteinnahmen: Liefergebühr + Provision",
       "accountSetup": "Kontoeinrichtung",
       "username": "Benutzername *",
       "usernameDesc": "Ihre eindeutige Anmeldekennung",
@@ -397,6 +401,26 @@
         "totalCommissions": "Provisionen gesamt",
         "pendingCommissions": "Ausstehende Provisionen"
       }
+    },
+    "success": {
+      "title": "Registrierung erfolgreich!",
+      "congratulations": "Herzlichen Glückwunsch!",
+      "submittedTitle": "Ihre Bewerbung wurde eingereicht",
+      "welcomeMessage": "Willkommen beim WaveMAX Partnerprogramm! Wir freuen uns, Sie als unseren Partner zu haben.",
+      "yourInfoTitle": "Ihre Informationen",
+      "affiliateId": "Partner-ID",
+      "name": "Name",
+      "email": "E-Mail",
+      "linkTitle": "Ihr Empfehlungslink",
+      "linkDescription": "Teilen Sie diesen Link mit Ihrem Netzwerk, um Provisionen zu verdienen:",
+      "linkHelp": "Wenn sich Kunden über Ihren Link registrieren, werden sie automatisch mit Ihrem Partnerkonto verbunden.",
+      "nextStepsTitle": "Nächste Schritte",
+      "nextStep1": "Überprüfen Sie Ihre E-Mail für Ihre Willkommensnachricht und Anmeldedaten",
+      "nextStep2": "Melden Sie sich in Ihrem Partner-Dashboard an, um auf Marketingmaterialien zuzugreifen",
+      "nextStep3": "Teilen Sie Ihren einzigartigen Empfehlungslink mit Freunden, Familie und Kunden",
+      "nextStep4": "Verfolgen Sie Ihre Empfehlungen und Provisionen in Echtzeit",
+      "nextStep5": "Erhalten Sie monatliche Zahlungen über Ihre bevorzugte Zahlungsmethode",
+      "loginToDashboard": "Zum Dashboard anmelden"
     }
   },
   "customer": {
@@ -624,5 +648,12 @@
     "settings": "Einstellungen",
     "help": "Hilfe",
     "logout": "Abmelden"
+  },
+  "spinner": {
+    "connectingWith": "Verbindung mit {{provider}} wird hergestellt...",
+    "validatingAddress": "Ihre Adresse wird überprüft...",
+    "processingRegistration": "Ihre Registrierung wird bearbeitet...",
+    "loading": "Wird geladen...",
+    "pleaseWait": "Bitte warten..."
   }
 }

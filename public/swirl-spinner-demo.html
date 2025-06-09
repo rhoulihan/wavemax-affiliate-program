@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Swirl Spinner Demo - WaveMAX Laundry</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <script src="/assets/js/swirl-spinner.js"></script>
+    <style>
+        .demo-form {
+            max-width: 400px;
+        }
+        .code-block {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+        }
+        .code-block .comment {
+            color: #64748b;
+        }
+        .code-block .string {
+            color: #86efac;
+        }
+        .code-block .keyword {
+            color: #c084fc;
+        }
+        .code-block .function {
+            color: #fbbf24;
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <div class="container mx-auto px-4 py-8">
+        <div class="bg-white rounded-lg shadow-lg p-8 mb-8">
+            <h1 class="text-3xl font-bold text-gray-800 mb-2">Swirl Spinner Library</h1>
+            <p class="text-gray-600 mb-6">A beautiful animated loading spinner for WaveMAX Laundry forms and data fetching operations.</p>
+        </div>
+
+        <!-- Basic Examples -->
+        <div class="bg-white rounded-lg shadow-lg p-8 mb-8">
+            <h2 class="text-2xl font-semibold mb-6">Size Variations</h2>
+            
+            <div class="grid md:grid-cols-3 gap-8 mb-8">
+                <div class="text-center">
+                    <h3 class="font-medium mb-4">Small Size</h3>
+                    <div id="small-spinner-container" class="flex justify-center mb-4" style="height: 60px;"></div>
+                    <button onclick="toggleSpinner('small')" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+                        Toggle Small
+                    </button>
+                </div>
+                
+                <div class="text-center">
+                    <h3 class="font-medium mb-4">Default Size</h3>
+                    <div id="default-spinner-container" class="flex justify-center mb-4" style="height: 100px;"></div>
+                    <button onclick="toggleSpinner('default')" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+                        Toggle Default
+                    </button>
+                </div>
+                
+                <div class="text-center">
+                    <h3 class="font-medium mb-4">Large Size</h3>
+                    <div id="large-spinner-container" class="flex justify-center mb-4" style="height: 140px;"></div>
+                    <button onclick="toggleSpinner('large')" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+                        Toggle Large
+                    </button>
+                </div>
+            </div>
+
+            <div class="code-block">
+<span class="comment">// Create spinners of different sizes</span>
+<span class="keyword">const</span> smallSpinner = <span class="keyword">new</span> <span class="function">SwirlSpinner</span>({
+    size: <span class="string">'small'</span>,
+    container: document.<span class="function">getElementById</span>(<span class="string">'container'</span>)
+});
+
+<span class="keyword">const</span> defaultSpinner = <span class="keyword">new</span> <span class="function">SwirlSpinner</span>({
+    size: <span class="string">'default'</span>,
+    container: document.<span class="function">getElementById</span>(<span class="string">'container'</span>)
+});
+
+<span class="keyword">const</span> largeSpinner = <span class="keyword">new</span> <span class="function">SwirlSpinner</span>({
+    size: <span class="string">'large'</span>,
+    container: document.<span class="function">getElementById</span>(<span class="string">'container'</span>)
+});</div>
+        </div>
+
+        <!-- Speed Variations -->
+        <div class="bg-white rounded-lg shadow-lg p-8 mb-8">
+            <h2 class="text-2xl font-semibold mb-6">Speed Variations</h2>
+            
+            <div class="grid md:grid-cols-3 gap-8 mb-8">
+                <div class="text-center">
+                    <h3 class="font-medium mb-4">Smooth (3s)</h3>
+                    <div id="smooth-spinner-container" class="flex justify-center mb-4" style="height: 100px;"></div>
+                    <button onclick="toggleSpeedSpinner('smooth')" class="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700">
+                        Toggle Smooth
+                    </button>
+                </div>
+                
+                <div class="text-center">
+                    <h3 class="font-medium mb-4">Normal (2s)</h3>
+                    <div id="normal-spinner-container" class="flex justify-center mb-4" style="height: 100px;"></div>
+                    <button onclick="toggleSpeedSpinner('normal')" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+                        Toggle Normal
+                    </button>
+                </div>
+                
+                <div class="text-center">
+                    <h3 class="font-medium mb-4">Fast (1s)</h3>
+                    <div id="fast-spinner-container" class="flex justify-center mb-4" style="height: 100px;"></div>
+                    <button onclick="toggleSpeedSpinner('fast')" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
+                        Toggle Fast
+                    </button>
+                </div>
+            </div>
+
+            <div class="code-block">
+<span class="comment">// Smooth animation (3s with easing)</span>
+<span class="keyword">const</span> smoothSpinner = <span class="keyword">new</span> <span class="function">SwirlSpinner</span>({
+    speed: <span class="string">'smooth'</span>,
+    container: document.<span class="function">getElementById</span>(<span class="string">'container'</span>)
+});
+
+<span class="comment">// Normal speed (2s linear)</span>
+<span class="keyword">const</span> normalSpinner = <span class="keyword">new</span> <span class="function">SwirlSpinner</span>({
+    speed: <span class="string">'normal'</span>,
+    container: document.<span class="function">getElementById</span>(<span class="string">'container'</span>)
+});
+
+<span class="comment">// Fast animation (1s linear)</span>
+<span class="keyword">const</span> fastSpinner = <span class="keyword">new</span> <span class="function">SwirlSpinner</span>({
+    speed: <span class="string">'fast'</span>,
+    container: document.<span class="function">getElementById</span>(<span class="string">'container'</span>)
+});</div>
+        </div>
+        
+        <!-- With Message -->
+        <div class="bg-white rounded-lg shadow-lg p-8 mb-8">
+            <h2 class="text-2xl font-semibold mb-6">With Message</h2>
+            
+            <div class="text-center">
+                <div id="message-spinner-container" class="flex justify-center mb-4" style="height: 120px;"></div>
+                <button onclick="toggleMessageSpinner()" class="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700">
+                    Toggle with Message
+                </button>
+            </div>
+
+            <div class="code-block mt-8">
+<span class="comment">// Spinner with message</span>
+<span class="keyword">const</span> messageSpinner = <span class="keyword">new</span> <span class="function">SwirlSpinner</span>({
+    message: <span class="string">'Loading your data...'</span>,
+    container: document.<span class="function">getElementById</span>(<span class="string">'container'</span>)
+});</div>
+        </div>
+
+        <!-- Form Integration -->
+        <div class="bg-white rounded-lg shadow-lg p-8 mb-8">
+            <h2 class="text-2xl font-semibold mb-6">Form Integration</h2>
+            
+            <div class="grid md:grid-cols-2 gap-8">
+                <div>
+                    <h3 class="font-medium mb-4">Form with Overlay</h3>
+                    <form id="demo-form" class="demo-form bg-gray-50 p-6 rounded border border-gray-200">
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium mb-2">Name</label>
+                            <input type="text" class="w-full px-3 py-2 border rounded" placeholder="Enter your name">
+                        </div>
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium mb-2">Email</label>
+                            <input type="email" class="w-full px-3 py-2 border rounded" placeholder="Enter your email">
+                        </div>
+                        <button type="submit" class="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 w-full">
+                            Submit Form
+                        </button>
+                    </form>
+                </div>
+                
+                <div>
+                    <h3 class="font-medium mb-4">Button Spinner</h3>
+                    <div class="space-y-4">
+                        <button id="save-button" onclick="simulateSave()" class="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700 w-full">
+                            Save Changes
+                        </button>
+                        <button id="load-button" onclick="simulateLoad()" class="bg-purple-600 text-white px-6 py-2 rounded hover:bg-purple-700 w-full">
+                            Load Data
+                        </button>
+                        <button onclick="showGlobalSpinner()" class="bg-gray-600 text-white px-6 py-2 rounded hover:bg-gray-700 w-full">
+                            Show Global Spinner
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="code-block mt-8">
+<span class="comment">// Show spinner on form submission</span>
+form.<span class="function">addEventListener</span>(<span class="string">'submit'</span>, <span class="keyword">async</span> (e) => {
+    e.<span class="function">preventDefault</span>();
+    
+    <span class="keyword">const</span> spinner = SwirlSpinnerUtils.<span class="function">showOnForm</span>(form, {
+        message: <span class="string">'Submitting form...'</span>
+    });
+    
+    <span class="keyword">await</span> <span class="function">submitData</span>();
+    
+    spinner.<span class="function">hide</span>();
+});
+
+<span class="comment">// Show spinner on button</span>
+<span class="keyword">const</span> spinner = SwirlSpinnerUtils.<span class="function">showOnButton</span>(button);
+<span class="keyword">await</span> <span class="function">performAction</span>();
+spinner.<span class="function">hide</span>();
+
+<span class="comment">// Show global spinner</span>
+<span class="keyword">const</span> globalSpinner = SwirlSpinnerUtils.<span class="function">showGlobal</span>({
+    message: <span class="string">'Please wait...'</span>
+});
+<span class="function">setTimeout</span>(() => globalSpinner.<span class="function">hide</span>(), 3000);</div>
+        </div>
+
+        <!-- API Reference -->
+        <div class="bg-white rounded-lg shadow-lg p-8 mb-8">
+            <h2 class="text-2xl font-semibold mb-6">API Reference</h2>
+            
+            <div class="space-y-6">
+                <div>
+                    <h3 class="text-lg font-medium mb-2">Constructor Options</h3>
+                    <table class="w-full border-collapse">
+                        <thead>
+                            <tr class="border-b">
+                                <th class="text-left py-2">Option</th>
+                                <th class="text-left py-2">Type</th>
+                                <th class="text-left py-2">Default</th>
+                                <th class="text-left py-2">Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="border-b">
+                                <td class="py-2"><code>size</code></td>
+                                <td class="py-2">string</td>
+                                <td class="py-2">'default'</td>
+                                <td class="py-2">Size of the spinner: 'small', 'default', 'large'</td>
+                            </tr>
+                            <tr class="border-b">
+                                <td class="py-2"><code>speed</code></td>
+                                <td class="py-2">string</td>
+                                <td class="py-2">'normal'</td>
+                                <td class="py-2">Animation speed: 'smooth' (3s), 'normal' (2s), 'fast' (1s)</td>
+                            </tr>
+                            <tr class="border-b">
+                                <td class="py-2"><code>container</code></td>
+                                <td class="py-2">Element</td>
+                                <td class="py-2">null</td>
+                                <td class="py-2">Container element to append spinner to</td>
+                            </tr>
+                            <tr class="border-b">
+                                <td class="py-2"><code>message</code></td>
+                                <td class="py-2">string</td>
+                                <td class="py-2">''</td>
+                                <td class="py-2">Message to display below spinner</td>
+                            </tr>
+                            <tr class="border-b">
+                                <td class="py-2"><code>overlay</code></td>
+                                <td class="py-2">boolean</td>
+                                <td class="py-2">false</td>
+                                <td class="py-2">Show spinner with overlay background</td>
+                            </tr>
+                            <tr class="border-b">
+                                <td class="py-2"><code>className</code></td>
+                                <td class="py-2">string</td>
+                                <td class="py-2">''</td>
+                                <td class="py-2">Additional CSS class names</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div>
+                    <h3 class="text-lg font-medium mb-2">Methods</h3>
+                    <div class="space-y-3">
+                        <div class="border-l-4 border-blue-500 pl-4">
+                            <code class="font-mono">.create()</code> - Creates the spinner element
+                        </div>
+                        <div class="border-l-4 border-blue-500 pl-4">
+                            <code class="font-mono">.show()</code> - Shows the spinner
+                        </div>
+                        <div class="border-l-4 border-blue-500 pl-4">
+                            <code class="font-mono">.hide()</code> - Hides the spinner
+                        </div>
+                        <div class="border-l-4 border-blue-500 pl-4">
+                            <code class="font-mono">.updateMessage(message)</code> - Updates the spinner message
+                        </div>
+                        <div class="border-l-4 border-blue-500 pl-4">
+                            <code class="font-mono">.destroy()</code> - Removes the spinner and cleans up
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <h3 class="text-lg font-medium mb-2">Utility Functions</h3>
+                    <div class="space-y-3">
+                        <div class="border-l-4 border-green-500 pl-4">
+                            <code class="font-mono">SwirlSpinnerUtils.showOnButton(button, options)</code><br>
+                            <span class="text-sm text-gray-600">Shows spinner inside a button and disables it</span>
+                        </div>
+                        <div class="border-l-4 border-green-500 pl-4">
+                            <code class="font-mono">SwirlSpinnerUtils.showOnForm(form, options)</code><br>
+                            <span class="text-sm text-gray-600">Shows spinner overlay on a form and disables inputs</span>
+                        </div>
+                        <div class="border-l-4 border-green-500 pl-4">
+                            <code class="font-mono">SwirlSpinnerUtils.showGlobal(options)</code><br>
+                            <span class="text-sm text-gray-600">Shows a full-screen global spinner</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Integration Guide -->
+        <div class="bg-white rounded-lg shadow-lg p-8 mb-8">
+            <h2 class="text-2xl font-semibold mb-6">Integration Guide</h2>
+            
+            <div class="space-y-4">
+                <div>
+                    <h3 class="text-lg font-medium mb-2">1. Include the Script</h3>
+                    <div class="code-block">
+&lt;script src="/assets/js/swirl-spinner.js"&gt;&lt;/script&gt;</div>
+                </div>
+
+                <div>
+                    <h3 class="text-lg font-medium mb-2">2. Basic Usage</h3>
+                    <div class="code-block">
+<span class="comment">// Create a spinner instance</span>
+<span class="keyword">const</span> spinner = <span class="keyword">new</span> <span class="function">SwirlSpinner</span>({
+    container: document.<span class="function">getElementById</span>(<span class="string">'my-container'</span>),
+    size: <span class="string">'default'</span>,
+    message: <span class="string">'Loading...'</span>
+});
+
+<span class="comment">// Show the spinner</span>
+spinner.<span class="function">show</span>();
+
+<span class="comment">// Hide the spinner</span>
+spinner.<span class="function">hide</span>();</div>
+                </div>
+
+                <div>
+                    <h3 class="text-lg font-medium mb-2">3. Real-World Example: AJAX Form</h3>
+                    <div class="code-block">
+<span class="keyword">async function</span> <span class="function">handleFormSubmit</span>(event) {
+    event.<span class="function">preventDefault</span>();
+    <span class="keyword">const</span> form = event.target;
+    
+    <span class="comment">// Show spinner on form</span>
+    <span class="keyword">const</span> spinner = SwirlSpinnerUtils.<span class="function">showOnForm</span>(form, {
+        message: <span class="string">'Processing your request...'</span>
+    });
+    
+    <span class="keyword">try</span> {
+        <span class="comment">// Make API call</span>
+        <span class="keyword">const</span> response = <span class="keyword">await</span> <span class="function">fetch</span>(<span class="string">'/api/submit'</span>, {
+            method: <span class="string">'POST'</span>,
+            body: <span class="keyword">new</span> <span class="function">FormData</span>(form)
+        });
+        
+        <span class="keyword">if</span> (response.ok) {
+            <span class="comment">// Success!</span>
+            <span class="function">showSuccessMessage</span>();
+        }
+    } <span class="keyword">catch</span> (error) {
+        <span class="function">showErrorMessage</span>(error);
+    } <span class="keyword">finally</span> {
+        <span class="comment">// Always hide spinner</span>
+        spinner.<span class="function">hide</span>();
+    }
+}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Demo functionality
+        const spinners = {};
+
+        function toggleSpinner(size) {
+            const containerId = `${size}-spinner-container`;
+            const container = document.getElementById(containerId);
+            
+            if (spinners[size]) {
+                spinners[size].hide();
+                spinners[size] = null;
+            } else {
+                spinners[size] = new SwirlSpinner({
+                    size: size,
+                    container: container
+                }).show();
+            }
+        }
+
+        function toggleSpeedSpinner(speed) {
+            const container = document.getElementById(`${speed}-spinner-container`);
+            
+            if (spinners[speed]) {
+                spinners[speed].hide();
+                spinners[speed] = null;
+            } else {
+                spinners[speed] = new SwirlSpinner({
+                    speed: speed,
+                    container: container
+                }).show();
+            }
+        }
+
+        function toggleMessageSpinner() {
+            const container = document.getElementById('message-spinner-container');
+            
+            if (spinners.message) {
+                spinners.message.hide();
+                spinners.message = null;
+            } else {
+                spinners.message = new SwirlSpinner({
+                    message: 'Loading your data...',
+                    container: container
+                }).show();
+            }
+        }
+
+        // Form demo
+        document.getElementById('demo-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const spinner = SwirlSpinnerUtils.showOnForm(this, {
+                message: 'Submitting form...'
+            });
+            
+            // Simulate API call
+            await new Promise(resolve => setTimeout(resolve, 3000));
+            
+            spinner.hide();
+            alert('Form submitted successfully!');
+        });
+
+        // Button demos
+        async function simulateSave() {
+            const button = document.getElementById('save-button');
+            const spinner = SwirlSpinnerUtils.showOnButton(button);
+            
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            
+            spinner.hide();
+            alert('Changes saved!');
+        }
+
+        async function simulateLoad() {
+            const button = document.getElementById('load-button');
+            const spinner = SwirlSpinnerUtils.showOnButton(button, { pulse: true });
+            
+            await new Promise(resolve => setTimeout(resolve, 2500));
+            
+            spinner.hide();
+            alert('Data loaded!');
+        }
+
+        function showGlobalSpinner() {
+            const spinner = SwirlSpinnerUtils.showGlobal({
+                message: 'Please wait while we process your request...'
+            });
+            
+            setTimeout(() => {
+                spinner.hide();
+                alert('Process completed!');
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
