@@ -161,6 +161,7 @@ exports.getAffiliateProfile = async (req, res) => {
       minimumDeliveryFee: affiliate.minimumDeliveryFee,
       perBagDeliveryFee: affiliate.perBagDeliveryFee,
       paymentMethod: affiliate.paymentMethod,
+      registrationMethod: affiliate.registrationMethod,
       isActive: affiliate.isActive,
       dateRegistered: affiliate.dateRegistered,
       lastLogin: affiliate.lastLogin
