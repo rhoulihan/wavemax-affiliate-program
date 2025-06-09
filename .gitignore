@@ -170,3 +170,7 @@ jest
 # Session summary files
 SESSION_SUMMARY.md
 SESSION_SUMMARY_*.md
+
+# Film walk content (non-affiliate content)
+public/filmwalk/
+server/routes/routingRoutes.js

@@ -26,7 +26,6 @@ const administratorRoutes = require('./server/routes/administratorRoutes');
 const operatorRoutes = require('./server/routes/operatorRoutes');
 const coverageRoutes = require('./server/routes/coverageRoutes');
 const systemConfigRoutes = require('./server/routes/systemConfigRoutes');
-const routingRoutes = require('./server/routes/routingRoutes');
 const affiliateController = require('./server/controllers/affiliateController');
 const customerController = require('./server/controllers/customerController');
 
@@ -323,7 +322,6 @@ apiV1Router.use('/orders', orderRoutes);
 apiV1Router.use('/administrators', administratorRoutes);
 apiV1Router.use('/operators', operatorRoutes);
 apiV1Router.use('/system/config', systemConfigRoutes);
-apiV1Router.use('/routing', routingRoutes);
 
 // Environment endpoint
 apiV1Router.get('/environment', (req, res) => {
