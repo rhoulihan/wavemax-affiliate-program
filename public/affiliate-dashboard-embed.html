@@ -514,23 +514,43 @@
             sendMessageToParent('iframe-loaded', { page: 'affiliate-dashboard' });
             
             // Check if this is an OAuth account and hide change password section if so
+            // This check will also happen in loadAffiliateData, but we do it here for immediate effect
             const currentAffiliate = localStorage.getItem('currentAffiliate');
             if (currentAffiliate) {
                 try {
                     const affiliateData = JSON.parse(currentAffiliate);
-                    console.log('Checking OAuth status:', affiliateData.loginProvider);
-                    if (affiliateData.loginProvider) {
+                    console.log('Initial OAuth check - registrationMethod:', affiliateData.registrationMethod);
+                    if (affiliateData.registrationMethod && affiliateData.registrationMethod !== 'traditional') {
                         // This is an OAuth account, hide the change password section
                         const changePasswordSection = document.getElementById('changePasswordSection');
                         if (changePasswordSection) {
                             changePasswordSection.style.display = 'none';
-                            console.log('Hiding change password section for OAuth account');
+                            console.log('Hiding change password section for OAuth account:', affiliateData.registrationMethod);
                         }
                     }
                 } catch (error) {
                     console.error('Error parsing affiliate data:', error);
                 }
             }
+            
+            // Also add a global function to check OAuth status that can be called anytime
+            window.checkOAuthStatus = function() {
+                const storedData = localStorage.getItem('currentAffiliate');
+                if (storedData) {
+                    try {
+                        const affiliate = JSON.parse(storedData);
+                        console.log('OAuth Status Check:', {
+                            hasRegistrationMethod: !!affiliate.registrationMethod,
+                            registrationMethod: affiliate.registrationMethod,
+                            isOAuth: affiliate.registrationMethod && affiliate.registrationMethod !== 'traditional'
+                        });
+                        return affiliate.registrationMethod && affiliate.registrationMethod !== 'traditional';
+                    } catch (e) {
+                        console.error('Error checking OAuth status:', e);
+                    }
+                }
+                return false;
+            };
         });
 
         // Override API calls to use full URLs

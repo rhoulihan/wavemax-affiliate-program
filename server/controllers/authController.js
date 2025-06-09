@@ -120,7 +120,8 @@ exports.affiliateLogin = async (req, res) => {
         affiliateId: affiliate.affiliateId,
         firstName: affiliate.firstName,
         lastName: affiliate.lastName,
-        email: affiliate.email
+        email: affiliate.email,
+        registrationMethod: affiliate.registrationMethod
       }
     });
   } catch (error) {
@@ -903,7 +904,8 @@ exports.handleSocialCallback = async (req, res) => {
             firstName: user.firstName,
             lastName: user.lastName,
             email: user.email,
-            businessName: user.businessName
+            businessName: user.businessName,
+            registrationMethod: user.registrationMethod
           }
         };
         
@@ -1511,7 +1513,8 @@ exports.socialLogin = async (req, res) => {
         affiliateId: affiliate.affiliateId,
         firstName: affiliate.firstName,
         lastName: affiliate.lastName,
-        email: affiliate.email
+        email: affiliate.email,
+        registrationMethod: affiliate.registrationMethod
       }
     });
     
