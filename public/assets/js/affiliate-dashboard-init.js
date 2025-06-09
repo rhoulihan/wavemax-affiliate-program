@@ -336,6 +336,19 @@ async function loadAffiliateData(affiliateId) {
       const landingPageLink = `https://www.wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program?route=/affiliate-landing&code=${affiliateId}`;
       const landingPageElement = document.getElementById('landingPageLink');
       if (landingPageElement) landingPageElement.value = landingPageLink;
+      
+      // Store affiliate data in localStorage for other uses
+      localStorage.setItem('currentAffiliate', JSON.stringify(data));
+      
+      // Check if this is an OAuth account and hide change password section if so
+      if (data.loginProvider) {
+        // This is an OAuth account, hide the change password section
+        const changePasswordSection = document.getElementById('changePasswordSection');
+        if (changePasswordSection) {
+          changePasswordSection.style.display = 'none';
+          console.log('Hiding change password section for OAuth account:', data.loginProvider);
+        }
+      }
     }
   } catch (error) {
     console.error('Error loading affiliate data:', error);
