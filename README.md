@@ -1644,6 +1644,16 @@ The implementation includes:
 - Automatic height adjustment with smooth transitions
 - Support for all administrator and operator pages
 
+### Test Pages and Development Tools
+
+The project includes several test pages for development and integration testing:
+
+- `/test-iframe-embed.html` - Test page for iframe integration with URL parameter handling
+- `/iframe-parent-example.html` - Complete parent page implementation example
+- `/mobile-parent-integration-guide.md` - Detailed guide for mobile-responsive iframe integration
+- `/swirl-spinner-demo.html` - Interactive demo of the custom loading spinner component
+- `/wavemax-development-prompt.html` - AI development framework documentation
+
 ## Acknowledgments
 
 - WaveMAX Laundry for the concept and business model
