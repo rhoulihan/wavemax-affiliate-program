@@ -123,6 +123,7 @@
     <script src="/assets/js/language-switcher.js"></script>
     <script src="/assets/js/modal-utils.js"></script>
     <script src="/assets/js/csrf-utils.js"></script>
+    <script src="/assets/js/swirl-spinner.js"></script>
     <script>
         // Initialize i18n
         document.addEventListener('DOMContentLoaded', async function() {
@@ -162,9 +163,56 @@
             csrfFetch: typeof csrfFetch
         });
 
+        // Helper function to get translated spinner messages
+        function getSpinnerMessage(key, params = {}) {
+            // Default messages
+            const defaults = {
+                'spinner.connectingWith': 'Connecting with {{provider}}...',
+                'spinner.pleaseWait': 'Please wait...'
+            };
+            
+            // Try to get translation
+            if (window.i18n && window.i18n.t) {
+                const translated = window.i18n.t(key, params);
+                // Check if we got an actual translation or just the key back
+                if (translated && translated !== key && !translated.includes('.')) {
+                    return translated;
+                }
+            }
+            
+            // Fallback to default message
+            let defaultMsg = defaults[key] || key;
+            // Replace parameters in default message
+            if (params) {
+                Object.keys(params).forEach(param => {
+                    defaultMsg = defaultMsg.replace(`{{${param}}}`, params[param]);
+                });
+            }
+            return defaultMsg;
+        }
+
         // OAuth Social Login Functionality for Affiliates
         function handleAffiliateLogin(provider) {
             console.log(`Starting ${provider} social login for affiliate`);
+            
+            // Get the clicked button to show spinner
+            const button = event.target.closest('button');
+            if (!button) {
+                console.error('Could not find button element for spinner');
+                return;
+            }
+            
+            // Show spinner on the button
+            let spinner = null;
+            if (window.SwirlSpinnerUtils) {
+                const providerName = provider.charAt(0).toUpperCase() + provider.slice(1);
+                const message = getSpinnerMessage('spinner.connectingWith', { provider: providerName });
+                spinner = window.SwirlSpinnerUtils.showOnButton(button, {
+                    message: message,
+                    size: 'small',
+                    speed: 'fast'
+                });
+            }
 
             // For embedded context, use popup window to avoid iframe restrictions
             if (isEmbedded || window.self !== window.top) {
@@ -187,6 +235,10 @@
                 });
                 
                 if (!popup || popup.closed) {
+                    // Hide spinner on error
+                    if (spinner) {
+                        spinner.hide();
+                    }
                     modalAlert(window.i18n ? window.i18n.t('common.messages.popupBlocked') : 'Popup was blocked. Please allow popups for this site and try again.', 'Popup Blocked');
                     return;
                 }
@@ -226,6 +278,11 @@
                                 
                                 if (popup && !popup.closed) {
                                     popup.close();
+                                }
+                                
+                                // Hide spinner since we got a result
+                                if (spinner) {
+                                    spinner.hide();
                                 }
                                 
                                 // Handle the result
@@ -273,6 +330,10 @@
                             clearInterval(pollForResult);
                             if (popup && !popup.closed) {
                                 popup.close();
+                            }
+                            // Hide spinner on timeout
+                            if (spinner) {
+                                spinner.hide();
                             }
                             modalAlert(window.i18n ? window.i18n.t('common.messages.authenticationTimeout') : 'Authentication timed out. Please try again.', window.i18n ? window.i18n.t('common.messages.authenticationTimeout') : 'Authentication Timeout');
                             return;

@@ -6,6 +6,37 @@
   console.log('[affiliate-register-init] SwirlSpinner available?', !!window.SwirlSpinner);
   console.log('[affiliate-register-init] Document readyState:', document.readyState);
   
+  // Helper function to get translated spinner messages
+  function getSpinnerMessage(key, params = {}) {
+    // Default messages
+    const defaults = {
+      'spinner.connectingWith': 'Connecting with {{provider}}...',
+      'spinner.validatingAddress': 'Validating your address...',
+      'spinner.processingRegistration': 'Processing your registration...',
+      'messages.registrationSuccess': 'Registration successful!',
+      'messages.redirecting': 'Redirecting...'
+    };
+    
+    // Try to get translation
+    if (window.i18n && window.i18n.t && window.i18n.currentLanguage) {
+      const translated = window.i18n.t(key, params);
+      // Check if we got an actual translation or just the key back
+      if (translated && translated !== key && !translated.includes('.')) {
+        return translated;
+      }
+    }
+    
+    // Fallback to default message
+    let defaultMsg = defaults[key] || key;
+    // Replace parameters in default message
+    if (params) {
+      Object.keys(params).forEach(param => {
+        defaultMsg = defaultMsg.replace(`{{${param}}}`, params[param]);
+      });
+    }
+    return defaultMsg;
+  }
+  
   // Note: Registration endpoints currently don't require CSRF tokens
   // But we'll prepare for future implementation
   const csrfFetch = window.CsrfUtils && window.CsrfUtils.csrfFetch ? window.CsrfUtils.csrfFetch : fetch;
@@ -258,12 +289,10 @@ function initializeAffiliateRegistration() {
         try {
           console.log('[OAuth] Creating SwirlSpinner with overlay...');
           // Get translated message
-          let connectingMessage = `Connecting with ${provider.charAt(0).toUpperCase() + provider.slice(1)}...`;
-          if (window.i18next && window.i18next.isInitialized) {
-            connectingMessage = window.i18next.t('spinner.connectingWith', { 
-              provider: provider.charAt(0).toUpperCase() + provider.slice(1) 
-            });
-          }
+          const connectingMessage = getSpinnerMessage('spinner.connectingWith', { 
+            provider: provider.charAt(0).toUpperCase() + provider.slice(1) 
+          });
+          console.log('[OAuth] Using message:', connectingMessage);
           
           sectionSpinner = new window.SwirlSpinner({
             container: socialAuthSection,
@@ -512,7 +541,7 @@ function initializeAffiliateRegistration() {
       `;
       
       // Trigger i18n update for the new content
-      if (window.i18next && window.i18next.isInitialized) {
+      if (window.i18n && window.i18n.updateContent) {
         window.i18n.updateContent();
       }
     }
@@ -760,10 +789,7 @@ function initializeAffiliateRegistration() {
       e.stopPropagation();
 
       // Show spinner on form
-      let processingMessage = 'Processing your registration...';
-      if (window.i18next && window.i18next.isInitialized) {
-        processingMessage = window.i18next.t('spinner.processingRegistration');
-      }
+      const processingMessage = getSpinnerMessage('spinner.processingRegistration');
       
       const formSpinner = window.SwirlSpinnerUtils ? 
         SwirlSpinnerUtils.showOnForm(form, {
@@ -965,11 +991,9 @@ function initializeAffiliateRegistration() {
         
         // Update spinner message to indicate success
         if (formSpinner && formSpinner.updateMessage) {
-          let successMessage = 'Registration successful! Redirecting...';
-          if (window.i18next && window.i18next.isInitialized) {
-            successMessage = window.i18next.t('messages.registrationSuccess') + ' ' + 
-                           window.i18next.t('messages.redirecting', { defaultValue: 'Redirecting...' });
-          }
+          const successPart = getSpinnerMessage('messages.registrationSuccess');
+          const redirectingPart = getSpinnerMessage('messages.redirecting');
+          const successMessage = successPart + ' ' + redirectingPart;
           formSpinner.updateMessage(successMessage);
         }
         
@@ -1710,10 +1734,7 @@ function initializeAffiliateRegistration() {
       let formSpinner = null;
       if (window.SwirlSpinner && form) {
         // Get translated message
-        let validatingMessage = 'Validating your address...';
-        if (window.i18next && window.i18next.isInitialized) {
-          validatingMessage = window.i18next.t('spinner.validatingAddress');
-        }
+        const validatingMessage = getSpinnerMessage('spinner.validatingAddress');
         
         formSpinner = new window.SwirlSpinner({
           container: form,

@@ -393,13 +393,21 @@
       "commissions": "Comisiones",
       "reports": "Reportes",
       "settings": "Configuración",
+      "tabs": {
+        "pickups": "Recogidas y Entregas",
+        "customers": "Clientes",
+        "earnings": "Ganancias",
+        "settings": "Configuración"
+      },
       "metrics": {
         "totalCustomers": "Total de Clientes",
         "activeCustomers": "Clientes Activos",
         "totalOrders": "Total de Pedidos",
         "totalRevenue": "Ingresos Totales",
         "totalCommissions": "Comisiones Totales",
-        "pendingCommissions": "Comisiones Pendientes"
+        "pendingCommissions": "Comisiones Pendientes",
+        "activeOrders": "Pedidos Activos",
+        "totalEarnings": "Ganancias Totales"
       }
     },
     "success": {

@@ -393,13 +393,21 @@
       "commissions": "Provisionen",
       "reports": "Berichte",
       "settings": "Einstellungen",
+      "tabs": {
+        "pickups": "Abholungen & Lieferungen",
+        "customers": "Kunden",
+        "earnings": "Verdienste",
+        "settings": "Einstellungen"
+      },
       "metrics": {
         "totalCustomers": "Kunden gesamt",
         "activeCustomers": "Aktive Kunden",
         "totalOrders": "Bestellungen gesamt",
         "totalRevenue": "Gesamtumsatz",
         "totalCommissions": "Provisionen gesamt",
-        "pendingCommissions": "Ausstehende Provisionen"
+        "pendingCommissions": "Ausstehende Provisionen",
+        "activeOrders": "Aktive Bestellungen",
+        "totalEarnings": "Gesamtverdienste"
       }
     },
     "success": {
