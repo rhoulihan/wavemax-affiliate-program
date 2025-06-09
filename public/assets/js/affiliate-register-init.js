@@ -2089,17 +2089,14 @@ function initializeAffiliateRegistration() {
           coverageAreaElement.textContent = `${radiusValue} mile radius`;
         }
         
-        // Update map center and marker (map might be initialized later)
-        if (window.updateServiceArea) {
-          window.updateServiceArea(lat, lon, radiusValue);
-        }
-        if (serviceAreaMap) {
-          serviceAreaMap.setView([lat, lon], 14);
-        } else {
-          // Store coordinates for when map initializes
-          window.pendingMapCenter = { lat, lon, radius: radiusValue };
-          console.log('[Service Area Map] Stored pending map center for later initialization');
-        }
+        // Store the selected coordinates and radius for component initialization
+        window.selectedServiceAreaData = {
+          latitude: lat,
+          longitude: lon,
+          radius: radiusValue,
+          address: addressText
+        };
+        console.log('[Service Area Map] Stored service area data for component initialization:', window.selectedServiceAreaData);
         
         // Mark address as validated
         window.addressValidated = true;
@@ -2144,14 +2141,15 @@ function initializeAffiliateRegistration() {
           // Force reflow by accessing offsetHeight
           serviceAreaSection.offsetHeight;
           
-          // Initialize the service area component
+          // Initialize the service area component with stored data
           console.log('[Service Area Map] Service area section shown, initializing component');
-          if (window.ServiceAreaComponent) {
+          if (window.ServiceAreaComponent && window.selectedServiceAreaData) {
+            const data = window.selectedServiceAreaData;
             window.registrationServiceArea = window.ServiceAreaComponent.init('registrationServiceAreaComponent', {
-              latitude: selectedLat,
-              longitude: selectedLon,
-              radius: radiusValue || 5,
-              address: selectedAddress,
+              latitude: data.latitude,
+              longitude: data.longitude,
+              radius: data.radius,
+              address: data.address,
               editable: true,
               showMap: true,
               showControls: true,
@@ -2164,8 +2162,13 @@ function initializeAffiliateRegistration() {
                 console.log('Service area updated:', serviceData);
               }
             });
+            
+            // Also update the hidden fields immediately with initial values
+            document.getElementById('serviceLatitude').value = data.latitude;
+            document.getElementById('serviceLongitude').value = data.longitude;
+            document.getElementById('serviceRadius').value = data.radius;
           } else {
-            console.error('ServiceAreaComponent not available');
+            console.error('ServiceAreaComponent or selectedServiceAreaData not available');
           }
         }
         
