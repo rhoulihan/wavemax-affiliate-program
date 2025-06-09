@@ -20,9 +20,66 @@
     csrfFetch: typeof csrfFetch
   });
 
+  // Helper function to get translated spinner messages
+  function getSpinnerMessage(key, params = {}) {
+    // Default messages
+    const defaults = {
+      'spinner.connectingWith': 'Connecting with {{provider}}...',
+      'spinner.pleaseWait': 'Please wait...'
+    };
+    
+    // Try to get translation
+    if (window.i18n && window.i18n.t) {
+      const translated = window.i18n.t(key, params);
+      // Check if we got an actual translation or just the key back
+      if (translated && translated !== key && !translated.includes('.')) {
+        return translated;
+      }
+    }
+    
+    // Fallback to default message
+    let defaultMsg = defaults[key] || key;
+    // Replace parameters in default message
+    if (params) {
+      Object.keys(params).forEach(param => {
+        defaultMsg = defaultMsg.replace(`{{${param}}}`, params[param]);
+      });
+    }
+    return defaultMsg;
+  }
+
   // OAuth Social Login Functionality for Affiliates
   function handleAffiliateLogin(provider) {
     console.log(`Starting ${provider} social login for affiliate`);
+    
+    // Show spinner on the social login section
+    const socialLoginSection = document.getElementById('socialLoginSection');
+    let spinner = null;
+    
+    if (socialLoginSection && window.SwirlSpinner) {
+      try {
+        console.log('[OAuth] Creating SwirlSpinner with overlay...');
+        const providerName = provider.charAt(0).toUpperCase() + provider.slice(1);
+        const message = getSpinnerMessage('spinner.connectingWith', { provider: providerName });
+        
+        spinner = new window.SwirlSpinner({
+          container: socialLoginSection,
+          size: 'default',
+          speed: 'normal',
+          overlay: true,
+          message: message
+        });
+        spinner.show();
+        console.log('[OAuth] Spinner shown successfully');
+      } catch (error) {
+        console.error('[OAuth] Error creating spinner:', error);
+      }
+    } else {
+      console.log('[OAuth] Cannot show spinner:', {
+        sectionFound: !!socialLoginSection,
+        swirlSpinnerAvailable: !!window.SwirlSpinner
+      });
+    }
 
     // For embedded context, use popup window to avoid iframe restrictions
     if (isEmbedded || window.self !== window.top) {
@@ -45,6 +102,10 @@
       });
       
       if (!popup || popup.closed) {
+        // Hide spinner on error
+        if (spinner) {
+          spinner.hide();
+        }
         if (window.ModalSystem) {
             window.ModalSystem.error('Popup was blocked. Please allow popups for this site and try again.', 'Popup Blocked');
         } else {
@@ -88,6 +149,11 @@
               
               if (popup && !popup.closed) {
                 popup.close();
+              }
+              
+              // Hide spinner since we got a result
+              if (spinner) {
+                spinner.hide();
               }
               
               // Handle the result
@@ -180,6 +246,10 @@
             clearInterval(pollForResult);
             if (popup && !popup.closed) {
               popup.close();
+            }
+            // Hide spinner on timeout
+            if (spinner) {
+              spinner.hide();
             }
             if (window.ModalSystem) {
                 window.ModalSystem.error('Authentication timed out. Please try again.', 'Authentication Timeout');

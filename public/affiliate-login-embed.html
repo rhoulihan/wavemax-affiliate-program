@@ -46,7 +46,7 @@
             
             <!-- Social Login Section -->
             <div class="p-6 pb-0">
-                <div class="bg-gray-50 p-4 rounded-lg mb-6">
+                <div id="socialLoginSection" class="bg-gray-50 p-4 rounded-lg mb-6" style="position: relative;">
                     <p class="text-gray-600 mb-4 text-center" data-i18n="affiliate.login.socialLogin">Sign in with your social media account</p>
                     <div class="grid grid-cols-3 gap-3">
                         <button type="button" id="googleLogin" class="flex items-center justify-center px-4 py-2 border border-gray-300 rounded-lg bg-white hover:bg-gray-50 transition">
@@ -192,25 +192,35 @@
         }
 
         // OAuth Social Login Functionality for Affiliates
-        function handleAffiliateLogin(provider) {
+        function handleAffiliateLogin(provider, event) {
             console.log(`Starting ${provider} social login for affiliate`);
             
-            // Get the clicked button to show spinner
-            const button = event.target.closest('button');
-            if (!button) {
-                console.error('Could not find button element for spinner');
-                return;
-            }
-            
-            // Show spinner on the button
+            // Show spinner on the social login section
+            const socialLoginSection = document.getElementById('socialLoginSection');
             let spinner = null;
-            if (window.SwirlSpinnerUtils) {
-                const providerName = provider.charAt(0).toUpperCase() + provider.slice(1);
-                const message = getSpinnerMessage('spinner.connectingWith', { provider: providerName });
-                spinner = window.SwirlSpinnerUtils.showOnButton(button, {
-                    message: message,
-                    size: 'small',
-                    speed: 'fast'
+            
+            if (socialLoginSection && window.SwirlSpinner) {
+                try {
+                    console.log('[OAuth] Creating SwirlSpinner with overlay...');
+                    const providerName = provider.charAt(0).toUpperCase() + provider.slice(1);
+                    const message = getSpinnerMessage('spinner.connectingWith', { provider: providerName });
+                    
+                    spinner = new window.SwirlSpinner({
+                        container: socialLoginSection,
+                        size: 'default',
+                        speed: 'normal',
+                        overlay: true,
+                        message: message
+                    });
+                    spinner.show();
+                    console.log('[OAuth] Spinner shown successfully');
+                } catch (error) {
+                    console.error('[OAuth] Error creating spinner:', error);
+                }
+            } else {
+                console.log('[OAuth] Cannot show spinner:', {
+                    sectionFound: !!socialLoginSection,
+                    swirlSpinnerAvailable: !!window.SwirlSpinner
                 });
             }
 
@@ -379,23 +389,23 @@
 
             if (googleLogin) {
                 console.log('✅ Attaching Google login handler');
-                googleLogin.addEventListener('click', function() {
+                googleLogin.addEventListener('click', function(e) {
                     console.log('🔴 Google login button clicked!');
-                    handleAffiliateLogin('google');
+                    handleAffiliateLogin('google', e);
                 });
             } else {
                 console.error('❌ Google login button not found!');
             }
 
             if (facebookLogin) {
-                facebookLogin.addEventListener('click', function() {
-                    handleAffiliateLogin('facebook');
+                facebookLogin.addEventListener('click', function(e) {
+                    handleAffiliateLogin('facebook', e);
                 });
             }
 
             if (linkedinLogin) {
-                linkedinLogin.addEventListener('click', function() {
-                    handleAffiliateLogin('linkedin');
+                linkedinLogin.addEventListener('click', function(e) {
+                    handleAffiliateLogin('linkedin', e);
                 });
             }
         });
