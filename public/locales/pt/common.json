@@ -490,6 +490,7 @@
         "minimumFeeDesc": "A taxa mínima cobrada independentemente do número de sacolas",
         "perBagFee": "Taxa por Sacola ($)",
         "perBagFeeDesc": "Taxa cobrada por cada sacola de roupa",
+        "earningsPreview": "Prévia de Ganhos",
         "pricingPreview": "Visualização de Preços (ida e volta):",
         "customerPrices": "Preços para clientes para coleta e entrega",
         "saveChanges": "Salvar Alterações",

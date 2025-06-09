@@ -287,6 +287,42 @@ function switchToCustomersTab(affiliateId, customerIdToHighlight) {
   loadCustomersWithHighlight(affiliateId, customerIdToHighlight);
 }
 
+// Function to initialize pricing preview component
+function initializePricingPreview(affiliateData) {
+  if (!window.PricingPreviewComponent) {
+    console.warn('PricingPreviewComponent still not available');
+    return;
+  }
+  
+  // Initialize the pricing preview in the settings tab
+  window.settingsPricingPreview = window.PricingPreviewComponent.init(
+    'settingsPricingPreview',
+    'settingsMinimumDeliveryFee',
+    'settingsPerBagDeliveryFee',
+    {
+      titleText: 'Earnings Preview',
+      titleI18n: 'affiliate.dashboard.settings.earningsPreview',
+      showNotes: true
+    }
+  );
+  console.log('Pricing preview initialized (delayed):', !!window.settingsPricingPreview);
+  
+  // Set initial values
+  const minimumFee = parseFloat(affiliateData.minimumDeliveryFee) || 25;
+  const perBagFee = parseFloat(affiliateData.perBagDeliveryFee) || 10;
+  
+  // Update inputs
+  const minInput = document.getElementById('settingsMinimumDeliveryFee');
+  const perBagInput = document.getElementById('settingsPerBagDeliveryFee');
+  if (minInput) minInput.value = minimumFee;
+  if (perBagInput) perBagInput.value = perBagFee;
+  
+  // Trigger update
+  if (window.settingsPricingPreview) {
+    window.settingsPricingPreview.update();
+  }
+}
+
 // Copy the existing functions from affiliate-dashboard.js
 async function loadAffiliateData(affiliateId) {
   try {
@@ -351,7 +387,9 @@ async function loadAffiliateData(affiliateId) {
       }
       
       // Initialize pricing preview component if available
+      console.log('Checking for PricingPreviewComponent:', !!window.PricingPreviewComponent);
       if (window.PricingPreviewComponent) {
+        console.log('PricingPreviewComponent found, initializing...');
         // Initialize the pricing preview in the settings tab
         window.settingsPricingPreview = window.PricingPreviewComponent.init(
           'settingsPricingPreview',
@@ -363,6 +401,7 @@ async function loadAffiliateData(affiliateId) {
             showNotes: true
           }
         );
+        console.log('Pricing preview initialized:', !!window.settingsPricingPreview);
         
         // Set initial values
         const minimumFee = parseFloat(data.minimumDeliveryFee) || 25;
@@ -378,6 +417,15 @@ async function loadAffiliateData(affiliateId) {
         if (window.settingsPricingPreview) {
           window.settingsPricingPreview.update();
         }
+      } else {
+        console.warn('PricingPreviewComponent not available yet');
+        // Try again after a short delay
+        setTimeout(() => {
+          if (window.PricingPreviewComponent) {
+            console.log('PricingPreviewComponent now available, initializing...');
+            initializePricingPreview(data);
+          }
+        }, 500);
       }
     }
   } catch (error) {
@@ -801,8 +849,15 @@ async function loadSettingsData(affiliateId) {
         if (minimumDeliveryFeeField) minimumDeliveryFeeField.value = data.minimumDeliveryFee || 25;
         if (perBagDeliveryFeeField) perBagDeliveryFeeField.value = data.perBagDeliveryFee || 5;
         
-        // Update fee calculator preview
-        updateFeeCalculatorPreview();
+        // Initialize pricing preview component
+        if (window.PricingPreviewComponent) {
+          console.log('Initializing pricing preview in loadSettingsData');
+          initializePricingPreview(data);
+        } else {
+          console.warn('PricingPreviewComponent not available in loadSettingsData, falling back to legacy');
+          // Fallback to old calculator
+          updateFeeCalculatorPreview();
+        }
 
         // Generate and display registration link with wavemaxlaundry.com format
         const registrationLink = `https://www.wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program?affid=${affiliateId}`;
@@ -837,16 +892,8 @@ function enableEditMode() {
   document.getElementById('editBtn').style.display = 'none';
   document.getElementById('formButtons').style.display = 'block';
   
-  // Add event listeners for fee fields to update preview
-  const minFeeInput = document.getElementById('settingsMinimumDeliveryFee');
-  const perBagInput = document.getElementById('settingsPerBagDeliveryFee');
-  
-  if (minFeeInput) {
-    minFeeInput.addEventListener('input', updateFeeCalculatorPreview);
-  }
-  if (perBagInput) {
-    perBagInput.addEventListener('input', updateFeeCalculatorPreview);
-  }
+  // The pricing preview component handles its own event listeners
+  // No need to add additional listeners here
 }
 
 // Disable edit mode
@@ -862,16 +909,8 @@ function disableEditMode() {
   document.getElementById('editBtn').style.display = 'block';
   document.getElementById('formButtons').style.display = 'none';
   
-  // Remove event listeners for fee fields
-  const minFeeInput = document.getElementById('settingsMinimumDeliveryFee');
-  const perBagInput = document.getElementById('settingsPerBagDeliveryFee');
-  
-  if (minFeeInput) {
-    minFeeInput.removeEventListener('input', updateFeeCalculatorPreview);
-  }
-  if (perBagInput) {
-    perBagInput.removeEventListener('input', updateFeeCalculatorPreview);
-  }
+  // The pricing preview component handles its own event listeners
+  // No need to remove listeners here
 }
 
 // Save settings
@@ -1081,31 +1120,7 @@ function updateFeeCalculatorPreview() {
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', function() {
     initializeAffiliateDashboard();
-    
-    // Add event listeners for fee inputs
-    const minFeeInput = document.getElementById('settingsMinimumDeliveryFee');
-    const perBagInput = document.getElementById('settingsPerBagDeliveryFee');
-    
-    if (minFeeInput) {
-      minFeeInput.addEventListener('input', updateFeeCalculatorPreview);
-    }
-    
-    if (perBagInput) {
-      perBagInput.addEventListener('input', updateFeeCalculatorPreview);
-    }
   });
 } else {
   initializeAffiliateDashboard();
-  
-  // Add event listeners for fee inputs
-  const minFeeInput = document.getElementById('settingsMinimumDeliveryFee');
-  const perBagInput = document.getElementById('settingsPerBagDeliveryFee');
-  
-  if (minFeeInput) {
-    minFeeInput.addEventListener('input', updateFeeCalculatorPreview);
-  }
-  
-  if (perBagInput) {
-    perBagInput.addEventListener('input', updateFeeCalculatorPreview);
-  }
 }

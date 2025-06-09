@@ -490,6 +490,7 @@
         "minimumFeeDesc": "Die Mindestgebühr, die unabhängig von der Taschenanzahl erhoben wird",
         "perBagFee": "Gebühr pro Tasche ($)",
         "perBagFeeDesc": "Gebühr für jede Wäschetasche",
+        "earningsPreview": "Einnahmenvorschau",
         "pricingPreview": "Preisvorschau (Hin- und Rückfahrt):",
         "customerPrices": "Kundenpreise für Abholung und Lieferung",
         "saveChanges": "Änderungen speichern",
