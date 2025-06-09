@@ -490,6 +490,7 @@
         "minimumFeeDesc": "La tarifa mínima cobrada independientemente del número de bolsas",
         "perBagFee": "Tarifa por Bolsa ($)",
         "perBagFeeDesc": "Tarifa cobrada por cada bolsa de lavandería",
+        "earningsPreview": "Vista Previa de Ganancias",
         "pricingPreview": "Vista Previa de Precios (ida y vuelta):",
         "customerPrices": "Precios para clientes por recogida y entrega",
         "saveChanges": "Guardar Cambios",

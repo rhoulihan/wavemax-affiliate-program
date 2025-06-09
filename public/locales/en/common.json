@@ -491,6 +491,7 @@
         "minimumFeeDesc": "The minimum fee charged regardless of bag count",
         "perBagFee": "Per-Bag Fee ($)",
         "perBagFeeDesc": "Fee charged for each bag of laundry",
+        "earningsPreview": "Earnings Preview",
         "pricingPreview": "Pricing Preview (round trip):",
         "customerPrices": "Customer prices for pickup & delivery",
         "saveChanges": "Save Changes",
