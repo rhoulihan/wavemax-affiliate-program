@@ -643,7 +643,7 @@ EXCHANGE_REJECT_UNAUTHORIZED=false
 The system automatically creates a default administrator account on first startup:
 
 1. When the server starts for the first time, it will automatically create a default administrator account with:
-   - **Email**: admin@wavemaxlaundry.com
+   - **Email**: Set by `DEFAULT_ADMIN_EMAIL` environment variable (defaults to admin@wavemaxlaundry.com)
    - **Password**: WaveMAX!2024
    - **Permissions**: All (super admin)
 
@@ -668,7 +668,7 @@ The system automatically creates a default administrator account on first startu
 
 **Important**: 
 - The default password should be changed immediately after first login
-- For production deployments, update the default email in `init-admin.js` before first startup
+- For production deployments, set `DEFAULT_ADMIN_EMAIL` in your environment variables
 - Never commit credentials to version control
 
 ### Environment Variables
@@ -681,6 +681,7 @@ The system automatically creates a default administrator account on first startu
 | `ENCRYPTION_KEY` | 32-byte hex key for encryption | Yes |
 | `JWT_SECRET` | Secret for JWT signing | Yes |
 | `SESSION_SECRET` | Express session secret | Yes |
+| `DEFAULT_ADMIN_EMAIL` | Email for default administrator account | No |
 | `EMAIL_PROVIDER` | Email service (ses/smtp/exchange/console) | Yes |
 | `CORS_ORIGIN` | Allowed CORS origins | Yes |
 | `LOG_LEVEL` | Logging level | No |

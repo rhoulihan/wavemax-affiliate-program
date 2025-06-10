@@ -16,10 +16,11 @@ async function initializeDefaultAdmin() {
     }
     
     // Create default administrator account
+    const adminEmail = process.env.DEFAULT_ADMIN_EMAIL || 'admin@wavemaxlaundry.com';
     const defaultAdmin = new Administrator({
       firstName: 'System',
       lastName: 'Administrator',
-      email: 'admin@wavemaxlaundry.com',
+      email: adminEmail,
       password: 'WaveMAX!2024',
       permissions: ['all'], // Super admin with all permissions
       isActive: true,
@@ -29,7 +30,7 @@ async function initializeDefaultAdmin() {
     await defaultAdmin.save();
     
     logger.info('Default administrator account created successfully');
-    logger.info('Email: admin@wavemaxlaundry.com');
+    logger.info(`Email: ${adminEmail}`);
     logger.info('Default Password: WaveMAX!2024 (must be changed on first login)');
     
     return defaultAdmin;
