@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WaveMAX - Payment Methods</title>
+    
+    <!-- Tailwind CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <!-- Payment Styles -->
+    <link rel="stylesheet" href="/assets/css/payment-styles.css">
+    
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: transparent;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica', 'Arial', sans-serif;
+        }
+        
+        /* Language switcher positioning */
+        #language-switcher-container {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            z-index: 1000;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Language Switcher -->
+    <div id="language-switcher-container"></div>
+    
+    <!-- Payment Methods Container -->
+    <div id="payment-methods-container" class="container mx-auto py-8">
+        <!-- Payment methods will be rendered here by JavaScript -->
+    </div>
+
+    <!-- Core Scripts -->
+    <script src="/assets/js/embed-config.js"></script>
+    <script src="/assets/js/csrf-utils.js"></script>
+    <script src="/assets/js/i18n.js"></script>
+    <script src="/assets/js/language-switcher.js"></script>
+    <script src="/assets/js/payment-validation.js"></script>
+    <script src="/assets/js/payment-service.js"></script>
+    <script src="/assets/js/payment-methods.js"></script>
+    
+    <script>
+        // Initialize payment methods when DOM is ready
+        document.addEventListener('DOMContentLoaded', async function() {
+            // Initialize language switcher
+            if (window.LanguageSwitcher) {
+                window.LanguageSwitcher.init({
+                    container: '#language-switcher-container'
+                });
+            }
+
+            // Initialize payment methods manager
+            const paymentMethods = new window.PaymentMethods({
+                container: '#payment-methods-container',
+                onMethodAdded: (method) => {
+                    console.log('Payment method added:', method);
+                    
+                    // Notify parent window if embedded
+                    if (window.parent !== window) {
+                        window.parent.postMessage({
+                            type: 'payment-method-added',
+                            data: { method }
+                        }, '*');
+                    }
+                },
+                onMethodDeleted: (methodId) => {
+                    console.log('Payment method deleted:', methodId);
+                    
+                    // Notify parent window if embedded
+                    if (window.parent !== window) {
+                        window.parent.postMessage({
+                            type: 'payment-method-deleted',
+                            data: { methodId }
+                        }, '*');
+                    }
+                },
+                onMethodUpdated: (method) => {
+                    console.log('Payment method updated:', method);
+                    
+                    // Notify parent window if embedded
+                    if (window.parent !== window) {
+                        window.parent.postMessage({
+                            type: 'payment-method-updated',
+                            data: { method }
+                        }, '*');
+                    }
+                }
+            });
+
+            // Listen for messages from parent window
+            window.addEventListener('message', (event) => {
+                if (event.data.type === 'refresh-methods') {
+                    paymentMethods.loadMethods();
+                }
+            });
+
+            // Notify parent that payment methods page is ready
+            if (window.parent !== window) {
+                window.parent.postMessage({
+                    type: 'payment-methods-ready',
+                    data: { ready: true }
+                }, '*');
+            }
+        });
+    </script>
+
+    <!-- Translations -->
+    <script>
+        // Add payment methods-specific translations
+        window.addEventListener('DOMContentLoaded', () => {
+            if (window.i18n) {
+                // These would normally be loaded from translation files
+                const paymentMethodsTranslations = {
+                    en: {
+                        payment: {
+                            methods: {
+                                title: 'Payment Methods',
+                                description: 'Manage your saved payment methods for faster checkout',
+                                addMethod: 'Add Payment Method',
+                                noMethods: 'No payment methods saved',
+                                noMethodsDescription: 'Add a payment method to make checkout faster and easier',
+                                addFirstMethod: 'Add Your First Payment Method',
+                                addNewMethod: 'Add New Payment Method',
+                                methodType: 'Payment Method Type',
+                                selectType: 'Select a type',
+                                creditCard: 'Credit/Debit Card',
+                                bankAccount: 'Bank Account',
+                                paypal: 'PayPal',
+                                cardNumber: 'Card Number',
+                                cardNumberPlaceholder: '•••• •••• •••• ••••',
+                                secureInput: 'Card details are securely processed',
+                                expiry: 'Expiry Date',
+                                expiryPlaceholder: 'MM/YY',
+                                cvv: 'CVV',
+                                cvvPlaceholder: '•••',
+                                accountNumber: 'Account Number',
+                                accountNumberPlaceholder: 'Enter account number',
+                                routingNumber: 'Routing Number',
+                                routingNumberPlaceholder: 'Enter routing number',
+                                nickname: 'Nickname (optional)',
+                                nicknamePlaceholder: 'e.g., Personal Card',
+                                setAsDefault: 'Set as default payment method',
+                                makeDefault: 'Make Default',
+                                setAsDefaultTooltip: 'Set as default payment method',
+                                deleteTooltip: 'Delete payment method',
+                                deleteConfirmTitle: 'Delete Payment Method?',
+                                deleteConfirmMessage: 'Are you sure you want to delete this payment method? This action cannot be undone.'
+                            }
+                        },
+                        common: {
+                            buttons: {
+                                save: 'Save',
+                                cancel: 'Cancel',
+                                delete: 'Delete'
+                            },
+                            saving: 'Saving...',
+                            loading: 'Loading...'
+                        }
+                    },
+                    es: {
+                        payment: {
+                            methods: {
+                                title: 'Métodos de Pago',
+                                description: 'Administre sus métodos de pago guardados para un pago más rápido',
+                                addMethod: 'Agregar Método de Pago',
+                                noMethods: 'No hay métodos de pago guardados',
+                                noMethodsDescription: 'Agregue un método de pago para hacer el pago más rápido y fácil',
+                                addFirstMethod: 'Agregue su Primer Método de Pago',
+                                addNewMethod: 'Agregar Nuevo Método de Pago',
+                                methodType: 'Tipo de Método de Pago',
+                                selectType: 'Seleccione un tipo',
+                                creditCard: 'Tarjeta de Crédito/Débito',
+                                bankAccount: 'Cuenta Bancaria',
+                                paypal: 'PayPal',
+                                cardNumber: 'Número de Tarjeta',
+                                cardNumberPlaceholder: '•••• •••• •••• ••••',
+                                secureInput: 'Los detalles de la tarjeta se procesan de forma segura',
+                                expiry: 'Fecha de Vencimiento',
+                                expiryPlaceholder: 'MM/AA',
+                                cvv: 'CVV',
+                                cvvPlaceholder: '•••',
+                                accountNumber: 'Número de Cuenta',
+                                accountNumberPlaceholder: 'Ingrese el número de cuenta',
+                                routingNumber: 'Número de Ruta',
+                                routingNumberPlaceholder: 'Ingrese el número de ruta',
+                                nickname: 'Apodo (opcional)',
+                                nicknamePlaceholder: 'ej., Tarjeta Personal',
+                                setAsDefault: 'Establecer como método de pago predeterminado',
+                                makeDefault: 'Hacer Predeterminado',
+                                setAsDefaultTooltip: 'Establecer como método de pago predeterminado',
+                                deleteTooltip: 'Eliminar método de pago',
+                                deleteConfirmTitle: '¿Eliminar Método de Pago?',
+                                deleteConfirmMessage: '¿Está seguro de que desea eliminar este método de pago? Esta acción no se puede deshacer.'
+                            }
+                        },
+                        common: {
+                            buttons: {
+                                save: 'Guardar',
+                                cancel: 'Cancelar',
+                                delete: 'Eliminar'
+                            },
+                            saving: 'Guardando...',
+                            loading: 'Cargando...'
+                        }
+                    },
+                    pt: {
+                        payment: {
+                            methods: {
+                                title: 'Métodos de Pagamento',
+                                description: 'Gerencie seus métodos de pagamento salvos para checkout mais rápido',
+                                addMethod: 'Adicionar Método de Pagamento',
+                                noMethods: 'Nenhum método de pagamento salvo',
+                                noMethodsDescription: 'Adicione um método de pagamento para tornar o checkout mais rápido e fácil',
+                                addFirstMethod: 'Adicione seu Primeiro Método de Pagamento',
+                                addNewMethod: 'Adicionar Novo Método de Pagamento',
+                                methodType: 'Tipo de Método de Pagamento',
+                                selectType: 'Selecione um tipo',
+                                creditCard: 'Cartão de Crédito/Débito',
+                                bankAccount: 'Conta Bancária',
+                                paypal: 'PayPal',
+                                cardNumber: 'Número do Cartão',
+                                cardNumberPlaceholder: '•••• •••• •••• ••••',
+                                secureInput: 'Os detalhes do cartão são processados com segurança',
+                                expiry: 'Data de Validade',
+                                expiryPlaceholder: 'MM/AA',
+                                cvv: 'CVV',
+                                cvvPlaceholder: '•••',
+                                accountNumber: 'Número da Conta',
+                                accountNumberPlaceholder: 'Digite o número da conta',
+                                routingNumber: 'Número de Roteamento',
+                                routingNumberPlaceholder: 'Digite o número de roteamento',
+                                nickname: 'Apelido (opcional)',
+                                nicknamePlaceholder: 'ex., Cartão Pessoal',
+                                setAsDefault: 'Definir como método de pagamento padrão',
+                                makeDefault: 'Tornar Padrão',
+                                setAsDefaultTooltip: 'Definir como método de pagamento padrão',
+                                deleteTooltip: 'Excluir método de pagamento',
+                                deleteConfirmTitle: 'Excluir Método de Pagamento?',
+                                deleteConfirmMessage: 'Tem certeza de que deseja excluir este método de pagamento? Esta ação não pode ser desfeita.'
+                            }
+                        },
+                        common: {
+                            buttons: {
+                                save: 'Salvar',
+                                cancel: 'Cancelar',
+                                delete: 'Excluir'
+                            },
+                            saving: 'Salvando...',
+                            loading: 'Carregando...'
+                        }
+                    },
+                    de: {
+                        payment: {
+                            methods: {
+                                title: 'Zahlungsmethoden',
+                                description: 'Verwalten Sie Ihre gespeicherten Zahlungsmethoden für einen schnelleren Checkout',
+                                addMethod: 'Zahlungsmethode hinzufügen',
+                                noMethods: 'Keine Zahlungsmethoden gespeichert',
+                                noMethodsDescription: 'Fügen Sie eine Zahlungsmethode hinzu, um den Checkout schneller und einfacher zu machen',
+                                addFirstMethod: 'Fügen Sie Ihre erste Zahlungsmethode hinzu',
+                                addNewMethod: 'Neue Zahlungsmethode hinzufügen',
+                                methodType: 'Zahlungsmethodentyp',
+                                selectType: 'Typ auswählen',
+                                creditCard: 'Kredit-/Debitkarte',
+                                bankAccount: 'Bankkonto',
+                                paypal: 'PayPal',
+                                cardNumber: 'Kartennummer',
+                                cardNumberPlaceholder: '•••• •••• •••• ••••',
+                                secureInput: 'Kartendetails werden sicher verarbeitet',
+                                expiry: 'Ablaufdatum',
+                                expiryPlaceholder: 'MM/JJ',
+                                cvv: 'CVV',
+                                cvvPlaceholder: '•••',
+                                accountNumber: 'Kontonummer',
+                                accountNumberPlaceholder: 'Kontonummer eingeben',
+                                routingNumber: 'Bankleitzahl',
+                                routingNumberPlaceholder: 'Bankleitzahl eingeben',
+                                nickname: 'Spitzname (optional)',
+                                nicknamePlaceholder: 'z.B. Persönliche Karte',
+                                setAsDefault: 'Als Standard-Zahlungsmethode festlegen',
+                                makeDefault: 'Als Standard festlegen',
+                                setAsDefaultTooltip: 'Als Standard-Zahlungsmethode festlegen',
+                                deleteTooltip: 'Zahlungsmethode löschen',
+                                deleteConfirmTitle: 'Zahlungsmethode löschen?',
+                                deleteConfirmMessage: 'Sind Sie sicher, dass Sie diese Zahlungsmethode löschen möchten? Diese Aktion kann nicht rückgängig gemacht werden.'
+                            }
+                        },
+                        common: {
+                            buttons: {
+                                save: 'Speichern',
+                                cancel: 'Abbrechen',
+                                delete: 'Löschen'
+                            },
+                            saving: 'Speichern...',
+                            loading: 'Laden...'
+                        }
+                    }
+                };
+
+                // Merge translations
+                Object.keys(paymentMethodsTranslations).forEach(lang => {
+                    if (window.i18n.translations[lang]) {
+                        Object.assign(window.i18n.translations[lang], paymentMethodsTranslations[lang]);
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>
