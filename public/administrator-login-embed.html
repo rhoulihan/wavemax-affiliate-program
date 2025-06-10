@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Administrator Login - WaveMAX</title>
+    <title data-i18n="administrator.login.title">Administrator Login - WaveMAX</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -19,7 +20,7 @@
         }
 
         .container {
-            max-width: 400px;
+            max-width: 500px;
             margin: 0 auto;
             padding: 60px 20px 20px 20px;
         }
@@ -181,6 +182,63 @@
             right: 10px;
             z-index: 1000;
         }
+
+        /* Password requirements styling */
+        #passwordRequirements {
+            background: #f5f7fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            font-size: 14px;
+        }
+
+        #passwordRequirements .req-title {
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        #passwordRequirements ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+
+        #passwordRequirements li {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        #passwordRequirements .req-indicator {
+            font-size: 14px;
+            line-height: 1;
+        }
+
+        #passwordRequirements .met {
+            color: #22c55e;
+        }
+
+        #passwordRequirements .unmet {
+            color: #94a3b8;
+        }
+
+        #passwordStrength {
+            margin-top: 10px;
+            font-size: 14px;
+            text-align: center;
+        }
+
+        .password-change-form input {
+            margin-bottom: 0;
+        }
+
+        .password-change-form .form-group {
+            margin-bottom: 15px;
+        }
     </style>
 </head>
 <body>
@@ -188,7 +246,7 @@
         <div class="login-card">
             <div class="logo">
                 <h1>WaveMAX</h1>
-                <p>Administrator Portal</p>
+                <p data-i18n="administrator.login.subtitle">Administrator Portal</p>
             </div>
 
             <div class="error-message" id="errorMessage"></div>
@@ -196,7 +254,7 @@
 
             <form id="loginForm">
                 <div class="form-group">
-                    <label for="email">Email Address</label>
+                    <label for="email" data-i18n="administrator.login.email">Email Address</label>
                     <input 
                         type="email" 
                         id="email" 
@@ -208,32 +266,33 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="password" data-i18n="common.labels.password">Password</label>
+                    <label for="password" data-i18n="administrator.login.password">Password</label>
                     <div class="password-toggle">
                         <input 
                             type="password" 
                             id="password" 
                             name="password" 
                             required 
+                            data-i18n-placeholder="administrator.login.password"
                             placeholder="Enter your password"
                             autocomplete="current-password"
                         >
-                        <button type="button" id="togglePassword" tabindex="-1">Show</button>
+                        <button type="button" id="togglePassword" tabindex="-1" data-i18n="administrator.login.showPassword">Show</button>
                     </div>
                 </div>
 
                 <button type="submit" class="btn" id="submitBtn">
-                    <span id="submitText">Sign In</span>
+                    <span id="submitText" data-i18n="administrator.login.signIn">Sign In</span>
                 </button>
             </form>
 
             <div class="forgot-password">
-                <a href="#" id="forgotPasswordLink">Forgot your password?</a>
+                <a href="#" id="forgotPasswordLink" data-i18n="administrator.login.forgotPassword">Forgot your password?</a>
             </div>
 
             <div class="security-notice">
-                <strong>Security Notice:</strong> This is a secure administrator portal. 
-                All access attempts are logged and monitored.
+                <strong data-i18n="administrator.login.securityNoticeTitle">Security Notice:</strong> 
+                <span data-i18n="administrator.login.securityNoticeText">This is a secure administrator portal. All access attempts are logged and monitored.</span>
             </div>
         </div>
     </div>
@@ -241,6 +300,7 @@
         <!-- i18n Scripts -->
     <script src="/assets/js/i18n.js"></script>
     <script src="/assets/js/language-switcher.js"></script>
+    <script src="/assets/js/csrf-utils.js"></script>
     <script src="/assets/js/administrator-login-init.js"></script>
     <script>
         // Initialize i18n
@@ -250,6 +310,12 @@
                 style: 'dropdown',
                 showLabel: false
             });
+            
+            // Ensure the toggle password button has correct initial text
+            const toggleBtn = document.getElementById('togglePassword');
+            if (toggleBtn && window.i18n) {
+                toggleBtn.textContent = window.i18n.t('administrator.login.showPassword');
+            }
         });
     </script>
 

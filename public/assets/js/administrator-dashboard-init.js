@@ -16,14 +16,46 @@
     // Authentication check
     const token = localStorage.getItem('adminToken');
     const adminData = JSON.parse(localStorage.getItem('adminData') || '{}');
+    const requirePasswordChange = localStorage.getItem('requirePasswordChange');
 
-    if (!token) {
+    // Redirect to login if no token or if password change is still required
+    if (!token || requirePasswordChange === 'true') {
+        // Clear everything and redirect to login
+        localStorage.removeItem('adminToken');
+        localStorage.removeItem('adminRefreshToken');
+        localStorage.removeItem('adminData');
+        localStorage.removeItem('requirePasswordChange');
         window.location.href = '/administrator-login-embed.html';
         return;
     }
 
     // Update user info
-    document.getElementById('userName').textContent = `${adminData.firstName} ${adminData.lastName}`;
+    const userName = `${adminData.firstName} ${adminData.lastName}`;
+    document.getElementById('userName').textContent = userName;
+
+    // Logout functionality
+    const logoutBtn = document.getElementById('logoutBtn');
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', async () => {
+            if (confirm('Are you sure you want to logout?')) {
+                try {
+                    // Call logout endpoint
+                    await adminFetch('/api/v1/auth/logout', { method: 'POST' });
+                } catch (error) {
+                    console.error('Logout error:', error);
+                }
+                
+                // Clear local storage
+                localStorage.removeItem('adminToken');
+                localStorage.removeItem('adminRefreshToken');
+                localStorage.removeItem('adminData');
+                localStorage.removeItem('requirePasswordChange');
+                
+                // Redirect to login
+                window.location.href = '/administrator-login-embed.html';
+            }
+        });
+    }
 
     // Tab navigation
     const tabs = document.querySelectorAll('.nav-tab');
@@ -69,8 +101,26 @@
         return response;
     }
 
+    // Clear loading states from all containers
+    function clearLoadingStates() {
+        const loadingContainers = ['dashboardStats', 'recentActivity', 'operatorsList', 'analyticsOverview', 'affiliatesList', 'systemConfigForm'];
+        loadingContainers.forEach(id => {
+            const element = document.getElementById(id);
+            if (element && element.querySelector('.loading')) {
+                // Only clear if it still has loading state
+                const loadingDiv = element.querySelector('.loading');
+                if (loadingDiv) {
+                    element.innerHTML = '';
+                }
+            }
+        });
+    }
+
     // Load tab data
     async function loadTabData(tab) {
+        // Clear any remaining loading states
+        clearLoadingStates();
+        
         switch(tab) {
             case 'dashboard':
                 await loadDashboard();
@@ -96,44 +146,57 @@
             const response = await adminFetch('/api/v1/administrators/dashboard');
             const data = await response.json();
 
-            if (response.ok) {
-                renderDashboardStats(data);
-                renderRecentActivity(data.recentActivity);
+            if (response.ok && data.success) {
+                renderDashboardStats(data.dashboard);
+                renderRecentActivity(data.dashboard.recentActivity || []);
+            } else {
+                console.error('Dashboard data not loaded:', data.message);
+                document.getElementById('dashboardStats').innerHTML = '<p style="padding: 20px; text-align: center; color: #666;">Failed to load dashboard data</p>';
             }
         } catch (error) {
             console.error('Error loading dashboard:', error);
+            document.getElementById('dashboardStats').innerHTML = '<p style="padding: 20px; text-align: center; color: #666;">Error loading dashboard</p>';
         }
     }
 
     // Render dashboard stats
     function renderDashboardStats(data) {
+        const dashboardElement = document.getElementById('dashboardStats');
+        
+        if (!data) {
+            dashboardElement.innerHTML = '<p style="padding: 20px; text-align: center; color: #666;">No dashboard data available</p>';
+            return;
+        }
+
+        const orderStats = data.orderStats || {};
+        const systemHealth = data.systemHealth || {};
+        const avgProcessingTime = Math.round(orderStats.averageProcessingTime || 0);
+        
         const statsHtml = `
             <div class="stat-card">
                 <h3>Active Operators</h3>
-                <div class="stat-value">${data.operators.active}</div>
-                <div class="stat-change">Total: ${data.operators.total}</div>
+                <div class="stat-value">${systemHealth.onShiftOperators || 0}</div>
+                <div class="stat-change">Total: ${systemHealth.activeOperators || 0}</div>
             </div>
             <div class="stat-card">
                 <h3>Today's Orders</h3>
-                <div class="stat-value">${data.orders.today}</div>
-                <div class="stat-change ${data.orders.todayChange < 0 ? 'negative' : ''}">
-                    ${data.orders.todayChange > 0 ? '+' : ''}${data.orders.todayChange}% vs yesterday
-                </div>
+                <div class="stat-value">${orderStats.today || 0}</div>
+                <div class="stat-change">This week: ${orderStats.thisWeek || 0}</div>
             </div>
             <div class="stat-card">
                 <h3>Processing Time</h3>
-                <div class="stat-value">${data.metrics.avgProcessingTime}m</div>
-                <div class="stat-change">Target: ${data.metrics.targetProcessingTime}m</div>
+                <div class="stat-value">${avgProcessingTime}m</div>
+                <div class="stat-change">Target: 60m</div>
             </div>
             <div class="stat-card">
-                <h3>Quality Score</h3>
-                <div class="stat-value">${data.metrics.qualityScore}%</div>
-                <div class="stat-change ${data.metrics.qualityScore < 85 ? 'negative' : ''}">
-                    Target: 85%
+                <h3>Pending Orders</h3>
+                <div class="stat-value">${systemHealth.pendingOrders || 0}</div>
+                <div class="stat-change ${systemHealth.processingDelays > 0 ? 'negative' : ''}">
+                    Delays: ${systemHealth.processingDelays || 0}
                 </div>
             </div>
         `;
-        document.getElementById('dashboardStats').innerHTML = statsHtml;
+        dashboardElement.innerHTML = statsHtml;
     }
 
     // Render recent activity
@@ -174,11 +237,14 @@
             const response = await adminFetch('/api/v1/administrators/operators');
             const data = await response.json();
 
-            if (response.ok) {
+            if (response.ok && data.success) {
                 renderOperatorsList(data.operators);
+            } else {
+                document.getElementById('operatorsList').innerHTML = '<p style="padding: 20px; text-align: center; color: #666;">Failed to load operators</p>';
             }
         } catch (error) {
             console.error('Error loading operators:', error);
+            document.getElementById('operatorsList').innerHTML = '<p style="padding: 20px; text-align: center; color: #666;">Error loading operators</p>';
         }
     }
 
@@ -189,16 +255,17 @@
             return;
         }
 
+        const t = window.i18n ? window.i18n.t.bind(window.i18n) : (key) => key;
         const tableHtml = `
             <table>
                 <thead>
                     <tr>
-                        <th>Employee ID</th>
-                        <th>Name</th>
-                        <th>Email</th>
-                        <th>Shift</th>
-                        <th>Status</th>
-                        <th>Actions</th>
+                        <th>${t('administrator.dashboard.operators.employeeId')}</th>
+                        <th>${t('administrator.dashboard.operators.name')}</th>
+                        <th>${t('administrator.dashboard.operators.email')}</th>
+                        <th>${t('administrator.dashboard.operators.shift')}</th>
+                        <th>${t('administrator.dashboard.operators.status')}</th>
+                        <th>${t('administrator.dashboard.operators.actions')}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -210,12 +277,12 @@
                             <td>${op.shiftStart} - ${op.shiftEnd}</td>
                             <td>
                                 <span class="status-badge ${op.isActive ? 'active' : 'inactive'}">
-                                    ${op.isActive ? 'Active' : 'Inactive'}
+                                    ${op.isActive ? t('administrator.dashboard.operators.active') : t('administrator.dashboard.operators.inactive')}
                                 </span>
                             </td>
                             <td>
-                                <button class="btn btn-sm" onclick="editOperator('${op._id}')">Edit</button>
-                                <button class="btn btn-sm btn-secondary" onclick="resetPin('${op._id}')">Reset PIN</button>
+                                <button class="btn btn-sm" onclick="editOperator('${op._id}')">${t('administrator.dashboard.operators.edit')}</button>
+                                <button class="btn btn-sm btn-secondary" onclick="resetPin('${op._id}')">${t('administrator.dashboard.operators.resetPin')}</button>
                             </td>
                         </tr>
                     `).join('')}
@@ -241,26 +308,27 @@
 
     // Render analytics overview
     function renderAnalyticsOverview(data) {
+        const t = window.i18n ? window.i18n.t.bind(window.i18n) : (key) => key;
         const overviewHtml = `
             <div class="stat-card">
-                <h3>Total Orders</h3>
+                <h3>${t('administrator.dashboard.analytics.totalOrders')}</h3>
                 <div class="stat-value">${data.summary.totalOrders}</div>
-                <div class="stat-change">This week</div>
+                <div class="stat-change">${t('administrator.dashboard.stats.thisWeek')}</div>
             </div>
             <div class="stat-card">
-                <h3>Completed</h3>
+                <h3>${t('administrator.dashboard.analytics.completed')}</h3>
                 <div class="stat-value">${data.summary.completedOrders}</div>
-                <div class="stat-change">${Math.round((data.summary.completedOrders / data.summary.totalOrders) * 100)}% completion rate</div>
+                <div class="stat-change">${Math.round((data.summary.completedOrders / data.summary.totalOrders) * 100)}% ${t('administrator.dashboard.analytics.completionRate')}</div>
             </div>
             <div class="stat-card">
-                <h3>Revenue</h3>
+                <h3>${t('administrator.dashboard.analytics.revenue')}</h3>
                 <div class="stat-value">$${data.summary.totalRevenue.toFixed(2)}</div>
-                <div class="stat-change">This week</div>
+                <div class="stat-change">${t('administrator.dashboard.stats.thisWeek')}</div>
             </div>
             <div class="stat-card">
-                <h3>Avg Order Value</h3>
+                <h3>${t('administrator.dashboard.analytics.avgOrderValue')}</h3>
                 <div class="stat-value">$${data.summary.avgOrderValue.toFixed(2)}</div>
-                <div class="stat-change">Per order</div>
+                <div class="stat-change">${t('administrator.dashboard.analytics.perOrder')}</div>
             </div>
         `;
         document.getElementById('analyticsOverview').innerHTML = overviewHtml;
@@ -283,20 +351,22 @@
     // Render affiliates list
     function renderAffiliatesList(affiliates) {
         if (!affiliates || affiliates.length === 0) {
-            document.getElementById('affiliatesList').innerHTML = '<p style="padding: 20px; text-align: center; color: #666;">No affiliate data available</p>';
+            const noDataText = window.i18n ? window.i18n.t('administrator.dashboard.affiliates.noData') : 'No affiliate data available';
+            document.getElementById('affiliatesList').innerHTML = `<p style="padding: 20px; text-align: center; color: #666;">${noDataText}</p>`;
             return;
         }
 
+        const t = window.i18n ? window.i18n.t.bind(window.i18n) : (key) => key;
         const tableHtml = `
             <table>
                 <thead>
                     <tr>
-                        <th>Affiliate ID</th>
-                        <th>Name</th>
-                        <th>Customers</th>
-                        <th>Orders</th>
-                        <th>Revenue</th>
-                        <th>Commission</th>
+                        <th>${t('administrator.dashboard.affiliates.affiliateId')}</th>
+                        <th>${t('administrator.dashboard.affiliates.name')}</th>
+                        <th>${t('administrator.dashboard.affiliates.customers')}</th>
+                        <th>${t('administrator.dashboard.affiliates.orders')}</th>
+                        <th>${t('administrator.dashboard.affiliates.revenue')}</th>
+                        <th>${t('administrator.dashboard.affiliates.commission')}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -348,10 +418,12 @@
                 configHtml += `<label for="config_${config.key}">${config.description}</label>`;
                 
                 if (config.dataType === 'boolean') {
+                    const enabledText = window.i18n ? window.i18n.t('administrator.dashboard.config.enabled') : 'Enabled';
+                    const disabledText = window.i18n ? window.i18n.t('administrator.dashboard.config.disabled') : 'Disabled';
                     configHtml += `
                         <select id="config_${config.key}" name="${config.key}" data-type="${config.dataType}">
-                            <option value="true" ${config.value === true ? 'selected' : ''}>Enabled</option>
-                            <option value="false" ${config.value === false ? 'selected' : ''}>Disabled</option>
+                            <option value="true" ${config.value === true ? 'selected' : ''}>${enabledText}</option>
+                            <option value="false" ${config.value === false ? 'selected' : ''}>${disabledText}</option>
                         </select>
                     `;
                 } else if (config.dataType === 'number') {
@@ -377,7 +449,8 @@
 
     document.getElementById('addOperatorBtn').addEventListener('click', () => {
         editingOperatorId = null;
-        document.getElementById('operatorModalTitle').textContent = 'Add Operator';
+        const titleText = window.i18n ? window.i18n.t('administrator.dashboard.operators.addOperator') : 'Add Operator';
+        document.getElementById('operatorModalTitle').textContent = titleText;
         operatorForm.reset();
         operatorModal.classList.add('active');
     });
@@ -495,7 +568,8 @@
 
             if (response.ok) {
                 editingOperatorId = operatorId;
-                document.getElementById('operatorModalTitle').textContent = 'Edit Operator';
+                const titleText = window.i18n ? window.i18n.t('administrator.dashboard.operators.editOperator') : 'Edit Operator';
+                document.getElementById('operatorModalTitle').textContent = titleText;
                 
                 // Fill form with operator data
                 document.getElementById('firstName').value = data.operator.firstName;
@@ -541,6 +615,22 @@
         }
     };
 
+    // Remove loading spinners before loading data
+    function removeLoadingSpinners() {
+        // Remove any swirl spinners
+        const swirlSpinners = document.querySelectorAll('.swirl-spinner-container');
+        swirlSpinners.forEach(spinner => spinner.remove());
+        
+        // Also remove standard loading divs
+        const loadingDivs = document.querySelectorAll('.loading');
+        loadingDivs.forEach(div => {
+            if (div.querySelector('.spinner')) {
+                div.remove();
+            }
+        });
+    }
+    
     // Load initial data
+    removeLoadingSpinners();
     loadDashboard();
 })();

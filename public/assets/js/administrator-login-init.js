@@ -27,7 +27,10 @@
     togglePassword.addEventListener('click', function() {
         const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
         passwordInput.setAttribute('type', type);
-        this.textContent = type === 'password' ? 'Show' : 'Hide';
+        const key = type === 'password' ? 'administrator.login.showPassword' : 'administrator.login.hidePassword';
+        this.textContent = window.i18n ? window.i18n.t(key) : (type === 'password' ? 'Show' : 'Hide');
+        // Update the data-i18n attribute so it stays translated if language changes
+        this.setAttribute('data-i18n', key);
     });
 
     // Show error message
@@ -176,76 +179,158 @@
         }
     });
 
-    // Check if already logged in
-    const existingToken = localStorage.getItem('adminToken');
-    if (existingToken) {
-        // Verify token is still valid
-        fetch(`${BASE_URL}/api/v1/auth/verify`, {
-            headers: {
-                'Authorization': `Bearer ${existingToken}`
+    // ALWAYS clear any existing session for admin login page
+    // This ensures administrators must always enter credentials
+    localStorage.removeItem('adminToken');
+    localStorage.removeItem('adminRefreshToken');
+    localStorage.removeItem('adminData');
+    localStorage.removeItem('requirePasswordChange');
+    
+    // The login form is already visible by default
+    // No auto-redirect or token checking for administrator login
+
+    // Password strength validation
+    function validatePasswordStrength(password, username = '', email = '') {
+        const requirements = {
+            length: password.length >= 12, // Administrators need stronger passwords
+            uppercase: /[A-Z]/.test(password),
+            lowercase: /[a-z]/.test(password),
+            number: /\d/.test(password),
+            special: /[!@#$%^&*()_+\-=\[\]{}|;:,.<>?]/.test(password)
+        };
+
+        // Check against common patterns and user data
+        const hasSequential = /123|234|345|456|567|678|789|890|abc|bcd|cde|def|efg|fgh|ghi|hij|ijk|jkl|klm|lmn|mno|nop|opq|pqr|qrs|rst|stu|tuv|uvw|vwx|wxy|xyz/i.test(password);
+        const hasUsername = username && password.toLowerCase().includes(username.toLowerCase());
+        const hasEmail = email && password.toLowerCase().includes(email.split('@')[0].toLowerCase());
+        const hasRepeated = /(.)\1{2,}/.test(password);
+
+        requirements.noSequential = !hasSequential;
+        requirements.noUsername = !hasUsername;
+        requirements.noEmail = !hasEmail;
+        requirements.noRepeated = !hasRepeated;
+
+        const score = Object.values(requirements).filter(Boolean).length;
+        return { requirements, score, isValid: score >= 5 && requirements.length && requirements.uppercase && requirements.lowercase && requirements.number && requirements.special };
+    }
+
+    function updatePasswordRequirements(password, confirmPassword = '', email = '') {
+        const validation = validatePasswordStrength(password, '', email);
+        const requirements = validation.requirements;
+        
+        // Add password match requirement
+        requirements.match = password !== '' && password === confirmPassword;
+
+        // Update requirement indicators
+        const updateReq = (id, met) => {
+            const element = document.getElementById(id);
+            if (element) {
+                const indicator = element.querySelector('.req-indicator');
+                if (indicator) {
+                    indicator.textContent = met ? '✅' : '⚪';
+                    indicator.className = met ? 'req-indicator met' : 'req-indicator unmet';
+                }
+                // Add visual emphasis to the requirement text
+                const textSpan = element.querySelector('span:not(.req-indicator)');
+                if (textSpan) {
+                    textSpan.style.color = met ? '#22c55e' : '#666';
+                    textSpan.style.fontWeight = met ? '500' : 'normal';
+                }
             }
-        })
-        .then(response => {
-            if (response.ok) {
-                window.location.href = '/administrator-dashboard-embed.html';
+        };
+
+        updateReq('req-length', requirements.length);
+        updateReq('req-uppercase', requirements.uppercase);
+        updateReq('req-lowercase', requirements.lowercase);
+        updateReq('req-number', requirements.number);
+        updateReq('req-special', requirements.special);
+        updateReq('req-match', requirements.match);
+
+        // Update strength indicator
+        const strengthElement = document.getElementById('passwordStrength');
+        if (strengthElement) {
+            if (password.length === 0) {
+                strengthElement.innerHTML = '';
+            } else if (validation.isValid && requirements.match) {
+                const strongText = window.i18n ? window.i18n.t('administrator.login.passwordStrong') : 'Strong password';
+                strengthElement.innerHTML = `<span style="color: #22c55e; font-weight: 500;">✅ ${strongText}</span>`;
             } else {
-                // Clear invalid token
-                localStorage.removeItem('adminToken');
-                localStorage.removeItem('adminRefreshToken');
-                localStorage.removeItem('adminData');
+                // Don't show missing items since they're already shown in the requirements list
+                strengthElement.innerHTML = '';
             }
-        })
-        .catch(() => {
-            // Network error, let user try to login
-        });
+        }
+
+        return validation.isValid && requirements.match;
     }
 
     // Show password change form
     function showPasswordChangeForm() {
+        const adminData = JSON.parse(localStorage.getItem('adminData') || '{}');
+        const adminEmail = adminData.email || '';
+        
         const formHtml = `
-            <form id="passwordChangeForm" class="space-y-6">
-                <div>
-                    <h2 class="text-xl font-semibold text-gray-900 mb-2">Password Change Required</h2>
-                    <p class="text-sm text-gray-600 mb-4">You must change your password before continuing.</p>
+            <form id="passwordChangeForm" class="password-change-form">
+                <div style="text-align: center; margin-bottom: 25px;">
+                    <h2 style="font-size: 24px; font-weight: 600; color: #333; margin-bottom: 8px;" data-i18n="administrator.login.passwordChangeRequired">Password Change Required</h2>
+                    <p style="font-size: 14px; color: #666;" data-i18n="administrator.login.passwordChangeSubtitle">You must change your password before continuing.</p>
                 </div>
                 
-                <div>
-                    <label for="currentPassword" class="block text-sm font-medium text-gray-700">
+                <div class="form-group">
+                    <label for="currentPassword" data-i18n="administrator.login.currentPassword">
                         Current Password
                     </label>
-                    <div class="mt-1">
-                        <input id="currentPassword" type="password" required
-                               class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
-                    </div>
+                    <input id="currentPassword" type="password" required>
                 </div>
 
-                <div>
-                    <label for="newPassword" class="block text-sm font-medium text-gray-700">
+                <div class="form-group">
+                    <label for="newPassword" data-i18n="administrator.login.newPassword">
                         New Password
                     </label>
-                    <div class="mt-1">
-                        <input id="newPassword" type="password" required
-                               class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
-                    </div>
-                    <p class="mt-2 text-sm text-gray-500">
-                        Must be at least 12 characters with uppercase, lowercase, numbers and special characters
-                    </p>
+                    <input id="newPassword" type="password" required>
                 </div>
 
-                <div>
-                    <label for="confirmPassword" class="block text-sm font-medium text-gray-700">
+                <div class="form-group">
+                    <label for="confirmPassword" data-i18n="administrator.login.confirmPassword">
                         Confirm New Password
                     </label>
-                    <div class="mt-1">
-                        <input id="confirmPassword" type="password" required
-                               class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
-                    </div>
+                    <input id="confirmPassword" type="password" required>
                 </div>
 
-                <div>
-                    <button type="submit" id="changePasswordBtn"
-                            class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                        <span id="changePasswordText">Change Password</span>
+                <!-- Password Requirements Display -->
+                <div id="passwordRequirements">
+                    <div class="req-title" data-i18n="administrator.login.passwordRequirementTitle">Password must contain:</div>
+                    <ul>
+                        <li id="req-length">
+                            <span class="req-indicator unmet">⚪</span>
+                            <span data-i18n="administrator.login.passwordLength">At least 12 characters</span>
+                        </li>
+                        <li id="req-uppercase">
+                            <span class="req-indicator unmet">⚪</span>
+                            <span data-i18n="administrator.login.passwordUppercase">One uppercase letter</span>
+                        </li>
+                        <li id="req-lowercase">
+                            <span class="req-indicator unmet">⚪</span>
+                            <span data-i18n="administrator.login.passwordLowercase">One lowercase letter</span>
+                        </li>
+                        <li id="req-number">
+                            <span class="req-indicator unmet">⚪</span>
+                            <span data-i18n="administrator.login.passwordNumber">One number</span>
+                        </li>
+                        <li id="req-special">
+                            <span class="req-indicator unmet">⚪</span>
+                            <span data-i18n="administrator.login.passwordSpecial">One special character (!@#$%^&*)</span>
+                        </li>
+                        <li id="req-match">
+                            <span class="req-indicator unmet">⚪</span>
+                            <span data-i18n="administrator.login.passwordsMatch">Passwords match</span>
+                        </li>
+                    </ul>
+                    <div id="passwordStrength"></div>
+                </div>
+
+                <div style="margin-top: 20px;">
+                    <button type="submit" id="changePasswordBtn" class="btn">
+                        <span id="changePasswordText" data-i18n="administrator.login.changePassword">Change Password</span>
                     </button>
                 </div>
             </form>
@@ -256,6 +341,48 @@
         const passwordDiv = document.createElement('div');
         passwordDiv.innerHTML = formHtml;
         container.appendChild(passwordDiv);
+        
+        // Refresh translations for the new form
+        if (window.i18n) {
+            window.i18n.updatePageTranslations();
+        }
+        
+        // Add password validation event listeners
+        const newPasswordField = document.getElementById('newPassword');
+        const confirmPasswordField = document.getElementById('confirmPassword');
+        
+        // Initialize with empty values to show all requirements
+        updatePasswordRequirements('', '', adminEmail);
+        
+        if (newPasswordField) {
+            newPasswordField.addEventListener('input', function() {
+                const newValue = this.value;
+                const confirmValue = confirmPasswordField ? confirmPasswordField.value : '';
+                updatePasswordRequirements(newValue, confirmValue, adminEmail);
+            });
+            
+            // Also listen for keyup to catch all changes
+            newPasswordField.addEventListener('keyup', function() {
+                const newValue = this.value;
+                const confirmValue = confirmPasswordField ? confirmPasswordField.value : '';
+                updatePasswordRequirements(newValue, confirmValue, adminEmail);
+            });
+        }
+        
+        if (confirmPasswordField) {
+            confirmPasswordField.addEventListener('input', function() {
+                const newValue = newPasswordField ? newPasswordField.value : '';
+                const confirmValue = this.value;
+                updatePasswordRequirements(newValue, confirmValue, adminEmail);
+            });
+            
+            // Also listen for keyup to catch all changes
+            confirmPasswordField.addEventListener('keyup', function() {
+                const newValue = newPasswordField ? newPasswordField.value : '';
+                const confirmValue = this.value;
+                updatePasswordRequirements(newValue, confirmValue, adminEmail);
+            });
+        }
         
         // Handle password change form submission
         const passwordChangeForm = document.getElementById('passwordChangeForm');
@@ -269,10 +396,25 @@
         const currentPassword = document.getElementById('currentPassword').value;
         const newPassword = document.getElementById('newPassword').value;
         const confirmPassword = document.getElementById('confirmPassword').value;
+        const adminData = JSON.parse(localStorage.getItem('adminData') || '{}');
+        const adminEmail = adminData.email || '';
         
         // Validate passwords match
         if (newPassword !== confirmPassword) {
-            showError('New passwords do not match');
+            showError('administrator.login.passwordsDontMatch', true);
+            return;
+        }
+        
+        // Validate password strength
+        const validation = validatePasswordStrength(newPassword, '', adminEmail);
+        if (!validation.isValid) {
+            showError('administrator.login.passwordRequirements', true);
+            return;
+        }
+        
+        // Check if new password is same as current
+        if (currentPassword === newPassword) {
+            showError('administrator.login.passwordSameAsCurrent', true);
             return;
         }
         
@@ -281,6 +423,9 @@
         
         changeBtn.disabled = true;
         changeText.innerHTML = '<span class="loading"></span>';
+        if (window.i18n) {
+            changeText.setAttribute('data-original-text', changeText.textContent);
+        }
         
         try {
             const response = await csrfFetch(`${BASE_URL}/api/v1/administrators/change-password`, {
@@ -299,7 +444,7 @@
                 // Clear password change flag
                 localStorage.removeItem('requirePasswordChange');
                 
-                showInfo('Password changed successfully! Please log in again with your new password.');
+                showInfo('administrator.login.passwordChangedSuccess', true);
                 
                 // Clear tokens
                 localStorage.removeItem('adminToken');
@@ -310,14 +455,18 @@
                     window.location.reload();
                 }, 2000);
             } else {
-                showError(data.message || 'Failed to change password');
+                showError(data.message || window.i18n?.t('administrator.login.passwordChangeFailed') || 'Failed to change password');
             }
         } catch (error) {
             console.error('Password change error:', error);
-            showError('Network error. Please try again.');
+            showError('administrator.login.networkError', true);
         } finally {
             changeBtn.disabled = false;
-            changeText.textContent = 'Change Password';
+            if (window.i18n) {
+                changeText.textContent = window.i18n.t('administrator.login.changePassword');
+            } else {
+                changeText.textContent = 'Change Password';
+            }
         }
     }
 
