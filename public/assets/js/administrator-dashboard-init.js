@@ -1,6 +1,20 @@
 (function() {
     'use strict';
 
+    // Translation helper
+    function t(key, fallback) {
+        return window.i18n && window.i18n.t ? window.i18n.t(key) : fallback;
+    }
+
+    // Refresh current tab when translations are ready
+    window.addEventListener('i18nReady', function() {
+        const activeTab = document.querySelector('.tab.active');
+        if (activeTab) {
+            const tabName = activeTab.getAttribute('data-tab');
+            loadTabData(tabName);
+        }
+    });
+
     // Load CSRF utilities
     if (!window.CsrfUtils) {
         console.error('CSRF utilities not loaded. Please include csrf-utils.js before this script.');
@@ -31,13 +45,16 @@
 
     // Update user info
     const userName = `${adminData.firstName} ${adminData.lastName}`;
-    document.getElementById('userName').textContent = userName;
+    const userNameElement = document.getElementById('userName');
+    if (userNameElement) {
+        userNameElement.textContent = userName;
+    }
 
     // Logout functionality
     const logoutBtn = document.getElementById('logoutBtn');
     if (logoutBtn) {
         logoutBtn.addEventListener('click', async () => {
-            if (confirm('Are you sure you want to logout?')) {
+            if (confirm(t('administrator.dashboard.confirmLogout', 'Are you sure you want to logout?'))) {
                 try {
                     // Call logout endpoint
                     await adminFetch('/api/v1/auth/logout', { method: 'POST' });
@@ -151,11 +168,11 @@
                 renderRecentActivity(data.dashboard.recentActivity || []);
             } else {
                 console.error('Dashboard data not loaded:', data.message);
-                document.getElementById('dashboardStats').innerHTML = '<p style="padding: 20px; text-align: center; color: #666;">Failed to load dashboard data</p>';
+                document.getElementById('dashboardStats').innerHTML = `<p style="padding: 20px; text-align: center; color: #666;">${t('administrator.dashboard.errors.dashboardLoadFailed', 'Failed to load dashboard data')}</p>`;
             }
         } catch (error) {
             console.error('Error loading dashboard:', error);
-            document.getElementById('dashboardStats').innerHTML = '<p style="padding: 20px; text-align: center; color: #666;">Error loading dashboard</p>';
+            document.getElementById('dashboardStats').innerHTML = `<p style="padding: 20px; text-align: center; color: #666;">${t('administrator.dashboard.errors.dashboardLoadFailed', 'Error loading dashboard')}</p>`;
         }
     }
 
@@ -164,7 +181,7 @@
         const dashboardElement = document.getElementById('dashboardStats');
         
         if (!data) {
-            dashboardElement.innerHTML = '<p style="padding: 20px; text-align: center; color: #666;">No dashboard data available</p>';
+            dashboardElement.innerHTML = `<p style="padding: 20px; text-align: center; color: #666;">${t('common.messages.noData', 'No dashboard data available')}</p>`;
             return;
         }
 
@@ -174,25 +191,25 @@
         
         const statsHtml = `
             <div class="stat-card">
-                <h3>Active Operators</h3>
+                <h3>${t('administrator.dashboard.stats.activeOperators', 'Active Operators')}</h3>
                 <div class="stat-value">${systemHealth.onShiftOperators || 0}</div>
-                <div class="stat-change">Total: ${systemHealth.activeOperators || 0}</div>
+                <div class="stat-change">${t('administrator.dashboard.stats.total', 'Total')}: ${systemHealth.activeOperators || 0}</div>
             </div>
             <div class="stat-card">
-                <h3>Today's Orders</h3>
+                <h3>${t('administrator.dashboard.stats.todaysOrders', "Today's Orders")}</h3>
                 <div class="stat-value">${orderStats.today || 0}</div>
-                <div class="stat-change">This week: ${orderStats.thisWeek || 0}</div>
+                <div class="stat-change">${t('administrator.dashboard.stats.thisWeek', 'This week')}: ${orderStats.thisWeek || 0}</div>
             </div>
             <div class="stat-card">
-                <h3>Processing Time</h3>
-                <div class="stat-value">${avgProcessingTime}m</div>
-                <div class="stat-change">Target: 60m</div>
+                <h3>${t('administrator.dashboard.stats.processingTime', 'Processing Time')}</h3>
+                <div class="stat-value">${avgProcessingTime}${t('administrator.dashboard.stats.minutes', 'm')}</div>
+                <div class="stat-change">${t('administrator.dashboard.stats.target', 'Target')}: 60${t('administrator.dashboard.stats.minutes', 'm')}</div>
             </div>
             <div class="stat-card">
-                <h3>Pending Orders</h3>
+                <h3>${t('administrator.dashboard.stats.pendingOrders', 'Pending Orders')}</h3>
                 <div class="stat-value">${systemHealth.pendingOrders || 0}</div>
                 <div class="stat-change ${systemHealth.processingDelays > 0 ? 'negative' : ''}">
-                    Delays: ${systemHealth.processingDelays || 0}
+                    ${t('administrator.dashboard.stats.delays', 'Delays')}: ${systemHealth.processingDelays || 0}
                 </div>
             </div>
         `;
@@ -202,7 +219,7 @@
     // Render recent activity
     function renderRecentActivity(activities) {
         if (!activities || activities.length === 0) {
-            document.getElementById('recentActivity').innerHTML = '<p style="padding: 20px; text-align: center; color: #666;">No recent activity</p>';
+            document.getElementById('recentActivity').innerHTML = `<p style="padding: 20px; text-align: center; color: #666;">${t('administrator.dashboard.recentActivity.noActivity', 'No recent activity')}</p>`;
             return;
         }
 
@@ -210,10 +227,10 @@
             <table>
                 <thead>
                     <tr>
-                        <th>Time</th>
-                        <th>Type</th>
-                        <th>User</th>
-                        <th>Action</th>
+                        <th>${t('administrator.dashboard.recentActivity.time', 'Time')}</th>
+                        <th>${t('administrator.dashboard.recentActivity.type', 'Type')}</th>
+                        <th>${t('administrator.dashboard.recentActivity.user', 'User')}</th>
+                        <th>${t('administrator.dashboard.recentActivity.action', 'Action')}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -240,18 +257,18 @@
             if (response.ok && data.success) {
                 renderOperatorsList(data.operators);
             } else {
-                document.getElementById('operatorsList').innerHTML = '<p style="padding: 20px; text-align: center; color: #666;">Failed to load operators</p>';
+                document.getElementById('operatorsList').innerHTML = `<p style="padding: 20px; text-align: center; color: #666;">${t('administrator.dashboard.errors.operatorsLoadFailed', 'Failed to load operators')}</p>`;
             }
         } catch (error) {
             console.error('Error loading operators:', error);
-            document.getElementById('operatorsList').innerHTML = '<p style="padding: 20px; text-align: center; color: #666;">Error loading operators</p>';
+            document.getElementById('operatorsList').innerHTML = `<p style="padding: 20px; text-align: center; color: #666;">${t('administrator.dashboard.errors.operatorsLoadFailed', 'Error loading operators')}</p>`;
         }
     }
 
     // Render operators list
     function renderOperatorsList(operators) {
         if (!operators || operators.length === 0) {
-            document.getElementById('operatorsList').innerHTML = '<p style="padding: 20px; text-align: center; color: #666;">No operators found</p>';
+            document.getElementById('operatorsList').innerHTML = `<p style="padding: 20px; text-align: center; color: #666;">${t('administrator.dashboard.operators.noOperators', 'No operators found')}</p>`;
             return;
         }
 
@@ -493,14 +510,14 @@
             if (response.ok) {
                 operatorModal.classList.remove('active');
                 loadOperators();
-                alert(editingOperatorId ? 'Operator updated successfully' : 'Operator created successfully');
+                alert(editingOperatorId ? t('administrator.dashboard.operators.operatorUpdated', 'Operator updated successfully') : t('administrator.dashboard.operators.operatorCreated', 'Operator created successfully'));
             } else {
                 const error = await response.json();
-                alert(error.message || 'Failed to save operator');
+                alert(error.message || t('administrator.dashboard.operators.operatorSaveFailed', 'Failed to save operator'));
             }
         } catch (error) {
             console.error('Error saving operator:', error);
-            alert('Network error. Please try again.');
+            alert(t('administrator.dashboard.errors.networkError', 'Network error. Please try again.'));
         }
     });
 
@@ -523,7 +540,7 @@
                     try {
                         value = JSON.parse(value);
                     } catch (e) {
-                        alert(`Invalid JSON for ${input.name}`);
+                        alert(t('administrator.dashboard.config.invalidJson', 'Invalid JSON for') + ` ${input.name}`);
                         return;
                     }
                 }
@@ -539,20 +556,20 @@
             });
 
             if (response.ok) {
-                alert('Configuration saved successfully');
+                alert(t('administrator.dashboard.config.configSaved', 'Configuration saved successfully'));
             } else {
                 const error = await response.json();
-                alert(error.message || 'Failed to save configuration');
+                alert(error.message || t('administrator.dashboard.config.configSaveFailed', 'Failed to save configuration'));
             }
         } catch (error) {
             console.error('Error saving config:', error);
-            alert('Network error. Please try again.');
+            alert(t('administrator.dashboard.errors.networkError', 'Network error. Please try again.'));
         }
     });
 
     // Logout
     document.getElementById('logoutBtn').addEventListener('click', () => {
-        if (confirm('Are you sure you want to logout?')) {
+        if (confirm(t('administrator.dashboard.confirmLogout', 'Are you sure you want to logout?'))) {
             localStorage.removeItem('adminToken');
             localStorage.removeItem('adminRefreshToken');
             localStorage.removeItem('adminData');
@@ -588,12 +605,12 @@
             }
         } catch (error) {
             console.error('Error loading operator:', error);
-            alert('Failed to load operator details');
+            alert(t('administrator.dashboard.errors.operatorsLoadFailed', 'Failed to load operator details'));
         }
     };
 
     window.resetPin = async (operatorId) => {
-        if (!confirm('Reset PIN for this operator? They will receive a new PIN via email.')) {
+        if (!confirm(t('administrator.dashboard.operators.confirmResetPin', 'Reset PIN for this operator? They will receive a new PIN via email.'))) {
             return;
         }
 
@@ -604,14 +621,14 @@
             });
 
             if (response.ok) {
-                alert('PIN reset successfully. New PIN has been sent to the operator.');
+                alert(t('administrator.dashboard.operators.pinResetSuccess', 'PIN reset successfully. New PIN has been sent to the operator.'));
             } else {
                 const error = await response.json();
-                alert(error.message || 'Failed to reset PIN');
+                alert(error.message || t('administrator.dashboard.operators.pinResetFailed', 'Failed to reset PIN'));
             }
         } catch (error) {
             console.error('Error resetting PIN:', error);
-            alert('Network error. Please try again.');
+            alert(t('administrator.dashboard.errors.networkError', 'Network error. Please try again.'));
         }
     };
 
