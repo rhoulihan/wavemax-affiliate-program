@@ -243,6 +243,7 @@ wavemax-affiliate-program/
 - **Backend**: Node.js 20, Express.js
 - **Database**: MongoDB 7.0 with Mongoose ODM
 - **Security**: JWT, CSRF, bcrypt, AES-256-GCM encryption
+- **Payment Processing**: Paygistix API integration (cards, ACH, tokenization)
 - **Email**: Amazon SES (AWS SDK v3), Nodemailer
 - **Testing**: Jest, Supertest, MongoDB Memory Server
 - **Deployment**: Docker, Nginx, PM2
@@ -398,7 +399,8 @@ Response:
         "auth": "/api/v1/auth",
         "affiliates": "/api/v1/affiliates",
         "customers": "/api/v1/customers",
-        "orders": "/api/v1/orders"
+        "orders": "/api/v1/orders",
+        "payments": "/api/v1/payments"
     },
     "timestamp": "2025-05-27T15:00:00.000Z"
 }
@@ -504,6 +506,20 @@ POST /api/v1/orders/:id/cancel
 POST /api/v1/bags
 GET /api/v1/bags/:barcode
 PUT /api/v1/bags/:id
+```
+
+#### Payment Processing
+```
+POST /api/v1/payments/process
+POST /api/v1/payments/:id/capture
+POST /api/v1/payments/:id/refund
+GET /api/v1/payments/:id
+GET /api/v1/payments
+POST /api/v1/payments/methods
+GET /api/v1/payments/methods
+DELETE /api/v1/payments/methods/:id
+PUT /api/v1/payments/methods/:id/default
+POST /api/v1/payments/webhooks
 ```
 
 #### CSRF Token Usage
@@ -665,6 +681,20 @@ To create an administrator account, you can use the provided script:
 | `LOG_DIR` | Directory for log files | No |
 | `ENABLE_DELETE_DATA_FEATURE` | Enable delete all data feature (true/false) | No |
 | `SHOW_DOCS` | Enable documentation at /docs (true/false) | No |
+
+#### Paygistix Payment Configuration
+| Variable | Description | Required |
+|----------|-------------|----------|
+| `PAYGISTIX_API_URL` | Production API URL | Yes |
+| `PAYGISTIX_SANDBOX_URL` | Sandbox API URL | Yes |
+| `PAYGISTIX_MERCHANT_ID` | Your merchant ID | Yes |
+| `PAYGISTIX_API_KEY` | API key for authentication | Yes |
+| `PAYGISTIX_API_SECRET` | API secret for signing | Yes |
+| `PAYGISTIX_WEBHOOK_SECRET` | Secret for webhook validation | Yes |
+| `PAYGISTIX_SANDBOX_MODE` | Use sandbox environment (true/false) | No |
+| `PAYGISTIX_AUTO_CAPTURE` | Auto-capture payments (true/false) | No |
+| `PAYGISTIX_CURRENCY` | Default currency (USD) | No |
+| `PAYGISTIX_WEBHOOK_ENDPOINT` | Webhook URL path | No |
 
 #### Standard SMTP Configuration (when EMAIL_PROVIDER=smtp)
 | Variable | Description | Required |
@@ -1065,6 +1095,56 @@ window.addEventListener('load', function() {
 - Complete app review process for each provider
 - Configure proper consent screens and privacy policies
 - Monitor OAuth usage and rate limits
+
+## Payment Processing with Paygistix
+
+### Overview
+The WaveMAX Affiliate Program integrates with Paygistix for secure payment processing, supporting credit/debit cards, ACH transfers, and digital wallets.
+
+### Features
+- **PCI-compliant tokenization** - Never store raw card data
+- **Multiple payment methods** - Cards, bank accounts, digital wallets
+- **Recurring payments** - Subscription management
+- **Real-time webhooks** - Instant payment status updates
+- **Comprehensive security** - Request signing, encryption, fraud detection
+
+### Configuration
+Add these variables to your `.env` file:
+```bash
+# Paygistix API Configuration
+PAYGISTIX_API_URL=https://api.paygistix.com/v2
+PAYGISTIX_SANDBOX_URL=https://sandbox.paygistix.com/v2
+PAYGISTIX_MERCHANT_ID=your_merchant_id
+PAYGISTIX_API_KEY=your_api_key
+PAYGISTIX_API_SECRET=your_api_secret
+PAYGISTIX_WEBHOOK_SECRET=your_webhook_secret
+PAYGISTIX_SANDBOX_MODE=true
+```
+
+### Payment Flow
+1. **Tokenization**: Customer card details are tokenized client-side
+2. **Authorization**: Payment is authorized with Paygistix
+3. **Capture**: Funds are captured after service completion
+4. **Settlement**: Automatic daily settlement
+
+### Testing
+Use Paygistix sandbox mode for development:
+```bash
+# Test the payment integration
+node scripts/test-paygistix.js
+
+# Run payment tests
+npm test -- tests/integration/payment.test.js
+```
+
+### Security Best Practices
+- Always use HTTPS for payment forms
+- Implement 3D Secure for card payments
+- Monitor for suspicious transactions
+- Use webhook signature validation
+- Implement idempotency keys
+
+For detailed integration documentation, see [Paygistix Integration Guide](docs/paygistix-integration.html).
 
 ## Testing
 

@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WaveMAX - Payment Form</title>
+    
+    <!-- Tailwind CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <!-- Payment Styles -->
+    <link rel="stylesheet" href="/assets/css/payment-styles.css">
+    
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: transparent;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica', 'Arial', sans-serif;
+        }
+        
+        /* Language switcher positioning */
+        #language-switcher-container {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            z-index: 1000;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Language Switcher -->
+    <div id="language-switcher-container"></div>
+    
+    <!-- Payment Form Container -->
+    <div id="payment-form-container" class="container mx-auto py-8">
+        <!-- Form will be rendered here by JavaScript -->
+    </div>
+
+    <!-- Core Scripts -->
+    <script src="/assets/js/embed-config.js"></script>
+    <script src="/assets/js/csrf-utils.js"></script>
+    <script src="/assets/js/i18n.js"></script>
+    <script src="/assets/js/language-switcher.js"></script>
+    <script src="/assets/js/payment-validation.js"></script>
+    <script src="/assets/js/payment-service.js"></script>
+    <script src="/assets/js/payment-form.js"></script>
+    
+    <script>
+        // Initialize payment form when DOM is ready
+        document.addEventListener('DOMContentLoaded', async function() {
+            // Initialize language switcher
+            if (window.LanguageSwitcher) {
+                window.LanguageSwitcher.init({
+                    container: '#language-switcher-container'
+                });
+            }
+
+            // Get order data from URL parameters or parent window
+            const urlParams = new URLSearchParams(window.location.search);
+            const amount = parseFloat(urlParams.get('amount')) || 0;
+            const currency = urlParams.get('currency') || 'USD';
+            const orderId = urlParams.get('orderId');
+            const customerId = urlParams.get('customerId');
+            
+            // Initialize payment form
+            const paymentForm = new window.PaymentForm({
+                container: '#payment-form-container',
+                amount: amount,
+                currency: currency,
+                customerData: {
+                    id: customerId,
+                    // Pre-fill with customer data if available
+                    name: urlParams.get('customerName') || '',
+                    email: urlParams.get('customerEmail') || '',
+                    phone: urlParams.get('customerPhone') || ''
+                },
+                onSuccess: async (result) => {
+                    console.log('Payment successful:', result);
+                    
+                    // Notify parent window if embedded
+                    if (window.parent !== window) {
+                        window.parent.postMessage({
+                            type: 'payment-success',
+                            data: {
+                                paymentId: result.payment.id,
+                                orderId: orderId,
+                                confirmationNumber: result.confirmationNumber,
+                                amount: amount,
+                                currency: currency
+                            }
+                        }, '*');
+                    }
+                    
+                    // Redirect to success page after delay
+                    setTimeout(() => {
+                        const successUrl = urlParams.get('successUrl') || '/payment-success.html';
+                        window.location.href = `${successUrl}?orderId=${orderId}&confirmationNumber=${result.confirmationNumber}`;
+                    }, 2000);
+                },
+                onError: (error) => {
+                    console.error('Payment error:', error);
+                    
+                    // Notify parent window if embedded
+                    if (window.parent !== window) {
+                        window.parent.postMessage({
+                            type: 'payment-error',
+                            data: {
+                                error: error.message,
+                                orderId: orderId
+                            }
+                        }, '*');
+                    }
+                }
+            });
+
+            // Listen for messages from parent window
+            window.addEventListener('message', (event) => {
+                if (event.data.type === 'update-amount') {
+                    paymentForm.updateAmount(event.data.amount, event.data.currency);
+                } else if (event.data.type === 'reset-form') {
+                    paymentForm.reset();
+                }
+            });
+
+            // Notify parent that payment form is ready
+            if (window.parent !== window) {
+                window.parent.postMessage({
+                    type: 'payment-form-ready',
+                    data: { ready: true }
+                }, '*');
+            }
+        });
+    </script>
+
+    <!-- Translations -->
+    <script>
+        // Add payment-specific translations
+        window.addEventListener('DOMContentLoaded', () => {
+            if (window.i18n) {
+                // These would normally be loaded from translation files
+                const paymentTranslations = {
+                    en: {
+                        payment: {
+                            form: {
+                                selectMethod: 'Select Payment Method',
+                                billingInfo: 'Billing Information',
+                                fullName: 'Full Name',
+                                fullNamePlaceholder: 'Enter your full name',
+                                email: 'Email',
+                                emailPlaceholder: 'Enter your email address',
+                                phone: 'Phone',
+                                phonePlaceholder: 'Enter your phone number',
+                                zipCode: 'ZIP Code',
+                                zipCodePlaceholder: 'Enter ZIP code',
+                                address: 'Billing Address',
+                                addressPlaceholder: 'Enter billing address',
+                                cardDetails: 'Card Details',
+                                securePayment: 'Secure card input will be loaded here',
+                                cardElementPlaceholder: 'Card payment integration would be initialized here',
+                                testMode: 'Test mode: Any valid card number will work',
+                                orderSummary: 'Order Summary',
+                                total: 'Total Amount',
+                                agreeToTerms: 'I agree to the',
+                                termsOfService: 'Terms of Service',
+                                and: 'and',
+                                privacyPolicy: 'Privacy Policy',
+                                submitPayment: 'Complete Payment',
+                                processing: 'Processing...',
+                                securityNotice: 'Your payment information is encrypted and secure',
+                                errorTitle: 'Payment Error',
+                                successTitle: 'Payment Successful!',
+                                successMessage: 'Your payment has been processed successfully.',
+                                noMethodsAvailable: 'No payment methods available',
+                                addNewMethod: 'Add New Payment Method',
+                                errorLoadingMethods: 'Error loading payment methods'
+                            }
+                        }
+                    },
+                    es: {
+                        payment: {
+                            form: {
+                                selectMethod: 'Seleccionar Método de Pago',
+                                billingInfo: 'Información de Facturación',
+                                fullName: 'Nombre Completo',
+                                fullNamePlaceholder: 'Ingrese su nombre completo',
+                                email: 'Correo Electrónico',
+                                emailPlaceholder: 'Ingrese su correo electrónico',
+                                phone: 'Teléfono',
+                                phonePlaceholder: 'Ingrese su número de teléfono',
+                                zipCode: 'Código Postal',
+                                zipCodePlaceholder: 'Ingrese el código postal',
+                                address: 'Dirección de Facturación',
+                                addressPlaceholder: 'Ingrese la dirección de facturación',
+                                cardDetails: 'Detalles de la Tarjeta',
+                                securePayment: 'La entrada segura de la tarjeta se cargará aquí',
+                                cardElementPlaceholder: 'La integración de pago con tarjeta se inicializaría aquí',
+                                testMode: 'Modo de prueba: Cualquier número de tarjeta válido funcionará',
+                                orderSummary: 'Resumen del Pedido',
+                                total: 'Monto Total',
+                                agreeToTerms: 'Acepto los',
+                                termsOfService: 'Términos de Servicio',
+                                and: 'y la',
+                                privacyPolicy: 'Política de Privacidad',
+                                submitPayment: 'Completar Pago',
+                                processing: 'Procesando...',
+                                securityNotice: 'Su información de pago está encriptada y segura',
+                                errorTitle: 'Error de Pago',
+                                successTitle: '¡Pago Exitoso!',
+                                successMessage: 'Su pago ha sido procesado exitosamente.',
+                                noMethodsAvailable: 'No hay métodos de pago disponibles',
+                                addNewMethod: 'Agregar Nuevo Método de Pago',
+                                errorLoadingMethods: 'Error al cargar métodos de pago'
+                            }
+                        }
+                    },
+                    pt: {
+                        payment: {
+                            form: {
+                                selectMethod: 'Selecionar Método de Pagamento',
+                                billingInfo: 'Informações de Faturamento',
+                                fullName: 'Nome Completo',
+                                fullNamePlaceholder: 'Digite seu nome completo',
+                                email: 'E-mail',
+                                emailPlaceholder: 'Digite seu endereço de e-mail',
+                                phone: 'Telefone',
+                                phonePlaceholder: 'Digite seu número de telefone',
+                                zipCode: 'CEP',
+                                zipCodePlaceholder: 'Digite o CEP',
+                                address: 'Endereço de Faturamento',
+                                addressPlaceholder: 'Digite o endereço de faturamento',
+                                cardDetails: 'Detalhes do Cartão',
+                                securePayment: 'A entrada segura do cartão será carregada aqui',
+                                cardElementPlaceholder: 'A integração de pagamento com cartão seria inicializada aqui',
+                                testMode: 'Modo de teste: Qualquer número de cartão válido funcionará',
+                                orderSummary: 'Resumo do Pedido',
+                                total: 'Valor Total',
+                                agreeToTerms: 'Eu concordo com os',
+                                termsOfService: 'Termos de Serviço',
+                                and: 'e a',
+                                privacyPolicy: 'Política de Privacidade',
+                                submitPayment: 'Concluir Pagamento',
+                                processing: 'Processando...',
+                                securityNotice: 'Suas informações de pagamento são criptografadas e seguras',
+                                errorTitle: 'Erro no Pagamento',
+                                successTitle: 'Pagamento Bem-sucedido!',
+                                successMessage: 'Seu pagamento foi processado com sucesso.',
+                                noMethodsAvailable: 'Nenhum método de pagamento disponível',
+                                addNewMethod: 'Adicionar Novo Método de Pagamento',
+                                errorLoadingMethods: 'Erro ao carregar métodos de pagamento'
+                            }
+                        }
+                    },
+                    de: {
+                        payment: {
+                            form: {
+                                selectMethod: 'Zahlungsmethode auswählen',
+                                billingInfo: 'Rechnungsinformationen',
+                                fullName: 'Vollständiger Name',
+                                fullNamePlaceholder: 'Geben Sie Ihren vollständigen Namen ein',
+                                email: 'E-Mail',
+                                emailPlaceholder: 'Geben Sie Ihre E-Mail-Adresse ein',
+                                phone: 'Telefon',
+                                phonePlaceholder: 'Geben Sie Ihre Telefonnummer ein',
+                                zipCode: 'Postleitzahl',
+                                zipCodePlaceholder: 'Postleitzahl eingeben',
+                                address: 'Rechnungsadresse',
+                                addressPlaceholder: 'Rechnungsadresse eingeben',
+                                cardDetails: 'Kartendetails',
+                                securePayment: 'Sichere Karteneingabe wird hier geladen',
+                                cardElementPlaceholder: 'Die Kartenzahlungsintegration würde hier initialisiert',
+                                testMode: 'Testmodus: Jede gültige Kartennummer funktioniert',
+                                orderSummary: 'Bestellübersicht',
+                                total: 'Gesamtbetrag',
+                                agreeToTerms: 'Ich stimme den',
+                                termsOfService: 'Nutzungsbedingungen',
+                                and: 'und der',
+                                privacyPolicy: 'Datenschutzrichtlinie',
+                                submitPayment: 'Zahlung abschließen',
+                                processing: 'Verarbeitung...',
+                                securityNotice: 'Ihre Zahlungsinformationen sind verschlüsselt und sicher',
+                                errorTitle: 'Zahlungsfehler',
+                                successTitle: 'Zahlung erfolgreich!',
+                                successMessage: 'Ihre Zahlung wurde erfolgreich verarbeitet.',
+                                noMethodsAvailable: 'Keine Zahlungsmethoden verfügbar',
+                                addNewMethod: 'Neue Zahlungsmethode hinzufügen',
+                                errorLoadingMethods: 'Fehler beim Laden der Zahlungsmethoden'
+                            }
+                        }
+                    }
+                };
+
+                // Merge translations
+                Object.keys(paymentTranslations).forEach(lang => {
+                    if (window.i18n.translations[lang]) {
+                        Object.assign(window.i18n.translations[lang], paymentTranslations[lang]);
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>
