@@ -5,11 +5,31 @@
 db = db.getSiblingDB('wavemax');
 
 // Create collections
+db.createCollection('administrators');
+db.createCollection('operators');
 db.createCollection('affiliates');
 db.createCollection('customers');
 db.createCollection('orders');
 db.createCollection('bags');
 db.createCollection('transactions');
+db.createCollection('systemconfigs');
+db.createCollection('refreshtokens');
+db.createCollection('tokenblacklists');
+db.createCollection('oauthsessions');
+db.createCollection('payments');
+db.createCollection('paymentmethods');
+
+// Create indexes for administrators collection
+db.administrators.createIndex({ 'adminId': 1 }, { unique: true });
+db.administrators.createIndex({ 'email': 1 }, { unique: true });
+db.administrators.createIndex({ 'isActive': 1 });
+db.administrators.createIndex({ 'createdAt': -1 });
+
+// Create indexes for operators collection
+db.operators.createIndex({ 'operatorId': 1 }, { unique: true });
+db.operators.createIndex({ 'email': 1 }, { unique: true });
+db.operators.createIndex({ 'isActive': 1 });
+db.operators.createIndex({ 'workStation': 1 });
 
 // Create indexes for affiliates collection
 db.affiliates.createIndex({ 'affiliateId': 1 }, { unique: true });
@@ -53,6 +73,34 @@ db.transactions.createIndex({ 'affiliateId': 1 });
 db.transactions.createIndex({ 'status': 1 });
 db.transactions.createIndex({ 'payoutDate': 1 });
 db.transactions.createIndex({ 'createdAt': 1 });
+
+// Create indexes for systemconfigs collection
+db.systemconfigs.createIndex({ 'name': 1 }, { unique: true });
+
+// Create indexes for refreshtokens collection
+db.refreshtokens.createIndex({ 'token': 1 }, { unique: true });
+db.refreshtokens.createIndex({ 'userId': 1 });
+db.refreshtokens.createIndex({ 'expiresAt': 1 });
+
+// Create indexes for tokenblacklists collection
+db.tokenblacklists.createIndex({ 'token': 1 }, { unique: true });
+db.tokenblacklists.createIndex({ 'expiresAt': 1 });
+
+// Create indexes for oauthsessions collection
+db.oauthsessions.createIndex({ 'sessionId': 1 }, { unique: true });
+db.oauthsessions.createIndex({ 'expiresAt': 1 });
+
+// Create indexes for payments collection
+db.payments.createIndex({ 'orderId': 1 });
+db.payments.createIndex({ 'customerId': 1 });
+db.payments.createIndex({ 'paygistixTransactionId': 1 });
+db.payments.createIndex({ 'status': 1 });
+db.payments.createIndex({ 'createdAt': -1 });
+
+// Create indexes for paymentmethods collection
+db.paymentmethods.createIndex({ 'customerId': 1 });
+db.paymentmethods.createIndex({ 'paygistixId': 1 });
+db.paymentmethods.createIndex({ 'isDefault': 1 });
 
 // Insert a demo affiliate account
 db.affiliates.insertOne({

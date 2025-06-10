@@ -713,13 +713,23 @@ exports.verifyToken = async (req, res) => {
       throw new Error('User data not found in request');
     }
 
+    // Check if this is an administrator with password change required
+    let requirePasswordChange = false;
+    if (req.user.role === 'administrator' && req.user.permissions && 
+        req.user.permissions.length === 1 && 
+        req.user.permissions[0] === 'change_password_required') {
+      requirePasswordChange = true;
+    }
+
     res.status(200).json({
       success: true,
+      requirePasswordChange,
       user: {
         id: req.user.id,
         role: req.user.role,
         ...(req.user.affiliateId && { affiliateId: req.user.affiliateId }),
-        ...(req.user.customerId && { customerId: req.user.customerId })
+        ...(req.user.customerId && { customerId: req.user.customerId }),
+        ...(req.user.adminId && { adminId: req.user.adminId })
       }
     });
   } catch (error) {
@@ -738,13 +748,8 @@ exports.logout = async (req, res) => {
   try {
     const { refreshToken } = req.body;
 
-    // Verify refresh token was provided
-    if (!refreshToken) {
-      return res.status(400).json({
-        success: false,
-        message: 'Refresh token is required'
-      });
-    }
+    // Refresh token is optional for logout
+    // We'll still blacklist tokens if provided
 
     // Get the access token from the authorization header
     const authHeader = req.headers.authorization || req.headers['x-auth-token'];
@@ -783,15 +788,14 @@ exports.logout = async (req, res) => {
       }
     }
 
-    // Find and delete the refresh token
-    const deletedToken = await RefreshToken.findOneAndDelete({ token: refreshToken });
-
-    if (!deletedToken) {
-      // Token not found, but still return success for security reasons
-      return res.status(200).json({
-        success: true,
-        message: 'Logged out successfully'
-      });
+    // Find and delete the refresh token if provided
+    if (refreshToken) {
+      try {
+        await RefreshToken.findOneAndDelete({ token: refreshToken });
+      } catch (error) {
+        console.error('Error deleting refresh token:', error);
+        // Continue with logout even if deletion fails
+      }
     }
 
     res.status(200).json({

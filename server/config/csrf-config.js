@@ -63,7 +63,12 @@ const CSRF_CONFIG = {
     '/api/v1/auth/forgot-password',
     '/api/v1/auth/reset-password',
     '/api/v1/auth/refresh-token',
-    '/api/v1/auth/oauth-session/:sessionId'
+    '/api/v1/auth/oauth-session/:sessionId',
+    // Password change endpoints (part of auth flow)
+    '/api/v1/administrators/change-password',
+    '/api/v1/affiliates/change-password',
+    '/api/v1/customers/change-password',
+    '/api/v1/operators/change-password'
   ],
 
   // Registration endpoints - will add CAPTCHA instead of CSRF
