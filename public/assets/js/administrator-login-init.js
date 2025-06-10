@@ -139,10 +139,7 @@
             }
         } catch (error) {
             console.error('Login error:', error);
-            // Only show network error if it's not an i18n-related issue
-            if (!error.message || !error.message.includes('i18n')) {
-                showError('Network error. Please check your connection and try again.');
-            }
+            showError('Network error. Please check your connection and try again.');
         } finally {
             // Re-enable form
             submitBtn.disabled = false;
