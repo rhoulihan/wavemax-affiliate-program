@@ -640,30 +640,36 @@ EXCHANGE_REJECT_UNAUTHORIZED=false
 
 ### Setting Up Administrator Account
 
-To create an administrator account, you can use the provided script:
+The system automatically creates a default administrator account on first startup:
 
-1. Make sure MongoDB is running and your `.env` file is configured with the correct `MONGODB_URI`
+1. When the server starts for the first time, it will automatically create a default administrator account with:
+   - **Email**: admin@wavemaxlaundry.com
+   - **Password**: WaveMAX!2024
+   - **Permissions**: All (super admin)
 
-2. Run the admin creation script:
-   ```bash
-   node scripts/create-admin-directly.js
-   ```
+2. **First Login Process**:
+   - Navigate to the administrator login page:
+     ```
+     http://localhost:3000/embed-app.html?route=/administrator-login
+     ```
+   - Log in with the default credentials
+   - You will be immediately prompted to change your password
+   - The new password must:
+     - Be at least 12 characters long
+     - Contain uppercase and lowercase letters
+     - Contain numbers and special characters
+     - Not match any of your previous 5 passwords
 
-3. The script will create an administrator with the following default credentials:
-   - **Admin ID**: ADM001
-   - **Email**: rickh@wavemaxlaundry.com
-   - **Password**: R8der50!
-   - **Permissions**: system_config, operator_management, view_analytics, manage_affiliates
+3. **Security Features**:
+   - Password change is mandatory on first login
+   - Previous passwords are tracked to prevent reuse
+   - Account lockout after 5 failed login attempts
+   - Comprehensive audit logging of all authentication events
 
-4. After running the script, you can log in to the administrator dashboard at:
-   ```
-   http://localhost:3000/embed-app.html?route=/administrator-login
-   ```
-
-**Important**: For production deployments, make sure to:
-- Modify the script to use secure credentials before running it
-- Change the default password immediately after first login
-- Store credentials securely and never commit them to version control
+**Important**: 
+- The default password should be changed immediately after first login
+- For production deployments, update the default email in `init-admin.js` before first startup
+- Never commit credentials to version control
 
 ### Environment Variables
 

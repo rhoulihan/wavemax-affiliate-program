@@ -241,91 +241,76 @@
             </div>
 
             <div class="step-box">
-                <h4>Step 2: Run the Interactive Admin Creation Script</h4>
-                <pre><code>cd /path/to/wavemax-affiliate-program
-node scripts/create-admin-directly.js</code></pre>
-                <p>The script will prompt you for the following information:</p>
+                <h4>Step 2: Start the Server</h4>
+                <p>The system automatically creates a default administrator account on first startup:</p>
+                <pre><code>npm start
+# or with PM2
+pm2 start ecosystem.config.js</code></pre>
+                <p>Default administrator credentials:</p>
                 <ul>
-                    <li><strong>First Name:</strong> Administrator's first name</li>
-                    <li><strong>Last Name:</strong> Administrator's last name</li>
-                    <li><strong>Email:</strong> Administrator's email address</li>
-                    <li><strong>Password:</strong> Secure password (hidden input with asterisks)</li>
-                    <li><strong>Permissions:</strong> Select from available permissions or choose "all"</li>
+                    <li><strong>Email:</strong> admin@wavemaxlaundry.com</li>
+                    <li><strong>Password:</strong> WaveMAX!2024</li>
+                    <li><strong>Permissions:</strong> All (super admin)</li>
                 </ul>
+                <div class="warning">
+                    <strong>⚠️ Important:</strong> You will be required to change the password on first login.
+                </div>
             </div>
 
             <div class="step-box">
-                <h4>Step 3: Permission Selection</h4>
-                <p>The script offers these permission options:</p>
-                <table>
-                    <tr>
-                        <th>Option</th>
-                        <th>Permission</th>
-                        <th>Description</th>
-                    </tr>
-                    <tr>
-                        <td>1</td>
-                        <td>system_config</td>
-                        <td>Manage system settings</td>
-                    </tr>
-                    <tr>
-                        <td>2</td>
-                        <td>operator_management</td>
-                        <td>Manage operators</td>
-                    </tr>
-                    <tr>
-                        <td>3</td>
-                        <td>view_analytics</td>
-                        <td>View analytics and reports</td>
-                    </tr>
-                    <tr>
-                        <td>4</td>
-                        <td>manage_affiliates</td>
-                        <td>Manage affiliate accounts</td>
-                    </tr>
-                    <tr>
-                        <td>all</td>
-                        <td>All permissions</td>
-                        <td>Grant all available permissions</td>
-                    </tr>
-                </table>
-                <p><strong>Example:</strong> Enter "1,3,4" to grant system_config, view_analytics, and manage_affiliates permissions.</p>
+                <h4>Step 3: First Login and Password Change</h4>
+                <p>Navigate to the administrator login page:</p>
+                <pre><code>https://yourdomain.com/embed-app.html?route=/administrator-login</code></pre>
+                <ol>
+                    <li>Log in with the default credentials</li>
+                    <li>You will be immediately prompted to change your password</li>
+                    <li>Enter your current password (WaveMAX!2024)</li>
+                    <li>Enter a new password that meets these requirements:
+                        <ul>
+                            <li>At least 12 characters long</li>
+                            <li>Contains uppercase and lowercase letters</li>
+                            <li>Contains numbers and special characters</li>
+                            <li>Not one of your last 5 passwords</li>
+                        </ul>
+                    </li>
+                    <li>After changing your password, log in again with the new password</li>
+                </ol>
             </div>
 
             <div class="step-box">
-                <h4>Step 4: Automatic Features</h4>
-                <p>The script automatically handles:</p>
+                <h4>Step 4: Security Features</h4>
+                <p>The system includes these security features:</p>
                 <ul>
-                    <li><strong>Sequential Admin ID:</strong> Generates ADM001, ADM002, ADM003, etc.</li>
-                    <li><strong>Password Hashing:</strong> Securely hashes passwords before storage</li>
-                    <li><strong>Welcome Email:</strong> Sends professional welcome email with login credentials</li>
-                    <li><strong>Database Validation:</strong> Ensures email uniqueness and required fields</li>
+                    <li><strong>Forced Password Change:</strong> Required on first login</li>
+                    <li><strong>Password History:</strong> Prevents reuse of last 5 passwords</li>
+                    <li><strong>Account Lockout:</strong> After 5 failed login attempts</li>
+                    <li><strong>Audit Logging:</strong> All authentication events are logged</li>
+                    <li><strong>Session Management:</strong> Secure JWT tokens with refresh capability</li>
                 </ul>
             </div>
 
             <div class="success">
-                <strong>✅ Enhanced Security:</strong> The interactive script ensures secure password input (hidden), email validation, and automatic welcome email delivery with proper login links.
+                <strong>✅ Enhanced Security:</strong> The automatic setup process ensures secure defaults with forced password change, password history tracking, and comprehensive audit logging.
             </div>
 
-            <h2>Customizing the Admin Creation Script</h2>
+            <h2>Customizing the Default Administrator</h2>
 
-            <p>To create an administrator with custom credentials, modify <code>scripts/create-admin-directly.js</code>:</p>
+            <p>To customize the default administrator account, modify <code>init-admin.js</code> before the first server startup:</p>
 
-            <pre><code>const admin = new Administrator({
-    adminId: 'ADM002',                          // Unique admin ID
-    firstName: 'Jane',                          // First name
-    lastName: 'Smith',                          // Last name
-    email: 'jane.smith@wavemaxlaundry.com',    // Email address
-    password: 'YourSecurePassword123!',         // Strong password
-    permissions: [                              // Permissions array
-        'system_config',
-        'operator_management',
-        'view_analytics',
-        'manage_affiliates'
-    ],
+            <pre><code>// Create default administrator account
+const defaultAdmin = new Administrator({
+    firstName: 'System',
+    lastName: 'Administrator',
+    email: 'admin@yourcompany.com',           // Change default email
+    password: 'YourSecurePassword123!',       // Change default password
+    permissions: ['all'],                     // Adjust permissions if needed
     isActive: true,
-    createdBy: 'system'
+    requirePasswordChange: true               // Always force password change
 });</code></pre>
+
+            <div class="info">
+                <strong>ℹ️ Note:</strong> The default administrator is only created if no administrators exist in the database. Existing installations are not affected.
+            </div>
 
             <h2>Manual Administrator Creation via MongoDB</h2>
 
@@ -361,20 +346,28 @@ db.administrators.insertOne({
                 <strong>ℹ️ Note:</strong> When creating administrators manually, you must hash the password using bcrypt with 10 rounds.
             </div>
 
-            <h2>Password Hashing Example</h2>
+            <h2>Creating Additional Administrators</h2>
 
-            <p>To generate a properly hashed password:</p>
+            <p>After the initial setup, you can create additional administrators through the dashboard:</p>
 
-            <pre><code>// Create a simple Node.js script
-const bcrypt = require('bcrypt');
+            <ol>
+                <li>Log in as an administrator with the <code>administrators.create</code> permission</li>
+                <li>Navigate to the Administrator Management section</li>
+                <li>Click "Create New Administrator"</li>
+                <li>Fill in the required information:
+                    <ul>
+                        <li>First Name and Last Name</li>
+                        <li>Email address (must be unique)</li>
+                        <li>Initial password (user will be forced to change on first login)</li>
+                        <li>Permissions (select from available options)</li>
+                    </ul>
+                </li>
+                <li>The new administrator will receive a welcome email with login instructions</li>
+            </ol>
 
-async function hashPassword(password) {
-    const salt = await bcrypt.genSalt(10);
-    const hash = await bcrypt.hash(password, salt);
-    console.log('Hashed password:', hash);
-}
-
-hashPassword('YourSecurePassword123!');</code></pre>
+            <div class="info">
+                <strong>ℹ️ Note:</strong> All new administrators are required to change their password on first login for security purposes.
+            </div>
 
             <h2>Available Administrator Permissions</h2>
 
@@ -449,15 +442,19 @@ hashPassword('YourSecurePassword123!');</code></pre>
             </div>
 
             <div class="step-box">
-                <h4>Step 3: Change Default Password</h4>
-                <p>If using default credentials, immediately:</p>
+                <h4>Step 3: Password Change (First Login)</h4>
+                <p>When logging in with the default account for the first time:</p>
                 <ol>
-                    <li>Navigate to Settings → My Profile</li>
-                    <li>Click "Change Password"</li>
-                    <li>Enter current password</li>
-                    <li>Set a strong new password</li>
+                    <li>You will be automatically redirected to the password change form</li>
+                    <li>Enter your current password (WaveMAX!2024)</li>
+                    <li>Enter a new password that meets all requirements</li>
                     <li>Confirm the new password</li>
+                    <li>Click "Change Password"</li>
+                    <li>Log in again with your new password</li>
                 </ol>
+                <div class="warning">
+                    <strong>⚠️ Important:</strong> You cannot access any other features until the password is changed.
+                </div>
             </div>
 
             <h2>Password Requirements</h2>
@@ -465,13 +462,14 @@ hashPassword('YourSecurePassword123!');</code></pre>
             <div class="info">
                 <strong>Strong Password Requirements:</strong>
                 <ul>
-                    <li>Minimum 8 characters</li>
+                    <li>Minimum 12 characters</li>
                     <li>At least one uppercase letter</li>
                     <li>At least one lowercase letter</li>
                     <li>At least one number</li>
                     <li>At least one special character (!@#$%^&*)</li>
                     <li>No common dictionary words</li>
                     <li>Not similar to email or name</li>
+                    <li>Cannot be any of your last 5 passwords</li>
                 </ul>
             </div>
 
