@@ -384,11 +384,11 @@
 
     <div class="container">
         <nav class="nav-tabs">
-            <button class="nav-tab active" data-tab="dashboard">Dashboard</button>
-            <button class="nav-tab" data-tab="operators">Operators</button>
-            <button class="nav-tab" data-tab="analytics">Analytics</button>
-            <button class="nav-tab" data-tab="affiliates">Affiliates</button>
-            <button class="nav-tab" data-tab="config">System Config</button>
+            <button class="nav-tab active" data-tab="dashboard" data-i18n="administrator.dashboard.tabs.dashboard">Dashboard</button>
+            <button class="nav-tab" data-tab="operators" data-i18n="administrator.dashboard.tabs.operators">Operators</button>
+            <button class="nav-tab" data-tab="analytics" data-i18n="administrator.dashboard.tabs.analytics">Analytics</button>
+            <button class="nav-tab" data-tab="affiliates" data-i18n="administrator.dashboard.tabs.affiliates">Affiliates</button>
+            <button class="nav-tab" data-tab="config" data-i18n="administrator.dashboard.tabs.config">Config</button>
         </nav>
 
         <!-- Dashboard Tab -->
@@ -402,7 +402,7 @@
 
             <div class="card">
                 <div class="card-header">
-                    <h2 class="card-title">Recent Activity</h2>
+                    <h2 class="card-title" data-i18n="administrator.dashboard.recentActivity.title">Recent Activity</h2>
                 </div>
                 <div id="recentActivity">
                     <div class="loading">
@@ -416,8 +416,8 @@
         <div class="tab-content" id="operators-tab">
             <div class="card">
                 <div class="card-header">
-                    <h2 class="card-title">Operator Management</h2>
-                    <button class="btn" id="addOperatorBtn">Add Operator</button>
+                    <h2 class="card-title" data-i18n="administrator.dashboard.operators.title">Operator Management</h2>
+                    <button class="btn" id="addOperatorBtn" data-i18n="administrator.dashboard.operators.addOperator">Add Operator</button>
                 </div>
                 <div id="operatorsList">
                     <div class="loading">
@@ -437,7 +437,7 @@
 
             <div class="card">
                 <div class="card-header">
-                    <h2 class="card-title">Order Analytics</h2>
+                    <h2 class="card-title" data-i18n="administrator.dashboard.analytics.title">Analytics Overview</h2>
                 </div>
                 <div id="orderAnalytics">
                     <div class="loading">
@@ -481,55 +481,55 @@
     <div class="modal" id="operatorModal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3 class="modal-title" id="operatorModalTitle">Add Operator</h3>
+                <h3 class="modal-title" id="operatorModalTitle" data-i18n="administrator.dashboard.operators.addOperator">Add Operator</h3>
                 <button class="modal-close" id="closeOperatorModal">&times;</button>
             </div>
             <form id="operatorForm">
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="firstName">First Name</label>
+                        <label for="firstName" data-i18n="administrator.dashboard.operators.firstName">First Name</label>
                         <input type="text" id="firstName" name="firstName" required>
                     </div>
                     <div class="form-group">
-                        <label for="lastName">Last Name</label>
+                        <label for="lastName" data-i18n="administrator.dashboard.operators.lastName">Last Name</label>
                         <input type="text" id="lastName" name="lastName" required>
                     </div>
                 </div>
                 <div class="form-group">
-                    <label for="email">Email</label>
+                    <label for="email" data-i18n="administrator.dashboard.operators.email">Email</label>
                     <input type="email" id="email" name="email" required>
                 </div>
                 <div class="form-group">
-                    <label for="phone">Phone</label>
+                    <label for="phone" data-i18n="administrator.dashboard.operators.phone">Phone</label>
                     <input type="tel" id="phone" name="phone" required>
                 </div>
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="shiftStart">Shift Start</label>
+                        <label for="shiftStart" data-i18n="administrator.dashboard.operators.shiftStart">Shift Start</label>
                         <input type="time" id="shiftStart" name="shiftStart" required>
                     </div>
                     <div class="form-group">
-                        <label for="shiftEnd">Shift End</label>
+                        <label for="shiftEnd" data-i18n="administrator.dashboard.operators.shiftEnd">Shift End</label>
                         <input type="time" id="shiftEnd" name="shiftEnd" required>
                     </div>
                 </div>
                 <div class="form-group">
-                    <label>Specializations</label>
+                    <label data-i18n="administrator.dashboard.operators.specializations">Specializations</label>
                     <div style="display: flex; gap: 15px;">
                         <label>
-                            <input type="checkbox" name="specializations" value="washing"> Washing
+                            <input type="checkbox" name="specializations" value="washing"> <span data-i18n="administrator.dashboard.operators.washing">Washing</span>
                         </label>
                         <label>
-                            <input type="checkbox" name="specializations" value="drying"> Drying
+                            <input type="checkbox" name="specializations" value="drying"> <span data-i18n="administrator.dashboard.operators.drying">Drying</span>
                         </label>
                         <label>
-                            <input type="checkbox" name="specializations" value="folding"> Folding
+                            <input type="checkbox" name="specializations" value="folding"> <span data-i18n="administrator.dashboard.operators.folding">Folding</span>
                         </label>
                     </div>
                 </div>
                 <div style="display: flex; gap: 10px; margin-top: 30px;">
-                    <button type="submit" class="btn">Save Operator</button>
-                    <button type="button" class="btn btn-secondary" id="cancelOperatorBtn">Cancel</button>
+                    <button type="submit" class="btn" data-i18n="administrator.dashboard.operators.save">Save Operator</button>
+                    <button type="button" class="btn btn-secondary" id="cancelOperatorBtn" data-i18n="administrator.dashboard.operators.cancel">Cancel</button>
                 </div>
             </form>
         </div>
