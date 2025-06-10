@@ -114,7 +114,7 @@ app.use(helmet({
       fontSrc: ['\'self\'', 'https://cdnjs.cloudflare.com', 'https://cdn.jsdelivr.net', 'https://fonts.gstatic.com'],
       objectSrc: ['\'none\''],
       mediaSrc: ['\'self\''],
-      frameSrc: ['\'none\''],
+      frameSrc: process.env.ENABLE_IFRAME_DEMO === 'true' ? ['\'self\''] : ['\'none\''],
       // Allow embedding on WaveMAX Laundry domains
       frameAncestors: ['\'self\'', 'https://www.wavemaxlaundry.com', 'https://wavemaxlaundry.com']
     }
