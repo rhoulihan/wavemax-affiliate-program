@@ -43,8 +43,11 @@
     });
 
     // Show error message
-    function showError(message) {
-        errorMessage.textContent = message;
+    function showError(message, isTranslationKey = false) {
+        const displayMessage = isTranslationKey && window.i18n 
+            ? window.i18n.t(message) 
+            : message;
+        errorMessage.textContent = displayMessage;
         errorMessage.style.display = 'block';
         infoMessage.style.display = 'none';
         
@@ -55,8 +58,11 @@
     }
 
     // Show info message
-    function showInfo(message) {
-        infoMessage.textContent = message;
+    function showInfo(message, isTranslationKey = false) {
+        const displayMessage = isTranslationKey && window.i18n 
+            ? window.i18n.t(message) 
+            : message;
+        infoMessage.textContent = displayMessage;
         infoMessage.style.display = 'block';
         errorMessage.style.display = 'none';
     }
