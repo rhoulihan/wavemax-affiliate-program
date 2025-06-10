@@ -1,6 +1,15 @@
 (function() {
     'use strict';
 
+    // Wait for i18n to be available
+    function waitForI18n(callback) {
+        if (window.i18n && typeof window.i18n.translatePage === 'function') {
+            callback();
+        } else {
+            setTimeout(() => waitForI18n(callback), 50);
+        }
+    }
+
     // Note: Login endpoints currently don't require CSRF tokens
     // But we'll prepare for future implementation
     const csrfFetch = window.CsrfUtils && window.CsrfUtils.csrfFetch ? window.CsrfUtils.csrfFetch : fetch;
@@ -130,7 +139,10 @@
             }
         } catch (error) {
             console.error('Login error:', error);
-            showError('Network error. Please check your connection and try again.');
+            // Only show network error if it's not an i18n-related issue
+            if (!error.message || !error.message.includes('i18n')) {
+                showError('Network error. Please check your connection and try again.');
+            }
         } finally {
             // Re-enable form
             submitBtn.disabled = false;
@@ -343,9 +355,9 @@
         container.appendChild(passwordDiv);
         
         // Refresh translations for the new form
-        if (window.i18n) {
-            window.i18n.updatePageTranslations();
-        }
+        waitForI18n(() => {
+            window.i18n.translatePage();
+        });
         
         // Add password validation event listeners
         const newPasswordField = document.getElementById('newPassword');
