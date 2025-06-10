@@ -76,7 +76,10 @@
 
         // Basic validation
         if (!email || !password) {
-            showError('Please enter both email and password');
+            const errorMsg = window.i18n 
+                ? window.i18n.t('common.messages.validation')
+                : 'Please enter both email and password';
+            showError(errorMsg);
             return;
         }
 
@@ -113,7 +116,10 @@
                     localStorage.setItem('adminData', JSON.stringify(data.user || data.administrator));
 
                     // Show success message
-                    showInfo('Login successful! Redirecting...');
+                    const successMsg = window.i18n 
+                        ? `${window.i18n.t('common.messages.loginSuccess')} ${window.i18n.t('common.messages.redirecting')}`
+                        : 'Login successful! Redirecting...';
+                    showInfo(successMsg);
 
                     // Notify parent window if embedded
                     if (window.parent !== window) {
@@ -134,18 +140,18 @@
             } else {
                 // Handle specific error cases
                 if (response.status === 403 && data.message.includes('locked')) {
-                    showError('Account is locked. Please contact system administrator.');
+                    showError('administrator.login.accountLocked', true);
                 } else if (response.status === 403 && data.message.includes('inactive')) {
-                    showError('Account is inactive. Please contact system administrator.');
+                    showError('administrator.login.accountInactive', true);
                 } else if (data.warning) {
                     showError(data.message + ' - ' + data.warning);
                 } else {
-                    showError(data.message || 'Login failed. Please try again.');
+                    showError(data.message || window.i18n?.t('administrator.login.loginFailed') || 'Login failed. Please try again.');
                 }
             }
         } catch (error) {
             console.error('Login error:', error);
-            showError('Network error. Please check your connection and try again.');
+            showError('administrator.login.networkError', true);
         } finally {
             // Re-enable form
             submitBtn.disabled = false;
@@ -160,11 +166,17 @@
         const email = document.getElementById('email').value.trim();
         
         if (!email) {
-            showError('Please enter your email address first');
+            const errorMsg = window.i18n 
+                ? window.i18n.t('common.messages.validation')
+                : 'Please enter your email address first';
+            showError(errorMsg);
             return;
         }
 
-        if (!confirm('Send password reset instructions to ' + email + '?')) {
+        const confirmMsg = window.i18n 
+            ? window.i18n.t('common.messages.confirmAction')
+            : 'Send password reset instructions to ' + email + '?';
+        if (!confirm(confirmMsg)) {
             return;
         }
 
@@ -184,13 +196,13 @@
             const data = await response.json();
 
             if (response.ok && data.success) {
-                showInfo('Password reset instructions have been sent to your email.');
+                showInfo('administrator.login.passwordResetSent', true);
             } else {
-                showError(data.message || 'Failed to send reset email. Please try again.');
+                showError(data.message || window.i18n?.t('administrator.login.passwordResetFailed') || 'Failed to send reset email. Please try again.');
             }
         } catch (error) {
             console.error('Password reset error:', error);
-            showError('Network error. Please try again later.');
+            showError('administrator.login.networkError', true);
         }
     });
 
@@ -492,7 +504,10 @@
             localStorage.removeItem('adminRefreshToken');
             localStorage.removeItem('adminData');
             localStorage.removeItem('requirePasswordChange');
-            showInfo('You have been logged out.');
+            const logoutMsg = window.i18n 
+                ? window.i18n.t('common.messages.logoutSuccess')
+                : 'You have been logged out.';
+            showInfo(logoutMsg);
         }
     });
 
