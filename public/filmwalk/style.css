@@ -14,7 +14,7 @@
     --neon-cyan: #05d9e8;
     --neon-purple: #d100d1;
     --neon-yellow: #fcee0a;
-    --smoke-white: #e8e8e8;
+    --smoke-white: #ffffff;
     --shadow-color: rgba(0, 0, 0, 0.9);
     
     /* Gradient overlays */
@@ -696,12 +696,14 @@ nav a:hover::after {
 
 .location-content {
     padding: 1.5rem;
-    color: var(--smoke-white);
+    color: #ffffff;
 }
 
 .location-content p {
-    opacity: 0.9;
+    opacity: 1;
     line-height: 1.8;
+    color: #ffffff;
+    font-size: 1rem;
 }
 
 .film-list {
@@ -731,8 +733,8 @@ nav a:hover::after {
 }
 
 .film-year {
-    color: var(--smoke-white);
-    opacity: 0.6;
+    color: #cccccc;
+    opacity: 1;
     font-size: 0.9rem;
 }
 
@@ -802,8 +804,10 @@ nav a:hover::after {
 }
 
 .bonus-card p {
-    color: var(--smoke-white);
-    opacity: 0.9;
+    color: #ffffff;
+    opacity: 1;
+    font-size: 1rem;
+    line-height: 1.8;
 }
 
 /* Footer */
@@ -921,12 +925,38 @@ footer::before {
     animation: slideIn 0.3s;
     border: 1px solid var(--neon-red);
     box-shadow: 0 0 50px rgba(255,42,109,0.3), 0 10px 40px rgba(0,0,0,0.9);
-    color: var(--smoke-white);
+    color: #ffffff;
 }
 
 .modal-content h2, .modal-content h3, .modal-content h4 {
     color: var(--smoke-white);
     text-shadow: 0 0 20px var(--neon-red);
+}
+
+.modal-content p, .modal-content li {
+    color: #ffffff;
+    opacity: 1;
+    line-height: 1.8;
+    font-size: 1.05rem;
+}
+
+.modal-content strong {
+    color: var(--neon-cyan);
+    text-shadow: 0 0 5px rgba(5,217,232,0.3);
+}
+
+.modal-content ul {
+    margin: 1rem 0;
+    padding-left: 1.5rem;
+}
+
+.modal-content ul li {
+    margin-bottom: 0.5rem;
+    list-style-position: outside;
+}
+
+.modal-content ul li::marker {
+    color: var(--neon-red);
 }
 
 .modal-content::-webkit-scrollbar {
