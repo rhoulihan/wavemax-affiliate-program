@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const paymentController = require('../controllers/paymentController');
-const { authenticateToken } = require('../middleware/auth');
+const { authenticate } = require('../middleware/auth');
 const { body, param, query } = require('express-validator');
 
 // Webhook endpoint (no authentication required)
@@ -11,7 +11,7 @@ router.post('/webhook',
 );
 
 // All other routes require authentication
-router.use(authenticateToken);
+router.use(authenticate);
 
 // Payment endpoints
 router.post('/',

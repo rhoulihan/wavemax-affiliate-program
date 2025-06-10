@@ -66,8 +66,22 @@ exports.authenticate = async (req, res, next) => {
       ...(decoded.affiliateId && { affiliateId: decoded.affiliateId }),
       ...(decoded.customerId && { customerId: decoded.customerId }),
       ...(decoded.adminId && { adminId: decoded.adminId }),
-      ...(decoded.operatorId && { operatorId: decoded.operatorId })
+      ...(decoded.operatorId && { operatorId: decoded.operatorId }),
+      ...(decoded.permissions && { permissions: decoded.permissions }),
+      ...(decoded.requirePasswordChange && { requirePasswordChange: decoded.requirePasswordChange })
     };
+
+    // Check if password change is required
+    if (decoded.requirePasswordChange && 
+        req.path !== '/change-password' && 
+        !req.path.includes('/auth/') &&
+        req.method !== 'GET') {
+      return res.status(403).json({
+        success: false,
+        message: 'Password change required before accessing other resources',
+        requirePasswordChange: true
+      });
+    }
 
     next();
   } catch (error) {

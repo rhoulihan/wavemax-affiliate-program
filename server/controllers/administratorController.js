@@ -436,6 +436,99 @@ exports.resetAdministratorPassword = async (req, res) => {
 };
 
 /**
+ * Change administrator password (for logged-in admin)
+ */
+exports.changeAdministratorPassword = async (req, res) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+    const administratorId = req.user.id;
+
+    // Validate input
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({
+        success: false,
+        message: 'Current password and new password are required'
+      });
+    }
+
+    // Find administrator with password field
+    const administrator = await Administrator.findById(administratorId).select('+password');
+    
+    if (!administrator) {
+      return res.status(404).json({
+        success: false,
+        message: 'Administrator not found'
+      });
+    }
+
+    // Verify current password
+    const isPasswordValid = administrator.verifyPassword(currentPassword);
+    
+    if (!isPasswordValid) {
+      logAuditEvent(AuditEvents.PASSWORD_CHANGE_FAILED, {
+        action: 'CHANGE_PASSWORD_FAILED',
+        userId: administratorId,
+        userType: 'administrator',
+        reason: 'Invalid current password'
+      }, req);
+      
+      return res.status(401).json({
+        success: false,
+        message: 'Current password is incorrect'
+      });
+    }
+
+    // Check if new password is in history
+    if (administrator.isPasswordInHistory && administrator.isPasswordInHistory(newPassword)) {
+      return res.status(400).json({
+        success: false,
+        message: 'New password cannot be the same as any of your last 5 passwords'
+      });
+    }
+
+    // Validate new password strength
+    const { validatePasswordStrength } = require('../utils/passwordValidator');
+    const validation = validatePasswordStrength(newPassword, {
+      username: administrator.email.split('@')[0],
+      email: administrator.email
+    });
+    
+    if (!validation.success) {
+      return res.status(400).json({
+        success: false,
+        message: 'Password does not meet security requirements',
+        errors: validation.errors
+      });
+    }
+
+    // Update password (pre-save hook will handle hashing and history)
+    administrator.password = newPassword;
+    administrator.requirePasswordChange = false; // Clear the flag after password change
+    await administrator.save();
+
+    // Log the action
+    logAuditEvent(AuditEvents.PASSWORD_CHANGE_SUCCESS, {
+      action: 'CHANGE_PASSWORD_SUCCESS',
+      userId: administratorId,
+      userType: 'administrator',
+      details: { adminId: administrator.adminId }
+    }, req);
+
+    res.json({
+      success: true,
+      message: 'Password changed successfully'
+    });
+
+  } catch (error) {
+    console.error('Error changing administrator password:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to change password'
+    });
+  }
+};
+
+/**
  * Get available permissions
  */
 exports.getPermissions = async (req, res) => {

@@ -27,6 +27,12 @@ router.patch('/:id', checkAdminPermission(['administrators.update']), administra
 router.delete('/:id', checkAdminPermission(['administrators.delete']), administratorController.deleteAdministrator);
 router.post('/:id/reset-password', checkAdminPermission(['administrators.update']), administratorController.resetAdministratorPassword);
 
+// Change password route (for logged-in admin changing their own password)
+router.post('/change-password', [
+  body('currentPassword').notEmpty().withMessage('Current password is required'),
+  body('newPassword').custom(customPasswordValidator())
+], administratorController.changeAdministratorPassword);
+
 // Operator Management
 router.post('/operators', checkAdminPermission(['operator_management']), [
   body('firstName').notEmpty().withMessage('First name is required'),

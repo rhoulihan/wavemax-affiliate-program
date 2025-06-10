@@ -78,6 +78,14 @@ const administratorSchema = new mongoose.Schema({
   lockUntil: Date,
   passwordResetToken: String,
   passwordResetExpires: Date,
+  requirePasswordChange: {
+    type: Boolean,
+    default: false
+  },
+  passwordHistory: [{
+    password: String,
+    changedAt: Date
+  }],
   createdAt: { 
     type: Date, 
     default: Date.now 
@@ -99,7 +107,7 @@ administratorSchema.index({ isActive: 1 });
 administratorSchema.index({ createdAt: -1 });
 
 // Pre-save middleware
-administratorSchema.pre('save', function(next) {
+administratorSchema.pre('save', async function(next) {
   // Update timestamp
   this.updatedAt = new Date();
   
@@ -124,8 +132,31 @@ administratorSchema.pre('save', function(next) {
     }
     
     const salt = crypto.randomBytes(16);
-    this.password = crypto.pbkdf2Sync(this.password, salt, 100000, 64, 'sha512')
+    const hashedPassword = crypto.pbkdf2Sync(this.password, salt, 100000, 64, 'sha512')
       .toString('hex') + ':' + salt.toString('hex');
+    
+    // Store the old password in history before updating
+    if (!this.isNew && this._id) {
+      // Get the current (old) password from database
+      const currentAdmin = await this.constructor.findById(this._id).select('+password');
+      if (currentAdmin && currentAdmin.password) {
+        if (!this.passwordHistory) {
+          this.passwordHistory = [];
+        }
+        this.passwordHistory.push({
+          password: currentAdmin.password, // Store the OLD hashed password
+          changedAt: new Date()
+        });
+        // Keep only last 5 passwords
+        if (this.passwordHistory.length > 5) {
+          this.passwordHistory = this.passwordHistory.slice(-5);
+        }
+      }
+      // Clear requirePasswordChange flag when password is changed
+      this.requirePasswordChange = false;
+    }
+    
+    this.password = hashedPassword;
   }
   
   // Set default permissions if none provided
@@ -142,6 +173,20 @@ administratorSchema.methods.verifyPassword = function(password) {
   const verifyHash = crypto.pbkdf2Sync(password, Buffer.from(salt, 'hex'), 100000, 64, 'sha512')
     .toString('hex');
   return hash === verifyHash;
+};
+
+// Method to check if password has been used before
+administratorSchema.methods.isPasswordInHistory = function(password) {
+  if (!this.passwordHistory || this.passwordHistory.length === 0) {
+    return false;
+  }
+  
+  return this.passwordHistory.some(historyEntry => {
+    const [hash, salt] = historyEntry.password.split(':');
+    const verifyHash = crypto.pbkdf2Sync(password, Buffer.from(salt, 'hex'), 100000, 64, 'sha512')
+      .toString('hex');
+    return hash === verifyHash;
+  });
 };
 
 // Method to handle failed login attempts

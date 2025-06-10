@@ -75,6 +75,14 @@ if (process.env.NODE_ENV !== 'test') {
       } catch (error) {
         logger.error('Error initializing system config:', { error: error.message });
       }
+      
+      // Initialize default administrator account
+      try {
+        const { initializeDefaultAdmin } = require('./init-admin');
+        await initializeDefaultAdmin();
+      } catch (error) {
+        logger.error('Error initializing default admin:', { error: error.message });
+      }
     })
     .catch(err => {
       logger.error('MongoDB connection error:', { error: err.message });

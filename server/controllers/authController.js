@@ -271,6 +271,32 @@ exports.administratorLogin = async (req, res) => {
     // Reset failed login attempts
     await administrator.resetLoginAttempts();
 
+    // Check if password change is required
+    if (administrator.requirePasswordChange) {
+      // Generate a limited token that only allows password change
+      const token = generateToken({
+        id: administrator._id,
+        adminId: administrator.adminId,
+        role: 'administrator',
+        permissions: ['change_password_required'],
+        requirePasswordChange: true
+      });
+
+      // Don't generate refresh token for password change required
+      return res.status(200).json({
+        success: true,
+        token,
+        requirePasswordChange: true,
+        message: 'Password change required for first login',
+        user: {
+          id: administrator._id,
+          adminId: administrator.adminId,
+          email: administrator.email,
+          requirePasswordChange: true
+        }
+      });
+    }
+
     // Generate token
     const token = generateToken({
       id: administrator._id,
