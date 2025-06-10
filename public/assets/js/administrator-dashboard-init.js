@@ -6,14 +6,6 @@
         return window.i18n && window.i18n.t ? window.i18n.t(key) : fallback;
     }
 
-    // Refresh current tab when translations are ready
-    window.addEventListener('i18nReady', function() {
-        const activeTab = document.querySelector('.tab.active');
-        if (activeTab) {
-            const tabName = activeTab.getAttribute('data-tab');
-            loadTabData(tabName);
-        }
-    });
 
     // Load CSRF utilities
     if (!window.CsrfUtils) {
@@ -650,4 +642,30 @@
     // Load initial data
     removeLoadingSpinners();
     loadDashboard();
+
+    // Refresh current tab when translations are ready
+    window.addEventListener('i18nReady', function() {
+        const activeTab = document.querySelector('.nav-tab.active');
+        if (activeTab) {
+            const tabName = activeTab.getAttribute('data-tab');
+            loadTabData(tabName);
+        }
+    });
+
+    // Listen for language changes
+    window.addEventListener('languageChanged', function(event) {
+        console.log('Language changed to:', event.detail.language);
+        
+        // Re-translate the page
+        if (window.i18n && window.i18n.translatePage) {
+            window.i18n.translatePage();
+        }
+        
+        // Update dynamic content in the active tab
+        const activeTab = document.querySelector('.nav-tab.active');
+        if (activeTab) {
+            const tabName = activeTab.getAttribute('data-tab');
+            loadTabData(tabName);
+        }
+    });
 })();
