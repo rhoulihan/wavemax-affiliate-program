@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Payment - WaveMAX</title>
+    <link href="assets/css/wavemax-embed.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #f8f9fa;
+            margin: 0;
+            padding: 20px;
+        }
+        
+        .payment-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .payment-header {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .payment-header h1 {
+            margin: 0 0 10px 0;
+            color: #1e3a8a;
+            font-size: 24px;
+        }
+        
+        .order-summary {
+            background: #e8f4fd;
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 15px;
+        }
+        
+        .order-summary h3 {
+            margin: 0 0 10px 0;
+            color: #1e3a8a;
+            font-size: 18px;
+        }
+        
+        .order-detail {
+            display: flex;
+            justify-content: space-between;
+            margin: 5px 0;
+        }
+        
+        .order-detail label {
+            font-weight: 600;
+        }
+        
+        .payment-instructions {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+        
+        .payment-instructions h3 {
+            margin: 0 0 10px 0;
+            color: #856404;
+        }
+        
+        .payment-instructions ul {
+            margin: 0;
+            padding-left: 20px;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+        }
+        
+        .error-message {
+            background: #fee2e2;
+            border: 1px solid #fecaca;
+            color: #991b1b;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 20px 0;
+        }
+        
+        .affiliate-info {
+            background: #f3f4f6;
+            padding: 10px 15px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            font-size: 14px;
+            color: #6b7280;
+        }
+    </style>
+</head>
+<body>
+    <!-- Set context for payment form -->
+    <input type="hidden" id="PAYCONTEXT" value="ORDER" />
+    <input type="hidden" id="AFFILIATEID" value="" />
+    
+    <div class="payment-container">
+        <div class="payment-header">
+            <h1>Complete Your Payment</h1>
+            <div id="affiliateInfo" class="affiliate-info" style="display:none;">
+                <span>Service provided by: <strong id="affiliateName"></strong></span>
+            </div>
+            <div id="orderSummary" class="order-summary">
+                <h3>Order Summary</h3>
+                <div class="loading">Loading order details...</div>
+            </div>
+        </div>
+        
+        <div class="payment-instructions">
+            <h3>Payment Instructions</h3>
+            <ul>
+                <li>Enter the estimated weight of your laundry in pounds</li>
+                <li>Select the number of bags for delivery</li>
+                <li>The minimum delivery fee will be automatically applied if applicable</li>
+                <li>Click "Pay Now" to proceed to secure payment</li>
+            </ul>
+        </div>
+        
+        <div id="paymentFormContainer">
+            <!-- Payment form will be loaded here -->
+        </div>
+    </div>
+    
+    <script src="assets/js/paygistix-payment-form.js"></script>
+    <script>
+        // Get order details from URL parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const orderId = urlParams.get('orderId');
+        const customerId = urlParams.get('customerId');
+        const affiliateId = urlParams.get('affiliateId');
+        const returnUrl = urlParams.get('returnUrl') || '/payment-success';
+        
+        // Set affiliate ID in hidden field
+        if (affiliateId) {
+            document.getElementById('AFFILIATEID').value = affiliateId;
+        }
+        
+        // Initialize order details
+        let orderDetails = {
+            orderId: orderId,
+            customerId: customerId,
+            affiliateId: affiliateId,
+            estimatedWeight: 0,
+            numberOfBags: 0,
+            deliveryFee: 0,
+            estimatedTotal: 0
+        };
+        
+        let paymentConfig = {};
+        let affiliateData = null;
+        
+        // Load order details
+        async function loadOrderDetails() {
+            if (!orderId) {
+                showError('No order ID provided');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/api/v1/orders/${orderId}`, {
+                    headers: {
+                        'Authorization': 'Bearer ' + localStorage.getItem('token')
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Failed to load order details');
+                }
+                
+                const data = await response.json();
+                if (data.success && data.order) {
+                    orderDetails = {
+                        orderId: data.order.orderId,
+                        customerId: data.order.customerId,
+                        affiliateId: data.order.affiliateId,
+                        estimatedWeight: data.order.estimatedWeight || 0,
+                        numberOfBags: data.order.numberOfBags || data.order.feeBreakdown?.numberOfBags || 0,
+                        deliveryFee: data.order.feeBreakdown?.totalFee || 0,
+                        estimatedTotal: data.order.estimatedTotal || 0,
+                        customerName: data.order.customer?.name || '',
+                        pickupDate: data.order.pickupDate,
+                        deliveryDate: data.order.deliveryDate
+                    };
+                    
+                    // Update affiliate ID
+                    document.getElementById('AFFILIATEID').value = orderDetails.affiliateId;
+                    
+                    // Display affiliate info
+                    if (data.order.affiliate) {
+                        affiliateData = data.order.affiliate;
+                        displayAffiliateInfo(affiliateData);
+                    }
+                    
+                    displayOrderSummary();
+                    await initializePaymentForm();
+                }
+            } catch (error) {
+                console.error('Error loading order:', error);
+                showError('Failed to load order details. Please try again.');
+            }
+        }
+        
+        function displayAffiliateInfo(affiliate) {
+            const affiliateNameEl = document.getElementById('affiliateName');
+            affiliateNameEl.textContent = affiliate.name || `${affiliate.firstName} ${affiliate.lastName}`;
+            document.getElementById('affiliateInfo').style.display = 'block';
+        }
+        
+        function displayOrderSummary() {
+            const summaryHtml = `
+                <h3>Order #${orderDetails.orderId}</h3>
+                <div class="order-detail">
+                    <label>Customer:</label>
+                    <span>${orderDetails.customerName}</span>
+                </div>
+                <div class="order-detail">
+                    <label>Estimated Weight:</label>
+                    <span>${orderDetails.estimatedWeight} lbs</span>
+                </div>
+                <div class="order-detail">
+                    <label>Number of Bags:</label>
+                    <span>${orderDetails.numberOfBags}</span>
+                </div>
+                <div class="order-detail">
+                    <label>Delivery Fee:</label>
+                    <span>$${orderDetails.deliveryFee.toFixed(2)}</span>
+                </div>
+                <div class="order-detail" style="margin-top: 10px; padding-top: 10px; border-top: 1px solid #cbd5e1;">
+                    <label><strong>Estimated Total:</strong></label>
+                    <span><strong>$${orderDetails.estimatedTotal.toFixed(2)}</strong></span>
+                </div>
+            `;
+            
+            document.getElementById('orderSummary').innerHTML = '<h3>Order Summary</h3>' + summaryHtml;
+        }
+        
+        async function loadPaymentConfig() {
+            try {
+                const response = await fetch('/api/v1/payments/config');
+                const data = await response.json();
+                
+                if (data.success) {
+                    paymentConfig = data.config;
+                } else {
+                    throw new Error(data.message || 'Failed to load payment configuration');
+                }
+            } catch (error) {
+                console.error('Error loading payment config:', error);
+                showError('Failed to load payment configuration. Please try again later.');
+                throw error;
+            }
+        }
+        
+        async function initializePaymentForm() {
+            // Load payment configuration first
+            await loadPaymentConfig();
+            
+            // Initialize the payment form with configuration
+            const paymentForm = new PaygistixPaymentForm('paymentFormContainer', {
+                orderId: orderDetails.orderId,
+                customerId: orderDetails.customerId,
+                orderDetails: orderDetails,
+                merchantId: paymentConfig.merchantId,
+                formId: paymentConfig.formId,
+                hash: paymentConfig.formHash,
+                formActionUrl: paymentConfig.formActionUrl,
+                returnURL: `${paymentConfig.returnUrl}?orderId=${orderDetails.orderId}`,
+                onSuccess: function() {
+                    console.log('Payment initiated successfully');
+                },
+                onError: function(error) {
+                    showError('Payment initialization failed: ' + error.message);
+                }
+            });
+            
+            // Pre-fill amounts based on order details
+            const prefilledAmounts = {};
+            
+            // Set wash dry fold quantity (weight)
+            if (orderDetails.estimatedWeight > 0) {
+                prefilledAmounts.WDF = Math.round(orderDetails.estimatedWeight);
+            }
+            
+            // Determine which delivery fee to select based on affiliate settings
+            if (affiliateData) {
+                const perBagFee = affiliateData.perBagDeliveryFee || 5;
+                const minimumFee = affiliateData.minimumDeliveryFee || 25;
+                
+                // Check if minimum fee applies
+                const calculatedFee = orderDetails.numberOfBags * perBagFee;
+                if (calculatedFee < minimumFee) {
+                    // Use minimum fee
+                    const minFeeCode = `MC${Math.round(minimumFee)}`;
+                    if (['MC25', 'MC30', 'MC40', 'MC50', 'MC75'].includes(minFeeCode)) {
+                        prefilledAmounts[minFeeCode] = 1;
+                    }
+                } else {
+                    // Use per bag fee
+                    const bagFeeCode = `DF${Math.round(perBagFee)}`;
+                    if (['DF5', 'DF10', 'DF15', 'DF20'].includes(bagFeeCode)) {
+                        prefilledAmounts[bagFeeCode] = orderDetails.numberOfBags;
+                    }
+                }
+            }
+            
+            // Set the prefilled amounts
+            setTimeout(() => {
+                paymentForm.setPrefilledAmounts(prefilledAmounts);
+            }, 500);
+        }
+        
+        function showError(message) {
+            const errorHtml = `<div class="error-message">${message}</div>`;
+            document.getElementById('paymentFormContainer').innerHTML = errorHtml;
+        }
+        
+        // Load order details when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            loadOrderDetails();
+        });
+        
+        // Handle messages from parent window if embedded
+        window.addEventListener('message', function(event) {
+            if (event.data.type === 'orderDetails') {
+                orderDetails = event.data.orderDetails;
+                document.getElementById('AFFILIATEID').value = orderDetails.affiliateId;
+                displayOrderSummary();
+                initializePaymentForm();
+            }
+        });
+    </script>
+</body>
+</html>
