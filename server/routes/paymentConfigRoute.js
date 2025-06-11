@@ -1,39 +1,35 @@
 const express = require('express');
 const router = express.Router();
 
-/**
- * Get Paygistix configuration for client-side payment forms
- * This endpoint provides non-sensitive configuration values
- */
-router.get('/config', (req, res) => {
+// Public endpoint to get payment configuration
+router.get('/', (req, res) => {
     try {
-        // Only return non-sensitive configuration
+        // Get configuration from environment variables
         const config = {
             merchantId: process.env.PAYGISTIX_MERCHANT_ID || 'wmaxaustWEB',
             formId: process.env.PAYGISTIX_FORM_ID || '55015031208',
             formHash: process.env.PAYGISTIX_FORM_HASH || '',
             formActionUrl: process.env.PAYGISTIX_FORM_ACTION_URL || 'https://safepay.paymentlogistics.net/transaction.asp',
-            environment: process.env.PAYGISTIX_ENVIRONMENT || 'production',
-            returnUrl: `${process.env.BASE_URL || req.protocol + '://' + req.get('host')}/api/v1/payment_callback`
+            returnUrl: process.env.PAYGISTIX_RETURN_URL || `${req.protocol}://${req.get('host')}/payment-callback-handler.html`
         };
         
-        // Don't send empty hash in production
-        if (!config.formHash && process.env.NODE_ENV === 'production') {
+        // Check if hash is configured
+        if (!config.formHash) {
             return res.status(500).json({
                 success: false,
-                message: 'Payment configuration not properly set up'
+                message: 'Payment form configuration is incomplete. Please contact support.'
             });
         }
         
         res.json({
             success: true,
-            config
+            config: config
         });
     } catch (error) {
-        console.error('Payment config error:', error);
+        console.error('Error getting payment config:', error);
         res.status(500).json({
             success: false,
-            message: 'Failed to retrieve payment configuration'
+            message: 'Failed to load payment configuration'
         });
     }
 });

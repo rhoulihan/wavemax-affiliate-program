@@ -9,17 +9,17 @@ Added BF (Bag Fee) as a permanent line item in the Paygistix payment form that i
 
 1. **Added Bag Fee to Service List**
    - BF is now the first line item in the form (index 1)
-   - Price is loaded from system configuration `bag_fee` setting
-   - Default price: $1.00
+   - Price is loaded from system configuration `laundry_bag_fee` setting
+   - Default price: $10.00
 
 2. **System Configuration**
-   - Created script to add `bag_fee` system configuration
-   - Located at: `/scripts/add-bag-fee-config.js`
-   - Run with: `node scripts/add-bag-fee-config.js`
+   - Uses existing `laundry_bag_fee` system configuration
+   - Located in payment category
+   - Current value: $10.00
 
 3. **Dynamic Pricing**
-   - Bag fee price is loaded from `/api/v1/system/config/bag_fee`
-   - Falls back to $1.00 if not configured
+   - Bag fee price is loaded from `/api/v1/system/config/laundry_bag_fee`
+   - Falls back to $10.00 if not configured
 
 4. **Context Filtering**
    - **REGISTRATION context**: Only BF line item is visible
@@ -36,10 +36,10 @@ Added BF (Bag Fee) as a permanent line item in the Paygistix payment form that i
 
 ### Usage:
 
-1. **Set bag fee in system configuration**:
-   ```bash
-   node scripts/add-bag-fee-config.js
-   ```
+1. **Bag fee is already configured in system**:
+   - Key: `laundry_bag_fee`
+   - Value: $10.00
+   - No additional setup required
 
 2. **For registration payments**:
    ```html

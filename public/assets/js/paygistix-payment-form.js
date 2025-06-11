@@ -70,7 +70,7 @@ class PaygistixPaymentForm {
             }
             
             // Load system bag fee
-            const bagFeeResponse = await fetch('/api/v1/system/config/bag_fee');
+            const bagFeeResponse = await fetch('/api/v1/system/config/laundry_bag_fee');
             if (bagFeeResponse.ok) {
                 const bagFeeData = await bagFeeResponse.json();
                 if (bagFeeData.success && bagFeeData.value) {

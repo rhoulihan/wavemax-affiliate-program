@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Processing Payment...</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center">
+    <div class="bg-white p-8 rounded-lg shadow-md max-w-md w-full text-center">
+        <div class="mb-6">
+            <div class="inline-flex items-center justify-center w-16 h-16 bg-blue-100 rounded-full mb-4">
+                <svg class="w-8 h-8 text-blue-600 animate-spin" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+            </div>
+            <h2 class="text-2xl font-bold text-gray-800 mb-2">Processing Payment</h2>
+            <p class="text-gray-600">Please wait while we confirm your payment...</p>
+        </div>
+        
+        <div id="status-message" class="hidden">
+            <!-- Status will be updated here -->
+        </div>
+    </div>
+
+    <script>
+        // Get query parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const status = urlParams.get('status');
+        const transactionId = urlParams.get('transactionId');
+        const type = urlParams.get('type');
+        const responseMessage = urlParams.get('responseMessage');
+        
+        // Process payment callback
+        async function processPaymentCallback() {
+            const statusDiv = document.getElementById('status-message');
+            
+            if (type === 'registration') {
+                // Handle registration payment callback
+                if (status === 'approved' || status === 'success') {
+                    // Get pending registration data from session storage
+                    const pendingRegistration = sessionStorage.getItem('pendingRegistration');
+                    
+                    if (pendingRegistration) {
+                        try {
+                            const registrationData = JSON.parse(pendingRegistration);
+                            
+                            // Add payment confirmation to registration data
+                            registrationData.paymentConfirmed = true;
+                            registrationData.transactionId = transactionId;
+                            
+                            // Submit registration with payment confirmation
+                            const response = await fetch('/api/v1/customers/register', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json'
+                                },
+                                credentials: 'include',
+                                body: JSON.stringify(registrationData)
+                            });
+                            
+                            const result = await response.json();
+                            
+                            if (result.success) {
+                                // Store registration data for success page
+                                const successData = {
+                                    customerId: result.customerId,
+                                    bagBarcode: result.bagBarcode,
+                                    firstName: registrationData.firstName,
+                                    lastName: registrationData.lastName,
+                                    email: registrationData.email,
+                                    affiliateId: registrationData.affiliateId,
+                                    numberOfBags: registrationData.numberOfBags,
+                                    transactionId: transactionId
+                                };
+                                
+                                sessionStorage.setItem('registrationData', JSON.stringify(successData));
+                                sessionStorage.removeItem('pendingRegistration');
+                                
+                                // Redirect to success page
+                                window.location.href = '/embed-app.html?route=/customer-success';
+                            } else {
+                                // Registration failed
+                                statusDiv.innerHTML = `
+                                    <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+                                        <h3 class="text-lg font-semibold text-red-800 mb-2">Registration Failed</h3>
+                                        <p class="text-red-600">${result.message || 'Unable to complete registration. Please contact support.'}</p>
+                                        <a href="/embed-app.html?route=/customer-register" class="inline-block mt-4 bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">
+                                            Try Again
+                                        </a>
+                                    </div>
+                                `;
+                                statusDiv.classList.remove('hidden');
+                            }
+                        } catch (error) {
+                            console.error('Error processing registration:', error);
+                            statusDiv.innerHTML = `
+                                <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+                                    <h3 class="text-lg font-semibold text-red-800 mb-2">Processing Error</h3>
+                                    <p class="text-red-600">An error occurred while processing your registration. Please contact support.</p>
+                                    <a href="/embed-app.html?route=/customer-register" class="inline-block mt-4 bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">
+                                        Try Again
+                                    </a>
+                                </div>
+                            `;
+                            statusDiv.classList.remove('hidden');
+                        }
+                    } else {
+                        // No pending registration data
+                        statusDiv.innerHTML = `
+                            <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                                <h3 class="text-lg font-semibold text-yellow-800 mb-2">Session Expired</h3>
+                                <p class="text-yellow-600">Your registration session has expired. Please start over.</p>
+                                <a href="/embed-app.html?route=/customer-register" class="inline-block mt-4 bg-yellow-600 text-white px-4 py-2 rounded hover:bg-yellow-700">
+                                    Start Registration
+                                </a>
+                            </div>
+                        `;
+                        statusDiv.classList.remove('hidden');
+                    }
+                } else {
+                    // Payment failed
+                    statusDiv.innerHTML = `
+                        <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+                            <h3 class="text-lg font-semibold text-red-800 mb-2">Payment Failed</h3>
+                            <p class="text-red-600">${responseMessage || 'Your payment could not be processed. Please try again.'}</p>
+                            <a href="/embed-app.html?route=/customer-register" class="inline-block mt-4 bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">
+                                Back to Registration
+                            </a>
+                        </div>
+                    `;
+                    statusDiv.classList.remove('hidden');
+                }
+            } else {
+                // Handle order payment callback
+                if (status === 'approved' || status === 'success') {
+                    window.location.href = `/payment-success?orderId=${urlParams.get('orderId')}&transactionId=${transactionId}`;
+                } else {
+                    window.location.href = `/payment-error?message=${encodeURIComponent(responseMessage || 'Payment failed')}`;
+                }
+            }
+        }
+        
+        // Process callback when page loads
+        processPaymentCallback();
+    </script>
+</body>
+</html>
