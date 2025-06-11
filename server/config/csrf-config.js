@@ -202,12 +202,23 @@ const conditionalCsrf = (req, res, next) => {
     return next();
   }
 
+  // For authenticated requests without session cookies (iframe context),
+  // skip CSRF check as we rely on bearer token authentication
+  if (req.headers.authorization && !req.headers.cookie?.includes('wavemax.sid')) {
+    console.log('Skipping CSRF for authenticated request without session cookie');
+    return next();
+  }
+
   // Debug session state
   console.log('CSRF check for:', req.path, {
     sessionID: req.sessionID,
     hasSession: !!req.session,
     sessionCookie: req.headers.cookie,
-    hasCsrfSecret: !!req.session?.csrfSecret
+    hasCsrfSecret: !!req.session?.csrfSecret,
+    hasAuth: !!req.headers.authorization,
+    origin: req.headers.origin,
+    referer: req.headers.referer,
+    userAgent: req.headers['user-agent']?.substring(0, 50)
   });
 
   // Apply CSRF protection

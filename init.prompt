@@ -96,7 +96,6 @@ You are working on the **WaveMAX Laundry Affiliate Program** - a Node.js/Express
 When we begin each session:
 - [ ] Review git status and recent commits
 - [ ] **CRITICAL: Review all uncommitted changes and determine if they are still relevant or need to be rolled back**
-- [ ] Check if any tests are currently failing (`npm test`)
 - [ ] Review the backlog queue in `BACKLOG.md` for pending work items
 - [ ] **Check for recent project logs in `/project-logs/`**:
   - Look for logs with status "IN PROGRESS"

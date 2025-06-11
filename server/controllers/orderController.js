@@ -141,7 +141,7 @@ exports.createOrder = async (req, res) => {
         totalFee: feeCalculation.totalFee,
         minimumApplied: feeCalculation.minimumApplied
       },
-      status: 'scheduled'
+      status: 'pending'
     });
 
     await newOrder.save();
@@ -289,11 +289,11 @@ exports.updateOrderStatus = async (req, res) => {
 
     // Check for valid status transition
     const validTransitions = {
-      scheduled: ['picked_up', 'cancelled'],
-      picked_up: ['processing', 'cancelled'],
-      processing: ['ready_for_delivery'],
-      ready_for_delivery: ['delivered'],
-      delivered: [],
+      pending: ['scheduled', 'cancelled'],
+      scheduled: ['processing', 'cancelled'],
+      processing: ['processed'],
+      processed: ['complete'],
+      complete: [],
       cancelled: []
     };
 
@@ -319,11 +319,11 @@ exports.updateOrderStatus = async (req, res) => {
     const affiliate = await Affiliate.findOne({ affiliateId: order.affiliateId });
 
     // Send status update email to customer
-    if (customer && ['picked_up', 'processing', 'ready_for_delivery', 'delivered'].includes(status)) {
+    if (customer && ['scheduled', 'processing', 'processed', 'complete'].includes(status)) {
       await emailService.sendOrderStatusUpdateEmail(customer, order, status);
 
-      // If order is delivered, also notify affiliate of commission
-      if (status === 'delivered' && affiliate) {
+      // If order is complete, also notify affiliate of commission
+      if (status === 'complete' && affiliate) {
         await emailService.sendAffiliateCommissionEmail(affiliate, order, customer);
       }
     }
@@ -364,7 +364,7 @@ exports.cancelOrder = async (req, res) => {
     }
 
     // Check if order can be cancelled
-    if (!['scheduled', 'picked_up'].includes(order.status)) {
+    if (!['pending', 'scheduled'].includes(order.status)) {
       return res.status(400).json({
         success: false,
         message: `Orders in ${order.status} status cannot be cancelled`
@@ -431,7 +431,7 @@ exports.bulkUpdateOrderStatus = async (req, res) => {
     }
 
     // Validate status
-    const validStatuses = ['scheduled', 'picked_up', 'processing', 'ready_for_delivery', 'delivered', 'cancelled'];
+    const validStatuses = ['pending', 'scheduled', 'processing', 'processed', 'complete', 'cancelled'];
     if (!validStatuses.includes(status)) {
       return res.status(400).json({
         success: false,
@@ -484,12 +484,8 @@ exports.bulkUpdateOrderStatus = async (req, res) => {
         // Update order
         order.status = status;
         
-        // Update status timestamps
-        if (status === 'picked_up') order.pickupDate = new Date();
-        if (status === 'processing') order.processingStartDate = new Date();
-        if (status === 'ready_for_delivery') order.readyForDeliveryDate = new Date();
-        if (status === 'delivered') order.deliveredDate = new Date();
-        if (status === 'cancelled') order.cancelledAt = new Date();
+        // Update status timestamps (these are now handled in the model middleware)
+        // The model's pre-save hook will automatically set the appropriate timestamps
 
         await order.save();
 
@@ -567,7 +563,7 @@ exports.bulkCancelOrders = async (req, res) => {
 
     for (const order of orders) {
       // Check if order can be cancelled
-      if (['delivered', 'cancelled'].includes(order.status)) {
+      if (['processing', 'processed', 'complete', 'cancelled'].includes(order.status)) {
         results.push({
           orderId: order.orderId,
           success: false,
@@ -788,11 +784,11 @@ exports.updatePaymentStatus = async (req, res) => {
       });
     }
 
-    // Check if order is delivered (payment status can only be updated for delivered orders)
-    if (order.status !== 'delivered') {
+    // Check if order is complete (payment status can only be updated for complete orders)
+    if (order.status !== 'complete') {
       return res.status(400).json({
         success: false,
-        message: 'Cannot update payment status for non-delivered orders'
+        message: 'Cannot update payment status for non-complete orders'
       });
     }
 
@@ -854,11 +850,23 @@ exports.updatePaymentStatus = async (req, res) => {
  */
 exports.searchOrders = async (req, res) => {
   try {
-    const { search, affiliateId } = req.query;
+    const { search, affiliateId, startDate, endDate, status } = req.query;
     const { page = 1, limit = 10 } = req.pagination || req.query;
 
     // Build query
     const query = {};
+
+    // Date range filter
+    if (startDate || endDate) {
+      query.createdAt = {};
+      if (startDate) query.createdAt.$gte = new Date(startDate);
+      if (endDate) query.createdAt.$lte = new Date(endDate);
+    }
+
+    // Status filter
+    if (status) {
+      query.status = status;
+    }
 
     // Affiliate filter
     if (affiliateId) {
@@ -869,7 +877,7 @@ exports.searchOrders = async (req, res) => {
     if (req.user.role === 'affiliate') {
       // Affiliates can only search their own orders
       query.affiliateId = req.user.affiliateId;
-    } else if (req.user.role !== 'admin') {
+    } else if (req.user.role !== 'admin' && req.user.role !== 'administrator') {
       return res.status(403).json({
         success: false,
         message: 'Unauthorized'
@@ -979,11 +987,11 @@ exports.getOrderStatistics = async (req, res) => {
     
     // Orders by status
     const ordersByStatus = {
+      pending: 0,
       scheduled: 0,
-      picked_up: 0,
       processing: 0,
-      ready_for_delivery: 0,
-      delivered: 0,
+      processed: 0,
+      complete: 0,
       cancelled: 0
     };
 
@@ -998,8 +1006,8 @@ exports.getOrderStatistics = async (req, res) => {
         ordersByStatus[order.status]++;
       }
 
-      // Calculate revenue from delivered orders
-      if (order.status === 'delivered') {
+      // Calculate revenue from complete orders
+      if (order.status === 'complete') {
         totalRevenue += order.actualTotal || order.estimatedTotal || 0;
         deliveredCount++;
       }

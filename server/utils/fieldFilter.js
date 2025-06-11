@@ -96,12 +96,12 @@ const fieldDefinitions = {
   // Operator fields visible to different roles
   operator: {
     public: ['operatorId', 'firstName', 'lastName'],
-    self: ['operatorId', 'firstName', 'lastName', 'email', 'workStation',
+    self: ['operatorId', 'firstName', 'lastName', 'email',
       'shiftStart', 'shiftEnd', 'isActive', 'currentOrderCount'],
-    admin: ['_id', 'operatorId', 'firstName', 'lastName', 'email', 'workStation',
+    admin: ['_id', 'operatorId', 'firstName', 'lastName', 'email',
       'shiftStart', 'shiftEnd', 'isActive', 'currentOrderCount', 'totalOrdersProcessed',
       'averageProcessingTime', 'qualityScore', 'createdBy', 'createdAt'],
-    administrator: ['_id', 'operatorId', 'firstName', 'lastName', 'email', 'workStation',
+    administrator: ['_id', 'operatorId', 'firstName', 'lastName', 'email',
       'shiftStart', 'shiftEnd', 'isActive', 'currentOrderCount', 'totalOrdersProcessed',
       'averageProcessingTime', 'qualityScore', 'createdBy', 'createdAt', 'role']
   }
@@ -196,7 +196,7 @@ const fieldFilter = (data, role) => {
   let dataType = null;
   if (data.adminId !== undefined && data.permissions !== undefined) {
     dataType = 'administrator';
-  } else if (data.operatorId !== undefined && data.workStation !== undefined) {
+  } else if (data.operatorId !== undefined && (data.shiftStart !== undefined || data.shiftEnd !== undefined || data.role === 'operator')) {
     dataType = 'operator';
   } else if (data.affiliateId !== undefined && data.businessName !== undefined) {
     dataType = 'affiliate';

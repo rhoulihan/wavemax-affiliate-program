@@ -28,6 +28,16 @@ const operatorSchema = new mongoose.Schema({
     trim: true,
     match: [/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/, 'Please enter a valid email']
   },
+  username: { 
+    type: String, 
+    unique: true,
+    required: true,
+    lowercase: true,
+    trim: true,
+    minLength: 3,
+    maxLength: 30,
+    match: [/^[a-zA-Z0-9_-]+$/, 'Username can only contain letters, numbers, underscores, and hyphens']
+  },
   password: { 
     type: String, 
     required: true,
@@ -41,10 +51,6 @@ const operatorSchema = new mongoose.Schema({
   isActive: { 
     type: Boolean, 
     default: true 
-  },
-  workStation: {
-    type: String,
-    trim: true
   },
   shiftStart: {
     type: String, // e.g., "08:00"
@@ -125,7 +131,6 @@ operatorSchema.virtual('isOnShift').get(function() {
 // Note: email already has a unique index from the schema definition
 operatorSchema.index({ isActive: 1 });
 operatorSchema.index({ createdBy: 1 });
-operatorSchema.index({ workStation: 1 });
 operatorSchema.index({ createdAt: -1 });
 
 // Pre-save middleware
@@ -250,6 +255,7 @@ operatorSchema.statics.findAvailableOperators = function(limit = 5) {
 
 // Transform output
 operatorSchema.set('toJSON', {
+  virtuals: true,
   transform: function(doc, ret) {
     delete ret.password;
     delete ret.passwordResetToken;
@@ -261,7 +267,6 @@ operatorSchema.set('toJSON', {
 
 // Create compound indexes
 operatorSchema.index({ operatorId: 1, isActive: 1 });
-operatorSchema.index({ workStation: 1, isActive: 1 });
 operatorSchema.index({ currentOrderCount: 1, isActive: 1 });
 
 const Operator = mongoose.model('Operator', operatorSchema);

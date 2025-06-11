@@ -180,6 +180,11 @@
         const orderStats = data.orderStats || {};
         const systemHealth = data.systemHealth || {};
         const avgProcessingTime = Math.round(orderStats.averageProcessingTime || 0);
+        const avgProcessingHours = Math.floor(avgProcessingTime / 60);
+        const avgProcessingMins = Math.round(avgProcessingTime % 60);
+        const processingTimeDisplay = avgProcessingHours > 0 ? 
+            `${avgProcessingHours}h ${avgProcessingMins}m` : 
+            `${avgProcessingMins}m`;
         
         const statsHtml = `
             <div class="stat-card">
@@ -193,16 +198,21 @@
                 <div class="stat-change">${t('administrator.dashboard.stats.thisWeek', 'This week')}: ${orderStats.thisWeek || 0}</div>
             </div>
             <div class="stat-card">
-                <h3>${t('administrator.dashboard.stats.processingTime', 'Processing Time')}</h3>
-                <div class="stat-value">${avgProcessingTime}${t('administrator.dashboard.stats.minutes', 'm')}</div>
-                <div class="stat-change">${t('administrator.dashboard.stats.target', 'Target')}: 60${t('administrator.dashboard.stats.minutes', 'm')}</div>
+                <h3>${t('administrator.dashboard.stats.processingTime', 'Avg Processing Time')}</h3>
+                <div class="stat-value">${processingTimeDisplay}</div>
+                <div class="stat-change">${t('administrator.dashboard.stats.target', 'Target')}: 24h</div>
             </div>
             <div class="stat-card">
-                <h3>${t('administrator.dashboard.stats.pendingOrders', 'Pending Orders')}</h3>
-                <div class="stat-value">${systemHealth.pendingOrders || 0}</div>
+                <h3>${t('administrator.dashboard.stats.ordersInProgress', 'Orders in Progress')}</h3>
+                <div class="stat-value">${systemHealth.ordersInProgress || 0}</div>
                 <div class="stat-change ${systemHealth.processingDelays > 0 ? 'negative' : ''}">
-                    ${t('administrator.dashboard.stats.delays', 'Delays')}: ${systemHealth.processingDelays || 0}
+                    ${t('administrator.dashboard.stats.delays', 'Delays (>24h)')}: ${systemHealth.processingDelays || 0}
                 </div>
+            </div>
+            <div class="stat-card">
+                <h3>${t('administrator.dashboard.stats.completedOrders', 'Completed Orders')}</h3>
+                <div class="stat-value">${systemHealth.completedOrders || 0}</div>
+                <div class="stat-change">${t('administrator.dashboard.stats.thisMonth', 'This month')}: ${orderStats.thisMonth || 0}</div>
             </div>
         `;
         dashboardElement.innerHTML = statsHtml;
@@ -244,12 +254,33 @@
     async function loadOperators() {
         try {
             const response = await adminFetch('/api/v1/administrators/operators');
-            const data = await response.json();
+            
+            // Log the response for debugging
+            console.log('Operators endpoint response:', {
+                status: response.status,
+                statusText: response.statusText,
+                ok: response.ok,
+                headers: Object.fromEntries(response.headers.entries())
+            });
+            
+            const text = await response.text();
+            console.log('Response body:', text);
+            
+            let data;
+            try {
+                data = JSON.parse(text);
+            } catch (e) {
+                console.error('Failed to parse response as JSON:', e);
+                document.getElementById('operatorsList').innerHTML = `<p style="padding: 20px; text-align: center; color: #666;">Error: Invalid response format</p>`;
+                return;
+            }
 
             if (response.ok && data.success) {
                 renderOperatorsList(data.operators);
             } else {
-                document.getElementById('operatorsList').innerHTML = `<p style="padding: 20px; text-align: center; color: #666;">${t('administrator.dashboard.errors.operatorsLoadFailed', 'Failed to load operators')}</p>`;
+                console.error('Operators load failed:', data);
+                const errorMsg = data.message || data.error || 'Failed to load operators';
+                document.getElementById('operatorsList').innerHTML = `<p style="padding: 20px; text-align: center; color: #666;">${t('administrator.dashboard.errors.operatorsLoadFailed', errorMsg)}</p>`;
             }
         } catch (error) {
             console.error('Error loading operators:', error);
@@ -280,7 +311,7 @@
                 <tbody>
                     ${operators.map(op => `
                         <tr>
-                            <td>${op.employeeId}</td>
+                            <td>${op.operatorId}</td>
                             <td>${op.firstName} ${op.lastName}</td>
                             <td>${op.email}</td>
                             <td>${op.shiftStart} - ${op.shiftEnd}</td>
@@ -301,46 +332,413 @@
         document.getElementById('operatorsList').innerHTML = tableHtml;
     }
 
-    // Load analytics
-    async function loadAnalytics() {
-        try {
-            const response = await adminFetch('/api/v1/administrators/analytics/orders?period=week');
-            const data = await response.json();
+    // Store current analytics data
+    let currentAnalyticsData = null;
+    let currentDashboardData = null;
+    let currentDateRange = 'month'; // Default to last 30 days
 
-            if (response.ok) {
-                renderAnalyticsOverview(data);
+    // Load analytics with date range
+    async function loadAnalytics(range = currentDateRange) {
+        try {
+            // Update current range
+            currentDateRange = range;
+            
+            // Determine period for API call
+            let period = 'month';
+            switch(range) {
+                case 'today':
+                    period = 'day';
+                    break;
+                case 'week':
+                    period = 'week';
+                    break;
+                case 'month':
+                    period = 'month';
+                    break;
+            }
+            
+            const [ordersResponse, dashboardResponse] = await Promise.all([
+                adminFetch(`/api/v1/administrators/analytics/orders?period=${period}`),
+                adminFetch('/api/v1/administrators/dashboard')
+            ]);
+            
+            // Check response status before parsing
+            if (!ordersResponse.ok || !dashboardResponse.ok) {
+                console.error('One or more API calls failed:', {
+                    orders: ordersResponse.ok ? 'OK' : `Failed (${ordersResponse.status})`,
+                    dashboard: dashboardResponse.ok ? 'OK' : `Failed (${dashboardResponse.status})`
+                });
+                return;
+            }
+            
+            const ordersData = await ordersResponse.json();
+            const dashboardData = await dashboardResponse.json();
+
+            if (ordersData && dashboardData) {
+                // Create analytics data
+                const analyticsData = {
+                    ...ordersData,
+                    dashboardData: dashboardData.dashboard,
+                    dateRange: range
+                };
+                
+                // Store data for re-rendering
+                currentAnalyticsData = analyticsData;
+                currentDashboardData = dashboardData.dashboard;
+                
+                renderAnalyticsOverview(ordersData);
+                renderAnalyticsCharts(analyticsData, dashboardData.dashboard);
+                
+                // Set up date range toggle handlers
+                setupDateRangeToggle();
             }
         } catch (error) {
             console.error('Error loading analytics:', error);
         }
     }
 
+    // Set up date range toggle handlers
+    function setupDateRangeToggle() {
+        const toggleButtons = document.querySelectorAll('.date-range-toggle .toggle-btn');
+        toggleButtons.forEach(btn => {
+            btn.addEventListener('click', async (e) => {
+                // Update active state
+                toggleButtons.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                
+                // Get selected range
+                const range = btn.dataset.range;
+                
+                // Reload all analytics with new date range
+                await loadAnalytics(range);
+            });
+        });
+    }
+
+
     // Render analytics overview
     function renderAnalyticsOverview(data) {
         const t = window.i18n ? window.i18n.t.bind(window.i18n) : (key) => key;
+        
+        // Handle both direct summary and nested analytics.summary structures
+        const summary = data.summary || (data.analytics && data.analytics.summary) || {};
+        
+        // Provide default values if data is missing
+        const totalOrders = summary.totalOrders || 0;
+        const completedOrders = summary.completedOrders || 0;
+        const totalRevenue = summary.totalRevenue || 0;
+        const avgOrderValue = summary.averageOrderValue || summary.avgOrderValue || 0;
+        const completionRate = totalOrders > 0 ? Math.round((completedOrders / totalOrders) * 100) : 0;
+        
         const overviewHtml = `
             <div class="stat-card">
                 <h3>${t('administrator.dashboard.analytics.totalOrders')}</h3>
-                <div class="stat-value">${data.summary.totalOrders}</div>
+                <div class="stat-value">${totalOrders}</div>
                 <div class="stat-change">${t('administrator.dashboard.stats.thisWeek')}</div>
             </div>
             <div class="stat-card">
                 <h3>${t('administrator.dashboard.analytics.completed')}</h3>
-                <div class="stat-value">${data.summary.completedOrders}</div>
-                <div class="stat-change">${Math.round((data.summary.completedOrders / data.summary.totalOrders) * 100)}% ${t('administrator.dashboard.analytics.completionRate')}</div>
+                <div class="stat-value">${completedOrders}</div>
+                <div class="stat-change">${completionRate}% ${t('administrator.dashboard.analytics.completionRate')}</div>
             </div>
             <div class="stat-card">
                 <h3>${t('administrator.dashboard.analytics.revenue')}</h3>
-                <div class="stat-value">$${data.summary.totalRevenue.toFixed(2)}</div>
+                <div class="stat-value">$${totalRevenue.toFixed(2)}</div>
                 <div class="stat-change">${t('administrator.dashboard.stats.thisWeek')}</div>
             </div>
             <div class="stat-card">
                 <h3>${t('administrator.dashboard.analytics.avgOrderValue')}</h3>
-                <div class="stat-value">$${data.summary.avgOrderValue.toFixed(2)}</div>
+                <div class="stat-value">$${avgOrderValue.toFixed(2)}</div>
                 <div class="stat-change">${t('administrator.dashboard.analytics.perOrder')}</div>
             </div>
         `;
         document.getElementById('analyticsOverview').innerHTML = overviewHtml;
+    }
+
+    // Chart instances storage
+    let chartInstances = {
+        revenue: null,
+        processingTime: null,
+        orderStatus: null,
+        dailyOrders: null
+    };
+
+    // Render analytics charts
+    function renderAnalyticsCharts(ordersData, dashboardData) {
+        // Destroy existing charts before creating new ones
+        Object.values(chartInstances).forEach(chart => {
+            if (chart) chart.destroy();
+        });
+
+        // Revenue Chart
+        renderRevenueChart(ordersData);
+        
+        // Processing Time Distribution Chart
+        renderProcessingTimeChart(ordersData);
+        
+        // Order Status Distribution Chart
+        renderOrderStatusChart(dashboardData);
+        
+        // Daily Orders Trend Chart
+        renderDailyOrdersChart(ordersData);
+    }
+
+    // Render revenue chart
+    function renderRevenueChart(data) {
+        const ctx = document.getElementById('revenueChart');
+        if (!ctx) return;
+
+        const timeline = data.analytics?.timeline || [];
+        const labels = timeline.map(item => item._id);
+        const revenues = timeline.map(item => item.totalRevenue || 0);
+
+        chartInstances.revenue = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: t('administrator.dashboard.analytics.revenue', 'Revenue'),
+                    data: revenues,
+                    borderColor: '#4A90E2',
+                    backgroundColor: 'rgba(74, 144, 226, 0.1)',
+                    tension: 0.4,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return '$' + context.parsed.y.toFixed(2);
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) {
+                                return '$' + value;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    // Render processing time chart (daily average scheduled to completion time)
+    function renderProcessingTimeChart(data) {
+        const ctx = document.getElementById('processingTimeChart');
+        if (!ctx) return;
+
+        // Use timeline data to show daily average completion times
+        const timeline = data.analytics?.timeline || [];
+        const labels = timeline.map(item => {
+            const date = new Date(item._id);
+            return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        });
+        
+        // Calculate average processing time in hours for each day
+        const avgProcessingTimes = timeline.map(item => {
+            const avgMinutes = item.averageProcessingTime || 0;
+            return Math.round(avgMinutes / 60 * 10) / 10; // Convert to hours with 1 decimal place
+        });
+
+        chartInstances.processingTime = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: t('administrator.dashboard.analytics.avgProcessingHours', 'Avg Hours to Complete'),
+                    data: avgProcessingTimes,
+                    backgroundColor: 'rgba(40, 167, 69, 0.1)',
+                    borderColor: '#28a745',
+                    borderWidth: 2,
+                    tension: 0.4,
+                    fill: true,
+                    pointBackgroundColor: '#28a745',
+                    pointBorderColor: '#fff',
+                    pointBorderWidth: 2,
+                    pointRadius: 4,
+                    pointHoverRadius: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return context.parsed.y.toFixed(1) + ' hours';
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) {
+                                return value + 'h';
+                            }
+                        },
+                        suggestedMax: 48, // 48 hours max
+                        grid: {
+                            drawBorder: false
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        }
+                    }
+                },
+                interaction: {
+                    intersect: false,
+                    mode: 'index'
+                }
+            }
+        });
+    }
+
+    // Render order status distribution chart
+    function renderOrderStatusChart(data, range = currentOrderStatusRange) {
+        const ctx = document.getElementById('orderStatusChart');
+        if (!ctx) return;
+
+        // Use dashboard data for status distribution
+        const statusDistribution = data.orderStats?.statusDistribution || [];
+        const statusCounts = {};
+        
+        // Build status counts from dashboard data
+        statusDistribution.forEach(item => {
+            statusCounts[item._id] = item.count;
+        });
+
+        // Convert to array format for chart
+        const statusArray = Object.entries(statusCounts)
+            .filter(([status, count]) => count > 0) // Only show statuses with orders
+            .map(([status, count]) => ({ status, count }));
+
+        const labels = statusArray.map(item => {
+            const statusLabels = {
+                'pending': t('administrator.dashboard.orderStatus.pending', 'Pending'),
+                'scheduled': t('administrator.dashboard.orderStatus.scheduled', 'Scheduled'),
+                'processing': t('administrator.dashboard.orderStatus.processing', 'Processing'),
+                'processed': t('administrator.dashboard.orderStatus.processed', 'Processed'),
+                'complete': t('administrator.dashboard.orderStatus.complete', 'Complete'),
+                'cancelled': t('administrator.dashboard.orderStatus.cancelled', 'Cancelled')
+            };
+            return statusLabels[item.status] || item.status;
+        });
+        const counts = statusArray.map(item => item.count);
+
+        const colors = {
+            'pending': '#ffc107',
+            'scheduled': '#17a2b8',
+            'processing': '#007bff',
+            'processed': '#28a745',
+            'complete': '#20c997',
+            'cancelled': '#dc3545'
+        };
+
+        const backgroundColors = statusArray.map(item => colors[item.status] || '#6c757d');
+
+        chartInstances.orderStatus = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: labels,
+                datasets: [{
+                    data: counts,
+                    backgroundColor: backgroundColors,
+                    borderWidth: 2,
+                    borderColor: '#fff'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'right',
+                        labels: {
+                            padding: 15,
+                            usePointStyle: true
+                        }
+                    },
+                    title: {
+                        display: false
+                    }
+                }
+            }
+        });
+    }
+
+    // Render daily orders trend chart
+    function renderDailyOrdersChart(data) {
+        const ctx = document.getElementById('dailyOrdersChart');
+        if (!ctx) return;
+
+        const timeline = data.analytics?.timeline || [];
+        const labels = timeline.map(item => {
+            const date = new Date(item._id);
+            return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        });
+        const totalOrders = timeline.map(item => item.totalOrders || 0);
+        const completedOrders = timeline.map(item => item.completedOrders || 0);
+
+        chartInstances.dailyOrders = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [
+                    {
+                        label: t('administrator.dashboard.analytics.totalOrders', 'Total Orders'),
+                        data: totalOrders,
+                        backgroundColor: 'rgba(74, 144, 226, 0.6)',
+                        borderColor: '#4A90E2',
+                        borderWidth: 1
+                    },
+                    {
+                        label: t('administrator.dashboard.analytics.completedOrders', 'Completed Orders'),
+                        data: completedOrders,
+                        backgroundColor: 'rgba(40, 167, 69, 0.6)',
+                        borderColor: '#28a745',
+                        borderWidth: 1
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top'
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 1
+                        }
+                    }
+                }
+            }
+        });
     }
 
     // Load affiliates
@@ -455,12 +853,51 @@
     const operatorModal = document.getElementById('operatorModal');
     const operatorForm = document.getElementById('operatorForm');
     let editingOperatorId = null;
+    let passwordValidator = null;
+
+    // Initialize password validator component
+    function initPasswordValidator() {
+        const container = document.getElementById('operatorPasswordValidator');
+        if (container && window.PasswordValidatorComponent) {
+            passwordValidator = new window.PasswordValidatorComponent('operatorPasswordValidator', {
+                showUsername: true,
+                showConfirmPassword: true,
+                showStrengthIndicator: true,
+                showRequirements: true,
+                usernameRequired: true,
+                passwordRequired: true
+            });
+
+            // Listen for email changes to update validation
+            const emailField = document.getElementById('email');
+            if (emailField) {
+                emailField.addEventListener('input', (e) => {
+                    if (passwordValidator) {
+                        passwordValidator.options.email = e.target.value;
+                        passwordValidator.updatePasswordRequirements();
+                    }
+                });
+            }
+        }
+    }
 
     document.getElementById('addOperatorBtn').addEventListener('click', () => {
         editingOperatorId = null;
         const titleText = window.i18n ? window.i18n.t('administrator.dashboard.operators.addOperator') : 'Add Operator';
         document.getElementById('operatorModalTitle').textContent = titleText;
         operatorForm.reset();
+        
+        // Show password container for new operators
+        const passwordContainer = document.getElementById('operatorPasswordContainer');
+        if (passwordContainer) {
+            passwordContainer.style.display = 'block';
+            if (!passwordValidator) {
+                initPasswordValidator();
+            } else {
+                passwordValidator.reset();
+            }
+        }
+        
         operatorModal.classList.add('active');
     });
 
@@ -481,11 +918,21 @@
             firstName: formData.get('firstName'),
             lastName: formData.get('lastName'),
             email: formData.get('email'),
-            phone: formData.get('phone'),
             shiftStart: formData.get('shiftStart'),
-            shiftEnd: formData.get('shiftEnd'),
-            specializations: formData.getAll('specializations')
+            shiftEnd: formData.get('shiftEnd')
         };
+
+        // Add username and password for new operators
+        if (!editingOperatorId) {
+            if (!passwordValidator || !passwordValidator.isValid()) {
+                alert('Please fill in all required fields and ensure the password meets all requirements.');
+                return;
+            }
+            
+            const credentials = passwordValidator.getValues();
+            operatorData.username = credentials.username;
+            operatorData.password = credentials.password;
+        }
 
         try {
             const url = editingOperatorId 
@@ -580,18 +1027,18 @@
                 const titleText = window.i18n ? window.i18n.t('administrator.dashboard.operators.editOperator') : 'Edit Operator';
                 document.getElementById('operatorModalTitle').textContent = titleText;
                 
+                // Hide password container for editing
+                const passwordContainer = document.getElementById('operatorPasswordContainer');
+                if (passwordContainer) {
+                    passwordContainer.style.display = 'none';
+                }
+                
                 // Fill form with operator data
                 document.getElementById('firstName').value = data.operator.firstName;
                 document.getElementById('lastName').value = data.operator.lastName;
                 document.getElementById('email').value = data.operator.email;
-                document.getElementById('phone').value = data.operator.phone;
-                document.getElementById('shiftStart').value = data.operator.shiftStart;
-                document.getElementById('shiftEnd').value = data.operator.shiftEnd;
-                
-                // Set specializations
-                document.querySelectorAll('input[name="specializations"]').forEach(checkbox => {
-                    checkbox.checked = data.operator.specializations.includes(checkbox.value);
-                });
+                document.getElementById('shiftStart').value = data.operator.shiftStart || '';
+                document.getElementById('shiftEnd').value = data.operator.shiftEnd || '';
                 
                 operatorModal.classList.add('active');
             }
@@ -661,11 +1108,29 @@
             window.i18n.translatePage();
         }
         
+        // Refresh password validator translations if it exists
+        if (passwordValidator && passwordValidator.refreshTranslations) {
+            passwordValidator.refreshTranslations();
+        }
+        
         // Update dynamic content in the active tab
         const activeTab = document.querySelector('.nav-tab.active');
         if (activeTab) {
             const tabName = activeTab.getAttribute('data-tab');
             loadTabData(tabName);
+        }
+    });
+    
+    // Listen for language changes from parent iframe bridge
+    // This is how the affiliate dashboard handles language changes
+    window.addEventListener('message', function(event) {
+        // Handle language change messages from parent iframe
+        if (event.data && event.data.type === 'language-change') {
+            const language = event.data.data?.language;
+            if (language && window.i18n && window.i18n.setLanguage) {
+                console.log('[Admin Dashboard] Received language change from parent:', language);
+                window.i18n.setLanguage(language);
+            }
         }
     });
 })();

@@ -590,8 +590,8 @@ exports.createOperator = async (req, res) => {
       firstName, 
       lastName, 
       email, 
+      username,
       password, 
-      workStation, 
       shiftStart, 
       shiftEnd 
     } = req.body;
@@ -619,8 +619,8 @@ exports.createOperator = async (req, res) => {
       firstName,
       lastName,
       email: email.toLowerCase(),
+      username: username.toLowerCase(),
       password,
-      workStation,
       shiftStart,
       shiftEnd,
       createdBy: req.user.id
@@ -683,7 +683,6 @@ exports.getOperators = async (req, res) => {
       limit = 20, 
       isActive, 
       active, // Support both 'active' and 'isActive' parameters
-      workStation, 
       onShift,
       search,
       sortBy = 'createdAt',
@@ -699,9 +698,6 @@ exports.getOperators = async (req, res) => {
       query.isActive = activeParam === 'true';
     }
     
-    if (workStation) {
-      query.workStation = workStation;
-    }
     
     if (search) {
       query.$or = [
@@ -1060,8 +1056,20 @@ exports.getDashboard = async (req, res) => {
             { $group: { _id: '$orderProcessingStatus', count: { $sum: 1 } } }
           ],
           averageProcessingTime: [
-            { $match: { processingTimeMinutes: { $exists: true } } },
-            { $group: { _id: null, avg: { $avg: '$processingTimeMinutes' } } }
+            { $match: { 
+              status: 'complete',
+              processingStartedAt: { $exists: true },
+              completedAt: { $exists: true }
+            }},
+            { $project: {
+              processingTime: {
+                $divide: [
+                  { $subtract: ['$completedAt', '$processingStartedAt'] },
+                  1000 * 60 // Convert to minutes
+                ]
+              }
+            }},
+            { $group: { _id: null, avg: { $avg: '$processingTime' } } }
           ]
         }
       }
@@ -1156,12 +1164,47 @@ exports.getDashboard = async (req, res) => {
       onShiftOperators: await Operator.findOnShift().then(ops => ops.length),
       activeAffiliates: await Affiliate.countDocuments({ isActive: true }),
       totalCustomers: await Customer.countDocuments(),
-      pendingOrders: await Order.countDocuments({ orderProcessingStatus: 'pending' }),
+      ordersInProgress: await Order.countDocuments({ 
+        status: { $in: ['pending', 'scheduled', 'processing', 'processed'] } 
+      }),
+      completedOrders: await Order.countDocuments({ status: 'complete' }),
       processingDelays: await Order.countDocuments({
-        orderProcessingStatus: { $in: ['assigned', 'washing', 'drying', 'folding'] },
-        processingStarted: { $lte: new Date(Date.now() - 2 * 60 * 60 * 1000) } // 2 hours
+        status: 'processing',
+        processingStartedAt: { $lte: new Date(Date.now() - 24 * 60 * 60 * 1000) } // 24 hours
       })
     };
+
+    // Get recent activity (last 10 activities)
+    const recentOrders = await Order.find({})
+      .sort({ updatedAt: -1 })
+      .limit(10)
+      .lean();
+    
+    // Get unique affiliate IDs from recent orders
+    const affiliateIds = [...new Set(recentOrders.map(o => o.affiliateId).filter(id => id))];
+    
+    let formattedActivity = [];
+    
+    if (affiliateIds.length > 0) {
+      const affiliates = await Affiliate.find({ affiliateId: { $in: affiliateIds } })
+        .select('affiliateId firstName lastName businessName')
+        .lean();
+      
+      // Create a map for quick lookup
+      const affiliateMap = new Map(affiliates.map(a => [a.affiliateId, a]));
+      
+      formattedActivity = recentOrders.map(order => {
+        const affiliate = affiliateMap.get(order.affiliateId);
+        return {
+          timestamp: order.updatedAt,
+          type: 'Order',
+          userName: affiliate ? 
+            `${affiliate.firstName} ${affiliate.lastName}` : 
+            'Unknown',
+          action: `Order ${order.orderId} - Status: ${order.status}`
+        };
+      });
+    }
 
     res.json({
       success: true,
@@ -1176,7 +1219,8 @@ exports.getDashboard = async (req, res) => {
         },
         operatorPerformance,
         affiliatePerformance,
-        systemHealth
+        systemHealth,
+        recentActivity: formattedActivity
       }
     });
 
@@ -1216,23 +1260,54 @@ exports.getOrderAnalytics = async (req, res) => {
         }
       },
       {
+        $addFields: {
+          // Calculate completion time in minutes (from scheduled to completed)
+          completionTimeMinutes: {
+            $cond: [
+              { 
+                $and: [
+                  { $eq: ['$status', 'complete'] },
+                  { $ne: ['$scheduledAt', null] },
+                  { $ne: ['$completedAt', null] }
+                ]
+              },
+              {
+                $divide: [
+                  { $subtract: ['$completedAt', '$scheduledAt'] },
+                  60000 // Convert milliseconds to minutes
+                ]
+              },
+              null
+            ]
+          }
+        }
+      },
+      {
         $group: {
           _id: {
             $dateToString: {
               format: groupByFormat[groupBy] || groupByFormat.day,
-              date: '$createdAt'
+              date: '$completedAt' // Group by completion date for completed orders
             }
           },
           totalOrders: { $sum: 1 },
           completedOrders: {
-            $sum: { $cond: [{ $eq: ['$status', 'delivered'] }, 1, 0] }
+            $sum: { $cond: [{ $eq: ['$status', 'complete'] }, 1, 0] }
           },
           cancelledOrders: {
             $sum: { $cond: [{ $eq: ['$status', 'cancelled'] }, 1, 0] }
           },
           totalRevenue: { $sum: '$actualTotal' },
           averageOrderValue: { $avg: '$actualTotal' },
-          averageProcessingTime: { $avg: '$processingTimeMinutes' },
+          averageProcessingTime: { 
+            $avg: {
+              $cond: [
+                { $eq: ['$status', 'complete'] },
+                '$completionTimeMinutes',
+                null
+              ]
+            }
+          },
           totalWeight: { $sum: '$actualWeight' }
         }
       },
@@ -1270,9 +1345,13 @@ exports.getOrderAnalytics = async (req, res) => {
         processingTimeDistribution,
         summary: {
           totalOrders: analytics.reduce((sum, item) => sum + item.totalOrders, 0),
+          completedOrders: analytics.reduce((sum, item) => sum + item.completedOrders, 0),
           totalRevenue: analytics.reduce((sum, item) => sum + (item.totalRevenue || 0), 0),
           averageOrderValue: analytics.reduce((sum, item) => sum + (item.averageOrderValue || 0), 0) / analytics.length,
-          averageProcessingTime: analytics.reduce((sum, item) => sum + (item.averageProcessingTime || 0), 0) / analytics.length
+          averageProcessingTime: analytics.reduce((sum, item) => {
+            // Only include non-null processing times in the average
+            return sum + (item.averageProcessingTime || 0);
+          }, 0) / analytics.filter(item => item.averageProcessingTime > 0).length || 0
         }
       }
     });
@@ -1943,7 +2022,7 @@ exports.getAvailableOperators = async (req, res) => {
     })
       .sort({ currentOrderCount: 1 })
       .limit(parseInt(limit))
-      .select('operatorId firstName lastName email workStation currentOrderCount isActive isOnShift shiftStart shiftEnd');
+      .select('operatorId firstName lastName email currentOrderCount isActive isOnShift shiftStart shiftEnd');
 
     res.json({
       success: true,
@@ -2082,8 +2161,7 @@ exports.updateOperatorSelf = async (req, res) => {
       }
     });
 
-    // Prevent operators from changing critical fields like workStation
-    delete filteredUpdates.workStation;
+    // Prevent operators from changing critical fields
     delete filteredUpdates.operatorId;
     delete filteredUpdates.email;
     delete filteredUpdates.isActive;

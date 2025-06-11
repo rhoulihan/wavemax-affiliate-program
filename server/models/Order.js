@@ -37,8 +37,8 @@ const orderSchema = new mongoose.Schema({
   // Order status
   status: {
     type: String,
-    enum: ['scheduled', 'picked_up', 'processing', 'ready_for_delivery', 'delivered', 'cancelled'],
-    default: 'scheduled'
+    enum: ['pending', 'scheduled', 'processing', 'processed', 'complete', 'cancelled'],
+    default: 'pending'
   },
   // Laundry details
   actualWeight: Number,
@@ -99,11 +99,11 @@ const orderSchema = new mongoose.Schema({
     default: 'pending'
   },
   // Timestamps
-  scheduledAt: { type: Date, default: Date.now },
-  pickedUpAt: Date,
-  processedAt: Date,
-  readyForDeliveryAt: Date,
-  deliveredAt: Date,
+  createdAt: { type: Date, default: Date.now }, // When order was created (pending state)
+  scheduledAt: Date, // When affiliate accepted the order
+  processingStartedAt: Date, // When order was received and WDF started
+  processedAt: Date, // When order is ready for affiliate pickup
+  completedAt: Date, // When affiliate delivered the order
   cancelledAt: Date
 }, { timestamps: true });
 
@@ -140,20 +140,20 @@ orderSchema.pre('save', async function(next) {
   if (this.isModified('status')) {
     const now = new Date();
     switch (this.status) {
-    case 'picked_up':
-      this.pickedUpAt = now;
+    case 'scheduled':
+      if (!this.scheduledAt) this.scheduledAt = now;
       break;
     case 'processing':
-      this.processedAt = now;
+      if (!this.processingStartedAt) this.processingStartedAt = now;
       break;
-    case 'ready_for_delivery':
-      this.readyForDeliveryAt = now;
+    case 'processed':
+      if (!this.processedAt) this.processedAt = now;
       break;
-    case 'delivered':
-      this.deliveredAt = now;
+    case 'complete':
+      if (!this.completedAt) this.completedAt = now;
       break;
     case 'cancelled':
-      this.cancelledAt = now;
+      if (!this.cancelledAt) this.cancelledAt = now;
       break;
     }
   }

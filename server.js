@@ -222,6 +222,18 @@ app.use(session({
     sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax', // 'none' required for cross-site iframe in production
     path: '/', // Ensure cookie is available for all paths
     domain: undefined // Let browser handle domain (works better for same-origin)
+  },
+  // Add genid to ensure consistent session IDs
+  genid: function(req) {
+    // For iframe contexts, try to use a consistent ID based on authorization token
+    if (req.headers.authorization) {
+      const crypto = require('crypto');
+      const token = req.headers.authorization.replace('Bearer ', '');
+      // Create a deterministic session ID based on the auth token
+      return 'sess_' + crypto.createHash('sha256').update(token).digest('hex').substring(0, 32);
+    }
+    // Default to random ID
+    return require('crypto').randomBytes(16).toString('hex');
   }
 }));
 
