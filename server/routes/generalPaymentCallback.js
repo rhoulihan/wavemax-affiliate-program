@@ -5,7 +5,6 @@ const Order = require('../models/Order');
 const Customer = require('../models/Customer');
 const emailService = require('../utils/emailService');
 const auditLogger = require('../utils/auditLogger');
-const bcrypt = require('bcryptjs');
 
 /**
  * Handle Paygistix payment callback for both registration and orders
@@ -236,11 +235,8 @@ router.post('/', async (req, res) => {
                 if (pendingRegistration) {
                     try {
                         // Create the customer
-                        const hashedPassword = await bcrypt.hash(pendingRegistration.password, 10);
-                        
                         const customer = new Customer({
                             ...pendingRegistration,
-                            password: hashedPassword,
                             paymentVerified: true,
                             paymentTransactionId: transactionId,
                             createdAt: new Date()
