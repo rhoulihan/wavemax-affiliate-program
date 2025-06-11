@@ -230,12 +230,11 @@
                     <h3 class="text-xl font-bold mb-4" data-i18n="customer.register.laundryBags">Laundry Bags</h3>
                     <div class="bg-yellow-50 border border-yellow-200 p-4 rounded-lg mb-4">
                         <p class="text-sm text-gray-700 mb-2">
-                            <strong data-i18n="customer.register.important">Important:</strong> <span data-i18n="customer.register.bagRequirement">Laundry bags are required for our service. Each bag costs <span id="bagFeeDisplay">$10.00</span> and will be:</span>
+                            <strong data-i18n="customer.register.important">Important:</strong> <span data-i18n="customer.register.bagRequirement">A one-time bag fee of <span id="bagFeeDisplay">$10.00</span> per bag is required for registration.</span>
                         </p>
                         <ul class="list-disc list-inside text-sm text-gray-700 space-y-1">
                             <li data-i18n="customer.register.bagCharged">Charged when you register</li>
-                            <li data-i18n="customer.register.bagDelivered">Delivered by your affiliate</li>
-                            <li data-i18n="customer.register.bagCredited">Credited back on your first order</li>
+                            <li data-i18n="customer.register.bagDelivered">Bags will be delivered by your affiliate</li>
                         </ul>
                     </div>
                     <div>
@@ -253,7 +252,7 @@
                     <div class="mt-4">
                         <div class="bg-blue-50 border border-blue-200 p-3 rounded">
                             <p class="text-sm font-bold text-blue-800"><span data-i18n="customer.register.totalBagFee">Total Bag Fee:</span> <span id="totalBagFee">$0.00</span></p>
-                            <p class="text-xs text-blue-600 mt-1" data-i18n="customer.register.bagCreditNote">This amount will be credited on your first order.</p>
+                            <p class="text-xs text-blue-600 mt-1" data-i18n="customer.register.bagNote">This fee covers the cost of your laundry bags.</p>
                         </div>
                     </div>
                 </div>
@@ -261,41 +260,13 @@
                 <!-- Payment Information -->
                 <div>
                     <h3 class="text-xl font-bold mb-4" data-i18n="customer.register.paymentInfo">Payment Information</h3>
-                    <div id="paymentMethodContainer">
-                        <p class="mb-4" data-i18n="customer.register.paymentSecure">All payment information will be securely encrypted.</p>
-                        
-                        <div class="grid md:grid-cols-2 gap-4">
-                            <div class="md:col-span-2">
-                                <label for="cardholderName" class="block text-gray-700 mb-2" data-i18n="customer.register.cardholderName">Cardholder Name *</label>
-                                <input type="text" id="cardholderName" name="cardholderName" required class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                            </div>
-                            
-                            <div class="md:col-span-2">
-                                <label for="cardNumber" class="block text-gray-700 mb-2" data-i18n="customer.register.cardNumber">Card Number *</label>
-                                <input type="text" id="cardNumber" name="cardNumber" required class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="•••• •••• •••• ••••">
-                            </div>
-                            
-                            <div>
-                                <label for="expiryDate" class="block text-gray-700 mb-2" data-i18n="customer.register.expiryDate">Expiry Date *</label>
-                                <input type="text" id="expiryDate" name="expiryDate" required class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="MM/YY">
-                            </div>
-                            
-                            <div>
-                                <label for="cvv" class="block text-gray-700 mb-2" data-i18n="customer.register.cvv">CVV *</label>
-                                <input type="text" id="cvv" name="cvv" required class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="•••">
-                            </div>
-                            
-                            <div class="md:col-span-2">
-                                <label for="billingZip" class="block text-gray-700 mb-2" data-i18n="customer.register.billingZip">Billing ZIP Code *</label>
-                                <input type="text" id="billingZip" name="billingZip" required class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                            </div>
-                        </div>
-                        
-                        <div class="mt-4">
-                            <div class="flex items-start">
-                                <input type="checkbox" id="savePaymentInfo" name="savePaymentInfo" class="mt-1 mr-2">
-                                <label for="savePaymentInfo" class="text-gray-700" data-i18n="customer.register.savePaymentInfo">Save payment information for future orders</label>
-                            </div>
+                    <!-- Hidden context for payment form -->
+                    <input type="hidden" id="PAYCONTEXT" value="REGISTRATION" />
+                    
+                    <div id="paymentFormContainer">
+                        <!-- Paygistix payment form will be loaded here -->
+                        <div class="text-center py-4">
+                            <span class="text-gray-600" data-i18n="customer.register.loadingPayment">Loading payment form...</span>
                         </div>
                     </div>
                 </div>
@@ -334,7 +305,7 @@
                 
                 <!-- Submit Button -->
                 <div>
-                    <button type="submit" class="w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-blue-700 transition" data-i18n="customer.register.submitButton">Register for Laundry Service</button>
+                    <button type="button" id="submitRegistration" class="w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-blue-700 transition" data-i18n="customer.register.submitButton">Register for Laundry Service</button>
                 </div>
             </form>
         </div>
@@ -471,9 +442,112 @@
     <script src="/assets/js/modal-utils.js"></script>
     <script src="/assets/js/errorHandler.js"></script>
     <script src="/assets/js/csrf-utils.js"></script>
+    <script src="/assets/js/paygistix-payment-form.js"></script>
     <script src="/assets/js/customer-register.js"></script>
     <script>
-        // Initialize i18n
+        let paymentForm = null;
+        let paymentConfig = null;
+        
+        // Initialize payment form
+        async function initializePaymentForm() {
+            try {
+                // Load payment configuration first
+                const configResponse = await fetch('/api/v1/payments/config');
+                const configData = await configResponse.json();
+                
+                if (!configData.success) {
+                    throw new Error(configData.message || 'Failed to load payment configuration');
+                }
+                
+                paymentConfig = configData.config;
+                
+                // Initialize the Paygistix payment form
+                paymentForm = new PaygistixPaymentForm('paymentFormContainer', {
+                    merchantId: paymentConfig.merchantId,
+                    formId: paymentConfig.formId,
+                    hash: paymentConfig.formHash,
+                    formActionUrl: paymentConfig.formActionUrl,
+                    returnURL: `${paymentConfig.returnUrl}?type=registration`,
+                    onSuccess: function() {
+                        console.log('Payment form initialized');
+                    },
+                    onError: function(error) {
+                        console.error('Payment form error:', error);
+                        document.getElementById('paymentFormContainer').innerHTML = 
+                            '<div class="text-red-600 p-4">Failed to load payment form. Please refresh the page.</div>';
+                    }
+                });
+                
+                // Update bag quantity when selection changes
+                updateBagQuantity();
+                
+            } catch (error) {
+                console.error('Error initializing payment form:', error);
+                document.getElementById('paymentFormContainer').innerHTML = 
+                    '<div class="text-red-600 p-4">Failed to load payment form. Please refresh the page.</div>';
+            }
+        }
+        
+        // Update bag quantity in payment form
+        function updateBagQuantity() {
+            const numberOfBags = document.getElementById('numberOfBags').value;
+            if (paymentForm && numberOfBags) {
+                paymentForm.setPrefilledAmounts({
+                    BF: parseInt(numberOfBags)
+                });
+            }
+        }
+        
+        // Handle registration submission
+        function handleRegistrationSubmit() {
+            const form = document.getElementById('customerRegistrationForm');
+            
+            // Validate form fields first
+            if (!form.checkValidity()) {
+                form.reportValidity();
+                return;
+            }
+            
+            // Check if payment form has valid data
+            if (!paymentForm || paymentForm.getTotal() === 0) {
+                modalAlert('Please select the number of bags needed before proceeding.', 'Payment Required');
+                return;
+            }
+            
+            // Collect form data
+            const formData = new FormData(form);
+            const customerData = {};
+            
+            formData.forEach((value, key) => {
+                customerData[key] = value;
+            });
+            
+            // Store customer data for post-payment processing
+            customerData.timestamp = Date.now();
+            customerData.paymentPending = true;
+            
+            // Add customer ID to payment form
+            if (paymentForm) {
+                paymentForm.setOrderDetails({
+                    customerData: customerData,
+                    registrationType: 'new_customer'
+                });
+            }
+            
+            // Store in session for callback processing
+            sessionStorage.setItem('pendingRegistration', JSON.stringify(customerData));
+            
+            // Submit the Paygistix payment form
+            const paygistixForm = document.querySelector('form[action*="paygistix"]');
+            if (paygistixForm) {
+                paygistixForm.submit();
+            } else {
+                console.error('Paygistix form not found');
+                modalAlert('Payment form not ready. Please refresh the page and try again.', 'Payment Error');
+            }
+        }
+        
+        // Initialize i18n and payment form
         document.addEventListener('DOMContentLoaded', async function() {
             await window.i18n.init({ debugMode: false });
             window.LanguageSwitcher.createSwitcher('language-switcher-container', {
@@ -484,6 +558,22 @@
             if (window.i18n && window.i18n.translatePage) {
                 window.i18n.translatePage();
             }
+            
+            // Initialize payment form
+            await initializePaymentForm();
+            
+            // Listen for bag quantity changes
+            document.getElementById('numberOfBags').addEventListener('change', function() {
+                updateBagQuantity();
+                // Update the bag fee display
+                const numberOfBags = parseInt(this.value) || 0;
+                const bagFee = 10.00; // Default, should match system config
+                const total = numberOfBags * bagFee;
+                document.getElementById('totalBagFee').textContent = `$${total.toFixed(2)}`;
+            });
+            
+            // Handle submit button click
+            document.getElementById('submitRegistration').addEventListener('click', handleRegistrationSubmit);
         });
     </script>
 

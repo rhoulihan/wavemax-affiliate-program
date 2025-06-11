@@ -350,7 +350,7 @@ apiV1Router.use('/system/config', systemConfigRoutes);
 apiV1Router.use('/payments', paymentRoutes);
 
 // Paygistix callback route (directly under /api/v1 for the callback)
-apiV1Router.use('/', require('./server/routes/paymentCallbackRoute'));
+apiV1Router.use('/payment_callback', require('./server/routes/generalPaymentCallback'));
 
 // Environment endpoint
 apiV1Router.get('/environment', (req, res) => {
