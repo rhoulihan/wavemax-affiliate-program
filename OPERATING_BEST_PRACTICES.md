@@ -79,7 +79,9 @@ This document contains important operational knowledge and workarounds discovere
 3. **Critical Script Loading Order**:
    - **Issue**: Scripts included in embedded HTML pages are NOT automatically loaded
    - **Discovered**: 2025-01-09 - SwirlSpinner class not available in affiliate registration
+   - **Discovered**: 2025-06-10 - FormValidation not available in affiliate registration
    - **Symptom**: JavaScript classes/functions undefined even though script tags exist in HTML
+   - **Root Cause**: The script was only included in the direct HTML file (affiliate-register-embed.html) but not in the pageScripts configuration in embed-app.html, which is what loads scripts when pages are loaded dynamically in the embedded iframe
    - **Solution**: Scripts must be added to BOTH locations:
      1. In the HTML file's script tags (for direct access)
      2. In embed-app.html's `pageScripts` mapping (for embedded access)
@@ -94,6 +96,7 @@ This document contains important operational knowledge and workarounds discovere
              '/assets/js/errorHandler.js',
              '/assets/js/csrf-utils.js',
              '/assets/js/swirl-spinner.js',  // Must be listed before scripts that use it
+             '/assets/js/form-validation.js', // Added 2025-06-10 for field validation
              '/assets/js/affiliate-register-init.js'
          ],
      };
@@ -102,6 +105,7 @@ This document contains important operational knowledge and workarounds discovere
      1. Add script tag to the HTML file
      2. Add to pageScripts in embed-app.html in correct loading order
      3. Test in both direct access AND embedded contexts
+     4. Verify the script is available via console debugging (e.g., check `window.FormValidation`)
 
 3. **Script Initialization Best Practices for Dynamic Content**:
    - **Use multiple initialization strategies**:
