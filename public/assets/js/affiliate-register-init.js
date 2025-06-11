@@ -44,6 +44,14 @@
 function initializeAffiliateRegistration() {
   console.log('[Init] Starting affiliate registration initialization');
   
+  // Initialize form validation first
+  if (window.FormValidation) {
+    console.log('[Init] Initializing form validation...');
+    window.FormValidation.initialize();
+  } else {
+    console.warn('[Init] FormValidation not available');
+  }
+  
   // Configuration for embedded environment
   const baseUrl = window.EMBED_CONFIG?.baseUrl || 'https://wavemax.promo';
   const isEmbedded = window.EMBED_CONFIG?.isEmbedded || false;
@@ -179,6 +187,17 @@ function initializeAffiliateRegistration() {
   // Shared validation function for both OAuth and form submission
   function validateFormFields(isSocialRegistration = false) {
     const requiredFields = [];
+    let hasValidationErrors = false;
+    
+    // First, run field-specific validation if FormValidation is available
+    if (window.FormValidation) {
+      console.log('[Form Validation] Running comprehensive field validation...');
+      const formValid = window.FormValidation.validateForm();
+      if (!formValid) {
+        hasValidationErrors = true;
+        console.log('[Form Validation] Field validation failed');
+      }
+    }
     
     // Personal information always required (OAuth pre-fills these but they can be missing for validation during OAuth button click)
     requiredFields.push(
@@ -253,6 +272,13 @@ function initializeAffiliateRegistration() {
       if (!paypalEmail?.value.trim()) missingFields.push('PayPal Email');
     }
 
+    // If we have field validation errors, add them to missing fields
+    if (hasValidationErrors) {
+      if (missingFields.length === 0) {
+        missingFields.push('Please correct the highlighted field errors above');
+      }
+    }
+    
     return missingFields;
   }
 
@@ -1106,16 +1132,36 @@ function initializeAffiliateRegistration() {
       height: document.body.scrollHeight
     }, '*');
 
-    // Monitor form height changes
+    // Track last sent height to prevent micro-adjustments
+    let lastSentHeight = 0;
+    let heightUpdateTimeout = null;
+    
+    // Monitor form height changes with throttling to prevent infinite loops
     resizeObserver = new ResizeObserver(entries => {
       // Check if we're still on the registration page
       if (!window.location.href.includes('affiliate-success')) {
         for (let entry of entries) {
-          console.log('Sending height to parent:', entry.target.scrollHeight);
-          window.parent.postMessage({
-            type: 'form-height',
-            height: entry.target.scrollHeight
-          }, '*');
+          const newHeight = entry.target.scrollHeight;
+          
+          // Only send height updates if the change is significant (more than 10px)
+          // and not too frequent (throttled)
+          if (Math.abs(newHeight - lastSentHeight) > 10) {
+            
+            // Clear any pending height update
+            if (heightUpdateTimeout) {
+              clearTimeout(heightUpdateTimeout);
+            }
+            
+            // Throttle height updates to prevent rapid-fire changes
+            heightUpdateTimeout = setTimeout(() => {
+              console.log('Sending height to parent:', newHeight);
+              lastSentHeight = newHeight;
+              window.parent.postMessage({
+                type: 'form-height',
+                height: newHeight
+              }, '*');
+            }, 200); // Wait 200ms before sending
+          }
         }
       } else {
         // If we've navigated away, disconnect the observer
