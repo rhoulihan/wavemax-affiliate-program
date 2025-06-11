@@ -285,14 +285,14 @@ describe('Model Tests', () => {
       expect(order.processedAt).toBeDefined();
 
       // Update status to ready_for_delivery
-      order.status = 'ready_for_delivery';
+      order.status = 'processed';
       await order.save();
-      expect(order.readyForDeliveryAt).toBeDefined();
+      expect(order.processedAt).toBeDefined();
 
-      // Update status to delivered
-      order.status = 'delivered';
+      // Update status to complete
+      order.status = 'complete';
       await order.save();
-      expect(order.deliveredAt).toBeDefined();
+      expect(order.completedAt).toBeDefined();
     });
   });
 

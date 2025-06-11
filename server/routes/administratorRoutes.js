@@ -13,27 +13,7 @@ router.use(checkRole(['administrator']));
 // Dashboard (must come before /:id routes)
 router.get('/dashboard', administratorController.getDashboard);
 
-// Administrator CRUD routes
-router.get('/', checkAdminPermission(['administrators.read']), administratorController.getAdministrators);
-router.get('/permissions', administratorController.getPermissions);
-router.post('/', checkAdminPermission(['administrators.create']), [
-  body('firstName').notEmpty().withMessage('First name is required'),
-  body('lastName').notEmpty().withMessage('Last name is required'),
-  body('email').isEmail().withMessage('Valid email is required'),
-  body('password').custom(customPasswordValidator())
-], administratorController.createAdministrator);
-router.get('/:id', checkAdminPermission(['administrators.read']), administratorController.getAdministratorById);
-router.patch('/:id', checkAdminPermission(['administrators.update']), administratorController.updateAdministrator);
-router.delete('/:id', checkAdminPermission(['administrators.delete']), administratorController.deleteAdministrator);
-router.post('/:id/reset-password', checkAdminPermission(['administrators.update']), administratorController.resetAdministratorPassword);
-
-// Change password route (for logged-in admin changing their own password)
-router.post('/change-password', [
-  body('currentPassword').notEmpty().withMessage('Current password is required'),
-  body('newPassword').custom(customPasswordValidator())
-], administratorController.changeAdministratorPassword);
-
-// Operator Management
+// Operator Management (must come before /:id routes)
 router.post('/operators', checkAdminPermission(['operator_management']), [
   body('firstName').notEmpty().withMessage('First name is required'),
   body('lastName').notEmpty().withMessage('Last name is required'),
@@ -46,7 +26,7 @@ router.put('/operators/:operatorId', checkAdminPermission(['operator_management'
 router.delete('/operators/:operatorId', checkAdminPermission(['operator_management']), administratorController.deactivateOperator);
 router.post('/operators/:operatorId/reset-password', checkAdminPermission(['operator_management']), administratorController.resetOperatorPassword);
 
-// Analytics
+// Analytics (must come before /:id routes)
 router.get('/analytics/orders', checkAdminPermission(['view_analytics']), administratorController.getOrderAnalytics);
 router.get('/analytics/operators', checkAdminPermission(['view_analytics']), administratorController.getOperatorAnalytics);
 router.get('/analytics/affiliates', checkAdminPermission(['view_analytics']), administratorController.getAffiliateAnalytics);
@@ -60,5 +40,28 @@ router.put('/config', checkAdminPermission(['system_config']), administratorCont
 
 // System Health
 router.get('/system/health', administratorController.getSystemHealth);
+
+// Administrator CRUD routes (these have :id params so must come after specific routes)
+router.get('/', checkAdminPermission(['administrators.read']), administratorController.getAdministrators);
+router.get('/permissions', administratorController.getPermissions);
+router.post('/', checkAdminPermission(['administrators.create']), [
+  body('firstName').notEmpty().withMessage('First name is required'),
+  body('lastName').notEmpty().withMessage('Last name is required'),
+  body('email').isEmail().withMessage('Valid email is required'),
+  body('password').custom(customPasswordValidator())
+], administratorController.createAdministrator);
+
+// Change password route (for logged-in admin changing their own password)
+router.post('/change-password', [
+  body('currentPassword').notEmpty().withMessage('Current password is required'),
+  body('newPassword').custom(customPasswordValidator())
+], administratorController.changeAdministratorPassword);
+
+// Administrator routes with :id parameter (MUST BE LAST)
+router.get('/:id', checkAdminPermission(['administrators.read']), administratorController.getAdministratorById);
+router.patch('/:id', checkAdminPermission(['administrators.update']), administratorController.updateAdministrator);
+router.delete('/:id', checkAdminPermission(['administrators.delete']), administratorController.deleteAdministrator);
+router.post('/:id/reset-password', checkAdminPermission(['administrators.update']), administratorController.resetAdministratorPassword);
+
 
 module.exports = router;

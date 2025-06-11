@@ -341,7 +341,7 @@ describe('Order Controller', () => {
     it('should validate status transitions', async () => {
       const mockOrder = {
         orderId: 'ORD123',
-        status: 'delivered'
+        status: 'complete'
       };
 
       req.params.orderId = 'ORD123';
@@ -355,11 +355,11 @@ describe('Order Controller', () => {
       expect(res.status).toHaveBeenCalledWith(400);
       expect(res.json).toHaveBeenCalledWith({
         success: false,
-        message: 'Invalid status transition from delivered to scheduled'
+        message: 'Invalid status transition from complete to scheduled'
       });
     });
 
-    it('should send commission email when delivered', async () => {
+    it('should send commission email when complete', async () => {
       const mockOrder = {
         orderId: 'ORD123',
         status: 'ready_for_delivery',
@@ -370,7 +370,7 @@ describe('Order Controller', () => {
       const mockAffiliate = { affiliateId: 'AFF123' };
 
       req.params.orderId = 'ORD123';
-      req.body = { status: 'delivered' };
+      req.body = { status: 'complete' };
       req.user = { role: 'admin' };
 
       Order.findOne.mockResolvedValue(mockOrder);

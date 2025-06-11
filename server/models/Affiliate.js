@@ -34,8 +34,20 @@ const affiliateSchema = new mongoose.Schema({
       default: undefined
     }
   },
-  serviceLatitude: { type: Number, required: true },
-  serviceLongitude: { type: Number, required: true },
+  serviceLatitude: { 
+    type: Number, 
+    required: function() {
+      // Only required for new affiliates or traditional registration
+      return this.isNew || this.registrationMethod === 'traditional';
+    }
+  },
+  serviceLongitude: { 
+    type: Number, 
+    required: function() {
+      // Only required for new affiliates or traditional registration
+      return this.isNew || this.registrationMethod === 'traditional';
+    }
+  },
   serviceRadius: { type: Number, required: true, default: 5, min: 1, max: 50 }, // Service radius in miles
   // Delivery fee structure
   minimumDeliveryFee: { 

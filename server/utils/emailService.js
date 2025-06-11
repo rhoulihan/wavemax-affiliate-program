@@ -339,7 +339,7 @@ exports.sendAffiliateNewCustomerEmail = async (affiliate, customer, bagInfo = {}
       en: {
         EMAIL_TITLE: 'New Customer Registration',
         EMAIL_HEADER: 'New Customer Registration!',
-        GREETING: `Congratulations, ${affiliate.businessName || affiliate.firstName}!`,
+        GREETING: 'Congratulations, {business_name}!',
         NEW_CUSTOMER_MESSAGE: 'Great news! A new customer has just registered through your affiliate link.',
         ACTION_REQUIRED_LABEL: 'Action Required',
         ACTION_REQUIRED_MESSAGE: `Please deliver ${numberOfBags} laundry bag(s) to your new customer within 48 hours.`,
@@ -362,7 +362,7 @@ exports.sendAffiliateNewCustomerEmail = async (affiliate, customer, bagInfo = {}
       es: {
         EMAIL_TITLE: 'Nuevo Registro de Cliente',
         EMAIL_HEADER: '¡Nuevo Registro de Cliente!',
-        GREETING: `¡Felicitaciones, ${affiliate.businessName || affiliate.firstName}!`,
+        GREETING: '¡Felicitaciones, {business_name}!',
         NEW_CUSTOMER_MESSAGE: '¡Excelentes noticias! Un nuevo cliente acaba de registrarse a través de su enlace de afiliado.',
         ACTION_REQUIRED_LABEL: 'Acción Requerida',
         ACTION_REQUIRED_MESSAGE: `Por favor entregue ${numberOfBags} bolsa(s) de lavandería a su nuevo cliente dentro de 48 horas.`,
@@ -385,7 +385,7 @@ exports.sendAffiliateNewCustomerEmail = async (affiliate, customer, bagInfo = {}
       pt: {
         EMAIL_TITLE: 'Novo Registro de Cliente',
         EMAIL_HEADER: 'Novo Registro de Cliente!',
-        GREETING: `Parabéns, ${affiliate.businessName || affiliate.firstName}!`,
+        GREETING: 'Parabéns, {business_name}!',
         NEW_CUSTOMER_MESSAGE: 'Ótimas notícias! Um novo cliente acabou de se registrar através do seu link de afiliado.',
         ACTION_REQUIRED_LABEL: 'Ação Necessária',
         ACTION_REQUIRED_MESSAGE: `Por favor, entregue ${numberOfBags} sacola(s) de lavanderia ao seu novo cliente dentro de 48 horas.`,
@@ -433,6 +433,7 @@ exports.sendAffiliateNewCustomerEmail = async (affiliate, customer, bagInfo = {}
     const emailTranslations = translations[language] || translations.en;
 
     const data = {
+      business_name: affiliate.businessName || affiliate.firstName || 'Affiliate',
       affiliate_first_name: affiliate.firstName,
       affiliate_name: affiliate.businessName || `${affiliate.firstName} ${affiliate.lastName}`,
       customer_first_name: customer.firstName,
@@ -891,7 +892,7 @@ exports.sendCustomerWelcomeEmail = async (customer, affiliate, bagInfo = {}) => 
       en: {
         EMAIL_TITLE: 'Welcome to WaveMAX Laundry Service',
         EMAIL_HEADER: 'Welcome to WaveMAX Laundry!',
-        GREETING: `Hi ${customer.firstName},`,
+        GREETING: 'Hi {first_name},',
         WELCOME_MESSAGE: 'Welcome to WaveMAX Laundry Service! Your account has been successfully created and you\'re ready to enjoy premium wash, dry, fold laundry services.',
         YOUR_INFO_TITLE: 'Your Account Information',
         CUSTOMER_ID_LABEL: 'Customer ID',
@@ -931,7 +932,7 @@ exports.sendCustomerWelcomeEmail = async (customer, affiliate, bagInfo = {}) => 
       es: {
         EMAIL_TITLE: 'Bienvenido al Servicio de Lavandería WaveMAX',
         EMAIL_HEADER: '¡Bienvenido a WaveMAX Laundry!',
-        GREETING: `Hola ${customer.firstName},`,
+        GREETING: 'Hola {first_name},',
         WELCOME_MESSAGE: '¡Bienvenido al Servicio de Lavandería WaveMAX! Su cuenta ha sido creada exitosamente y está listo para disfrutar de servicios premium de lavado, secado y doblado.',
         YOUR_INFO_TITLE: 'Información de Su Cuenta',
         CUSTOMER_ID_LABEL: 'ID de Cliente',
@@ -971,7 +972,7 @@ exports.sendCustomerWelcomeEmail = async (customer, affiliate, bagInfo = {}) => 
       pt: {
         EMAIL_TITLE: 'Bem-vindo ao Serviço de Lavanderia WaveMAX',
         EMAIL_HEADER: 'Bem-vindo ao WaveMAX Laundry!',
-        GREETING: `Olá ${customer.firstName},`,
+        GREETING: 'Olá {first_name},',
         WELCOME_MESSAGE: 'Bem-vindo ao Serviço de Lavanderia WaveMAX! Sua conta foi criada com sucesso e você está pronto para desfrutar de serviços premium de lavar, secar e dobrar roupas.',
         YOUR_INFO_TITLE: 'Informações da Sua Conta',
         CUSTOMER_ID_LABEL: 'ID do Cliente',
@@ -1011,7 +1012,7 @@ exports.sendCustomerWelcomeEmail = async (customer, affiliate, bagInfo = {}) => 
       de: {
         EMAIL_TITLE: 'Willkommen beim WaveMAX Wäscheservice',
         EMAIL_HEADER: 'Willkommen bei WaveMAX Laundry!',
-        GREETING: `Hallo ${customer.firstName},`,
+        GREETING: 'Hallo {first_name},',
         WELCOME_MESSAGE: 'Willkommen beim WaveMAX Wäscheservice! Ihr Konto wurde erfolgreich erstellt und Sie können nun Premium-Wasch-, Trocken- und Faltservice genießen.',
         YOUR_INFO_TITLE: 'Ihre Kontoinformationen',
         CUSTOMER_ID_LABEL: 'Kunden-ID',
@@ -1263,16 +1264,18 @@ exports.sendOrderStatusUpdateEmail = async (customer, order, status) => {
         FOOTER_RIGHTS: 'All rights reserved.',
         FOOTER_AUTOMATED_MESSAGE: 'This is an automated message. Please do not reply to this email.',
         STATUS_MESSAGES: {
-          picked_up: 'Your laundry has been picked up',
-          processing: 'Your laundry is being processed',
-          ready_for_delivery: 'Your laundry is ready for delivery',
-          delivered: 'Your laundry has been delivered'
+          pending: 'Your order has been created and is awaiting acceptance',
+          scheduled: 'Your order has been accepted by the affiliate',
+          processing: 'Your laundry has been received and is being processed',
+          processed: 'Your laundry is ready for pickup by the affiliate',
+          complete: 'Your laundry has been delivered'
         },
         STATUS_TITLES: {
-          picked_up: 'Laundry Picked Up',
+          pending: 'Order Pending',
+          scheduled: 'Order Scheduled',
           processing: 'Laundry Processing',
-          ready_for_delivery: 'Ready for Delivery',
-          delivered: 'Laundry Delivered'
+          processed: 'Ready for Pickup',
+          complete: 'Order Complete'
         }
       },
       es: {
@@ -1289,16 +1292,18 @@ exports.sendOrderStatusUpdateEmail = async (customer, order, status) => {
         FOOTER_RIGHTS: 'Todos los derechos reservados.',
         FOOTER_AUTOMATED_MESSAGE: 'Este es un mensaje automatizado. Por favor no responda a este correo.',
         STATUS_MESSAGES: {
-          picked_up: 'Su ropa ha sido recogida',
-          processing: 'Su ropa está siendo procesada',
-          ready_for_delivery: 'Su ropa está lista para entrega',
-          delivered: 'Su ropa ha sido entregada'
+          pending: 'Su pedido ha sido creado y está esperando aceptación',
+          scheduled: 'Su pedido ha sido aceptado por el afiliado',
+          processing: 'Su ropa ha sido recibida y está siendo procesada',
+          processed: 'Su ropa está lista para ser recogida por el afiliado',
+          complete: 'Su ropa ha sido entregada'
         },
         STATUS_TITLES: {
-          picked_up: 'Ropa Recogida',
+          pending: 'Pedido Pendiente',
+          scheduled: 'Pedido Programado',
           processing: 'Procesando Ropa',
-          ready_for_delivery: 'Lista para Entrega',
-          delivered: 'Ropa Entregada'
+          processed: 'Lista para Recoger',
+          complete: 'Pedido Completo'
         }
       },
       pt: {
@@ -1315,16 +1320,18 @@ exports.sendOrderStatusUpdateEmail = async (customer, order, status) => {
         FOOTER_RIGHTS: 'Todos os direitos reservados.',
         FOOTER_AUTOMATED_MESSAGE: 'Esta é uma mensagem automatizada. Por favor, não responda a este e-mail.',
         STATUS_MESSAGES: {
-          picked_up: 'Sua roupa foi coletada',
-          processing: 'Sua roupa está sendo processada',
-          ready_for_delivery: 'Sua roupa está pronta para entrega',
-          delivered: 'Sua roupa foi entregue'
+          pending: 'Seu pedido foi criado e está aguardando aceitação',
+          scheduled: 'Seu pedido foi aceito pelo afiliado',
+          processing: 'Sua roupa foi recebida e está sendo processada',
+          processed: 'Sua roupa está pronta para ser recolhida pelo afiliado',
+          complete: 'Sua roupa foi entregue'
         },
         STATUS_TITLES: {
-          picked_up: 'Roupa Coletada',
+          pending: 'Pedido Pendente',
+          scheduled: 'Pedido Agendado',
           processing: 'Processando Roupa',
-          ready_for_delivery: 'Pronta para Entrega',
-          delivered: 'Roupa Entregue'
+          processed: 'Pronta para Recolher',
+          complete: 'Pedido Completo'
         }
       },
       de: {
@@ -1341,16 +1348,18 @@ exports.sendOrderStatusUpdateEmail = async (customer, order, status) => {
         FOOTER_RIGHTS: 'Alle Rechte vorbehalten.',
         FOOTER_AUTOMATED_MESSAGE: 'Dies ist eine automatisierte Nachricht. Bitte antworten Sie nicht auf diese E-Mail.',
         STATUS_MESSAGES: {
-          picked_up: 'Ihre Wäsche wurde abgeholt',
-          processing: 'Ihre Wäsche wird bearbeitet',
-          ready_for_delivery: 'Ihre Wäsche ist bereit zur Lieferung',
-          delivered: 'Ihre Wäsche wurde geliefert'
+          pending: 'Ihre Bestellung wurde erstellt und wartet auf Annahme',
+          scheduled: 'Ihre Bestellung wurde vom Partner angenommen',
+          processing: 'Ihre Wäsche wurde empfangen und wird bearbeitet',
+          processed: 'Ihre Wäsche ist bereit zur Abholung durch den Partner',
+          complete: 'Ihre Wäsche wurde geliefert'
         },
         STATUS_TITLES: {
-          picked_up: 'Wäsche abgeholt',
+          pending: 'Bestellung ausstehend',
+          scheduled: 'Bestellung geplant',
           processing: 'Wäsche in Bearbeitung',
-          ready_for_delivery: 'Bereit zur Lieferung',
-          delivered: 'Wäsche geliefert'
+          processed: 'Bereit zur Abholung',
+          complete: 'Bestellung abgeschlossen'
         }
       }
     };
@@ -1706,7 +1715,6 @@ exports.sendOperatorWelcomeEmail = async (operator, temporaryPin) => {
         TEMPORARY_PIN_LABEL: 'Temporary PIN',
         EMAIL_LABEL: 'Email',
         SHIFT_HOURS_LABEL: 'Shift Hours',
-        SPECIALIZATIONS_LABEL: 'Specializations',
         LOGIN_BUTTON: 'Login to Operator Portal',
         IMPORTANT_INFO_TITLE: 'Important Information',
         IMPORTANT_INFO_LIST: '<ul><li>Change your PIN on first login</li><li>You can only login during your assigned shift hours</li><li>Keep your PIN confidential - never share it with anyone</li><li>Clock in at the start of your shift and clock out when finished</li><li>Contact your supervisor if you have any questions</li></ul>',
@@ -1725,7 +1733,6 @@ exports.sendOperatorWelcomeEmail = async (operator, temporaryPin) => {
         TEMPORARY_PIN_LABEL: 'PIN Temporal',
         EMAIL_LABEL: 'Correo Electrónico',
         SHIFT_HOURS_LABEL: 'Horario de Turno',
-        SPECIALIZATIONS_LABEL: 'Especializaciones',
         LOGIN_BUTTON: 'Ingresar al Portal de Operador',
         IMPORTANT_INFO_TITLE: 'Información Importante',
         IMPORTANT_INFO_LIST: '<ul><li>Cambie su PIN en el primer inicio de sesión</li><li>Solo puede iniciar sesión durante sus horas de turno asignadas</li><li>Mantenga su PIN confidencial - nunca lo comparta con nadie</li><li>Registre su entrada al inicio de su turno y su salida al finalizar</li><li>Contacte a su supervisor si tiene alguna pregunta</li></ul>',
@@ -1744,7 +1751,6 @@ exports.sendOperatorWelcomeEmail = async (operator, temporaryPin) => {
         TEMPORARY_PIN_LABEL: 'PIN Temporário',
         EMAIL_LABEL: 'E-mail',
         SHIFT_HOURS_LABEL: 'Horário do Turno',
-        SPECIALIZATIONS_LABEL: 'Especializações',
         LOGIN_BUTTON: 'Entrar no Portal do Operador',
         IMPORTANT_INFO_TITLE: 'Informações Importantes',
         IMPORTANT_INFO_LIST: '<ul><li>Mude seu PIN no primeiro login</li><li>Você só pode fazer login durante seus horários de turno atribuídos</li><li>Mantenha seu PIN confidencial - nunca o compartilhe com ninguém</li><li>Registre entrada no início do seu turno e saída quando terminar</li><li>Entre em contato com seu supervisor se tiver alguma dúvida</li></ul>',
@@ -1763,7 +1769,6 @@ exports.sendOperatorWelcomeEmail = async (operator, temporaryPin) => {
         TEMPORARY_PIN_LABEL: 'Temporäre PIN',
         EMAIL_LABEL: 'E-Mail',
         SHIFT_HOURS_LABEL: 'Schichtzeiten',
-        SPECIALIZATIONS_LABEL: 'Spezialisierungen',
         LOGIN_BUTTON: 'Zum Betreiberportal anmelden',
         IMPORTANT_INFO_TITLE: 'Wichtige Informationen',
         IMPORTANT_INFO_LIST: '<ul><li>Ändern Sie Ihre PIN bei der ersten Anmeldung</li><li>Sie können sich nur während Ihrer zugewiesenen Schichtzeiten anmelden</li><li>Halten Sie Ihre PIN vertraulich - teilen Sie sie niemals mit anderen</li><li>Stempeln Sie zu Beginn Ihrer Schicht ein und am Ende aus</li><li>Kontaktieren Sie Ihren Vorgesetzten bei Fragen</li></ul>',
@@ -1778,11 +1783,10 @@ exports.sendOperatorWelcomeEmail = async (operator, temporaryPin) => {
     const data = {
       first_name: operator.firstName,
       last_name: operator.lastName,
-      employee_id: operator.employeeId,
+      employee_id: operator.operatorId || operator.employeeId,
       email: operator.email,
       temporary_pin: temporaryPin,
-      shift_hours: `${operator.shiftStart} - ${operator.shiftEnd}`,
-      specializations: operator.specializations.join(', '),
+      shift_hours: operator.shiftStart && operator.shiftEnd ? `${operator.shiftStart} - ${operator.shiftEnd}` : 'Not specified',
       login_url: `${process.env.BASE_URL || 'https://wavemax.promo'}/embed-app.html?login=operator`,
       current_year: new Date().getFullYear(),
       ...emailTranslations

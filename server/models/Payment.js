@@ -41,8 +41,7 @@ const PaymentSchema = new mongoose.Schema({
   paygistixId: {
     type: String,
     required: true,
-    unique: true,
-    index: true
+    unique: true
   },
   transactionId: {
     type: String,
@@ -142,7 +141,6 @@ const PaymentSchema = new mongoose.Schema({
 PaymentSchema.index({ orderId: 1, status: 1 });
 PaymentSchema.index({ customerId: 1, createdAt: -1 });
 PaymentSchema.index({ status: 1, createdAt: -1 });
-PaymentSchema.index({ paygistixId: 1 });
 
 // Virtual for net amount (captured - refunded)
 PaymentSchema.virtual('netAmount').get(function() {

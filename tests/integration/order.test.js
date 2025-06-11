@@ -369,28 +369,28 @@ describe('Order Integration Tests', () => {
         .set('Authorization', `Bearer ${affiliateToken}`)
         .set('X-CSRF-Token', csrfToken)
         .send({
-          status: 'picked_up'
+          status: 'processing'
         });
 
       expect(response.status).toBe(200);
       expect(response.body).toMatchObject({
         success: true,
         orderId: 'ORD123456',
-        status: 'picked_up',
+        status: 'processing',
         message: 'Order status updated successfully!'
       });
 
       // Verify status was updated
       const order = await Order.findOne({ orderId: 'ORD123456' });
-      expect(order.status).toBe('picked_up');
-      expect(order.pickedUpAt).toBeDefined();
+      expect(order.status).toBe('processing');
+      expect(order.processingStartedAt).toBeDefined();
     });
 
     it('should update weight when processing', async () => {
-      // First update to picked_up
+      // First update to processing
       await Order.updateOne(
         { orderId: 'ORD123456' },
-        { status: 'picked_up' }
+        { status: 'processing' }
       );
 
       const response = await agent
@@ -398,7 +398,7 @@ describe('Order Integration Tests', () => {
         .set('Authorization', `Bearer ${affiliateToken}`)
         .set('X-CSRF-Token', csrfToken)
         .send({
-          status: 'processing',
+          status: 'processed',
           actualWeight: 25.5
         });
 
@@ -412,10 +412,10 @@ describe('Order Integration Tests', () => {
     });
 
     it('should prevent invalid status transitions', async () => {
-      // Update to delivered first
+      // Update to complete first
       await Order.updateOne(
         { orderId: 'ORD123456' },
-        { status: 'delivered' }
+        { status: 'complete' }
       );
 
       const response = await agent
@@ -429,7 +429,7 @@ describe('Order Integration Tests', () => {
       expect(response.status).toBe(400);
       expect(response.body).toMatchObject({
         success: false,
-        message: 'Invalid status transition from delivered to scheduled'
+        message: 'Invalid status transition from complete to scheduled'
       });
     });
 
@@ -444,7 +444,7 @@ describe('Order Integration Tests', () => {
         .set('Authorization', `Bearer ${otherAffiliateToken}`)
         .set('X-CSRF-Token', csrfToken)
         .send({
-          status: 'picked_up'
+          status: 'processing'
         });
 
       expect(response.status).toBe(403);
@@ -460,7 +460,7 @@ describe('Order Integration Tests', () => {
         .set('Authorization', `Bearer ${customerToken}`)
         .set('X-CSRF-Token', csrfToken)
         .send({
-          status: 'picked_up'
+          status: 'processing'
         });
 
       expect(response.status).toBe(403);
@@ -625,7 +625,7 @@ describe('Order Integration Tests', () => {
         .set('X-CSRF-Token', csrfToken)
         .send({
           orderIds: ['ORD001', 'ORD002'],
-          status: 'picked_up'
+          status: 'processing'
         });
 
       expect(response.status).toBe(200);
@@ -645,8 +645,8 @@ describe('Order Integration Tests', () => {
     });
 
     it('should handle partial bulk update failures', async () => {
-      // Update one order to delivered first
-      await Order.updateOne({ orderId: 'ORD001' }, { status: 'delivered' });
+      // Update one order to complete first
+      await Order.updateOne({ orderId: 'ORD001' }, { status: 'complete' });
 
       const response = await agent
         .put('/api/v1/orders/bulk/status')
@@ -654,7 +654,7 @@ describe('Order Integration Tests', () => {
         .set('X-CSRF-Token', csrfToken)
         .send({
           orderIds: ['ORD001', 'ORD002', 'ORD003'],
-          status: 'picked_up'
+          status: 'processing'
         });
 
       expect(response.status).toBe(200);
@@ -663,7 +663,7 @@ describe('Order Integration Tests', () => {
         updated: 2,
         failed: 1,
         results: expect.arrayContaining([
-          { orderId: 'ORD001', success: false, message: expect.stringContaining('Cannot transition from delivered to picked_up') },
+          { orderId: 'ORD001', success: false, message: expect.stringContaining('Cannot transition from complete to processing') },
           { orderId: 'ORD002', success: true, message: 'Order updated successfully' },
           { orderId: 'ORD003', success: true, message: 'Order updated successfully' }
         ])
@@ -704,7 +704,7 @@ describe('Order Integration Tests', () => {
           pickupTime: i % 3 === 0 ? 'morning' : i % 3 === 1 ? 'afternoon' : 'evening',
           deliveryDate: new Date(`2025-05-${String(i + 2).padStart(2, '0')}`),
           deliveryTime: 'afternoon',
-          status: i <= 10 ? 'delivered' : 'processing',
+          status: i <= 10 ? 'complete' : 'processing',
           estimatedWeight: i % 3 === 0 ? 15 : i % 3 === 1 ? 30 : 50,
           numberOfBags: i % 3 === 0 ? 1 : i % 3 === 1 ? 2 : 3,
           actualWeight: i <= 10 ? 20 + i : null,
@@ -744,7 +744,7 @@ describe('Order Integration Tests', () => {
         .set('Authorization', `Bearer ${affiliateToken}`)
         .query({
           format: 'json',
-          status: 'delivered',
+          status: 'complete',
           affiliateId: 'AFF123'
         });
 
@@ -754,14 +754,14 @@ describe('Order Integration Tests', () => {
         success: true,
         exportDate: expect.any(String),
         filters: {
-          status: 'delivered',
+          status: 'complete',
           affiliateId: 'AFF123'
         },
         totalOrders: 10,
         orders: expect.any(Array)
       });
       expect(response.body.orders).toHaveLength(10);
-      expect(response.body.orders.every(order => order.status === 'delivered')).toBe(true);
+      expect(response.body.orders.every(order => order.status === 'complete')).toBe(true);
     });
 
     it('should export orders as Excel', async () => {
@@ -818,7 +818,7 @@ describe('Order Integration Tests', () => {
         minimumDeliveryFee: 25,
         perBagDeliveryFee: 5,
         actualTotal: 54.19,
-        deliveredAt: new Date('2025-05-27'),
+        completedAt: new Date('2025-05-27'),
         paymentStatus: 'pending'
       });
       await testOrder.save();
@@ -869,7 +869,7 @@ describe('Order Integration Tests', () => {
       expect(response.body.order.paymentError).toBe('Insufficient funds');
     });
 
-    it('should prevent payment status update on non-delivered orders', async () => {
+    it('should prevent payment status update on non-complete orders', async () => {
       await Order.updateOne({ orderId: 'ORD123456' }, { status: 'processing' });
 
       const response = await agent
@@ -883,7 +883,7 @@ describe('Order Integration Tests', () => {
       expect(response.status).toBe(400);
       expect(response.body).toMatchObject({
         success: false,
-        message: 'Cannot update payment status for non-delivered orders'
+        message: 'Cannot update payment status for non-complete orders'
       });
     });
 
@@ -947,7 +947,7 @@ describe('Order Integration Tests', () => {
           pickupTime: 'morning',
           deliveryDate: new Date('2025-05-22'),
           deliveryTime: 'afternoon',
-          status: 'delivered',
+          status: 'complete',
           estimatedWeight: 30,
           numberOfBags: 2,
           actualWeight: 25.5,
@@ -1034,7 +1034,7 @@ describe('Order Integration Tests', () => {
         .get('/api/v1/affiliates/AFF123/orders')
         .set('Authorization', `Bearer ${affiliateToken}`)
         .query({
-          status: 'delivered',
+          status: 'complete',
           date: 'month'
         });
 
@@ -1081,7 +1081,7 @@ describe('Order Integration Tests', () => {
           ordersByStatus: {
             scheduled: 1,
             processing: 1,
-            delivered: 1
+            complete: 1
           },
           totalRevenue: 54.19,
           averageOrderValue: 54.19,
@@ -1124,7 +1124,7 @@ describe('Order Integration Tests', () => {
       // Update order with actual weight (as admin/operator would)
       const order = await Order.findOne({ orderId });
       order.actualWeight = 25; // 25 lbs
-      order.status = 'delivered';
+      order.status = 'complete';
       await order.save();
 
       // Verify commission calculation
@@ -1220,7 +1220,7 @@ describe('Order Integration Tests', () => {
       for (const orderId of orderIds) {
         const order = await Order.findOne({ orderId });
         order.actualWeight = 20; // 20 lbs each
-        order.status = 'delivered';
+        order.status = 'complete';
         await order.save();
       }
 
@@ -1260,7 +1260,7 @@ describe('Order Integration Tests', () => {
       // Update with actual weight
       const order = await Order.findOne({ orderId: response.body.orderId });
       order.actualWeight = 15;
-      order.status = 'delivered';
+      order.status = 'complete';
       await order.save();
 
       const updatedOrder = await Order.findOne({ orderId: response.body.orderId });
