@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Failed - WaveMAX</title>
+    <link href="assets/css/wavemax-embed.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #f8f9fa;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+        
+        .error-container {
+            background: white;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            text-align: center;
+            max-width: 500px;
+            width: 100%;
+        }
+        
+        .error-icon {
+            width: 80px;
+            height: 80px;
+            background: #ef4444;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+        }
+        
+        .error-icon svg {
+            width: 40px;
+            height: 40px;
+            fill: white;
+        }
+        
+        h1 {
+            color: #991b1b;
+            margin: 0 0 10px 0;
+            font-size: 28px;
+        }
+        
+        .error-message {
+            color: #6b7280;
+            margin: 0 0 30px 0;
+            font-size: 16px;
+            line-height: 1.5;
+        }
+        
+        .error-details {
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            padding: 20px;
+            border-radius: 4px;
+            margin: 20px 0;
+            text-align: left;
+        }
+        
+        .error-details h3 {
+            margin: 0 0 10px 0;
+            color: #991b1b;
+            font-size: 16px;
+        }
+        
+        .error-details p {
+            margin: 5px 0;
+            color: #7f1d1d;
+            font-size: 14px;
+        }
+        
+        .help-section {
+            background: #f3f4f6;
+            padding: 20px;
+            border-radius: 4px;
+            margin: 20px 0;
+            text-align: left;
+        }
+        
+        .help-section h3 {
+            margin: 0 0 15px 0;
+            color: #1e3a8a;
+            font-size: 18px;
+        }
+        
+        .help-section ul {
+            margin: 0;
+            padding-left: 20px;
+        }
+        
+        .help-section li {
+            margin: 8px 0;
+            color: #4b5563;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 30px;
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            border-radius: 4px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s;
+            cursor: pointer;
+            border: none;
+            font-size: 16px;
+        }
+        
+        .btn-primary {
+            background: #3b82f6;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #2563eb;
+        }
+        
+        .btn-secondary {
+            background: white;
+            color: #6b7280;
+            border: 2px solid #e5e7eb;
+        }
+        
+        .btn-secondary:hover {
+            background: #f3f4f6;
+        }
+        
+        .support-link {
+            color: #3b82f6;
+            text-decoration: none;
+        }
+        
+        .support-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="error-container">
+        <div class="error-icon">
+            <svg viewBox="0 0 24 24">
+                <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/>
+            </svg>
+        </div>
+        
+        <h1>Payment Failed</h1>
+        <p class="error-message">
+            We were unable to process your payment. Please review the error details below and try again.
+        </p>
+        
+        <div class="error-details" id="errorDetails">
+            <h3>Error Details</h3>
+            <p id="errorMessage">Loading error information...</p>
+        </div>
+        
+        <div class="help-section">
+            <h3>What to do next:</h3>
+            <ul>
+                <li>Check your card details and try again</li>
+                <li>Ensure you have sufficient funds in your account</li>
+                <li>Try a different payment method</li>
+                <li>Contact your bank if the problem persists</li>
+            </ul>
+        </div>
+        
+        <div class="action-buttons">
+            <a href="#" class="btn btn-primary" id="retryBtn">Try Again</a>
+            <a href="#" class="btn btn-secondary" id="backBtn">Back to Order</a>
+        </div>
+        
+        <p style="margin-top: 20px; color: #6b7280; font-size: 14px;">
+            Need help? <a href="#" class="support-link" id="supportLink">Contact Support</a>
+        </p>
+    </div>
+    
+    <script>
+        // Get parameters from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const orderId = urlParams.get('orderId');
+        const message = urlParams.get('message') || 'Payment processing failed';
+        const responseCode = urlParams.get('responseCode');
+        
+        // Display error message
+        function displayError() {
+            let errorHtml = message;
+            
+            if (responseCode) {
+                errorHtml += `<br><small style="color: #9ca3af;">Error Code: ${responseCode}</small>`;
+            }
+            
+            document.getElementById('errorMessage').innerHTML = errorHtml;
+        }
+        
+        // Set up button links
+        if (orderId) {
+            document.getElementById('retryBtn').href = `/paygistix-payment-embed.html?orderId=${orderId}`;
+            document.getElementById('backBtn').href = `/order-details?orderId=${orderId}`;
+        } else {
+            document.getElementById('retryBtn').href = '/schedule-pickup';
+            document.getElementById('backBtn').href = '/customer-dashboard';
+        }
+        
+        // Set up support link
+        document.getElementById('supportLink').href = 'mailto:support@wavemaxlaundry.com?subject=Payment Failed - Order ' + (orderId || 'Unknown');
+        
+        // Display error on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            displayError();
+            
+            // Notify parent window if embedded
+            if (window.parent !== window) {
+                window.parent.postMessage({
+                    type: 'paymentError',
+                    orderId: orderId,
+                    message: message,
+                    responseCode: responseCode
+                }, '*');
+            }
+        });
+    </script>
+</body>
+</html>

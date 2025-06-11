@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const paymentController = require('../controllers/paymentController');
+const paymentConfigRoute = require('./paymentConfigRoute');
 const { authenticate } = require('../middleware/auth');
 const { body, param, query } = require('express-validator');
 
@@ -9,6 +10,9 @@ router.post('/webhook',
   express.raw({ type: 'application/json' }), // Raw body for signature verification
   paymentController.handleWebhook
 );
+
+// Payment configuration endpoint (public)
+router.use('/config', paymentConfigRoute);
 
 // All other routes require authentication
 router.use(authenticate);

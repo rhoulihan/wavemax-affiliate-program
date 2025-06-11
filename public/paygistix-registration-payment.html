@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registration Payment - WaveMAX</title>
+    <link href="assets/css/wavemax-embed.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #f8f9fa;
+            margin: 0;
+            padding: 20px;
+        }
+        
+        .payment-container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .payment-header {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        
+        .payment-header h1 {
+            margin: 0 0 10px 0;
+            color: #1e3a8a;
+            font-size: 24px;
+        }
+        
+        .payment-header p {
+            margin: 0;
+            color: #6b7280;
+        }
+        
+        .registration-info {
+            background: #e8f4fd;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+        
+        .registration-info h3 {
+            margin: 0 0 10px 0;
+            color: #1e3a8a;
+            font-size: 18px;
+        }
+        
+        .registration-info p {
+            margin: 5px 0;
+            color: #4b5563;
+        }
+        
+        .error-message {
+            background: #fee2e2;
+            border: 1px solid #fecaca;
+            color: #991b1b;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <!-- Set context for payment form -->
+    <input type="hidden" id="PAYCONTEXT" value="REGISTRATION" />
+    
+    <div class="payment-container">
+        <div class="payment-header">
+            <h1>Complete Your Registration</h1>
+            <p>One-time bag fee payment required</p>
+        </div>
+        
+        <div class="registration-info">
+            <h3>Registration Fee</h3>
+            <p>A one-time bag fee of $1.00 is required to complete your registration.</p>
+            <p>This fee covers the cost of your laundry bags and helps us maintain our service quality.</p>
+        </div>
+        
+        <div id="paymentFormContainer">
+            <!-- Payment form will be loaded here -->
+        </div>
+    </div>
+    
+    <script src="assets/js/paygistix-payment-form.js"></script>
+    <script>
+        // Get customer details from URL or session
+        const urlParams = new URLSearchParams(window.location.search);
+        const customerId = urlParams.get('customerId') || localStorage.getItem('pendingCustomerId');
+        const customerName = urlParams.get('name') || '';
+        const returnUrl = urlParams.get('returnUrl') || '/registration-success';
+        
+        // Load payment configuration and initialize form
+        async function initializePayment() {
+            try {
+                // Load payment configuration
+                const configResponse = await fetch('/api/v1/payments/config');
+                const configData = await configResponse.json();
+                
+                if (!configData.success) {
+                    throw new Error(configData.message || 'Failed to load payment configuration');
+                }
+                
+                const paymentConfig = configData.config;
+                
+                // Initialize the payment form
+                const paymentForm = new PaygistixPaymentForm('paymentFormContainer', {
+                    customerId: customerId,
+                    merchantId: paymentConfig.merchantId,
+                    formId: paymentConfig.formId,
+                    hash: paymentConfig.formHash,
+                    formActionUrl: paymentConfig.formActionUrl,
+                    returnURL: `${paymentConfig.returnUrl}?customerId=${customerId}&type=registration`,
+                    onSuccess: function() {
+                        console.log('Payment form initialized');
+                    },
+                    onError: function(error) {
+                        showError('Payment initialization failed: ' + error.message);
+                    }
+                });
+                
+                // Pre-fill bag fee quantity to 1
+                setTimeout(() => {
+                    paymentForm.setPrefilledAmounts({
+                        BF: 1  // Set bag fee quantity to 1
+                    });
+                }, 500);
+                
+            } catch (error) {
+                console.error('Error initializing payment:', error);
+                showError('Failed to initialize payment form. Please try again.');
+            }
+        }
+        
+        function showError(message) {
+            const errorHtml = `<div class="error-message">${message}</div>`;
+            document.getElementById('paymentFormContainer').innerHTML = errorHtml;
+        }
+        
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            if (!customerId) {
+                showError('Customer information not found. Please complete registration first.');
+                return;
+            }
+            
+            initializePayment();
+        });
+        
+        // Handle messages from parent window if embedded
+        window.addEventListener('message', function(event) {
+            if (event.data.type === 'customerInfo') {
+                const customerId = event.data.customerId;
+                if (customerId) {
+                    localStorage.setItem('pendingCustomerId', customerId);
+                    initializePayment();
+                }
+            }
+        });
+    </script>
+</body>
+</html>
