@@ -28,6 +28,7 @@ class PaygistixPaymentForm {
         this.payContext = this.getPayContext();
         this.affiliateId = this.getAffiliateId();
         this.wdfPrice = 1.25; // Default, will be updated from system config
+        this.bagFee = 1.00; // Default, will be updated from system config
         this.affiliateSettings = null;
         
         this.init();
@@ -65,6 +66,15 @@ class PaygistixPaymentForm {
                 const wdfData = await wdfResponse.json();
                 if (wdfData.success && wdfData.value) {
                     this.wdfPrice = parseFloat(wdfData.value);
+                }
+            }
+            
+            // Load system bag fee
+            const bagFeeResponse = await fetch('/api/v1/system/config/bag_fee');
+            if (bagFeeResponse.ok) {
+                const bagFeeData = await bagFeeResponse.json();
+                if (bagFeeData.success && bagFeeData.value) {
+                    this.bagFee = parseFloat(bagFeeData.value);
                 }
             }
             
@@ -217,8 +227,9 @@ class PaygistixPaymentForm {
     }
     
     getAllServices() {
-        // Get WDF price from system config
+        // Get prices from system config
         const wdfPrice = this.wdfPrice;
+        const bagFeePrice = this.bagFee;
         
         // Get affiliate fees or use defaults
         const perBagFee = this.affiliateSettings?.perBagDeliveryFee || 5.00;
@@ -226,7 +237,7 @@ class PaygistixPaymentForm {
         
         // All possible service definitions with dynamic pricing
         return [
-            { code: 'BF', description: 'Bag Fee', price: 1.00, index: 1 },
+            { code: 'BF', description: 'Bag Fee', price: bagFeePrice, index: 1 },
             { code: 'WDF', description: 'Wash Dry Fold Service', price: wdfPrice, unit: 'per lb', index: 2 },
             { code: 'DF5', description: '$5 per bag delivery fee', price: 5.00, index: 3 },
             { code: 'DF10', description: '$10 per bag delivery fee', price: 10.00, index: 4 },
