@@ -780,7 +780,7 @@ class PaygistixPaymentForm {
         
         modalContent.innerHTML = `
             <div class="loading-state">
-                <div style="display: inline-block; width: 50px; height: 50px; border: 3px solid #f3f3f3; border-top: 3px solid #1e3a8a; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+                <div class="swirl-spinner"></div>
                 <h3 style="margin-top: 20px; color: #1e3a8a;">Opening Payment Window</h3>
                 <p style="color: #6b7280; margin-top: 10px;">Please complete your payment in the new window...</p>
             </div>
@@ -788,16 +788,6 @@ class PaygistixPaymentForm {
         
         modal.appendChild(modalContent);
         document.body.appendChild(modal);
-        
-        // Add spinner animation
-        const style = document.createElement('style');
-        style.textContent = `
-            @keyframes spin {
-                0% { transform: rotate(0deg); }
-                100% { transform: rotate(360deg); }
-            }
-        `;
-        document.head.appendChild(style);
         
         // Open payment window with dynamic form submission
         setTimeout(() => {
@@ -880,7 +870,7 @@ class PaygistixPaymentForm {
                     
                     // Update modal to show processing state
                     loadingState.innerHTML = `
-                        <div style="display: inline-block; width: 50px; height: 50px; border: 3px solid #f3f3f3; border-top: 3px solid #1e3a8a; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+                        <div class="swirl-spinner"></div>
                         <h3 style="margin-top: 20px; color: #1e3a8a;">Processing Payment</h3>
                         <p style="color: #6b7280; margin-top: 10px;">Please complete the payment in the new window</p>
                         <p style="color: #6b7280; font-size: 14px; margin-top: 5px;">Do not close this window...</p>
