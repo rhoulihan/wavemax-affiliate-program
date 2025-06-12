@@ -447,6 +447,15 @@
     if (window.SwirlSpinner || window.SwirlSpinnerUtils) {
       // Find the form to overlay
       const form = document.getElementById('customerRegistrationForm');
+      
+      // Mark already disabled elements before spinner shows
+      if (form) {
+        const disabledElements = form.querySelectorAll('input:disabled, select:disabled, button:disabled, textarea:disabled');
+        disabledElements.forEach(element => {
+          element.setAttribute('data-was-disabled', 'true');
+        });
+      }
+      
       if (form && window.SwirlSpinnerUtils) {
         // Use the utility function to show spinner on form
         addressValidationSpinner = window.SwirlSpinnerUtils.showOnForm(form, {
@@ -602,6 +611,18 @@
             fallbackSpinner.remove();
           }
         }
+        
+        // Re-enable form elements after validation failure
+        const form = document.getElementById('customerRegistrationForm');
+        if (form) {
+          const formElements = form.querySelectorAll('input, select, button, textarea');
+          formElements.forEach(element => {
+            if (!element.hasAttribute('data-was-disabled')) {
+              element.disabled = false;
+            }
+          });
+        }
+        
         modalAlert(
           `Unfortunately, this address is outside the service area. The service area extends ${affiliateData.serviceRadius} miles from the affiliate location, and this address is ${distance.toFixed(1)} miles away.`,
           'Outside Service Area'
@@ -635,11 +656,20 @@
           // Remove any pointer-events style that might have been added
           form.style.pointerEvents = '';
           
+          // Re-enable all form elements that might have been disabled
+          const formElements = form.querySelectorAll('input, select, button, textarea');
+          formElements.forEach(element => {
+            // Only re-enable if it wasn't already disabled before validation
+            if (!element.hasAttribute('data-was-disabled')) {
+              element.disabled = false;
+            }
+          });
+          
           // Check if buttons are still clickable
           const advanceButton = document.getElementById('advanceButton');
           const numberOfBags = document.getElementById('numberOfBags');
-          console.log('Advance button:', advanceButton, 'enabled:', !advanceButton?.disabled);
-          console.log('Number of bags:', numberOfBags, 'enabled:', !numberOfBags?.disabled);
+          console.log('Advance button after re-enable:', advanceButton, 'enabled:', !advanceButton?.disabled);
+          console.log('Number of bags after re-enable:', numberOfBags, 'enabled:', !numberOfBags?.disabled);
         }
       }, 100);
       
