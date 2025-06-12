@@ -15,10 +15,10 @@ router.get('/', (req, res) => {
         
         // Check if hash is configured
         if (!config.formHash) {
-            // Return a test configuration for development
-            console.warn('PAYGISTIX_FORM_HASH not configured - using test mode');
-            config.formHash = 'TEST_MODE_HASH_' + Date.now(); // Temporary hash for testing
-            config.testMode = true;
+            return res.status(500).json({
+                success: false,
+                message: 'Payment configuration not properly set up'
+            });
         }
         
         res.json({
