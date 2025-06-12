@@ -441,11 +441,31 @@
     console.log('Validating service area for address:', fullAddress);
     
     // Show spinner using SwirlSpinner
+    console.log('SwirlSpinnerUtils available:', !!window.SwirlSpinnerUtils);
     if (window.SwirlSpinnerUtils) {
       addressValidationSpinner = window.SwirlSpinnerUtils.showGlobal({
         message: 'Validating address...',
         submessage: 'Checking if your address is within our service area'
       });
+    } else {
+      // Fallback: show a basic loading indicator
+      console.warn('SwirlSpinnerUtils not available, using fallback');
+      const spinnerHTML = `
+        <div id="addressValidationSpinner" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); display: flex; align-items: center; justify-content: center; z-index: 10000;">
+          <div style="background: white; padding: 40px; border-radius: 8px; text-align: center; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+            <div style="display: inline-block; width: 50px; height: 50px; border: 3px solid #f3f3f3; border-top: 3px solid #1e3a8a; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+            <h3 style="margin-top: 20px; color: #1e3a8a;">Validating Address</h3>
+            <p style="color: #6b7280; margin-top: 10px;">Checking if your address is within our service area...</p>
+          </div>
+        </div>
+        <style>
+          @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+          }
+        </style>
+      `;
+      document.body.insertAdjacentHTML('beforeend', spinnerHTML);
     }
     
     try {
@@ -510,6 +530,12 @@
         if (addressValidationSpinner) {
           addressValidationSpinner.hide();
           addressValidationSpinner = null;
+        } else {
+          // Remove fallback spinner
+          const fallbackSpinner = document.getElementById('addressValidationSpinner');
+          if (fallbackSpinner) {
+            fallbackSpinner.remove();
+          }
         }
         return true;
       }
@@ -539,6 +565,12 @@
         if (addressValidationSpinner) {
           addressValidationSpinner.hide();
           addressValidationSpinner = null;
+        } else {
+          // Remove fallback spinner
+          const fallbackSpinner = document.getElementById('addressValidationSpinner');
+          if (fallbackSpinner) {
+            fallbackSpinner.remove();
+          }
         }
         modalAlert(
           `Unfortunately, this address is outside the service area. The service area extends ${affiliateData.serviceRadius} miles from the affiliate location, and this address is ${distance.toFixed(1)} miles away.`,
@@ -557,6 +589,12 @@
       if (addressValidationSpinner) {
         addressValidationSpinner.hide();
         addressValidationSpinner = null;
+      } else {
+        // Remove fallback spinner
+        const fallbackSpinner = document.getElementById('addressValidationSpinner');
+        if (fallbackSpinner) {
+          fallbackSpinner.remove();
+        }
       }
       return true; // Within service area
       
@@ -565,6 +603,12 @@
       if (addressValidationSpinner) {
         addressValidationSpinner.hide();
         addressValidationSpinner = null;
+      } else {
+        // Remove fallback spinner
+        const fallbackSpinner = document.getElementById('addressValidationSpinner');
+        if (fallbackSpinner) {
+          fallbackSpinner.remove();
+        }
       }
       return true; // Allow to proceed if validation fails
     }
