@@ -128,6 +128,17 @@ console.log('[SwirlSpinner] Script file loaded');
             } else if (this.element && this.element.parentNode) {
                 this.element.parentNode.removeChild(this.element);
             }
+            
+            // Clean up any style changes on container
+            if (this.options.container) {
+                // Remove any inline styles that might have been added
+                if (this.options.container.style.pointerEvents === 'none') {
+                    this.options.container.style.pointerEvents = '';
+                }
+                if (this.options.container.style.opacity === '0.5') {
+                    this.options.container.style.opacity = '';
+                }
+            }
 
             return this;
         }
@@ -183,23 +194,50 @@ console.log('[SwirlSpinner] Script file loaded');
                 ...options
             }).show();
 
-            // Disable form inputs
+            // Track and disable form inputs
             const inputs = form.querySelectorAll('input, select, textarea, button');
-            inputs.forEach(input => {
+            const disabledStates = [];
+            
+            inputs.forEach((input, index) => {
+                // Store the current disabled state BEFORE disabling
+                disabledStates[index] = input.disabled;
                 input.disabled = true;
-                input.dataset.wasDisabled = input.disabled;
             });
 
             return {
                 hide: () => {
                     spinner.hide();
-                    // Re-enable form inputs
-                    inputs.forEach(input => {
-                        if (input.dataset.wasDisabled !== 'true') {
+                    
+                    // Re-enable form inputs based on their original state
+                    inputs.forEach((input, index) => {
+                        // Only re-enable if it wasn't originally disabled
+                        if (!disabledStates[index]) {
                             input.disabled = false;
                         }
-                        delete input.dataset.wasDisabled;
                     });
+                    
+                    // Also remove any pointer-events restrictions
+                    form.style.pointerEvents = '';
+                    
+                    // Clean up any lingering overlay elements
+                    const overlays = form.querySelectorAll('.swirl-spinner-overlay');
+                    overlays.forEach(overlay => overlay.remove());
+                    
+                    console.log('[SwirlSpinner] Form controls re-enabled after hide');
+                },
+                
+                updateMessage: (message, submessage) => {
+                    spinner.updateMessage(message);
+                    if (submessage) {
+                        const messageEl = spinner.element?.querySelector('.swirl-spinner-message');
+                        if (messageEl && messageEl.nextSibling?.tagName !== 'P') {
+                            const subEl = document.createElement('p');
+                            subEl.style.cssText = 'color: #6b7280; margin-top: 5px; font-size: 14px;';
+                            subEl.textContent = submessage;
+                            messageEl.parentNode.appendChild(subEl);
+                        }
+                    }
+                    return this;
                 }
             };
         },
