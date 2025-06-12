@@ -146,6 +146,13 @@
     } else {
       console.error('affiliateId field not found');
     }
+    
+    // Also set the AFFILIATEID field for Paygistix component
+    const affiliateIdUpperField = document.getElementById('AFFILIATEID');
+    if (affiliateIdUpperField) {
+      affiliateIdUpperField.value = affiliateId;
+      console.log('Set AFFILIATEID field for Paygistix to:', affiliateId);
+    }
 
     // Clear from session storage after use
     sessionStorage.removeItem('affiliateId');

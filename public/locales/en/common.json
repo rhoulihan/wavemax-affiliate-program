@@ -408,11 +408,45 @@
       "title": "Affiliate Dashboard",
       "welcome": "Welcome back, {{name}}!",
       "overview": "Overview",
-      "customers": "Customers",
+      "customers": {
+        "title": "Customer Management",
+        "searchLabel": "Search Customers",
+        "searchPlaceholder": "Search by name, email, or phone",
+        "sortBy": "Sort By",
+        "nameAsc": "Name (A-Z)",
+        "nameDesc": "Name (Z-A)",
+        "mostRecent": "Most Recent",
+        "mostOrders": "Most Orders"
+      },
       "orders": "Orders",
       "commissions": "Commissions",
       "reports": "Reports",
-      "settings": "Settings",
+      "settings": {
+        "title": "Account Settings",
+        "marketingLinks": "Marketing Links",
+        "customerLandingPage": "Customer Landing Page",
+        "directRegistrationUrl": "Direct Registration URL",
+        "landingPageDesc": "Professional landing page to showcase your services and pricing to potential customers",
+        "registrationLinkDesc": "Direct link for customers to register under your affiliate account",
+        "personalInfo": "Personal Information",
+        "deliveryFeeStructure": "Delivery Fee Structure",
+        "dynamicPricing": "Dynamic Pricing:",
+        "dynamicPricingDesc": "Your customers pay whichever is higher: the minimum fee or the calculated per-bag rate. You keep 100% of delivery fees.",
+        "minimumDeliveryFee": "Minimum Delivery Fee ($)",
+        "minimumFeeDesc": "The minimum fee charged regardless of bag count",
+        "perBagFee": "Per-Bag Fee ($)",
+        "perBagFeeDesc": "Fee charged for each bag of laundry",
+        "earningsPreview": "Earnings Preview",
+        "pricingPreview": "Pricing Preview (round trip):",
+        "customerPrices": "Customer prices for pickup & delivery",
+        "saveChanges": "Save Changes",
+        "changePassword": "Change Password",
+        "currentPassword": "Current Password",
+        "newPassword": "New Password",
+        "passwordRequirement": "Password must be at least 8 characters long",
+        "confirmNewPassword": "Confirm New Password",
+        "changePasswordButton": "Change Password"
+      },
       "tabs": {
         "pickups": "Pickups & Deliveries",
         "customers": "Customers",
@@ -472,16 +506,6 @@
         "of": "of",
         "orders": "orders"
       },
-      "customers": {
-        "title": "Customer Management",
-        "searchLabel": "Search Customers",
-        "searchPlaceholder": "Search by name, email, or phone",
-        "sortBy": "Sort By",
-        "nameAsc": "Name (A-Z)",
-        "nameDesc": "Name (Z-A)",
-        "mostRecent": "Most Recent",
-        "mostOrders": "Most Orders"
-      },
       "earnings": {
         "title": "Earnings & Commission",
         "thisMonth": "This Month",
@@ -491,32 +515,6 @@
         "orders": "orders",
         "nextPayout": "Next payout:",
         "recentTransactions": "Recent Transactions"
-      },
-      "settings": {
-        "title": "Account Settings",
-        "marketingLinks": "Marketing Links",
-        "customerLandingPage": "Customer Landing Page",
-        "directRegistrationUrl": "Direct Registration URL",
-        "landingPageDesc": "Professional landing page to showcase your services and pricing to potential customers",
-        "registrationLinkDesc": "Direct link for customers to register under your affiliate account",
-        "personalInfo": "Personal Information",
-        "deliveryFeeStructure": "Delivery Fee Structure",
-        "dynamicPricing": "Dynamic Pricing:",
-        "dynamicPricingDesc": "Your customers pay whichever is higher: the minimum fee or the calculated per-bag rate. You keep 100% of delivery fees.",
-        "minimumDeliveryFee": "Minimum Delivery Fee ($)",
-        "minimumFeeDesc": "The minimum fee charged regardless of bag count",
-        "perBagFee": "Per-Bag Fee ($)",
-        "perBagFeeDesc": "Fee charged for each bag of laundry",
-        "earningsPreview": "Earnings Preview",
-        "pricingPreview": "Pricing Preview (round trip):",
-        "customerPrices": "Customer prices for pickup & delivery",
-        "saveChanges": "Save Changes",
-        "changePassword": "Change Password",
-        "currentPassword": "Current Password",
-        "newPassword": "New Password",
-        "passwordRequirement": "Password must be at least 8 characters long",
-        "confirmNewPassword": "Confirm New Password",
-        "changePasswordButton": "Change Password"
       }
     },
     "success": {
@@ -621,7 +619,8 @@
       "alreadyHaveAccount": "Already have an account?",
       "socialAccountConnected": "Social Media Account Connected!",
       "successfullyConnectedWith": "Successfully Connected with {{provider}}",
-      "autoFilledMessage": "Your information has been automatically filled in below. Complete the remaining fields to finish your registration."
+      "autoFilledMessage": "Your information has been automatically filled in below. Complete the remaining fields to finish your registration.",
+      "bagNote": "This fee covers the cost of your laundry bags."
     },
     "dashboard": {
       "title": "Customer Dashboard",
