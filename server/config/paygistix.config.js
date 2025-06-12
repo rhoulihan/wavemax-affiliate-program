@@ -106,6 +106,7 @@ class PaygistixConfig {
 
   /**
    * Get public configuration object for client
+   * Note: For hosted form approach, the hash must be included in the HTML form
    * @returns {Object}
    * @throws {Error} If required configuration is missing
    */
@@ -116,7 +117,8 @@ class PaygistixConfig {
         formId: this.getFormId(),
         formActionUrl: this.getFormActionUrl(),
         returnUrl: this.getReturnUrl(),
-        environment: this.getEnvironment()
+        environment: this.getEnvironment(),
+        formHash: this.getFormHash() // Required for hosted form submission
       };
     } catch (error) {
       logger.error('Failed to get client config:', error.message);
