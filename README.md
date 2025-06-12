@@ -689,19 +689,25 @@ The system automatically creates a default administrator account on first startu
 | `ENABLE_DELETE_DATA_FEATURE` | Enable delete all data feature (true/false) | No |
 | `SHOW_DOCS` | Enable documentation at /docs (true/false) | No |
 
-#### Paygistix Payment Configuration
+#### Paygistix Hosted Form Configuration
+
+WaveMAX uses Paygistix's secure hosted payment form for processing customer payments. This approach ensures PCI compliance by handling all card data directly on Paygistix's secure servers.
+
 | Variable | Description | Required |
 |----------|-------------|----------|
-| `PAYGISTIX_API_URL` | Production API URL | Yes |
-| `PAYGISTIX_SANDBOX_URL` | Sandbox API URL | Yes |
-| `PAYGISTIX_MERCHANT_ID` | Your merchant ID | Yes |
-| `PAYGISTIX_API_KEY` | API key for authentication | Yes |
-| `PAYGISTIX_API_SECRET` | API secret for signing | Yes |
-| `PAYGISTIX_WEBHOOK_SECRET` | Secret for webhook validation | Yes |
-| `PAYGISTIX_SANDBOX_MODE` | Use sandbox environment (true/false) | No |
-| `PAYGISTIX_AUTO_CAPTURE` | Auto-capture payments (true/false) | No |
-| `PAYGISTIX_CURRENCY` | Default currency (USD) | No |
-| `PAYGISTIX_WEBHOOK_ENDPOINT` | Webhook URL path | No |
+| `PAYGISTIX_ENVIRONMENT` | Environment: 'production' or 'sandbox' | Yes |
+| `PAYGISTIX_MERCHANT_ID` | Your Paygistix merchant ID | Yes |
+| `PAYGISTIX_FORM_ID` | Your hosted form ID | Yes |
+| `PAYGISTIX_FORM_HASH` | Security hash for form validation | Yes |
+| `PAYGISTIX_FORM_ACTION_URL` | Form submission URL (https://safepay.paymentlogistics.net/transaction.asp) | Yes |
+| `PAYGISTIX_RETURN_URL` | URL for payment completion callback | Yes |
+
+**Implementation Details:**
+- Payment form opens in a new window for better user experience
+- Automatic detection when user closes payment window without completing
+- Payment tokens are created to track payment status
+- Tokens are automatically cancelled if user abandons payment
+- Real-time status polling while payment is processing
 
 #### Standard SMTP Configuration (when EMAIL_PROVIDER=smtp)
 | Variable | Description | Required |

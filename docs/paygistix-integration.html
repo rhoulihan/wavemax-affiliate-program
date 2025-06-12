@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Paygistix Integration - WaveMAX Developer Documentation</title>
+    <title>Paygistix Hosted Form Integration - WaveMAX Developer Documentation</title>
     <style>
         * {
             margin: 0;
@@ -98,7 +98,6 @@
             background: #f3f4f6;
             padding: 2px 4px;
             border-radius: 3px;
-            font-size: 0.9em;
         }
         
         .alert {
@@ -111,25 +110,19 @@
         .alert-info {
             background: #e0f2fe;
             border-color: #0284c7;
-            color: #075985;
+            color: #0c4a6e;
         }
         
         .alert-warning {
             background: #fef3c7;
             border-color: #f59e0b;
-            color: #92400e;
+            color: #78350f;
         }
         
         .alert-success {
             background: #d1fae5;
             border-color: #10b981;
             color: #065f46;
-        }
-        
-        .alert-danger {
-            background: #fee2e2;
-            border-color: #ef4444;
-            color: #991b1b;
         }
         
         table {
@@ -147,46 +140,27 @@
         th {
             background: #f9fafb;
             font-weight: 600;
-            color: #1e3a8a;
+            color: #374151;
         }
         
-        .badge {
-            display: inline-block;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 0.8em;
-            font-weight: 600;
+        ul {
+            margin: 15px 0;
+            padding-left: 30px;
         }
         
-        .badge-get {
-            background: #d1fae5;
-            color: #065f46;
-        }
-        
-        .badge-post {
-            background: #e0f2fe;
-            color: #075985;
-        }
-        
-        .badge-put {
-            background: #fef3c7;
-            color: #92400e;
-        }
-        
-        .badge-delete {
-            background: #fee2e2;
-            color: #991b1b;
+        li {
+            margin: 5px 0;
         }
     </style>
 </head>
 <body>
     <header>
         <div class="container">
-            <h1>Paygistix Integration</h1>
-            <p>Complete guide for integrating Paygistix payment processing with WaveMAX</p>
+            <h1>Paygistix Hosted Form Integration</h1>
+            <p>Secure payment processing with Paygistix's PCI-compliant hosted form</p>
         </div>
     </header>
-
+    
     <nav>
         <div class="container">
             <ul>
@@ -194,8 +168,7 @@
                 <li><a href="#setup">Setup</a></li>
                 <li><a href="#architecture">Architecture</a></li>
                 <li><a href="#implementation">Implementation</a></li>
-                <li><a href="#webhooks">Webhooks</a></li>
-                <li><a href="#testing">Testing</a></li>
+                <li><a href="#api">API Reference</a></li>
                 <li><a href="#security">Security</a></li>
                 <li><a href="#troubleshooting">Troubleshooting</a></li>
             </ul>
@@ -206,18 +179,20 @@
         <div class="content">
             <section id="overview">
                 <h2>Overview</h2>
-                <p>Paygistix is WaveMAX's payment processing partner, providing secure and reliable payment solutions for laundry services. This integration enables:</p>
+                <p>WaveMAX uses Paygistix's hosted payment form solution for secure payment processing. This approach ensures PCI compliance by handling all card data directly on Paygistix's secure servers, never touching our application servers.</p>
+                
+                <h3>Key Features</h3>
                 <ul>
-                    <li>Credit/debit card processing</li>
-                    <li>ACH transfers</li>
-                    <li>Recurring payments for subscriptions</li>
-                    <li>Refund processing</li>
-                    <li>Payment method tokenization</li>
-                    <li>PCI-compliant card data handling</li>
+                    <li><strong>PCI Compliant</strong>: Card data never touches your servers</li>
+                    <li><strong>Secure Processing</strong>: All transactions encrypted and tokenized</li>
+                    <li><strong>New Window Experience</strong>: Payment form opens in separate window for better UX</li>
+                    <li><strong>Automatic Cancellation</strong>: Detects when users close payment window</li>
+                    <li><strong>Real-time Status</strong>: Polling mechanism for payment status updates</li>
+                    <li><strong>Mobile Responsive</strong>: Works seamlessly on all devices</li>
                 </ul>
 
                 <div class="alert alert-info">
-                    <strong>Important:</strong> This integration requires a valid Paygistix merchant account. Contact Paygistix support to obtain your API credentials.
+                    <strong>Important:</strong> This integration requires a valid Paygistix merchant account with hosted form access. Contact Paygistix support to obtain your form credentials.
                 </div>
             </section>
 
@@ -226,931 +201,205 @@
                 
                 <h3>1. Prerequisites</h3>
                 <ul>
-                    <li>Node.js version 16.0.0 or higher</li>
-                    <li>MongoDB instance</li>
-                    <li>Paygistix merchant account</li>
+                    <li>Active Paygistix merchant account</li>
+                    <li>Hosted form ID and hash from Paygistix dashboard</li>
                     <li>SSL certificate for production deployment</li>
+                    <li>Node.js 16+ and MongoDB</li>
                 </ul>
 
                 <h3>2. Environment Configuration</h3>
                 <p>Add the following variables to your <code>.env</code> file:</p>
                 <pre>
-# Paygistix Configuration
-PAYGISTIX_API_URL=https://api.paygistix.com/v1
+# Paygistix Hosted Form Configuration
+PAYGISTIX_ENVIRONMENT=production
+
+# Merchant Configuration - Get from Paygistix Dashboard
 PAYGISTIX_MERCHANT_ID=your_merchant_id
-PAYGISTIX_API_KEY=your_api_key
-PAYGISTIX_API_SECRET=your_api_secret
-PAYGISTIX_WEBHOOK_SECRET=your_webhook_secret
+PAYGISTIX_FORM_ID=your_form_id
+PAYGISTIX_FORM_HASH=your_form_hash
 
-# Payment Settings
-PAYMENT_CURRENCY=USD
-PAYMENT_MIN_AMOUNT=1000  # $10.00 in cents
-PAYMENT_MAX_AMOUNT=100000  # $1000.00 in cents
-PAYMENT_RETRY_ATTEMPTS=3
-PAYMENT_TIMEOUT=30000  # 30 seconds
+# Form Settings
+PAYGISTIX_FORM_ACTION_URL=https://safepay.paymentlogistics.net/transaction.asp
+PAYGISTIX_RETURN_URL=https://yourdomain.com/payment-callback-handler.html</pre>
 
-# Webhook Configuration
-WEBHOOK_ENDPOINT_URL=https://your-domain.com/api/webhooks/paygistix
-WEBHOOK_RETRY_ENABLED=true
-WEBHOOK_MAX_RETRIES=5</pre>
-
-                <h3>3. Install Dependencies</h3>
-                <pre>
-npm install axios crypto-js express-validator
-npm install --save-dev jest supertest</pre>
-
-                <h3>4. Database Schema</h3>
-                <p>Create the Payment model to store transaction data:</p>
-                <pre>
-// server/models/Payment.js
-const mongoose = require('mongoose');
-
-const paymentSchema = new mongoose.Schema({
-    orderId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Order',
-        required: true
-    },
-    customerId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Customer',
-        required: true
-    },
-    paygistixTransactionId: {
-        type: String,
-        required: true,
-        unique: true
-    },
-    amount: {
-        type: Number,
-        required: true,
-        min: 0
-    },
-    currency: {
-        type: String,
-        default: 'USD',
-        required: true
-    },
-    status: {
-        type: String,
-        enum: ['pending', 'processing', 'completed', 'failed', 'refunded', 'partially_refunded'],
-        default: 'pending'
-    },
-    paymentMethod: {
-        type: {
-            type: String,
-            enum: ['card', 'ach', 'saved_card'],
-            required: true
-        },
-        last4: String,
-        brand: String,
-        tokenId: String
-    },
-    metadata: {
-        type: Map,
-        of: String
-    },
-    refunds: [{
-        refundId: String,
-        amount: Number,
-        reason: String,
-        createdAt: Date,
-        status: String
-    }],
-    webhookEvents: [{
-        eventType: String,
-        receivedAt: Date,
-        processed: Boolean
-    }],
-    errorMessage: String,
-    attempts: {
-        type: Number,
-        default: 1
-    }
-}, {
-    timestamps: true
-});
-
-module.exports = mongoose.model('Payment', paymentSchema);</pre>
+                <h3>3. Obtaining Credentials</h3>
+                <ol>
+                    <li>Log into your Paygistix merchant dashboard</li>
+                    <li>Navigate to "Hosted Forms" section</li>
+                    <li>Create or select your form</li>
+                    <li>Copy the Form ID and Form Hash</li>
+                    <li>Ensure your return URL is whitelisted</li>
+                </ol>
             </section>
 
             <section id="architecture">
                 <h2>Architecture</h2>
                 
-                <h3>System Components</h3>
-                <ul>
-                    <li><strong>Payment Controller:</strong> Handles HTTP requests for payment operations</li>
-                    <li><strong>Paygistix Service:</strong> Manages API communication with Paygistix</li>
-                    <li><strong>Webhook Handler:</strong> Processes asynchronous payment events</li>
-                    <li><strong>Payment Model:</strong> Stores transaction data</li>
-                    <li><strong>Security Middleware:</strong> Validates requests and signatures</li>
-                </ul>
-
                 <h3>Payment Flow</h3>
                 <pre>
 1. Customer initiates payment
    ↓
-2. Frontend collects payment details
+2. Frontend creates payment token via API
    ↓
-3. Backend validates order and customer
+3. Payment form opens in new window
    ↓
-4. Create payment intent with Paygistix
+4. Customer enters card details on Paygistix
    ↓
-5. Frontend completes payment authorization
+5. Frontend polls for payment status
    ↓
 6. Paygistix processes payment
    ↓
-7. Webhook confirms payment status
+7. Customer redirected to callback URL
    ↓
-8. Update order status
+8. Backend updates payment status
    ↓
-9. Send confirmation to customer</pre>
+9. Frontend shows success/failure</pre>
+
+                <h3>Key Components</h3>
+                <ul>
+                    <li><strong>PaygistixPaymentForm Class</strong>: Frontend controller for payment flow</li>
+                    <li><strong>Payment Token Model</strong>: Tracks payment status in database</li>
+                    <li><strong>Payment Controller</strong>: Backend API endpoints</li>
+                    <li><strong>Window Monitor</strong>: Detects payment window closure</li>
+                    <li><strong>Status Poller</strong>: Real-time payment status updates</li>
+                </ul>
             </section>
 
             <section id="implementation">
-                <h2>Implementation Guide</h2>
+                <h2>Implementation Details</h2>
                 
-                <h3>1. Paygistix Service Layer</h3>
+                <h3>Frontend Integration</h3>
+                <p>The payment form is initialized on customer registration pages:</p>
                 <pre>
-// server/services/paygistixService.js
-const axios = require('axios');
-const crypto = require('crypto');
+// Initialize payment form
+const paymentForm = new PaygistixPaymentForm('payment-container', {
+    mode: 'registration',
+    onSuccess: (data) => {
+        // Handle successful payment
+        window.location.href = '/registration-success.html';
+    },
+    onError: (error) => {
+        // Handle payment error
+        console.error('Payment failed:', error);
+    }
+});</pre>
 
-class PaygistixService {
-    constructor() {
-        this.apiUrl = process.env.PAYGISTIX_API_URL;
-        this.merchantId = process.env.PAYGISTIX_MERCHANT_ID;
-        this.apiKey = process.env.PAYGISTIX_API_KEY;
-        this.apiSecret = process.env.PAYGISTIX_API_SECRET;
-        
-        this.client = axios.create({
-            baseURL: this.apiUrl,
-            timeout: parseInt(process.env.PAYMENT_TIMEOUT) || 30000,
-            headers: {
-                'Content-Type': 'application/json',
-                'X-Merchant-ID': this.merchantId
-            }
-        });
-        
-        // Add request interceptor for authentication
-        this.client.interceptors.request.use(
-            config => this.addAuthHeaders(config),
-            error => Promise.reject(error)
-        );
-    }
-    
-    addAuthHeaders(config) {
-        const timestamp = Date.now().toString();
-        const signature = this.generateSignature(
-            config.method.toUpperCase(),
-            config.url,
-            timestamp,
-            config.data
-        );
-        
-        config.headers['X-Api-Key'] = this.apiKey;
-        config.headers['X-Timestamp'] = timestamp;
-        config.headers['X-Signature'] = signature;
-        
-        return config;
-    }
-    
-    generateSignature(method, path, timestamp, body) {
-        const payload = [
-            method,
-            path,
-            timestamp,
-            body ? JSON.stringify(body) : ''
-        ].join('|');
-        
-        return crypto
-            .createHmac('sha256', this.apiSecret)
-            .update(payload)
-            .digest('hex');
-    }
-    
-    async createPaymentIntent(data) {
-        try {
-            const response = await this.client.post('/payment-intents', {
-                amount: data.amount,
-                currency: data.currency || 'USD',
-                customerId: data.customerId,
-                orderId: data.orderId,
-                description: data.description,
-                metadata: data.metadata
-            });
-            
-            return response.data;
-        } catch (error) {
-            this.handleApiError(error);
-        }
-    }
-    
-    async capturePayment(paymentIntentId) {
-        try {
-            const response = await this.client.post(
-                `/payment-intents/${paymentIntentId}/capture`
-            );
-            
-            return response.data;
-        } catch (error) {
-            this.handleApiError(error);
-        }
-    }
-    
-    async refundPayment(transactionId, amount, reason) {
-        try {
-            const response = await this.client.post('/refunds', {
-                transactionId,
-                amount,
-                reason
-            });
-            
-            return response.data;
-        } catch (error) {
-            this.handleApiError(error);
-        }
-    }
-    
-    async tokenizeCard(cardData) {
-        try {
-            const response = await this.client.post('/tokens', {
-                type: 'card',
-                card: {
-                    number: cardData.number,
-                    exp_month: cardData.expMonth,
-                    exp_year: cardData.expYear,
-                    cvc: cardData.cvc
-                }
-            });
-            
-            return response.data;
-        } catch (error) {
-            this.handleApiError(error);
-        }
-    }
-    
-    async chargeWithToken(tokenId, amount, customerId) {
-        try {
-            const response = await this.client.post('/charges', {
-                amount,
-                currency: 'USD',
-                source: tokenId,
-                customerId
-            });
-            
-            return response.data;
-        } catch (error) {
-            this.handleApiError(error);
-        }
-    }
-    
-    handleApiError(error) {
-        if (error.response) {
-            const { status, data } = error.response;
-            const errorMessage = data.error?.message || 'Payment processing failed';
-            
-            const err = new Error(errorMessage);
-            err.status = status;
-            err.code = data.error?.code;
-            err.paygistixError = data.error;
-            
-            throw err;
-        } else if (error.request) {
-            const err = new Error('Payment service unavailable');
-            err.status = 503;
-            throw err;
-        } else {
-            throw error;
-        }
-    }
-    
-    verifyWebhookSignature(payload, signature) {
-        const expectedSignature = crypto
-            .createHmac('sha256', process.env.PAYGISTIX_WEBHOOK_SECRET)
-            .update(payload)
-            .digest('hex');
-        
-        return crypto.timingSafeEqual(
-            Buffer.from(signature),
-            Buffer.from(expectedSignature)
-        );
-    }
-}
-
-module.exports = new PaygistixService();</pre>
-
-                <h3>2. Payment Controller</h3>
+                <h3>Payment Token Creation</h3>
+                <p>Before opening the payment form, a token is created to track the payment:</p>
                 <pre>
-// server/controllers/paymentController.js
-const Payment = require('../models/Payment');
-const Order = require('../models/Order');
-const paygistixService = require('../services/paygistixService');
-const { validationResult } = require('express-validator');
-
-const paymentController = {
-    // Create payment intent
-    createPaymentIntent: async (req, res) => {
-        try {
-            const errors = validationResult(req);
-            if (!errors.isEmpty()) {
-                return res.status(400).json({ errors: errors.array() });
-            }
-            
-            const { orderId } = req.body;
-            
-            // Fetch order details
-            const order = await Order.findById(orderId)
-                .populate('customerId');
-            
-            if (!order) {
-                return res.status(404).json({
-                    error: 'Order not found'
-                });
-            }
-            
-            if (order.paymentStatus === 'paid') {
-                return res.status(400).json({
-                    error: 'Order already paid'
-                });
-            }
-            
-            // Create payment intent with Paygistix
-            const paymentIntent = await paygistixService.createPaymentIntent({
-                amount: Math.round(order.totalAmount * 100), // Convert to cents
-                currency: process.env.PAYMENT_CURRENCY || 'USD',
-                customerId: order.customerId._id.toString(),
-                orderId: order._id.toString(),
-                description: `Order #${order.orderNumber}`,
-                metadata: {
-                    orderNumber: order.orderNumber,
-                    customerEmail: order.customerId.email,
-                    servicetype: order.serviceType
-                }
-            });
-            
-            // Create payment record
-            const payment = new Payment({
-                orderId: order._id,
-                customerId: order.customerId._id,
-                paygistixTransactionId: paymentIntent.id,
-                amount: paymentIntent.amount,
-                currency: paymentIntent.currency,
-                status: 'pending',
-                paymentMethod: {
-                    type: req.body.paymentMethod || 'card'
-                }
-            });
-            
-            await payment.save();
-            
-            res.json({
-                clientSecret: paymentIntent.clientSecret,
-                paymentIntentId: paymentIntent.id,
-                amount: paymentIntent.amount,
-                currency: paymentIntent.currency
-            });
-            
-        } catch (error) {
-            console.error('Payment intent creation error:', error);
-            res.status(error.status || 500).json({
-                error: error.message || 'Failed to create payment intent'
-            });
-        }
+POST /api/v1/payments/create-token
+{
+    "customerData": {
+        "email": "customer@example.com",
+        "firstName": "John",
+        "lastName": "Doe",
+        "phone": "555-1234"
     },
-    
-    // Process payment
-    processPayment: async (req, res) => {
-        try {
-            const { paymentIntentId, paymentMethodId } = req.body;
-            
-            // Find payment record
-            const payment = await Payment.findOne({
-                paygistixTransactionId: paymentIntentId
-            });
-            
-            if (!payment) {
-                return res.status(404).json({
-                    error: 'Payment not found'
-                });
+    "paymentData": {
+        "amount": 4000,  // $40.00 in cents
+        "items": [
+            {
+                "code": "REG_FEE",
+                "description": "Registration Fee",
+                "price": 4000,
+                "quantity": 1
             }
-            
-            if (payment.status === 'completed') {
-                return res.status(400).json({
-                    error: 'Payment already processed'
-                });
-            }
-            
-            // Update payment status
-            payment.status = 'processing';
-            await payment.save();
-            
-            // Capture payment
-            const result = await paygistixService.capturePayment(paymentIntentId);
-            
-            // Update payment record
-            payment.status = result.status === 'succeeded' ? 'completed' : 'failed';
-            payment.paymentMethod.last4 = result.payment_method?.last4;
-            payment.paymentMethod.brand = result.payment_method?.brand;
-            
-            await payment.save();
-            
-            // Update order if payment successful
-            if (payment.status === 'completed') {
-                await Order.findByIdAndUpdate(payment.orderId, {
-                    paymentStatus: 'paid',
-                    paidAt: new Date()
-                });
-            }
-            
-            res.json({
-                status: payment.status,
-                transactionId: payment.paygistixTransactionId,
-                orderId: payment.orderId
-            });
-            
-        } catch (error) {
-            console.error('Payment processing error:', error);
-            res.status(error.status || 500).json({
-                error: error.message || 'Payment processing failed'
-            });
-        }
-    },
-    
-    // Refund payment
-    refundPayment: async (req, res) => {
-        try {
-            const { paymentId } = req.params;
-            const { amount, reason } = req.body;
-            
-            const payment = await Payment.findById(paymentId);
-            
-            if (!payment) {
-                return res.status(404).json({
-                    error: 'Payment not found'
-                });
-            }
-            
-            if (payment.status !== 'completed') {
-                return res.status(400).json({
-                    error: 'Can only refund completed payments'
-                });
-            }
-            
-            // Calculate refund amount
-            const refundAmount = amount || payment.amount;
-            const totalRefunded = payment.refunds.reduce(
-                (sum, refund) => sum + refund.amount, 
-                0
-            );
-            
-            if (totalRefunded + refundAmount > payment.amount) {
-                return res.status(400).json({
-                    error: 'Refund amount exceeds payment amount'
-                });
-            }
-            
-            // Process refund with Paygistix
-            const refund = await paygistixService.refundPayment(
-                payment.paygistixTransactionId,
-                refundAmount,
-                reason
-            );
-            
-            // Update payment record
-            payment.refunds.push({
-                refundId: refund.id,
-                amount: refundAmount,
-                reason: reason,
-                createdAt: new Date(),
-                status: refund.status
-            });
-            
-            if (totalRefunded + refundAmount === payment.amount) {
-                payment.status = 'refunded';
-            } else {
-                payment.status = 'partially_refunded';
-            }
-            
-            await payment.save();
-            
-            // Update order status
-            await Order.findByIdAndUpdate(payment.orderId, {
-                paymentStatus: payment.status === 'refunded' ? 'refunded' : 'partially_refunded'
-            });
-            
-            res.json({
-                refundId: refund.id,
-                amount: refundAmount,
-                status: refund.status
-            });
-            
-        } catch (error) {
-            console.error('Refund error:', error);
-            res.status(error.status || 500).json({
-                error: error.message || 'Refund processing failed'
-            });
-        }
-    },
-    
-    // Get payment details
-    getPayment: async (req, res) => {
-        try {
-            const { paymentId } = req.params;
-            
-            const payment = await Payment.findById(paymentId)
-                .populate('orderId')
-                .populate('customerId', 'name email');
-            
-            if (!payment) {
-                return res.status(404).json({
-                    error: 'Payment not found'
-                });
-            }
-            
-            res.json(payment);
-            
-        } catch (error) {
-            console.error('Get payment error:', error);
-            res.status(500).json({
-                error: 'Failed to retrieve payment details'
-            });
-        }
-    },
-    
-    // List payments
-    listPayments: async (req, res) => {
-        try {
-            const {
-                customerId,
-                orderId,
-                status,
-                startDate,
-                endDate,
-                page = 1,
-                limit = 20
-            } = req.query;
-            
-            const query = {};
-            
-            if (customerId) query.customerId = customerId;
-            if (orderId) query.orderId = orderId;
-            if (status) query.status = status;
-            
-            if (startDate || endDate) {
-                query.createdAt = {};
-                if (startDate) query.createdAt.$gte = new Date(startDate);
-                if (endDate) query.createdAt.$lte = new Date(endDate);
-            }
-            
-            const skip = (page - 1) * limit;
-            
-            const [payments, total] = await Promise.all([
-                Payment.find(query)
-                    .populate('orderId', 'orderNumber')
-                    .populate('customerId', 'name email')
-                    .sort({ createdAt: -1 })
-                    .skip(skip)
-                    .limit(parseInt(limit)),
-                Payment.countDocuments(query)
-            ]);
-            
-            res.json({
-                payments,
-                pagination: {
-                    total,
-                    page: parseInt(page),
-                    pages: Math.ceil(total / limit)
-                }
-            });
-            
-        } catch (error) {
-            console.error('List payments error:', error);
-            res.status(500).json({
-                error: 'Failed to retrieve payments'
-            });
-        }
+        ]
     }
-};
+}</pre>
 
-module.exports = paymentController;</pre>
-
-                <h3>3. Payment Routes</h3>
+                <h3>Window Close Detection</h3>
+                <p>The system automatically detects when users close the payment window:</p>
                 <pre>
-// server/routes/paymentRoutes.js
-const express = require('express');
-const router = express.Router();
-const paymentController = require('../controllers/paymentController');
-const { body, query, param } = require('express-validator');
-const { requireAuth } = require('../middleware/auth');
+// Check if payment window is closed
+let windowCheckInterval = setInterval(() => {
+    if (paymentWindow.closed) {
+        // Cancel the payment token
+        cancelPaymentToken(token);
+        // Close the modal
+        closePaymentModal();
+        // Show cancellation message
+        showAlert('Payment cancelled');
+    }
+}, 500);</pre>
 
-// Validation middleware
-const validatePaymentIntent = [
-    body('orderId').isMongoId().withMessage('Invalid order ID'),
-    body('paymentMethod').optional().isIn(['card', 'ach', 'saved_card'])
-];
+                <h3>Payment Status Polling</h3>
+                <p>While the payment window is open, the system polls for status updates:</p>
+                <pre>
+GET /api/v1/payments/check-status/:token
 
-const validateProcessPayment = [
-    body('paymentIntentId').notEmpty().withMessage('Payment intent ID required'),
-    body('paymentMethodId').optional()
-];
-
-const validateRefund = [
-    param('paymentId').isMongoId().withMessage('Invalid payment ID'),
-    body('amount').optional().isInt({ min: 1 }).withMessage('Invalid refund amount'),
-    body('reason').notEmpty().withMessage('Refund reason required')
-];
-
-// Routes
-router.post(
-    '/payment-intent',
-    requireAuth,
-    validatePaymentIntent,
-    paymentController.createPaymentIntent
-);
-
-router.post(
-    '/process',
-    requireAuth,
-    validateProcessPayment,
-    paymentController.processPayment
-);
-
-router.post(
-    '/:paymentId/refund',
-    requireAuth,
-    validateRefund,
-    paymentController.refundPayment
-);
-
-router.get(
-    '/:paymentId',
-    requireAuth,
-    paymentController.getPayment
-);
-
-router.get(
-    '/',
-    requireAuth,
-    paymentController.listPayments
-);
-
-module.exports = router;</pre>
+Response:
+{
+    "success": true,
+    "status": "pending|processing|success|failed|cancelled",
+    "errorMessage": null
+}</pre>
             </section>
 
-            <section id="webhooks">
-                <h2>Webhook Implementation</h2>
+            <section id="api">
+                <h2>API Reference</h2>
                 
-                <h3>Webhook Handler</h3>
-                <pre>
-// server/controllers/webhookController.js
-const Payment = require('../models/Payment');
-const Order = require('../models/Order');
-const paygistixService = require('../services/paygistixService');
-
-const webhookController = {
-    handlePaygistixWebhook: async (req, res) => {
-        try {
-            // Verify webhook signature
-            const signature = req.headers['x-paygistix-signature'];
-            const payload = JSON.stringify(req.body);
-            
-            if (!paygistixService.verifyWebhookSignature(payload, signature)) {
-                return res.status(401).json({ error: 'Invalid signature' });
-            }
-            
-            const { event, data } = req.body;
-            
-            // Log webhook event
-            console.log(`Received webhook event: ${event}`);
-            
-            switch (event) {
-                case 'payment.succeeded':
-                    await this.handlePaymentSucceeded(data);
-                    break;
-                    
-                case 'payment.failed':
-                    await this.handlePaymentFailed(data);
-                    break;
-                    
-                case 'refund.succeeded':
-                    await this.handleRefundSucceeded(data);
-                    break;
-                    
-                case 'refund.failed':
-                    await this.handleRefundFailed(data);
-                    break;
-                    
-                case 'chargeback.created':
-                    await this.handleChargebackCreated(data);
-                    break;
-                    
-                default:
-                    console.log(`Unhandled webhook event: ${event}`);
-            }
-            
-            // Record webhook event
-            await Payment.findOneAndUpdate(
-                { paygistixTransactionId: data.paymentIntentId },
-                {
-                    $push: {
-                        webhookEvents: {
-                            eventType: event,
-                            receivedAt: new Date(),
-                            processed: true
-                        }
-                    }
-                }
-            );
-            
-            res.json({ received: true });
-            
-        } catch (error) {
-            console.error('Webhook processing error:', error);
-            res.status(500).json({ error: 'Webhook processing failed' });
-        }
-    },
-    
-    handlePaymentSucceeded: async (data) => {
-        const payment = await Payment.findOne({
-            paygistixTransactionId: data.paymentIntentId
-        });
-        
-        if (!payment) {
-            console.error(`Payment not found: ${data.paymentIntentId}`);
-            return;
-        }
-        
-        // Update payment status
-        payment.status = 'completed';
-        payment.paymentMethod.last4 = data.payment_method?.last4;
-        payment.paymentMethod.brand = data.payment_method?.brand;
-        await payment.save();
-        
-        // Update order status
-        await Order.findByIdAndUpdate(payment.orderId, {
-            paymentStatus: 'paid',
-            paidAt: new Date()
-        });
-        
-        // Send confirmation email
-        // await emailService.sendPaymentConfirmation(payment);
-    },
-    
-    handlePaymentFailed: async (data) => {
-        const payment = await Payment.findOne({
-            paygistixTransactionId: data.paymentIntentId
-        });
-        
-        if (!payment) return;
-        
-        payment.status = 'failed';
-        payment.errorMessage = data.error?.message;
-        payment.attempts += 1;
-        await payment.save();
-        
-        // Update order status
-        await Order.findByIdAndUpdate(payment.orderId, {
-            paymentStatus: 'failed'
-        });
-    },
-    
-    handleRefundSucceeded: async (data) => {
-        const payment = await Payment.findOne({
-            paygistixTransactionId: data.paymentIntentId
-        });
-        
-        if (!payment) return;
-        
-        // Update refund status
-        const refund = payment.refunds.find(r => r.refundId === data.refundId);
-        if (refund) {
-            refund.status = 'succeeded';
-        }
-        
-        // Update payment status
-        const totalRefunded = payment.refunds
-            .filter(r => r.status === 'succeeded')
-            .reduce((sum, r) => sum + r.amount, 0);
-            
-        if (totalRefunded >= payment.amount) {
-            payment.status = 'refunded';
-        } else {
-            payment.status = 'partially_refunded';
-        }
-        
-        await payment.save();
-    },
-    
-    handleRefundFailed: async (data) => {
-        const payment = await Payment.findOne({
-            paygistixTransactionId: data.paymentIntentId
-        });
-        
-        if (!payment) return;
-        
-        const refund = payment.refunds.find(r => r.refundId === data.refundId);
-        if (refund) {
-            refund.status = 'failed';
-        }
-        
-        await payment.save();
-    },
-    
-    handleChargebackCreated: async (data) => {
-        const payment = await Payment.findOne({
-            paygistixTransactionId: data.paymentIntentId
-        });
-        
-        if (!payment) return;
-        
-        payment.status = 'chargeback';
-        payment.metadata.set('chargebackReason', data.reason);
-        payment.metadata.set('chargebackAmount', data.amount.toString());
-        await payment.save();
-        
-        // Notify administrators
-        // await emailService.notifyChargeback(payment, data);
-    }
-};
-
-module.exports = webhookController;</pre>
-
-                <h3>Webhook Security</h3>
-                <div class="alert alert-warning">
-                    <strong>Security Best Practices:</strong>
-                    <ul>
-                        <li>Always verify webhook signatures</li>
-                        <li>Use HTTPS endpoints only</li>
-                        <li>Implement idempotency to handle duplicate events</li>
-                        <li>Log all webhook events for audit purposes</li>
-                        <li>Set up webhook retry logic for failed deliveries</li>
-                    </ul>
-                </div>
-            </section>
-
-            <section id="testing">
-                <h2>Testing</h2>
-                
-                <h3>Test Environment Setup</h3>
-                <pre>
-# Test environment variables
-PAYGISTIX_API_URL=https://sandbox.paygistix.com/v1
-PAYGISTIX_MERCHANT_ID=test_merchant_123
-PAYGISTIX_API_KEY=test_api_key
-PAYGISTIX_API_SECRET=test_api_secret
-PAYGISTIX_WEBHOOK_SECRET=test_webhook_secret</pre>
-
-                <h3>Test Card Numbers</h3>
+                <h3>Endpoints</h3>
                 <table>
                     <thead>
                         <tr>
-                            <th>Card Number</th>
-                            <th>Type</th>
-                            <th>Expected Result</th>
+                            <th>Method</th>
+                            <th>Endpoint</th>
+                            <th>Description</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr>
-                            <td><code>4242424242424242</code></td>
-                            <td>Visa</td>
-                            <td>Success</td>
+                            <td>GET</td>
+                            <td>/api/v1/payments/config</td>
+                            <td>Get payment form configuration</td>
                         </tr>
                         <tr>
-                            <td><code>4000000000000002</code></td>
-                            <td>Visa</td>
-                            <td>Decline</td>
+                            <td>POST</td>
+                            <td>/api/v1/payments/create-token</td>
+                            <td>Create payment tracking token</td>
                         </tr>
                         <tr>
-                            <td><code>4000000000000127</code></td>
-                            <td>Visa</td>
-                            <td>Insufficient funds</td>
+                            <td>GET</td>
+                            <td>/api/v1/payments/check-status/:token</td>
+                            <td>Check payment status</td>
                         </tr>
                         <tr>
-                            <td><code>5555555555554444</code></td>
-                            <td>Mastercard</code>
-                            <td>Success</td>
+                            <td>POST</td>
+                            <td>/api/v1/payments/cancel-token/:token</td>
+                            <td>Cancel payment token</td>
                         </tr>
                         <tr>
-                            <td><code>378282246310005</code></td>
-                            <td>Amex</code>
-                            <td>Success</td>
+                            <td>POST</td>
+                            <td>/api/v1/payments/callback</td>
+                            <td>Handle Paygistix callback</td>
                         </tr>
                     </tbody>
                 </table>
 
-                <h3>Running Tests</h3>
+                <h3>Payment Token Schema</h3>
                 <pre>
-# Run all payment tests
-npm test tests/unit/paymentController.test.js
-npm test tests/unit/paygistixService.test.js
-npm test tests/integration/payment.test.js
-
-# Run with coverage
-npm run test:coverage -- tests/unit/payment
-
-# Run integration tests only
-npm run test:integration -- payment</pre>
+{
+    token: String (unique),
+    status: 'pending' | 'processing' | 'success' | 'failed' | 'cancelled',
+    customerData: {
+        email: String,
+        firstName: String,
+        lastName: String,
+        phone: String,
+        affiliateId: String
+    },
+    paymentData: {
+        amount: Number,
+        items: Array,
+        formId: String,
+        merchantId: String
+    },
+    paygistixResponse: Object,
+    errorMessage: String,
+    createdAt: Date,
+    updatedAt: Date
+}</pre>
             </section>
 
             <section id="security">
@@ -1158,49 +407,29 @@ npm run test:integration -- payment</pre>
                 
                 <h3>PCI Compliance</h3>
                 <ul>
-                    <li>Never store raw card numbers</li>
-                    <li>Use tokenization for saved payment methods</li>
-                    <li>Implement proper access controls</li>
-                    <li>Maintain secure audit logs</li>
-                    <li>Use TLS 1.2 or higher for all API calls</li>
+                    <li>No card data is ever transmitted to or stored on WaveMAX servers</li>
+                    <li>All card processing happens on Paygistix's PCI-compliant infrastructure</li>
+                    <li>Only payment tokens and transaction IDs are stored locally</li>
                 </ul>
 
-                <h3>API Security</h3>
-                <pre>
-// Implement rate limiting
-const rateLimit = require('express-rate-limit');
+                <h3>Form Security</h3>
+                <ul>
+                    <li>Form hash validates authenticity of payment requests</li>
+                    <li>HTTPS required for all payment communications</li>
+                    <li>CSRF protection on all payment endpoints</li>
+                    <li>Payment tokens expire after 1 hour</li>
+                </ul>
 
-const paymentLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 10, // limit each IP to 10 requests per windowMs
-    message: 'Too many payment attempts, please try again later'
-});
+                <h3>Access Control</h3>
+                <ul>
+                    <li>Payment configuration endpoint filters sensitive data for external requests</li>
+                    <li>Form hash only exposed to localhost requests</li>
+                    <li>All payment APIs require authentication</li>
+                </ul>
 
-router.use('/api/payments', paymentLimiter);</pre>
-
-                <h3>Data Encryption</h3>
-                <pre>
-// Encrypt sensitive data at rest
-const crypto = require('crypto');
-
-function encryptCardToken(token) {
-    const algorithm = 'aes-256-gcm';
-    const key = Buffer.from(process.env.ENCRYPTION_KEY, 'hex');
-    const iv = crypto.randomBytes(16);
-    
-    const cipher = crypto.createCipheriv(algorithm, key, iv);
-    
-    let encrypted = cipher.update(token, 'utf8', 'hex');
-    encrypted += cipher.final('hex');
-    
-    const authTag = cipher.getAuthTag();
-    
-    return {
-        encrypted,
-        iv: iv.toString('hex'),
-        authTag: authTag.toString('hex')
-    };
-}</pre>
+                <div class="alert alert-warning">
+                    <strong>Security Note:</strong> Never expose your PAYGISTIX_FORM_HASH in client-side code or public repositories. This value should only be accessible server-side.
+                </div>
             </section>
 
             <section id="troubleshooting">
@@ -1208,57 +437,55 @@ function encryptCardToken(token) {
                 
                 <h3>Common Issues</h3>
                 
-                <div class="alert alert-danger">
-                    <h4>Authentication Errors</h4>
-                    <p><strong>Error:</strong> "Invalid API credentials"</p>
-                    <p><strong>Solution:</strong></p>
-                    <ul>
-                        <li>Verify API key and secret are correct</li>
-                        <li>Check merchant ID matches your account</li>
-                        <li>Ensure you're using the correct environment (sandbox vs production)</li>
-                    </ul>
-                </div>
+                <h4>Payment Window Blocked</h4>
+                <p><strong>Problem:</strong> Browser blocks the payment window popup</p>
+                <p><strong>Solution:</strong> Ensure payment is triggered by user action (click event). Modern browsers block popups not initiated by user interaction.</p>
 
-                <div class="alert alert-danger">
-                    <h4>Webhook Failures</h4>
-                    <p><strong>Error:</strong> "Webhook signature verification failed"</p>
-                    <p><strong>Solution:</strong></p>
-                    <ul>
-                        <li>Verify webhook secret is correctly configured</li>
-                        <li>Ensure raw body is used for signature verification</li>
-                        <li>Check for middleware that might modify the request body</li>
-                    </ul>
-                </div>
+                <h4>Form Hash Invalid</h4>
+                <p><strong>Problem:</strong> Paygistix returns "Invalid form hash" error</p>
+                <p><strong>Solution:</strong> Verify your PAYGISTIX_FORM_HASH matches exactly what's in your Paygistix dashboard. Check for trailing spaces.</p>
 
-                <div class="alert alert-danger">
-                    <h4>Payment Declined</h4>
-                    <p><strong>Error:</strong> "Payment was declined"</p>
-                    <p><strong>Solution:</strong></p>
+                <h4>Callback Not Received</h4>
+                <p><strong>Problem:</strong> Payment completes but callback isn't triggered</p>
+                <p><strong>Solution:</strong> 
                     <ul>
-                        <li>Check card details are correct</li>
-                        <li>Verify sufficient funds available</li>
-                        <li>Try a different payment method</li>
-                        <li>Contact Paygistix support for specific decline codes</li>
+                        <li>Ensure PAYGISTIX_RETURN_URL is correctly set</li>
+                        <li>Verify the URL is whitelisted in Paygistix dashboard</li>
+                        <li>Check server logs for incoming callback requests</li>
                     </ul>
-                </div>
+                </p>
+
+                <h4>Payment Status Stuck</h4>
+                <p><strong>Problem:</strong> Payment status remains "pending"</p>
+                <p><strong>Solution:</strong> 
+                    <ul>
+                        <li>Check if callback endpoint is accessible</li>
+                        <li>Verify MongoDB connection for token updates</li>
+                        <li>Review Paygistix merchant dashboard for transaction status</li>
+                    </ul>
+                </p>
 
                 <h3>Debug Mode</h3>
+                <p>Enable debug logging for payment troubleshooting:</p>
                 <pre>
-// Enable debug logging
-const debug = require('debug')('wavemax:payment');
+// In your .env file
+LOG_LEVEL=debug
+NODE_ENV=development
 
-// In your payment service
-debug('Creating payment intent', { amount, currency, customerId });
+// This will log:
+// - Payment token creation
+// - Status check requests
+// - Callback data
+// - Window close events</pre>
 
-// Set DEBUG environment variable
-DEBUG=wavemax:payment* npm start</pre>
-
-                <h3>Support Resources</h3>
-                <ul>
-                    <li><strong>Paygistix Support:</strong> support@paygistix.com</li>
-                    <li><strong>API Status:</strong> <a href="https://status.paygistix.com">status.paygistix.com</a></li>
-                    <li><strong>Developer Forum:</strong> <a href="https://developers.paygistix.com/forum">developers.paygistix.com/forum</a></li>
-                </ul>
+                <h3>Testing</h3>
+                <p>For testing in sandbox mode:</p>
+                <ol>
+                    <li>Set <code>PAYGISTIX_ENVIRONMENT=sandbox</code></li>
+                    <li>Use test card numbers provided by Paygistix</li>
+                    <li>Monitor browser console for debug messages</li>
+                    <li>Check server logs for API interactions</li>
+                </ol>
             </section>
         </div>
     </div>
