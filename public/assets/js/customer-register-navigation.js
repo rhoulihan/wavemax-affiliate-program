@@ -276,6 +276,13 @@
                 console.error('Validation error:', error);
                 return;
             }
+            
+            // Debug: Check for any lingering overlays after validation
+            const overlays = document.querySelectorAll('.swirl-spinner-overlay, .swirl-spinner-global');
+            if (overlays.length > 0) {
+                console.warn('Found lingering spinner overlays:', overlays);
+                overlays.forEach(overlay => overlay.remove());
+            }
         }
 
         // Move to next step

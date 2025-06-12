@@ -626,6 +626,23 @@
           fallbackSpinner.remove();
         }
       }
+      
+      // Re-enable form interactions after spinner is hidden
+      setTimeout(() => {
+        console.log('Re-enabling form after address validation success');
+        const form = document.getElementById('customerRegistrationForm');
+        if (form) {
+          // Remove any pointer-events style that might have been added
+          form.style.pointerEvents = '';
+          
+          // Check if buttons are still clickable
+          const advanceButton = document.getElementById('advanceButton');
+          const numberOfBags = document.getElementById('numberOfBags');
+          console.log('Advance button:', advanceButton, 'enabled:', !advanceButton?.disabled);
+          console.log('Number of bags:', numberOfBags, 'enabled:', !numberOfBags?.disabled);
+        }
+      }, 100);
+      
       return true; // Within service area
       
     } catch (error) {
