@@ -407,11 +407,45 @@
       "title": "Partner-Dashboard",
       "welcome": "Willkommen zurück, {{name}}!",
       "overview": "Übersicht",
-      "customers": "Kunden",
+      "customers": {
+        "title": "Kundenverwaltung",
+        "searchLabel": "Kunden suchen",
+        "searchPlaceholder": "Nach Name, E-Mail oder Telefon suchen",
+        "sortBy": "Sortieren nach",
+        "nameAsc": "Name (A-Z)",
+        "nameDesc": "Name (Z-A)",
+        "mostRecent": "Neueste",
+        "mostOrders": "Meiste Bestellungen"
+      },
       "orders": "Bestellungen",
       "commissions": "Provisionen",
       "reports": "Berichte",
-      "settings": "Einstellungen",
+      "settings": {
+        "title": "Kontoeinstellungen",
+        "marketingLinks": "Marketing-Links",
+        "customerLandingPage": "Kunden-Landingpage",
+        "directRegistrationUrl": "Direkte Registrierungs-URL",
+        "landingPageDesc": "Professionelle Landingpage zur Präsentation Ihrer Dienstleistungen und Preise für potenzielle Kunden",
+        "registrationLinkDesc": "Direkter Link für Kunden zur Registrierung unter Ihrem Partnerkonto",
+        "personalInfo": "Persönliche Informationen",
+        "deliveryFeeStructure": "Liefergebührenstruktur",
+        "dynamicPricing": "Dynamische Preisgestaltung:",
+        "dynamicPricingDesc": "Ihre Kunden zahlen den höheren Betrag: die Mindestgebühr oder die berechnete Gebühr pro Tasche. Sie behalten 100% der Liefergebühren.",
+        "minimumDeliveryFee": "Mindestliefergebühr ($)",
+        "minimumFeeDesc": "Die Mindestgebühr, die unabhängig von der Taschenanzahl erhoben wird",
+        "perBagFee": "Gebühr pro Tasche ($)",
+        "perBagFeeDesc": "Gebühr für jede Wäschetasche",
+        "earningsPreview": "Einnahmenvorschau",
+        "pricingPreview": "Preisvorschau (Hin- und Rückfahrt):",
+        "customerPrices": "Kundenpreise für Abholung und Lieferung",
+        "saveChanges": "Änderungen speichern",
+        "changePassword": "Passwort ändern",
+        "currentPassword": "Aktuelles Passwort",
+        "newPassword": "Neues Passwort",
+        "passwordRequirement": "Das Passwort muss mindestens 8 Zeichen lang sein",
+        "confirmNewPassword": "Neues Passwort bestätigen",
+        "changePasswordButton": "Passwort ändern"
+      },
       "tabs": {
         "pickups": "Abholungen & Lieferungen",
         "customers": "Kunden",
@@ -471,16 +505,6 @@
         "of": "von",
         "orders": "Bestellungen"
       },
-      "customers": {
-        "title": "Kundenverwaltung",
-        "searchLabel": "Kunden suchen",
-        "searchPlaceholder": "Nach Name, E-Mail oder Telefon suchen",
-        "sortBy": "Sortieren nach",
-        "nameAsc": "Name (A-Z)",
-        "nameDesc": "Name (Z-A)",
-        "mostRecent": "Neueste",
-        "mostOrders": "Meiste Bestellungen"
-      },
       "earnings": {
         "title": "Verdienste & Provisionen",
         "thisMonth": "Diesen Monat",
@@ -490,32 +514,6 @@
         "orders": "Bestellungen",
         "nextPayout": "Nächste Auszahlung:",
         "recentTransactions": "Letzte Transaktionen"
-      },
-      "settings": {
-        "title": "Kontoeinstellungen",
-        "marketingLinks": "Marketing-Links",
-        "customerLandingPage": "Kunden-Landingpage",
-        "directRegistrationUrl": "Direkte Registrierungs-URL",
-        "landingPageDesc": "Professionelle Landingpage zur Präsentation Ihrer Dienstleistungen und Preise für potenzielle Kunden",
-        "registrationLinkDesc": "Direkter Link für Kunden zur Registrierung unter Ihrem Partnerkonto",
-        "personalInfo": "Persönliche Informationen",
-        "deliveryFeeStructure": "Liefergebührenstruktur",
-        "dynamicPricing": "Dynamische Preisgestaltung:",
-        "dynamicPricingDesc": "Ihre Kunden zahlen den höheren Betrag: die Mindestgebühr oder die berechnete Gebühr pro Tasche. Sie behalten 100% der Liefergebühren.",
-        "minimumDeliveryFee": "Mindestliefergebühr ($)",
-        "minimumFeeDesc": "Die Mindestgebühr, die unabhängig von der Taschenanzahl erhoben wird",
-        "perBagFee": "Gebühr pro Tasche ($)",
-        "perBagFeeDesc": "Gebühr für jede Wäschetasche",
-        "earningsPreview": "Einnahmenvorschau",
-        "pricingPreview": "Preisvorschau (Hin- und Rückfahrt):",
-        "customerPrices": "Kundenpreise für Abholung und Lieferung",
-        "saveChanges": "Änderungen speichern",
-        "changePassword": "Passwort ändern",
-        "currentPassword": "Aktuelles Passwort",
-        "newPassword": "Neues Passwort",
-        "passwordRequirement": "Das Passwort muss mindestens 8 Zeichen lang sein",
-        "confirmNewPassword": "Neues Passwort bestätigen",
-        "changePasswordButton": "Passwort ändern"
       }
     },
     "success": {
@@ -620,7 +618,8 @@
       "alreadyHaveAccount": "Haben Sie bereits ein Konto?",
       "socialAccountConnected": "Social-Media-Konto verbunden!",
       "successfullyConnectedWith": "Erfolgreich verbunden mit {{provider}}",
-      "autoFilledMessage": "Ihre Informationen wurden automatisch unten ausgefüllt. Vervollständigen Sie die restlichen Felder, um Ihre Registrierung abzuschließen."
+      "autoFilledMessage": "Ihre Informationen wurden automatisch unten ausgefüllt. Vervollständigen Sie die restlichen Felder, um Ihre Registrierung abzuschließen.",
+      "bagNote": "Diese Gebühr deckt die Kosten für Ihre Wäschesäcke."
     },
     "dashboard": {
       "title": "Kunden-Dashboard",

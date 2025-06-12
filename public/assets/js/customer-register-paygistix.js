@@ -8,8 +8,18 @@
     async function initializePaymentForm() {
         try {
             // Load payment configuration first
+            console.log('Fetching payment config from /api/v1/payments/config');
             const configResponse = await fetch('/api/v1/payments/config');
+            
+            if (!configResponse.ok) {
+                console.error('Config response status:', configResponse.status);
+                const errorText = await configResponse.text();
+                console.error('Config response error:', errorText);
+                throw new Error(`Failed to load payment configuration: ${configResponse.status} ${configResponse.statusText}`);
+            }
+            
             const configData = await configResponse.json();
+            console.log('Payment config data:', configData);
             
             if (!configData.success) {
                 throw new Error(configData.message || 'Failed to load payment configuration');
@@ -18,12 +28,8 @@
             paymentConfig = configData.config;
             
             // Initialize the Paygistix payment form
+            // Note: The form uses hardcoded values from the Paygistix generator
             paymentForm = new PaygistixPaymentForm('paymentFormContainer', {
-                merchantId: paymentConfig.merchantId,
-                formId: paymentConfig.formId,
-                hash: paymentConfig.formHash,
-                formActionUrl: paymentConfig.formActionUrl,
-                returnURL: `${paymentConfig.returnUrl}?type=registration`,
                 onSuccess: function() {
                     console.log('Payment form initialized');
                 },
@@ -98,10 +104,11 @@
         sessionStorage.setItem('pendingRegistration', JSON.stringify(customerData));
         
         // Submit the Paygistix payment form
-        const paygistixForm = document.querySelector('form[action*="paygistix"]') || 
+        const paygistixForm = document.querySelector('#paygistixPaymentForm') || 
                               document.querySelector('form[action*="safepay"]') ||
-                              document.querySelector('#' + paymentConfig.formId);
+                              document.querySelector('form[action*="transaction.asp"]');
         if (paygistixForm) {
+            console.log('Submitting Paygistix form:', paygistixForm);
             paygistixForm.submit();
         } else {
             console.error('Paygistix form not found');

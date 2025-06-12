@@ -407,11 +407,45 @@
       "title": "Panel de Afiliado",
       "welcome": "¡Bienvenido de vuelta, {{name}}!",
       "overview": "Resumen",
-      "customers": "Clientes",
+      "customers": {
+        "title": "Gestión de Clientes",
+        "searchLabel": "Buscar Clientes",
+        "searchPlaceholder": "Buscar por nombre, correo o teléfono",
+        "sortBy": "Ordenar Por",
+        "nameAsc": "Nombre (A-Z)",
+        "nameDesc": "Nombre (Z-A)",
+        "mostRecent": "Más Recientes",
+        "mostOrders": "Más Pedidos"
+      },
       "orders": "Pedidos",
       "commissions": "Comisiones",
       "reports": "Reportes",
-      "settings": "Configuración",
+      "settings": {
+        "title": "Configuración de Cuenta",
+        "marketingLinks": "Enlaces de Marketing",
+        "customerLandingPage": "Página de Destino para Clientes",
+        "directRegistrationUrl": "URL de Registro Directo",
+        "landingPageDesc": "Página de destino profesional para mostrar tus servicios y precios a clientes potenciales",
+        "registrationLinkDesc": "Enlace directo para que los clientes se registren bajo tu cuenta de afiliado",
+        "personalInfo": "Información Personal",
+        "deliveryFeeStructure": "Estructura de Tarifas de Entrega",
+        "dynamicPricing": "Precios Dinámicos:",
+        "dynamicPricingDesc": "Tus clientes pagan lo que sea mayor: la tarifa mínima o la tarifa calculada por bolsa. Conservas el 100% de las tarifas de entrega.",
+        "minimumDeliveryFee": "Tarifa Mínima de Entrega ($)",
+        "minimumFeeDesc": "La tarifa mínima cobrada independientemente del número de bolsas",
+        "perBagFee": "Tarifa por Bolsa ($)",
+        "perBagFeeDesc": "Tarifa cobrada por cada bolsa de lavandería",
+        "earningsPreview": "Vista Previa de Ganancias",
+        "pricingPreview": "Vista Previa de Precios (ida y vuelta):",
+        "customerPrices": "Precios para clientes por recogida y entrega",
+        "saveChanges": "Guardar Cambios",
+        "changePassword": "Cambiar Contraseña",
+        "currentPassword": "Contraseña Actual",
+        "newPassword": "Nueva Contraseña",
+        "passwordRequirement": "La contraseña debe tener al menos 8 caracteres",
+        "confirmNewPassword": "Confirmar Nueva Contraseña",
+        "changePasswordButton": "Cambiar Contraseña"
+      },
       "tabs": {
         "pickups": "Recogidas y Entregas",
         "customers": "Clientes",
@@ -471,16 +505,6 @@
         "of": "de",
         "orders": "pedidos"
       },
-      "customers": {
-        "title": "Gestión de Clientes",
-        "searchLabel": "Buscar Clientes",
-        "searchPlaceholder": "Buscar por nombre, correo o teléfono",
-        "sortBy": "Ordenar Por",
-        "nameAsc": "Nombre (A-Z)",
-        "nameDesc": "Nombre (Z-A)",
-        "mostRecent": "Más Recientes",
-        "mostOrders": "Más Pedidos"
-      },
       "earnings": {
         "title": "Ganancias y Comisiones",
         "thisMonth": "Este Mes",
@@ -490,32 +514,6 @@
         "orders": "pedidos",
         "nextPayout": "Próximo pago:",
         "recentTransactions": "Transacciones Recientes"
-      },
-      "settings": {
-        "title": "Configuración de Cuenta",
-        "marketingLinks": "Enlaces de Marketing",
-        "customerLandingPage": "Página de Destino para Clientes",
-        "directRegistrationUrl": "URL de Registro Directo",
-        "landingPageDesc": "Página de destino profesional para mostrar tus servicios y precios a clientes potenciales",
-        "registrationLinkDesc": "Enlace directo para que los clientes se registren bajo tu cuenta de afiliado",
-        "personalInfo": "Información Personal",
-        "deliveryFeeStructure": "Estructura de Tarifas de Entrega",
-        "dynamicPricing": "Precios Dinámicos:",
-        "dynamicPricingDesc": "Tus clientes pagan lo que sea mayor: la tarifa mínima o la tarifa calculada por bolsa. Conservas el 100% de las tarifas de entrega.",
-        "minimumDeliveryFee": "Tarifa Mínima de Entrega ($)",
-        "minimumFeeDesc": "La tarifa mínima cobrada independientemente del número de bolsas",
-        "perBagFee": "Tarifa por Bolsa ($)",
-        "perBagFeeDesc": "Tarifa cobrada por cada bolsa de lavandería",
-        "earningsPreview": "Vista Previa de Ganancias",
-        "pricingPreview": "Vista Previa de Precios (ida y vuelta):",
-        "customerPrices": "Precios para clientes por recogida y entrega",
-        "saveChanges": "Guardar Cambios",
-        "changePassword": "Cambiar Contraseña",
-        "currentPassword": "Contraseña Actual",
-        "newPassword": "Nueva Contraseña",
-        "passwordRequirement": "La contraseña debe tener al menos 8 caracteres",
-        "confirmNewPassword": "Confirmar Nueva Contraseña",
-        "changePasswordButton": "Cambiar Contraseña"
       }
     },
     "success": {
@@ -620,7 +618,8 @@
       "alreadyHaveAccount": "¿Ya tienes una cuenta?",
       "socialAccountConnected": "¡Cuenta de Redes Sociales Conectada!",
       "successfullyConnectedWith": "Conectado exitosamente con {{provider}}",
-      "autoFilledMessage": "Su información se ha completado automáticamente a continuación. Complete los campos restantes para finalizar su registro."
+      "autoFilledMessage": "Su información se ha completado automáticamente a continuación. Complete los campos restantes para finalizar su registro.",
+      "bagNote": "Esta tarifa cubre el costo de sus bolsas de lavandería."
     },
     "dashboard": {
       "title": "Panel de Cliente",
