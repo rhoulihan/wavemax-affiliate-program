@@ -423,6 +423,10 @@ class PaygistixPaymentForm {
                         if (window.formatQty) {
                             window.formatQty(qtyInput);
                         }
+                        // Trigger blur event to update the form
+                        qtyInput.dispatchEvent(new Event('blur'));
+                        // Also trigger input event for form recalculation
+                        qtyInput.dispatchEvent(new Event('input'));
                     }
                 }
             });
