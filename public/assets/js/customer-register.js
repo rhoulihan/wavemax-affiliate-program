@@ -444,60 +444,34 @@
     console.log('SwirlSpinner available:', !!window.SwirlSpinner);
     console.log('SwirlSpinnerUtils available:', !!window.SwirlSpinnerUtils);
     
-    if (window.SwirlSpinner) {
-      // Create a global spinner manually
-      addressValidationSpinner = new window.SwirlSpinner({
-        size: 'large',
-        overlay: true,
-        message: 'Validating address...'
-      });
-      
-      // Create global container
-      const globalContainer = document.createElement('div');
-      globalContainer.className = 'swirl-spinner-global';
-      globalContainer.style.cssText = `
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background: rgba(0, 0, 0, 0.5);
-        z-index: 9999;
-      `;
-      
-      const wrapper = document.createElement('div');
-      wrapper.className = 'swirl-spinner-wrapper';
-      wrapper.style.cssText = `
-        background: white;
-        padding: 30px;
-        border-radius: 8px;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-        text-align: center;
-      `;
-      
-      globalContainer.appendChild(wrapper);
-      document.body.appendChild(globalContainer);
-      
-      addressValidationSpinner.options.container = wrapper;
-      addressValidationSpinner.show();
-      
-      // Add submessage
-      const submessage = document.createElement('p');
-      submessage.style.cssText = 'color: #6b7280; margin-top: 5px; font-size: 14px;';
-      submessage.textContent = 'Checking if your address is within our service area';
-      wrapper.appendChild(submessage);
-      
-      // Override hide method to remove global container
-      const originalHide = addressValidationSpinner.hide.bind(addressValidationSpinner);
-      addressValidationSpinner.hide = function() {
-        originalHide();
-        if (globalContainer.parentNode) {
-          globalContainer.remove();
+    if (window.SwirlSpinner || window.SwirlSpinnerUtils) {
+      // Find the form to overlay
+      const form = document.getElementById('customerRegistrationForm');
+      if (form && window.SwirlSpinnerUtils) {
+        // Use the utility function to show spinner on form
+        addressValidationSpinner = window.SwirlSpinnerUtils.showOnForm(form, {
+          message: 'Validating address...',
+          submessage: 'Checking if your address is within our service area'
+        });
+      } else if (form && window.SwirlSpinner) {
+        // Create spinner manually on the form
+        addressValidationSpinner = new window.SwirlSpinner({
+          container: form,
+          size: 'large',
+          overlay: true,
+          message: 'Validating address...'
+        });
+        addressValidationSpinner.show();
+        
+        // Add submessage
+        const spinnerWrapper = form.querySelector('.swirl-spinner-wrapper');
+        if (spinnerWrapper) {
+          const submessage = document.createElement('p');
+          submessage.style.cssText = 'color: #6b7280; margin-top: 5px; font-size: 14px;';
+          submessage.textContent = 'Checking if your address is within our service area';
+          spinnerWrapper.appendChild(submessage);
         }
-      };
+      }
     } else if (window.SwirlSpinnerUtils) {
       addressValidationSpinner = window.SwirlSpinnerUtils.showGlobal({
         message: 'Validating address...',
