@@ -18,26 +18,17 @@ class PaymentController {
         });
       }
       
-      // Check if request is from localhost
-      const isLocalhost = req.ip === '127.0.0.1' || 
-                         req.ip === '::1' || 
-                         req.ip === '::ffff:127.0.0.1' ||
-                         req.hostname === 'localhost' ||
-                         req.get('host')?.includes('localhost');
+      // Get payment configuration
+      // Note: For hosted form approach, the hash is required in the client form
+      const config = paygistixConfig.getClientConfig();
       
-      // Get appropriate config based on request origin
-      const config = isLocalhost 
-        ? paygistixConfig.getFullConfig()  // Include hash for localhost
-        : paygistixConfig.getClientConfig(); // Exclude hash for external requests
-      
-      // Log access for security monitoring
-      if (isLocalhost && config.formHash) {
-        logger.info('Payment config with hash accessed from localhost', {
-          ip: req.ip,
-          hostname: req.hostname,
-          userAgent: req.get('user-agent')
-        });
-      }
+      // Log config access for monitoring
+      logger.info('Payment config accessed', {
+        ip: req.ip,
+        hostname: req.hostname,
+        userAgent: req.get('user-agent'),
+        hasHash: !!config.formHash
+      });
       
       res.json({
         success: true,
