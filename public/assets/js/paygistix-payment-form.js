@@ -47,6 +47,11 @@ class PaygistixPaymentForm {
             // Load Paygistix script
             this.loadPaygistixScript();
             
+            // Setup registration mode if in REGISTRATION context
+            if (this.payContext === 'REGISTRATION') {
+                this.setupRegistrationMode();
+            }
+            
             // Call success callback
             this.onSuccess();
         } catch (error) {

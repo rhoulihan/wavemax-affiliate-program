@@ -13,6 +13,9 @@
   // Configuration for embedded environment
   const baseUrl = window.EMBED_CONFIG?.baseUrl || (window.location.protocol + '//' + window.location.host);
   const isEmbedded = window.EMBED_CONFIG?.isEmbedded || false;
+  
+  // Store affiliate data globally for service area validation
+  let affiliateData = null;
 
   // Function to show account conflict modal for existing affiliate accounts
   function showAccountConflictModal(result) {
@@ -174,6 +177,8 @@
         console.log('Affiliate data received:', data);
         if (data.success) {
           const affiliate = data;  // The affiliate data is at the top level
+          affiliateData = affiliate; // Store for service area validation
+          
           const affiliateIntro = document.getElementById('affiliateIntro');
           if (affiliateIntro) {
             const name = affiliate.businessName || `${affiliate.firstName} ${affiliate.lastName}`;
@@ -248,8 +253,10 @@
 
   // Password validation function
   function validatePassword() {
-    const password = document.getElementById('password').value;
-    const confirmPassword = document.getElementById('confirmPassword').value;
+    const passwordField = document.getElementById('password');
+    const confirmPasswordField = document.getElementById('confirmPassword');
+    const password = passwordField.value;
+    const confirmPassword = confirmPasswordField.value;
     const username = document.getElementById('username').value;
     const email = document.getElementById('email').value;
 
@@ -287,13 +294,38 @@
     updateReq('req-special', requirements.special);
     updateReq('req-match', requirements.match);
 
+    // Check if all requirements are met
+    const allRequirementsMet = requirements.length && requirements.uppercase && requirements.lowercase && 
+                               requirements.number && requirements.special && requirements.match && 
+                               !containsUsername && !containsEmailUser;
+
+    // Update field borders based on password state
+    if (password.length > 0) {
+      if (allRequirementsMet) {
+        // All requirements met - turn both fields green
+        passwordField.classList.remove('border-red-500');
+        passwordField.classList.add('border-green-500');
+        confirmPasswordField.classList.remove('border-red-500');
+        confirmPasswordField.classList.add('border-green-500');
+      } else {
+        // Requirements not met - turn both fields red
+        passwordField.classList.remove('border-green-500');
+        passwordField.classList.add('border-red-500');
+        confirmPasswordField.classList.remove('border-green-500');
+        confirmPasswordField.classList.add('border-red-500');
+      }
+    } else {
+      // No password entered - remove all border colors
+      passwordField.classList.remove('border-red-500', 'border-green-500');
+      confirmPasswordField.classList.remove('border-red-500', 'border-green-500');
+    }
+
     // Update strength indicator
     const strengthElement = document.getElementById('passwordStrength');
     if (strengthElement) {
       if (password.length === 0) {
         strengthElement.innerHTML = '';
-      } else if (requirements.length && requirements.uppercase && requirements.lowercase && 
-                 requirements.number && requirements.special && !containsUsername && !containsEmailUser) {
+      } else if (allRequirementsMet) {
         strengthElement.innerHTML = '<span class="text-green-600 font-medium">✅ Strong password</span>';
       } else {
         const missing = [];
@@ -302,15 +334,296 @@
         if (!requirements.lowercase) missing.push('lowercase letter');
         if (!requirements.number) missing.push('number');
         if (!requirements.special) missing.push('special character');
+        if (!requirements.match) missing.push('passwords must match');
         if (containsUsername || containsEmailUser) missing.push('cannot contain username/email');
         
         strengthElement.innerHTML = `<span class="text-red-600">❌ Missing: ${missing.join(', ')}</span>`;
       }
     }
 
-    // Return true if all password strength requirements are met (excluding match for strength)
-    return requirements.length && requirements.uppercase && requirements.lowercase && 
-           requirements.number && requirements.special && !containsUsername && !containsEmailUser;
+    // Return true if all password strength requirements are met
+    return allRequirementsMet;
+  }
+
+  // Email validation function
+  async function validateEmail() {
+    const emailField = document.getElementById('email');
+    const emailHelp = emailField.parentElement.querySelector('.text-xs') || 
+                     createEmailHelpText(emailField);
+    
+    if (!emailField.value || emailField.value.trim() === '') {
+      // Reset to default state if empty
+      emailField.classList.remove('border-red-500', 'border-green-500');
+      emailHelp.textContent = '';
+      emailHelp.classList.remove('text-red-600', 'text-green-600');
+      return;
+    }
+    
+    // Basic email format validation
+    const emailRegex = /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/;
+    if (!emailRegex.test(emailField.value.trim())) {
+      emailField.classList.add('border-red-500');
+      emailField.classList.remove('border-green-500');
+      emailHelp.textContent = '❌ Invalid email format';
+      emailHelp.classList.add('text-red-600');
+      emailHelp.classList.remove('text-green-600', 'text-gray-500');
+      return;
+    }
+    
+    console.log('Checking email availability for:', emailField.value.trim());
+    
+    try {
+      const response = await fetch(`${baseUrl}/api/v1/auth/check-email`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ email: emailField.value.trim() })
+      });
+      
+      console.log('Email check response:', response.status, response.statusText);
+      
+      const data = await response.json();
+      console.log('Email check data:', data);
+      
+      if (data.success && data.available) {
+        // Email is available
+        emailField.classList.remove('border-red-500');
+        emailField.classList.add('border-green-500');
+        emailHelp.textContent = '✅ Email available';
+        emailHelp.classList.remove('text-red-600', 'text-gray-500');
+        emailHelp.classList.add('text-green-600');
+      } else {
+        // Email is taken
+        emailField.classList.remove('border-green-500');
+        emailField.classList.add('border-red-500');
+        emailHelp.textContent = '❌ Email already in use';
+        emailHelp.classList.remove('text-gray-500', 'text-green-600');
+        emailHelp.classList.add('text-red-600');
+      }
+    } catch (error) {
+      console.error('Error checking email:', error);
+      // On error, just validate format
+      emailField.classList.remove('border-red-500', 'border-green-500');
+      emailHelp.textContent = '';
+      emailHelp.classList.remove('text-red-600', 'text-green-600');
+    }
+  }
+
+  // Helper function to create email help text if it doesn't exist
+  function createEmailHelpText(emailField) {
+    const helpText = document.createElement('p');
+    helpText.className = 'text-xs mt-1';
+    emailField.parentElement.appendChild(helpText);
+    return helpText;
+  }
+
+  // Service area validation function
+  async function validateServiceArea() {
+    const address = document.getElementById('address').value.trim();
+    const city = document.getElementById('city').value.trim();
+    const state = document.getElementById('state').value.trim();
+    const zipCode = document.getElementById('zipCode').value.trim();
+    
+    if (!address || !city || !state || !zipCode) {
+      return false; // Not all fields filled
+    }
+    
+    if (!affiliateData || !affiliateData.serviceLatitude || !affiliateData.serviceLongitude || !affiliateData.serviceRadius) {
+      console.error('Missing affiliate service area data');
+      return true; // Allow to proceed if we can't validate
+    }
+    
+    const fullAddress = `${address}, ${city}, ${state} ${zipCode}`;
+    console.log('Validating service area for address:', fullAddress);
+    
+    try {
+      // Try multiple geocoding strategies for better results
+      let geocodeData = null;
+      
+      // Strategy 1: Try with full address
+      let geocodeUrl = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(fullAddress)}&countrycodes=us&limit=1`;
+      let response = await fetch(geocodeUrl, {
+        headers: {
+          'User-Agent': 'WaveMAX Laundry Application'
+        }
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        if (data && data.length > 0) {
+          geocodeData = data;
+        }
+      }
+      
+      // Strategy 2: If no results, try with just ZIP code (more reliable)
+      if (!geocodeData) {
+        console.log('Trying geocoding with ZIP code:', zipCode);
+        geocodeUrl = `https://nominatim.openstreetmap.org/search?format=json&postalcode=${zipCode}&country=United States&limit=1`;
+        response = await fetch(geocodeUrl, {
+          headers: {
+            'User-Agent': 'WaveMAX Laundry Application'
+          }
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          if (data && data.length > 0) {
+            geocodeData = data;
+          }
+        }
+      }
+      
+      // Strategy 3: Try with city and state
+      if (!geocodeData) {
+        console.log('Trying geocoding with city and state:', `${city}, ${state}`);
+        geocodeUrl = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(`${city}, ${state}`)}&countrycodes=us&limit=1`;
+        response = await fetch(geocodeUrl, {
+          headers: {
+            'User-Agent': 'WaveMAX Laundry Application'
+          }
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          if (data && data.length > 0) {
+            geocodeData = data;
+          }
+        }
+      }
+      
+      if (!geocodeData || geocodeData.length === 0) {
+        console.error('No geocoding results found after trying multiple strategies');
+        // For now, allow to proceed if we can't geocode
+        console.log('Allowing registration to proceed despite geocoding failure');
+        return true;
+      }
+      
+      const customerLat = parseFloat(geocodeData[0].lat);
+      const customerLon = parseFloat(geocodeData[0].lon);
+      
+      console.log('Geocoding successful:', {
+        lat: customerLat,
+        lon: customerLon,
+        display_name: geocodeData[0].display_name
+      });
+      
+      // Calculate distance using Haversine formula
+      const distance = calculateDistance(
+        affiliateData.serviceLatitude,
+        affiliateData.serviceLongitude,
+        customerLat,
+        customerLon
+      );
+      
+      console.log('Distance from affiliate:', distance, 'miles');
+      console.log('Service radius:', affiliateData.serviceRadius, 'miles');
+      
+      if (distance > affiliateData.serviceRadius) {
+        // Outside service area
+        modalAlert(
+          `Unfortunately, this address is outside the service area. The service area extends ${affiliateData.serviceRadius} miles from the affiliate location, and this address is ${distance.toFixed(1)} miles away.`,
+          'Outside Service Area'
+        );
+        
+        // Clear address fields
+        document.getElementById('address').value = '';
+        document.getElementById('city').value = '';
+        document.getElementById('state').value = '';
+        document.getElementById('zipCode').value = '';
+        
+        return false;
+      }
+      
+      return true; // Within service area
+      
+    } catch (error) {
+      console.error('Service area validation error:', error);
+      return true; // Allow to proceed if validation fails
+    }
+  }
+
+  // Calculate distance between two coordinates using Haversine formula
+  function calculateDistance(lat1, lon1, lat2, lon2) {
+    const R = 3959; // Radius of Earth in miles
+    const dLat = toRad(lat2 - lat1);
+    const dLon = toRad(lon2 - lon1);
+    const a = 
+      Math.sin(dLat/2) * Math.sin(dLat/2) +
+      Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * 
+      Math.sin(dLon/2) * Math.sin(dLon/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    return R * c;
+  }
+
+  function toRad(deg) {
+    return deg * (Math.PI/180);
+  }
+  
+  // Make validateServiceArea available globally for navigation
+  window.validateServiceArea = validateServiceArea;
+
+  // Username validation function
+  async function validateUsername() {
+    const usernameField = document.getElementById('username');
+    const usernameHelp = usernameField.nextElementSibling; // The help text element
+    
+    if (!usernameField.value || usernameField.value.trim() === '') {
+      // Reset to default state if empty
+      usernameField.classList.remove('border-red-500', 'border-green-500');
+      if (usernameHelp) {
+        usernameHelp.textContent = 'Your unique login identifier';
+        usernameHelp.classList.remove('text-red-600', 'text-green-600');
+        usernameHelp.classList.add('text-gray-500');
+      }
+      return;
+    }
+    
+    console.log('Checking username availability for:', usernameField.value.trim());
+    
+    try {
+      const response = await fetch(`${baseUrl}/api/v1/auth/check-username`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ username: usernameField.value.trim() })
+      });
+      
+      console.log('Username check response:', response.status, response.statusText);
+      
+      const data = await response.json();
+      console.log('Username check data:', data);
+      
+      if (data.success && data.available) {
+        // Username is available
+        usernameField.classList.remove('border-red-500');
+        usernameField.classList.add('border-green-500');
+        if (usernameHelp) {
+          usernameHelp.textContent = '✅ Username available';
+          usernameHelp.classList.remove('text-red-600', 'text-gray-500');
+          usernameHelp.classList.add('text-green-600');
+        }
+      } else {
+        // Username is taken
+        usernameField.classList.remove('border-green-500');
+        usernameField.classList.add('border-red-500');
+        if (usernameHelp) {
+          usernameHelp.textContent = '❌ Username unavailable';
+          usernameHelp.classList.remove('text-gray-500', 'text-green-600');
+          usernameHelp.classList.add('text-red-600');
+        }
+      }
+    } catch (error) {
+      console.error('Error checking username:', error);
+      // On error, reset to neutral state
+      usernameField.classList.remove('border-red-500', 'border-green-500');
+      if (usernameHelp) {
+        usernameHelp.textContent = 'Your unique login identifier';
+        usernameHelp.classList.remove('text-red-600', 'text-green-600');
+        usernameHelp.classList.add('text-gray-500');
+      }
+    }
   }
 
   // Add password validation event listeners
@@ -328,9 +641,32 @@
   }
   if (usernameInput) {
     usernameInput.addEventListener('input', validatePassword);
+    // Add username validation on blur
+    usernameInput.addEventListener('blur', validateUsername);
+    // Reset on input change
+    usernameInput.addEventListener('input', function() {
+      const usernameHelp = this.nextElementSibling;
+      this.classList.remove('border-red-500', 'border-green-500');
+      if (usernameHelp) {
+        usernameHelp.textContent = 'Your unique login identifier';
+        usernameHelp.classList.remove('text-red-600', 'text-green-600');
+        usernameHelp.classList.add('text-gray-500');
+      }
+    });
   }
   if (emailInput) {
     emailInput.addEventListener('input', validatePassword);
+    // Add email validation on blur
+    emailInput.addEventListener('blur', validateEmail);
+    // Reset on input change
+    emailInput.addEventListener('input', function() {
+      const emailHelp = this.parentElement.querySelector('.text-xs');
+      if (emailHelp && emailHelp.textContent.includes('❌')) {
+        this.classList.remove('border-red-500', 'border-green-500');
+        emailHelp.textContent = '';
+        emailHelp.classList.remove('text-red-600', 'text-green-600');
+      }
+    });
   }
 
   // Form submission is handled by Paygistix payment integration

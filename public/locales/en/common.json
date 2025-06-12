@@ -621,7 +621,9 @@
       "successfullyConnectedWith": "Successfully Connected with {{provider}}",
       "autoFilledMessage": "Your information has been automatically filled in below. Complete the remaining fields to finish your registration.",
       "bagNote": "This fee covers the cost of your laundry bags.",
-      "loadingPayment": "Loading payment form..."
+      "loadingPayment": "Loading payment form...",
+      "next": "Next →",
+      "back": "← Back"
     },
     "dashboard": {
       "title": "Customer Dashboard",

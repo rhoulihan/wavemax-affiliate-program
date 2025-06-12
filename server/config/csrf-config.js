@@ -32,6 +32,10 @@ const CSRF_CONFIG = {
     '/api/health',
     '/api/v1/health',
     
+    // Username and email availability check (public endpoints)
+    '/api/v1/auth/check-username',
+    '/api/v1/auth/check-email',
+    
     // OAuth endpoints (GET only - these handle their own security)
     '/api/v1/auth/google',
     '/api/v1/auth/facebook',

@@ -153,4 +153,32 @@ router.get('/oauth-session/:sessionId',
   authController.pollOAuthSession
 );
 
+/**
+ * @route   POST /api/auth/check-username
+ * @desc    Check if username is available
+ * @access  Public
+ */
+router.post('/check-username',
+  [
+    body('username').trim().notEmpty().withMessage('Username is required')
+      .isLength({ min: 3 }).withMessage('Username must be at least 3 characters')
+  ],
+  validate,
+  authController.checkUsername
+);
+
+/**
+ * @route   POST /api/auth/check-email
+ * @desc    Check if email is available
+ * @access  Public
+ */
+router.post('/check-email',
+  [
+    body('email').trim().notEmpty().withMessage('Email is required')
+      .isEmail().withMessage('Must be a valid email')
+  ],
+  validate,
+  authController.checkEmail
+);
+
 module.exports = router;
