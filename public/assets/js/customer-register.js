@@ -441,8 +441,64 @@
     console.log('Validating service area for address:', fullAddress);
     
     // Show spinner using SwirlSpinner
+    console.log('SwirlSpinner available:', !!window.SwirlSpinner);
     console.log('SwirlSpinnerUtils available:', !!window.SwirlSpinnerUtils);
-    if (window.SwirlSpinnerUtils) {
+    
+    if (window.SwirlSpinner) {
+      // Create a global spinner manually
+      addressValidationSpinner = new window.SwirlSpinner({
+        size: 'large',
+        overlay: true,
+        message: 'Validating address...'
+      });
+      
+      // Create global container
+      const globalContainer = document.createElement('div');
+      globalContainer.className = 'swirl-spinner-global';
+      globalContainer.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 9999;
+      `;
+      
+      const wrapper = document.createElement('div');
+      wrapper.className = 'swirl-spinner-wrapper';
+      wrapper.style.cssText = `
+        background: white;
+        padding: 30px;
+        border-radius: 8px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+        text-align: center;
+      `;
+      
+      globalContainer.appendChild(wrapper);
+      document.body.appendChild(globalContainer);
+      
+      addressValidationSpinner.options.container = wrapper;
+      addressValidationSpinner.show();
+      
+      // Add submessage
+      const submessage = document.createElement('p');
+      submessage.style.cssText = 'color: #6b7280; margin-top: 5px; font-size: 14px;';
+      submessage.textContent = 'Checking if your address is within our service area';
+      wrapper.appendChild(submessage);
+      
+      // Override hide method to remove global container
+      const originalHide = addressValidationSpinner.hide.bind(addressValidationSpinner);
+      addressValidationSpinner.hide = function() {
+        originalHide();
+        if (globalContainer.parentNode) {
+          globalContainer.remove();
+        }
+      };
+    } else if (window.SwirlSpinnerUtils) {
       addressValidationSpinner = window.SwirlSpinnerUtils.showGlobal({
         message: 'Validating address...',
         submessage: 'Checking if your address is within our service area'
@@ -633,6 +689,14 @@
   
   // Make validateServiceArea available globally for navigation
   window.validateServiceArea = validateServiceArea;
+  
+  // Debug swirl spinner availability
+  console.log('Customer register loaded, SwirlSpinnerUtils:', !!window.SwirlSpinnerUtils);
+  
+  // Check again after a delay
+  setTimeout(() => {
+    console.log('After delay, SwirlSpinnerUtils:', !!window.SwirlSpinnerUtils);
+  }, 1000);
 
   // Username validation function
   async function validateUsername() {
