@@ -148,23 +148,59 @@
                     window.PaygistixRegistration.updateBagQuantity();
                 }
                 
-                // Don't hide the payment container - show it properly
+                // Move submit button to navigation area and hide payment container
                 setTimeout(function() {
+                    const submitBtn = document.querySelector('#paymentFormContainer #pxSubmit');
                     const paymentContainer = document.getElementById('paymentFormContainer');
+                    const navigationSection = document.getElementById('navigationSection');
                     const advanceButton = document.getElementById('advanceButton');
                     
-                    if (paymentContainer) {
-                        // Make sure payment container is visible
-                        paymentContainer.style.display = 'block';
+                    if (submitBtn && paymentContainer && navigationSection) {
+                        // Hide the entire payment container
+                        paymentContainer.style.display = 'none';
                         
-                        // Hide the advance button since this is the last step
-                        if (advanceButton) {
-                            advanceButton.style.display = 'none';
+                        // Check if payment button already exists in navigation
+                        let payButton = document.getElementById('completePayButton');
+                        if (!payButton) {
+                            // Create a new button (not clone, to avoid event issues)
+                            payButton = document.createElement('button');
+                            payButton.id = 'completePayButton';
+                            payButton.type = 'button';
+                            payButton.className = 'px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition';
+                            payButton.innerHTML = '<span data-i18n="customer.register.completeAndPay">Complete and Pay</span>';
+                            
+                            // Add click handler to trigger the original submit button
+                            payButton.addEventListener('click', function(e) {
+                                e.preventDefault();
+                                console.log('Complete and Pay clicked, triggering payment form submit');
+                                
+                                // If using registration mode, click the original button
+                                if (window.paymentForm && window.paymentForm.isProcessingPayment !== undefined) {
+                                    submitBtn.click();
+                                } else {
+                                    // Fallback: submit the form directly
+                                    const form = document.querySelector('#paymentFormContainer form');
+                                    if (form) {
+                                        form.submit();
+                                    }
+                                }
+                            });
+                            
+                            // Hide the advance button
+                            if (advanceButton) {
+                                advanceButton.style.display = 'none';
+                            }
+                            
+                            // Add the payment button to navigation
+                            const buttonsContainer = navigationSection.querySelector('.flex.justify-between');
+                            if (buttonsContainer) {
+                                buttonsContainer.appendChild(payButton);
+                            }
                         }
                         
-                        // Setup the registration mode for the payment form
-                        if (window.paymentForm && window.paymentForm.setupRegistrationMode) {
-                            window.paymentForm.setupRegistrationMode();
+                        // Update i18n if available
+                        if (window.i18n && window.i18n.translatePage) {
+                            window.i18n.translatePage();
                         }
                     }
                 }, 500); // Wait for form to be fully loaded
