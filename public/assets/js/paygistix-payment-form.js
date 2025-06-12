@@ -422,6 +422,11 @@ class PaygistixPaymentForm {
             });
         });
         
+        // Apply registration-specific styling and behavior
+        if (this.payContext === 'REGISTRATION') {
+            this.setupRegistrationMode();
+        }
+        
         // Apply pre-filled amounts if any
         if (this.prefilledAmounts) {
             Object.keys(this.prefilledAmounts).forEach(code => {
@@ -478,6 +483,83 @@ class PaygistixPaymentForm {
     
     getForm() {
         return this.container.querySelector('#paygistixPaymentForm');
+    }
+    
+    setupRegistrationMode() {
+        const submitBtn = this.container.querySelector('#pxSubmit');
+        const form = this.container.querySelector('#paygistixPaymentForm');
+        
+        if (submitBtn) {
+            // Style the button like the registration form button
+            submitBtn.style.width = '100%';
+            submitBtn.style.padding = '12px 16px';
+            submitBtn.style.fontSize = '16px';
+            submitBtn.style.fontWeight = '700';
+            submitBtn.style.borderRadius = '8px';
+            submitBtn.style.background = '#2563eb';
+            submitBtn.style.transition = 'all 0.3s ease';
+            submitBtn.value = 'Complete Registration & Pay';
+            
+            // Add hover effect
+            submitBtn.addEventListener('mouseenter', function() {
+                this.style.background = '#1d4ed8';
+                this.style.transform = 'translateY(-1px)';
+                this.style.boxShadow = '0 4px 6px -1px rgba(0, 0, 0, 0.1)';
+            });
+            
+            submitBtn.addEventListener('mouseleave', function() {
+                this.style.background = '#2563eb';
+                this.style.transform = 'translateY(0)';
+                this.style.boxShadow = 'none';
+            });
+        }
+        
+        if (form) {
+            // Intercept form submission to validate customer data first
+            form.addEventListener('submit', (e) => {
+                // Check if customer form is valid
+                const customerForm = document.getElementById('customerRegistrationForm');
+                
+                if (customerForm && !customerForm.checkValidity()) {
+                    e.preventDefault();
+                    customerForm.reportValidity();
+                    return false;
+                }
+                
+                // Check if bags are selected
+                const numberOfBags = document.getElementById('numberOfBags')?.value;
+                if (!numberOfBags || numberOfBags === '' || numberOfBags === '0') {
+                    e.preventDefault();
+                    if (window.modalAlert) {
+                        window.modalAlert('Please select the number of bags needed before proceeding.', 'Bags Required');
+                    } else {
+                        alert('Please select the number of bags needed before proceeding.');
+                    }
+                    return false;
+                }
+                
+                // Store customer data for post-payment processing
+                if (customerForm) {
+                    const formData = new FormData(customerForm);
+                    const customerData = {};
+                    
+                    formData.forEach((value, key) => {
+                        customerData[key] = value;
+                    });
+                    
+                    customerData.timestamp = Date.now();
+                    customerData.paymentPending = true;
+                    
+                    // Store in session for callback processing
+                    sessionStorage.setItem('pendingRegistration', JSON.stringify(customerData));
+                    console.log('Stored customer data for post-payment processing');
+                }
+                
+                // Allow form submission to proceed
+                console.log('Proceeding with Paygistix payment submission');
+                return true;
+            });
+        }
     }
 }
 
