@@ -115,6 +115,8 @@ app.use(helmet({
       objectSrc: ['\'none\''],
       mediaSrc: ['\'self\''],
       frameSrc: process.env.ENABLE_IFRAME_DEMO === 'true' ? ['\'self\''] : ['\'none\''],
+      // Allow form submissions to Paygistix
+      formAction: ['\'self\'', 'https://safepay.paymentlogistics.net'],
       // Allow embedding on WaveMAX Laundry domains
       frameAncestors: ['\'self\'', 'https://www.wavemaxlaundry.com', 'https://wavemaxlaundry.com']
     }

@@ -257,20 +257,9 @@
                     </div>
                 </div>
                 
-                <!-- Payment Information -->
-                <div>
-                    <h3 class="text-xl font-bold mb-4" data-i18n="customer.register.paymentInfo">Payment Information</h3>
-                    <!-- Hidden context for payment form -->
-                    <input type="hidden" id="PAYCONTEXT" value="REGISTRATION" />
-                    <input type="hidden" id="AFFILIATEID" value="" />
-                    
-                    <div id="paymentFormContainer">
-                        <!-- Paygistix payment form will be loaded here -->
-                        <div class="text-center py-4">
-                            <span class="text-gray-600" data-i18n="customer.register.loadingPayment">Loading payment form...</span>
-                        </div>
-                    </div>
-                </div>
+                <!-- Hidden context for payment form -->
+                <input type="hidden" id="PAYCONTEXT" value="REGISTRATION" />
+                <input type="hidden" id="AFFILIATEID" value="" />
                 
                 <!-- Service Agreement -->
                 <div>
@@ -306,6 +295,17 @@
                 
                 <!-- Submit handled by Paygistix Pay Now button -->
             </form>
+            
+            <!-- Payment Form Container (outside of customer form to prevent nested form submission) -->
+            <div class="mt-6">
+                <h3 class="text-xl font-bold mb-4" data-i18n="customer.register.paymentInfo">Payment Information</h3>
+                <div id="paymentFormContainer">
+                    <!-- Paygistix payment form will be loaded here -->
+                    <div class="text-center py-4">
+                        <span class="text-gray-600" data-i18n="customer.register.loadingPayment">Loading payment form...</span>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 

@@ -21,6 +21,12 @@ class PaygistixPaymentForm {
         // Form ID for Paygistix script
         this.paygistixFormId = 'pxForm';
         
+        // Payment configuration (can include hash if provided)
+        this.paymentConfig = config.paymentConfig || null;
+        
+        // Flag to control whether to hide form rows in REGISTRATION context
+        this.hideRegistrationFormRows = config.hideRegistrationFormRows !== undefined ? config.hideRegistrationFormRows : true;
+        
         this.init();
     }
     
@@ -74,7 +80,7 @@ class PaygistixPaymentForm {
     render() {
         const formHTML = `
             <div class="paygistix-payment-wrapper">
-                <form action="https://safepay.paymentlogistics.net/transaction.asp" method="post" id="paygistixPaymentForm">
+                <form action="https://safepay.paymentlogistics.net/transaction.asp" method="post" id="paygistixPaymentForm" target="_top">
                 <style type="text/css">
                     .paygistix-payment-wrapper {
                         padding: 20px;
@@ -343,10 +349,10 @@ class PaygistixPaymentForm {
                     </tfoot>
                 </table>
                 <input type="hidden" name="txnType" value="FORM" />
-                <input type="hidden" name="merchantID" value="wmaxaustWEB" />
-                <input type="hidden" name="formID" value="55015141435" />
-                <input type="hidden" name="hash" value="40a00618f540225d" />
-                <input type="hidden" name="ReturnURL" value="https://wavemax.promo/payment-callback-handler.html" />
+                <input type="hidden" name="merchantID" value="${this.paymentConfig?.merchantId || 'wmaxaustWEB'}" />
+                <input type="hidden" name="formID" value="${this.paymentConfig?.formId || '55015141435'}" />
+                <input type="hidden" name="hash" value="${this.paymentConfig?.formHash || '40a00618f540225d'}" />
+                <input type="hidden" name="ReturnURL" value="${this.paymentConfig?.returnUrl || 'https://wavemax.promo/payment-callback-handler.html?type=registration'}" />
                 </form>
             </div>
         `;
@@ -357,8 +363,8 @@ class PaygistixPaymentForm {
     initializeVisibility() {
         const rows = this.container.querySelectorAll('tbody tr');
         
-        if (this.payContext === 'REGISTRATION') {
-            // For registration, hide all rows except BF (Bag Fee)
+        if (this.payContext === 'REGISTRATION' && this.hideRegistrationFormRows) {
+            // For registration, hide all rows except BF (Bag Fee) only if flag is true
             rows.forEach(row => {
                 if (row.getAttribute('data-code') !== 'BF') {
                     row.classList.add('hidden-row');
@@ -515,13 +521,26 @@ class PaygistixPaymentForm {
         }
         
         if (form) {
+            // Debug form attributes
+            console.log('Paygistix form attributes:', {
+                action: form.getAttribute('action'),
+                method: form.getAttribute('method'),
+                target: form.getAttribute('target'),
+                id: form.getAttribute('id')
+            });
+            
+            // Ensure target="_top" is set
+            form.setAttribute('target', '_top');
+            
             // Intercept form submission to validate customer data first
             form.addEventListener('submit', (e) => {
+                console.log('Form submission intercepted');
+                e.preventDefault(); // Always prevent default first
+                
                 // Check if customer form is valid
                 const customerForm = document.getElementById('customerRegistrationForm');
                 
                 if (customerForm && !customerForm.checkValidity()) {
-                    e.preventDefault();
                     customerForm.reportValidity();
                     return false;
                 }
@@ -529,7 +548,6 @@ class PaygistixPaymentForm {
                 // Check if bags are selected
                 const numberOfBags = document.getElementById('numberOfBags')?.value;
                 if (!numberOfBags || numberOfBags === '' || numberOfBags === '0') {
-                    e.preventDefault();
                     if (window.modalAlert) {
                         window.modalAlert('Please select the number of bags needed before proceeding.', 'Bags Required');
                     } else {
@@ -552,12 +570,57 @@ class PaygistixPaymentForm {
                     
                     // Store in session for callback processing
                     sessionStorage.setItem('pendingRegistration', JSON.stringify(customerData));
-                    console.log('Stored customer data for post-payment processing');
+                    console.log('Stored customer data for post-payment processing:', customerData);
                 }
                 
-                // Allow form submission to proceed
-                console.log('Proceeding with Paygistix payment submission');
-                return true;
+                // Create a new form to submit only Paygistix data
+                console.log('Creating clean Paygistix form for submission');
+                const paygistixForm = document.createElement('form');
+                paygistixForm.method = 'post';
+                paygistixForm.action = form.action;
+                paygistixForm.target = '_top'; // Break out of iframe
+                
+                // Copy only Paygistix-specific fields
+                const paygistixFields = [
+                    'txnType', 'merchantID', 'formID', 'hash', 'ReturnURL',
+                    // Product codes
+                    'pxCode1', 'pxDescription1', 'pxPrice1', 'pxQty1',
+                    'pxCode2', 'pxDescription2', 'pxPrice2', 'pxQty2',
+                    'pxCode3', 'pxDescription3', 'pxPrice3', 'pxQty3',
+                    'pxCode4', 'pxDescription4', 'pxPrice4', 'pxQty4',
+                    'pxCode5', 'pxDescription5', 'pxPrice5', 'pxQty5',
+                    'pxCode6', 'pxDescription6', 'pxPrice6', 'pxQty6',
+                    'pxCode7', 'pxDescription7', 'pxPrice7', 'pxQty7',
+                    'pxCode8', 'pxDescription8', 'pxPrice8', 'pxQty8',
+                    'pxCode9', 'pxDescription9', 'pxPrice9', 'pxQty9',
+                    'pxCode10', 'pxDescription10', 'pxPrice10', 'pxQty10'
+                ];
+                
+                paygistixFields.forEach(fieldName => {
+                    const field = form.elements[fieldName];
+                    if (field) {
+                        const hiddenField = document.createElement('input');
+                        hiddenField.type = 'hidden';
+                        hiddenField.name = fieldName;
+                        hiddenField.value = field.value;
+                        paygistixForm.appendChild(hiddenField);
+                    }
+                });
+                
+                // Log form submission details
+                console.log('Submitting to Paygistix:', paygistixForm.action);
+                console.log('Form target:', paygistixForm.target);
+                
+                // Append to body temporarily and submit
+                document.body.appendChild(paygistixForm);
+                paygistixForm.submit();
+                
+                // Form will navigate away, but clean up just in case
+                setTimeout(() => {
+                    if (document.body.contains(paygistixForm)) {
+                        document.body.removeChild(paygistixForm);
+                    }
+                }, 100);
             });
         }
     }
