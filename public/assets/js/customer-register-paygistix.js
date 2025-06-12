@@ -41,9 +41,12 @@
             });
             
             // Update bag quantity when selection changes
-            // Wait a bit for the form to fully render
+            // Only update if there's already a selection
             setTimeout(() => {
-                updateBagQuantity();
+                const numberOfBags = document.getElementById('numberOfBags').value;
+                if (numberOfBags && numberOfBags !== '') {
+                    updateBagQuantity();
+                }
             }, 100);
             
         } catch (error) {
