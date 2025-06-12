@@ -51,6 +51,25 @@ class PaymentController {
   }
 
   /**
+   * Log payment submission for debugging
+   * POST /api/v1/payments/log-submission
+   */
+  async logSubmission(req, res) {
+    try {
+      logger.info('Paygistix payment submission:', {
+        ...req.body,
+        ip: req.ip,
+        userAgent: req.get('user-agent')
+      });
+      
+      res.json({ success: true, message: 'Payment submission logged' });
+    } catch (error) {
+      logger.error('Error logging payment submission:', error);
+      res.status(500).json({ success: false, message: 'Failed to log submission' });
+    }
+  }
+
+  /**
    * Handle payment callback from hosted form
    * This endpoint processes the return from Paygistix after payment
    */

@@ -80,7 +80,7 @@ class PaygistixPaymentForm {
     render() {
         const formHTML = `
             <div class="paygistix-payment-wrapper">
-                <form action="https://safepay.paymentlogistics.net/transaction.asp" method="post" id="paygistixPaymentForm" target="_top">
+                <form action="${this.paymentConfig?.formActionUrl || 'https://safepay.paymentlogistics.net/transaction.asp'}" method="post" id="paygistixPaymentForm">
                 <style type="text/css">
                     .paygistix-payment-wrapper {
                         padding: 20px;
@@ -209,150 +209,93 @@ class PaygistixPaymentForm {
                                 $1.25<input type="hidden" name="pxPrice1" id="pxPrice1" value="1.25" />
                             </td>
                             <td>
-                                <input type="text" class="pxQty" name="pxQty1" id="pxQty1" value="0" maxlength="3"/>
-                            </td>
-                        </tr>
-                        <tr id="row-DF5" data-code="DF5" data-delivery-fee="5.00">
-                            <td class="pxCode">
-                                DF5<input type="hidden" name="pxCode2" value="DF5" />
-                            </td>
-                            <td class="pxDescription">
-                                Per bag delivery fee<input type="hidden" name="pxDescription2" value="Per bag delivery fee" />
-                            </td>
-                            <td class="pxPrice">
-                                $5.00<input type="hidden" name="pxPrice2" id="pxPrice2" value="5.00" />
-                            </td>
-                            <td>
-                                <input type="text" class="pxQty" name="pxQty2" id="pxQty2" value="0" maxlength="3"/>
-                            </td>
-                        </tr>
-                        <tr id="row-DF10" data-code="DF10" data-delivery-fee="10.00">
-                            <td class="pxCode">
-                                DF10<input type="hidden" name="pxCode3" value="DF10" />
-                            </td>
-                            <td class="pxDescription">
-                                Per bag delivery fee<input type="hidden" name="pxDescription3" value="Per bag delivery fee" />
-                            </td>
-                            <td class="pxPrice">
-                                $10.00<input type="hidden" name="pxPrice3" id="pxPrice3" value="10.00" />
-                            </td>
-                            <td>
-                                <input type="text" class="pxQty" name="pxQty3" id="pxQty3" value="0" maxlength="3"/>
-                            </td>
-                        </tr>
-                        <tr id="row-DF15" data-code="DF15" data-delivery-fee="15.00">
-                            <td class="pxCode">
-                                DF15<input type="hidden" name="pxCode4" value="DF15" />
-                            </td>
-                            <td class="pxDescription">
-                                Per bag delivery fee<input type="hidden" name="pxDescription4" value="Per bag delivery fee" />
-                            </td>
-                            <td class="pxPrice">
-                                $15.00<input type="hidden" name="pxPrice4" id="pxPrice4" value="15.00" />
-                            </td>
-                            <td>
-                                <input type="text" class="pxQty" name="pxQty4" id="pxQty4" value="0" maxlength="3"/>
-                            </td>
-                        </tr>
-                        <tr id="row-DF20" data-code="DF20" data-delivery-fee="20.00">
-                            <td class="pxCode">
-                                DF20<input type="hidden" name="pxCode5" value="DF20" />
-                            </td>
-                            <td class="pxDescription">
-                                Per bag delivery fee<input type="hidden" name="pxDescription5" value="Per bag delivery fee" />
-                            </td>
-                            <td class="pxPrice">
-                                $20.00<input type="hidden" name="pxPrice5" id="pxPrice5" value="20.00" />
-                            </td>
-                            <td>
-                                <input type="text" class="pxQty" name="pxQty5" id="pxQty5" value="0" maxlength="3"/>
-                            </td>
-                        </tr>
-                        <tr id="row-MF25" data-code="MF25" data-min-fee="25.00">
-                            <td class="pxCode">
-                                MF25<input type="hidden" name="pxCode6" value="MF25" />
-                            </td>
-                            <td class="pxDescription">
-                                Minimum delivery fee<input type="hidden" name="pxDescription6" value="Minimum delivery fee" />
-                            </td>
-                            <td class="pxPrice">
-                                $25.00<input type="hidden" name="pxPrice6" id="pxPrice6" value="25.00" />
-                            </td>
-                            <td>
-                                <input type="text" class="pxQty" name="pxQty6" id="pxQty6" value="0" maxlength="3"/>
-                            </td>
-                        </tr>
-                        <tr id="row-MF35" data-code="MF35" data-min-fee="35.00">
-                            <td class="pxCode">
-                                MF35<input type="hidden" name="pxCode7" value="MF35" />
-                            </td>
-                            <td class="pxDescription">
-                                Minimum delivery fee<input type="hidden" name="pxDescription7" value="Minimum delivery fee" />
-                            </td>
-                            <td class="pxPrice">
-                                $35.00<input type="hidden" name="pxPrice7" id="pxPrice7" value="35.00" />
-                            </td>
-                            <td>
-                                <input type="text" class="pxQty" name="pxQty7" id="pxQty7" value="0" maxlength="3"/>
-                            </td>
-                        </tr>
-                        <tr id="row-MF50" data-code="MF50" data-min-fee="50.00">
-                            <td class="pxCode">
-                                MF50<input type="hidden" name="pxCode8" value="MF50" />
-                            </td>
-                            <td class="pxDescription">
-                                Minimum delivery fee<input type="hidden" name="pxDescription8" value="Minimum delivery fee" />
-                            </td>
-                            <td class="pxPrice">
-                                $50.00<input type="hidden" name="pxPrice8" id="pxPrice8" value="50.00" />
-                            </td>
-                            <td>
-                                <input type="text" class="pxQty" name="pxQty8" id="pxQty8" value="0" maxlength="3"/>
-                            </td>
-                        </tr>
-                        <tr id="row-MF75" data-code="MF75" data-min-fee="75.00">
-                            <td class="pxCode">
-                                MF75<input type="hidden" name="pxCode9" value="MF75" />
-                            </td>
-                            <td class="pxDescription">
-                                Minimum delivery fee<input type="hidden" name="pxDescription9" value="Minimum delivery fee" />
-                            </td>
-                            <td class="pxPrice">
-                                $75.00<input type="hidden" name="pxPrice9" id="pxPrice9" value="75.00" />
-                            </td>
-                            <td>
-                                <input type="text" class="pxQty" name="pxQty9" id="pxQty9" value="0" maxlength="3"/>
+                                <input type="text" class="pxQty" name="pxQty1" id="pxQty1" value="0" onblur="javascript:formatQty(this);" maxlength="3"/>
                             </td>
                         </tr>
                         <tr id="row-BF" data-code="BF">
                             <td class="pxCode">
-                                BF<input type="hidden" name="pxCode10" value="BF" />
+                                BF<input type="hidden" name="pxCode2" value="BF" />
                             </td>
                             <td class="pxDescription">
-                                Bag fee<input type="hidden" name="pxDescription10" value="Bag fee" />
+                                Bag Fee<input type="hidden" name="pxDescription2" value="Bag Fee" />
                             </td>
                             <td class="pxPrice">
-                                $10.00<input type="hidden" name="pxPrice10" id="pxPrice10" value="10.00" />
+                                $10.00<input type="hidden" name="pxPrice2" id="pxPrice2" value="10.00" />
                             </td>
                             <td>
-                                <input type="text" class="pxQty" name="pxQty10" id="pxQty10" value="0" maxlength="3"/>
+                                <input type="text" class="pxQty" name="pxQty2" id="pxQty2" value="0" onblur="javascript:formatQty(this);" maxlength="3"/>
+                            </td>
+                        </tr>
+                        <tr id="row-PBF5" data-code="PBF5" data-per-bag-fee="5.00">
+                            <td class="pxCode">
+                                PBF5<input type="hidden" name="pxCode3" value="PBF5" />
+                            </td>
+                            <td class="pxDescription">
+                                Per bag fee<input type="hidden" name="pxDescription3" value="Per bag fee" />
+                            </td>
+                            <td class="pxPrice">
+                                $5.00<input type="hidden" name="pxPrice3" id="pxPrice3" value="5.00" />
+                            </td>
+                            <td>
+                                <input type="text" class="pxQty" name="pxQty3" id="pxQty3" value="0" onblur="javascript:formatQty(this);" maxlength="3"/>
+                            </td>
+                        </tr>
+                        <tr id="row-PBF10" data-code="PBF10" data-per-bag-fee="10.00">
+                            <td class="pxCode">
+                                PBF10<input type="hidden" name="pxCode4" value="PBF10" />
+                            </td>
+                            <td class="pxDescription">
+                                Per bag fee<input type="hidden" name="pxDescription4" value="Per bag fee" />
+                            </td>
+                            <td class="pxPrice">
+                                $10.00<input type="hidden" name="pxPrice4" id="pxPrice4" value="10.00" />
+                            </td>
+                            <td>
+                                <input type="text" class="pxQty" name="pxQty4" id="pxQty4" value="0" onblur="javascript:formatQty(this);" maxlength="3"/>
+                            </td>
+                        </tr>
+                        <tr id="row-PBF15" data-code="PBF15" data-per-bag-fee="15.00">
+                            <td class="pxCode">
+                                PBF15<input type="hidden" name="pxCode5" value="PBF15" />
+                            </td>
+                            <td class="pxDescription">
+                                Per bag fee<input type="hidden" name="pxDescription5" value="Per bag fee" />
+                            </td>
+                            <td class="pxPrice">
+                                $15.00<input type="hidden" name="pxPrice5" id="pxPrice5" value="15.00" />
+                            </td>
+                            <td>
+                                <input type="text" class="pxQty" name="pxQty5" id="pxQty5" value="0" onblur="javascript:formatQty(this);" maxlength="3"/>
+                            </td>
+                        </tr>
+                        <tr id="row-PBF20" data-code="PBF20" data-per-bag-fee="20.00">
+                            <td class="pxCode">
+                                PBF20<input type="hidden" name="pxCode6" value="PBF20" />
+                            </td>
+                            <td class="pxDescription">
+                                Per bag fee<input type="hidden" name="pxDescription6" value="Per bag fee" />
+                            </td>
+                            <td class="pxPrice">
+                                $20.00<input type="hidden" name="pxPrice6" id="pxPrice6" value="20.00" />
+                            </td>
+                            <td>
+                                <input type="text" class="pxQty" name="pxQty6" id="pxQty6" value="0" onblur="javascript:formatQty(this);" maxlength="3"/>
                             </td>
                         </tr>
                     </tbody>
                     <tfoot>
                         <tr>
                             <td colspan="4" align="right">
-                                <span id="pxTotal"><b>Total $0.00</b></span>
-                                <input type="submit" id="pxSubmit" value="Pay Now" />
+                                <span id="pxTotal"><b>Total $0.00</b></span><input type="submit" id="pxSubmit" value="Pay Now" />
                             </td>
                         </tr>
                     </tfoot>
                 </table>
                 <input type="hidden" name="txnType" value="FORM" />
                 <input type="hidden" name="merchantID" value="${this.paymentConfig?.merchantId || 'wmaxaustWEB'}" />
-                <input type="hidden" name="formID" value="${this.paymentConfig?.formId || '55015141435'}" />
-                <input type="hidden" name="hash" value="${this.paymentConfig?.formHash || '40a00618f540225d'}" />
-                <input type="hidden" name="ReturnURL" value="${this.paymentConfig?.returnUrl || 'https://wavemax.promo/payment-callback-handler.html?type=registration'}" />
+                <input type="hidden" name="formID" value="${this.paymentConfig?.formId || '55015281462'}" />
+                <input type="hidden" name="hash" value="${this.paymentConfig?.formHash || '0ccde8f43fd2e92cb3d9cd6c948d7bcc'}" />
+                <input type="hidden" name="ReturnURL" value="${this.paymentConfig?.returnUrl || 'https://wavemax.promo/payment-callback-handler.html'}" />
                 </form>
             </div>
         `;
@@ -377,9 +320,8 @@ class PaygistixPaymentForm {
                 }
             });
         } else if (this.payContext === 'ORDER' && this.affiliateSettings) {
-            // For orders, show WDF and appropriate delivery/minimum fees
+            // For orders, show WDF and appropriate per bag fee
             const perBagFee = this.affiliateSettings.perBagDeliveryFee;
-            const minFee = this.affiliateSettings.minimumDeliveryFee;
             
             rows.forEach(row => {
                 const code = row.getAttribute('data-code');
@@ -389,15 +331,10 @@ class PaygistixPaymentForm {
                 if (code === 'WDF') {
                     shouldShow = true;
                 }
-                // Show matching delivery fee
-                else if (code.startsWith('DF')) {
-                    const fee = parseFloat(row.getAttribute('data-delivery-fee'));
+                // Show matching per bag fee
+                else if (code.startsWith('PBF')) {
+                    const fee = parseFloat(row.getAttribute('data-per-bag-fee'));
                     shouldShow = (fee === perBagFee);
-                }
-                // Show matching minimum fee
-                else if (code.startsWith('MF')) {
-                    const fee = parseFloat(row.getAttribute('data-min-fee'));
-                    shouldShow = (fee === minFee);
                 }
                 // Hide BF for orders
                 else if (code === 'BF') {
@@ -417,16 +354,8 @@ class PaygistixPaymentForm {
     }
     
     initializeHandlers() {
-        // Add blur event listeners to all quantity inputs
-        const qtyInputs = this.container.querySelectorAll('.pxQty');
-        qtyInputs.forEach(input => {
-            input.addEventListener('blur', function() {
-                // Call formatQty if it exists (loaded by Paygistix script)
-                if (window.formatQty) {
-                    window.formatQty(this);
-                }
-            });
-        });
+        // Note: blur handlers are already set inline with onblur="javascript:formatQty(this);"
+        // This ensures they work with the Paygistix script
         
         // Apply registration-specific styling and behavior
         if (this.payContext === 'REGISTRATION') {
@@ -529,13 +458,13 @@ class PaygistixPaymentForm {
                 id: form.getAttribute('id')
             });
             
-            // Ensure target="_top" is set
-            form.setAttribute('target', '_top');
-            
             // Intercept form submission to validate customer data first
             form.addEventListener('submit', (e) => {
                 console.log('Form submission intercepted');
                 e.preventDefault(); // Always prevent default first
+                
+                // Store the click position for modal positioning
+                this.lastClickY = e.clientY || 0;
                 
                 // Check if customer form is valid
                 const customerForm = document.getElementById('customerRegistrationForm');
@@ -578,23 +507,26 @@ class PaygistixPaymentForm {
                 const paygistixForm = document.createElement('form');
                 paygistixForm.method = 'post';
                 paygistixForm.action = form.action;
-                paygistixForm.target = '_top'; // Break out of iframe
                 
                 // Copy only Paygistix-specific fields
                 const paygistixFields = [
                     'txnType', 'merchantID', 'formID', 'hash', 'ReturnURL',
-                    // Product codes
+                    // Product codes (only 6 items in new form)
                     'pxCode1', 'pxDescription1', 'pxPrice1', 'pxQty1',
                     'pxCode2', 'pxDescription2', 'pxPrice2', 'pxQty2',
                     'pxCode3', 'pxDescription3', 'pxPrice3', 'pxQty3',
                     'pxCode4', 'pxDescription4', 'pxPrice4', 'pxQty4',
                     'pxCode5', 'pxDescription5', 'pxPrice5', 'pxQty5',
-                    'pxCode6', 'pxDescription6', 'pxPrice6', 'pxQty6',
-                    'pxCode7', 'pxDescription7', 'pxPrice7', 'pxQty7',
-                    'pxCode8', 'pxDescription8', 'pxPrice8', 'pxQty8',
-                    'pxCode9', 'pxDescription9', 'pxPrice9', 'pxQty9',
-                    'pxCode10', 'pxDescription10', 'pxPrice10', 'pxQty10'
+                    'pxCode6', 'pxDescription6', 'pxPrice6', 'pxQty6'
                 ];
+                
+                // Build payment data object for logging
+                const paymentData = {
+                    action: paygistixForm.action,
+                    method: paygistixForm.method,
+                    timestamp: new Date().toISOString(),
+                    fields: {}
+                };
                 
                 paygistixFields.forEach(fieldName => {
                     const field = form.elements[fieldName];
@@ -604,16 +536,37 @@ class PaygistixPaymentForm {
                         hiddenField.name = fieldName;
                         hiddenField.value = field.value;
                         paygistixForm.appendChild(hiddenField);
+                        
+                        // Add to payment data for logging
+                        paymentData.fields[fieldName] = field.value;
                     }
                 });
                 
                 // Log form submission details
-                console.log('Submitting to Paygistix:', paygistixForm.action);
-                console.log('Form target:', paygistixForm.target);
+                console.log('=== PAYGISTIX PAYMENT SUBMISSION ===');
+                console.log('Submitting to:', paymentData.action);
+                console.log('Method:', paymentData.method);
+                console.log('Timestamp:', paymentData.timestamp);
+                console.log('Form Fields:', paymentData.fields);
+                console.log('Full Payment Data:', JSON.stringify(paymentData, null, 2));
+                console.log('=====================================');
                 
-                // Append to body temporarily and submit
-                document.body.appendChild(paygistixForm);
-                paygistixForm.submit();
+                // Also log to server for debugging
+                try {
+                    fetch('/api/v1/payments/log-submission', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': 'Bearer ' + (localStorage.getItem('token') || '')
+                        },
+                        body: JSON.stringify(paymentData)
+                    }).catch(err => console.log('Failed to log payment submission to server:', err));
+                } catch (err) {
+                    console.log('Error logging payment submission:', err);
+                }
+                
+                // Create and show payment processing modal
+                this.showPaymentModal(paygistixForm, paymentData);
                 
                 // Form will navigate away, but clean up just in case
                 setTimeout(() => {
@@ -623,6 +576,208 @@ class PaygistixPaymentForm {
                 }, 100);
             });
         }
+    }
+    
+    showPaymentModal(paygistixForm, paymentData) {
+        // Create modal HTML for confirmation
+        const modalHTML = `
+            <div id="paymentProcessingModal" class="fixed inset-0 z-50" style="display: none;">
+                <!-- Background overlay -->
+                <div class="fixed inset-0 bg-gray-500 opacity-75"></div>
+                
+                <!-- Modal panel -->
+                <div id="paymentModalPanel" class="absolute bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:max-w-lg sm:w-full" style="left: 50%; transform: translateX(-50%);">
+                        <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                            <div class="sm:flex sm:items-start">
+                                <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-blue-100 sm:mx-0 sm:h-10 sm:w-10">
+                                    <svg class="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                </div>
+                                <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
+                                    <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">
+                                        Secure Payment Processing
+                                    </h3>
+                                    <div class="mt-2">
+                                        <!-- Confirmation state -->
+                                        <div id="paymentConfirmState">
+                                            <p class="text-sm text-gray-500">
+                                                You will be redirected to our secure payment processor, Paygistix, to complete your payment. 
+                                                The payment page will open in a new window.
+                                            </p>
+                                            <p class="text-sm text-gray-500 mt-2">
+                                                Please ensure pop-up blockers are disabled for this site.
+                                            </p>
+                                        </div>
+                                        
+                                        <!-- Loading state (hidden initially) -->
+                                        <div id="paymentLoadingState" style="display: none;" class="text-center py-4">
+                                            <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mb-2"></div>
+                                            <p class="text-sm text-gray-600">Opening payment window...</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                            <button type="button" id="proceedToPaymentBtn" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:ml-3 sm:w-auto sm:text-sm">
+                                Proceed to Payment
+                            </button>
+                            <button type="button" id="cancelPaymentBtn" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
+                                Cancel
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        // Add modal to page if not already present
+        if (!document.getElementById('paymentProcessingModal')) {
+            document.body.insertAdjacentHTML('beforeend', modalHTML);
+        }
+        
+        const modal = document.getElementById('paymentProcessingModal');
+        const proceedBtn = document.getElementById('proceedToPaymentBtn');
+        const cancelBtn = document.getElementById('cancelPaymentBtn');
+        const confirmState = document.getElementById('paymentConfirmState');
+        const loadingState = document.getElementById('paymentLoadingState');
+        
+        // Show modal
+        modal.style.display = 'block';
+        
+        // Position the modal panel at 70% down from top of viewport
+        const modalPanel = document.getElementById('paymentModalPanel');
+        if (modalPanel) {
+            // Calculate 70% down from top of current viewport
+            const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+            const viewportHeight = window.innerHeight;
+            const modalTop = scrollTop + (viewportHeight * 0.7);
+            
+            modalPanel.style.top = modalTop + 'px';
+            
+            // No need to scroll since we're positioning relative to current viewport
+        }
+        
+        // Add CSS for animation if not already present
+        if (!document.getElementById('modalAnimationStyles')) {
+            const style = document.createElement('style');
+            style.id = 'modalAnimationStyles';
+            style.textContent = `
+                @keyframes spin {
+                    to { transform: rotate(360deg); }
+                }
+                .animate-spin {
+                    animation: spin 1s linear infinite;
+                }
+            `;
+            document.head.appendChild(style);
+        }
+        
+        // Handle proceed button click
+        proceedBtn.onclick = () => {
+            // Show loading state
+            confirmState.style.display = 'none';
+            loadingState.style.display = 'block';
+            proceedBtn.disabled = true;
+            cancelBtn.disabled = true;
+            
+            // Append form to the current document body (not parent)
+            // The form needs to be in the same document context where it was created
+            document.body.appendChild(paygistixForm);
+            
+            // Submit form to open in new window
+            try {
+                console.log('Opening Paygistix payment in new window');
+                console.log('Form connected to DOM:', document.body.contains(paygistixForm));
+                console.log('Form action:', paygistixForm.action);
+                
+                // Use setTimeout to ensure form is properly attached to DOM
+                setTimeout(() => {
+                    // Calculate window size for the form
+                    const windowWidth = 800;
+                    const windowHeight = 600;
+                    
+                    // Calculate center position relative to current browser window
+                    const left = window.screenX + (window.outerWidth - windowWidth) / 2;
+                    const top = window.screenY + (window.outerHeight - windowHeight) / 2;
+                    
+                    // Window features
+                    const windowFeatures = [
+                        `width=${windowWidth}`,
+                        `height=${windowHeight}`,
+                        `left=${left}`,
+                        `top=${top}`,
+                        'resizable=yes',
+                        'scrollbars=yes',
+                        'toolbar=no',
+                        'menubar=no',
+                        'location=no',
+                        'status=yes'
+                    ].join(',');
+                    
+                    // Open new window
+                    const paymentWindow = window.open('', 'PaygistixPayment', windowFeatures);
+                    
+                    if (paymentWindow) {
+                        // Set form target to the new window
+                        paygistixForm.target = 'PaygistixPayment';
+                        
+                        // Submit form to the new window
+                        paygistixForm.submit();
+                        console.log('Form submitted to new window');
+                        
+                        // Close modal after a short delay
+                        setTimeout(() => {
+                            modal.style.display = 'none';
+                            console.log('Payment window opened, closing modal');
+                            // Clean up form
+                            if (document.body.contains(paygistixForm)) {
+                                document.body.removeChild(paygistixForm);
+                            }
+                        }, 1000);
+                    } else {
+                        throw new Error('Pop-up blocked');
+                    }
+                }, 100);
+            } catch (error) {
+                console.error('Error opening payment window:', error);
+                // Show error in modal
+                loadingState.innerHTML = `
+                    <div class="text-center py-4">
+                        <svg class="mx-auto h-12 w-12 text-red-500 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                        </svg>
+                        <p class="text-gray-700 font-medium mb-2">Unable to open payment window</p>
+                        <p class="text-gray-600 text-sm">Please check your pop-up blocker settings and try again.</p>
+                    </div>
+                `;
+                proceedBtn.disabled = false;
+                cancelBtn.disabled = false;
+            }
+        };
+        
+        // Handle cancel button
+        cancelBtn.onclick = () => {
+            modal.style.display = 'none';
+            console.log('Payment cancelled by user');
+            // Clean up form
+            if (document.body.contains(paygistixForm)) {
+                document.body.removeChild(paygistixForm);
+            }
+        };
+        
+        // Handle click outside modal
+        modal.onclick = (e) => {
+            if (e.target === modal) {
+                modal.style.display = 'none';
+                console.log('Payment modal closed by user (clicked outside)');
+                // Clean up form
+                if (document.body.contains(paygistixForm)) {
+                    document.body.removeChild(paygistixForm);
+                }
+            }
+        };
     }
 }
 
