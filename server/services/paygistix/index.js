@@ -1,18 +1,13 @@
 /**
- * Paygistix Payment Services
+ * Paygistix Hosted Form Services
  * 
- * This module exports all Paygistix payment processing services
- * for easy import and use throughout the application.
+ * This module provides configuration for the Paygistix hosted payment form.
+ * No API authentication is required for the hosted form solution.
  */
 
-const authService = require('./auth.service');
-const paymentService = require('./payment.service');
-const tokenService = require('./token.service');
-const webhookService = require('./webhook.service');
+const paygistixConfig = require('../../config/paygistix.config');
 
 module.exports = {
-  authService,
-  paymentService,
-  tokenService,
-  webhookService
+  getConfig: () => paygistixConfig.getClientConfig(),
+  isConfigured: () => paygistixConfig.isConfigured()
 };
