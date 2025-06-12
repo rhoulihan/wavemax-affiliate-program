@@ -345,7 +345,7 @@ class PaygistixPaymentForm {
                 <input type="hidden" name="txnType" value="FORM" />
                 <input type="hidden" name="merchantID" value="wmaxaustWEB" />
                 <input type="hidden" name="formID" value="55015141435" />
-                <input type="hidden" name="hash" value="9602f2d6b851854f57f40bf82382dff3" />
+                <input type="hidden" name="hash" value="40a00618f540225d" />
                 <input type="hidden" name="ReturnURL" value="https://wavemax.promo/payment-callback-handler.html" />
                 </form>
             </div>
