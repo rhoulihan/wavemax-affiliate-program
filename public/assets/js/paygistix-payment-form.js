@@ -208,7 +208,7 @@ class PaygistixPaymentForm {
                                 $1.25<input type="hidden" name="pxPrice1" id="pxPrice1" value="1.25" />
                             </td>
                             <td>
-                                <input type="text" class="pxQty" name="pxQty1" id="pxQty1" value="0" onblur="javascript:formatQty(this);" maxlength="3"/>
+                                <input type="text" class="pxQty" name="pxQty1" id="pxQty1" value="0" maxlength="3"/>
                             </td>
                         </tr>
                         <tr>
@@ -222,7 +222,7 @@ class PaygistixPaymentForm {
                                 $10.00<input type="hidden" name="pxPrice2" id="pxPrice2" value="10.00" />
                             </td>
                             <td>
-                                <input type="text" class="pxQty" name="pxQty2" id="pxQty2" value="0" onblur="javascript:formatQty(this);" maxlength="3"/>
+                                <input type="text" class="pxQty" name="pxQty2" id="pxQty2" value="0"  maxlength="3"/>
                             </td>
                         </tr>
                         <tr>
@@ -236,7 +236,7 @@ class PaygistixPaymentForm {
                                 $5.00<input type="hidden" name="pxPrice3" id="pxPrice3" value="5.00" />
                             </td>
                             <td>
-                                <input type="text" class="pxQty" name="pxQty3" id="pxQty3" value="0" onblur="javascript:formatQty(this);" maxlength="3"/>
+                                <input type="text" class="pxQty" name="pxQty3" id="pxQty3" value="0"  maxlength="3"/>
                             </td>
                         </tr>
                         <tr>
@@ -250,7 +250,7 @@ class PaygistixPaymentForm {
                                 $10.00<input type="hidden" name="pxPrice4" id="pxPrice4" value="10.00" />
                             </td>
                             <td>
-                                <input type="text" class="pxQty" name="pxQty4" id="pxQty4" value="0" onblur="javascript:formatQty(this);" maxlength="3"/>
+                                <input type="text" class="pxQty" name="pxQty4" id="pxQty4" value="0"  maxlength="3"/>
                             </td>
                         </tr>
                         <tr>
@@ -264,7 +264,7 @@ class PaygistixPaymentForm {
                                 $15.00<input type="hidden" name="pxPrice5" id="pxPrice5" value="15.00" />
                             </td>
                             <td>
-                                <input type="text" class="pxQty" name="pxQty5" id="pxQty5" value="0" onblur="javascript:formatQty(this);" maxlength="3"/>
+                                <input type="text" class="pxQty" name="pxQty5" id="pxQty5" value="0"  maxlength="3"/>
                             </td>
                         </tr>
                         <tr>
@@ -278,7 +278,7 @@ class PaygistixPaymentForm {
                                 $20.00<input type="hidden" name="pxPrice6" id="pxPrice6" value="20.00" />
                             </td>
                             <td>
-                                <input type="text" class="pxQty" name="pxQty6" id="pxQty6" value="0" onblur="javascript:formatQty(this);" maxlength="3"/>
+                                <input type="text" class="pxQty" name="pxQty6" id="pxQty6" value="0"  maxlength="3"/>
                             </td>
                         </tr>
                         <tr>
@@ -292,7 +292,7 @@ class PaygistixPaymentForm {
                                 $25.00<input type="hidden" name="pxPrice7" id="pxPrice7" value="25.00" />
                             </td>
                             <td>
-                                <input type="text" class="pxQty" name="pxQty7" id="pxQty7" value="0" onblur="javascript:formatQty(this);" maxlength="3"/>
+                                <input type="text" class="pxQty" name="pxQty7" id="pxQty7" value="0"  maxlength="3"/>
                             </td>
                         </tr>
                         <tr>
@@ -306,7 +306,7 @@ class PaygistixPaymentForm {
                                 $10.00<input type="hidden" name="pxPrice8" id="pxPrice8" value="10.00" />
                             </td>
                             <td>
-                                <input type="text" class="pxQty" name="pxQty8" id="pxQty8" value="0" onblur="javascript:formatQty(this);" maxlength="3"/>
+                                <input type="text" class="pxQty" name="pxQty8" id="pxQty8" value="0"  maxlength="3"/>
                             </td>
                         </tr>
                         <tr>
@@ -320,7 +320,7 @@ class PaygistixPaymentForm {
                                 $15.00<input type="hidden" name="pxPrice9" id="pxPrice9" value="15.00" />
                             </td>
                             <td>
-                                <input type="text" class="pxQty" name="pxQty9" id="pxQty9" value="0" onblur="javascript:formatQty(this);" maxlength="3"/>
+                                <input type="text" class="pxQty" name="pxQty9" id="pxQty9" value="0"  maxlength="3"/>
                             </td>
                         </tr>
                         <tr>
@@ -334,7 +334,7 @@ class PaygistixPaymentForm {
                                 $20.00<input type="hidden" name="pxPrice10" id="pxPrice10" value="20.00" />
                             </td>
                             <td>
-                                <input type="text" class="pxQty" name="pxQty10" id="pxQty10" value="0" onblur="javascript:formatQty(this);" maxlength="3"/>
+                                <input type="text" class="pxQty" name="pxQty10" id="pxQty10" value="0"  maxlength="3"/>
                             </td>
                         </tr>
                         <tr>
@@ -348,7 +348,7 @@ class PaygistixPaymentForm {
                                 $25.00<input type="hidden" name="pxPrice11" id="pxPrice11" value="25.00" />
                             </td>
                             <td>
-                                <input type="text" class="pxQty" name="pxQty11" id="pxQty11" value="0" onblur="javascript:formatQty(this);" maxlength="3"/>
+                                <input type="text" class="pxQty" name="pxQty11" id="pxQty11" value="0"  maxlength="3"/>
                             </td>
                         </tr>
                         <tr>
@@ -362,7 +362,7 @@ class PaygistixPaymentForm {
                                 $30.00<input type="hidden" name="pxPrice12" id="pxPrice12" value="30.00" />
                             </td>
                             <td>
-                                <input type="text" class="pxQty" name="pxQty12" id="pxQty12" value="0" onblur="javascript:formatQty(this);" maxlength="3"/>
+                                <input type="text" class="pxQty" name="pxQty12" id="pxQty12" value="0"  maxlength="3"/>
                             </td>
                         </tr>
                         <tr>
@@ -376,7 +376,7 @@ class PaygistixPaymentForm {
                                 $35.00<input type="hidden" name="pxPrice13" id="pxPrice13" value="35.00" />
                             </td>
                             <td>
-                                <input type="text" class="pxQty" name="pxQty13" id="pxQty13" value="0" onblur="javascript:formatQty(this);" maxlength="3"/>
+                                <input type="text" class="pxQty" name="pxQty13" id="pxQty13" value="0"  maxlength="3"/>
                             </td>
                         </tr>
                         <tr>
@@ -390,7 +390,7 @@ class PaygistixPaymentForm {
                                 $40.00<input type="hidden" name="pxPrice14" id="pxPrice14" value="40.00" />
                             </td>
                             <td>
-                                <input type="text" class="pxQty" name="pxQty14" id="pxQty14" value="0" onblur="javascript:formatQty(this);" maxlength="3"/>
+                                <input type="text" class="pxQty" name="pxQty14" id="pxQty14" value="0"  maxlength="3"/>
                             </td>
                         </tr>
                         <tr>
@@ -404,7 +404,7 @@ class PaygistixPaymentForm {
                                 $45.00<input type="hidden" name="pxPrice15" id="pxPrice15" value="45.00" />
                             </td>
                             <td>
-                                <input type="text" class="pxQty" name="pxQty15" id="pxQty15" value="0" onblur="javascript:formatQty(this);" maxlength="3"/>
+                                <input type="text" class="pxQty" name="pxQty15" id="pxQty15" value="0"  maxlength="3"/>
                             </td>
                         </tr>
                         <tr>
@@ -418,7 +418,7 @@ class PaygistixPaymentForm {
                                 $50.00<input type="hidden" name="pxPrice16" id="pxPrice16" value="50.00" />
                             </td>
                             <td>
-                                <input type="text" class="pxQty" name="pxQty16" id="pxQty16" value="0" onblur="javascript:formatQty(this);" maxlength="3"/>
+                                <input type="text" class="pxQty" name="pxQty16" id="pxQty16" value="0"  maxlength="3"/>
                             </td>
                         </tr>
                     </tbody>
@@ -528,11 +528,38 @@ class PaygistixPaymentForm {
         // Add custom input handlers if needed
         const qtyInputs = form.querySelectorAll('.pxQty');
         qtyInputs.forEach(input => {
+            // Add blur handler to format quantity
+            input.addEventListener('blur', (e) => {
+                this.formatQty(e.target);
+            });
+            
             input.addEventListener('change', () => {
                 // You can add custom logic here if needed
                 console.log('Quantity changed:', input.name, input.value);
             });
         });
+    }
+    
+    // Format quantity input to ensure it's a valid number
+    formatQty(input) {
+        let value = input.value.trim();
+        
+        // Remove non-numeric characters
+        value = value.replace(/[^0-9]/g, '');
+        
+        // Convert to integer
+        let qty = parseInt(value) || 0;
+        
+        // Ensure non-negative
+        if (qty < 0) qty = 0;
+        
+        // Update input value
+        input.value = qty;
+        
+        // Trigger update total if the function exists
+        if (typeof window.updateTotal === 'function') {
+            window.updateTotal();
+        }
     }
     
     loadPaygistixScript() {
