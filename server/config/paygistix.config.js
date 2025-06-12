@@ -9,16 +9,31 @@ class PaygistixConfig {
    * Validate required environment variables
    */
   validateEnvironment() {
-    const required = [
-      'PAYGISTIX_API_KEY',
-      'PAYGISTIX_API_SECRET',
-      'PAYGISTIX_WEBHOOK_SECRET'
+    // For hosted form solution, we only need form configuration
+    const requiredForHostedForm = [
+      'PAYGISTIX_MERCHANT_ID',
+      'PAYGISTIX_FORM_ID',
+      'PAYGISTIX_FORM_HASH'
     ];
 
-    const missing = required.filter(key => !process.env[key]);
+    const missing = requiredForHostedForm.filter(key => !process.env[key]);
     
     if (missing.length > 0) {
-      logger.warn(`Missing Paygistix environment variables: ${missing.join(', ')}`);
+      logger.warn(`Missing Paygistix hosted form configuration: ${missing.join(', ')}`);
+    }
+    
+    // API keys are only needed if using API-based integration
+    if (process.env.PAYGISTIX_USE_API === 'true') {
+      const apiRequired = [
+        'PAYGISTIX_API_KEY',
+        'PAYGISTIX_API_SECRET',
+        'PAYGISTIX_WEBHOOK_SECRET'
+      ];
+      
+      const missingApi = apiRequired.filter(key => !process.env[key]);
+      if (missingApi.length > 0) {
+        logger.warn(`Missing Paygistix API configuration: ${missingApi.join(', ')}`);
+      }
     }
   }
 
