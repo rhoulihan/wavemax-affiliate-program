@@ -372,6 +372,21 @@
       // Keep using default fee
     });
 
+  // Function to sync bag quantity with payment form
+  function syncBagQuantityToPaymentForm() {
+    const numberOfBags = parseInt(numberOfBagsSelect.value) || 0;
+    const bfQtyInput = document.getElementById('pxQty10');
+    if (bfQtyInput) {
+      bfQtyInput.value = numberOfBags;
+      // Trigger the blur event to update the form's total
+      bfQtyInput.dispatchEvent(new Event('blur'));
+      // Also trigger any formatQty function if it exists
+      if (window.formatQty) {
+        window.formatQty(bfQtyInput);
+      }
+    }
+  }
+
   numberOfBagsSelect.addEventListener('change', function() {
     const numberOfBags = parseInt(this.value) || 0;
     const total = numberOfBags * bagFee;
@@ -384,6 +399,9 @@
     } else {
       bagFeeSummary.style.display = 'none';
     }
+    
+    // Update the Paygistix payment form BF quantity
+    syncBagQuantityToPaymentForm();
   });
 
   // Social registration button handlers
@@ -718,6 +736,12 @@
 
   // Check for customer social registration callback on page load
   handleCustomerSocialRegistrationCallback();
+
+  // Sync bag quantity after payment form loads
+  // Wait a bit to ensure the Paygistix payment form is rendered
+  setTimeout(() => {
+    syncBagQuantityToPaymentForm();
+  }, 1000);
 
   }
 

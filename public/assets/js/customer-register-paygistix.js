@@ -41,7 +41,10 @@
             });
             
             // Update bag quantity when selection changes
-            updateBagQuantity();
+            // Wait a bit for the form to fully render
+            setTimeout(() => {
+                updateBagQuantity();
+            }, 100);
             
         } catch (error) {
             console.error('Error initializing payment form:', error);
@@ -53,9 +56,18 @@
     // Update bag quantity in payment form
     function updateBagQuantity() {
         const numberOfBags = document.getElementById('numberOfBags').value;
+        console.log('updateBagQuantity called with numberOfBags:', numberOfBags);
+        
         if (paymentForm && numberOfBags) {
+            const quantity = parseInt(numberOfBags);
+            console.log('Setting BF quantity to:', quantity);
             paymentForm.setPrefilledAmounts({
-                BF: parseInt(numberOfBags)
+                BF: quantity
+            });
+        } else {
+            console.log('PaymentForm not ready or numberOfBags is empty', {
+                paymentForm: !!paymentForm,
+                numberOfBags: numberOfBags
             });
         }
     }
