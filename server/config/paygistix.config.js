@@ -38,25 +38,37 @@ class PaygistixConfig {
   /**
    * Get merchant ID
    * @returns {string}
+   * @throws {Error} If merchant ID is not configured
    */
   getMerchantId() {
-    return process.env.PAYGISTIX_MERCHANT_ID || '';
+    if (!process.env.PAYGISTIX_MERCHANT_ID) {
+      throw new Error('PAYGISTIX_MERCHANT_ID is required but not configured');
+    }
+    return process.env.PAYGISTIX_MERCHANT_ID;
   }
 
   /**
    * Get form ID
    * @returns {string}
+   * @throws {Error} If form ID is not configured
    */
   getFormId() {
-    return process.env.PAYGISTIX_FORM_ID || '';
+    if (!process.env.PAYGISTIX_FORM_ID) {
+      throw new Error('PAYGISTIX_FORM_ID is required but not configured');
+    }
+    return process.env.PAYGISTIX_FORM_ID;
   }
 
   /**
    * Get form hash
    * @returns {string}
+   * @throws {Error} If form hash is not configured
    */
   getFormHash() {
-    return process.env.PAYGISTIX_FORM_HASH || '';
+    if (!process.env.PAYGISTIX_FORM_HASH) {
+      throw new Error('PAYGISTIX_FORM_HASH is required but not configured');
+    }
+    return process.env.PAYGISTIX_FORM_HASH;
   }
 
   /**
@@ -80,32 +92,53 @@ class PaygistixConfig {
    * @returns {boolean}
    */
   isConfigured() {
-    return !!(this.getMerchantId() && this.getFormId() && this.getFormHash());
+    try {
+      // Try to get all required values - will throw if any are missing
+      this.getMerchantId();
+      this.getFormId();
+      this.getFormHash();
+      return true;
+    } catch (error) {
+      logger.error('Paygistix configuration incomplete:', error.message);
+      return false;
+    }
   }
 
   /**
    * Get public configuration object for client
    * @returns {Object}
+   * @throws {Error} If required configuration is missing
    */
   getClientConfig() {
-    return {
-      merchantId: this.getMerchantId(),
-      formId: this.getFormId(),
-      formActionUrl: this.getFormActionUrl(),
-      returnUrl: this.getReturnUrl(),
-      environment: this.getEnvironment()
-    };
+    try {
+      return {
+        merchantId: this.getMerchantId(),
+        formId: this.getFormId(),
+        formActionUrl: this.getFormActionUrl(),
+        returnUrl: this.getReturnUrl(),
+        environment: this.getEnvironment()
+      };
+    } catch (error) {
+      logger.error('Failed to get client config:', error.message);
+      throw error;
+    }
   }
 
   /**
    * Get full configuration including sensitive data (for server use only)
    * @returns {Object}
+   * @throws {Error} If required configuration is missing
    */
   getFullConfig() {
-    return {
-      ...this.getClientConfig(),
-      formHash: this.getFormHash()
-    };
+    try {
+      return {
+        ...this.getClientConfig(),
+        formHash: this.getFormHash()
+      };
+    } catch (error) {
+      logger.error('Failed to get full config:', error.message);
+      throw error;
+    }
   }
 }
 

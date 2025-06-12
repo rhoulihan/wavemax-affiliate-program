@@ -78,9 +78,34 @@ class PaygistixPaymentForm {
     }
     
     render() {
+        // Validate that payment config is loaded and complete
+        if (!this.paymentConfig) {
+            this.container.innerHTML = `
+                <div class="alert alert-danger">
+                    <strong>Configuration Error:</strong> Payment configuration not loaded. Please contact support.
+                </div>
+            `;
+            console.error('PaygistixPaymentForm: Payment configuration is missing');
+            return;
+        }
+
+        // Validate required config fields
+        const requiredFields = ['merchantId', 'formId', 'formHash', 'formActionUrl', 'returnUrl'];
+        const missingFields = requiredFields.filter(field => !this.paymentConfig[field]);
+        
+        if (missingFields.length > 0) {
+            this.container.innerHTML = `
+                <div class="alert alert-danger">
+                    <strong>Configuration Error:</strong> Missing required payment configuration fields: ${missingFields.join(', ')}
+                </div>
+            `;
+            console.error('PaygistixPaymentForm: Missing required fields:', missingFields);
+            return;
+        }
+
         const formHTML = `
             <div class="paygistix-payment-wrapper">
-                <form action="${this.paymentConfig?.formActionUrl || 'https://safepay.paymentlogistics.net/transaction.asp'}" method="post" id="paygistixPaymentForm">
+                <form action="${this.paymentConfig.formActionUrl}" method="post" id="paygistixPaymentForm">
                 <style type="text/css">
                     .paygistix-payment-wrapper {
                         padding: 20px;
@@ -292,10 +317,10 @@ class PaygistixPaymentForm {
                     </tfoot>
                 </table>
                 <input type="hidden" name="txnType" value="FORM" />
-                <input type="hidden" name="merchantID" value="${this.paymentConfig?.merchantId || 'wmaxaustWEB'}" />
-                <input type="hidden" name="formID" value="${this.paymentConfig?.formId || '55015281462'}" />
-                <input type="hidden" name="hash" value="${this.paymentConfig?.formHash || '0ccde8f43fd2e92cb3d9cd6c948d7bcc'}" />
-                <input type="hidden" name="ReturnURL" value="${this.paymentConfig?.returnUrl || 'https://wavemax.promo/payment-callback-handler.html'}" />
+                <input type="hidden" name="merchantID" value="${this.paymentConfig?.merchantId}" />
+                <input type="hidden" name="formID" value="${this.paymentConfig?.formId}" />
+                <input type="hidden" name="hash" value="${this.paymentConfig?.formHash}" />
+                <input type="hidden" name="ReturnURL" value="${this.paymentConfig?.returnUrl}" />
                 </form>
             </div>
         `;
@@ -420,6 +445,58 @@ class PaygistixPaymentForm {
         return this.container.querySelector('#paygistixPaymentForm');
     }
     
+    async createPaymentToken(customerData, paymentData) {
+        try {
+            const response = await fetch('/api/v1/payments/create-token', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + (localStorage.getItem('token') || '')
+                },
+                body: JSON.stringify({
+                    customerData,
+                    paymentData
+                })
+            });
+            
+            if (!response.ok) {
+                throw new Error('Failed to create payment token');
+            }
+            
+            const data = await response.json();
+            if (data.success) {
+                return data.token;
+            } else {
+                throw new Error(data.message || 'Failed to create payment token');
+            }
+        } catch (error) {
+            console.error('Error creating payment token:', error);
+            throw error;
+        }
+    }
+    
+    async cancelPaymentToken(token) {
+        try {
+            const response = await fetch(`/api/v1/payments/cancel-token/${token}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + (localStorage.getItem('token') || '')
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to cancel payment token');
+            }
+
+            const data = await response.json();
+            return data;
+        } catch (error) {
+            console.error('Error cancelling payment token:', error);
+            throw error;
+        }
+    }
+    
     setupRegistrationMode() {
         const submitBtn = this.container.querySelector('#pxSubmit');
         const form = this.container.querySelector('#paygistixPaymentForm');
@@ -463,6 +540,12 @@ class PaygistixPaymentForm {
                 console.log('Form submission intercepted');
                 e.preventDefault(); // Always prevent default first
                 
+                // Prevent duplicate submissions
+                if (this.isProcessingPayment) {
+                    console.log('Payment already processing, ignoring duplicate submission');
+                    return false;
+                }
+                
                 // Store the click position for modal positioning
                 this.lastClickY = e.clientY || 0;
                 
@@ -486,9 +569,9 @@ class PaygistixPaymentForm {
                 }
                 
                 // Store customer data for post-payment processing
+                let customerData = {};
                 if (customerForm) {
                     const formData = new FormData(customerForm);
-                    const customerData = {};
                     
                     formData.forEach((value, key) => {
                         customerData[key] = value;
@@ -565,8 +648,46 @@ class PaygistixPaymentForm {
                     console.log('Error logging payment submission:', err);
                 }
                 
-                // Create and show payment processing modal
-                this.showPaymentModal(paygistixForm, paymentData);
+                // Set processing flag to prevent duplicate submissions
+                this.isProcessingPayment = true;
+                
+                // Create payment token before showing modal
+                this.createPaymentToken(customerData, paymentData).then(token => {
+                    if (token) {
+                        // Add token to form and return URL
+                        const tokenField = document.createElement('input');
+                        tokenField.type = 'hidden';
+                        tokenField.name = 'token';
+                        tokenField.value = token;
+                        paygistixForm.appendChild(tokenField);
+                        
+                        // Update return URL to include token
+                        const returnUrlField = paygistixForm.elements['ReturnURL'];
+                        if (returnUrlField) {
+                            const baseUrl = returnUrlField.value.split('?')[0];
+                            returnUrlField.value = `${baseUrl}?token=${token}`;
+                        }
+                        
+                        // Show payment processing modal
+                        this.showPaymentModal(paygistixForm, paymentData, token);
+                    } else {
+                        console.error('Failed to create payment token');
+                        if (window.modalAlert) {
+                            window.modalAlert('Failed to initialize payment. Please try again.', 'Payment Error');
+                        } else {
+                            alert('Failed to initialize payment. Please try again.');
+                        }
+                        this.isProcessingPayment = false; // Reset flag
+                    }
+                }).catch(error => {
+                    console.error('Error creating payment token:', error);
+                    if (window.modalAlert) {
+                        window.modalAlert('Failed to initialize payment. Please try again.', 'Payment Error');
+                    } else {
+                        alert('Failed to initialize payment. Please try again.');
+                    }
+                    this.isProcessingPayment = false; // Reset flag
+                });
                 
                 // Form will navigate away, but clean up just in case
                 setTimeout(() => {
@@ -578,15 +699,15 @@ class PaygistixPaymentForm {
         }
     }
     
-    showPaymentModal(paygistixForm, paymentData) {
+    showPaymentModal(paygistixForm, paymentData, paymentToken) {
         // Create modal HTML for confirmation
         const modalHTML = `
-            <div id="paymentProcessingModal" class="fixed inset-0 z-50" style="display: none;">
+            <div id="paymentProcessingModal" class="fixed inset-0 z-50 flex items-center justify-center" style="display: none;">
                 <!-- Background overlay -->
                 <div class="fixed inset-0 bg-gray-500 opacity-75"></div>
                 
                 <!-- Modal panel -->
-                <div id="paymentModalPanel" class="absolute bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:max-w-lg sm:w-full" style="left: 50%; transform: translateX(-50%);">
+                <div id="paymentModalPanel" class="relative bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:max-w-lg sm:w-full mx-4">
                         <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
                             <div class="sm:flex sm:items-start">
                                 <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-blue-100 sm:mx-0 sm:h-10 sm:w-10">
@@ -644,20 +765,7 @@ class PaygistixPaymentForm {
         const loadingState = document.getElementById('paymentLoadingState');
         
         // Show modal
-        modal.style.display = 'block';
-        
-        // Position the modal panel at 70% down from top of viewport
-        const modalPanel = document.getElementById('paymentModalPanel');
-        if (modalPanel) {
-            // Calculate 70% down from top of current viewport
-            const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-            const viewportHeight = window.innerHeight;
-            const modalTop = scrollTop + (viewportHeight * 0.7);
-            
-            modalPanel.style.top = modalTop + 'px';
-            
-            // No need to scroll since we're positioning relative to current viewport
-        }
+        modal.style.display = 'flex';
         
         // Add CSS for animation if not already present
         if (!document.getElementById('modalAnimationStyles')) {
@@ -674,6 +782,10 @@ class PaygistixPaymentForm {
             document.head.appendChild(style);
         }
         
+        // Store reference to this for use in callbacks
+        const self = this;
+        let pollingInterval = null;
+        
         // Handle proceed button click
         proceedBtn.onclick = () => {
             // Show loading state
@@ -681,6 +793,14 @@ class PaygistixPaymentForm {
             loadingState.style.display = 'block';
             proceedBtn.disabled = true;
             cancelBtn.disabled = true;
+            
+            // Update loading message
+            loadingState.innerHTML = `
+                <div class="text-center py-4">
+                    <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mb-2"></div>
+                    <p class="text-sm text-gray-600">Opening payment window...</p>
+                </div>
+            `;
             
             // Append form to the current document body (not parent)
             // The form needs to be in the same document context where it was created
@@ -696,7 +816,7 @@ class PaygistixPaymentForm {
                 setTimeout(() => {
                     // Calculate window size for the form
                     const windowWidth = 800;
-                    const windowHeight = 600;
+                    const windowHeight = 675; // Increased by 75px to show trademark
                     
                     // Calculate center position relative to current browser window
                     const left = window.screenX + (window.outerWidth - windowWidth) / 2;
@@ -727,10 +847,60 @@ class PaygistixPaymentForm {
                         paygistixForm.submit();
                         console.log('Form submitted to new window');
                         
-                        // Close modal after a short delay
+                        // Update modal to show processing state
                         setTimeout(() => {
-                            modal.style.display = 'none';
-                            console.log('Payment window opened, closing modal');
+                            // Update loading message
+                            loadingState.innerHTML = `
+                                <div class="text-center py-4">
+                                    <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mb-2"></div>
+                                    <p class="text-sm text-gray-600 mb-2">Processing payment...</p>
+                                    <p class="text-xs text-gray-500">Please complete the payment in the new window</p>
+                                </div>
+                            `;
+                            
+                            // Check if payment window is closed
+                            let windowCheckInterval = setInterval(() => {
+                                if (paymentWindow.closed) {
+                                    console.log('Payment window was closed by user');
+                                    clearInterval(windowCheckInterval);
+                                    clearInterval(pollingInterval);
+                                    
+                                    // Cancel the payment token
+                                    self.cancelPaymentToken(paymentToken).then(() => {
+                                        console.log('Payment token cancelled');
+                                    }).catch(err => {
+                                        console.error('Error cancelling payment token:', err);
+                                    });
+                                    
+                                    // Close the modal
+                                    modal.style.display = 'none';
+                                    
+                                    // Show alert to user
+                                    if (window.modalAlert) {
+                                        window.modalAlert('Payment was cancelled. Please try again when you are ready to complete the payment.', 'Payment Cancelled');
+                                    }
+                                    
+                                    // Reset processing flag
+                                    self.isProcessingPayment = false;
+                                }
+                            }, 500); // Check every 500ms
+                            
+                            // Start polling for payment status
+                            pollingInterval = setInterval(() => {
+                                self.checkPaymentStatus(paymentToken, (status, error) => {
+                                    if (status === 'success') {
+                                        clearInterval(pollingInterval);
+                                        clearInterval(windowCheckInterval);
+                                        self.handlePaymentSuccess(modal, paymentWindow);
+                                    } else if (status === 'failed') {
+                                        clearInterval(pollingInterval);
+                                        clearInterval(windowCheckInterval);
+                                        self.handlePaymentFailure(modal, error, paymentWindow);
+                                    }
+                                    // Continue polling if status is still pending/processing
+                                });
+                            }, 2000); // Poll every 2 seconds
+                            
                             // Clean up form
                             if (document.body.contains(paygistixForm)) {
                                 document.body.removeChild(paygistixForm);
@@ -759,25 +929,122 @@ class PaygistixPaymentForm {
         
         // Handle cancel button
         cancelBtn.onclick = () => {
+            // Stop polling if active
+            if (pollingInterval) {
+                clearInterval(pollingInterval);
+            }
             modal.style.display = 'none';
             console.log('Payment cancelled by user');
             // Clean up form
             if (document.body.contains(paygistixForm)) {
                 document.body.removeChild(paygistixForm);
             }
+            // Reset processing flag
+            self.isProcessingPayment = false;
         };
         
         // Handle click outside modal
         modal.onclick = (e) => {
             if (e.target === modal) {
+                // Stop polling if active
+                if (pollingInterval) {
+                    clearInterval(pollingInterval);
+                }
                 modal.style.display = 'none';
                 console.log('Payment modal closed by user (clicked outside)');
                 // Clean up form
                 if (document.body.contains(paygistixForm)) {
                     document.body.removeChild(paygistixForm);
                 }
+                // Reset processing flag
+                self.isProcessingPayment = false;
             }
         };
+        
+        // Store polling interval for cleanup
+        modal.pollingInterval = pollingInterval;
+    }
+    
+    async checkPaymentStatus(token, callback) {
+        try {
+            const response = await fetch(`/api/v1/payments/check-status/${token}`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': 'Bearer ' + (localStorage.getItem('token') || '')
+                }
+            });
+            
+            if (!response.ok) {
+                throw new Error('Failed to check payment status');
+            }
+            
+            const data = await response.json();
+            if (data.success) {
+                callback(data.status, data.errorMessage);
+            } else {
+                callback('error', data.message);
+            }
+        } catch (error) {
+            console.error('Error checking payment status:', error);
+            // Don't stop polling on network errors
+        }
+    }
+    
+    handlePaymentSuccess(modal, paymentWindow) {
+        // Close payment window if still open
+        if (paymentWindow && !paymentWindow.closed) {
+            paymentWindow.close();
+        }
+        
+        // Update modal to show success
+        const loadingState = document.getElementById('paymentLoadingState');
+        if (loadingState) {
+            loadingState.innerHTML = `
+                <div class="text-center py-4">
+                    <svg class="mx-auto h-12 w-12 text-green-500 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <p class="text-gray-700 font-medium mb-2">Payment Successful!</p>
+                    <p class="text-gray-600 text-sm mb-4">Your registration has been completed.</p>
+                </div>
+            `;
+        }
+        
+        // Redirect to success page after a short delay
+        setTimeout(() => {
+            // Clear stored customer data
+            sessionStorage.removeItem('pendingRegistration');
+            
+            // Redirect to success page
+            window.location.href = '/registration-success.html';
+        }, 2000);
+    }
+    
+    handlePaymentFailure(modal, errorMessage, paymentWindow) {
+        // Close payment window if still open
+        if (paymentWindow && !paymentWindow.closed) {
+            paymentWindow.close();
+        }
+        
+        // Update modal to show error
+        const loadingState = document.getElementById('paymentLoadingState');
+        const proceedBtn = document.getElementById('proceedToPaymentBtn');
+        const cancelBtn = document.getElementById('cancelPaymentBtn');
+        
+        if (loadingState) {
+            loadingState.innerHTML = `
+                <div class="text-center py-4">
+                    <svg class="mx-auto h-12 w-12 text-red-500 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <p class="text-gray-700 font-medium mb-2">Payment Failed</p>
+                    <p class="text-gray-600 text-sm mb-4">${errorMessage || 'The payment could not be processed. Please try again.'}</p>
+                    <button type="button" onclick="location.reload()" class="inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:text-sm">
+                        Try Again
+                    </button>
+                </div>
+            `;
+        }
     }
 }
 
