@@ -778,48 +778,16 @@ class PaygistixPaymentForm {
     }
     
     showPaymentProcessingModal(paymentToken) {
-        // Create modal overlay
-        const modal = document.createElement('div');
-        modal.className = 'payment-processing-modal';
-        modal.style.cssText = `
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 10000;
-        `;
-        
-        const modalContent = document.createElement('div');
-        modalContent.style.cssText = `
-            background: white;
-            padding: 40px;
-            border-radius: 8px;
-            max-width: 500px;
-            width: 90%;
-            text-align: center;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        `;
-        
-        modalContent.innerHTML = `
-            <div class="loading-state">
-                <div class="swirl-spinner"></div>
-                <h3 style="margin-top: 20px; color: #1e3a8a;">Opening Payment Window</h3>
-                <p style="color: #6b7280; margin-top: 10px;">Please complete your payment in the new window...</p>
-            </div>
-        `;
-        
-        modal.appendChild(modalContent);
-        document.body.appendChild(modal);
+        // Show spinner using SwirlSpinner
+        const paymentSpinner = window.SwirlSpinnerUtils ? 
+            window.SwirlSpinnerUtils.showGlobal({
+                message: 'Opening Payment Window',
+                submessage: 'Please complete your payment in the new window...'
+            }) : null;
         
         // Open payment window with dynamic form submission
         setTimeout(() => {
             try {
-                const loadingState = modalContent.querySelector('.loading-state');
                 const self = this;
                 
                 // Create a form for Paygistix submission
@@ -895,13 +863,10 @@ class PaygistixPaymentForm {
                     paygistixForm.submit();
                     console.log('Form submitted to new window');
                     
-                    // Update modal to show processing state
-                    loadingState.innerHTML = `
-                        <div class="swirl-spinner"></div>
-                        <h3 style="margin-top: 20px; color: #1e3a8a;">Processing Payment</h3>
-                        <p style="color: #6b7280; margin-top: 10px;">Please complete the payment in the new window</p>
-                        <p style="color: #6b7280; font-size: 14px; margin-top: 5px;">Do not close this window...</p>
-                    `;
+                    // Update spinner to show processing state
+                    if (paymentSpinner) {
+                        paymentSpinner.updateMessage('Processing Payment', 'Please complete the payment in the new window');
+                    }
                     
                     // Check if payment window is closed
                     let windowCheckInterval = setInterval(() => {
@@ -917,8 +882,10 @@ class PaygistixPaymentForm {
                                 console.error('Error cancelling payment token:', err);
                             });
                             
-                            // Close the modal
-                            modal.style.display = 'none';
+                            // Hide the spinner
+                            if (paymentSpinner) {
+                                paymentSpinner.hide();
+                            }
                             
                             // Show alert to user
                             if (window.modalAlert) {
@@ -936,11 +903,11 @@ class PaygistixPaymentForm {
                             if (status === 'success') {
                                 clearInterval(pollingInterval);
                                 clearInterval(windowCheckInterval);
-                                self.handlePaymentSuccess(modal, paymentWindow);
+                                self.handlePaymentSuccess(paymentSpinner, paymentWindow);
                             } else if (status === 'failed') {
                                 clearInterval(pollingInterval);
                                 clearInterval(windowCheckInterval);
-                                self.handlePaymentFailure(modal, error, paymentWindow);
+                                self.handlePaymentFailure(paymentSpinner, error, paymentWindow);
                             }
                         });
                     }, 2000); // Check every 2 seconds
@@ -954,12 +921,13 @@ class PaygistixPaymentForm {
                 }
             } catch (error) {
                 console.error('Error opening payment window:', error);
-                loadingState.innerHTML = `
-                    <div style="color: #dc2626; font-size: 48px;">⚠️</div>
-                    <h3 style="margin-top: 20px; color: #dc2626;">Unable to Open Payment Window</h3>
-                    <p style="color: #6b7280; margin-top: 10px;">Please check your pop-up blocker settings and try again.</p>
-                    <button onclick="this.closest('.payment-processing-modal').remove(); window.PaygistixPaymentForm.prototype.isProcessingPayment = false;" style="margin-top: 20px; padding: 10px 20px; background: #1e3a8a; color: white; border: none; border-radius: 4px; cursor: pointer;">Close</button>
-                `;
+                if (paymentSpinner) {
+                    paymentSpinner.hide();
+                }
+                if (window.modalAlert) {
+                    window.modalAlert('Unable to open payment window. Please check your pop-up blocker settings and try again.', 'Pop-up Blocked');
+                }
+                this.isProcessingPayment = false;
             }
         }, 100);
     }
@@ -980,36 +948,40 @@ class PaygistixPaymentForm {
             });
     }
     
-    handlePaymentSuccess(modal, paymentWindow) {
+    handlePaymentSuccess(spinner, paymentWindow) {
         if (paymentWindow && !paymentWindow.closed) {
             paymentWindow.close();
         }
         
-        modal.querySelector('.loading-state').innerHTML = `
-            <div style="color: #10b981; font-size: 48px;">✓</div>
-            <h3 style="margin-top: 20px; color: #10b981;">Payment Successful!</h3>
-            <p style="color: #6b7280; margin-top: 10px;">Your registration is complete.</p>
-        `;
+        if (spinner) {
+            spinner.hide();
+        }
+        
+        // Show success message
+        if (window.modalAlert) {
+            window.modalAlert('Payment successful! Your registration is complete.', 'Success');
+        }
         
         setTimeout(() => {
-            modal.remove();
             this.isProcessingPayment = false;
             // Redirect to success page
             window.location.href = '/registration-success.html';
-        }, 2000);
+        }, 1000);
     }
     
-    handlePaymentFailure(modal, error, paymentWindow) {
+    handlePaymentFailure(spinner, error, paymentWindow) {
         if (paymentWindow && !paymentWindow.closed) {
             paymentWindow.close();
         }
         
-        modal.querySelector('.loading-state').innerHTML = `
-            <div style="color: #dc2626; font-size: 48px;">✗</div>
-            <h3 style="margin-top: 20px; color: #dc2626;">Payment Failed</h3>
-            <p style="color: #6b7280; margin-top: 10px;">${error || 'Your payment could not be processed. Please try again.'}</p>
-            <button onclick="this.closest('.payment-processing-modal').remove(); window.PaygistixPaymentForm.prototype.isProcessingPayment = false;" style="margin-top: 20px; padding: 10px 20px; background: #1e3a8a; color: white; border: none; border-radius: 4px; cursor: pointer;">Close</button>
-        `;
+        if (spinner) {
+            spinner.hide();
+        }
+        
+        // Show error message
+        if (window.modalAlert) {
+            window.modalAlert(error || 'Your payment could not be processed. Please try again.', 'Payment Failed');
+        }
         
         this.isProcessingPayment = false;
     }
