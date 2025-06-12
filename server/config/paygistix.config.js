@@ -84,17 +84,27 @@ class PaygistixConfig {
   }
 
   /**
-   * Get full configuration object for client
+   * Get public configuration object for client
    * @returns {Object}
    */
   getClientConfig() {
     return {
       merchantId: this.getMerchantId(),
       formId: this.getFormId(),
-      formHash: this.getFormHash(),
       formActionUrl: this.getFormActionUrl(),
       returnUrl: this.getReturnUrl(),
       environment: this.getEnvironment()
+    };
+  }
+
+  /**
+   * Get full configuration including sensitive data (for server use only)
+   * @returns {Object}
+   */
+  getFullConfig() {
+    return {
+      ...this.getClientConfig(),
+      formHash: this.getFormHash()
     };
   }
 }
