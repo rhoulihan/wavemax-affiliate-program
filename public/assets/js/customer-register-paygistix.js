@@ -27,11 +27,12 @@
             
             paymentConfig = configData.config;
             
-            // Initialize the Paygistix payment form
-            // Note: The form uses hardcoded values from the Paygistix generator
+            // Initialize the Paygistix payment form with config
             paymentForm = new PaygistixPaymentForm('paymentFormContainer', {
+                paymentConfig: paymentConfig,
+                hideRegistrationFormRows: false, // Don't hide form rows in registration
                 onSuccess: function() {
-                    console.log('Payment form initialized');
+                    console.log('Payment form initialized with config:', paymentConfig);
                 },
                 onError: function(error) {
                     console.error('Payment form error:', error);
