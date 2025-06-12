@@ -342,12 +342,25 @@
     <script src="/assets/js/modal-utils.js"></script>
     <script src="/assets/js/errorHandler.js"></script>
     <script src="/assets/js/csrf-utils.js"></script>
-    <script src="/assets/js/swirl-spinner.js"></script>
+    <script src="/assets/js/swirl-spinner.js?v=<?php echo time(); ?>" onerror="console.error('[Script Load Error] Failed to load swirl-spinner.js')"></script>
     <script src="/assets/js/paygistix-payment-form.js"></script>
     <script src="/assets/js/customer-register.js"></script>
     <script src="/assets/js/customer-register-paygistix.js"></script>
     <!-- Load navigation last to ensure DOM is ready -->
     <script src="/assets/js/customer-register-navigation.js"></script>
+    
+    <!-- Debug script loading -->
+    <script>
+        console.log('[Page Load Debug] Scripts loaded');
+        console.log('[Page Load Debug] window.SwirlSpinner:', !!window.SwirlSpinner);
+        console.log('[Page Load Debug] window.SwirlSpinnerUtils:', !!window.SwirlSpinnerUtils);
+        
+        // Check if swirl-spinner.js loaded properly
+        setTimeout(() => {
+            console.log('[After 500ms] window.SwirlSpinner:', !!window.SwirlSpinner);
+            console.log('[After 500ms] window.SwirlSpinnerUtils:', !!window.SwirlSpinnerUtils);
+        }, 500);
+    </script>
 
 </body>
 </html>
