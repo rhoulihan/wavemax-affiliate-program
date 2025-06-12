@@ -50,27 +50,28 @@ class PaygistixPaymentForm {
             // Call success callback
             this.onSuccess();
         } catch (error) {
-            console.error('PaygistixPaymentForm initialization error:', error);
+            console.error('Error initializing payment form:', error);
             this.onError(error);
         }
     }
     
     async loadAffiliateSettings() {
         try {
-            const affiliateResponse = await fetch(`/api/v1/affiliates/${this.affiliateId}`, {
+            const response = await fetch('/api/v1/affiliates/public/pricing/' + this.affiliateId, {
                 headers: {
-                    'Authorization': 'Bearer ' + (localStorage.getItem('token') || '')
+                    'Content-Type': 'application/json'
                 }
             });
             
-            if (affiliateResponse.ok) {
-                const affiliateData = await affiliateResponse.json();
-                if (affiliateData.success && affiliateData.affiliate) {
-                    this.affiliateSettings = {
-                        perBagDeliveryFee: affiliateData.affiliate.perBagDeliveryFee,
-                        minimumDeliveryFee: affiliateData.affiliate.minimumDeliveryFee
-                    };
-                }
+            if (!response.ok) {
+                throw new Error('Failed to load affiliate settings');
+            }
+            
+            const data = await response.json();
+            
+            if (data.success && data.affiliate) {
+                this.affiliateSettings = data.affiliate;
+                console.log('Loaded affiliate settings:', this.affiliateSettings);
             }
         } catch (error) {
             console.error('Error loading affiliate settings:', error);
@@ -103,10 +104,15 @@ class PaygistixPaymentForm {
             return;
         }
 
+        // Use the exact HTML structure from Paygistix
         const formHTML = `
             <div class="paygistix-payment-wrapper">
+                <!-- BEGIN PAYMENT FORM CODE -->
                 <form action="${this.paymentConfig.formActionUrl}" method="post" id="paygistixPaymentForm">
                 <style type="text/css">
+                    .pxPrice {text-align:right;}
+                    .pxQty {width:60px;text-align:right;}
+                    /* Additional WaveMAX styling */
                     .paygistix-payment-wrapper {
                         padding: 20px;
                         background: #f8f9fa;
@@ -129,101 +135,64 @@ class PaygistixPaymentForm {
                         text-align: left;
                         font-weight: 600;
                         font-size: 14px;
-                        text-transform: uppercase;
-                        letter-spacing: 0.5px;
                     }
                     .paygistix-payment-wrapper tbody tr {
                         border-bottom: 1px solid #e5e7eb;
-                        transition: background-color 0.2s;
                     }
                     .paygistix-payment-wrapper tbody tr:hover {
-                        background-color: #f9fafb;
-                    }
-                    .paygistix-payment-wrapper tbody tr.hidden-row {
-                        display: none;
+                        background: #f9fafb;
                     }
                     .paygistix-payment-wrapper td {
                         padding: 12px 16px;
-                        font-size: 14px;
                     }
-                    .paygistix-payment-wrapper .pxCode {
+                    .paygistix-payment-wrapper tfoot {
+                        background: #f9fafb;
                         font-weight: 600;
-                        color: #374151;
-                        font-family: monospace;
-                    }
-                    .paygistix-payment-wrapper .pxDescription {
-                        color: #4b5563;
-                    }
-                    .paygistix-payment-wrapper .pxPrice {
-                        text-align: right;
-                        font-weight: 600;
-                        color: #1f2937;
-                        font-family: monospace;
-                    }
-                    .paygistix-payment-wrapper .pxQty {
-                        width: 60px;
-                        text-align: right;
-                        padding: 6px 10px;
-                        border: 2px solid #e5e7eb;
-                        border-radius: 6px;
-                        font-size: 14px;
-                        font-weight: 500;
-                        transition: border-color 0.2s;
-                    }
-                    .paygistix-payment-wrapper .pxQty:focus {
-                        outline: none;
-                        border-color: #3b82f6;
-                        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-                    }
-                    .paygistix-payment-wrapper .pxQty:disabled {
-                        background-color: #f3f4f6;
-                        cursor: not-allowed;
                     }
                     .paygistix-payment-wrapper tfoot td {
                         padding: 16px;
-                        background: #f9fafb;
-                        border-top: 2px solid #e5e7eb;
                     }
-                    .paygistix-payment-wrapper #pxTotal {
+                    #pxTotal {
                         font-size: 18px;
-                        font-weight: bold;
-                        color: #1f2937;
                         margin-right: 20px;
+                        color: #1e3a8a;
                     }
-                    .paygistix-payment-wrapper #pxSubmit {
-                        background: #3b82f6;
+                    #pxSubmit {
+                        background: #1e3a8a;
                         color: white;
                         padding: 10px 24px;
                         border: none;
                         border-radius: 6px;
-                        font-size: 16px;
                         font-weight: 600;
+                        font-size: 16px;
                         cursor: pointer;
-                        transition: background-color 0.2s;
+                        transition: background 0.2s;
                     }
-                    .paygistix-payment-wrapper #pxSubmit:hover {
-                        background: #2563eb;
+                    #pxSubmit:hover {
+                        background: #1e40af;
                     }
-                    .paygistix-payment-wrapper #pxSubmit:focus {
-                        outline: none;
-                        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.5);
+                    #pxSubmit:active {
+                        transform: translateY(1px);
                     }
-                    .paygistix-payment-wrapper #pxSubmit:disabled {
-                        background: #9ca3af;
-                        cursor: not-allowed;
+                    .pxCode {
+                        font-family: 'Courier New', monospace;
+                        font-weight: 600;
+                        color: #6b7280;
+                    }
+                    .pxDescription {
+                        color: #374151;
+                    }
+                    /* Hide rows that should not be visible */
+                    tr[style*="display: none"] {
+                        display: none !important;
                     }
                 </style>
-                <table id="pxForm" name="pxForm">
+                <table id=pxForm name=pxForm>
                     <thead>
-                        <tr>
-                            <th>Code</th>
-                            <th>Item</th>
-                            <th>Price</th>
-                            <th>Qty</th>
-                        </tr>
+                        <th>Code</th><th>Item</th><th>Price</th><th>Qty</th>
                     </thead>
                     <tbody>
-                        <tr id="row-WDF" data-code="WDF">
+                        <tr>
                             <td class="pxCode">
                                 WDF<input type="hidden" name="pxCode1" value="WDF" />
                             </td>
@@ -237,7 +206,7 @@ class PaygistixPaymentForm {
                                 <input type="text" class="pxQty" name="pxQty1" id="pxQty1" value="0" onblur="javascript:formatQty(this);" maxlength="3"/>
                             </td>
                         </tr>
-                        <tr id="row-BF" data-code="BF">
+                        <tr>
                             <td class="pxCode">
                                 BF<input type="hidden" name="pxCode2" value="BF" />
                             </td>
@@ -251,12 +220,12 @@ class PaygistixPaymentForm {
                                 <input type="text" class="pxQty" name="pxQty2" id="pxQty2" value="0" onblur="javascript:formatQty(this);" maxlength="3"/>
                             </td>
                         </tr>
-                        <tr id="row-PBF5" data-code="PBF5" data-per-bag-fee="5.00">
+                        <tr>
                             <td class="pxCode">
                                 PBF5<input type="hidden" name="pxCode3" value="PBF5" />
                             </td>
                             <td class="pxDescription">
-                                Per bag fee<input type="hidden" name="pxDescription3" value="Per bag fee" />
+                                Per Bag Delivery Fee<input type="hidden" name="pxDescription3" value="Per Bag Delivery Fee" />
                             </td>
                             <td class="pxPrice">
                                 $5.00<input type="hidden" name="pxPrice3" id="pxPrice3" value="5.00" />
@@ -265,12 +234,12 @@ class PaygistixPaymentForm {
                                 <input type="text" class="pxQty" name="pxQty3" id="pxQty3" value="0" onblur="javascript:formatQty(this);" maxlength="3"/>
                             </td>
                         </tr>
-                        <tr id="row-PBF10" data-code="PBF10" data-per-bag-fee="10.00">
+                        <tr>
                             <td class="pxCode">
                                 PBF10<input type="hidden" name="pxCode4" value="PBF10" />
                             </td>
                             <td class="pxDescription">
-                                Per bag fee<input type="hidden" name="pxDescription4" value="Per bag fee" />
+                                Per Bag Delivery Fee<input type="hidden" name="pxDescription4" value="Per Bag Delivery Fee" />
                             </td>
                             <td class="pxPrice">
                                 $10.00<input type="hidden" name="pxPrice4" id="pxPrice4" value="10.00" />
@@ -279,12 +248,12 @@ class PaygistixPaymentForm {
                                 <input type="text" class="pxQty" name="pxQty4" id="pxQty4" value="0" onblur="javascript:formatQty(this);" maxlength="3"/>
                             </td>
                         </tr>
-                        <tr id="row-PBF15" data-code="PBF15" data-per-bag-fee="15.00">
+                        <tr>
                             <td class="pxCode">
                                 PBF15<input type="hidden" name="pxCode5" value="PBF15" />
                             </td>
                             <td class="pxDescription">
-                                Per bag fee<input type="hidden" name="pxDescription5" value="Per bag fee" />
+                                Per Bag Delivery Fee<input type="hidden" name="pxDescription5" value="Per Bag Delivery Fee" />
                             </td>
                             <td class="pxPrice">
                                 $15.00<input type="hidden" name="pxPrice5" id="pxPrice5" value="15.00" />
@@ -293,12 +262,12 @@ class PaygistixPaymentForm {
                                 <input type="text" class="pxQty" name="pxQty5" id="pxQty5" value="0" onblur="javascript:formatQty(this);" maxlength="3"/>
                             </td>
                         </tr>
-                        <tr id="row-PBF20" data-code="PBF20" data-per-bag-fee="20.00">
+                        <tr>
                             <td class="pxCode">
                                 PBF20<input type="hidden" name="pxCode6" value="PBF20" />
                             </td>
                             <td class="pxDescription">
-                                Per bag fee<input type="hidden" name="pxDescription6" value="Per bag fee" />
+                                Per Bag Delivery Fee<input type="hidden" name="pxDescription6" value="Per Bag Delivery Fee" />
                             </td>
                             <td class="pxPrice">
                                 $20.00<input type="hidden" name="pxPrice6" id="pxPrice6" value="20.00" />
@@ -307,21 +276,162 @@ class PaygistixPaymentForm {
                                 <input type="text" class="pxQty" name="pxQty6" id="pxQty6" value="0" onblur="javascript:formatQty(this);" maxlength="3"/>
                             </td>
                         </tr>
+                        <tr>
+                            <td class="pxCode">
+                                PBF25<input type="hidden" name="pxCode7" value="PBF25" />
+                            </td>
+                            <td class="pxDescription">
+                                Per Bag Delivery Fee<input type="hidden" name="pxDescription7" value="Per Bag Delivery Fee" />
+                            </td>
+                            <td class="pxPrice">
+                                $25.00<input type="hidden" name="pxPrice7" id="pxPrice7" value="25.00" />
+                            </td>
+                            <td>
+                                <input type="text" class="pxQty" name="pxQty7" id="pxQty7" value="0" onblur="javascript:formatQty(this);" maxlength="3"/>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="pxCode">
+                                MDF10<input type="hidden" name="pxCode8" value="MDF10" />
+                            </td>
+                            <td class="pxDescription">
+                                Minimum Delivery Fee<input type="hidden" name="pxDescription8" value="Minimum Delivery Fee" />
+                            </td>
+                            <td class="pxPrice">
+                                $10.00<input type="hidden" name="pxPrice8" id="pxPrice8" value="10.00" />
+                            </td>
+                            <td>
+                                <input type="text" class="pxQty" name="pxQty8" id="pxQty8" value="0" onblur="javascript:formatQty(this);" maxlength="3"/>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="pxCode">
+                                MDF15<input type="hidden" name="pxCode9" value="MDF15" />
+                            </td>
+                            <td class="pxDescription">
+                                Minimum Delivery Fee<input type="hidden" name="pxDescription9" value="Minimum Delivery Fee" />
+                            </td>
+                            <td class="pxPrice">
+                                $15.00<input type="hidden" name="pxPrice9" id="pxPrice9" value="15.00" />
+                            </td>
+                            <td>
+                                <input type="text" class="pxQty" name="pxQty9" id="pxQty9" value="0" onblur="javascript:formatQty(this);" maxlength="3"/>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="pxCode">
+                                MDF20<input type="hidden" name="pxCode10" value="MDF20" />
+                            </td>
+                            <td class="pxDescription">
+                                Minimum Delivery Fee<input type="hidden" name="pxDescription10" value="Minimum Delivery Fee" />
+                            </td>
+                            <td class="pxPrice">
+                                $20.00<input type="hidden" name="pxPrice10" id="pxPrice10" value="20.00" />
+                            </td>
+                            <td>
+                                <input type="text" class="pxQty" name="pxQty10" id="pxQty10" value="0" onblur="javascript:formatQty(this);" maxlength="3"/>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="pxCode">
+                                MDF25<input type="hidden" name="pxCode11" value="MDF25" />
+                            </td>
+                            <td class="pxDescription">
+                                Minimum Delivery Fee<input type="hidden" name="pxDescription11" value="Minimum Delivery Fee" />
+                            </td>
+                            <td class="pxPrice">
+                                $25.00<input type="hidden" name="pxPrice11" id="pxPrice11" value="25.00" />
+                            </td>
+                            <td>
+                                <input type="text" class="pxQty" name="pxQty11" id="pxQty11" value="0" onblur="javascript:formatQty(this);" maxlength="3"/>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="pxCode">
+                                MDF30<input type="hidden" name="pxCode12" value="MDF30" />
+                            </td>
+                            <td class="pxDescription">
+                                Minimum Delivery Fee<input type="hidden" name="pxDescription12" value="Minimum Delivery Fee" />
+                            </td>
+                            <td class="pxPrice">
+                                $30.00<input type="hidden" name="pxPrice12" id="pxPrice12" value="30.00" />
+                            </td>
+                            <td>
+                                <input type="text" class="pxQty" name="pxQty12" id="pxQty12" value="0" onblur="javascript:formatQty(this);" maxlength="3"/>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="pxCode">
+                                MDF35<input type="hidden" name="pxCode13" value="MDF35" />
+                            </td>
+                            <td class="pxDescription">
+                                Minimum Delivery Fee<input type="hidden" name="pxDescription13" value="Minimum Delivery Fee" />
+                            </td>
+                            <td class="pxPrice">
+                                $35.00<input type="hidden" name="pxPrice13" id="pxPrice13" value="35.00" />
+                            </td>
+                            <td>
+                                <input type="text" class="pxQty" name="pxQty13" id="pxQty13" value="0" onblur="javascript:formatQty(this);" maxlength="3"/>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="pxCode">
+                                MDF40<input type="hidden" name="pxCode14" value="MDF40" />
+                            </td>
+                            <td class="pxDescription">
+                                Minimum Delivery Fee<input type="hidden" name="pxDescription14" value="Minimum Delivery Fee" />
+                            </td>
+                            <td class="pxPrice">
+                                $40.00<input type="hidden" name="pxPrice14" id="pxPrice14" value="40.00" />
+                            </td>
+                            <td>
+                                <input type="text" class="pxQty" name="pxQty14" id="pxQty14" value="0" onblur="javascript:formatQty(this);" maxlength="3"/>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="pxCode">
+                                MDF45<input type="hidden" name="pxCode15" value="MDF45" />
+                            </td>
+                            <td class="pxDescription">
+                                Minimum Delivery Fee<input type="hidden" name="pxDescription15" value="Minimum Delivery Fee" />
+                            </td>
+                            <td class="pxPrice">
+                                $45.00<input type="hidden" name="pxPrice15" id="pxPrice15" value="45.00" />
+                            </td>
+                            <td>
+                                <input type="text" class="pxQty" name="pxQty15" id="pxQty15" value="0" onblur="javascript:formatQty(this);" maxlength="3"/>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="pxCode">
+                                MDF50<input type="hidden" name="pxCode16" value="MDF50" />
+                            </td>
+                            <td class="pxDescription">
+                                Minimum Delivery Fee<input type="hidden" name="pxDescription16" value="Minimum Delivery Fee" />
+                            </td>
+                            <td class="pxPrice">
+                                $50.00<input type="hidden" name="pxPrice16" id="pxPrice16" value="50.00" />
+                            </td>
+                            <td>
+                                <input type="text" class="pxQty" name="pxQty16" id="pxQty16" value="0" onblur="javascript:formatQty(this);" maxlength="3"/>
+                            </td>
+                        </tr>
                     </tbody>
                     <tfoot>
                         <tr>
-                            <td colspan="4" align="right">
+                            <td colspan=4 align=right>
                                 <span id="pxTotal"><b>Total $0.00</b></span><input type="submit" id="pxSubmit" value="Pay Now" />
                             </td>
                         </tr>
                     </tfoot>
                 </table>
                 <input type="hidden" name="txnType" value="FORM" />
-                <input type="hidden" name="merchantID" value="${this.paymentConfig?.merchantId}" />
-                <input type="hidden" name="formID" value="${this.paymentConfig?.formId}" />
-                <input type="hidden" name="hash" value="${this.paymentConfig?.formHash}" />
-                <input type="hidden" name="ReturnURL" value="${this.paymentConfig?.returnUrl}" />
+                <input type="hidden" name="merchantID" value="${this.paymentConfig.merchantId}" />
+                <input type="hidden" name="formID" value="${this.paymentConfig.formId}" />
+                <input type="hidden" name="hash" value="${this.paymentConfig.formHash}" />
+                <input type="hidden" name="ReturnURL" value="${this.paymentConfig.returnUrl}" />
                 </form>
+                <!-- END PAYMENT FORM CODE -->
             </div>
         `;
         
@@ -332,117 +442,208 @@ class PaygistixPaymentForm {
         const rows = this.container.querySelectorAll('tbody tr');
         
         if (this.payContext === 'REGISTRATION' && this.hideRegistrationFormRows) {
-            // For registration, hide all rows except BF (Bag Fee) only if flag is true
+            // Hide all rows except bag fee in registration context
             rows.forEach(row => {
-                if (row.getAttribute('data-code') !== 'BF') {
-                    row.classList.add('hidden-row');
-                    // Disable the quantity input
-                    const qtyInput = row.querySelector('.pxQty');
-                    if (qtyInput) {
-                        qtyInput.disabled = true;
-                        qtyInput.value = '0';
-                    }
+                const codeInput = row.querySelector('input[name^="pxCode"]');
+                if (codeInput && codeInput.value !== 'BF') {
+                    row.style.display = 'none';
                 }
             });
         } else if (this.payContext === 'ORDER' && this.affiliateSettings) {
-            // For orders, show WDF and appropriate per bag fee
-            const perBagFee = this.affiliateSettings.perBagDeliveryFee;
+            // Use affiliate settings to determine which rows to show
+            const { minimumDeliveryFee, perBagFee } = this.affiliateSettings;
             
+            // Hide all rows initially
             rows.forEach(row => {
-                const code = row.getAttribute('data-code');
-                let shouldShow = false;
-                
-                // Always show WDF for orders
-                if (code === 'WDF') {
-                    shouldShow = true;
-                }
-                // Show matching per bag fee
-                else if (code.startsWith('PBF')) {
-                    const fee = parseFloat(row.getAttribute('data-per-bag-fee'));
-                    shouldShow = (fee === perBagFee);
-                }
-                // Hide BF for orders
-                else if (code === 'BF') {
-                    shouldShow = false;
-                }
-                
-                if (!shouldShow) {
-                    row.classList.add('hidden-row');
-                    const qtyInput = row.querySelector('.pxQty');
-                    if (qtyInput) {
-                        qtyInput.disabled = true;
-                        qtyInput.value = '0';
-                    }
-                }
+                row.style.display = 'none';
             });
+            
+            // Show WDF (Wash Dry Fold Service)
+            const wdfRow = Array.from(rows).find(row => {
+                const codeInput = row.querySelector('input[name^="pxCode"]');
+                return codeInput && codeInput.value === 'WDF';
+            });
+            if (wdfRow) wdfRow.style.display = '';
+            
+            // Show BF (Bag Fee)
+            const bfRow = Array.from(rows).find(row => {
+                const codeInput = row.querySelector('input[name^="pxCode"]');
+                return codeInput && codeInput.value === 'BF';
+            });
+            if (bfRow) bfRow.style.display = '';
+            
+            // Show the appropriate MDF row
+            const mdfCode = `MDF${minimumDeliveryFee}`;
+            const mdfRow = Array.from(rows).find(row => {
+                const codeInput = row.querySelector('input[name^="pxCode"]');
+                return codeInput && codeInput.value === mdfCode;
+            });
+            if (mdfRow) {
+                mdfRow.style.display = '';
+                // Pre-fill with quantity 1
+                const qtyInput = mdfRow.querySelector('input[name^="pxQty"]');
+                if (qtyInput) {
+                    qtyInput.value = '1';
+                    this.prefilledAmounts[mdfCode] = 1;
+                }
+            }
+            
+            // Show the appropriate PBF row
+            const pbfCode = `PBF${perBagFee}`;
+            const pbfRow = Array.from(rows).find(row => {
+                const codeInput = row.querySelector('input[name^="pxCode"]');
+                return codeInput && codeInput.value === pbfCode;
+            });
+            if (pbfRow) {
+                pbfRow.style.display = '';
+            }
+        }
+        
+        // Update the total after setting visibility
+        if (typeof window.updateTotal === 'function') {
+            setTimeout(() => window.updateTotal(), 100);
         }
     }
     
     initializeHandlers() {
-        // Note: blur handlers are already set inline with onblur="javascript:formatQty(this);"
-        // This ensures they work with the Paygistix script
+        const form = this.container.querySelector('form');
+        if (!form) return;
         
-        // Apply registration-specific styling and behavior
-        if (this.payContext === 'REGISTRATION') {
-            this.setupRegistrationMode();
-        }
+        // Prevent default form submission
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            // The Paygistix script will handle the actual submission
+        });
         
-        // Apply pre-filled amounts if any
-        if (this.prefilledAmounts) {
-            Object.keys(this.prefilledAmounts).forEach(code => {
-                const row = this.container.querySelector(`tr[data-code="${code}"]`);
-                if (row && !row.classList.contains('hidden-row')) {
-                    const qtyInput = row.querySelector('.pxQty');
-                    if (qtyInput) {
-                        qtyInput.value = this.prefilledAmounts[code];
-                        // Trigger the formatQty function
-                        if (window.formatQty) {
-                            window.formatQty(qtyInput);
-                        }
-                        // Trigger blur event to update the form
-                        qtyInput.dispatchEvent(new Event('blur'));
-                        // Also trigger input event for form recalculation
-                        qtyInput.dispatchEvent(new Event('input'));
-                    }
-                }
+        // Add custom input handlers if needed
+        const qtyInputs = form.querySelectorAll('.pxQty');
+        qtyInputs.forEach(input => {
+            input.addEventListener('change', () => {
+                // You can add custom logic here if needed
+                console.log('Quantity changed:', input.name, input.value);
             });
-        }
+        });
     }
     
     loadPaygistixScript() {
         // Check if script is already loaded
         if (document.querySelector('script[src*="safepay.paymentlogistics.net/form.js"]')) {
+            console.log('Paygistix script already loaded');
             return;
         }
         
+        // Create and append the script
         const script = document.createElement('script');
         script.src = 'https://safepay.paymentlogistics.net/form.js';
         script.type = 'text/javascript';
         script.async = true;
+        
+        script.onload = () => {
+            console.log('Paygistix script loaded successfully');
+        };
+        
+        script.onerror = () => {
+            console.error('Failed to load Paygistix script');
+            this.onError(new Error('Failed to load payment processor script'));
+        };
+        
         document.body.appendChild(script);
     }
     
-    setPrefilledAmounts(amounts) {
-        this.prefilledAmounts = amounts;
-        this.initializeHandlers();
-    }
-    
-    getTotal() {
-        const totalElement = this.container.querySelector('#pxTotal');
-        if (totalElement) {
-            const match = totalElement.textContent.match(/\$([0-9.]+)/);
-            return match ? parseFloat(match[1]) : 0;
+    // Public method to update bag quantity
+    updateBagQuantity(quantity) {
+        const bagFeeRow = this.container.querySelector('input[value="BF"]')?.closest('tr');
+        if (bagFeeRow) {
+            const qtyInput = bagFeeRow.querySelector('.pxQty');
+            if (qtyInput) {
+                qtyInput.value = quantity;
+                // Trigger change event
+                const event = new Event('change', { bubbles: true });
+                qtyInput.dispatchEvent(event);
+                // Update total if function exists
+                if (typeof window.updateTotal === 'function') {
+                    window.updateTotal();
+                }
+            }
         }
-        return 0;
     }
     
-    setOrderDetails(details) {
-        // Store order details for reference
-        this.orderDetails = details;
+    // Public method to get pre-filled amounts
+    getPrefilledAmounts() {
+        return this.prefilledAmounts;
     }
     
-    getForm() {
-        return this.container.querySelector('#paygistixPaymentForm');
+    // Processing state management
+    isProcessingPayment = false;
+    
+    // Public method to handle registration payment
+    async processRegistrationPayment(customerData) {
+        if (this.isProcessingPayment) {
+            console.log('Payment already in progress');
+            return;
+        }
+        
+        this.isProcessingPayment = true;
+        
+        try {
+            // Get the form
+            const form = this.container.querySelector('form#paygistixPaymentForm');
+            if (!form) {
+                throw new Error('Payment form not found');
+            }
+            
+            // Get the bag quantity
+            const bagQtyInput = form.querySelector('input[name="pxQty2"]');
+            const bagQuantity = parseInt(bagQtyInput?.value || '0');
+            
+            if (bagQuantity <= 0) {
+                throw new Error('Please select the number of bags');
+            }
+            
+            // Calculate total
+            const bagPrice = 10.00; // $10 per bag
+            const totalAmount = bagQuantity * bagPrice * 100; // Convert to cents
+            
+            // Prepare payment data
+            const paymentData = {
+                amount: totalAmount,
+                items: [{
+                    code: 'BF',
+                    description: 'Bag Fee',
+                    price: bagPrice * 100,
+                    quantity: bagQuantity
+                }],
+                formId: this.paymentConfig.formId,
+                merchantId: this.paymentConfig.merchantId
+            };
+            
+            // Create payment token
+            const paymentToken = await this.createPaymentToken(customerData, paymentData);
+            
+            // Add token as hidden field
+            const tokenInput = document.createElement('input');
+            tokenInput.type = 'hidden';
+            tokenInput.name = 'paymentToken';
+            tokenInput.value = paymentToken;
+            form.appendChild(tokenInput);
+            
+            // Show payment processing modal
+            this.showPaymentProcessingModal(paymentToken);
+            
+        } catch (error) {
+            console.error('Error processing payment:', error);
+            this.isProcessingPayment = false;
+            
+            if (error.message.includes('pop-up') || error.message.includes('blocked')) {
+                if (window.modalAlert) {
+                    window.modalAlert('Please allow pop-ups for this site to complete payment. Check your browser\'s address bar for the pop-up blocker icon.', 'Pop-up Blocked');
+                }
+            } else {
+                if (window.modalAlert) {
+                    window.modalAlert(error.message || 'Failed to process payment. Please try again.', 'Payment Error');
+                }
+            }
+        }
     }
     
     async createPaymentToken(customerData, paymentData) {
@@ -464,11 +665,12 @@ class PaygistixPaymentForm {
             }
             
             const data = await response.json();
-            if (data.success) {
-                return data.token;
-            } else {
+            
+            if (!data.success || !data.token) {
                 throw new Error(data.message || 'Failed to create payment token');
             }
+            
+            return data.token;
         } catch (error) {
             console.error('Error creating payment token:', error);
             throw error;
@@ -496,557 +698,284 @@ class PaygistixPaymentForm {
             throw error;
         }
     }
-    
+
     setupRegistrationMode() {
         const submitBtn = this.container.querySelector('#pxSubmit');
         const form = this.container.querySelector('#paygistixPaymentForm');
         
-        if (submitBtn) {
-            // Style the button like the registration form button
-            submitBtn.style.width = '100%';
-            submitBtn.style.padding = '12px 16px';
-            submitBtn.style.fontSize = '16px';
-            submitBtn.style.fontWeight = '700';
-            submitBtn.style.borderRadius = '8px';
-            submitBtn.style.background = '#2563eb';
-            submitBtn.style.transition = 'all 0.3s ease';
-            submitBtn.value = 'Complete Registration & Pay';
-            
-            // Add hover effect
-            submitBtn.addEventListener('mouseenter', function() {
-                this.style.background = '#1d4ed8';
-                this.style.transform = 'translateY(-1px)';
-                this.style.boxShadow = '0 4px 6px -1px rgba(0, 0, 0, 0.1)';
-            });
-            
-            submitBtn.addEventListener('mouseleave', function() {
-                this.style.background = '#2563eb';
-                this.style.transform = 'translateY(0)';
-                this.style.boxShadow = 'none';
-            });
-        }
-        
-        if (form) {
-            // Debug form attributes
-            console.log('Paygistix form attributes:', {
-                action: form.getAttribute('action'),
-                method: form.getAttribute('method'),
-                target: form.getAttribute('target'),
-                id: form.getAttribute('id')
-            });
-            
-            // Intercept form submission to validate customer data first
-            form.addEventListener('submit', (e) => {
-                console.log('Form submission intercepted');
-                e.preventDefault(); // Always prevent default first
+        if (submitBtn && form) {
+            // Override the submit button to use our custom handler
+            submitBtn.type = 'button';
+            submitBtn.addEventListener('click', async (e) => {
+                e.preventDefault();
                 
-                // Prevent duplicate submissions
-                if (this.isProcessingPayment) {
-                    console.log('Payment already processing, ignoring duplicate submission');
-                    return false;
+                // Get customer data from the page
+                const customerData = this.gatherCustomerData();
+                if (customerData) {
+                    await this.processRegistrationPayment(customerData);
                 }
-                
-                // Store the click position for modal positioning
-                this.lastClickY = e.clientY || 0;
-                
-                // Check if customer form is valid
-                const customerForm = document.getElementById('customerRegistrationForm');
-                
-                if (customerForm && !customerForm.checkValidity()) {
-                    customerForm.reportValidity();
-                    return false;
-                }
-                
-                // Check if bags are selected
-                const numberOfBags = document.getElementById('numberOfBags')?.value;
-                if (!numberOfBags || numberOfBags === '' || numberOfBags === '0') {
-                    if (window.modalAlert) {
-                        window.modalAlert('Please select the number of bags needed before proceeding.', 'Bags Required');
-                    } else {
-                        alert('Please select the number of bags needed before proceeding.');
-                    }
-                    return false;
-                }
-                
-                // Store customer data for post-payment processing
-                let customerData = {};
-                if (customerForm) {
-                    const formData = new FormData(customerForm);
-                    
-                    formData.forEach((value, key) => {
-                        customerData[key] = value;
-                    });
-                    
-                    customerData.timestamp = Date.now();
-                    customerData.paymentPending = true;
-                    
-                    // Store in session for callback processing
-                    sessionStorage.setItem('pendingRegistration', JSON.stringify(customerData));
-                    console.log('Stored customer data for post-payment processing:', customerData);
-                }
-                
-                // Create a new form to submit only Paygistix data
-                console.log('Creating clean Paygistix form for submission');
-                const paygistixForm = document.createElement('form');
-                paygistixForm.method = 'post';
-                paygistixForm.action = form.action;
-                
-                // Copy only Paygistix-specific fields
-                const paygistixFields = [
-                    'txnType', 'merchantID', 'formID', 'hash', 'ReturnURL',
-                    // Product codes (only 6 items in new form)
-                    'pxCode1', 'pxDescription1', 'pxPrice1', 'pxQty1',
-                    'pxCode2', 'pxDescription2', 'pxPrice2', 'pxQty2',
-                    'pxCode3', 'pxDescription3', 'pxPrice3', 'pxQty3',
-                    'pxCode4', 'pxDescription4', 'pxPrice4', 'pxQty4',
-                    'pxCode5', 'pxDescription5', 'pxPrice5', 'pxQty5',
-                    'pxCode6', 'pxDescription6', 'pxPrice6', 'pxQty6'
-                ];
-                
-                // Build payment data object for logging
-                const paymentData = {
-                    action: paygistixForm.action,
-                    method: paygistixForm.method,
-                    timestamp: new Date().toISOString(),
-                    fields: {}
-                };
-                
-                paygistixFields.forEach(fieldName => {
-                    const field = form.elements[fieldName];
-                    if (field) {
-                        const hiddenField = document.createElement('input');
-                        hiddenField.type = 'hidden';
-                        hiddenField.name = fieldName;
-                        hiddenField.value = field.value;
-                        paygistixForm.appendChild(hiddenField);
-                        
-                        // Add to payment data for logging
-                        paymentData.fields[fieldName] = field.value;
-                    }
-                });
-                
-                // Log form submission details
-                console.log('=== PAYGISTIX PAYMENT SUBMISSION ===');
-                console.log('Submitting to:', paymentData.action);
-                console.log('Method:', paymentData.method);
-                console.log('Timestamp:', paymentData.timestamp);
-                console.log('Form Fields:', paymentData.fields);
-                console.log('Full Payment Data:', JSON.stringify(paymentData, null, 2));
-                console.log('=====================================');
-                
-                // Also log to server for debugging
-                try {
-                    fetch('/api/v1/payments/log-submission', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': 'Bearer ' + (localStorage.getItem('token') || '')
-                        },
-                        body: JSON.stringify(paymentData)
-                    }).catch(err => console.log('Failed to log payment submission to server:', err));
-                } catch (err) {
-                    console.log('Error logging payment submission:', err);
-                }
-                
-                // Set processing flag to prevent duplicate submissions
-                this.isProcessingPayment = true;
-                
-                // Create payment token before showing modal
-                this.createPaymentToken(customerData, paymentData).then(token => {
-                    if (token) {
-                        // Add token to form and return URL
-                        const tokenField = document.createElement('input');
-                        tokenField.type = 'hidden';
-                        tokenField.name = 'token';
-                        tokenField.value = token;
-                        paygistixForm.appendChild(tokenField);
-                        
-                        // Update return URL to include token
-                        const returnUrlField = paygistixForm.elements['ReturnURL'];
-                        if (returnUrlField) {
-                            const baseUrl = returnUrlField.value.split('?')[0];
-                            returnUrlField.value = `${baseUrl}?token=${token}`;
-                        }
-                        
-                        // Show payment processing modal
-                        this.showPaymentModal(paygistixForm, paymentData, token);
-                    } else {
-                        console.error('Failed to create payment token');
-                        if (window.modalAlert) {
-                            window.modalAlert('Failed to initialize payment. Please try again.', 'Payment Error');
-                        } else {
-                            alert('Failed to initialize payment. Please try again.');
-                        }
-                        this.isProcessingPayment = false; // Reset flag
-                    }
-                }).catch(error => {
-                    console.error('Error creating payment token:', error);
-                    if (window.modalAlert) {
-                        window.modalAlert('Failed to initialize payment. Please try again.', 'Payment Error');
-                    } else {
-                        alert('Failed to initialize payment. Please try again.');
-                    }
-                    this.isProcessingPayment = false; // Reset flag
-                });
-                
-                // Form will navigate away, but clean up just in case
-                setTimeout(() => {
-                    if (document.body.contains(paygistixForm)) {
-                        document.body.removeChild(paygistixForm);
-                    }
-                }, 100);
             });
         }
     }
     
-    showPaymentModal(paygistixForm, paymentData, paymentToken) {
-        // Create modal HTML for confirmation
-        const modalHTML = `
-            <div id="paymentProcessingModal" class="fixed inset-0 z-50 flex items-center justify-center" style="display: none;">
-                <!-- Background overlay -->
-                <div class="fixed inset-0 bg-gray-500 opacity-75"></div>
-                
-                <!-- Modal panel -->
-                <div id="paymentModalPanel" class="relative bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:max-w-lg sm:w-full mx-4">
-                        <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-                            <div class="sm:flex sm:items-start">
-                                <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-blue-100 sm:mx-0 sm:h-10 sm:w-10">
-                                    <svg class="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    </svg>
-                                </div>
-                                <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
-                                    <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">
-                                        Secure Payment Processing
-                                    </h3>
-                                    <div class="mt-2">
-                                        <!-- Confirmation state -->
-                                        <div id="paymentConfirmState">
-                                            <p class="text-sm text-gray-500">
-                                                You will be redirected to our secure payment processor, Paygistix, to complete your payment. 
-                                                The payment page will open in a new window.
-                                            </p>
-                                            <p class="text-sm text-gray-500 mt-2">
-                                                Please ensure pop-up blockers are disabled for this site.
-                                            </p>
-                                        </div>
-                                        
-                                        <!-- Loading state (hidden initially) -->
-                                        <div id="paymentLoadingState" style="display: none;" class="text-center py-4">
-                                            <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mb-2"></div>
-                                            <p class="text-sm text-gray-600">Opening payment window...</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
-                            <button type="button" id="proceedToPaymentBtn" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:ml-3 sm:w-auto sm:text-sm">
-                                Proceed to Payment
-                            </button>
-                            <button type="button" id="cancelPaymentBtn" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
-                                Cancel
-                            </button>
-                        </div>
-                    </div>
-                </div>
+    gatherCustomerData() {
+        // This method should be overridden or the data should be passed in
+        // For now, we'll try to gather from common form fields
+        const email = document.querySelector('[name="email"], #email')?.value;
+        const firstName = document.querySelector('[name="firstName"], #firstName')?.value;
+        const lastName = document.querySelector('[name="lastName"], #lastName')?.value;
+        const phone = document.querySelector('[name="phone"], #phone')?.value;
+        
+        if (!email || !firstName || !lastName) {
+            console.error('Missing required customer data');
+            return null;
+        }
+        
+        return {
+            email,
+            firstName,
+            lastName,
+            phone: phone || '',
+            affiliateId: this.affiliateId
+        };
+    }
+    
+    showPaymentProcessingModal(paymentToken) {
+        // Create modal overlay
+        const modal = document.createElement('div');
+        modal.className = 'payment-processing-modal';
+        modal.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+        `;
+        
+        const modalContent = document.createElement('div');
+        modalContent.style.cssText = `
+            background: white;
+            padding: 40px;
+            border-radius: 8px;
+            max-width: 500px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        `;
+        
+        modalContent.innerHTML = `
+            <div class="loading-state">
+                <div style="display: inline-block; width: 50px; height: 50px; border: 3px solid #f3f3f3; border-top: 3px solid #1e3a8a; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+                <h3 style="margin-top: 20px; color: #1e3a8a;">Opening Payment Window</h3>
+                <p style="color: #6b7280; margin-top: 10px;">Please complete your payment in the new window...</p>
             </div>
         `;
         
-        // Add modal to page if not already present
-        if (!document.getElementById('paymentProcessingModal')) {
-            document.body.insertAdjacentHTML('beforeend', modalHTML);
-        }
+        modal.appendChild(modalContent);
+        document.body.appendChild(modal);
         
-        const modal = document.getElementById('paymentProcessingModal');
-        const proceedBtn = document.getElementById('proceedToPaymentBtn');
-        const cancelBtn = document.getElementById('cancelPaymentBtn');
-        const confirmState = document.getElementById('paymentConfirmState');
-        const loadingState = document.getElementById('paymentLoadingState');
+        // Add spinner animation
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes spin {
+                0% { transform: rotate(0deg); }
+                100% { transform: rotate(360deg); }
+            }
+        `;
+        document.head.appendChild(style);
         
-        // Show modal
-        modal.style.display = 'flex';
-        
-        // Add CSS for animation if not already present
-        if (!document.getElementById('modalAnimationStyles')) {
-            const style = document.createElement('style');
-            style.id = 'modalAnimationStyles';
-            style.textContent = `
-                @keyframes spin {
-                    to { transform: rotate(360deg); }
-                }
-                .animate-spin {
-                    animation: spin 1s linear infinite;
-                }
-            `;
-            document.head.appendChild(style);
-        }
-        
-        // Store reference to this for use in callbacks
-        const self = this;
-        let pollingInterval = null;
-        
-        // Handle proceed button click
-        proceedBtn.onclick = () => {
-            // Show loading state
-            confirmState.style.display = 'none';
-            loadingState.style.display = 'block';
-            proceedBtn.disabled = true;
-            cancelBtn.disabled = true;
-            
-            // Update loading message
-            loadingState.innerHTML = `
-                <div class="text-center py-4">
-                    <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mb-2"></div>
-                    <p class="text-sm text-gray-600">Opening payment window...</p>
-                </div>
-            `;
-            
-            // Append form to the current document body (not parent)
-            // The form needs to be in the same document context where it was created
-            document.body.appendChild(paygistixForm);
-            
-            // Submit form to open in new window
+        // Open payment window with dynamic form submission
+        setTimeout(() => {
             try {
-                console.log('Opening Paygistix payment in new window');
-                console.log('Form connected to DOM:', document.body.contains(paygistixForm));
-                console.log('Form action:', paygistixForm.action);
+                const loadingState = modalContent.querySelector('.loading-state');
+                const self = this;
                 
-                // Use setTimeout to ensure form is properly attached to DOM
-                setTimeout(() => {
-                    // Calculate window size for the form
-                    const windowWidth = 800;
-                    const windowHeight = 675; // Increased by 75px to show trademark
+                // Create a form for Paygistix submission
+                const paygistixForm = document.createElement('form');
+                paygistixForm.method = 'POST';
+                paygistixForm.action = this.paymentConfig.formActionUrl;
+                paygistixForm.style.display = 'none';
+                
+                // Get all form inputs from the payment form
+                const originalForm = this.container.querySelector('form#paygistixPaymentForm');
+                const inputs = originalForm.querySelectorAll('input[type="hidden"], input.pxQty');
+                
+                // Clone all inputs to the new form
+                inputs.forEach(input => {
+                    const clone = input.cloneNode(true);
+                    paygistixForm.appendChild(clone);
+                });
+                
+                // Add payment token
+                const tokenInput = document.createElement('input');
+                tokenInput.type = 'hidden';
+                tokenInput.name = 'custom1';
+                tokenInput.value = paymentToken;
+                paygistixForm.appendChild(tokenInput);
+                
+                // Add customer email
+                const customerData = this.gatherCustomerData();
+                if (customerData && customerData.email) {
+                    const emailInput = document.createElement('input');
+                    emailInput.type = 'hidden';
+                    emailInput.name = 'email';
+                    emailInput.value = customerData.email;
+                    paygistixForm.appendChild(emailInput);
+                }
+                
+                // Append form to body
+                document.body.appendChild(paygistixForm);
+                
+                // Log form data for debugging
+                const formData = new FormData(paygistixForm);
+                const paymentData = {};
+                for (let [key, value] of formData.entries()) {
+                    paymentData[key] = value;
+                }
+                console.log('Payment form data:', paymentData);
+                
+                // Open payment window
+                const windowWidth = 800;
+                const windowHeight = 600;
+                const left = (screen.width - windowWidth) / 2;
+                const top = (screen.height - windowHeight) / 2;
+                
+                const windowFeatures = `width=${windowWidth},height=${windowHeight},left=${left},top=${top},resizable=yes,scrollbars=yes,toolbar=no,menubar=no,location=no,status=yes`;
+                
+                const paymentWindow = window.open('', 'PaygistixPayment', windowFeatures);
+                
+                if (paymentWindow) {
+                    // Set form target to the new window
+                    paygistixForm.target = 'PaygistixPayment';
                     
-                    // Calculate center position relative to current browser window
-                    const left = window.screenX + (window.outerWidth - windowWidth) / 2;
-                    const top = window.screenY + (window.outerHeight - windowHeight) / 2;
+                    // Submit form to the new window
+                    paygistixForm.submit();
+                    console.log('Form submitted to new window');
                     
-                    // Window features
-                    const windowFeatures = [
-                        `width=${windowWidth}`,
-                        `height=${windowHeight}`,
-                        `left=${left}`,
-                        `top=${top}`,
-                        'resizable=yes',
-                        'scrollbars=yes',
-                        'toolbar=no',
-                        'menubar=no',
-                        'location=no',
-                        'status=yes'
-                    ].join(',');
+                    // Update modal to show processing state
+                    loadingState.innerHTML = `
+                        <div style="display: inline-block; width: 50px; height: 50px; border: 3px solid #f3f3f3; border-top: 3px solid #1e3a8a; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+                        <h3 style="margin-top: 20px; color: #1e3a8a;">Processing Payment</h3>
+                        <p style="color: #6b7280; margin-top: 10px;">Please complete the payment in the new window</p>
+                        <p style="color: #6b7280; font-size: 14px; margin-top: 5px;">Do not close this window...</p>
+                    `;
                     
-                    // Open new window
-                    const paymentWindow = window.open('', 'PaygistixPayment', windowFeatures);
-                    
-                    if (paymentWindow) {
-                        // Set form target to the new window
-                        paygistixForm.target = 'PaygistixPayment';
-                        
-                        // Submit form to the new window
-                        paygistixForm.submit();
-                        console.log('Form submitted to new window');
-                        
-                        // Update modal to show processing state
-                        setTimeout(() => {
-                            // Update loading message
-                            loadingState.innerHTML = `
-                                <div class="text-center py-4">
-                                    <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mb-2"></div>
-                                    <p class="text-sm text-gray-600 mb-2">Processing payment...</p>
-                                    <p class="text-xs text-gray-500">Please complete the payment in the new window</p>
-                                </div>
-                            `;
+                    // Check if payment window is closed
+                    let windowCheckInterval = setInterval(() => {
+                        if (paymentWindow.closed) {
+                            console.log('Payment window was closed by user');
+                            clearInterval(windowCheckInterval);
+                            clearInterval(pollingInterval);
                             
-                            // Check if payment window is closed
-                            let windowCheckInterval = setInterval(() => {
-                                if (paymentWindow.closed) {
-                                    console.log('Payment window was closed by user');
-                                    clearInterval(windowCheckInterval);
-                                    clearInterval(pollingInterval);
-                                    
-                                    // Cancel the payment token
-                                    self.cancelPaymentToken(paymentToken).then(() => {
-                                        console.log('Payment token cancelled');
-                                    }).catch(err => {
-                                        console.error('Error cancelling payment token:', err);
-                                    });
-                                    
-                                    // Close the modal
-                                    modal.style.display = 'none';
-                                    
-                                    // Show alert to user
-                                    if (window.modalAlert) {
-                                        window.modalAlert('Payment was cancelled. Please try again when you are ready to complete the payment.', 'Payment Cancelled');
-                                    }
-                                    
-                                    // Reset processing flag
-                                    self.isProcessingPayment = false;
-                                }
-                            }, 500); // Check every 500ms
+                            // Cancel the payment token
+                            self.cancelPaymentToken(paymentToken).then(() => {
+                                console.log('Payment token cancelled');
+                            }).catch(err => {
+                                console.error('Error cancelling payment token:', err);
+                            });
                             
-                            // Start polling for payment status
-                            pollingInterval = setInterval(() => {
-                                self.checkPaymentStatus(paymentToken, (status, error) => {
-                                    if (status === 'success') {
-                                        clearInterval(pollingInterval);
-                                        clearInterval(windowCheckInterval);
-                                        self.handlePaymentSuccess(modal, paymentWindow);
-                                    } else if (status === 'failed') {
-                                        clearInterval(pollingInterval);
-                                        clearInterval(windowCheckInterval);
-                                        self.handlePaymentFailure(modal, error, paymentWindow);
-                                    }
-                                    // Continue polling if status is still pending/processing
-                                });
-                            }, 2000); // Poll every 2 seconds
+                            // Close the modal
+                            modal.style.display = 'none';
                             
-                            // Clean up form
-                            if (document.body.contains(paygistixForm)) {
-                                document.body.removeChild(paygistixForm);
+                            // Show alert to user
+                            if (window.modalAlert) {
+                                window.modalAlert('Payment was cancelled. Please try again when you are ready to complete the payment.', 'Payment Cancelled');
                             }
-                        }, 1000);
-                    } else {
-                        throw new Error('Pop-up blocked');
+                            
+                            // Reset processing flag
+                            self.isProcessingPayment = false;
+                        }
+                    }, 500); // Check every 500ms
+                    
+                    // Start polling for payment status
+                    let pollingInterval = setInterval(() => {
+                        self.checkPaymentStatus(paymentToken, (status, error) => {
+                            if (status === 'success') {
+                                clearInterval(pollingInterval);
+                                clearInterval(windowCheckInterval);
+                                self.handlePaymentSuccess(modal, paymentWindow);
+                            } else if (status === 'failed') {
+                                clearInterval(pollingInterval);
+                                clearInterval(windowCheckInterval);
+                                self.handlePaymentFailure(modal, error, paymentWindow);
+                            }
+                        });
+                    }, 2000); // Check every 2 seconds
+                    
+                    // Clean up form
+                    if (document.body.contains(paygistixForm)) {
+                        document.body.removeChild(paygistixForm);
                     }
-                }, 100);
+                } else {
+                    throw new Error('Pop-up blocked');
+                }
             } catch (error) {
                 console.error('Error opening payment window:', error);
-                // Show error in modal
                 loadingState.innerHTML = `
-                    <div class="text-center py-4">
-                        <svg class="mx-auto h-12 w-12 text-red-500 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                        </svg>
-                        <p class="text-gray-700 font-medium mb-2">Unable to open payment window</p>
-                        <p class="text-gray-600 text-sm">Please check your pop-up blocker settings and try again.</p>
-                    </div>
+                    <div style="color: #dc2626; font-size: 48px;">⚠️</div>
+                    <h3 style="margin-top: 20px; color: #dc2626;">Unable to Open Payment Window</h3>
+                    <p style="color: #6b7280; margin-top: 10px;">Please check your pop-up blocker settings and try again.</p>
+                    <button onclick="this.closest('.payment-processing-modal').remove(); window.PaygistixPaymentForm.prototype.isProcessingPayment = false;" style="margin-top: 20px; padding: 10px 20px; background: #1e3a8a; color: white; border: none; border-radius: 4px; cursor: pointer;">Close</button>
                 `;
-                proceedBtn.disabled = false;
-                cancelBtn.disabled = false;
             }
-        };
-        
-        // Handle cancel button
-        cancelBtn.onclick = () => {
-            // Stop polling if active
-            if (pollingInterval) {
-                clearInterval(pollingInterval);
-            }
-            modal.style.display = 'none';
-            console.log('Payment cancelled by user');
-            // Clean up form
-            if (document.body.contains(paygistixForm)) {
-                document.body.removeChild(paygistixForm);
-            }
-            // Reset processing flag
-            self.isProcessingPayment = false;
-        };
-        
-        // Handle click outside modal
-        modal.onclick = (e) => {
-            if (e.target === modal) {
-                // Stop polling if active
-                if (pollingInterval) {
-                    clearInterval(pollingInterval);
-                }
-                modal.style.display = 'none';
-                console.log('Payment modal closed by user (clicked outside)');
-                // Clean up form
-                if (document.body.contains(paygistixForm)) {
-                    document.body.removeChild(paygistixForm);
-                }
-                // Reset processing flag
-                self.isProcessingPayment = false;
-            }
-        };
-        
-        // Store polling interval for cleanup
-        modal.pollingInterval = pollingInterval;
+        }, 100);
     }
     
-    async checkPaymentStatus(token, callback) {
-        try {
-            const response = await fetch(`/api/v1/payments/check-status/${token}`, {
-                method: 'GET',
-                headers: {
-                    'Authorization': 'Bearer ' + (localStorage.getItem('token') || '')
+    checkPaymentStatus(token, callback) {
+        fetch(`/api/v1/payments/check-status/${token}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    callback(data.status, data.errorMessage);
+                } else {
+                    callback('error', 'Failed to check payment status');
                 }
+            })
+            .catch(error => {
+                console.error('Error checking payment status:', error);
+                callback('error', error.message);
             });
-            
-            if (!response.ok) {
-                throw new Error('Failed to check payment status');
-            }
-            
-            const data = await response.json();
-            if (data.success) {
-                callback(data.status, data.errorMessage);
-            } else {
-                callback('error', data.message);
-            }
-        } catch (error) {
-            console.error('Error checking payment status:', error);
-            // Don't stop polling on network errors
-        }
     }
     
     handlePaymentSuccess(modal, paymentWindow) {
-        // Close payment window if still open
         if (paymentWindow && !paymentWindow.closed) {
             paymentWindow.close();
         }
         
-        // Update modal to show success
-        const loadingState = document.getElementById('paymentLoadingState');
-        if (loadingState) {
-            loadingState.innerHTML = `
-                <div class="text-center py-4">
-                    <svg class="mx-auto h-12 w-12 text-green-500 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    <p class="text-gray-700 font-medium mb-2">Payment Successful!</p>
-                    <p class="text-gray-600 text-sm mb-4">Your registration has been completed.</p>
-                </div>
-            `;
-        }
+        modal.querySelector('.loading-state').innerHTML = `
+            <div style="color: #10b981; font-size: 48px;">✓</div>
+            <h3 style="margin-top: 20px; color: #10b981;">Payment Successful!</h3>
+            <p style="color: #6b7280; margin-top: 10px;">Your registration is complete.</p>
+        `;
         
-        // Redirect to success page after a short delay
         setTimeout(() => {
-            // Clear stored customer data
-            sessionStorage.removeItem('pendingRegistration');
-            
+            modal.remove();
+            this.isProcessingPayment = false;
             // Redirect to success page
             window.location.href = '/registration-success.html';
         }, 2000);
     }
     
-    handlePaymentFailure(modal, errorMessage, paymentWindow) {
-        // Close payment window if still open
+    handlePaymentFailure(modal, error, paymentWindow) {
         if (paymentWindow && !paymentWindow.closed) {
             paymentWindow.close();
         }
         
-        // Update modal to show error
-        const loadingState = document.getElementById('paymentLoadingState');
-        const proceedBtn = document.getElementById('proceedToPaymentBtn');
-        const cancelBtn = document.getElementById('cancelPaymentBtn');
+        modal.querySelector('.loading-state').innerHTML = `
+            <div style="color: #dc2626; font-size: 48px;">✗</div>
+            <h3 style="margin-top: 20px; color: #dc2626;">Payment Failed</h3>
+            <p style="color: #6b7280; margin-top: 10px;">${error || 'Your payment could not be processed. Please try again.'}</p>
+            <button onclick="this.closest('.payment-processing-modal').remove(); window.PaygistixPaymentForm.prototype.isProcessingPayment = false;" style="margin-top: 20px; padding: 10px 20px; background: #1e3a8a; color: white; border: none; border-radius: 4px; cursor: pointer;">Close</button>
+        `;
         
-        if (loadingState) {
-            loadingState.innerHTML = `
-                <div class="text-center py-4">
-                    <svg class="mx-auto h-12 w-12 text-red-500 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    <p class="text-gray-700 font-medium mb-2">Payment Failed</p>
-                    <p class="text-gray-600 text-sm mb-4">${errorMessage || 'The payment could not be processed. Please try again.'}</p>
-                    <button type="button" onclick="location.reload()" class="inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:text-sm">
-                        Try Again
-                    </button>
-                </div>
-            `;
-        }
+        this.isProcessingPayment = false;
     }
 }
 
-// Make it available globally
+// Make the class available globally
 window.PaygistixPaymentForm = PaygistixPaymentForm;
