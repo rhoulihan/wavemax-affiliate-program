@@ -452,6 +452,11 @@ class PaygistixPaymentForm {
                 const codeInput = row.querySelector('input[name^="pxCode"]');
                 if (codeInput && codeInput.value !== 'BF') {
                     row.style.display = 'none';
+                    // Also set quantity to 0 for hidden rows
+                    const qtyInput = row.querySelector('input[name^="pxQty"]');
+                    if (qtyInput) {
+                        qtyInput.value = '0';
+                    }
                 }
             });
         } else if (this.payContext === 'ORDER' && this.affiliateSettings) {
@@ -810,10 +815,21 @@ class PaygistixPaymentForm {
                 const originalForm = this.container.querySelector('form#paygistixPaymentForm');
                 const inputs = originalForm.querySelectorAll('input[type="hidden"], input.pxQty');
                 
-                // Clone all inputs to the new form
+                // Clone all inputs to the new form, but only if they have meaningful values
                 inputs.forEach(input => {
+                    // Skip quantity inputs with value of 0
+                    if (input.classList.contains('pxQty') && input.value === '0') {
+                        console.log(`Skipping ${input.name} with value 0`);
+                        return;
+                    }
+                    
                     const clone = input.cloneNode(true);
                     paygistixForm.appendChild(clone);
+                    
+                    // Log what we're adding
+                    if (input.value && input.value !== '0') {
+                        console.log(`Adding ${input.name}: ${input.value}`);
+                    }
                 });
                 
                 // Add payment token
