@@ -75,64 +75,10 @@
         }
     }
     
-    // Handle registration submission
+    // Handle registration submission - Deprecated, now handled by PaygistixPaymentForm
     function handleRegistrationSubmit() {
-        const form = document.getElementById('customerRegistrationForm');
-        
-        // Validate form fields first
-        if (!form.checkValidity()) {
-            form.reportValidity();
-            return;
-        }
-        
-        // Check if payment form has valid data
-        if (!paymentForm || paymentForm.getTotal() === 0) {
-            if (window.modalAlert) {
-                window.modalAlert('Please select the number of bags needed before proceeding.', 'Payment Required');
-            } else {
-                alert('Please select the number of bags needed before proceeding.');
-            }
-            return;
-        }
-        
-        // Collect form data
-        const formData = new FormData(form);
-        const customerData = {};
-        
-        formData.forEach((value, key) => {
-            customerData[key] = value;
-        });
-        
-        // Store customer data for post-payment processing
-        customerData.timestamp = Date.now();
-        customerData.paymentPending = true;
-        
-        // Add customer ID to payment form
-        if (paymentForm) {
-            paymentForm.setOrderDetails({
-                customerData: customerData,
-                registrationType: 'new_customer'
-            });
-        }
-        
-        // Store in session for callback processing
-        sessionStorage.setItem('pendingRegistration', JSON.stringify(customerData));
-        
-        // Submit the Paygistix payment form
-        const paygistixForm = document.querySelector('#paygistixPaymentForm') || 
-                              document.querySelector('form[action*="safepay"]') ||
-                              document.querySelector('form[action*="transaction.asp"]');
-        if (paygistixForm) {
-            console.log('Submitting Paygistix form:', paygistixForm);
-            paygistixForm.submit();
-        } else {
-            console.error('Paygistix form not found');
-            if (window.modalAlert) {
-                window.modalAlert('Payment form not ready. Please refresh the page and try again.', 'Payment Error');
-            } else {
-                alert('Payment form not ready. Please refresh the page and try again.');
-            }
-        }
+        console.log('handleRegistrationSubmit called - this function is deprecated');
+        // The Paygistix form now handles submission directly
     }
     
     // Initialize when DOM is ready
@@ -172,11 +118,7 @@
             });
         }
         
-        // Handle submit button click
-        const submitButton = document.getElementById('submitRegistration');
-        if (submitButton) {
-            submitButton.addEventListener('click', handleRegistrationSubmit);
-        }
+        // Submit button is now handled by Paygistix form directly
     }
     
     // Check if DOM is ready
