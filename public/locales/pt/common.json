@@ -619,7 +619,8 @@
       "socialAccountConnected": "Conta de Rede Social Conectada!",
       "successfullyConnectedWith": "Conectado com sucesso com {{provider}}",
       "autoFilledMessage": "Suas informações foram preenchidas automaticamente abaixo. Complete os campos restantes para finalizar seu registro.",
-      "bagNote": "Esta taxa cobre o custo das suas sacolas de lavanderia."
+      "bagNote": "Esta taxa cobre o custo das suas sacolas de lavanderia.",
+      "loadingPayment": "Carregando formulário de pagamento..."
     },
     "dashboard": {
       "title": "Painel do Cliente",

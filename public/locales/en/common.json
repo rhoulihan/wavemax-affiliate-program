@@ -620,7 +620,8 @@
       "socialAccountConnected": "Social Media Account Connected!",
       "successfullyConnectedWith": "Successfully Connected with {{provider}}",
       "autoFilledMessage": "Your information has been automatically filled in below. Complete the remaining fields to finish your registration.",
-      "bagNote": "This fee covers the cost of your laundry bags."
+      "bagNote": "This fee covers the cost of your laundry bags.",
+      "loadingPayment": "Loading payment form..."
     },
     "dashboard": {
       "title": "Customer Dashboard",

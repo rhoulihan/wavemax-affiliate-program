@@ -619,7 +619,8 @@
       "socialAccountConnected": "Social-Media-Konto verbunden!",
       "successfullyConnectedWith": "Erfolgreich verbunden mit {{provider}}",
       "autoFilledMessage": "Ihre Informationen wurden automatisch unten ausgefüllt. Vervollständigen Sie die restlichen Felder, um Ihre Registrierung abzuschließen.",
-      "bagNote": "Diese Gebühr deckt die Kosten für Ihre Wäschesäcke."
+      "bagNote": "Diese Gebühr deckt die Kosten für Ihre Wäschesäcke.",
+      "loadingPayment": "Zahlungsformular wird geladen..."
     },
     "dashboard": {
       "title": "Kunden-Dashboard",

@@ -619,7 +619,8 @@
       "socialAccountConnected": "¡Cuenta de Redes Sociales Conectada!",
       "successfullyConnectedWith": "Conectado exitosamente con {{provider}}",
       "autoFilledMessage": "Su información se ha completado automáticamente a continuación. Complete los campos restantes para finalizar su registro.",
-      "bagNote": "Esta tarifa cubre el costo de sus bolsas de lavandería."
+      "bagNote": "Esta tarifa cubre el costo de sus bolsas de lavandería.",
+      "loadingPayment": "Cargando formulario de pago..."
     },
     "dashboard": {
       "title": "Panel de Cliente",
