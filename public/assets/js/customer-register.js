@@ -418,6 +418,28 @@
     return helpText;
   }
 
+  // Show address validation spinner
+  function showAddressValidationSpinner() {
+    const spinnerHTML = `
+      <div id="addressValidationSpinner" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); display: flex; align-items: center; justify-content: center; z-index: 10000;">
+        <div style="background: white; padding: 40px; border-radius: 8px; text-align: center; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+          <div class="swirl-spinner"></div>
+          <h3 style="margin-top: 20px; color: #1e3a8a;">Validating Address</h3>
+          <p style="color: #6b7280; margin-top: 10px;">Checking if your address is within our service area...</p>
+        </div>
+      </div>
+    `;
+    document.body.insertAdjacentHTML('beforeend', spinnerHTML);
+  }
+  
+  // Hide address validation spinner
+  function hideAddressValidationSpinner() {
+    const spinner = document.getElementById('addressValidationSpinner');
+    if (spinner) {
+      spinner.remove();
+    }
+  }
+
   // Service area validation function
   async function validateServiceArea() {
     const address = document.getElementById('address').value.trim();
@@ -436,6 +458,9 @@
     
     const fullAddress = `${address}, ${city}, ${state} ${zipCode}`;
     console.log('Validating service area for address:', fullAddress);
+    
+    // Show spinner
+    showAddressValidationSpinner();
     
     try {
       // Try multiple geocoding strategies for better results
@@ -496,6 +521,7 @@
         console.error('No geocoding results found after trying multiple strategies');
         // For now, allow to proceed if we can't geocode
         console.log('Allowing registration to proceed despite geocoding failure');
+        hideAddressValidationSpinner();
         return true;
       }
       
@@ -521,6 +547,7 @@
       
       if (distance > affiliateData.serviceRadius) {
         // Outside service area
+        hideAddressValidationSpinner();
         modalAlert(
           `Unfortunately, this address is outside the service area. The service area extends ${affiliateData.serviceRadius} miles from the affiliate location, and this address is ${distance.toFixed(1)} miles away.`,
           'Outside Service Area'
@@ -535,10 +562,12 @@
         return false;
       }
       
+      hideAddressValidationSpinner();
       return true; // Within service area
       
     } catch (error) {
       console.error('Service area validation error:', error);
+      hideAddressValidationSpinner();
       return true; // Allow to proceed if validation fails
     }
   }
