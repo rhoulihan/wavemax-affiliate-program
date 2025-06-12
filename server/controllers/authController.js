@@ -2115,4 +2115,110 @@ exports.completeSocialCustomerRegistration = async (req, res) => {
   }
 };
 
+/**
+ * Check if username is available (public endpoint)
+ * @route   POST /api/auth/check-username
+ * @desc    Check if username is available
+ * @access  Public
+ */
+exports.checkUsername = async (req, res) => {
+  try {
+    const { username } = req.body;
+    
+    if (!username || username.trim().length < 3) {
+      return res.status(400).json({
+        success: false,
+        message: 'Username must be at least 3 characters'
+      });
+    }
+    
+    const trimmedUsername = username.trim();
+    
+    console.log('Checking username availability for:', trimmedUsername);
+    
+    // Check across all user types - using exact match with case-insensitive
+    const [affiliate, customer, administrator, operator] = await Promise.all([
+      Affiliate.findOne({ username: { $regex: `^${trimmedUsername}$`, $options: 'i' } }),
+      Customer.findOne({ username: { $regex: `^${trimmedUsername}$`, $options: 'i' } }),
+      Administrator.findOne({ username: { $regex: `^${trimmedUsername}$`, $options: 'i' } }),
+      Operator.findOne({ username: { $regex: `^${trimmedUsername}$`, $options: 'i' } })
+    ]);
+    
+    console.log('Username check results:', {
+      username: trimmedUsername,
+      affiliateFound: !!affiliate,
+      customerFound: !!customer,
+      administratorFound: !!administrator,
+      operatorFound: !!operator
+    });
+    
+    const isAvailable = !affiliate && !customer && !administrator && !operator;
+    
+    res.json({
+      success: true,
+      available: isAvailable
+    });
+    
+  } catch (error) {
+    console.error('Check username error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error checking username availability'
+    });
+  }
+};
+
+/**
+ * Check if email is available (public endpoint)
+ * @route   POST /api/auth/check-email
+ * @desc    Check if email is available
+ * @access  Public
+ */
+exports.checkEmail = async (req, res) => {
+  try {
+    const { email } = req.body;
+    
+    if (!email || !email.trim()) {
+      return res.status(400).json({
+        success: false,
+        message: 'Email is required'
+      });
+    }
+    
+    const trimmedEmail = email.trim().toLowerCase();
+    
+    console.log('Checking email availability for:', trimmedEmail);
+    
+    // Check across all user types
+    const [affiliate, customer, administrator, operator] = await Promise.all([
+      Affiliate.findOne({ email: trimmedEmail }),
+      Customer.findOne({ email: trimmedEmail }),
+      Administrator.findOne({ email: trimmedEmail }),
+      Operator.findOne({ email: trimmedEmail })
+    ]);
+    
+    console.log('Email check results:', {
+      email: trimmedEmail,
+      affiliateFound: !!affiliate,
+      customerFound: !!customer,
+      administratorFound: !!administrator,
+      operatorFound: !!operator
+    });
+    
+    const isAvailable = !affiliate && !customer && !administrator && !operator;
+    
+    res.json({
+      success: true,
+      available: isAvailable
+    });
+    
+  } catch (error) {
+    console.error('Check email error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error checking email availability'
+    });
+  }
+};
+
 module.exports = exports;

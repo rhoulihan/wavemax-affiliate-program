@@ -41,6 +41,9 @@
                 }
             });
             
+            // Make paymentForm globally accessible
+            window.paymentForm = paymentForm;
+            
             // Update bag quantity when selection changes
             // Only update if there's already a selection
             setTimeout(() => {
@@ -65,9 +68,8 @@
         if (paymentForm && numberOfBags) {
             const quantity = parseInt(numberOfBags);
             console.log('Setting BF quantity to:', quantity);
-            paymentForm.setPrefilledAmounts({
-                BF: quantity
-            });
+            // Use the updateBagQuantity method from PaygistixPaymentForm
+            paymentForm.updateBagQuantity(quantity);
         } else {
             console.log('PaymentForm not ready or numberOfBags is empty', {
                 paymentForm: !!paymentForm,
