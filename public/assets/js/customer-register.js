@@ -420,6 +420,7 @@
 
   // Address validation spinner instance
   let addressValidationSpinner = null;
+  
 
   // Service area validation function
   async function validateServiceArea() {
@@ -448,13 +449,7 @@
       // Find the form to overlay
       const form = document.getElementById('customerRegistrationForm');
       
-      // Mark already disabled elements before spinner shows
-      if (form) {
-        const disabledElements = form.querySelectorAll('input:disabled, select:disabled, button:disabled, textarea:disabled');
-        disabledElements.forEach(element => {
-          element.setAttribute('data-was-disabled', 'true');
-        });
-      }
+      // The swirl spinner will track disabled states internally
       
       if (form && window.SwirlSpinnerUtils) {
         // Use the utility function to show spinner on form
@@ -576,6 +571,9 @@
             fallbackSpinner.remove();
           }
         }
+        
+        // Swirl spinner handles re-enabling
+        
         return true;
       }
       
@@ -612,16 +610,7 @@
           }
         }
         
-        // Re-enable form elements after validation failure
-        const form = document.getElementById('customerRegistrationForm');
-        if (form) {
-          const formElements = form.querySelectorAll('input, select, button, textarea');
-          formElements.forEach(element => {
-            if (!element.hasAttribute('data-was-disabled')) {
-              element.disabled = false;
-            }
-          });
-        }
+        // Swirl spinner handles re-enabling
         
         modalAlert(
           `Unfortunately, this address is outside the service area. The service area extends ${affiliateData.serviceRadius} miles from the affiliate location, and this address is ${distance.toFixed(1)} miles away.`,
@@ -648,29 +637,10 @@
         }
       }
       
-      // Re-enable form interactions after spinner is hidden
+      // The swirl-spinner.js now handles re-enabling form controls
+      // Just add a small delay to ensure spinner cleanup is complete
       setTimeout(() => {
-        console.log('Re-enabling form after address validation success');
-        const form = document.getElementById('customerRegistrationForm');
-        if (form) {
-          // Remove any pointer-events style that might have been added
-          form.style.pointerEvents = '';
-          
-          // Re-enable all form elements that might have been disabled
-          const formElements = form.querySelectorAll('input, select, button, textarea');
-          formElements.forEach(element => {
-            // Only re-enable if it wasn't already disabled before validation
-            if (!element.hasAttribute('data-was-disabled')) {
-              element.disabled = false;
-            }
-          });
-          
-          // Check if buttons are still clickable
-          const advanceButton = document.getElementById('advanceButton');
-          const numberOfBags = document.getElementById('numberOfBags');
-          console.log('Advance button after re-enable:', advanceButton, 'enabled:', !advanceButton?.disabled);
-          console.log('Number of bags after re-enable:', numberOfBags, 'enabled:', !numberOfBags?.disabled);
-        }
+        console.log('Address validation complete');
       }, 100);
       
       return true; // Within service area
