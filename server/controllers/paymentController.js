@@ -189,8 +189,8 @@ class PaymentController {
         body: req.body
       });
 
-      // Extract token from callback parameters
-      const token = req.query.token || req.body.token;
+      // Extract token from callback parameters (Paygistix sends it as custom1)
+      const token = req.query.custom1 || req.body.custom1 || req.query.token || req.body.token;
       
       if (!token) {
         logger.error('No payment token in callback');
@@ -206,15 +206,18 @@ class PaymentController {
       }
       
       // Check payment status from Paygistix response
-      // This will depend on Paygistix's callback parameters
-      const isSuccess = req.query.status === 'success' || 
+      // Paygistix sends Result=0 for success
+      const isSuccess = req.query.Result === '0' || 
+                       req.body.Result === '0' ||
+                       req.query.status === 'success' || 
                        req.query.result === 'approved' ||
                        req.body.status === 'success' ||
                        req.body.result === 'approved';
       
       // Update payment token status
-      paymentToken.status = isSuccess ? 'success' : 'failed';
+      paymentToken.status = isSuccess ? 'completed' : 'failed';
       paymentToken.paygistixResponse = { ...req.query, ...req.body };
+      paymentToken.transactionId = req.query.PNRef || req.body.PNRef;
       
       if (!isSuccess) {
         paymentToken.errorMessage = req.query.error || req.body.error || 'Payment was not successful';
@@ -258,8 +261,14 @@ class PaymentController {
         }
       }
       
-      // Redirect to callback handler with token
-      res.redirect(`/payment-callback-handler.html?token=${token}&status=${paymentToken.status}`);
+      // Redirect to callback handler with all parameters
+      const queryString = new URLSearchParams({
+        ...req.query,
+        token: token,
+        status: paymentToken.status,
+        paymentToken: token
+      }).toString();
+      res.redirect(`/payment-callback-handler.html?${queryString}`);
     } catch (error) {
       logger.error('Error handling payment callback:', error);
       res.redirect('/payment-callback-handler.html?error=processing_failed');
