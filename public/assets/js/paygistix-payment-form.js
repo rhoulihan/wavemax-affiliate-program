@@ -883,6 +883,7 @@ class PaygistixPaymentForm {
                     
                     // Track if we've received a payment result
                     let paymentCompleted = false;
+                    let waitingForCallback = true; // Expect redirect to callback page
                     
                     // Listen for message from payment callback window
                     const messageHandler = (event) => {
@@ -937,61 +938,86 @@ class PaygistixPaymentForm {
                     
                     window.addEventListener('message', messageHandler);
                     
-                    // Check if payment window is closed
+                    // Monitor window status but give time for payment processing
+                    let windowClosedCount = 0;
                     let windowCheckInterval = setInterval(() => {
                         if (paymentWindow.closed) {
-                            console.log('Payment window was closed');
+                            windowClosedCount++;
                             
-                            // Wait a bit to see if we get a postMessage
-                            setTimeout(() => {
-                                if (!paymentCompleted) {
-                                    console.log('No payment result received, assuming cancellation');
-                                    clearInterval(windowCheckInterval);
-                                    clearInterval(pollingInterval);
-                                    window.removeEventListener('message', messageHandler);
-                                    
-                                    // Cancel the payment token
-                                    self.cancelPaymentToken(paymentToken).then(() => {
-                                        console.log('Payment token cancelled');
-                                    }).catch(err => {
-                                        console.error('Error cancelling payment token:', err);
-                                    });
-                                    
-                                    // Hide the spinner
-                                    if (paymentSpinner) {
-                                        paymentSpinner.hide();
+                            // Only consider it truly closed after 10 seconds (20 checks)
+                            // This gives time for redirects and callbacks
+                            if (windowClosedCount > 20 && !paymentCompleted) {
+                                console.log('Payment window closed for extended period, checking final status...');
+                                clearInterval(windowCheckInterval);
+                                clearInterval(pollingInterval);
+                                
+                                // Do one final status check
+                                self.checkPaymentStatus(paymentToken, (status, error) => {
+                                    if (status === 'completed' || status === 'success') {
+                                        console.log('Payment was actually completed!');
+                                        paymentCompleted = true;
+                                        window.removeEventListener('message', messageHandler);
+                                        self.handlePaymentSuccess(paymentSpinner, null);
+                                    } else {
+                                        console.log('Payment was not completed, showing cancellation message');
+                                        window.removeEventListener('message', messageHandler);
+                                        
+                                        // Cancel the payment token
+                                        self.cancelPaymentToken(paymentToken).then(() => {
+                                            console.log('Payment token cancelled');
+                                        }).catch(err => {
+                                            console.error('Error cancelling payment token:', err);
+                                        });
+                                        
+                                        // Hide the spinner
+                                        if (paymentSpinner) {
+                                            paymentSpinner.hide();
+                                        }
+                                        
+                                        // Show alert to user
+                                        if (window.modalAlert) {
+                                            window.modalAlert('Payment was cancelled. Please try again when you are ready to complete the payment.', 'Payment Cancelled');
+                                        }
+                                        
+                                        // Reset processing flag
+                                        self.isProcessingPayment = false;
                                     }
-                                    
-                                    // Hide any existing modal first
-                                    const existingModal = document.querySelector('.fixed.inset-0.z-50');
-                                    if (existingModal) {
-                                        existingModal.remove();
-                                    }
-                                    
-                                    // Show alert to user
-                                    if (window.modalAlert) {
-                                        window.modalAlert('Payment was cancelled. Please try again when you are ready to complete the payment.', 'Payment Cancelled');
-                                    }
-                                    
-                                    // Reset processing flag
-                                    self.isProcessingPayment = false;
-                                }
-                            }, 3000); // Wait 3 seconds for postMessage
+                                });
+                            }
+                        } else {
+                            // Window is open, reset counter
+                            windowClosedCount = 0;
                         }
                     }, 500); // Check every 500ms
                     
-                    // Start polling for payment status
+                    // Start polling for payment status as backup
+                    let pollCount = 0;
                     let pollingInterval = setInterval(() => {
+                        pollCount++;
+                        console.log(`Polling payment status (attempt ${pollCount})...`);
+                        
                         self.checkPaymentStatus(paymentToken, (status, error) => {
+                            console.log(`Payment status check result: ${status}`);
+                            
                             if (status === 'success' || status === 'completed') {
+                                console.log('Payment completed via polling!');
                                 paymentCompleted = true;
                                 clearInterval(pollingInterval);
                                 clearInterval(windowCheckInterval);
-                                self.handlePaymentSuccess(paymentSpinner, paymentWindow);
+                                window.removeEventListener('message', messageHandler);
+                                
+                                // Close payment window if still open
+                                if (paymentWindow && !paymentWindow.closed) {
+                                    paymentWindow.close();
+                                }
+                                
+                                self.handlePaymentSuccess(paymentSpinner, null);
                             } else if (status === 'failed') {
+                                console.log('Payment failed via polling');
                                 paymentCompleted = true;
                                 clearInterval(pollingInterval);
                                 clearInterval(windowCheckInterval);
+                                window.removeEventListener('message', messageHandler);
                                 self.handlePaymentFailure(paymentSpinner, error, paymentWindow);
                             }
                         });
