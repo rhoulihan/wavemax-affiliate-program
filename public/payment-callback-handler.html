@@ -27,14 +27,51 @@
     <script>
         // Get query parameters
         const urlParams = new URLSearchParams(window.location.search);
-        const status = urlParams.get('status');
-        const transactionId = urlParams.get('transactionId');
-        const type = urlParams.get('type');
-        const responseMessage = urlParams.get('responseMessage');
+        
+        // Handle Paygistix parameters
+        const result = urlParams.get('Result');
+        const pnRef = urlParams.get('PNRef');
+        const orderId = urlParams.get('OrderID');
+        const amount = urlParams.get('Amount');
+        const authCode = urlParams.get('AuthCode');
+        const custom1 = urlParams.get('custom1'); // This should contain the payment token
+        
+        // Map Paygistix parameters to expected values
+        const status = result === '0' ? 'approved' : 'declined';
+        const transactionId = pnRef;
+        const type = 'registration'; // Default to registration for now
+        const responseMessage = urlParams.get('ResponseMsg') || (result !== '0' ? 'Payment declined' : 'Payment approved');
         
         // Process payment callback
         async function processPaymentCallback() {
             const statusDiv = document.getElementById('status-message');
+            
+            // Log the callback parameters for debugging
+            console.log('Payment callback received:', {
+                result,
+                status,
+                transactionId,
+                orderId,
+                amount,
+                authCode,
+                custom1
+            });
+            
+            // If we have a payment token (custom1), verify the payment status server-side
+            if (custom1) {
+                try {
+                    const response = await fetch(`/api/v1/payments/check-status/${custom1}`);
+                    const data = await response.json();
+                    
+                    if (data.success && data.status === 'completed') {
+                        // Payment was successful, redirect to success page
+                        window.location.href = '/registration-success.html';
+                        return;
+                    }
+                } catch (error) {
+                    console.error('Error checking payment status:', error);
+                }
+            }
             
             if (type === 'registration') {
                 // Handle registration payment callback
