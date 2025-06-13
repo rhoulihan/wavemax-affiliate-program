@@ -663,6 +663,13 @@ class PaygistixPaymentForm {
             // Create payment token
             const paymentToken = await this.createPaymentToken(customerData, paymentData);
             
+            // Store registration data in sessionStorage for callback handler
+            sessionStorage.setItem('pendingRegistration', JSON.stringify({
+                ...customerData,
+                numberOfBags: bagQuantity,
+                paymentToken: paymentToken
+            }));
+            
             // Add token as hidden field
             const tokenInput = document.createElement('input');
             tokenInput.type = 'hidden';
@@ -872,49 +879,72 @@ class PaygistixPaymentForm {
                     // Update spinner to show processing state
                     console.log('Payment window opened, waiting for completion...');
                     
+                    // Track if we've received a payment result
+                    let paymentCompleted = false;
+                    
                     // Check if payment window is closed
-                    let windowCheckInterval = setInterval(() => {
+                    let windowCheckInterval = setInterval(async () => {
                         if (paymentWindow.closed) {
-                            console.log('Payment window was closed by user');
+                            console.log('Payment window was closed');
                             clearInterval(windowCheckInterval);
                             clearInterval(pollingInterval);
                             
-                            // Cancel the payment token
-                            self.cancelPaymentToken(paymentToken).then(() => {
-                                console.log('Payment token cancelled');
-                            }).catch(err => {
-                                console.error('Error cancelling payment token:', err);
-                            });
-                            
-                            // Hide the spinner
-                            if (paymentSpinner) {
-                                paymentSpinner.hide();
+                            // Check payment status before assuming cancellation
+                            try {
+                                const statusResponse = await fetch(`/api/v1/payments/check-status/${paymentToken}`);
+                                const statusData = await statusResponse.json();
+                                
+                                if (statusData.success && (statusData.status === 'completed' || statusData.status === 'success')) {
+                                    console.log('Payment was completed successfully');
+                                    paymentCompleted = true;
+                                    self.handlePaymentSuccess(paymentSpinner, null);
+                                    return;
+                                }
+                            } catch (error) {
+                                console.error('Error checking final payment status:', error);
                             }
                             
-                            // Hide any existing modal first
-                            const existingModal = document.querySelector('.fixed.inset-0.z-50');
-                            if (existingModal) {
-                                existingModal.remove();
+                            // Only show cancelled message if payment wasn't completed
+                            if (!paymentCompleted) {
+                                // Cancel the payment token
+                                self.cancelPaymentToken(paymentToken).then(() => {
+                                    console.log('Payment token cancelled');
+                                }).catch(err => {
+                                    console.error('Error cancelling payment token:', err);
+                                });
+                                
+                                // Hide the spinner
+                                if (paymentSpinner) {
+                                    paymentSpinner.hide();
+                                }
+                                
+                                // Hide any existing modal first
+                                const existingModal = document.querySelector('.fixed.inset-0.z-50');
+                                if (existingModal) {
+                                    existingModal.remove();
+                                }
+                                
+                                // Show alert to user
+                                if (window.modalAlert) {
+                                    window.modalAlert('Payment was cancelled. Please try again when you are ready to complete the payment.', 'Payment Cancelled');
+                                }
+                                
+                                // Reset processing flag
+                                self.isProcessingPayment = false;
                             }
-                            
-                            // Show alert to user
-                            if (window.modalAlert) {
-                                window.modalAlert('Payment was cancelled. Please try again when you are ready to complete the payment.', 'Payment Cancelled');
-                            }
-                            
-                            // Reset processing flag
-                            self.isProcessingPayment = false;
                         }
                     }, 500); // Check every 500ms
                     
                     // Start polling for payment status
                     let pollingInterval = setInterval(() => {
                         self.checkPaymentStatus(paymentToken, (status, error) => {
-                            if (status === 'success') {
+                            if (status === 'success' || status === 'completed') {
+                                paymentCompleted = true;
                                 clearInterval(pollingInterval);
                                 clearInterval(windowCheckInterval);
                                 self.handlePaymentSuccess(paymentSpinner, paymentWindow);
                             } else if (status === 'failed') {
+                                paymentCompleted = true;
                                 clearInterval(pollingInterval);
                                 clearInterval(windowCheckInterval);
                                 self.handlePaymentFailure(paymentSpinner, error, paymentWindow);
