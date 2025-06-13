@@ -434,7 +434,7 @@ class PaygistixPaymentForm {
                 <input type="hidden" name="merchantID" value="${this.paymentConfig.merchantId}" />
                 <input type="hidden" name="formID" value="${this.paymentConfig.formId}" />
                 <input type="hidden" name="hash" value="${this.paymentConfig.formHash}" />
-                <input type="hidden" name="ReturnURL" value="${this.paymentConfig.returnUrl}" />
+                <input type="hidden" name="ReturnURL" value="${this.paymentConfig.returnUrl}" id="returnUrlField" />
                 </form>
                 <!-- END PAYMENT FORM CODE -->
             </div>
@@ -837,8 +837,7 @@ class PaygistixPaymentForm {
                 tokenInput.value = paymentToken;
                 paygistixForm.appendChild(tokenInput);
                 
-                // Also store in localStorage as backup since Paygistix might not return custom fields
-                localStorage.setItem('activePaymentToken', paymentToken);
+                // The payment token will be tracked via postMessage from callback window
                 
                 // Add customer email
                 const customerData = this.gatherCustomerData();
@@ -885,59 +884,94 @@ class PaygistixPaymentForm {
                     // Track if we've received a payment result
                     let paymentCompleted = false;
                     
+                    // Listen for message from payment callback window
+                    const messageHandler = (event) => {
+                        console.log('Received postMessage:', event.data);
+                        
+                        if (event.data && event.data.type === 'paygistix-payment-callback') {
+                            // Verify it's our payment by checking the token
+                            if (event.data.paymentToken === paymentToken || !event.data.paymentToken) {
+                                console.log('Payment callback received via postMessage:', event.data);
+                                
+                                // Remove the message listener
+                                window.removeEventListener('message', messageHandler);
+                                
+                                // Clear intervals
+                                clearInterval(windowCheckInterval);
+                                clearInterval(pollingInterval);
+                                paymentCompleted = true;
+                                
+                                if (event.data.success) {
+                                    // Update payment token status on server
+                                    fetch(`/api/v1/payments/callback`, {
+                                        method: 'POST',
+                                        headers: {
+                                            'Content-Type': 'application/json'
+                                        },
+                                        body: JSON.stringify({
+                                            custom1: paymentToken,
+                                            Result: event.data.result,
+                                            PNRef: event.data.transactionId,
+                                            OrderID: event.data.orderId,
+                                            Amount: event.data.amount,
+                                            AuthCode: event.data.authCode
+                                        })
+                                    }).then(() => {
+                                        console.log('Payment status updated on server');
+                                    }).catch(err => {
+                                        console.error('Error updating payment status:', err);
+                                    });
+                                    
+                                    self.handlePaymentSuccess(paymentSpinner, paymentWindow);
+                                } else {
+                                    self.handlePaymentFailure(paymentSpinner, 'Payment was declined', paymentWindow);
+                                }
+                            }
+                        }
+                    };
+                    
+                    window.addEventListener('message', messageHandler);
+                    
                     // Check if payment window is closed
-                    let windowCheckInterval = setInterval(async () => {
+                    let windowCheckInterval = setInterval(() => {
                         if (paymentWindow.closed) {
                             console.log('Payment window was closed');
-                            clearInterval(windowCheckInterval);
-                            clearInterval(pollingInterval);
                             
-                            // Check payment status before assuming cancellation
-                            try {
-                                const statusResponse = await fetch(`/api/v1/payments/check-status/${paymentToken}`);
-                                const statusData = await statusResponse.json();
-                                
-                                if (statusData.success && (statusData.status === 'completed' || statusData.status === 'success')) {
-                                    console.log('Payment was completed successfully');
-                                    paymentCompleted = true;
-                                    self.handlePaymentSuccess(paymentSpinner, null);
-                                    return;
+                            // Wait a bit to see if we get a postMessage
+                            setTimeout(() => {
+                                if (!paymentCompleted) {
+                                    console.log('No payment result received, assuming cancellation');
+                                    clearInterval(windowCheckInterval);
+                                    clearInterval(pollingInterval);
+                                    window.removeEventListener('message', messageHandler);
+                                    
+                                    // Cancel the payment token
+                                    self.cancelPaymentToken(paymentToken).then(() => {
+                                        console.log('Payment token cancelled');
+                                    }).catch(err => {
+                                        console.error('Error cancelling payment token:', err);
+                                    });
+                                    
+                                    // Hide the spinner
+                                    if (paymentSpinner) {
+                                        paymentSpinner.hide();
+                                    }
+                                    
+                                    // Hide any existing modal first
+                                    const existingModal = document.querySelector('.fixed.inset-0.z-50');
+                                    if (existingModal) {
+                                        existingModal.remove();
+                                    }
+                                    
+                                    // Show alert to user
+                                    if (window.modalAlert) {
+                                        window.modalAlert('Payment was cancelled. Please try again when you are ready to complete the payment.', 'Payment Cancelled');
+                                    }
+                                    
+                                    // Reset processing flag
+                                    self.isProcessingPayment = false;
                                 }
-                            } catch (error) {
-                                console.error('Error checking final payment status:', error);
-                            }
-                            
-                            // Only show cancelled message if payment wasn't completed
-                            if (!paymentCompleted) {
-                                // Cancel the payment token
-                                self.cancelPaymentToken(paymentToken).then(() => {
-                                    console.log('Payment token cancelled');
-                                }).catch(err => {
-                                    console.error('Error cancelling payment token:', err);
-                                });
-                                
-                                // Hide the spinner
-                                if (paymentSpinner) {
-                                    paymentSpinner.hide();
-                                }
-                                
-                                // Hide any existing modal first
-                                const existingModal = document.querySelector('.fixed.inset-0.z-50');
-                                if (existingModal) {
-                                    existingModal.remove();
-                                }
-                                
-                                // Show alert to user
-                                if (window.modalAlert) {
-                                    window.modalAlert('Payment was cancelled. Please try again when you are ready to complete the payment.', 'Payment Cancelled');
-                                }
-                                
-                                // Reset processing flag
-                                self.isProcessingPayment = false;
-                                
-                                // Clean up localStorage
-                                localStorage.removeItem('activePaymentToken');
-                            }
+                            }, 1500); // Wait 1.5 seconds for postMessage
                         }
                     }, 500); // Check every 500ms
                     
@@ -1016,8 +1050,6 @@ class PaygistixPaymentForm {
         
         setTimeout(() => {
             this.isProcessingPayment = false;
-            // Clean up localStorage
-            localStorage.removeItem('activePaymentToken');
             // Redirect to success page
             window.location.href = '/registration-success.html';
         }, 1000);
@@ -1038,8 +1070,6 @@ class PaygistixPaymentForm {
         }
         
         this.isProcessingPayment = false;
-        // Clean up localStorage
-        localStorage.removeItem('activePaymentToken');
     }
 }
 
