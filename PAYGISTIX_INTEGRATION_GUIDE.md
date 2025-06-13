@@ -5,24 +5,25 @@
 2. [Quick Start](#quick-start)
 3. [Architecture](#architecture)
 4. [Implementation Steps](#implementation-steps)
-5. [API Integration](#api-integration)
-6. [Security Best Practices](#security-best-practices)
-7. [Testing Strategy](#testing-strategy)
-8. [Deployment Checklist](#deployment-checklist)
-9. [Monitoring & Maintenance](#monitoring--maintenance)
-10. [Troubleshooting](#troubleshooting)
+5. [Form Pool System](#form-pool-system)
+6. [API Integration](#api-integration)
+7. [Security Best Practices](#security-best-practices)
+8. [Testing Strategy](#testing-strategy)
+9. [Deployment Checklist](#deployment-checklist)
+10. [Monitoring & Maintenance](#monitoring--maintenance)
+11. [Troubleshooting](#troubleshooting)
 
 ## Overview
 
 Paygistix is WaveMAX's payment processing solution that provides secure, reliable payment processing for laundry services. This guide covers the complete integration process from development to production deployment.
 
 ### Key Features
-- PCI-compliant payment processing
-- Credit/debit card payments
-- ACH transfers
-- Recurring payments for subscriptions
-- Tokenization for saved payment methods
-- Real-time webhook notifications
+- PCI-compliant hosted payment forms
+- Credit/debit card payments  
+- Form pool system for payment tracking
+- Real-time callback notifications
+- Payment window close detection
+- Test payment form for development
 - Comprehensive fraud protection
 
 ### Prerequisites
@@ -276,55 +277,126 @@ module.exports = router;
 
 ### Step 5: Frontend Integration
 
-```javascript
-// Frontend payment component example
-import { loadPaygistix } from '@paygistix/js';
+The WaveMAX implementation uses Paygistix's hosted payment form approach for PCI compliance. The payment form is dynamically populated with assigned form credentials from the form pool.
 
-const PaymentForm = ({ orderId, amount }) => {
-    const [clientSecret, setClientSecret] = useState('');
-    
-    useEffect(() => {
-        // Create payment intent
-        fetch('/api/payments/payment-intent', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-            },
-            body: JSON.stringify({ orderId })
-        })
-        .then(res => res.json())
-        .then(data => setClientSecret(data.clientSecret));
-    }, [orderId]);
-    
-    const handleSubmit = async (e) => {
-        e.preventDefault();
+```javascript
+// public/assets/js/paygistix-payment-form.js
+class PaygistixPaymentForm {
+    async processRegistrationPayment(customerData) {
+        // Create payment token and acquire form from pool
+        const tokenData = await this.createPaymentToken(customerData, paymentData);
+        const paymentToken = tokenData.token;
+        const formConfig = tokenData.formConfig;
         
-        const paygistix = await loadPaygistix(PAYGISTIX_PUBLIC_KEY);
-        const result = await paygistix.confirmPayment({
-            clientSecret,
-            payment_method: {
-                card: cardElement,
-                billing_details: {
-                    name: customerName,
-                    email: customerEmail
-                }
-            }
-        });
+        // Update payment config with assigned form
+        this.paymentConfig = {
+            ...this.paymentConfig,
+            formId: formConfig.formId,
+            formHash: formConfig.formHash,
+            returnUrl: formConfig.callbackUrl // Unique callback URL
+        };
         
-        if (result.error) {
-            // Handle error
-        } else {
-            // Payment successful
-        }
-    };
+        // Open payment window
+        this.showPaymentProcessingModal(paymentToken);
+    }
+}
+```
+
+## Form Pool System
+
+The form pool system solves the challenge of identifying payments when Paygistix doesn't return custom fields in callbacks. Each form has a unique callback URL that allows us to track which payment is being processed.
+
+### Architecture
+
+```
+┌─────────────────┐     ┌──────────────────┐     ┌─────────────────┐
+│  Customer       │────▶│  Form Pool       │────▶│   Paygistix     │
+│  Registration   │     │  Manager         │     │   Forms 1-10    │
+└─────────────────┘     └──────────────────┘     └─────────────────┘
+                               │                           │
+                               ▼                           ▼
+                        ┌──────────────┐          ┌────────────────┐
+                        │   FormPool   │          │ Form-Specific  │
+                        │   Database   │◀─────────│   Callbacks    │
+                        └──────────────┘          └────────────────┘
+```
+
+### Form Pool Configuration
+
+Forms are configured in `server/config/paygistix-forms.json`:
+
+```json
+{
+  "forms": [
+    {
+      "formId": "FORM_ID_1",
+      "formHash": "FORM_HASH_1", 
+      "callbackPath": "/api/v1/payments/callback/form-1"
+    },
+    // ... forms 2-10
+  ],
+  "lockTimeoutMinutes": 10,
+  "baseUrl": "https://wavemax.promo"
+}
+```
+
+### Form Pool Manager
+
+The FormPoolManager service handles form lifecycle:
+
+```javascript
+// server/services/formPoolManager.js
+class FormPoolManager {
+    async acquireForm(paymentToken) {
+        // Find available form or one with expired lock
+        const form = await FormPool.acquireForm(paymentToken);
+        if (!form) throw new Error('No forms available');
+        
+        // Build callback URL
+        const callbackUrl = `${baseUrl}${form.callbackPath}`;
+        
+        return {
+            formId: form.formId,
+            formHash: form.formHash,
+            callbackPath: form.callbackPath,
+            callbackUrl: callbackUrl
+        };
+    }
     
-    return (
-        <form onSubmit={handleSubmit}>
-            {/* Payment form fields */}
-        </form>
-    );
-};
+    async releaseForm(paymentToken) {
+        await FormPool.releaseForm(paymentToken);
+    }
+}
+```
+
+### Payment Flow with Form Pool
+
+1. **Token Creation**: Customer initiates payment
+2. **Form Acquisition**: System acquires available form from pool
+3. **Payment Window**: Opens with form-specific callback URL
+4. **Callback Processing**: Form-specific endpoint identifies payment
+5. **Form Release**: Form returned to pool after completion
+
+### Database Schema
+
+```javascript
+// FormPool Model
+{
+    formId: String,           // Paygistix form ID
+    formHash: String,         // Form security hash
+    callbackPath: String,     // Unique callback path
+    isLocked: Boolean,        // Current lock status
+    lockedBy: String,         // Payment token holding lock
+    lockedAt: Date,          // Lock timestamp
+    lastUsedAt: Date,        // Last usage timestamp
+    usageCount: Number       // Total usage count
+}
+
+// PaymentToken Model additions
+{
+    assignedFormId: String,   // Assigned form ID
+    callbackPath: String      // Form callback path
+}
 ```
 
 ## API Integration
@@ -471,40 +543,46 @@ app.use('/api/payments', paymentLimiter);
 
 ## Testing Strategy
 
+### Test Payment Form
+
+A test payment form is available for simulating Paygistix callbacks in development environments:
+
+```bash
+# Enable test payment form
+ENABLE_TEST_PAYMENT_FORM=true
+
+# Access at: https://yourdomain/test-payment
+```
+
+The test form allows you to:
+- Simulate successful and failed payments
+- Test different callback scenarios
+- Generate realistic Paygistix parameters
+- Test form pool callback routing
+
 ### Unit Tests
 
 ```javascript
-// tests/unit/paygistixService.test.js
-describe('PaygistixService', () => {
-    it('should generate correct signature', () => {
-        const signature = paygistixService.generateSignature(
-            'POST',
-            '/payment-intents',
-            '1234567890',
-            { amount: 1000 }
-        );
+// tests/unit/formPoolManager.test.js
+describe('FormPoolManager', () => {
+    it('should acquire available form', async () => {
+        const token = 'test_token_123';
+        const form = await formPoolManager.acquireForm(token);
         
-        expect(signature).toMatch(/^[a-f0-9]{64}$/);
+        expect(form).toBeDefined();
+        expect(form.formId).toBeTruthy();
+        expect(form.callbackUrl).toContain('/callback/form-');
     });
     
-    it('should create payment intent', async () => {
-        const mockResponse = {
-            data: {
-                id: 'pi_test_123',
-                clientSecret: 'pi_test_123_secret',
-                amount: 1000
-            }
-        };
+    it('should handle concurrent form requests', async () => {
+        const promises = Array(5).fill().map((_, i) => 
+            formPoolManager.acquireForm(`token_${i}`)
+        );
         
-        axios.post.mockResolvedValue(mockResponse);
+        const forms = await Promise.all(promises);
+        const uniqueFormIds = new Set(forms.map(f => f.formId));
         
-        const result = await paygistixService.createPaymentIntent({
-            amount: 1000,
-            currency: 'USD'
-        });
-        
-        expect(result.id).toBe('pi_test_123');
-        expect(result.amount).toBe(1000);
+        expect(uniqueFormIds.size).toBe(5);
     });
 });
 ```

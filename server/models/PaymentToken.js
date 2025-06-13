@@ -27,11 +27,24 @@ const paymentTokenSchema = new mongoose.Schema({
     formId: String,
     merchantId: String
   },
+  assignedFormId: {
+    type: String,
+    default: null,
+    index: true
+  },
+  callbackPath: {
+    type: String,
+    default: null
+  },
   paygistixResponse: {
     type: Object,
     default: null
   },
   errorMessage: {
+    type: String,
+    default: null
+  },
+  transactionId: {
     type: String,
     default: null
   },

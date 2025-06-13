@@ -1112,52 +1112,81 @@ window.addEventListener('load', function() {
 ## Payment Processing with Paygistix
 
 ### Overview
-The WaveMAX Affiliate Program integrates with Paygistix for secure payment processing, supporting credit/debit cards, ACH transfers, and digital wallets.
+The WaveMAX Affiliate Program uses Paygistix hosted payment forms with a unique form pool system for secure payment processing and tracking.
 
 ### Features
-- **PCI-compliant tokenization** - Never store raw card data
-- **Multiple payment methods** - Cards, bank accounts, digital wallets
-- **Recurring payments** - Subscription management
-- **Real-time webhooks** - Instant payment status updates
-- **Comprehensive security** - Request signing, encryption, fraud detection
+- **PCI-compliant hosted forms** - No card data touches our servers
+- **Form pool system** - Multiple forms with unique callbacks for payment tracking
+- **Payment window detection** - Automatic handling of closed payment windows
+- **Real-time callbacks** - Instant payment status updates
+- **Test payment form** - Development testing without real transactions
+
+### Form Pool System
+The application uses a pool of 10 identical Paygistix forms with unique callback URLs to track payments:
+
+```json
+// server/config/paygistix-forms.json
+{
+  "forms": [
+    {
+      "formId": "FORM_ID_1",
+      "formHash": "FORM_HASH_1",
+      "callbackPath": "/api/v1/payments/callback/form-1"
+    }
+    // ... forms 2-10
+  ]
+}
+```
 
 ### Configuration
-Add these variables to your `.env` file:
+Environment variables for Paygistix:
 ```bash
-# Paygistix API Configuration
-PAYGISTIX_API_URL=https://api.paygistix.com/v2
-PAYGISTIX_SANDBOX_URL=https://sandbox.paygistix.com/v2
-PAYGISTIX_MERCHANT_ID=your_merchant_id
-PAYGISTIX_API_KEY=your_api_key
-PAYGISTIX_API_SECRET=your_api_secret
-PAYGISTIX_WEBHOOK_SECRET=your_webhook_secret
-PAYGISTIX_SANDBOX_MODE=true
+# Paygistix Hosted Form Configuration
+PAYGISTIX_ENVIRONMENT=production
+PAYGISTIX_MERCHANT_ID=wmaxaustWEB
+PAYGISTIX_FORM_ACTION_URL=https://safepay.paymentlogistics.net/transaction.asp
+
+# Test Payment Form (development only)
+ENABLE_TEST_PAYMENT_FORM=true
 ```
 
 ### Payment Flow
-1. **Tokenization**: Customer card details are tokenized client-side
-2. **Authorization**: Payment is authorized with Paygistix
-3. **Capture**: Funds are captured after service completion
-4. **Settlement**: Automatic daily settlement
+1. **Form Acquisition**: System assigns available form from pool
+2. **Payment Window**: Opens Paygistix hosted form in new window
+3. **Callback Processing**: Form-specific URL identifies payment
+4. **Form Release**: Returns form to pool after completion
 
 ### Testing
-Use Paygistix sandbox mode for development:
+Enable test payment form for development:
 ```bash
-# Test the payment integration
-node scripts/test-paygistix.js
+# Enable in .env
+ENABLE_TEST_PAYMENT_FORM=true
 
-# Run payment tests
-npm test -- tests/integration/payment.test.js
+# Access at
+https://yourdomain/test-payment
 ```
 
-### Security Best Practices
-- Always use HTTPS for payment forms
-- Implement 3D Secure for card payments
-- Monitor for suspicious transactions
-- Use webhook signature validation
-- Implement idempotency keys
+### Security & CSP Configuration
+The application's Content Security Policy is configured to allow all necessary payment scripts:
 
-For detailed integration documentation, see [Paygistix Integration Guide](docs/paygistix-integration.html).
+```javascript
+// server.js - CSP configuration
+scriptSrc: [
+  "'self'", 
+  'https://cdnjs.cloudflare.com',
+  'https://cdn.jsdelivr.net', 
+  'https://safepay.paymentlogistics.net', // Paygistix payment scripts
+  "'unsafe-inline'" // Required for form functionality
+],
+formAction: [
+  "'self'", 
+  'https://safepay.paymentlogistics.net' // Paygistix form submission
+]
+```
+
+For detailed documentation:
+- [Paygistix Integration Guide](PAYGISTIX_INTEGRATION_GUIDE.md)
+- [Form Pool System Guide](PAYGISTIX_FORM_POOL_GUIDE.md)
 
 ## Testing
 

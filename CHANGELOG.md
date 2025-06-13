@@ -5,6 +5,22 @@ All notable changes to the WaveMAX Laundry Affiliate Program will be documented 
 ## [Unreleased]
 
 ### Added
+- Paygistix Form Pool System for payment tracking
+  - Multiple identical forms with unique callback URLs
+  - Dynamic form assignment with locking mechanism
+  - Automatic form release and cleanup
+  - Form-specific callback routing
+  - Database-backed form availability tracking
+- Test Payment Form for development
+  - Simulates Paygistix payment callbacks
+  - Configurable payment scenarios (success/failure)
+  - Realistic parameter generation
+  - Controlled by ENABLE_TEST_PAYMENT_FORM environment variable
+- Payment window close detection
+  - Automatic detection when user closes payment window
+  - Payment token cancellation on abandonment
+  - Real-time status polling during payment
+  - PostMessage communication between windows
 - Internationalization (i18n) support for multi-language deployment
   - Support for English, Spanish, Portuguese, and German languages
   - Automatic browser language detection during user registration
