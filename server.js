@@ -84,13 +84,13 @@ if (process.env.NODE_ENV !== 'test') {
         logger.error('Error initializing default admin:', { error: error.message });
       }
       
-      // Initialize Paygistix form pool
+      // Initialize Paygistix callback pool
       try {
-        const formPoolManager = require('./server/services/formPoolManager');
-        await formPoolManager.initializePool();
-        logger.info('Paygistix form pool initialized');
+        const callbackPoolManager = require('./server/services/callbackPoolManager');
+        await callbackPoolManager.initializePool();
+        logger.info('Paygistix callback pool initialized');
       } catch (error) {
-        logger.error('Error initializing form pool:', { error: error.message });
+        logger.error('Error initializing callback pool:', { error: error.message });
       }
     })
     .catch(err => {

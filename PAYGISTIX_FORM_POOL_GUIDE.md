@@ -1,16 +1,17 @@
-# Paygistix Form Pool System Guide
+# Paygistix Callback Pool System Guide
 
 ## Overview
 
-The Form Pool System is an innovative solution to track payments when Paygistix doesn't return custom fields in their callback responses. By creating multiple identical forms with unique callback URLs, we can identify which payment is being processed.
+The Callback Pool System is an innovative solution to track payments when Paygistix doesn't return custom fields in their callback responses. By dynamically assigning unique callback URLs to each payment session, we can identify which payment is being processed.
 
 ## Problem Statement
 
-Paygistix hosted payment forms don't return custom fields (like payment tokens) in their callback, making it impossible to identify which specific payment transaction is being confirmed. The form pool system solves this by:
+Paygistix hosted payment forms don't return custom fields (like payment tokens) in their callback, making it impossible to identify which specific payment transaction is being confirmed. The callback pool system solves this by:
 
-1. Creating multiple Paygistix forms with identical configuration except for callback URLs
-2. Dynamically assigning forms to payment sessions
-3. Using the callback URL to identify the payment
+1. Using a single Paygistix form that accepts dynamic callback URLs
+2. Managing a pool of callback handler URLs
+3. Dynamically assigning callback URLs to payment sessions
+4. Using the callback URL to identify the payment
 
 ## System Architecture
 
@@ -18,42 +19,39 @@ Paygistix hosted payment forms don't return custom fields (like payment tokens) 
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                        Form Pool System                          │
+│                     Callback Pool System                         │
 ├─────────────────────────────────────────────────────────────────┤
 │                                                                 │
-│  ┌──────────────┐    ┌─────────────────┐    ┌───────────────┐ │
-│  │   FormPool   │    │ FormPoolManager │    │  PaymentToken │ │
-│  │   Database   │◄───│    Service      │───►│   Database    │ │
-│  └──────────────┘    └─────────────────┘    └───────────────┘ │
+│  ┌───────────────┐   ┌──────────────────┐   ┌───────────────┐ │
+│  │ CallbackPool  │   │CallbackPoolManager│   │ PaymentToken  │ │
+│  │   Database    │◄──│     Service       │──►│   Database    │ │
+│  └───────────────┘   └──────────────────┘   └───────────────┘ │
 │         │                     │                       │         │
 │         └─────────────────────┴───────────────────────┘         │
 │                               │                                 │
 │                               ▼                                 │
 │                    ┌─────────────────────┐                     │
 │                    │   Dynamic Routes    │                     │
-│                    │ /callback/form-1-10 │                     │
+│                    │/callback/handler-1-10│                     │
 │                    └─────────────────────┘                     │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
-### Form Pool Configuration
+### Callback Pool Configuration
 
 Located in `server/config/paygistix-forms.json`:
 
 ```json
 {
-  "forms": [
-    {
-      "formId": "55015901455",
-      "formHash": "c701523a33721cdbe999f7a4406a0a98",
-      "callbackPath": "/api/v1/payments/callback/form-1"
-    },
-    {
-      "formId": "55015901456",
-      "formHash": "d802634b44832dece000f8b5517b1b09",
-      "callbackPath": "/api/v1/payments/callback/form-2"
-    },
-    // ... up to form-10
+  "form": {
+    "formId": "55015901455",
+    "formHash": "c701523a33721cdbe999f7a4406a0a98"
+  },
+  "callbackPaths": [
+    "/api/v1/payments/callback/handler-1",
+    "/api/v1/payments/callback/handler-2",
+    "/api/v1/payments/callback/handler-3",
+    // ... up to handler-10
   ],
   "lockTimeoutMinutes": 10,
   "baseUrl": "https://wavemax.promo"
@@ -62,20 +60,11 @@ Located in `server/config/paygistix-forms.json`:
 
 ## Implementation Details
 
-### 1. Form Pool Model
+### 1. Callback Pool Model
 
 ```javascript
-// server/models/FormPool.js
-const formPoolSchema = new mongoose.Schema({
-  formId: {
-    type: String,
-    required: true,
-    unique: true
-  },
-  formHash: {
-    type: String,
-    required: true
-  },
+// server/models/CallbackPool.js
+const callbackPoolSchema = new mongoose.Schema({
   callbackPath: {
     type: String,
     required: true,
@@ -103,8 +92,8 @@ const formPoolSchema = new mongoose.Schema({
   }
 });
 
-// Atomic form acquisition
-formPoolSchema.statics.acquireForm = async function(paymentToken, lockTimeoutMinutes = 10) {
+// Atomic callback acquisition
+callbackPoolSchema.statics.acquireCallback = async function(paymentToken, lockTimeoutMinutes = 10) {
   const lockExpiredTime = new Date(Date.now() - lockTimeoutMinutes * 60 * 1000);
   
   const form = await this.findOneAndUpdate(
@@ -133,26 +122,31 @@ formPoolSchema.statics.acquireForm = async function(paymentToken, lockTimeoutMin
 };
 ```
 
-### 2. Form Pool Manager Service
+### 2. Callback Pool Manager Service
 
 ```javascript
-// server/services/formPoolManager.js
-class FormPoolManager {
+// server/services/callbackPoolManager.js
+class CallbackPoolManager {
   constructor() {
-    this.formsConfig = require('../config/paygistix-forms.json');
-    this.baseUrl = this.formsConfig.baseUrl;
-    this.lockTimeoutMinutes = this.formsConfig.lockTimeoutMinutes;
+    this.config = require('../config/paygistix-forms.json');
+    this.baseUrl = this.config.baseUrl;
+    this.lockTimeoutMinutes = this.config.lockTimeoutMinutes;
+    this.formId = this.config.form.formId;
+    this.formHash = this.config.form.formHash;
   }
 
   async initializePool() {
-    for (const formConfig of this.formsConfig.forms) {
-      await FormPool.findOneAndUpdate(
-        { formId: formConfig.formId },
+    for (const callbackPath of this.config.callbackPaths) {
+      await CallbackPool.findOneAndUpdate(
+        { callbackPath },
         {
-          $set: {
-            formId: formConfig.formId,
-            formHash: formConfig.formHash,
-            callbackPath: formConfig.callbackPath
+          $setOnInsert: {
+            callbackPath,
+            isLocked: false,
+            lockedBy: null,
+            lockedAt: null,
+            lastUsedAt: null,
+            usageCount: 0
           }
         },
         { upsert: true, new: true }

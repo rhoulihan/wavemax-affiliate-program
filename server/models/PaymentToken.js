@@ -27,11 +27,7 @@ const paymentTokenSchema = new mongoose.Schema({
     formId: String,
     merchantId: String
   },
-  assignedFormId: {
-    type: String,
-    default: null,
-    index: true
-  },
+  // Removed assignedFormId - all use same Paygistix form
   callbackPath: {
     type: String,
     default: null

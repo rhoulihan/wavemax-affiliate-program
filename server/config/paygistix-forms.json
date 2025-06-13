@@ -1,55 +1,19 @@
 {
-  "forms": [
-    {
-      "formId": "FORM_ID_1",
-      "formHash": "FORM_HASH_1",
-      "callbackPath": "/api/v1/payments/callback/form-1"
-    },
-    {
-      "formId": "FORM_ID_2",
-      "formHash": "FORM_HASH_2",
-      "callbackPath": "/api/v1/payments/callback/form-2"
-    },
-    {
-      "formId": "FORM_ID_3",
-      "formHash": "FORM_HASH_3",
-      "callbackPath": "/api/v1/payments/callback/form-3"
-    },
-    {
-      "formId": "FORM_ID_4",
-      "formHash": "FORM_HASH_4",
-      "callbackPath": "/api/v1/payments/callback/form-4"
-    },
-    {
-      "formId": "FORM_ID_5",
-      "formHash": "FORM_HASH_5",
-      "callbackPath": "/api/v1/payments/callback/form-5"
-    },
-    {
-      "formId": "FORM_ID_6",
-      "formHash": "FORM_HASH_6",
-      "callbackPath": "/api/v1/payments/callback/form-6"
-    },
-    {
-      "formId": "FORM_ID_7",
-      "formHash": "FORM_HASH_7",
-      "callbackPath": "/api/v1/payments/callback/form-7"
-    },
-    {
-      "formId": "FORM_ID_8",
-      "formHash": "FORM_HASH_8",
-      "callbackPath": "/api/v1/payments/callback/form-8"
-    },
-    {
-      "formId": "FORM_ID_9",
-      "formHash": "FORM_HASH_9",
-      "callbackPath": "/api/v1/payments/callback/form-9"
-    },
-    {
-      "formId": "FORM_ID_10",
-      "formHash": "FORM_HASH_10",
-      "callbackPath": "/api/v1/payments/callback/form-10"
-    }
+  "form": {
+    "formId": "55015901455",
+    "formHash": "c701523a33721cdbe999f7a4406a0a98"
+  },
+  "callbackPaths": [
+    "/api/v1/payments/callback/handler-1",
+    "/api/v1/payments/callback/handler-2",
+    "/api/v1/payments/callback/handler-3",
+    "/api/v1/payments/callback/handler-4",
+    "/api/v1/payments/callback/handler-5",
+    "/api/v1/payments/callback/handler-6",
+    "/api/v1/payments/callback/handler-7",
+    "/api/v1/payments/callback/handler-8",
+    "/api/v1/payments/callback/handler-9",
+    "/api/v1/payments/callback/handler-10"
   ],
   "lockTimeoutMinutes": 10,
   "baseUrl": "https://wavemax.promo"

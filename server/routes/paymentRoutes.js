@@ -18,28 +18,28 @@ router.post('/cancel-token/:token', paymentController.cancelPaymentToken);
 // Pool statistics endpoint
 router.get('/pool-stats', paymentController.getPoolStats);
 
-// Dynamic form-specific callback routes
+// Dynamic callback handler routes
 try {
   const configPath = path.join(__dirname, '../config/paygistix-forms.json');
   const configData = fs.readFileSync(configPath, 'utf8');
-  const formsConfig = JSON.parse(configData);
+  const config = JSON.parse(configData);
   
-  // Create dynamic routes for each form
-  formsConfig.forms.forEach(form => {
+  // Create dynamic routes for each callback path
+  config.callbackPaths.forEach(callbackPath => {
     // Remove /api/v1/payments prefix from callback path since it's already in the router base
-    const routePath = form.callbackPath.replace('/api/v1/payments', '');
+    const routePath = callbackPath.replace('/api/v1/payments', '');
     
     router.get(routePath, (req, res) => 
-      paymentController.handleFormCallback(req, res, form.callbackPath)
+      paymentController.handleFormCallback(req, res, callbackPath)
     );
     router.post(routePath, (req, res) => 
-      paymentController.handleFormCallback(req, res, form.callbackPath)
+      paymentController.handleFormCallback(req, res, callbackPath)
     );
     
-    console.log(`Registered payment callback route: ${form.callbackPath}`);
+    console.log(`Registered payment callback route: ${callbackPath}`);
   });
 } catch (error) {
-  console.error('Error loading form routes:', error);
+  console.error('Error loading callback routes:', error);
 }
 
 module.exports = router;
