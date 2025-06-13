@@ -446,6 +446,8 @@ class PaygistixPaymentForm {
     initializeVisibility() {
         const rows = this.container.querySelectorAll('tbody tr');
         
+        console.log('Initializing visibility - Context:', this.payContext, 'Affiliate settings:', !!this.affiliateSettings);
+        
         if (this.payContext === 'REGISTRATION' && this.hideRegistrationFormRows) {
             // Hide all rows except bag fee in registration context
             rows.forEach(row => {
@@ -459,7 +461,11 @@ class PaygistixPaymentForm {
                     }
                 }
             });
-        } else if (this.payContext === 'ORDER' && this.affiliateSettings) {
+            // Important: Don't continue to ORDER logic for REGISTRATION context
+            return;
+        }
+        
+        if (this.payContext === 'ORDER' && this.affiliateSettings) {
             // Use affiliate settings to determine which rows to show
             const { minimumDeliveryFee, perBagFee } = this.affiliateSettings;
             
@@ -864,9 +870,7 @@ class PaygistixPaymentForm {
                     console.log('Form submitted to new window');
                     
                     // Update spinner to show processing state
-                    if (paymentSpinner) {
-                        paymentSpinner.updateMessage('Processing Payment', 'Please complete the payment in the new window');
-                    }
+                    console.log('Payment window opened, waiting for completion...');
                     
                     // Check if payment window is closed
                     let windowCheckInterval = setInterval(() => {
@@ -885,6 +889,12 @@ class PaygistixPaymentForm {
                             // Hide the spinner
                             if (paymentSpinner) {
                                 paymentSpinner.hide();
+                            }
+                            
+                            // Hide any existing modal first
+                            const existingModal = document.querySelector('.fixed.inset-0.z-50');
+                            if (existingModal) {
+                                existingModal.remove();
                             }
                             
                             // Show alert to user
@@ -917,17 +927,23 @@ class PaygistixPaymentForm {
                         document.body.removeChild(paygistixForm);
                     }
                 } else {
+                    // Only throw error if window truly failed to open
                     throw new Error('Pop-up blocked');
                 }
             } catch (error) {
-                console.error('Error opening payment window:', error);
-                if (paymentSpinner) {
-                    paymentSpinner.hide();
+                console.error('Error in payment processing:', error);
+                
+                // Only show pop-up blocked message if window failed to open
+                if (!paymentWindow || paymentWindow.closed) {
+                    if (paymentSpinner) {
+                        paymentSpinner.hide();
+                    }
+                    if (window.modalAlert) {
+                        window.modalAlert('Unable to open payment window. Please check your pop-up blocker settings and try again.', 'Pop-up Blocked');
+                    }
+                    this.isProcessingPayment = false;
                 }
-                if (window.modalAlert) {
-                    window.modalAlert('Unable to open payment window. Please check your pop-up blocker settings and try again.', 'Pop-up Blocked');
-                }
-                this.isProcessingPayment = false;
+                // Otherwise, the payment window opened successfully despite the error
             }
         }, 100);
     }
