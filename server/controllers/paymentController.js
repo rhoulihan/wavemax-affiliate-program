@@ -2,7 +2,7 @@ const paygistixConfig = require('../config/paygistix.config');
 const logger = require('../utils/logger');
 const PaymentToken = require('../models/PaymentToken');
 const Customer = require('../models/Customer');
-const formPoolManager = require('../services/formPoolManager');
+const callbackPoolManager = require('../services/callbackPoolManager');
 
 class PaymentController {
   /**
@@ -74,42 +74,37 @@ class PaymentController {
       // Generate unique token
       const token = PaymentToken.generateToken();
       
-      // Acquire form from pool
-      const form = await formPoolManager.acquireForm(token);
+      // Acquire callback handler from pool
+      const callbackConfig = await callbackPoolManager.acquireCallback(token);
       
-      if (!form) {
+      if (!callbackConfig) {
         return res.status(503).json({
           success: false,
-          message: 'No payment forms available. Please try again in a moment.'
+          message: 'No payment handlers available. Please try again in a moment.'
         });
       }
       
-      // Create payment token record with form assignment
+      // Create payment token record with callback assignment
       const paymentToken = new PaymentToken({
         token,
         customerData,
         paymentData,
-        assignedFormId: form.formId,
-        callbackPath: form.callbackPath,
+        callbackPath: callbackConfig.callbackPath,
         status: 'pending'
       });
       
       await paymentToken.save();
       
-      // Get form configuration with full callback URL
-      const formConfig = formPoolManager.getFormConfig(form);
-      
-      logger.info('Payment token created with form assignment:', {
+      logger.info('Payment token created with callback assignment:', {
         token,
         customerEmail: customerData.email,
-        assignedFormId: form.formId,
-        callbackPath: form.callbackPath
+        callbackPath: callbackConfig.callbackPath
       });
       
       res.json({
         success: true,
         token,
-        formConfig,
+        formConfig: callbackConfig,
         message: 'Payment token created successfully'
       });
     } catch (error) {
@@ -175,9 +170,9 @@ class PaymentController {
         paymentToken.errorMessage = 'Payment cancelled by user';
         await paymentToken.save();
         
-        // Release the form back to the pool
-        if (paymentToken.assignedFormId) {
-          await formPoolManager.releaseForm(paymentToken.assignedFormId);
+        // Release the callback back to the pool
+        if (paymentToken.callbackPath) {
+          await callbackPoolManager.releaseCallback(paymentToken.token);
         }
         
         logger.info('Payment token cancelled:', {
@@ -215,30 +210,22 @@ class PaymentController {
         body: req.body
       });
 
-      // Get form info from callback path
-      const form = await formPoolManager.getFormByCallbackPath(callbackPath);
-      
-      if (!form) {
-        logger.error('Form not found for callback path:', callbackPath);
-        return res.redirect('/payment-callback-handler.html?error=invalid_form');
-      }
-
-      // Find payment token associated with this form
+      // Find payment token associated with this callback path
       const paymentToken = await PaymentToken.findOne({
-        assignedFormId: form.formId,
+        callbackPath: callbackPath,
         status: 'pending'
       });
       
       if (!paymentToken) {
-        logger.error('No pending payment found for form:', form.formId);
+        logger.error('No pending payment found for callback path:', callbackPath);
         return res.redirect('/payment-callback-handler.html?error=no_pending_payment');
       }
 
       // Process the payment result
       await this.processCallbackResult(req, res, paymentToken);
       
-      // Release form back to pool
-      await formPoolManager.releaseForm(form.formId);
+      // Release callback back to pool
+      await callbackPoolManager.releaseCallback(paymentToken.token);
       
     } catch (error) {
       logger.error('Error handling form callback:', error);
@@ -318,12 +305,12 @@ class PaymentController {
 
 
   /**
-   * Get form pool statistics
+   * Get callback pool statistics
    * GET /api/v1/payments/pool-stats
    */
   async getPoolStats(req, res) {
     try {
-      const stats = await formPoolManager.getPoolStats();
+      const stats = await callbackPoolManager.getPoolStatus();
       
       res.json({
         success: true,

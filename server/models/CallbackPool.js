@@ -1,20 +1,11 @@
 const mongoose = require('mongoose');
 
-const formPoolSchema = new mongoose.Schema({
-  formId: {
+const callbackPoolSchema = new mongoose.Schema({
+  callbackPath: {
     type: String,
     required: true,
     unique: true,
     index: true
-  },
-  formHash: {
-    type: String,
-    required: true
-  },
-  callbackPath: {
-    type: String,
-    required: true,
-    unique: true
   },
   isLocked: {
     type: Boolean,
@@ -33,37 +24,42 @@ const formPoolSchema = new mongoose.Schema({
   lastUsedAt: {
     type: Date,
     default: null
+  },
+  usageCount: {
+    type: Number,
+    default: 0
   }
 }, {
   timestamps: true
 });
 
-// Compound index for finding available forms
-formPoolSchema.index({ isLocked: 1, lastUsedAt: 1 });
+// Compound index for finding available callbacks
+callbackPoolSchema.index({ isLocked: 1, lastUsedAt: 1 });
 
-// Instance method to lock form
-formPoolSchema.methods.lock = function(paymentToken) {
+// Instance method to lock callback
+callbackPoolSchema.methods.lock = function(paymentToken) {
   this.isLocked = true;
   this.lockedBy = paymentToken;
   this.lockedAt = new Date();
   this.lastUsedAt = new Date();
+  this.usageCount += 1;
   return this.save();
 };
 
-// Instance method to release form
-formPoolSchema.methods.release = function() {
+// Instance method to release callback
+callbackPoolSchema.methods.release = function() {
   this.isLocked = false;
   this.lockedBy = null;
   this.lockedAt = null;
   return this.save();
 };
 
-// Static method to acquire available form
-formPoolSchema.statics.acquireForm = async function(paymentToken, lockTimeoutMinutes = 10) {
+// Static method to acquire available callback URL
+callbackPoolSchema.statics.acquireCallback = async function(paymentToken, lockTimeoutMinutes = 10) {
   const lockExpiredTime = new Date(Date.now() - lockTimeoutMinutes * 60 * 1000);
   
-  // Try to find and lock an available form atomically
-  const form = await this.findOneAndUpdate(
+  // Try to find and lock an available callback atomically
+  const callback = await this.findOneAndUpdate(
     {
       $or: [
         { isLocked: false },
@@ -76,19 +72,37 @@ formPoolSchema.statics.acquireForm = async function(paymentToken, lockTimeoutMin
         lockedBy: paymentToken,
         lockedAt: new Date(),
         lastUsedAt: new Date()
-      }
+      },
+      $inc: { usageCount: 1 }
     },
     {
       new: true,
-      sort: { lastUsedAt: 1 } // Use least recently used form
+      sort: { lastUsedAt: 1 } // Use least recently used callback
     }
   );
   
-  return form;
+  return callback;
+};
+
+// Static method to release a callback by payment token
+callbackPoolSchema.statics.releaseCallback = async function(paymentToken) {
+  const callback = await this.findOneAndUpdate(
+    { lockedBy: paymentToken },
+    {
+      $set: {
+        isLocked: false,
+        lockedBy: null,
+        lockedAt: null
+      }
+    },
+    { new: true }
+  );
+  
+  return callback;
 };
 
 // Static method to release expired locks
-formPoolSchema.statics.releaseExpiredLocks = async function(lockTimeoutMinutes = 10) {
+callbackPoolSchema.statics.releaseExpiredLocks = async function(lockTimeoutMinutes = 10) {
   const lockExpiredTime = new Date(Date.now() - lockTimeoutMinutes * 60 * 1000);
   
   const result = await this.updateMany(
@@ -105,4 +119,4 @@ formPoolSchema.statics.releaseExpiredLocks = async function(lockTimeoutMinutes =
   return result.modifiedCount;
 };
 
-module.exports = mongoose.model('FormPool', formPoolSchema);
+module.exports = mongoose.model('CallbackPool', callbackPoolSchema);
