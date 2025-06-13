@@ -837,6 +837,9 @@ class PaygistixPaymentForm {
                 tokenInput.value = paymentToken;
                 paygistixForm.appendChild(tokenInput);
                 
+                // Also store in localStorage as backup since Paygistix might not return custom fields
+                localStorage.setItem('activePaymentToken', paymentToken);
+                
                 // Add customer email
                 const customerData = this.gatherCustomerData();
                 if (customerData && customerData.email) {
@@ -931,6 +934,9 @@ class PaygistixPaymentForm {
                                 
                                 // Reset processing flag
                                 self.isProcessingPayment = false;
+                                
+                                // Clean up localStorage
+                                localStorage.removeItem('activePaymentToken');
                             }
                         }
                     }, 500); // Check every 500ms
@@ -1010,6 +1016,8 @@ class PaygistixPaymentForm {
         
         setTimeout(() => {
             this.isProcessingPayment = false;
+            // Clean up localStorage
+            localStorage.removeItem('activePaymentToken');
             // Redirect to success page
             window.location.href = '/registration-success.html';
         }, 1000);
@@ -1030,6 +1038,8 @@ class PaygistixPaymentForm {
         }
         
         this.isProcessingPayment = false;
+        // Clean up localStorage
+        localStorage.removeItem('activePaymentToken');
     }
 }
 
