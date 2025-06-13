@@ -67,10 +67,22 @@
                         // Payment was successful, redirect to success page
                         window.location.href = '/registration-success.html';
                         return;
+                    } else if (data.success && data.paymentToken && data.paymentToken.status === 'completed') {
+                        // Alternative check for completed status
+                        window.location.href = '/registration-success.html';
+                        return;
                     }
                 } catch (error) {
                     console.error('Error checking payment status:', error);
                 }
+            }
+            
+            // If Result=0 from Paygistix, payment was successful
+            if (result === '0' && status === 'approved') {
+                // Even without sessionStorage data, we can redirect to success
+                // The server already created the customer record
+                window.location.href = '/registration-success.html';
+                return;
             }
             
             if (type === 'registration') {
