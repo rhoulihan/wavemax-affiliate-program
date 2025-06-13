@@ -83,6 +83,15 @@ if (process.env.NODE_ENV !== 'test') {
       } catch (error) {
         logger.error('Error initializing default admin:', { error: error.message });
       }
+      
+      // Initialize Paygistix form pool
+      try {
+        const formPoolManager = require('./server/services/formPoolManager');
+        await formPoolManager.initializePool();
+        logger.info('Paygistix form pool initialized');
+      } catch (error) {
+        logger.error('Error initializing form pool:', { error: error.message });
+      }
     })
     .catch(err => {
       logger.error('MongoDB connection error:', { error: err.message });
@@ -328,6 +337,14 @@ app.use(express.static(path.join(__dirname, 'public'), {
   }
 }));
 
+// Test payment form - only available when explicitly enabled
+if (process.env.ENABLE_TEST_PAYMENT_FORM === 'true') {
+  app.get('/test-payment', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'test-payment-form.html'));
+  });
+  logger.info('Test payment form enabled and available at /test-payment');
+}
+
 // API Routes with versioning
 const apiV1Router = express.Router();
 
@@ -336,7 +353,8 @@ apiV1Router.get('/environment', (req, res) => {
   res.json({
     success: true,
     nodeEnv: process.env.NODE_ENV || 'development',
-    enableDeleteDataFeature: process.env.ENABLE_DELETE_DATA_FEATURE === 'true'
+    enableDeleteDataFeature: process.env.ENABLE_DELETE_DATA_FEATURE === 'true',
+    enableTestPaymentForm: process.env.ENABLE_TEST_PAYMENT_FORM === 'true'
   });
 });
 

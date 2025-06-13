@@ -660,8 +660,18 @@ class PaygistixPaymentForm {
                 merchantId: this.paymentConfig.merchantId
             };
             
-            // Create payment token
-            const paymentToken = await this.createPaymentToken(customerData, paymentData);
+            // Create payment token and get form config
+            const tokenData = await this.createPaymentToken(customerData, paymentData);
+            const paymentToken = tokenData.token;
+            const formConfig = tokenData.formConfig;
+            
+            // Update payment config with assigned form
+            this.paymentConfig = {
+                ...this.paymentConfig,
+                formId: formConfig.formId,
+                formHash: formConfig.formHash,
+                returnUrl: formConfig.callbackUrl
+            };
             
             // Store payment session data that callback can use to identify this payment
             const paymentSession = {
@@ -725,7 +735,11 @@ class PaygistixPaymentForm {
                 throw new Error(data.message || 'Failed to create payment token');
             }
             
-            return data.token;
+            // Return both token and form config
+            return {
+                token: data.token,
+                formConfig: data.formConfig
+            };
         } catch (error) {
             console.error('Error creating payment token:', error);
             throw error;
@@ -826,6 +840,11 @@ class PaygistixPaymentForm {
                         return;
                     }
                     
+                    // Skip form config fields - we'll add updated ones
+                    if (input.name === 'formID' || input.name === 'hash' || input.name === 'ReturnURL') {
+                        return;
+                    }
+                    
                     const clone = input.cloneNode(true);
                     paygistixForm.appendChild(clone);
                     
@@ -834,6 +853,25 @@ class PaygistixPaymentForm {
                         console.log(`Adding ${input.name}: ${input.value}`);
                     }
                 });
+                
+                // Add updated form config fields
+                const formIdInput = document.createElement('input');
+                formIdInput.type = 'hidden';
+                formIdInput.name = 'formID';
+                formIdInput.value = this.paymentConfig.formId;
+                paygistixForm.appendChild(formIdInput);
+                
+                const hashInput = document.createElement('input');
+                hashInput.type = 'hidden';
+                hashInput.name = 'hash';
+                hashInput.value = this.paymentConfig.formHash;
+                paygistixForm.appendChild(hashInput);
+                
+                const returnUrlInput = document.createElement('input');
+                returnUrlInput.type = 'hidden';
+                returnUrlInput.name = 'ReturnURL';
+                returnUrlInput.value = this.paymentConfig.returnUrl;
+                paygistixForm.appendChild(returnUrlInput);
                 
                 // Add payment token
                 const tokenInput = document.createElement('input');
@@ -927,25 +965,9 @@ class PaygistixPaymentForm {
                                         paymentWindow.close();
                                     }
                                     
-                                    // Update payment token status on server
-                                    fetch(`/api/v1/payments/callback`, {
-                                        method: 'POST',
-                                        headers: {
-                                            'Content-Type': 'application/json'
-                                        },
-                                        body: JSON.stringify({
-                                            custom1: paymentToken,
-                                            Result: event.data.result,
-                                            PNRef: event.data.transactionId,
-                                            OrderID: event.data.orderId,
-                                            Amount: event.data.amount,
-                                            AuthCode: event.data.authCode
-                                        })
-                                    }).then(() => {
-                                        console.log('Payment status updated on server');
-                                    }).catch(err => {
-                                        console.error('Error updating payment status:', err);
-                                    });
+                                    // Note: Payment status is already updated by the form pool callback system
+                                    // No need to make an additional API call here
+                                    console.log('Payment completed successfully via form pool callback');
                                     
                                     self.handlePaymentSuccess(paymentSpinner, null);
                                 } else {
