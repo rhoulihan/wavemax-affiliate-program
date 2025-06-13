@@ -34,7 +34,13 @@
         const orderId = urlParams.get('OrderID');
         const amount = urlParams.get('Amount');
         const authCode = urlParams.get('AuthCode');
-        const custom1 = urlParams.get('custom1'); // This should contain the payment token
+        let custom1 = urlParams.get('custom1'); // This should contain the payment token
+        
+        // If custom1 is not in URL, try localStorage
+        if (!custom1) {
+            custom1 = localStorage.getItem('activePaymentToken');
+            console.log('Retrieved payment token from localStorage:', custom1);
+        }
         
         // Map Paygistix parameters to expected values
         const status = result === '0' ? 'approved' : 'declined';
@@ -65,10 +71,12 @@
                     
                     if (data.success && data.status === 'completed') {
                         // Payment was successful, redirect to success page
+                        localStorage.removeItem('activePaymentToken');
                         window.location.href = '/registration-success.html';
                         return;
                     } else if (data.success && data.paymentToken && data.paymentToken.status === 'completed') {
                         // Alternative check for completed status
+                        localStorage.removeItem('activePaymentToken');
                         window.location.href = '/registration-success.html';
                         return;
                     }
@@ -81,6 +89,7 @@
             if (result === '0' && status === 'approved') {
                 // Even without sessionStorage data, we can redirect to success
                 // The server already created the customer record
+                localStorage.removeItem('activePaymentToken');
                 window.location.href = '/registration-success.html';
                 return;
             }
