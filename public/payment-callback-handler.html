@@ -25,6 +25,20 @@
     </div>
 
     <script>
+        console.log('Payment callback handler loaded');
+        console.log('Current URL:', window.location.href);
+        console.log('Window.opener exists:', !!window.opener);
+        
+        // Immediately notify parent window that callback is starting
+        if (window.opener && !window.opener.closed) {
+            try {
+                window.opener.postMessage({ type: 'paygistix-callback-starting' }, '*');
+                console.log('Notified parent window that callback is starting');
+            } catch (e) {
+                console.error('Could not notify parent:', e);
+            }
+        }
+        
         // Get query parameters
         const urlParams = new URLSearchParams(window.location.search);
         
@@ -94,33 +108,66 @@
                     console.error('Error sending postMessage:', error);
                 }
                 
-                // Show success message
-                statusDiv.innerHTML = `
-                    <div class="bg-green-50 border border-green-200 rounded-lg p-4">
-                        <h3 class="text-lg font-semibold text-green-800 mb-2">Payment Successful!</h3>
-                        <p class="text-green-600">Your payment has been processed. This window will close automatically...</p>
-                    </div>
-                `;
+                // Show appropriate message based on payment result
+                if (result === '0') {
+                    statusDiv.innerHTML = `
+                        <div class="bg-green-50 border border-green-200 rounded-lg p-6 text-center">
+                            <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-green-100 mb-4">
+                                <svg class="h-8 w-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                </svg>
+                            </div>
+                            <h3 class="text-xl font-bold text-green-800 mb-2">Payment Successful!</h3>
+                            <p class="text-green-600 mb-4">Your payment has been processed successfully.</p>
+                            <p class="text-sm text-green-500">This window will close in a few seconds...</p>
+                        </div>
+                    `;
+                } else {
+                    statusDiv.innerHTML = `
+                        <div class="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
+                            <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-red-100 mb-4">
+                                <svg class="h-8 w-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                </svg>
+                            </div>
+                            <h3 class="text-xl font-bold text-red-800 mb-2">Payment Failed</h3>
+                            <p class="text-red-600 mb-4">${responseMessage || 'Your payment could not be processed.'}</p>
+                            <p class="text-sm text-red-500">This window will close in a few seconds...</p>
+                        </div>
+                    `;
+                }
                 statusDiv.classList.remove('hidden');
                 
-                // Hide the spinner
-                const spinnerContainer = document.querySelector('.bg-white.p-8.rounded-lg');
+                // Hide the entire spinner container
+                const spinnerContainer = document.querySelector('.mb-6');
                 if (spinnerContainer) {
-                    const spinner = spinnerContainer.querySelector('.animate-spin');
-                    if (spinner) {
-                        spinner.style.display = 'none';
-                    }
-                    const h2 = spinnerContainer.querySelector('h2');
-                    if (h2) {
-                        h2.style.display = 'none';
-                    }
-                    const p = spinnerContainer.querySelector('p');
-                    if (p) {
-                        p.style.display = 'none';
-                    }
+                    spinnerContainer.style.display = 'none';
                 }
                 
-                console.log('Payment processed successfully');
+                console.log('Payment callback processed, closing window in 3 seconds...');
+                
+                // Close the window after giving user time to see the message
+                setTimeout(() => {
+                    console.log('Attempting to close payment window...');
+                    try {
+                        window.close();
+                        console.log('Window.close() called successfully');
+                    } catch (e) {
+                        console.error('Error closing window:', e);
+                    }
+                    
+                    // Check if window is still open after attempting to close
+                    setTimeout(() => {
+                        if (!window.closed) {
+                            console.log('Window did not close, may need user interaction');
+                            // Update message to inform user
+                            const messageDiv = statusDiv.querySelector('p.text-sm');
+                            if (messageDiv) {
+                                messageDiv.textContent = 'You can now close this window.';
+                            }
+                        }
+                    }, 100);
+                }, 3000);
                 
                 return;
             }
@@ -146,8 +193,31 @@
             
             // If Result=0 from Paygistix, payment was successful
             if (result === '0' && status === 'approved') {
-                // Payment was successful
-                window.location.href = '/registration-success.html';
+                // Show success in the current window since no opener
+                statusDiv.innerHTML = `
+                    <div class="bg-green-50 border border-green-200 rounded-lg p-6 text-center">
+                        <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-green-100 mb-4">
+                            <svg class="h-8 w-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                        </div>
+                        <h3 class="text-xl font-bold text-green-800 mb-2">Payment Successful!</h3>
+                        <p class="text-green-600 mb-4">Your payment has been processed successfully.</p>
+                        <p class="text-sm text-green-500">Redirecting to success page...</p>
+                    </div>
+                `;
+                statusDiv.classList.remove('hidden');
+                
+                // Hide the spinner
+                const spinnerContainer = document.querySelector('.mb-6');
+                if (spinnerContainer) {
+                    spinnerContainer.style.display = 'none';
+                }
+                
+                // Redirect after delay
+                setTimeout(() => {
+                    window.location.href = '/registration-success.html';
+                }, 2000);
                 return;
             }
             
