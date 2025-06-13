@@ -837,7 +837,7 @@
   // Function to sync bag quantity with payment form
   function syncBagQuantityToPaymentForm() {
     const numberOfBags = parseInt(numberOfBagsSelect.value) || 0;
-    const bfQtyInput = document.getElementById('pxQty10');
+    const bfQtyInput = document.getElementById('pxQty2'); // BF (Bag Fee) is pxQty2, not pxQty10
     if (bfQtyInput) {
       bfQtyInput.value = numberOfBags;
       // Trigger the blur event to update the form's total
