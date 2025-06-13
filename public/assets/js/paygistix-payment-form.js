@@ -902,6 +902,11 @@ class PaygistixPaymentForm {
                                 paymentCompleted = true;
                                 
                                 if (event.data.success) {
+                                    // Close the payment window immediately
+                                    if (paymentWindow && !paymentWindow.closed) {
+                                        paymentWindow.close();
+                                    }
+                                    
                                     // Update payment token status on server
                                     fetch(`/api/v1/payments/callback`, {
                                         method: 'POST',
@@ -922,7 +927,7 @@ class PaygistixPaymentForm {
                                         console.error('Error updating payment status:', err);
                                     });
                                     
-                                    self.handlePaymentSuccess(paymentSpinner, paymentWindow);
+                                    self.handlePaymentSuccess(paymentSpinner, null);
                                 } else {
                                     self.handlePaymentFailure(paymentSpinner, 'Payment was declined', paymentWindow);
                                 }
@@ -971,7 +976,7 @@ class PaygistixPaymentForm {
                                     // Reset processing flag
                                     self.isProcessingPayment = false;
                                 }
-                            }, 1500); // Wait 1.5 seconds for postMessage
+                            }, 3000); // Wait 3 seconds for postMessage
                         }
                     }, 500); // Check every 500ms
                     
