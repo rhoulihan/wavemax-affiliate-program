@@ -36,10 +36,10 @@
         const authCode = urlParams.get('AuthCode');
         let custom1 = urlParams.get('custom1'); // This should contain the payment token
         
-        // If custom1 is not in URL, try localStorage
+        // Check if payment token is in the URL (added to ReturnURL)
         if (!custom1) {
-            custom1 = localStorage.getItem('activePaymentToken');
-            console.log('Retrieved payment token from localStorage:', custom1);
+            custom1 = urlParams.get('paymentToken');
+            console.log('Retrieved payment token from URL parameter:', custom1);
         }
         
         // Map Paygistix parameters to expected values
@@ -63,6 +63,44 @@
                 custom1
             });
             
+            // Prepare callback data for parent window
+            const callbackData = {
+                type: 'paygistix-payment-callback',
+                result: result,
+                status: status,
+                transactionId: transactionId,
+                orderId: orderId,
+                amount: amount,
+                authCode: authCode,
+                paymentToken: custom1,
+                success: result === '0'
+            };
+            
+            // If we have window.opener, send the message and close
+            if (window.opener && !window.opener.closed) {
+                console.log('Sending payment result to parent window:', callbackData);
+                window.opener.postMessage(callbackData, '*');
+                
+                // Show a brief message before closing
+                statusDiv.innerHTML = `
+                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                        <h3 class="text-lg font-semibold text-blue-800 mb-2">Processing...</h3>
+                        <p class="text-blue-600">Completing your registration...</p>
+                    </div>
+                `;
+                statusDiv.classList.remove('hidden');
+                
+                // Close window after a short delay
+                setTimeout(() => {
+                    window.close();
+                }, 1000);
+                
+                return;
+            }
+            
+            // Fallback: If no opener, try the original approach
+            console.log('No window.opener available, using fallback approach');
+            
             // If we have a payment token (custom1), verify the payment status server-side
             if (custom1) {
                 try {
@@ -71,12 +109,6 @@
                     
                     if (data.success && data.status === 'completed') {
                         // Payment was successful, redirect to success page
-                        localStorage.removeItem('activePaymentToken');
-                        window.location.href = '/registration-success.html';
-                        return;
-                    } else if (data.success && data.paymentToken && data.paymentToken.status === 'completed') {
-                        // Alternative check for completed status
-                        localStorage.removeItem('activePaymentToken');
                         window.location.href = '/registration-success.html';
                         return;
                     }
@@ -87,9 +119,7 @@
             
             // If Result=0 from Paygistix, payment was successful
             if (result === '0' && status === 'approved') {
-                // Even without sessionStorage data, we can redirect to success
-                // The server already created the customer record
-                localStorage.removeItem('activePaymentToken');
+                // Payment was successful
                 window.location.href = '/registration-success.html';
                 return;
             }
