@@ -197,6 +197,108 @@ class PaymentController {
   }
 
   /**
+   * Update payment status (for test mode)
+   * POST /api/v1/payments/update-status/:token
+   */
+  async updatePaymentStatus(req, res) {
+    try {
+      const { token } = req.params;
+      const { status, result, message } = req.body;
+      
+      const paymentToken = await PaymentToken.findOne({ token });
+      
+      if (!paymentToken) {
+        return res.status(404).json({
+          success: false,
+          message: 'Payment token not found'
+        });
+      }
+      
+      // Update payment status
+      paymentToken.status = status === 'success' ? 'completed' : 'failed';
+      paymentToken.paygistixResponse = {
+        Result: result || (status === 'success' ? '0' : '1'),
+        testMode: true,
+        message: message
+      };
+      
+      if (status !== 'success') {
+        paymentToken.errorMessage = message || 'Payment failed';
+      }
+      
+      await paymentToken.save();
+      
+      // If payment was successful in test mode, create the customer
+      if (status === 'success' && paymentToken.customerData) {
+        try {
+          const customerData = paymentToken.customerData;
+          
+          // Check if customer already exists
+          const existingCustomer = await Customer.findOne({ email: customerData.email });
+          if (!existingCustomer) {
+            // Create customer with affiliate reference
+            const customer = new Customer({
+              firstName: customerData.firstName,
+              lastName: customerData.lastName,
+              email: customerData.email,
+              phone: customerData.phone,
+              username: customerData.username,
+              password: customerData.password, // This should be hashed in the model
+              address: {
+                street: customerData.address,
+                city: customerData.city,
+                state: customerData.state,
+                postalCode: customerData.zipCode
+              },
+              numberOfBags: customerData.numberOfBags,
+              specialInstructions: customerData.specialInstructions,
+              notificationPreference: customerData.notificationPreference || 'both',
+              affiliateId: customerData.affiliateId,
+              languagePreference: customerData.languagePreference || 'en',
+              registrationDate: new Date()
+            });
+            
+            await customer.save();
+            
+            logger.info('Customer created after successful test payment:', {
+              customerId: customer._id,
+              email: customer.email,
+              affiliateId: customer.affiliateId,
+              testMode: true
+            });
+          }
+        } catch (customerError) {
+          logger.error('Error creating customer after test payment:', customerError);
+          // Don't fail the payment update, but log the error
+        }
+      }
+      
+      // Release the callback back to the pool
+      if (paymentToken.callbackPath) {
+        await callbackPoolManager.releaseCallback(paymentToken.token);
+      }
+      
+      logger.info('Payment status updated (test mode):', {
+        token: token,
+        status: paymentToken.status,
+        testMode: true
+      });
+      
+      res.json({
+        success: true,
+        message: 'Payment status updated',
+        status: paymentToken.status
+      });
+    } catch (error) {
+      logger.error('Error updating payment status:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to update payment status'
+      });
+    }
+  }
+
+  /**
    * Handle form-specific payment callback
    * This method is called by dynamic routes for each form
    */
@@ -211,6 +313,7 @@ class PaymentController {
       });
 
       // Find payment token associated with this callback path
+      // There should only be one pending payment per callback path
       const paymentToken = await PaymentToken.findOne({
         callbackPath: callbackPath,
         status: 'pending'

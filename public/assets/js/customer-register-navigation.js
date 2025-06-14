@@ -170,18 +170,56 @@
                             payButton.innerHTML = '<span data-i18n="customer.register.completeAndPay">Complete and Pay</span>';
                             
                             // Add click handler to trigger the original submit button
-                            payButton.addEventListener('click', function(e) {
+                            payButton.addEventListener('click', async function(e) {
                                 e.preventDefault();
-                                console.log('Complete and Pay clicked, triggering payment form submit');
+                                console.log('Complete and Pay clicked');
                                 
-                                // If using registration mode, click the original button
-                                if (window.paymentForm && window.paymentForm.isProcessingPayment !== undefined) {
-                                    submitBtn.click();
+                                // Check if test mode is enabled
+                                if (window.paymentConfig && window.paymentConfig.testModeEnabled) {
+                                    console.log('Test mode is enabled, using test payment flow');
+                                    
+                                    // Use the payment form's test mode handler
+                                    if (window.paymentForm && window.paymentForm.processRegistrationPaymentTestMode) {
+                                        // Gather customer data from the form
+                                        const customerData = {
+                                            firstName: document.getElementById('firstName').value,
+                                            lastName: document.getElementById('lastName').value,
+                                            email: document.getElementById('email').value,
+                                            phone: document.getElementById('phone').value,
+                                            address: document.getElementById('address').value,
+                                            city: document.getElementById('city').value,
+                                            state: document.getElementById('state').value,
+                                            zipCode: document.getElementById('zipCode').value,
+                                            affiliateId: document.getElementById('affiliateId').value,
+                                            numberOfBags: document.getElementById('numberOfBags').value,
+                                            username: document.getElementById('username')?.value || '',
+                                            password: document.getElementById('password')?.value || '',
+                                            socialToken: document.querySelector('input[name="socialToken"]')?.value || '',
+                                            specialInstructions: document.getElementById('specialInstructions')?.value || '',
+                                            affiliateSpecialInstructions: document.getElementById('affiliateSpecialInstructions')?.value || '',
+                                            languagePreference: document.getElementById('languagePreference')?.value || 'en'
+                                        };
+                                        
+                                        // Process payment in test mode
+                                        window.paymentForm.processRegistrationPaymentTestMode(customerData);
+                                    } else {
+                                        console.error('Payment form not properly initialized for test mode');
+                                        if (window.modalAlert) {
+                                            window.modalAlert('Payment system not ready. Please refresh the page and try again.', 'Error');
+                                        }
+                                    }
                                 } else {
-                                    // Fallback: submit the form directly
-                                    const form = document.querySelector('#paymentFormContainer form');
-                                    if (form) {
-                                        form.submit();
+                                    console.log('Production mode, triggering actual payment form submit');
+                                    
+                                    // If using registration mode, click the original button
+                                    if (window.paymentForm && window.paymentForm.isProcessingPayment !== undefined) {
+                                        submitBtn.click();
+                                    } else {
+                                        // Fallback: submit the form directly
+                                        const form = document.querySelector('#paymentFormContainer form');
+                                        if (form) {
+                                            form.submit();
+                                        }
                                     }
                                 }
                             });

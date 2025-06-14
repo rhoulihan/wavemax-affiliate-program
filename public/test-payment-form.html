@@ -5,25 +5,46 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Paygistix Payment Simulator</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <style>
+        .form-input {
+            @apply mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm;
+        }
+        .form-label {
+            @apply block text-sm font-medium text-gray-700;
+        }
+        .section-card {
+            @apply bg-white rounded-lg shadow-md p-6 mb-6;
+        }
+        .button-primary {
+            @apply bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors;
+        }
+        .button-secondary {
+            @apply bg-gray-600 text-white px-6 py-2 rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors;
+        }
+        .button-success {
+            @apply bg-green-600 text-white px-6 py-2 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors;
+        }
+    </style>
 </head>
-<body class="bg-gray-100 min-h-screen p-8">
-    <div class="max-w-4xl mx-auto">
-        <div class="bg-white rounded-lg shadow-lg p-6 mb-6">
-            <h1 class="text-3xl font-bold text-blue-800 mb-2">Paygistix Payment Simulator</h1>
-            <p class="text-gray-600">Test payment callbacks in non-production environments</p>
+<body class="bg-gray-50 min-h-screen p-4 sm:p-8">
+    <div class="max-w-5xl mx-auto">
+        <!-- Header -->
+        <div class="section-card bg-gradient-to-r from-blue-600 to-blue-800 text-white">
+            <h1 class="text-3xl font-bold mb-2">🧪 Paygistix Payment Simulator</h1>
+            <p class="text-blue-100">Test payment callbacks in non-production environments</p>
         </div>
 
         <!-- Payment Form Info -->
-        <div class="bg-white rounded-lg shadow-lg p-6 mb-6">
-            <h2 class="text-xl font-semibold mb-4">Simulated Payment Form</h2>
-            <div class="grid grid-cols-2 gap-4 mb-4">
+        <div class="section-card">
+            <h2 class="text-xl font-semibold mb-4 text-gray-800">💳 Simulated Payment Details</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700">Card Number</label>
-                    <input type="text" id="cardNumber" value="4111111111111111" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" placeholder="Card ending in...">
+                    <label class="form-label">Card Number</label>
+                    <input type="text" id="cardNumber" value="4111111111111111" class="form-input" placeholder="Card ending in...">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700">Card Type</label>
-                    <select id="cardType" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
+                    <label class="form-label">Card Type</label>
+                    <select id="cardType" class="form-input">
                         <option value="VISA">VISA</option>
                         <option value="MC">MasterCard</option>
                         <option value="AMEX">American Express</option>
@@ -31,177 +52,86 @@
                     </select>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700">Expiration</label>
-                    <input type="text" id="expDate" value="1225" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" placeholder="MMYY">
+                    <label class="form-label">Expiration</label>
+                    <input type="text" id="expDate" value="1225" class="form-input" placeholder="MMYY">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700">Amount</label>
-                    <input type="text" id="amount" value="10.00" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" placeholder="0.00">
+                    <label class="form-label">Amount</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500">$</span>
+                        <input type="text" id="amount" value="10.00" class="form-input pl-7" placeholder="0.00">
+                    </div>
                 </div>
             </div>
         </div>
 
         <!-- Callback Configuration -->
-        <div class="bg-white rounded-lg shadow-lg p-6 mb-6">
-            <h2 class="text-xl font-semibold mb-4">Callback Configuration</h2>
+        <div class="section-card" id="callbackConfigSection">
+            <h2 class="text-xl font-semibold mb-4 text-gray-800">⚙️ Callback Configuration</h2>
             <div class="space-y-4">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700">Callback URL</label>
-                    <select id="callbackUrl" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
-                        <option value="/api/v1/payments/callback/form-1">Form Pool - Form 1</option>
-                        <option value="/api/v1/payments/callback/form-2">Form Pool - Form 2</option>
-                        <option value="/api/v1/payments/callback/form-3">Form Pool - Form 3</option>
-                        <option value="/api/v1/payments/callback/form-4">Form Pool - Form 4</option>
-                        <option value="/api/v1/payments/callback/form-5">Form Pool - Form 5</option>
+                <div id="callbackUrlDisplay" class="hidden">
+                    <label class="form-label">Assigned Callback URL</label>
+                    <div class="bg-blue-50 border border-blue-200 rounded-md p-3">
+                        <code class="text-sm text-blue-800" id="assignedCallbackUrl"></code>
+                    </div>
+                </div>
+                <div id="callbackUrlSelect">
+                    <label class="form-label">Callback URL (for manual testing)</label>
+                    <select id="callbackUrl" class="form-input">
+                        <option value="/api/v1/payments/callback/handler-1">Callback Handler 1</option>
+                        <option value="/api/v1/payments/callback/handler-2">Callback Handler 2</option>
+                        <option value="/api/v1/payments/callback/handler-3">Callback Handler 3</option>
+                        <option value="/api/v1/payments/callback/handler-4">Callback Handler 4</option>
+                        <option value="/api/v1/payments/callback/handler-5">Callback Handler 5</option>
+                        <option value="/api/v1/payments/callback/handler-6">Callback Handler 6</option>
+                        <option value="/api/v1/payments/callback/handler-7">Callback Handler 7</option>
+                        <option value="/api/v1/payments/callback/handler-8">Callback Handler 8</option>
+                        <option value="/api/v1/payments/callback/handler-9">Callback Handler 9</option>
+                        <option value="/api/v1/payments/callback/handler-10">Callback Handler 10</option>
                     </select>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700">Payment Token (optional)</label>
-                    <input type="text" id="paymentToken" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" placeholder="Leave empty to auto-generate">
+                    <label class="form-label">Payment Token</label>
+                    <input type="text" id="paymentToken" class="form-input font-mono" placeholder="Leave empty to auto-generate">
+                    <p class="mt-1 text-sm text-gray-500">Token will be auto-generated if left empty</p>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700">Result</label>
-                    <select id="result" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
-                        <option value="0">0 - Success</option>
-                        <option value="1">1 - Failed</option>
-                        <option value="2">2 - Declined</option>
+                    <label class="form-label">Payment Result</label>
+                    <select id="result" class="form-input">
+                        <option value="0" class="text-green-600">✅ 0 - Success</option>
+                        <option value="1" class="text-red-600">❌ 1 - Failed</option>
+                        <option value="2" class="text-orange-600">⚠️ 2 - Declined</option>
                     </select>
                 </div>
             </div>
         </div>
 
         <!-- Actions -->
-        <div class="bg-white rounded-lg shadow-lg p-6 mb-6">
-            <h2 class="text-xl font-semibold mb-4">Simulate Payment</h2>
-            <div class="space-x-4">
-                <button onclick="simulatePayment()" class="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700">
-                    Simulate Payment Callback
+        <div class="section-card">
+            <h2 class="text-xl font-semibold mb-4 text-gray-800">🚀 Simulate Payment</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <button class="button-primary">
+                    <span class="inline-block mr-2">📤</span> Simulate Callback
                 </button>
-                <button onclick="simulateInNewWindow()" class="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700">
-                    Simulate in New Window
+                <button class="button-success">
+                    <span class="inline-block mr-2">🪟</span> New Window
                 </button>
-                <button onclick="generateRandomData()" class="bg-gray-600 text-white px-6 py-2 rounded hover:bg-gray-700">
-                    Generate Random Data
+                <button class="button-secondary">
+                    <span class="inline-block mr-2">🎲</span> Random Data
                 </button>
             </div>
         </div>
 
         <!-- Generated URL -->
-        <div id="generatedUrl" class="bg-white rounded-lg shadow-lg p-6 hidden">
-            <h2 class="text-xl font-semibold mb-4">Generated Callback URL</h2>
-            <div class="bg-gray-100 p-4 rounded break-all font-mono text-sm" id="urlDisplay"></div>
-            <button onclick="copyUrl()" class="mt-4 bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700">
-                Copy URL
+        <div id="generatedUrl" class="section-card hidden">
+            <h2 class="text-xl font-semibold mb-4 text-gray-800">📋 Generated Callback URL</h2>
+            <div class="bg-gray-100 p-4 rounded-md break-all font-mono text-sm border border-gray-300" id="urlDisplay"></div>
+            <button class="mt-4 button-secondary">
+                <span class="inline-block mr-2">📋</span> Copy URL
             </button>
         </div>
     </div>
 
-    <script>
-        function generateRandomData() {
-            // Generate random card last 4
-            const last4 = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
-            document.getElementById('cardNumber').value = '************' + last4;
-            
-            // Generate random expiration (future date)
-            const month = Math.floor(Math.random() * 12) + 1;
-            const year = new Date().getFullYear() + Math.floor(Math.random() * 5) + 1;
-            const expDate = month.toString().padStart(2, '0') + year.toString().slice(-2);
-            document.getElementById('expDate').value = expDate;
-            
-            // Generate random auth code
-            const authCode = Math.floor(Math.random() * 1000000).toString().padStart(6, '0');
-        }
-        
-        function generateCallbackUrl() {
-            const cardNumber = document.getElementById('cardNumber').value;
-            const last4 = cardNumber.slice(-4);
-            const cardType = document.getElementById('cardType').value;
-            const expDate = document.getElementById('expDate').value;
-            const amount = document.getElementById('amount').value;
-            const callbackUrl = document.getElementById('callbackUrl').value;
-            const paymentToken = document.getElementById('paymentToken').value;
-            const result = document.getElementById('result').value;
-            
-            // Generate realistic values
-            const merchantId = 'wmaxaustWEB';
-            const orderId = 'WMAX' + Date.now();
-            const pnRef = Math.floor(Math.random() * 100000000).toString();
-            const authCode = result === '0' ? Math.floor(Math.random() * 1000000).toString().padStart(6, '0') : '';
-            const txnType = 'SALE';
-            
-            // Generate hash (in production this would be calculated by Paygistix)
-            const hash = btoa(orderId + pnRef + amount).replace(/[^a-zA-Z0-9]/g, '').substring(0, 32);
-            
-            // Build query parameters
-            const params = new URLSearchParams({
-                hash: hash,
-                MerchantID: merchantId,
-                OrderID: orderId,
-                Amount: amount,
-                PNRef: pnRef,
-                Result: result,
-                TxnType: txnType,
-                Last4: last4,
-                ExpDate: expDate,
-                CardType: cardType
-            });
-            
-            // Add auth code if successful
-            if (result === '0' && authCode) {
-                params.append('AuthCode', authCode);
-            }
-            
-            // Add payment token if provided
-            if (paymentToken) {
-                params.append('custom1', paymentToken);
-                params.append('paymentToken', paymentToken);
-            }
-            
-            return `${window.location.origin}${callbackUrl}?${params.toString()}`;
-        }
-        
-        function simulatePayment() {
-            const url = generateCallbackUrl();
-            document.getElementById('generatedUrl').classList.remove('hidden');
-            document.getElementById('urlDisplay').textContent = url;
-            
-            // Redirect to the callback URL
-            setTimeout(() => {
-                if (confirm('Redirect to callback URL?')) {
-                    window.location.href = url;
-                }
-            }, 1000);
-        }
-        
-        function simulateInNewWindow() {
-            const url = generateCallbackUrl();
-            document.getElementById('generatedUrl').classList.remove('hidden');
-            document.getElementById('urlDisplay').textContent = url;
-            
-            // Open in new window (simulating Paygistix behavior)
-            const width = 800;
-            const height = 600;
-            const left = (screen.width - width) / 2;
-            const top = (screen.height - height) / 2;
-            window.open(url, 'PaymentSimulator', `width=${width},height=${height},left=${left},top=${top}`);
-        }
-        
-        function copyUrl() {
-            const url = document.getElementById('urlDisplay').textContent;
-            navigator.clipboard.writeText(url).then(() => {
-                alert('URL copied to clipboard!');
-            });
-        }
-        
-        // Check if test form is enabled by checking if we can access this page
-        // If the server didn't enable the route, we wouldn't be here
-        // This is just a fallback check for direct file access
-        fetch('/api/v1/environment').then(response => response.json()).then(data => {
-            // Just log the environment for debugging
-            console.log('Environment:', data);
-        }).catch(err => {
-            console.error('Could not check environment:', err);
-        });
-    </script>
+    <script src="/assets/js/test-payment-form.js"></script>
 </body>
 </html>
