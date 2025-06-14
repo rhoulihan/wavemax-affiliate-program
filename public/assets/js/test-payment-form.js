@@ -219,6 +219,20 @@
     
     // Initialize page
     function initializePage() {
+        // Send message to opener that we've loaded
+        if (window.opener) {
+            try {
+                window.opener.postMessage({ 
+                    type: 'test-window-loaded', 
+                    url: window.location.href,
+                    timestamp: Date.now()
+                }, '*');
+                console.log('Sent load message to opener');
+            } catch (e) {
+                console.log('Could not send message to opener:', e.message);
+            }
+        }
+        
         // Check if test form is enabled by checking if we can access this page
         fetch('/api/v1/environment').then(response => response.json()).then(data => {
             // Just log the environment for debugging
