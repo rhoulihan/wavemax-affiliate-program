@@ -420,7 +420,7 @@
                 '/customer-register': ['/assets/js/i18n.js', '/assets/js/language-switcher.js', '/assets/js/embed-config.js', '/assets/js/modal-utils.js', '/assets/js/errorHandler.js', '/assets/js/csrf-utils.js', '/assets/js/swirl-spinner.js', '/assets/js/paygistix-payment-form.js', '/assets/js/customer-register.js', '/assets/js/customer-register-paygistix.js', '/assets/js/customer-register-navigation.js'],
                 '/customer-login': ['/assets/js/i18n.js', '/assets/js/language-switcher.js', '/assets/js/modal-utils.js', '/assets/js/errorHandler.js', '/assets/js/csrf-utils.js', '/assets/js/customer-login-embed.js'],
                 '/customer-dashboard': ['/assets/js/i18n.js', '/assets/js/language-switcher.js', '/assets/js/modal-utils.js', '/assets/js/errorHandler.js', '/assets/js/csrf-utils.js', '/assets/js/customer-dashboard.js'],
-                '/customer-success': ['/assets/js/i18n.js', '/assets/js/language-switcher.js', '/assets/js/customer-success.js'],
+                '/customer-success': ['/assets/js/i18n.js', '/assets/js/language-switcher.js', '/assets/js/customer-success-embed.js'],
                 '/schedule-pickup': ['/assets/js/i18n.js', '/assets/js/language-switcher.js', '/assets/js/modal-utils.js', '/assets/js/errorHandler.js', '/assets/js/csrf-utils.js', '/assets/js/schedule-pickup.js'],
                 '/order-confirmation': ['/assets/js/i18n.js', '/assets/js/language-switcher.js', '/assets/js/modal-utils.js', '/assets/js/errorHandler.js', '/assets/js/order-confirmation.js'],
                 '/administrator-login': ['/assets/js/i18n.js', '/assets/js/language-switcher.js', '/assets/js/modal-utils.js', '/assets/js/errorHandler.js', '/assets/js/csrf-utils.js', '/assets/js/administrator-login-init.js'],
@@ -509,51 +509,14 @@
             loadPage(route);
         }
         
-        // Track last sent height to prevent loops
-        let lastSentHeight = 0;
-        let heightDebounceTimer = null;
-        let isUpdatingHeight = false;
-        
-        // Send height to parent window
+        // Use embed-navigation.js for height management
+        // This function will be called but delegate to embed-navigation
         function sendHeight(force = false) {
-            if (window.parent !== window && !isUpdatingHeight) {
-                // Clear any pending height updates
-                if (heightDebounceTimer) {
-                    clearTimeout(heightDebounceTimer);
-                }
-                
-                // Debounce height updates
-                heightDebounceTimer = setTimeout(() => {
-                    isUpdatingHeight = true;
-                    
-                    // Get the most accurate height without buffer first
-                    const heights = [
-                        document.body.scrollHeight,
-                        document.body.offsetHeight,
-                        document.documentElement.scrollHeight,
-                        document.documentElement.offsetHeight,
-                        document.querySelector('#app-container')?.scrollHeight || 0
-                    ];
-                    
-                    const height = Math.max(...heights);
-                    
-                    // Only send if height has changed significantly (more than 10px) or forced
-                    if (force || Math.abs(height - lastSentHeight) > 10) {
-                        console.log('Sending height to parent:', height);
-                        lastSentHeight = height;
-                        
-                        window.parent.postMessage({
-                            type: 'resize',
-                            data: { height: height + 20 } // Small buffer instead of 50
-                        }, '*');
-                    }
-                    
-                    // Reset flag after a delay to allow for any parent-triggered reflows
-                    setTimeout(() => {
-                        isUpdatingHeight = false;
-                    }, 500);
-                }, 100); // Debounce for 100ms
+            // If embed-navigation is loaded, use its sendHeight function
+            if (window.embedNavigation && window.embedNavigation.sendHeight) {
+                window.embedNavigation.sendHeight(force);
             }
+            // Otherwise do nothing - wait for embed-navigation to load
         }
         
         // Scroll parent window to top
@@ -769,66 +732,14 @@
             loadPage(route);
         });
         
-        // Monitor content changes for height updates
-        let resizeThrottleTimer = null;
-        const resizeObserver = new ResizeObserver(() => {
-            // Throttle resize observations
-            if (!resizeThrottleTimer) {
-                resizeThrottleTimer = setTimeout(() => {
-                    sendHeight();
-                    resizeThrottleTimer = null;
-                }, 200); // Throttle to once every 200ms
-            }
-        });
+        // ResizeObserver removed - handled by embed-navigation.js
         
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
             const initialRoute = getRouteFromUrl();
             loadPage(initialRoute);
             
-            // Only observe the app container, not the body (to prevent loops)
-            const appContainer = document.getElementById('app-container');
-            if (appContainer) {
-                resizeObserver.observe(appContainer);
-                
-                // Additionally use MutationObserver for DOM changes
-                let mutationThrottleTimer = null;
-                const mutationObserver = new MutationObserver((mutations) => {
-                    // Check if mutation is actually changing content
-                    let hasContentChange = false;
-                    for (const mutation of mutations) {
-                        if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
-                            hasContentChange = true;
-                            break;
-                        }
-                    }
-                    
-                    // Only send height if content actually changed
-                    if (hasContentChange && !mutationThrottleTimer) {
-                        mutationThrottleTimer = setTimeout(() => {
-                            sendHeight();
-                            mutationThrottleTimer = null;
-                        }, 300); // Throttle to once every 300ms
-                    }
-                });
-                
-                mutationObserver.observe(appContainer, {
-                    childList: true,
-                    subtree: true
-                    // Removed attributes observation to prevent loops
-                });
-            }
-        });
-        
-        // Also send height on window resize (throttled)
-        let windowResizeTimer = null;
-        window.addEventListener('resize', () => {
-            if (windowResizeTimer) {
-                clearTimeout(windowResizeTimer);
-            }
-            windowResizeTimer = setTimeout(() => {
-                sendHeight();
-            }, 250);
+            // Height observation is handled by embed-navigation.js
         });
     </script>
 </body>

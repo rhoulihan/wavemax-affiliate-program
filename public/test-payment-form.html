@@ -3,132 +3,283 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Paygistix Payment Simulator</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <title>Test Payment - Paygistix Simulator</title>
     <style>
-        .form-input {
-            @apply mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #f9fafb;
+            color: #333;
+            padding: 1rem;
+        }
+        
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            background: linear-gradient(to right, #2563eb, #1e40af);
+            color: white;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .header h1 {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 0.25rem;
+        }
+        
+        .header p {
+            font-size: 0.875rem;
+            opacity: 0.9;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .card h2 {
+            font-size: 1.125rem;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+            color: #1f2937;
+        }
+        
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.75rem;
+        }
+        
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .form-group.full-width {
+            grid-column: span 2;
+        }
+        
         .form-label {
-            @apply block text-sm font-medium text-gray-700;
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: #374151;
+            margin-bottom: 0.25rem;
         }
-        .section-card {
-            @apply bg-white rounded-lg shadow-md p-6 mb-6;
+        
+        .form-input {
+            padding: 0.375rem 0.5rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.25rem;
+            font-size: 0.875rem;
         }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+        }
+        
+        .amount-input {
+            padding-left: 1.5rem;
+        }
+        
+        .currency-symbol {
+            position: absolute;
+            left: 0.5rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #6b7280;
+        }
+        
+        .callback-display {
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+            border-radius: 0.25rem;
+            padding: 0.5rem;
+            margin-bottom: 0.75rem;
+        }
+        
+        .callback-display code {
+            font-size: 0.75rem;
+            color: #1e40af;
+            word-break: break-all;
+        }
+        
+        .help-text {
+            font-size: 0.75rem;
+            color: #6b7280;
+            margin-top: 0.25rem;
+        }
+        
+        .button-group {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.5rem;
+        }
+        
+        .button {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 0.25rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+        }
+        
         .button-primary {
-            @apply bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors;
+            background-color: #3b82f6;
+            color: white;
         }
-        .button-secondary {
-            @apply bg-gray-600 text-white px-6 py-2 rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors;
+        
+        .button-primary:hover {
+            background-color: #2563eb;
         }
+        
         .button-success {
-            @apply bg-green-600 text-white px-6 py-2 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors;
+            background-color: #10b981;
+            color: white;
         }
+        
+        .button-success:hover {
+            background-color: #059669;
+        }
+        
+        .button-secondary {
+            background-color: #6b7280;
+            color: white;
+        }
+        
+        .button-secondary:hover {
+            background-color: #4b5563;
+        }
+        
+        .result-display {
+            background: #f3f4f6;
+            border: 1px solid #d1d5db;
+            border-radius: 0.25rem;
+            padding: 0.75rem;
+            font-family: monospace;
+            font-size: 0.75rem;
+            word-break: break-all;
+            margin-top: 0.75rem;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        select.success { color: #059669; }
+        select.error { color: #dc2626; }
+        select.warning { color: #ea580c; }
     </style>
 </head>
-<body class="bg-gray-50 min-h-screen p-4 sm:p-8">
-    <div class="max-w-5xl mx-auto">
+<body>
+    <div class="container">
         <!-- Header -->
-        <div class="section-card bg-gradient-to-r from-blue-600 to-blue-800 text-white">
-            <h1 class="text-3xl font-bold mb-2">🧪 Paygistix Payment Simulator</h1>
-            <p class="text-blue-100">Test payment callbacks in non-production environments</p>
+        <div class="header">
+            <h1>🧪 Paygistix Payment Simulator</h1>
+            <p>Test payment callbacks for development</p>
         </div>
 
-        <!-- Payment Form Info -->
-        <div class="section-card">
-            <h2 class="text-xl font-semibold mb-4 text-gray-800">💳 Simulated Payment Details</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
+        <!-- Payment Details -->
+        <div class="card">
+            <h2>💳 Payment Details</h2>
+            <div class="form-grid">
+                <div class="form-group">
                     <label class="form-label">Card Number</label>
-                    <input type="text" id="cardNumber" value="4111111111111111" class="form-input" placeholder="Card ending in...">
+                    <input type="text" id="cardNumber" value="4111111111111111" class="form-input">
                 </div>
-                <div>
+                <div class="form-group">
                     <label class="form-label">Card Type</label>
                     <select id="cardType" class="form-input">
                         <option value="VISA">VISA</option>
                         <option value="MC">MasterCard</option>
-                        <option value="AMEX">American Express</option>
+                        <option value="AMEX">AMEX</option>
                         <option value="DISC">Discover</option>
                     </select>
                 </div>
-                <div>
+                <div class="form-group">
                     <label class="form-label">Expiration</label>
                     <input type="text" id="expDate" value="1225" class="form-input" placeholder="MMYY">
                 </div>
-                <div>
+                <div class="form-group">
                     <label class="form-label">Amount</label>
-                    <div class="relative">
-                        <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500">$</span>
-                        <input type="text" id="amount" value="10.00" class="form-input pl-7" placeholder="0.00">
+                    <div style="position: relative;">
+                        <span class="currency-symbol">$</span>
+                        <input type="text" id="amount" value="10.00" class="form-input amount-input">
                     </div>
                 </div>
             </div>
         </div>
 
         <!-- Callback Configuration -->
-        <div class="section-card" id="callbackConfigSection">
-            <h2 class="text-xl font-semibold mb-4 text-gray-800">⚙️ Callback Configuration</h2>
-            <div class="space-y-4">
-                <div id="callbackUrlDisplay" class="hidden">
-                    <label class="form-label">Assigned Callback URL</label>
-                    <div class="bg-blue-50 border border-blue-200 rounded-md p-3">
-                        <code class="text-sm text-blue-800" id="assignedCallbackUrl"></code>
-                    </div>
+        <div class="card">
+            <h2>⚙️ Callback Configuration</h2>
+            
+            <div id="callbackUrlDisplay" class="hidden">
+                <label class="form-label">Assigned Callback URL</label>
+                <div class="callback-display">
+                    <code id="assignedCallbackUrl"></code>
                 </div>
-                <div id="callbackUrlSelect">
-                    <label class="form-label">Callback URL (for manual testing)</label>
-                    <select id="callbackUrl" class="form-input">
-                        <option value="/api/v1/payments/callback/handler-1">Callback Handler 1</option>
-                        <option value="/api/v1/payments/callback/handler-2">Callback Handler 2</option>
-                        <option value="/api/v1/payments/callback/handler-3">Callback Handler 3</option>
-                        <option value="/api/v1/payments/callback/handler-4">Callback Handler 4</option>
-                        <option value="/api/v1/payments/callback/handler-5">Callback Handler 5</option>
-                        <option value="/api/v1/payments/callback/handler-6">Callback Handler 6</option>
-                        <option value="/api/v1/payments/callback/handler-7">Callback Handler 7</option>
-                        <option value="/api/v1/payments/callback/handler-8">Callback Handler 8</option>
-                        <option value="/api/v1/payments/callback/handler-9">Callback Handler 9</option>
-                        <option value="/api/v1/payments/callback/handler-10">Callback Handler 10</option>
-                    </select>
-                </div>
-                <div>
+            </div>
+            
+            <!-- Hidden select to store callback URL value -->
+            <select id="callbackUrl" class="hidden">
+                <option value="">Select callback handler</option>
+            </select>
+            
+            <div class="form-grid">
+                <div class="form-group full-width">
                     <label class="form-label">Payment Token</label>
-                    <input type="text" id="paymentToken" class="form-input font-mono" placeholder="Leave empty to auto-generate">
-                    <p class="mt-1 text-sm text-gray-500">Token will be auto-generated if left empty</p>
+                    <input type="text" id="paymentToken" class="form-input" style="font-family: monospace;">
+                    <p class="help-text">Auto-generated if empty</p>
                 </div>
-                <div>
+                <div class="form-group full-width">
                     <label class="form-label">Payment Result</label>
                     <select id="result" class="form-input">
-                        <option value="0" class="text-green-600">✅ 0 - Success</option>
-                        <option value="1" class="text-red-600">❌ 1 - Failed</option>
-                        <option value="2" class="text-orange-600">⚠️ 2 - Declined</option>
+                        <option value="0" class="success">✅ Success</option>
+                        <option value="1" class="error">❌ Failed</option>
+                        <option value="2" class="warning">⚠️ Declined</option>
                     </select>
                 </div>
             </div>
         </div>
 
         <!-- Actions -->
-        <div class="section-card">
-            <h2 class="text-xl font-semibold mb-4 text-gray-800">🚀 Simulate Payment</h2>
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <button class="button-primary">
-                    <span class="inline-block mr-2">📤</span> Simulate Callback
+        <div class="card">
+            <h2>🚀 Actions</h2>
+            <div class="button-group">
+                <button class="button button-primary">
+                    📤 Simulate
                 </button>
-                <button class="button-success">
-                    <span class="inline-block mr-2">🪟</span> New Window
+                <button class="button button-success">
+                    🪟 New Window
                 </button>
-                <button class="button-secondary">
-                    <span class="inline-block mr-2">🎲</span> Random Data
+                <button class="button button-secondary">
+                    🎲 Random
                 </button>
             </div>
         </div>
 
         <!-- Generated URL -->
-        <div id="generatedUrl" class="section-card hidden">
-            <h2 class="text-xl font-semibold mb-4 text-gray-800">📋 Generated Callback URL</h2>
-            <div class="bg-gray-100 p-4 rounded-md break-all font-mono text-sm border border-gray-300" id="urlDisplay"></div>
-            <button class="mt-4 button-secondary">
-                <span class="inline-block mr-2">📋</span> Copy URL
-            </button>
+        <div id="generatedUrl" class="card hidden">
+            <h2>📋 Full Callback URL (with parameters)</h2>
+            <div class="result-display" id="urlDisplay"></div>
         </div>
     </div>
 

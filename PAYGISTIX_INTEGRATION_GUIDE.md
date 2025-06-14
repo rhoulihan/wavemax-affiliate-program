@@ -5,7 +5,7 @@
 2. [Quick Start](#quick-start)
 3. [Architecture](#architecture)
 4. [Implementation Steps](#implementation-steps)
-5. [Form Pool System](#form-pool-system)
+5. [Callback Pool System](#callback-pool-system)
 6. [API Integration](#api-integration)
 7. [Security Best Practices](#security-best-practices)
 8. [Testing Strategy](#testing-strategy)
@@ -20,7 +20,7 @@ Paygistix is WaveMAX's payment processing solution that provides secure, reliabl
 ### Key Features
 - PCI-compliant hosted payment forms
 - Credit/debit card payments  
-- Form pool system for payment tracking
+- Callback URL pool system for payment tracking
 - Real-time callback notifications
 - Payment window close detection
 - Test payment form for development
@@ -277,7 +277,7 @@ module.exports = router;
 
 ### Step 5: Frontend Integration
 
-The WaveMAX implementation uses Paygistix's hosted payment form approach for PCI compliance. The payment form is dynamically populated with assigned form credentials from the form pool.
+The WaveMAX implementation uses Paygistix's hosted payment form approach for PCI compliance. The payment form is dynamically populated with a unique callback URL from the callback pool.
 
 ```javascript
 // public/assets/js/paygistix-payment-form.js
@@ -302,74 +302,77 @@ class PaygistixPaymentForm {
 }
 ```
 
-## Form Pool System
+## Callback Pool System
 
-The form pool system solves the challenge of identifying payments when Paygistix doesn't return custom fields in callbacks. Each form has a unique callback URL that allows us to track which payment is being processed.
+The callback pool system solves the challenge of identifying payments when Paygistix doesn't return custom fields in callbacks. Each payment gets a unique callback URL that allows us to track which payment is being processed.
 
 ### Architecture
 
 ```
 ┌─────────────────┐     ┌──────────────────┐     ┌─────────────────┐
-│  Customer       │────▶│  Form Pool       │────▶│   Paygistix     │
-│  Registration   │     │  Manager         │     │   Forms 1-10    │
+│  Customer       │────▶│  Callback Pool   │────▶│   Paygistix     │
+│  Registration   │     │  Manager         │     │   Single Form   │
 └─────────────────┘     └──────────────────┘     └─────────────────┘
                                │                           │
                                ▼                           ▼
                         ┌──────────────┐          ┌────────────────┐
-                        │   FormPool   │          │ Form-Specific  │
-                        │   Database   │◀─────────│   Callbacks    │
+                        │ CallbackPool │          │ Unique Callback│
+                        │   Database   │◀─────────│     URLs       │
                         └──────────────┘          └────────────────┘
 ```
 
-### Form Pool Configuration
+### Callback Pool Configuration
 
-Forms are configured in `server/config/paygistix-forms.json`:
-
-```json
-{
-  "forms": [
-    {
-      "formId": "FORM_ID_1",
-      "formHash": "FORM_HASH_1", 
-      "callbackPath": "/api/v1/payments/callback/form-1"
-    },
-    // ... forms 2-10
-  ],
-  "lockTimeoutMinutes": 10,
-  "baseUrl": "https://wavemax.promo"
-}
-```
-
-### Form Pool Manager
-
-The FormPoolManager service handles form lifecycle:
+Callback URLs are configured in `server/config/paygistix.config.js`:
 
 ```javascript
-// server/services/formPoolManager.js
-class FormPoolManager {
-    async acquireForm(paymentToken) {
-        // Find available form or one with expired lock
-        const form = await FormPool.acquireForm(paymentToken);
-        if (!form) throw new Error('No forms available');
+module.exports = {
+  // Single form configuration
+  formId: process.env.PAYGISTIX_FORM_ID,
+  formHash: process.env.PAYGISTIX_FORM_HASH,
+  
+  // Pool of callback paths
+  callbackPaths: [
+    '/api/v1/payments/callback/1',
+    '/api/v1/payments/callback/2',
+    // ... up to 10 callback paths
+  ],
+  
+  lockTimeoutMinutes: 10,
+  baseUrl: process.env.PAYGISTIX_BASE_URL || 'https://wavemax.promo'
+};
+```
+
+### Callback Pool Manager
+
+The CallbackPoolManager service handles callback URL lifecycle:
+
+```javascript
+// server/services/callbackPoolManager.js
+class CallbackPoolManager {
+    async acquireCallback(paymentToken) {
+        // Find available callback or one with expired lock
+        const callback = await CallbackPool.acquireCallback(paymentToken);
+        if (!callback) throw new Error('No callbacks available');
         
-        // Build callback URL
-        const callbackUrl = `${baseUrl}${form.callbackPath}`;
+        // Build full callback URL
+        const callbackUrl = `${baseUrl}${callback.callbackPath}`;
         
         return {
-            formId: form.formId,
-            formHash: form.formHash,
-            callbackPath: form.callbackPath,
+            formId: config.formId,
+            formHash: config.formHash,
+            callbackPath: callback.callbackPath,
             callbackUrl: callbackUrl
         };
     }
     
-    async releaseForm(paymentToken) {
-        await FormPool.releaseForm(paymentToken);
+    async releaseCallback(paymentToken) {
+        await CallbackPool.releaseCallback(paymentToken);
     }
 }
 ```
 
-### Payment Flow with Form Pool
+### Payment Flow with Callback Pool
 
 1. **Token Creation**: Customer initiates payment
 2. **Form Acquisition**: System acquires available form from pool
@@ -558,7 +561,7 @@ The test form allows you to:
 - Simulate successful and failed payments
 - Test different callback scenarios
 - Generate realistic Paygistix parameters
-- Test form pool callback routing
+- Test callback pool routing
 
 ### Unit Tests
 

@@ -178,6 +178,7 @@
         if (data.success) {
           const affiliate = data;  // The affiliate data is at the top level
           affiliateData = affiliate; // Store for service area validation
+          window.affiliateData = affiliate; // Make available globally for payment registration
           
           const affiliateIntro = document.getElementById('affiliateIntro');
           if (affiliateIntro) {
@@ -806,6 +807,14 @@
   const totalBagFeeDisplay = document.getElementById('totalBagFee');
   const bagFeeSummary = document.getElementById('bagFeeSummary');
   const bagFeeSummaryAmount = document.getElementById('bagFeeSummaryAmount');
+  
+  // Initialize bag fee summary visibility to prevent layout shifts
+  if (bagFeeSummary) {
+    bagFeeSummary.style.visibility = 'hidden';
+    bagFeeSummary.style.height = '0';
+    bagFeeSummary.style.transition = 'visibility 0.3s, height 0.3s';
+    bagFeeSummary.style.overflow = 'hidden';
+  }
 
   // Fetch bag fee from system configuration
   const baseUrl = window.EMBED_CONFIG?.baseUrl || 'https://wavemax.promo';
@@ -856,10 +865,13 @@
     totalBagFeeDisplay.textContent = `$${total.toFixed(2)}`;
     bagFeeSummaryAmount.textContent = `$${total.toFixed(2)}`;
     
+    // Use visibility instead of display to prevent layout reflows
     if (numberOfBags > 0) {
-      bagFeeSummary.style.display = 'block';
+      bagFeeSummary.style.visibility = 'visible';
+      bagFeeSummary.style.height = 'auto';
     } else {
-      bagFeeSummary.style.display = 'none';
+      bagFeeSummary.style.visibility = 'hidden';
+      bagFeeSummary.style.height = '0';
     }
     
     // Update the Paygistix payment form BF quantity

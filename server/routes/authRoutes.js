@@ -44,9 +44,18 @@ router.post('/affiliate/login',
 router.post('/customer/login',
   authLimiter,
   [
-    body('username').trim().notEmpty().withMessage('Username is required')
-      .isLength({ min: 3 }).withMessage('Username must be at least 3 characters'),
-    body('password').notEmpty().withMessage('Password is required')
+    // Support both username and emailOrUsername fields
+    body('emailOrUsername').optional().trim(),
+    body('username').optional().trim(),
+    body('password').notEmpty().withMessage('Password is required'),
+    // Custom validation to ensure at least one identifier is provided
+    body().custom((value, { req }) => {
+      const { username, emailOrUsername } = req.body;
+      if (!username && !emailOrUsername) {
+        throw new Error('Username or email is required');
+      }
+      return true;
+    })
   ],
   validate,
   authController.customerLogin

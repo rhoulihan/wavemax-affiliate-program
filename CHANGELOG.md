@@ -4,13 +4,25 @@ All notable changes to the WaveMAX Laundry Affiliate Program will be documented 
 
 ## [Unreleased]
 
+### Changed
+- Simplified Paygistix integration from form pool to callback URL pool
+  - Single Paygistix form configuration instead of multiple forms
+  - Dynamic callback URL assignment for payment tracking
+  - CallbackPool model replaces FormPool
+  - Reduced complexity while maintaining payment tracking capabilities
+- Consolidated iframe resize handling
+  - All resize handling now managed by embed-navigation.js
+  - Removed duplicate ResizeObserver instances
+  - Fixed height calculation feedback loop
+  - Improved performance with proper debouncing
+
 ### Added
-- Paygistix Form Pool System for payment tracking
-  - Multiple identical forms with unique callback URLs
-  - Dynamic form assignment with locking mechanism
-  - Automatic form release and cleanup
-  - Form-specific callback routing
-  - Database-backed form availability tracking
+- Paygistix Callback URL Pool System for payment tracking
+  - Single form with multiple callback URLs
+  - Dynamic callback assignment with locking mechanism
+  - Automatic callback release and cleanup
+  - Callback-specific routing for payment identification
+  - Database-backed callback availability tracking
 - Test Payment Form for development
   - Simulates Paygistix payment callbacks
   - Configurable payment scenarios (success/failure)
@@ -21,6 +33,13 @@ All notable changes to the WaveMAX Laundry Affiliate Program will be documented 
   - Payment token cancellation on abandonment
   - Real-time status polling during payment
   - PostMessage communication between windows
+
+### Removed
+- Diagnostic test files for payment window detection
+  - public/test-payment-form.html
+  - public/assets/js/test-payment-form.js
+- Duplicate window resize event handlers in embed-app.html
+- embedAppHasResizeObserver flag (no longer needed)
 - Internationalization (i18n) support for multi-language deployment
   - Support for English, Spanish, Portuguese, and German languages
   - Automatic browser language detection during user registration

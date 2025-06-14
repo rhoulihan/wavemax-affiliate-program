@@ -21,7 +21,7 @@
         .embed-container {
             max-width: 100%;
             margin: 0;
-            padding: 16px;
+            padding: 40px 16px 16px 16px; /* Added top padding */
         }
     
         /* Language switcher positioning */
@@ -42,6 +42,22 @@
         .border-green-500 {
             border-color: #10b981 !important;
             border-width: 1px;
+        }
+        
+        /* Smooth transitions for visibility changes */
+        #bagFeeSummary {
+            transition: visibility 0.3s, height 0.3s;
+            overflow: hidden;
+        }
+        
+        /* Prevent layout shifts during password validation */
+        #passwordStrength {
+            min-height: 1.5rem;
+        }
+        
+        /* Stabilize password requirements height */
+        #passwordRequirements {
+            min-height: 180px;
         }
     </style>
 </head>

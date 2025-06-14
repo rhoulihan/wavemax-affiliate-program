@@ -41,6 +41,18 @@
                     console.error('Payment form error:', error);
                     document.getElementById('paymentFormContainer').innerHTML = 
                         '<div class="text-red-600 p-4">Failed to load payment form. Please refresh the page.</div>';
+                },
+                onPaymentSuccess: async function(paymentDetails) {
+                    console.log('=== PAYMENT SUCCESS CALLBACK TRIGGERED ===');
+                    console.log('Payment successful, creating customer account...');
+                    console.log('Payment details:', paymentDetails);
+                    await createCustomerAccount(paymentDetails);
+                },
+                onPaymentFailure: function(error) {
+                    console.error('Payment failed:', error);
+                    if (window.modalAlert) {
+                        window.modalAlert(error || 'Payment failed. Please try again.', 'Payment Error');
+                    }
                 }
             });
             
@@ -78,6 +90,156 @@
                 paymentForm: !!paymentForm,
                 numberOfBags: numberOfBags
             });
+        }
+    }
+    
+    // Create customer account after successful payment
+    async function createCustomerAccount(paymentDetails) {
+        console.log('=== CREATE CUSTOMER ACCOUNT CALLED ===');
+        console.log('Payment details received:', paymentDetails);
+        
+        // If we have payment details with a payment token but no transaction ID,
+        // wait a moment and fetch the updated payment status
+        if (paymentDetails && !paymentDetails.transactionId && window.paymentForm && window.paymentForm.paymentToken) {
+            console.log('Fetching updated payment status for token:', window.paymentForm.paymentToken);
+            try {
+                const response = await fetch(`/api/v1/payments/check-status/${window.paymentForm.paymentToken}`);
+                const data = await response.json();
+                if (data.success && data.transactionId) {
+                    paymentDetails = { ...paymentDetails, transactionId: data.transactionId };
+                    console.log('Updated payment details with transaction ID:', paymentDetails);
+                }
+            } catch (error) {
+                console.error('Error fetching payment status:', error);
+            }
+        }
+        
+        let spinner = null;
+        try {
+            // Show spinner
+            spinner = window.SwirlSpinnerUtils ? 
+                window.SwirlSpinnerUtils.showGlobal({
+                    message: 'Creating your account...',
+                    submessage: 'Please wait while we set up your account'
+                }) : null;
+            
+            // Gather all form data with null safety
+            const formData = {
+                // Personal Information
+                firstName: document.getElementById('firstName')?.value || '',
+                lastName: document.getElementById('lastName')?.value || '',
+                email: document.getElementById('email')?.value || '',
+                phone: document.getElementById('phone')?.value || '',
+                
+                // Address
+                address: document.getElementById('address')?.value || '',
+                city: document.getElementById('city')?.value || '',
+                state: document.getElementById('state')?.value || '',
+                zipCode: document.getElementById('zipCode')?.value || '',
+                
+                // Service Details
+                numberOfBags: parseInt(document.getElementById('numberOfBags')?.value || '0'),
+                specialInstructions: document.getElementById('specialInstructions')?.value || '',
+                
+                // Account Setup
+                username: document.getElementById('username')?.value || '',
+                password: document.getElementById('password')?.value || '',
+                
+                // Affiliate Info - check both possible field names
+                affiliateId: document.getElementById('AFFILIATEID')?.value || document.getElementById('affiliateId')?.value || '',
+                
+                // Payment confirmation (payment was already processed successfully)
+                paymentConfirmed: true
+            };
+            
+            console.log('Form data collected:', formData);
+            
+            // Submit registration
+            const response = await fetch('/api/v1/customers/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                credentials: 'include',
+                body: JSON.stringify(formData)
+            });
+            
+            console.log('Registration response status:', response.status);
+            const result = await response.json();
+            console.log('Registration response:', result);
+            
+            if (spinner) {
+                spinner.hide();
+            }
+            
+            if (result.success) {
+                console.log('=== REGISTRATION SUCCESSFUL ===', result);
+                // Store registration data for success page
+                const successData = {
+                    customerId: result.customerId || result.customerData?.customerId,
+                    bagBarcode: result.bagBarcode || result.customerData?.bagBarcode,
+                    firstName: formData.firstName,
+                    lastName: formData.lastName,
+                    email: formData.email,
+                    affiliateId: formData.affiliateId,
+                    numberOfBags: formData.numberOfBags,
+                    transactionId: paymentDetails?.transactionId || null,
+                    // Include affiliate info if available
+                    affiliateInfo: window.affiliateData ? {
+                        firstName: window.affiliateData.firstName,
+                        lastName: window.affiliateData.lastName,
+                        businessName: window.affiliateData.businessName,
+                        city: window.affiliateData.city,
+                        state: window.affiliateData.state,
+                        minimumDeliveryFee: window.affiliateData.minimumDeliveryFee,
+                        perBagDeliveryFee: window.affiliateData.perBagDeliveryFee
+                    } : null
+                };
+                
+                sessionStorage.setItem('registrationData', JSON.stringify(successData));
+                console.log('Success data stored in sessionStorage:', successData);
+                
+                // Show success message
+                if (window.modalAlert) {
+                    window.modalAlert('Your account has been created successfully!', 'Registration Complete');
+                }
+                
+                // Redirect to success page after a short delay
+                console.log('Redirecting to customer success page in 1.5 seconds...');
+                setTimeout(() => {
+                    console.log('Redirecting now...');
+                    if (window.navigateTo) {
+                        console.log('Using navigateTo function');
+                        window.navigateTo('/customer-success');
+                    } else {
+                        console.log('Using direct navigation');
+                        window.location.href = '/embed-app.html?route=/customer-success';
+                    }
+                }, 1500);
+            } else {
+                // Registration failed
+                console.error('Registration failed:', result);
+                let errorMessage = result.message || 'Unable to complete registration. Please contact support.';
+                
+                // Check for validation errors
+                if (result.errors && Array.isArray(result.errors)) {
+                    errorMessage = result.errors.map(err => err.msg || err.message).join(', ');
+                }
+                
+                if (window.modalAlert) {
+                    window.modalAlert(errorMessage, 'Registration Error');
+                }
+            }
+        } catch (error) {
+            console.error('Error creating customer account:', error);
+            
+            if (spinner) {
+                spinner.hide();
+            }
+            
+            if (window.modalAlert) {
+                window.modalAlert('An error occurred while creating your account. Please contact support.', 'Error');
+            }
         }
     }
     

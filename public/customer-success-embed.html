@@ -21,7 +21,7 @@
         .embed-container {
             max-width: 100%;
             margin: 0;
-            padding: 16px;
+            padding: 40px 16px 16px 16px; /* Added top padding */
         }
     
         /* Language switcher positioning */
@@ -36,7 +36,7 @@
 <body class="bg-white font-sans">
     <!-- Success Content -->
     <div class="embed-container">
-        <div class="max-w-3xl mx-auto bg-white rounded-lg shadow-md overflow-hidden">
+        <div class="max-w-3xl mx-auto bg-white rounded-lg shadow-md overflow-hidden" style="margin-top: 40px;">
             <div class="wavemax-blue text-white p-6">
                 <h2 class="text-2xl font-bold">Registration Successful!</h2>
                 <p class="mt-2">Thank you for signing up for WaveMAX Laundry pickup and delivery service.</p>
@@ -60,9 +60,13 @@
                             <span class="font-bold">Name:</span>
                             <span id="customerName">Loading...</span>
                         </div>
-                        <div>
+                        <div class="mb-2">
                             <span class="font-bold">Email:</span>
                             <span id="customerEmail">Loading...</span>
+                        </div>
+                        <div>
+                            <span class="font-bold">Transaction ID:</span>
+                            <span id="transactionId">Loading...</span>
                         </div>
                     </div>
                 </div>
@@ -73,15 +77,15 @@
                     <div class="bg-gray-50 p-4 rounded-lg">
                         <div class="mb-2">
                             <span class="font-bold">Provider:</span>
-                            <span id="affiliateName">Loading...</span>
+                            <span id="affiliateName">Contact for details</span>
                         </div>
                         <div class="mb-2">
                             <span class="font-bold">Service Area:</span>
-                            <span id="serviceArea">Loading...</span>
+                            <span id="serviceArea">Austin, TX area</span>
                         </div>
                         <div>
                             <span class="font-bold">Delivery Fee:</span>
-                            <span id="deliveryFee">Loading...</span>
+                            <span id="deliveryFee">Contact for pricing</span>
                         </div>
                     </div>
                 </div>
@@ -116,8 +120,8 @@
                 <!-- Actions -->
                 <div class="pt-4 border-t">
                     <div class="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-4">
-                        <a href="#" id="schedulePickupBtn" class="bg-blue-600 text-white text-center font-bold py-3 px-4 rounded-lg hover:bg-blue-700 transition" onclick="navigateParent('schedule-pickup'); return false;" data-i18n="customer.dashboard.schedulePickup">Schedule Your First Pickup</a>
-                        <a href="#" id="customerDashboardBtn" class="border border-blue-600 text-blue-600 text-center font-bold py-3 px-4 rounded-lg hover:bg-blue-50 transition" onclick="navigateParent('customer-dashboard'); return false;">Go to Customer Dashboard</a>
+                        <a href="https://www.wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program?login=customer&pickup=true" id="schedulePickupBtn" class="bg-blue-600 text-white text-center font-bold py-3 px-4 rounded-lg hover:bg-blue-700 transition" target="_top" data-i18n="customer.dashboard.schedulePickup">Schedule Your First Pickup</a>
+                        <a href="https://www.wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program?login=customer" id="customerDashboardBtn" class="border border-blue-600 text-blue-600 text-center font-bold py-3 px-4 rounded-lg hover:bg-blue-50 transition" target="_top">Go to Customer Dashboard</a>
                     </div>
                 </div>
             </div>
@@ -127,148 +131,8 @@
         <!-- i18n Scripts -->
     <script src="/assets/js/i18n.js"></script>
     <script src="/assets/js/language-switcher.js"></script>
-    <script>
-        // PostMessage communication with parent window
-        function sendMessageToParent(type, data) {
-            if (window.parent && window.parent !== window) {
-                window.parent.postMessage({
-                    type: type,
-                    source: 'wavemax-embed',
-                    data: data
-                }, '*');
-            }
-        }
-
-        // Navigate parent frame
-        function navigateParent(page) {
-            sendMessageToParent('navigate', { page: page });
-        }
-
-        // Load customer information
-        document.addEventListener('DOMContentLoaded', function() {
-            // Try to get customer info from sessionStorage first (for registration flow)
-            const registrationData = sessionStorage.getItem('registrationData');
-            let customerData = null;
-            
-            if (registrationData) {
-                try {
-                    customerData = JSON.parse(registrationData);
-                    // Clear registration data after use
-                    sessionStorage.removeItem('registrationData');
-                } catch (e) {
-                    console.error('Error parsing registration data:', e);
-                }
-            }
-            
-            // Fall back to localStorage if no registration data
-            if (!customerData) {
-                const customer = localStorage.getItem('currentCustomer');
-                if (customer) {
-                    try {
-                        customerData = JSON.parse(customer);
-                    } catch (e) {
-                        console.error('Error parsing customer data:', e);
-                    }
-                }
-            }
-            
-            if (customerData) {
-                // Display customer information
-                document.getElementById('customerId').textContent = customerData.customerId;
-                document.getElementById('customerName').textContent = 
-                    `${customerData.firstName} ${customerData.lastName}`;
-                document.getElementById('customerEmail').textContent = customerData.email;
-                
-                // Display bags purchased (default to 1 if not specified)
-                const bagCount = customerData.bagsPurchased || 1;
-                document.getElementById('bagsPurchased').textContent = bagCount;
-                    
-                    // Fetch bag fee from system config to calculate credit
-                    fetch('https://wavemax.promo/api/v1/system/config/public', {
-                        credentials: 'include'
-                    })
-                    .then(response => response.json())
-                    .then(configs => {
-                        const bagFeeConfig = configs.find(c => c.key === 'laundry_bag_fee');
-                        if (bagFeeConfig && bagFeeConfig.currentValue) {
-                            const bagFee = bagFeeConfig.currentValue;
-                            const totalCredit = bagFee * bagCount;
-                            document.getElementById('bagCreditAmount').textContent = `$${totalCredit.toFixed(2)}`;
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error fetching bag fee:', error);
-                        // Keep default $10.00 if fetch fails
-                    });
-                    
-                    // Load affiliate information if available
-                    if (customerData.affiliateId) {
-                        loadAffiliateInfo(customerData.affiliateId);
-                    } else {
-                        showFallbackAffiliateInfo();
-                    }
-                    
-                    // Notify parent of successful registration
-                    sendMessageToParent('customer-registered', {
-                        customerId: customerData.customerId,
-                        affiliateId: customerData.affiliateId
-                    });
-            } else {
-                showFallbackContent();
-            }
-            
-            // Notify parent that iframe is loaded
-            sendMessageToParent('iframe-loaded', { page: 'customer-success' });
-        });
-
-        function loadAffiliateInfo(affiliateId) {
-            fetch(`https://wavemax.promo/api/v1/affiliates/${affiliateId}/public`, {
-                credentials: 'include'
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success && data.affiliate) {
-                    const affiliate = data.affiliate;
-                    document.getElementById('affiliateName').textContent = 
-                        `${affiliate.firstName} ${affiliate.lastName} (${affiliate.businessName})`;
-                    document.getElementById('serviceArea').textContent = 
-                        affiliate.serviceArea || 'Your local area';
-                    document.getElementById('deliveryFee').textContent = 
-                        `$${(affiliate.deliveryFee || 0).toFixed(2)} per pickup/delivery`;
-                } else {
-                    showFallbackAffiliateInfo();
-                }
-            })
-            .catch(error => {
-                console.error('Error loading affiliate:', error);
-                showFallbackAffiliateInfo();
-            });
-        }
-
-        function showFallbackAffiliateInfo() {
-            document.getElementById('affiliateName').textContent = 'Your local WaveMAX partner';
-            document.getElementById('serviceArea').textContent = 'Your local area';
-            document.getElementById('deliveryFee').textContent = 'Contact provider for pricing';
-        }
-
-        function showFallbackContent() {
-            document.getElementById('customerId').textContent = 'Your unique ID will be provided shortly';
-            document.getElementById('customerName').textContent = 'Your information is being processed';
-            document.getElementById('customerEmail').textContent = 'Check your email for confirmation';
-            document.getElementById('bagsPurchased').textContent = '1';
-            showFallbackAffiliateInfo();
-        }
-    </script>
-    <script>
-        // Initialize i18n
-        document.addEventListener('DOMContentLoaded', async function() {
-            await window.i18n.init({ debugMode: false });
-            window.LanguageSwitcher.createSwitcher('language-switcher-container', {
-                style: 'dropdown',
-                showLabel: false
-            });
-        });
-    </script>
+    <!-- Customer Success Page Scripts -->
+    <script src="/assets/js/customer-success-embed.js"></script>
 
 </body>
 </html>

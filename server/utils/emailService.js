@@ -215,7 +215,7 @@ exports.sendAffiliateWelcomeEmail = async (affiliate) => {
       es: {
         EMAIL_TITLE: 'Bienvenido al Programa de Afiliados de WaveMAX Laundry',
         EMAIL_HEADER: '¡Bienvenido al Programa de Afiliados!',
-        GREETING: `Hola ${affiliate.firstName},`,
+        GREETING: 'Hola [first_name],',
         WELCOME_MESSAGE: '¡Felicitaciones y bienvenido al Programa de Afiliados de WaveMAX Laundry! Estamos emocionados de que se una a nuestra red de socios afiliados.',
         READY_MESSAGE: 'Ahora está listo para comenzar a ofrecer servicios premium de lavado, secado y doblado de ropa, con recogida y entrega manejados por usted.',
         YOUR_INFO_TITLE: 'Su Información de Afiliado',
@@ -505,7 +505,7 @@ exports.sendAffiliateNewOrderEmail = async (affiliate, customer, order) => {
       es: {
         EMAIL_TITLE: 'Nuevo Pedido de Recogida de Lavandería',
         EMAIL_HEADER: 'Nuevo Pedido de Recogida de Lavandería',
-        GREETING: `Hola ${affiliate.firstName},`,
+        GREETING: 'Hola [first_name],',
         NEW_ORDER_MESSAGE: '¡Tiene un nuevo pedido de recogida de lavandería para procesar!',
         ORDER_DETAILS_TITLE: 'Detalles del Pedido',
         ORDER_ID_LABEL: 'ID del Pedido',
@@ -635,7 +635,7 @@ exports.sendAffiliateCommissionEmail = async (affiliate, order, customer) => {
       es: {
         EMAIL_TITLE: 'Comisión Ganada: Pedido Entregado',
         EMAIL_HEADER: '¡Comisión Ganada!',
-        GREETING: `Hola ${affiliate.firstName},`,
+        GREETING: 'Hola [first_name],',
         COMMISSION_MESSAGE: '¡Excelentes noticias! Ha ganado una comisión por un pedido completado.',
         COMMISSION_DETAILS_TITLE: 'Detalles de la Comisión',
         ORDER_ID_LABEL: 'ID del Pedido',
@@ -747,7 +747,7 @@ exports.sendAffiliateOrderCancellationEmail = async (affiliate, order, customer)
       es: {
         EMAIL_TITLE: 'Pedido Cancelado',
         EMAIL_HEADER: 'Pedido Cancelado',
-        GREETING: `Hola ${affiliate.firstName},`,
+        GREETING: 'Hola [first_name],',
         CANCELLATION_MESSAGE: 'Queremos informarle que un pedido ha sido cancelado.',
         CANCELLATION_DETAILS_TITLE: 'Detalles de Cancelación',
         ORDER_ID_LABEL: 'ID del Pedido',
@@ -892,7 +892,7 @@ exports.sendCustomerWelcomeEmail = async (customer, affiliate, bagInfo = {}) => 
       en: {
         EMAIL_TITLE: 'Welcome to WaveMAX Laundry Service',
         EMAIL_HEADER: 'Welcome to WaveMAX Laundry!',
-        GREETING: 'Hi {first_name},',
+        GREETING: 'Hi [first_name],',
         WELCOME_MESSAGE: 'Welcome to WaveMAX Laundry Service! Your account has been successfully created and you\'re ready to enjoy premium wash, dry, fold laundry services.',
         YOUR_INFO_TITLE: 'Your Account Information',
         CUSTOMER_ID_LABEL: 'Customer ID',
@@ -932,7 +932,7 @@ exports.sendCustomerWelcomeEmail = async (customer, affiliate, bagInfo = {}) => 
       es: {
         EMAIL_TITLE: 'Bienvenido al Servicio de Lavandería WaveMAX',
         EMAIL_HEADER: '¡Bienvenido a WaveMAX Laundry!',
-        GREETING: 'Hola {first_name},',
+        GREETING: 'Hola [first_name],',
         WELCOME_MESSAGE: '¡Bienvenido al Servicio de Lavandería WaveMAX! Su cuenta ha sido creada exitosamente y está listo para disfrutar de servicios premium de lavado, secado y doblado.',
         YOUR_INFO_TITLE: 'Información de Su Cuenta',
         CUSTOMER_ID_LABEL: 'ID de Cliente',
@@ -972,7 +972,7 @@ exports.sendCustomerWelcomeEmail = async (customer, affiliate, bagInfo = {}) => 
       pt: {
         EMAIL_TITLE: 'Bem-vindo ao Serviço de Lavanderia WaveMAX',
         EMAIL_HEADER: 'Bem-vindo ao WaveMAX Laundry!',
-        GREETING: 'Olá {first_name},',
+        GREETING: 'Olá [first_name],',
         WELCOME_MESSAGE: 'Bem-vindo ao Serviço de Lavanderia WaveMAX! Sua conta foi criada com sucesso e você está pronto para desfrutar de serviços premium de lavar, secar e dobrar roupas.',
         YOUR_INFO_TITLE: 'Informações da Sua Conta',
         CUSTOMER_ID_LABEL: 'ID do Cliente',
@@ -1012,7 +1012,7 @@ exports.sendCustomerWelcomeEmail = async (customer, affiliate, bagInfo = {}) => 
       de: {
         EMAIL_TITLE: 'Willkommen beim WaveMAX Wäscheservice',
         EMAIL_HEADER: 'Willkommen bei WaveMAX Laundry!',
-        GREETING: 'Hallo {first_name},',
+        GREETING: 'Hallo [first_name],',
         WELCOME_MESSAGE: 'Willkommen beim WaveMAX Wäscheservice! Ihr Konto wurde erfolgreich erstellt und Sie können nun Premium-Wasch-, Trocken- und Faltservice genießen.',
         YOUR_INFO_TITLE: 'Ihre Kontoinformationen',
         CUSTOMER_ID_LABEL: 'Kunden-ID',

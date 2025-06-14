@@ -43,6 +43,9 @@
       if (!this.container) {
         throw new Error(`Container with id "${containerId}" not found`);
       }
+      
+      // Add debounce timer
+      this.updateTimer = null;
 
       // Default options
       this.options = {
@@ -234,6 +237,18 @@
     }
 
     updatePasswordRequirements() {
+      // Clear existing timer
+      if (this.updateTimer) {
+        clearTimeout(this.updateTimer);
+      }
+      
+      // Debounce updates by 150ms to reduce DOM thrashing
+      this.updateTimer = setTimeout(() => {
+        this.performPasswordRequirementsUpdate();
+      }, 150);
+    }
+    
+    performPasswordRequirementsUpdate() {
       const validation = validatePasswordStrength(this.state.password, this.state.username, this.state.email);
       const requirements = validation.requirements;
       
@@ -354,7 +369,8 @@
         if (field) field.value = '';
       });
       
-      this.updatePasswordRequirements();
+      // Perform immediate update without debouncing
+      this.performPasswordRequirementsUpdate();
     }
     
     // Refresh translations when language changes
@@ -369,8 +385,8 @@
       // Restore values
       this.setValues(currentValues);
       
-      // Update requirements display
-      this.updatePasswordRequirements();
+      // Update requirements display - perform immediate update
+      this.performPasswordRequirementsUpdate();
     }
   }
 

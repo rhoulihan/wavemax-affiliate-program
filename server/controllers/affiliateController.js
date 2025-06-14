@@ -948,4 +948,46 @@ exports.getPublicAffiliateInfo = async (req, res) => {
   }
 };
 
+// Get public affiliate info by ID (for customer success page)
+exports.getPublicAffiliateInfoById = async (req, res) => {
+  try {
+    const { affiliateId } = req.params;
+
+    // Find affiliate by ID
+    const affiliate = await Affiliate.findOne({ affiliateId: affiliateId })
+      .select('firstName lastName businessName minimumDeliveryFee perBagDeliveryFee serviceLatitude serviceLongitude serviceRadius city state');
+
+    if (!affiliate) {
+      return res.status(404).json({
+        success: false,
+        message: 'Affiliate not found'
+      });
+    }
+
+    // Calculate delivery fee (use perBagDeliveryFee if set, otherwise minimumDeliveryFee)
+    const deliveryFee = affiliate.perBagDeliveryFee || affiliate.minimumDeliveryFee || 0;
+
+    // Return public information formatted for the success page
+    res.status(200).json({
+      success: true,
+      affiliate: {
+        firstName: affiliate.firstName,
+        lastName: affiliate.lastName,
+        businessName: affiliate.businessName,
+        deliveryFee: deliveryFee,
+        minimumDeliveryFee: affiliate.minimumDeliveryFee,
+        perBagDeliveryFee: affiliate.perBagDeliveryFee,
+        serviceArea: `${affiliate.city}, ${affiliate.state}`,
+        serviceRadius: affiliate.serviceRadius
+      }
+    });
+  } catch (error) {
+    console.error('Get public affiliate info by ID error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'An error occurred while retrieving affiliate information'
+    });
+  }
+};
+
 module.exports = exports;

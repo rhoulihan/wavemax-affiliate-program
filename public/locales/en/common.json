@@ -547,6 +547,7 @@
       "subtitle": "Sign in to manage your laundry service",
       "socialLogin": "Sign in with your social media account",
       "orEmail": "Or sign in with email and password",
+      "emailOrUsername": "Username or Email Address",
       "noAccount": "Don't have an account?"
     },
     "register": {

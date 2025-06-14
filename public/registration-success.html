@@ -3,39 +3,113 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Registration Successful - WaveMAX Laundry</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Payment Successful - WaveMAX Laundry</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <style>
+        @keyframes checkmark {
+            0% {
+                stroke-dashoffset: 100;
+            }
+            100% {
+                stroke-dashoffset: 0;
+            }
+        }
+        .checkmark-animation {
+            stroke-dasharray: 100;
+            stroke-dashoffset: 100;
+            animation: checkmark 0.5s ease-in-out forwards;
+            animation-delay: 0.3s;
+        }
+    </style>
 </head>
-<body class="bg-gray-50">
-    <div class="min-h-screen flex items-center justify-center px-4">
-        <div class="max-w-md w-full bg-white rounded-lg shadow-lg p-8 text-center">
-            <div class="mb-6">
-                <svg class="mx-auto h-16 w-16 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+<body class="bg-gray-100 min-h-screen flex items-center justify-center">
+    <div class="bg-white p-8 rounded-lg shadow-xl max-w-md w-full text-center transform transition-all">
+        <div class="mb-6">
+            <div class="mx-auto flex items-center justify-center h-24 w-24 rounded-full bg-green-100 mb-4">
+                <svg class="h-12 w-12 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path class="checkmark-animation" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                 </svg>
             </div>
+            <h2 class="text-3xl font-bold text-gray-800 mb-2">Payment Successful!</h2>
+            <p class="text-xl text-gray-600 mb-1">Thank you for your payment</p>
+            <p class="text-gray-500 mb-6">Your transaction has been completed successfully.</p>
             
-            <h1 class="text-2xl font-bold text-gray-900 mb-4">Registration Successful!</h1>
+            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+                <p class="text-blue-800 font-semibold mb-2">What happens next?</p>
+                <p class="text-blue-700 text-sm">Your registration is complete! You'll receive a confirmation email with your account details and instructions to get started.</p>
+            </div>
             
-            <p class="text-gray-600 mb-6">
-                Thank you for registering with WaveMAX Laundry. Your payment has been processed successfully 
-                and your account has been created.
-            </p>
-            
-            <p class="text-gray-600 mb-8">
-                You will receive a confirmation email shortly with your account details and next steps.
-            </p>
-            
-            <div class="space-y-3">
-                <a href="/" class="block w-full bg-blue-600 text-white py-3 px-4 rounded-lg font-semibold hover:bg-blue-700 transition">
-                    Return to Home
-                </a>
-                
-                <a href="/customer-login.html" class="block w-full bg-gray-200 text-gray-800 py-3 px-4 rounded-lg font-semibold hover:bg-gray-300 transition">
-                    Login to Your Account
-                </a>
+            <div class="text-left bg-gray-50 rounded-lg p-4 mb-6">
+                <p class="text-sm text-gray-600 mb-1"><span class="font-semibold">Status:</span> <span class="text-green-600">Completed</span></p>
+                <p class="text-sm text-gray-600"><span class="font-semibold">Transaction ID:</span> <span id="transactionId" class="font-mono">-</span></p>
             </div>
         </div>
+        
+        <button id="okButton" class="w-full bg-green-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-green-700 transition duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5">
+            OK
+        </button>
+        
+        <p class="text-xs text-gray-500 mt-4">This window will close automatically in <span id="countdown">30</span> seconds</p>
     </div>
+
+    <script>
+        // Debug logging
+        console.log('Registration success page loaded');
+        console.log('Current URL:', window.location.href);
+        console.log('URL search params:', window.location.search);
+        
+        // Get transaction ID from URL parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        console.log('All URL parameters:');
+        for (const [key, value] of urlParams) {
+            console.log(`  ${key}: ${value}`);
+        }
+        
+        const transactionId = urlParams.get('PNRef') || urlParams.get('transactionId') || urlParams.get('token') || '-';
+        console.log('Transaction ID found:', transactionId);
+        document.getElementById('transactionId').textContent = transactionId;
+        
+        // Countdown timer
+        let countdown = 30;
+        const countdownElement = document.getElementById('countdown');
+        const countdownInterval = setInterval(() => {
+            countdown--;
+            countdownElement.textContent = countdown;
+            if (countdown <= 0) {
+                clearInterval(countdownInterval);
+                window.close();
+            }
+        }, 1000);
+        
+        // Handle OK button click
+        document.getElementById('okButton').addEventListener('click', function() {
+            // Clear the countdown
+            clearInterval(countdownInterval);
+            
+            // Try to close the window
+            window.close();
+            
+            // If window doesn't close (might be blocked), update UI
+            setTimeout(() => {
+                if (!window.closed) {
+                    document.getElementById('okButton').textContent = 'You can now close this window';
+                    document.getElementById('okButton').disabled = true;
+                    document.getElementById('okButton').classList.add('opacity-50', 'cursor-not-allowed');
+                    document.getElementById('okButton').classList.remove('hover:bg-green-700', 'hover:shadow-lg', 'transform', 'hover:-translate-y-0.5');
+                    
+                    // Hide countdown
+                    const countdownP = document.querySelector('.text-xs.text-gray-500.mt-4');
+                    if (countdownP) {
+                        countdownP.style.display = 'none';
+                    }
+                }
+            }, 100);
+        });
+        
+        // Auto-close after 30 seconds (backup to countdown)
+        setTimeout(() => {
+            window.close();
+        }, 30000);
+    </script>
 </body>
 </html>

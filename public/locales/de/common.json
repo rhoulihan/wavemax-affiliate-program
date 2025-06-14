@@ -546,6 +546,7 @@
       "subtitle": "Melden Sie sich an, um Ihren Wäscheservice zu verwalten",
       "socialLogin": "Mit Ihrem Social-Media-Konto anmelden",
       "orEmail": "Oder mit E-Mail und Passwort anmelden",
+      "emailOrUsername": "Benutzername oder E-Mail-Adresse",
       "noAccount": "Haben Sie noch kein Konto?"
     },
     "register": {

@@ -457,15 +457,30 @@ exports.operatorLogin = async (req, res) => {
  */
 exports.customerLogin = async (req, res) => {
   try {
-    const { username, password } = req.body;
+    const { username, emailOrUsername, password } = req.body;
 
-    // Find customer by username
-    const customer = await Customer.findOne({ username });
+    // Support both the old 'username' field and new 'emailOrUsername' field
+    const loginIdentifier = emailOrUsername || username;
+
+    if (!loginIdentifier) {
+      return res.status(400).json({
+        success: false,
+        message: 'Username or email is required'
+      });
+    }
+
+    // Find customer by username or email
+    const customer = await Customer.findOne({
+      $or: [
+        { username: loginIdentifier },
+        { email: loginIdentifier.toLowerCase() }
+      ]
+    });
 
     if (!customer) {
       return res.status(401).json({
         success: false,
-        message: 'Invalid username or password'
+        message: 'Invalid username/email or password'
       });
     }
 
@@ -477,10 +492,10 @@ exports.customerLogin = async (req, res) => {
     );
 
     if (!isPasswordValid) {
-      logLoginAttempt(false, 'affiliate', username, req, 'Invalid password');
+      logLoginAttempt(false, 'customer', loginIdentifier, req, 'Invalid password');
       return res.status(401).json({
         success: false,
-        message: 'Invalid username or password'
+        message: 'Invalid username/email or password'
       });
     }
 

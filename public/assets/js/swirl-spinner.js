@@ -254,6 +254,28 @@ console.log('[SwirlSpinner] Script file loaded');
                 pulse: true,
                 ...options
             }).show();
+            
+            // Add cancel button if requested
+            if (options.showCancelButton) {
+                const cancelBtn = document.createElement('button');
+                cancelBtn.textContent = 'Cancel Payment';
+                cancelBtn.style.cssText = 'margin-top: 20px; padding: 10px 20px; background: #dc2626; color: white; border: none; border-radius: 6px; font-size: 16px; cursor: pointer; font-weight: 600;';
+                cancelBtn.onmouseover = () => cancelBtn.style.background = '#b91c1c';
+                cancelBtn.onmouseout = () => cancelBtn.style.background = '#dc2626';
+                
+                if (options.onCancel) {
+                    cancelBtn.onclick = options.onCancel;
+                }
+                
+                // Find the wrapper and add button
+                const wrapper = container.querySelector('.swirl-spinner-wrapper');
+                if (wrapper) {
+                    wrapper.appendChild(cancelBtn);
+                } else {
+                    // If no wrapper, add directly to spinner element's parent
+                    spinner.element.parentNode.appendChild(cancelBtn);
+                }
+            }
 
             return {
                 hide: () => {
@@ -261,6 +283,19 @@ console.log('[SwirlSpinner] Script file loaded');
                     if (container.parentNode) {
                         container.parentNode.removeChild(container);
                     }
+                },
+                updateMessage: (message, submessage) => {
+                    spinner.updateMessage(message);
+                    if (submessage) {
+                        const messageEl = spinner.element?.querySelector('.swirl-spinner-message');
+                        if (messageEl && messageEl.nextSibling?.tagName !== 'P') {
+                            const subEl = document.createElement('p');
+                            subEl.style.cssText = 'color: #6b7280; margin-top: 5px; font-size: 14px;';
+                            subEl.textContent = submessage;
+                            messageEl.parentNode.appendChild(subEl);
+                        }
+                    }
+                    return this;
                 }
             };
         }

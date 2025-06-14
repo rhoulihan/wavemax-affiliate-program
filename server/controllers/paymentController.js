@@ -136,7 +136,8 @@ class PaymentController {
       res.json({
         success: true,
         status: paymentToken.status,
-        errorMessage: paymentToken.errorMessage
+        errorMessage: paymentToken.errorMessage,
+        transactionId: paymentToken.transactionId
       });
     } catch (error) {
       logger.error('Error checking payment status:', error);
@@ -215,7 +216,7 @@ class PaymentController {
       }
       
       // Update payment status
-      paymentToken.status = status === 'success' ? 'completed' : 'failed';
+      paymentToken.status = status === 'success' ? 'success' : 'failed';
       paymentToken.paygistixResponse = {
         Result: result || (status === 'success' ? '0' : '1'),
         testMode: true,
@@ -227,51 +228,6 @@ class PaymentController {
       }
       
       await paymentToken.save();
-      
-      // If payment was successful in test mode, create the customer
-      if (status === 'success' && paymentToken.customerData) {
-        try {
-          const customerData = paymentToken.customerData;
-          
-          // Check if customer already exists
-          const existingCustomer = await Customer.findOne({ email: customerData.email });
-          if (!existingCustomer) {
-            // Create customer with affiliate reference
-            const customer = new Customer({
-              firstName: customerData.firstName,
-              lastName: customerData.lastName,
-              email: customerData.email,
-              phone: customerData.phone,
-              username: customerData.username,
-              password: customerData.password, // This should be hashed in the model
-              address: {
-                street: customerData.address,
-                city: customerData.city,
-                state: customerData.state,
-                postalCode: customerData.zipCode
-              },
-              numberOfBags: customerData.numberOfBags,
-              specialInstructions: customerData.specialInstructions,
-              notificationPreference: customerData.notificationPreference || 'both',
-              affiliateId: customerData.affiliateId,
-              languagePreference: customerData.languagePreference || 'en',
-              registrationDate: new Date()
-            });
-            
-            await customer.save();
-            
-            logger.info('Customer created after successful test payment:', {
-              customerId: customer._id,
-              email: customer.email,
-              affiliateId: customer.affiliateId,
-              testMode: true
-            });
-          }
-        } catch (customerError) {
-          logger.error('Error creating customer after test payment:', customerError);
-          // Don't fail the payment update, but log the error
-        }
-      }
       
       // Release the callback back to the pool
       if (paymentToken.callbackPath) {
@@ -350,58 +306,37 @@ class PaymentController {
                      req.body.result === 'approved';
     
     // Update payment token status
-    paymentToken.status = isSuccess ? 'completed' : 'failed';
+    paymentToken.status = isSuccess ? 'success' : 'failed';
     paymentToken.paygistixResponse = { ...req.query, ...req.body };
-    paymentToken.transactionId = req.query.PNRef || req.body.PNRef;
+    paymentToken.transactionId = req.query.PNRef || req.body.PNRef || req.query.transactionId || req.body.transactionId;
     
     if (!isSuccess) {
       paymentToken.errorMessage = req.query.error || req.body.error || 'Payment was not successful';
     }
     
+    // Save and ensure the transaction ID is persisted
     await paymentToken.save();
     
-    // If payment was successful, create the customer
-    if (isSuccess && paymentToken.customerData) {
-      try {
-        const customerData = paymentToken.customerData;
-        
-        // Create customer with affiliate reference
-        const customer = new Customer({
-          firstName: customerData.firstName,
-          lastName: customerData.lastName,
-          email: customerData.email,
-          phone: customerData.phone,
-          address: {
-            street: customerData.address,
-            city: customerData.city,
-            state: customerData.state,
-            postalCode: customerData.postalCode
-          },
-          numberOfBags: customerData.numberOfBags,
-          notificationPreference: customerData.notificationPreference || 'both',
-          affiliateId: customerData.affiliateId,
-          registrationDate: new Date()
-        });
-        
-        await customer.save();
-        
-        logger.info('Customer created after successful payment:', {
-          customerId: customer._id,
-          email: customer.email,
-          affiliateId: customer.affiliateId
-        });
-      } catch (customerError) {
-        logger.error('Error creating customer after payment:', customerError);
-        // Don't fail the payment callback, but log the error
-      }
-    }
+    // Log the transaction ID to verify it was saved
+    logger.info('Transaction ID saved:', {
+      token: paymentToken.token,
+      transactionId: paymentToken.transactionId
+    });
+    
+    // Log payment result
+    logger.info('Payment token updated from callback:', {
+      token: paymentToken.token,
+      status: paymentToken.status,
+      isSuccess: isSuccess
+    });
     
     // Redirect to callback handler with all parameters
     const queryString = new URLSearchParams({
       ...req.query,
       token: paymentToken.token,
       status: paymentToken.status,
-      paymentToken: paymentToken.token
+      paymentToken: paymentToken.token,
+      transactionId: paymentToken.transactionId || ''
     }).toString();
     res.redirect(`/payment-callback-handler.html?${queryString}`);
   }
