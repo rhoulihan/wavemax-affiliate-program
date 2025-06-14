@@ -40,16 +40,16 @@
         e.preventDefault();
         console.log('Form submitted');
 
-        const username = document.getElementById('username').value;
+        const emailOrUsername = document.getElementById('emailOrUsername').value;
         const password = document.getElementById('password').value;
 
-        console.log('Submitting login with username:', username);
+        console.log('Submitting login with email/username:', emailOrUsername);
 
         // Send login status to parent
         sendMessageToParent('form-submit', { form: 'customer-login' });
 
         console.log('Making API request to:', 'https://wavemax.promo/api/v1/auth/customer/login');
-        console.log('Request body:', { username, password: '***' });
+        console.log('Request body:', { emailOrUsername, password: '***' });
 
         // API call with full URL
         const loginFetch = window.CsrfUtils && window.CsrfUtils.csrfFetch ? window.CsrfUtils.csrfFetch : fetch;
@@ -60,7 +60,7 @@
             'Content-Type': 'application/json'
           },
           credentials: 'include',
-          body: JSON.stringify({ username, password })
+          body: JSON.stringify({ emailOrUsername, password })
         })
           .then(response => {
             console.log('Response status:', response.status);

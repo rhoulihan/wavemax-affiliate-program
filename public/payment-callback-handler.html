@@ -82,7 +82,8 @@
                 type: 'paygistix-payment-callback',
                 result: result,
                 status: status,
-                transactionId: transactionId,
+                transactionId: transactionId || pnRef,
+                PNRef: pnRef,
                 orderId: orderId,
                 amount: amount,
                 authCode: authCode,
@@ -181,9 +182,13 @@
                     const response = await fetch(`/api/v1/payments/check-status/${custom1}`);
                     const data = await response.json();
                     
-                    if (data.success && data.status === 'completed') {
-                        // Payment was successful, redirect to success page
-                        window.location.href = '/registration-success.html';
+                    if (data.success && (data.status === 'success' || data.status === 'completed')) {
+                        // Payment was successful, redirect to success page with transaction ID
+                        const params = new URLSearchParams({
+                            PNRef: transactionId || pnRef,
+                            transactionId: transactionId || pnRef
+                        });
+                        window.location.href = `/registration-success.html?${params.toString()}`;
                         return;
                     }
                 } catch (error) {
@@ -214,116 +219,29 @@
                     spinnerContainer.style.display = 'none';
                 }
                 
-                // Redirect after delay
-                setTimeout(() => {
-                    window.location.href = '/registration-success.html';
-                }, 2000);
+                // Redirect to payment success page
+                const params = new URLSearchParams({
+                    PNRef: transactionId,
+                    transactionId: transactionId
+                });
+                window.location.href = `/payment-success.html?${params.toString()}`;
                 return;
             }
             
-            if (type === 'registration') {
-                // Handle registration payment callback
-                if (status === 'approved' || status === 'success') {
-                    // Get pending registration data from session storage
-                    const pendingRegistration = sessionStorage.getItem('pendingRegistration');
-                    
-                    if (pendingRegistration) {
-                        try {
-                            const registrationData = JSON.parse(pendingRegistration);
-                            
-                            // Add payment confirmation to registration data
-                            registrationData.paymentConfirmed = true;
-                            registrationData.transactionId = transactionId;
-                            
-                            // Submit registration with payment confirmation
-                            const response = await fetch('/api/v1/customers/register', {
-                                method: 'POST',
-                                headers: {
-                                    'Content-Type': 'application/json'
-                                },
-                                credentials: 'include',
-                                body: JSON.stringify(registrationData)
-                            });
-                            
-                            const result = await response.json();
-                            
-                            if (result.success) {
-                                // Store registration data for success page
-                                const successData = {
-                                    customerId: result.customerId,
-                                    bagBarcode: result.bagBarcode,
-                                    firstName: registrationData.firstName,
-                                    lastName: registrationData.lastName,
-                                    email: registrationData.email,
-                                    affiliateId: registrationData.affiliateId,
-                                    numberOfBags: registrationData.numberOfBags,
-                                    transactionId: transactionId
-                                };
-                                
-                                sessionStorage.setItem('registrationData', JSON.stringify(successData));
-                                sessionStorage.removeItem('pendingRegistration');
-                                
-                                // Redirect to success page
-                                window.location.href = '/embed-app.html?route=/customer-success';
-                            } else {
-                                // Registration failed
-                                statusDiv.innerHTML = `
-                                    <div class="bg-red-50 border border-red-200 rounded-lg p-4">
-                                        <h3 class="text-lg font-semibold text-red-800 mb-2">Registration Failed</h3>
-                                        <p class="text-red-600">${result.message || 'Unable to complete registration. Please contact support.'}</p>
-                                        <a href="/embed-app.html?route=/customer-register" class="inline-block mt-4 bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">
-                                            Try Again
-                                        </a>
-                                    </div>
-                                `;
-                                statusDiv.classList.remove('hidden');
-                            }
-                        } catch (error) {
-                            console.error('Error processing registration:', error);
-                            statusDiv.innerHTML = `
-                                <div class="bg-red-50 border border-red-200 rounded-lg p-4">
-                                    <h3 class="text-lg font-semibold text-red-800 mb-2">Processing Error</h3>
-                                    <p class="text-red-600">An error occurred while processing your registration. Please contact support.</p>
-                                    <a href="/embed-app.html?route=/customer-register" class="inline-block mt-4 bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">
-                                        Try Again
-                                    </a>
-                                </div>
-                            `;
-                            statusDiv.classList.remove('hidden');
-                        }
-                    } else {
-                        // No pending registration data
-                        statusDiv.innerHTML = `
-                            <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                                <h3 class="text-lg font-semibold text-yellow-800 mb-2">Session Expired</h3>
-                                <p class="text-yellow-600">Your registration session has expired. Please start over.</p>
-                                <a href="/embed-app.html?route=/customer-register" class="inline-block mt-4 bg-yellow-600 text-white px-4 py-2 rounded hover:bg-yellow-700">
-                                    Start Registration
-                                </a>
-                            </div>
-                        `;
-                        statusDiv.classList.remove('hidden');
-                    }
-                } else {
-                    // Payment failed
-                    statusDiv.innerHTML = `
-                        <div class="bg-red-50 border border-red-200 rounded-lg p-4">
-                            <h3 class="text-lg font-semibold text-red-800 mb-2">Payment Failed</h3>
-                            <p class="text-red-600">${responseMessage || 'Your payment could not be processed. Please try again.'}</p>
-                            <a href="/embed-app.html?route=/customer-register" class="inline-block mt-4 bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">
-                                Back to Registration
-                            </a>
-                        </div>
-                    `;
-                    statusDiv.classList.remove('hidden');
-                }
+            // For any payment type without window.opener, redirect to appropriate page
+            if (status === 'approved' || status === 'success') {
+                const params = new URLSearchParams({
+                    PNRef: transactionId,
+                    transactionId: transactionId,
+                    orderId: urlParams.get('orderId') || urlParams.get('OrderID')
+                });
+                window.location.href = `/payment-success.html?${params.toString()}`;
             } else {
-                // Handle order payment callback
-                if (status === 'approved' || status === 'success') {
-                    window.location.href = `/payment-success?orderId=${urlParams.get('orderId')}&transactionId=${transactionId}`;
-                } else {
-                    window.location.href = `/payment-error?message=${encodeURIComponent(responseMessage || 'Payment failed')}`;
-                }
+                const params = new URLSearchParams({
+                    message: responseMessage || 'Payment was declined',
+                    ResponseMsg: responseMessage
+                });
+                window.location.href = `/payment-error.html?${params.toString()}`;
             }
         }
         

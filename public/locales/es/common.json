@@ -546,6 +546,7 @@
       "subtitle": "Inicia sesión para gestionar tu servicio de lavandería",
       "socialLogin": "Inicia sesión con tu cuenta de redes sociales",
       "orEmail": "O inicia sesión con correo electrónico y contraseña",
+      "emailOrUsername": "Nombre de Usuario o Correo Electrónico",
       "noAccount": "¿No tienes una cuenta?"
     },
     "register": {

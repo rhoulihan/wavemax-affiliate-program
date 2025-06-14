@@ -1112,30 +1112,32 @@ window.addEventListener('load', function() {
 ## Payment Processing with Paygistix
 
 ### Overview
-The WaveMAX Affiliate Program uses Paygistix hosted payment forms with a unique form pool system for secure payment processing and tracking.
+The WaveMAX Affiliate Program uses Paygistix hosted payment forms with a callback URL pool system for secure payment processing and tracking.
 
 ### Features
 - **PCI-compliant hosted forms** - No card data touches our servers
-- **Form pool system** - Multiple forms with unique callbacks for payment tracking
+- **Callback URL pool system** - Dynamic callback URLs for payment tracking
 - **Payment window detection** - Automatic handling of closed payment windows
 - **Real-time callbacks** - Instant payment status updates
 - **Test payment form** - Development testing without real transactions
 
-### Form Pool System
-The application uses a pool of 10 identical Paygistix forms with unique callback URLs to track payments:
+### Callback URL Pool System
+The application uses a pool of callback URLs with a single Paygistix form to track multiple concurrent payments:
 
-```json
-// server/config/paygistix-forms.json
-{
-  "forms": [
-    {
-      "formId": "FORM_ID_1",
-      "formHash": "FORM_HASH_1",
-      "callbackPath": "/api/v1/payments/callback/form-1"
-    }
-    // ... forms 2-10
+```javascript
+// server/config/paygistix.config.js
+module.exports = {
+  // Single form configuration
+  formId: process.env.PAYGISTIX_FORM_ID,
+  formHash: process.env.PAYGISTIX_FORM_HASH,
+  
+  // Pool of callback paths
+  callbackPaths: [
+    '/api/v1/payments/callback/1',
+    '/api/v1/payments/callback/2',
+    // ... up to 10 callback paths
   ]
-}
+};
 ```
 
 ### Configuration
@@ -1151,10 +1153,10 @@ ENABLE_TEST_PAYMENT_FORM=true
 ```
 
 ### Payment Flow
-1. **Form Acquisition**: System assigns available form from pool
-2. **Payment Window**: Opens Paygistix hosted form in new window
-3. **Callback Processing**: Form-specific URL identifies payment
-4. **Form Release**: Returns form to pool after completion
+1. **Callback Acquisition**: System assigns available callback URL from pool
+2. **Payment Window**: Opens Paygistix hosted form with unique callback URL
+3. **Callback Processing**: Callback-specific URL identifies payment
+4. **Callback Release**: Returns callback URL to pool after completion
 
 ### Testing
 Enable test payment form for development:
@@ -1186,7 +1188,7 @@ formAction: [
 
 For detailed documentation:
 - [Paygistix Integration Guide](PAYGISTIX_INTEGRATION_GUIDE.md)
-- [Form Pool System Guide](PAYGISTIX_FORM_POOL_GUIDE.md)
+- [Callback Pool System Guide](PAYGISTIX_FORM_POOL_GUIDE.md)
 
 ## Testing
 

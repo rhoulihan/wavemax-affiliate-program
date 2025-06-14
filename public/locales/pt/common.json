@@ -546,6 +546,7 @@
       "subtitle": "Entre para gerenciar seu serviço de lavanderia",
       "socialLogin": "Entre com sua conta de mídia social",
       "orEmail": "Ou entre com e-mail e senha",
+      "emailOrUsername": "Nome de Usuário ou E-mail",
       "noAccount": "Não tem uma conta?"
     },
     "register": {

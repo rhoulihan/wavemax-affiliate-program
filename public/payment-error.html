@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Failed</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center">
+    <div class="bg-white p-8 rounded-lg shadow-md max-w-md w-full text-center">
+        <div class="mb-6">
+            <div class="mx-auto flex items-center justify-center h-24 w-24 rounded-full bg-red-100 mb-4">
+                <svg class="h-12 w-12 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </div>
+            <h2 class="text-3xl font-bold text-gray-800 mb-2">Payment Failed</h2>
+            <p class="text-gray-600 mb-1">Your payment could not be processed.</p>
+            <p class="text-sm text-red-600" id="errorMessage">Please try again or contact support.</p>
+        </div>
+        
+        <button id="okButton" class="w-full bg-red-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-red-700 transition duration-200">
+            Close
+        </button>
+    </div>
+
+    <script>
+        // Get error message from URL parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const errorMessage = urlParams.get('ResponseMsg') || urlParams.get('message') || 'Payment was declined. Please try again.';
+        document.getElementById('errorMessage').textContent = errorMessage;
+        
+        // Handle OK button click
+        document.getElementById('okButton').addEventListener('click', function() {
+            // If we have window.opener, notify the parent and close
+            if (window.opener && !window.opener.closed) {
+                try {
+                    window.opener.postMessage({ 
+                        type: 'payment-error-acknowledged',
+                        errorMessage: errorMessage
+                    }, '*');
+                } catch (e) {
+                    console.log('Could not send message to opener:', e);
+                }
+            }
+            
+            // Try to close the window
+            window.close();
+            
+            // If window doesn't close (might be blocked), show message
+            setTimeout(() => {
+                if (!window.closed) {
+                    document.getElementById('okButton').textContent = 'You can now close this window';
+                    document.getElementById('okButton').disabled = true;
+                    document.getElementById('okButton').classList.add('opacity-50', 'cursor-not-allowed');
+                }
+            }, 100);
+        });
+        
+        // Auto-close after 30 seconds
+        setTimeout(() => {
+            window.close();
+        }, 30000);
+    </script>
+</body>
+</html>

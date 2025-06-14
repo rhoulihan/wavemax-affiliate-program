@@ -85,6 +85,7 @@ exports.registerCustomer = async (req, res) => {
     const totalBagCredit = bagFee * bagCount;
 
     // Create new customer with bag information
+    console.log('Creating new customer with email:', email, 'username:', username);
     const newCustomer = new Customer({
       affiliateId,
       firstName,
@@ -113,7 +114,9 @@ exports.registerCustomer = async (req, res) => {
       languagePreference: languagePreference || 'en'
     });
 
+    console.log('Saving customer to database...');
     await newCustomer.save();
+    console.log('Customer saved successfully with ID:', newCustomer.customerId);
 
     // Send welcome emails with bag information
     try {

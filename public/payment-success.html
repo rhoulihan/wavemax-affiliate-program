@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Successful</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center">
+    <div class="bg-white p-8 rounded-lg shadow-md max-w-md w-full text-center">
+        <div class="mb-6">
+            <div class="mx-auto flex items-center justify-center h-24 w-24 rounded-full bg-green-100 mb-4">
+                <svg class="h-12 w-12 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+            </div>
+            <h2 class="text-3xl font-bold text-gray-800 mb-2">Payment Successful!</h2>
+            <p class="text-gray-600 mb-1">Your payment has been processed successfully.</p>
+            <p class="text-sm text-gray-500">Transaction ID: <span id="transactionId" class="font-mono">-</span></p>
+        </div>
+        
+        <button id="okButton" class="w-full bg-green-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-green-700 transition duration-200">
+            OK
+        </button>
+    </div>
+
+    <script>
+        // Debug logging
+        console.log('Payment success page loaded');
+        console.log('Current URL:', window.location.href);
+        console.log('URL search params:', window.location.search);
+        
+        // Get transaction ID from URL parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        console.log('All URL parameters:');
+        for (const [key, value] of urlParams) {
+            console.log(`  ${key}: ${value}`);
+        }
+        
+        const transactionId = urlParams.get('PNRef') || urlParams.get('transactionId') || '-';
+        console.log('Transaction ID found:', transactionId);
+        document.getElementById('transactionId').textContent = transactionId;
+        
+        // Handle OK button click - just close the window
+        document.getElementById('okButton').addEventListener('click', function() {
+            // Try to close the window
+            window.close();
+            
+            // If window doesn't close (might be blocked), show message
+            setTimeout(() => {
+                if (!window.closed) {
+                    document.getElementById('okButton').textContent = 'You can now close this window';
+                    document.getElementById('okButton').disabled = true;
+                    document.getElementById('okButton').classList.add('opacity-50', 'cursor-not-allowed');
+                }
+            }, 100);
+        });
+        
+        // Auto-close after 30 seconds
+        setTimeout(() => {
+            window.close();
+        }, 30000);
+    </script>
+</body>
+</html>

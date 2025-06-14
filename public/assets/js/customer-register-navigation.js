@@ -296,6 +296,36 @@
         if (formContainer) {
             formContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
+        
+        // Send resize event after step change is complete
+        // Wait for DOM updates and any transitions
+        setTimeout(() => {
+            sendResizeEvent();
+        }, 100);
+    }
+    
+    // Function to manually send resize event
+    function sendResizeEvent() {
+        // Use the embed navigation's sendHeight function if available
+        if (window.embedNavigation && window.embedNavigation.sendHeight) {
+            console.log('Using embedNavigation.sendHeight()');
+            window.embedNavigation.sendHeight();
+        } else if (window.parent && window.parent !== window) {
+            // Fallback to manual implementation
+            const height = Math.max(
+                document.documentElement.scrollHeight,
+                document.body.scrollHeight,
+                document.documentElement.offsetHeight,
+                document.body.offsetHeight,
+                document.documentElement.clientHeight
+            );
+            
+            console.log('Sending manual resize event, height:', height);
+            window.parent.postMessage({
+                type: 'resize',
+                data: { height: height }
+            }, '*');
+        }
     }
 
     async function advanceStep() {

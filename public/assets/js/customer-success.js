@@ -70,20 +70,46 @@ function displayCustomerData(data) {
   document.getElementById('customerId').textContent = data.customerId;
   document.getElementById('customerName').textContent = `${data.firstName} ${data.lastName}`;
   document.getElementById('customerEmail').textContent = data.email;
+  
+  // Set transaction ID if available
+  const transactionIdElement = document.getElementById('transactionId');
+  if (transactionIdElement && data.transactionId) {
+    transactionIdElement.textContent = data.transactionId;
+  }
 
   // Set affiliate information
-  document.getElementById('affiliateName').textContent = data.affiliateName;
-  document.getElementById('serviceArea').textContent = 'Austin, TX area';
-  // Display delivery fee structure
-  if (data.minimumDeliveryFee !== undefined && data.perBagDeliveryFee !== undefined) {
-    const minFee = parseFloat(data.minimumDeliveryFee);
-    const perBag = parseFloat(data.perBagDeliveryFee);
-    document.getElementById('deliveryFee').textContent = `Starting at $${minFee.toFixed(2)} (min) or $${perBag.toFixed(2)}/bag`;
-  } else if (data.deliveryFee !== undefined) {
-    // Fallback for legacy data
-    document.getElementById('deliveryFee').textContent = `$${parseFloat(data.deliveryFee).toFixed(2)} per pickup/delivery`;
+  if (data.affiliateInfo) {
+    // Use the new affiliateInfo object structure
+    const affiliate = data.affiliateInfo;
+    document.getElementById('affiliateName').textContent = 
+      `${affiliate.firstName} ${affiliate.lastName} (${affiliate.businessName})`;
+    document.getElementById('serviceArea').textContent = 
+      `${affiliate.city}, ${affiliate.state}`;
+    
+    // Display delivery fee structure
+    if (affiliate.minimumDeliveryFee !== undefined && affiliate.perBagDeliveryFee !== undefined) {
+      const minFee = parseFloat(affiliate.minimumDeliveryFee);
+      const perBag = parseFloat(affiliate.perBagDeliveryFee);
+      document.getElementById('deliveryFee').textContent = 
+        `$${minFee.toFixed(2)} minimum, then $${perBag.toFixed(2)} per bag`;
+    } else {
+      document.getElementById('deliveryFee').textContent = 'Contact for pricing';
+    }
   } else {
-    document.getElementById('deliveryFee').textContent = 'Contact for pricing';
+    // Fallback for legacy data structure
+    document.getElementById('affiliateName').textContent = data.affiliateName || 'Your local WaveMAX partner';
+    document.getElementById('serviceArea').textContent = 'Austin, TX area';
+    
+    // Display delivery fee structure (legacy)
+    if (data.minimumDeliveryFee !== undefined && data.perBagDeliveryFee !== undefined) {
+      const minFee = parseFloat(data.minimumDeliveryFee);
+      const perBag = parseFloat(data.perBagDeliveryFee);
+      document.getElementById('deliveryFee').textContent = `Starting at $${minFee.toFixed(2)} (min) or $${perBag.toFixed(2)}/bag`;
+    } else if (data.deliveryFee !== undefined) {
+      document.getElementById('deliveryFee').textContent = `$${parseFloat(data.deliveryFee).toFixed(2)} per pickup/delivery`;
+    } else {
+      document.getElementById('deliveryFee').textContent = 'Contact for pricing';
+    }
   }
 
   // Update button links to use direct navigation
@@ -118,9 +144,12 @@ function displayCustomerData(data) {
     };
   }
 
-  // Set bags purchased (default to 1)
-  const bagCount = data.bagsPurchased || 1;
-  document.getElementById('bagsPurchased').textContent = bagCount;
+  // Set bags purchased (check both field names for compatibility)
+  const bagCount = data.numberOfBags || data.bagsPurchased || 1;
+  const bagsPurchasedElement = document.getElementById('bagsPurchased');
+  if (bagsPurchasedElement) {
+    bagsPurchasedElement.textContent = bagCount;
+  }
   
   // Fetch bag fee from system config to calculate credit
   fetch('/api/v1/system/config/public')

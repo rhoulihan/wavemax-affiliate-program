@@ -162,10 +162,10 @@
 
     // Handle iframe resizing
     if (window.parent !== window) {
-      let lastHeight = 0;
+      let lastSentHeight = 0;  // Track the last height we actually sent to parent
       let heightTimeout = null;
       
-      function sendHeight() {
+      function sendHeight(force = false) {
         const height = Math.max(
           document.body.scrollHeight,
           document.body.offsetHeight,
@@ -174,39 +174,55 @@
           document.documentElement.offsetHeight
         );
 
-        // Only send if height has actually changed
-        if (Math.abs(height - lastHeight) > 5) { // 5px threshold to avoid minor fluctuations
-          lastHeight = height;
-          
-          // Debounce height messages to prevent flooding
+        // Only send if height has changed by more than 10px (increase or decrease)
+        const heightDifference = Math.abs(height - lastSentHeight);
+        
+        if (force || heightDifference > 10) {
+          // Clear any pending timeout
           if (heightTimeout) {
             clearTimeout(heightTimeout);
           }
           
+          // Debounce height messages to prevent flooding
           heightTimeout = setTimeout(() => {
-            console.log('Sending height to parent:', height);
+            console.log(`Height changed from ${lastSentHeight} to ${height} (diff: ${height - lastSentHeight}px)`);
+            lastSentHeight = height;  // Update last sent height
+            
             window.parent.postMessage({
               type: 'resize',
               data: { height: height }
             }, '*');
-          }, 50); // 50ms debounce
+          }, 200); // 200ms debounce
         }
       }
 
-      // Send initial height
-      sendHeight();
+      // Expose sendHeight function globally for manual control
+      window.embedNavigation = window.embedNavigation || {};
+      window.embedNavigation.sendHeight = sendHeight;
+      
+      // Check if auto-resize is disabled
+      const autoResizeDisabled = document.body.hasAttribute('data-disable-auto-resize');
+      
+      if (!autoResizeDisabled) {
+        // Send initial height (force to ensure it's sent)
+        sendHeight(true);
 
-      // Monitor for changes
-      const resizeObserver = new ResizeObserver(() => {
-        sendHeight();
-      });
-      resizeObserver.observe(document.body);
+        // Monitor for changes
+        const resizeObserver = new ResizeObserver(() => {
+          sendHeight();
+        });
+        resizeObserver.observe(document.body);
 
-      // Also send height on window resize
-      window.addEventListener('resize', sendHeight);
+        // Also send height on window resize
+        window.addEventListener('resize', () => sendHeight());
 
-      // Send height after images load
-      window.addEventListener('load', sendHeight);
+        // Send height after images load (force to ensure proper height)
+        window.addEventListener('load', () => sendHeight(true));
+      } else {
+        console.log('[Embed Navigation] Auto-resize disabled, manual resize control enabled');
+        // Still send initial height once (force)
+        sendHeight(true);
+      }
       
       // Clean up on page unload
       window.addEventListener('beforeunload', function() {

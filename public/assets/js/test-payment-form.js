@@ -9,6 +9,26 @@
     
     console.log('Test payment form loaded');
     
+    // Send heartbeat to parent window every second
+    const heartbeatInterval = setInterval(() => {
+        try {
+            // Send heartbeat to all origins since we're in cross-origin context
+            window.opener?.postMessage({ type: 'test-payment-heartbeat' }, '*');
+        } catch (e) {
+            console.log('Failed to send heartbeat:', e);
+        }
+    }, 1000);
+    
+    // Clean up on window unload
+    window.addEventListener('beforeunload', () => {
+        clearInterval(heartbeatInterval);
+        try {
+            window.opener?.postMessage({ type: 'test-payment-closing' }, '*');
+        } catch (e) {
+            console.log('Failed to send closing message:', e);
+        }
+    });
+    
     // Generate random payment data
     window.generateRandomData = function() {
         // Generate random card last 4
@@ -23,6 +43,13 @@
         
         // Generate random auth code
         const authCode = Math.floor(Math.random() * 1000000).toString().padStart(6, '0');
+        
+        // Regenerate and display the URL with new data
+        if (document.getElementById('callbackUrl').value || document.getElementById('assignedCallbackUrl')?.textContent) {
+            const url = generateCallbackUrl();
+            document.getElementById('generatedUrl').classList.remove('hidden');
+            document.getElementById('urlDisplay').textContent = url;
+        }
     };
     
     // Generate callback URL
@@ -32,7 +59,18 @@
         const cardType = document.getElementById('cardType').value;
         const expDate = document.getElementById('expDate').value;
         const amount = document.getElementById('amount').value;
-        const callbackUrl = document.getElementById('callbackUrl').value;
+        
+        // Get callback URL - check if it's hidden in the display div or in the select
+        let callbackUrl = document.getElementById('callbackUrl').value;
+        if (!callbackUrl) {
+            // Try to get from the displayed URL if select is hidden
+            const displayedUrl = document.getElementById('assignedCallbackUrl')?.textContent;
+            if (displayedUrl) {
+                callbackUrl = displayedUrl;
+            }
+        }
+        console.log('Callback URL retrieved:', callbackUrl);
+        
         const paymentToken = document.getElementById('paymentToken').value;
         const result = document.getElementById('result').value;
         
@@ -67,9 +105,17 @@
         
         // Don't add payment token to URL - the handler will find it by callback path
         
-        // Use the full URL including https://wavemax.promo
-        const baseUrl = 'https://wavemax.promo';
-        return `${baseUrl}${callbackUrl}?${params.toString()}`;
+        // Parse the callback URL to check if it's already a full URL
+        let fullCallbackUrl;
+        if (callbackUrl.startsWith('http://') || callbackUrl.startsWith('https://')) {
+            // Already a full URL
+            fullCallbackUrl = callbackUrl;
+        } else {
+            // Relative URL, prepend the base URL
+            const baseUrl = 'https://wavemax.promo';
+            fullCallbackUrl = baseUrl + callbackUrl;
+        }
+        return `${fullCallbackUrl}?${params.toString()}`;
     };
     
     // Simulate payment
@@ -84,55 +130,15 @@
         
         // Check if this is a customer registration test
         const customerDataStr = sessionStorage.getItem('testPaymentCustomerData');
-        if (customerDataStr && paymentToken) {
-            // Update payment status via API
-            try {
-                const status = result === '0' ? 'success' : 'failed';
-                const response = await fetch(`/api/v1/payments/update-status/${paymentToken}`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        status: status,
-                        result: result,
-                        message: result === '0' ? 'Test payment successful' : 'Test payment failed'
-                    })
-                });
-                
-                if (response.ok) {
-                    console.log(`Payment token ${paymentToken} updated to ${status}`);
-                    
-                    // For successful payment, close window after brief delay
-                    if (result === '0') {
-                        setTimeout(() => {
-                            if (confirm('Payment successful! Close this window?')) {
-                                window.close();
-                            }
-                        }, 1000);
-                    } else {
-                        // For failed payment, show error and close
-                        setTimeout(() => {
-                            alert('Payment failed. Please try again.');
-                            window.close();
-                        }, 1000);
-                    }
-                } else {
-                    console.error('Failed to update payment status');
-                    alert('Error updating payment status. Please try again.');
-                }
-            } catch (error) {
-                console.error('Error updating payment status:', error);
-                alert('Error processing payment. Please try again.');
+        
+        // For ALL test payments (registration or regular), redirect to callback URL
+        // This simulates what Paygistix does - it redirects to the callback URL
+        // The callback handler will find the pending token and update its status
+        setTimeout(() => {
+            if (confirm('Redirect to callback URL?')) {
+                window.location.href = url;
             }
-        } else {
-            // Regular test payment - redirect to callback URL
-            setTimeout(() => {
-                if (confirm('Redirect to callback URL?')) {
-                    window.location.href = url;
-                }
-            }, 1000);
-        }
+        }, 1000);
     };
     
     // Simulate in new window
@@ -141,72 +147,13 @@
         document.getElementById('generatedUrl').classList.remove('hidden');
         document.getElementById('urlDisplay').textContent = url;
         
-        // Check if this is a customer registration test
-        const customerDataStr = sessionStorage.getItem('testPaymentCustomerData');
-        if (customerDataStr) {
-            // For registration test, show a simple success/failure dialog
-            const result = document.getElementById('result').value;
-            const width = 400;
-            const height = 300;
-            const left = (screen.width - width) / 2;
-            const top = (screen.height - height) / 2;
-            
-            const testWindow = window.open('', 'PaymentSimulator', `width=${width},height=${height},left=${left},top=${top}`);
-            testWindow.document.write(`
-                <html>
-                <head>
-                    <title>Test Payment Result</title>
-                    <style>
-                        body { font-family: Arial, sans-serif; padding: 20px; text-align: center; }
-                        .success { color: green; }
-                        .failure { color: red; }
-                        button { padding: 10px 20px; margin: 10px; cursor: pointer; }
-                    </style>
-                </head>
-                <body>
-                    <h2>Test Payment Result</h2>
-                    ${result === '0' 
-                        ? '<p class="success">✅ Payment Successful!</p><button onclick="window.opener.completeRegistration(); window.close();">Complete Registration</button>' 
-                        : '<p class="failure">❌ Payment Failed</p><button onclick="window.close();">Close</button>'
-                    }
-                </body>
-                </html>
-            `);
-            
-            // Add function to handle registration completion
-            window.completeRegistration = async function() {
-                // Update payment status first
-                const paymentToken = document.getElementById('paymentToken').value;
-                if (paymentToken) {
-                    try {
-                        await fetch(`/api/v1/payments/update-status/${paymentToken}`, {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json'
-                            },
-                            body: JSON.stringify({
-                                status: 'success',
-                                result: '0',
-                                message: 'Test payment successful'
-                            })
-                        });
-                        console.log('Payment status updated to success');
-                    } catch (error) {
-                        console.error('Error updating payment status:', error);
-                    }
-                }
-                
-                // Close the test window
-                testWindow.close();
-            };
-        } else {
-            // Regular test - open callback URL in new window
-            const width = 800;
-            const height = 600;
-            const left = (screen.width - width) / 2;
-            const top = (screen.height - height) / 2;
-            window.open(url, 'PaymentSimulator', `width=${width},height=${height},left=${left},top=${top}`);
-        }
+        // For ALL test payments (registration or regular), open callback URL in new window
+        // This simulates what Paygistix does - it opens the callback URL in a new window
+        const width = 800;
+        const height = 600;
+        const left = (screen.width - width) / 2;
+        const top = (screen.height - height) / 2;
+        window.open(url, 'PaymentSimulator', `width=${width},height=${height},left=${left},top=${top}`);
     };
     
     // Copy URL to clipboard
@@ -290,10 +237,33 @@
                     // Display the assigned callback URL
                     document.getElementById('callbackUrlDisplay').classList.remove('hidden');
                     document.getElementById('assignedCallbackUrl').textContent = callbackUrl;
-                    document.getElementById('callbackUrlSelect').style.display = 'none';
+                    // Remove line about callbackUrlSelect since it no longer exists
                     
-                    // Use this callback URL for the simulation
-                    document.getElementById('callbackUrl').value = callbackUrl;
+                    // IMPORTANT: Set the actual input value so generateCallbackUrl can retrieve it
+                    // Create a hidden input if the select doesn't have this value
+                    const selectElement = document.getElementById('callbackUrl');
+                    if (selectElement) {
+                        // Check if this option exists in the select
+                        let optionExists = false;
+                        for (let option of selectElement.options) {
+                            if (option.value === callbackUrl) {
+                                optionExists = true;
+                                break;
+                            }
+                        }
+                        
+                        if (!optionExists) {
+                            // Add the callback URL as a new option
+                            const newOption = document.createElement('option');
+                            newOption.value = callbackUrl;
+                            newOption.textContent = callbackUrl;
+                            newOption.selected = true;
+                            selectElement.appendChild(newOption);
+                        } else {
+                            // Set the value
+                            selectElement.value = callbackUrl;
+                        }
+                    }
                 }
                 
             } catch (error) {
@@ -305,38 +275,46 @@
         const urlParams = new URLSearchParams(window.location.search);
         const callbackUrlParam = urlParams.get('callbackUrl');
         if (callbackUrlParam && !customerDataStr) {
+            // Decode the URL parameter
+            const decodedCallbackUrl = decodeURIComponent(callbackUrlParam);
+            
             document.getElementById('callbackUrlDisplay').classList.remove('hidden');
-            document.getElementById('assignedCallbackUrl').textContent = callbackUrlParam;
-            document.getElementById('callbackUrlSelect').style.display = 'none';
-            document.getElementById('callbackUrl').value = callbackUrlParam;
+            document.getElementById('assignedCallbackUrl').textContent = decodedCallbackUrl;
+            // Remove line about callbackUrlSelect since it no longer exists
+            
+            // Set the select value properly
+            const selectElement = document.getElementById('callbackUrl');
+            if (selectElement) {
+                // Add as new option since this is a dynamic URL
+                const newOption = document.createElement('option');
+                newOption.value = decodedCallbackUrl;
+                newOption.textContent = decodedCallbackUrl;
+                newOption.selected = true;
+                selectElement.appendChild(newOption);
+            }
         }
         
         // Add event listeners to buttons
-        // Find buttons by their position/text content since we removed onclick attributes
-        const buttons = document.querySelectorAll('.button-primary, .button-success, .button-secondary');
+        // Find buttons in the action section by their class
+        const actionButtons = document.querySelectorAll('.card .button-group .button');
         
-        // Simulate Callback button (first button-primary)
-        const simulateButton = document.querySelector('.button-primary');
-        if (simulateButton && simulateButton.textContent.includes('Simulate Callback')) {
-            simulateButton.addEventListener('click', simulatePayment);
+        if (actionButtons.length >= 3) {
+            // Simulate button (first button - button-primary)
+            actionButtons[0].addEventListener('click', simulatePayment);
+            
+            // New Window button (second button - button-success)
+            actionButtons[1].addEventListener('click', simulateInNewWindow);
+            
+            // Random button (third button - button-secondary)
+            actionButtons[2].addEventListener('click', generateRandomData);
         }
         
-        // New Window button (button-success)
-        const newWindowButton = document.querySelector('.button-success');
-        if (newWindowButton && newWindowButton.textContent.includes('New Window')) {
-            newWindowButton.addEventListener('click', simulateInNewWindow);
-        }
-        
-        // Random Data button (first button-secondary in actions section)
-        const randomButton = document.querySelector('.section-card .button-secondary');
-        if (randomButton && randomButton.textContent.includes('Random Data')) {
-            randomButton.addEventListener('click', generateRandomData);
-        }
-        
-        // Copy URL button (button-secondary in generated URL section)
-        const copyButton = document.querySelector('#generatedUrl .button-secondary');
-        if (copyButton && copyButton.textContent.includes('Copy URL')) {
-            copyButton.addEventListener('click', copyUrl);
+        // Remove copy button functionality since we don't need it
+        // Generate and display the full URL automatically
+        if (document.getElementById('callbackUrl').value || document.getElementById('assignedCallbackUrl')?.textContent) {
+            const url = generateCallbackUrl();
+            document.getElementById('generatedUrl').classList.remove('hidden');
+            document.getElementById('urlDisplay').textContent = url;
         }
     }
     
