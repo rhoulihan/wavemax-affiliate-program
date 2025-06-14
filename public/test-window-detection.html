@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Window Detection Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .log {
+            background: #f5f5f5;
+            padding: 10px;
+            margin: 10px 0;
+            font-family: monospace;
+            font-size: 12px;
+            white-space: pre-wrap;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            cursor: pointer;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .status {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+        }
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+    </style>
+</head>
+<body>
+    <h1>Window Detection Test</h1>
+    
+    <div class="test-section">
+        <h2>Test 1: Paygistix Payment Window</h2>
+        <button onclick="testPaygistixWindow()">Open Paygistix Window</button>
+        <div id="paygistix-status" class="status"></div>
+        <div id="paygistix-log" class="log"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Test 2: Test Payment Form Window</h2>
+        <button onclick="testPaymentFormWindow()">Open Test Payment Window</button>
+        <div id="test-status" class="status"></div>
+        <div id="test-log" class="log"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Test 3: Same Origin Window</h2>
+        <button onclick="testSameOriginWindow()">Open Same Origin Window</button>
+        <div id="same-origin-status" class="status"></div>
+        <div id="same-origin-log" class="log"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Test 4: About:blank Window</h2>
+        <button onclick="testAboutBlankWindow()">Open About:blank Window</button>
+        <div id="blank-status" class="status"></div>
+        <div id="blank-log" class="log"></div>
+    </div>
+
+    <script>
+        function log(testId, message) {
+            const logEl = document.getElementById(testId + '-log');
+            const timestamp = new Date().toISOString().substring(11, 23);
+            logEl.textContent += `[${timestamp}] ${message}\n`;
+            logEl.scrollTop = logEl.scrollHeight;
+            console.log(`[${testId}] ${message}`);
+        }
+        
+        function setStatus(testId, message, isError = false) {
+            const statusEl = document.getElementById(testId + '-status');
+            statusEl.textContent = message;
+            statusEl.className = 'status ' + (isError ? 'error' : 'success');
+        }
+        
+        function monitorWindow(testId, window, windowName) {
+            let checkCount = 0;
+            const maxChecks = 30; // 30 seconds
+            
+            log(testId, `Window opened: ${windowName}`);
+            log(testId, `Initial window.closed: ${window.closed}`);
+            log(testId, `Window constructor: ${window.constructor.name}`);
+            log(testId, `Window type: ${typeof window}`);
+            
+            // Try to check window properties
+            try {
+                log(testId, `Can access window.location: ${!!window.location}`);
+                log(testId, `Window.location.href: ${window.location.href}`);
+            } catch (e) {
+                log(testId, `Cannot access window.location: ${e.message}`);
+            }
+            
+            const interval = setInterval(() => {
+                checkCount++;
+                
+                let windowClosed = false;
+                let checkResults = [];
+                
+                // Method 1: Check closed property
+                try {
+                    windowClosed = window.closed === true;
+                    checkResults.push(`closed=${window.closed}`);
+                } catch (e) {
+                    checkResults.push(`closed=error(${e.message})`);
+                    windowClosed = true;
+                }
+                
+                // Method 2: Try to focus
+                try {
+                    window.focus();
+                    checkResults.push('focus=success');
+                } catch (e) {
+                    checkResults.push(`focus=error(${e.message})`);
+                    windowClosed = true;
+                }
+                
+                // Method 3: Try postMessage
+                try {
+                    window.postMessage({ type: 'ping' }, '*');
+                    checkResults.push('postMessage=success');
+                } catch (e) {
+                    checkResults.push(`postMessage=error(${e.message})`);
+                    windowClosed = true;
+                }
+                
+                // Method 4: Check if window reference is still valid
+                try {
+                    const validWindow = window && window.window === window;
+                    checkResults.push(`self-reference=${validWindow}`);
+                    if (!validWindow) windowClosed = true;
+                } catch (e) {
+                    checkResults.push(`self-reference=error(${e.message})`);
+                    windowClosed = true;
+                }
+                
+                log(testId, `Check #${checkCount}: ${checkResults.join(', ')}`);
+                
+                if (windowClosed) {
+                    clearInterval(interval);
+                    log(testId, `Window closed detected after ${checkCount} checks`);
+                    setStatus(testId, `Window closed after ${checkCount} checks`);
+                } else if (checkCount >= maxChecks) {
+                    clearInterval(interval);
+                    log(testId, `Monitoring stopped after ${maxChecks} checks`);
+                    setStatus(testId, `Window still open after ${maxChecks} checks`, true);
+                }
+            }, 1000);
+            
+            return interval;
+        }
+        
+        function testPaygistixWindow() {
+            const testId = 'paygistix';
+            log(testId, 'Opening Paygistix payment window...');
+            
+            const windowFeatures = 'width=800,height=600,resizable=yes,scrollbars=yes';
+            const paymentWindow = window.open('https://safepay.paymentlogistics.net/pg/payment-form.aspx', 'PaygistixPayment', windowFeatures);
+            
+            if (!paymentWindow) {
+                setStatus(testId, 'Failed to open window - popup blocked', true);
+                return;
+            }
+            
+            monitorWindow(testId, paymentWindow, 'Paygistix');
+        }
+        
+        function testPaymentFormWindow() {
+            const testId = 'test';
+            log(testId, 'Opening test payment form window...');
+            
+            const windowFeatures = 'width=800,height=600,resizable=yes,scrollbars=yes';
+            const testWindow = window.open('/test-payment', 'TestPaymentWindow', windowFeatures);
+            
+            if (!testWindow) {
+                setStatus(testId, 'Failed to open window - popup blocked', true);
+                return;
+            }
+            
+            monitorWindow(testId, testWindow, 'Test Payment Form');
+        }
+        
+        function testSameOriginWindow() {
+            const testId = 'same-origin';
+            log(testId, 'Opening same origin window...');
+            
+            const windowFeatures = 'width=800,height=600,resizable=yes,scrollbars=yes';
+            const sameOriginWindow = window.open('/login.html', 'SameOriginWindow', windowFeatures);
+            
+            if (!sameOriginWindow) {
+                setStatus(testId, 'Failed to open window - popup blocked', true);
+                return;
+            }
+            
+            monitorWindow(testId, sameOriginWindow, 'Same Origin');
+        }
+        
+        function testAboutBlankWindow() {
+            const testId = 'blank';
+            log(testId, 'Opening about:blank window...');
+            
+            const windowFeatures = 'width=800,height=600,resizable=yes,scrollbars=yes';
+            const blankWindow = window.open('about:blank', 'BlankWindow', windowFeatures);
+            
+            if (!blankWindow) {
+                setStatus(testId, 'Failed to open window - popup blocked', true);
+                return;
+            }
+            
+            // Write some content to the blank window
+            blankWindow.document.write('<html><body><h1>Test Window</h1><p>Close this window to test detection.</p></body></html>');
+            blankWindow.document.close();
+            
+            monitorWindow(testId, blankWindow, 'About:blank');
+        }
+        
+        // Test if we're in an iframe
+        if (window !== window.top) {
+            document.body.insertAdjacentHTML('afterbegin', '<div style="background: #fff3cd; padding: 10px; margin-bottom: 20px; border: 1px solid #ffeaa7;">⚠️ This page is running inside an iframe. Cross-origin restrictions may apply.</div>');
+        }
+    </script>
+</body>
+</html>

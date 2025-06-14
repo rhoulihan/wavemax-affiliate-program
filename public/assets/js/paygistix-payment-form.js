@@ -769,15 +769,22 @@ class PaygistixPaymentForm {
     }
     
     // Shared window monitoring function for both test and production
-    setupWindowMonitoring(paymentWindow, paymentToken, paymentSpinner, messageHandler, onWindowClosed) {
+    setupWindowMonitoring(paymentWindow, paymentToken, paymentSpinner, messageHandler, onWindowClosed, isTestMode = false) {
         const self = this;
         
         // Track window state
         let lastFocusSucceeded = true;
         let consecutiveFailures = 0;
-        const maxFailures = 1; // Fail on first check failure
+        // For test mode, allow more failures since window needs time to navigate
+        const maxFailures = isTestMode ? 3 : 1;
         
-        self.windowCheckInterval = setInterval(() => {
+        // Add a small delay before starting monitoring to allow window to fully load
+        // For test mode, add extra delay for navigation
+        const startDelay = isTestMode ? 3000 : 2000;
+        setTimeout(() => {
+            console.log(`Starting window monitoring after ${startDelay}ms delay (testMode=${isTestMode})`);
+            
+            self.windowCheckInterval = setInterval(() => {
                 let currentCheckFailed = false;
                 
                 // Method 1: Try postMessage (doesn't require response)
@@ -805,11 +812,14 @@ class PaygistixPaymentForm {
                 
                 // Method 3: Check closed property
                 try {
-                    if (paymentWindow.closed === true) {
+                    const isClosed = paymentWindow.closed;
+                    console.log(`Window.closed check: ${isClosed} (type: ${typeof isClosed})`);
+                    if (isClosed === true) {
                         console.log('Window reports as closed');
                         currentCheckFailed = true;
                     }
                 } catch (e) {
+                    console.log('Cannot check closed property:', e.message);
                     // Can't even check closed property
                     currentCheckFailed = true;
                 }
@@ -848,7 +858,8 @@ class PaygistixPaymentForm {
                         });
                     }
                 }
-        }, 2000); // Check every 2 seconds
+            }, 2000); // Check every 2 seconds
+        }, startDelay); // Wait before starting monitoring
     }
 
     setupRegistrationMode() {
@@ -1324,12 +1335,19 @@ class PaygistixPaymentForm {
             const top = (screen.height - windowHeight) / 2;
             const windowFeatures = `width=${windowWidth},height=${windowHeight},left=${left},top=${top},resizable=yes,scrollbars=yes`;
             
-            const testPaymentUrl = `/test-payment?token=${paymentToken}&amount=${totalAmount}&callbackUrl=${encodeURIComponent(formConfig.callbackUrl)}`;
+            // Use absolute URL to ensure proper resolution when in iframe
+            const baseUrl = window.location.protocol + '//' + window.location.host;
+            const testPaymentUrl = `${baseUrl}/test-payment?token=${paymentToken}&amount=${totalAmount}&callbackUrl=${encodeURIComponent(formConfig.callbackUrl)}`;
             console.log('Opening test payment window with URL:', testPaymentUrl);
             
             let paymentWindow;
             try {
-                paymentWindow = window.open(testPaymentUrl, 'TestPaymentWindow', windowFeatures);
+                // Try opening with empty URL first, like Paygistix does
+                paymentWindow = window.open('', 'TestPaymentWindow', windowFeatures);
+                if (paymentWindow) {
+                    // Navigate to the test payment URL
+                    paymentWindow.location.href = testPaymentUrl;
+                }
                 console.log('window.open returned:', paymentWindow);
                 console.log('Type of paymentWindow:', typeof paymentWindow);
                 console.log('paymentWindow constructor:', paymentWindow?.constructor?.name);
@@ -1371,6 +1389,17 @@ class PaygistixPaymentForm {
             // Store reference to window for manual close after success
             self.testPaymentWindow = paymentWindow;
             
+            // Add initial check to see if window is accessible
+            setTimeout(() => {
+                try {
+                    console.log('Initial test window check after 500ms:');
+                    console.log('- window.closed:', paymentWindow.closed);
+                    console.log('- can focus:', !!(paymentWindow.focus));
+                    console.log('- location accessible:', !!(paymentWindow.location));
+                } catch (e) {
+                    console.log('Initial test window check error:', e.message);
+                }
+            }, 500);
             
             // Use shared window monitoring function
             console.log('Test payment window opened - using cross-origin compatible monitoring');
@@ -1386,7 +1415,7 @@ class PaygistixPaymentForm {
                     console.error('Error cancelling payment token:', err);
                     self.handlePaymentFailure(paymentSpinner, 'Payment cancelled', null);
                 });
-            });
+            }, true); // Pass true for isTestMode
             
             // Start polling for payment status as backup
             let pollCount = 0;
