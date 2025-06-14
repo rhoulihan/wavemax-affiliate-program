@@ -14,6 +14,7 @@ router.post('/log-submission', paymentController.logSubmission);
 router.post('/create-token', paymentController.createPaymentToken);
 router.get('/check-status/:token', paymentController.checkPaymentStatus);
 router.post('/cancel-token/:token', paymentController.cancelPaymentToken);
+router.post('/update-status/:token', paymentController.updatePaymentStatus);
 
 // Pool statistics endpoint
 router.get('/pool-stats', paymentController.getPoolStats);

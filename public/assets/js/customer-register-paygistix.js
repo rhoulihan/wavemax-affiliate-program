@@ -27,6 +27,9 @@
             
             paymentConfig = configData.config;
             
+            // Make payment config globally available for navigation script
+            window.paymentConfig = paymentConfig;
+            
             // Initialize the Paygistix payment form with config
             paymentForm = new PaygistixPaymentForm('paymentFormContainer', {
                 paymentConfig: paymentConfig,

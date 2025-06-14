@@ -118,7 +118,8 @@ class PaygistixConfig {
         formActionUrl: this.getFormActionUrl(),
         returnUrl: this.getReturnUrl(),
         environment: this.getEnvironment(),
-        formHash: this.getFormHash() // Required for hosted form submission
+        formHash: this.getFormHash(), // Required for hosted form submission
+        testModeEnabled: process.env.ENABLE_TEST_PAYMENT_FORM === 'true' // Add test mode flag
       };
     } catch (error) {
       logger.error('Failed to get client config:', error.message);
