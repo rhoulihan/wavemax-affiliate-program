@@ -41,6 +41,13 @@ Historical documentation and change tracking:
 - [Recent Updates](./project-history/RECENT_UPDATES.md) - Major feature updates
 - [Project Logs](../project-logs/) - Detailed implementation logs for major features
 
+### 💡 [Examples](./examples/)
+Working examples and implementation templates:
+- [Iframe Embed Examples](./examples/README.md) - Complete embedding implementations
+- [WaveMAX Laundry Integration](./examples/wavemaxlaundry-iframe-embed.html) - Full-featured embed
+- [Simple Embed](./examples/wavemaxlaundry-simple-embed.html) - Basic implementation
+- [Embed Code Snippet](./examples/wavemaxlaundry-iframe-code.txt) - Copy-paste ready code
+
 ### 🔍 [API Documentation](./paygistix/)
 Detailed API and parameter documentation:
 - [Paygistix Callback Parameters](./paygistix/paygistix-callback-parameters.md)

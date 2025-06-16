@@ -19,6 +19,9 @@ test_*.log
 test_*.txt
 *_test_results.*
 admin_test_results.*
+test-coverage-results.txt
+test-output.log
+unit-test-results.txt
 
 # Coverage output files
 /tmp/coverage*.txt
@@ -46,6 +49,7 @@ lib-cov
 # Coverage directory used by tools like istanbul
 coverage
 *.lcov
+coverage-report.lcov
 
 # nyc test coverage
 .nyc_output
