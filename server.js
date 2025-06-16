@@ -24,10 +24,12 @@ const customerRoutes = require('./server/routes/customerRoutes');
 const orderRoutes = require('./server/routes/orderRoutes');
 const administratorRoutes = require('./server/routes/administratorRoutes');
 const operatorRoutes = require('./server/routes/operatorRoutes');
+const w9Routes = require('./server/routes/w9Routes');
 const coverageRoutes = require('./server/routes/coverageRoutes');
 const systemConfigRoutes = require('./server/routes/systemConfigRoutes');
 const routingRoutes = require('./server/routes/routingRoutes');
 const paymentRoutes = require('./server/routes/paymentRoutes');
+const quickbooksRoutes = require('./server/routes/quickbooksRoutes');
 const affiliateController = require('./server/controllers/affiliateController');
 const customerController = require('./server/controllers/customerController');
 
@@ -91,6 +93,15 @@ if (process.env.NODE_ENV !== 'test') {
         logger.info('Paygistix callback pool initialized');
       } catch (error) {
         logger.error('Error initializing callback pool:', { error: error.message });
+      }
+      
+      // Initialize data retention service
+      try {
+        const DataRetentionService = require('./server/services/dataRetentionService');
+        DataRetentionService.initialize();
+        logger.info('Data retention service initialized');
+      } catch (error) {
+        logger.error('Error initializing data retention service:', { error: error.message });
       }
     })
     .catch(err => {
@@ -366,8 +377,10 @@ apiV1Router.use('/customers', customerRoutes);
 apiV1Router.use('/orders', orderRoutes);
 apiV1Router.use('/administrators', administratorRoutes);
 apiV1Router.use('/operators', operatorRoutes);
+apiV1Router.use('/w9', w9Routes);  // W-9 document management
 apiV1Router.use('/system/config', systemConfigRoutes);
 apiV1Router.use('/payments', paymentRoutes);
+apiV1Router.use('/quickbooks', quickbooksRoutes);  // QuickBooks export functionality
 
 // Paygistix callback route (directly under /api/v1 for the callback)
 apiV1Router.use('/payment_callback', require('./server/routes/generalPaymentCallback'));

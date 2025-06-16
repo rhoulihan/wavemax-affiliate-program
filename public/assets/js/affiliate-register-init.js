@@ -1850,10 +1850,19 @@ function initializeAffiliateRegistration() {
       
       // Always search for the address
       if (true) {
-        // Build search queries from most specific to least specific
+        // Build search queries prioritizing street address + zip code for accuracy
+        // This approach works better for business locations by avoiding city/neighborhood ambiguity
         const searchQueries = [];
         
-        // Full address with zip
+        // FIRST PRIORITY: Street address + zip code only (most accurate for business locations)
+        if (address && zipCode) {
+          searchQueries.push({
+            query: `${address}, ${zipCode}, USA`,
+            description: `${address}, ${zipCode}`
+          });
+        }
+        
+        // SECOND: Full address with zip
         if (address && zipCode) {
           searchQueries.push({
             query: `${address}, ${city}, ${state} ${zipCode}, USA`,
@@ -1861,7 +1870,7 @@ function initializeAffiliateRegistration() {
           });
         }
         
-        // Full address without zip
+        // THIRD: Full address without zip
         if (address) {
           searchQueries.push({
             query: `${address}, ${city}, ${state}, USA`,
@@ -1869,7 +1878,7 @@ function initializeAffiliateRegistration() {
           });
         }
         
-        // Just city and state
+        // LAST: Just city and state (fallback)
         searchQueries.push({
           query: `${city}, ${state}, USA`,
           description: `${city}, ${state} (City Center)`
@@ -2172,7 +2181,7 @@ function initializeAffiliateRegistration() {
           latitude: lat,
           longitude: lon,
           radius: radiusValue,
-          address: addressText
+          address: window.confirmedServiceAddress || fullAddress || addressText
         };
         console.log('[Service Area Map] Stored service area data for component initialization:', window.selectedServiceAreaData);
         
@@ -2227,7 +2236,9 @@ function initializeAffiliateRegistration() {
           console.log('[Service Area Map] Service area section shown, initializing component');
           if (window.ServiceAreaComponent && window.selectedServiceAreaData) {
             const data = window.selectedServiceAreaData;
-            window.registrationServiceArea = window.ServiceAreaComponent.init('registrationServiceAreaComponent', {
+            // Small delay to ensure container is fully rendered
+            setTimeout(() => {
+              window.registrationServiceArea = window.ServiceAreaComponent.init('registrationServiceAreaComponent', {
               latitude: data.latitude,
               longitude: data.longitude,
               radius: data.radius,
@@ -2236,6 +2247,10 @@ function initializeAffiliateRegistration() {
               showMap: true,
               showControls: true,
               showInfo: true,
+              // Store registration address for "Use Registration Address" button
+              registrationAddress: data.address,
+              registrationLat: data.latitude,
+              registrationLng: data.longitude,
               onUpdate: function(serviceData) {
                 // Update hidden fields - component creates fields with containerId prefix
                 const latField = document.getElementById('registrationServiceAreaComponent-latitude');
@@ -2247,16 +2262,17 @@ function initializeAffiliateRegistration() {
                 if (radiusField) radiusField.value = serviceData.radius;
                 console.log('Service area updated:', serviceData);
               }
-            });
-            
-            // Also update the hidden fields immediately with initial values
-            const latField = document.getElementById('registrationServiceAreaComponent-latitude');
-            const lngField = document.getElementById('registrationServiceAreaComponent-longitude');
-            const radiusField = document.getElementById('registrationServiceAreaComponent-radius');
-            
-            if (latField) latField.value = data.latitude;
-            if (lngField) lngField.value = data.longitude;
-            if (radiusField) radiusField.value = data.radius;
+              });
+              
+              // Also update the hidden fields immediately with initial values
+              const latField = document.getElementById('registrationServiceAreaComponent-latitude');
+              const lngField = document.getElementById('registrationServiceAreaComponent-longitude');
+              const radiusField = document.getElementById('registrationServiceAreaComponent-radius');
+              
+              if (latField) latField.value = data.latitude;
+              if (lngField) lngField.value = data.longitude;
+              if (radiusField) radiusField.value = data.radius;
+            }, 100); // Small delay to ensure DOM is ready
           } else {
             console.error('ServiceAreaComponent or selectedServiceAreaData not available');
           }

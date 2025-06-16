@@ -249,6 +249,7 @@ describe('Administrator Controller', () => {
         firstName: 'John',
         lastName: 'Operator',
         email: 'operator@example.com',
+        username: 'johnoperator',
         password: 'Pass123!',
         workStation: 'Station1',
         shiftStart: '09:00',
@@ -352,6 +353,13 @@ describe('Administrator Controller', () => {
       Affiliate.countDocuments.mockResolvedValue(20);
       Customer.countDocuments.mockResolvedValue(100);
       Order.countDocuments.mockResolvedValue(5);
+      
+      // Mock for recent activity
+      Order.find.mockReturnValue({
+        sort: jest.fn().mockReturnThis(),
+        limit: jest.fn().mockReturnThis(),
+        lean: jest.fn().mockResolvedValue([])
+      });
 
       await administratorController.getDashboard(req, res);
 
@@ -361,7 +369,8 @@ describe('Administrator Controller', () => {
           orderStats: expect.any(Object),
           operatorPerformance: expect.any(Array),
           affiliatePerformance: expect.any(Array),
-          systemHealth: expect.any(Object)
+          systemHealth: expect.any(Object),
+          recentActivity: expect.any(Array)
         })
       });
     });

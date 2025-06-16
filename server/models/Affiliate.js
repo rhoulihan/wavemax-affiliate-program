@@ -151,6 +151,32 @@ const affiliateSchema = new mongoose.Schema({
     type: String,
     enum: ['en', 'es', 'pt', 'de'],
     default: 'en'
+  },
+  // W-9 Tax Information
+  w9Information: {
+    status: {
+      type: String,
+      enum: ['not_submitted', 'pending_review', 'verified', 'rejected', 'expired'],
+      default: 'not_submitted'
+    },
+    submittedAt: Date,
+    verifiedAt: Date,
+    verifiedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'Administrator' },
+    rejectedAt: Date,
+    rejectedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'Administrator' },
+    rejectionReason: String,
+    expiryDate: Date,
+    documentId: String, // Reference to W9Document
+    taxIdType: { type: String, enum: ['SSN', 'EIN'] },
+    taxIdLast4: String, // Store only last 4 digits for display
+    businessName: String, // Legal business name from W-9
+    quickbooksVendorId: String,
+    quickbooksData: {
+      displayName: String,
+      vendorType: { type: String, default: '1099 Contractor' },
+      terms: { type: String, default: 'Net 15' },
+      defaultExpenseAccount: { type: String, default: 'Commission Expense' }
+    }
   }
 }, { 
   timestamps: true,
@@ -195,6 +221,23 @@ affiliateSchema.pre('save', function(next) {
 
 // Create 2dsphere index for location-based queries
 affiliateSchema.index({ serviceLocation: '2dsphere' });
+
+// Method to check if affiliate can receive payments
+affiliateSchema.methods.canReceivePayments = function() {
+  return this.w9Information.status === 'verified' && this.isActive;
+};
+
+// Method to get W-9 status display text
+affiliateSchema.methods.getW9StatusDisplay = function() {
+  const statusMap = {
+    'not_submitted': 'W-9 Required',
+    'pending_review': 'W-9 Under Review',
+    'verified': 'W-9 Verified',
+    'rejected': 'W-9 Rejected - Resubmission Required',
+    'expired': 'W-9 Expired - Update Required'
+  };
+  return statusMap[this.w9Information.status] || 'Unknown Status';
+};
 
 // Update serviceLocation when lat/lng changes
 affiliateSchema.pre('save', function(next) {

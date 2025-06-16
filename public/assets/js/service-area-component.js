@@ -22,6 +22,8 @@
       return null;
     }
 
+    console.log('[ServiceAreaComponent] Init called with options:', options);
+
     // Default options
     const config = {
       editable: true,
@@ -34,8 +36,13 @@
       address: options.address || '',
       onUpdate: options.onUpdate || null,
       readOnly: options.readOnly || false,
+      registrationAddress: options.registrationAddress || null,
+      registrationLat: options.registrationLat || null,
+      registrationLng: options.registrationLng || null,
       ...options
     };
+    
+    console.log('[ServiceAreaComponent] Final config:', config);
 
     // Create the HTML structure
     const html = `
@@ -89,18 +96,31 @@
                 <!-- Service Area Details -->
                 <div id="${containerId}-info" class="service-area-info bg-gray-50 p-4 rounded-lg border border-gray-200">
                   <h4 class="font-semibold text-gray-800 mb-3" data-i18n="affiliate.register.serviceAreaDetails">Service Area Details</h4>
-                  <div class="text-sm space-y-2">
-                    <div>
-                      <span class="text-gray-600" data-i18n="affiliate.register.serviceCenter">Service Center:</span>
-                      <div id="${containerId}-centerLocation" class="text-gray-800 font-medium mt-1">${config.address || 'Click on map to set location'}</div>
+                  <div class="grid md:grid-cols-2 gap-4">
+                    <!-- Left column: Details -->
+                    <div class="text-sm space-y-2">
+                      <div>
+                        <span class="text-gray-600" data-i18n="affiliate.register.serviceCenter">Service Center:</span>
+                        <div id="${containerId}-centerLocation" class="text-gray-800 font-medium mt-1">${config.address || 'Click on map to set location'}</div>
+                      </div>
+                      <div>
+                        <span class="text-gray-600" data-i18n="affiliate.register.coordinates">Coordinates:</span>
+                        <div id="${containerId}-centerCoordinates" class="text-gray-800 font-mono text-xs mt-1">${config.latitude.toFixed(6)}, ${config.longitude.toFixed(6)}</div>
+                      </div>
+                      <div>
+                        <span class="text-gray-600" data-i18n="affiliate.register.coverageArea">Coverage Area:</span>
+                        <div id="${containerId}-coverageArea" class="text-gray-800 font-medium mt-1">${config.radius} mile radius</div>
+                      </div>
                     </div>
-                    <div>
-                      <span class="text-gray-600" data-i18n="affiliate.register.coordinates">Coordinates:</span>
-                      <div id="${containerId}-centerCoordinates" class="text-gray-800 font-mono text-xs mt-1">${config.latitude.toFixed(6)}, ${config.longitude.toFixed(6)}</div>
-                    </div>
-                    <div>
-                      <span class="text-gray-600" data-i18n="affiliate.register.coverageArea">Coverage Area:</span>
-                      <div id="${containerId}-coverageArea" class="text-gray-800 font-medium mt-1">${config.radius} mile radius</div>
+                    <!-- Right column: Use Registration Address button -->
+                    <div class="flex items-start justify-end">
+                      ${config.registrationAddress ? `
+                        <button type="button" 
+                                id="${containerId}-useRegistrationBtn"
+                                class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition text-sm font-medium">
+                          <span data-i18n="affiliate.register.useRegistrationAddress">Use Registration Address</span>
+                        </button>
+                      ` : ''}
                     </div>
                   </div>
                 </div>
@@ -155,6 +175,24 @@
     // Initialize map if needed
     if (config.showMap) {
       initializeMap(component);
+    }
+
+    // Add event handler for "Use Registration Address" button
+    const useRegistrationBtn = document.getElementById(`${containerId}-useRegistrationBtn`);
+    if (useRegistrationBtn && config.registrationLat && config.registrationLng) {
+      useRegistrationBtn.addEventListener('click', function() {
+        // Update service area to registration address
+        updateServiceArea(component, config.registrationLat, config.registrationLng, component.config.radius);
+        
+        // If registration address is provided, update the address display immediately
+        if (config.registrationAddress) {
+          const locationElement = document.getElementById(`${containerId}-centerLocation`);
+          if (locationElement) {
+            locationElement.textContent = config.registrationAddress;
+            component.config.address = config.registrationAddress;
+          }
+        }
+      });
     }
 
     // Store component instance
@@ -223,8 +261,20 @@
     }
 
     try {
+      console.log('[ServiceAreaComponent] Initializing map with center:', component.config.latitude, component.config.longitude);
+      
+      // Calculate initial zoom level based on radius
+      const radiusInKm = component.config.radius * 1.60934;
+      let initialZoom = 12;
+      if (radiusInKm <= 5) initialZoom = 13;
+      else if (radiusInKm <= 10) initialZoom = 12;
+      else if (radiusInKm <= 20) initialZoom = 11;
+      else if (radiusInKm <= 40) initialZoom = 10;
+      else if (radiusInKm <= 80) initialZoom = 9;
+      else initialZoom = 8;
+      
       // Initialize map
-      component.map = L.map(mapContainer).setView([component.config.latitude, component.config.longitude], 12);
+      component.map = L.map(mapContainer).setView([component.config.latitude, component.config.longitude], initialZoom);
       
       // Add OpenStreetMap tiles
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -300,9 +350,21 @@
       });
     }
 
-    // Fit map to show the entire circle
-    const bounds = component.circle.getBounds();
-    component.map.fitBounds(bounds, { padding: [50, 50] });
+    // Calculate appropriate zoom level based on radius
+    // This ensures the service area circle is visible while keeping the center point
+    const radiusInKm = component.config.radius * 1.60934;
+    let zoomLevel = 12; // Default zoom
+    
+    // Adjust zoom based on radius
+    if (radiusInKm <= 5) zoomLevel = 13;
+    else if (radiusInKm <= 10) zoomLevel = 12;
+    else if (radiusInKm <= 20) zoomLevel = 11;
+    else if (radiusInKm <= 40) zoomLevel = 10;
+    else if (radiusInKm <= 80) zoomLevel = 9;
+    else zoomLevel = 8;
+    
+    // Set the view to center on the registration address with appropriate zoom
+    component.map.setView([component.config.latitude, component.config.longitude], zoomLevel);
   }
 
   /**
@@ -313,6 +375,12 @@
    * @param {number} radius - Radius in miles
    */
   function updateServiceArea(component, lat, lng, radius) {
+    // Check if coordinates have actually changed
+    const coordsChanged = (
+      Math.abs(component.config.latitude - lat) > 0.000001 || 
+      Math.abs(component.config.longitude - lng) > 0.000001
+    );
+
     // Update config
     component.config.latitude = lat;
     component.config.longitude = lng;
@@ -339,8 +407,11 @@
     // Update map display
     updateMapDisplay(component);
 
-    // Reverse geocode to get address
-    reverseGeocodeLocation(component, lat, lng);
+    // Only reverse geocode if coordinates have changed
+    // This prevents address from changing when only radius is adjusted
+    if (coordsChanged) {
+      reverseGeocodeLocation(component, lat, lng);
+    }
 
     // Call update callback if provided
     if (component.config.onUpdate) {

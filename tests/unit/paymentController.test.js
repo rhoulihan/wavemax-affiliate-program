@@ -1,14 +1,14 @@
 const paymentController = require('../../server/controllers/paymentController');
-const Payment = require('../../server/models/Payment');
-const Order = require('../../server/models/Order');
-const paygistixService = require('../../server/services/paygistixService');
-const { validationResult } = require('express-validator');
+const paygistixConfig = require('../../server/config/paygistix.config');
+const PaymentToken = require('../../server/models/PaymentToken');
+const callbackPoolManager = require('../../server/services/callbackPoolManager');
+const logger = require('../../server/utils/logger');
 
 // Mock dependencies
-jest.mock('../../server/models/Payment');
-jest.mock('../../server/models/Order');
-jest.mock('../../server/services/paygistixService');
-jest.mock('express-validator');
+jest.mock('../../server/config/paygistix.config');
+jest.mock('../../server/models/PaymentToken');
+jest.mock('../../server/services/callbackPoolManager');
+jest.mock('../../server/utils/logger');
 
 describe('Payment Controller', () => {
     let req, res;
@@ -18,512 +18,529 @@ describe('Payment Controller', () => {
             body: {},
             params: {},
             query: {},
-            user: { id: 'user123' }
+            ip: '127.0.0.1',
+            hostname: 'localhost',
+            get: jest.fn().mockReturnValue('test-user-agent'),
+            method: 'GET'
         };
         res = {
             status: jest.fn().mockReturnThis(),
             json: jest.fn(),
-            send: jest.fn()
+            redirect: jest.fn()
         };
         jest.clearAllMocks();
     });
 
-    describe('createPaymentIntent', () => {
-        it('should create payment intent successfully', async () => {
-            // Setup
-            const mockOrder = {
-                _id: 'order123',
-                orderNumber: 'ORD-2024-001',
-                totalAmount: 25.00,
-                paymentStatus: 'pending',
-                serviceType: 'wash-dry-fold',
-                customerId: {
-                    _id: 'customer123',
-                    email: 'customer@example.com'
+    describe('getConfig', () => {
+        it('should return payment configuration when properly configured', async () => {
+            const mockConfig = {
+                formUrl: 'https://test.paygistix.com/form',
+                formHash: 'test-hash-123',
+                merchantId: 'test-merchant'
+            };
+
+            paygistixConfig.isConfigured.mockReturnValue(true);
+            paygistixConfig.getClientConfig.mockReturnValue(mockConfig);
+
+            await paymentController.getConfig(req, res);
+
+            expect(paygistixConfig.isConfigured).toHaveBeenCalled();
+            expect(paygistixConfig.getClientConfig).toHaveBeenCalled();
+            expect(logger.info).toHaveBeenCalledWith('Payment config accessed', {
+                ip: '127.0.0.1',
+                hostname: 'localhost',
+                userAgent: 'test-user-agent',
+                hasHash: true
+            });
+            expect(res.json).toHaveBeenCalledWith({
+                success: true,
+                config: mockConfig
+            });
+        });
+
+        it('should return error when Paygistix is not configured', async () => {
+            paygistixConfig.isConfigured.mockReturnValue(false);
+
+            await paymentController.getConfig(req, res);
+
+            expect(res.status).toHaveBeenCalledWith(500);
+            expect(res.json).toHaveBeenCalledWith({
+                success: false,
+                message: 'Payment configuration not properly set up'
+            });
+        });
+
+        it('should handle errors gracefully', async () => {
+            paygistixConfig.isConfigured.mockReturnValue(true);
+            paygistixConfig.getClientConfig.mockImplementation(() => {
+                throw new Error('Config error');
+            });
+
+            await paymentController.getConfig(req, res);
+
+            expect(logger.error).toHaveBeenCalledWith('Error getting payment config:', expect.any(Error));
+            expect(res.status).toHaveBeenCalledWith(500);
+            expect(res.json).toHaveBeenCalledWith({
+                success: false,
+                message: 'Failed to load payment configuration'
+            });
+        });
+    });
+
+    describe('logSubmission', () => {
+        it('should log payment submission successfully', async () => {
+            req.body = {
+                formId: 'form-123',
+                timestamp: '2024-01-01T12:00:00Z',
+                status: 'submitted'
+            };
+
+            await paymentController.logSubmission(req, res);
+
+            expect(logger.info).toHaveBeenCalledWith('Paygistix payment submission:', {
+                formId: 'form-123',
+                timestamp: '2024-01-01T12:00:00Z',
+                status: 'submitted',
+                ip: '127.0.0.1',
+                userAgent: 'test-user-agent'
+            });
+            expect(res.json).toHaveBeenCalledWith({
+                success: true,
+                message: 'Payment submission logged'
+            });
+        });
+
+        it('should handle logging errors', async () => {
+            logger.info.mockImplementation(() => {
+                throw new Error('Logging error');
+            });
+
+            await paymentController.logSubmission(req, res);
+
+            expect(logger.error).toHaveBeenCalledWith('Error logging payment submission:', expect.any(Error));
+            expect(res.status).toHaveBeenCalledWith(500);
+            expect(res.json).toHaveBeenCalledWith({
+                success: false,
+                message: 'Failed to log submission'
+            });
+        });
+    });
+
+    describe('createPaymentToken', () => {
+        beforeEach(() => {
+            PaymentToken.generateToken = jest.fn().mockReturnValue('test-token-123');
+            PaymentToken.prototype.save = jest.fn();
+        });
+
+        it('should create payment token successfully', async () => {
+            req.body = {
+                customerData: {
+                    email: 'test@example.com',
+                    name: 'Test User'
+                },
+                paymentData: {
+                    amount: 100.00,
+                    description: 'Test payment'
                 }
             };
 
-            const mockPaymentIntent = {
-                id: 'pi_test_123',
-                clientSecret: 'pi_test_123_secret',
-                amount: 2500,
-                currency: 'USD'
+            const mockCallbackConfig = {
+                callbackPath: '/api/v1/payments/callback/form-1',
+                formId: 'form-1'
             };
 
-            req.body = { orderId: 'order123' };
-            validationResult.mockReturnValue({ isEmpty: () => true });
-            Order.findById.mockReturnValue({
-                populate: jest.fn().mockResolvedValue(mockOrder)
+            callbackPoolManager.acquireCallback.mockResolvedValue(mockCallbackConfig);
+
+            await paymentController.createPaymentToken(req, res);
+
+            expect(PaymentToken.generateToken).toHaveBeenCalled();
+            expect(callbackPoolManager.acquireCallback).toHaveBeenCalledWith('test-token-123');
+            expect(PaymentToken).toHaveBeenCalledWith({
+                token: 'test-token-123',
+                customerData: req.body.customerData,
+                paymentData: req.body.paymentData,
+                callbackPath: '/api/v1/payments/callback/form-1',
+                status: 'pending'
             });
-            paygistixService.createPaymentIntent.mockResolvedValue(mockPaymentIntent);
-            Payment.prototype.save = jest.fn().mockResolvedValue({});
-
-            // Execute
-            await paymentController.createPaymentIntent(req, res);
-
-            // Assert
-            expect(Order.findById).toHaveBeenCalledWith('order123');
-            expect(paygistixService.createPaymentIntent).toHaveBeenCalledWith({
-                amount: 2500,
-                currency: 'USD',
-                customerId: 'customer123',
-                orderId: 'order123',
-                description: 'Order #ORD-2024-001',
-                metadata: {
-                    orderNumber: 'ORD-2024-001',
-                    customerEmail: 'customer@example.com',
-                    servicetype: 'wash-dry-fold'
-                }
+            expect(logger.info).toHaveBeenCalledWith('Payment token created with callback assignment:', {
+                token: 'test-token-123',
+                customerEmail: 'test@example.com',
+                callbackPath: '/api/v1/payments/callback/form-1'
             });
             expect(res.json).toHaveBeenCalledWith({
-                clientSecret: 'pi_test_123_secret',
-                paymentIntentId: 'pi_test_123',
-                amount: 2500,
-                currency: 'USD'
+                success: true,
+                token: 'test-token-123',
+                formConfig: mockCallbackConfig,
+                message: 'Payment token created successfully'
             });
         });
 
-        it('should return validation errors', async () => {
-            validationResult.mockReturnValue({
-                isEmpty: () => false,
-                array: () => [{ msg: 'Invalid order ID', param: 'orderId' }]
-            });
-
-            await paymentController.createPaymentIntent(req, res);
-
-            expect(res.status).toHaveBeenCalledWith(400);
-            expect(res.json).toHaveBeenCalledWith({
-                errors: [{ msg: 'Invalid order ID', param: 'orderId' }]
-            });
-        });
-
-        it('should handle order not found', async () => {
-            req.body = { orderId: 'nonexistent' };
-            validationResult.mockReturnValue({ isEmpty: () => true });
-            Order.findById.mockReturnValue({
-                populate: jest.fn().mockResolvedValue(null)
-            });
-
-            await paymentController.createPaymentIntent(req, res);
-
-            expect(res.status).toHaveBeenCalledWith(404);
-            expect(res.json).toHaveBeenCalledWith({
-                error: 'Order not found'
-            });
-        });
-
-        it('should handle already paid order', async () => {
-            const mockOrder = {
-                _id: 'order123',
-                paymentStatus: 'paid'
+        it('should handle no available callbacks', async () => {
+            req.body = {
+                customerData: { email: 'test@example.com' },
+                paymentData: { amount: 100.00 }
             };
 
-            req.body = { orderId: 'order123' };
-            validationResult.mockReturnValue({ isEmpty: () => true });
-            Order.findById.mockReturnValue({
-                populate: jest.fn().mockResolvedValue(mockOrder)
-            });
+            callbackPoolManager.acquireCallback.mockResolvedValue(null);
 
-            await paymentController.createPaymentIntent(req, res);
-
-            expect(res.status).toHaveBeenCalledWith(400);
-            expect(res.json).toHaveBeenCalledWith({
-                error: 'Order already paid'
-            });
-        });
-
-        it('should handle Paygistix API errors', async () => {
-            const mockOrder = {
-                _id: 'order123',
-                totalAmount: 25.00,
-                paymentStatus: 'pending',
-                customerId: { _id: 'customer123' }
-            };
-
-            req.body = { orderId: 'order123' };
-            validationResult.mockReturnValue({ isEmpty: () => true });
-            Order.findById.mockReturnValue({
-                populate: jest.fn().mockResolvedValue(mockOrder)
-            });
-            
-            const error = new Error('Payment service unavailable');
-            error.status = 503;
-            paygistixService.createPaymentIntent.mockRejectedValue(error);
-
-            await paymentController.createPaymentIntent(req, res);
+            await paymentController.createPaymentToken(req, res);
 
             expect(res.status).toHaveBeenCalledWith(503);
             expect(res.json).toHaveBeenCalledWith({
-                error: 'Payment service unavailable'
+                success: false,
+                message: 'No payment handlers available. Please try again in a moment.'
             });
         });
-    });
 
-    describe('processPayment', () => {
-        it('should process payment successfully', async () => {
-            const mockPayment = {
-                _id: 'payment123',
-                orderId: 'order123',
-                paygistixTransactionId: 'pi_test_123',
-                status: 'pending',
-                save: jest.fn()
-            };
-
-            const mockCaptureResult = {
-                status: 'succeeded',
-                payment_method: {
-                    last4: '4242',
-                    brand: 'visa'
-                }
-            };
-
+        it('should handle token creation errors', async () => {
             req.body = {
-                paymentIntentId: 'pi_test_123',
-                paymentMethodId: 'pm_test_123'
+                customerData: { email: 'test@example.com' },
+                paymentData: { amount: 100.00 }
             };
 
-            Payment.findOne.mockResolvedValue(mockPayment);
-            paygistixService.capturePayment.mockResolvedValue(mockCaptureResult);
-            Order.findByIdAndUpdate.mockResolvedValue({});
+            callbackPoolManager.acquireCallback.mockRejectedValue(new Error('Pool error'));
 
-            await paymentController.processPayment(req, res);
+            await paymentController.createPaymentToken(req, res);
 
-            expect(Payment.findOne).toHaveBeenCalledWith({
-                paygistixTransactionId: 'pi_test_123'
-            });
-            expect(mockPayment.status).toBe('completed');
-            expect(mockPayment.paymentMethod.last4).toBe('4242');
-            expect(mockPayment.paymentMethod.brand).toBe('visa');
-            expect(mockPayment.save).toHaveBeenCalled();
-            expect(Order.findByIdAndUpdate).toHaveBeenCalledWith('order123', {
-                paymentStatus: 'paid',
-                paidAt: expect.any(Date)
-            });
+            expect(logger.error).toHaveBeenCalledWith('Error creating payment token:', expect.any(Error));
+            expect(res.status).toHaveBeenCalledWith(500);
             expect(res.json).toHaveBeenCalledWith({
-                status: 'completed',
-                transactionId: 'pi_test_123',
-                orderId: 'order123'
+                success: false,
+                message: 'Failed to create payment token'
+            });
+        });
+    });
+
+    describe('checkPaymentStatus', () => {
+        it('should return payment status successfully', async () => {
+            req.params = { token: 'test-token-123' };
+
+            const mockPaymentToken = {
+                token: 'test-token-123',
+                status: 'success',
+                errorMessage: null,
+                transactionId: 'txn-123'
+            };
+
+            PaymentToken.findOne.mockResolvedValue(mockPaymentToken);
+
+            await paymentController.checkPaymentStatus(req, res);
+
+            expect(PaymentToken.findOne).toHaveBeenCalledWith({ token: 'test-token-123' });
+            expect(res.json).toHaveBeenCalledWith({
+                success: true,
+                status: 'success',
+                errorMessage: null,
+                transactionId: 'txn-123'
             });
         });
 
-        it('should handle payment not found', async () => {
-            req.body = { paymentIntentId: 'nonexistent' };
-            Payment.findOne.mockResolvedValue(null);
+        it('should handle token not found', async () => {
+            req.params = { token: 'nonexistent-token' };
+            PaymentToken.findOne.mockResolvedValue(null);
 
-            await paymentController.processPayment(req, res);
+            await paymentController.checkPaymentStatus(req, res);
 
             expect(res.status).toHaveBeenCalledWith(404);
             expect(res.json).toHaveBeenCalledWith({
-                error: 'Payment not found'
+                success: false,
+                message: 'Payment token not found'
             });
         });
 
-        it('should handle already processed payment', async () => {
-            const mockPayment = {
-                status: 'completed'
-            };
+        it('should handle database errors', async () => {
+            req.params = { token: 'test-token-123' };
+            PaymentToken.findOne.mockRejectedValue(new Error('DB error'));
 
-            req.body = { paymentIntentId: 'pi_test_123' };
-            Payment.findOne.mockResolvedValue(mockPayment);
+            await paymentController.checkPaymentStatus(req, res);
 
-            await paymentController.processPayment(req, res);
-
-            expect(res.status).toHaveBeenCalledWith(400);
+            expect(logger.error).toHaveBeenCalledWith('Error checking payment status:', expect.any(Error));
+            expect(res.status).toHaveBeenCalledWith(500);
             expect(res.json).toHaveBeenCalledWith({
-                error: 'Payment already processed'
+                success: false,
+                message: 'Failed to check payment status'
             });
         });
+    });
 
-        it('should handle failed payment capture', async () => {
-            const mockPayment = {
-                _id: 'payment123',
+    describe('cancelPaymentToken', () => {
+        it('should cancel pending payment token', async () => {
+            req.params = { token: 'test-token-123' };
+
+            const mockPaymentToken = {
+                token: 'test-token-123',
                 status: 'pending',
+                callbackPath: '/api/v1/payments/callback/form-1',
+                customerId: 'customer-123',
+                assignedFormId: 'form-1',
                 save: jest.fn()
             };
 
-            const mockCaptureResult = {
+            PaymentToken.findOne.mockResolvedValue(mockPaymentToken);
+
+            await paymentController.cancelPaymentToken(req, res);
+
+            expect(mockPaymentToken.status).toBe('cancelled');
+            expect(mockPaymentToken.errorMessage).toBe('Payment cancelled by user');
+            expect(mockPaymentToken.save).toHaveBeenCalled();
+            expect(callbackPoolManager.releaseCallback).toHaveBeenCalledWith('test-token-123');
+            expect(logger.info).toHaveBeenCalledWith('Payment token cancelled:', {
+                token: 'test-token-123',
+                customerId: 'customer-123',
+                formReleased: 'form-1'
+            });
+            expect(res.json).toHaveBeenCalledWith({
+                success: true,
+                message: 'Payment token cancelled',
+                status: 'cancelled'
+            });
+        });
+
+        it('should not cancel non-pending tokens', async () => {
+            req.params = { token: 'test-token-123' };
+
+            const mockPaymentToken = {
+                token: 'test-token-123',
+                status: 'success',
+                save: jest.fn()
+            };
+
+            PaymentToken.findOne.mockResolvedValue(mockPaymentToken);
+
+            await paymentController.cancelPaymentToken(req, res);
+
+            expect(mockPaymentToken.save).not.toHaveBeenCalled();
+            expect(callbackPoolManager.releaseCallback).not.toHaveBeenCalled();
+            expect(res.json).toHaveBeenCalledWith({
+                success: true,
+                message: 'Payment token cancelled',
+                status: 'success'
+            });
+        });
+
+        it('should handle token not found', async () => {
+            req.params = { token: 'nonexistent-token' };
+            PaymentToken.findOne.mockResolvedValue(null);
+
+            await paymentController.cancelPaymentToken(req, res);
+
+            expect(res.status).toHaveBeenCalledWith(404);
+            expect(res.json).toHaveBeenCalledWith({
+                success: false,
+                message: 'Payment token not found'
+            });
+        });
+    });
+
+    describe('updatePaymentStatus', () => {
+        it('should update payment status to success', async () => {
+            req.params = { token: 'test-token-123' };
+            req.body = {
+                status: 'success',
+                result: '0',
+                message: 'Payment successful'
+            };
+
+            const mockPaymentToken = {
+                token: 'test-token-123',
+                callbackPath: '/api/v1/payments/callback/form-1',
+                save: jest.fn()
+            };
+
+            PaymentToken.findOne.mockResolvedValue(mockPaymentToken);
+
+            await paymentController.updatePaymentStatus(req, res);
+
+            expect(mockPaymentToken.status).toBe('success');
+            expect(mockPaymentToken.paygistixResponse).toEqual({
+                Result: '0',
+                testMode: true,
+                message: 'Payment successful'
+            });
+            expect(mockPaymentToken.errorMessage).toBeUndefined();
+            expect(mockPaymentToken.save).toHaveBeenCalled();
+            expect(callbackPoolManager.releaseCallback).toHaveBeenCalledWith('test-token-123');
+            expect(res.json).toHaveBeenCalledWith({
+                success: true,
+                message: 'Payment status updated',
+                status: 'success'
+            });
+        });
+
+        it('should update payment status to failed', async () => {
+            req.params = { token: 'test-token-123' };
+            req.body = {
                 status: 'failed',
-                error: { message: 'Insufficient funds' }
+                result: '1',
+                message: 'Card declined'
             };
 
-            req.body = { paymentIntentId: 'pi_test_123' };
-            Payment.findOne.mockResolvedValue(mockPayment);
-            paygistixService.capturePayment.mockResolvedValue(mockCaptureResult);
-
-            await paymentController.processPayment(req, res);
-
-            expect(mockPayment.status).toBe('failed');
-            expect(mockPayment.save).toHaveBeenCalled();
-            expect(Order.findByIdAndUpdate).not.toHaveBeenCalled();
-        });
-    });
-
-    describe('refundPayment', () => {
-        it('should process full refund successfully', async () => {
-            const mockPayment = {
-                _id: 'payment123',
-                orderId: 'order123',
-                paygistixTransactionId: 'pi_test_123',
-                amount: 2500,
-                status: 'completed',
-                refunds: [],
+            const mockPaymentToken = {
+                token: 'test-token-123',
+                callbackPath: '/api/v1/payments/callback/form-1',
                 save: jest.fn()
             };
 
-            const mockRefund = {
-                id: 'ref_test_123',
-                status: 'succeeded'
-            };
+            PaymentToken.findOne.mockResolvedValue(mockPaymentToken);
 
-            req.params = { paymentId: 'payment123' };
-            req.body = { reason: 'Customer requested refund' };
+            await paymentController.updatePaymentStatus(req, res);
 
-            Payment.findById.mockResolvedValue(mockPayment);
-            paygistixService.refundPayment.mockResolvedValue(mockRefund);
-            Order.findByIdAndUpdate.mockResolvedValue({});
-
-            await paymentController.refundPayment(req, res);
-
-            expect(paygistixService.refundPayment).toHaveBeenCalledWith(
-                'pi_test_123',
-                2500,
-                'Customer requested refund'
-            );
-            expect(mockPayment.refunds).toHaveLength(1);
-            expect(mockPayment.status).toBe('refunded');
-            expect(mockPayment.save).toHaveBeenCalled();
-            expect(Order.findByIdAndUpdate).toHaveBeenCalledWith('order123', {
-                paymentStatus: 'refunded'
-            });
-            expect(res.json).toHaveBeenCalledWith({
-                refundId: 'ref_test_123',
-                amount: 2500,
-                status: 'succeeded'
-            });
-        });
-
-        it('should process partial refund successfully', async () => {
-            const mockPayment = {
-                _id: 'payment123',
-                orderId: 'order123',
-                paygistixTransactionId: 'pi_test_123',
-                amount: 2500,
-                status: 'completed',
-                refunds: [],
-                save: jest.fn()
-            };
-
-            req.params = { paymentId: 'payment123' };
-            req.body = { amount: 1000, reason: 'Partial refund' };
-
-            Payment.findById.mockResolvedValue(mockPayment);
-            paygistixService.refundPayment.mockResolvedValue({
-                id: 'ref_test_123',
-                status: 'succeeded'
-            });
-
-            await paymentController.refundPayment(req, res);
-
-            expect(mockPayment.status).toBe('partially_refunded');
-            expect(Order.findByIdAndUpdate).toHaveBeenCalledWith('order123', {
-                paymentStatus: 'partially_refunded'
-            });
-        });
-
-        it('should prevent refund exceeding payment amount', async () => {
-            const mockPayment = {
-                amount: 2500,
-                status: 'completed',
-                refunds: [{ amount: 1500, status: 'succeeded' }]
-            };
-
-            req.params = { paymentId: 'payment123' };
-            req.body = { amount: 1500, reason: 'Refund' };
-
-            Payment.findById.mockResolvedValue(mockPayment);
-
-            await paymentController.refundPayment(req, res);
-
-            expect(res.status).toHaveBeenCalledWith(400);
-            expect(res.json).toHaveBeenCalledWith({
-                error: 'Refund amount exceeds payment amount'
-            });
-        });
-
-        it('should handle payment not found', async () => {
-            req.params = { paymentId: 'nonexistent' };
-            req.body = { reason: 'Refund' };
-            Payment.findById.mockResolvedValue(null);
-
-            await paymentController.refundPayment(req, res);
-
-            expect(res.status).toHaveBeenCalledWith(404);
-            expect(res.json).toHaveBeenCalledWith({
-                error: 'Payment not found'
-            });
-        });
-
-        it('should only allow refunds for completed payments', async () => {
-            const mockPayment = {
-                status: 'pending'
-            };
-
-            req.params = { paymentId: 'payment123' };
-            req.body = { reason: 'Refund' };
-            Payment.findById.mockResolvedValue(mockPayment);
-
-            await paymentController.refundPayment(req, res);
-
-            expect(res.status).toHaveBeenCalledWith(400);
-            expect(res.json).toHaveBeenCalledWith({
-                error: 'Can only refund completed payments'
-            });
+            expect(mockPaymentToken.status).toBe('failed');
+            expect(mockPaymentToken.errorMessage).toBe('Card declined');
+            expect(mockPaymentToken.save).toHaveBeenCalled();
         });
     });
 
-    describe('getPayment', () => {
-        it('should retrieve payment details successfully', async () => {
-            const mockPayment = {
-                _id: 'payment123',
-                orderId: { _id: 'order123', orderNumber: 'ORD-2024-001' },
-                customerId: { _id: 'customer123', name: 'John Doe', email: 'john@example.com' },
-                amount: 2500,
-                status: 'completed'
-            };
-
-            req.params = { paymentId: 'payment123' };
-            Payment.findById.mockReturnValue({
-                populate: jest.fn().mockReturnValue({
-                    populate: jest.fn().mockResolvedValue(mockPayment)
-                })
-            });
-
-            await paymentController.getPayment(req, res);
-
-            expect(Payment.findById).toHaveBeenCalledWith('payment123');
-            expect(res.json).toHaveBeenCalledWith(mockPayment);
-        });
-
-        it('should handle payment not found', async () => {
-            req.params = { paymentId: 'nonexistent' };
-            Payment.findById.mockReturnValue({
-                populate: jest.fn().mockReturnValue({
-                    populate: jest.fn().mockResolvedValue(null)
-                })
-            });
-
-            await paymentController.getPayment(req, res);
-
-            expect(res.status).toHaveBeenCalledWith(404);
-            expect(res.json).toHaveBeenCalledWith({
-                error: 'Payment not found'
-            });
-        });
-    });
-
-    describe('listPayments', () => {
-        it('should list payments with pagination', async () => {
-            const mockPayments = [
-                {
-                    _id: 'payment1',
-                    amount: 2500,
-                    status: 'completed',
-                    orderId: { orderNumber: 'ORD-001' },
-                    customerId: { name: 'John Doe', email: 'john@example.com' }
-                },
-                {
-                    _id: 'payment2',
-                    amount: 3500,
-                    status: 'completed',
-                    orderId: { orderNumber: 'ORD-002' },
-                    customerId: { name: 'Jane Doe', email: 'jane@example.com' }
-                }
-            ];
-
-            req.query = { page: 1, limit: 20, status: 'completed' };
-            
-            Payment.find.mockReturnValue({
-                populate: jest.fn().mockReturnValue({
-                    populate: jest.fn().mockReturnValue({
-                        sort: jest.fn().mockReturnValue({
-                            skip: jest.fn().mockReturnValue({
-                                limit: jest.fn().mockResolvedValue(mockPayments)
-                            })
-                        })
-                    })
-                })
-            });
-            
-            Payment.countDocuments.mockResolvedValue(50);
-
-            await paymentController.listPayments(req, res);
-
-            expect(Payment.find).toHaveBeenCalledWith({ status: 'completed' });
-            expect(Payment.countDocuments).toHaveBeenCalledWith({ status: 'completed' });
-            expect(res.json).toHaveBeenCalledWith({
-                payments: mockPayments,
-                pagination: {
-                    total: 50,
-                    page: 1,
-                    pages: 3
-                }
-            });
-        });
-
-        it('should filter by date range', async () => {
+    describe('handleFormCallback', () => {
+        it('should process callback successfully', async () => {
             req.query = {
-                startDate: '2024-01-01',
-                endDate: '2024-01-31'
+                Result: '0',
+                PNRef: 'txn-123',
+                token: 'test-token-123'
             };
 
-            Payment.find.mockReturnValue({
-                populate: jest.fn().mockReturnValue({
-                    populate: jest.fn().mockReturnValue({
-                        sort: jest.fn().mockReturnValue({
-                            skip: jest.fn().mockReturnValue({
-                                limit: jest.fn().mockResolvedValue([])
-                            })
-                        })
-                    })
-                })
+            const mockPaymentToken = {
+                token: 'test-token-123',
+                status: 'pending',
+                callbackPath: '/api/v1/payments/callback/form-1',
+                save: jest.fn()
+            };
+
+            PaymentToken.findOne.mockResolvedValue(mockPaymentToken);
+
+            await paymentController.handleFormCallback(req, res, '/api/v1/payments/callback/form-1');
+
+            expect(PaymentToken.findOne).toHaveBeenCalledWith({
+                callbackPath: '/api/v1/payments/callback/form-1',
+                status: 'pending'
             });
-            Payment.countDocuments.mockResolvedValue(0);
+            expect(mockPaymentToken.status).toBe('success');
+            expect(mockPaymentToken.transactionId).toBe('txn-123');
+            expect(mockPaymentToken.save).toHaveBeenCalled();
+            expect(callbackPoolManager.releaseCallback).toHaveBeenCalledWith('test-token-123');
+            expect(res.redirect).toHaveBeenCalledWith(expect.stringContaining('/payment-callback-handler.html'));
+        });
 
-            await paymentController.listPayments(req, res);
+        it('should handle no pending payment for callback', async () => {
+            PaymentToken.findOne.mockResolvedValue(null);
 
-            expect(Payment.find).toHaveBeenCalledWith({
-                createdAt: {
-                    $gte: new Date('2024-01-01'),
-                    $lte: new Date('2024-01-31')
-                }
+            await paymentController.handleFormCallback(req, res, '/api/v1/payments/callback/form-1');
+
+            expect(logger.error).toHaveBeenCalledWith(
+                'No pending payment found for callback path:',
+                '/api/v1/payments/callback/form-1'
+            );
+            expect(res.redirect).toHaveBeenCalledWith('/payment-callback-handler.html?error=no_pending_payment');
+        });
+
+        it('should handle callback processing errors', async () => {
+            PaymentToken.findOne.mockRejectedValue(new Error('DB error'));
+
+            await paymentController.handleFormCallback(req, res, '/api/v1/payments/callback/form-1');
+
+            expect(logger.error).toHaveBeenCalledWith('Error handling form callback:', expect.any(Error));
+            expect(res.redirect).toHaveBeenCalledWith('/payment-callback-handler.html?error=processing_failed');
+        });
+    });
+
+    describe('processCallbackResult', () => {
+        it('should process successful payment from query params', async () => {
+            req.query = { Result: '0', PNRef: 'txn-123' };
+            req.body = {};
+
+            const mockPaymentToken = {
+                token: 'test-token-123',
+                save: jest.fn()
+            };
+
+            await paymentController.processCallbackResult(req, res, mockPaymentToken);
+
+            expect(mockPaymentToken.status).toBe('success');
+            expect(mockPaymentToken.transactionId).toBe('txn-123');
+            expect(mockPaymentToken.paygistixResponse).toEqual({ Result: '0', PNRef: 'txn-123' });
+            expect(mockPaymentToken.save).toHaveBeenCalled();
+            expect(logger.info).toHaveBeenCalledWith('Transaction ID saved:', {
+                token: 'test-token-123',
+                transactionId: 'txn-123'
             });
         });
 
-        it('should handle empty results', async () => {
+        it('should process failed payment', async () => {
+            req.query = { Result: '1', error: 'Insufficient funds' };
+            req.body = {};
+
+            const mockPaymentToken = {
+                token: 'test-token-123',
+                save: jest.fn()
+            };
+
+            await paymentController.processCallbackResult(req, res, mockPaymentToken);
+
+            expect(mockPaymentToken.status).toBe('failed');
+            expect(mockPaymentToken.errorMessage).toBe('Insufficient funds');
+        });
+
+        it('should handle body parameters', async () => {
             req.query = {};
-            
-            Payment.find.mockReturnValue({
-                populate: jest.fn().mockReturnValue({
-                    populate: jest.fn().mockReturnValue({
-                        sort: jest.fn().mockReturnValue({
-                            skip: jest.fn().mockReturnValue({
-                                limit: jest.fn().mockResolvedValue([])
-                            })
-                        })
-                    })
-                })
-            });
-            Payment.countDocuments.mockResolvedValue(0);
+            req.body = { Result: '0', transactionId: 'txn-456' };
 
-            await paymentController.listPayments(req, res);
+            const mockPaymentToken = {
+                token: 'test-token-123',
+                save: jest.fn()
+            };
 
+            await paymentController.processCallbackResult(req, res, mockPaymentToken);
+
+            expect(mockPaymentToken.status).toBe('success');
+            expect(mockPaymentToken.transactionId).toBe('txn-456');
+        });
+
+        it('should redirect with all parameters', async () => {
+            req.query = { Result: '0', PNRef: 'txn-789' };
+            req.body = {};
+
+            const mockPaymentToken = {
+                token: 'test-token-123',
+                save: jest.fn()
+            };
+
+            await paymentController.processCallbackResult(req, res, mockPaymentToken);
+
+            expect(res.redirect).toHaveBeenCalledWith(expect.stringContaining('token=test-token-123'));
+            expect(res.redirect).toHaveBeenCalledWith(expect.stringContaining('status=success'));
+            expect(res.redirect).toHaveBeenCalledWith(expect.stringContaining('transactionId=txn-789'));
+        });
+    });
+
+    describe('getPoolStats', () => {
+        it('should return pool statistics', async () => {
+            const mockStats = {
+                availableCallbacks: 5,
+                totalCallbacks: 10,
+                activePayments: 5
+            };
+
+            callbackPoolManager.getPoolStatus.mockResolvedValue(mockStats);
+
+            await paymentController.getPoolStats(req, res);
+
+            expect(callbackPoolManager.getPoolStatus).toHaveBeenCalled();
             expect(res.json).toHaveBeenCalledWith({
-                payments: [],
-                pagination: {
-                    total: 0,
-                    page: 1,
-                    pages: 0
-                }
+                success: true,
+                stats: mockStats
+            });
+        });
+
+        it('should handle stats retrieval errors', async () => {
+            callbackPoolManager.getPoolStatus.mockRejectedValue(new Error('Stats error'));
+
+            await paymentController.getPoolStats(req, res);
+
+            expect(logger.error).toHaveBeenCalledWith('Error getting pool stats:', expect.any(Error));
+            expect(res.status).toHaveBeenCalledWith(500);
+            expect(res.json).toHaveBeenCalledWith({
+                success: false,
+                message: 'Failed to get pool statistics'
             });
         });
     });

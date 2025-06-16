@@ -293,7 +293,7 @@ describe('Order Controller', () => {
       const mockAffiliate = { affiliateId: 'AFF123' };
 
       req.params.orderId = 'ORD123';
-      req.body = { status: 'picked_up' };
+      req.body = { status: 'processing' }; // Use valid status
       req.user = { role: 'affiliate', affiliateId: 'AFF123' };
 
       Order.findOne.mockResolvedValue(mockOrder);
@@ -303,14 +303,14 @@ describe('Order Controller', () => {
 
       await orderController.updateOrderStatus(req, res);
 
-      expect(mockOrder.status).toBe('picked_up');
+      expect(mockOrder.status).toBe('processing');
       expect(mockOrder.save).toHaveBeenCalled();
       expect(emailService.sendOrderStatusUpdateEmail).toHaveBeenCalled();
       expect(res.status).toHaveBeenCalledWith(200);
       expect(res.json).toHaveBeenCalledWith(
         expect.objectContaining({
           success: true,
-          status: 'picked_up'
+          status: 'processing'
         })
       );
     });
@@ -318,7 +318,7 @@ describe('Order Controller', () => {
     it('should update actual weight when processing', async () => {
       const mockOrder = {
         orderId: 'ORD123',
-        status: 'picked_up',
+        status: 'scheduled', // Use valid status
         save: jest.fn()
       };
 
@@ -362,7 +362,7 @@ describe('Order Controller', () => {
     it('should send commission email when complete', async () => {
       const mockOrder = {
         orderId: 'ORD123',
-        status: 'ready_for_delivery',
+        status: 'processed', // Use valid status (ready for delivery)
         save: jest.fn()
       };
 

@@ -183,7 +183,12 @@ describe('Auth Controller', () => {
 
       await authController.customerLogin(req, res);
 
-      expect(Customer.findOne).toHaveBeenCalledWith({ username: 'testcustomer' });
+      expect(Customer.findOne).toHaveBeenCalledWith({
+        $or: [
+          { username: 'testcustomer' },
+          { email: 'testcustomer' }
+        ]
+      });
       expect(encryptionUtil.verifyPassword).toHaveBeenCalledWith(
         'password123',
         'salt',
@@ -221,7 +226,111 @@ describe('Auth Controller', () => {
       expect(res.status).toHaveBeenCalledWith(401);
       expect(res.json).toHaveBeenCalledWith({
         success: false,
-        message: 'Invalid username or password'
+        message: 'Invalid username/email or password'
+      });
+    });
+
+    it('should login customer using emailOrUsername field', async () => {
+      const mockCustomer = {
+        _id: 'customer123',
+        customerId: 'CUST123',
+        username: 'testcustomer',
+        passwordHash: 'hashedPassword',
+        passwordSalt: 'salt',
+        firstName: 'Jane',
+        lastName: 'Smith',
+        email: 'jane@example.com',
+        affiliateId: 'AFF123',
+        save: jest.fn()
+      };
+
+      const mockAffiliate = {
+        affiliateId: 'AFF123',
+        deliveryFee: 5.99
+      };
+
+      req.body = {
+        emailOrUsername: 'jane@example.com',
+        password: 'password123'
+      };
+
+      Customer.findOne.mockResolvedValue(mockCustomer);
+      Affiliate.findOne.mockResolvedValue(mockAffiliate);
+      encryptionUtil.verifyPassword.mockReturnValue(true);
+      jwt.sign.mockReturnValue('mockToken');
+      RefreshToken.prototype.save = jest.fn();
+
+      await authController.customerLogin(req, res);
+
+      expect(Customer.findOne).toHaveBeenCalledWith({
+        $or: [
+          { username: 'jane@example.com' },
+          { email: 'jane@example.com' }
+        ]
+      });
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.json).toHaveBeenCalledWith(
+        expect.objectContaining({
+          success: true,
+          token: 'mockToken'
+        })
+      );
+    });
+
+    it('should prioritize emailOrUsername over username field', async () => {
+      const mockCustomer = {
+        _id: 'customer123',
+        customerId: 'CUST123',
+        username: 'testcustomer',
+        passwordHash: 'hashedPassword',
+        passwordSalt: 'salt',
+        firstName: 'Jane',
+        lastName: 'Smith',
+        email: 'jane@example.com',
+        affiliateId: 'AFF123',
+        save: jest.fn()
+      };
+
+      const mockAffiliate = {
+        affiliateId: 'AFF123',
+        deliveryFee: 5.99
+      };
+
+      req.body = {
+        username: 'oldusername',
+        emailOrUsername: 'testcustomer',
+        password: 'password123'
+      };
+
+      Customer.findOne.mockResolvedValue(mockCustomer);
+      Affiliate.findOne.mockResolvedValue(mockAffiliate);
+      encryptionUtil.verifyPassword.mockReturnValue(true);
+      jwt.sign.mockReturnValue('mockToken');
+      RefreshToken.prototype.save = jest.fn();
+
+      await authController.customerLogin(req, res);
+
+      // Should use emailOrUsername value, not username
+      expect(Customer.findOne).toHaveBeenCalledWith({
+        $or: [
+          { username: 'testcustomer' },
+          { email: 'testcustomer' }
+        ]
+      });
+      expect(res.status).toHaveBeenCalledWith(200);
+    });
+
+    it('should return error when neither username nor emailOrUsername provided', async () => {
+      req.body = {
+        password: 'password123'
+      };
+
+      await authController.customerLogin(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(400);
+      expect(res.json).toHaveBeenCalledWith({
+        success: false,
+        message: 'Username or email is required'
       });
     });
   });
@@ -239,6 +348,7 @@ describe('Auth Controller', () => {
       expect(res.status).toHaveBeenCalledWith(200);
       expect(res.json).toHaveBeenCalledWith({
         success: true,
+        requirePasswordChange: false,
         user: {
           id: 'user123',
           role: 'affiliate',
@@ -271,6 +381,7 @@ describe('Auth Controller', () => {
       expect(res.status).toHaveBeenCalledWith(200);
       expect(res.json).toHaveBeenCalledWith({
         success: true,
+        requirePasswordChange: false,
         user: {
           id: 'user456',
           role: 'customer',

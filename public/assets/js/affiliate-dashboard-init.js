@@ -991,6 +991,20 @@ async function loadSettingsData(affiliateId) {
         // Generate and display registration link with wavemaxlaundry.com format
         const registrationLink = `https://www.wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program?affid=${affiliateId}`;
         if (registrationLinkField) registrationLinkField.value = registrationLink;
+        
+        // Load W-9 status
+        loadW9Status();
+        
+        // Set up W-9 event listeners
+        const w9UploadForm = document.getElementById('w9UploadFormElement');
+        if (w9UploadForm) {
+          w9UploadForm.addEventListener('submit', handleW9Upload);
+        }
+        
+        const downloadW9Btn = document.getElementById('downloadSubmittedW9');
+        if (downloadW9Btn) {
+          downloadW9Btn.addEventListener('click', downloadSubmittedW9);
+        }
 
         // Set landing page link
         const landingPageLinkField = document.getElementById('landingPageLink');
@@ -1273,6 +1287,233 @@ function updateFeeCalculatorPreview() {
       }
     }
   });
+}
+
+// W-9 Tax Information Functions
+let w9Status = null;
+
+async function loadW9Status() {
+  try {
+    const response = await authenticatedFetch('/api/v1/w9/status');
+    
+    if (response.ok) {
+      w9Status = await response.json();
+      updateW9Display();
+    } else {
+      console.error('Failed to load W-9 status');
+    }
+  } catch (error) {
+    console.error('Error loading W-9 status:', error);
+  }
+}
+
+function updateW9Display() {
+  if (!w9Status) return;
+  
+  // Update status text
+  const statusText = document.getElementById('w9StatusText');
+  const statusAlert = document.getElementById('w9StatusAlert');
+  const uploadForm = document.getElementById('w9UploadForm');
+  const downloadBtn = document.getElementById('downloadSubmittedW9');
+  
+  if (statusText) {
+    statusText.textContent = w9Status.statusDisplay;
+    statusText.className = 'ml-2 font-semibold ';
+    
+    // Add color coding based on status
+    switch (w9Status.status) {
+      case 'not_submitted':
+        statusText.className += 'text-red-600';
+        break;
+      case 'pending_review':
+        statusText.className += 'text-yellow-600';
+        break;
+      case 'verified':
+        statusText.className += 'text-green-600';
+        break;
+      case 'rejected':
+        statusText.className += 'text-red-600';
+        break;
+      case 'expired':
+        statusText.className += 'text-orange-600';
+        break;
+    }
+  }
+  
+  // Update status alert
+  if (statusAlert) {
+    let alertHTML = '';
+    
+    if (w9Status.status === 'not_submitted') {
+      alertHTML = `
+        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative">
+          <strong class="font-bold" data-i18n="affiliate.dashboard.settings.w9Required">W-9 Required!</strong>
+          <span class="block sm:inline" data-i18n="affiliate.dashboard.settings.w9RequiredMessage">You must submit a W-9 form before payments can be processed.</span>
+        </div>
+      `;
+      if (uploadForm) uploadForm.style.display = 'block';
+    } else if (w9Status.status === 'pending_review') {
+      alertHTML = `
+        <div class="bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded relative">
+          <strong class="font-bold" data-i18n="affiliate.dashboard.settings.w9UnderReview">W-9 Under Review</strong>
+          <span class="block sm:inline" data-i18n="affiliate.dashboard.settings.w9UnderReviewMessage">Your W-9 is being reviewed by our team.</span>
+        </div>
+      `;
+      if (downloadBtn) downloadBtn.style.display = 'inline-block';
+    } else if (w9Status.status === 'verified') {
+      alertHTML = `
+        <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative">
+          <strong class="font-bold" data-i18n="affiliate.dashboard.settings.w9Verified">W-9 Verified</strong>
+          <span class="block sm:inline" data-i18n="affiliate.dashboard.settings.w9VerifiedMessage">Your W-9 has been verified. You can receive payments.</span>
+        </div>
+      `;
+      if (downloadBtn) downloadBtn.style.display = 'inline-block';
+    } else if (w9Status.status === 'rejected') {
+      alertHTML = `
+        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative">
+          <strong class="font-bold" data-i18n="affiliate.dashboard.settings.w9Rejected">W-9 Rejected</strong>
+          <span class="block sm:inline" data-i18n="affiliate.dashboard.settings.w9RejectedMessage">Your W-9 was rejected. Please submit a new one.</span>
+        </div>
+      `;
+      if (uploadForm) uploadForm.style.display = 'block';
+    }
+    
+    statusAlert.innerHTML = alertHTML;
+  }
+  
+  // Update dates
+  if (w9Status.submittedAt) {
+    const submittedDateDiv = document.getElementById('w9SubmittedDate');
+    const submittedDateText = document.getElementById('w9SubmittedDateText');
+    if (submittedDateDiv && submittedDateText) {
+      submittedDateDiv.style.display = 'block';
+      submittedDateText.textContent = new Date(w9Status.submittedAt).toLocaleDateString();
+    }
+  }
+  
+  if (w9Status.verifiedAt) {
+    const verifiedDateDiv = document.getElementById('w9VerifiedDate');
+    const verifiedDateText = document.getElementById('w9VerifiedDateText');
+    if (verifiedDateDiv && verifiedDateText) {
+      verifiedDateDiv.style.display = 'block';
+      verifiedDateText.textContent = new Date(w9Status.verifiedAt).toLocaleDateString();
+    }
+  }
+  
+  // Update tax info (only shown if verified)
+  if (w9Status.status === 'verified' && w9Status.taxInfo) {
+    const taxInfoDiv = document.getElementById('w9TaxInfo');
+    const taxIdType = document.getElementById('w9TaxIdType');
+    const taxIdLast4 = document.getElementById('w9TaxIdLast4');
+    
+    if (taxInfoDiv && taxIdType && taxIdLast4) {
+      taxInfoDiv.style.display = 'block';
+      taxIdType.textContent = w9Status.taxInfo.type;
+      taxIdLast4.textContent = '***-**-' + w9Status.taxInfo.last4;
+    }
+  }
+  
+  // Update rejection reason
+  if (w9Status.status === 'rejected' && w9Status.rejectionReason) {
+    const rejectionDiv = document.getElementById('w9RejectionReason');
+    const rejectionText = document.getElementById('w9RejectionReasonText');
+    
+    if (rejectionDiv && rejectionText) {
+      rejectionDiv.style.display = 'block';
+      rejectionText.textContent = w9Status.rejectionReason;
+    }
+  }
+  
+  // Re-apply i18n translations
+  if (window.i18next && window.i18next.isInitialized) {
+    window.applyTranslations();
+  }
+}
+
+async function handleW9Upload(event) {
+  event.preventDefault();
+  
+  const fileInput = document.getElementById('w9File');
+  const file = fileInput.files[0];
+  
+  if (!file) {
+    alert('Please select a file to upload');
+    return;
+  }
+  
+  if (file.type !== 'application/pdf') {
+    alert('Only PDF files are accepted');
+    return;
+  }
+  
+  if (file.size > 5 * 1024 * 1024) {
+    alert('File size must be less than 5MB');
+    return;
+  }
+  
+  // Show progress
+  document.getElementById('w9UploadProgress').style.display = 'block';
+  document.getElementById('w9UploadSuccess').style.display = 'none';
+  document.getElementById('w9UploadError').style.display = 'none';
+  
+  const formData = new FormData();
+  formData.append('w9document', file);
+  
+  try {
+    const response = await authenticatedFetch('/api/v1/w9/upload', {
+      method: 'POST',
+      body: formData
+    });
+    
+    if (response.ok) {
+      const result = await response.json();
+      document.getElementById('w9UploadProgress').style.display = 'none';
+      document.getElementById('w9UploadSuccess').style.display = 'block';
+      
+      // Reset form
+      fileInput.value = '';
+      
+      // Reload W-9 status
+      setTimeout(() => {
+        loadW9Status();
+        document.getElementById('w9UploadSuccess').style.display = 'none';
+      }, 3000);
+    } else {
+      const error = await response.json();
+      document.getElementById('w9UploadProgress').style.display = 'none';
+      document.getElementById('w9UploadError').style.display = 'block';
+      document.getElementById('w9UploadErrorText').textContent = error.message || 'Failed to upload W-9';
+    }
+  } catch (error) {
+    console.error('Upload error:', error);
+    document.getElementById('w9UploadProgress').style.display = 'none';
+    document.getElementById('w9UploadError').style.display = 'block';
+    document.getElementById('w9UploadErrorText').textContent = 'An error occurred while uploading the file';
+  }
+}
+
+async function downloadSubmittedW9() {
+  try {
+    const response = await authenticatedFetch('/api/v1/w9/download');
+    
+    if (response.ok) {
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.style.display = 'none';
+      a.href = url;
+      a.download = 'W9_Submitted.pdf';
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } else {
+      alert('Failed to download W-9');
+    }
+  } catch (error) {
+    console.error('Download error:', error);
+    alert('An error occurred while downloading the W-9');
+  }
 }
 
 // Initialize when DOM is ready or immediately if already ready

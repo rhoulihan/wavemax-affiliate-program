@@ -207,7 +207,7 @@ describe('Affiliate API', () => {
       pickupTime: 'morning',
       deliveryDate: new Date('2025-05-27'),
       deliveryTime: 'afternoon',
-      status: 'delivered',
+      status: 'complete',
       estimatedWeight: 30,
       numberOfBags: 2,
       actualWeight: 23.5,

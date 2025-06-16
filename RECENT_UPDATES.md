@@ -1,5 +1,33 @@
 # Recent Major Updates
 
+## W-9 Tax Compliance & QuickBooks Integration (June 2025)
+- **W-9 Collection System**: Complete tax compliance solution for affiliates
+  - Secure PDF upload with file size and type validation
+  - AES-256-GCM encryption for document storage at rest
+  - Manual verification workflow for administrators
+  - Payment hold enforcement until W-9 verification
+  - Automatic expiry after 3 years with reminder notifications
+  - IRS-compliant 7-year data retention with automatic deletion
+  - Comprehensive audit logging for all document operations
+  - Multi-language email notifications for status changes
+
+- **QuickBooks Export Functionality**: Streamlined accounting integration
+  - Export verified affiliates as QuickBooks vendors with tax information
+  - Biweekly payment summaries with date range filtering
+  - Detailed commission reports showing order-level breakdowns
+  - CSV format optimized for QuickBooks Desktop import
+  - JSON format available for API integrations
+  - Export history tracking with audit trails
+  - Masked tax ID display for security compliance
+
+- **Enhanced Security & Compliance**: Enterprise-grade document management
+  - Secure storage outside web root directory
+  - Role-based access control with admin-only document access
+  - Legal hold functionality for documents under audit
+  - Automated data retention service with daily checks
+  - Complete audit trail for regulatory compliance
+  - Encrypted document transmission and storage
+
 ## Enhanced UI Components (January 2025)
 - **Swirl Spinner Implementation**: Custom loading spinner with WaveMAX branding
   - Elliptical orbit animations for smooth, professional loading states

@@ -333,7 +333,7 @@ exports.getAffiliateEarnings = async (req, res) => {
     // Find all delivered orders for this affiliate within the date range
     const orders = await Order.find({
       affiliateId,
-      status: 'delivered',
+      status: 'complete',
       deliveredAt: { $gte: startDate, $lte: endDate }
     }).sort({ deliveredAt: -1 });
 
@@ -627,7 +627,7 @@ exports.getAffiliateOrders = async (req, res) => {
 
     // Calculate total earnings from delivered orders
     const totalEarnings = orders.reduce((sum, order) => {
-      if (order.status === 'delivered' && order.affiliateCommission) {
+      if (order.status === 'complete' && order.affiliateCommission) {
         return sum + order.affiliateCommission;
       }
       return sum;
@@ -757,7 +757,7 @@ exports.getAffiliateDashboardStats = async (req, res) => {
     // Get total earnings
     const deliveredOrders = await Order.find({
       affiliateId,
-      status: 'delivered'
+      status: 'complete'
     });
 
     let totalEarnings = 0;

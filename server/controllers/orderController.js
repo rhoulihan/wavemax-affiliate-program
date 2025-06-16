@@ -307,8 +307,8 @@ exports.updateOrderStatus = async (req, res) => {
     // Update order status
     order.status = status;
 
-    // If the order is being marked as processing, update actual weight
-    if (status === 'processing' && actualWeight) {
+    // Update actual weight when transitioning to processing or processed
+    if ((status === 'processing' || status === 'processed') && actualWeight) {
       order.actualWeight = parseFloat(actualWeight);
     }
 
@@ -1048,11 +1048,11 @@ exports.getOrderStatistics = async (req, res) => {
  */
 function checkStatusTransition(currentStatus, newStatus) {
   const validTransitions = {
-    'scheduled': ['picked_up', 'cancelled'],
-    'picked_up': ['processing', 'cancelled'],
-    'processing': ['ready_for_delivery'],
-    'ready_for_delivery': ['delivered'],
-    'delivered': [],
+    'pending': ['scheduled', 'processing', 'cancelled'],
+    'scheduled': ['processing', 'cancelled'],
+    'processing': ['processed'],
+    'processed': ['complete'],
+    'complete': [],
     'cancelled': []
   };
 

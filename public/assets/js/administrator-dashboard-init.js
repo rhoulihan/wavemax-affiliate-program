@@ -143,6 +143,15 @@
             case 'affiliates':
                 await loadAffiliates();
                 break;
+            case 'w9review':
+                await loadW9Documents();
+                break;
+            case 'quickbooks':
+                await loadQuickBooksTab();
+                break;
+            case 'auditlog':
+                await loadAuditLog();
+                break;
             case 'config':
                 await loadSystemConfig();
                 break;
@@ -791,6 +800,847 @@
             </table>
         `;
         document.getElementById('affiliatesList').innerHTML = tableHtml;
+    }
+
+    // Store current W-9 filter state
+    let currentW9Filter = 'pending';
+    let currentW9Search = '';
+    let w9Documents = [];
+
+    // Load W-9 documents
+    async function loadW9Documents() {
+        try {
+            const response = await adminFetch('/api/v1/w9/admin/pending?status=' + currentW9Filter);
+            const data = await response.json();
+
+            if (response.ok) {
+                w9Documents = data.documents || [];
+                updateW9Count();
+                renderW9DocumentsList();
+            } else {
+                document.getElementById('w9DocumentsList').innerHTML = `
+                    <p style="padding: 20px; text-align: center; color: #666;">${t('administrator.dashboard.errors.w9LoadFailed', 'Failed to load W-9 documents')}</p>
+                `;
+            }
+        } catch (error) {
+            console.error('Error loading W-9 documents:', error);
+            document.getElementById('w9DocumentsList').innerHTML = `
+                <p style="padding: 20px; text-align: center; color: #666;">${t('administrator.dashboard.errors.w9LoadFailed', 'Error loading W-9 documents')}</p>
+            `;
+        }
+    }
+
+    // Update W-9 pending count
+    function updateW9Count() {
+        const pendingCount = w9Documents.filter(doc => doc.w9Status === 'pending_review').length;
+        const badge = document.getElementById('pendingW9Count');
+        if (badge) {
+            badge.textContent = `${pendingCount} ${t('administrator.dashboard.w9review.pending', 'Pending')}`;
+            badge.style.display = pendingCount > 0 ? 'inline-block' : 'none';
+        }
+    }
+
+    // Render W-9 documents list
+    function renderW9DocumentsList() {
+        const filteredDocs = w9Documents.filter(doc => {
+            // Apply status filter
+            if (currentW9Filter !== 'all' && doc.w9Status !== currentW9Filter) {
+                return false;
+            }
+            
+            // Apply search filter
+            if (currentW9Search) {
+                const search = currentW9Search.toLowerCase();
+                return (
+                    doc.affiliateName.toLowerCase().includes(search) ||
+                    doc.affiliateEmail.toLowerCase().includes(search) ||
+                    doc.affiliateId.toLowerCase().includes(search)
+                );
+            }
+            
+            return true;
+        });
+
+        if (filteredDocs.length === 0) {
+            document.getElementById('w9DocumentsList').innerHTML = `
+                <p style="padding: 20px; text-align: center; color: #666;">${t('administrator.dashboard.w9review.noDocuments', 'No W-9 documents found')}</p>
+            `;
+            return;
+        }
+
+        const docsHtml = filteredDocs.map(doc => `
+            <div class="w9-row">
+                <div class="w9-info">
+                    <div class="w9-affiliate-name">${doc.affiliateName}</div>
+                    <div class="w9-affiliate-details">
+                        ${doc.affiliateEmail} | ID: ${doc.affiliateId}
+                        ${doc.submittedAt ? ` | Submitted: ${new Date(doc.submittedAt).toLocaleDateString()}` : ''}
+                    </div>
+                </div>
+                <div class="w9-status">
+                    <span class="status-badge status-${doc.w9Status === 'pending_review' ? 'pending' : doc.w9Status}">
+                        ${getW9StatusLabel(doc.w9Status)}
+                    </span>
+                </div>
+                <div class="w9-actions">
+                    <button class="btn btn-sm" onclick="downloadW9('${doc.affiliateId}')">${t('administrator.dashboard.w9review.download', 'Download')}</button>
+                    ${doc.w9Status === 'pending_review' ? `
+                        <button class="btn btn-sm btn-primary" onclick="openW9VerificationModal('${doc.affiliateId}')">${t('administrator.dashboard.w9review.verify', 'Verify')}</button>
+                        <button class="btn btn-sm btn-secondary" onclick="openW9RejectionModal('${doc.affiliateId}')">${t('administrator.dashboard.w9review.reject', 'Reject')}</button>
+                    ` : ''}
+                </div>
+            </div>
+        `).join('');
+
+        document.getElementById('w9DocumentsList').innerHTML = docsHtml;
+    }
+
+    // Get W-9 status label
+    function getW9StatusLabel(status) {
+        const labels = {
+            'pending_review': t('administrator.dashboard.w9review.pendingReview', 'Pending Review'),
+            'verified': t('administrator.dashboard.w9review.verified', 'Verified'),
+            'rejected': t('administrator.dashboard.w9review.rejected', 'Rejected')
+        };
+        return labels[status] || status;
+    }
+
+    // Download W-9 document
+    window.downloadW9 = async function(affiliateId) {
+        try {
+            const response = await adminFetch(`/api/v1/w9/admin/${affiliateId}/download`);
+            
+            if (response.ok) {
+                // Get filename from Content-Disposition header
+                const contentDisposition = response.headers.get('Content-Disposition');
+                let filename = `W9_${affiliateId}.pdf`;
+                if (contentDisposition) {
+                    const match = contentDisposition.match(/filename="(.+)"/);
+                    if (match) filename = match[1];
+                }
+                
+                // Create blob and download
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+            } else {
+                const error = await response.json();
+                alert(error.message || t('administrator.dashboard.w9review.downloadFailed', 'Failed to download W-9 document'));
+            }
+        } catch (error) {
+            console.error('Error downloading W-9:', error);
+            alert(t('administrator.dashboard.errors.networkError', 'Network error. Please try again.'));
+        }
+    };
+
+    // Open W-9 verification modal
+    window.openW9VerificationModal = function(affiliateId) {
+        const doc = w9Documents.find(d => d.affiliateId === affiliateId);
+        if (!doc) return;
+        
+        // Populate modal fields
+        document.getElementById('verifyAffiliateId').value = affiliateId;
+        document.getElementById('verifyAffiliateName').textContent = doc.affiliateName;
+        document.getElementById('verifyAffiliateEmail').textContent = doc.affiliateEmail;
+        document.getElementById('verifyAffiliateIdDisplay').textContent = affiliateId;
+        
+        // Reset form
+        document.getElementById('w9VerificationForm').reset();
+        document.getElementById('verifyAffiliateId').value = affiliateId;
+        
+        // Show modal
+        document.getElementById('w9VerificationModal').style.display = 'flex';
+    };
+
+    // Close W-9 verification modal
+    window.closeW9VerificationModal = function() {
+        document.getElementById('w9VerificationModal').style.display = 'none';
+    };
+
+    // Open W-9 rejection modal
+    window.openW9RejectionModal = function(affiliateId) {
+        document.getElementById('rejectAffiliateId').value = affiliateId;
+        document.getElementById('w9RejectionForm').reset();
+        document.getElementById('rejectAffiliateId').value = affiliateId;
+        document.getElementById('w9RejectionModal').style.display = 'flex';
+    };
+
+    // Close W-9 rejection modal
+    window.closeW9RejectionModal = function() {
+        document.getElementById('w9RejectionModal').style.display = 'none';
+    };
+
+    // Handle W-9 verification form submission
+    document.getElementById('w9VerificationForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const affiliateId = document.getElementById('verifyAffiliateId').value;
+        const verificationData = {
+            taxIdType: document.getElementById('taxIdType').value,
+            taxIdLast4: document.getElementById('taxIdLast4').value,
+            businessName: document.getElementById('businessName').value,
+            quickbooksVendorId: document.getElementById('quickbooksVendorId').value,
+            notes: document.getElementById('verificationNotes').value
+        };
+
+        try {
+            const response = await adminFetch(`/api/v1/w9/admin/${affiliateId}/verify`, {
+                method: 'POST',
+                body: JSON.stringify(verificationData)
+            });
+
+            if (response.ok) {
+                alert(t('administrator.dashboard.w9review.verifySuccess', 'W-9 document verified successfully'));
+                closeW9VerificationModal();
+                loadW9Documents(); // Reload the list
+            } else {
+                const error = await response.json();
+                alert(error.message || t('administrator.dashboard.w9review.verifyFailed', 'Failed to verify W-9 document'));
+            }
+        } catch (error) {
+            console.error('Error verifying W-9:', error);
+            alert(t('administrator.dashboard.errors.networkError', 'Network error. Please try again.'));
+        }
+    });
+
+    // Handle W-9 rejection form submission
+    document.getElementById('w9RejectionForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const affiliateId = document.getElementById('rejectAffiliateId').value;
+        const rejectionData = {
+            reason: document.getElementById('rejectionReason').value
+        };
+
+        try {
+            const response = await adminFetch(`/api/v1/w9/admin/${affiliateId}/reject`, {
+                method: 'POST',
+                body: JSON.stringify(rejectionData)
+            });
+
+            if (response.ok) {
+                alert(t('administrator.dashboard.w9review.rejectSuccess', 'W-9 document rejected successfully'));
+                closeW9RejectionModal();
+                loadW9Documents(); // Reload the list
+            } else {
+                const error = await response.json();
+                alert(error.message || t('administrator.dashboard.w9review.rejectFailed', 'Failed to reject W-9 document'));
+            }
+        } catch (error) {
+            console.error('Error rejecting W-9:', error);
+            alert(t('administrator.dashboard.errors.networkError', 'Network error. Please try again.'));
+        }
+    });
+
+    // W-9 filter and search handlers
+    const w9StatusFilter = document.getElementById('w9StatusFilter');
+    const w9SearchInput = document.getElementById('w9SearchInput');
+    const refreshW9ListBtn = document.getElementById('refreshW9ListBtn');
+
+    if (w9StatusFilter) {
+        w9StatusFilter.addEventListener('change', (e) => {
+            currentW9Filter = e.target.value;
+            loadW9Documents();
+        });
+    }
+
+    if (w9SearchInput) {
+        w9SearchInput.addEventListener('input', (e) => {
+            currentW9Search = e.target.value;
+            renderW9DocumentsList();
+        });
+    }
+
+    if (refreshW9ListBtn) {
+        refreshW9ListBtn.addEventListener('click', () => {
+            loadW9Documents();
+        });
+    }
+
+    // QuickBooks Export functionality
+    let exportHistory = [];
+    let searchTimeout = null;
+    let affiliateSearchResults = [];
+
+    // Load QuickBooks tab
+    async function loadQuickBooksTab() {
+        await loadExportHistory();
+        setupQuickBooksEventHandlers();
+    }
+
+    // Load export history
+    async function loadExportHistory() {
+        try {
+            const response = await adminFetch('/api/v1/quickbooks/history?limit=20');
+            const data = await response.json();
+
+            if (response.ok) {
+                exportHistory = data.exports || [];
+                renderExportHistory();
+            } else {
+                document.getElementById('exportHistoryList').innerHTML = `
+                    <p style="padding: 20px; text-align: center; color: #666;">${t('administrator.dashboard.errors.exportHistoryLoadFailed', 'Failed to load export history')}</p>
+                `;
+            }
+        } catch (error) {
+            console.error('Error loading export history:', error);
+            document.getElementById('exportHistoryList').innerHTML = `
+                <p style="padding: 20px; text-align: center; color: #666;">${t('administrator.dashboard.errors.exportHistoryLoadFailed', 'Error loading export history')}</p>
+            `;
+        }
+    }
+
+    // Render export history
+    function renderExportHistory() {
+        if (exportHistory.length === 0) {
+            document.getElementById('exportHistoryList').innerHTML = `
+                <p style="padding: 20px; text-align: center; color: #666;">${t('administrator.dashboard.quickbooks.noExports', 'No exports found')}</p>
+            `;
+            return;
+        }
+
+        const historyHtml = `
+            <table>
+                <thead>
+                    <tr>
+                        <th>${t('administrator.dashboard.quickbooks.exportId', 'Export ID')}</th>
+                        <th>${t('administrator.dashboard.quickbooks.type', 'Type')}</th>
+                        <th>${t('administrator.dashboard.quickbooks.date', 'Date')}</th>
+                        <th>${t('administrator.dashboard.quickbooks.exportedBy', 'Exported By')}</th>
+                        <th>${t('administrator.dashboard.quickbooks.details', 'Details')}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${exportHistory.map(exp => {
+                        const typeLabels = {
+                            'vendor': t('administrator.dashboard.quickbooks.vendorExport', 'Vendor Export'),
+                            'payment_summary': t('administrator.dashboard.quickbooks.paymentSummary', 'Payment Summary'),
+                            'commission_detail': t('administrator.dashboard.quickbooks.commissionDetail', 'Commission Detail')
+                        };
+                        
+                        let details = '';
+                        if (exp.type === 'vendor') {
+                            details = `${exp.affiliateIds.length} vendors`;
+                        } else if (exp.type === 'payment_summary') {
+                            const start = new Date(exp.periodStart).toLocaleDateString();
+                            const end = new Date(exp.periodEnd).toLocaleDateString();
+                            details = `${start} - ${end}`;
+                        } else if (exp.type === 'commission_detail') {
+                            details = `Affiliate: ${exp.affiliateIds[0]}`;
+                        }
+                        
+                        return `
+                            <tr>
+                                <td>${exp.exportId}</td>
+                                <td>${typeLabels[exp.type] || exp.type}</td>
+                                <td>${new Date(exp.createdAt).toLocaleString()}</td>
+                                <td>${exp.exportedBy?.firstName || ''} ${exp.exportedBy?.lastName || ''}</td>
+                                <td>${details}</td>
+                            </tr>
+                        `;
+                    }).join('')}
+                </tbody>
+            </table>
+        `;
+        
+        document.getElementById('exportHistoryList').innerHTML = historyHtml;
+    }
+
+    // Setup QuickBooks event handlers
+    function setupQuickBooksEventHandlers() {
+        // Export vendors button
+        const exportVendorsBtn = document.getElementById('exportVendorsBtn');
+        if (exportVendorsBtn && !exportVendorsBtn.hasAttribute('data-initialized')) {
+            exportVendorsBtn.setAttribute('data-initialized', 'true');
+            exportVendorsBtn.addEventListener('click', exportVendors);
+        }
+
+        // Payment summary button
+        const openPaymentSummaryBtn = document.getElementById('openPaymentSummaryBtn');
+        if (openPaymentSummaryBtn && !openPaymentSummaryBtn.hasAttribute('data-initialized')) {
+            openPaymentSummaryBtn.setAttribute('data-initialized', 'true');
+            openPaymentSummaryBtn.addEventListener('click', () => {
+                document.getElementById('paymentSummaryModal').style.display = 'flex';
+            });
+        }
+
+        // Commission detail button
+        const openCommissionDetailBtn = document.getElementById('openCommissionDetailBtn');
+        if (openCommissionDetailBtn && !openCommissionDetailBtn.hasAttribute('data-initialized')) {
+            openCommissionDetailBtn.setAttribute('data-initialized', 'true');
+            openCommissionDetailBtn.addEventListener('click', () => {
+                document.getElementById('commissionDetailModal').style.display = 'flex';
+            });
+        }
+
+        // Refresh export history button
+        const refreshExportHistoryBtn = document.getElementById('refreshExportHistoryBtn');
+        if (refreshExportHistoryBtn && !refreshExportHistoryBtn.hasAttribute('data-initialized')) {
+            refreshExportHistoryBtn.setAttribute('data-initialized', 'true');
+            refreshExportHistoryBtn.addEventListener('click', loadExportHistory);
+        }
+
+        // Payment summary form
+        const paymentSummaryForm = document.getElementById('paymentSummaryForm');
+        if (paymentSummaryForm && !paymentSummaryForm.hasAttribute('data-initialized')) {
+            paymentSummaryForm.setAttribute('data-initialized', 'true');
+            paymentSummaryForm.addEventListener('submit', handlePaymentSummaryExport);
+        }
+
+        // Commission detail form
+        const commissionDetailForm = document.getElementById('commissionDetailForm');
+        if (commissionDetailForm && !commissionDetailForm.hasAttribute('data-initialized')) {
+            commissionDetailForm.setAttribute('data-initialized', 'true');
+            commissionDetailForm.addEventListener('submit', handleCommissionDetailExport);
+        }
+
+        // Affiliate search
+        const detailAffiliateSearch = document.getElementById('detailAffiliateSearch');
+        if (detailAffiliateSearch && !detailAffiliateSearch.hasAttribute('data-initialized')) {
+            detailAffiliateSearch.setAttribute('data-initialized', 'true');
+            detailAffiliateSearch.addEventListener('input', handleAffiliateSearch);
+        }
+    }
+
+    // Export vendors
+    async function exportVendors() {
+        try {
+            const response = await adminFetch('/api/v1/quickbooks/vendors?format=csv');
+            
+            if (response.ok) {
+                // Download CSV file
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `wavemax-vendors-${new Date().toISOString().split('T')[0]}.csv`;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+                
+                // Reload export history
+                await loadExportHistory();
+            } else {
+                const error = await response.json();
+                alert(error.message || t('administrator.dashboard.quickbooks.exportFailed', 'Export failed'));
+            }
+        } catch (error) {
+            console.error('Error exporting vendors:', error);
+            alert(t('administrator.dashboard.errors.networkError', 'Network error. Please try again.'));
+        }
+    }
+
+    // Handle payment summary export
+    async function handlePaymentSummaryExport(e) {
+        e.preventDefault();
+        
+        const startDate = document.getElementById('summaryStartDate').value;
+        const endDate = document.getElementById('summaryEndDate').value;
+        const format = document.getElementById('summaryFormat').value;
+
+        try {
+            const response = await adminFetch(`/api/v1/quickbooks/payment-summary?startDate=${startDate}&endDate=${endDate}&format=${format}`);
+            
+            if (response.ok) {
+                if (format === 'csv') {
+                    // Download CSV file
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `wavemax-payments-${startDate}-to-${endDate}.csv`;
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                    document.body.removeChild(a);
+                } else {
+                    // Show JSON response
+                    const data = await response.json();
+                    alert(t('administrator.dashboard.quickbooks.exportSuccess', 'Export successful! Check export history for details.'));
+                }
+                
+                closePaymentSummaryModal();
+                await loadExportHistory();
+            } else {
+                const error = await response.json();
+                alert(error.message || t('administrator.dashboard.quickbooks.exportFailed', 'Export failed'));
+            }
+        } catch (error) {
+            console.error('Error exporting payment summary:', error);
+            alert(t('administrator.dashboard.errors.networkError', 'Network error. Please try again.'));
+        }
+    }
+
+    // Handle commission detail export
+    async function handleCommissionDetailExport(e) {
+        e.preventDefault();
+        
+        const affiliateId = document.getElementById('detailAffiliateId').value;
+        const startDate = document.getElementById('detailStartDate').value;
+        const endDate = document.getElementById('detailEndDate').value;
+        const format = document.getElementById('detailFormat').value;
+
+        if (!affiliateId) {
+            alert(t('administrator.dashboard.quickbooks.selectAffiliateError', 'Please select an affiliate'));
+            return;
+        }
+
+        try {
+            const response = await adminFetch(`/api/v1/quickbooks/commission-detail?affiliateId=${affiliateId}&startDate=${startDate}&endDate=${endDate}&format=${format}`);
+            
+            if (response.ok) {
+                if (format === 'csv') {
+                    // Download CSV file
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `wavemax-commission-${affiliateId}-${startDate}-to-${endDate}.csv`;
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                    document.body.removeChild(a);
+                } else {
+                    // Show JSON response
+                    const data = await response.json();
+                    alert(t('administrator.dashboard.quickbooks.exportSuccess', 'Export successful! Check export history for details.'));
+                }
+                
+                closeCommissionDetailModal();
+                await loadExportHistory();
+            } else {
+                const error = await response.json();
+                alert(error.message || t('administrator.dashboard.quickbooks.exportFailed', 'Export failed'));
+            }
+        } catch (error) {
+            console.error('Error exporting commission detail:', error);
+            alert(t('administrator.dashboard.errors.networkError', 'Network error. Please try again.'));
+        }
+    }
+
+    // Handle affiliate search
+    async function handleAffiliateSearch(e) {
+        const searchTerm = e.target.value.trim();
+        
+        if (searchTerm.length < 2) {
+            document.getElementById('affiliateSearchResults').style.display = 'none';
+            return;
+        }
+
+        // Clear previous timeout
+        if (searchTimeout) clearTimeout(searchTimeout);
+
+        // Debounce search
+        searchTimeout = setTimeout(async () => {
+            try {
+                const response = await adminFetch(`/api/v1/affiliates?search=${encodeURIComponent(searchTerm)}&status=active&limit=10`);
+                const data = await response.json();
+
+                if (response.ok && data.affiliates) {
+                    affiliateSearchResults = data.affiliates;
+                    renderAffiliateSearchResults();
+                }
+            } catch (error) {
+                console.error('Error searching affiliates:', error);
+            }
+        }, 300);
+    }
+
+    // Render affiliate search results
+    function renderAffiliateSearchResults() {
+        const resultsDiv = document.getElementById('affiliateSearchResults');
+        
+        if (affiliateSearchResults.length === 0) {
+            resultsDiv.innerHTML = `<div style="padding: 10px; color: #666;">${t('administrator.dashboard.quickbooks.noAffiliatesFound', 'No affiliates found')}</div>`;
+        } else {
+            resultsDiv.innerHTML = affiliateSearchResults.map(affiliate => `
+                <div style="padding: 10px; cursor: pointer; border-bottom: 1px solid #eee;" 
+                     onmouseover="this.style.backgroundColor='#f8f9fa'" 
+                     onmouseout="this.style.backgroundColor=''"
+                     onclick="selectAffiliate('${affiliate.affiliateId}', '${affiliate.firstName} ${affiliate.lastName}')">
+                    <strong>${affiliate.firstName} ${affiliate.lastName}</strong><br>
+                    <small>${affiliate.email} | ID: ${affiliate.affiliateId}</small>
+                </div>
+            `).join('');
+        }
+        
+        resultsDiv.style.display = 'block';
+    }
+
+    // Select affiliate
+    window.selectAffiliate = function(affiliateId, affiliateName) {
+        document.getElementById('detailAffiliateId').value = affiliateId;
+        document.getElementById('selectedAffiliateName').textContent = affiliateName;
+        document.getElementById('selectedAffiliate').style.display = 'block';
+        document.getElementById('affiliateSearchResults').style.display = 'none';
+        document.getElementById('detailAffiliateSearch').value = '';
+    };
+
+    // Modal close functions
+    window.closePaymentSummaryModal = function() {
+        document.getElementById('paymentSummaryModal').style.display = 'none';
+        document.getElementById('paymentSummaryForm').reset();
+    };
+
+    window.closeCommissionDetailModal = function() {
+        document.getElementById('commissionDetailModal').style.display = 'none';
+        document.getElementById('commissionDetailForm').reset();
+        document.getElementById('detailAffiliateId').value = '';
+        document.getElementById('selectedAffiliate').style.display = 'none';
+        document.getElementById('affiliateSearchResults').style.display = 'none';
+    };
+
+    // Audit Log functionality
+    let currentAuditFilters = {
+        action: '',
+        affiliateId: '',
+        dateFrom: '',
+        dateTo: ''
+    };
+
+    // Load audit log
+    async function loadAuditLog() {
+        try {
+            // Set up event listeners
+            setupAuditLogEventListeners();
+            
+            // Load initial data
+            await loadAuditLogData();
+        } catch (error) {
+            console.error('Error loading audit log:', error);
+            document.getElementById('auditLogContent').innerHTML = `
+                <p style="padding: 20px; text-align: center; color: #dc3545;">
+                    ${t('administrator.dashboard.auditlog.loadError', 'Error loading audit logs')}
+                </p>
+            `;
+        }
+    }
+
+    // Set up audit log event listeners
+    function setupAuditLogEventListeners() {
+        // Apply filters button
+        const applyFiltersBtn = document.getElementById('applyAuditFiltersBtn');
+        if (applyFiltersBtn) {
+            applyFiltersBtn.addEventListener('click', async () => {
+                currentAuditFilters = {
+                    action: document.getElementById('auditActionFilter').value,
+                    affiliateId: document.getElementById('auditAffiliateFilter').value,
+                    dateFrom: document.getElementById('auditDateFromFilter').value,
+                    dateTo: document.getElementById('auditDateToFilter').value
+                };
+                await loadAuditLogData();
+            });
+        }
+
+        // Clear filters button
+        const clearFiltersBtn = document.getElementById('clearAuditFiltersBtn');
+        if (clearFiltersBtn) {
+            clearFiltersBtn.addEventListener('click', async () => {
+                // Clear filter inputs
+                document.getElementById('auditActionFilter').value = '';
+                document.getElementById('auditAffiliateFilter').value = '';
+                document.getElementById('auditDateFromFilter').value = '';
+                document.getElementById('auditDateToFilter').value = '';
+                
+                // Reset current filters
+                currentAuditFilters = {
+                    action: '',
+                    affiliateId: '',
+                    dateFrom: '',
+                    dateTo: ''
+                };
+                
+                await loadAuditLogData();
+            });
+        }
+
+        // Refresh button
+        const refreshBtn = document.getElementById('refreshAuditLogBtn');
+        if (refreshBtn) {
+            refreshBtn.addEventListener('click', async () => {
+                await loadAuditLogData();
+            });
+        }
+
+        // Export button
+        const exportBtn = document.getElementById('exportAuditLogBtn');
+        if (exportBtn) {
+            exportBtn.addEventListener('click', async () => {
+                await exportAuditLog();
+            });
+        }
+    }
+
+    // Load audit log data
+    async function loadAuditLogData() {
+        const container = document.getElementById('auditLogContent');
+        container.innerHTML = `
+            <div class="loading">
+                <div class="spinner"></div>
+                <p>${t('administrator.dashboard.auditlog.loading', 'Loading audit logs...')}</p>
+            </div>
+        `;
+
+        try {
+            // Build query string
+            const params = new URLSearchParams();
+            if (currentAuditFilters.action) params.append('action', currentAuditFilters.action);
+            if (currentAuditFilters.affiliateId) params.append('affiliateId', currentAuditFilters.affiliateId);
+            if (currentAuditFilters.dateFrom) params.append('startDate', currentAuditFilters.dateFrom);
+            if (currentAuditFilters.dateTo) params.append('endDate', currentAuditFilters.dateTo);
+            params.append('limit', '100');
+
+            const response = await adminFetch(`/api/v1/w9/admin/audit-logs?${params.toString()}`);
+            const data = await response.json();
+
+            if (response.ok && data.success) {
+                renderAuditLogTable(data.logs);
+            } else {
+                container.innerHTML = `
+                    <p style="padding: 20px; text-align: center; color: #dc3545;">
+                        ${data.message || t('administrator.dashboard.auditlog.loadError', 'Failed to load audit logs')}
+                    </p>
+                `;
+            }
+        } catch (error) {
+            console.error('Error loading audit logs:', error);
+            container.innerHTML = `
+                <p style="padding: 20px; text-align: center; color: #dc3545;">
+                    ${t('administrator.dashboard.auditlog.loadError', 'Error loading audit logs')}
+                </p>
+            `;
+        }
+    }
+
+    // Render audit log table
+    function renderAuditLogTable(logs) {
+        const container = document.getElementById('auditLogContent');
+        
+        if (!logs || logs.length === 0) {
+            container.innerHTML = `
+                <p style="padding: 20px; text-align: center; color: #666;">
+                    ${t('administrator.dashboard.auditlog.noLogs', 'No audit logs found')}
+                </p>
+            `;
+            return;
+        }
+
+        const actionLabels = {
+            'upload_attempt': 'Upload Attempt',
+            'upload_success': 'Upload Success',
+            'upload_failure': 'Upload Failure',
+            'download_affiliate': 'Download (Affiliate)',
+            'download_admin': 'Download (Admin)',
+            'verify_attempt': 'Verify Attempt',
+            'verify_success': 'Verify Success',
+            'reject': 'Reject',
+            'expire': 'Expire',
+            'delete': 'Delete',
+            'quickbooks_export': 'QuickBooks Export',
+            'legal_hold': 'Legal Hold'
+        };
+
+        const tableHtml = `
+            <table>
+                <thead>
+                    <tr>
+                        <th>${t('administrator.dashboard.auditlog.timestamp', 'Timestamp')}</th>
+                        <th>${t('administrator.dashboard.auditlog.action', 'Action')}</th>
+                        <th>${t('administrator.dashboard.auditlog.user', 'User')}</th>
+                        <th>${t('administrator.dashboard.auditlog.affiliate', 'Affiliate')}</th>
+                        <th>${t('administrator.dashboard.auditlog.details', 'Details')}</th>
+                        <th>${t('administrator.dashboard.auditlog.ipAddress', 'IP Address')}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${logs.map(log => {
+                        // Format timestamp
+                        const timestamp = new Date(log.timestamp).toLocaleString();
+                        
+                        // Format user info
+                        const user = log.userInfo ? 
+                            `${log.userInfo.userName} (${log.userInfo.userType})` : 
+                            'System';
+                        
+                        // Format details
+                        let detailsHtml = '';
+                        if (log.details) {
+                            if (log.details.success !== undefined) {
+                                detailsHtml += `<span class="status-badge ${log.details.success ? 'active' : 'inactive'}">
+                                    ${log.details.success ? 'Success' : 'Failed'}
+                                </span>`;
+                            }
+                            if (log.details.reason) {
+                                detailsHtml += `<br><small>${log.details.reason}</small>`;
+                            }
+                            if (log.details.error) {
+                                detailsHtml += `<br><small class="text-danger">${log.details.error}</small>`;
+                            }
+                        }
+                        
+                        return `
+                            <tr>
+                                <td>${timestamp}</td>
+                                <td>${actionLabels[log.action] || log.action}</td>
+                                <td>${user}</td>
+                                <td>${log.targetInfo?.affiliateId || '-'}</td>
+                                <td>${detailsHtml || '-'}</td>
+                                <td>${log.metadata?.ipAddress || '-'}</td>
+                            </tr>
+                        `;
+                    }).join('')}
+                </tbody>
+            </table>
+        `;
+
+        container.innerHTML = tableHtml;
+    }
+
+    // Export audit log
+    async function exportAuditLog() {
+        try {
+            // Build query string with current filters
+            const params = new URLSearchParams();
+            if (currentAuditFilters.action) params.append('action', currentAuditFilters.action);
+            if (currentAuditFilters.affiliateId) params.append('affiliateId', currentAuditFilters.affiliateId);
+            if (currentAuditFilters.dateFrom) params.append('startDate', currentAuditFilters.dateFrom);
+            if (currentAuditFilters.dateTo) params.append('endDate', currentAuditFilters.dateTo);
+            params.append('format', 'csv');
+
+            const response = await adminFetch(`/api/v1/w9/admin/audit-logs/export?${params.toString()}`);
+            
+            if (response.ok) {
+                // Get the filename from the Content-Disposition header
+                const contentDisposition = response.headers.get('Content-Disposition');
+                const filenameMatch = contentDisposition && contentDisposition.match(/filename="(.+)"/);
+                const filename = filenameMatch ? filenameMatch[1] : 'audit-log-export.csv';
+                
+                // Download the file
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.style.display = 'none';
+                a.href = url;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+            } else {
+                const error = await response.json();
+                alert(error.message || t('administrator.dashboard.auditlog.exportFailed', 'Export failed'));
+            }
+        } catch (error) {
+            console.error('Error exporting audit log:', error);
+            alert(t('administrator.dashboard.auditlog.exportError', 'Error exporting audit log'));
+        }
     }
 
     // Load system config

@@ -182,6 +182,7 @@ describe('Administrator Integration Tests', () => {
         firstName: 'Op',
         lastName: 'Erator',
         email: 'operator@wavemax.com',
+        username: 'operator1',
         password: 'StrongPassword417!',
         createdBy: testAdmin._id
       });

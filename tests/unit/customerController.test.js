@@ -343,8 +343,8 @@ describe('Customer Controller', () => {
         { 
           orderId: 'ORD001', 
           customerId: 'CUST123', 
-          status: 'delivered',
-          toObject: jest.fn().mockReturnValue({ orderId: 'ORD001', customerId: 'CUST123', status: 'delivered' })
+          status: 'complete',
+          toObject: jest.fn().mockReturnValue({ orderId: 'ORD001', customerId: 'CUST123', status: 'complete' })
         },
         { 
           orderId: 'ORD002', 

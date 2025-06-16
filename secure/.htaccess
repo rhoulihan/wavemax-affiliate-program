@@ -1,0 +1,8 @@
+# Deny all web access to secure directory
+Deny from all
+
+# Additional security headers
+<FilesMatch ".*">
+    Order Deny,Allow
+    Deny from all
+</FilesMatch>

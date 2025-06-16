@@ -40,6 +40,7 @@
     "cors": "2.8.5",
     "crypto-js": "^4.2.0",
     "csurf": "^1.2.2",
+    "csv-writer": "^1.6.0",
     "dotenv": "16.3.1",
     "express": "^4.21.2",
     "express-mongo-sanitize": "^2.2.0",

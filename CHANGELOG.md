@@ -4,6 +4,30 @@ All notable changes to the WaveMAX Laundry Affiliate Program will be documented 
 
 ## [Unreleased]
 
+### Added
+- W-9 Tax Compliance System
+  - Secure W-9 document upload for affiliates
+  - AES-256-GCM encryption for document storage
+  - Administrator verification workflow with QuickBooks data entry
+  - Payment hold system until W-9 verification
+  - Automatic expiry notifications after 3 years
+  - IRS-compliant 7-year data retention policy
+  - Comprehensive audit logging for all W-9 operations
+  - Email notifications for W-9 status changes
+- QuickBooks Integration
+  - Export verified affiliates as QuickBooks vendors
+  - Biweekly payment summary exports with date ranges
+  - Detailed commission reports per affiliate
+  - CSV format compatible with QuickBooks import
+  - Export history tracking and audit trails
+  - Support for both CSV and JSON export formats
+- Security Enhancements
+  - W-9 document encryption at rest
+  - Secure storage outside web root
+  - Role-based access control for W-9 documents
+  - Legal hold functionality for documents
+  - Automated data retention service
+
 ### Changed
 - Simplified Paygistix integration from form pool to callback URL pool
   - Single Paygistix form configuration instead of multiple forms
