@@ -468,24 +468,349 @@
 
             <h2 id="implementation">Implementation Guide</h2>
 
-            <h3>Environment Configuration</h3>
+            <h3>Step 1: Create DocuSign Developer Account</h3>
+            <ol>
+                <li>Go to <a href="https://developers.docusign.com/" target="_blank">https://developers.docusign.com/</a></li>
+                <li>Click "Create a free sandbox account"</li>
+                <li>Complete registration with your email</li>
+                <li>Verify your email address</li>
+                <li>Log into the DocuSign Admin dashboard</li>
+            </ol>
+
+            <div class="alert alert-info">
+                <strong>Note:</strong> Start with a developer sandbox account for testing. You'll need to request production access once testing is complete.
+            </div>
+
+            <h3>Step 2: Create Integration Key (App)</h3>
+            <ol>
+                <li>In DocuSign Admin, go to <strong>Settings → Apps and Keys</strong></li>
+                <li>Click <strong>"Add App and Integration Key"</strong></li>
+                <li>Enter app details:
+                    <ul>
+                        <li><strong>App Name:</strong> WaveMAX W9 Integration</li>
+                        <li><strong>App Description:</strong> Electronic W-9 collection for affiliates</li>
+                    </ul>
+                </li>
+                <li>After creation, copy your <strong>Integration Key (Client ID)</strong></li>
+                <li>Add a redirect URI: <code>https://yourdomain.com/api/v1/w9/docusign/callback</code></li>
+            </ol>
+
+            <h3>Step 3: Generate RSA Key Pair</h3>
+            <p>DocuSign uses JWT authentication which requires an RSA key pair:</p>
+
+            <h4>Option A: Generate in DocuSign Admin</h4>
+            <ol>
+                <li>In your app settings, find <strong>"RSA Keypairs"</strong></li>
+                <li>Click <strong>"Generate RSA"</strong></li>
+                <li>Copy the private key immediately (shown only once)</li>
+                <li>Save it securely - you'll need it for the environment configuration</li>
+            </ol>
+
+            <h4>Option B: Generate Locally (Recommended)</h4>
+            <pre><code># Generate private key
+openssl genrsa -out docusign_private.key 2048
+
+# Generate public key
+openssl rsa -in docusign_private.key -pubout -out docusign_public.key
+
+# View private key for copying to .env
+cat docusign_private.key</code></pre>
+
+            <p>Then upload the public key to DocuSign:</p>
+            <ol>
+                <li>In app settings, click <strong>"Add RSA Keypair"</strong></li>
+                <li>Paste your public key content</li>
+                <li>Click <strong>"Save"</strong></li>
+            </ol>
+
+            <h3>Step 4: Get User and Account IDs</h3>
+            <ol>
+                <li>In DocuSign Admin, click your profile icon (top right)</li>
+                <li>Select <strong>"My Preferences"</strong></li>
+                <li>Copy your <strong>API Username</strong> (this is your User ID)</li>
+                <li>For Account ID, go to <strong>Settings → Account Information</strong></li>
+                <li>Copy the <strong>Account ID</strong> (API Account ID)</li>
+            </ol>
+
+            <h3>Step 5: Create W-9 Template</h3>
+            <ol>
+                <li>Log into your DocuSign account (not Admin)</li>
+                <li>Go to <strong>Templates</strong> → <strong>"New Template"</strong></li>
+                <li>Upload the IRS W-9 form PDF</li>
+                <li>Name it: <strong>"W-9 Tax Form"</strong></li>
+                <li>Add recipient:
+                    <ul>
+                        <li><strong>Role Name:</strong> Taxpayer</li>
+                        <li><strong>Type:</strong> Signer</li>
+                    </ul>
+                </li>
+                <li>Add fields to the form:
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Field Type</th>
+                                <th>Field Label</th>
+                                <th>Location on W-9</th>
+                                <th>Required</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Text</td>
+                                <td>Name</td>
+                                <td>Line 1 (Name)</td>
+                                <td>Yes</td>
+                            </tr>
+                            <tr>
+                                <td>Text</td>
+                                <td>BusinessName</td>
+                                <td>Line 2 (Business name)</td>
+                                <td>No</td>
+                            </tr>
+                            <tr>
+                                <td>Checkbox Group</td>
+                                <td>TaxClassification</td>
+                                <td>Federal tax classification boxes</td>
+                                <td>Yes</td>
+                            </tr>
+                            <tr>
+                                <td>Text</td>
+                                <td>Address</td>
+                                <td>Address field</td>
+                                <td>Yes</td>
+                            </tr>
+                            <tr>
+                                <td>Text</td>
+                                <td>City</td>
+                                <td>City field</td>
+                                <td>Yes</td>
+                            </tr>
+                            <tr>
+                                <td>Text</td>
+                                <td>State</td>
+                                <td>State field</td>
+                                <td>Yes</td>
+                            </tr>
+                            <tr>
+                                <td>Text</td>
+                                <td>ZipCode</td>
+                                <td>ZIP field</td>
+                                <td>Yes</td>
+                            </tr>
+                            <tr>
+                                <td>SSN</td>
+                                <td>SSN</td>
+                                <td>Social security number box</td>
+                                <td>No*</td>
+                            </tr>
+                            <tr>
+                                <td>Text</td>
+                                <td>EIN</td>
+                                <td>Employer ID number box</td>
+                                <td>No*</td>
+                            </tr>
+                            <tr>
+                                <td>Signature</td>
+                                <td>Signature</td>
+                                <td>Signature line</td>
+                                <td>Yes</td>
+                            </tr>
+                            <tr>
+                                <td>Date</td>
+                                <td>DateSigned</td>
+                                <td>Date line</td>
+                                <td>Yes</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <p><small>* Either SSN or EIN must be provided</small></p>
+                </li>
+                <li>Save the template and copy the <strong>Template ID</strong></li>
+            </ol>
+
+            <div class="alert alert-warning">
+                <strong>Important:</strong> Field labels must match exactly as shown above for the integration to work properly.
+            </div>
+
+            <h3>Step 6: Configure Webhooks</h3>
+            <ol>
+                <li>In DocuSign Admin, go to <strong>Settings → Connect</strong></li>
+                <li>Click <strong>"Add Configuration"</strong> → <strong>"Custom"</strong></li>
+                <li>Configure webhook:
+                    <ul>
+                        <li><strong>Name:</strong> WaveMAX W9 Webhooks</li>
+                        <li><strong>URL to Publish:</strong> <code>https://yourdomain.com/api/v1/w9/webhook/docusign</code></li>
+                        <li><strong>Envelope Events:</strong> Check all (Sent, Delivered, Completed, Declined, Voided)</li>
+                        <li><strong>Include Data:</strong> Check "Include Documents" and "Include Certificate of Completion"</li>
+                    </ul>
+                </li>
+                <li>Enable <strong>"Require Acknowledgment"</strong></li>
+                <li>Save and note the <strong>Connect Key</strong> (use as webhook secret)</li>
+            </ol>
+
+            <h3>Step 7: Environment Configuration</h3>
+            <p>Update your <code>.env</code> file with the values collected:</p>
             <pre><code># DocuSign Configuration
-DOCUSIGN_INTEGRATION_KEY=your_integration_key
-DOCUSIGN_USER_ID=your_user_id
-DOCUSIGN_ACCOUNT_ID=your_account_id
+DOCUSIGN_INTEGRATION_KEY=6f3e7a92-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+DOCUSIGN_USER_ID=8d4a2b6c-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+DOCUSIGN_ACCOUNT_ID=9e5b3c7d-xxxx-xxxx-xxxx-xxxxxxxxxxxx
 DOCUSIGN_BASE_URL=https://demo.docusign.net/restapi
 DOCUSIGN_OAUTH_BASE_URL=https://account-d.docusign.com
-DOCUSIGN_W9_TEMPLATE_ID=your_w9_template_id
-DOCUSIGN_WEBHOOK_SECRET=your_webhook_secret
+DOCUSIGN_W9_TEMPLATE_ID=3a8c5e9f-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+DOCUSIGN_WEBHOOK_SECRET=your_connect_key_from_step_6
+DOCUSIGN_REDIRECT_URI=https://yourdomain.com/affiliate/dashboard?tab=settings
 DOCUSIGN_PRIVATE_KEY="-----BEGIN RSA PRIVATE KEY-----
-your_private_key_here
+MIIEpAIBAAKCAQEA1234567890abcdef...
+[Your complete private key here]
+...xyz987654321
 -----END RSA PRIVATE KEY-----"</code></pre>
 
+            <div class="alert alert-info">
+                <strong>Production URLs:</strong> When moving to production, update:
+                <ul>
+                    <li><code>DOCUSIGN_BASE_URL=https://na4.docusign.net/restapi</code></li>
+                    <li><code>DOCUSIGN_OAUTH_BASE_URL=https://account.docusign.com</code></li>
+                </ul>
+            </div>
+
+            <h3>Step 8: Testing the Integration</h3>
+            
+            <h4>8.1 Verify Configuration</h4>
+            <p>Test your configuration with this script:</p>
+            <pre><code>// Create test-docusign-config.js
+const docusignService = require('./server/services/docusignService');
+
+async function testConfig() {
+    try {
+        console.log('Testing DocuSign authentication...');
+        const token = await docusignService.authenticate();
+        console.log('✅ Authentication successful!');
+        console.log('Token preview:', token.substring(0, 20) + '...');
+    } catch (error) {
+        console.error('❌ Authentication failed:', error.message);
+    }
+}
+
+testConfig();</code></pre>
+
+            <p>Run with: <code>node test-docusign-config.js</code></p>
+
+            <h4>8.2 Test W-9 Template</h4>
+            <ol>
+                <li>Log into affiliate dashboard with test account</li>
+                <li>Navigate to Settings → Tax Information</li>
+                <li>Click "Complete W9 Form with DocuSign"</li>
+                <li>Verify:
+                    <ul>
+                        <li>Form opens with pre-filled information</li>
+                        <li>All fields are in correct positions</li>
+                        <li>Signature and date fields work</li>
+                    </ul>
+                </li>
+            </ol>
+
+            <h4>8.3 Test Webhook Reception</h4>
+            <p>Monitor webhook events:</p>
+            <pre><code># Add to your server logs
+// In w9Controller.js webhook handler
+console.log('DocuSign Webhook Received:', {
+    event: req.body.event,
+    envelopeId: req.body.envelopeId,
+    status: req.body.status,
+    timestamp: new Date().toISOString()
+});</code></pre>
+
+            <h3>Step 9: Production Deployment</h3>
+
+            <h4>9.1 Request Production Access</h4>
+            <ol>
+                <li>Complete 20+ API calls in sandbox (DocuSign requirement)</li>
+                <li>In DocuSign Admin → <strong>"Go Live"</strong></li>
+                <li>Submit production request with:
+                    <ul>
+                        <li>Company information</li>
+                        <li>Use case description</li>
+                        <li>Expected volume</li>
+                    </ul>
+                </li>
+                <li>Wait for approval (typically 1-2 business days)</li>
+            </ol>
+
+            <h4>9.2 Production Configuration</h4>
+            <ol>
+                <li>Create production integration key</li>
+                <li>Update environment variables for production</li>
+                <li>Create production W-9 template</li>
+                <li>Configure production webhooks</li>
+                <li>Update redirect URIs</li>
+            </ol>
+
+            <h4>9.3 Enable DocuSign in Production</h4>
+            <p>Add feature flag to control rollout:</p>
+            <pre><code># In .env
+ENABLE_DOCUSIGN_W9=true
+
+// In w9Routes.js
+if (process.env.ENABLE_DOCUSIGN_W9 === 'true') {
+    router.post('/initiate-signing', ...);
+} else {
+    // Fallback to manual upload
+}</code></pre>
+
+            <h3>Step 10: Monitoring & Maintenance</h3>
+
+            <h4>10.1 Monitor DocuSign Connect</h4>
+            <ol>
+                <li>Log into DocuSign Admin</li>
+                <li>Go to <strong>Settings → Connect</strong></li>
+                <li>Click on your configuration</li>
+                <li>View <strong>"Logs"</strong> for webhook history</li>
+                <li>Check for failed deliveries</li>
+            </ol>
+
+            <h4>10.2 Common Configuration Issues</h4>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Error</th>
+                        <th>Cause</th>
+                        <th>Solution</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>USER_LACKS_PERMISSIONS</td>
+                        <td>User ID incorrect or lacks consent</td>
+                        <td>Verify User ID and grant consent in app settings</td>
+                    </tr>
+                    <tr>
+                        <td>INVALID_GRANT</td>
+                        <td>JWT token expired or clock skew</td>
+                        <td>Check server time sync, regenerate token</td>
+                    </tr>
+                    <tr>
+                        <td>TEMPLATE_NOT_FOUND</td>
+                        <td>Template ID incorrect</td>
+                        <td>Verify template ID and account</td>
+                    </tr>
+                    <tr>
+                        <td>Webhook not received</td>
+                        <td>URL not accessible</td>
+                        <td>Check firewall, SSL certificate</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h4>10.3 Backup Configuration</h4>
+            <p>Always maintain the manual upload option as fallback:</p>
+            <pre><code>// In affiliate dashboard
+if (!window.docuSignW9 || !process.env.DOCUSIGN_INTEGRATION_KEY) {
+    // Show manual upload form
+    document.getElementById('w9UploadForm').style.display = 'block';
+}</code></pre>
+
             <h3>Frontend Integration</h3>
-            <p>The affiliate dashboard automatically loads the DocuSign integration when configured:</p>
-            <pre><code>// The DocuSign integration is automatically initialized
-// when the affiliate dashboard loads
-window.docuSignW9.initialize();</code></pre>
+            <p>The affiliate dashboard automatically loads the DocuSign integration when properly configured. The integration script checks for required environment variables and gracefully falls back to manual upload if DocuSign is not available.</p>
 
             <h3>Status Display</h3>
             <p>The W-9 status section shows different states based on the signing progress:</p>
