@@ -3,22 +3,144 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>London On Screen - Self-Guided Film & TV Walking Tour</title>
+    <title data-i18n="filmwalk.title">London On Screen - Self-Guided Film & TV Walking Tour</title>
     <link rel="stylesheet" href="style.css">
     <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
+    <style>
+        /* Language Selector Styles */
+        .language-selector {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1001;
+        }
+        
+        .language-dropdown {
+            background: rgba(0, 0, 0, 0.9);
+            border: 2px solid #888;
+            border-radius: 8px;
+            padding: 8px 12px;
+            color: #fff;
+            font-size: 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+        }
+        
+        .language-dropdown:hover {
+            border-color: #fcee0a;
+        }
+        
+        .language-dropdown img {
+            width: 24px;
+            height: 16px;
+            object-fit: cover;
+            border-radius: 2px;
+        }
+        
+        .language-menu {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            margin-top: 8px;
+            background: rgba(0, 0, 0, 0.95);
+            border: 2px solid #888;
+            border-radius: 8px;
+            overflow: hidden;
+            display: none;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+        }
+        
+        .language-menu.active {
+            display: block;
+        }
+        
+        .language-option {
+            padding: 10px 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border-bottom: 1px solid #333;
+        }
+        
+        .language-option:last-child {
+            border-bottom: none;
+        }
+        
+        .language-option:hover {
+            background: rgba(252, 238, 10, 0.2);
+            color: #fcee0a;
+        }
+        
+        .language-option img {
+            width: 24px;
+            height: 16px;
+            object-fit: cover;
+            border-radius: 2px;
+        }
+        
+        @media (max-width: 768px) {
+            .language-selector {
+                top: 10px;
+                right: 10px;
+            }
+            
+            .language-dropdown {
+                padding: 6px 10px;
+                font-size: 12px;
+            }
+            
+            .language-dropdown img,
+            .language-option img {
+                width: 20px;
+                height: 14px;
+            }
+        }
+    </style>
 </head>
 <body>
+    <!-- Language Selector -->
+    <div class="language-selector">
+        <div class="language-dropdown" id="languageDropdown">
+            <img src="https://flagcdn.com/w40/gb.png" alt="EN" id="selectedFlag">
+            <span id="selectedLang">EN</span>
+            <span style="margin-left: 4px;">▼</span>
+        </div>
+        <div class="language-menu" id="languageMenu">
+            <div class="language-option" data-lang="en">
+                <img src="https://flagcdn.com/w40/gb.png" alt="English">
+                <span>English</span>
+            </div>
+            <div class="language-option" data-lang="es">
+                <img src="https://flagcdn.com/w40/es.png" alt="Español">
+                <span>Español</span>
+            </div>
+            <div class="language-option" data-lang="pt">
+                <img src="https://flagcdn.com/w40/pt.png" alt="Português">
+                <span>Português</span>
+            </div>
+            <div class="language-option" data-lang="de">
+                <img src="https://flagcdn.com/w40/de.png" alt="Deutsch">
+                <span>Deutsch</span>
+            </div>
+        </div>
+    </div>
     <!-- Header -->
     <header>
         <div class="header-content">
-            <h1>🎬 London On Screen</h1>
+            <h1 data-i18n="filmwalk.header.title">🎬 London On Screen</h1>
             <nav>
                 <ul>
-                    <li><a href="#tour">The Tour</a></li>
-                    <li><a href="#locations">Locations</a></li>
-                    <li><a href="#bonus">Bonus Sites</a></li>
-                    <li><a href="#about">About</a></li>
+                    <li><a href="#tour" data-i18n="filmwalk.nav.tour">The Tour</a></li>
+                    <li><a href="#locations" data-i18n="filmwalk.nav.locations">Locations</a></li>
+                    <li><a href="#bonus" data-i18n="filmwalk.nav.bonus">Bonus Sites</a></li>
+                    <li><a href="#about" data-i18n="filmwalk.nav.about">About</a></li>
                 </ul>
             </nav>
         </div>
@@ -26,90 +148,92 @@
 
     <!-- Hero Section -->
     <section class="hero">
-        <h2>Walk Through Cinema History</h2>
-        <p>Discover London's iconic film and TV locations on this self-guided walking tour through the Square Mile</p>
-        <a href="#tour" class="btn">Start Your Journey</a>
+        <h2 data-i18n="filmwalk.hero.title">Walk Through Cinema History</h2>
+        <p data-i18n="filmwalk.hero.subtitle">Discover London's iconic film and TV locations on this self-guided walking tour through the Square Mile</p>
+        <a href="#tour" class="btn" data-i18n="filmwalk.hero.button">Start Your Journey</a>
     </section>
 
     <!-- Tour Stats -->
     <div class="tour-stats">
         <div class="stat">
             <div class="stat-number">10+12</div>
-            <div class="stat-label">Main + Bonus Sites</div>
+            <div class="stat-label" data-i18n="filmwalk.stats.sites">Main + Bonus Sites</div>
         </div>
         <div class="stat">
             <div class="stat-number">3.5</div>
-            <div class="stat-label">Miles (Main Route)</div>
+            <div class="stat-label" data-i18n="filmwalk.stats.miles">Miles (Main Route)</div>
         </div>
         <div class="stat">
             <div class="stat-number">70+</div>
-            <div class="stat-label">Films & Shows</div>
+            <div class="stat-label" data-i18n="filmwalk.stats.films">Films & Shows</div>
         </div>
         <div class="stat">
             <div class="stat-number">2-4</div>
-            <div class="stat-label">Hours Duration</div>
+            <div class="stat-label" data-i18n="filmwalk.stats.duration">Hours Duration</div>
         </div>
     </div>
 
     <!-- Interactive Map -->
     <section id="tour" class="map-container">
         <div class="interactive-map">
-            <h3 style="font-size: 1.8rem; margin-bottom: 1rem; color: var(--primary-color);">Interactive Walking Route</h3>
+            <h3 style="font-size: 1.8rem; margin-bottom: 1rem; color: var(--primary-color);" data-i18n="filmwalk.map.title">Interactive Walking Route</h3>
             
             <div class="map-wrapper">
                 <!-- Interactive map with route visualization -->
                 <div id="map-container" class="map-iframe">
-                    <p style="text-align: center; padding: 2rem; color: var(--smoke-white); opacity: 0.8;">Interactive map loading...</p>
+                    <p style="text-align: center; padding: 2rem; color: var(--smoke-white); opacity: 0.8;" data-i18n="filmwalk.map.loading">Interactive map loading...</p>
                 </div>
                 <!-- Loading spinner overlay -->
                 <div class="map-loading-overlay" id="mapLoadingOverlay">
                     <div class="map-spinner"></div>
-                    <div class="map-loading-text">Calculating route...</div>
+                    <div class="map-loading-text" data-i18n="filmwalk.map.calculating">Calculating route...</div>
                 </div>
             </div>
             
             <div class="map-controls">
-                <button class="map-button" id="viewFullRouteBtn">View Full Route</button>
-                <button class="map-button" id="getDirectionsBtn">Get Directions</button>
-                <button class="map-button" id="downloadRouteBtn">Download GPX</button>
+                <button class="map-button" id="viewFullRouteBtn" data-i18n="filmwalk.map.viewRoute">View Full Route</button>
+                <button class="map-button" id="getDirectionsBtn" data-i18n="filmwalk.map.getDirections">Get Directions</button>
+                <button class="map-button" id="downloadRouteBtn" data-i18n="filmwalk.map.downloadGPX">Download GPX</button>
             </div>
             
             <div id="directionsPanel" class="directions-panel">
-                <h4 style="margin-bottom: 1rem;">Walking Directions</h4>
+                <h4 style="margin-bottom: 1rem;" data-i18n="filmwalk.directions.title">Walking Directions</h4>
                 <div class="route-info">
                     <div class="route-stat">
                         <div class="route-stat-value">3.5 mi</div>
-                        <div class="route-stat-label">Total Distance</div>
+                        <div class="route-stat-label" data-i18n="filmwalk.directions.distance">Total Distance</div>
                     </div>
                     <div class="route-stat">
                         <div class="route-stat-value">1h 15m</div>
-                        <div class="route-stat-label">Walking Time</div>
+                        <div class="route-stat-label" data-i18n="filmwalk.directions.time">Walking Time</div>
                     </div>
                     <div class="route-stat">
                         <div class="route-stat-value">10</div>
-                        <div class="route-stat-label">Film Locations</div>
+                        <div class="route-stat-label" data-i18n="filmwalk.directions.locations">Film Locations</div>
                     </div>
                 </div>
-                <p style="margin-top: 1rem;">For turn-by-turn directions, we recommend using Google Maps or Apple Maps on your phone. Click below to open the route in your preferred app:</p>
+                <p style="margin-top: 1rem;" data-i18n="filmwalk.directions.description">For turn-by-turn directions, we recommend using Google Maps or Apple Maps on your phone. Click below to open the route in your preferred app:</p>
                 <div style="margin-top: 1rem; display: flex; gap: 1rem; flex-wrap: wrap;">
                     <a href="https://www.google.com/maps/dir/Millennium+Bridge,+London/St+Paul's+Cathedral,+London/Old+Bailey,+London/Postman's+Park,+London/Smithfield+Market,+London/St+Bartholomew+the+Great,+London/Barbican+Centre,+London/Bank+Junction,+London/Leadenhall+Market,+London/Tower+Bridge,+London" 
                        target="_blank" 
                        class="btn" 
-                       style="font-size: 0.9rem;">
+                       style="font-size: 0.9rem;"
+                       data-i18n="filmwalk.directions.openGoogle">
                         Open in Google Maps
                     </a>
                     <a href="https://maps.apple.com/?daddr=Millennium+Bridge,+London+to+St+Paul's+Cathedral,+London+to+Old+Bailey,+London+to+Postman's+Park,+London+to+Smithfield+Market,+London+to+St+Bartholomew+the+Great,+London+to+Barbican+Centre,+London+to+Bank+Junction,+London+to+Leadenhall+Market,+London+to+Tower+Bridge,+London" 
                        class="btn" 
-                       style="font-size: 0.9rem;">
+                       style="font-size: 0.9rem;"
+                       data-i18n="filmwalk.directions.openApple">
                         Open in Apple Maps
                     </a>
                 </div>
             </div>
             
             <div class="route-overview-box">
-                <h4>Walking Route Overview</h4>
+                <h4 data-i18n="filmwalk.route.title">Walking Route Overview</h4>
                 <ol class="route-list">
-                    <li><strong>Millennium Bridge</strong> → St Paul's Cathedral (5 min walk)</li>
+                    <li><strong>Millennium Bridge</strong> → St Paul's Cathedral (<span data-i18n-attr="text:filmwalk.route.minute">5 min walk</span>)</li>
                     <li><strong>St Paul's Cathedral</strong> → Old Bailey (7 min walk)</li>
                     <li><strong>Old Bailey</strong> → Postman's Park (5 min walk)</li>
                     <li><strong>Postman's Park</strong> → Smithfield Market (8 min walk)</li>
@@ -120,8 +244,7 @@
                     <li><strong>Leadenhall Market</strong> → Tower Bridge (15 min walk)</li>
                 </ol>
                 <p class="pro-tip">
-                    <strong>Pro tip:</strong> The route is designed to be walked in order, but you can easily skip locations or add bonus sites. 
-                    Each location is well-connected by public transport if you need a break.
+                    <strong data-i18n="filmwalk.route.proTip">Pro tip:</strong> <span data-i18n="filmwalk.route.proTipText">The route is designed to be walked in order, but you can easily skip locations or add bonus sites. Each location is well-connected by public transport if you need a break.</span>
                 </p>
             </div>
         </div>
@@ -364,8 +487,8 @@
     <section id="bonus" class="bonus-section">
         <div class="locations">
             <div class="bonus-header">
-                <h3>🌟 Bonus Film Locations Nearby</h3>
-                <p>Extend your tour with these additional cinematic spots from the original film walk!</p>
+                <h3 data-i18n="filmwalk.bonus.title">🌟 Bonus Film Locations Nearby</h3>
+                <p data-i18n="filmwalk.bonus.subtitle">Extend your tour with these additional cinematic spots from the original film walk!</p>
             </div>
             
             <div class="bonus-card">
@@ -444,13 +567,13 @@
 
     <!-- About Section -->
     <section id="about" class="about-section">
-        <h3>About This Tour</h3>
-        <p>This self-guided walking tour takes you through the Square Mile, London's historic heart, visiting locations that have appeared in blockbuster films and beloved TV shows. From superhero landings to wizard shopping trips, romantic encounters to explosive action sequences, you'll see the City through the lens of cinema.</p>
-        <p>The main route covers approximately 3.5 miles and takes 2-3 hours at a leisurely pace. Feel free to explore the bonus locations to extend your cinematic adventure!</p>
+        <h3 data-i18n="filmwalk.about.title">About This Tour</h3>
+        <p data-i18n="filmwalk.about.description1">This self-guided walking tour takes you through the Square Mile, London's historic heart, visiting locations that have appeared in blockbuster films and beloved TV shows. From superhero landings to wizard shopping trips, romantic encounters to explosive action sequences, you'll see the City through the lens of cinema.</p>
+        <p data-i18n="filmwalk.about.description2">The main route covers approximately 3.5 miles and takes 2-3 hours at a leisurely pace. Feel free to explore the bonus locations to extend your cinematic adventure!</p>
         
         <div class="tips-box">
-            <h4>Tips for Your Tour:</h4>
-            <ul>
+            <h4 data-i18n="filmwalk.about.tipsTitle">Tips for Your Tour:</h4>
+            <ul data-i18n="filmwalk.about.tips">
                 <li>Start early to avoid crowds at popular spots</li>
                 <li>Bring a camera - these locations are incredibly photogenic!</li>
                 <li>Many locations are free to enter or view from outside</li>
@@ -463,8 +586,8 @@
     <!-- Footer -->
     <footer>
         <div class="footer-content">
-            <p>&copy; 2024 London On Screen Walking Tour. Educational use only.</p>
-            <p style="margin-top: 0.5rem; font-size: 0.9rem;">Based on the City of London's film location guide</p>
+            <p data-i18n="filmwalk.footer.copyright">&copy; 2024 London On Screen Walking Tour. Educational use only.</p>
+            <p style="margin-top: 0.5rem; font-size: 0.9rem;" data-i18n="filmwalk.footer.credit">Based on the City of London's film location guide</p>
         </div>
     </footer>
 
@@ -480,6 +603,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
     <!-- Leaflet Routing Machine for walking paths -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet-routing-machine/3.2.12/leaflet-routing-machine.min.js"></script>
+    <!-- Internationalization -->
+    <script src="i18n.js"></script>
     <script src="script.js"></script>
 </body>
 </html>
