@@ -27,10 +27,21 @@ The WaveMAX Affiliate Program enables individuals to register as affiliates, onb
 - **W-9 Tax Compliance**: Secure document collection and verification system for affiliate tax compliance
 - **QuickBooks Integration**: Export vendors, payment summaries, and commission details for accounting
 
-## Recent Updates
+## Documentation
 
-For recent major updates and features, see [RECENT_UPDATES.md](RECENT_UPDATES.md).
-For a detailed history of all changes, see [CHANGELOG.md](CHANGELOG.md).
+Comprehensive documentation is organized in the [`docs/`](docs/) directory:
+
+- 📚 **[Documentation Index](docs/README.md)** - Complete documentation overview
+- 🔧 **[Implementation Details](docs/implementation/)** - Technical feature documentation
+- 📖 **[Integration Guides](docs/guides/)** - Step-by-step integration instructions
+- 🛠️ **[Development Tools](docs/development/)** - Best practices and development resources
+- 📜 **[Project History](docs/project-history/)** - Changelog and update history
+
+### Quick Links
+- [Recent Updates](docs/project-history/RECENT_UPDATES.md) - Latest features and improvements
+- [Changelog](docs/project-history/CHANGELOG.md) - Detailed change history
+- [Backlog](docs/development/BACKLOG.md) - Upcoming features and known issues
+- [Operating Best Practices](docs/development/OPERATING_BEST_PRACTICES.md) - Known issues and workarounds
 
 ## System Architecture
 
@@ -442,11 +453,11 @@ All exports generate QuickBooks-compatible CSV files with proper field mapping:
 - **Legal Hold Support**: Documents can be marked for retention beyond normal policy
 - **Automatic Cleanup**: Expired documents are automatically archived/deleted
 
-## Documentation
+## HTML Documentation (Optional)
 
-The WaveMAX Affiliate Program includes comprehensive HTML documentation covering all aspects of deployment, configuration, and usage.
+The WaveMAX Affiliate Program can optionally serve HTML documentation through the web interface.
 
-### Accessing Documentation
+### Enabling Web Documentation
 
 1. **Enable documentation in your environment:**
    ```bash
@@ -464,20 +475,12 @@ The WaveMAX Affiliate Program includes comprehensive HTML documentation covering
    https://yourdomain.com/docs
    ```
 
-### Available Documentation
-
-- **Server Configuration** - Complete setup guide for all server components
-- **Embedding Guide** - Instructions for integrating with wavemaxlaundry.com
-- **Administrator Setup** - Creating and managing administrator accounts
-- **RBAC Guide** - Role-based access control and permissions
-- **User Management** - Managing all user types in the system
-
-### Security Note
-
-For production environments, it's recommended to disable documentation access:
+**Security Note:** For production environments, it's recommended to disable web documentation access:
 ```bash
 SHOW_DOCS=false
 ```
+
+For complete technical documentation, see the [`docs/`](docs/) directory.
 
 ## API Documentation
 
@@ -1285,8 +1288,8 @@ formAction: [
 ```
 
 For detailed documentation:
-- [Paygistix Integration Guide](PAYGISTIX_INTEGRATION_GUIDE.md)
-- [Callback Pool System Guide](PAYGISTIX_FORM_POOL_GUIDE.md)
+- [Paygistix Integration Guide](docs/implementation/PAYGISTIX_INTEGRATION_GUIDE.md)
+- [Callback Pool System Guide](docs/implementation/PAYGISTIX_FORM_POOL_GUIDE.md)
 
 ## Testing
 
@@ -1708,7 +1711,7 @@ Add this script to your parent page to enable mobile features:
 - **Secure Communication**: PostMessage API with origin validation for parent-iframe communication
 - **Touch Support**: Full touch gesture support and mobile-optimized interactions
 
-For detailed mobile implementation guide, see the [Mobile Parent Integration Guide](public/mobile-parent-integration-guide.md).
+For detailed mobile implementation guide, see the [Mobile Parent Integration Guide](docs/guides/mobile-parent-integration-guide.md).
 
 ### Performance Optimization
 
@@ -1898,7 +1901,7 @@ The project includes several test pages for development and integration testing:
 
 - `/test-iframe-embed.html` - Test page for iframe integration with URL parameter handling
 - `/iframe-parent-example.html` - Complete parent page implementation example
-- `/mobile-parent-integration-guide.md` - Detailed guide for mobile-responsive iframe integration
+- [`/docs/guides/mobile-parent-integration-guide.md`](docs/guides/mobile-parent-integration-guide.md) - Detailed guide for mobile-responsive iframe integration
 - `/swirl-spinner-demo.html` - Interactive demo of the custom loading spinner component
 - `/wavemax-development-prompt.html` - AI development framework documentation
 
