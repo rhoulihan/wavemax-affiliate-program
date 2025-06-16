@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>W-9 Tax Compliance & DocuSign Integration - WaveMAX Documentation</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f8f9fa;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+            color: white;
+            padding: 40px 0;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        
+        header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        
+        nav {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+        
+        nav h3 {
+            color: #1e3a8a;
+            margin-bottom: 15px;
+        }
+        
+        nav ul {
+            list-style: none;
+            padding-left: 0;
+        }
+        
+        nav li {
+            margin: 10px 0;
+        }
+        
+        nav a {
+            color: #3b82f6;
+            text-decoration: none;
+            border-bottom: 1px solid transparent;
+            transition: border-color 0.2s;
+        }
+        
+        nav a:hover {
+            border-bottom-color: #3b82f6;
+        }
+        
+        .content {
+            background: white;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+        
+        h2 {
+            color: #1e3a8a;
+            font-size: 2rem;
+            margin: 40px 0 20px;
+            padding-top: 20px;
+            border-top: 2px solid #e5e7eb;
+        }
+        
+        h2:first-child {
+            margin-top: 0;
+            padding-top: 0;
+            border-top: none;
+        }
+        
+        h3 {
+            color: #2563eb;
+            font-size: 1.5rem;
+            margin: 30px 0 15px;
+        }
+        
+        h4 {
+            color: #3b82f6;
+            font-size: 1.2rem;
+            margin: 20px 0 10px;
+        }
+        
+        p {
+            margin: 15px 0;
+        }
+        
+        ul, ol {
+            margin: 15px 0;
+            padding-left: 30px;
+        }
+        
+        li {
+            margin: 8px 0;
+        }
+        
+        code {
+            background: #f3f4f6;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.9em;
+        }
+        
+        pre {
+            background: #1f2937;
+            color: #e5e7eb;
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 20px 0;
+        }
+        
+        pre code {
+            background: transparent;
+            color: inherit;
+            padding: 0;
+        }
+        
+        .alert {
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        
+        .alert-info {
+            background: #dbeafe;
+            color: #1e40af;
+            border: 1px solid #93c5fd;
+        }
+        
+        .alert-warning {
+            background: #fef3c7;
+            color: #92400e;
+            border: 1px solid #fcd34d;
+        }
+        
+        .alert-success {
+            background: #d1fae5;
+            color: #065f46;
+            border: 1px solid #6ee7b7;
+        }
+        
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        .feature-card {
+            background: #f9fafb;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+        }
+        
+        .feature-card h4 {
+            color: #1e3a8a;
+            margin-top: 0;
+        }
+        
+        .workflow-step {
+            display: flex;
+            align-items: flex-start;
+            margin: 20px 0;
+        }
+        
+        .workflow-step-number {
+            background: #3b82f6;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 15px;
+            flex-shrink: 0;
+        }
+        
+        .workflow-step-content {
+            flex: 1;
+        }
+        
+        .api-endpoint {
+            background: #f3f4f6;
+            border-left: 4px solid #3b82f6;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        
+        .api-endpoint h5 {
+            margin: 0 0 5px;
+            font-family: 'Courier New', Courier, monospace;
+            color: #1e3a8a;
+        }
+        
+        .api-endpoint p {
+            margin: 5px 0;
+            color: #6b7280;
+        }
+        
+        .back-link {
+            display: inline-block;
+            margin: 20px 0;
+            color: #3b82f6;
+            text-decoration: none;
+            border-bottom: 1px solid transparent;
+            transition: border-color 0.2s;
+        }
+        
+        .back-link:hover {
+            border-bottom-color: #3b82f6;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        
+        th {
+            background: #f9fafb;
+            color: #1e3a8a;
+            font-weight: 600;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+        
+        .status-pending {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        
+        .status-verified {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        
+        .status-rejected {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>W-9 Tax Compliance & DocuSign Integration</h1>
+        <p>Complete guide to electronic W-9 collection and tax compliance</p>
+    </header>
+
+    <div class="container">
+        <a href="index.html" class="back-link">← Back to Documentation</a>
+
+        <nav>
+            <h3>Table of Contents</h3>
+            <ul>
+                <li><a href="#overview">Overview</a></li>
+                <li><a href="#docusign-integration">DocuSign Integration</a></li>
+                <li><a href="#features">Features</a></li>
+                <li><a href="#workflow">W-9 Collection Workflow</a></li>
+                <li><a href="#api-endpoints">API Endpoints</a></li>
+                <li><a href="#implementation">Implementation Guide</a></li>
+                <li><a href="#security">Security & Compliance</a></li>
+                <li><a href="#troubleshooting">Troubleshooting</a></li>
+                <li><a href="#quickbooks">QuickBooks Integration</a></li>
+            </ul>
+        </nav>
+
+        <div class="content">
+            <h2 id="overview">Overview</h2>
+            <p>The WaveMAX Affiliate Program includes a comprehensive W-9 tax compliance system that ensures all affiliates provide proper tax documentation before receiving commission payments. The system now features full DocuSign integration for electronic signature collection, making the process seamless and user-friendly.</p>
+
+            <div class="alert alert-info">
+                <strong>New Feature:</strong> DocuSign eSignature integration is now available, allowing affiliates to complete their W-9 forms electronically without downloading, printing, or scanning documents.
+            </div>
+
+            <h2 id="docusign-integration">DocuSign Integration</h2>
+            <p>The DocuSign integration provides a modern, paperless solution for W-9 collection:</p>
+
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <h4>🖊️ Electronic Signatures</h4>
+                    <p>Legally binding electronic signatures that meet IRS requirements for tax forms.</p>
+                </div>
+                <div class="feature-card">
+                    <h4>📱 Mobile Friendly</h4>
+                    <p>Complete W-9 forms on any device - desktop, tablet, or smartphone.</p>
+                </div>
+                <div class="feature-card">
+                    <h4>🔄 Real-time Updates</h4>
+                    <p>Webhook integration provides instant status updates as documents are signed.</p>
+                </div>
+            </div>
+
+            <h3>DocuSign Setup Requirements</h3>
+            <ol>
+                <li>DocuSign developer account (production account for live use)</li>
+                <li>Integration key (Client ID) for API access</li>
+                <li>RSA key pair for JWT authentication</li>
+                <li>W-9 template created in DocuSign</li>
+                <li>Webhook endpoint configured for status updates</li>
+            </ol>
+
+            <h2 id="features">Features</h2>
+
+            <h3>Electronic Signature Features</h3>
+            <ul>
+                <li><strong>One-Click Signing:</strong> Pre-filled forms with affiliate information</li>
+                <li><strong>Embedded Experience:</strong> Sign within the affiliate dashboard</li>
+                <li><strong>Audit Trail:</strong> Complete signing history with timestamps and IP addresses</li>
+                <li><strong>Automatic Filing:</strong> Signed documents automatically stored and encrypted</li>
+                <li><strong>Status Tracking:</strong> Real-time updates on signing progress</li>
+            </ul>
+
+            <h3>Security & Compliance Features</h3>
+            <ul>
+                <li><strong>AES-256-GCM Encryption:</strong> All documents encrypted at rest</li>
+                <li><strong>Secure Storage:</strong> Documents stored outside web root</li>
+                <li><strong>Payment Hold:</strong> Commissions blocked until W-9 verified</li>
+                <li><strong>Automatic Expiry:</strong> W-9s expire after 3 years with reminders</li>
+                <li><strong>Data Retention:</strong> 7-year retention per IRS requirements</li>
+                <li><strong>Audit Logging:</strong> Complete trail of all W-9 operations</li>
+            </ul>
+
+            <h2 id="workflow">W-9 Collection Workflow</h2>
+
+            <h3>DocuSign Electronic Workflow (Primary)</h3>
+            <div class="workflow-step">
+                <div class="workflow-step-number">1</div>
+                <div class="workflow-step-content">
+                    <strong>Initiate Signing</strong>
+                    <p>Affiliate clicks "Complete W9 Form with DocuSign" in their dashboard</p>
+                </div>
+            </div>
+            <div class="workflow-step">
+                <div class="workflow-step-number">2</div>
+                <div class="workflow-step-content">
+                    <strong>Pre-filled Form</strong>
+                    <p>DocuSign opens with affiliate's name and address already filled</p>
+                </div>
+            </div>
+            <div class="workflow-step">
+                <div class="workflow-step-number">3</div>
+                <div class="workflow-step-content">
+                    <strong>Complete & Sign</strong>
+                    <p>Affiliate enters tax ID, selects classification, and signs electronically</p>
+                </div>
+            </div>
+            <div class="workflow-step">
+                <div class="workflow-step-number">4</div>
+                <div class="workflow-step-content">
+                    <strong>Automatic Processing</strong>
+                    <p>System receives completed document via webhook and updates status</p>
+                </div>
+            </div>
+            <div class="workflow-step">
+                <div class="workflow-step-number">5</div>
+                <div class="workflow-step-content">
+                    <strong>Admin Review</strong>
+                    <p>Administrator verifies tax information and approves</p>
+                </div>
+            </div>
+            <div class="workflow-step">
+                <div class="workflow-step-number">6</div>
+                <div class="workflow-step-content">
+                    <strong>Payment Enabled</strong>
+                    <p>Affiliate can now receive commission payments</p>
+                </div>
+            </div>
+
+            <h3>Manual Upload Workflow (Fallback)</h3>
+            <p>For cases where electronic signing isn't suitable, the manual upload process remains available:</p>
+            <ol>
+                <li>Download blank W-9 form from IRS website</li>
+                <li>Complete and sign manually</li>
+                <li>Scan and upload PDF through dashboard</li>
+                <li>Administrator reviews and verifies</li>
+                <li>System updates affiliate status</li>
+            </ol>
+
+            <h2 id="api-endpoints">API Endpoints</h2>
+
+            <h3>DocuSign Integration Endpoints</h3>
+            
+            <div class="api-endpoint">
+                <h5>POST /api/v1/w9/initiate-signing</h5>
+                <p>Start a new DocuSign W-9 signing session for the authenticated affiliate</p>
+            </div>
+
+            <div class="api-endpoint">
+                <h5>POST /api/v1/w9/webhook/docusign</h5>
+                <p>Webhook endpoint for DocuSign to send envelope status updates</p>
+            </div>
+
+            <div class="api-endpoint">
+                <h5>POST /api/v1/w9/cancel-signing</h5>
+                <p>Cancel an in-progress DocuSign signing session</p>
+            </div>
+
+            <div class="api-endpoint">
+                <h5>GET /api/v1/w9/status</h5>
+                <p>Get current W-9 status including DocuSign envelope status</p>
+            </div>
+
+            <h3>Administrative Endpoints</h3>
+
+            <div class="api-endpoint">
+                <h5>GET /api/v1/w9/admin/pending</h5>
+                <p>List all W-9 documents pending review</p>
+            </div>
+
+            <div class="api-endpoint">
+                <h5>POST /api/v1/w9/admin/:affiliateId/verify</h5>
+                <p>Verify and approve a W-9 document with tax information</p>
+            </div>
+
+            <div class="api-endpoint">
+                <h5>POST /api/v1/w9/admin/:affiliateId/reject</h5>
+                <p>Reject a W-9 document with reason</p>
+            </div>
+
+            <div class="api-endpoint">
+                <h5>POST /api/v1/w9/admin/:affiliateId/resend</h5>
+                <p>Resend DocuSign W-9 request to affiliate</p>
+            </div>
+
+            <h2 id="implementation">Implementation Guide</h2>
+
+            <h3>Environment Configuration</h3>
+            <pre><code># DocuSign Configuration
+DOCUSIGN_INTEGRATION_KEY=your_integration_key
+DOCUSIGN_USER_ID=your_user_id
+DOCUSIGN_ACCOUNT_ID=your_account_id
+DOCUSIGN_BASE_URL=https://demo.docusign.net/restapi
+DOCUSIGN_OAUTH_BASE_URL=https://account-d.docusign.com
+DOCUSIGN_W9_TEMPLATE_ID=your_w9_template_id
+DOCUSIGN_WEBHOOK_SECRET=your_webhook_secret
+DOCUSIGN_PRIVATE_KEY="-----BEGIN RSA PRIVATE KEY-----
+your_private_key_here
+-----END RSA PRIVATE KEY-----"</code></pre>
+
+            <h3>Frontend Integration</h3>
+            <p>The affiliate dashboard automatically loads the DocuSign integration when configured:</p>
+            <pre><code>// The DocuSign integration is automatically initialized
+// when the affiliate dashboard loads
+window.docuSignW9.initialize();</code></pre>
+
+            <h3>Status Display</h3>
+            <p>The W-9 status section shows different states based on the signing progress:</p>
+            
+            <table>
+                <thead>
+                    <tr>
+                        <th>DocuSign Status</th>
+                        <th>Display Status</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>sent</code></td>
+                        <td><span class="status-badge status-pending">Awaiting Signature</span></td>
+                        <td>W-9 sent to affiliate</td>
+                    </tr>
+                    <tr>
+                        <td><code>delivered</code></td>
+                        <td><span class="status-badge status-pending">In Progress</span></td>
+                        <td>Affiliate has opened the W-9</td>
+                    </tr>
+                    <tr>
+                        <td><code>completed</code></td>
+                        <td><span class="status-badge status-verified">Under Review</span></td>
+                        <td>W-9 signed, awaiting admin verification</td>
+                    </tr>
+                    <tr>
+                        <td><code>declined</code></td>
+                        <td><span class="status-badge status-rejected">Declined</span></td>
+                        <td>Affiliate declined to sign</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h2 id="security">Security & Compliance</h2>
+
+            <h3>DocuSign Security</h3>
+            <ul>
+                <li><strong>JWT Authentication:</strong> Secure system-to-system authentication</li>
+                <li><strong>Webhook Verification:</strong> HMAC signature validation on all webhooks</li>
+                <li><strong>SSL/TLS:</strong> All communications encrypted in transit</li>
+                <li><strong>Audit Trail:</strong> Complete record of all signing events</li>
+            </ul>
+
+            <h3>Document Security</h3>
+            <ul>
+                <li><strong>Encryption:</strong> AES-256-GCM encryption for stored documents</li>
+                <li><strong>Access Control:</strong> Role-based permissions for document access</li>
+                <li><strong>Secure Storage:</strong> Documents stored outside web root</li>
+                <li><strong>Automatic Deletion:</strong> Documents deleted after 7-year retention period</li>
+            </ul>
+
+            <h3>IRS Compliance</h3>
+            <div class="alert alert-success">
+                <strong>IRS Approved:</strong> Electronic signatures are accepted by the IRS for W-9 forms when using a compliant service like DocuSign.
+            </div>
+
+            <h2 id="troubleshooting">Troubleshooting</h2>
+
+            <h3>Common Issues</h3>
+
+            <h4>Signing URL Not Generated</h4>
+            <ul>
+                <li>Check DocuSign API credentials in environment</li>
+                <li>Verify RSA private key is properly formatted</li>
+                <li>Ensure template ID is correct</li>
+            </ul>
+
+            <h4>Webhook Not Received</h4>
+            <ul>
+                <li>Verify webhook URL is publicly accessible</li>
+                <li>Check webhook secret matches configuration</li>
+                <li>Review DocuSign Connect logs</li>
+            </ul>
+
+            <h4>Template Fields Not Populating</h4>
+            <ul>
+                <li>Ensure field labels in template match code exactly</li>
+                <li>Verify role name is set to "Taxpayer"</li>
+                <li>Check affiliate data is complete</li>
+            </ul>
+
+            <h3>Debug Mode</h3>
+            <p>Enable debug logging for troubleshooting:</p>
+            <pre><code>// In browser console
+localStorage.setItem('docusign_debug', 'true');
+
+// Server-side
+DEBUG=docusign:* npm start</code></pre>
+
+            <h2 id="quickbooks">QuickBooks Integration</h2>
+            <p>Once W-9s are verified, affiliate data can be exported to QuickBooks:</p>
+
+            <h3>Export Features</h3>
+            <ul>
+                <li><strong>Vendor Export:</strong> Create QuickBooks vendors from verified affiliates</li>
+                <li><strong>Tax Information:</strong> Include masked tax ID and classification</li>
+                <li><strong>Payment Summaries:</strong> Export commission data for accounting</li>
+                <li><strong>Audit Trail:</strong> Track all exports and modifications</li>
+            </ul>
+
+            <h3>Export Process</h3>
+            <ol>
+                <li>Navigate to QuickBooks Export in admin dashboard</li>
+                <li>Select affiliates to export (only verified W-9s)</li>
+                <li>Choose export format (CSV or JSON)</li>
+                <li>Import into QuickBooks Desktop or Online</li>
+            </ol>
+
+            <div class="alert alert-warning">
+                <strong>Important:</strong> Only affiliates with verified W-9s can be exported to QuickBooks to ensure tax compliance.
+            </div>
+        </div>
+
+        <a href="index.html" class="back-link">← Back to Documentation</a>
+    </div>
+</body>
+</html>
