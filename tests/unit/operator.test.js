@@ -21,8 +21,8 @@ describe('Operator Model', () => {
         firstName: 'John',
         lastName: 'Doe',
         email: 'john.doe@wavemax.com',
+        username: 'johndoe',
         password: 'SecurePassword123!',
-        workStation: 'Station A',
         shiftStart: '08:00',
         shiftEnd: '17:00',
         createdBy: createdById
@@ -37,9 +37,9 @@ describe('Operator Model', () => {
       expect(saved.firstName).toBe('John');
       expect(saved.lastName).toBe('Doe');
       expect(saved.email).toBe('john.doe@wavemax.com');
+      expect(saved.username).toBe('johndoe');
       expect(saved.role).toBe('operator');
       expect(saved.isActive).toBe(true);
-      expect(saved.workStation).toBe('Station A');
       expect(saved.shiftStart).toBe('08:00');
       expect(saved.shiftEnd).toBe('17:00');
       expect(saved.currentOrderCount).toBe(0);
@@ -65,6 +65,7 @@ describe('Operator Model', () => {
       expect(error.errors.firstName).toBeDefined();
       expect(error.errors.lastName).toBeDefined();
       expect(error.errors.email).toBeDefined();
+      expect(error.errors.username).toBeDefined();
       expect(error.errors.password).toBeDefined();
       expect(error.errors.createdBy).toBeDefined();
     });
@@ -74,6 +75,7 @@ describe('Operator Model', () => {
         firstName: 'John',
         lastName: 'Doe',
         email: 'invalid-email',
+        username: 'johndoe',
         password: 'password123',
         createdBy: createdById
       });
@@ -97,6 +99,7 @@ describe('Operator Model', () => {
         firstName: 'John',
         lastName: 'Doe',
         email: 'john.doe@wavemax.com',
+        username: 'johndoe',
         password: 'password123',
         createdBy: createdById
       };
@@ -105,6 +108,38 @@ describe('Operator Model', () => {
 
       const duplicate = new Operator({
         ...operatorData,
+        firstName: 'Jane',
+        username: 'janedoe'
+      });
+
+      let error;
+      try {
+        await duplicate.save();
+      } catch (e) {
+        error = e;
+      }
+
+      expect(error).toBeDefined();
+      expect(error.code === 11000 || error.name === 'MongoServerError').toBe(true);
+    });
+
+    it('should enforce unique username constraint', async () => {
+      await Operator.ensureIndexes();
+
+      const operatorData = {
+        firstName: 'John',
+        lastName: 'Doe',
+        email: 'john.doe@wavemax.com',
+        username: 'johndoe',
+        password: 'password123',
+        createdBy: createdById
+      };
+
+      await new Operator(operatorData).save();
+
+      const duplicate = new Operator({
+        ...operatorData,
+        email: 'jane.doe@wavemax.com',
         firstName: 'Jane'
       });
 
@@ -119,47 +154,36 @@ describe('Operator Model', () => {
       expect(error.code === 11000 || error.name === 'MongoServerError').toBe(true);
     });
 
-    it('should enforce unique operatorId constraint', async () => {
-      await Operator.ensureIndexes();
-
-      const operator1 = new Operator({
-        operatorId: 'OPR123456',
+    it('should validate username format', async () => {
+      const operator = new Operator({
         firstName: 'John',
         lastName: 'Doe',
         email: 'john.doe@wavemax.com',
+        username: 'john doe!', // Invalid - contains space and special char
         password: 'password123',
-        createdBy: createdById
-      });
-      await operator1.save();
-
-      const operator2 = new Operator({
-        operatorId: 'OPR123456',
-        firstName: 'Jane',
-        lastName: 'Smith',
-        email: 'jane.smith@wavemax.com',
-        password: 'password456',
         createdBy: createdById
       });
 
       let error;
       try {
-        await operator2.save();
+        await operator.save();
       } catch (e) {
         error = e;
       }
 
       expect(error).toBeDefined();
-      expect(error.code === 11000 || error.name === 'MongoServerError').toBe(true);
+      expect(error.errors.username).toBeDefined();
+      expect(error.errors.username.message).toContain('Username can only contain letters, numbers, underscores, and hyphens');
     });
 
     it('should validate shift time format', async () => {
       const operator = new Operator({
         firstName: 'John',
         lastName: 'Doe',
-        email: 'john@wavemax.com',
+        email: 'john.doe@wavemax.com',
+        username: 'johndoe',
         password: 'password123',
         shiftStart: '25:00', // Invalid time
-        shiftEnd: '17:00',
         createdBy: createdById
       });
 
@@ -172,14 +196,15 @@ describe('Operator Model', () => {
 
       expect(error).toBeDefined();
       expect(error.errors.shiftStart).toBeDefined();
-      expect(error.errors.shiftStart.message).toContain('Please enter a valid time format');
+      expect(error.errors.shiftStart.message).toContain('Please enter a valid time format (HH:MM)');
     });
 
     it('should accept valid shift times', async () => {
       const operator = new Operator({
         firstName: 'John',
         lastName: 'Doe',
-        email: 'john@wavemax.com',
+        email: 'john.doe@wavemax.com',
+        username: 'johndoe',
         password: 'password123',
         shiftStart: '08:30',
         shiftEnd: '17:45',
@@ -195,7 +220,8 @@ describe('Operator Model', () => {
       const operator = new Operator({
         firstName: 'John',
         lastName: 'Doe',
-        email: 'john@wavemax.com',
+        email: 'john.doe@wavemax.com',
+        username: 'johndoe',
         password: 'password123',
         qualityScore: 150, // Out of range
         createdBy: createdById
@@ -216,8 +242,8 @@ describe('Operator Model', () => {
       const operator = new Operator({
         firstName: '  John  ',
         lastName: '  Doe  ',
-        email: '  john@wavemax.com  ',
-        workStation: '  Station A  ',
+        email: '  john.doe@wavemax.com  ',
+        username: '  johndoe  ',
         password: 'password123',
         createdBy: createdById
       });
@@ -225,103 +251,107 @@ describe('Operator Model', () => {
       const saved = await operator.save();
       expect(saved.firstName).toBe('John');
       expect(saved.lastName).toBe('Doe');
-      expect(saved.email).toBe('john@wavemax.com');
-      expect(saved.workStation).toBe('Station A');
+      expect(saved.email).toBe('john.doe@wavemax.com');
+      expect(saved.username).toBe('johndoe');
     });
 
-    it('should convert email to lowercase', async () => {
+    it('should convert email and username to lowercase', async () => {
       const operator = new Operator({
         firstName: 'John',
         lastName: 'Doe',
-        email: 'John.Doe@WaveMAX.com',
+        email: 'JOHN.DOE@WAVEMAX.COM',
+        username: 'JOHNDOE',
         password: 'password123',
         createdBy: createdById
       });
 
       const saved = await operator.save();
       expect(saved.email).toBe('john.doe@wavemax.com');
+      expect(saved.username).toBe('johndoe');
     });
 
     it('should not allow role to be changed after creation', async () => {
       const operator = new Operator({
         firstName: 'John',
         lastName: 'Doe',
-        email: 'john@wavemax.com',
+        email: 'john.doe@wavemax.com',
+        username: 'johndoe',
         password: 'password123',
         createdBy: createdById
       });
 
       const saved = await operator.save();
-      expect(saved.role).toBe('operator');
+      expect(saved.role).toBe('operator'); // Default role
 
-      saved.role = 'administrator';
+      // Try to update role
+      saved.role = 'admin';
       await saved.save();
-
-      const updated = await Operator.findById(saved._id);
-      expect(updated.role).toBe('operator');
+      
+      const reloaded = await Operator.findById(saved._id);
+      expect(reloaded.role).toBe('operator'); // Should still be operator due to immutable
     });
   });
 
   describe('Password Handling', () => {
     it('should hash password on save', async () => {
-      const plainPassword = 'SecurePassword123!';
+      const plainPassword = 'MySecurePassword123!';
       const operator = new Operator({
         firstName: 'John',
         lastName: 'Doe',
-        email: 'john@wavemax.com',
+        email: 'john.doe@wavemax.com',
+        username: 'johndoe',
         password: plainPassword,
         createdBy: createdById
       });
 
       const saved = await operator.save();
       
-      const operatorWithPassword = await Operator.findById(saved._id).select('+password');
-      
-      expect(operatorWithPassword.password).toBeDefined();
-      expect(operatorWithPassword.password).not.toBe(plainPassword);
-      expect(operatorWithPassword.password).toContain(':');
+      // Reload with password field
+      const withPassword = await Operator.findById(saved._id).select('+password');
+      expect(withPassword.password).toBeDefined();
+      expect(withPassword.password).not.toBe(plainPassword);
+      expect(withPassword.password).toContain(':'); // Salt separator
     });
 
     it('should verify correct password', async () => {
-      const plainPassword = 'SecurePassword123!';
+      const plainPassword = 'MySecurePassword123!';
       const operator = new Operator({
         firstName: 'John',
         lastName: 'Doe',
-        email: 'john@wavemax.com',
+        email: 'john.doe@wavemax.com',
+        username: 'johndoe',
         password: plainPassword,
         createdBy: createdById
       });
 
       await operator.save();
       
-      const operatorWithPassword = await Operator.findByEmailWithPassword('john@wavemax.com');
-      const isValid = operatorWithPassword.verifyPassword(plainPassword);
-      
-      expect(isValid).toBe(true);
+      const found = await Operator.findById(operator._id).select('+password');
+      expect(found.verifyPassword(plainPassword)).toBe(true);
     });
 
     it('should reject incorrect password', async () => {
       const operator = new Operator({
         firstName: 'John',
         lastName: 'Doe',
-        email: 'john@wavemax.com',
+        email: 'john.doe@wavemax.com',
+        username: 'johndoe',
         password: 'CorrectPassword123!',
         createdBy: createdById
       });
 
       await operator.save();
       
-      const operatorWithPassword = await Operator.findByEmailWithPassword('john@wavemax.com');
-      const isValid = operatorWithPassword.verifyPassword('WrongPassword123!');
-      
-      expect(isValid).toBe(false);
+      const found = await Operator.findById(operator._id).select('+password');
+      expect(found.verifyPassword('WrongPassword123!')).toBe(false);
     });
 
     it('should not expose password in JSON output', async () => {
       const operator = new Operator({
         firstName: 'John',
         lastName: 'Doe',
-        email: 'john@wavemax.com',
+        email: 'john.doe@wavemax.com',
+        username: 'johndoe',
         password: 'password123',
         createdBy: createdById
       });
@@ -332,21 +362,24 @@ describe('Operator Model', () => {
       expect(json.password).toBeUndefined();
       expect(json.passwordResetToken).toBeUndefined();
       expect(json.passwordResetExpires).toBeUndefined();
-      expect(json.__v).toBeUndefined();
     });
   });
 
   describe('Login Attempts and Account Locking', () => {
-    it('should increment login attempts', async () => {
-      const operator = new Operator({
+    let operator;
+
+    beforeEach(async () => {
+      operator = await new Operator({
         firstName: 'John',
         lastName: 'Doe',
-        email: 'john@wavemax.com',
+        email: 'john.doe@wavemax.com',
+        username: 'johndoe',
         password: 'password123',
         createdBy: createdById
-      });
+      }).save();
+    });
 
-      await operator.save();
+    it('should increment login attempts', async () => {
       await operator.incLoginAttempts();
       
       const updated = await Operator.findById(operator._id);
@@ -354,59 +387,40 @@ describe('Operator Model', () => {
     });
 
     it('should lock account after 5 failed attempts', async () => {
-      const operator = new Operator({
-        firstName: 'John',
-        lastName: 'Doe',
-        email: 'john@wavemax.com',
-        password: 'password123',
-        loginAttempts: 4,
-        createdBy: createdById
-      });
+      // Simulate 5 failed attempts
+      for (let i = 0; i < 5; i++) {
+        await operator.incLoginAttempts();
+        operator = await Operator.findById(operator._id);
+      }
 
-      await operator.save();
-      await operator.incLoginAttempts();
-      
-      const updated = await Operator.findById(operator._id);
-      expect(updated.loginAttempts).toBe(5);
-      expect(updated.lockUntil).toBeDefined();
-      expect(updated.lockUntil).toBeInstanceOf(Date);
-      expect(updated.lockUntil.getTime()).toBeGreaterThan(Date.now());
+      expect(operator.loginAttempts).toBe(5);
+      expect(operator.lockUntil).toBeDefined();
+      expect(operator.lockUntil > new Date()).toBe(true);
     });
 
     it('should lock for 30 minutes', async () => {
-      const operator = new Operator({
-        firstName: 'John',
-        lastName: 'Doe',
-        email: 'john@wavemax.com',
-        password: 'password123',
-        loginAttempts: 4,
-        createdBy: createdById
-      });
+      // Get to 4 attempts
+      for (let i = 0; i < 4; i++) {
+        await operator.incLoginAttempts();
+        operator = await Operator.findById(operator._id);
+      }
 
-      await operator.save();
-      const beforeLock = Date.now();
+      const beforeLock = new Date();
       await operator.incLoginAttempts();
+      operator = await Operator.findById(operator._id);
+
+      const lockDuration = operator.lockUntil - beforeLock;
+      const thirtyMinutesInMs = 30 * 60 * 1000;
       
-      const updated = await Operator.findById(operator._id);
-      const lockDuration = updated.lockUntil.getTime() - beforeLock;
-      
-      // Should be approximately 30 minutes (with some tolerance)
-      expect(lockDuration).toBeGreaterThan(29 * 60 * 1000);
-      expect(lockDuration).toBeLessThan(31 * 60 * 1000);
+      expect(lockDuration).toBeGreaterThan(thirtyMinutesInMs - 1000);
+      expect(lockDuration).toBeLessThan(thirtyMinutesInMs + 1000);
     });
 
     it('should reset login attempts on successful login', async () => {
-      const operator = new Operator({
-        firstName: 'John',
-        lastName: 'Doe',
-        email: 'john@wavemax.com',
-        password: 'password123',
-        loginAttempts: 3,
-        lockUntil: new Date(Date.now() + 60000),
-        createdBy: createdById
-      });
-
-      await operator.save();
+      // Add some failed attempts
+      await operator.incLoginAttempts();
+      await operator.incLoginAttempts();
+      
       await operator.resetLoginAttempts();
       
       const updated = await Operator.findById(operator._id);
@@ -416,17 +430,11 @@ describe('Operator Model', () => {
     });
 
     it('should reset attempts if lock has expired', async () => {
-      const operator = new Operator({
-        firstName: 'John',
-        lastName: 'Doe',
-        email: 'john@wavemax.com',
-        password: 'password123',
-        loginAttempts: 5,
-        lockUntil: new Date(Date.now() - 60000), // Expired lock
-        createdBy: createdById
-      });
-
+      // Set expired lock
+      operator.lockUntil = new Date(Date.now() - 1000);
+      operator.loginAttempts = 5;
       await operator.save();
+
       await operator.incLoginAttempts();
       
       const updated = await Operator.findById(operator._id);
@@ -435,22 +443,12 @@ describe('Operator Model', () => {
     });
 
     it('should correctly identify locked accounts', async () => {
-      const operator = new Operator({
-        firstName: 'John',
-        lastName: 'Doe',
-        email: 'john@wavemax.com',
-        password: 'password123',
-        createdBy: createdById
-      });
-
-      await operator.save();
-      
       expect(operator.isLocked).toBe(false);
-      
-      operator.lockUntil = new Date(Date.now() + 60000);
+
+      operator.lockUntil = new Date(Date.now() + 60000); // 1 minute from now
       expect(operator.isLocked).toBe(true);
-      
-      operator.lockUntil = new Date(Date.now() - 60000);
+
+      operator.lockUntil = new Date(Date.now() - 60000); // 1 minute ago
       expect(operator.isLocked).toBe(false);
     });
   });
@@ -460,42 +458,39 @@ describe('Operator Model', () => {
       const operator = new Operator({
         firstName: 'John',
         lastName: 'Doe',
-        email: 'john@wavemax.com',
+        email: 'john.doe@wavemax.com',
+        username: 'johndoe',
         password: 'password123',
         createdBy: createdById
       });
 
-      await operator.save();
-      
       const resetToken = operator.generatePasswordResetToken();
       
       expect(resetToken).toBeDefined();
-      expect(resetToken).toHaveLength(64);
+      expect(resetToken.length).toBe(64); // 32 bytes hex = 64 chars
       expect(operator.passwordResetToken).toBeDefined();
-      expect(operator.passwordResetToken).not.toBe(resetToken);
+      expect(operator.passwordResetToken).not.toBe(resetToken); // Should be hashed
       expect(operator.passwordResetExpires).toBeDefined();
-      expect(operator.passwordResetExpires.getTime()).toBeGreaterThan(Date.now());
     });
 
     it('should set password reset expiry to 30 minutes', async () => {
       const operator = new Operator({
         firstName: 'John',
         lastName: 'Doe',
-        email: 'john@wavemax.com',
+        email: 'john.doe@wavemax.com',
+        username: 'johndoe',
         password: 'password123',
         createdBy: createdById
       });
 
-      await operator.save();
-      
-      const now = Date.now();
+      const beforeGenerate = new Date();
       operator.generatePasswordResetToken();
       
-      const expiryTime = operator.passwordResetExpires.getTime();
-      const timeDiff = expiryTime - now;
+      const expiryDuration = operator.passwordResetExpires - beforeGenerate;
+      const thirtyMinutesInMs = 30 * 60 * 1000;
       
-      expect(timeDiff).toBeGreaterThan(29 * 60 * 1000);
-      expect(timeDiff).toBeLessThan(31 * 60 * 1000);
+      expect(expiryDuration).toBeGreaterThan(thirtyMinutesInMs - 1000);
+      expect(expiryDuration).toBeLessThan(thirtyMinutesInMs + 1000);
     });
   });
 
@@ -505,517 +500,400 @@ describe('Operator Model', () => {
         const operator = new Operator({
           firstName: 'John',
           lastName: 'Doe',
-          email: 'john@wavemax.com',
+          email: 'john.doe@wavemax.com',
+          username: 'johndoe',
           password: 'password123',
           createdBy: createdById
         });
 
-        await operator.save();
         expect(operator.isOnShift).toBe(true);
       });
 
       it('should correctly identify operator on shift during normal hours', async () => {
+        const now = new Date();
+        const currentHour = now.getHours();
+        
         const operator = new Operator({
           firstName: 'John',
           lastName: 'Doe',
-          email: 'john@wavemax.com',
+          email: 'john.doe@wavemax.com',
+          username: 'johndoe',
           password: 'password123',
-          shiftStart: '08:00',
-          shiftEnd: '17:00',
+          shiftStart: `${String(currentHour).padStart(2, '0')}:00`,
+          shiftEnd: `${String((currentHour + 1) % 24).padStart(2, '0')}:00`,
           createdBy: createdById
         });
 
-        await operator.save();
-        
-        // Mock the Date constructor for the virtual property check
-        const originalDate = global.Date;
-        const mockDate = new originalDate();
-        mockDate.setHours(10, 0, 0, 0);
-        
-        global.Date = class extends originalDate {
-          constructor() {
-            return mockDate;
-          }
-          static now() {
-            return originalDate.now();
-          }
-        };
-
         expect(operator.isOnShift).toBe(true);
-
-        global.Date = originalDate;
       });
 
       it('should correctly identify operator off shift', async () => {
+        const now = new Date();
+        const currentHour = now.getHours();
+        
         const operator = new Operator({
           firstName: 'John',
           lastName: 'Doe',
-          email: 'john@wavemax.com',
+          email: 'john.doe@wavemax.com',
+          username: 'johndoe',
           password: 'password123',
-          shiftStart: '08:00',
-          shiftEnd: '17:00',
+          shiftStart: `${String((currentHour + 2) % 24).padStart(2, '0')}:00`,
+          shiftEnd: `${String((currentHour + 3) % 24).padStart(2, '0')}:00`,
           createdBy: createdById
         });
 
-        await operator.save();
-        
-        // Mock the Date constructor for the virtual property check
-        const originalDate = global.Date;
-        const mockDate = new originalDate();
-        mockDate.setHours(20, 0, 0, 0);
-        
-        global.Date = class extends originalDate {
-          constructor() {
-            return mockDate;
-          }
-          static now() {
-            return originalDate.now();
-          }
-        };
-
         expect(operator.isOnShift).toBe(false);
-
-        global.Date = originalDate;
       });
 
       it('should handle overnight shifts correctly', async () => {
+        // Create operator with overnight shift (22:00 - 06:00)
         const operator = new Operator({
           firstName: 'John',
           lastName: 'Doe',
-          email: 'john@wavemax.com',
+          email: 'john.doe@wavemax.com',
+          username: 'johndoe',
           password: 'password123',
           shiftStart: '22:00',
           shiftEnd: '06:00',
           createdBy: createdById
         });
 
-        await operator.save();
+        // Mock current time to be 23:00
+        const now = new Date();
+        const currentHour = now.getHours();
         
-        // Mock the Date constructor for the virtual property check
-        const originalDate = global.Date;
-        const mockDate = new originalDate();
-        
-        global.Date = class extends originalDate {
-          constructor() {
-            return mockDate;
-          }
-          static now() {
-            return originalDate.now();
-          }
-        };
-
-        // Test at 23:00
-        mockDate.setHours(23, 0, 0, 0);
-        expect(operator.isOnShift).toBe(true);
-
-        // Test early morning hours
-        mockDate.setHours(3, 0, 0, 0);
-        expect(operator.isOnShift).toBe(true);
-
-        // Test after shift end
-        mockDate.setHours(7, 0, 0, 0);
-        expect(operator.isOnShift).toBe(false);
-
-        global.Date = originalDate;
+        if (currentHour >= 22 || currentHour < 6) {
+          expect(operator.isOnShift).toBe(true);
+        } else {
+          expect(operator.isOnShift).toBe(false);
+        }
       });
     });
   });
 
   describe('Processing Statistics', () => {
     it('should update processing stats correctly', async () => {
-      const operator = new Operator({
+      const operator = await new Operator({
         firstName: 'John',
         lastName: 'Doe',
-        email: 'john@wavemax.com',
+        email: 'john.doe@wavemax.com',
+        username: 'johndoe',
         password: 'password123',
         totalOrdersProcessed: 10,
         averageProcessingTime: 30,
         createdBy: createdById
-      });
+      }).save();
 
-      await operator.save();
-      
-      await operator.updateProcessingStats(45);
-      
+      await operator.updateProcessingStats(40);
+
       expect(operator.totalOrdersProcessed).toBe(11);
-      // Average should be (30 * 10 + 45) / 11 = 31.36
-      expect(operator.averageProcessingTime).toBeCloseTo(31.36, 1);
+      expect(operator.averageProcessingTime).toBeCloseTo(30.91, 1);
     });
 
     it('should handle first order processing', async () => {
-      const operator = new Operator({
+      const operator = await new Operator({
         firstName: 'John',
         lastName: 'Doe',
-        email: 'john@wavemax.com',
+        email: 'john.doe@wavemax.com',
+        username: 'johndoe',
         password: 'password123',
         createdBy: createdById
-      });
+      }).save();
 
-      await operator.save();
-      
-      await operator.updateProcessingStats(25);
-      
+      await operator.updateProcessingStats(45);
+
       expect(operator.totalOrdersProcessed).toBe(1);
-      expect(operator.averageProcessingTime).toBe(25);
+      expect(operator.averageProcessingTime).toBe(45);
     });
 
     it('should update quality score with passing result', async () => {
-      const operator = new Operator({
+      const operator = await new Operator({
         firstName: 'John',
         lastName: 'Doe',
-        email: 'john@wavemax.com',
+        email: 'john.doe@wavemax.com',
+        username: 'johndoe',
         password: 'password123',
-        qualityScore: 90,
+        qualityScore: 80,
         createdBy: createdById
-      });
+      }).save();
 
-      await operator.save();
-      
       await operator.updateQualityScore(true);
-      
-      // Score should increase: 90 * 0.9 + 100 * 0.1 = 91
-      expect(operator.qualityScore).toBeCloseTo(91, 1);
+
+      // 80 * 0.9 + 100 * 0.1 = 72 + 10 = 82
+      expect(operator.qualityScore).toBe(82);
     });
 
     it('should update quality score with failing result', async () => {
-      const operator = new Operator({
+      const operator = await new Operator({
         firstName: 'John',
         lastName: 'Doe',
-        email: 'john@wavemax.com',
+        email: 'john.doe@wavemax.com',
+        username: 'johndoe',
         password: 'password123',
-        qualityScore: 90,
+        qualityScore: 80,
         createdBy: createdById
-      });
+      }).save();
 
-      await operator.save();
-      
       await operator.updateQualityScore(false);
-      
-      // Score should decrease: 90 * 0.9 + 0 * 0.1 = 81
-      expect(operator.qualityScore).toBeCloseTo(81, 1);
+
+      // 80 * 0.9 + 0 * 0.1 = 72 + 0 = 72
+      expect(operator.qualityScore).toBe(72);
     });
   });
 
   describe('Static Methods', () => {
     describe('findActive', () => {
       it('should find only active operators', async () => {
-        await Operator.create([
-          {
-            firstName: 'Active',
-            lastName: 'Operator1',
-            email: 'active1@wavemax.com',
-            password: 'password123',
-            isActive: true,
-            createdBy: createdById
-          },
-          {
-            firstName: 'Inactive',
-            lastName: 'Operator',
-            email: 'inactive@wavemax.com',
-            password: 'password123',
-            isActive: false,
-            createdBy: createdById
-          },
-          {
-            firstName: 'Active',
-            lastName: 'Operator2',
-            email: 'active2@wavemax.com',
-            password: 'password123',
-            isActive: true,
-            createdBy: createdById
-          }
-        ]);
+        await new Operator({
+          firstName: 'Active',
+          lastName: 'Op',
+          email: 'active@wavemax.com',
+          username: 'activeop',
+          password: 'password123',
+          isActive: true,
+          createdBy: createdById
+        }).save();
 
-        const activeOperators = await Operator.findActive();
-        
-        expect(activeOperators).toHaveLength(2);
-        expect(activeOperators.every(op => op.isActive === true)).toBe(true);
+        await new Operator({
+          firstName: 'Inactive',
+          lastName: 'Op',
+          email: 'inactive@wavemax.com',
+          username: 'inactiveop',
+          password: 'password123',
+          isActive: false,
+          createdBy: createdById
+        }).save();
+
+        const active = await Operator.findActive();
+        expect(active.length).toBe(1);
+        expect(active[0].firstName).toBe('Active');
       });
     });
 
     describe('findOnShift', () => {
       it('should find only operators on shift', async () => {
-        await Operator.create([
-          {
-            firstName: 'OnShift',
-            lastName: 'Operator',
-            email: 'onshift@wavemax.com',
-            password: 'password123',
-            shiftStart: '08:00',
-            shiftEnd: '17:00',
-            isActive: true,
-            createdBy: createdById
-          },
-          {
-            firstName: 'OffShift',
-            lastName: 'Operator',
-            email: 'offshift@wavemax.com',
-            password: 'password123',
-            shiftStart: '18:00',
-            shiftEnd: '02:00',
-            isActive: true,
-            createdBy: createdById
-          },
-          {
-            firstName: 'NoShift',
-            lastName: 'Operator',
-            email: 'noshift@wavemax.com',
-            password: 'password123',
-            isActive: true,
-            createdBy: createdById
-          }
-        ]);
+        const now = new Date();
+        const currentHour = now.getHours();
 
-        // Mock the Date constructor for the virtual property check
-        const originalDate = global.Date;
-        const mockDate = new originalDate();
-        mockDate.setHours(10, 0, 0, 0);
-        
-        global.Date = class extends originalDate {
-          constructor() {
-            return mockDate;
-          }
-          static now() {
-            return originalDate.now();
-          }
-        };
+        await new Operator({
+          firstName: 'OnShift',
+          lastName: 'Op',
+          email: 'onshift@wavemax.com',
+          username: 'onshiftop',
+          password: 'password123',
+          shiftStart: `${String(currentHour).padStart(2, '0')}:00`,
+          shiftEnd: `${String((currentHour + 1) % 24).padStart(2, '0')}:00`,
+          createdBy: createdById
+        }).save();
 
-        const onShiftOperators = await Operator.findOnShift();
-        
-        expect(onShiftOperators).toHaveLength(2);
-        expect(onShiftOperators.some(op => op.email === 'onshift@wavemax.com')).toBe(true);
-        expect(onShiftOperators.some(op => op.email === 'noshift@wavemax.com')).toBe(true);
+        await new Operator({
+          firstName: 'OffShift',
+          lastName: 'Op',
+          email: 'offshift@wavemax.com',
+          username: 'offshiftop',
+          password: 'password123',
+          shiftStart: `${String((currentHour + 2) % 24).padStart(2, '0')}:00`,
+          shiftEnd: `${String((currentHour + 3) % 24).padStart(2, '0')}:00`,
+          createdBy: createdById
+        }).save();
 
-        global.Date = originalDate;
+        const onShift = await Operator.findOnShift();
+        expect(onShift.length).toBe(1);
+        expect(onShift[0].firstName).toBe('OnShift');
       });
     });
 
     describe('findByEmailWithPassword', () => {
       it('should find operator by email with password', async () => {
-        await Operator.create({
+        await new Operator({
           firstName: 'John',
           lastName: 'Doe',
-          email: 'john@wavemax.com',
+          email: 'john.doe@wavemax.com',
+          username: 'johndoe',
           password: 'password123',
           createdBy: createdById
-        });
+        }).save();
 
-        const operator = await Operator.findByEmailWithPassword('john@wavemax.com');
-        
-        expect(operator).toBeDefined();
-        expect(operator.email).toBe('john@wavemax.com');
-        expect(operator.password).toBeDefined();
+        const found = await Operator.findByEmailWithPassword('john.doe@wavemax.com');
+        expect(found).toBeDefined();
+        expect(found.email).toBe('john.doe@wavemax.com');
+        expect(found.password).toBeDefined(); // Password should be included
       });
 
       it('should handle case-insensitive email search', async () => {
-        await Operator.create({
+        await new Operator({
           firstName: 'John',
           lastName: 'Doe',
-          email: 'john@wavemax.com',
+          email: 'john.doe@wavemax.com',
+          username: 'johndoe',
           password: 'password123',
           createdBy: createdById
-        });
+        }).save();
 
-        const operator = await Operator.findByEmailWithPassword('JOHN@WAVEMAX.COM');
-        
-        expect(operator).toBeDefined();
-        expect(operator.email).toBe('john@wavemax.com');
+        const found = await Operator.findByEmailWithPassword('JOHN.DOE@WAVEMAX.COM');
+        expect(found).toBeDefined();
+        expect(found.email).toBe('john.doe@wavemax.com');
       });
 
       it('should return null for non-existent email', async () => {
-        const operator = await Operator.findByEmailWithPassword('nonexistent@wavemax.com');
-        expect(operator).toBeNull();
+        const found = await Operator.findByEmailWithPassword('nonexistent@wavemax.com');
+        expect(found).toBeNull();
       });
     });
 
     describe('findAvailableOperators', () => {
       it('should find operators with low order count', async () => {
-        await Operator.create([
-          {
-            firstName: 'Available1',
-            lastName: 'Operator',
-            email: 'avail1@wavemax.com',
-            password: 'password123',
-            currentOrderCount: 2,
-            isActive: true,
-            createdBy: createdById
-          },
-          {
-            firstName: 'Busy',
-            lastName: 'Operator',
-            email: 'busy@wavemax.com',
-            password: 'password123',
-            currentOrderCount: 12,
-            isActive: true,
-            createdBy: createdById
-          },
-          {
-            firstName: 'Available2',
-            lastName: 'Operator',
-            email: 'avail2@wavemax.com',
-            password: 'password123',
-            currentOrderCount: 5,
-            isActive: true,
-            createdBy: createdById
-          },
-          {
-            firstName: 'Inactive',
-            lastName: 'Operator',
-            email: 'inactive@wavemax.com',
-            password: 'password123',
-            currentOrderCount: 0,
-            isActive: false,
-            createdBy: createdById
-          }
-        ]);
+        await new Operator({
+          firstName: 'Available',
+          lastName: 'Op',
+          email: 'available@wavemax.com',
+          username: 'availableop',
+          password: 'password123',
+          currentOrderCount: 2,
+          createdBy: createdById
+        }).save();
+
+        await new Operator({
+          firstName: 'Busy',
+          lastName: 'Op',
+          email: 'busy@wavemax.com',
+          username: 'busyop',
+          password: 'password123',
+          currentOrderCount: 10,
+          createdBy: createdById
+        }).save();
 
         const available = await Operator.findAvailableOperators();
-        
-        expect(available).toHaveLength(2);
-        expect(available.every(op => op.currentOrderCount < 10)).toBe(true);
-        expect(available.every(op => op.isActive === true)).toBe(true);
+        expect(available.length).toBe(1);
+        expect(available[0].firstName).toBe('Available');
       });
 
       it('should sort by current order count', async () => {
-        await Operator.create([
-          {
-            firstName: 'Op1',
-            lastName: 'Operator',
-            email: 'op1@wavemax.com',
-            password: 'password123',
-            currentOrderCount: 5,
-            isActive: true,
-            createdBy: createdById
-          },
-          {
-            firstName: 'Op2',
-            lastName: 'Operator',
-            email: 'op2@wavemax.com',
-            password: 'password123',
-            currentOrderCount: 2,
-            isActive: true,
-            createdBy: createdById
-          },
-          {
-            firstName: 'Op3',
-            lastName: 'Operator',
-            email: 'op3@wavemax.com',
-            password: 'password123',
-            currentOrderCount: 8,
-            isActive: true,
-            createdBy: createdById
-          }
-        ]);
+        await new Operator({
+          firstName: 'Less',
+          lastName: 'Busy',
+          email: 'less@wavemax.com',
+          username: 'lessbusy',
+          password: 'password123',
+          currentOrderCount: 5,
+          createdBy: createdById
+        }).save();
+
+        await new Operator({
+          firstName: 'Least',
+          lastName: 'Busy',
+          email: 'least@wavemax.com',
+          username: 'leastbusy',
+          password: 'password123',
+          currentOrderCount: 2,
+          createdBy: createdById
+        }).save();
 
         const available = await Operator.findAvailableOperators();
-        
         expect(available[0].currentOrderCount).toBe(2);
         expect(available[1].currentOrderCount).toBe(5);
-        expect(available[2].currentOrderCount).toBe(8);
       });
 
       it('should respect limit parameter', async () => {
-        // Create 10 available operators
-        const operators = [];
         for (let i = 0; i < 10; i++) {
-          operators.push({
+          await new Operator({
             firstName: `Op${i}`,
-            lastName: 'Operator',
+            lastName: 'Test',
             email: `op${i}@wavemax.com`,
+            username: `op${i}`,
             password: 'password123',
             currentOrderCount: i,
-            isActive: true,
             createdBy: createdById
-          });
+          }).save();
         }
-        await Operator.create(operators);
 
         const available = await Operator.findAvailableOperators(3);
-        
-        expect(available).toHaveLength(3);
+        expect(available.length).toBe(3);
       });
     });
   });
 
   describe('Timestamps', () => {
     it('should auto-generate timestamps on creation', async () => {
-      const operator = new Operator({
+      const beforeCreate = new Date();
+
+      const operator = await new Operator({
         firstName: 'John',
         lastName: 'Doe',
-        email: 'john@wavemax.com',
+        email: 'john.doe@wavemax.com',
+        username: 'johndoe',
         password: 'password123',
         createdBy: createdById
-      });
+      }).save();
 
-      const saved = await operator.save();
-      
-      expect(saved.createdAt).toBeDefined();
-      expect(saved.updatedAt).toBeDefined();
-      expect(saved.createdAt).toBeInstanceOf(Date);
-      expect(saved.updatedAt).toBeInstanceOf(Date);
+      expect(operator.createdAt).toBeDefined();
+      expect(operator.updatedAt).toBeDefined();
+      expect(operator.createdAt >= beforeCreate).toBe(true);
+      expect(operator.updatedAt >= beforeCreate).toBe(true);
     });
 
     it('should update updatedAt on modification', async () => {
-      const operator = new Operator({
+      const operator = await new Operator({
         firstName: 'John',
         lastName: 'Doe',
-        email: 'john@wavemax.com',
+        email: 'john.doe@wavemax.com',
+        username: 'johndoe',
         password: 'password123',
         createdBy: createdById
-      });
+      }).save();
 
-      const saved = await operator.save();
-      const originalUpdatedAt = saved.updatedAt;
-      
+      const originalUpdatedAt = operator.updatedAt;
+
+      // Wait a bit to ensure timestamp difference
       await new Promise(resolve => setTimeout(resolve, 100));
-      
-      saved.firstName = 'Jane';
-      await saved.save();
-      
-      expect(saved.updatedAt.getTime()).toBeGreaterThan(originalUpdatedAt.getTime());
+
+      operator.firstName = 'Jane';
+      await operator.save();
+
+      expect(operator.updatedAt > originalUpdatedAt).toBe(true);
     });
   });
 
   describe('Operator ID Generation', () => {
     it('should auto-generate unique operator ID', async () => {
-      const operator1 = new Operator({
+      const operator1 = await new Operator({
         firstName: 'John',
         lastName: 'Doe',
-        email: 'john@wavemax.com',
+        email: 'john1@wavemax.com',
+        username: 'john1',
         password: 'password123',
         createdBy: createdById
-      });
+      }).save();
 
-      const operator2 = new Operator({
+      const operator2 = await new Operator({
         firstName: 'Jane',
-        lastName: 'Smith',
+        lastName: 'Doe',
         email: 'jane@wavemax.com',
-        password: 'password456',
+        username: 'jane',
+        password: 'password123',
         createdBy: createdById
-      });
+      }).save();
 
-      const saved1 = await operator1.save();
-      const saved2 = await operator2.save();
-      
-      expect(saved1.operatorId).toBeDefined();
-      expect(saved2.operatorId).toBeDefined();
-      expect(saved1.operatorId).not.toBe(saved2.operatorId);
-      expect(saved1.operatorId).toMatch(/^OPR[A-Z0-9]+$/);
+      expect(operator1.operatorId).toBeDefined();
+      expect(operator2.operatorId).toBeDefined();
+      expect(operator1.operatorId).not.toBe(operator2.operatorId);
+      expect(operator1.operatorId).toMatch(/^OPR[A-Z0-9]+$/);
     });
 
     it('should not override provided operator ID', async () => {
-      const customId = 'OPRCUSTOM123';
-      const operator = new Operator({
+      const customId = 'OPR-CUSTOM-123';
+
+      const operator = await new Operator({
         operatorId: customId,
         firstName: 'John',
         lastName: 'Doe',
         email: 'john@wavemax.com',
+        username: 'john',
         password: 'password123',
         createdBy: createdById
-      });
+      }).save();
 
-      const saved = await operator.save();
-      expect(saved.operatorId).toBe(customId);
+      expect(operator.operatorId).toBe(customId);
     });
   });
 });

@@ -517,6 +517,7 @@ describe('Password Validation Integration Tests', () => {
         firstName: 'Worker',
         lastName: 'Person',
         email: 'newoperator@example.com',
+        username: 'workeroperator',
         password: strongPassword,
         role: 'pickup_delivery',
         assignedRoutes: ['route1']

@@ -338,7 +338,7 @@ exports.getCustomerOrders = async (req, res) => {
       if (status === 'active') {
         query.status = { $in: ['scheduled', 'picked_up', 'processing', 'ready_for_delivery'] };
       } else if (status === 'completed') {
-        query.status = 'delivered';
+        query.status = 'complete';
       } else if (status === 'cancelled') {
         query.status = 'cancelled';
       } else {
@@ -421,7 +421,7 @@ exports.getCustomerDashboardStats = async (req, res) => {
     );
     
     // Get completed orders
-    const completedOrders = allOrders.filter(order => order.status === 'delivered');
+    const completedOrders = allOrders.filter(order => order.status === 'complete');
     
     // Calculate statistics
     const totalOrders = allOrders.length;

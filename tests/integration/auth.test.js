@@ -199,6 +199,224 @@ describe('Authentication Integration Tests', () => {
         }
       });
     });
+
+    it('should login customer using emailOrUsername field with email', async () => {
+      // Create test affiliate first
+      const affiliate = new Affiliate({
+        affiliateId: 'AFF123',
+        firstName: 'John',
+        lastName: 'Doe',
+        email: 'john@example.com',
+        phone: '555-123-4567',
+        address: '123 Main St',
+        city: 'Austin',
+        state: 'TX',
+        zipCode: '78701',
+        serviceArea: 'Downtown',
+        serviceLatitude: 30.2672,
+        serviceLongitude: -97.7431,
+        serviceRadius: 10,
+        minimumDeliveryFee: 25,
+        perBagDeliveryFee: 5,
+        username: 'johndoe',
+        passwordHash: 'hash',
+        passwordSalt: 'salt',
+        paymentMethod: 'directDeposit'
+      });
+      await affiliate.save();
+
+      // Create test customer
+      const { hash, salt } = encryptionUtil.hashPassword(getStrongPassword('customer', 1));
+      const customer = new Customer({
+        customerId: 'CUST123',
+        firstName: 'Jane',
+        lastName: 'Smith',
+        email: 'jane@example.com',
+        phone: '555-987-6543',
+        address: '456 Oak Ave',
+        city: 'Austin',
+        state: 'TX',
+        zipCode: '78702',
+        serviceFrequency: 'weekly',
+        username: 'janesmith',
+        passwordHash: hash,
+        passwordSalt: salt,
+        affiliateId: 'AFF123'
+      });
+      await customer.save();
+
+      const response = await agent
+        .post('/api/v1/auth/customer/login')
+        .send({
+          emailOrUsername: 'jane@example.com',
+          password: getStrongPassword('customer', 1)
+        });
+
+      expect(response.status).toBe(200);
+      expect(response.body).toMatchObject({
+        success: true,
+        token: expect.any(String),
+        customer: {
+          customerId: 'CUST123',
+          firstName: 'Jane',
+          lastName: 'Smith',
+          email: 'jane@example.com',
+          affiliate: {
+            affiliateId: 'AFF123',
+            name: 'John Doe'
+          }
+        }
+      });
+    });
+
+    it('should login customer using emailOrUsername field with username', async () => {
+      // Create test affiliate first
+      const affiliate = new Affiliate({
+        affiliateId: 'AFF123',
+        firstName: 'John',
+        lastName: 'Doe',
+        email: 'john@example.com',
+        phone: '555-123-4567',
+        address: '123 Main St',
+        city: 'Austin',
+        state: 'TX',
+        zipCode: '78701',
+        serviceArea: 'Downtown',
+        serviceLatitude: 30.2672,
+        serviceLongitude: -97.7431,
+        serviceRadius: 10,
+        minimumDeliveryFee: 25,
+        perBagDeliveryFee: 5,
+        username: 'johndoe',
+        passwordHash: 'hash',
+        passwordSalt: 'salt',
+        paymentMethod: 'directDeposit'
+      });
+      await affiliate.save();
+
+      // Create test customer
+      const { hash, salt } = encryptionUtil.hashPassword(getStrongPassword('customer', 1));
+      const customer = new Customer({
+        customerId: 'CUST123',
+        firstName: 'Jane',
+        lastName: 'Smith',
+        email: 'jane@example.com',
+        phone: '555-987-6543',
+        address: '456 Oak Ave',
+        city: 'Austin',
+        state: 'TX',
+        zipCode: '78702',
+        serviceFrequency: 'weekly',
+        username: 'janesmith',
+        passwordHash: hash,
+        passwordSalt: salt,
+        affiliateId: 'AFF123'
+      });
+      await customer.save();
+
+      const response = await agent
+        .post('/api/v1/auth/customer/login')
+        .send({
+          emailOrUsername: 'janesmith',
+          password: getStrongPassword('customer', 1)
+        });
+
+      expect(response.status).toBe(200);
+      expect(response.body).toMatchObject({
+        success: true,
+        token: expect.any(String),
+        customer: {
+          customerId: 'CUST123',
+          firstName: 'Jane',
+          lastName: 'Smith',
+          email: 'jane@example.com',
+          affiliate: {
+            affiliateId: 'AFF123',
+            name: 'John Doe'
+          }
+        }
+      });
+    });
+
+    it('should prioritize emailOrUsername over username field', async () => {
+      // Create test affiliate first
+      const affiliate = new Affiliate({
+        affiliateId: 'AFF123',
+        firstName: 'John',
+        lastName: 'Doe',
+        email: 'john@example.com',
+        phone: '555-123-4567',
+        address: '123 Main St',
+        city: 'Austin',
+        state: 'TX',
+        zipCode: '78701',
+        serviceArea: 'Downtown',
+        serviceLatitude: 30.2672,
+        serviceLongitude: -97.7431,
+        serviceRadius: 10,
+        minimumDeliveryFee: 25,
+        perBagDeliveryFee: 5,
+        username: 'johndoe',
+        passwordHash: 'hash',
+        passwordSalt: 'salt',
+        paymentMethod: 'directDeposit'
+      });
+      await affiliate.save();
+
+      // Create test customer
+      const { hash, salt } = encryptionUtil.hashPassword(getStrongPassword('customer', 1));
+      const customer = new Customer({
+        customerId: 'CUST123',
+        firstName: 'Jane',
+        lastName: 'Smith',
+        email: 'jane@example.com',
+        phone: '555-987-6543',
+        address: '456 Oak Ave',
+        city: 'Austin',
+        state: 'TX',
+        zipCode: '78702',
+        serviceFrequency: 'weekly',
+        username: 'janesmith',
+        passwordHash: hash,
+        passwordSalt: salt,
+        affiliateId: 'AFF123'
+      });
+      await customer.save();
+
+      const response = await agent
+        .post('/api/v1/auth/customer/login')
+        .send({
+          username: 'wrongusername',
+          emailOrUsername: 'janesmith',
+          password: getStrongPassword('customer', 1)
+        });
+
+      expect(response.status).toBe(200);
+      expect(response.body).toMatchObject({
+        success: true,
+        token: expect.any(String),
+        customer: {
+          customerId: 'CUST123',
+          firstName: 'Jane',
+          lastName: 'Smith'
+        }
+      });
+    });
+
+    it('should return error with invalid emailOrUsername', async () => {
+      const response = await agent
+        .post('/api/v1/auth/customer/login')
+        .send({
+          emailOrUsername: 'nonexistent@example.com',
+          password: getStrongPassword('customer', 1)
+        });
+
+      expect(response.status).toBe(401);
+      expect(response.body).toMatchObject({
+        success: false,
+        message: 'Invalid username/email or password'
+      });
+    });
   });
 
   describe('GET /api/v1/auth/verify', () => {
@@ -848,6 +1066,7 @@ describe('Authentication Integration Tests', () => {
         firstName: 'Op',
         lastName: 'User',
         email: 'operator@example.com',
+        username: 'opuser',
         password: getStrongPassword('operator', 1),
         shiftStart: '00:00',
         shiftEnd: '23:59',
@@ -894,6 +1113,7 @@ describe('Authentication Integration Tests', () => {
         firstName: 'Op',
         lastName: 'User',
         email: 'operator@example.com',
+        username: 'opuser',
         password: getStrongPassword('operator', 1),
         shiftStart: '00:00',
         shiftEnd: '23:59',
@@ -933,6 +1153,7 @@ describe('Authentication Integration Tests', () => {
         firstName: 'Op',
         lastName: 'User',
         email: 'operator@example.com',
+        username: 'opuser',
         password: getStrongPassword('operator', 1),
         shiftStart: '00:00',
         shiftEnd: '23:59',

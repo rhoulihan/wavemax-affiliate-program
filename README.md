@@ -24,6 +24,8 @@ The WaveMAX Affiliate Program enables individuals to register as affiliates, onb
 - **Language Preference**: Automatic browser language detection and personalized email communications
 - **Enhanced UI Components**: Custom swirl spinner with elliptical orbit animations for loading states
 - **Advanced Address Validation**: Intelligent geocoding with manual confirmation and reverse geocoding display
+- **W-9 Tax Compliance**: Secure document collection and verification system for affiliate tax compliance
+- **QuickBooks Integration**: Export vendors, payment summaries, and commission details for accounting
 
 ## Recent Updates
 
@@ -115,7 +117,9 @@ wavemax-affiliate-program/
 │   │   ├── bagController.js               # Bag management
 │   │   ├── customerController.js          # Customer operations
 │   │   ├── operatorController.js          # Operator management
-│   │   └── orderController.js             # Order processing
+│   │   ├── orderController.js             # Order processing
+│   │   ├── quickbooksController.js        # QuickBooks export functionality
+│   │   └── w9Controller.js                # W-9 document management
 │   │
 │   ├── middleware/                        # Express middleware
 │   │   ├── auth.js                        # JWT authentication
@@ -133,7 +137,10 @@ wavemax-affiliate-program/
 │   │   ├── RefreshToken.js                # Refresh token model
 │   │   ├── SystemConfig.js                # System configuration
 │   │   ├── TokenBlacklist.js              # Token blacklist model
-│   │   └── Transaction.js                 # Transaction model
+│   │   ├── Transaction.js                 # Transaction model
+│   │   ├── W9Document.js                  # W-9 document tracking
+│   │   ├── W9AuditLog.js                  # W-9 audit logging
+│   │   └── PaymentExport.js               # QuickBooks export records
 │   │
 │   ├── routes/                            # Express routes
 │   │   ├── administratorRoutes.js         # Administrator endpoints
@@ -142,7 +149,9 @@ wavemax-affiliate-program/
 │   │   ├── bagRoutes.js                   # Bag management endpoints
 │   │   ├── customerRoutes.js              # Customer endpoints
 │   │   ├── operatorRoutes.js              # Operator endpoints
-│   │   └── orderRoutes.js                 # Order endpoints
+│   │   ├── orderRoutes.js                 # Order endpoints
+│   │   ├── quickbooksRoutes.js            # QuickBooks export endpoints
+│   │   └── w9Routes.js                    # W-9 management endpoints
 │   │
 │   ├── templates/                         # Email templates
 │   │   └── emails/
@@ -154,6 +163,9 @@ wavemax-affiliate-program/
 │   │       ├── affiliate-new-order.html
 │   │       ├── affiliate-order-cancelled.html
 │   │       ├── affiliate-welcome.html
+│   │       ├── affiliate-w9-reminder.html
+│   │       ├── affiliate-w9-rejected.html
+│   │       ├── affiliate-w9-verified.html
 │   │       ├── customer-order-cancelled.html
 │   │       ├── customer-order-confirmation.html
 │   │       ├── customer-order-status.html
@@ -162,13 +174,18 @@ wavemax-affiliate-program/
 │   │       ├── operator-shift-reminder.html
 │   │       └── operator-welcome.html
 │   │
+│   ├── services/                          # Business logic services
+│   │   ├── dataRetentionService.js        # W-9 data retention policies
+│   │   └── w9AuditService.js              # W-9 audit logging service
+│   │
 │   └── utils/                             # Utility functions
 │       ├── auditLogger.js                 # Security audit logging
 │       ├── emailService.js                # Email service
 │       ├── encryption.js                  # AES-256-GCM encryption
 │       ├── fieldFilter.js                 # API field filtering
 │       ├── logger.js                      # Winston logging
-│       └── paginationMiddleware.js        # Pagination helper
+│       ├── paginationMiddleware.js        # Pagination helper
+│       └── w9Storage.js                   # W-9 document storage utility
 │
 ├── scripts/                               # Utility scripts
 │   ├── complete-migration-fixed.js        # Migration script (fixed)
@@ -179,6 +196,7 @@ wavemax-affiliate-program/
 │   ├── migrate-admin-system-auto.js       # Auto admin migration
 │   ├── migrate-admin-system-interactive.js # Interactive migration
 │   ├── migrate-admin-system.js            # Admin system migration
+│   ├── migrate-w9-status.js               # W-9 status migration script
 │   └── test-csrf.js                       # CSRF testing script
 │
 ├── tests/                                 # Comprehensive test suite
@@ -199,13 +217,22 @@ wavemax-affiliate-program/
 │   │   ├── operatorController.test.js
 │   │   ├── orderController.test.js
 │   │   ├── paginationMiddleware.test.js
-│   │   └── sanitization.test.js
+│   │   ├── paymentExport.test.js
+│   │   ├── quickbooksController.test.js
+│   │   ├── sanitization.test.js
+│   │   ├── w9AuditLog.test.js
+│   │   ├── w9AuditService.test.js
+│   │   ├── w9Controller.test.js
+│   │   ├── w9Document.test.js
+│   │   └── w9Storage.test.js
 │   │
 │   ├── integration/                       # API integration tests
 │   │   ├── affiliate.test.js
 │   │   ├── auth.test.js
 │   │   ├── customer.test.js
 │   │   ├── order.test.js
+│   │   ├── quickbooks.test.js
+│   │   ├── w9.test.js
 │   │   └── TEST_ADDITIONS_SUMMARY.md
 │   │
 │   ├── helpers/                           # Test utilities
@@ -232,6 +259,10 @@ wavemax-affiliate-program/
 ├── package-lock.json                      # Dependency lock file
 ├── server.js                              # Application entry point
 ├── server.js.backup-csrf-remediation-*    # Backup file
+├── secure/                                # Secure storage directory
+│   └── w9-documents/                      # Encrypted W-9 document storage
+├── project-logs/                          # Project implementation logs
+│   └── 2025-06-16-w9-quickbooks-implementation.md
 ├── csrf-exclusion-analysis.md             # CSRF analysis documentation
 ├── csrf-test-plan.md                      # CSRF testing plan
 └── README.md                              # This file
@@ -343,6 +374,73 @@ If URL parameters are not being passed to the iframe:
 - Login attempt tracking
 - Sensitive data access logging
 - Suspicious activity detection
+- Comprehensive W-9 audit trails
+- QuickBooks export history tracking
+
+## W-9 Tax Compliance & QuickBooks Integration
+
+### W-9 Collection System
+
+The WaveMAX Affiliate Program includes a comprehensive W-9 collection and verification system to ensure tax compliance:
+
+#### Features
+- **Secure Document Upload**: Affiliates can upload W-9 forms through their dashboard
+- **Encryption at Rest**: All W-9 documents are encrypted using AES-256-GCM
+- **Manual Verification Workflow**: Administrators review and verify W-9 documents
+- **Payment Hold System**: Affiliates cannot receive payments until W-9 is verified
+- **Automatic Expiry**: W-9 documents expire after 3 years with reminders
+- **Data Retention**: Automatic deletion after 7 years per IRS requirements
+
+#### W-9 API Endpoints
+```
+POST   /api/v1/w9/upload                     - Affiliate uploads W-9 document
+GET    /api/v1/w9/status                     - Get affiliate's W-9 status
+GET    /api/v1/w9/download                   - Download affiliate's own W-9
+GET    /api/v1/w9/admin/pending              - List pending W-9 documents (admin)
+POST   /api/v1/w9/admin/:affiliateId/verify  - Verify W-9 document (admin)
+POST   /api/v1/w9/admin/:affiliateId/reject  - Reject W-9 document (admin)
+GET    /api/v1/w9/admin/:affiliateId/download - Download any W-9 (admin)
+GET    /api/v1/w9/admin/audit-logs           - View W-9 audit logs (admin)
+```
+
+#### W-9 Workflow
+1. Affiliate receives W-9 instructions in welcome email
+2. Affiliate uploads W-9 PDF through dashboard
+3. Administrator reviews document in W-9 Review tab
+4. Administrator verifies with tax ID and QuickBooks vendor ID
+5. Affiliate can now receive commission payments
+6. System tracks all actions for audit compliance
+
+### QuickBooks Integration
+
+Export affiliate and commission data directly to QuickBooks for streamlined accounting:
+
+#### Export Features
+- **Vendor Export**: Export verified affiliates as QuickBooks vendors
+- **Payment Summary**: Biweekly commission summaries by date range
+- **Commission Details**: Detailed order-level commission reports
+- **Multiple Formats**: Support for CSV (QuickBooks import) and JSON
+
+#### QuickBooks API Endpoints
+```
+GET    /api/v1/quickbooks/vendors            - Export vendors to QuickBooks
+GET    /api/v1/quickbooks/payment-summary    - Export payment summary
+GET    /api/v1/quickbooks/commission-detail  - Export commission details
+GET    /api/v1/quickbooks/history            - View export history
+```
+
+#### QuickBooks Export Formats
+All exports generate QuickBooks-compatible CSV files with proper field mapping:
+- Vendor exports include masked tax IDs and 1099 tracking flags
+- Payment summaries aggregate commissions by affiliate
+- Commission details provide transaction-level data
+
+### Security & Compliance Features
+- **Comprehensive Audit Logging**: Every W-9 action is logged with user details
+- **Role-Based Access**: Only administrators can view/verify W-9 documents
+- **Encrypted Storage**: Documents stored outside web root with encryption
+- **Legal Hold Support**: Documents can be marked for retention beyond normal policy
+- **Automatic Cleanup**: Expired documents are automatically archived/deleted
 
 ## Documentation
 

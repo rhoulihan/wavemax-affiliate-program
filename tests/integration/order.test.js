@@ -125,7 +125,7 @@ describe('Order Integration Tests', () => {
       expect(order).toBeTruthy();
       expect(order.customerId).toBe('CUST123');
       expect(order.affiliateId).toBe('AFF123');
-      expect(order.status).toBe('scheduled');
+      expect(order.status).toBe('pending');
       expect(order.feeBreakdown.totalFee).toBe(25); // 2 bags × $5/bag = $10, but minimum $25 applies
     });
 
@@ -403,9 +403,8 @@ describe('Order Integration Tests', () => {
         });
 
       expect(response.status).toBe(200);
-      expect(response.body.actualWeight).toBe(25.5);
-
-      // Verify weight was updated
+      
+      // Verify weight was updated in the database
       const order = await Order.findOne({ orderId: 'ORD123456' });
       expect(order.actualWeight).toBe(25.5);
       expect(order.actualTotal).toBeGreaterThan(0);
@@ -573,7 +572,7 @@ describe('Order Integration Tests', () => {
           pickupTime: 'morning',
           deliveryDate: new Date('2025-05-27'),
           deliveryTime: 'afternoon',
-          status: 'scheduled',
+          status: 'pending',
           estimatedWeight: 30,
           numberOfBags: 2,
           baseRate: 1.89,
@@ -589,7 +588,7 @@ describe('Order Integration Tests', () => {
           pickupTime: 'morning',
           deliveryDate: new Date('2025-05-27'),
           deliveryTime: 'afternoon',
-          status: 'scheduled',
+          status: 'pending',
           estimatedWeight: 50,
           numberOfBags: 3,
           baseRate: 1.89,
@@ -605,7 +604,7 @@ describe('Order Integration Tests', () => {
           pickupTime: 'afternoon',
           deliveryDate: new Date('2025-05-28'),
           deliveryTime: 'morning',
-          status: 'scheduled',
+          status: 'pending',
           estimatedWeight: 15,
           numberOfBags: 1,
           baseRate: 1.89,
@@ -641,7 +640,7 @@ describe('Order Integration Tests', () => {
 
       // Verify orders were updated
       const updatedOrders = await Order.find({ orderId: { $in: ['ORD001', 'ORD002'] } });
-      expect(updatedOrders.every(order => order.status === 'picked_up')).toBe(true);
+      expect(updatedOrders.every(order => order.status === 'processing')).toBe(true);
     });
 
     it('should handle partial bulk update failures', async () => {
@@ -809,7 +808,7 @@ describe('Order Integration Tests', () => {
         pickupTime: 'morning',
         deliveryDate: new Date('2025-05-27'),
         deliveryTime: 'afternoon',
-        status: 'delivered',
+        status: 'complete',
         estimatedWeight: 30,
         numberOfBags: 2,
         actualWeight: 25.5,

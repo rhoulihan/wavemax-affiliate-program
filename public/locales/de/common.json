@@ -349,6 +349,7 @@
       "serviceCenter": "Servicezentrum:",
       "coverageArea": "Abdeckungsgebiet:",
       "coordinates": "Koordinaten:",
+      "useRegistrationAddress": "Registrierungsadresse verwenden",
       "notSet": "Nicht festgelegt",
       "serviceInfo": "Serviceinformationen",
       "deliveryFeeStructure": "Liefergebührenstruktur",
@@ -444,7 +445,32 @@
         "newPassword": "Neues Passwort",
         "passwordRequirement": "Das Passwort muss mindestens 8 Zeichen lang sein",
         "confirmNewPassword": "Neues Passwort bestätigen",
-        "changePasswordButton": "Passwort ändern"
+        "changePasswordButton": "Passwort ändern",
+        "taxInformation": "Steuerinformationen (W-9)",
+        "w9Status": "W-9 Status",
+        "status": "Status",
+        "submittedOn": "Eingereicht am",
+        "verifiedOn": "Verifiziert am",
+        "taxIdType": "Steuer-ID-Typ",
+        "taxIdLast4": "Steuer-ID (Letzte 4)",
+        "rejectionReason": "Ablehnungsgrund",
+        "w9Actions": "Aktionen",
+        "uploadW9": "W-9 Formular hochladen (PDF)",
+        "w9UploadHelp": "Nur PDF-Dateien bis zu 5MB werden akzeptiert",
+        "uploadW9Button": "W-9 hochladen",
+        "downloadBlankW9": "Leeres W-9 Formular herunterladen",
+        "downloadSubmittedW9": "Eingereichtes W-9 herunterladen",
+        "uploadingW9": "W-9 Dokument wird hochgeladen...",
+        "w9UploadSuccess": "W-9 erfolgreich hochgeladen! Es wird von unserem Team überprüft.",
+        "w9Note": "<strong>Hinweis:</strong> W-9 Formulare werden vom IRS für Steuermeldezwecke benötigt. Zahlungen können erst nach Verifizierung Ihres W-9 verarbeitet werden. Laden Sie das offizielle Formular von der IRS-Website herunter, füllen Sie es aus und laden Sie es hier hoch.",
+        "w9Required": "W-9 Erforderlich!",
+        "w9RequiredMessage": "Sie müssen ein W-9 Formular einreichen, bevor Zahlungen verarbeitet werden können.",
+        "w9UnderReview": "W-9 Wird Überprüft",
+        "w9UnderReviewMessage": "Ihr W-9 wird von unserem Team überprüft.",
+        "w9Verified": "W-9 Verifiziert",
+        "w9VerifiedMessage": "Ihr W-9 wurde verifiziert. Sie können Zahlungen erhalten.",
+        "w9Rejected": "W-9 Abgelehnt",
+        "w9RejectedMessage": "Ihr W-9 wurde abgelehnt. Bitte reichen Sie ein neues ein."
       },
       "tabs": {
         "pickups": "Abholungen & Lieferungen",
@@ -720,6 +746,9 @@
         "operators": "Operatoren",
         "analytics": "Analysen",
         "affiliates": "Partner",
+        "w9review": "W-9 Prüfung",
+        "quickbooks": "QuickBooks",
+        "auditlog": "Audit-Protokoll",
         "config": "Konfiguration"
       },
       "stats": {
@@ -821,6 +850,166 @@
         "revenue": "Umsatz",
         "commission": "Provision"
       },
+      "w9review": {
+        "title": "W-9 Dokumentenprüfung",
+        "pendingReview": "Ausstehende Prüfung",
+        "verifiedDocuments": "Verifizierte Dokumente",
+        "rejectedDocuments": "Abgelehnte Dokumente",
+        "searchPlaceholder": "Nach Name oder Geschäft suchen",
+        "filters": {
+          "all": "Alle",
+          "pending": "Ausstehend",
+          "verified": "Verifiziert",
+          "rejected": "Abgelehnt"
+        },
+        "table": {
+          "affiliateName": "Partnername",
+          "businessName": "Firmenname (rechtlich)",
+          "taxIdType": "Steuer-ID-Typ",
+          "submittedDate": "Eingereicht am",
+          "status": "Status",
+          "actions": "Aktionen"
+        },
+        "actions": {
+          "view": "Anzeigen",
+          "verify": "Verifizieren",
+          "reject": "Ablehnen",
+          "download": "Herunterladen"
+        },
+        "statusBadge": {
+          "pending": "Ausstehend",
+          "verified": "Verifiziert",
+          "rejected": "Abgelehnt"
+        },
+        "modal": {
+          "title": "W-9 Dokumentendetails",
+          "personalInfo": "Persönliche Informationen",
+          "fullName": "Vollständiger Name",
+          "businessName": "Firmenname",
+          "taxInfo": "Steuerinformationen",
+          "taxIdType": "Steuer-ID-Typ",
+          "taxId": "Steuer-ID",
+          "documentStatus": "Dokumentenstatus",
+          "currentStatus": "Aktueller Status",
+          "submittedOn": "Eingereicht am",
+          "lastReviewedOn": "Zuletzt geprüft am",
+          "reviewedBy": "Geprüft von",
+          "rejectionReason": "Ablehnungsgrund",
+          "documentPreview": "Dokumentenvorschau",
+          "actions": "Aktionen",
+          "verifyButton": "Dokument verifizieren",
+          "rejectButton": "Dokument ablehnen",
+          "downloadButton": "PDF herunterladen",
+          "close": "Schließen"
+        },
+        "confirmModal": {
+          "verifyTitle": "W-9 Dokument verifizieren",
+          "verifyMessage": "Sind Sie sicher, dass Sie dieses W-9 Dokument verifizieren möchten?",
+          "rejectTitle": "W-9 Dokument ablehnen",
+          "rejectMessage": "Bitte geben Sie einen Grund für die Ablehnung an:",
+          "rejectReasonPlaceholder": "Geben Sie den Ablehnungsgrund ein...",
+          "confirm": "Bestätigen",
+          "cancel": "Abbrechen"
+        },
+        "messages": {
+          "verifySuccess": "W-9 Dokument erfolgreich verifiziert",
+          "rejectSuccess": "W-9 Dokument abgelehnt",
+          "operationFailed": "Vorgang fehlgeschlagen. Bitte versuchen Sie es erneut.",
+          "rejectionReasonRequired": "Ablehnungsgrund ist erforderlich"
+        },
+        "noDocuments": "Keine W-9 Dokumente gefunden",
+        "stats": {
+          "pending": "Ausstehend",
+          "verified": "Verifiziert",
+          "rejected": "Abgelehnt"
+        }
+      },
+      "quickbooks": {
+        "title": "QuickBooks Integration",
+        "exportVendors": "Lieferanten exportieren",
+        "paymentSummary": "Zahlungsübersicht",
+        "commissionDetail": "Provisionsdetails",
+        "exportHistory": "Exportverlauf",
+        "vendorExport": {
+          "title": "Lieferanten nach QuickBooks exportieren",
+          "description": "Exportieren Sie alle Partner mit verifizierten W-9 Dokumenten als Lieferanten nach QuickBooks.",
+          "exportButton": "Lieferanten exportieren",
+          "exporting": "Exportiere...",
+          "includeInactive": "Inaktive Partner einschließen",
+          "stats": {
+            "totalAffiliates": "Partner gesamt",
+            "verifiedW9": "Verifizierte W-9",
+            "readyToExport": "Bereit zum Export"
+          }
+        },
+        "paymentSummaryExport": {
+          "title": "Zahlungsübersicht exportieren",
+          "description": "Exportieren Sie die Zahlungsübersicht für einen bestimmten Zeitraum.",
+          "dateRange": "Datumsbereich",
+          "startDate": "Startdatum",
+          "endDate": "Enddatum",
+          "exportFormat": "Exportformat",
+          "exportButton": "Übersicht exportieren",
+          "exporting": "Exportiere..."
+        },
+        "commissionDetailExport": {
+          "title": "Provisionsdetails exportieren",
+          "description": "Exportieren Sie detaillierte Provisionsdaten für einen bestimmten Partner und Zeitraum.",
+          "selectAffiliate": "Partner auswählen",
+          "selectAffiliatePlaceholder": "Partner auswählen...",
+          "dateRange": "Datumsbereich",
+          "startDate": "Startdatum",
+          "endDate": "Enddatum",
+          "exportButton": "Details exportieren",
+          "exporting": "Exportiere..."
+        },
+        "exportHistoryTable": {
+          "title": "Jüngste Exporte",
+          "exportType": "Exporttyp",
+          "exportDate": "Exportdatum",
+          "exportedBy": "Exportiert von",
+          "recordCount": "Datensätze",
+          "status": "Status",
+          "actions": "Aktionen",
+          "download": "Herunterladen",
+          "noExports": "Noch keine Exporte"
+        },
+        "exportTypes": {
+          "vendors": "Lieferanten",
+          "paymentSummary": "Zahlungsübersicht",
+          "commissionDetail": "Provisionsdetails"
+        },
+        "messages": {
+          "exportSuccess": "Export erfolgreich abgeschlossen",
+          "exportFailed": "Export fehlgeschlagen. Bitte versuchen Sie es erneut.",
+          "noDataToExport": "Keine Daten zum Exportieren gefunden",
+          "dateRangeRequired": "Bitte wählen Sie Start- und Enddatum",
+          "affiliateRequired": "Bitte wählen Sie einen Partner"
+        }
+      },
+      "auditlog": {
+        "title": "W-9 Audit-Protokoll",
+        "refresh": "Aktualisieren",
+        "export": "CSV exportieren",
+        "loading": "Audit-Protokolle werden geladen...",
+        "noLogs": "Keine Audit-Protokolle gefunden",
+        "loadError": "Fehler beim Laden der Audit-Protokolle",
+        "exportFailed": "Export fehlgeschlagen",
+        "exportError": "Fehler beim Exportieren des Audit-Protokolls",
+        "actionType": "Aktionstyp",
+        "allActions": "Alle Aktionen",
+        "affiliateId": "Partner-ID",
+        "dateFrom": "Von Datum",
+        "dateTo": "Bis Datum",
+        "applyFilters": "Filter anwenden",
+        "clearFilters": "Filter löschen",
+        "timestamp": "Zeitstempel",
+        "action": "Aktion",
+        "user": "Benutzer",
+        "affiliate": "Partner",
+        "details": "Details",
+        "ipAddress": "IP-Adresse"
+      },
       "config": {
         "title": "Systemkonfiguration",
         "save": "Konfiguration speichern",
@@ -835,6 +1024,8 @@
         "operators": "Operatoren werden geladen...",
         "analytics": "Analysen werden geladen...",
         "affiliates": "Partner werden geladen...",
+        "w9review": "W-9 Dokumente werden geladen...",
+        "quickbooks": "QuickBooks-Daten werden geladen...",
         "config": "Konfiguration wird geladen..."
       },
       "errors": {
@@ -842,6 +1033,8 @@
         "operatorsLoadFailed": "Operatoren konnten nicht geladen werden",
         "analyticsLoadFailed": "Fehler beim Laden der Analysen",
         "affiliatesLoadFailed": "Fehler beim Laden der Partner",
+        "w9reviewLoadFailed": "Fehler beim Laden der W-9 Dokumente",
+        "quickbooksLoadFailed": "Fehler beim Laden der QuickBooks-Daten",
         "configLoadFailed": "Fehler beim Laden der Systemkonfiguration",
         "networkError": "Netzwerkfehler. Bitte versuchen Sie es erneut."
       },

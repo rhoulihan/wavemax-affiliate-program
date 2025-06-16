@@ -382,6 +382,103 @@
                         </div>
                     </form>
                     
+                    <!-- W-9 Tax Information Section -->
+                    <div id="w9Section" class="mt-8 pt-6 border-t">
+                        <h3 class="text-lg font-bold mb-4" data-i18n="affiliate.dashboard.settings.taxInformation">Tax Information (W-9)</h3>
+                        
+                        <!-- W-9 Status Alert -->
+                        <div id="w9StatusAlert" class="mb-6">
+                            <!-- Dynamic status alert will be inserted here -->
+                        </div>
+                        
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <!-- W-9 Status Column -->
+                            <div>
+                                <h4 class="font-semibold mb-2" data-i18n="affiliate.dashboard.settings.w9Status">W-9 Status</h4>
+                                <div class="bg-gray-50 p-4 rounded-lg">
+                                    <div class="space-y-2">
+                                        <div>
+                                            <span class="font-medium" data-i18n="affiliate.dashboard.settings.status">Status:</span>
+                                            <span id="w9StatusText" class="ml-2">Loading...</span>
+                                        </div>
+                                        <div id="w9SubmittedDate" style="display: none;">
+                                            <span class="font-medium" data-i18n="affiliate.dashboard.settings.submittedOn">Submitted On:</span>
+                                            <span id="w9SubmittedDateText" class="ml-2"></span>
+                                        </div>
+                                        <div id="w9VerifiedDate" style="display: none;">
+                                            <span class="font-medium" data-i18n="affiliate.dashboard.settings.verifiedOn">Verified On:</span>
+                                            <span id="w9VerifiedDateText" class="ml-2"></span>
+                                        </div>
+                                        <div id="w9TaxInfo" style="display: none;">
+                                            <div>
+                                                <span class="font-medium" data-i18n="affiliate.dashboard.settings.taxIdType">Tax ID Type:</span>
+                                                <span id="w9TaxIdType" class="ml-2"></span>
+                                            </div>
+                                            <div>
+                                                <span class="font-medium" data-i18n="affiliate.dashboard.settings.taxIdLast4">Tax ID (Last 4):</span>
+                                                <span id="w9TaxIdLast4" class="ml-2"></span>
+                                            </div>
+                                        </div>
+                                        <div id="w9RejectionReason" style="display: none;">
+                                            <span class="font-medium text-red-600" data-i18n="affiliate.dashboard.settings.rejectionReason">Rejection Reason:</span>
+                                            <p id="w9RejectionReasonText" class="text-red-600 mt-1"></p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- W-9 Actions Column -->
+                            <div>
+                                <h4 class="font-semibold mb-2" data-i18n="affiliate.dashboard.settings.w9Actions">Actions</h4>
+                                
+                                <!-- Upload Form -->
+                                <div id="w9UploadForm" style="display: none;">
+                                    <form id="w9UploadFormElement" enctype="multipart/form-data">
+                                        <div class="mb-4">
+                                            <label for="w9File" class="block text-gray-700 mb-2" data-i18n="affiliate.dashboard.settings.uploadW9">Upload W-9 Form (PDF)</label>
+                                            <input type="file" id="w9File" name="w9document" accept=".pdf" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                                            <p class="text-sm text-gray-600 mt-1" data-i18n="affiliate.dashboard.settings.w9UploadHelp">Only PDF files up to 5MB are accepted</p>
+                                        </div>
+                                        <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition" data-i18n="affiliate.dashboard.settings.uploadW9Button">Upload W-9</button>
+                                    </form>
+                                </div>
+                                
+                                <!-- Download Buttons -->
+                                <div id="w9Actions" class="space-y-2">
+                                    <a href="https://www.irs.gov/pub/irs-pdf/fw9.pdf" target="_blank" class="inline-block bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition" data-i18n="affiliate.dashboard.settings.downloadBlankW9">Download Blank W-9 Form</a>
+                                    <button id="downloadSubmittedW9" type="button" class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition" style="display: none;" data-i18n="affiliate.dashboard.settings.downloadSubmittedW9">Download Submitted W-9</button>
+                                </div>
+                                
+                                <!-- Upload Progress -->
+                                <div id="w9UploadProgress" style="display: none;" class="mt-4">
+                                    <div class="bg-blue-100 border border-blue-400 text-blue-700 px-4 py-3 rounded">
+                                        <p data-i18n="affiliate.dashboard.settings.uploadingW9">Uploading W-9 document...</p>
+                                    </div>
+                                </div>
+                                
+                                <!-- Upload Success -->
+                                <div id="w9UploadSuccess" style="display: none;" class="mt-4">
+                                    <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">
+                                        <p data-i18n="affiliate.dashboard.settings.w9UploadSuccess">W-9 uploaded successfully! It will be reviewed by our team.</p>
+                                    </div>
+                                </div>
+                                
+                                <!-- Upload Error -->
+                                <div id="w9UploadError" style="display: none;" class="mt-4">
+                                    <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+                                        <p id="w9UploadErrorText"></p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-4 p-4 bg-blue-50 rounded-lg">
+                            <p class="text-sm text-blue-800" data-i18n="affiliate.dashboard.settings.w9Note">
+                                <strong>Note:</strong> W-9 forms are required by the IRS for tax reporting purposes. Payments cannot be processed until your W-9 is verified. Download the official form from the IRS website, complete it, and upload it here.
+                            </p>
+                        </div>
+                    </div>
+                    
                     <!-- Change Password Section -->
                     <div id="changePasswordSection" class="mt-8 pt-6 border-t">
                         <h3 class="text-lg font-bold mb-4" data-i18n="affiliate.dashboard.settings.changePassword">Change Password</h3>

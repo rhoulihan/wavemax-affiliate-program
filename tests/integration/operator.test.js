@@ -64,8 +64,8 @@ describe('Operator Integration Tests', () => {
       firstName: 'Test',
       lastName: 'Operator',
       email: 'operator@wavemax.com',
+      username: 'testoperator',
       password: 'OperatorStrongPassword951!',
-      workStation: 'Station A',
       shiftStart: '00:00',
       shiftEnd: '23:59',
       createdBy: testAdmin._id
@@ -106,8 +106,8 @@ describe('Operator Integration Tests', () => {
           firstName: 'John',
           lastName: 'Doe',
           email: 'john@wavemax.com',
+          username: 'johndoe',
           password: 'StrongPassword951!',
-          workStation: 'Station B',
           shiftStart: '09:00',
           shiftEnd: '18:00',
           currentOrderCount: 3,
@@ -118,8 +118,8 @@ describe('Operator Integration Tests', () => {
           firstName: 'Jane',
           lastName: 'Smith',
           email: 'jane@wavemax.com',
+          username: 'janesmith',
           password: 'StrongPassword951!',
-          workStation: 'Station C',
           isActive: false,
           createdBy: testAdmin._id
         }
@@ -139,7 +139,6 @@ describe('Operator Integration Tests', () => {
         lastName: expect.any(String),
         email: expect.any(String),
         role: 'operator',
-        workStation: expect.any(String)
       });
       expect(response.body.operators[0].password).toBeUndefined();
     });
@@ -150,6 +149,7 @@ describe('Operator Integration Tests', () => {
         firstName: 'Inactive',
         lastName: 'Operator',
         email: 'inactive@wavemax.com',
+        username: 'inactiveop',
         password: 'StrongPassword951!',
         isActive: false,
         createdBy: testAdmin._id
@@ -165,37 +165,6 @@ describe('Operator Integration Tests', () => {
       expect(response.body.operators[0].isActive).toBe(true);
     });
 
-    it('should filter by work station', async () => {
-      await Operator.create([
-        {
-          operatorId: 'OPR002',
-          firstName: 'Station B',
-          lastName: 'Operator',
-          email: 'stationb@wavemax.com',
-          password: 'StrongPassword951!',
-          workStation: 'Station B',
-          createdBy: testAdmin._id
-        },
-        {
-          operatorId: 'OPR003',
-          firstName: 'Another Station A',
-          lastName: 'Operator',
-          email: 'stationa2@wavemax.com',
-          password: 'StrongPassword951!',
-          workStation: 'Station A',
-          createdBy: testAdmin._id
-        }
-      ]);
-
-      const response = await adminAgent
-        .get('/api/v1/operators?workStation=Station A')
-        .set('Authorization', `Bearer ${adminToken}`)
-        .set('x-csrf-token', adminCsrfToken);
-
-      expect(response.status).toBe(200);
-      expect(response.body.operators).toHaveLength(2);
-      expect(response.body.operators.every(op => op.workStation === 'Station A')).toBe(true);
-    });
 
     it('should filter by on-shift status', async () => {
       // Get current time to create realistic shift schedules
@@ -211,6 +180,7 @@ describe('Operator Integration Tests', () => {
         firstName: 'Off Shift',
         lastName: 'Operator',
         email: 'offshift@wavemax.com',
+        username: 'offshiftop',
         password: 'StrongPassword951!',
         shiftStart: offShiftStart,
         shiftEnd: offShiftEnd,
@@ -237,8 +207,8 @@ describe('Operator Integration Tests', () => {
           firstName: `Op${i}`,
           lastName: 'Test',
           email: `op${i}@wavemax.com`,
+          username: `op${i}test`,
           password: 'StrongPassword951!',
-          workStation: `Station ${i}`,
           createdBy: testAdmin._id,
           createdAt: new Date(Date.now() - i * 60000)
         });
@@ -304,8 +274,8 @@ describe('Operator Integration Tests', () => {
         firstName: 'John',
         lastName: 'Doe',
         email: 'john@wavemax.com',
+        username: 'johndoe2',
         password: 'StrongPassword951!',
-        workStation: 'Station B',
         shiftStart: '09:00',
         shiftEnd: '18:00',
         totalOrdersProcessed: 150,
@@ -326,7 +296,6 @@ describe('Operator Integration Tests', () => {
         firstName: 'John',
         lastName: 'Doe',
         email: 'john@wavemax.com',
-        workStation: 'Station B',
         totalOrdersProcessed: 150,
         averageProcessingTime: 25.5,
         qualityScore: 95
@@ -349,6 +318,7 @@ describe('Operator Integration Tests', () => {
         firstName: 'Other',
         lastName: 'Operator',
         email: 'other@wavemax.com',
+        username: 'otherop',
         password: 'StrongPassword951!',
         createdBy: testAdmin._id
       });
@@ -381,8 +351,8 @@ describe('Operator Integration Tests', () => {
         firstName: 'New',
         lastName: 'Operator',
         email: 'newop@wavemax.com',
+        username: 'newoperator',
         password: 'NewPassw0rd!',
-        workStation: 'Station D',
         shiftStart: '00:00',
         shiftEnd: '23:59'
       };
@@ -400,7 +370,6 @@ describe('Operator Integration Tests', () => {
         firstName: 'New',
         lastName: 'Operator',
         email: 'newop@wavemax.com',
-        workStation: 'Station D',
         shiftStart: '00:00',
         shiftEnd: '23:59',
         isActive: true,
@@ -529,8 +498,8 @@ describe('Operator Integration Tests', () => {
         firstName: 'Target',
         lastName: 'Operator',
         email: 'target@wavemax.com',
+        username: 'targetop',
         password: 'StrongPassword951!',
-        workStation: 'Station X',
         shiftStart: '00:00',
         shiftEnd: '23:59',
         createdBy: testAdmin._id
@@ -545,7 +514,6 @@ describe('Operator Integration Tests', () => {
         .send({
           firstName: 'Updated',
           lastName: 'Name',
-          workStation: 'Station Y',
           shiftStart: '10:00',
           shiftEnd: '18:00'
         });
@@ -556,7 +524,6 @@ describe('Operator Integration Tests', () => {
         operatorId: 'TARGET001',
         firstName: 'Updated',
         lastName: 'Name',
-        workStation: 'Station Y',
         shiftStart: '10:00',
         shiftEnd: '18:00'
       });
@@ -644,11 +611,10 @@ describe('Operator Integration Tests', () => {
         .set('Authorization', `Bearer ${targetLogin.body.token}`)
         .set('x-csrf-token', csrfToken)
         .send({
-          workStation: 'Hacked Station'
         });
 
       expect(response.status).toBe(200);
-      expect(response.body.operator.workStation).toBe('Station X'); // Unchanged
+      expect(response.body.operator.shiftStart).toBe('00:00'); // Unchanged
     });
 
     it('should not allow updating operatorId', async () => {
@@ -687,6 +653,7 @@ describe('Operator Integration Tests', () => {
         firstName: 'Delete',
         lastName: 'Me',
         email: 'delete@wavemax.com',
+        username: 'deleteme',
         password: 'StrongPassword951!',
         createdBy: testAdmin._id
       });
@@ -770,6 +737,7 @@ describe('Operator Integration Tests', () => {
         firstName: 'Pin',
         lastName: 'Reset',
         email: 'pinreset@wavemax.com',
+        username: 'pinreset',
         password: 'StrongPassword951!',
         createdBy: testAdmin._id
       });
@@ -831,6 +799,7 @@ describe('Operator Integration Tests', () => {
           firstName: 'Available1',
           lastName: 'Op',
           email: 'avail1@wavemax.com',
+          username: 'avail1op',
           password: 'StrongPassword951!',
           currentOrderCount: 2,
           createdBy: testAdmin._id
@@ -840,6 +809,7 @@ describe('Operator Integration Tests', () => {
           firstName: 'Available2',
           lastName: 'Op',
           email: 'avail2@wavemax.com',
+          username: 'avail2op',
           password: 'StrongPassword951!',
           currentOrderCount: 5,
           createdBy: testAdmin._id
@@ -849,6 +819,7 @@ describe('Operator Integration Tests', () => {
           firstName: 'Busy',
           lastName: 'Op',
           email: 'busy@wavemax.com',
+          username: 'busyop',
           password: 'StrongPassword951!',
           currentOrderCount: 12, // Over limit
           createdBy: testAdmin._id
@@ -858,6 +829,7 @@ describe('Operator Integration Tests', () => {
           firstName: 'Inactive',
           lastName: 'Op',
           email: 'inactive@wavemax.com',
+          username: 'inactiveop2',
           password: 'StrongPassword951!',
           currentOrderCount: 0,
           isActive: false,
@@ -917,6 +889,7 @@ describe('Operator Integration Tests', () => {
         firstName: 'Stats',
         lastName: 'Operator',
         email: 'stats@wavemax.com',
+        username: 'statsop',
         password: 'StrongPassword951!',
         totalOrdersProcessed: 10,
         averageProcessingTime: 20,

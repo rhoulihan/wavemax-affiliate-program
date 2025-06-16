@@ -126,15 +126,18 @@ const fillTemplate = (template, data) => {
   data.BASE_URL = baseUrl;
   
   // Use a regex to find all placeholders and replace them in one operation
-  return template.replace(/\[([A-Z0-9_]+)\]/g, (match, placeholder) => {
-    // First try the exact placeholder (uppercase), then try lowercase
-    const upperKey = placeholder;
+  return template.replace(/\[([A-Za-z0-9_]+)\]/g, (match, placeholder) => {
+    // First try the exact placeholder as-is, then try lowercase, then uppercase
+    const exactKey = placeholder;
     const lowerKey = placeholder.toLowerCase();
+    const upperKey = placeholder.toUpperCase();
 
-    if (data[upperKey] !== undefined) {
-      return data[upperKey];
+    if (data[exactKey] !== undefined) {
+      return data[exactKey];
     } else if (data[lowerKey] !== undefined) {
       return data[lowerKey];
+    } else if (data[upperKey] !== undefined) {
+      return data[upperKey];
     } else {
       // If not found, return empty string for cleaner emails
       console.warn(`Email template placeholder [${placeholder}] not found in data`);
@@ -210,7 +213,16 @@ exports.sendAffiliateWelcomeEmail = async (affiliate) => {
         DELIVERY_FEES_LABEL: 'OF DELIVERY FEES',
         STARTUP_COST_LABEL: 'STARTUP COST',
         DASHBOARD_MESSAGE: 'Login to your dashboard to manage your affiliate account, track orders, and view your earnings.',
-        DASHBOARD_BUTTON: 'Go to Dashboard'
+        DASHBOARD_BUTTON: 'Go to Dashboard',
+        W9_NOTICE_TITLE: '⚠️ IMPORTANT: W-9 Form Required',
+        W9_NOTICE_SUBTITLE: 'Action Required Before Payments Can Be Processed',
+        W9_NOTICE_MESSAGE: 'To comply with IRS regulations and enable payment processing, you must submit a completed W-9 form:',
+        W9_STEP_1: 'Download the official W-9 form from: https://www.irs.gov/pub/irs-pdf/fw9.pdf',
+        W9_STEP_2: 'Complete all required fields including your taxpayer identification number',
+        W9_STEP_3: 'Log in to your affiliate dashboard',
+        W9_STEP_4: 'Navigate to "Tax Information" and upload your completed W-9',
+        W9_IRS_NOTE: 'Note: The W-9 form must be obtained directly from the IRS website to ensure you have the current version.',
+        W9_SUPPORT_MESSAGE: 'For technical support with uploading, contact support@wavemax.com'
       },
       es: {
         EMAIL_TITLE: 'Bienvenido al Programa de Afiliados de WaveMAX Laundry',
@@ -235,7 +247,16 @@ exports.sendAffiliateWelcomeEmail = async (affiliate) => {
         DELIVERY_FEES_LABEL: 'DE TARIFAS DE ENTREGA',
         STARTUP_COST_LABEL: 'COSTO INICIAL',
         DASHBOARD_MESSAGE: 'Inicie sesión en su panel para administrar su cuenta de afiliado, rastrear pedidos y ver sus ganancias.',
-        DASHBOARD_BUTTON: 'Ir al Panel'
+        DASHBOARD_BUTTON: 'Ir al Panel',
+        W9_NOTICE_TITLE: '⚠️ IMPORTANTE: Formulario W-9 Requerido',
+        W9_NOTICE_SUBTITLE: 'Acción Requerida Antes de Procesar Pagos',
+        W9_NOTICE_MESSAGE: 'Para cumplir con las regulaciones del IRS y habilitar el procesamiento de pagos, debe enviar un formulario W-9 completo:',
+        W9_STEP_1: 'Descargue el formulario W-9 oficial de: https://www.irs.gov/pub/irs-pdf/fw9.pdf',
+        W9_STEP_2: 'Complete todos los campos requeridos, incluido su número de identificación fiscal',
+        W9_STEP_3: 'Inicie sesión en su panel de afiliado',
+        W9_STEP_4: 'Navegue a "Información Fiscal" y cargue su W-9 completo',
+        W9_IRS_NOTE: 'Nota: El formulario W-9 debe obtenerse directamente del sitio web del IRS para asegurar que tenga la versión actual.',
+        W9_SUPPORT_MESSAGE: 'Para soporte técnico con la carga, contacte a support@wavemax.com'
       },
       pt: {
         EMAIL_TITLE: 'Bem-vindo ao Programa de Afiliados WaveMAX Laundry',
@@ -260,7 +281,16 @@ exports.sendAffiliateWelcomeEmail = async (affiliate) => {
         DELIVERY_FEES_LABEL: 'DAS TAXAS DE ENTREGA',
         STARTUP_COST_LABEL: 'CUSTO INICIAL',
         DASHBOARD_MESSAGE: 'Faça login em seu painel para gerenciar sua conta de afiliado, rastrear pedidos e visualizar seus ganhos.',
-        DASHBOARD_BUTTON: 'Ir para o Painel'
+        DASHBOARD_BUTTON: 'Ir para o Painel',
+        W9_NOTICE_TITLE: '⚠️ IMPORTANTE: Formulário W-9 Obrigatório',
+        W9_NOTICE_SUBTITLE: 'Ação Necessária Antes do Processamento de Pagamentos',
+        W9_NOTICE_MESSAGE: 'Para cumprir com os regulamentos do IRS e permitir o processamento de pagamentos, você deve enviar um formulário W-9 preenchido:',
+        W9_STEP_1: 'Baixe o formulário W-9 oficial de: https://www.irs.gov/pub/irs-pdf/fw9.pdf',
+        W9_STEP_2: 'Preencha todos os campos obrigatórios, incluindo seu número de identificação fiscal',
+        W9_STEP_3: 'Faça login no seu painel de afiliado',
+        W9_STEP_4: 'Navegue até "Informações Fiscais" e faça upload do seu W-9 preenchido',
+        W9_IRS_NOTE: 'Nota: O formulário W-9 deve ser obtido diretamente do site do IRS para garantir que você tenha a versão atual.',
+        W9_SUPPORT_MESSAGE: 'Para suporte técnico com o upload, entre em contato com support@wavemax.com'
       },
       de: {
         EMAIL_TITLE: 'Willkommen beim WaveMAX Laundry Affiliate-Programm',
@@ -285,7 +315,16 @@ exports.sendAffiliateWelcomeEmail = async (affiliate) => {
         DELIVERY_FEES_LABEL: 'DER LIEFERGEBÜHREN',
         STARTUP_COST_LABEL: 'STARTKOSTEN',
         DASHBOARD_MESSAGE: 'Melden Sie sich in Ihrem Dashboard an, um Ihr Affiliate-Konto zu verwalten, Bestellungen zu verfolgen und Ihre Einnahmen anzuzeigen.',
-        DASHBOARD_BUTTON: 'Zum Dashboard'
+        DASHBOARD_BUTTON: 'Zum Dashboard',
+        W9_NOTICE_TITLE: '⚠️ WICHTIG: W-9 Formular erforderlich',
+        W9_NOTICE_SUBTITLE: 'Maßnahme erforderlich vor der Zahlungsverarbeitung',
+        W9_NOTICE_MESSAGE: 'Um die IRS-Vorschriften einzuhalten und die Zahlungsverarbeitung zu ermöglichen, müssen Sie ein ausgefülltes W-9-Formular einreichen:',
+        W9_STEP_1: 'Laden Sie das offizielle W-9-Formular herunter von: https://www.irs.gov/pub/irs-pdf/fw9.pdf',
+        W9_STEP_2: 'Füllen Sie alle erforderlichen Felder aus, einschließlich Ihrer Steueridentifikationsnummer',
+        W9_STEP_3: 'Melden Sie sich in Ihrem Affiliate-Dashboard an',
+        W9_STEP_4: 'Navigieren Sie zu "Steuerinformationen" und laden Sie Ihr ausgefülltes W-9 hoch',
+        W9_IRS_NOTE: 'Hinweis: Das W-9-Formular muss direkt von der IRS-Website bezogen werden, um sicherzustellen, dass Sie die aktuelle Version haben.',
+        W9_SUPPORT_MESSAGE: 'Für technischen Support beim Hochladen kontaktieren Sie support@wavemax.com'
       }
     };
 
@@ -339,7 +378,7 @@ exports.sendAffiliateNewCustomerEmail = async (affiliate, customer, bagInfo = {}
       en: {
         EMAIL_TITLE: 'New Customer Registration',
         EMAIL_HEADER: 'New Customer Registration!',
-        GREETING: 'Congratulations, {business_name}!',
+        GREETING: 'Congratulations, [BUSINESS_NAME]!',
         NEW_CUSTOMER_MESSAGE: 'Great news! A new customer has just registered through your affiliate link.',
         ACTION_REQUIRED_LABEL: 'Action Required',
         ACTION_REQUIRED_MESSAGE: `Please deliver ${numberOfBags} laundry bag(s) to your new customer within 48 hours.`,
@@ -362,7 +401,7 @@ exports.sendAffiliateNewCustomerEmail = async (affiliate, customer, bagInfo = {}
       es: {
         EMAIL_TITLE: 'Nuevo Registro de Cliente',
         EMAIL_HEADER: '¡Nuevo Registro de Cliente!',
-        GREETING: '¡Felicitaciones, {business_name}!',
+        GREETING: '¡Felicitaciones, [BUSINESS_NAME]!',
         NEW_CUSTOMER_MESSAGE: '¡Excelentes noticias! Un nuevo cliente acaba de registrarse a través de su enlace de afiliado.',
         ACTION_REQUIRED_LABEL: 'Acción Requerida',
         ACTION_REQUIRED_MESSAGE: `Por favor entregue ${numberOfBags} bolsa(s) de lavandería a su nuevo cliente dentro de 48 horas.`,
@@ -385,7 +424,7 @@ exports.sendAffiliateNewCustomerEmail = async (affiliate, customer, bagInfo = {}
       pt: {
         EMAIL_TITLE: 'Novo Registro de Cliente',
         EMAIL_HEADER: 'Novo Registro de Cliente!',
-        GREETING: 'Parabéns, {business_name}!',
+        GREETING: 'Parabéns, [BUSINESS_NAME]!',
         NEW_CUSTOMER_MESSAGE: 'Ótimas notícias! Um novo cliente acabou de se registrar através do seu link de afiliado.',
         ACTION_REQUIRED_LABEL: 'Ação Necessária',
         ACTION_REQUIRED_MESSAGE: `Por favor, entregue ${numberOfBags} sacola(s) de lavanderia ao seu novo cliente dentro de 48 horas.`,
@@ -408,7 +447,7 @@ exports.sendAffiliateNewCustomerEmail = async (affiliate, customer, bagInfo = {}
       de: {
         EMAIL_TITLE: 'Neue Kundenregistrierung',
         EMAIL_HEADER: 'Neue Kundenregistrierung!',
-        GREETING: `Herzlichen Glückwunsch, ${affiliate.businessName || affiliate.firstName}!`,
+        GREETING: 'Herzlichen Glückwunsch, [BUSINESS_NAME]!',
         NEW_CUSTOMER_MESSAGE: 'Großartige Neuigkeiten! Ein neuer Kunde hat sich gerade über Ihren Affiliate-Link registriert.',
         ACTION_REQUIRED_LABEL: 'Aktion erforderlich',
         ACTION_REQUIRED_MESSAGE: `Bitte liefern Sie ${numberOfBags} Wäschesack/-säcke innerhalb von 48 Stunden an Ihren neuen Kunden.`,

@@ -483,6 +483,116 @@
         .toggle-btn.active:hover {
             background: #357ABD;
         }
+
+        /* Modal styles */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 8px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .modal-header {
+            padding: 20px;
+            border-bottom: 1px solid #e9ecef;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h3 {
+            margin: 0;
+            font-size: 1.25rem;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #999;
+        }
+
+        .modal-close:hover {
+            color: #333;
+        }
+
+        .modal-body {
+            padding: 20px;
+        }
+
+        /* W-9 specific styles */
+        .w9-row {
+            display: flex;
+            align-items: center;
+            padding: 15px 20px;
+            border-bottom: 1px solid #e9ecef;
+            transition: background-color 0.2s;
+        }
+
+        .w9-row:hover {
+            background-color: #f8f9fa;
+        }
+
+        .w9-info {
+            flex: 1;
+        }
+
+        .w9-affiliate-name {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .w9-affiliate-details {
+            font-size: 0.875rem;
+            color: #666;
+        }
+
+        .w9-status {
+            margin: 0 20px;
+        }
+
+        .w9-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .status-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-verified {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-rejected {
+            background: #f8d7da;
+            color: #721c24;
+        }
     </style>
 </head>
 <body>
@@ -504,6 +614,9 @@
             <button class="nav-tab" data-tab="operators" data-i18n="administrator.dashboard.tabs.operators">Operators</button>
             <button class="nav-tab" data-tab="analytics" data-i18n="administrator.dashboard.tabs.analytics">Analytics</button>
             <button class="nav-tab" data-tab="affiliates" data-i18n="administrator.dashboard.tabs.affiliates">Affiliates</button>
+            <button class="nav-tab" data-tab="w9review" data-i18n="administrator.dashboard.tabs.w9review">W-9 Review</button>
+            <button class="nav-tab" data-tab="quickbooks" data-i18n="administrator.dashboard.tabs.quickbooks">QuickBooks</button>
+            <button class="nav-tab" data-tab="auditlog" data-i18n="administrator.dashboard.tabs.auditlog">Audit Log</button>
             <button class="nav-tab" data-tab="config" data-i18n="administrator.dashboard.tabs.config">Config</button>
         </nav>
 
@@ -635,6 +748,246 @@
             </div>
         </div>
 
+        <!-- W-9 Review Tab -->
+        <div class="tab-content" id="w9review-tab">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title" data-i18n="administrator.dashboard.w9review.title">W-9 Document Review</h2>
+                    <div style="display: flex; gap: 10px;">
+                        <span class="badge" id="pendingW9Count" style="background: #ffc107; color: #000;">0 Pending</span>
+                        <button class="btn btn-secondary" id="refreshW9ListBtn" data-i18n="common.buttons.refresh">Refresh</button>
+                    </div>
+                </div>
+                
+                <!-- Filter Section -->
+                <div style="padding: 20px; border-bottom: 1px solid #e9ecef;">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="w9StatusFilter" data-i18n="administrator.dashboard.w9review.filterByStatus">Filter by Status</label>
+                            <select id="w9StatusFilter" class="form-control">
+                                <option value="all" data-i18n="common.labels.all">All</option>
+                                <option value="pending" selected data-i18n="administrator.dashboard.w9review.pending">Pending Review</option>
+                                <option value="verified" data-i18n="administrator.dashboard.w9review.verified">Verified</option>
+                                <option value="rejected" data-i18n="administrator.dashboard.w9review.rejected">Rejected</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="w9SearchInput" data-i18n="administrator.dashboard.w9review.searchAffiliate">Search Affiliate</label>
+                            <input type="text" id="w9SearchInput" class="form-control" placeholder="Name, Email, or Affiliate ID">
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- W-9 Documents List -->
+                <div id="w9DocumentsList">
+                    <div class="loading">
+                        <div class="spinner"></div>
+                        <p data-i18n="administrator.dashboard.loading.w9documents">Loading W-9 documents...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- W-9 Verification Modal -->
+        <div id="w9VerificationModal" class="modal" style="display: none;">
+            <div class="modal-content" style="max-width: 600px;">
+                <div class="modal-header">
+                    <h3 data-i18n="administrator.dashboard.w9review.verifyTitle">Verify W-9 Document</h3>
+                    <button class="modal-close" onclick="closeW9VerificationModal()">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <form id="w9VerificationForm">
+                        <input type="hidden" id="verifyAffiliateId">
+                        
+                        <div class="form-group">
+                            <label data-i18n="administrator.dashboard.w9review.affiliateInfo">Affiliate Information</label>
+                            <div class="info-box" style="background: #f8f9fa; padding: 15px; border-radius: 6px; margin-bottom: 20px;">
+                                <p><strong data-i18n="common.labels.name">Name:</strong> <span id="verifyAffiliateName"></span></p>
+                                <p><strong data-i18n="common.labels.email">Email:</strong> <span id="verifyAffiliateEmail"></span></p>
+                                <p><strong data-i18n="common.labels.affiliateId">Affiliate ID:</strong> <span id="verifyAffiliateIdDisplay"></span></p>
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="taxIdType" data-i18n="administrator.dashboard.w9review.taxIdType">Tax ID Type</label>
+                                <select id="taxIdType" class="form-control" required>
+                                    <option value="">Select Type</option>
+                                    <option value="SSN">SSN (Social Security Number)</option>
+                                    <option value="EIN">EIN (Employer ID Number)</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="taxIdLast4" data-i18n="administrator.dashboard.w9review.taxIdLast4">Tax ID (Last 4 Digits)</label>
+                                <input type="text" id="taxIdLast4" class="form-control" pattern="[0-9]{4}" maxlength="4" required placeholder="1234">
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="businessName" data-i18n="administrator.dashboard.w9review.businessName">Legal Business Name (if different)</label>
+                            <input type="text" id="businessName" class="form-control" placeholder="Leave blank if using personal name">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="quickbooksVendorId" data-i18n="administrator.dashboard.w9review.quickbooksVendorId">QuickBooks Vendor ID</label>
+                            <input type="text" id="quickbooksVendorId" class="form-control" placeholder="QB-VENDOR-123">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="verificationNotes" data-i18n="administrator.dashboard.w9review.notes">Verification Notes</label>
+                            <textarea id="verificationNotes" class="form-control" rows="3" placeholder="Optional notes about the verification"></textarea>
+                        </div>
+                        
+                        <div class="form-actions" style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px;">
+                            <button type="button" class="btn btn-secondary" onclick="closeW9VerificationModal()" data-i18n="common.buttons.cancel">Cancel</button>
+                            <button type="submit" class="btn btn-primary" data-i18n="administrator.dashboard.w9review.verifyButton">Verify W-9</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- W-9 Rejection Modal -->
+        <div id="w9RejectionModal" class="modal" style="display: none;">
+            <div class="modal-content" style="max-width: 500px;">
+                <div class="modal-header">
+                    <h3 data-i18n="administrator.dashboard.w9review.rejectTitle">Reject W-9 Document</h3>
+                    <button class="modal-close" onclick="closeW9RejectionModal()">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <form id="w9RejectionForm">
+                        <input type="hidden" id="rejectAffiliateId">
+                        
+                        <div class="form-group">
+                            <label data-i18n="administrator.dashboard.w9review.rejectionReason">Rejection Reason</label>
+                            <textarea id="rejectionReason" class="form-control" rows="4" required placeholder="Please provide a clear reason for rejection"></textarea>
+                            <small class="text-muted" data-i18n="administrator.dashboard.w9review.rejectionHelp">This message will be sent to the affiliate</small>
+                        </div>
+                        
+                        <div class="form-actions" style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px;">
+                            <button type="button" class="btn btn-secondary" onclick="closeW9RejectionModal()" data-i18n="common.buttons.cancel">Cancel</button>
+                            <button type="submit" class="btn btn-danger" data-i18n="administrator.dashboard.w9review.rejectButton">Reject W-9</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- QuickBooks Export Tab -->
+        <div class="tab-content" id="quickbooks-tab">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title" data-i18n="administrator.dashboard.quickbooks.title">QuickBooks Export</h2>
+                </div>
+                
+                <!-- Export Options -->
+                <div style="padding: 20px;">
+                    <div class="dashboard-grid">
+                        <!-- Vendor Export Card -->
+                        <div class="stat-card">
+                            <h3 data-i18n="administrator.dashboard.quickbooks.vendorExport">Vendor Export</h3>
+                            <p style="color: #666; margin-bottom: 15px;" data-i18n="administrator.dashboard.quickbooks.vendorExportDesc">Export all affiliates with verified W-9s as QuickBooks vendors</p>
+                            <button class="btn btn-primary" id="exportVendorsBtn" data-i18n="administrator.dashboard.quickbooks.exportVendors">Export Vendors</button>
+                        </div>
+                        
+                        <!-- Payment Summary Card -->
+                        <div class="stat-card">
+                            <h3 data-i18n="administrator.dashboard.quickbooks.paymentSummary">Payment Summary</h3>
+                            <p style="color: #666; margin-bottom: 15px;" data-i18n="administrator.dashboard.quickbooks.paymentSummaryDesc">Export commission payments for a date range</p>
+                            <button class="btn btn-primary" id="openPaymentSummaryBtn" data-i18n="administrator.dashboard.quickbooks.selectDateRange">Select Date Range</button>
+                        </div>
+                        
+                        <!-- Commission Detail Card -->
+                        <div class="stat-card">
+                            <h3 data-i18n="administrator.dashboard.quickbooks.commissionDetail">Commission Detail</h3>
+                            <p style="color: #666; margin-bottom: 15px;" data-i18n="administrator.dashboard.quickbooks.commissionDetailDesc">Export detailed commission report for a specific affiliate</p>
+                            <button class="btn btn-primary" id="openCommissionDetailBtn" data-i18n="administrator.dashboard.quickbooks.selectAffiliate">Select Affiliate</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Export History -->
+                <div class="card" style="margin-top: 20px;">
+                    <div class="card-header">
+                        <h3 style="margin: 0; font-size: 18px;" data-i18n="administrator.dashboard.quickbooks.exportHistory">Export History</h3>
+                        <button class="btn btn-secondary btn-sm" id="refreshExportHistoryBtn" data-i18n="common.buttons.refresh">Refresh</button>
+                    </div>
+                    <div id="exportHistoryList">
+                        <div class="loading">
+                            <div class="spinner"></div>
+                            <p data-i18n="administrator.dashboard.loading.exportHistory">Loading export history...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Audit Log Tab -->
+        <div class="tab-content" id="auditlog-tab">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title" data-i18n="administrator.dashboard.auditlog.title">W-9 Audit Log</h2>
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        <button class="btn btn-secondary" id="refreshAuditLogBtn" data-i18n="administrator.dashboard.auditlog.refresh">Refresh</button>
+                        <button class="btn btn-primary" id="exportAuditLogBtn" data-i18n="administrator.dashboard.auditlog.export">Export CSV</button>
+                    </div>
+                </div>
+                
+                <!-- Filters -->
+                <div style="padding: 20px; background: #f8f9fa; border-bottom: 1px solid #e9ecef;">
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+                        <div>
+                            <label for="auditActionFilter" data-i18n="administrator.dashboard.auditlog.actionType">Action Type</label>
+                            <select id="auditActionFilter" class="form-control">
+                                <option value="" data-i18n="administrator.dashboard.auditlog.allActions">All Actions</option>
+                                <option value="upload_attempt">Upload Attempt</option>
+                                <option value="upload_success">Upload Success</option>
+                                <option value="upload_failure">Upload Failure</option>
+                                <option value="download_affiliate">Download (Affiliate)</option>
+                                <option value="download_admin">Download (Admin)</option>
+                                <option value="verify_attempt">Verify Attempt</option>
+                                <option value="verify_success">Verify Success</option>
+                                <option value="reject">Reject</option>
+                                <option value="expire">Expire</option>
+                                <option value="delete">Delete</option>
+                                <option value="quickbooks_export">QuickBooks Export</option>
+                                <option value="legal_hold">Legal Hold</option>
+                            </select>
+                        </div>
+                        
+                        <div>
+                            <label for="auditAffiliateFilter" data-i18n="administrator.dashboard.auditlog.affiliateId">Affiliate ID</label>
+                            <input type="text" id="auditAffiliateFilter" class="form-control" placeholder="Search by Affiliate ID">
+                        </div>
+                        
+                        <div>
+                            <label for="auditDateFromFilter" data-i18n="administrator.dashboard.auditlog.dateFrom">Date From</label>
+                            <input type="date" id="auditDateFromFilter" class="form-control">
+                        </div>
+                        
+                        <div>
+                            <label for="auditDateToFilter" data-i18n="administrator.dashboard.auditlog.dateTo">Date To</label>
+                            <input type="date" id="auditDateToFilter" class="form-control">
+                        </div>
+                    </div>
+                    
+                    <div style="margin-top: 15px; display: flex; gap: 10px;">
+                        <button class="btn btn-primary" id="applyAuditFiltersBtn" data-i18n="administrator.dashboard.auditlog.applyFilters">Apply Filters</button>
+                        <button class="btn btn-secondary" id="clearAuditFiltersBtn" data-i18n="administrator.dashboard.auditlog.clearFilters">Clear Filters</button>
+                    </div>
+                </div>
+                
+                <!-- Audit Log Table -->
+                <div id="auditLogContent" style="padding: 20px;">
+                    <div class="loading">
+                        <div class="spinner"></div>
+                        <p data-i18n="administrator.dashboard.auditlog.loading">Loading audit logs...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- System Config Tab -->
         <div class="tab-content" id="config-tab">
             <div class="card">
@@ -647,6 +1000,88 @@
                         <div class="spinner"></div>
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Payment Summary Export Modal -->
+    <div id="paymentSummaryModal" class="modal" style="display: none;">
+        <div class="modal-content" style="max-width: 500px;">
+            <div class="modal-header">
+                <h3 data-i18n="administrator.dashboard.quickbooks.paymentSummaryTitle">Export Payment Summary</h3>
+                <button class="modal-close" onclick="closePaymentSummaryModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="paymentSummaryForm">
+                    <div class="form-group">
+                        <label for="summaryStartDate" data-i18n="administrator.dashboard.quickbooks.startDate">Start Date</label>
+                        <input type="date" id="summaryStartDate" class="form-control" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="summaryEndDate" data-i18n="administrator.dashboard.quickbooks.endDate">End Date</label>
+                        <input type="date" id="summaryEndDate" class="form-control" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="summaryFormat" data-i18n="administrator.dashboard.quickbooks.exportFormat">Export Format</label>
+                        <select id="summaryFormat" class="form-control">
+                            <option value="csv">CSV (QuickBooks Import)</option>
+                            <option value="json">JSON (API Response)</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-actions" style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px;">
+                        <button type="button" class="btn btn-secondary" onclick="closePaymentSummaryModal()" data-i18n="common.buttons.cancel">Cancel</button>
+                        <button type="submit" class="btn btn-primary" data-i18n="administrator.dashboard.quickbooks.export">Export</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Commission Detail Export Modal -->
+    <div id="commissionDetailModal" class="modal" style="display: none;">
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-header">
+                <h3 data-i18n="administrator.dashboard.quickbooks.commissionDetailTitle">Export Commission Detail</h3>
+                <button class="modal-close" onclick="closeCommissionDetailModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="commissionDetailForm">
+                    <div class="form-group">
+                        <label for="detailAffiliateSearch" data-i18n="administrator.dashboard.quickbooks.searchAffiliate">Search Affiliate</label>
+                        <input type="text" id="detailAffiliateSearch" class="form-control" placeholder="Type to search...">
+                        <div id="affiliateSearchResults" style="max-height: 200px; overflow-y: auto; border: 1px solid #ddd; margin-top: 5px; display: none;"></div>
+                        <input type="hidden" id="detailAffiliateId" required>
+                        <div id="selectedAffiliate" style="margin-top: 10px; padding: 10px; background: #f8f9fa; border-radius: 4px; display: none;">
+                            <strong data-i18n="administrator.dashboard.quickbooks.selected">Selected:</strong> <span id="selectedAffiliateName"></span>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="detailStartDate" data-i18n="administrator.dashboard.quickbooks.startDate">Start Date</label>
+                        <input type="date" id="detailStartDate" class="form-control" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="detailEndDate" data-i18n="administrator.dashboard.quickbooks.endDate">End Date</label>
+                        <input type="date" id="detailEndDate" class="form-control" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="detailFormat" data-i18n="administrator.dashboard.quickbooks.exportFormat">Export Format</label>
+                        <select id="detailFormat" class="form-control">
+                            <option value="csv">CSV (Detailed Report)</option>
+                            <option value="json">JSON (API Response)</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-actions" style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px;">
+                        <button type="button" class="btn btn-secondary" onclick="closeCommissionDetailModal()" data-i18n="common.buttons.cancel">Cancel</button>
+                        <button type="submit" class="btn btn-primary" data-i18n="administrator.dashboard.quickbooks.export">Export</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
