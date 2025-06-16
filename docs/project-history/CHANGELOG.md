@@ -5,6 +5,16 @@ All notable changes to the WaveMAX Laundry Affiliate Program will be documented 
 ## [Unreleased]
 
 ### Added
+- DocuSign W-9 Integration
+  - Electronic W-9 signing with DocuSign eSignature API
+  - Pre-filled forms with affiliate information
+  - Embedded signing experience in dashboard
+  - Real-time webhook status updates
+  - JWT authentication for secure API access
+  - Automatic document retrieval upon completion
+  - Mobile-friendly signing on any device
+  - Webhook signature verification
+  - Fallback to manual upload option
 - W-9 Tax Compliance System
   - Secure W-9 document upload for affiliates
   - AES-256-GCM encryption for document storage

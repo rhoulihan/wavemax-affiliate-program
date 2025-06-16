@@ -24,7 +24,7 @@ The WaveMAX Affiliate Program enables individuals to register as affiliates, onb
 - **Language Preference**: Automatic browser language detection and personalized email communications
 - **Enhanced UI Components**: Custom swirl spinner with elliptical orbit animations for loading states
 - **Advanced Address Validation**: Intelligent geocoding with manual confirmation and reverse geocoding display
-- **W-9 Tax Compliance**: Secure document collection and verification system for affiliate tax compliance
+- **W-9 Tax Compliance**: DocuSign-integrated electronic W-9 collection with automated verification workflow
 - **QuickBooks Integration**: Export vendors, payment summaries, and commission details for accounting
 
 ## Documentation
@@ -392,35 +392,59 @@ If URL parameters are not being passed to the iframe:
 
 ### W-9 Collection System
 
-The WaveMAX Affiliate Program includes a comprehensive W-9 collection and verification system to ensure tax compliance:
+The WaveMAX Affiliate Program includes a comprehensive W-9 collection and verification system with DocuSign integration:
 
 #### Features
-- **Secure Document Upload**: Affiliates can upload W-9 forms through their dashboard
-- **Encryption at Rest**: All W-9 documents are encrypted using AES-256-GCM
-- **Manual Verification Workflow**: Administrators review and verify W-9 documents
+- **DocuSign eSignature Integration**: Electronic W-9 completion with legally binding signatures
+- **Automated Workflow**: Direct signing experience with pre-filled affiliate information
+- **Real-time Status Tracking**: Monitor signing progress through DocuSign webhooks
+- **Mobile-Friendly**: Complete W-9 forms on any device
+- **Secure Document Storage**: Signed documents stored with AES-256-GCM encryption
+- **Manual Verification Option**: Fallback to traditional upload for special cases
 - **Payment Hold System**: Affiliates cannot receive payments until W-9 is verified
 - **Automatic Expiry**: W-9 documents expire after 3 years with reminders
 - **Data Retention**: Automatic deletion after 7 years per IRS requirements
+- **Audit Trail**: Complete signing history with IP addresses and timestamps
 
 #### W-9 API Endpoints
 ```
-POST   /api/v1/w9/upload                     - Affiliate uploads W-9 document
+# DocuSign Integration
+POST   /api/v1/w9/initiate-signing           - Start DocuSign W-9 signing session
+POST   /api/v1/w9/webhook/docusign           - Handle DocuSign webhook events
+POST   /api/v1/w9/cancel-signing             - Cancel in-progress signing
 GET    /api/v1/w9/status                     - Get affiliate's W-9 status
+
+# Manual Upload (Fallback)
+POST   /api/v1/w9/upload                     - Manual W-9 document upload
 GET    /api/v1/w9/download                   - Download affiliate's own W-9
+
+# Administrative
 GET    /api/v1/w9/admin/pending              - List pending W-9 documents (admin)
 POST   /api/v1/w9/admin/:affiliateId/verify  - Verify W-9 document (admin)
 POST   /api/v1/w9/admin/:affiliateId/reject  - Reject W-9 document (admin)
+POST   /api/v1/w9/admin/:affiliateId/resend  - Resend DocuSign request (admin)
 GET    /api/v1/w9/admin/:affiliateId/download - Download any W-9 (admin)
 GET    /api/v1/w9/admin/audit-logs           - View W-9 audit logs (admin)
 ```
 
 #### W-9 Workflow
-1. Affiliate receives W-9 instructions in welcome email
-2. Affiliate uploads W-9 PDF through dashboard
+
+**DocuSign Electronic Signing (Primary)**
+1. Affiliate clicks "Complete W9 Form with DocuSign" in dashboard
+2. Pre-filled W-9 form opens with affiliate information
+3. Affiliate completes and signs electronically
+4. System automatically receives signed document via webhook
+5. Administrator reviews and verifies tax information
+6. Affiliate can now receive commission payments
+
+**Manual Upload (Fallback)**
+1. Affiliate downloads blank W-9 form
+2. Completes and uploads signed PDF through dashboard
 3. Administrator reviews document in W-9 Review tab
 4. Administrator verifies with tax ID and QuickBooks vendor ID
 5. Affiliate can now receive commission payments
-6. System tracks all actions for audit compliance
+
+All workflows include comprehensive audit logging for compliance.
 
 ### QuickBooks Integration
 
@@ -670,6 +694,11 @@ The application supports multiple email providers for sending notifications:
    - Development/testing mode
    - Logs emails to console instead of sending
 
+5. **Brevo** (`EMAIL_PROVIDER=brevo`)
+   - Modern email API service (formerly Sendinblue)
+   - High deliverability rates and advanced analytics
+   - API-based delivery (no SMTP configuration needed)
+
 ### Exchange Server Setup Example
 
 For Office 365:
@@ -693,6 +722,21 @@ EXCHANGE_FROM_EMAIL=noreply@yourdomain.com
 # For self-signed certificates in dev/test environments only
 EXCHANGE_REJECT_UNAUTHORIZED=false
 ```
+
+### Brevo Setup Example
+
+```env
+EMAIL_PROVIDER=brevo
+BREVO_API_KEY=your-brevo-api-key
+BREVO_FROM_EMAIL=noreply@yourdomain.com
+BREVO_FROM_NAME=Your Company Name
+```
+
+To get your Brevo API key:
+1. Sign up for a Brevo account at https://www.brevo.com
+2. Navigate to SMTP & API → API Keys
+3. Create a new API key with "Send emails" permission
+4. Add your sending domain and verify it for better deliverability
 
 ## Local Development Setup
 
@@ -835,6 +879,13 @@ WaveMAX uses Paygistix's secure hosted payment form for processing customer paym
 | `EXCHANGE_PASS` | Exchange password | Yes |
 | `EXCHANGE_FROM_EMAIL` | Sender email address | No |
 | `EXCHANGE_REJECT_UNAUTHORIZED` | Validate SSL certificates (default: true) | No |
+
+#### Brevo Configuration (when EMAIL_PROVIDER=brevo)
+| Variable | Description | Required |
+|----------|-------------|----------|
+| `BREVO_API_KEY` | Brevo API key with send permissions | Yes |
+| `BREVO_FROM_EMAIL` | Sender email address | Yes |
+| `BREVO_FROM_NAME` | Sender display name | No |
 
 ## Social Media Authentication Configuration
 
