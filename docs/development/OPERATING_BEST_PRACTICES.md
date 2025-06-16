@@ -302,7 +302,7 @@ When the command "run coverage test" is issued, the system performs the followin
    <p>Hello <span id="userName">Guest</span></p>
    ```
 
-3. **For detailed i18n guidelines**: See `i18n-best-practices.md`
+3. **For detailed i18n guidelines**: See [`../guides/i18n-best-practices.md`](../guides/i18n-best-practices.md)
 
 ## Legal and Branding Guidelines
 
