@@ -1,5 +1,17 @@
 # Recent Major Updates
 
+## DocuSign W-9 Integration (June 2025)
+- **Electronic W-9 Signatures**: Complete DocuSign integration for tax form collection
+  - One-click W-9 completion with pre-filled affiliate information
+  - Embedded signing experience within affiliate dashboard
+  - Real-time status tracking via DocuSign webhooks
+  - Mobile-friendly signing on any device
+  - Automatic document retrieval upon completion
+  - Fallback to manual upload for special cases
+  - Complete audit trail with IP addresses and timestamps
+  - JWT authentication for secure API access
+  - Webhook signature verification for security
+
 ## W-9 Tax Compliance & QuickBooks Integration (June 2025)
 - **W-9 Collection System**: Complete tax compliance solution for affiliates
   - Secure PDF upload with file size and type validation

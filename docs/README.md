@@ -25,11 +25,13 @@ Step-by-step guides for integrating and using the system:
 - [Mobile Parent Integration](./guides/mobile-parent-integration-guide.md) - Mobile-responsive iframe setup
 - [Embed Test Pages Guide](./guides/embed-test-pages-guide.md) - Testing embedded implementations
 - [i18n Best Practices](./guides/i18n-best-practices.md) - Internationalization guidelines
+- [DocuSign W9 Migration Guide](./guides/docusign-w9-migration-guide.md) - Migrating to electronic W-9 signatures
 
 ### 🛠️ [Development](./development/)
 Development tools, best practices, and ongoing work:
 - [Operating Best Practices](./development/OPERATING_BEST_PRACTICES.md) - Known issues and workarounds
 - [Backlog](./development/BACKLOG.md) - Pending work items and future features
+- [DocuSign W9 Integration Plan](./development/docusign-w9-integration-plan.md) - Technical plan for DocuSign integration
 - [Code Audit Report](./development/CODE_AUDIT_REPORT.md) - Code quality analysis
 - [Test Coverage Summary](./development/test-coverage-final-summary-2025-01-07.md) - Test coverage analysis
 - [Unused Functions Report](./development/unused-functions-report.md) - Dead code analysis
@@ -71,6 +73,7 @@ For testing information, see:
 
 Security-related documentation is integrated throughout:
 - W-9 document encryption details in the main README
+- DocuSign W-9 integration security in [DocuSign Integration Plan](./development/docusign-w9-integration-plan.md)
 - CSRF protection in [Operating Best Practices](./development/OPERATING_BEST_PRACTICES.md)
 - Authentication flows in the API documentation section of the main README
 
