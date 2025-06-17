@@ -463,6 +463,8 @@
         "uploadingW9": "Cargando documento W-9...",
         "w9UploadSuccess": "¡W-9 cargado exitosamente! Será revisado por nuestro equipo.",
         "w9Note": "<strong>Nota:</strong> Los formularios W-9 son requeridos por el IRS para propósitos de reporte fiscal. Los pagos no pueden ser procesados hasta que su W-9 sea verificado. Descargue el formulario oficial del sitio web del IRS, complételo y cárguelo aquí.",
+        "w9NoteLabel": "Nota:",
+        "w9NoteText": "Los formularios W-9 son requeridos por el IRS para propósitos de reporte fiscal. Los pagos no pueden ser procesados hasta que su W-9 sea verificado. Descargue el formulario oficial del sitio web del IRS, complételo y cárguelo aquí.",
         "w9Required": "¡W-9 Requerido!",
         "w9RequiredMessage": "Debe enviar un formulario W-9 antes de que se puedan procesar los pagos.",
         "w9UnderReview": "W-9 Bajo Revisión",

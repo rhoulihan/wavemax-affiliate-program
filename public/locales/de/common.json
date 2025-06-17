@@ -463,6 +463,8 @@
         "uploadingW9": "W-9 Dokument wird hochgeladen...",
         "w9UploadSuccess": "W-9 erfolgreich hochgeladen! Es wird von unserem Team überprüft.",
         "w9Note": "<strong>Hinweis:</strong> W-9 Formulare werden vom IRS für Steuermeldezwecke benötigt. Zahlungen können erst nach Verifizierung Ihres W-9 verarbeitet werden. Laden Sie das offizielle Formular von der IRS-Website herunter, füllen Sie es aus und laden Sie es hier hoch.",
+        "w9NoteLabel": "Hinweis:",
+        "w9NoteText": "W-9 Formulare werden vom IRS für Steuermeldezwecke benötigt. Zahlungen können erst nach Verifizierung Ihres W-9 verarbeitet werden. Laden Sie das offizielle Formular von der IRS-Website herunter, füllen Sie es aus und laden Sie es hier hoch.",
         "w9Required": "W-9 Erforderlich!",
         "w9RequiredMessage": "Sie müssen ein W-9 Formular einreichen, bevor Zahlungen verarbeitet werden können.",
         "w9UnderReview": "W-9 Wird Überprüft",

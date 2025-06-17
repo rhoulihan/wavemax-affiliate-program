@@ -70,14 +70,25 @@
         }
         .button {
             display: inline-block;
-            background-color: #3b82f6;
-            color: #ffffff;
+            background-color: #ffffff !important;
+            color: #ffffff !important;
             padding: 12px 30px;
-            text-decoration: none;
+            text-decoration: none !important;
             border-radius: 6px;
             font-weight: bold;
             margin: 20px 0;
         }
+    a.button {
+      color: #ffffff !important;
+      text-decoration: none !important;
+    }
+    a.button:link,
+    a.button:visited,
+    a.button:hover,
+    a.button:active {
+      color: #ffffff !important;
+      text-decoration: none !important;
+    }
         .footer {
             background-color: #f8f9fa;
             padding: 20px;
@@ -139,7 +150,7 @@
             [NEXT_STEPS_LIST]
             
             <center>
-                <a href="[DASHBOARD_URL]" class="button">[VIEW_CUSTOMER_BUTTON]</a>
+                <a href="[DASHBOARD_URL]" class="button" style="display: inline-block; background-color: #1e3a8a !important; color: #ffffff !important; padding: 12px 20px; text-decoration: none !important; border-radius: 4px; font-weight: bold; text-align: center;">[VIEW_CUSTOMER_BUTTON]</a>
             </center>
             
             <p>[REMINDER_MESSAGE]</p>

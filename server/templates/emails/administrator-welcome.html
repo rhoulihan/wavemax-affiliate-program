@@ -23,7 +23,7 @@
         }
         .header {
             background: linear-gradient(135deg, #4A90E2 0%, #1e3a8a 100%);
-            color: white;
+            color: #ffffff !important;
             padding: 40px 30px;
             text-align: center;
         }
@@ -86,14 +86,25 @@
             display: inline-block;
             padding: 16px 40px;
             background: linear-gradient(135deg, #4A90E2 0%, #1e3a8a 100%);
-            color: white;
-            text-decoration: none;
+            color: #ffffff !important;
+            text-decoration: none !important;
             border-radius: 8px;
             font-size: 18px;
             font-weight: 600;
             box-shadow: 0 4px 15px rgba(74, 144, 226, 0.3);
             transition: all 0.3s ease;
         }
+    a.button {
+      color: #ffffff !important;
+      text-decoration: none !important;
+    }
+    a.button:link,
+    a.button:visited,
+    a.button:hover,
+    a.button:active {
+      color: #ffffff !important;
+      text-decoration: none !important;
+    }
         .button:hover {
             transform: translateY(-2px);
             box-shadow: 0 6px 20px rgba(74, 144, 226, 0.4);
@@ -159,7 +170,7 @@
             </div>
             
             <div class="button-container">
-                <a href="[LOGIN_URL]" class="button">[ACCESS_BUTTON]</a>
+                <a href="[LOGIN_URL]" class="button" style="display: inline-block; background-color: #1e3a8a !important; color: #ffffff !important; padding: 12px 20px; text-decoration: none !important; border-radius: 4px; font-weight: bold; text-align: center;">[ACCESS_BUTTON]</a>
             </div>
             
             <div class="security-note">

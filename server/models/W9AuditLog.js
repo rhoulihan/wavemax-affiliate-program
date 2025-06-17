@@ -18,6 +18,7 @@ const w9AuditLogSchema = new mongoose.Schema({
         type: String,
         required: true,
         enum: [
+            'initiated',           // DocuSign W-9 signing initiated
             'upload_attempt',
             'upload_success',
             'upload_failed',

@@ -8,25 +8,25 @@ describe('W9AuditLog Model Unit Tests', () => {
     // Create a mock audit log entry
     mockLogEntry = new W9AuditLog({
       action: 'upload_success',
-      userInfo: {
+      performedBy: {
         userId: 'user123',
         userType: 'affiliate',
-        userName: 'John Doe'
+        userName: 'John Doe',
+        ipAddress: '192.168.1.1',
+        userAgent: 'Mozilla/5.0'
       },
-      targetInfo: {
+      target: {
         affiliateId: 'AFF-123',
         documentId: 'W9DOC-123'
-      },
-      metadata: {
-        ipAddress: '192.168.1.1',
-        userAgent: 'Mozilla/5.0',
-        requestId: 'req-123',
-        sessionId: 'session-123'
       },
       details: {
         success: true,
         fileSize: 1024000,
         fileName: 'w9-form.pdf'
+      },
+      metadata: {
+        requestId: 'req-123',
+        sessionId: 'session-123'
       }
     });
   });
@@ -36,12 +36,12 @@ describe('W9AuditLog Model Unit Tests', () => {
       const error = mockLogEntry.validateSync();
       expect(error).toBeUndefined();
       expect(mockLogEntry.action).toBe('upload_success');
-      expect(mockLogEntry.userInfo.userId).toBe('user123');
+      expect(mockLogEntry.performedBy.userId).toBe('user123');
     });
 
     it('should require action field', () => {
       const logEntry = new W9AuditLog({
-        userInfo: { userId: 'user123', userType: 'affiliate' }
+        performedBy: { userId: 'user123', userType: 'affiliate' }
       });
       const error = logEntry.validateSync();
       expect(error).toBeDefined();
@@ -61,11 +61,12 @@ describe('W9AuditLog Model Unit Tests', () => {
 
     it('should accept all valid action types', () => {
       const validActions = [
-        'upload_attempt', 'upload_success', 'upload_failure',
+        'upload_attempt', 'upload_success', 'upload_failed',
         'download_affiliate', 'download_admin',
-        'verify_attempt', 'verify_success',
-        'reject', 'expire', 'delete',
-        'quickbooks_export', 'legal_hold'
+        'view_attempt', 'verify_attempt', 'verify_success',
+        'reject', 'delete', 'expire',
+        'encryption_failed', 'decryption_failed',
+        'access_denied', 'quickbooks_export'
       ];
       
       validActions.forEach(action => {
@@ -80,45 +81,40 @@ describe('W9AuditLog Model Unit Tests', () => {
       expect(mockLogEntry.timestamp).toBeInstanceOf(Date);
     });
 
-    it('should set isArchived to false by default', () => {
-      expect(mockLogEntry.isArchived).toBe(false);
+    it('should set archived to false by default', () => {
+      expect(mockLogEntry.archived).toBe(false);
     });
   });
 
   describe('User Info Validation', () => {
     it('should validate userType enum', () => {
-      const validUserTypes = ['affiliate', 'administrator', 'operator', 'system'];
+      const validUserTypes = ['affiliate', 'administrator', 'system'];
       
       validUserTypes.forEach(userType => {
-        mockLogEntry.userInfo.userType = userType;
+        mockLogEntry.performedBy.userType = userType;
         const error = mockLogEntry.validateSync();
         expect(error).toBeUndefined();
       });
     });
 
     it('should reject invalid userType', () => {
-      mockLogEntry.userInfo.userType = 'invalid_type';
+      mockLogEntry.performedBy.userType = 'invalid_type';
       const error = mockLogEntry.validateSync();
       expect(error).toBeDefined();
-      expect(error.errors['userInfo.userType']).toBeDefined();
+      expect(error.errors['performedBy.userType']).toBeDefined();
     });
   });
 
   describe('Static Methods', () => {
-    beforeEach(() => {
-      // Mock the create method
-      W9AuditLog.create = jest.fn();
-    });
-
     describe('logAction()', () => {
       it('should create audit log entry with all parameters', async () => {
         const action = 'upload_success';
-        const userInfo = {
+        const performedBy = {
           userId: 'user123',
           userType: 'affiliate',
           userName: 'John Doe'
         };
-        const targetInfo = {
+        const target = {
           affiliateId: 'AFF-123',
           documentId: 'W9DOC-123'
         };
@@ -126,45 +122,41 @@ describe('W9AuditLog Model Unit Tests', () => {
           success: true,
           fileSize: 1024000
         };
-        const metadata = {
-          ipAddress: '192.168.1.1',
-          userAgent: 'Mozilla/5.0'
+        const security = {
+          sessionId: 'session-123',
+          csrfTokenUsed: true
         };
 
-        const mockCreatedLog = {
-          _id: 'log123',
+        // Mock the save method on prototype
+        const saveSpy = jest.spyOn(W9AuditLog.prototype, 'save').mockResolvedValue({
           action,
-          userInfo,
-          targetInfo,
+          performedBy,
+          target,
           details,
-          metadata,
+          security,
           timestamp: new Date()
-        };
-
-        W9AuditLog.create.mockResolvedValue(mockCreatedLog);
+        });
 
         const result = await W9AuditLog.logAction(
           action,
-          userInfo,
-          targetInfo,
+          performedBy,
+          target,
           details,
-          metadata
+          security
         );
 
-        expect(W9AuditLog.create).toHaveBeenCalledWith({
-          action,
-          userInfo,
-          targetInfo,
-          details,
-          metadata,
-          timestamp: expect.any(Date)
-        });
-        expect(result).toEqual(mockCreatedLog);
+        expect(saveSpy).toHaveBeenCalled();
+        expect(result).toBeDefined();
+        expect(result.action).toBe(action);
+        
+        saveSpy.mockRestore();
       });
 
       it('should handle logging errors gracefully', async () => {
         const error = new Error('Database error');
-        W9AuditLog.create.mockRejectedValue(error);
+        
+        // Mock save to throw error
+        const saveSpy = jest.spyOn(W9AuditLog.prototype, 'save').mockRejectedValue(error);
         
         // Mock console.error to prevent test output pollution
         const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
@@ -175,12 +167,17 @@ describe('W9AuditLog Model Unit Tests', () => {
         );
 
         expect(consoleErrorSpy).toHaveBeenCalledWith(
-          'Failed to create audit log:',
-          error
+          'Failed to create W9 audit log:',
+          expect.objectContaining({
+            action: 'upload_attempt',
+            performedBy: 'user123',
+            error: 'Database error'
+          })
         );
         expect(result).toBeNull();
         
         consoleErrorSpy.mockRestore();
+        saveSpy.mockRestore();
       });
     });
   });
@@ -201,7 +198,7 @@ describe('W9AuditLog Model Unit Tests', () => {
       
       // Check for composite index
       const hasCompositeIndex = indexes.some(index => 
-        index[0]['targetInfo.affiliateId'] === 1 && 
+        index[0]['target.affiliateId'] === 1 && 
         index[0].timestamp === -1
       );
       
@@ -213,12 +210,12 @@ describe('W9AuditLog Model Unit Tests', () => {
 
   describe('Archive Flag', () => {
     it('should track archived status', () => {
-      mockLogEntry.isArchived = true;
+      mockLogEntry.archived = true;
       mockLogEntry.archivedAt = new Date();
       
       const error = mockLogEntry.validateSync();
       expect(error).toBeUndefined();
-      expect(mockLogEntry.isArchived).toBe(true);
+      expect(mockLogEntry.archived).toBe(true);
       expect(mockLogEntry.archivedAt).toBeDefined();
     });
   });
@@ -280,7 +277,7 @@ describe('W9AuditLog Model Unit Tests', () => {
   describe('System Actions', () => {
     it('should allow system user type for automated actions', () => {
       mockLogEntry.action = 'expire';
-      mockLogEntry.userInfo = {
+      mockLogEntry.performedBy = {
         userId: 'system',
         userType: 'system',
         userName: 'Data Retention Service'
@@ -292,7 +289,7 @@ describe('W9AuditLog Model Unit Tests', () => {
       
       const error = mockLogEntry.validateSync();
       expect(error).toBeUndefined();
-      expect(mockLogEntry.userInfo.userType).toBe('system');
+      expect(mockLogEntry.performedBy.userType).toBe('system');
     });
   });
 });

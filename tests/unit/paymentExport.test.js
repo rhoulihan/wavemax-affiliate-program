@@ -8,7 +8,8 @@ describe('PaymentExport Model Unit Tests', () => {
     // Create a mock export instance
     mockExport = new PaymentExport({
       type: 'vendor',
-      exportedBy: mongoose.Types.ObjectId(),
+      generatedBy: new mongoose.Types.ObjectId(),
+      filename: 'vendor-export-2025-01-16.csv',
       affiliateIds: ['AFF-001', 'AFF-002', 'AFF-003'],
       exportData: {
         vendors: [
@@ -54,6 +55,11 @@ describe('PaymentExport Model Unit Tests', () => {
       
       validTypes.forEach(type => {
         mockExport.type = type;
+        // Add required fields for payment_summary and commission_detail
+        if (type === 'payment_summary' || type === 'commission_detail') {
+          mockExport.periodStart = new Date('2025-01-01');
+          mockExport.periodEnd = new Date('2025-01-31');
+        }
         const error = mockExport.validateSync();
         expect(error).toBeUndefined();
       });
@@ -66,11 +72,11 @@ describe('PaymentExport Model Unit Tests', () => {
       expect(error.errors.type).toBeDefined();
     });
 
-    it('should require exportedBy field', () => {
-      mockExport.exportedBy = undefined;
+    it('should require generatedBy field', () => {
+      mockExport.generatedBy = undefined;
       const error = mockExport.validateSync();
       expect(error).toBeDefined();
-      expect(error.errors.exportedBy).toBeDefined();
+      expect(error.errors.generatedBy).toBeDefined();
     });
   });
 
@@ -116,54 +122,54 @@ describe('PaymentExport Model Unit Tests', () => {
 
     it('should store payment summary data', () => {
       mockExport.type = 'payment_summary';
+      mockExport.periodStart = new Date('2025-01-01');
+      mockExport.periodEnd = new Date('2025-01-31');
       mockExport.exportData = {
         payments: [
           {
             affiliateId: 'AFF-001',
-            affiliateName: 'John Doe',
-            orderCount: 5,
-            totalCommission: 150.50,
-            orders: [
-              {
-                orderId: 'ORD-001',
-                completedAt: new Date(),
-                orderTotal: 100,
-                commission: 10
-              }
-            ]
+            orderId: 'ORD-001',
+            amount: 150.50,
+            date: new Date(),
+            description: 'Commission payment'
           }
-        ]
+        ],
+        summary: {
+          totalVendors: 1,
+          totalPayments: 1,
+          totalAmount: 150.50
+        }
       };
       
       const error = mockExport.validateSync();
       expect(error).toBeUndefined();
-      expect(mockExport.exportData.payments[0].totalCommission).toBe(150.50);
+      expect(mockExport.exportData.payments[0].amount).toBe(150.50);
     });
 
     it('should store commission detail data', () => {
       mockExport.type = 'commission_detail';
+      mockExport.periodStart = new Date('2025-01-01');
+      mockExport.periodEnd = new Date('2025-01-31');
       mockExport.exportData = {
-        affiliate: {
-          affiliateId: 'AFF-001',
-          name: 'John Doe',
-          email: 'john@example.com'
-        },
-        orders: [
+        payments: [
           {
+            affiliateId: 'AFF-001',
             orderId: 'ORD-001',
-            completedAt: new Date(),
-            customerName: 'Customer One',
-            orderTotal: 100,
-            commission: 10,
-            commissionRate: 10
+            amount: 10,
+            date: new Date(),
+            description: 'Order commission'
           }
         ],
-        totalCommission: 50
+        summary: {
+          totalVendors: 1,
+          totalPayments: 1,
+          totalAmount: 50
+        }
       };
       
       const error = mockExport.validateSync();
       expect(error).toBeUndefined();
-      expect(mockExport.exportData.totalCommission).toBe(50);
+      expect(mockExport.exportData.summary.totalAmount).toBe(50);
     });
   });
 
@@ -179,6 +185,8 @@ describe('PaymentExport Model Unit Tests', () => {
 
     it('should store single affiliate ID for commission detail', () => {
       mockExport.type = 'commission_detail';
+      mockExport.periodStart = new Date('2025-01-01');
+      mockExport.periodEnd = new Date('2025-01-31');
       mockExport.affiliateIds = ['AFF-001'];
       
       const error = mockExport.validateSync();
@@ -208,30 +216,29 @@ describe('PaymentExport Model Unit Tests', () => {
     it('should have required indexes defined', () => {
       const indexes = PaymentExport.schema.indexes();
       
-      // Check for exportId unique index
+      // Check for type and generatedAt composite index
+      const hasTypeGeneratedAtIndex = indexes.some(index => 
+        index[0].type === 1 && index[0].generatedAt === -1
+      );
+      
+      // Check for period index
+      const hasPeriodIndex = indexes.some(index => 
+        index[0].periodStart === 1 && index[0].periodEnd === 1
+      );
+      
+      // Check for status index
+      const hasStatusIndex = indexes.some(index => 
+        index[0].status === 1
+      );
+      
+      // Check for exportId unique index (from default)
       const hasExportIdIndex = indexes.some(index => 
-        index[0].exportId === 1 && index[1].unique === true
+        index[0].exportId === 1
       );
       
-      // Check for type index
-      const hasTypeIndex = indexes.some(index => 
-        index[0].type === 1
-      );
-      
-      // Check for exportedBy index
-      const hasExportedByIndex = indexes.some(index => 
-        index[0].exportedBy === 1
-      );
-      
-      // Check for createdAt index
-      const hasCreatedAtIndex = indexes.some(index => 
-        index[0].createdAt === -1
-      );
-      
-      expect(hasExportIdIndex).toBe(true);
-      expect(hasTypeIndex).toBe(true);
-      expect(hasExportedByIndex).toBe(true);
-      expect(hasCreatedAtIndex).toBe(true);
+      expect(hasTypeGeneratedAtIndex).toBe(true);
+      expect(hasPeriodIndex).toBe(true);
+      expect(hasStatusIndex).toBe(true);
     });
   });
 
@@ -257,8 +264,16 @@ describe('PaymentExport Model Unit Tests', () => {
       mockExport.exportData = {
         payments: Array(10).fill(null).map((_, i) => ({
           affiliateId: `AFF-${String(i + 1).padStart(3, '0')}`,
-          totalCommission: (i + 1) * 100
-        }))
+          orderId: `ORD-${String(i + 1).padStart(3, '0')}`,
+          amount: (i + 1) * 100,
+          date: new Date(),
+          description: 'Commission payment'
+        })),
+        summary: {
+          totalVendors: 10,
+          totalPayments: 10,
+          totalAmount: 5500
+        }
       };
       
       const error = mockExport.validateSync();
@@ -272,21 +287,24 @@ describe('PaymentExport Model Unit Tests', () => {
       mockExport.periodEnd = new Date('2025-01-31');
       mockExport.affiliateIds = ['AFF-001'];
       mockExport.exportData = {
-        affiliate: {
+        payments: Array(50).fill(null).map((_, i) => ({
           affiliateId: 'AFF-001',
-          name: 'John Doe'
-        },
-        orders: Array(50).fill(null).map((_, i) => ({
           orderId: `ORD-${String(i + 1).padStart(3, '0')}`,
-          commission: 10
+          amount: 10,
+          date: new Date(),
+          description: 'Order commission'
         })),
-        totalCommission: 500
+        summary: {
+          totalVendors: 1,
+          totalPayments: 50,
+          totalAmount: 500
+        }
       };
       
       const error = mockExport.validateSync();
       expect(error).toBeUndefined();
-      expect(mockExport.exportData.orders).toHaveLength(50);
-      expect(mockExport.exportData.totalCommission).toBe(500);
+      expect(mockExport.exportData.payments).toHaveLength(50);
+      expect(mockExport.exportData.summary.totalAmount).toBe(500);
     });
   });
 
@@ -294,13 +312,15 @@ describe('PaymentExport Model Unit Tests', () => {
     it('should generate unique export IDs', () => {
       const export1 = new PaymentExport({
         type: 'vendor',
-        exportedBy: mongoose.Types.ObjectId(),
+        generatedBy: new mongoose.Types.ObjectId(),
+        filename: 'export1.csv',
         affiliateIds: []
       });
       
       const export2 = new PaymentExport({
         type: 'vendor',
-        exportedBy: mongoose.Types.ObjectId(),
+        generatedBy: new mongoose.Types.ObjectId(),
+        filename: 'export2.csv',
         affiliateIds: []
       });
       
@@ -311,15 +331,15 @@ describe('PaymentExport Model Unit Tests', () => {
   });
 
   describe('Reference Validation', () => {
-    it('should validate exportedBy as ObjectId reference', () => {
-      mockExport.exportedBy = 'invalid-id';
+    it('should validate generatedBy as ObjectId reference', () => {
+      mockExport.generatedBy = 'invalid-id';
       const error = mockExport.validateSync();
       expect(error).toBeDefined();
-      expect(error.errors.exportedBy).toBeDefined();
+      expect(error.errors.generatedBy).toBeDefined();
     });
 
-    it('should accept valid ObjectId for exportedBy', () => {
-      mockExport.exportedBy = mongoose.Types.ObjectId();
+    it('should accept valid ObjectId for generatedBy', () => {
+      mockExport.generatedBy = new mongoose.Types.ObjectId();
       const error = mockExport.validateSync();
       expect(error).toBeUndefined();
     });

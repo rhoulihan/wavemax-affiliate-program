@@ -22,8 +22,10 @@ async function authenticatedFetch(url, options = {}) {
   const fullUrl = url.startsWith('http') ? url : `${baseUrl}${url}`;
   
   // Add authorization header
+  const token = localStorage.getItem('affiliateToken');
+  console.log('Auth token from localStorage:', token ? 'Token exists' : 'No token found');
   const headers = {
-    'Authorization': `Bearer ${localStorage.getItem('affiliateToken')}`,
+    'Authorization': `Bearer ${token}`,
     ...options.headers
   };
   
@@ -96,6 +98,9 @@ function initializeAffiliateDashboard() {
   // Check authentication
   const token = localStorage.getItem('affiliateToken');
   const currentAffiliate = JSON.parse(localStorage.getItem('currentAffiliate'));
+  
+  console.log('Dashboard initialization - Token:', token ? 'exists' : 'missing');
+  console.log('Dashboard initialization - Affiliate:', currentAffiliate ? currentAffiliate.affiliateId : 'missing');
 
   if (!token || !currentAffiliate) {
     // Redirect to login if not authenticated
@@ -1001,10 +1006,7 @@ async function loadSettingsData(affiliateId) {
           w9UploadForm.addEventListener('submit', handleW9Upload);
         }
         
-        const downloadW9Btn = document.getElementById('downloadSubmittedW9');
-        if (downloadW9Btn) {
-          downloadW9Btn.addEventListener('click', downloadSubmittedW9);
-        }
+        // Download button removed - using DocuSign for W9 management
 
         // Set landing page link
         const landingPageLinkField = document.getElementById('landingPageLink');
@@ -1314,7 +1316,7 @@ function updateW9Display() {
   const statusText = document.getElementById('w9StatusText');
   const statusAlert = document.getElementById('w9StatusAlert');
   const uploadForm = document.getElementById('w9UploadForm');
-  const downloadBtn = document.getElementById('downloadSubmittedW9');
+  // Download button removed - using DocuSign only
   
   if (statusText) {
     statusText.textContent = w9Status.statusDisplay;
@@ -1359,7 +1361,7 @@ function updateW9Display() {
           <span class="block sm:inline" data-i18n="affiliate.dashboard.settings.w9UnderReviewMessage">Your W-9 is being reviewed by our team.</span>
         </div>
       `;
-      if (downloadBtn) downloadBtn.style.display = 'inline-block';
+      // Download button removed - DocuSign handles document access
     } else if (w9Status.status === 'verified') {
       alertHTML = `
         <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative">
@@ -1367,7 +1369,7 @@ function updateW9Display() {
           <span class="block sm:inline" data-i18n="affiliate.dashboard.settings.w9VerifiedMessage">Your W-9 has been verified. You can receive payments.</span>
         </div>
       `;
-      if (downloadBtn) downloadBtn.style.display = 'inline-block';
+      // Download button removed - DocuSign handles document access
     } else if (w9Status.status === 'rejected') {
       alertHTML = `
         <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative">

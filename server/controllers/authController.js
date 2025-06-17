@@ -926,7 +926,7 @@ exports.handleSocialCallback = async (req, res) => {
       const token = generateToken({
         id: user._id,
         affiliateId: user.affiliateId,
-        userType: 'affiliate'
+        role: 'affiliate'
       });
       
       const refreshToken = await generateRefreshToken(

@@ -8,6 +8,7 @@ const { promisify } = require('util');
 const readFile = promisify(fs.readFile);
 const { SESClient } = require('@aws-sdk/client-ses');
 const { defaultProvider } = require('@aws-sdk/credential-provider-node');
+const SibApiV3Sdk = require('@getbrevo/brevo');
 
 // Create email transport
 const createTransport = () => {
@@ -56,6 +57,72 @@ const createTransport = () => {
       debug: process.env.NODE_ENV === 'development',
       logger: process.env.NODE_ENV === 'development'
     });
+  }
+  // Check if using Brevo
+  else if (process.env.EMAIL_PROVIDER === 'brevo') {
+    // Create a custom transport for Brevo API
+    const apiInstance = new SibApiV3Sdk.TransactionalEmailsApi();
+    const apiKey = apiInstance.authentications['api-key'];
+    apiKey.apiKey = process.env.BREVO_API_KEY;
+    
+    // Return a mock transport that uses Brevo API
+    return {
+      sendMail: async (mailOptions) => {
+        try {
+          // Parse the from field to extract name and email
+          let senderName = process.env.BREVO_FROM_NAME || 'WaveMAX Laundry';
+          let senderEmail = process.env.BREVO_FROM_EMAIL || 'no-reply@wavemax.promo';
+          
+          if (mailOptions.from) {
+            const fromMatch = mailOptions.from.match(/^"?([^"]*)"?\s*<(.+)>$/);
+            if (fromMatch) {
+              senderName = fromMatch[1] || senderName;
+              senderEmail = fromMatch[2] || senderEmail;
+            } else if (mailOptions.from.includes('@')) {
+              senderEmail = mailOptions.from;
+            }
+          }
+          
+          // Create the email object for Brevo
+          const sendSmtpEmail = new SibApiV3Sdk.SendSmtpEmail();
+          
+          sendSmtpEmail.subject = mailOptions.subject;
+          sendSmtpEmail.htmlContent = mailOptions.html;
+          sendSmtpEmail.sender = { 
+            name: senderName, 
+            email: senderEmail 
+          };
+          
+          // Handle multiple recipients
+          const recipients = Array.isArray(mailOptions.to) 
+            ? mailOptions.to 
+            : [mailOptions.to];
+            
+          sendSmtpEmail.to = recipients.map(email => ({ email: email.trim() }));
+          
+          // Add reply-to if specified
+          if (mailOptions.replyTo) {
+            sendSmtpEmail.replyTo = { email: mailOptions.replyTo };
+          }
+          
+          // Send the email via Brevo API
+          const response = await apiInstance.sendTransacEmail(sendSmtpEmail);
+          
+          console.log('Brevo email sent successfully:', response.messageId);
+          
+          // Return response in nodemailer format
+          return {
+            messageId: response.messageId,
+            accepted: recipients,
+            rejected: [],
+            response: `250 Message sent: ${response.messageId}`
+          };
+        } catch (error) {
+          console.error('Brevo email send error:', error);
+          throw error;
+        }
+      }
+    };
   } else {
     // Use standard SMTP transport for non-SES configuration
     return nodemailer.createTransport({
@@ -157,7 +224,9 @@ const sendEmail = async (to, subject, html) => {
         ? process.env.EMAIL_FROM || 'noreply@wavemax.promo'
         : process.env.EMAIL_PROVIDER === 'exchange'
           ? process.env.EXCHANGE_FROM_EMAIL || process.env.EXCHANGE_USER
-          : `"WaveMAX Laundry" <${process.env.EMAIL_USER}>`;
+          : process.env.EMAIL_PROVIDER === 'brevo'
+            ? `"${process.env.BREVO_FROM_NAME || 'WaveMAX Laundry'}" <${process.env.BREVO_FROM_EMAIL || 'no-reply@wavemax.promo'}>`
+            : `"WaveMAX Laundry" <${process.env.EMAIL_USER}>`;
 
     const info = await transporter.sendMail({
       from,
@@ -227,7 +296,7 @@ exports.sendAffiliateWelcomeEmail = async (affiliate) => {
       es: {
         EMAIL_TITLE: 'Bienvenido al Programa de Afiliados de WaveMAX Laundry',
         EMAIL_HEADER: '¡Bienvenido al Programa de Afiliados!',
-        GREETING: 'Hola [first_name],',
+        GREETING: `Hola ${affiliate.firstName},`,
         WELCOME_MESSAGE: '¡Felicitaciones y bienvenido al Programa de Afiliados de WaveMAX Laundry! Estamos emocionados de que se una a nuestra red de socios afiliados.',
         READY_MESSAGE: 'Ahora está listo para comenzar a ofrecer servicios premium de lavado, secado y doblado de ropa, con recogida y entrega manejados por usted.',
         YOUR_INFO_TITLE: 'Su Información de Afiliado',
@@ -334,11 +403,17 @@ exports.sendAffiliateWelcomeEmail = async (affiliate) => {
       first_name: affiliate.firstName,
       last_name: affiliate.lastName,
       affiliate_id: affiliate.affiliateId,
+      AFFILIATE_ID: affiliate.affiliateId,
       registration_url: registrationUrl,
+      REGISTRATION_URL: registrationUrl,
       landing_page_url: landingPageUrl,
+      LANDING_PAGE_URL: landingPageUrl,
       login_url: `https://www.wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program?login=affiliate`,
+      LOGIN_URL: `https://www.wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program?login=affiliate`,
       dashboard_url: `https://www.wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program?login=affiliate`,
+      DASHBOARD_URL: `https://www.wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program?login=affiliate`,
       current_year: new Date().getFullYear(),
+      CURRENT_YEAR: new Date().getFullYear(),
       ...emailTranslations
     };
 
@@ -544,7 +619,7 @@ exports.sendAffiliateNewOrderEmail = async (affiliate, customer, order) => {
       es: {
         EMAIL_TITLE: 'Nuevo Pedido de Recogida de Lavandería',
         EMAIL_HEADER: 'Nuevo Pedido de Recogida de Lavandería',
-        GREETING: 'Hola [first_name],',
+        GREETING: `Hola ${affiliate.firstName},`,
         NEW_ORDER_MESSAGE: '¡Tiene un nuevo pedido de recogida de lavandería para procesar!',
         ORDER_DETAILS_TITLE: 'Detalles del Pedido',
         ORDER_ID_LABEL: 'ID del Pedido',
@@ -674,7 +749,7 @@ exports.sendAffiliateCommissionEmail = async (affiliate, order, customer) => {
       es: {
         EMAIL_TITLE: 'Comisión Ganada: Pedido Entregado',
         EMAIL_HEADER: '¡Comisión Ganada!',
-        GREETING: 'Hola [first_name],',
+        GREETING: `Hola ${affiliate.firstName},`,
         COMMISSION_MESSAGE: '¡Excelentes noticias! Ha ganado una comisión por un pedido completado.',
         COMMISSION_DETAILS_TITLE: 'Detalles de la Comisión',
         ORDER_ID_LABEL: 'ID del Pedido',
@@ -786,7 +861,7 @@ exports.sendAffiliateOrderCancellationEmail = async (affiliate, order, customer)
       es: {
         EMAIL_TITLE: 'Pedido Cancelado',
         EMAIL_HEADER: 'Pedido Cancelado',
-        GREETING: 'Hola [first_name],',
+        GREETING: `Hola ${affiliate.firstName},`,
         CANCELLATION_MESSAGE: 'Queremos informarle que un pedido ha sido cancelado.',
         CANCELLATION_DETAILS_TITLE: 'Detalles de Cancelación',
         ORDER_ID_LABEL: 'ID del Pedido',
@@ -931,7 +1006,7 @@ exports.sendCustomerWelcomeEmail = async (customer, affiliate, bagInfo = {}) => 
       en: {
         EMAIL_TITLE: 'Welcome to WaveMAX Laundry Service',
         EMAIL_HEADER: 'Welcome to WaveMAX Laundry!',
-        GREETING: 'Hi [first_name],',
+        GREETING: `Hi ${customer.firstName},`,
         WELCOME_MESSAGE: 'Welcome to WaveMAX Laundry Service! Your account has been successfully created and you\'re ready to enjoy premium wash, dry, fold laundry services.',
         YOUR_INFO_TITLE: 'Your Account Information',
         CUSTOMER_ID_LABEL: 'Customer ID',
@@ -971,7 +1046,7 @@ exports.sendCustomerWelcomeEmail = async (customer, affiliate, bagInfo = {}) => 
       es: {
         EMAIL_TITLE: 'Bienvenido al Servicio de Lavandería WaveMAX',
         EMAIL_HEADER: '¡Bienvenido a WaveMAX Laundry!',
-        GREETING: 'Hola [first_name],',
+        GREETING: `Hola ${affiliate.firstName},`,
         WELCOME_MESSAGE: '¡Bienvenido al Servicio de Lavandería WaveMAX! Su cuenta ha sido creada exitosamente y está listo para disfrutar de servicios premium de lavado, secado y doblado.',
         YOUR_INFO_TITLE: 'Información de Su Cuenta',
         CUSTOMER_ID_LABEL: 'ID de Cliente',
@@ -1011,7 +1086,7 @@ exports.sendCustomerWelcomeEmail = async (customer, affiliate, bagInfo = {}) => 
       pt: {
         EMAIL_TITLE: 'Bem-vindo ao Serviço de Lavanderia WaveMAX',
         EMAIL_HEADER: 'Bem-vindo ao WaveMAX Laundry!',
-        GREETING: 'Olá [first_name],',
+        GREETING: `Olá ${customer.firstName},`,
         WELCOME_MESSAGE: 'Bem-vindo ao Serviço de Lavanderia WaveMAX! Sua conta foi criada com sucesso e você está pronto para desfrutar de serviços premium de lavar, secar e dobrar roupas.',
         YOUR_INFO_TITLE: 'Informações da Sua Conta',
         CUSTOMER_ID_LABEL: 'ID do Cliente',
@@ -1051,7 +1126,7 @@ exports.sendCustomerWelcomeEmail = async (customer, affiliate, bagInfo = {}) => 
       de: {
         EMAIL_TITLE: 'Willkommen beim WaveMAX Wäscheservice',
         EMAIL_HEADER: 'Willkommen bei WaveMAX Laundry!',
-        GREETING: 'Hallo [first_name],',
+        GREETING: `Hallo ${customer.firstName},`,
         WELCOME_MESSAGE: 'Willkommen beim WaveMAX Wäscheservice! Ihr Konto wurde erfolgreich erstellt und Sie können nun Premium-Wasch-, Trocken- und Faltservice genießen.',
         YOUR_INFO_TITLE: 'Ihre Kontoinformationen',
         CUSTOMER_ID_LABEL: 'Kunden-ID',
