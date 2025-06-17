@@ -19,7 +19,7 @@
     }
     .header {
       background-color: #1e3a8a;
-      color: white;
+      color: #ffffff !important;
       padding: 20px;
       text-align: center;
     }
@@ -36,12 +36,24 @@
     }
     .button {
       display: inline-block;
-      background-color: #1e3a8a;
-      color: white;
+      background-color: #1e3a8a !important;
+      color: #ffffff !important;
       padding: 12px 20px;
-      text-decoration: none;
+      text-decoration: none !important;
       border-radius: 4px;
       font-weight: bold;
+      text-align: center;
+    }
+    a.button {
+      color: #ffffff !important;
+      text-decoration: none !important;
+    }
+    a.button:link,
+    a.button:visited,
+    a.button:hover,
+    a.button:active {
+      color: #ffffff !important;
+      text-decoration: none !important;
     }
     .footer {
       background-color: #f5f5f5;
@@ -178,7 +190,7 @@
       
       <div class="section" style="text-align: center;">
         <p>[DASHBOARD_MESSAGE]</p>
-        <a href="[LOGIN_URL]" class="button">[DASHBOARD_BUTTON]</a>
+        <a href="[LOGIN_URL]" class="button" style="display: inline-block; background-color: #1e3a8a !important; color: #ffffff !important; padding: 12px 20px; text-decoration: none !important; border-radius: 4px; font-weight: bold; text-align: center;">[DASHBOARD_BUTTON]</a>
       </div>
     </div>
     

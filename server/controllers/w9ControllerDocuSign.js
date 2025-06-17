@@ -8,6 +8,159 @@ const docusignService = require('../services/docusignService');
 const logger = require('../utils/logger');
 
 /**
+ * Check if DocuSign is authorized
+ */
+exports.checkDocuSignAuth = async (req, res) => {
+  try {
+    // Try to get access token
+    const hasValidToken = await docusignService.hasValidToken();
+    
+    if (hasValidToken) {
+      return res.json({ authorized: true });
+    }
+    
+    // Generate authorization URL
+    const authData = await docusignService.getAuthorizationUrl();
+    
+    res.json({
+      authorized: false,
+      authorizationUrl: authData.url,
+      state: authData.state
+    });
+  } catch (error) {
+    logger.error('Failed to check DocuSign auth:', error);
+    res.status(500).json({ 
+      error: 'Failed to check authorization status' 
+    });
+  }
+};
+
+/**
+ * Handle DocuSign OAuth callback
+ */
+exports.handleOAuthCallback = async (req, res) => {
+  try {
+    const { code, state } = req.query;
+    
+    if (!code) {
+      return res.status(400).json({ 
+        error: 'Authorization code not provided' 
+      });
+    }
+    
+    if (!state) {
+      return res.status(400).json({ 
+        error: 'State parameter not provided' 
+      });
+    }
+    
+    // Exchange code for token (passing state to retrieve PKCE verifier)
+    const tokenData = await docusignService.exchangeCodeForToken(code, state);
+    
+    logger.info('OAuth callback - token exchange completed', {
+      hasAccessToken: !!tokenData.access_token,
+      hasRefreshToken: !!tokenData.refresh_token
+    });
+    
+    // Return success page
+    res.send(`
+      <html>
+        <head>
+          <title>DocuSign Authorization</title>
+          <style>
+            body { font-family: Arial, sans-serif; text-align: center; padding: 50px; }
+            h2 { color: #28a745; }
+            p { color: #666; }
+          </style>
+        </head>
+        <body>
+          <h2>DocuSign Authorization Successful!</h2>
+          <p>You can now close this window and return to the application.</p>
+          <script>
+            console.log('OAuth callback page loaded');
+            console.log('window.opener:', window.opener);
+            
+            // Try multiple methods to notify the parent
+            try {
+              // Store auth success in localStorage for fallback
+              localStorage.setItem('docusign-auth-success', JSON.stringify({
+                success: true,
+                state: '${state}',
+                timestamp: Date.now()
+              }));
+              
+              // Method 1: Direct opener
+              if (window.opener && !window.opener.closed) {
+                console.log('Posting message to opener');
+                window.opener.postMessage({ 
+                  type: 'docusign-auth-success',
+                  state: '${state}'
+                }, 'https://wavemax.promo');
+                
+                // Also try wildcard
+                window.opener.postMessage({ 
+                  type: 'docusign-auth-success',
+                  state: '${state}'
+                }, '*');
+              }
+              
+              // Method 2: Try parent
+              if (window.parent && window.parent !== window) {
+                console.log('Posting message to parent');
+                window.parent.postMessage({ 
+                  type: 'docusign-auth-success',
+                  state: '${state}'
+                }, 'https://wavemax.promo');
+              }
+              
+              // Method 3: Try top window (for deeply nested iframes)
+              if (window.top && window.top !== window) {
+                console.log('Posting message to top');
+                window.top.postMessage({ 
+                  type: 'docusign-auth-success',
+                  state: '${state}'
+                }, 'https://wavemax.promo');
+              }
+              
+            } catch (e) {
+              console.error('Failed to post message:', e);
+            }
+            
+            // Close window after delay
+            setTimeout(() => {
+              console.log('Closing window');
+              window.close();
+            }, 2000);
+          </script>
+        </body>
+      </html>
+    `);
+  } catch (error) {
+    logger.error('OAuth callback error:', error);
+    res.status(500).send(`
+      <html>
+        <head>
+          <title>DocuSign Authorization Failed</title>
+          <style>
+            body { font-family: Arial, sans-serif; text-align: center; padding: 50px; }
+            h2 { color: #dc3545; }
+            p { color: #666; }
+            .error { background: #f8d7da; border: 1px solid #f5c6cb; color: #721c24; padding: 10px; border-radius: 4px; margin: 20px auto; max-width: 500px; }
+          </style>
+        </head>
+        <body>
+          <h2>Authorization Failed</h2>
+          <div class="error">
+            <p>Error: ${error.message}</p>
+          </div>
+          <p>Please close this window and try again.</p>
+        </body>
+      </html>
+    `);
+  }
+};
+
+/**
  * Initiate W9 signing with DocuSign
  * Replaces the manual upload process
  */
@@ -15,16 +168,29 @@ exports.initiateW9Signing = async (req, res) => {
   try {
     const affiliateId = req.user.affiliateId || req.user.id;
     
-    // Get affiliate details
-    const affiliate = await Affiliate.findById(affiliateId);
+    // Get affiliate details using affiliateId field
+    const affiliate = await Affiliate.findOne({ affiliateId: affiliateId });
     if (!affiliate) {
       return res.status(404).json({ 
         error: 'Affiliate not found' 
       });
     }
 
+    // Check if DocuSign is authorized
+    const hasToken = await docusignService.hasValidToken();
+    if (!hasToken) {
+      // Generate authorization URL
+      const authData = await docusignService.getAuthorizationUrl();
+      return res.status(401).json({
+        error: 'DocuSign authorization required',
+        authorizationUrl: authData.url,
+        state: authData.state
+      });
+    }
+
     // Check if there's an existing envelope in progress
-    if (affiliate.w9Information.docusignEnvelopeId && 
+    if (affiliate.w9Information && 
+        affiliate.w9Information.docusignEnvelopeId && 
         affiliate.w9Information.docusignStatus === 'sent') {
       // Get the existing signing URL
       try {
@@ -53,24 +219,37 @@ exports.initiateW9Signing = async (req, res) => {
       affiliate
     );
 
-    // Update affiliate with envelope ID
+    // Update affiliate with envelope ID - but don't change status yet
+    if (!affiliate.w9Information) {
+      affiliate.w9Information = {};
+    }
     affiliate.w9Information.docusignEnvelopeId = envelope.envelopeId;
     affiliate.w9Information.docusignStatus = 'sent';
-    affiliate.w9Information.status = 'pending_review';
-    affiliate.w9Information.submittedAt = new Date();
+    // Don't change the status until the document is actually signed
+    // affiliate.w9Information.status remains as 'not_submitted' or current status
+    affiliate.w9Information.docusignInitiatedAt = new Date();
     await affiliate.save();
 
     // Create audit log
     await W9AuditLog.create({
-      affiliateId: affiliate._id,
-      action: 'initiated',
-      performedBy: affiliate._id,
-      performerRole: 'affiliate',
+      action: 'upload_attempt',  // Using existing action enum value
+      performedBy: {
+        userId: affiliate._id.toString(),
+        userType: 'affiliate',
+        userEmail: affiliate.email,
+        userName: `${affiliate.firstName} ${affiliate.lastName}`,
+        ipAddress: req.ip,
+        userAgent: req.headers['user-agent']
+      },
+      target: {
+        affiliateId: affiliate.affiliateId,
+        affiliateName: `${affiliate.firstName} ${affiliate.lastName}`
+      },
       details: {
         method: 'docusign',
-        envelopeId: envelope.envelopeId
-      },
-      ipAddress: req.ip
+        envelopeId: envelope.envelopeId,
+        success: true
+      }
     });
 
     res.json({
@@ -79,9 +258,83 @@ exports.initiateW9Signing = async (req, res) => {
       message: 'W9 signing session created successfully'
     });
   } catch (error) {
+    console.error('Failed to initiate W9 signing:', error);
     logger.error('Failed to initiate W9 signing:', error);
     res.status(500).json({ 
-      error: 'Failed to create W9 signing session' 
+      error: 'Failed to create W9 signing session',
+      details: error.message
+    });
+  }
+};
+
+/**
+ * Get envelope status for polling
+ */
+exports.getEnvelopeStatus = async (req, res) => {
+  try {
+    const { envelopeId } = req.params;
+    const affiliateId = req.user.affiliateId || req.user.id;
+    
+    // Get affiliate to check if they own this envelope
+    const affiliate = await Affiliate.findOne({ affiliateId: affiliateId });
+    if (!affiliate) {
+      return res.status(404).json({ error: 'Affiliate not found' });
+    }
+    
+    // Check if w9Information exists
+    if (!affiliate.w9Information) {
+      console.log('No w9Information found for affiliate:', affiliateId);
+      return res.status(404).json({ error: 'No W9 information found' });
+    }
+    
+    // Verify this envelope belongs to the affiliate
+    if (affiliate.w9Information.docusignEnvelopeId !== envelopeId) {
+      console.log('Envelope mismatch:', {
+        expected: affiliate.w9Information.docusignEnvelopeId,
+        received: envelopeId
+      });
+      return res.status(403).json({ error: 'Unauthorized' });
+    }
+    
+    // Get envelope status from DocuSign
+    try {
+      const envelopeStatus = await docusignService.getEnvelopeStatus(envelopeId);
+      
+      // Update local status if it has changed
+      if (envelopeStatus.status !== affiliate.w9Information.docusignStatus) {
+        affiliate.w9Information.docusignStatus = envelopeStatus.status;
+        
+        // Update affiliate status based on DocuSign status
+        if (envelopeStatus.status === 'completed') {
+          affiliate.w9Information.status = 'pending_verification';
+          affiliate.w9Information.submittedAt = new Date();
+        } else if (envelopeStatus.status === 'declined' || envelopeStatus.status === 'voided') {
+          affiliate.w9Information.status = 'not_submitted';
+          // Clear the envelope ID if declined/voided
+          affiliate.w9Information.docusignEnvelopeId = null;
+          affiliate.w9Information.docusignStatus = null;
+        }
+        
+        await affiliate.save();
+      }
+      
+      res.json({
+        envelopeId: envelopeId,
+        status: envelopeStatus.status
+      });
+    } catch (error) {
+      // If DocuSign API fails, return local status
+      logger.warn('Failed to get envelope status from DocuSign:', error);
+      res.json({
+        envelopeId: envelopeId,
+        status: affiliate.w9Information.docusignStatus || 'sent'
+      });
+    }
+  } catch (error) {
+    console.error('Failed to get envelope status:', error);
+    logger.error('Failed to get envelope status:', error);
+    res.status(500).json({ 
+      error: 'Failed to get envelope status' 
     });
   }
 };
@@ -356,6 +609,27 @@ exports.resendW9Request = async (req, res) => {
     logger.error('Failed to resend W9 request:', error);
     res.status(500).json({ 
       error: 'Failed to resend W9 request' 
+    });
+  }
+};
+
+/**
+ * Check authorization status endpoint
+ * This is called by the client after OAuth callback to verify authorization
+ */
+exports.checkAuthorizationStatus = async (req, res) => {
+  try {
+    // Check if we have a valid token
+    const hasToken = await docusignService.hasValidToken();
+    
+    res.json({
+      authorized: hasToken,
+      message: hasToken ? 'DocuSign authorization successful' : 'Not authorized'
+    });
+  } catch (error) {
+    logger.error('Failed to check authorization status:', error);
+    res.status(500).json({ 
+      error: 'Failed to check authorization status' 
     });
   }
 };

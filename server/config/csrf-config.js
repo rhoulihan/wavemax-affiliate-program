@@ -48,7 +48,11 @@ const CSRF_CONFIG = {
     '/api/v1/auth/customer/linkedin',
     '/api/v1/auth/customer/google/callback',
     '/api/v1/auth/customer/facebook/callback',
-    '/api/v1/auth/customer/linkedin/callback'
+    '/api/v1/auth/customer/linkedin/callback',
+    
+    // DocuSign webhook endpoints (external callbacks)
+    '/api/v1/w9/docusign-webhook',
+    '/api/auth/docusign/callback'
   ],
 
   // Authentication endpoints - will add rate limiting instead of CSRF

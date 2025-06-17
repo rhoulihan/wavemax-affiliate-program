@@ -6,6 +6,7 @@ const multer = require('multer');
 const { authenticate, authorize } = require('../middleware/auth');
 const { body, param } = require('express-validator');
 const w9Controller = require('../controllers/w9Controller');
+const w9ControllerDocuSign = require('../controllers/w9ControllerDocuSign');
 
 // Configure multer for W-9 uploads
 const upload = multer({
@@ -22,6 +23,63 @@ const upload = multer({
     }
   }
 });
+
+// ===== DocuSign Routes =====
+
+/**
+ * @route   GET /api/v1/w9/check-auth
+ * @desc    Check if DocuSign is authorized
+ * @access  Private (Affiliate)
+ */
+router.get('/check-auth',
+  authenticate,
+  authorize(['affiliate']),
+  w9ControllerDocuSign.checkDocuSignAuth
+);
+
+/**
+ * @route   POST /api/v1/w9/initiate-signing
+ * @desc    Initiate W-9 signing with DocuSign
+ * @access  Private (Affiliate)
+ */
+router.post('/initiate-signing',
+  authenticate,
+  authorize(['affiliate']),
+  w9ControllerDocuSign.initiateW9Signing
+);
+
+/**
+ * @route   GET /api/v1/w9/envelope-status/:envelopeId
+ * @desc    Check DocuSign envelope status
+ * @access  Private (Affiliate)
+ */
+router.get('/envelope-status/:envelopeId',
+  authenticate,
+  authorize(['affiliate']),
+  param('envelopeId').notEmpty().withMessage('Envelope ID is required'),
+  w9ControllerDocuSign.getEnvelopeStatus
+);
+
+/**
+ * @route   POST /api/v1/w9/docusign-webhook
+ * @desc    Handle DocuSign webhook events
+ * @access  Public (webhook endpoint)
+ */
+router.post('/docusign-webhook',
+  express.raw({ type: 'application/json' }), // Raw body for signature verification
+  w9ControllerDocuSign.handleDocuSignWebhook
+);
+
+/**
+ * @route   GET /api/v1/w9/authorization-status
+ * @desc    Check if DocuSign authorization is complete
+ * @access  Private (Affiliate)
+ */
+router.get('/authorization-status',
+  authenticate,
+  authorize(['affiliate']),
+  w9ControllerDocuSign.checkAuthorizationStatus
+);
 
 /**
  * @route   POST /api/w9/upload

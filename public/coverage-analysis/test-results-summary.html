@@ -3,371 +3,311 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Test Coverage Results - June 14, 2025</title>
+    <title>WaveMAX Test Coverage Analysis - January 16, 2025</title>
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            margin: 0;
-            padding: 20px;
-            background: #f5f5f5;
+            line-height: 1.6;
             color: #333;
-        }
-        .container {
             max-width: 1200px;
             margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
         }
-        .header {
+        h1, h2, h3 { color: #1e3a8a; }
+        .metric-card {
             background: white;
-            padding: 30px;
             border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            margin-bottom: 20px;
         }
-        h1 {
-            margin: 0;
-            color: #2c3e50;
-        }
-        .timestamp {
-            color: #7f8c8d;
-            margin-top: 10px;
-        }
-        .summary-grid {
+        .coverage-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px;
-            margin-bottom: 20px;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
         }
-        .card {
-            background: white;
+        .coverage-item {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
             padding: 20px;
             border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            text-align: center;
         }
-        .card h2 {
-            margin-top: 0;
-            color: #34495e;
-            font-size: 1.2em;
-        }
-        .stats {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin: 10px 0;
-        }
-        .stats-label {
-            color: #7f8c8d;
-        }
-        .stats-value {
-            font-size: 1.5em;
+        .coverage-item h3 { color: white; margin: 0; }
+        .coverage-percentage {
+            font-size: 2.5em;
             font-weight: bold;
-        }
-        .success {
-            color: #27ae60;
-        }
-        .warning {
-            color: #f39c12;
-        }
-        .error {
-            color: #e74c3c;
-        }
-        .progress-bar {
-            width: 100%;
-            height: 20px;
-            background: #ecf0f1;
-            border-radius: 10px;
-            overflow: hidden;
             margin: 10px 0;
         }
-        .progress-fill {
-            height: 100%;
-            background: #3498db;
-            transition: width 0.3s ease;
-        }
-        .details-section {
+        .coverage-label { font-size: 0.9em; opacity: 0.9; }
+        .low-coverage { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+        .medium-coverage { background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); }
+        .high-coverage { background: linear-gradient(135deg, #30cfd0 0%, #330867 100%); }
+        .priority-list {
             background: white;
-            padding: 30px;
             border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            padding: 20px;
             margin-top: 20px;
         }
-        .details-section h2 {
-            color: #2c3e50;
-            margin-bottom: 20px;
+        .priority-item {
+            padding: 15px;
+            margin-bottom: 10px;
+            border-left: 4px solid #f5576c;
+            background: #fff5f5;
+            border-radius: 4px;
         }
-        .details-list {
-            list-style: none;
-            padding: 0;
+        .priority-high { border-left-color: #f5576c; background: #fff5f5; }
+        .priority-medium { border-left-color: #fee140; background: #fffef5; }
+        .priority-low { border-left-color: #30cfd0; background: #f0fffe; }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
         }
-        .details-list li {
-            padding: 10px;
-            border-bottom: 1px solid #ecf0f1;
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
         }
-        .details-list li:last-child {
-            border-bottom: none;
-        }
+        th { background-color: #1e3a8a; color: white; }
+        tr:hover { background-color: #f5f5f5; }
         .badge {
             display: inline-block;
             padding: 4px 8px;
             border-radius: 4px;
             font-size: 0.8em;
             font-weight: bold;
-            margin-left: 10px;
         }
-        .badge-success {
-            background: #d4edda;
-            color: #155724;
+        .badge-critical { background: #f5576c; color: white; }
+        .badge-high { background: #fa709a; color: white; }
+        .badge-medium { background: #fee140; color: #333; }
+        .badge-low { background: #30cfd0; color: white; }
+        .test-stats {
+            display: flex;
+            justify-content: space-around;
+            margin: 20px 0;
         }
-        .badge-error {
-            background: #f8d7da;
-            color: #721c24;
+        .stat-item {
+            text-align: center;
         }
-        .badge-warning {
-            background: #fff3cd;
-            color: #856404;
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+            color: #1e3a8a;
         }
-        .failing-test {
-            background: #fee;
-            padding: 10px;
-            margin: 5px 0;
-            border-radius: 4px;
-            font-family: monospace;
-            font-size: 0.9em;
+        .timestamp {
+            text-align: right;
+            color: #666;
+            font-style: italic;
+            margin-top: 20px;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>WaveMAX Affiliate Program - Test Coverage Results</h1>
-            <div class="timestamp">Generated on: June 15, 2025 at 7:13 PM</div>
-        </div>
-
-        <div class="summary-grid">
-            <div class="card">
-                <h2>Test Suites</h2>
-                <div class="stats">
-                    <span class="stats-label">Total Suites</span>
-                    <span class="stats-value">56</span>
-                </div>
-                <div class="stats">
-                    <span class="stats-label">Passed</span>
-                    <span class="stats-value success">56</span>
-                </div>
-                <div class="stats">
-                    <span class="stats-label">Failed</span>
-                    <span class="stats-value error">0</span>
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill" style="width: 100%; background: #27ae60;"></div>
-                </div>
+    <h1>WaveMAX Test Coverage Analysis</h1>
+    
+    <div class="metric-card">
+        <h2>Overall Test Coverage</h2>
+        <div class="coverage-grid">
+            <div class="coverage-item low-coverage">
+                <h3>Statements</h3>
+                <div class="coverage-percentage">52.7%</div>
+                <div class="coverage-label">Target: 80%</div>
             </div>
-
-            <div class="card">
-                <h2>Test Cases</h2>
-                <div class="stats">
-                    <span class="stats-label">Total Tests</span>
-                    <span class="stats-value">1,254</span>
-                </div>
-                <div class="stats">
-                    <span class="stats-label">Passed</span>
-                    <span class="stats-value success">1,232</span>
-                </div>
-                <div class="stats">
-                    <span class="stats-label">Failed</span>
-                    <span class="stats-value error">0</span>
-                </div>
-                <div class="stats">
-                    <span class="stats-label">Skipped</span>
-                    <span class="stats-value warning">22</span>
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill" style="width: 100%; background: #27ae60;"></div>
-                </div>
+            <div class="coverage-item low-coverage">
+                <h3>Branches</h3>
+                <div class="coverage-percentage">47.22%</div>
+                <div class="coverage-label">Target: 80%</div>
             </div>
-
-            <div class="card">
-                <h2>Coverage Metrics</h2>
-                <div class="stats">
-                    <span class="stats-label">Statements</span>
-                    <span class="stats-value warning">73.90%</span>
-                </div>
-                <div class="stats">
-                    <span class="stats-label">Branches</span>
-                    <span class="stats-value warning">63.63%</span>
-                </div>
-                <div class="stats">
-                    <span class="stats-label">Functions</span>
-                    <span class="stats-value warning">77.93%</span>
-                </div>
-                <div class="stats">
-                    <span class="stats-label">Lines</span>
-                    <span class="stats-value warning">73.69%</span>
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill" style="width: 73.90%; background: #f39c12;"></div>
-                </div>
+            <div class="coverage-item low-coverage">
+                <h3>Functions</h3>
+                <div class="coverage-percentage">55.91%</div>
+                <div class="coverage-label">Target: 80%</div>
+            </div>
+            <div class="coverage-item low-coverage">
+                <h3>Lines</h3>
+                <div class="coverage-percentage">52.67%</div>
+                <div class="coverage-label">Target: 80%</div>
             </div>
         </div>
+    </div>
 
-        <div class="details-section">
-            <h2>✅ 100% Test Pass Rate Achieved!</h2>
-            <p style="color: #27ae60; font-size: 1.2em; font-weight: bold;">
-                All 56 test suites are passing with 1,232 passing tests!
-            </p>
-            <p>Major achievement: Tests pass rate increased from 90.8% to 100%. All unit and integration tests are now passing!</p>
+    <div class="metric-card">
+        <h2>Test Suite Summary</h2>
+        <div class="test-stats">
+            <div class="stat-item">
+                <div class="stat-number">66</div>
+                <div>Total Test Suites</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">46</div>
+                <div>Passed</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">20</div>
+                <div>Failed</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">1087</div>
+                <div>Total Tests</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="priority-list">
+        <h2>🎯 Priority Areas for Coverage Improvement</h2>
+        
+        <div class="priority-item priority-high">
+            <h3>1. Critical: Payment Processing & QuickBooks Integration</h3>
+            <p><strong>Coverage: 0%</strong> - Files: quickbooksController.js, Payment.js, PaymentMethod.js</p>
+            <p><strong>Impact:</strong> Core financial functionality completely untested. High risk for production issues.</p>
+            <p><strong>Action:</strong> Create comprehensive unit and integration tests for all payment workflows.</p>
         </div>
 
-        <div class="details-section">
-            <h2>All Test Suites Passing ✅</h2>
-            <h3>Unit Tests (100% Pass Rate)</h3>
-            <ul class="details-list">
-                <li>
-                    <strong>tests/unit/models.test.js</strong> <span class="badge badge-success">PASS</span>
-                    <div class="failing-test">✅ Fixed order status enum validation</div>
-                </li>
-                <li>
-                    <strong>tests/unit/orderController.test.js</strong> <span class="badge badge-success">PASS</span>
-                    <div class="failing-test">✅ Fixed order status update tests</div>
-                </li>
-                <li>
-                    <strong>tests/unit/administratorController.test.js</strong> <span class="badge badge-success">PASS</span>
-                    <div class="failing-test">✅ Fixed operator creation and dashboard tests</div>
-                </li>
-                <li>
-                    <strong>tests/unit/authController.test.js</strong> <span class="badge badge-success">PASS</span>
-                    <div class="failing-test">✅ Fixed customer login emailOrUsername tests</div>
-                </li>
-                <li>
-                    <strong>tests/unit/operator.test.js</strong> <span class="badge badge-success">PASS</span>
-                    <div class="failing-test">✅ Complete rewrite matching new schema</div>
-                </li>
-                <li>
-                    <strong>tests/unit/paymentController.test.js</strong> <span class="badge badge-success">PASS</span>
-                    <div class="failing-test">✅ Created comprehensive test suite</div>
-                </li>
-                <li>
-                    <strong>tests/unit/callbackPoolManager.test.js</strong> <span class="badge badge-success">NEW</span>
-                    <div class="failing-test">✅ Created new test suite with full coverage</div>
-                </li>
-            </ul>
-
-            <h3>Integration Tests (100% Pass Rate)</h3>
-            <ul class="details-list">
-                <li>
-                    <strong>tests/integration/administrator.test.js</strong> <span class="badge badge-success">PASS</span>
-                    <div class="failing-test">✅ Fixed operator validation - added username field</div>
-                </li>
-                <li>
-                    <strong>tests/integration/affiliate.test.js</strong> <span class="badge badge-success">PASS</span>
-                    <div class="failing-test">✅ Fixed test setup issues</div>
-                </li>
-                <li>
-                    <strong>tests/integration/auth.test.js</strong> <span class="badge badge-success">PASS</span>
-                    <div class="failing-test">✅ Fixed OAuth and login flow</div>
-                </li>
-                <li>
-                    <strong>tests/integration/customer.test.js</strong> <span class="badge badge-success">PASS</span>
-                    <div class="failing-test">✅ Fixed customer validation</div>
-                </li>
-                <li>
-                    <strong>tests/integration/operator.test.js</strong> <span class="badge badge-success">PASS</span>
-                    <div class="failing-test">✅ Added username to operator creation</div>
-                </li>
-                <li>
-                    <strong>tests/integration/order.test.js</strong> <span class="badge badge-success">PASS</span>
-                    <div class="failing-test">✅ Fixed order status transitions</div>
-                </li>
-                <li>
-                    <strong>tests/integration/payment.test.js</strong> <span class="badge badge-success">PASS</span>
-                    <div class="failing-test">✅ Fixed CSRF tokens and callback pool initialization</div>
-                </li>
-            </ul>
+        <div class="priority-item priority-high">
+            <h3>2. Critical: Route Testing</h3>
+            <p><strong>Coverage: 6.63%</strong> - Most route files have 0% coverage</p>
+            <p><strong>Impact:</strong> API endpoints untested, potential security and functionality issues.</p>
+            <p><strong>Action:</strong> Implement supertest-based integration tests for all routes.</p>
         </div>
 
-        <div class="details-section">
-            <h2>Coverage Breakdown</h2>
-            <ul class="details-list">
-                <li>
-                    <strong>Statement Coverage</strong> <span class="badge badge-warning">73.90%</span>
-                    <div style="color: #7f8c8d; margin-top: 5px;">Improved from 65.26% - getting closer to 80% target</div>
-                </li>
-                <li>
-                    <strong>Branch Coverage</strong> <span class="badge badge-warning">63.63%</span>
-                    <div style="color: #7f8c8d; margin-top: 5px;">Improved from 55.00% - still needs work</div>
-                </li>
-                <li>
-                    <strong>Function Coverage</strong> <span class="badge badge-warning">77.93%</span>
-                    <div style="color: #7f8c8d; margin-top: 5px;">Improved from 62.52% - approaching 80% target</div>
-                </li>
-                <li>
-                    <strong>Line Coverage</strong> <span class="badge badge-warning">73.69%</span>
-                    <div style="color: #7f8c8d; margin-top: 5px;">Improved from 65.15% - approaching target</div>
-                </li>
-            </ul>
+        <div class="priority-item priority-high">
+            <h3>3. High: Order Controller</h3>
+            <p><strong>Coverage: 31.91%</strong> - orderController.js</p>
+            <p><strong>Impact:</strong> Core business logic for order management inadequately tested.</p>
+            <p><strong>Action:</strong> Add tests for order creation, updates, status changes, and commission calculations.</p>
         </div>
 
-        <div class="details-section">
-            <h2>Areas with Improved Coverage</h2>
-            <ul class="details-list">
-                <li>
-                    <strong>Payment Modules</strong> <span class="badge badge-success">Excellent</span>
-                    <div style="color: #7f8c8d; margin-top: 5px;">paymentController.js improved to 94.84% (was 6.18%) ✅</div>
-                </li>
-                <li>
-                    <strong>Operator Model</strong> <span class="badge badge-success">Perfect</span>
-                    <div style="color: #7f8c8d; margin-top: 5px;">Operator.js achieved 100% coverage across all metrics ✅</div>
-                </li>
-                <li>
-                    <strong>Callback Pool System</strong> <span class="badge badge-warning">Improved</span>
-                    <div style="color: #7f8c8d; margin-top: 5px;">Created comprehensive test suite, CallbackPool.js at 33.33%</div>
-                </li>
-                <li>
-                    <strong>Email Service</strong> <span class="badge badge-error">Skipped</span>
-                    <div style="color: #7f8c8d; margin-top: 5px;">Per user request - skipped email service tests</div>
-                </li>
-            </ul>
+        <div class="priority-item priority-high">
+            <h3>4. High: W9 Document Management</h3>
+            <p><strong>Coverage: 32.35%</strong> - w9Controller.js, w9Storage.js (25.24%)</p>
+            <p><strong>Impact:</strong> Tax compliance features poorly tested.</p>
+            <p><strong>Action:</strong> Test document upload, verification, storage, and audit trail functionality.</p>
         </div>
 
-        <div class="details-section">
-            <h2>Test Fixes Completed</h2>
-            <ul class="details-list">
-                <li>
-                    <strong>Order Model Tests</strong> <span class="badge badge-success">Fixed</span>
-                    <div style="color: #7f8c8d; margin-top: 5px;">Fixed invalid enum values, updated timestamp handling</div>
-                </li>
-                <li>
-                    <strong>Customer Login Tests</strong> <span class="badge badge-success">Fixed</span>
-                    <div style="color: #7f8c8d; margin-top: 5px;">Updated tests for emailOrUsername field support</div>
-                </li>
-                <li>
-                    <strong>Payment System Tests</strong> <span class="badge badge-success">Created</span>
-                    <div style="color: #7f8c8d; margin-top: 5px;">Comprehensive test suite - coverage from 6% to 95%</div>
-                </li>
-                <li>
-                    <strong>Operator Model Tests</strong> <span class="badge badge-success">Rewritten</span>
-                    <div style="color: #7f8c8d; margin-top: 5px;">Complete rewrite matching new schema - 100% coverage</div>
-                </li>
-            </ul>
+        <div class="priority-item priority-medium">
+            <h3>5. Medium: Administrator Controller</h3>
+            <p><strong>Coverage: 46.62%</strong> - administratorController.js</p>
+            <p><strong>Impact:</strong> Admin management features need better coverage.</p>
+            <p><strong>Action:</strong> Focus on permission management, admin creation/update, and edge cases.</p>
         </div>
 
-        <div class="details-section">
-            <h2>Summary</h2>
-            <p style="color: #27ae60;">Outstanding improvements achieved! From <strong>106 failing tests down to 0</strong>, and test pass rate improved from 90.8% to 100%.</p>
-            <p>Key accomplishments:</p>
-            <ul>
-                <li>✅ Fixed all critical unit test failures</li>
-                <li>✅ Order status enum validation fixed</li>
-                <li>✅ Customer login emailOrUsername tests fixed</li>
-                <li>✅ Payment controller coverage: 6.18% → 94.84%</li>
-                <li>✅ Operator model achieved 100% coverage</li>
-                <li>✅ Created comprehensive callback pool tests</li>
-                <li>✅ Overall statement coverage: 65.26% → 73.90%</li>
-                <li>✅ Fixed all integration test failures</li>
-                <li>✅ Added CSRF token support to payment tests</li>
-                <li>✅ Fixed callback pool initialization in tests</li>
-            </ul>
-            <p>All tests are now passing! Coverage has significantly improved and is approaching the 80% target across all metrics.</p>
+        <div class="priority-item priority-medium">
+            <h3>6. Medium: Customer Controller</h3>
+            <p><strong>Coverage: 51.01%</strong> - customerController.js</p>
+            <p><strong>Impact:</strong> Customer management features partially tested.</p>
+            <p><strong>Action:</strong> Add tests for customer registration, profile updates, and affiliate associations.</p>
         </div>
+
+        <div class="priority-item priority-medium">
+            <h3>7. Medium: Email Service</h3>
+            <p><strong>Coverage: 0%</strong> - emailService.js (excluding recent Brevo tests)</p>
+            <p><strong>Impact:</strong> Critical communication system untested.</p>
+            <p><strong>Note:</strong> Basic unit tests added for Brevo, but comprehensive email workflow testing needed.</p>
+        </div>
+
+        <div class="priority-item priority-low">
+            <h3>8. Low: Authentication Controller</h3>
+            <p><strong>Coverage: 66.6%</strong> - authController.js</p>
+            <p><strong>Impact:</strong> Good coverage but room for improvement in edge cases.</p>
+            <p><strong>Action:</strong> Add tests for OAuth flows, password reset edge cases, and session management.</p>
+        </div>
+    </div>
+
+    <div class="metric-card">
+        <h2>Coverage by Component</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Component</th>
+                    <th>Statements</th>
+                    <th>Branches</th>
+                    <th>Functions</th>
+                    <th>Lines</th>
+                    <th>Priority</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Controllers</td>
+                    <td>56.45%</td>
+                    <td>44.73%</td>
+                    <td>58.67%</td>
+                    <td>56.84%</td>
+                    <td><span class="badge badge-high">High</span></td>
+                </tr>
+                <tr>
+                    <td>Models</td>
+                    <td>64.9%</td>
+                    <td>54.2%</td>
+                    <td>60.68%</td>
+                    <td>65.81%</td>
+                    <td><span class="badge badge-medium">Medium</span></td>
+                </tr>
+                <tr>
+                    <td>Routes</td>
+                    <td>6.63%</td>
+                    <td>8.69%</td>
+                    <td>16.27%</td>
+                    <td>6.65%</td>
+                    <td><span class="badge badge-critical">Critical</span></td>
+                </tr>
+                <tr>
+                    <td>Middleware</td>
+                    <td>96.22%</td>
+                    <td>89.44%</td>
+                    <td>92.1%</td>
+                    <td>96.01%</td>
+                    <td><span class="badge badge-low">Low</span></td>
+                </tr>
+                <tr>
+                    <td>Utils</td>
+                    <td>41.14%</td>
+                    <td>39.75%</td>
+                    <td>48.57%</td>
+                    <td>39.72%</td>
+                    <td><span class="badge badge-high">High</span></td>
+                </tr>
+                <tr>
+                    <td>Config</td>
+                    <td>70.25%</td>
+                    <td>58.47%</td>
+                    <td>44%</td>
+                    <td>70.1%</td>
+                    <td><span class="badge badge-low">Low</span></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="metric-card">
+        <h2>Known Test Failures</h2>
+        <ul>
+            <li><strong>Missing Module:</strong> utils/helpers - Referenced by quickbooksController.js</li>
+            <li><strong>W9AuditLog:</strong> Schema validation issues with performedBy.userType field</li>
+            <li><strong>PaymentExport:</strong> Mongoose ObjectId constructor issues in tests</li>
+            <li><strong>MongoDB Deprecation:</strong> Several deprecated MongoDB method warnings</li>
+        </ul>
+    </div>
+
+    <div class="metric-card">
+        <h2>Recommended Action Plan</h2>
+        <ol>
+            <li><strong>Fix Breaking Tests:</strong> Resolve missing helpers module and ObjectId constructor issues</li>
+            <li><strong>Payment System:</strong> Implement comprehensive tests for payment processing (0% → 80%)</li>
+            <li><strong>Route Coverage:</strong> Add integration tests for all API routes (6.63% → 80%)</li>
+            <li><strong>Order Management:</strong> Complete order controller testing (31.91% → 80%)</li>
+            <li><strong>W9 Compliance:</strong> Full test coverage for tax document handling (32.35% → 80%)</li>
+            <li><strong>Email Workflows:</strong> Test all email sending scenarios beyond basic Brevo integration</li>
+            <li><strong>Edge Cases:</strong> Add negative test cases and error handling scenarios</li>
+        </ol>
+    </div>
+
+    <div class="timestamp">
+        <p>Generated: January 16, 2025</p>
+        <p>Total Execution Time: ~2 minutes</p>
     </div>
 </body>
 </html>

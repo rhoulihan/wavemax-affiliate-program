@@ -70,6 +70,16 @@ exports.authenticate = async (req, res, next) => {
       ...(decoded.permissions && { permissions: decoded.permissions }),
       ...(decoded.requirePasswordChange && { requirePasswordChange: decoded.requirePasswordChange })
     };
+    
+    // Debug logging for W9 endpoint
+    if (req.path.includes('/w9/')) {
+      console.log('Auth middleware - W9 endpoint accessed:', {
+        path: req.path,
+        userId: req.user.id,
+        role: req.user.role,
+        affiliateId: req.user.affiliateId
+      });
+    }
 
     // Check if password change is required
     if (decoded.requirePasswordChange && 
@@ -118,6 +128,7 @@ exports.authorize = (...roles) => {
 
   return (req, res, next) => {
     if (!req.user) {
+      console.log('Authorization failed - No user object on request for path:', req.path);
       return res.status(403).json({
         success: false,
         message: 'Insufficient permissions'
@@ -125,6 +136,7 @@ exports.authorize = (...roles) => {
     }
 
     if (!req.user.role || !allowedRoles.includes(req.user.role)) {
+      console.log('Authorization failed for path:', req.path, '- User role:', req.user.role, 'Allowed roles:', allowedRoles);
       return res.status(403).json({
         success: false,
         message: 'Insufficient permissions'

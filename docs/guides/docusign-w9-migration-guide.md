@@ -8,19 +8,26 @@ This guide provides step-by-step instructions for migrating from the manual W9 u
 1. **DocuSign Developer Account**
    - Sign up at https://developers.docusign.com/
    - Create an integration key (Client ID)
-   - Generate RSA keypair for JWT authentication
+   - Add OAuth redirect URI: `https://yourdomain.com/api/auth/docusign/callback`
+   - OAuth 2.0 Authorization Code Grant with PKCE is implemented (no RSA key needed)
 
 2. **W9 Template Setup in DocuSign**
    - Log into DocuSign
-   - Create a new template named "W9 Tax Form"
-   - Upload the IRS W9 PDF
-   - Add fields:
-     - Text fields: Name, BusinessName, Address, City, State, ZipCode
-     - SSN field: SSN (masked)
-     - Text field: EIN (for businesses)
-     - Checkbox fields: Tax classification options
-     - Signature field: Taxpayer signature
-     - Date field: Signature date
+   - Use the DocuSign Template Library W9 template or create your own
+   - Set the recipient role name to "Signer 1"
+   - Required field labels for automatic pre-filling:
+     - Text field: "Owner's First Name"
+     - Text field: "Owner's Last Name"
+     - Text field: "Owner's Middle Initial" (optional)
+     - Text field: "Street Address"
+     - Text field: "City"
+     - Text field: "State 1"
+     - Text field: "5-Digit Zip Code"
+   - Additional fields handled by signer:
+     - SSN/EIN fields (various conditional fields)
+     - Tax classification checkboxes
+     - Signature field
+     - Date signed field
 
 ## Backend Migration Steps
 
@@ -29,16 +36,16 @@ Add the following to your `.env` file:
 ```env
 # DocuSign Configuration
 DOCUSIGN_INTEGRATION_KEY=your_actual_integration_key
+DOCUSIGN_CLIENT_SECRET=your_client_secret
 DOCUSIGN_USER_ID=your_user_id
 DOCUSIGN_ACCOUNT_ID=your_account_id
-DOCUSIGN_BASE_URL=https://demo.docusign.net/restapi  # Use https://na4.docusign.net/restapi for production
+DOCUSIGN_BASE_URL=https://demo.docusign.net/restapi  # Use https://na3.docusign.net/restapi for production
 DOCUSIGN_OAUTH_BASE_URL=https://account-d.docusign.com  # Use https://account.docusign.com for production
 DOCUSIGN_W9_TEMPLATE_ID=your_w9_template_id
 DOCUSIGN_WEBHOOK_SECRET=generate_a_secure_random_string
-DOCUSIGN_PRIVATE_KEY="-----BEGIN RSA PRIVATE KEY-----
-your_private_key_here
------END RSA PRIVATE KEY-----"
-DOCUSIGN_REDIRECT_URI=https://yourdomain.com/affiliate/dashboard?tab=settings
+DOCUSIGN_REDIRECT_URI=https://yourdomain.com/api/auth/docusign/callback
+# Backend URL for webhooks
+BACKEND_URL=https://yourdomain.com
 ```
 
 ### 2. Install Required Dependencies

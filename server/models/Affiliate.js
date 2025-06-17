@@ -230,11 +230,11 @@ affiliateSchema.methods.canReceivePayments = function() {
 // Method to get W-9 status display text
 affiliateSchema.methods.getW9StatusDisplay = function() {
   const statusMap = {
-    'not_submitted': 'W-9 Required',
-    'pending_review': 'W-9 Under Review',
-    'verified': 'W-9 Verified',
-    'rejected': 'W-9 Rejected - Resubmission Required',
-    'expired': 'W-9 Expired - Update Required'
+    'not_submitted': 'Waiting for Upload',
+    'pending_review': 'Awaiting Review',
+    'verified': 'Approved',
+    'rejected': 'Rejected',
+    'expired': 'Expired - Update Required'
   };
   return statusMap[this.w9Information.status] || 'Unknown Status';
 };

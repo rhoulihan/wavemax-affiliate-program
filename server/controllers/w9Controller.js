@@ -106,6 +106,7 @@ exports.uploadW9Document = async (req, res) => {
  */
 exports.getW9Status = async (req, res) => {
   try {
+    console.log('W9 Status Request - User:', req.user);
     const affiliateId = req.user.affiliateId;
     
     const affiliate = await Affiliate.findOne({ affiliateId })

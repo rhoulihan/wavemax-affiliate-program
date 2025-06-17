@@ -2,15 +2,17 @@
 
 ## DocuSign W-9 Integration (June 2025)
 - **Electronic W-9 Signatures**: Complete DocuSign integration for tax form collection
+  - OAuth 2.0 Authorization Code Grant with PKCE for secure authentication
   - One-click W-9 completion with pre-filled affiliate information
-  - Embedded signing experience within affiliate dashboard
-  - Real-time status tracking via DocuSign webhooks
+  - Template-based signing using DocuSign's W9 template library
+  - Automatic field mapping for owner name, address, city, state, and zip
+  - Pop-up window signing experience with status tracking
+  - Real-time envelope status polling during signing session
+  - Webhook integration for asynchronous status updates
+  - CSRF-exempt webhook endpoint for DocuSign callbacks
+  - Automatic W9 status updates upon document completion
   - Mobile-friendly signing on any device
-  - Automatic document retrieval upon completion
-  - Fallback to manual upload for special cases
   - Complete audit trail with IP addresses and timestamps
-  - JWT authentication for secure API access
-  - Webhook signature verification for security
 
 ## W-9 Tax Compliance & QuickBooks Integration (June 2025)
 - **W-9 Collection System**: Complete tax compliance solution for affiliates

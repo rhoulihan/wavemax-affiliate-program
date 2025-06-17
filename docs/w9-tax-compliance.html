@@ -498,29 +498,14 @@
             <h3>Step 3: Generate RSA Key Pair</h3>
             <p>DocuSign uses JWT authentication which requires an RSA key pair:</p>
 
-            <h4>Option A: Generate in DocuSign Admin</h4>
+            <h4>OAuth 2.0 Configuration</h4>
+            <p>The integration uses OAuth 2.0 Authorization Code Grant with PKCE for secure authentication.</p>
             <ol>
-                <li>In your app settings, find <strong>"RSA Keypairs"</strong></li>
-                <li>Click <strong>"Generate RSA"</strong></li>
-                <li>Copy the private key immediately (shown only once)</li>
-                <li>Save it securely - you'll need it for the environment configuration</li>
-            </ol>
-
-            <h4>Option B: Generate Locally (Recommended)</h4>
-            <pre><code># Generate private key
-openssl genrsa -out docusign_private.key 2048
-
-# Generate public key
-openssl rsa -in docusign_private.key -pubout -out docusign_public.key
-
-# View private key for copying to .env
-cat docusign_private.key</code></pre>
-
-            <p>Then upload the public key to DocuSign:</p>
-            <ol>
-                <li>In app settings, click <strong>"Add RSA Keypair"</strong></li>
-                <li>Paste your public key content</li>
-                <li>Click <strong>"Save"</strong></li>
+                <li>In your app settings, add the <strong>Redirect URI</strong>:</li>
+                <li><code>https://yourdomain.com/api/auth/docusign/callback</code></li>
+                <li>Note your <strong>Integration Key</strong> (Client ID)</li>
+                <li>Note your <strong>Client Secret</strong></li>
+                <li>No RSA keypair is needed for this OAuth flow</li>
             </ol>
 
             <h3>Step 4: Get User and Account IDs</h3>
@@ -540,7 +525,7 @@ cat docusign_private.key</code></pre>
                 <li>Name it: <strong>"W-9 Tax Form"</strong></li>
                 <li>Add recipient:
                     <ul>
-                        <li><strong>Role Name:</strong> Taxpayer</li>
+                        <li><strong>Role Name:</strong> Signer 1</li>
                         <li><strong>Type:</strong> Signer</li>
                     </ul>
                 </li>
@@ -557,14 +542,20 @@ cat docusign_private.key</code></pre>
                         <tbody>
                             <tr>
                                 <td>Text</td>
-                                <td>Name</td>
-                                <td>Line 1 (Name)</td>
+                                <td>Owner's First Name</td>
+                                <td>Line 1 (First Name)</td>
                                 <td>Yes</td>
                             </tr>
                             <tr>
                                 <td>Text</td>
-                                <td>BusinessName</td>
-                                <td>Line 2 (Business name)</td>
+                                <td>Owner's Last Name</td>
+                                <td>Line 1 (Last Name)</td>
+                                <td>Yes</td>
+                            </tr>
+                            <tr>
+                                <td>Text</td>
+                                <td>Owner's Middle Initial</td>
+                                <td>Line 1 (Middle Initial)</td>
                                 <td>No</td>
                             </tr>
                             <tr>
@@ -575,7 +566,7 @@ cat docusign_private.key</code></pre>
                             </tr>
                             <tr>
                                 <td>Text</td>
-                                <td>Address</td>
+                                <td>Street Address</td>
                                 <td>Address field</td>
                                 <td>Yes</td>
                             </tr>
@@ -587,13 +578,13 @@ cat docusign_private.key</code></pre>
                             </tr>
                             <tr>
                                 <td>Text</td>
-                                <td>State</td>
+                                <td>State 1</td>
                                 <td>State field</td>
                                 <td>Yes</td>
                             </tr>
                             <tr>
                                 <td>Text</td>
-                                <td>ZipCode</td>
+                                <td>5-Digit Zip Code</td>
                                 <td>ZIP field</td>
                                 <td>Yes</td>
                             </tr>
@@ -652,23 +643,21 @@ cat docusign_private.key</code></pre>
             <p>Update your <code>.env</code> file with the values collected:</p>
             <pre><code># DocuSign Configuration
 DOCUSIGN_INTEGRATION_KEY=6f3e7a92-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+DOCUSIGN_CLIENT_SECRET=5241fc39-xxxx-xxxx-xxxx-xxxxxxxxxxxx
 DOCUSIGN_USER_ID=8d4a2b6c-xxxx-xxxx-xxxx-xxxxxxxxxxxx
 DOCUSIGN_ACCOUNT_ID=9e5b3c7d-xxxx-xxxx-xxxx-xxxxxxxxxxxx
 DOCUSIGN_BASE_URL=https://demo.docusign.net/restapi
 DOCUSIGN_OAUTH_BASE_URL=https://account-d.docusign.com
 DOCUSIGN_W9_TEMPLATE_ID=3a8c5e9f-xxxx-xxxx-xxxx-xxxxxxxxxxxx
 DOCUSIGN_WEBHOOK_SECRET=your_connect_key_from_step_6
-DOCUSIGN_REDIRECT_URI=https://yourdomain.com/affiliate/dashboard?tab=settings
-DOCUSIGN_PRIVATE_KEY="-----BEGIN RSA PRIVATE KEY-----
-MIIEpAIBAAKCAQEA1234567890abcdef...
-[Your complete private key here]
-...xyz987654321
------END RSA PRIVATE KEY-----"</code></pre>
+DOCUSIGN_REDIRECT_URI=https://yourdomain.com/api/auth/docusign/callback
+# Backend URL for webhooks
+BACKEND_URL=https://yourdomain.com</code></pre>
 
             <div class="alert alert-info">
                 <strong>Production URLs:</strong> When moving to production, update:
                 <ul>
-                    <li><code>DOCUSIGN_BASE_URL=https://na4.docusign.net/restapi</code></li>
+                    <li><code>DOCUSIGN_BASE_URL=https://na3.docusign.net/restapi</code></li>
                     <li><code>DOCUSIGN_OAUTH_BASE_URL=https://account.docusign.com</code></li>
                 </ul>
             </div>

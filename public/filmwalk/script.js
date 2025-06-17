@@ -507,6 +507,10 @@ function showDetails(locationId) {
     const details = locationDetails[locationId];
     const modalContent = document.getElementById('modalContent');
     
+    // Get translations
+    const featuredFilmsLabel = window.i18n ? window.i18n.getTranslation('filmwalk.modal.featuredFilms') : 'Featured Films & Shows';
+    const visitorTipsLabel = window.i18n ? window.i18n.getTranslation('filmwalk.modal.visitorTips') : 'Visitor Tips';
+    
     let filmDetailsHTML = details.films.map(film => `
         <div style="margin-bottom: 1.5rem; padding: 1rem; background: rgba(42, 42, 42, 0.8); border: 1px solid rgba(5, 217, 232, 0.3); border-radius: 0;">
             <h4 style="color: #05d9e8; margin-bottom: 0.5rem; text-shadow: 0 0 10px rgba(5, 217, 232, 0.5);">${film.title}</h4>
@@ -517,10 +521,10 @@ function showDetails(locationId) {
     modalContent.innerHTML = `
         <h2 style="color: #ffffff; margin-bottom: 1rem; text-shadow: 0 0 20px rgba(255, 42, 109, 0.5);">${details.title}</h2>
         <p style="font-size: 1.1rem; margin-bottom: 2rem; color: #ffffff; line-height: 1.8;">${details.description}</p>
-        <h3 style="margin-bottom: 1rem; color: #ff2a6d; text-shadow: 0 0 15px rgba(255, 42, 109, 0.5);">Featured Films & Shows</h3>
+        <h3 style="margin-bottom: 1rem; color: #ff2a6d; text-shadow: 0 0 15px rgba(255, 42, 109, 0.5);">${featuredFilmsLabel}</h3>
         ${filmDetailsHTML}
         <div style="margin-top: 2rem; padding: 1rem; background: rgba(209, 0, 209, 0.1); border: 1px solid rgba(209, 0, 209, 0.3); border-radius: 0;">
-            <h4 style="margin-bottom: 0.5rem; color: #d100d1; text-shadow: 0 0 10px rgba(209, 0, 209, 0.5);">Visitor Tips</h4>
+            <h4 style="margin-bottom: 0.5rem; color: #d100d1; text-shadow: 0 0 10px rgba(209, 0, 209, 0.5);">${visitorTipsLabel}</h4>
             <p style="color: #ffffff; line-height: 1.6;">${details.tips}</p>
         </div>
     `;
@@ -535,6 +539,11 @@ function showBonusDetails(locationId) {
     
     const modalContent = document.getElementById('modalContent');
     
+    // Get translations
+    const featuredFilmsLabel = window.i18n ? window.i18n.getTranslation('filmwalk.modal.featuredFilms') : 'Featured Films & Shows';
+    const visitorTipsLabel = window.i18n ? window.i18n.getTranslation('filmwalk.modal.visitorTips') : 'Visitor Tips';
+    const bonusLocationLabel = window.i18n ? window.i18n.getTranslation('filmwalk.modal.bonusLocation') : 'Bonus Location';
+    
     let filmDetailsHTML = details.films.map(film => `
         <div style="margin-bottom: 1.5rem; padding: 1rem; background: rgba(42, 42, 42, 0.8); border: 1px solid rgba(5, 217, 232, 0.3); border-radius: 0;">
             <h4 style="color: #05d9e8; margin-bottom: 0.5rem; text-shadow: 0 0 10px rgba(5, 217, 232, 0.5);">${film.title}</h4>
@@ -544,12 +553,12 @@ function showBonusDetails(locationId) {
     
     modalContent.innerHTML = `
         <h2 style="color: #ffffff; margin-bottom: 1rem; text-shadow: 0 0 20px rgba(255, 42, 109, 0.5);">${details.title}</h2>
-        <span style="background: #d100d1; color: #0a0a0a; padding: 4px 12px; border-radius: 0; font-size: 0.85rem; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; box-shadow: 0 0 15px rgba(209, 0, 209, 0.5);">Bonus Location</span>
+        <span style="background: #d100d1; color: #0a0a0a; padding: 4px 12px; border-radius: 0; font-size: 0.85rem; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; box-shadow: 0 0 15px rgba(209, 0, 209, 0.5);">${bonusLocationLabel}</span>
         <p style="font-size: 1.1rem; margin-top: 1rem; margin-bottom: 2rem; color: #ffffff; line-height: 1.8;">${details.description}</p>
-        <h3 style="margin-bottom: 1rem; color: #ff2a6d; text-shadow: 0 0 15px rgba(255, 42, 109, 0.5);">Featured Films & Shows</h3>
+        <h3 style="margin-bottom: 1rem; color: #ff2a6d; text-shadow: 0 0 15px rgba(255, 42, 109, 0.5);">${featuredFilmsLabel}</h3>
         ${filmDetailsHTML}
         <div style="margin-top: 2rem; padding: 1rem; background: rgba(209, 0, 209, 0.1); border: 1px solid rgba(209, 0, 209, 0.3); border-radius: 0;">
-            <h4 style="margin-bottom: 0.5rem; color: #d100d1; text-shadow: 0 0 10px rgba(209, 0, 209, 0.5);">Visitor Tips</h4>
+            <h4 style="margin-bottom: 0.5rem; color: #d100d1; text-shadow: 0 0 10px rgba(209, 0, 209, 0.5);">${visitorTipsLabel}</h4>
             <p style="color: #ffffff; line-height: 1.6;">${details.tips}</p>
         </div>
     `;

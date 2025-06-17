@@ -21,6 +21,16 @@ const validate = (req, res, next) => {
 };
 
 /**
+ * @route   GET /api/auth/docusign/callback
+ * @desc    DocuSign OAuth callback for consent
+ * @access  Public
+ */
+// Import the w9 controller for DocuSign OAuth
+const w9ControllerDocuSign = require('../controllers/w9ControllerDocuSign');
+
+router.get('/docusign/callback', w9ControllerDocuSign.handleOAuthCallback);
+
+/**
  * @route   POST /api/auth/affiliate/login
  * @desc    Login affiliate
  * @access  Public

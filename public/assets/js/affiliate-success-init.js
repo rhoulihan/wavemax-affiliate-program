@@ -27,10 +27,10 @@ function initializeAffiliateSuccess() {
     }
   };
 
-  // Copy link functionality
-  window.copyLink = function() {
-    const linkInput = document.getElementById('registrationLink');
-    const btn = document.getElementById('copyLinkBtn');
+  // Generic copy functionality
+  function copyToClipboard(inputId, buttonId, messageType) {
+    const linkInput = document.getElementById(inputId);
+    const btn = document.getElementById(buttonId);
 
     // Method 1: Try selecting the input directly first
     try {
@@ -51,7 +51,7 @@ function initializeAffiliateSuccess() {
           btn.classList.add('bg-blue-600');
         }, 2000);
 
-        sendMessageToParent('link-copied', { link: linkInput.value });
+        sendMessageToParent(messageType, { link: linkInput.value });
         return;
       }
     } catch (err) {
@@ -93,7 +93,7 @@ function initializeAffiliateSuccess() {
           btn.classList.add('bg-blue-600');
         }, 2000);
 
-        sendMessageToParent('link-copied', { link: linkInput.value });
+        sendMessageToParent(messageType, { link: linkInput.value });
       } else {
         throw new Error('Copy command failed');
       }
@@ -105,6 +105,16 @@ function initializeAffiliateSuccess() {
       linkInput.focus();
       alert('Please press Ctrl+C (or Cmd+C on Mac) to copy the link.');
     }
+  }
+
+  // Copy registration link functionality
+  window.copyLink = function() {
+    copyToClipboard('registrationLink', 'copyLinkBtn', 'link-copied');
+  };
+
+  // Copy landing page link functionality
+  window.copyLandingPageLink = function() {
+    copyToClipboard('landingPageLink', 'copyLandingLinkBtn', 'landing-link-copied');
   };
 
   // Load affiliate information
@@ -121,6 +131,13 @@ function initializeAffiliateSuccess() {
         document.getElementById('affiliateName').textContent =
                     `${affiliateData.firstName} ${affiliateData.lastName}`;
         document.getElementById('affiliateEmail').textContent = affiliateData.email;
+
+        // Generate landing page link
+        const landingPageLink = `https://www.wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program?route=/affiliate-landing&code=${affiliateData.affiliateId}`;
+        const landingPageInput = document.getElementById('landingPageLink');
+        if (landingPageInput) {
+          landingPageInput.value = landingPageLink;
+        }
 
         // Generate registration link with wavemaxlaundry.com format
         const registrationLink = `https://www.wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program?affid=${affiliateData.affiliateId}`;
@@ -169,12 +186,22 @@ function initializeAffiliateSuccess() {
           };
         }
 
-        // Set up copy button event listener
+        // Set up copy button event listener for registration link
         const copyBtn = document.getElementById('copyLinkBtn');
         if (copyBtn) {
           copyBtn.onclick = function(e) {
             e.preventDefault();
             window.copyLink();
+            return false;
+          };
+        }
+
+        // Set up copy button event listener for landing page link
+        const copyLandingBtn = document.getElementById('copyLandingLinkBtn');
+        if (copyLandingBtn) {
+          copyLandingBtn.onclick = function(e) {
+            e.preventDefault();
+            window.copyLandingPageLink();
             return false;
           };
         }
