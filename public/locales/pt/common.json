@@ -751,6 +751,7 @@
       "tabs": {
         "dashboard": "Painel",
         "operators": "Operadores",
+        "customers": "Clientes",
         "analytics": "Análises",
         "affiliates": "Afiliados",
         "w9review": "Revisão W-9",
@@ -816,6 +817,29 @@
         "accountCredentials": "Credenciais da Conta",
         "personalInfo": "Informações Pessoais",
         "scheduleInfo": "Informações de Horário"
+      },
+      "customers": {
+        "title": "Gestão de Clientes",
+        "search": "Pesquisar Clientes",
+        "filterByAffiliate": "Filtrar por Afiliado",
+        "filterByStatus": "Filtrar por Status",
+        "new": "Novo (Sem Pedidos)",
+        "statusNEW": "Novo",
+        "statusACTIVE": "Ativo",
+        "noCustomers": "Nenhum cliente encontrado",
+        "orders": "Pedidos",
+        "joined": "Cadastrado",
+        "printCard": "Imprimir Cartão",
+        "printSelected": "Imprimir Cartões Selecionados",
+        "printSelectedCount": "Imprimir {{count}} Cartões Selecionados",
+        "selectAll": "Selecionar Tudo",
+        "customerId": "ID do Cliente",
+        "name": "Nome",
+        "contact": "Contato",
+        "address": "Endereço",
+        "affiliate": "Afiliado",
+        "status": "Status",
+        "actions": "Ações"
       },
       "analytics": {
         "title": "Visão Geral das Análises",

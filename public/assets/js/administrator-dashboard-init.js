@@ -333,8 +333,8 @@
                                 </span>
                             </td>
                             <td>
-                                <button class="btn btn-sm" onclick="editOperator('${op._id}')">${t('administrator.dashboard.operators.edit')}</button>
-                                <button class="btn btn-sm btn-secondary" onclick="resetPin('${op._id}')">${t('administrator.dashboard.operators.resetPin')}</button>
+                                <button class="btn btn-sm edit-operator-btn" data-operator-id="${op._id}">${t('administrator.dashboard.operators.edit')}</button>
+                                <button class="btn btn-sm btn-secondary reset-pin-btn" data-operator-id="${op._id}">${t('administrator.dashboard.operators.resetPin')}</button>
                             </td>
                         </tr>
                     `).join('')}
@@ -388,58 +388,69 @@
       return;
     }
     
-    const listHtml = `
-      <div style="padding: 10px 20px; background: #f8f9fa; border-bottom: 1px solid #e9ecef;">
-        <label style="display: flex; align-items: center;">
-          <input type="checkbox" id="selectAllCustomers" style="margin-right: 10px;">
-          <span>${t('administrator.dashboard.customers.selectAll', 'Select All')}</span>
-        </label>
-      </div>
-      ${customers.map(customer => {
-        const hasOrders = customer.orderCount > 0;
-        const status = customer.isActive ? 'active' : 'inactive';
-        const statusBadge = customer.isActive ? 
-          `<span class="status-badge active">${t('common.labels.active', 'Active')}</span>` :
-          `<span class="status-badge inactive">${t('common.labels.inactive', 'Inactive')}</span>`;
-        
-        return `
-          <div class="customer-row">
-            <input type="checkbox" class="customer-checkbox" data-customer-id="${customer._id}" 
-                   data-customer-data='${JSON.stringify({
-                     id: customer.customerId,
-                     name: `${customer.firstName} ${customer.lastName}`,
-                     address: `${customer.address}, ${customer.city}, ${customer.state} ${customer.zipCode}`,
-                     phone: customer.phone,
-                     email: customer.email
-                   }).replace(/'/g, '&apos;')}'>
-            <div class="customer-info">
-              <div>
-                <div class="customer-name">${customer.firstName} ${customer.lastName}</div>
-                <div class="customer-id">ID: ${customer.customerId}</div>
-              </div>
-              <div>
-                <div class="customer-details">${customer.email}</div>
-                <div class="customer-details">${customer.phone}</div>
-              </div>
-              <div>
-                <div class="customer-details">${customer.address}</div>
-                <div class="customer-details">${customer.city}, ${customer.state} ${customer.zipCode}</div>
-              </div>
-              <div>
-                <div class="customer-details">${t('administrator.dashboard.customers.orders', 'Orders')}: ${customer.orderCount || 0}</div>
-                <div class="customer-details">${t('administrator.dashboard.customers.joined', 'Joined')}: ${new Date(customer.createdAt).toLocaleDateString()}</div>
-              </div>
-              <div class="customer-actions">
-                ${statusBadge}
-                <button class="btn btn-sm" onclick="printCustomerCard('${customer._id}')">${t('administrator.dashboard.customers.printCard', 'Print Card')}</button>
-              </div>
-            </div>
-          </div>
-        `;
-      }).join('')}
+    const tableHtml = `
+      <table>
+        <thead>
+          <tr>
+            <th style="width: 50px;">
+              <input type="checkbox" id="selectAllCustomers">
+            </th>
+            <th>${t('administrator.dashboard.customers.name', 'Name')}</th>
+            <th>${t('administrator.dashboard.customers.contact', 'Contact')}</th>
+            <th>${t('administrator.dashboard.customers.address', 'Address')}</th>
+            <th>${t('administrator.dashboard.customers.orders', 'Orders')}</th>
+            <th>${t('administrator.dashboard.customers.status', 'Status')}</th>
+            <th>${t('administrator.dashboard.customers.actions', 'Actions')}</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${customers.map(customer => {
+            // Determine status based on order count
+            const statusText = customer.orderCount === 0 ? 'NEW' : 'ACTIVE';
+            const statusClass = customer.orderCount === 0 ? 'pending' : 'active';
+            const statusBadge = `<span class="status-badge ${statusClass}">${t(`administrator.dashboard.customers.status${statusText}`, statusText)}</span>`;
+            
+            return `
+              <tr>
+                <td>
+                  <input type="checkbox" class="customer-checkbox" data-customer-id="${customer._id}" 
+                         data-customer-data='${JSON.stringify({
+                           id: customer.customerId,
+                           name: `${customer.firstName} ${customer.lastName}`,
+                           address: `${customer.address}, ${customer.city}, ${customer.state} ${customer.zipCode}`,
+                           phone: customer.phone,
+                           email: customer.email
+                         }).replace(/'/g, '&apos;')}'>
+                </td>
+                <td>
+                  <div>${customer.firstName} ${customer.lastName}</div>
+                  ${customer.businessName ? `<div style="font-size: 0.875rem; color: #666;">${customer.businessName}</div>` : ''}
+                  <div style="font-size: 0.875rem; color: #999;">${customer.customerId}</div>
+                </td>
+                <td>
+                  <div>${customer.email}</div>
+                  <div style="font-size: 0.875rem; color: #666;">${customer.phone}</div>
+                </td>
+                <td>
+                  <div>${customer.address}</div>
+                  <div style="font-size: 0.875rem; color: #666;">${customer.city}, ${customer.state} ${customer.zipCode}</div>
+                </td>
+                <td>
+                  <div>${customer.orderCount || 0}</div>
+                  <div style="font-size: 0.875rem; color: #666;">${t('administrator.dashboard.customers.joined', 'Joined')}: ${new Date(customer.createdAt).toLocaleDateString()}</div>
+                </td>
+                <td>${statusBadge}</td>
+                <td>
+                  <button class="btn btn-sm print-card-btn" data-customer-id="${customer._id}">${t('administrator.dashboard.customers.printCard', 'Print Card')}</button>
+                </td>
+              </tr>
+            `;
+          }).join('')}
+        </tbody>
+      </table>
     `;
     
-    document.getElementById('customersList').innerHTML = listHtml;
+    document.getElementById('customersList').innerHTML = tableHtml;
     
     // Update selected count
     updateSelectedCustomersCount();
@@ -448,7 +459,7 @@
   // Load affiliates for filter dropdown
   async function loadAffiliatesForFilter() {
     try {
-      const response = await adminFetch('/api/v1/affiliates');
+      const response = await adminFetch('/api/v1/administrators/affiliates');
       const data = await response.json();
       
       if (response.ok && data.success) {
@@ -512,7 +523,8 @@
     // Select all checkbox
     setTimeout(() => {
       const selectAllCheckbox = document.getElementById('selectAllCustomers');
-      if (selectAllCheckbox) {
+      if (selectAllCheckbox && !selectAllCheckbox.hasAttribute('data-initialized')) {
+        selectAllCheckbox.setAttribute('data-initialized', 'true');
         selectAllCheckbox.addEventListener('change', function() {
           const checkboxes = document.querySelectorAll('.customer-checkbox');
           checkboxes.forEach(checkbox => {
@@ -524,7 +536,10 @@
       
       // Individual checkboxes
       document.querySelectorAll('.customer-checkbox').forEach(checkbox => {
-        checkbox.addEventListener('change', updateSelectedCustomersCount);
+        if (!checkbox.hasAttribute('data-initialized')) {
+          checkbox.setAttribute('data-initialized', 'true');
+          checkbox.addEventListener('change', updateSelectedCustomersCount);
+        }
       });
     }, 100);
   }
@@ -1181,10 +1196,10 @@
                     </span>
                 </div>
                 <div class="w9-actions">
-                    <button class="btn btn-sm" onclick="downloadW9('${doc.affiliateId}')">${t('administrator.dashboard.w9review.download', 'Download')}</button>
+                    <button class="btn btn-sm download-w9-btn" data-affiliate-id="${doc.affiliateId}">${t('administrator.dashboard.w9review.download', 'Download')}</button>
                     ${doc.w9Status === 'pending_review' ? `
-                        <button class="btn btn-sm btn-primary" onclick="openW9VerificationModal('${doc.affiliateId}')">${t('administrator.dashboard.w9review.verify', 'Verify')}</button>
-                        <button class="btn btn-sm btn-secondary" onclick="openW9RejectionModal('${doc.affiliateId}')">${t('administrator.dashboard.w9review.reject', 'Reject')}</button>
+                        <button class="btn btn-sm btn-primary verify-w9-btn" data-affiliate-id="${doc.affiliateId}">${t('administrator.dashboard.w9review.verify', 'Verify')}</button>
+                        <button class="btn btn-sm btn-secondary reject-w9-btn" data-affiliate-id="${doc.affiliateId}">${t('administrator.dashboard.w9review.reject', 'Reject')}</button>
                     ` : ''}
                 </div>
             </div>
@@ -1660,9 +1675,7 @@
     } else {
       resultsDiv.innerHTML = affiliateSearchResults.map(affiliate => `
                 <div style="padding: 10px; cursor: pointer; border-bottom: 1px solid #eee;" 
-                     onmouseover="this.style.backgroundColor='#f8f9fa'" 
-                     onmouseout="this.style.backgroundColor=''"
-                     onclick="selectAffiliate('${affiliate.affiliateId}', '${affiliate.firstName} ${affiliate.lastName}')">
+                     data-affiliate-id="${affiliate.affiliateId}" data-affiliate-name="${affiliate.firstName} ${affiliate.lastName}" class="select-affiliate-link affiliate-search-item">
                     <strong>${affiliate.firstName} ${affiliate.lastName}</strong><br>
                     <small>${affiliate.email} | ID: ${affiliate.affiliateId}</small>
                 </div>
@@ -2233,6 +2246,62 @@
       }
     });
   }
+
+  // Set up event delegation for dynamic buttons
+  document.addEventListener('click', function(e) {
+    // Edit operator button
+    if (e.target.classList.contains('edit-operator-btn')) {
+      const operatorId = e.target.getAttribute('data-operator-id');
+      editOperator(operatorId);
+    }
+    
+    // Reset PIN button
+    if (e.target.classList.contains('reset-pin-btn')) {
+      const operatorId = e.target.getAttribute('data-operator-id');
+      resetPin(operatorId);
+    }
+    
+    // Print customer card button
+    if (e.target.classList.contains('print-card-btn')) {
+      const customerId = e.target.getAttribute('data-customer-id');
+      printCustomerCard(customerId);
+    }
+    
+    // Download W9 button
+    if (e.target.classList.contains('download-w9-btn')) {
+      const affiliateId = e.target.getAttribute('data-affiliate-id');
+      downloadW9(affiliateId);
+    }
+    
+    // Verify W9 button
+    if (e.target.classList.contains('verify-w9-btn')) {
+      const affiliateId = e.target.getAttribute('data-affiliate-id');
+      openW9VerificationModal(affiliateId);
+    }
+    
+    // Reject W9 button
+    if (e.target.classList.contains('reject-w9-btn')) {
+      const affiliateId = e.target.getAttribute('data-affiliate-id');
+      openW9RejectionModal(affiliateId);
+    }
+    
+    // Select affiliate link
+    if (e.target.closest('.select-affiliate-link')) {
+      const link = e.target.closest('.select-affiliate-link');
+      const affiliateId = link.getAttribute('data-affiliate-id');
+      const affiliateName = link.getAttribute('data-affiliate-name');
+      selectAffiliate(affiliateId, affiliateName);
+    }
+  });
+  
+  // Add hover effect for affiliate search items via CSS class
+  const style = document.createElement('style');
+  style.textContent = `
+    .affiliate-search-item:hover {
+      background-color: #f8f9fa !important;
+    }
+  `;
+  document.head.appendChild(style);
 
   // Load initial data
   removeLoadingSpinners();

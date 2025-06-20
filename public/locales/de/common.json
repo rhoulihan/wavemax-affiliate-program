@@ -751,6 +751,7 @@
       "tabs": {
         "dashboard": "Dashboard",
         "operators": "Operatoren",
+        "customers": "Kunden",
         "analytics": "Analysen",
         "affiliates": "Partner",
         "w9review": "W-9 Prüfung",
@@ -816,6 +817,29 @@
         "accountCredentials": "Kontoanmeldedaten",
         "personalInfo": "Persönliche Informationen",
         "scheduleInfo": "Zeitplaninformationen"
+      },
+      "customers": {
+        "title": "Kundenverwaltung",
+        "search": "Kunden suchen",
+        "filterByAffiliate": "Nach Partner filtern",
+        "filterByStatus": "Nach Status filtern",
+        "new": "Neu (Keine Bestellungen)",
+        "statusNEW": "Neu",
+        "statusACTIVE": "Aktiv",
+        "noCustomers": "Keine Kunden gefunden",
+        "orders": "Bestellungen",
+        "joined": "Beigetreten",
+        "printCard": "Karte drucken",
+        "printSelected": "Ausgewählte Karten drucken",
+        "printSelectedCount": "{{count}} Ausgewählte Karten drucken",
+        "selectAll": "Alle auswählen",
+        "customerId": "Kunden-ID",
+        "name": "Name",
+        "contact": "Kontakt",
+        "address": "Adresse",
+        "affiliate": "Partner",
+        "status": "Status",
+        "actions": "Aktionen"
       },
       "analytics": {
         "title": "Analyseübersicht",

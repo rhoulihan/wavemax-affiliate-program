@@ -594,48 +594,15 @@
             color: #721c24;
         }
 
-        /* Customer List Styles */
-        .customer-row {
-            display: flex;
-            align-items: center;
-            padding: 15px 20px;
-            border-bottom: 1px solid #e9ecef;
-            transition: background-color 0.2s;
+        /* Customer List Styles - Now using table structure */
+        #customersList table {
+            margin-top: 0;
         }
-
-        .customer-row:hover {
-            background-color: #f8f9fa;
-        }
-
-        .customer-checkbox {
-            margin-right: 15px;
-        }
-
-        .customer-info {
-            flex: 1;
-            display: grid;
-            grid-template-columns: 2fr 2fr 1fr 1fr 1fr;
-            gap: 20px;
-            align-items: center;
-        }
-
-        .customer-name {
-            font-weight: 600;
-        }
-
-        .customer-id {
-            font-size: 0.875rem;
-            color: #666;
-        }
-
-        .customer-details {
-            font-size: 0.875rem;
-            color: #666;
-        }
-
-        .customer-actions {
-            display: flex;
-            gap: 10px;
+        
+        #customersList th:first-child,
+        #customersList td:first-child {
+            text-align: center;
+            width: 50px;
         }
 
         /* Print Styles */
@@ -732,6 +699,11 @@
                 float: left;
                 margin: 5mm;
             }
+        }
+        
+        /* Utility classes */
+        .hidden {
+            display: none !important;
         }
     </style>
 </head>
@@ -1349,7 +1321,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     
     <!-- QR Code Library -->
-    <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+    <script src="/assets/js/qrcode.min.js"></script>
     
     <script src="/assets/js/i18n.js"></script>
     <script src="/assets/js/language-switcher.js"></script>

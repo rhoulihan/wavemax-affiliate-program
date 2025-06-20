@@ -111,7 +111,9 @@ exports.registerCustomer = async (req, res) => {
       numberOfBags: bagCount,
       bagCredit: totalBagCredit,
       bagCreditApplied: false,
-      languagePreference: languagePreference || 'en'
+      languagePreference: languagePreference || 'en',
+      // Set isActive to false for new customers (will be set to true on first order)
+      isActive: false
     });
 
     console.log('Saving customer to database...');
@@ -727,12 +729,24 @@ exports.getCustomersForAdmin = async (req, res) => {
     // Get customers
     let customers = await Customer.find(query)
       .select('-passwordHash -passwordSalt -__v')
-      .populate('affiliateId', 'businessName affiliateId')
       .sort({ createdAt: -1 })
       .limit(500);
     
+    // Get unique affiliate IDs from customers
+    const affiliateIds = [...new Set(customers.map(c => c.affiliateId))];
+    
+    // Fetch all affiliates for these customers
+    const affiliates = await Affiliate.find({ affiliateId: { $in: affiliateIds } })
+      .select('affiliateId businessName firstName lastName');
+    
+    // Create a map of affiliates
+    const affiliateMap = {};
+    affiliates.forEach(aff => {
+      affiliateMap[aff.affiliateId] = aff;
+    });
+    
     // Get order counts for each customer
-    const customerIds = customers.map(c => c._id);
+    const customerIds = customers.map(c => c.customerId);
     const orderCounts = await Order.aggregate([
       { $match: { customerId: { $in: customerIds } } },
       { $group: { _id: '$customerId', count: { $sum: 1 } } }
@@ -741,13 +755,15 @@ exports.getCustomersForAdmin = async (req, res) => {
     // Create a map of order counts
     const orderCountMap = {};
     orderCounts.forEach(oc => {
-      orderCountMap[oc._id.toString()] = oc.count;
+      orderCountMap[oc._id] = oc.count;
     });
     
-    // Add order counts to customers
+    // Add order counts and affiliate info to customers
     customers = customers.map(customer => {
       const customerObj = customer.toObject();
-      customerObj.orderCount = orderCountMap[customer._id.toString()] || 0;
+      customerObj.orderCount = orderCountMap[customer.customerId] || 0;
+      // Add affiliate information
+      customerObj.affiliate = affiliateMap[customer.affiliateId] || null;
       return customerObj;
     });
     
