@@ -171,6 +171,14 @@
                       console.log('Stored affiliate data:', data.result.affiliate);
                     }
 
+                    // Use SessionManager to set auth data
+                    if (window.SessionManager && data.result.affiliate) {
+                      window.SessionManager.setAuth('affiliate', {
+                        token: data.result.token,
+                        userData: data.result.affiliate
+                      });
+                    }
+
                     // Navigate to affiliate dashboard - affiliate data should always be present
                     if (!data.result.affiliate || !data.result.affiliate.affiliateId) {
                       console.error('OAuth login successful but affiliate data is missing:', data.result);
@@ -359,6 +367,14 @@
           // Store token in localStorage
             localStorage.setItem('affiliateToken', data.token);
             localStorage.setItem('currentAffiliate', JSON.stringify(data.affiliate));
+
+            // Use SessionManager to set auth data
+            if (window.SessionManager) {
+              window.SessionManager.setAuth('affiliate', {
+                token: data.token,
+                userData: data.affiliate
+              });
+            }
 
             console.log('Login successful, redirecting to dashboard');
 

@@ -17,9 +17,22 @@ async function initializeDashboard() {
   console.log('Token exists:', !!token);
   console.log('Customer data exists:', !!customerStr);
 
+  // Update session activity if authenticated
+  if (token && window.SessionManager) {
+    window.SessionManager.updateActivity('customer');
+  }
+
   if (!token || !customerStr) {
     console.log('No authentication found, redirecting to login');
-    window.location.href = '/embed-app.html?route=/customer-login';
+    // Use embed navigation
+    if (window.parent !== window) {
+      window.parent.postMessage({
+        type: 'navigate',
+        data: { page: '/customer-login' }
+      }, '*');
+    } else {
+      window.location.href = '/embed-app.html?route=/customer-login';
+    }
     return;
   }
 
@@ -459,7 +472,21 @@ async function saveProfile() {
 function handleLogout() {
   localStorage.removeItem('customerToken');
   localStorage.removeItem('currentCustomer');
-  window.location.href = '/embed-app.html?route=/customer-login';
+  
+  // Clear session manager data
+  if (window.SessionManager) {
+    window.SessionManager.clearAuth('customer');
+  }
+
+  // Use embed navigation
+  if (window.parent !== window) {
+    window.parent.postMessage({
+      type: 'navigate',
+      data: { page: '/customer-login' }
+    }, '*');
+  } else {
+    window.location.href = '/embed-app.html?route=/customer-login';
+  }
 }
 
 // Show orders (alias for loadOrders)

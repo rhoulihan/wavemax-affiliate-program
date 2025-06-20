@@ -82,6 +82,14 @@
               localStorage.setItem('customerToken', data.token);
               localStorage.setItem('currentCustomer', JSON.stringify(data.customer));
 
+              // Use SessionManager to set auth data
+              if (window.SessionManager) {
+                window.SessionManager.setAuth('customer', {
+                  token: data.token,
+                  userData: data.customer
+                });
+              }
+
               // Notify parent of successful login
               sendMessageToParent('login-success', {
                 userType: 'customer',
@@ -232,6 +240,14 @@
 
                   localStorage.setItem('currentCustomer', JSON.stringify(data.result.customer));
                   console.log('Stored customer data:', data.result.customer);
+
+                  // Use SessionManager to set auth data
+                  if (window.SessionManager) {
+                    window.SessionManager.setAuth('customer', {
+                      token: data.result.token,
+                      userData: data.result.customer
+                    });
+                  }
 
                   // Notify parent of successful login
                   sendMessageToParent('login-success', {

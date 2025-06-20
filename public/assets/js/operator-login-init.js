@@ -76,6 +76,15 @@
         localStorage.setItem('operatorRefreshToken', data.refreshToken);
         localStorage.setItem('operatorData', JSON.stringify(data.operator));
 
+        // Use SessionManager to set auth data
+        if (window.SessionManager) {
+          window.SessionManager.setAuth('operator', {
+            token: data.token,
+            refreshToken: data.refreshToken,
+            userData: data.operator
+          });
+        }
+
         // Show success message
         errorMessage.style.display = 'none';
         submitText.textContent = 'SUCCESS!';

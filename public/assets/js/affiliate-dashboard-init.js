@@ -102,6 +102,11 @@ function initializeAffiliateDashboard() {
   console.log('Dashboard initialization - Token:', token ? 'exists' : 'missing');
   console.log('Dashboard initialization - Affiliate:', currentAffiliate ? currentAffiliate.affiliateId : 'missing');
 
+  // Update session activity if authenticated
+  if (token && window.SessionManager) {
+    window.SessionManager.updateActivity('affiliate');
+  }
+
   if (!token || !currentAffiliate) {
     // Redirect to login if not authenticated
     if (isEmbedded) {
@@ -109,7 +114,7 @@ function initializeAffiliateDashboard() {
       console.log('Not authenticated, navigating to login');
       window.parent.postMessage({
         type: 'navigate',
-        data: { url: '/affiliate-login' }
+        data: { page: '/affiliate-login' }
       }, '*');
     } else {
       window.location.href = '/embed-app.html?route=/affiliate-login';
@@ -209,12 +214,17 @@ function initializeAffiliateDashboard() {
       localStorage.removeItem('affiliateToken');
       localStorage.removeItem('currentAffiliate');
 
+      // Clear session manager data
+      if (window.SessionManager) {
+        window.SessionManager.clearAuth('affiliate');
+      }
+
       if (isEmbedded) {
         console.log('Sending logout navigation message');
         // For embedded, use postMessage navigation
         window.parent.postMessage({
           type: 'navigate',
-          data: { url: '/affiliate-login' }
+          data: { page: '/affiliate-login' }
         }, '*');
 
         // Fallback direct navigation after a short delay
