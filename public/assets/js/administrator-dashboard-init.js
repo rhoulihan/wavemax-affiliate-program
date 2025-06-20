@@ -584,30 +584,69 @@
   
   // Generate and print customer cards
   async function generateAndPrintCards(customers) {
-    let printContainer = document.getElementById('printContainer');
-    
-    // If print container doesn't exist, create it
-    if (!printContainer) {
-      console.warn('Print container not found, creating one');
-      printContainer = document.createElement('div');
-      printContainer.id = 'printContainer';
-      printContainer.className = 'print-container';
-      document.body.appendChild(printContainer);
+    // Check if jsPDF is available
+    if (typeof window.jspdf === 'undefined') {
+      console.error('jsPDF library not loaded');
+      alert('PDF generation library not loaded. Please refresh the page and try again.');
+      return;
     }
     
-    printContainer.innerHTML = '';
+    // Create new PDF with 4x6 inch dimensions
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF({
+      orientation: 'portrait',
+      unit: 'in',
+      format: [4, 6]
+    });
+    
+    let isFirstCard = true;
     
     for (const customer of customers) {
-      const card = document.createElement('div');
-      card.className = 'customer-card';
+      // Add new page for each card except the first
+      if (!isFirstCard) {
+        pdf.addPage();
+      }
+      isFirstCard = false;
+      
+      // Set margins and positions
+      const margin = 0.375;
+      const pageWidth = 4;
+      const pageHeight = 6;
+      const contentWidth = pageWidth - (margin * 2);
+      
+      // Add WaveMAX Laundry logo/title
+      pdf.setFontSize(18);
+      pdf.setFont(undefined, 'bold');
+      pdf.setTextColor(74, 144, 226); // #4A90E2
+      pdf.text('WaveMAX Laundry', margin, margin + 0.3);
+      
+      // Add customer name
+      pdf.setFontSize(16);
+      pdf.setFont(undefined, 'bold');
+      pdf.setTextColor(0, 0, 0);
+      pdf.text(customer.name, margin, margin + 0.7);
+      
+      // Add customer address
+      pdf.setFontSize(11);
+      pdf.setFont(undefined, 'normal');
+      const addressLines = [
+        customer.address,
+        customer.phone,
+        customer.email || ''
+      ].filter(line => line);
+      
+      let yPosition = margin + 1;
+      addressLines.forEach(line => {
+        pdf.text(line, margin, yPosition);
+        yPosition += 0.2;
+      });
       
       // Generate QR code URL
       const qrData = `https://www.wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program/customer?cust=${customer.id}`;
       
-      // Create QR code as data URL for better print compatibility
-      let qrImageUrl = '';
+      // Create QR code
       try {
-        qrImageUrl = await QRCode.toDataURL(qrData, {
+        const qrImageUrl = await QRCode.toDataURL(qrData, {
           width: 150,
           margin: 1,
           errorCorrectionLevel: 'M',
@@ -616,135 +655,35 @@
             light: '#FFFFFF'
           }
         });
+        
+        // Add QR code to PDF (bottom right)
+        const qrSize = 1.25;
+        const qrX = pageWidth - margin - qrSize;
+        const qrY = pageHeight - margin - qrSize;
+        pdf.addImage(qrImageUrl, 'PNG', qrX, qrY, qrSize, qrSize);
       } catch (err) {
         console.error('QR Code generation failed:', err);
       }
-      
-      card.innerHTML = `
-        <div class="card-header">
-          <div class="card-info">
-            <div class="card-logo">WaveMAX Laundry</div>
-            <div class="customer-name">${customer.name}</div>
-            <div class="customer-address">
-              ${customer.address}<br>
-              ${customer.phone}<br>
-              ${customer.email || ''}
-            </div>
-          </div>
-        </div>
-        <div class="qr-code">
-          ${qrImageUrl ? `<img src="${qrImageUrl}" alt="QR Code" />` : '<div style="text-align: center; color: #999;">QR Code Error</div>'}
-        </div>
-      `;
-      
-      printContainer.appendChild(card);
     }
     
-    // Debug: Log the print container content
-    console.log('Print container HTML:', printContainer.innerHTML);
-    console.log('Number of cards generated:', customers.length);
+    // Generate filename with timestamp
+    const timestamp = new Date().toISOString().slice(0, 10);
+    const filename = `customer-cards-${timestamp}.pdf`;
     
-    // Ensure print styles are applied
-    if (!document.getElementById('printStyles')) {
-      const printStyles = document.createElement('style');
-      printStyles.id = 'printStyles';
-      printStyles.textContent = `
-        @media print {
-          @page {
-            size: 4in 6in;
-            margin: 0;
-          }
-          
-          body * {
-            visibility: hidden !important;
-          }
-          
-          .print-container,
-          .print-container * {
-            visibility: visible !important;
-          }
-          
-          .print-container {
-            display: block !important;
-            position: absolute !important;
-            top: 0 !important;
-            left: 0 !important;
-            width: 4in !important;
-            z-index: 9999 !important;
-          }
-          
-          .customer-card {
-            display: block !important;
-            visibility: visible !important;
-            width: 4in !important;
-            height: 6in !important;
-            margin: 0 !important;
-            padding: 0.375in !important;
-            border: none !important;
-            page-break-after: always !important;
-            page-break-inside: avoid !important;
-            box-sizing: border-box !important;
-            position: relative !important;
-            background: white !important;
-          }
-          
-          .customer-card .card-header {
-            margin-bottom: 0.25in !important;
-          }
-          
-          .customer-card .card-logo {
-            font-size: 1.25rem !important;
-            font-weight: bold !important;
-            color: #000 !important;
-            margin-bottom: 0.125in !important;
-          }
-          
-          .customer-card .customer-name {
-            font-size: 1.1rem !important;
-            font-weight: 600 !important;
-            margin-bottom: 0.125in !important;
-          }
-          
-          .customer-card .customer-address {
-            font-size: 0.8rem !important;
-            line-height: 1.3 !important;
-            color: #333 !important;
-          }
-          
-          .customer-card .qr-code {
-            position: absolute !important;
-            bottom: 0.375in !important;
-            right: 0.375in !important;
-            width: 1.25in !important;
-            height: 1.25in !important;
-            padding: 0 !important;
-            border: none !important;
-          }
-          
-          .customer-card .qr-code img {
-            width: 100% !important;
-            height: 100% !important;
-          }
-        }
-      `;
-      document.head.appendChild(printStyles);
-    }
+    // Save the PDF and open in new window for printing
+    const pdfBlob = pdf.output('blob');
+    const pdfUrl = URL.createObjectURL(pdfBlob);
     
-    // Force layout recalculation
-    printContainer.offsetHeight;
+    // Open PDF in new window
+    const printWindow = window.open(pdfUrl, '_blank');
     
-    // Show print instructions
-    alert('Print Settings:\n\n1. Set Paper Size to 4x6 inches (or Index Card 4x6)\n2. Set Orientation to Portrait\n3. Set Margins to None\n4. Disable Headers and Footers\n\nClick OK to open print dialog.');
-    
-    // Trigger print with longer delay to ensure rendering
+    // Clean up the URL immediately after opening
+    // The browser will have already loaded the PDF data
     setTimeout(() => {
-      window.print();
-      
-      // Clean up print container after printing
-      setTimeout(() => {
-        printContainer.innerHTML = '';
-      }, 1000);
-    }, 1000);
+      URL.revokeObjectURL(pdfUrl);
+    }, 100); // Very short delay to ensure window has opened
+    
+    console.log(`Generated PDF with ${customers.length} customer cards`);
   }
   
   // Debounce helper
