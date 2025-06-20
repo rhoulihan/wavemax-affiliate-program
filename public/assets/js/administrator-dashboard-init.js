@@ -24,19 +24,13 @@
   const adminData = JSON.parse(localStorage.getItem('adminData') || '{}');
   const requirePasswordChange = localStorage.getItem('requirePasswordChange');
 
-  console.log('[Admin Dashboard] Token exists:', !!token);
-  console.log('[Admin Dashboard] Require password change:', requirePasswordChange);
-  console.log('[Admin Dashboard] SessionManager available:', !!window.SessionManager);
-
   // Update session activity if authenticated
   if (token && window.SessionManager) {
     window.SessionManager.updateActivity('administrator');
-    console.log('[Admin Dashboard] Updated session activity');
   }
 
   // Redirect to login if no token or if password change is still required
   if (!token || requirePasswordChange === 'true') {
-    console.log('[Admin Dashboard] Redirecting to login - No token or password change required');
     // Clear everything and redirect to login
     localStorage.removeItem('adminToken');
     localStorage.removeItem('adminRefreshToken');

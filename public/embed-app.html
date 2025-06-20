@@ -201,7 +201,13 @@
                 }
             }
             
-            let route = params.get('route') || '/';
+            let route = params.get('route');
+            
+            // If no route in URL, check localStorage for saved route
+            if (!route) {
+                route = localStorage.getItem('currentRoute') || '/';
+                console.log('No route in URL, using saved route:', route);
+            }
             
             // If route is customer-login with affid, redirect to registration
             if (route === '/customer-login' && affid) {
@@ -211,8 +217,11 @@
             
             // Use SessionManager to validate route based on authentication
             if (window.SessionManager) {
+                const originalRoute = route;
                 route = window.SessionManager.getAuthenticatedRoute(route);
-                console.log('SessionManager adjusted route to:', route);
+                if (originalRoute !== route) {
+                    console.log('SessionManager adjusted route from', originalRoute, 'to:', route);
+                }
             }
             
             console.log('Final route:', route);
@@ -321,6 +330,9 @@
                 
                 container.innerHTML = html;
                 currentRoute = route;
+                
+                // Store the current route for persistence
+                localStorage.setItem('currentRoute', route);
                 
                 // Set data-route attribute on body for route-specific styling
                 document.body.setAttribute('data-route', route);
@@ -491,6 +503,9 @@
         // Navigate to a route
         function navigateTo(route, params = {}) {
             console.log('Navigating to:', route, 'with params:', params);
+            
+            // Store the current route in localStorage for persistence
+            localStorage.setItem('currentRoute', route);
             
             // Update URL parameter
             const url = new URL(window.location);
