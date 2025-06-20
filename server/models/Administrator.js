@@ -3,7 +3,7 @@
 
 const mongoose = require('mongoose');
 const crypto = require('crypto');
-const { encrypt, decrypt } = require('../utils/encryption');
+const encryptionUtil = require('../utils/encryption');
 const { validatePasswordStrength } = require('../utils/passwordValidator');
 
 const administratorSchema = new mongoose.Schema({
@@ -29,10 +29,13 @@ const administratorSchema = new mongoose.Schema({
     trim: true,
     match: [/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/, 'Please enter a valid email']
   },
-  password: {
+  passwordSalt: {
     type: String,
-    required: true,
-    select: false
+    required: true
+  },
+  passwordHash: {
+    type: String,
+    required: true
   },
   role: {
     type: String,
@@ -83,7 +86,8 @@ const administratorSchema = new mongoose.Schema({
     default: false
   },
   passwordHistory: [{
-    password: String,
+    passwordHash: String,
+    passwordSalt: String,
     changedAt: Date
   }],
   createdAt: {
@@ -117,48 +121,6 @@ administratorSchema.pre('save', async function(next) {
                    crypto.randomBytes(3).toString('hex').toUpperCase();
   }
 
-  // Validate and hash password if modified
-  if (this.isModified('password')) {
-    // Validate password strength
-    const validation = validatePasswordStrength(this.password, {
-      username: this.email.split('@')[0], // Use email prefix as username
-      email: this.email
-    });
-
-    if (!validation.success) {
-      const error = new Error(validation.errors.join('; '));
-      error.name = 'ValidationError';
-      throw error;
-    }
-
-    const salt = crypto.randomBytes(16);
-    const hashedPassword = crypto.pbkdf2Sync(this.password, salt, 100000, 64, 'sha512')
-      .toString('hex') + ':' + salt.toString('hex');
-
-    // Store the old password in history before updating
-    if (!this.isNew && this._id) {
-      // Get the current (old) password from database
-      const currentAdmin = await this.constructor.findById(this._id).select('+password');
-      if (currentAdmin && currentAdmin.password) {
-        if (!this.passwordHistory) {
-          this.passwordHistory = [];
-        }
-        this.passwordHistory.push({
-          password: currentAdmin.password, // Store the OLD hashed password
-          changedAt: new Date()
-        });
-        // Keep only last 5 passwords
-        if (this.passwordHistory.length > 5) {
-          this.passwordHistory = this.passwordHistory.slice(-5);
-        }
-      }
-      // Clear requirePasswordChange flag when password is changed
-      this.requirePasswordChange = false;
-    }
-
-    this.password = hashedPassword;
-  }
-
   // Set default permissions if none provided
   if (this.isNew && this.permissions.length === 0) {
     this.permissions = ['system_config', 'operator_management', 'view_analytics', 'manage_affiliates'];
@@ -167,12 +129,9 @@ administratorSchema.pre('save', async function(next) {
   next();
 });
 
-// Method to verify password
+// Method to verify password (now using passwordSalt and passwordHash)
 administratorSchema.methods.verifyPassword = function(password) {
-  const [hash, salt] = this.password.split(':');
-  const verifyHash = crypto.pbkdf2Sync(password, Buffer.from(salt, 'hex'), 100000, 64, 'sha512')
-    .toString('hex');
-  return hash === verifyHash;
+  return encryptionUtil.verifyPassword(password, this.passwordSalt, this.passwordHash);
 };
 
 // Method to check if password has been used before
@@ -182,10 +141,7 @@ administratorSchema.methods.isPasswordInHistory = function(password) {
   }
 
   return this.passwordHistory.some(historyEntry => {
-    const [hash, salt] = historyEntry.password.split(':');
-    const verifyHash = crypto.pbkdf2Sync(password, Buffer.from(salt, 'hex'), 100000, 64, 'sha512')
-      .toString('hex');
-    return hash === verifyHash;
+    return encryptionUtil.verifyPassword(password, historyEntry.passwordSalt, historyEntry.passwordHash);
   });
 };
 

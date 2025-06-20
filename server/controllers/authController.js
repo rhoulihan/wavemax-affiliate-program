@@ -228,7 +228,7 @@ exports.administratorLogin = async (req, res) => {
     const { email, password } = req.body;
 
     // Find administrator by email
-    const administrator = await Administrator.findOne({ email }).select('+password');
+    const administrator = await Administrator.findOne({ email });
 
     if (!administrator) {
       logLoginAttempt(false, 'administrator', email, req, 'User not found');
