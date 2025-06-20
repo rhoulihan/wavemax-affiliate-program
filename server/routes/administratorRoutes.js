@@ -26,6 +26,9 @@ router.put('/operators/:operatorId', checkAdminPermission(['operator_management'
 router.delete('/operators/:operatorId', checkAdminPermission(['operator_management']), administratorController.deactivateOperator);
 router.post('/operators/:operatorId/reset-password', checkAdminPermission(['operator_management']), administratorController.resetOperatorPassword);
 
+// Affiliates list (for dropdowns, filters, etc.)
+router.get('/affiliates', checkAdminPermission(['view_analytics']), administratorController.getAffiliatesList);
+
 // Analytics (must come before /:id routes)
 router.get('/analytics/orders', checkAdminPermission(['view_analytics']), administratorController.getOrderAnalytics);
 router.get('/analytics/operators', checkAdminPermission(['view_analytics']), administratorController.getOperatorAnalytics);

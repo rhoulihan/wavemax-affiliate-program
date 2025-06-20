@@ -134,7 +134,7 @@
 
           // Redirect to dashboard
           setTimeout(() => {
-            window.location.href = '/administrator-dashboard-embed.html';
+            window.location.href = '/embed-app.html?route=/administrator-dashboard';
           }, 1000);
         }
       } else {

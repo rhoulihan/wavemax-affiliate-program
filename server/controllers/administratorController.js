@@ -1659,6 +1659,60 @@ exports.exportReport = async (req, res) => {
   }
 };
 
+/**
+ * Get list of affiliates for dropdowns and filters
+ */
+exports.getAffiliatesList = async (req, res) => {
+  try {
+    const { search, status, limit = 100 } = req.query;
+    
+    // Build query
+    const query = {};
+    
+    if (search) {
+      query.$or = [
+        { businessName: { $regex: search, $options: 'i' } },
+        { firstName: { $regex: search, $options: 'i' } },
+        { lastName: { $regex: search, $options: 'i' } },
+        { email: { $regex: search, $options: 'i' } },
+        { affiliateId: { $regex: search, $options: 'i' } }
+      ];
+    }
+    
+    if (status === 'active') {
+      query.isActive = true;
+    } else if (status === 'inactive') {
+      query.isActive = false;
+    }
+    
+    const affiliates = await Affiliate.find(query)
+      .select('affiliateId firstName lastName businessName email isActive serviceArea')
+      .limit(parseInt(limit))
+      .sort('businessName');
+    
+    res.json({
+      success: true,
+      affiliates: affiliates.map(affiliate => ({
+        _id: affiliate._id,
+        affiliateId: affiliate.affiliateId,
+        businessName: affiliate.businessName,
+        firstName: affiliate.firstName,
+        lastName: affiliate.lastName,
+        email: affiliate.email,
+        isActive: affiliate.isActive,
+        serviceArea: affiliate.serviceArea
+      }))
+    });
+  } catch (error) {
+    console.error('Error fetching affiliates list:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch affiliates list',
+      error: error.message
+    });
+  }
+};
+
 // System Configuration
 
 /**

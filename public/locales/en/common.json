@@ -859,13 +859,22 @@
         "filterByAffiliate": "Filter by Affiliate",
         "filterByStatus": "Filter by Status",
         "new": "New (No Orders)",
+        "statusNEW": "New",
+        "statusACTIVE": "Active",
         "noCustomers": "No customers found",
         "orders": "Orders",
         "joined": "Joined",
         "printCard": "Print Card",
         "printSelected": "Print Selected Cards",
         "printSelectedCount": "Print {{count}} Selected Cards",
-        "selectAll": "Select All"
+        "selectAll": "Select All",
+        "customerId": "Customer ID",
+        "name": "Name",
+        "contact": "Contact",
+        "address": "Address",
+        "affiliate": "Affiliate",
+        "status": "Status",
+        "actions": "Actions"
       },
       "analytics": {
         "title": "Analytics Overview",

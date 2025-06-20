@@ -202,13 +202,14 @@
 
       // Check if auto-resize is disabled
       const autoResizeDisabled = document.body.hasAttribute('data-disable-auto-resize');
+      let resizeObserver = null; // Define at function scope
 
       if (!autoResizeDisabled) {
         // Send initial height (force to ensure it's sent)
         sendHeight(true);
 
         // Monitor for changes
-        const resizeObserver = new ResizeObserver(() => {
+        resizeObserver = new ResizeObserver(() => {
           sendHeight();
         });
         resizeObserver.observe(document.body);

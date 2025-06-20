@@ -74,6 +74,13 @@ router.get('/payment_callback', async (req, res) => {
       // Get customer for email
       const customer = await Customer.findOne({ customerId: order.customerId });
 
+      // Update customer isActive to true on successful payment
+      if (customer && !customer.isActive) {
+        customer.isActive = true;
+        await customer.save();
+        console.log('Updated customer isActive status to true for customer:', customer.customerId);
+      }
+
       // Send confirmation email
       if (customer) {
         try {

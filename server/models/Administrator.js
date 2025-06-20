@@ -31,11 +31,13 @@ const administratorSchema = new mongoose.Schema({
   },
   passwordSalt: {
     type: String,
-    required: true
+    required: true,
+    select: true
   },
   passwordHash: {
     type: String,
-    required: true
+    required: true,
+    select: true
   },
   role: {
     type: String,
@@ -216,15 +218,16 @@ administratorSchema.statics.findActive = function() {
   return this.find({ isActive: true });
 };
 
-// Static method to find by email with password
+// Static method to find by email with password fields
 administratorSchema.statics.findByEmailWithPassword = function(email) {
-  return this.findOne({ email: email.toLowerCase() }).select('+password');
+  return this.findOne({ email: email.toLowerCase() }).select('+passwordSalt +passwordHash');
 };
 
 // Transform output
 administratorSchema.set('toJSON', {
   transform: function(doc, ret) {
-    delete ret.password;
+    delete ret.passwordSalt;
+    delete ret.passwordHash;
     delete ret.passwordResetToken;
     delete ret.passwordResetExpires;
     delete ret.__v;

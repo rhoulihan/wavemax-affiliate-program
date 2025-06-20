@@ -138,6 +138,13 @@ exports.createOrder = async (req, res) => {
 
     await newOrder.save();
 
+    // Update customer isActive to true on first order
+    if (!customer.isActive) {
+      customer.isActive = true;
+      await customer.save();
+      console.log('Updated customer isActive status to true for customer:', customer.customerId);
+    }
+
     // Send notification emails (don't let email failures stop the order)
     try {
       await emailService.sendCustomerOrderConfirmationEmail(customer, newOrder, affiliate);
