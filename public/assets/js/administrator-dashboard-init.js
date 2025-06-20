@@ -116,6 +116,11 @@
     // Save current tab to localStorage
     localStorage.setItem('adminCurrentTab', targetTab);
 
+    // Update URL with tab parameter for browser history
+    if (window.updateTabInUrl) {
+      window.updateTabInUrl(targetTab);
+    }
+
     // Load tab data
     loadTabData(targetTab);
   }
@@ -128,9 +133,19 @@
     });
   });
 
-  // Restore last active tab or default to dashboard
-  const savedTab = localStorage.getItem('adminCurrentTab') || 'dashboard';
+  // Check URL for tab parameter first, then localStorage, then default
+  const urlParams = new URLSearchParams(window.location.search);
+  const urlTab = urlParams.get('tab');
+  const savedTab = urlTab || localStorage.getItem('adminCurrentTab') || 'dashboard';
   switchToTab(savedTab);
+
+  // Listen for tab restore messages from browser navigation
+  window.addEventListener('message', function(event) {
+    if (event.data && event.data.type === 'restore-tab' && event.data.tab) {
+      console.log('[Admin Dashboard] Restoring tab from browser navigation:', event.data.tab);
+      switchToTab(event.data.tab);
+    }
+  });
 
   // Create authenticated fetch with CSRF support
   const authenticatedFetch = window.CsrfUtils.createAuthenticatedFetch(() => token);

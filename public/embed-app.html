@@ -501,7 +501,7 @@
         }
         
         // Navigate to a route
-        function navigateTo(route, params = {}) {
+        function navigateTo(route, params = {}, options = {}) {
             console.log('Navigating to:', route, 'with params:', params);
             
             // Store the current route in localStorage for persistence
@@ -527,7 +527,19 @@
                 url.searchParams.set(key, params[key]);
             });
             
-            window.history.pushState({}, '', url);
+            // Store state for history navigation
+            const state = {
+                route: route,
+                tab: params.tab || null,
+                timestamp: Date.now()
+            };
+            
+            // Use replaceState if specified (for tab changes within same route)
+            if (options.replaceState) {
+                window.history.replaceState(state, '', url);
+            } else {
+                window.history.pushState(state, '', url);
+            }
             
             // Load the new page
             loadPage(route);
@@ -750,10 +762,41 @@
         window.requestGeocodeForward = requestGeocodeForward;
         window.requestGeocodeReverse = requestGeocodeReverse;
         
+        // Function to update URL with tab parameter (for dashboards to call)
+        window.updateTabInUrl = function(tab) {
+            const url = new URL(window.location);
+            const currentRoute = url.searchParams.get('route') || localStorage.getItem('currentRoute') || '/';
+            
+            // Update tab parameter
+            url.searchParams.set('tab', tab);
+            
+            // Update history state without reloading page
+            const state = {
+                route: currentRoute,
+                tab: tab,
+                timestamp: Date.now()
+            };
+            
+            window.history.pushState(state, '', url);
+        };
+        
         // Handle browser back/forward
-        window.addEventListener('popstate', function() {
+        window.addEventListener('popstate', function(event) {
+            console.log('Popstate event:', event.state);
+            
             const route = getRouteFromUrl();
             loadPage(route);
+            
+            // If state contains tab information, notify the dashboard
+            if (event.state && event.state.tab) {
+                // Wait for page to load then switch to the tab
+                setTimeout(() => {
+                    window.postMessage({
+                        type: 'restore-tab',
+                        tab: event.state.tab
+                    }, window.location.origin);
+                }, 100);
+            }
         });
         
         // ResizeObserver removed - handled by embed-navigation.js
@@ -762,6 +805,16 @@
         document.addEventListener('DOMContentLoaded', function() {
             const initialRoute = getRouteFromUrl();
             loadPage(initialRoute);
+            
+            // Check if we have tab state from history
+            if (window.history.state && window.history.state.tab) {
+                setTimeout(() => {
+                    window.postMessage({
+                        type: 'restore-tab',
+                        tab: window.history.state.tab
+                    }, window.location.origin);
+                }, 100);
+            }
             
             // Height observation is handled by embed-navigation.js
         });

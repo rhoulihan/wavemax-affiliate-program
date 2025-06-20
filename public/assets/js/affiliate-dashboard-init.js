@@ -190,6 +190,11 @@ function initializeAffiliateDashboard() {
       // Save current tab to localStorage
       localStorage.setItem('affiliateCurrentTab', tabId);
 
+      // Update URL with tab parameter for browser history
+      if (window.updateTabInUrl) {
+        window.updateTabInUrl(tabId);
+      }
+
       // Load tab-specific data
       if (tabId === 'pickups') {
         loadPickupRequests(affiliateId);
@@ -211,7 +216,10 @@ function initializeAffiliateDashboard() {
     });
   });
 
-  // Restore last active tab or use customer filter or default to pickups
+  // Check URL for tab parameter first, then handle customer filter, then localStorage
+  const urlParams = new URLSearchParams(window.location.search);
+  const urlTab = urlParams.get('tab');
+  
   if (filterCustomerId) {
     // If filtering by customer, switch to customers tab
     setTimeout(() => {
@@ -225,11 +233,22 @@ function initializeAffiliateDashboard() {
         }
       }, 300);
     }, 500);
+  } else if (urlTab) {
+    // URL tab parameter takes precedence
+    switchToTab(urlTab);
   } else {
     // Restore saved tab or default to pickups
     const savedTab = localStorage.getItem('affiliateCurrentTab') || 'pickups';
     switchToTab(savedTab);
   }
+
+  // Listen for tab restore messages from browser navigation
+  window.addEventListener('message', function(event) {
+    if (event.data && event.data.type === 'restore-tab' && event.data.tab) {
+      console.log('[Affiliate Dashboard] Restoring tab from browser navigation:', event.data.tab);
+      switchToTab(event.data.tab);
+    }
+  });
 
   // Logout functionality
   const logoutBtn = document.getElementById('logoutBtn');
