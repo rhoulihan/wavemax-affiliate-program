@@ -4,9 +4,9 @@
 const mongoose = require('mongoose');
 
 const systemConfigSchema = new mongoose.Schema({
-  key: { 
-    type: String, 
-    unique: true, 
+  key: {
+    type: String,
+    unique: true,
     required: true,
     trim: true
   },
@@ -40,17 +40,17 @@ const systemConfigSchema = new mongoose.Schema({
     regex: String,
     allowedValues: [mongoose.Schema.Types.Mixed]
   },
-  updatedBy: { 
-    type: mongoose.Schema.Types.ObjectId, 
-    ref: 'Administrator' 
+  updatedBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Administrator'
   },
-  createdAt: { 
-    type: Date, 
-    default: Date.now 
+  createdAt: {
+    type: Date,
+    default: Date.now
   },
-  updatedAt: { 
-    type: Date, 
-    default: Date.now 
+  updatedAt: {
+    type: Date,
+    default: Date.now
   }
 });
 
@@ -58,7 +58,7 @@ const systemConfigSchema = new mongoose.Schema({
 systemConfigSchema.pre('save', function(next) {
   // Update timestamp
   this.updatedAt = new Date();
-  
+
   // Validate value based on dataType
   if (this.isModified('value')) {
     switch (this.dataType) {
@@ -76,13 +76,13 @@ systemConfigSchema.pre('save', function(next) {
         }
       }
       break;
-      
+
     case 'boolean':
       if (typeof this.value !== 'boolean') {
         return next(new Error(`Value must be a boolean for key: ${this.key}`));
       }
       break;
-      
+
     case 'string':
       if (typeof this.value !== 'string') {
         return next(new Error(`Value must be a string for key: ${this.key}`));
@@ -95,20 +95,20 @@ systemConfigSchema.pre('save', function(next) {
         }
       }
       break;
-      
+
     case 'array':
       if (!Array.isArray(this.value)) {
         return next(new Error(`Value must be an array for key: ${this.key}`));
       }
       break;
-      
+
     case 'object':
       if (typeof this.value !== 'object' || Array.isArray(this.value)) {
         return next(new Error(`Value must be an object for key: ${this.key}`));
       }
       break;
     }
-    
+
     // Check allowed values
     if (this.validation && this.validation.allowedValues && this.validation.allowedValues.length > 0) {
       if (!this.validation.allowedValues.includes(this.value)) {
@@ -116,7 +116,7 @@ systemConfigSchema.pre('save', function(next) {
       }
     }
   }
-  
+
   next();
 });
 
@@ -135,16 +135,16 @@ systemConfigSchema.statics.setValue = async function(key, value, updatedBy = nul
   if (!config) {
     throw new Error(`Configuration key not found: ${key}`);
   }
-  
+
   if (!config.isEditable) {
     throw new Error(`Configuration is not editable: ${key}`);
   }
-  
+
   config.value = value;
   if (updatedBy) {
     config.updatedBy = updatedBy;
   }
-  
+
   return config.save();
 };
 
@@ -184,7 +184,7 @@ systemConfigSchema.statics.initializeDefaults = async function() {
       dataType: 'number',
       validation: { min: 1, max: 20 }
     },
-    
+
     // Processing settings
     {
       key: 'order_processing_timeout_minutes',
@@ -211,7 +211,7 @@ systemConfigSchema.statics.initializeDefaults = async function() {
       category: 'processing',
       dataType: 'boolean'
     },
-    
+
     // Notification settings
     {
       key: 'operator_assignment_notification',
@@ -230,7 +230,7 @@ systemConfigSchema.statics.initializeDefaults = async function() {
       dataType: 'number',
       validation: { min: 15, max: 120 }
     },
-    
+
     // Pricing settings
     {
       key: 'wdf_base_rate_per_pound',
@@ -252,7 +252,7 @@ systemConfigSchema.statics.initializeDefaults = async function() {
       validation: { min: 0.00, max: 50.00 },
       isPublic: true
     },
-    
+
     // System settings
     {
       key: 'maintenance_mode',
@@ -270,12 +270,12 @@ systemConfigSchema.statics.initializeDefaults = async function() {
       description: 'System timezone',
       category: 'system',
       dataType: 'string',
-      validation: { 
+      validation: {
         allowedValues: ['America/Chicago', 'America/New_York', 'America/Los_Angeles', 'UTC']
       }
     }
   ];
-  
+
   // Insert defaults if they don't exist
   for (const config of defaultConfigs) {
     await this.findOneAndUpdate(

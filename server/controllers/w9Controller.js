@@ -23,7 +23,7 @@ exports.uploadW9Document = async (req, res) => {
     }
 
     const affiliateId = req.user.affiliateId;
-    
+
     // Get affiliate
     const affiliate = await Affiliate.findOne({ affiliateId });
     if (!affiliate) {
@@ -38,8 +38,8 @@ exports.uploadW9Document = async (req, res) => {
     });
 
     if (existingPending) {
-      return res.status(400).json({ 
-        message: 'You already have a W-9 document pending review. Please wait for verification before uploading another.' 
+      return res.status(400).json({
+        message: 'You already have a W-9 document pending review. Please wait for verification before uploading another.'
       });
     }
 
@@ -90,13 +90,13 @@ exports.uploadW9Document = async (req, res) => {
 
   } catch (error) {
     console.error('Error uploading W-9:', error);
-    
+
     // Log failed upload
     await W9AuditService.logUploadAttempt(req, req.user?.affiliateId, false, {
       errorMessage: error.message,
       errorCode: error.code
     });
-    
+
     res.status(500).json({ message: 'Error uploading W-9 document', error: error.message });
   }
 };
@@ -108,10 +108,10 @@ exports.getW9Status = async (req, res) => {
   try {
     console.log('W9 Status Request - User:', req.user);
     const affiliateId = req.user.affiliateId;
-    
+
     const affiliate = await Affiliate.findOne({ affiliateId })
       .select('w9Information firstName lastName email');
-    
+
     if (!affiliate) {
       return res.status(404).json({ message: 'Affiliate not found' });
     }
@@ -150,20 +150,20 @@ exports.getW9Status = async (req, res) => {
 exports.downloadOwnW9 = async (req, res) => {
   try {
     const affiliateId = req.user.affiliateId;
-    
+
     // Find active W-9 document
     const w9Doc = await W9Document.findActiveForAffiliate(affiliateId);
-    
+
     if (!w9Doc) {
       return res.status(404).json({ message: 'No W-9 document found' });
     }
 
     // Retrieve document
     const fileData = await w9Storage.retrieve(w9Doc.documentId, affiliateId);
-    
+
     // Log download
     await W9AuditService.logDownload(req, affiliateId, w9Doc.documentId, false);
-    
+
     // Set headers for PDF download
     res.set({
       'Content-Type': 'application/pdf',
@@ -190,8 +190,8 @@ exports.getPendingW9Documents = async (req, res) => {
       verificationStatus: 'pending',
       isActive: true
     })
-    .populate('affiliateId', 'affiliateId firstName lastName email businessName')
-    .sort({ uploadedAt: 1 });
+      .populate('affiliateId', 'affiliateId firstName lastName email businessName')
+      .sort({ uploadedAt: 1 });
 
     const formattedDocs = pendingDocs.map(doc => ({
       documentId: doc.documentId,
@@ -221,26 +221,26 @@ exports.downloadW9ForReview = async (req, res) => {
   try {
     const { documentId } = req.params;
     const adminId = req.user.id;
-    
+
     // Find document
     const w9Doc = await W9Document.findOne({ documentId })
       .populate('affiliateId', 'affiliateId firstName lastName');
-    
+
     if (!w9Doc) {
       return res.status(404).json({ message: 'W-9 document not found' });
     }
 
     // Retrieve document
     const fileData = await w9Storage.retrieve(documentId, `admin:${adminId}`);
-    
+
     // Log admin download
     await W9AuditService.logDownload(
-      req, 
-      w9Doc.affiliateId.affiliateId, 
-      documentId, 
+      req,
+      w9Doc.affiliateId.affiliateId,
+      documentId,
       true  // isAdminDownload
     );
-    
+
     // Set headers for PDF download
     res.set({
       'Content-Type': 'application/pdf',
@@ -295,7 +295,7 @@ exports.verifyW9Document = async (req, res) => {
     affiliate.w9Information.taxIdLast4 = taxIdLast4;
     affiliate.w9Information.businessName = businessName || affiliate.businessName;
     affiliate.w9Information.quickbooksVendorId = quickbooksVendorId;
-    
+
     // Set expiry date (3 years from verification)
     const expiryDate = new Date();
     expiryDate.setFullYear(expiryDate.getFullYear() + 3);
@@ -434,26 +434,26 @@ exports.getW9History = async (req, res) => {
  */
 exports.getAuditLogs = async (req, res) => {
   try {
-    const { 
-      action, 
-      affiliateId, 
-      startDate, 
-      endDate, 
+    const {
+      action,
+      affiliateId,
+      startDate,
+      endDate,
       limit = 100,
-      offset = 0 
+      offset = 0
     } = req.query;
 
     // Build query
     const query = {};
-    
+
     if (action) {
       query.action = action;
     }
-    
+
     if (affiliateId) {
       query['targetInfo.affiliateId'] = affiliateId;
     }
-    
+
     if (startDate || endDate) {
       query.timestamp = {};
       if (startDate) {
@@ -467,10 +467,10 @@ exports.getAuditLogs = async (req, res) => {
     }
 
     const W9AuditLog = require('../models/W9AuditLog');
-    
+
     // Get total count for pagination
     const totalCount = await W9AuditLog.countDocuments(query);
-    
+
     // Get logs with pagination
     const logs = await W9AuditLog.find(query)
       .sort({ timestamp: -1 })
@@ -495,10 +495,10 @@ exports.getAuditLogs = async (req, res) => {
 
   } catch (error) {
     console.error('Error getting audit logs:', error);
-    res.status(500).json({ 
+    res.status(500).json({
       success: false,
       message: 'Error retrieving audit logs',
-      error: error.message 
+      error: error.message
     });
   }
 };
@@ -508,25 +508,25 @@ exports.getAuditLogs = async (req, res) => {
  */
 exports.exportAuditLogs = async (req, res) => {
   try {
-    const { 
-      action, 
-      affiliateId, 
-      startDate, 
+    const {
+      action,
+      affiliateId,
+      startDate,
       endDate,
       format = 'csv'
     } = req.query;
 
     // Build query (same as getAuditLogs)
     const query = {};
-    
+
     if (action) {
       query.action = action;
     }
-    
+
     if (affiliateId) {
       query['targetInfo.affiliateId'] = affiliateId;
     }
-    
+
     if (startDate || endDate) {
       query.timestamp = {};
       if (startDate) {
@@ -540,14 +540,14 @@ exports.exportAuditLogs = async (req, res) => {
     }
 
     const W9AuditLog = require('../models/W9AuditLog');
-    
+
     // Get all matching logs (no pagination for export)
     const logs = await W9AuditLog.find(query)
       .sort({ timestamp: -1 });
 
     if (format === 'csv') {
       const csv = require('csv-writer').createObjectCsvStringifier;
-      
+
       const csvStringifier = csv({
         header: [
           { id: 'timestamp', title: 'Timestamp' },
@@ -581,7 +581,7 @@ exports.exportAuditLogs = async (req, res) => {
       }));
 
       const csvContent = csvStringifier.getHeaderString() + csvStringifier.stringifyRecords(records);
-      
+
       // Generate filename with timestamp
       const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
       const filename = `w9-audit-log-${timestamp}.csv`;
@@ -608,10 +608,10 @@ exports.exportAuditLogs = async (req, res) => {
 
   } catch (error) {
     console.error('Error exporting audit logs:', error);
-    res.status(500).json({ 
+    res.status(500).json({
       success: false,
       message: 'Error exporting audit logs',
-      error: error.message 
+      error: error.message
     });
   }
 };

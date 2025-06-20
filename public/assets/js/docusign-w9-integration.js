@@ -17,10 +17,10 @@
   function initializeDocuSignW9() {
     // Replace upload form with DocuSign button
     replaceUploadWithDocuSign();
-    
+
     // Listen for return from DocuSign
     checkForDocuSignReturn();
-    
+
     // Add event listeners
     addEventListeners();
   }
@@ -126,7 +126,7 @@
   async function handleStartSigning() {
     try {
       console.log('Starting W9 signing process...');
-      
+
       // Disable button and show progress
       const button = document.getElementById('startW9Signing');
       button.disabled = true;
@@ -145,7 +145,7 @@
           'Authorization': `Bearer ${localStorage.getItem('affiliateToken')}`
         }
       });
-      
+
       console.log('Initiate signing response:', response.status);
 
       if (response.status === 401) {
@@ -166,22 +166,22 @@
 
       const data = await response.json();
       console.log('DocuSign response:', data);
-      
+
       // Store envelope ID
       docusignState.currentEnvelopeId = data.envelopeId;
       docusignState.isSigningInProgress = true;
-      
+
       // Store return URL for later
       docusignState.returnUrl = window.location.href;
-      
+
       // Open DocuSign in a new window
       console.log('Opening DocuSign window with URL:', data.signingUrl);
       openDocuSignWindow(data.signingUrl, data.envelopeId);
-      
+
     } catch (error) {
       console.error('Failed to start W9 signing:', error);
       showError(window.i18n.t('affiliate.dashboard.settings.signingError'));
-      
+
       // Re-enable button
       document.getElementById('startW9Signing').disabled = false;
       document.getElementById('signingInProgress').style.display = 'none';
@@ -194,63 +194,63 @@
   function handleDocuSignAuthorization(authorizationUrl, state) {
     // Store state for verification
     docusignState.authState = state;
-    
-    showInfo(window.i18n.t('affiliate.dashboard.settings.authorizationRequired', 
+
+    showInfo(window.i18n.t('affiliate.dashboard.settings.authorizationRequired',
       'DocuSign authorization required. A new window will open for you to grant access.'));
-    
+
     // Calculate window position
     const windowWidth = 600;
     const windowHeight = 700;
     const left = (screen.width - windowWidth) / 2;
     const top = (screen.height - windowHeight) / 2;
-    
+
     const windowFeatures = `width=${windowWidth},height=${windowHeight},left=${left},top=${top},resizable=yes,scrollbars=yes`;
-    
+
     // Open authorization window
     const authWindow = window.open(authorizationUrl, 'DocuSignAuth', windowFeatures);
-    
+
     if (!authWindow) {
-      showError(window.i18n.t('affiliate.dashboard.settings.popupBlocked', 
+      showError(window.i18n.t('affiliate.dashboard.settings.popupBlocked',
         'Please allow popups for this site to complete DocuSign authorization.'));
       // Re-enable button
       document.getElementById('startW9Signing').disabled = false;
       document.getElementById('signingInProgress').style.display = 'none';
       return;
     }
-    
+
     // Store state for verification
     docusignState.authState = state;
     docusignState.authWindow = authWindow;
     docusignState.authInProgress = true;
-    
+
     // Listen for authorization success message
     const messageHandler = (event) => {
       console.log('Received message from:', event.origin);
       console.log('Message data:', event.data);
-      
+
       // Accept messages from our own domain
       if (event.origin !== 'https://wavemax.promo') {
         return;
       }
-      
+
       if (event.data && event.data.type === 'docusign-auth-success') {
         console.log('DocuSign auth success message received');
         window.removeEventListener('message', messageHandler);
         clearInterval(windowCheckInterval); // Clear the interval immediately
-        
+
         // Mark auth as complete
         docusignState.authInProgress = false;
         docusignState.authCompleted = true;
-        
+
         showSuccess(window.i18n.t('affiliate.dashboard.settings.authorizationSuccess',
           'DocuSign authorization successful! Starting W9 signing...'));
-        
+
         // Re-enable button temporarily for retry
         const button = document.getElementById('startW9Signing');
         if (button) {
           button.disabled = false;
         }
-        
+
         // Retry signing after successful authorization
         setTimeout(() => {
           console.log('Retrying W9 signing after auth success');
@@ -258,15 +258,15 @@
         }, 1500);
       }
     };
-    
+
     window.addEventListener('message', messageHandler);
-    
+
     // Check if window is closed
     const windowCheckInterval = setInterval(() => {
       if (authWindow.closed) {
         clearInterval(windowCheckInterval);
         window.removeEventListener('message', messageHandler);
-        
+
         // Check if auth was completed
         if (!docusignState.authCompleted) {
           console.log('Window closed, checking for auth completion...');
@@ -282,18 +282,18 @@
                 if (parsed.success && (Date.now() - parsed.timestamp) < 60000) {
                   console.log('Found auth success in localStorage');
                   localStorage.removeItem('docusign-auth-success');
-                  
+
                   docusignState.authCompleted = true;
-                  
+
                   showSuccess(window.i18n.t('affiliate.dashboard.settings.authorizationSuccess',
                     'DocuSign authorization successful! Starting W9 signing...'));
-                  
+
                   // Re-enable button temporarily for retry
                   const button = document.getElementById('startW9Signing');
                   if (button) {
                     button.disabled = false;
                   }
-                  
+
                   // Check authorization status first
                   setTimeout(async () => {
                     console.log('Checking authorization status before retry...');
@@ -305,7 +305,7 @@
                           'X-CSRF-Token': csrfToken
                         }
                       });
-                      
+
                       if (authCheckResponse.ok) {
                         const authStatus = await authCheckResponse.json();
                         if (authStatus.authorized) {
@@ -325,7 +325,7 @@
             } catch (e) {
               console.error('Error checking localStorage:', e);
             }
-            
+
             // Give it more time - check again in 2 seconds
             setTimeout(() => {
               const authData = localStorage.getItem('docusign-auth-success');
@@ -335,18 +335,18 @@
                   if (parsed.success && (Date.now() - parsed.timestamp) < 60000) {
                     console.log('Found auth success in localStorage (second check)');
                     localStorage.removeItem('docusign-auth-success');
-                    
+
                     docusignState.authCompleted = true;
-                    
+
                     showSuccess(window.i18n.t('affiliate.dashboard.settings.authorizationSuccess',
                       'DocuSign authorization successful! Starting W9 signing...'));
-                    
+
                     // Re-enable button and retry
                     const button = document.getElementById('startW9Signing');
                     if (button) {
                       button.disabled = false;
                     }
-                    
+
                     // Check authorization status first
                     setTimeout(async () => {
                       console.log('Checking authorization status before retry (second check)...');
@@ -358,7 +358,7 @@
                             'X-CSRF-Token': csrfToken
                           }
                         });
-                        
+
                         if (authCheckResponse.ok) {
                           const authStatus = await authCheckResponse.json();
                           if (authStatus.authorized) {
@@ -384,7 +384,7 @@
                   console.error('Error checking localStorage (second check):', e);
                 }
               }
-              
+
               if (!docusignState.authCompleted) {
                 // Re-enable button if auth wasn't successful
                 const button = document.getElementById('startW9Signing');
@@ -412,58 +412,58 @@
     const windowHeight = 700;
     const left = (screen.width - windowWidth) / 2;
     const top = (screen.height - windowHeight) / 2;
-    
+
     const windowFeatures = `width=${windowWidth},height=${windowHeight},left=${left},top=${top},resizable=yes,scrollbars=yes,toolbar=no,menubar=no,location=no,status=yes`;
-    
+
     // Open the DocuSign window
     const docusignWindow = window.open(signingUrl, 'DocuSignW9', windowFeatures);
-    
+
     if (!docusignWindow) {
-      showError(window.i18n.t('affiliate.dashboard.settings.popupBlocked', 
+      showError(window.i18n.t('affiliate.dashboard.settings.popupBlocked',
         'Please allow popups for this site to complete W9 signing.'));
       // Re-enable button
       document.getElementById('startW9Signing').disabled = false;
       document.getElementById('signingInProgress').style.display = 'none';
       return;
     }
-    
+
     console.log('DocuSign window opened, monitoring status...');
-    
+
     // Track if signing is completed
     let signingCompleted = false;
     let windowClosed = false;
-    
+
     // Monitor window closure
     const windowCheckInterval = setInterval(() => {
       if (docusignWindow.closed) {
         windowClosed = true;
         clearInterval(windowCheckInterval);
         clearInterval(pollingInterval);
-        
+
         // Reset UI
         document.getElementById('startW9Signing').disabled = false;
         document.getElementById('signingInProgress').style.display = 'none';
-        
+
         if (!signingCompleted) {
           console.log('DocuSign window closed without completion');
           showInfo(window.i18n.t('affiliate.dashboard.settings.signingCancelled',
             'W9 signing was cancelled.'));
         }
-        
+
         // Reload W9 status
         if (typeof loadW9Status === 'function') {
           setTimeout(loadW9Status, 1000);
         }
       }
     }, 500);
-    
+
     // Poll for completion status
     let pollCount = 0;
     const maxPolls = 120; // 10 minutes (5 seconds * 120)
-    
+
     const pollingInterval = setInterval(async () => {
       pollCount++;
-      
+
       if (windowClosed || signingCompleted || pollCount > maxPolls) {
         clearInterval(pollingInterval);
         if (pollCount > maxPolls) {
@@ -472,7 +472,7 @@
         }
         return;
       }
-      
+
       try {
         // Check envelope status
         const statusResponse = await fetch(`/api/v1/w9/envelope-status/${envelopeId}`, {
@@ -480,28 +480,28 @@
             'Authorization': `Bearer ${localStorage.getItem('affiliateToken')}`
           }
         });
-        
+
         if (statusResponse.ok) {
           const statusData = await statusResponse.json();
-          
+
           if (statusData.status === 'completed') {
             signingCompleted = true;
             clearInterval(pollingInterval);
             clearInterval(windowCheckInterval);
-            
+
             // Close the window if still open
             if (!docusignWindow.closed) {
               docusignWindow.close();
             }
-            
+
             // Show success
             showSuccess(window.i18n.t('affiliate.dashboard.settings.w9SigningComplete',
               'Your W9 form has been signed successfully! It will be reviewed by our team.'));
-            
+
             // Reset UI
             document.getElementById('startW9Signing').disabled = false;
             document.getElementById('signingInProgress').style.display = 'none';
-            
+
             // Reload W9 status
             if (typeof loadW9Status === 'function') {
               setTimeout(loadW9Status, 1000);
@@ -512,7 +512,7 @@
         console.error('Error checking envelope status:', error);
       }
     }, 5000); // Poll every 5 seconds
-    
+
     // Store intervals for cleanup
     docusignState.windowCheckInterval = windowCheckInterval;
     docusignState.pollingInterval = pollingInterval;
@@ -524,16 +524,16 @@
   function showEmbeddedSigning(signingUrl) {
     const container = document.getElementById('docusignContainer');
     const iframe = document.getElementById('docusignFrame');
-    
+
     // Set iframe source
     iframe.src = signingUrl;
-    
+
     // Show container
     container.style.display = 'block';
-    
+
     // Hide signing button
     document.getElementById('startW9Signing').style.display = 'none';
-    
+
     // Listen for DocuSign events
     window.addEventListener('message', handleDocuSignMessage);
   }
@@ -544,21 +544,21 @@
   function closeEmbeddedSigning() {
     const container = document.getElementById('docusignContainer');
     const iframe = document.getElementById('docusignFrame');
-    
+
     // Clear iframe
     iframe.src = 'about:blank';
-    
+
     // Hide container
     container.style.display = 'none';
-    
+
     // Show signing button
     document.getElementById('startW9Signing').style.display = 'block';
     document.getElementById('startW9Signing').disabled = false;
     document.getElementById('signingInProgress').style.display = 'none';
-    
+
     // Remove event listener
     window.removeEventListener('message', handleDocuSignMessage);
-    
+
     // Reload W9 status
     if (typeof loadW9Status === 'function') {
       loadW9Status();
@@ -571,9 +571,9 @@
   function handleDocuSignMessage(event) {
     // Verify origin
     if (!event.origin.includes('docusign')) return;
-    
+
     const message = event.data;
-    
+
     if (message.event === 'signing_complete') {
       // Signing completed successfully
       closeEmbeddedSigning();
@@ -593,11 +593,11 @@
     const urlParams = new URLSearchParams(window.location.search);
     const event = urlParams.get('event');
     const envelopeId = urlParams.get('envelopeId');
-    
+
     if (event && envelopeId) {
       // Clear URL parameters
       window.history.replaceState({}, document.title, window.location.pathname);
-      
+
       // Handle return event
       handleDocuSignReturn(event, envelopeId);
     }
@@ -608,30 +608,30 @@
    */
   function handleDocuSignReturn(event, envelopeId) {
     switch (event) {
-      case 'signing_complete':
-        showSuccess(window.i18n.t('affiliate.dashboard.settings.w9SigningComplete',
-          'Your W9 form has been signed successfully! It will be reviewed by our team.'));
-        break;
-      case 'cancel':
-        showInfo(window.i18n.t('affiliate.dashboard.settings.w9SigningCancelled',
-          'W9 signing was cancelled.'));
-        break;
-      case 'decline':
-        showWarning(window.i18n.t('affiliate.dashboard.settings.w9SigningDeclined',
-          'W9 signing was declined.'));
-        break;
-      case 'session_timeout':
-        showWarning(window.i18n.t('affiliate.dashboard.settings.w9SessionTimeout',
-          'Your signing session timed out. Please try again.'));
-        break;
-      default:
-        console.log('Unknown DocuSign event:', event);
+    case 'signing_complete':
+      showSuccess(window.i18n.t('affiliate.dashboard.settings.w9SigningComplete',
+        'Your W9 form has been signed successfully! It will be reviewed by our team.'));
+      break;
+    case 'cancel':
+      showInfo(window.i18n.t('affiliate.dashboard.settings.w9SigningCancelled',
+        'W9 signing was cancelled.'));
+      break;
+    case 'decline':
+      showWarning(window.i18n.t('affiliate.dashboard.settings.w9SigningDeclined',
+        'W9 signing was declined.'));
+      break;
+    case 'session_timeout':
+      showWarning(window.i18n.t('affiliate.dashboard.settings.w9SessionTimeout',
+        'Your signing session timed out. Please try again.'));
+      break;
+    default:
+      console.log('Unknown DocuSign event:', event);
     }
-    
+
     // Reset state
     docusignState.isSigningInProgress = false;
     docusignState.currentEnvelopeId = null;
-    
+
     // Reload W9 status
     if (typeof loadW9Status === 'function') {
       setTimeout(loadW9Status, 1000);
@@ -644,9 +644,9 @@
   function updateW9StatusForDocuSign(statusData) {
     const statusText = document.getElementById('w9StatusText');
     const statusAlert = document.getElementById('w9StatusAlert');
-    
+
     if (!statusText || !statusAlert) return;
-    
+
     // Add DocuSign-specific status information
     if (statusData.docusignStatus) {
       const docusignStatusMap = {
@@ -671,7 +671,7 @@
           class: 'bg-gray-100 border-gray-400 text-gray-700'
         }
       };
-      
+
       const statusInfo = docusignStatusMap[statusData.docusignStatus];
       if (statusInfo) {
         statusAlert.className = `mb-6 px-4 py-3 rounded border ${statusInfo.class}`;
@@ -685,7 +685,7 @@
         `;
       }
     }
-    
+
     // Show "Resume Signing" button if signing is in progress
     if (statusData.docusignStatus === 'sent' && statusData.envelopeId) {
       const button = document.getElementById('startW9Signing');
@@ -755,7 +755,7 @@
         </button>
       </div>
     `;
-    
+
     return alert;
   }
 
@@ -766,7 +766,7 @@
     const w9Section = document.getElementById('w9DocuSignSection');
     if (w9Section) {
       w9Section.insertBefore(alert, w9Section.firstChild);
-      
+
       // Auto-remove after 5 seconds
       setTimeout(() => {
         if (alert.parentNode) {

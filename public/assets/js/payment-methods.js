@@ -4,39 +4,39 @@
  */
 
 (function(window) {
-    'use strict';
+  'use strict';
 
-    class PaymentMethods {
-        constructor(options = {}) {
-            this.container = options.container || '#payment-methods-container';
-            this.onMethodAdded = options.onMethodAdded || (() => {});
-            this.onMethodDeleted = options.onMethodDeleted || (() => {});
-            this.onMethodUpdated = options.onMethodUpdated || (() => {});
-            this.methods = [];
-            this.isLoading = false;
-            
-            // Initialize on DOM ready
-            if (document.readyState === 'loading') {
-                document.addEventListener('DOMContentLoaded', () => this.init());
-            } else {
-                this.init();
-            }
-        }
+  class PaymentMethods {
+    constructor(options = {}) {
+      this.container = options.container || '#payment-methods-container';
+      this.onMethodAdded = options.onMethodAdded || (() => {});
+      this.onMethodDeleted = options.onMethodDeleted || (() => {});
+      this.onMethodUpdated = options.onMethodUpdated || (() => {});
+      this.methods = [];
+      this.isLoading = false;
 
-        async init() {
-            await this.render();
-            this.attachEventListeners();
-            await this.loadMethods();
-        }
+      // Initialize on DOM ready
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', () => this.init());
+      } else {
+        this.init();
+      }
+    }
 
-        async render() {
-            const container = document.querySelector(this.container);
-            if (!container) {
-                console.error('Payment methods container not found');
-                return;
-            }
+    async init() {
+      await this.render();
+      this.attachEventListeners();
+      await this.loadMethods();
+    }
 
-            container.innerHTML = `
+    async render() {
+      const container = document.querySelector(this.container);
+      if (!container) {
+        console.error('Payment methods container not found');
+        return;
+      }
+
+      container.innerHTML = `
                 <div class="payment-methods-wrapper">
                     <!-- Header -->
                     <div class="payment-methods-header mb-6">
@@ -229,42 +229,42 @@
                 </div>
             `;
 
-            // Translate content
-            if (window.i18n) {
-                window.i18n.translatePage();
-            }
+      // Translate content
+      if (window.i18n) {
+        window.i18n.translatePage();
+      }
+    }
+
+    async loadMethods() {
+      try {
+        const response = await window.PaymentService.getPaymentMethods();
+
+        if (response.success) {
+          this.methods = response.methods || [];
+          this.renderMethods();
+        } else {
+          throw new Error(response.error || 'Failed to load payment methods');
         }
+      } catch (error) {
+        console.error('Error loading payment methods:', error);
+        this.showError('Failed to load payment methods');
+      }
+    }
 
-        async loadMethods() {
-            try {
-                const response = await window.PaymentService.getPaymentMethods();
-                
-                if (response.success) {
-                    this.methods = response.methods || [];
-                    this.renderMethods();
-                } else {
-                    throw new Error(response.error || 'Failed to load payment methods');
-                }
-            } catch (error) {
-                console.error('Error loading payment methods:', error);
-                this.showError('Failed to load payment methods');
-            }
-        }
+    renderMethods() {
+      const methodsList = document.getElementById('methods-list');
+      const emptyState = document.getElementById('empty-state');
 
-        renderMethods() {
-            const methodsList = document.getElementById('methods-list');
-            const emptyState = document.getElementById('empty-state');
-            
-            if (!this.methods || this.methods.length === 0) {
-                methodsList.classList.add('hidden');
-                emptyState.classList.remove('hidden');
-                return;
-            }
+      if (!this.methods || this.methods.length === 0) {
+        methodsList.classList.add('hidden');
+        emptyState.classList.remove('hidden');
+        return;
+      }
 
-            methodsList.classList.remove('hidden');
-            emptyState.classList.add('hidden');
+      methodsList.classList.remove('hidden');
+      emptyState.classList.add('hidden');
 
-            methodsList.innerHTML = this.methods.map(method => `
+      methodsList.innerHTML = this.methods.map(method => `
                 <div class="payment-method-card bg-white border rounded-lg p-4 hover:shadow-md transition duration-200" data-method-id="${method.id}">
                     <div class="flex items-center justify-between">
                         <div class="flex items-center flex-1">
@@ -298,250 +298,250 @@
                 </div>
             `).join('');
 
-            // Translate new content
-            if (window.i18n) {
-                window.i18n.translatePage();
-            }
-        }
-
-        getMethodIcon(type) {
-            const icons = {
-                'card': 'fa-credit-card',
-                'bank': 'fa-university',
-                'paypal': 'fa-paypal',
-                'apple_pay': 'fa-apple-pay',
-                'google_pay': 'fa-google-pay',
-                'default': 'fa-wallet'
-            };
-            return icons[type] || icons.default;
-        }
-
-        getMethodDisplayName(method) {
-            if (method.type === 'card' && method.brand) {
-                return `${method.brand} ••••${method.last4}`;
-            } else if (method.type === 'bank') {
-                return `Bank Account ••••${method.last4}`;
-            } else if (method.type === 'paypal' && method.email) {
-                return `PayPal (${method.email})`;
-            }
-            return method.name || 'Payment Method';
-        }
-
-        getMethodDescription(method) {
-            const descriptions = {
-                'card': 'Credit/Debit Card',
-                'bank': 'Bank Account',
-                'paypal': 'PayPal Account',
-                'apple_pay': 'Apple Pay',
-                'google_pay': 'Google Pay'
-            };
-            return descriptions[method.type] || 'Payment Method';
-        }
-
-        attachEventListeners() {
-            // Add method button
-            document.getElementById('add-method-btn')?.addEventListener('click', () => this.showAddModal());
-            document.querySelector('.add-first-method')?.addEventListener('click', () => this.showAddModal());
-
-            // Modal controls
-            document.getElementById('close-modal')?.addEventListener('click', () => this.hideModal());
-            document.getElementById('cancel-modal')?.addEventListener('click', () => this.hideModal());
-            document.getElementById('cancel-delete')?.addEventListener('click', () => this.hideDeleteModal());
-
-            // Method type selection
-            document.getElementById('method-type')?.addEventListener('change', (e) => this.handleTypeChange(e));
-
-            // Form submission
-            document.getElementById('method-form')?.addEventListener('submit', (e) => this.handleSubmit(e));
-
-            // Expiry date formatting
-            document.getElementById('card-expiry')?.addEventListener('input', (e) => this.formatExpiry(e));
-
-            // Method actions (delegation)
-            document.addEventListener('click', (e) => {
-                if (e.target.closest('.set-default-btn')) {
-                    const methodId = e.target.closest('.set-default-btn').dataset.methodId;
-                    this.setDefaultMethod(methodId);
-                }
-                
-                if (e.target.closest('.delete-method-btn')) {
-                    const methodId = e.target.closest('.delete-method-btn').dataset.methodId;
-                    this.showDeleteConfirmation(methodId);
-                }
-            });
-
-            // Delete confirmation
-            document.getElementById('confirm-delete')?.addEventListener('click', () => this.confirmDelete());
-
-            // Close modals on background click
-            document.getElementById('method-modal')?.addEventListener('click', (e) => {
-                if (e.target.id === 'method-modal') this.hideModal();
-            });
-            
-            document.getElementById('delete-modal')?.addEventListener('click', (e) => {
-                if (e.target.id === 'delete-modal') this.hideDeleteModal();
-            });
-        }
-
-        showAddModal() {
-            const modal = document.getElementById('method-modal');
-            if (modal) {
-                modal.classList.remove('hidden');
-                document.getElementById('method-form')?.reset();
-                document.getElementById('modal-title').setAttribute('data-i18n', 'payment.methods.addNewMethod');
-                if (window.i18n) {
-                    window.i18n.translatePage();
-                }
-            }
-        }
-
-        hideModal() {
-            const modal = document.getElementById('method-modal');
-            if (modal) {
-                modal.classList.add('hidden');
-                document.getElementById('method-form')?.reset();
-                this.hideAllDetails();
-            }
-        }
-
-        handleTypeChange(e) {
-            const type = e.target.value;
-            this.hideAllDetails();
-            
-            if (type === 'card') {
-                document.getElementById('card-details')?.classList.remove('hidden');
-            } else if (type === 'bank') {
-                document.getElementById('bank-details')?.classList.remove('hidden');
-            }
-        }
-
-        hideAllDetails() {
-            document.getElementById('card-details')?.classList.add('hidden');
-            document.getElementById('bank-details')?.classList.add('hidden');
-        }
-
-        formatExpiry(e) {
-            let value = e.target.value.replace(/\s/g, '');
-            let formattedValue = '';
-            
-            if (value.length >= 2) {
-                formattedValue = value.slice(0, 2) + '/' + value.slice(2, 4);
-            } else {
-                formattedValue = value;
-            }
-            
-            e.target.value = formattedValue;
-        }
-
-        async handleSubmit(e) {
-            e.preventDefault();
-            
-            const submitBtn = document.getElementById('save-method');
-            const buttonText = submitBtn.querySelector('.button-text');
-            const buttonSpinner = submitBtn.querySelector('.button-spinner');
-            
-            try {
-                // Show loading state
-                submitBtn.disabled = true;
-                buttonText.classList.add('hidden');
-                buttonSpinner.classList.remove('hidden');
-                
-                const formData = new FormData(e.target);
-                const methodData = Object.fromEntries(formData);
-                
-                // Validate based on type
-                const validation = window.PaymentValidation.validatePaymentMethod(methodData);
-                if (!validation.valid) {
-                    throw new Error(validation.errors.join(', '));
-                }
-                
-                // Save method
-                const result = await window.PaymentService.addPaymentMethod(methodData);
-                
-                if (result.success) {
-                    this.hideModal();
-                    await this.loadMethods();
-                    this.onMethodAdded(result.method);
-                    this.showSuccess('Payment method added successfully');
-                } else {
-                    throw new Error(result.error || 'Failed to add payment method');
-                }
-                
-            } catch (error) {
-                console.error('Error adding payment method:', error);
-                this.showError(error.message);
-            } finally {
-                // Reset button state
-                submitBtn.disabled = false;
-                buttonText.classList.remove('hidden');
-                buttonSpinner.classList.add('hidden');
-            }
-        }
-
-        async setDefaultMethod(methodId) {
-            try {
-                const result = await window.PaymentService.setDefaultMethod(methodId);
-                
-                if (result.success) {
-                    await this.loadMethods();
-                    this.showSuccess('Default payment method updated');
-                } else {
-                    throw new Error(result.error || 'Failed to update default method');
-                }
-            } catch (error) {
-                console.error('Error setting default method:', error);
-                this.showError(error.message);
-            }
-        }
-
-        showDeleteConfirmation(methodId) {
-            this.deleteMethodId = methodId;
-            const modal = document.getElementById('delete-modal');
-            if (modal) {
-                modal.classList.remove('hidden');
-            }
-        }
-
-        hideDeleteModal() {
-            const modal = document.getElementById('delete-modal');
-            if (modal) {
-                modal.classList.add('hidden');
-            }
-            this.deleteMethodId = null;
-        }
-
-        async confirmDelete() {
-            if (!this.deleteMethodId) return;
-            
-            try {
-                const result = await window.PaymentService.deletePaymentMethod(this.deleteMethodId);
-                
-                if (result.success) {
-                    this.hideDeleteModal();
-                    await this.loadMethods();
-                    this.onMethodDeleted(this.deleteMethodId);
-                    this.showSuccess('Payment method deleted');
-                } else {
-                    throw new Error(result.error || 'Failed to delete payment method');
-                }
-            } catch (error) {
-                console.error('Error deleting payment method:', error);
-                this.showError(error.message);
-            }
-        }
-
-        showSuccess(message) {
-            // You can implement a toast notification here
-            console.log('Success:', message);
-        }
-
-        showError(message) {
-            // You can implement a toast notification here
-            console.error('Error:', message);
-        }
+      // Translate new content
+      if (window.i18n) {
+        window.i18n.translatePage();
+      }
     }
 
-    // Expose to global scope
-    window.PaymentMethods = PaymentMethods;
+    getMethodIcon(type) {
+      const icons = {
+        'card': 'fa-credit-card',
+        'bank': 'fa-university',
+        'paypal': 'fa-paypal',
+        'apple_pay': 'fa-apple-pay',
+        'google_pay': 'fa-google-pay',
+        'default': 'fa-wallet'
+      };
+      return icons[type] || icons.default;
+    }
+
+    getMethodDisplayName(method) {
+      if (method.type === 'card' && method.brand) {
+        return `${method.brand} ••••${method.last4}`;
+      } else if (method.type === 'bank') {
+        return `Bank Account ••••${method.last4}`;
+      } else if (method.type === 'paypal' && method.email) {
+        return `PayPal (${method.email})`;
+      }
+      return method.name || 'Payment Method';
+    }
+
+    getMethodDescription(method) {
+      const descriptions = {
+        'card': 'Credit/Debit Card',
+        'bank': 'Bank Account',
+        'paypal': 'PayPal Account',
+        'apple_pay': 'Apple Pay',
+        'google_pay': 'Google Pay'
+      };
+      return descriptions[method.type] || 'Payment Method';
+    }
+
+    attachEventListeners() {
+      // Add method button
+      document.getElementById('add-method-btn')?.addEventListener('click', () => this.showAddModal());
+      document.querySelector('.add-first-method')?.addEventListener('click', () => this.showAddModal());
+
+      // Modal controls
+      document.getElementById('close-modal')?.addEventListener('click', () => this.hideModal());
+      document.getElementById('cancel-modal')?.addEventListener('click', () => this.hideModal());
+      document.getElementById('cancel-delete')?.addEventListener('click', () => this.hideDeleteModal());
+
+      // Method type selection
+      document.getElementById('method-type')?.addEventListener('change', (e) => this.handleTypeChange(e));
+
+      // Form submission
+      document.getElementById('method-form')?.addEventListener('submit', (e) => this.handleSubmit(e));
+
+      // Expiry date formatting
+      document.getElementById('card-expiry')?.addEventListener('input', (e) => this.formatExpiry(e));
+
+      // Method actions (delegation)
+      document.addEventListener('click', (e) => {
+        if (e.target.closest('.set-default-btn')) {
+          const methodId = e.target.closest('.set-default-btn').dataset.methodId;
+          this.setDefaultMethod(methodId);
+        }
+
+        if (e.target.closest('.delete-method-btn')) {
+          const methodId = e.target.closest('.delete-method-btn').dataset.methodId;
+          this.showDeleteConfirmation(methodId);
+        }
+      });
+
+      // Delete confirmation
+      document.getElementById('confirm-delete')?.addEventListener('click', () => this.confirmDelete());
+
+      // Close modals on background click
+      document.getElementById('method-modal')?.addEventListener('click', (e) => {
+        if (e.target.id === 'method-modal') this.hideModal();
+      });
+
+      document.getElementById('delete-modal')?.addEventListener('click', (e) => {
+        if (e.target.id === 'delete-modal') this.hideDeleteModal();
+      });
+    }
+
+    showAddModal() {
+      const modal = document.getElementById('method-modal');
+      if (modal) {
+        modal.classList.remove('hidden');
+        document.getElementById('method-form')?.reset();
+        document.getElementById('modal-title').setAttribute('data-i18n', 'payment.methods.addNewMethod');
+        if (window.i18n) {
+          window.i18n.translatePage();
+        }
+      }
+    }
+
+    hideModal() {
+      const modal = document.getElementById('method-modal');
+      if (modal) {
+        modal.classList.add('hidden');
+        document.getElementById('method-form')?.reset();
+        this.hideAllDetails();
+      }
+    }
+
+    handleTypeChange(e) {
+      const type = e.target.value;
+      this.hideAllDetails();
+
+      if (type === 'card') {
+        document.getElementById('card-details')?.classList.remove('hidden');
+      } else if (type === 'bank') {
+        document.getElementById('bank-details')?.classList.remove('hidden');
+      }
+    }
+
+    hideAllDetails() {
+      document.getElementById('card-details')?.classList.add('hidden');
+      document.getElementById('bank-details')?.classList.add('hidden');
+    }
+
+    formatExpiry(e) {
+      let value = e.target.value.replace(/\s/g, '');
+      let formattedValue = '';
+
+      if (value.length >= 2) {
+        formattedValue = value.slice(0, 2) + '/' + value.slice(2, 4);
+      } else {
+        formattedValue = value;
+      }
+
+      e.target.value = formattedValue;
+    }
+
+    async handleSubmit(e) {
+      e.preventDefault();
+
+      const submitBtn = document.getElementById('save-method');
+      const buttonText = submitBtn.querySelector('.button-text');
+      const buttonSpinner = submitBtn.querySelector('.button-spinner');
+
+      try {
+        // Show loading state
+        submitBtn.disabled = true;
+        buttonText.classList.add('hidden');
+        buttonSpinner.classList.remove('hidden');
+
+        const formData = new FormData(e.target);
+        const methodData = Object.fromEntries(formData);
+
+        // Validate based on type
+        const validation = window.PaymentValidation.validatePaymentMethod(methodData);
+        if (!validation.valid) {
+          throw new Error(validation.errors.join(', '));
+        }
+
+        // Save method
+        const result = await window.PaymentService.addPaymentMethod(methodData);
+
+        if (result.success) {
+          this.hideModal();
+          await this.loadMethods();
+          this.onMethodAdded(result.method);
+          this.showSuccess('Payment method added successfully');
+        } else {
+          throw new Error(result.error || 'Failed to add payment method');
+        }
+
+      } catch (error) {
+        console.error('Error adding payment method:', error);
+        this.showError(error.message);
+      } finally {
+        // Reset button state
+        submitBtn.disabled = false;
+        buttonText.classList.remove('hidden');
+        buttonSpinner.classList.add('hidden');
+      }
+    }
+
+    async setDefaultMethod(methodId) {
+      try {
+        const result = await window.PaymentService.setDefaultMethod(methodId);
+
+        if (result.success) {
+          await this.loadMethods();
+          this.showSuccess('Default payment method updated');
+        } else {
+          throw new Error(result.error || 'Failed to update default method');
+        }
+      } catch (error) {
+        console.error('Error setting default method:', error);
+        this.showError(error.message);
+      }
+    }
+
+    showDeleteConfirmation(methodId) {
+      this.deleteMethodId = methodId;
+      const modal = document.getElementById('delete-modal');
+      if (modal) {
+        modal.classList.remove('hidden');
+      }
+    }
+
+    hideDeleteModal() {
+      const modal = document.getElementById('delete-modal');
+      if (modal) {
+        modal.classList.add('hidden');
+      }
+      this.deleteMethodId = null;
+    }
+
+    async confirmDelete() {
+      if (!this.deleteMethodId) return;
+
+      try {
+        const result = await window.PaymentService.deletePaymentMethod(this.deleteMethodId);
+
+        if (result.success) {
+          this.hideDeleteModal();
+          await this.loadMethods();
+          this.onMethodDeleted(this.deleteMethodId);
+          this.showSuccess('Payment method deleted');
+        } else {
+          throw new Error(result.error || 'Failed to delete payment method');
+        }
+      } catch (error) {
+        console.error('Error deleting payment method:', error);
+        this.showError(error.message);
+      }
+    }
+
+    showSuccess(message) {
+      // You can implement a toast notification here
+      console.log('Success:', message);
+    }
+
+    showError(message) {
+      // You can implement a toast notification here
+      console.error('Error:', message);
+    }
+  }
+
+  // Expose to global scope
+  window.PaymentMethods = PaymentMethods;
 
 })(window);

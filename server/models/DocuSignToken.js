@@ -12,35 +12,35 @@ const docuSignTokenSchema = new mongoose.Schema({
     unique: true,
     index: true
   },
-  
+
   // OAuth tokens
   accessToken: {
     type: String,
     required: true
   },
-  
+
   refreshToken: {
     type: String,
     required: true
   },
-  
+
   // Token expiration
   expiresAt: {
     type: Date,
     required: true,
     index: true
   },
-  
+
   // Token metadata
   tokenType: {
     type: String,
     default: 'Bearer'
   },
-  
+
   scope: {
     type: String
   },
-  
+
   // User who authorized
   authorizedBy: {
     userId: String,
@@ -50,13 +50,13 @@ const docuSignTokenSchema = new mongoose.Schema({
       default: Date.now
     }
   },
-  
+
   // Last used
   lastUsed: {
     type: Date,
     default: Date.now
   },
-  
+
   // Token status
   status: {
     type: String,
@@ -86,7 +86,7 @@ docuSignTokenSchema.statics.getCurrentToken = async function() {
 docuSignTokenSchema.statics.saveToken = async function(tokenData, authorizedBy = null) {
   try {
     const expiresAt = new Date(Date.now() + (tokenData.expires_in * 1000));
-    
+
     const updateData = {
       accessToken: tokenData.access_token,
       refreshToken: tokenData.refresh_token,
@@ -96,7 +96,7 @@ docuSignTokenSchema.statics.saveToken = async function(tokenData, authorizedBy =
       status: 'active',
       lastUsed: new Date()
     };
-    
+
     if (authorizedBy) {
       updateData.authorizedBy = {
         userId: authorizedBy.userId,
@@ -104,23 +104,23 @@ docuSignTokenSchema.statics.saveToken = async function(tokenData, authorizedBy =
         authorizedAt: new Date()
       };
     }
-    
+
     const token = await this.findOneAndUpdate(
       { tokenId: 'default' },
       updateData,
-      { 
-        upsert: true, 
+      {
+        upsert: true,
         new: true,
         runValidators: true
       }
     );
-    
+
     console.log('DocuSignToken saved:', {
       tokenId: token.tokenId,
       expiresAt: token.expiresAt,
       status: token.status
     });
-    
+
     return token;
   } catch (error) {
     console.error('Failed to save DocuSign token:', error);

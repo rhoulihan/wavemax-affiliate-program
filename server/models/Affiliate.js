@@ -34,15 +34,15 @@ const affiliateSchema = new mongoose.Schema({
       default: undefined
     }
   },
-  serviceLatitude: { 
-    type: Number, 
+  serviceLatitude: {
+    type: Number,
     required: function() {
       // Only required for new affiliates or traditional registration
       return this.isNew || this.registrationMethod === 'traditional';
     }
   },
-  serviceLongitude: { 
-    type: Number, 
+  serviceLongitude: {
+    type: Number,
     required: function() {
       // Only required for new affiliates or traditional registration
       return this.isNew || this.registrationMethod === 'traditional';
@@ -50,30 +50,30 @@ const affiliateSchema = new mongoose.Schema({
   },
   serviceRadius: { type: Number, required: true, default: 5, min: 1, max: 50 }, // Service radius in miles
   // Delivery fee structure
-  minimumDeliveryFee: { 
-    type: Number, 
+  minimumDeliveryFee: {
+    type: Number,
     required: true,
     default: 25,
     min: 0,
     max: 100
   },
-  perBagDeliveryFee: { 
-    type: Number, 
+  perBagDeliveryFee: {
+    type: Number,
     required: true,
     default: 5,
     min: 0,
     max: 50
   },
   username: { type: String, required: true, unique: true },
-  passwordSalt: { 
-    type: String, 
-    required: function() { 
+  passwordSalt: {
+    type: String,
+    required: function() {
       return this.registrationMethod === 'traditional' || !this.registrationMethod;
     }
   },
-  passwordHash: { 
-    type: String, 
-    required: function() { 
+  passwordHash: {
+    type: String,
+    required: function() {
       return this.registrationMethod === 'traditional' || !this.registrationMethod;
     }
   },
@@ -176,9 +176,14 @@ const affiliateSchema = new mongoose.Schema({
       vendorType: { type: String, default: '1099 Contractor' },
       terms: { type: String, default: 'Net 15' },
       defaultExpenseAccount: { type: String, default: 'Commission Expense' }
-    }
+    },
+    // DocuSign fields
+    docusignEnvelopeId: String,
+    docusignStatus: String,
+    docusignInitiatedAt: Date,
+    docusignCompletedAt: Date
   }
-}, { 
+}, {
   timestamps: true,
   toObject: { virtuals: true },
   toJSON: { virtuals: true }
@@ -198,7 +203,7 @@ affiliateSchema.pre('save', function(next) {
     this.passwordHash = hash;
     this.password = undefined; // Remove plain text password
   }
-  
+
   next();
 });
 

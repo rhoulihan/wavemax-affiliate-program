@@ -7,21 +7,21 @@ describe('Passport Configuration Tests', () => {
   let strategies;
   let consoleLogSpy;
   let consoleErrorSpy;
-  
+
   beforeEach(() => {
     // Save original environment
     originalEnv = { ...process.env };
-    
+
     // Clear module cache
     jest.resetModules();
-    
+
     // Mock console methods
     consoleLogSpy = jest.spyOn(console, 'log').mockImplementation();
     consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
-    
+
     // Reset strategies
     strategies = {};
-    
+
     // Create mock passport object
     passport = {
       use: jest.fn((strategy) => {
@@ -40,10 +40,10 @@ describe('Passport Configuration Tests', () => {
         strategies.deserializeUser = fn;
       })
     };
-    
+
     // Mock all external modules
     jest.doMock('passport', () => passport);
-    
+
     jest.doMock('passport-google-oauth20', () => ({
       Strategy: jest.fn(function(options, verify) {
         this.name = 'google';
@@ -52,7 +52,7 @@ describe('Passport Configuration Tests', () => {
         this.options = options;
       })
     }));
-    
+
     jest.doMock('passport-facebook', () => ({
       Strategy: jest.fn(function(options, verify) {
         this.name = 'facebook';
@@ -61,7 +61,7 @@ describe('Passport Configuration Tests', () => {
         this.options = options;
       })
     }));
-    
+
     jest.doMock('passport-linkedin-oauth2', () => ({
       Strategy: jest.fn(function(options, verify) {
         this.name = 'linkedin';
@@ -70,18 +70,18 @@ describe('Passport Configuration Tests', () => {
         this.options = options;
       })
     }));
-    
+
     jest.doMock('../../server/models/Affiliate', () => ({
       findOne: jest.fn(),
       findById: jest.fn(),
       findByIdAndUpdate: jest.fn()
     }));
-    
+
     jest.doMock('../../server/models/Customer', () => ({
       findOne: jest.fn(),
       findById: jest.fn()
     }));
-    
+
     jest.doMock('../../server/utils/auditLogger', () => ({
       logAuditEvent: jest.fn(),
       AuditEvents: {
@@ -90,27 +90,27 @@ describe('Passport Configuration Tests', () => {
       }
     }));
   });
-  
+
   afterEach(() => {
     // Restore environment
     process.env = originalEnv;
-    
+
     // Restore console
     consoleLogSpy.mockRestore();
     consoleErrorSpy.mockRestore();
-    
+
     // Clear all mocks
     jest.clearAllMocks();
   });
-  
+
   describe('Strategy Configuration', () => {
     test('should configure Google strategy when credentials are present', () => {
       process.env.GOOGLE_CLIENT_ID = 'test-google-client-id';
       process.env.GOOGLE_CLIENT_SECRET = 'test-google-client-secret';
       process.env.OAUTH_CALLBACK_URI = 'https://test.wavemax.com';
-      
+
       require('../../server/config/passport-config');
-      
+
       expect(passport.use).toHaveBeenCalled();
       expect(strategies.google).toBeDefined();
       expect(strategies.google.options).toEqual({
@@ -120,22 +120,22 @@ describe('Passport Configuration Tests', () => {
         passReqToCallback: true
       });
     });
-    
+
     test('should not configure Google strategy without credentials', () => {
       delete process.env.GOOGLE_CLIENT_ID;
       delete process.env.GOOGLE_CLIENT_SECRET;
-      
+
       require('../../server/config/passport-config');
-      
+
       expect(strategies.google).toBeUndefined();
     });
-    
+
     test('should configure Facebook strategy when credentials are present', () => {
       process.env.FACEBOOK_APP_ID = 'test-facebook-app-id';
       process.env.FACEBOOK_APP_SECRET = 'test-facebook-app-secret';
-      
+
       require('../../server/config/passport-config');
-      
+
       expect(passport.use).toHaveBeenCalled();
       expect(strategies.facebook).toBeDefined();
       expect(strategies.facebook.options).toEqual({
@@ -145,22 +145,22 @@ describe('Passport Configuration Tests', () => {
         profileFields: ['id', 'emails', 'name', 'picture.type(large)']
       });
     });
-    
+
     test('should not configure Facebook strategy without credentials', () => {
       delete process.env.FACEBOOK_APP_ID;
       delete process.env.FACEBOOK_APP_SECRET;
-      
+
       require('../../server/config/passport-config');
-      
+
       expect(strategies.facebook).toBeUndefined();
     });
-    
+
     test('should configure LinkedIn strategy when credentials are present', () => {
       process.env.LINKEDIN_CLIENT_ID = 'test-linkedin-client-id';
       process.env.LINKEDIN_CLIENT_SECRET = 'test-linkedin-client-secret';
-      
+
       require('../../server/config/passport-config');
-      
+
       expect(passport.use).toHaveBeenCalled();
       expect(strategies.linkedin).toBeDefined();
       expect(strategies.linkedin.options).toEqual({
@@ -171,27 +171,27 @@ describe('Passport Configuration Tests', () => {
       });
     });
   });
-  
+
   describe('Google OAuth Strategy', () => {
     let googleVerify;
     let Affiliate;
     let Customer;
     let logAuditEvent;
-    
+
     beforeEach(() => {
       process.env.GOOGLE_CLIENT_ID = 'test-google-client-id';
       process.env.GOOGLE_CLIENT_SECRET = 'test-google-client-secret';
-      
+
       Affiliate = require('../../server/models/Affiliate');
       Customer = require('../../server/models/Customer');
       const auditLogger = require('../../server/utils/auditLogger');
       logAuditEvent = auditLogger.logAuditEvent;
-      
+
       require('../../server/config/passport-config');
-      
+
       googleVerify = strategies.google._verify;
     });
-    
+
     describe('Customer Context', () => {
       const mockReq = { query: { state: 'customer_oauth_123' } };
       const mockProfile = {
@@ -201,7 +201,7 @@ describe('Passport Configuration Tests', () => {
         displayName: 'John Doe',
         _json: { sub: 'google123' }
       };
-      
+
       test('should handle existing customer with Google account', async () => {
         const mockCustomer = {
           _id: 'customer123',
@@ -209,31 +209,31 @@ describe('Passport Configuration Tests', () => {
           socialAccounts: { google: { id: 'google123' } },
           save: jest.fn().mockResolvedValue(true)
         };
-        
+
         Customer.findOne.mockResolvedValue(mockCustomer);
-        
+
         const done = jest.fn();
         await googleVerify(mockReq, 'access-token', 'refresh-token', mockProfile, done);
-        
+
         expect(Customer.findOne).toHaveBeenCalledWith({ 'socialAccounts.google.id': 'google123' });
         expect(mockCustomer.save).toHaveBeenCalled();
         expect(done).toHaveBeenCalledWith(null, mockCustomer);
       });
-      
+
       test('should link Google account to existing customer', async () => {
         const mockCustomer = {
           _id: 'customer123',
           socialAccounts: {},
           save: jest.fn().mockResolvedValue(true)
         };
-        
+
         Customer.findOne
           .mockResolvedValueOnce(null) // No customer with Google ID
           .mockResolvedValueOnce(mockCustomer); // Customer with same email
-        
+
         const done = jest.fn();
         await googleVerify(mockReq, 'access-token', 'refresh-token', mockProfile, done);
-        
+
         expect(mockCustomer.socialAccounts.google).toEqual({
           id: 'google123',
           accessToken: 'access-token',
@@ -244,16 +244,16 @@ describe('Passport Configuration Tests', () => {
         });
         expect(done).toHaveBeenCalledWith(null, mockCustomer);
       });
-      
+
       test('should handle existing affiliate conflict', async () => {
         const mockAffiliate = { affiliateId: 'AFF000001', email: 'test@example.com' };
-        
+
         Customer.findOne.mockResolvedValue(null);
         Affiliate.findOne.mockResolvedValue(mockAffiliate);
-        
+
         const done = jest.fn();
         await googleVerify(mockReq, 'access-token', 'refresh-token', mockProfile, done);
-        
+
         expect(done).toHaveBeenCalledWith(null, expect.objectContaining({
           isExistingAffiliate: true,
           provider: 'google',
@@ -262,14 +262,14 @@ describe('Passport Configuration Tests', () => {
           affiliate: mockAffiliate
         }));
       });
-      
+
       test('should return new user data', async () => {
         Customer.findOne.mockResolvedValue(null);
         Affiliate.findOne.mockResolvedValue(null);
-        
+
         const done = jest.fn();
         await googleVerify(mockReq, 'access-token', 'refresh-token', mockProfile, done);
-        
+
         expect(done).toHaveBeenCalledWith(null, expect.objectContaining({
           isNewUser: true,
           userType: 'customer',
@@ -279,7 +279,7 @@ describe('Passport Configuration Tests', () => {
         }));
       });
     });
-    
+
     describe('Affiliate Context', () => {
       const mockReq = { query: { state: 'affiliate_oauth' } };
       const mockProfile = {
@@ -289,21 +289,21 @@ describe('Passport Configuration Tests', () => {
         displayName: 'Jane Smith',
         _json: { sub: 'google123' }
       };
-      
+
       test('should handle existing affiliate with Google account', async () => {
         const mockAffiliate = {
           _id: 'affiliate123',
           affiliateId: 'AFF000001',
           socialAccounts: { google: { id: 'google123' } }
         };
-        
+
         Affiliate.findOne.mockResolvedValue(mockAffiliate);
         Affiliate.findByIdAndUpdate.mockResolvedValue(mockAffiliate);
         Affiliate.findById.mockResolvedValue(mockAffiliate);
-        
+
         const done = jest.fn();
         await googleVerify(mockReq, 'access-token', 'refresh-token', mockProfile, done);
-        
+
         expect(Affiliate.findOne).toHaveBeenCalledWith({ 'socialAccounts.google.id': 'google123' });
         expect(Affiliate.findByIdAndUpdate).toHaveBeenCalledWith(
           'affiliate123',
@@ -315,16 +315,16 @@ describe('Passport Configuration Tests', () => {
         );
         expect(done).toHaveBeenCalledWith(null, mockAffiliate);
       });
-      
+
       test('should handle customer conflict', async () => {
         const mockCustomer = { customerId: 'CUST000001', email: 'affiliate@example.com' };
-        
+
         Affiliate.findOne.mockResolvedValue(null);
         Customer.findOne.mockResolvedValue(mockCustomer);
-        
+
         const done = jest.fn();
         await googleVerify(mockReq, 'access-token', 'refresh-token', mockProfile, done);
-        
+
         expect(done).toHaveBeenCalledWith(null, expect.objectContaining({
           isExistingCustomer: true,
           provider: 'google',
@@ -332,14 +332,14 @@ describe('Passport Configuration Tests', () => {
           customer: mockCustomer
         }));
       });
-      
+
       test('should link Google account to existing affiliate with email', async () => {
         const mockAffiliate = {
           _id: 'affiliate123',
           affiliateId: 'AFF000001',
           socialAccounts: {}
         };
-        
+
         const updatedAffiliate = {
           ...mockAffiliate,
           socialAccounts: {
@@ -353,17 +353,17 @@ describe('Passport Configuration Tests', () => {
             }
           }
         };
-        
+
         Affiliate.findOne
           .mockResolvedValueOnce(null) // No affiliate with Google ID
           .mockResolvedValueOnce(mockAffiliate); // Affiliate with same email
-        
+
         Affiliate.findByIdAndUpdate.mockResolvedValue(updatedAffiliate);
         Affiliate.findById.mockResolvedValue(updatedAffiliate);
-        
+
         const done = jest.fn();
         await googleVerify(mockReq, 'access-token', 'refresh-token', mockProfile, done);
-        
+
         expect(Affiliate.findByIdAndUpdate).toHaveBeenCalledWith(
           'affiliate123',
           expect.objectContaining({
@@ -379,14 +379,14 @@ describe('Passport Configuration Tests', () => {
         );
         expect(done).toHaveBeenCalledWith(null, updatedAffiliate);
       });
-      
+
       test('should return new affiliate user data', async () => {
         Affiliate.findOne.mockResolvedValue(null);
         Customer.findOne.mockResolvedValue(null);
-        
+
         const done = jest.fn();
         await googleVerify(mockReq, 'access-token', 'refresh-token', mockProfile, done);
-        
+
         expect(done).toHaveBeenCalledWith(null, expect.objectContaining({
           isNewUser: true,
           userType: 'affiliate',
@@ -396,10 +396,10 @@ describe('Passport Configuration Tests', () => {
         }));
       });
     });
-    
+
     test('should handle database errors', async () => {
       Customer.findOne.mockRejectedValue(new Error('Database error'));
-      
+
       const done = jest.fn();
       await googleVerify(
         { query: { state: 'customer_oauth' } },
@@ -408,37 +408,37 @@ describe('Passport Configuration Tests', () => {
         { id: 'g123', emails: [{ value: 'test@example.com' }], name: {}, _json: {} },
         done
       );
-      
+
       expect(consoleErrorSpy).toHaveBeenCalledWith('Google OAuth error:', expect.any(Error));
       expect(done).toHaveBeenCalledWith(expect.any(Error), null);
     });
   });
-  
+
   describe('Facebook OAuth Strategy', () => {
     let facebookVerify;
     let Affiliate;
-    
+
     beforeEach(() => {
       process.env.FACEBOOK_APP_ID = 'test-facebook-app-id';
       process.env.FACEBOOK_APP_SECRET = 'test-facebook-app-secret';
-      
+
       Affiliate = require('../../server/models/Affiliate');
-      
+
       require('../../server/config/passport-config');
-      
+
       facebookVerify = strategies.facebook._verify;
     });
-    
+
     test('should handle existing affiliate', async () => {
       const mockAffiliate = {
         _id: 'affiliate123',
         socialAccounts: { facebook: { id: 'fb123' } }
       };
-      
+
       Affiliate.findOne.mockResolvedValue(mockAffiliate);
       Affiliate.findByIdAndUpdate.mockResolvedValue(mockAffiliate);
       Affiliate.findById.mockResolvedValue(mockAffiliate);
-      
+
       const done = jest.fn();
       await facebookVerify(
         'access-token',
@@ -446,13 +446,13 @@ describe('Passport Configuration Tests', () => {
         { id: 'fb123', emails: [{ value: 'test@example.com' }], name: {}, _json: {} },
         done
       );
-      
+
       expect(done).toHaveBeenCalledWith(null, mockAffiliate);
     });
-    
+
     test('should return new user data for registration', async () => {
       Affiliate.findOne.mockResolvedValue(null);
-      
+
       const done = jest.fn();
       await facebookVerify(
         'access-token',
@@ -465,20 +465,20 @@ describe('Passport Configuration Tests', () => {
         },
         done
       );
-      
+
       expect(done).toHaveBeenCalledWith(null, expect.objectContaining({
         isNewUser: true,
         provider: 'facebook',
         socialId: 'fb123'
       }));
     });
-    
+
     test('should link Facebook account to existing affiliate', async () => {
       const mockAffiliate = {
         _id: 'affiliate123',
         socialAccounts: {}
       };
-      
+
       const updatedAffiliate = {
         ...mockAffiliate,
         socialAccounts: {
@@ -491,14 +491,14 @@ describe('Passport Configuration Tests', () => {
           }
         }
       };
-      
+
       Affiliate.findOne
         .mockResolvedValueOnce(null) // No affiliate with Facebook ID
         .mockResolvedValueOnce(mockAffiliate); // Affiliate with same email
-      
+
       Affiliate.findByIdAndUpdate.mockResolvedValue(updatedAffiliate);
       Affiliate.findById.mockResolvedValue(updatedAffiliate);
-      
+
       const done = jest.fn();
       await facebookVerify(
         'access-token',
@@ -512,7 +512,7 @@ describe('Passport Configuration Tests', () => {
         },
         done
       );
-      
+
       expect(Affiliate.findByIdAndUpdate).toHaveBeenCalledWith(
         'affiliate123',
         expect.objectContaining({
@@ -527,10 +527,10 @@ describe('Passport Configuration Tests', () => {
       );
       expect(done).toHaveBeenCalledWith(null, updatedAffiliate);
     });
-    
+
     test('should handle Facebook error', async () => {
       Affiliate.findOne.mockRejectedValue(new Error('Database error'));
-      
+
       const done = jest.fn();
       await facebookVerify(
         'access-token',
@@ -538,37 +538,37 @@ describe('Passport Configuration Tests', () => {
         { id: 'fb123', emails: [{ value: 'test@example.com' }], name: {}, _json: {} },
         done
       );
-      
+
       expect(consoleErrorSpy).toHaveBeenCalledWith('Facebook OAuth error:', expect.any(Error));
       expect(done).toHaveBeenCalledWith(expect.any(Error), null);
     });
   });
-  
+
   describe('LinkedIn OAuth Strategy', () => {
     let linkedinVerify;
     let Affiliate;
-    
+
     beforeEach(() => {
       process.env.LINKEDIN_CLIENT_ID = 'test-linkedin-client-id';
       process.env.LINKEDIN_CLIENT_SECRET = 'test-linkedin-client-secret';
-      
+
       Affiliate = require('../../server/models/Affiliate');
-      
+
       require('../../server/config/passport-config');
-      
+
       linkedinVerify = strategies.linkedin._verify;
     });
-    
+
     test('should handle existing affiliate', async () => {
       const mockAffiliate = {
         _id: 'affiliate123',
         socialAccounts: { linkedin: { id: 'li123' } }
       };
-      
+
       Affiliate.findOne.mockResolvedValue(mockAffiliate);
       Affiliate.findByIdAndUpdate.mockResolvedValue(mockAffiliate);
       Affiliate.findById.mockResolvedValue(mockAffiliate);
-      
+
       const done = jest.fn();
       await linkedinVerify(
         'access-token',
@@ -576,16 +576,16 @@ describe('Passport Configuration Tests', () => {
         { id: 'li123', emails: [{ value: 'test@example.com' }], name: {}, _json: {} },
         done
       );
-      
+
       expect(done).toHaveBeenCalledWith(null, mockAffiliate);
     });
-    
+
     test('should link LinkedIn account to existing affiliate', async () => {
       const mockAffiliate = {
         _id: 'affiliate123',
         socialAccounts: {}
       };
-      
+
       const updatedAffiliate = {
         ...mockAffiliate,
         socialAccounts: {
@@ -599,14 +599,14 @@ describe('Passport Configuration Tests', () => {
           }
         }
       };
-      
+
       Affiliate.findOne
         .mockResolvedValueOnce(null) // No affiliate with LinkedIn ID
         .mockResolvedValueOnce(mockAffiliate); // Affiliate with same email
-      
+
       Affiliate.findByIdAndUpdate.mockResolvedValue(updatedAffiliate);
       Affiliate.findById.mockResolvedValue(updatedAffiliate);
-      
+
       const done = jest.fn();
       await linkedinVerify(
         'access-token',
@@ -620,7 +620,7 @@ describe('Passport Configuration Tests', () => {
         },
         done
       );
-      
+
       expect(Affiliate.findByIdAndUpdate).toHaveBeenCalledWith(
         'affiliate123',
         expect.objectContaining({
@@ -636,10 +636,10 @@ describe('Passport Configuration Tests', () => {
       );
       expect(done).toHaveBeenCalledWith(null, updatedAffiliate);
     });
-    
+
     test('should return new LinkedIn user data', async () => {
       Affiliate.findOne.mockResolvedValue(null);
-      
+
       const done = jest.fn();
       await linkedinVerify(
         'access-token',
@@ -652,7 +652,7 @@ describe('Passport Configuration Tests', () => {
         },
         done
       );
-      
+
       expect(done).toHaveBeenCalledWith(null, expect.objectContaining({
         isNewUser: true,
         provider: 'linkedin',
@@ -660,10 +660,10 @@ describe('Passport Configuration Tests', () => {
         email: 'test@example.com'
       }));
     });
-    
+
     test('should handle LinkedIn error', async () => {
       Affiliate.findOne.mockRejectedValue(new Error('Database error'));
-      
+
       const done = jest.fn();
       await linkedinVerify(
         'access-token',
@@ -671,63 +671,63 @@ describe('Passport Configuration Tests', () => {
         { id: 'li123', emails: [{ value: 'test@example.com' }], name: {}, _json: {} },
         done
       );
-      
+
       expect(consoleErrorSpy).toHaveBeenCalledWith('LinkedIn OAuth error:', expect.any(Error));
       expect(done).toHaveBeenCalledWith(expect.any(Error), null);
     });
   });
-  
+
   describe('Serialization', () => {
     let serializeUser;
     let deserializeUser;
     let Affiliate;
-    
+
     beforeEach(() => {
       Affiliate = require('../../server/models/Affiliate');
-      
+
       require('../../server/config/passport-config');
-      
+
       serializeUser = strategies.serializeUser;
       deserializeUser = strategies.deserializeUser;
     });
-    
+
     test('should serialize user with _id', (done) => {
       const user = { _id: 'user123' };
-      
+
       serializeUser(user, (err, id) => {
         expect(err).toBeNull();
         expect(id).toBe('user123');
         done();
       });
     });
-    
+
     test('should serialize user with socialId', (done) => {
       const user = { socialId: 'social123' };
-      
+
       serializeUser(user, (err, id) => {
         expect(err).toBeNull();
         expect(id).toBe('social123');
         done();
       });
     });
-    
+
     test('should deserialize user', async () => {
       const mockAffiliate = { _id: 'user123', affiliateId: 'AFF001' };
       Affiliate.findById.mockResolvedValue(mockAffiliate);
-      
+
       const done = jest.fn();
       await deserializeUser('user123', done);
-      
+
       expect(Affiliate.findById).toHaveBeenCalledWith('user123');
       expect(done).toHaveBeenCalledWith(null, mockAffiliate);
     });
-    
+
     test('should handle deserialization errors', async () => {
       Affiliate.findById.mockRejectedValue(new Error('Database error'));
-      
+
       const done = jest.fn();
       await deserializeUser('user123', done);
-      
+
       expect(done).toHaveBeenCalledWith(expect.any(Error), null);
     });
   });

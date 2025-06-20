@@ -21,7 +21,7 @@ describe('W9 Controller - Comprehensive Tests', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    
+
     req = {
       user: { _id: 'user123', affiliateId: 'AFF-123' },
       file: {
@@ -37,7 +37,7 @@ describe('W9 Controller - Comprehensive Tests', () => {
       get: jest.fn().mockReturnValue('Mozilla/5.0'),
       sessionID: 'session123'
     };
-    
+
     res = {
       status: jest.fn().mockReturnThis(),
       json: jest.fn(),
@@ -46,7 +46,7 @@ describe('W9 Controller - Comprehensive Tests', () => {
       setHeader: jest.fn().mockReturnThis(),
       send: jest.fn()
     };
-    
+
     // Default mock for validation
     validationResult.mockReturnValue({
       isEmpty: jest.fn().mockReturnValue(true),
@@ -77,7 +77,7 @@ describe('W9 Controller - Comprehensive Tests', () => {
         this.documentId = 'W9DOC-123';
         return Promise.resolve(this);
       });
-      w9Storage.store.mockResolvedValue('encrypted-key');
+      w9Storage.store.mockResolvedValue({ documentId: 'W9DOC-123' });
       W9AuditService.logUploadAttempt.mockResolvedValue();
 
       await w9Controller.uploadW9Document(req, res);
@@ -123,16 +123,16 @@ describe('W9 Controller - Comprehensive Tests', () => {
 
     it('should reject upload when pending W9 exists', async () => {
       Affiliate.findOne.mockResolvedValue({ affiliateId: 'AFF-123' });
-      W9Document.findOne.mockResolvedValue({ 
+      W9Document.findOne.mockResolvedValue({
         documentId: 'W9DOC-999',
-        verificationStatus: 'pending' 
+        verificationStatus: 'pending'
       });
 
       await w9Controller.uploadW9Document(req, res);
 
       expect(res.status).toHaveBeenCalledWith(400);
-      expect(res.json).toHaveBeenCalledWith({ 
-        message: 'You already have a W-9 document pending review. Please wait for verification before uploading another.' 
+      expect(res.json).toHaveBeenCalledWith({
+        message: 'You already have a W-9 document pending review. Please wait for verification before uploading another.'
       });
     });
 
@@ -268,9 +268,9 @@ describe('W9 Controller - Comprehensive Tests', () => {
       const mockDocuments = [
         {
           documentId: 'W9DOC-123',
-          affiliateId: { 
+          affiliateId: {
             affiliateId: 'AFF-123',
-            firstName: 'John', 
+            firstName: 'John',
             lastName: 'Doe',
             email: 'john@example.com',
             businessName: 'John Corp'
@@ -325,13 +325,14 @@ describe('W9 Controller - Comprehensive Tests', () => {
         email: 'test@example.com',
         firstName: 'John',
         w9Information: {},
-        save: jest.fn()
+        save: jest.fn(),
+        canReceivePayments: jest.fn().mockReturnValue(true)
       };
 
       Affiliate.findOne.mockResolvedValue(mockAffiliate);
       W9Document.findActiveForAffiliate.mockResolvedValue(mockDocument);
       W9AuditService.logVerification.mockResolvedValue();
-      emailService.sendW9VerificationEmail.mockResolvedValue();
+      // emailService.sendW9VerificationEmail is not called in the controller
 
       await w9Controller.verifyW9Document(req, res);
 
@@ -341,7 +342,8 @@ describe('W9 Controller - Comprehensive Tests', () => {
       expect(mockAffiliate.w9Information.taxIdLast4).toBe('1234');
       expect(mockAffiliate.save).toHaveBeenCalled();
       expect(res.json).toHaveBeenCalledWith({
-        message: 'W-9 verified successfully'
+        message: 'W-9 document verified successfully',
+        affiliate: expect.any(Object)
       });
     });
 
@@ -391,13 +393,14 @@ describe('W9 Controller - Comprehensive Tests', () => {
         email: 'test@example.com',
         firstName: 'John',
         w9Information: {},
-        save: jest.fn()
+        save: jest.fn(),
+        canReceivePayments: jest.fn().mockReturnValue(true)
       };
 
       Affiliate.findOne.mockResolvedValue(mockAffiliate);
       W9Document.findActiveForAffiliate.mockResolvedValue(mockDocument);
       W9AuditService.logRejection.mockResolvedValue();
-      emailService.sendW9VerificationEmail.mockResolvedValue();
+      // emailService.sendW9VerificationEmail is not called in the controller
 
       await w9Controller.rejectW9Document(req, res);
 
@@ -406,7 +409,8 @@ describe('W9 Controller - Comprehensive Tests', () => {
       expect(mockAffiliate.w9Information.status).toBe('rejected');
       expect(mockAffiliate.save).toHaveBeenCalled();
       expect(res.json).toHaveBeenCalledWith({
-        message: 'W-9 rejected'
+        message: 'W-9 document rejected',
+        affiliate: expect.any(Object)
       });
     });
 
@@ -450,8 +454,20 @@ describe('W9 Controller - Comprehensive Tests', () => {
 
       expect(W9Document.find).toHaveBeenCalledWith({ affiliateId: 'AFF-123' });
       expect(res.json).toHaveBeenCalledWith({
-        success: true,
-        documents: mockDocuments
+        affiliateId: 'AFF-123',
+        documentCount: 2,
+        history: expect.arrayContaining([
+          expect.objectContaining({
+            documentId: 'W9DOC-123',
+            uploadedAt: new Date('2025-01-01'),
+            verificationStatus: 'verified'
+          }),
+          expect.objectContaining({
+            documentId: 'W9DOC-122',
+            uploadedAt: new Date('2024-12-01'),
+            verificationStatus: 'rejected'
+          })
+        ])
       });
     });
   });
@@ -486,7 +502,7 @@ describe('W9 Controller - Comprehensive Tests', () => {
       await w9Controller.getAuditLogs(req, res);
 
       expect(W9AuditLog.find).toHaveBeenCalledWith({
-        'target.id': 'AFF-123',
+        'targetInfo.affiliateId': 'AFF-123',
         action: 'upload_success',
         timestamp: {
           $gte: new Date('2025-01-01'),
@@ -495,13 +511,15 @@ describe('W9 Controller - Comprehensive Tests', () => {
       });
       expect(res.json).toHaveBeenCalledWith({
         success: true,
-        logs: mockLogs,
-        pagination: {
-          total: 1,
-          page: 1,
-          limit: 20,
-          pages: 1
-        }
+        totalCount: 1,
+        limit: 20,
+        offset: 0,
+        logs: expect.arrayContaining([
+          expect.objectContaining({
+            action: 'upload_success',
+            timestamp: expect.any(Date)
+          })
+        ])
       });
     });
   });
@@ -528,8 +546,8 @@ describe('W9 Controller - Comprehensive Tests', () => {
       await w9Controller.exportAuditLogs(req, res);
 
       expect(res.setHeader).toHaveBeenCalledWith('Content-Type', 'text/csv');
-      expect(res.setHeader).toHaveBeenCalledWith('Content-Disposition', expect.stringContaining('attachment; filename="w9-audit-logs-'));
-      expect(res.json).toHaveBeenCalled();
+      expect(res.setHeader).toHaveBeenCalledWith('Content-Disposition', expect.stringContaining('attachment; filename="w9-audit-log-'));
+      expect(res.send).toHaveBeenCalledWith(expect.stringContaining('Timestamp,Action'));
     });
 
     it('should export audit logs as JSON', async () => {
@@ -546,9 +564,13 @@ describe('W9 Controller - Comprehensive Tests', () => {
 
       expect(res.json).toHaveBeenCalledWith({
         success: true,
-        logs: mockLogs,
-        exportDate: expect.any(Date),
-        totalRecords: 1
+        logs: expect.arrayContaining([
+          expect.objectContaining({
+            action: 'upload_success'
+          })
+        ]),
+        recordCount: 1,
+        exportDate: expect.any(Date)
       });
     });
   });

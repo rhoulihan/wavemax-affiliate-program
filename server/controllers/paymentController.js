@@ -18,11 +18,11 @@ class PaymentController {
           message: 'Payment configuration not properly set up'
         });
       }
-      
+
       // Get payment configuration
       // Note: For hosted form approach, the hash is required in the client form
       const config = paygistixConfig.getClientConfig();
-      
+
       // Log config access for monitoring
       logger.info('Payment config accessed', {
         ip: req.ip,
@@ -30,7 +30,7 @@ class PaymentController {
         userAgent: req.get('user-agent'),
         hasHash: !!config.formHash
       });
-      
+
       res.json({
         success: true,
         config: config
@@ -55,7 +55,7 @@ class PaymentController {
         ip: req.ip,
         userAgent: req.get('user-agent')
       });
-      
+
       res.json({ success: true, message: 'Payment submission logged' });
     } catch (error) {
       logger.error('Error logging payment submission:', error);
@@ -70,20 +70,20 @@ class PaymentController {
   async createPaymentToken(req, res) {
     try {
       const { customerData, paymentData } = req.body;
-      
+
       // Generate unique token
       const token = PaymentToken.generateToken();
-      
+
       // Acquire callback handler from pool
       const callbackConfig = await callbackPoolManager.acquireCallback(token);
-      
+
       if (!callbackConfig) {
         return res.status(503).json({
           success: false,
           message: 'No payment handlers available. Please try again in a moment.'
         });
       }
-      
+
       // Create payment token record with callback assignment
       const paymentToken = new PaymentToken({
         token,
@@ -92,15 +92,15 @@ class PaymentController {
         callbackPath: callbackConfig.callbackPath,
         status: 'pending'
       });
-      
+
       await paymentToken.save();
-      
+
       logger.info('Payment token created with callback assignment:', {
         token,
         customerEmail: customerData.email,
         callbackPath: callbackConfig.callbackPath
       });
-      
+
       res.json({
         success: true,
         token,
@@ -123,16 +123,16 @@ class PaymentController {
   async checkPaymentStatus(req, res) {
     try {
       const { token } = req.params;
-      
+
       const paymentToken = await PaymentToken.findOne({ token });
-      
+
       if (!paymentToken) {
         return res.status(404).json({
           success: false,
           message: 'Payment token not found'
         });
       }
-      
+
       res.json({
         success: true,
         status: paymentToken.status,
@@ -155,34 +155,34 @@ class PaymentController {
   async cancelPaymentToken(req, res) {
     try {
       const { token } = req.params;
-      
+
       const paymentToken = await PaymentToken.findOne({ token });
-      
+
       if (!paymentToken) {
         return res.status(404).json({
           success: false,
           message: 'Payment token not found'
         });
       }
-      
+
       // Only cancel if the token is still pending
       if (paymentToken.status === 'pending') {
         paymentToken.status = 'cancelled';
         paymentToken.errorMessage = 'Payment cancelled by user';
         await paymentToken.save();
-        
+
         // Release the callback back to the pool
         if (paymentToken.callbackPath) {
           await callbackPoolManager.releaseCallback(paymentToken.token);
         }
-        
+
         logger.info('Payment token cancelled:', {
           token: token,
           customerId: paymentToken.customerId,
           formReleased: paymentToken.assignedFormId
         });
       }
-      
+
       res.json({
         success: true,
         message: 'Payment token cancelled',
@@ -205,16 +205,16 @@ class PaymentController {
     try {
       const { token } = req.params;
       const { status, result, message } = req.body;
-      
+
       const paymentToken = await PaymentToken.findOne({ token });
-      
+
       if (!paymentToken) {
         return res.status(404).json({
           success: false,
           message: 'Payment token not found'
         });
       }
-      
+
       // Update payment status
       paymentToken.status = status === 'success' ? 'success' : 'failed';
       paymentToken.paygistixResponse = {
@@ -222,24 +222,24 @@ class PaymentController {
         testMode: true,
         message: message
       };
-      
+
       if (status !== 'success') {
         paymentToken.errorMessage = message || 'Payment failed';
       }
-      
+
       await paymentToken.save();
-      
+
       // Release the callback back to the pool
       if (paymentToken.callbackPath) {
         await callbackPoolManager.releaseCallback(paymentToken.token);
       }
-      
+
       logger.info('Payment status updated (test mode):', {
         token: token,
         status: paymentToken.status,
         testMode: true
       });
-      
+
       res.json({
         success: true,
         message: 'Payment status updated',
@@ -274,7 +274,7 @@ class PaymentController {
         callbackPath: callbackPath,
         status: 'pending'
       });
-      
+
       if (!paymentToken) {
         logger.error('No pending payment found for callback path:', callbackPath);
         return res.redirect('/payment-callback-handler.html?error=no_pending_payment');
@@ -282,10 +282,10 @@ class PaymentController {
 
       // Process the payment result
       await this.processCallbackResult(req, res, paymentToken);
-      
+
       // Release callback back to pool
       await callbackPoolManager.releaseCallback(paymentToken.token);
-      
+
     } catch (error) {
       logger.error('Error handling form callback:', error);
       res.redirect('/payment-callback-handler.html?error=processing_failed');
@@ -298,38 +298,38 @@ class PaymentController {
   async processCallbackResult(req, res, paymentToken) {
     // Check payment status from Paygistix response
     // Paygistix sends Result=0 for success
-    const isSuccess = req.query.Result === '0' || 
+    const isSuccess = req.query.Result === '0' ||
                      req.body.Result === '0' ||
-                     req.query.status === 'success' || 
+                     req.query.status === 'success' ||
                      req.query.result === 'approved' ||
                      req.body.status === 'success' ||
                      req.body.result === 'approved';
-    
+
     // Update payment token status
     paymentToken.status = isSuccess ? 'success' : 'failed';
     paymentToken.paygistixResponse = { ...req.query, ...req.body };
     paymentToken.transactionId = req.query.PNRef || req.body.PNRef || req.query.transactionId || req.body.transactionId;
-    
+
     if (!isSuccess) {
       paymentToken.errorMessage = req.query.error || req.body.error || 'Payment was not successful';
     }
-    
+
     // Save and ensure the transaction ID is persisted
     await paymentToken.save();
-    
+
     // Log the transaction ID to verify it was saved
     logger.info('Transaction ID saved:', {
       token: paymentToken.token,
       transactionId: paymentToken.transactionId
     });
-    
+
     // Log payment result
     logger.info('Payment token updated from callback:', {
       token: paymentToken.token,
       status: paymentToken.status,
       isSuccess: isSuccess
     });
-    
+
     // Redirect to callback handler with all parameters
     const queryString = new URLSearchParams({
       ...req.query,
@@ -349,7 +349,7 @@ class PaymentController {
   async getPoolStats(req, res) {
     try {
       const stats = await callbackPoolManager.getPoolStatus();
-      
+
       res.json({
         success: true,
         stats

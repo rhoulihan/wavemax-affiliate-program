@@ -92,7 +92,7 @@ describe('Customer Controller', () => {
 
       // Mock the Customer constructor to return our mockCustomer
       Customer.mockImplementation(() => mockCustomer);
-      
+
       // Mock SystemConfig for bag fee
       SystemConfig.getValue.mockResolvedValue(10.00);
 
@@ -340,15 +340,15 @@ describe('Customer Controller', () => {
     it('should return customer orders with pagination', async () => {
       const mockCustomer = { customerId: 'CUST123', affiliateId: 'AFF123' };
       const mockOrders = [
-        { 
-          orderId: 'ORD001', 
-          customerId: 'CUST123', 
+        {
+          orderId: 'ORD001',
+          customerId: 'CUST123',
           status: 'complete',
           toObject: jest.fn().mockReturnValue({ orderId: 'ORD001', customerId: 'CUST123', status: 'complete' })
         },
-        { 
-          orderId: 'ORD002', 
-          customerId: 'CUST123', 
+        {
+          orderId: 'ORD002',
+          customerId: 'CUST123',
           status: 'processing',
           toObject: jest.fn().mockReturnValue({ orderId: 'ORD002', customerId: 'CUST123', status: 'processing' })
         }
@@ -368,7 +368,7 @@ describe('Customer Controller', () => {
 
       Order.find.mockReturnValue(mockOrderQuery);
       Order.countDocuments.mockResolvedValue(2);
-      
+
       // Setup getFilteredData mock
       getFilteredData.mockImplementation((type, data) => data);
 

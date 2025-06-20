@@ -64,20 +64,20 @@ const fieldDefinitions = {
 
   // Order fields visible to different roles
   order: {
-    customer: ['orderId', 'pickupDate', 'pickupTime', 'deliveryDate', 'deliveryTime',
+    customer: ['orderId', 'pickupDate', 'pickupTime',
       'status', 'estimatedSize', 'actualWeight', 'estimatedTotal', 'actualTotal',
       'deliveryFee', 'paymentStatus', 'createdAt'],
-    affiliate: ['orderId', 'customerId', 'pickupDate', 'pickupTime', 'deliveryDate',
-      'deliveryTime', 'status', 'estimatedSize', 'actualWeight', 'baseRate',
+    affiliate: ['orderId', 'customerId', 'pickupDate', 'pickupTime',
+      'status', 'estimatedSize', 'actualWeight', 'baseRate',
       'deliveryFee', 'estimatedTotal', 'actualTotal', 'affiliateCommission',
-      'paymentStatus', 'specialPickupInstructions', 'specialDeliveryInstructions',
-      'serviceNotes', 'washInstructions', 'createdAt', 'pickedUpAt',
+      'paymentStatus', 'specialPickupInstructions',
+      'washInstructions', 'createdAt', 'pickedUpAt',
       'processedAt', 'readyForDeliveryAt', 'deliveredAt'],
     admin: ['_id', 'orderId', 'customerId', 'affiliateId', 'pickupDate', 'pickupTime',
-      'deliveryDate', 'deliveryTime', 'status', 'estimatedSize', 'actualWeight',
+      'status', 'estimatedSize', 'actualWeight',
       'baseRate', 'deliveryFee', 'estimatedTotal', 'actualTotal', 'affiliateCommission',
-      'paymentStatus', 'specialPickupInstructions', 'specialDeliveryInstructions',
-      'serviceNotes', 'washInstructions', 'createdAt', 'pickedUpAt',
+      'paymentStatus', 'specialPickupInstructions',
+      'washInstructions', 'createdAt', 'pickedUpAt',
       'processedAt', 'readyForDeliveryAt', 'deliveredAt', 'cancelledAt']
   },
 
@@ -191,7 +191,7 @@ const responseFilter = (req, res, next) => {
  */
 const fieldFilter = (data, role) => {
   if (!data || typeof data !== 'object') return data;
-  
+
   // Try to determine data type from the object
   let dataType = null;
   if (data.adminId !== undefined && data.permissions !== undefined) {
@@ -205,9 +205,9 @@ const fieldFilter = (data, role) => {
   } else if (data.orderId !== undefined && data.pickupDate !== undefined) {
     dataType = 'order';
   }
-  
+
   if (!dataType) return data;
-  
+
   return getFilteredData(dataType, data, role);
 };
 

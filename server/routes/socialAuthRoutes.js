@@ -20,10 +20,10 @@ router.get('/google', (req, res, next) => {
       message: 'Google OAuth is not configured'
     });
   }
-  
+
   // Pass state parameter through OAuth (includes sessionId for popup requests)
   const state = req.query.state || '';
-  
+
   passport.authenticate('google', {
     scope: ['profile', 'email'],
     state: state
@@ -35,7 +35,7 @@ router.get('/google', (req, res, next) => {
  * @desc    Handle Google OAuth callback
  * @access  Public
  */
-router.get('/google/callback', 
+router.get('/google/callback',
   passport.authenticate('google', { session: false }),
   authController.handleSocialCallback
 );
@@ -53,7 +53,7 @@ router.get('/facebook', (req, res, next) => {
       message: 'Facebook OAuth is not configured'
     });
   }
-  
+
   passport.authenticate('facebook', {
     scope: ['email']
   })(req, res, next);
@@ -82,7 +82,7 @@ router.get('/linkedin', (req, res, next) => {
       message: 'LinkedIn OAuth is not configured'
     });
   }
-  
+
   passport.authenticate('linkedin', {
     scope: ['r_emailaddress', 'r_liteprofile']
   })(req, res, next);
@@ -115,7 +115,7 @@ router.post('/social/register', [
   body('serviceRadius').notEmpty().isNumeric().isInt({ min: 1, max: 50 }).withMessage('Service radius must be between 1 and 50 miles'),
   body('minimumDeliveryFee').optional().isNumeric().withMessage('Minimum delivery fee must be a number'),
   body('perBagDeliveryFee').optional().isNumeric().withMessage('Per-bag delivery fee must be a number'),
-  body('paymentMethod').isIn(['directDeposit', 'check', 'paypal']).withMessage('Invalid payment method'),
+  body('paymentMethod').isIn(['directDeposit', 'check', 'paypal']).withMessage('Invalid payment method')
   // Username and password are NOT required for social registrations - OAuth provides authentication
   // These fields will be auto-generated if not provided
 ], authController.completeSocialRegistration);
@@ -153,13 +153,13 @@ router.get('/customer/google', (req, res, next) => {
       message: 'Google OAuth is not configured'
     });
   }
-  
+
   // Pass state parameter through OAuth (includes sessionId for popup requests)
   const state = req.query.state || '';
-  
+
   // Add customer context to state parameter
   const customerState = state ? `customer_${state}` : 'customer';
-  
+
   passport.authenticate('google', {
     scope: ['profile', 'email'],
     state: customerState
@@ -190,9 +190,9 @@ router.get('/customer/facebook', (req, res, next) => {
       message: 'Facebook OAuth is not configured'
     });
   }
-  
+
   const state = req.query.state || '';
-  
+
   passport.authenticate('facebook', {
     scope: ['email'],
     state: state
@@ -222,9 +222,9 @@ router.get('/customer/linkedin', (req, res, next) => {
       message: 'LinkedIn OAuth is not configured'
     });
   }
-  
+
   const state = req.query.state || '';
-  
+
   passport.authenticate('linkedin', {
     scope: ['r_emailaddress', 'r_liteprofile'],
     state: state
@@ -254,7 +254,7 @@ router.post('/customer/social/register', [
   body('city').notEmpty().withMessage('City is required'),
   body('state').notEmpty().withMessage('State is required'),
   body('zipCode').notEmpty().withMessage('ZIP code is required'),
-  body('serviceFrequency').isIn(['weekly', 'biweekly', 'monthly']).withMessage('Invalid service frequency'),
+  body('serviceFrequency').isIn(['weekly', 'biweekly', 'monthly']).withMessage('Invalid service frequency')
   // Username and password are NOT required for customer social registrations - OAuth provides authentication
   // These fields will be auto-generated if not provided
 ], authController.completeSocialCustomerRegistration);

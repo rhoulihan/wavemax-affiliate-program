@@ -15,10 +15,10 @@ jest.mock('../../server/models/Administrator', () => {
     permissions: ['system_config', 'operator_management'],
     save: jest.fn().mockResolvedValue()
   };
-  
+
   const MockAdministrator = jest.fn(() => mockAdmin);
   MockAdministrator.findOne = jest.fn();
-  
+
   return MockAdministrator;
 });
 
@@ -51,13 +51,13 @@ describe('Create Admin Directly Script Unit Tests', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    
+
     mockRl = {
       question: jest.fn(),
       close: jest.fn()
     };
     readlineMock.createInterface.mockReturnValue(mockRl);
-    
+
     mockAdmin = {
       adminId: 'ADM001',
       firstName: 'John',
@@ -67,17 +67,17 @@ describe('Create Admin Directly Script Unit Tests', () => {
       permissions: ['system_config', 'operator_management'],
       save: jest.fn().mockResolvedValue()
     };
-    
+
     Administrator.mockImplementation(() => mockAdmin);
     Administrator.findOne = jest.fn().mockResolvedValue(null);
-    
+
     mongoose.connect = jest.fn().mockResolvedValue();
     mongoose.connection = {
       close: jest.fn().mockResolvedValue()
     };
-    
+
     emailService.sendAdministratorWelcomeEmail = jest.fn().mockResolvedValue();
-    
+
     consoleLogSpy = jest.spyOn(console, 'log').mockImplementation();
     consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
     processExitSpy = jest.spyOn(process, 'exit').mockImplementation();
@@ -95,7 +95,7 @@ describe('Create Admin Directly Script Unit Tests', () => {
       if (!lastAdmin) {
         return 'ADM001';
       }
-      
+
       const lastNumber = parseInt(lastAdmin.adminId.substring(3));
       const nextNumber = lastNumber + 1;
       return `ADM${nextNumber.toString().padStart(3, '0')}`;
@@ -105,7 +105,7 @@ describe('Create Admin Directly Script Unit Tests', () => {
       Administrator.findOne.mockReturnValue({
         sort: jest.fn().mockResolvedValue(null)
       });
-      
+
       const result = await generateAdminId();
       expect(result).toBe('ADM001');
     });
@@ -114,7 +114,7 @@ describe('Create Admin Directly Script Unit Tests', () => {
       Administrator.findOne.mockReturnValue({
         sort: jest.fn().mockResolvedValue({ adminId: 'ADM005' })
       });
-      
+
       const result = await generateAdminId();
       expect(result).toBe('ADM006');
     });
@@ -123,7 +123,7 @@ describe('Create Admin Directly Script Unit Tests', () => {
       Administrator.findOne.mockReturnValue({
         sort: jest.fn().mockResolvedValue({ adminId: 'ADM099' })
       });
-      
+
       const result = await generateAdminId();
       expect(result).toBe('ADM100');
     });
@@ -133,11 +133,11 @@ describe('Create Admin Directly Script Unit Tests', () => {
     it('should handle "all" permission selection', () => {
       const permissionInput = 'all';
       let permissions = [];
-      
+
       if (permissionInput.toLowerCase() === 'all') {
         permissions = ['system_config', 'operator_management', 'view_analytics', 'manage_affiliates'];
       }
-      
+
       expect(permissions).toEqual(['system_config', 'operator_management', 'view_analytics', 'manage_affiliates']);
     });
 
@@ -145,14 +145,14 @@ describe('Create Admin Directly Script Unit Tests', () => {
       const permissionInput = '1,3,4';
       const permissionMap = {
         '1': 'system_config',
-        '2': 'operator_management', 
+        '2': 'operator_management',
         '3': 'view_analytics',
         '4': 'manage_affiliates'
       };
-      
+
       const selectedNumbers = permissionInput.split(',').map(s => s.trim());
       const permissions = selectedNumbers.map(num => permissionMap[num]).filter(Boolean);
-      
+
       expect(permissions).toEqual(['system_config', 'view_analytics', 'manage_affiliates']);
     });
 
@@ -160,14 +160,14 @@ describe('Create Admin Directly Script Unit Tests', () => {
       const permissionInput = '1,5,3,invalid';
       const permissionMap = {
         '1': 'system_config',
-        '2': 'operator_management', 
+        '2': 'operator_management',
         '3': 'view_analytics',
         '4': 'manage_affiliates'
       };
-      
+
       const selectedNumbers = permissionInput.split(',').map(s => s.trim());
       const permissions = selectedNumbers.map(num => permissionMap[num]).filter(Boolean);
-      
+
       expect(permissions).toEqual(['system_config', 'view_analytics']);
     });
   });
@@ -175,9 +175,9 @@ describe('Create Admin Directly Script Unit Tests', () => {
   describe('Database operations', () => {
     it('should connect to MongoDB successfully', async () => {
       process.env.MONGODB_URI = 'mongodb://localhost:27017/test';
-      
+
       await mongoose.connect(process.env.MONGODB_URI);
-      
+
       expect(mongoose.connect).toHaveBeenCalledWith('mongodb://localhost:27017/test');
     });
 
@@ -193,17 +193,17 @@ describe('Create Admin Directly Script Unit Tests', () => {
         isActive: true,
         createdBy: 'system'
       };
-      
+
       const admin = new Administrator(adminData);
       await admin.save();
-      
+
       expect(Administrator).toHaveBeenCalledWith(adminData);
       expect(mockAdmin.save).toHaveBeenCalled();
     });
 
     it('should handle database save errors', async () => {
       mockAdmin.save.mockRejectedValue(new Error('Database error'));
-      
+
       try {
         await mockAdmin.save();
       } catch (error) {
@@ -215,14 +215,14 @@ describe('Create Admin Directly Script Unit Tests', () => {
   describe('Email functionality', () => {
     it('should send welcome email after admin creation', async () => {
       await emailService.sendAdministratorWelcomeEmail(mockAdmin);
-      
+
       expect(emailService.sendAdministratorWelcomeEmail).toHaveBeenCalledWith(mockAdmin);
     });
 
     it('should handle email sending errors gracefully', async () => {
       const emailError = new Error('Email service unavailable');
       emailService.sendAdministratorWelcomeEmail.mockRejectedValue(emailError);
-      
+
       try {
         await emailService.sendAdministratorWelcomeEmail(mockAdmin);
       } catch (error) {
@@ -236,7 +236,7 @@ describe('Create Admin Directly Script Unit Tests', () => {
       const firstName = '';
       const lastName = '';
       const email = '';
-      
+
       expect(firstName).toBe('');
       expect(lastName).toBe('');
       expect(email).toBe('');
@@ -245,7 +245,7 @@ describe('Create Admin Directly Script Unit Tests', () => {
     it('should handle whitespace in permission input', () => {
       const permissionInput = ' 1 , 2 , 3 ';
       const selectedNumbers = permissionInput.split(',').map(s => s.trim());
-      
+
       expect(selectedNumbers).toEqual(['1', '2', '3']);
     });
   });
@@ -254,7 +254,7 @@ describe('Create Admin Directly Script Unit Tests', () => {
     it('should handle MongoDB connection errors', async () => {
       const connectionError = new Error('Connection failed');
       mongoose.connect.mockRejectedValue(connectionError);
-      
+
       try {
         await mongoose.connect(process.env.MONGODB_URI);
       } catch (error) {
@@ -264,13 +264,13 @@ describe('Create Admin Directly Script Unit Tests', () => {
 
     it('should close database connection in finally block', async () => {
       await mongoose.connection.close();
-      
+
       expect(mongoose.connection.close).toHaveBeenCalled();
     });
 
     it('should close readline interface in finally block', () => {
       mockRl.close();
-      
+
       expect(mockRl.close).toHaveBeenCalled();
     });
   });

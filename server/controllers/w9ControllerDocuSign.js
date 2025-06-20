@@ -14,14 +14,14 @@ exports.checkDocuSignAuth = async (req, res) => {
   try {
     // Try to get access token
     const hasValidToken = await docusignService.hasValidToken();
-    
+
     if (hasValidToken) {
       return res.json({ authorized: true });
     }
-    
+
     // Generate authorization URL
     const authData = await docusignService.getAuthorizationUrl();
-    
+
     res.json({
       authorized: false,
       authorizationUrl: authData.url,
@@ -29,8 +29,8 @@ exports.checkDocuSignAuth = async (req, res) => {
     });
   } catch (error) {
     logger.error('Failed to check DocuSign auth:', error);
-    res.status(500).json({ 
-      error: 'Failed to check authorization status' 
+    res.status(500).json({
+      error: 'Failed to check authorization status'
     });
   }
 };
@@ -41,27 +41,27 @@ exports.checkDocuSignAuth = async (req, res) => {
 exports.handleOAuthCallback = async (req, res) => {
   try {
     const { code, state } = req.query;
-    
+
     if (!code) {
-      return res.status(400).json({ 
-        error: 'Authorization code not provided' 
+      return res.status(400).json({
+        error: 'Authorization code not provided'
       });
     }
-    
+
     if (!state) {
-      return res.status(400).json({ 
-        error: 'State parameter not provided' 
+      return res.status(400).json({
+        error: 'State parameter not provided'
       });
     }
-    
+
     // Exchange code for token (passing state to retrieve PKCE verifier)
     const tokenData = await docusignService.exchangeCodeForToken(code, state);
-    
+
     logger.info('OAuth callback - token exchange completed', {
       hasAccessToken: !!tokenData.access_token,
       hasRefreshToken: !!tokenData.refresh_token
     });
-    
+
     // Return success page
     res.send(`
       <html>
@@ -167,12 +167,12 @@ exports.handleOAuthCallback = async (req, res) => {
 exports.initiateW9Signing = async (req, res) => {
   try {
     const affiliateId = req.user.affiliateId || req.user.id;
-    
+
     // Get affiliate details using affiliateId field
     const affiliate = await Affiliate.findOne({ affiliateId: affiliateId });
     if (!affiliate) {
-      return res.status(404).json({ 
-        error: 'Affiliate not found' 
+      return res.status(404).json({
+        error: 'Affiliate not found'
       });
     }
 
@@ -189,8 +189,8 @@ exports.initiateW9Signing = async (req, res) => {
     }
 
     // Check if there's an existing envelope in progress
-    if (affiliate.w9Information && 
-        affiliate.w9Information.docusignEnvelopeId && 
+    if (affiliate.w9Information &&
+        affiliate.w9Information.docusignEnvelopeId &&
         affiliate.w9Information.docusignStatus === 'sent') {
       // Get the existing signing URL
       try {
@@ -198,7 +198,7 @@ exports.initiateW9Signing = async (req, res) => {
           affiliate.w9Information.docusignEnvelopeId,
           affiliate
         );
-        
+
         return res.json({
           signingUrl,
           envelopeId: affiliate.w9Information.docusignEnvelopeId,
@@ -212,7 +212,7 @@ exports.initiateW9Signing = async (req, res) => {
 
     // Create new DocuSign envelope
     const envelope = await docusignService.createW9Envelope(affiliate);
-    
+
     // Get embedded signing URL
     const signingUrl = await docusignService.getEmbeddedSigningUrl(
       envelope.envelopeId,
@@ -228,6 +228,7 @@ exports.initiateW9Signing = async (req, res) => {
     // Don't change the status until the document is actually signed
     // affiliate.w9Information.status remains as 'not_submitted' or current status
     affiliate.w9Information.docusignInitiatedAt = new Date();
+    affiliate.markModified('w9Information');
     await affiliate.save();
 
     // Create audit log
@@ -260,7 +261,7 @@ exports.initiateW9Signing = async (req, res) => {
   } catch (error) {
     console.error('Failed to initiate W9 signing:', error);
     logger.error('Failed to initiate W9 signing:', error);
-    res.status(500).json({ 
+    res.status(500).json({
       error: 'Failed to create W9 signing session',
       details: error.message
     });
@@ -274,39 +275,39 @@ exports.getEnvelopeStatus = async (req, res) => {
   try {
     const { envelopeId } = req.params;
     const affiliateId = req.user.affiliateId || req.user.id;
-    
+
     // Get affiliate to check if they own this envelope
     const affiliate = await Affiliate.findOne({ affiliateId: affiliateId });
     if (!affiliate) {
       return res.status(404).json({ error: 'Affiliate not found' });
     }
-    
+
     // Check if w9Information exists
     if (!affiliate.w9Information) {
       console.log('No w9Information found for affiliate:', affiliateId);
       return res.status(404).json({ error: 'No W9 information found' });
     }
-    
+
     // Verify this envelope belongs to the affiliate
-    if (affiliate.w9Information.docusignEnvelopeId !== envelopeId) {
+    if (!affiliate.w9Information.docusignEnvelopeId || affiliate.w9Information.docusignEnvelopeId !== envelopeId) {
       console.log('Envelope mismatch:', {
         expected: affiliate.w9Information.docusignEnvelopeId,
         received: envelopeId
       });
       return res.status(403).json({ error: 'Unauthorized' });
     }
-    
+
     // Get envelope status from DocuSign
     try {
       const envelopeStatus = await docusignService.getEnvelopeStatus(envelopeId);
-      
+
       // Update local status if it has changed
       if (envelopeStatus.status !== affiliate.w9Information.docusignStatus) {
         affiliate.w9Information.docusignStatus = envelopeStatus.status;
-        
+
         // Update affiliate status based on DocuSign status
         if (envelopeStatus.status === 'completed') {
-          affiliate.w9Information.status = 'pending_verification';
+          affiliate.w9Information.status = 'pending_review';
           affiliate.w9Information.submittedAt = new Date();
         } else if (envelopeStatus.status === 'declined' || envelopeStatus.status === 'voided') {
           affiliate.w9Information.status = 'not_submitted';
@@ -314,10 +315,11 @@ exports.getEnvelopeStatus = async (req, res) => {
           affiliate.w9Information.docusignEnvelopeId = null;
           affiliate.w9Information.docusignStatus = null;
         }
-        
+
+        affiliate.markModified('w9Information');
         await affiliate.save();
       }
-      
+
       res.json({
         envelopeId: envelopeId,
         status: envelopeStatus.status
@@ -333,8 +335,8 @@ exports.getEnvelopeStatus = async (req, res) => {
   } catch (error) {
     console.error('Failed to get envelope status:', error);
     logger.error('Failed to get envelope status:', error);
-    res.status(500).json({ 
-      error: 'Failed to get envelope status' 
+    res.status(500).json({
+      error: 'Failed to get envelope status'
     });
   }
 };
@@ -347,7 +349,7 @@ exports.handleDocuSignWebhook = async (req, res) => {
     // Verify webhook signature
     const signature = req.headers['x-docusign-signature-1'];
     const payload = JSON.stringify(req.body);
-    
+
     if (!docusignService.verifyWebhookSignature(payload, signature)) {
       logger.warn('Invalid DocuSign webhook signature');
       return res.status(401).json({ error: 'Invalid signature' });
@@ -370,14 +372,14 @@ exports.handleDocuSignWebhook = async (req, res) => {
     // Update affiliate W9 information
     affiliate.w9Information.docusignStatus = result.docusignStatus;
     affiliate.w9Information.status = result.status;
-    
+
     if (result.status === 'verified' && result.taxInfo) {
       // Update tax information from completed form
       affiliate.w9Information.taxIdType = result.taxInfo.taxIdType;
       affiliate.w9Information.taxIdLast4 = result.taxInfo.taxIdLast4;
       affiliate.w9Information.verifiedAt = new Date();
-      affiliate.w9Information.verifiedBy = 'docusign-auto';
-      
+      // verifiedBy is left empty for automatic DocuSign verification
+
       if (result.taxInfo.businessName) {
         affiliate.w9Information.businessName = result.taxInfo.businessName;
       }
@@ -385,7 +387,7 @@ exports.handleDocuSignWebhook = async (req, res) => {
       // Download and store the completed W9
       try {
         const w9File = await docusignService.downloadCompletedW9(result.envelopeId);
-        
+
         // Create W9Document record
         const w9Document = new W9Document({
           affiliateId: affiliate._id,
@@ -409,30 +411,40 @@ exports.handleDocuSignWebhook = async (req, res) => {
       }
     }
 
+    affiliate.markModified('w9Information');
     await affiliate.save();
 
     // Create audit log
     await W9AuditLog.create({
-      affiliateId: affiliate._id,
-      action: `docusign_${event.event}`,
-      performedBy: 'system',
-      performerRole: 'system',
+      action: 'upload_success',  // Using existing enum value
+      performedBy: {
+        userId: 'system',
+        userType: 'system',
+        userEmail: 'system@docusign',
+        userName: 'DocuSign System',
+        ipAddress: req.ip,
+        userAgent: req.headers['user-agent']
+      },
+      target: {
+        affiliateId: affiliate.affiliateId,
+        affiliateName: `${affiliate.firstName} ${affiliate.lastName}`
+      },
       details: {
+        success: true,
         envelopeId: result.envelopeId,
         status: result.docusignStatus,
         event: event.event
-      },
-      ipAddress: req.ip
+      }
     });
 
-    res.json({ 
+    res.json({
       message: 'Webhook processed successfully',
-      envelopeId: result.envelopeId 
+      envelopeId: result.envelopeId
     });
   } catch (error) {
     logger.error('Failed to process DocuSign webhook:', error);
-    res.status(500).json({ 
-      error: 'Failed to process webhook' 
+    res.status(500).json({
+      error: 'Failed to process webhook'
     });
   }
 };
@@ -444,13 +456,13 @@ exports.handleDocuSignWebhook = async (req, res) => {
 exports.getW9SigningStatus = async (req, res) => {
   try {
     const affiliateId = req.user.affiliateId || req.user.id;
-    
+
     const affiliate = await Affiliate.findById(affiliateId)
       .select('w9Information firstName lastName email');
-    
+
     if (!affiliate) {
-      return res.status(404).json({ 
-        error: 'Affiliate not found' 
+      return res.status(404).json({
+        error: 'Affiliate not found'
       });
     }
 
@@ -475,7 +487,7 @@ exports.getW9SigningStatus = async (req, res) => {
     }
 
     // If in progress, check current status with DocuSign
-    if (affiliate.w9Information.docusignEnvelopeId && 
+    if (affiliate.w9Information.docusignEnvelopeId &&
         ['sent', 'delivered'].includes(affiliate.w9Information.docusignStatus)) {
       try {
         const envelopeStatus = await docusignService.getEnvelopeStatus(
@@ -491,8 +503,8 @@ exports.getW9SigningStatus = async (req, res) => {
     res.json(response);
   } catch (error) {
     logger.error('Error getting W9 status:', error);
-    res.status(500).json({ 
-      error: 'Failed to retrieve W9 status' 
+    res.status(500).json({
+      error: 'Failed to retrieve W9 status'
     });
   }
 };
@@ -504,17 +516,17 @@ exports.getW9SigningStatus = async (req, res) => {
 exports.cancelW9Signing = async (req, res) => {
   try {
     const affiliateId = req.user.affiliateId || req.user.id;
-    
+
     const affiliate = await Affiliate.findById(affiliateId);
     if (!affiliate) {
-      return res.status(404).json({ 
-        error: 'Affiliate not found' 
+      return res.status(404).json({
+        error: 'Affiliate not found'
       });
     }
 
     if (!affiliate.w9Information.docusignEnvelopeId) {
-      return res.status(400).json({ 
-        error: 'No W9 signing in progress' 
+      return res.status(400).json({
+        error: 'No W9 signing in progress'
       });
     }
 
@@ -532,23 +544,32 @@ exports.cancelW9Signing = async (req, res) => {
 
     // Create audit log
     await W9AuditLog.create({
-      affiliateId: affiliate._id,
-      action: 'cancelled',
-      performedBy: affiliate._id,
-      performerRole: 'affiliate',
-      details: {
-        reason: 'Cancelled by affiliate'
+      action: 'delete',  // Using existing enum value
+      performedBy: {
+        userId: affiliate._id.toString(),
+        userType: 'affiliate',
+        userEmail: affiliate.email,
+        userName: `${affiliate.firstName} ${affiliate.lastName}`,
+        ipAddress: req.ip,
+        userAgent: req.headers['user-agent']
       },
-      ipAddress: req.ip
+      target: {
+        affiliateId: affiliate.affiliateId,
+        affiliateName: `${affiliate.firstName} ${affiliate.lastName}`
+      },
+      details: {
+        success: true,
+        errorMessage: 'Cancelled by affiliate'
+      }
     });
 
-    res.json({ 
-      message: 'W9 signing cancelled successfully' 
+    res.json({
+      message: 'W9 signing cancelled successfully'
     });
   } catch (error) {
     logger.error('Failed to cancel W9 signing:', error);
-    res.status(500).json({ 
-      error: 'Failed to cancel W9 signing' 
+    res.status(500).json({
+      error: 'Failed to cancel W9 signing'
     });
   }
 };
@@ -559,11 +580,11 @@ exports.cancelW9Signing = async (req, res) => {
 exports.resendW9Request = async (req, res) => {
   try {
     const { affiliateId } = req.params;
-    
+
     const affiliate = await Affiliate.findById(affiliateId);
     if (!affiliate) {
-      return res.status(404).json({ 
-        error: 'Affiliate not found' 
+      return res.status(404).json({
+        error: 'Affiliate not found'
       });
     }
 
@@ -591,24 +612,34 @@ exports.resendW9Request = async (req, res) => {
 
     // Create audit log
     await W9AuditLog.create({
-      affiliateId: affiliate._id,
-      action: 'resent',
-      performedBy: req.user.id,
-      performerRole: 'administrator',
-      details: {
-        newEnvelopeId: envelope.envelopeId
+      action: 'upload_attempt',  // Using existing enum value
+      performedBy: {
+        userId: req.user.id,
+        userType: 'administrator',
+        userEmail: req.user.email,
+        userName: req.user.name || 'Administrator',
+        ipAddress: req.ip,
+        userAgent: req.headers['user-agent']
       },
-      ipAddress: req.ip
+      target: {
+        affiliateId: affiliate.affiliateId,
+        affiliateName: `${affiliate.firstName} ${affiliate.lastName}`
+      },
+      details: {
+        success: true,
+        method: 'docusign-resent',
+        envelopeId: envelope.envelopeId
+      }
     });
 
-    res.json({ 
+    res.json({
       message: 'W9 request resent successfully',
       envelopeId: envelope.envelopeId
     });
   } catch (error) {
     logger.error('Failed to resend W9 request:', error);
-    res.status(500).json({ 
-      error: 'Failed to resend W9 request' 
+    res.status(500).json({
+      error: 'Failed to resend W9 request'
     });
   }
 };
@@ -621,15 +652,15 @@ exports.checkAuthorizationStatus = async (req, res) => {
   try {
     // Check if we have a valid token
     const hasToken = await docusignService.hasValidToken();
-    
+
     res.json({
       authorized: hasToken,
       message: hasToken ? 'DocuSign authorization successful' : 'Not authorized'
     });
   } catch (error) {
     logger.error('Failed to check authorization status:', error);
-    res.status(500).json({ 
-      error: 'Failed to check authorization status' 
+    res.status(500).json({
+      error: 'Failed to check authorization status'
     });
   }
 };

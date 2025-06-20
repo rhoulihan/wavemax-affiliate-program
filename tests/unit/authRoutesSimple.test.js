@@ -6,11 +6,11 @@ describe('Auth Routes - Simple', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    
+
     // Create a simple express app with mock routes
     app = express();
     app.use(express.json());
-    
+
     // Mock auth middleware for protected routes
     const mockAuth = (req, res, next) => {
       if (req.headers.authorization) {
@@ -20,11 +20,11 @@ describe('Auth Routes - Simple', () => {
         res.status(401).json({ message: 'Unauthorized' });
       }
     };
-    
+
     // Define routes directly
     app.post('/api/auth/login', (req, res) => {
       if (req.body.email === 'test@example.com' && req.body.password === 'password123') {
-        res.json({ 
+        res.json({
           success: true,
           token: 'jwt-token-123',
           user: { id: 'user-123', email: 'test@example.com' }
@@ -33,52 +33,52 @@ describe('Auth Routes - Simple', () => {
         res.status(401).json({ message: 'Invalid credentials' });
       }
     });
-    
+
     app.post('/api/auth/register', (req, res) => {
-      res.status(201).json({ 
+      res.status(201).json({
         success: true,
         message: 'Registration successful',
         user: { id: 'user-new', email: req.body.email }
       });
     });
-    
+
     app.post('/api/auth/logout', mockAuth, (req, res) => {
-      res.json({ 
+      res.json({
         success: true,
         message: 'Logged out successfully'
       });
     });
-    
+
     app.post('/api/auth/forgot-password', (req, res) => {
-      res.json({ 
+      res.json({
         success: true,
         message: 'Password reset email sent'
       });
     });
-    
+
     app.post('/api/auth/reset-password', (req, res) => {
-      res.json({ 
+      res.json({
         success: true,
         message: 'Password reset successful'
       });
     });
-    
+
     app.get('/api/auth/verify-email/:token', (req, res) => {
-      res.json({ 
+      res.json({
         success: true,
         message: 'Email verified successfully'
       });
     });
-    
+
     app.post('/api/auth/refresh-token', (req, res) => {
-      res.json({ 
+      res.json({
         success: true,
         token: 'new-jwt-token-456'
       });
     });
-    
+
     app.get('/api/auth/me', mockAuth, (req, res) => {
-      res.json({ 
+      res.json({
         user: {
           id: req.user.id,
           email: 'test@example.com',

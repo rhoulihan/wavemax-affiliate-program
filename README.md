@@ -1956,6 +1956,35 @@ The project includes several test pages for development and integration testing:
 - `/swirl-spinner-demo.html` - Interactive demo of the custom loading spinner component
 - `/wavemax-development-prompt.html` - AI development framework documentation
 
+## Recent Updates (January 2025)
+
+### Payment Processing Improvements
+- **Generic Payment Methods**: Introduced unified `processPayment` and `processPaymentTestMode` methods replacing dedicated registration/order payment methods
+- **Simplified Integration**: Single payment processing flow for all transaction types (registrations, orders, etc.)
+- **Enhanced Test Mode**: Improved test payment form for development with configurable scenarios
+
+### Schedule Pickup Workflow Enhancements
+- **Integrated Payment Flow**: Seamless payment processing during pickup scheduling
+- **Improved User Experience**: Streamlined flow from login to pickup scheduling to payment
+- **Dynamic Pricing Display**: Real-time calculation of WDF service and delivery fees
+- **Translation Support**: Full internationalization for schedule pickup forms
+
+### Order Confirmation Updates
+- **Simplified Display**: Removed delivery details section for cleaner presentation
+- **Improved Navigation**: Better flow back to main website or customer dashboard
+- **Bug Fixes**: Resolved data display timing issues
+
+### Translation System Improvements
+- **Enhanced Payment Forms**: Complete translation coverage for all payment-related UI elements
+- **Email Template Updates**: Improved placeholder system for multi-language email support
+- **Language Persistence**: Better handling of language preferences across sessions
+
+### Bug Fixes
+- **OAuth Login Flow**: Fixed affiliate dashboard OAuth login redirect issues
+- **Payment Window Detection**: Improved cross-origin window detection for payment forms
+- **Session Management**: Enhanced session handling for embedded iframe contexts
+- **CSRF Protection**: Refined CSRF exemptions for payment callbacks
+
 ## Acknowledgments
 
 - WaveMAX Laundry for the concept and business model

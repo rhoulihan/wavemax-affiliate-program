@@ -107,10 +107,10 @@ describe('Enhanced Password Validator', () => {
 
         validCharacterPasswords.forEach(password => {
           const result = validatePasswordStrength(password);
-          const characterErrors = result.errors.filter(error => 
-            error.includes('uppercase') || 
-            error.includes('lowercase') || 
-            error.includes('number') || 
+          const characterErrors = result.errors.filter(error =>
+            error.includes('uppercase') ||
+            error.includes('lowercase') ||
+            error.includes('number') ||
             error.includes('special character')
           );
           expect(characterErrors).toHaveLength(0);
@@ -400,7 +400,7 @@ describe('Enhanced Password Validator', () => {
 
     test('should validate passwords correctly in express-validator context', () => {
       const validator = customPasswordValidator();
-      
+
       // Mock express-validator context
       const mockValue = 'ValidPasswordNonSeq1!';
       const mockReq = {
@@ -416,7 +416,7 @@ describe('Enhanced Password Validator', () => {
 
     test('should throw for invalid passwords in express-validator context', () => {
       const validator = customPasswordValidator();
-      
+
       // Mock express-validator context with invalid password
       const mockValue = 'weak';
       const mockReq = {
@@ -432,7 +432,7 @@ describe('Enhanced Password Validator', () => {
 
     test('should include admin-specific validation when userType is admin', () => {
       const validator = customPasswordValidator();
-      
+
       const mockValue = 'TestuserSecure9!'; // Contains username but passes other validation
       const mockReq = {
         body: {
@@ -448,7 +448,7 @@ describe('Enhanced Password Validator', () => {
 
     test('should include admin-specific validation when userType is operator', () => {
       const validator = customPasswordValidator();
-      
+
       const mockValue = 'TestuserSecure9!'; // Contains username but passes other validation
       const mockReq = {
         body: {
@@ -559,7 +559,7 @@ describe('Enhanced Password Validator', () => {
     test('should handle very long passwords', () => {
       const veryLongPassword = 'A'.repeat(1000) + '1!';
       const result = validatePasswordStrength(veryLongPassword);
-      
+
       // Should not crash and should validate properly
       expect(result).toBeDefined();
       expect(result.success).toBeDefined();
@@ -568,7 +568,7 @@ describe('Enhanced Password Validator', () => {
     test('should handle special Unicode characters', () => {
       const unicodePassword = 'ValidPassword123!你好';
       const result = validatePasswordStrength(unicodePassword);
-      
+
       // Should handle Unicode gracefully
       expect(result).toBeDefined();
       expect(result.success).toBeDefined();
@@ -579,7 +579,7 @@ describe('Enhanced Password Validator', () => {
       const password = 'testuser123!'; // lowercase version
 
       const result = validatePasswordStrength(password, { username });
-      
+
       // Should still detect case-insensitive username inclusion
       expect(result.errors).toContain('Password cannot contain your username or email');
     });

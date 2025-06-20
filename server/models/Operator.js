@@ -6,30 +6,30 @@ const crypto = require('crypto');
 const { encrypt, decrypt } = require('../utils/encryption');
 
 const operatorSchema = new mongoose.Schema({
-  operatorId: { 
-    type: String, 
+  operatorId: {
+    type: String,
     unique: true
   },
-  firstName: { 
-    type: String, 
+  firstName: {
+    type: String,
     required: true,
-    trim: true 
+    trim: true
   },
-  lastName: { 
-    type: String, 
+  lastName: {
+    type: String,
     required: true,
-    trim: true 
+    trim: true
   },
-  email: { 
-    type: String, 
-    unique: true, 
+  email: {
+    type: String,
+    unique: true,
     required: true,
     lowercase: true,
     trim: true,
     match: [/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/, 'Please enter a valid email']
   },
-  username: { 
-    type: String, 
+  username: {
+    type: String,
     unique: true,
     required: true,
     lowercase: true,
@@ -38,19 +38,19 @@ const operatorSchema = new mongoose.Schema({
     maxLength: 30,
     match: [/^[a-zA-Z0-9_-]+$/, 'Username can only contain letters, numbers, underscores, and hyphens']
   },
-  password: { 
-    type: String, 
+  password: {
+    type: String,
     required: true,
-    select: false 
+    select: false
   },
-  role: { 
-    type: String, 
+  role: {
+    type: String,
     default: 'operator',
-    immutable: true 
+    immutable: true
   },
-  isActive: { 
-    type: Boolean, 
-    default: true 
+  isActive: {
+    type: Boolean,
+    default: true
   },
   shiftStart: {
     type: String, // e.g., "08:00"
@@ -78,26 +78,26 @@ const operatorSchema = new mongoose.Schema({
     min: 0,
     max: 100
   },
-  createdBy: { 
-    type: mongoose.Schema.Types.ObjectId, 
+  createdBy: {
+    type: mongoose.Schema.Types.ObjectId,
     ref: 'Administrator',
     required: true
   },
   lastLogin: Date,
-  loginAttempts: { 
-    type: Number, 
-    default: 0 
+  loginAttempts: {
+    type: Number,
+    default: 0
   },
   lockUntil: Date,
   passwordResetToken: String,
   passwordResetExpires: Date,
-  createdAt: { 
-    type: Date, 
-    default: Date.now 
+  createdAt: {
+    type: Date,
+    default: Date.now
   },
-  updatedAt: { 
-    type: Date, 
-    default: Date.now 
+  updatedAt: {
+    type: Date,
+    default: Date.now
   }
 });
 
@@ -109,21 +109,21 @@ operatorSchema.virtual('isLocked').get(function() {
 // Virtual for checking if operator is on shift
 operatorSchema.virtual('isOnShift').get(function() {
   if (!this.shiftStart || !this.shiftEnd) return true; // If no shift times set, always available
-  
+
   const now = new Date();
   const currentTime = now.getHours() * 60 + now.getMinutes();
-  
+
   const [startHour, startMin] = this.shiftStart.split(':').map(Number);
   const [endHour, endMin] = this.shiftEnd.split(':').map(Number);
-  
+
   const shiftStartMinutes = startHour * 60 + startMin;
   const shiftEndMinutes = endHour * 60 + endMin;
-  
+
   // Handle overnight shifts
   if (shiftEndMinutes < shiftStartMinutes) {
     return currentTime >= shiftStartMinutes || currentTime <= shiftEndMinutes;
   }
-  
+
   return currentTime >= shiftStartMinutes && currentTime <= shiftEndMinutes;
 });
 
@@ -137,20 +137,20 @@ operatorSchema.index({ createdAt: -1 });
 operatorSchema.pre('save', function(next) {
   // Update timestamp
   this.updatedAt = new Date();
-  
+
   // Generate operator ID if new
   if (this.isNew && !this.operatorId) {
-    this.operatorId = 'OPR' + Date.now().toString(36).toUpperCase() + 
+    this.operatorId = 'OPR' + Date.now().toString(36).toUpperCase() +
                       crypto.randomBytes(3).toString('hex').toUpperCase();
   }
-  
+
   // Hash password if modified
   if (this.isModified('password')) {
     const salt = crypto.randomBytes(16);
     this.password = crypto.pbkdf2Sync(this.password, salt, 100000, 64, 'sha512')
       .toString('hex') + ':' + salt.toString('hex');
   }
-  
+
   next();
 });
 
@@ -171,17 +171,17 @@ operatorSchema.methods.incLoginAttempts = function() {
       $unset: { lockUntil: 1 }
     });
   }
-  
+
   const updates = { $inc: { loginAttempts: 1 } };
-  
+
   // Lock account after 5 attempts for 30 minutes
   const maxAttempts = 5;
   const lockTime = 30 * 60 * 1000; // 30 minutes
-  
+
   if (this.loginAttempts + 1 >= maxAttempts && !this.isLocked) {
     updates.$set = { lockUntil: new Date(Date.now() + lockTime) };
   }
-  
+
   return this.updateOne(updates);
 };
 
@@ -196,14 +196,14 @@ operatorSchema.methods.resetLoginAttempts = function() {
 // Method to generate password reset token
 operatorSchema.methods.generatePasswordResetToken = function() {
   const resetToken = crypto.randomBytes(32).toString('hex');
-  
+
   this.passwordResetToken = crypto
     .createHash('sha256')
     .update(resetToken)
     .digest('hex');
-  
+
   this.passwordResetExpires = Date.now() + 30 * 60 * 1000; // 30 minutes
-  
+
   return resetToken;
 };
 
@@ -212,7 +212,7 @@ operatorSchema.methods.updateProcessingStats = function(processingTimeMinutes) {
   const totalTime = this.averageProcessingTime * this.totalOrdersProcessed;
   this.totalOrdersProcessed += 1;
   this.averageProcessingTime = (totalTime + processingTimeMinutes) / this.totalOrdersProcessed;
-  
+
   return this.save();
 };
 
@@ -222,7 +222,7 @@ operatorSchema.methods.updateQualityScore = function(passed) {
   const weight = 0.1; // 10% weight for new result
   const newScore = passed ? 100 : 0;
   this.qualityScore = (this.qualityScore * (1 - weight)) + (newScore * weight);
-  
+
   return this.save();
 };
 
@@ -245,12 +245,12 @@ operatorSchema.statics.findByEmailWithPassword = function(email) {
 
 // Static method to find operators with low order count
 operatorSchema.statics.findAvailableOperators = function(limit = 5) {
-  return this.find({ 
+  return this.find({
     isActive: true,
     currentOrderCount: { $lt: 10 } // Max 10 concurrent orders per operator
   })
-  .sort({ currentOrderCount: 1 })
-  .limit(limit);
+    .sort({ currentOrderCount: 1 })
+    .limit(limit);
 };
 
 // Transform output

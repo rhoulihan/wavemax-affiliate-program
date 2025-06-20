@@ -116,9 +116,9 @@ describe('SystemConfig Model', () => {
     });
 
     it('should accept all valid categories', async () => {
-      const validCategories = ['operator', 'operations', 'processing', 'notification', 
-                               'payment', 'system', 'affiliate', 'customer', 'quality', 'performance'];
-      
+      const validCategories = ['operator', 'operations', 'processing', 'notification',
+        'payment', 'system', 'affiliate', 'customer', 'quality', 'performance'];
+
       for (const category of validCategories) {
         const config = new SystemConfig({
           key: `test_${category}`,
@@ -134,15 +134,15 @@ describe('SystemConfig Model', () => {
 
     it('should accept all valid data types', async () => {
       const validDataTypes = ['string', 'number', 'boolean', 'array', 'object'];
-      
+
       for (const dataType of validDataTypes) {
         let value;
         switch (dataType) {
-          case 'string': value = 'test'; break;
-          case 'number': value = 123; break;
-          case 'boolean': value = true; break;
-          case 'array': value = [1, 2, 3]; break;
-          case 'object': value = { test: 'value' }; break;
+        case 'string': value = 'test'; break;
+        case 'number': value = 123; break;
+        case 'boolean': value = true; break;
+        case 'array': value = [1, 2, 3]; break;
+        case 'object': value = { test: 'value' }; break;
         }
 
         const config = new SystemConfig({
@@ -543,7 +543,7 @@ describe('SystemConfig Model', () => {
 
       it('should update updatedBy when provided', async () => {
         const adminId = new mongoose.Types.ObjectId();
-        
+
         await SystemConfig.create({
           key: 'test_key',
           category: 'system',
@@ -818,11 +818,11 @@ describe('SystemConfig Model', () => {
       });
 
       const saved = await config.save();
-      
+
       // Change non-value field
       saved.description = 'Updated description';
       const updated = await saved.save();
-      
+
       expect(updated.description).toBe('Updated description');
     });
   });

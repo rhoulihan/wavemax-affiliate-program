@@ -43,12 +43,12 @@ async function createSuperAdmin() {
     }
 
     console.log('\n=== Creating Super Administrator ===');
-    
+
     const firstName = await question('First Name: ');
     const lastName = await question('Last Name: ');
     const email = await question('Email: ');
     const password = await question('Password (min 8 chars, uppercase, lowercase, number): ');
-    
+
     const superAdmin = new Administrator({
       adminId: 'ADM001',
       firstName: firstName.trim(),
@@ -64,7 +64,7 @@ async function createSuperAdmin() {
     console.log('✓ Super administrator created successfully');
     console.log(`  Admin ID: ${superAdmin.adminId}`);
     console.log(`  Email: ${superAdmin.email}`);
-    
+
     return superAdmin;
   } catch (error) {
     console.error('✗ Error creating super administrator:', error.message);
@@ -75,7 +75,7 @@ async function createSuperAdmin() {
 async function initializeSystemConfig() {
   try {
     console.log('\n=== Initializing System Configuration ===');
-    
+
     const configs = [
       {
         key: 'order_processing_hours',
@@ -162,9 +162,9 @@ async function initializeSystemConfig() {
         console.log(`  Config already exists: ${config.key}`);
       }
     }
-    
+
     console.log('✓ System configuration initialized');
-    
+
   } catch (error) {
     console.error('✗ Error initializing system configuration:', error.message);
     throw error;
@@ -174,17 +174,17 @@ async function initializeSystemConfig() {
 async function createDemoData(admin) {
   try {
     const createDemo = await question('\nCreate demo operator account? (y/n): ');
-    
+
     if (createDemo.toLowerCase() !== 'y') {
       return;
     }
-    
+
     const existingOperator = await Operator.findOne({ operatorId: 'OPR001' });
     if (existingOperator) {
       console.log('  Demo operator already exists');
       return;
     }
-    
+
     const demoOperator = new Operator({
       operatorId: 'OPR001',
       firstName: 'Demo',
@@ -202,9 +202,9 @@ async function createDemoData(admin) {
     console.log('✓ Demo operator created');
     console.log(`  Operator ID: ${demoOperator.operatorId}`);
     console.log(`  Email: ${demoOperator.email}`);
-    console.log(`  Password: Demo1234!`);
+    console.log('  Password: Demo1234!');
     console.log(`  Shift: ${demoOperator.shiftStart} - ${demoOperator.shiftEnd}`);
-    
+
   } catch (error) {
     console.error('✗ Error creating demo operator:', error.message);
   }
@@ -213,25 +213,25 @@ async function createDemoData(admin) {
 async function main() {
   try {
     console.log('WaveMAX Administrator & Operator System Migration\n');
-    
+
     // Initialize readline
     rl = readline.createInterface({
       input: process.stdin,
       output: process.stdout
     });
-    
+
     await connectDB();
     const admin = await createSuperAdmin();
     await initializeSystemConfig();
     await createDemoData(admin);
-    
+
     console.log('\n✓ Migration completed successfully!');
     console.log('\n=== Access Information ===');
     console.log('\n1. Administrator Portal:');
     console.log('   URL: https://wavemax.promo/administrator-login-embed.html');
     console.log('   Email: Use the email you entered above');
     console.log('   Password: Use the password you entered above');
-    
+
     if (await Operator.findOne({ operatorId: 'OPR001' })) {
       console.log('\n2. Operator Portal:');
       console.log('   URL: https://wavemax.promo/operator-login-embed.html');
@@ -239,10 +239,10 @@ async function main() {
       console.log('   Password: Demo1234!');
       console.log('   Note: Can only login during shift hours (8:00 AM - 4:00 PM)');
     }
-    
+
     console.log('\n3. Embedded Application:');
     console.log('   URL: https://wavemax.promo/embed-app.html');
-    
+
   } catch (error) {
     console.error('\n✗ Migration failed:', error.message);
     logger.error('Migration failed:', error);

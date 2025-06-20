@@ -1,12 +1,12 @@
 // Test file for affiliate dashboard customer filtering logic
 describe('Affiliate Dashboard Customer Filtering', () => {
-  
+
   describe('URL Parameter Detection Logic', () => {
     test('should detect customer parameter from URL search params', () => {
       const testURL = '?route=/affiliate-dashboard&id=AFF123456&customer=CUST789012';
       const urlParams = new URLSearchParams(testURL);
       const filterCustomerId = urlParams.get('customer');
-      
+
       expect(filterCustomerId).toBe('CUST789012');
     });
 
@@ -14,7 +14,7 @@ describe('Affiliate Dashboard Customer Filtering', () => {
       const testURL = '?route=/affiliate-dashboard&id=AFF123456';
       const urlParams = new URLSearchParams(testURL);
       const filterCustomerId = urlParams.get('customer');
-      
+
       expect(filterCustomerId).toBeNull();
     });
 
@@ -22,16 +22,16 @@ describe('Affiliate Dashboard Customer Filtering', () => {
       const testURL = '?route=/affiliate-dashboard&id=AFF123456&customer=CUST789012&other=value';
       const urlParams = new URLSearchParams(testURL);
       const filterCustomerId = urlParams.get('customer');
-      
+
       expect(filterCustomerId).toBe('CUST789012');
     });
 
     test('should handle regex pattern matching for customer parameter', () => {
       const searchParams = '?route=/affiliate-dashboard&id=AFF123456&customer=CUST789012';
-      
+
       // Test regex fallback logic like in the actual code
       const customerMatch = searchParams.match(/customer=([^&]+)/);
-      
+
       expect(customerMatch).not.toBeNull();
       expect(customerMatch[1]).toBe('CUST789012');
     });
@@ -68,7 +68,7 @@ describe('Affiliate Dashboard Customer Filtering', () => {
       ];
 
       // Test highlighting logic
-      const highlightedCustomers = customers.filter(customer => 
+      const highlightedCustomers = customers.filter(customer =>
         highlightCustomerId && customer.customerId === highlightCustomerId
       );
 
@@ -119,7 +119,7 @@ describe('Affiliate Dashboard Customer Filtering', () => {
       };
 
       const isHighlighted = highlightCustomerId && customer.customerId === highlightCustomerId;
-      
+
       expect(isHighlighted).toBe(false);
     });
   });
@@ -128,21 +128,21 @@ describe('Affiliate Dashboard Customer Filtering', () => {
     test('should determine correct tab activation based on customer parameter', () => {
       const filterCustomerId = 'CUST789012';
       const shouldSwitchToCustomersTab = Boolean(filterCustomerId);
-      
+
       expect(shouldSwitchToCustomersTab).toBe(true);
     });
 
     test('should not switch tabs when no customer parameter', () => {
       const filterCustomerId = null;
       const shouldSwitchToCustomersTab = Boolean(filterCustomerId);
-      
+
       expect(shouldSwitchToCustomersTab).toBe(false);
     });
 
     test('should handle empty string customer parameter', () => {
       const filterCustomerId = '';
       const shouldSwitchToCustomersTab = Boolean(filterCustomerId);
-      
+
       expect(shouldSwitchToCustomersTab).toBe(false);
     });
   });
@@ -151,27 +151,27 @@ describe('Affiliate Dashboard Customer Filtering', () => {
     test('should identify authenticated state correctly', () => {
       const token = 'test-token-123';
       const currentAffiliate = { affiliateId: 'AFF123456' };
-      
+
       const isAuthenticated = Boolean(token && currentAffiliate);
-      
+
       expect(isAuthenticated).toBe(true);
     });
 
     test('should identify unauthenticated state when missing token', () => {
       const token = null;
       const currentAffiliate = { affiliateId: 'AFF123456' };
-      
+
       const isAuthenticated = Boolean(token && currentAffiliate);
-      
+
       expect(isAuthenticated).toBe(false);
     });
 
     test('should identify unauthenticated state when missing affiliate', () => {
       const token = 'test-token-123';
       const currentAffiliate = null;
-      
+
       const isAuthenticated = Boolean(token && currentAffiliate);
-      
+
       expect(isAuthenticated).toBe(false);
     });
   });
@@ -180,12 +180,12 @@ describe('Affiliate Dashboard Customer Filtering', () => {
     test('should handle empty customer list', () => {
       const customers = [];
       const filterCustomerId = 'CUST789012';
-      
+
       const hasCustomers = customers.length > 0;
-      const filteredCustomers = customers.filter(customer => 
+      const filteredCustomers = customers.filter(customer =>
         !filterCustomerId || customer.customerId === filterCustomerId
       );
-      
+
       expect(hasCustomers).toBe(false);
       expect(filteredCustomers).toHaveLength(0);
     });
@@ -196,11 +196,11 @@ describe('Affiliate Dashboard Customer Filtering', () => {
         { customerId: 'CUST222222', firstName: 'Jane', lastName: 'Smith' }
       ];
       const filterCustomerId = null;
-      
-      const filteredCustomers = customers.filter(customer => 
+
+      const filteredCustomers = customers.filter(customer =>
         !filterCustomerId || customer.customerId === filterCustomerId
       );
-      
+
       expect(filteredCustomers).toHaveLength(2);
     });
 
@@ -210,11 +210,11 @@ describe('Affiliate Dashboard Customer Filtering', () => {
         { customerId: 'CUST222222', firstName: 'Jane', lastName: 'Smith' }
       ];
       const filterCustomerId = 'CUST222222';
-      
-      const filteredCustomers = customers.filter(customer => 
+
+      const filteredCustomers = customers.filter(customer =>
         !filterCustomerId || customer.customerId === filterCustomerId
       );
-      
+
       expect(filteredCustomers).toHaveLength(1);
       expect(filteredCustomers[0].customerId).toBe('CUST222222');
     });
@@ -224,11 +224,11 @@ describe('Affiliate Dashboard Customer Filtering', () => {
     test('should construct API URLs correctly', () => {
       const baseUrl = 'https://test.wavemax.promo';
       const affiliateId = 'AFF123456';
-      
+
       const customersURL = `${baseUrl}/api/v1/affiliates/${affiliateId}/customers`;
       const profileURL = `${baseUrl}/api/v1/affiliates/${affiliateId}`;
       const dashboardURL = `${baseUrl}/api/v1/affiliates/${affiliateId}/dashboard`;
-      
+
       expect(customersURL).toBe('https://test.wavemax.promo/api/v1/affiliates/AFF123456/customers');
       expect(profileURL).toBe('https://test.wavemax.promo/api/v1/affiliates/AFF123456');
       expect(dashboardURL).toBe('https://test.wavemax.promo/api/v1/affiliates/AFF123456/dashboard');
@@ -237,9 +237,9 @@ describe('Affiliate Dashboard Customer Filtering', () => {
     test('should validate customer ID format', () => {
       const validCustomerId = 'CUST123456';
       const invalidCustomerId = 'invalid-123';
-      
+
       const isValidFormat = (id) => /^CUST\d+$/.test(id);
-      
+
       expect(isValidFormat(validCustomerId)).toBe(true);
       expect(isValidFormat(invalidCustomerId)).toBe(false);
     });
@@ -249,18 +249,18 @@ describe('Affiliate Dashboard Customer Filtering', () => {
     test('should calculate correct delay for tab switching', () => {
       const defaultDelay = 500; // milliseconds
       const hasCustomerParameter = true;
-      
+
       const delay = hasCustomerParameter ? defaultDelay : 0;
-      
+
       expect(delay).toBe(500);
     });
 
     test('should handle immediate execution when no customer parameter', () => {
       const defaultDelay = 500;
       const hasCustomerParameter = false;
-      
+
       const delay = hasCustomerParameter ? defaultDelay : 0;
-      
+
       expect(delay).toBe(0);
     });
   });

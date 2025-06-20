@@ -57,7 +57,7 @@ callbackPoolSchema.methods.release = function() {
 // Static method to acquire available callback URL
 callbackPoolSchema.statics.acquireCallback = async function(paymentToken, lockTimeoutMinutes = 10) {
   const lockExpiredTime = new Date(Date.now() - lockTimeoutMinutes * 60 * 1000);
-  
+
   // Try to find and lock an available callback atomically
   const callback = await this.findOneAndUpdate(
     {
@@ -80,7 +80,7 @@ callbackPoolSchema.statics.acquireCallback = async function(paymentToken, lockTi
       sort: { lastUsedAt: 1 } // Use least recently used callback
     }
   );
-  
+
   return callback;
 };
 
@@ -97,14 +97,14 @@ callbackPoolSchema.statics.releaseCallback = async function(paymentToken) {
     },
     { new: true }
   );
-  
+
   return callback;
 };
 
 // Static method to release expired locks
 callbackPoolSchema.statics.releaseExpiredLocks = async function(lockTimeoutMinutes = 10) {
   const lockExpiredTime = new Date(Date.now() - lockTimeoutMinutes * 60 * 1000);
-  
+
   const result = await this.updateMany(
     {
       isLocked: true,
@@ -115,7 +115,7 @@ callbackPoolSchema.statics.releaseExpiredLocks = async function(lockTimeoutMinut
       $unset: { lockedBy: 1, lockedAt: 1 }
     }
   );
-  
+
   return result.modifiedCount;
 };
 

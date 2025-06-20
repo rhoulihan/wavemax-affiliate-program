@@ -143,19 +143,19 @@ PaymentMethodSchema.virtual('isExpired').get(function() {
   if (this.type !== 'card' || !this.card) {
     return false;
   }
-  
+
   const now = new Date();
   const currentYear = now.getFullYear();
   const currentMonth = now.getMonth() + 1;
-  
+
   if (this.card.expiryYear < currentYear) {
     return true;
   }
-  
+
   if (this.card.expiryYear === currentYear && this.card.expiryMonth < currentMonth) {
     return true;
   }
-  
+
   return false;
 });
 
@@ -164,15 +164,15 @@ PaymentMethodSchema.methods.canUse = function() {
   if (!this.isActive) {
     return { canUse: false, reason: 'Payment method is inactive' };
   }
-  
+
   if (this.isExpired) {
     return { canUse: false, reason: 'Payment method is expired' };
   }
-  
+
   if (this.type === 'bank_account' && !this.isVerified) {
     return { canUse: false, reason: 'Bank account needs verification' };
   }
-  
+
   return { canUse: true };
 };
 
@@ -184,18 +184,18 @@ PaymentMethodSchema.methods.markAsUsed = function() {
 
 // Static method to find default payment method for customer
 PaymentMethodSchema.statics.findDefault = function(customerId) {
-  return this.findOne({ 
-    customerId, 
-    isActive: true, 
-    isDefault: true 
+  return this.findOne({
+    customerId,
+    isActive: true,
+    isDefault: true
   });
 };
 
 // Static method to find active payment methods for customer
 PaymentMethodSchema.statics.findActiveByCustomer = function(customerId) {
-  return this.find({ 
-    customerId, 
-    isActive: true 
+  return this.find({
+    customerId,
+    isActive: true
   }).sort({ isDefault: -1, createdAt: -1 });
 };
 
@@ -206,7 +206,7 @@ PaymentMethodSchema.statics.checkDuplicate = async function(customerId, fingerpr
     'card.fingerprint': fingerprint,
     isActive: true
   });
-  
+
   return existing;
 };
 
@@ -215,24 +215,24 @@ PaymentMethodSchema.pre('save', async function(next) {
   if (this.isModified('isDefault') && this.isDefault) {
     // Remove default from other payment methods
     await this.constructor.updateMany(
-      { 
-        customerId: this.customerId, 
+      {
+        customerId: this.customerId,
         _id: { $ne: this._id },
         isDefault: true
       },
       { isDefault: false }
     );
   }
-  
+
   // Prevent modification of certain fields
   if (this.isModified('paygistixId') && !this.isNew) {
     return next(new Error('Paygistix ID cannot be modified'));
   }
-  
+
   if (this.isModified('customerId') && !this.isNew) {
     return next(new Error('Customer ID cannot be modified'));
   }
-  
+
   next();
 });
 
@@ -243,12 +243,12 @@ PaymentMethodSchema.pre('save', async function(next) {
       customerId: this.customerId,
       isActive: true
     });
-    
+
     if (count === 0) {
       this.isDefault = true;
     }
   }
-  
+
   next();
 });
 

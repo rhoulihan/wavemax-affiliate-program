@@ -22,7 +22,7 @@ describe('OAuth Authentication Integration Tests', () => {
     await OAuthSession.deleteMany({});
     await Affiliate.deleteMany({});
     await Customer.deleteMany({});
-    
+
     // Get fresh CSRF token
     csrfToken = await getCsrfToken(app, agent);
   });
@@ -419,10 +419,10 @@ describe('OAuth Authentication Integration Tests', () => {
           zipCode: `1000${i}`,
           serviceArea: `Area ${i + 1}`,
           serviceLatitude: 30.2672,
-        serviceLongitude: -97.7431,
-        serviceRadius: 10,
-        minimumDeliveryFee: 25,
-        perBagDeliveryFee: 5.99 + i,
+          serviceLongitude: -97.7431,
+          serviceRadius: 10,
+          minimumDeliveryFee: 25,
+          perBagDeliveryFee: 5.99 + i,
           paymentMethod: 'check'
         };
 
@@ -436,8 +436,8 @@ describe('OAuth Authentication Integration Tests', () => {
       }
 
       // Verify all affiliates were created with unique usernames
-      const affiliates = await Affiliate.find({ 
-        affiliateId: { $in: createdAffiliates } 
+      const affiliates = await Affiliate.find({
+        affiliateId: { $in: createdAffiliates }
       }).sort({ username: 1 });
 
       expect(affiliates).toHaveLength(3);
@@ -735,7 +735,7 @@ describe('OAuth Authentication Integration Tests', () => {
         .send(linkData);
 
       // This test would require authentication middleware setup
-      // which is complex in integration tests. 
+      // which is complex in integration tests.
       // The actual functionality is tested in unit tests.
       expect([200, 401, 403]).toContain(response.status); // Various auth states
     });

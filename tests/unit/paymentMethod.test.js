@@ -44,7 +44,7 @@ describe('PaymentMethod Model Unit Tests', () => {
 
     it('should validate type enum', () => {
       const validTypes = ['card', 'bank_account', 'wallet'];
-      
+
       validTypes.forEach(type => {
         const pm = new PaymentMethod({
           customerId: customerId,
@@ -70,7 +70,7 @@ describe('PaymentMethod Model Unit Tests', () => {
         } else if (type === 'wallet') {
           pm.walletType = 'apple_pay';
         }
-        
+
         const error = pm.validateSync();
         expect(error).toBeUndefined();
       });
@@ -114,7 +114,7 @@ describe('PaymentMethod Model Unit Tests', () => {
 
     it('should validate card brand enum', () => {
       const validBrands = ['visa', 'mastercard', 'amex', 'discover', 'diners', 'jcb', 'unionpay'];
-      
+
       validBrands.forEach(brand => {
         mockPaymentMethod.card.brand = brand;
         const error = mockPaymentMethod.validateSync();
@@ -192,7 +192,7 @@ describe('PaymentMethod Model Unit Tests', () => {
 
     it('should validate account type enum', () => {
       const validTypes = ['checking', 'savings'];
-      
+
       validTypes.forEach(type => {
         mockPaymentMethod.bankAccount.accountType = type;
         const error = mockPaymentMethod.validateSync();
@@ -232,7 +232,7 @@ describe('PaymentMethod Model Unit Tests', () => {
 
     it('should validate wallet type enum', () => {
       const validTypes = ['apple_pay', 'google_pay', 'paypal'];
-      
+
       validTypes.forEach(type => {
         mockPaymentMethod.walletType = type;
         const error = mockPaymentMethod.validateSync();
@@ -273,7 +273,7 @@ describe('PaymentMethod Model Unit Tests', () => {
             fingerprint: 'FP-123'
           }
         });
-        
+
         expect(bankPM.displayName).toBe('Chase Bank •••• 6789');
       });
 
@@ -284,7 +284,7 @@ describe('PaymentMethod Model Unit Tests', () => {
           type: 'wallet',
           walletType: 'apple_pay'
         });
-        
+
         expect(walletPM.displayName).toBe('Apple Pay');
       });
 
@@ -295,7 +295,7 @@ describe('PaymentMethod Model Unit Tests', () => {
           type: 'wallet',
           walletType: 'google_pay'
         });
-        
+
         expect(walletPM.displayName).toBe('Google Pay');
       });
 
@@ -323,7 +323,7 @@ describe('PaymentMethod Model Unit Tests', () => {
             fingerprint: 'FP-123'
           }
         });
-        
+
         expect(bankPM.isExpired).toBe(false);
       });
 
@@ -386,7 +386,7 @@ describe('PaymentMethod Model Unit Tests', () => {
           },
           isVerified: false
         });
-        
+
         const result = bankPM.canUse();
         expect(result.canUse).toBe(false);
         expect(result.reason).toContain('verification');
@@ -405,7 +405,7 @@ describe('PaymentMethod Model Unit Tests', () => {
           },
           isVerified: true
         });
-        
+
         const result = bankPM.canUse();
         expect(result.canUse).toBe(true);
       });
@@ -414,12 +414,12 @@ describe('PaymentMethod Model Unit Tests', () => {
     describe('markAsUsed()', () => {
       it('should update lastUsedAt', async () => {
         const beforeUse = new Date();
-        
+
         // Mock save method
         mockPaymentMethod.save = jest.fn().mockResolvedValue(mockPaymentMethod);
-        
+
         await mockPaymentMethod.markAsUsed();
-        
+
         expect(mockPaymentMethod.lastUsedAt).toBeDefined();
         expect(mockPaymentMethod.lastUsedAt.getTime()).toBeGreaterThanOrEqual(beforeUse.getTime());
         expect(mockPaymentMethod.save).toHaveBeenCalled();
@@ -442,7 +442,7 @@ describe('PaymentMethod Model Unit Tests', () => {
         PaymentMethod.findOne.mockResolvedValue(mockDefault);
 
         const result = await PaymentMethod.findDefault(customerId);
-        
+
         expect(PaymentMethod.findOne).toHaveBeenCalledWith({
           customerId,
           isActive: true,
@@ -458,15 +458,15 @@ describe('PaymentMethod Model Unit Tests', () => {
           { _id: 'pm1', isDefault: true },
           { _id: 'pm2', isDefault: false }
         ];
-        
+
         const mockQuery = {
           sort: jest.fn().mockResolvedValue(mockMethods)
         };
-        
+
         PaymentMethod.find.mockReturnValue(mockQuery);
 
         const result = await PaymentMethod.findActiveByCustomer(customerId);
-        
+
         expect(PaymentMethod.find).toHaveBeenCalledWith({
           customerId,
           isActive: true
@@ -480,11 +480,11 @@ describe('PaymentMethod Model Unit Tests', () => {
       it('should check for duplicate card fingerprint', async () => {
         const fingerprint = 'FP-123';
         const mockExisting = { _id: 'pm123' };
-        
+
         PaymentMethod.findOne.mockResolvedValue(mockExisting);
 
         const result = await PaymentMethod.checkDuplicate(customerId, fingerprint);
-        
+
         expect(PaymentMethod.findOne).toHaveBeenCalledWith({
           customerId,
           'card.fingerprint': fingerprint,
@@ -497,7 +497,7 @@ describe('PaymentMethod Model Unit Tests', () => {
         PaymentMethod.findOne.mockResolvedValue(null);
 
         const result = await PaymentMethod.checkDuplicate(customerId, 'FP-NEW');
-        
+
         expect(result).toBeNull();
       });
     });
@@ -549,7 +549,7 @@ describe('PaymentMethod Model Unit Tests', () => {
         ['version', '2.0'],
         ['device', { type: 'ios', version: '14.5' }]
       ]);
-      
+
       const error = mockPaymentMethod.validateSync();
       expect(error).toBeUndefined();
       expect(mockPaymentMethod.metadata.get('source')).toBe('mobile_app');
@@ -560,7 +560,7 @@ describe('PaymentMethod Model Unit Tests', () => {
   describe('JSON Transformation', () => {
     it('should include virtuals and exclude sensitive fields', () => {
       const json = mockPaymentMethod.toJSON();
-      
+
       expect(json.__v).toBeUndefined();
       expect(json.paygistixId).toBeUndefined();
       expect(json.displayName).toBeDefined();

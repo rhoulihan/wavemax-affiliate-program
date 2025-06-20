@@ -811,6 +811,37 @@ X-CSRF-Token: {csrf_token}</code></pre>
     "specialInstructions": "Handle with care",
     "rushService": false
 }</code></pre>
+                
+                <h5>Response:</h5>
+                <pre><code>{
+    "success": true,
+    "order": {
+        "id": "507f1f77bcf86cd799439011",
+        "orderId": "ORD-2025-0001",
+        "status": "pending_payment",
+        "estimatedTotal": 33.13,
+        "wdfCharge": 25.00,  // Based on system config rate
+        "deliveryFee": 8.13,  // Based on affiliate settings
+        "createdAt": "2025-01-20T10:00:00.000Z"
+    }
+}</code></pre>
+                
+                <h5>Schedule Pickup Workflow:</h5>
+                <p>The schedule pickup process follows these steps:</p>
+                <ol>
+                    <li>Customer logs in or provides authentication</li>
+                    <li>Customer fills out pickup form with date, time, and weight estimate</li>
+                    <li>System calculates pricing based on:
+                        <ul>
+                            <li>WDF rate from system configuration</li>
+                            <li>Delivery fee from affiliate settings (minimum + per-bag)</li>
+                        </ul>
+                    </li>
+                    <li>Order is created with status "pending_payment"</li>
+                    <li>Customer is redirected to payment processing</li>
+                    <li>Upon successful payment, order status updates to "scheduled"</li>
+                    <li>Confirmation emails sent to customer and affiliate</li>
+                </ol>
             </div>
 
             <div class="endpoint">

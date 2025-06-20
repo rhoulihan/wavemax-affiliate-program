@@ -67,7 +67,7 @@
           customerData[key] = value;
         }
       });
-      
+
       // Store customer data for post-payment processing
       sessionStorage.setItem('pendingRegistration', JSON.stringify({
         customerData,
@@ -105,7 +105,7 @@
     }
 
     // Determine endpoint based on whether this is a social registration
-    const endpoint = isSocialRegistration 
+    const endpoint = isSocialRegistration
       ? `${baseUrl}/api/v1/auth/customer/social/register`
       : `${baseUrl}/api/v1/customers/register`;
 

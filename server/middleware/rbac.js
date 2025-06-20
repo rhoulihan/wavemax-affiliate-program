@@ -107,7 +107,7 @@ exports.checkResourceOwnership = (resourceOwnerField) => {
     }
 
     const userRole = req.user.role;
-    
+
     // Admins and administrators can access any resource
     if (userRole === 'admin' || userRole === 'administrator') {
       return next();
@@ -115,7 +115,7 @@ exports.checkResourceOwnership = (resourceOwnerField) => {
 
     // Get the resource owner ID from params or body
     const resourceOwnerId = req.params[resourceOwnerField] || req.body[resourceOwnerField];
-    
+
     // Check ownership based on role
     let isOwner = false;
     switch (userRole) {
@@ -238,7 +238,7 @@ exports.checkOperatorStatus = () => {
 exports.filterResponseFields = (fieldPermissions) => {
   return (req, res, next) => {
     const originalJson = res.json;
-    
+
     res.json = function(data) {
       if (!req.user || !req.user.role) {
         return originalJson.call(this, data);
@@ -255,7 +255,7 @@ exports.filterResponseFields = (fieldPermissions) => {
       // Filter the response data
       const filterObject = (obj) => {
         if (!obj || typeof obj !== 'object') return obj;
-        
+
         if (Array.isArray(obj)) {
           return obj.map(item => filterObject(item));
         }

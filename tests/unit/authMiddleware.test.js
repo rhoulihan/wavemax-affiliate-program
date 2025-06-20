@@ -17,6 +17,7 @@ describe('Auth Middleware', () => {
     req = {
       headers: {},
       user: null,
+      path: '/api/test',
       get: jest.fn().mockReturnValue('Mozilla/5.0')
     };
     res = {
@@ -25,7 +26,7 @@ describe('Auth Middleware', () => {
     };
     next = jest.fn();
     jest.clearAllMocks();
-    
+
     // Reset TokenBlacklist mock
     TokenBlacklist.isBlacklisted.mockReset();
   });
@@ -45,7 +46,11 @@ describe('Auth Middleware', () => {
 
       expect(jwt.verify).toHaveBeenCalledWith('validtoken', process.env.JWT_SECRET);
       expect(TokenBlacklist.isBlacklisted).toHaveBeenCalledWith('validtoken');
-      expect(req.user).toEqual(decodedToken);
+      expect(req.user).toEqual({
+        id: 'user123',
+        role: 'affiliate',
+        affiliateId: 'AFF123'
+      });
       expect(next).toHaveBeenCalled();
       expect(res.status).not.toHaveBeenCalled();
     });
@@ -64,7 +69,11 @@ describe('Auth Middleware', () => {
 
       expect(jwt.verify).toHaveBeenCalledWith('validtoken', process.env.JWT_SECRET);
       expect(TokenBlacklist.isBlacklisted).toHaveBeenCalledWith('validtoken');
-      expect(req.user).toEqual(decodedToken);
+      expect(req.user).toEqual({
+        id: 'user123',
+        role: 'customer',
+        customerId: 'CUST123'
+      });
       expect(next).toHaveBeenCalled();
     });
 

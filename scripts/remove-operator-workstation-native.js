@@ -5,7 +5,7 @@ require('dotenv').config({ path: '../.env' });
 
 async function removeWorkStationField() {
   const client = new MongoClient(process.env.MONGODB_URI || 'mongodb://localhost:27017/wavemax-affiliate');
-  
+
   try {
     await client.connect();
     console.log('Connected to MongoDB');
@@ -16,7 +16,7 @@ async function removeWorkStationField() {
     // Remove workStation field from all operators
     const result = await collection.updateMany(
       {},
-      { $unset: { workStation: "" } }
+      { $unset: { workStation: '' } }
     );
 
     console.log(`Updated ${result.modifiedCount} operators out of ${result.matchedCount} matched`);

@@ -11,11 +11,11 @@ const w9DocumentSchema = new mongoose.Schema({
     default: () => 'W9DOC-' + uuidv4(),
     unique: true
   },
-  affiliateId: { 
-    type: String, 
-    required: true, 
+  affiliateId: {
+    type: String,
+    required: true,
     ref: 'Affiliate',
-    index: true 
+    index: true
   },
   filename: {
     type: String,
@@ -40,9 +40,9 @@ const w9DocumentSchema = new mongoose.Schema({
     required: true,
     unique: true // Encrypted file reference
   },
-  uploadedAt: { 
-    type: Date, 
-    default: Date.now 
+  uploadedAt: {
+    type: Date,
+    default: Date.now
   },
   uploadedBy: {
     type: String,
@@ -53,9 +53,9 @@ const w9DocumentSchema = new mongoose.Schema({
     enum: ['affiliate_upload', 'admin_upload', 'email_attachment'],
     default: 'affiliate_upload'
   },
-  isActive: { 
-    type: Boolean, 
-    default: true 
+  isActive: {
+    type: Boolean,
+    default: true
   },
   // Audit fields
   metadata: {
@@ -70,9 +70,9 @@ const w9DocumentSchema = new mongoose.Schema({
     default: 'pending'
   },
   verifiedAt: Date,
-  verifiedBy: { 
-    type: mongoose.Schema.Types.ObjectId, 
-    ref: 'Administrator' 
+  verifiedBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Administrator'
   },
   // Document expiry
   expiryDate: {
@@ -99,8 +99,8 @@ const w9DocumentSchema = new mongoose.Schema({
   },
   legalHoldReason: String,
   legalHoldDate: Date
-}, { 
-  timestamps: true 
+}, {
+  timestamps: true
 });
 
 // Indexes for efficient querying
@@ -110,8 +110,8 @@ w9DocumentSchema.index({ expiryDate: 1 });
 
 // Method to check if document is valid
 w9DocumentSchema.methods.isValid = function() {
-  return this.isActive && 
-         this.verificationStatus === 'verified' && 
+  return this.isActive &&
+         this.verificationStatus === 'verified' &&
          this.expiryDate > new Date() &&
          !this.deletedAt;
 };

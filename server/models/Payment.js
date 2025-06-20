@@ -152,13 +152,13 @@ PaymentSchema.methods.canRefund = function(amount = null) {
   if (this.status !== 'captured' && this.status !== 'partially_refunded') {
     return false;
   }
-  
+
   const availableAmount = this.capturedAmount - this.refundedAmount;
-  
+
   if (amount === null) {
     return availableAmount > 0;
   }
-  
+
   return amount <= availableAmount;
 };
 
@@ -174,10 +174,10 @@ PaymentSchema.methods.addRefund = function(refundId, amount, reason) {
     amount,
     reason
   });
-  
+
   this.refundedAmount += amount;
   this.lastRefundAt = new Date();
-  
+
   if (this.refundedAmount >= this.capturedAmount) {
     this.status = 'refunded';
   } else {
@@ -192,12 +192,12 @@ PaymentSchema.statics.findByOrder = function(orderId) {
 
 // Static method to find successful payments by customer
 PaymentSchema.statics.findSuccessfulByCustomer = function(customerId, limit = 10) {
-  return this.find({ 
-    customerId, 
-    status: { $in: ['captured', 'succeeded'] } 
+  return this.find({
+    customerId,
+    status: { $in: ['captured', 'succeeded'] }
   })
-  .sort({ createdAt: -1 })
-  .limit(limit);
+    .sort({ createdAt: -1 })
+    .limit(limit);
 };
 
 // Static method to calculate total revenue for a period
@@ -237,11 +237,11 @@ PaymentSchema.pre('save', function(next) {
   if (this.isModified('paygistixId') && !this.isNew) {
     return next(new Error('Paygistix ID cannot be modified'));
   }
-  
+
   if (this.isModified('orderId') && !this.isNew) {
     return next(new Error('Order ID cannot be modified'));
   }
-  
+
   next();
 });
 

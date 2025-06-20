@@ -65,16 +65,16 @@ describe('Administrator Controller - Enhanced Coverage', () => {
       send: jest.fn().mockReturnThis(),
       setHeader: jest.fn().mockReturnThis()
     };
-    
+
     // Mock express-validator
     validationResult.mockReturnValue({
       isEmpty: jest.fn().mockReturnValue(true),
       array: jest.fn().mockReturnValue([])
     });
-    
+
     // Mock fieldFilter
     fieldFilter.mockImplementation((data) => data);
-    
+
     jest.clearAllMocks();
   });
 
@@ -82,20 +82,20 @@ describe('Administrator Controller - Enhanced Coverage', () => {
     describe('getAdministrators', () => {
       test('should get all administrators with pagination', async () => {
         const mockAdmins = [
-          { 
-            adminId: 'ADM001', 
-            firstName: 'John', 
+          {
+            adminId: 'ADM001',
+            firstName: 'John',
             email: 'john@example.com',
             toObject: jest.fn().mockReturnValue({ adminId: 'ADM001', firstName: 'John', email: 'john@example.com' })
           },
-          { 
-            adminId: 'ADM002', 
-            firstName: 'Jane', 
+          {
+            adminId: 'ADM002',
+            firstName: 'Jane',
             email: 'jane@example.com',
             toObject: jest.fn().mockReturnValue({ adminId: 'ADM002', firstName: 'Jane', email: 'jane@example.com' })
           }
         ];
-        
+
         Administrator.find.mockReturnValue({
           select: jest.fn().mockReturnThis(),
           sort: jest.fn().mockReturnThis(),
@@ -123,7 +123,7 @@ describe('Administrator Controller - Enhanced Coverage', () => {
 
       test('should filter administrators by search query', async () => {
         req.query = { search: 'john' };
-        
+
         Administrator.find.mockReturnValue({
           select: jest.fn().mockReturnThis(),
           sort: jest.fn().mockReturnThis(),
@@ -166,9 +166,9 @@ describe('Administrator Controller - Enhanced Coverage', () => {
     describe('getAdministratorById', () => {
       test('should get administrator by ID', async () => {
         req.params.id = '507f1f77bcf86cd799439011'; // Valid ObjectId
-        const mockAdmin = { 
-          _id: '507f1f77bcf86cd799439011', 
-          adminId: 'ADM001', 
+        const mockAdmin = {
+          _id: '507f1f77bcf86cd799439011',
+          adminId: 'ADM001',
           firstName: 'John',
           permissions: ['all'],
           toObject: jest.fn().mockReturnValue({
@@ -178,7 +178,7 @@ describe('Administrator Controller - Enhanced Coverage', () => {
             permissions: ['all']
           })
         };
-        
+
         Administrator.findById.mockReturnValue({
           select: jest.fn().mockResolvedValue(mockAdmin)
         });
@@ -231,19 +231,19 @@ describe('Administrator Controller - Enhanced Coverage', () => {
           password: 'SecurePassword123!',
           permissions: ['administrators.read', 'operators.manage']
         };
-        
+
         // Mock validation result - no errors
         validationResult.mockReturnValue({
           isEmpty: jest.fn().mockReturnValue(true),
           array: jest.fn().mockReturnValue([])
         });
-        
+
         // Mock existing admin check
         Administrator.findOne.mockResolvedValue(null);
-        
+
         const mockAdminCount = 5;
         Administrator.countDocuments.mockResolvedValue(mockAdminCount);
-        
+
         const mockSavedAdmin = {
           _id: 'new-admin-id',
           adminId: 'ADM006',
@@ -318,7 +318,7 @@ describe('Administrator Controller - Enhanced Coverage', () => {
           isEmpty: jest.fn().mockReturnValue(true),
           array: jest.fn().mockReturnValue([])
         });
-        
+
         // Mock existing admin found
         Administrator.findOne.mockResolvedValue({ email: 'existing@example.com' });
 
@@ -406,7 +406,7 @@ describe('Administrator Controller - Enhanced Coverage', () => {
       test('should delete administrator successfully', async () => {
         req.params.id = '507f1f77bcf86cd799439011';
         req.user.id = '507f1f77bcf86cd799439012'; // Different ID
-        
+
         const mockAdmin = {
           _id: '507f1f77bcf86cd799439011',
           adminId: 'ADM002',
@@ -443,12 +443,12 @@ describe('Administrator Controller - Enhanced Coverage', () => {
       test('should prevent deletion of last administrator', async () => {
         req.params.id = '507f1f77bcf86cd799439011';
         req.user.id = '507f1f77bcf86cd799439012'; // Different ID
-        
-        const mockAdmin = { 
+
+        const mockAdmin = {
           _id: '507f1f77bcf86cd799439011',
           permissions: ['all']
         };
-        
+
         Administrator.find.mockResolvedValue([]); // No other admins with 'all' permissions
         Administrator.findById.mockResolvedValue(mockAdmin);
 
@@ -535,7 +535,7 @@ describe('Administrator Controller - Enhanced Coverage', () => {
     describe('deactivateOperator', () => {
       test('should deactivate operator', async () => {
         req.params.id = '507f1f77bcf86cd799439011';
-        
+
         const mockOperator = {
           _id: '507f1f77bcf86cd799439011',
           isActive: false,
@@ -548,11 +548,11 @@ describe('Administrator Controller - Enhanced Coverage', () => {
 
         expect(Operator.findByIdAndUpdate).toHaveBeenCalledWith(
           '507f1f77bcf86cd799439011',
-          { 
-            $set: { 
+          {
+            $set: {
               isActive: false,
-              currentOrderCount: 0 
-            } 
+              currentOrderCount: 0
+            }
           },
           { new: true }
         );
@@ -652,7 +652,7 @@ describe('Administrator Controller - Enhanced Coverage', () => {
     describe('deleteOperator', () => {
       test.skip('should delete operator permanently', async () => {
         req.params.id = 'op123';
-        
+
         const mockOperator = {
           _id: 'op123',
           operatorId: 'OP001',
@@ -850,7 +850,7 @@ describe('Administrator Controller - Enhanced Coverage', () => {
     describe('getOperatorSelf', () => {
       test.skip('should get current operator profile', async () => {
         req.user = { id: 'op123', role: 'operator' };
-        
+
         const mockOperator = {
           _id: 'op123',
           operatorId: 'OP001',

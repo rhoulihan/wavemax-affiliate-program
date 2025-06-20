@@ -34,11 +34,11 @@ exports.getAdministrators = async (req, res) => {
 
     // Build query
     const query = {};
-    
+
     if (active !== undefined) {
       query.isActive = active === 'true';
     }
-    
+
     if (search) {
       query.$or = [
         { firstName: new RegExp(search, 'i') },
@@ -183,7 +183,7 @@ exports.createAdministrator = async (req, res) => {
 
   } catch (error) {
     console.error('Error creating administrator:', error);
-    
+
     // Handle validation errors from model pre-save hooks
     if (error.name === 'ValidationError') {
       return res.status(400).json({
@@ -191,7 +191,7 @@ exports.createAdministrator = async (req, res) => {
         message: error.message
       });
     }
-    
+
     // Handle duplicate key errors
     if (error.code === 11000) {
       return res.status(409).json({
@@ -199,7 +199,7 @@ exports.createAdministrator = async (req, res) => {
         message: 'Email already exists'
       });
     }
-    
+
     res.status(500).json({
       success: false,
       message: 'Failed to create administrator'
@@ -453,7 +453,7 @@ exports.changeAdministratorPassword = async (req, res) => {
 
     // Find administrator with password field
     const administrator = await Administrator.findById(administratorId).select('+password');
-    
+
     if (!administrator) {
       return res.status(404).json({
         success: false,
@@ -463,7 +463,7 @@ exports.changeAdministratorPassword = async (req, res) => {
 
     // Verify current password
     const isPasswordValid = administrator.verifyPassword(currentPassword);
-    
+
     if (!isPasswordValid) {
       logAuditEvent(AuditEvents.PASSWORD_CHANGE_FAILED, {
         action: 'CHANGE_PASSWORD_FAILED',
@@ -471,7 +471,7 @@ exports.changeAdministratorPassword = async (req, res) => {
         userType: 'administrator',
         reason: 'Invalid current password'
       }, req);
-      
+
       return res.status(401).json({
         success: false,
         message: 'Current password is incorrect'
@@ -492,7 +492,7 @@ exports.changeAdministratorPassword = async (req, res) => {
       username: administrator.email.split('@')[0],
       email: administrator.email
     });
-    
+
     if (!validation.success) {
       return res.status(400).json({
         success: false,
@@ -586,14 +586,14 @@ exports.createOperator = async (req, res) => {
       });
     }
 
-    const { 
-      firstName, 
-      lastName, 
-      email, 
+    const {
+      firstName,
+      lastName,
+      email,
       username,
-      password, 
-      shiftStart, 
-      shiftEnd 
+      password,
+      shiftStart,
+      shiftEnd
     } = req.body;
 
     // Validate shift time format if provided
@@ -649,7 +649,7 @@ exports.createOperator = async (req, res) => {
 
   } catch (error) {
     console.error('Error creating operator:', error);
-    
+
     // Handle validation errors from model pre-save hooks
     if (error.name === 'ValidationError') {
       return res.status(400).json({
@@ -657,7 +657,7 @@ exports.createOperator = async (req, res) => {
         message: error.message
       });
     }
-    
+
     // Handle duplicate key errors
     if (error.code === 11000) {
       return res.status(409).json({
@@ -665,7 +665,7 @@ exports.createOperator = async (req, res) => {
         message: 'Email already exists'
       });
     }
-    
+
     res.status(500).json({
       success: false,
       message: 'Failed to create operator'
@@ -678,10 +678,10 @@ exports.createOperator = async (req, res) => {
  */
 exports.getOperators = async (req, res) => {
   try {
-    const { 
-      page = 1, 
-      limit = 20, 
-      isActive, 
+    const {
+      page = 1,
+      limit = 20,
+      isActive,
       active, // Support both 'active' and 'isActive' parameters
       onShift,
       search,
@@ -691,14 +691,14 @@ exports.getOperators = async (req, res) => {
 
     // Build query
     const query = {};
-    
+
     // Handle both 'active' and 'isActive' parameter names
     const activeParam = active !== undefined ? active : isActive;
     if (activeParam !== undefined) {
       query.isActive = activeParam === 'true';
     }
-    
-    
+
+
     if (search) {
       query.$or = [
         { firstName: new RegExp(search, 'i') },
@@ -714,18 +714,18 @@ exports.getOperators = async (req, res) => {
       const allOperators = await Operator.find(query)
         .sort({ [sortBy]: sortOrder === 'asc' ? 1 : -1 })
         .populate('createdBy', 'firstName lastName');
-      
+
       // Filter by onShift status
       const isOnShiftFilter = onShift === 'true';
       const filteredOperators = allOperators.filter(op => op.isOnShift === isOnShiftFilter);
-      
+
       // Apply pagination to filtered results
       const startIndex = (page - 1) * limit;
       const endIndex = startIndex + parseInt(limit);
       const operators = filteredOperators.slice(startIndex, endIndex);
-      
+
       const total = filteredOperators.length;
-      
+
       res.json({
         success: true,
         operators: operators.map(op => fieldFilter(op.toObject(), 'administrator')),
@@ -787,10 +787,10 @@ exports.getOperatorById = async (req, res) => {
 
     // Get operator statistics
     const stats = await Order.aggregate([
-      { 
-        $match: { 
-          assignedOperator: operator._id 
-        } 
+      {
+        $match: {
+          assignedOperator: operator._id
+        }
       },
       {
         $group: {
@@ -852,9 +852,9 @@ exports.updateOperator = async (req, res) => {
 
     // Check email uniqueness if email is being updated
     if (updates.email && updates.email !== existingOperator.email) {
-      const emailExists = await Operator.findOne({ 
-        email: updates.email, 
-        _id: { $ne: id } 
+      const emailExists = await Operator.findOne({
+        email: updates.email,
+        _id: { $ne: id }
       });
       if (emailExists) {
         return res.status(409).json({
@@ -919,11 +919,11 @@ exports.deactivateOperator = async (req, res) => {
 
     const operator = await Operator.findByIdAndUpdate(
       id,
-      { 
-        $set: { 
+      {
+        $set: {
           isActive: false,
-          currentOrderCount: 0 
-        } 
+          currentOrderCount: 0
+        }
       },
       { new: true }
     );
@@ -937,11 +937,11 @@ exports.deactivateOperator = async (req, res) => {
 
     // Unassign any active orders
     await Order.updateMany(
-      { 
+      {
         assignedOperator: operator._id,
         orderProcessingStatus: { $in: ['assigned', 'washing', 'drying', 'folding'] }
       },
-      { 
+      {
         $unset: { assignedOperator: 1 },
         $set: { orderProcessingStatus: 'pending' }
       }
@@ -1027,10 +1027,10 @@ exports.getDashboard = async (req, res) => {
   try {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    
+
     const thisWeekStart = new Date(today);
     thisWeekStart.setDate(today.getDate() - today.getDay());
-    
+
     const thisMonthStart = new Date(today.getFullYear(), today.getMonth(), 1);
 
     // Aggregate order statistics
@@ -1056,11 +1056,11 @@ exports.getDashboard = async (req, res) => {
             { $group: { _id: '$orderProcessingStatus', count: { $sum: 1 } } }
           ],
           averageProcessingTime: [
-            { $match: { 
+            { $match: {
               status: 'complete',
               processingStartedAt: { $exists: true },
               completedAt: { $exists: true }
-            }},
+            } },
             { $project: {
               processingTime: {
                 $divide: [
@@ -1068,7 +1068,7 @@ exports.getDashboard = async (req, res) => {
                   1000 * 60 // Convert to minutes
                 ]
               }
-            }},
+            } },
             { $group: { _id: null, avg: { $avg: '$processingTime' } } }
           ]
         }
@@ -1164,8 +1164,8 @@ exports.getDashboard = async (req, res) => {
       onShiftOperators: await Operator.findOnShift().then(ops => ops.length),
       activeAffiliates: await Affiliate.countDocuments({ isActive: true }),
       totalCustomers: await Customer.countDocuments(),
-      ordersInProgress: await Order.countDocuments({ 
-        status: { $in: ['pending', 'scheduled', 'processing', 'processed'] } 
+      ordersInProgress: await Order.countDocuments({
+        status: { $in: ['pending', 'scheduled', 'processing', 'processed'] }
       }),
       completedOrders: await Order.countDocuments({ status: 'complete' }),
       processingDelays: await Order.countDocuments({
@@ -1179,27 +1179,27 @@ exports.getDashboard = async (req, res) => {
       .sort({ updatedAt: -1 })
       .limit(10)
       .lean();
-    
+
     // Get unique affiliate IDs from recent orders
     const affiliateIds = [...new Set(recentOrders.map(o => o.affiliateId).filter(id => id))];
-    
+
     let formattedActivity = [];
-    
+
     if (affiliateIds.length > 0) {
       const affiliates = await Affiliate.find({ affiliateId: { $in: affiliateIds } })
         .select('affiliateId firstName lastName businessName')
         .lean();
-      
+
       // Create a map for quick lookup
       const affiliateMap = new Map(affiliates.map(a => [a.affiliateId, a]));
-      
+
       formattedActivity = recentOrders.map(order => {
         const affiliate = affiliateMap.get(order.affiliateId);
         return {
           timestamp: order.updatedAt,
           type: 'Order',
-          userName: affiliate ? 
-            `${affiliate.firstName} ${affiliate.lastName}` : 
+          userName: affiliate ?
+            `${affiliate.firstName} ${affiliate.lastName}` :
             'Unknown',
           action: `Order ${order.orderId} - Status: ${order.status}`
         };
@@ -1238,7 +1238,7 @@ exports.getDashboard = async (req, res) => {
  */
 exports.getOrderAnalytics = async (req, res) => {
   try {
-    const { 
+    const {
       startDate = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000), // 30 days ago
       endDate = new Date(),
       groupBy = 'day' // day, week, month
@@ -1264,7 +1264,7 @@ exports.getOrderAnalytics = async (req, res) => {
           // Calculate completion time in minutes (from scheduled to completed)
           completionTimeMinutes: {
             $cond: [
-              { 
+              {
                 $and: [
                   { $eq: ['$status', 'complete'] },
                   { $ne: ['$scheduledAt', null] },
@@ -1299,7 +1299,7 @@ exports.getOrderAnalytics = async (req, res) => {
           },
           totalRevenue: { $sum: '$actualTotal' },
           averageOrderValue: { $avg: '$actualTotal' },
-          averageProcessingTime: { 
+          averageProcessingTime: {
             $avg: {
               $cond: [
                 { $eq: ['$status', 'complete'] },
@@ -1370,7 +1370,7 @@ exports.getOrderAnalytics = async (req, res) => {
  */
 exports.getOperatorAnalytics = async (req, res) => {
   try {
-    const { 
+    const {
       startDate = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
       endDate = new Date()
     } = req.query;
@@ -1499,7 +1499,7 @@ exports.getOperatorAnalytics = async (req, res) => {
  */
 exports.getAffiliateAnalytics = async (req, res) => {
   try {
-    const { 
+    const {
       startDate = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
       endDate = new Date()
     } = req.query;
@@ -1599,7 +1599,7 @@ exports.getAffiliateAnalytics = async (req, res) => {
  */
 exports.exportReport = async (req, res) => {
   try {
-    const { 
+    const {
       reportType = 'orders', // orders, operators, affiliates, comprehensive
       format = 'csv', // csv, excel
       startDate,
@@ -1610,7 +1610,7 @@ exports.exportReport = async (req, res) => {
     // For now, returning JSON data that can be converted client-side
 
     let reportData;
-    
+
     switch (reportType) {
     case 'orders':
       reportData = await generateOrdersReport(startDate, endDate);
@@ -1785,18 +1785,18 @@ async function generateOrdersReport(startDate, endDate) {
       $lte: new Date(endDate || Date.now())
     }
   })
-  .populate('assignedOperator', 'firstName lastName operatorId')
-  .populate('affiliateId', 'firstName lastName businessName')
-  .lean();
+    .populate('assignedOperator', 'firstName lastName operatorId')
+    .populate('affiliateId', 'firstName lastName businessName')
+    .lean();
 
   return orders.map(order => ({
     orderId: order.orderId,
     customerID: order.customerId,
-    affiliateName: order.affiliateId ? 
+    affiliateName: order.affiliateId ?
       `${order.affiliateId.firstName} ${order.affiliateId.lastName}` : 'N/A',
     status: order.status,
     processingStatus: order.orderProcessingStatus,
-    operator: order.assignedOperator ? 
+    operator: order.assignedOperator ?
       `${order.assignedOperator.firstName} ${order.assignedOperator.lastName}` : 'Unassigned',
     processingTime: order.processingTimeMinutes || 0,
     actualWeight: order.actualWeight || 0,
@@ -1807,9 +1807,9 @@ async function generateOrdersReport(startDate, endDate) {
 
 async function generateOperatorsReport(startDate, endDate) {
   const operators = await Operator.find().lean();
-  
+
   const operatorReports = [];
-  
+
   for (const operator of operators) {
     const orderStats = await Order.aggregate([
       {
@@ -1852,9 +1852,9 @@ async function generateOperatorsReport(startDate, endDate) {
 
 async function generateAffiliatesReport(startDate, endDate) {
   const affiliates = await Affiliate.find().lean();
-  
+
   const affiliateReports = [];
-  
+
   for (const affiliate of affiliates) {
     const stats = await Order.aggregate([
       {
@@ -1957,11 +1957,11 @@ exports.updateOperatorStats = async (req, res) => {
     if (processingTime !== undefined) {
       const currentTotal = operator.totalOrdersProcessed || 0;
       const currentAvg = operator.averageProcessingTime || 0;
-      
+
       // Calculate new running average: (old_avg * old_count + new_time) / new_count
       const newTotal = currentTotal + 1;
       const newAverage = (currentAvg * currentTotal + processingTime) / newTotal;
-      
+
       operator.totalOrdersProcessed = newTotal;
       operator.averageProcessingTime = newAverage;
     }
@@ -2016,7 +2016,7 @@ exports.getAvailableOperators = async (req, res) => {
     const { limit = 20 } = req.query;
 
     // Get all active operators who are not too busy (less than 10 current orders)
-    const operators = await Operator.find({ 
+    const operators = await Operator.find({
       isActive: true,
       currentOrderCount: { $lt: 10 }
     })
@@ -2154,7 +2154,7 @@ exports.updateOperatorSelf = async (req, res) => {
     // Only allow specific fields to be updated by operators themselves
     const allowedFields = ['firstName', 'lastName', 'password', 'phone'];
     const filteredUpdates = {};
-    
+
     allowedFields.forEach(field => {
       if (updates[field] !== undefined) {
         filteredUpdates[field] = updates[field];
@@ -2204,7 +2204,7 @@ exports.getOperatorSelf = async (req, res) => {
       });
     }
 
-    // Filter sensitive fields from response - operator viewing their own profile  
+    // Filter sensitive fields from response - operator viewing their own profile
     const { getFilteredData } = require('../utils/fieldFilter');
     const responseData = getFilteredData('operator', operator.toObject(), 'operator', { isSelf: true });
 

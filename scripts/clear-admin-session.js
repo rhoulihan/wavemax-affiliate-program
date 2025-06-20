@@ -14,27 +14,27 @@ async function main() {
     console.log('Connecting to MongoDB...');
     await mongoose.connect(process.env.MONGODB_URI);
     console.log('✓ Connected to MongoDB\n');
-    
+
     // Find the default admin
-    const defaultAdmin = await Administrator.findOne({ 
-      email: process.env.DEFAULT_ADMIN_EMAIL || 'rickh@wavemaxlaundry.com' 
+    const defaultAdmin = await Administrator.findOne({
+      email: process.env.DEFAULT_ADMIN_EMAIL || 'rickh@wavemaxlaundry.com'
     });
-    
+
     if (defaultAdmin) {
       console.log('Found administrator:', defaultAdmin.adminId);
-      
+
       // Clear any refresh tokens for this admin
-      const deletedTokens = await RefreshToken.deleteMany({ 
-        userId: defaultAdmin._id 
+      const deletedTokens = await RefreshToken.deleteMany({
+        userId: defaultAdmin._id
       });
       console.log(`✓ Deleted ${deletedTokens.deletedCount} refresh tokens`);
-      
+
       // Clear any blacklisted tokens for this admin
-      const deletedBlacklisted = await TokenBlacklist.deleteMany({ 
-        userId: defaultAdmin._id.toString() 
+      const deletedBlacklisted = await TokenBlacklist.deleteMany({
+        userId: defaultAdmin._id.toString()
       });
       console.log(`✓ Deleted ${deletedBlacklisted.deletedCount} blacklisted tokens`);
-      
+
       // Ensure requirePasswordChange is true
       if (!defaultAdmin.requirePasswordChange) {
         defaultAdmin.requirePasswordChange = true;
@@ -46,10 +46,10 @@ async function main() {
     } else {
       console.log('❌ Default administrator not found');
     }
-    
+
     console.log('\n✅ Session cleanup completed!');
     console.log('The administrator will need to login with credentials on next access.');
-    
+
   } catch (error) {
     console.error('\n❌ Error:', error.message);
   } finally {

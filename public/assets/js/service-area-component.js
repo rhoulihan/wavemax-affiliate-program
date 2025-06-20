@@ -41,7 +41,7 @@
       registrationLng: options.registrationLng || null,
       ...options
     };
-    
+
     console.log('[ServiceAreaComponent] Final config:', config);
 
     // Create the HTML structure
@@ -183,7 +183,7 @@
       useRegistrationBtn.addEventListener('click', function() {
         // Update service area to registration address
         updateServiceArea(component, config.registrationLat, config.registrationLng, component.config.radius);
-        
+
         // If registration address is provided, update the address display immediately
         if (config.registrationAddress) {
           const locationElement = document.getElementById(`${containerId}-centerLocation`);
@@ -215,17 +215,17 @@
     // Check if Leaflet is available
     if (typeof L === 'undefined') {
       console.log('Leaflet not available, loading it dynamically...');
-      
+
       // Check if we're already loading Leaflet
       if (window.leafletLoading) {
         console.log('Leaflet is already being loaded, waiting...');
         setTimeout(() => initializeMap(component), 500);
         return;
       }
-      
+
       // Mark that we're loading Leaflet
       window.leafletLoading = true;
-      
+
       // Check if Leaflet CSS is loaded
       if (!document.querySelector('link[href*="leaflet"]')) {
         const leafletCSS = document.createElement('link');
@@ -235,7 +235,7 @@
         document.head.appendChild(leafletCSS);
         console.log('Added Leaflet CSS');
       }
-      
+
       // Check if Leaflet JS is being loaded
       if (!document.querySelector('script[src*="leaflet"]')) {
         const leafletJS = document.createElement('script');
@@ -262,7 +262,7 @@
 
     try {
       console.log('[ServiceAreaComponent] Initializing map with center:', component.config.latitude, component.config.longitude);
-      
+
       // Calculate initial zoom level based on radius
       const radiusInKm = component.config.radius * 1.60934;
       let initialZoom = 12;
@@ -272,10 +272,10 @@
       else if (radiusInKm <= 40) initialZoom = 10;
       else if (radiusInKm <= 80) initialZoom = 9;
       else initialZoom = 8;
-      
+
       // Initialize map
       component.map = L.map(mapContainer).setView([component.config.latitude, component.config.longitude], initialZoom);
-      
+
       // Add OpenStreetMap tiles
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
@@ -298,7 +298,7 @@
         radiusSlider.addEventListener('input', function() {
           const radius = parseInt(this.value);
           document.getElementById(`${component.container.id}-radiusValue`).textContent = radius;
-          
+
           if (component.marker) {
             const position = component.marker.getLatLng();
             updateServiceArea(component, position.lat, position.lng, radius);
@@ -354,7 +354,7 @@
     // This ensures the service area circle is visible while keeping the center point
     const radiusInKm = component.config.radius * 1.60934;
     let zoomLevel = 12; // Default zoom
-    
+
     // Adjust zoom based on radius
     if (radiusInKm <= 5) zoomLevel = 13;
     else if (radiusInKm <= 10) zoomLevel = 12;
@@ -362,7 +362,7 @@
     else if (radiusInKm <= 40) zoomLevel = 10;
     else if (radiusInKm <= 80) zoomLevel = 9;
     else zoomLevel = 8;
-    
+
     // Set the view to center on the registration address with appropriate zoom
     component.map.setView([component.config.latitude, component.config.longitude], zoomLevel);
   }
@@ -377,7 +377,7 @@
   function updateServiceArea(component, lat, lng, radius) {
     // Check if coordinates have actually changed
     const coordsChanged = (
-      Math.abs(component.config.latitude - lat) > 0.000001 || 
+      Math.abs(component.config.latitude - lat) > 0.000001 ||
       Math.abs(component.config.longitude - lng) > 0.000001
     );
 
@@ -440,7 +440,7 @@
     if (window.parent !== window) {
       // Use bridge method
       const requestId = 'service_area_' + Date.now();
-      
+
       window.parent.postMessage({
         type: 'geocode-reverse',
         data: { lat, lng, requestId }
@@ -448,9 +448,9 @@
 
       // Set up one-time handler
       const handleResponse = function(event) {
-        if (event.data && event.data.type === 'geocode-reverse-response' && 
+        if (event.data && event.data.type === 'geocode-reverse-response' &&
             event.data.data && event.data.data.requestId === requestId) {
-          
+
           if (event.data.data.address) {
             const formattedAddress = formatAddress(event.data.data.address);
             locationElement.textContent = formattedAddress;
@@ -458,11 +458,11 @@
           } else {
             locationElement.textContent = 'Address not found';
           }
-          
+
           window.removeEventListener('message', handleResponse);
         }
       };
-      
+
       window.addEventListener('message', handleResponse);
     } else {
       // Direct Nominatim call
@@ -492,7 +492,7 @@
   function formatAddress(displayName) {
     const parts = displayName.split(',').map(p => p.trim());
     let street = '', city = '', state = '', zipcode = '';
-    
+
     // Parse address components
     if (parts.length >= 2) {
       if (parts[0].match(/^\d+$/)) {
@@ -521,7 +521,7 @@
         }
       }
     }
-    
+
     // Build formatted address
     let formatted = street;
     if (city) formatted += ', ' + city;
@@ -529,7 +529,7 @@
       formatted += ', ' + state;
       if (zipcode) formatted += ' ' + zipcode;
     }
-    
+
     return formatted || parts.slice(0, 3).join(', ');
   }
 
@@ -559,7 +559,7 @@
       // Re-render the component with new visibility settings
       const container = component.container;
       component.config = { ...component.config, ...data };
-      
+
       // Reinitialize the component
       const newComponent = initServiceArea(containerId, component.config);
       if (newComponent) {

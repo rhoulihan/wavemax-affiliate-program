@@ -12,7 +12,7 @@ const w9ControllerDocuSign = require('../controllers/w9ControllerDocuSign');
 const upload = multer({
   storage: multer.memoryStorage(),
   limits: {
-    fileSize: 5 * 1024 * 1024, // 5MB limit
+    fileSize: 5 * 1024 * 1024 // 5MB limit
   },
   fileFilter: (req, file, cb) => {
     // Only accept PDFs

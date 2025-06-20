@@ -73,7 +73,7 @@ describe('Affiliate API', () => {
         serviceLongitude: -97.7431,
         serviceRadius: 10,
         minimumDeliveryFee: 25,
-      perBagDeliveryFee: 5,
+        perBagDeliveryFee: 5,
         username: 'newaffiliate',
         password: getStrongPassword('affiliate', 1),
         paymentMethod: 'directDeposit'
@@ -205,8 +205,7 @@ describe('Affiliate API', () => {
       affiliateId: testAffiliate.affiliateId,
       pickupDate: new Date('2025-05-25'),
       pickupTime: 'morning',
-      deliveryDate: new Date('2025-05-27'),
-      deliveryTime: 'afternoon',
+
       status: 'complete',
       estimatedWeight: 30,
       numberOfBags: 2,
@@ -228,8 +227,7 @@ describe('Affiliate API', () => {
       affiliateId: testAffiliate.affiliateId,
       pickupDate: new Date('2025-05-26'),
       pickupTime: 'afternoon',
-      deliveryDate: new Date('2025-05-28'),
-      deliveryTime: 'morning',
+
       status: 'processing',
       estimatedWeight: 50,
       numberOfBags: 3,
@@ -365,8 +363,7 @@ describe('Affiliate API', () => {
       affiliateId: testAffiliate.affiliateId,
       pickupDate: new Date(),
       pickupTime: 'morning',
-      deliveryDate: new Date(),
-      deliveryTime: 'afternoon',
+
       status: 'scheduled',
       estimatedWeight: 30,
       numberOfBags: 2,

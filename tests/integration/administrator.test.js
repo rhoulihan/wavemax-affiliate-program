@@ -66,7 +66,7 @@ describe('Administrator Integration Tests', () => {
         email: 'admin@wavemax.com',
         password: 'CompletelyDifferentPassword417!'
       });
-    
+
     adminToken = loginRes.body.token;
   });
 
@@ -235,7 +235,7 @@ describe('Administrator Integration Tests', () => {
 
     it('should return 404 for non-existent administrator', async () => {
       const fakeId = new mongoose.Types.ObjectId();
-      
+
       const response = await adminAgent
         .get(`/api/v1/administrators/${fakeId}`)
         .set('Authorization', `Bearer ${adminToken}`)
@@ -291,7 +291,7 @@ describe('Administrator Integration Tests', () => {
           email: 'newadmin@wavemax.com',
           password: 'NewStrongPassword849!'
         });
-      
+
       expect(loginRes.status).toBe(200);
     });
 
@@ -375,7 +375,7 @@ describe('Administrator Integration Tests', () => {
       // Create new agent for limited admin
       const limitedAgent = createAgent(app);
       const limitedCsrfToken = await getCsrfToken(app, limitedAgent);
-      
+
       const limitedLogin = await limitedAgent
         .post('/api/v1/auth/administrator/login')
         .send({
@@ -468,7 +468,7 @@ describe('Administrator Integration Tests', () => {
           email: 'target@wavemax.com',
           password: 'NewStrongPassword849!'
         });
-      
+
       expect(loginRes.status).toBe(200);
     });
 
@@ -491,7 +491,7 @@ describe('Administrator Integration Tests', () => {
           email: 'target@wavemax.com',
           password: 'StrongPassword417!'
         });
-      
+
       expect(loginRes.status).toBe(401);
       expect(loginRes.body.message).toContain('Account is deactivated');
     });
@@ -549,7 +549,7 @@ describe('Administrator Integration Tests', () => {
       // Create new agent for limited admin
       const limitedAgent = createAgent(app);
       const limitedCsrfToken = await getCsrfToken(app, limitedAgent);
-      
+
       const limitedLogin = await limitedAgent
         .post('/api/v1/auth/administrator/login')
         .send({
@@ -636,7 +636,7 @@ describe('Administrator Integration Tests', () => {
       // Create new agent for limited admin
       const limitedAgent = createAgent(app);
       const limitedCsrfToken = await getCsrfToken(app, limitedAgent);
-      
+
       const limitedLogin = await limitedAgent
         .post('/api/v1/auth/administrator/login')
         .send({
@@ -655,7 +655,7 @@ describe('Administrator Integration Tests', () => {
 
     it('should handle non-existent administrator', async () => {
       const fakeId = new mongoose.Types.ObjectId();
-      
+
       const response = await adminAgent
         .delete(`/api/v1/administrators/${fakeId}`)
         .set('Authorization', `Bearer ${adminToken}`)
@@ -700,7 +700,7 @@ describe('Administrator Integration Tests', () => {
           email: 'reset@wavemax.com',
           password: 'NewStrongPassword849!'
         });
-      
+
       expect(loginRes.status).toBe(200);
 
       // Verify old password doesn't work
@@ -710,7 +710,7 @@ describe('Administrator Integration Tests', () => {
           email: 'reset@wavemax.com',
           password: 'OldStrongPassword417!'
         });
-      
+
       expect(oldLoginRes.status).toBe(401);
     });
 
@@ -763,7 +763,7 @@ describe('Administrator Integration Tests', () => {
       // Create new agent for limited admin
       const limitedAgent = createAgent(app);
       const limitedCsrfToken = await getCsrfToken(app, limitedAgent);
-      
+
       const limitedLogin = await limitedAgent
         .post('/api/v1/auth/administrator/login')
         .send({

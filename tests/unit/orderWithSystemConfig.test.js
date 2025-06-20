@@ -9,14 +9,13 @@ function createOrderData(overrides = {}) {
   const perBagFee = overrides.perBagFee || 2;
   const calculatedFee = numberOfBags * perBagFee;
   const totalFee = Math.max(minimumFee, calculatedFee);
-  
+
   return {
     customerId: overrides.customerId || 'CUST' + Math.floor(100000 + Math.random() * 900000),
     affiliateId: overrides.affiliateId || 'AFF' + Math.floor(100000 + Math.random() * 900000),
     pickupDate: new Date(),
     pickupTime: 'morning',
-    deliveryDate: new Date(),
-    deliveryTime: 'afternoon',
+
     estimatedWeight: 30,
     numberOfBags: numberOfBags,
     feeBreakdown: overrides.feeBreakdown || {
@@ -84,7 +83,7 @@ describe('Order Model with SystemConfig Integration', () => {
 
       const order = new Order(createOrderData({
         estimatedWeight: 30,
-        numberOfBags: 2,
+        numberOfBags: 2
         // Using default fee breakdown from helper
       }));
 
@@ -119,7 +118,7 @@ describe('Order Model with SystemConfig Integration', () => {
         customerId: 'CUST123',
         affiliateId: 'AFF123',
         estimatedWeight: 30,
-    numberOfBags: 2,
+        numberOfBags: 2,
         deliveryFee: 25.00,
         actualWeight: 20
       }));
@@ -204,7 +203,7 @@ describe('Order Model with SystemConfig Integration', () => {
         customerId: 'CUST123',
         affiliateId: 'AFF123',
         estimatedWeight: 30,
-    numberOfBags: 2,
+        numberOfBags: 2,
         deliveryFee: 10.00
       }));
 
@@ -219,7 +218,7 @@ describe('Order Model with SystemConfig Integration', () => {
         customerId: 'CUST124',
         affiliateId: 'AFF124',
         estimatedWeight: 30,
-    numberOfBags: 2,
+        numberOfBags: 2,
         deliveryFee: 10.00
       }));
 
@@ -237,7 +236,7 @@ describe('Order Model with SystemConfig Integration', () => {
     it('should validate minimum and maximum base rates', async () => {
       // Ensure config exists
       await SystemConfig.initializeDefaults();
-      
+
       // Try to set rate below minimum (0.50)
       try {
         await SystemConfig.setValue('wdf_base_rate_per_pound', 0.25);

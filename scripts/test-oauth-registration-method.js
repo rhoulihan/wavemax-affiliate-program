@@ -14,7 +14,7 @@ async function testOAuthAffiliates() {
 
     console.log('\n=== OAuth Affiliates ===');
     console.log(`Total OAuth affiliates found: ${oauthAffiliates.length}`);
-    
+
     oauthAffiliates.forEach(affiliate => {
       console.log(`\nAffiliate: ${affiliate.firstName} ${affiliate.lastName}`);
       console.log(`Email: ${affiliate.email}`);
@@ -29,7 +29,7 @@ async function testOAuthAffiliates() {
 
     console.log('\n\n=== Affiliates without registrationMethod ===');
     console.log(`Found: ${noMethodAffiliates.length}`);
-    
+
     noMethodAffiliates.forEach(affiliate => {
       console.log(`\nAffiliate: ${affiliate.firstName} ${affiliate.lastName}`);
       console.log(`Email: ${affiliate.email}`);

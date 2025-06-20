@@ -16,7 +16,7 @@ describe('Social Authentication Integration Tests', () => {
   beforeEach(async () => {
     // Clean up test data
     await Affiliate.deleteMany({});
-    
+
     // Create agent and get CSRF token for tests that need it
     agent = createAgent(app);
     csrfToken = await getCsrfToken(app, agent);
@@ -31,7 +31,7 @@ describe('Social Authentication Integration Tests', () => {
 
       const response = await request(app)
         .get('/api/v1/auth/google');
-      
+
       expect(response.status).toBe(302);
       expect(response.headers.location).toContain('accounts.google.com');
       expect(response.headers.location).toContain('oauth2');
@@ -45,7 +45,7 @@ describe('Social Authentication Integration Tests', () => {
 
       const response = await request(app)
         .get('/api/v1/auth/facebook');
-      
+
       expect(response.status).toBe(302);
       expect(response.headers.location).toContain('facebook.com');
       expect(response.headers.location).toContain('oauth');
@@ -59,7 +59,7 @@ describe('Social Authentication Integration Tests', () => {
 
       const response = await request(app)
         .get('/api/v1/auth/linkedin');
-      
+
       expect(response.status).toBe(302);
       expect(response.headers.location).toContain('linkedin.com');
       expect(response.headers.location).toContain('oauth');
@@ -69,7 +69,7 @@ describe('Social Authentication Integration Tests', () => {
       // Temporarily remove environment variables
       const originalGoogleId = process.env.GOOGLE_CLIENT_ID;
       const originalGoogleSecret = process.env.GOOGLE_CLIENT_SECRET;
-      
+
       delete process.env.GOOGLE_CLIENT_ID;
       delete process.env.GOOGLE_CLIENT_SECRET;
 
@@ -77,7 +77,7 @@ describe('Social Authentication Integration Tests', () => {
 
       const response = await request(app)
         .get('/api/v1/auth/google');
-      
+
       expect(response.status).toBe(404);
 
       // Restore environment variables
@@ -279,7 +279,7 @@ describe('Social Authentication Integration Tests', () => {
       // Create agent and get CSRF token
       agent = createAgent(app);
       csrfToken = await getCsrfToken(app, agent);
-      
+
       // Create a traditional affiliate account for linking tests
       const hashedPassword = hashPassword('SecurePassword123!');
       const affiliate = new Affiliate({
@@ -374,7 +374,7 @@ describe('Social Authentication Integration Tests', () => {
       // Create agent and get CSRF token
       agent = createAgent(app);
       csrfToken = await getCsrfToken(app, agent);
-      
+
       // Create affiliate with linked social account
       const hashedPassword = hashPassword('SecurePassword123!');
       const affiliate = new Affiliate({
@@ -472,10 +472,10 @@ describe('Social Authentication Integration Tests', () => {
           phone: '+1234567890',
           serviceArea: 'Downtown',
           serviceLatitude: 30.2672,
-        serviceLongitude: -97.7431,
-        serviceRadius: 10,
-        minimumDeliveryFee: 25,
-        perBagDeliveryFee: 5,
+          serviceLongitude: -97.7431,
+          serviceRadius: 10,
+          minimumDeliveryFee: 25,
+          perBagDeliveryFee: 5,
           paymentMethod: 'check',
           username: 'testuser123',
           password: 'SecurePassw0rd!',
@@ -515,10 +515,10 @@ describe('Social Authentication Integration Tests', () => {
           phone: '+1234567890',
           serviceArea: 'Downtown',
           serviceLatitude: 30.2672,
-        serviceLongitude: -97.7431,
-        serviceRadius: 10,
-        minimumDeliveryFee: 25,
-        perBagDeliveryFee: 5,
+          serviceLongitude: -97.7431,
+          serviceRadius: 10,
+          minimumDeliveryFee: 25,
+          perBagDeliveryFee: 5,
           paymentMethod: 'check',
           username: 'testuser123',
           password: 'SecurePassw0rd!',
@@ -629,7 +629,7 @@ describe('Social Authentication Integration Tests', () => {
       expiresIn: '1h',
       issuer: 'wavemax-social-auth'
     };
-    
+
     return jwt.sign(payload, secret, { ...defaultOptions, ...options });
   }
 });

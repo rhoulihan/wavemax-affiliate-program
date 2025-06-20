@@ -6,54 +6,54 @@ describe('Order Routes - Simple', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    
+
     // Create a simple express app with mock routes
     app = express();
     app.use(express.json());
-    
+
     // Mock auth middleware
     const mockAuth = (req, res, next) => {
       req.user = { id: 'test-user-id', role: 'affiliate' };
       next();
     };
-    
+
     // Define routes directly without validation
     app.post('/api/orders', mockAuth, (req, res) => {
       res.json({ orderId: 'ORD-123', success: true });
     });
-    
+
     app.get('/api/orders/export', mockAuth, (req, res) => {
       res.json({ exported: true });
     });
-    
+
     app.get('/api/orders/search', mockAuth, (req, res) => {
       res.json({ orders: [] });
     });
-    
+
     app.get('/api/orders/statistics', mockAuth, (req, res) => {
       res.json({ stats: {} });
     });
-    
+
     app.put('/api/orders/bulk/status', mockAuth, (req, res) => {
       res.json({ updated: true });
     });
-    
+
     app.post('/api/orders/bulk/cancel', mockAuth, (req, res) => {
       res.json({ cancelled: true });
     });
-    
+
     app.get('/api/orders/:orderId', mockAuth, (req, res) => {
       res.json({ order: { id: req.params.orderId } });
     });
-    
+
     app.put('/api/orders/:orderId/status', mockAuth, (req, res) => {
       res.json({ updated: true });
     });
-    
+
     app.post('/api/orders/:orderId/cancel', mockAuth, (req, res) => {
       res.json({ cancelled: true });
     });
-    
+
     app.put('/api/orders/:orderId/payment-status', mockAuth, (req, res) => {
       res.json({ updated: true });
     });
@@ -69,10 +69,7 @@ describe('Order Routes - Simple', () => {
           pickupDate: '2025-01-20',
           pickupTime: 'morning',
           numberOfBags: 2,
-          estimatedWeight: 20.5,
-          deliveryDate: '2025-01-22',
-          deliveryTime: 'afternoon'
-        });
+          estimatedWeight: 20.5 });
 
       expect(response.status).toBe(200);
       expect(response.body).toEqual({ orderId: 'ORD-123', success: true });

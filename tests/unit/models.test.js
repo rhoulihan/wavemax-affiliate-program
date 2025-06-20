@@ -63,7 +63,7 @@ describe('Model Tests', () => {
     it('should enforce unique constraints', async () => {
       // First, ensure indexes are created
       await Affiliate.ensureIndexes();
-      
+
       const affiliateData = {
         firstName: 'John',
         lastName: 'Doe',
@@ -189,8 +189,7 @@ describe('Model Tests', () => {
         affiliateId: 'AFF123',
         pickupDate: new Date('2025-05-25'),
         pickupTime: 'morning',
-        deliveryDate: new Date('2025-05-27'),
-        deliveryTime: 'afternoon',
+
         estimatedWeight: 30,
         numberOfBags: 2,
         deliveryFee: 5.99
@@ -212,8 +211,7 @@ describe('Model Tests', () => {
         affiliateId: 'AFF123',
         pickupDate: new Date(),
         pickupTime: 'morning',
-        deliveryDate: new Date(),
-        deliveryTime: 'afternoon',
+
         estimatedWeight: 30,
         numberOfBags: 2,
         feeBreakdown: {
@@ -237,8 +235,7 @@ describe('Model Tests', () => {
         affiliateId: 'AFF123',
         pickupDate: new Date(),
         pickupTime: 'morning',
-        deliveryDate: new Date(),
-        deliveryTime: 'afternoon',
+
         estimatedWeight: 50,
         numberOfBags: 3,
         feeBreakdown: {
@@ -265,8 +262,7 @@ describe('Model Tests', () => {
         affiliateId: 'AFF123',
         pickupDate: new Date(),
         pickupTime: 'morning',
-        deliveryDate: new Date(),
-        deliveryTime: 'afternoon',
+
         estimatedWeight: 15,
         numberOfBags: 1,
         deliveryFee: 5.99

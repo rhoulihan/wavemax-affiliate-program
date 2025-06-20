@@ -8,7 +8,7 @@ const formPoolManager = require('../server/services/formPoolManager');
 async function testFormPool() {
   try {
     console.log('Testing Paygistix Form Pool...\n');
-    
+
     // Connect to MongoDB
     console.log('Connecting to MongoDB...');
     await mongoose.connect(process.env.MONGODB_URI, {
@@ -16,12 +16,12 @@ async function testFormPool() {
       tlsAllowInvalidCertificates: process.env.NODE_ENV !== 'production'
     });
     console.log('✓ Connected to MongoDB\n');
-    
+
     // Initialize form pool
     console.log('Initializing form pool...');
     await formPoolManager.initializePool();
     console.log('✓ Form pool initialized\n');
-    
+
     // Get pool stats
     console.log('Getting pool statistics...');
     const stats = await formPoolManager.getPoolStats();
@@ -34,11 +34,11 @@ async function testFormPool() {
       console.log(`  ${form.formId}: ${form.isLocked ? 'LOCKED' : 'Available'}`);
     });
     console.log('');
-    
+
     // Test acquiring forms
     console.log('Testing form acquisition...');
     const tokens = [];
-    
+
     // Acquire 3 forms
     for (let i = 1; i <= 3; i++) {
       const token = `test-token-${i}`;
@@ -51,13 +51,13 @@ async function testFormPool() {
       }
     }
     console.log('');
-    
+
     // Get stats after acquisition
     const statsAfter = await formPoolManager.getPoolStats();
     console.log('Pool Stats After Acquisition:');
     console.log(`  Available: ${statsAfter.available}`);
     console.log(`  Locked: ${statsAfter.locked}\n`);
-    
+
     // Test releasing forms
     console.log('Testing form release...');
     for (const { token, formId } of tokens) {
@@ -65,15 +65,15 @@ async function testFormPool() {
       console.log(`${released ? '✓' : '✗'} Released form ${formId}`);
     }
     console.log('');
-    
+
     // Final stats
     const statsFinal = await formPoolManager.getPoolStats();
     console.log('Final Pool Stats:');
     console.log(`  Available: ${statsFinal.available}`);
     console.log(`  Locked: ${statsFinal.locked}\n`);
-    
+
     console.log('✅ Form pool test completed successfully!');
-    
+
   } catch (error) {
     console.error('❌ Form pool test failed:', error);
   } finally {

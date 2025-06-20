@@ -29,7 +29,7 @@ const verifyBagRemoval = async () => {
     console.log('1. Checking for bags collection...');
     const collections = await mongoose.connection.db.listCollections().toArray();
     const bagsCollection = collections.find(col => col.name === 'bags');
-    
+
     if (bagsCollection) {
       issues.push('Bags collection still exists');
       console.log('   ❌ Bags collection found');
@@ -41,7 +41,7 @@ const verifyBagRemoval = async () => {
     console.log('\n2. Checking orders for bagIDs field...');
     const Order = require('../server/models/Order');
     const ordersWithBags = await Order.findOne({ bagIDs: { $exists: true } });
-    
+
     if (ordersWithBags) {
       issues.push('Some orders still have bagIDs field');
       console.log('   ❌ Found orders with bagIDs field');
@@ -67,7 +67,7 @@ const verifyBagRemoval = async () => {
       // Find a test customer
       const testCustomer = await Customer.findOne();
       const testAffiliate = await Affiliate.findOne();
-      
+
       if (testCustomer && testAffiliate) {
         const testOrder = new Order({
           customerId: testCustomer.customerId,
@@ -79,7 +79,7 @@ const verifyBagRemoval = async () => {
           estimatedSize: 'medium',
           status: 'scheduled'
         });
-        
+
         // Validate without saving
         await testOrder.validate();
         console.log('   ✓ Order validation successful (without bags)');
@@ -110,7 +110,7 @@ const verifyBagRemoval = async () => {
 // Run verification
 (async () => {
   await connectDB();
-  
+
   try {
     await verifyBagRemoval();
   } catch (error) {

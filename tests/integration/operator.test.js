@@ -17,7 +17,7 @@ describe('Operator Integration Tests', () => {
   let operatorToken;
   let testAdmin;
   let testOperator;
-  
+
   // Set timeout for all tests in this suite
   jest.setTimeout(10000);
 
@@ -52,9 +52,9 @@ describe('Operator Integration Tests', () => {
         email: 'superuser@wavemax.com',
         password: 'CompletelyUniquePassword417!'
       });
-    
+
     adminToken = adminLogin.body.token;
-    
+
     // Get CSRF token for admin agent
     adminCsrfToken = await getCsrfToken(app, adminAgent);
 
@@ -78,9 +78,9 @@ describe('Operator Integration Tests', () => {
         email: 'operator@wavemax.com',
         password: 'OperatorStrongPassword951!'
       });
-    
+
     operatorToken = operatorLogin.body.token;
-    
+
     // Get CSRF token for operator agent
     operatorCsrfToken = await getCsrfToken(app, operatorAgent);
   });
@@ -138,7 +138,7 @@ describe('Operator Integration Tests', () => {
         firstName: expect.any(String),
         lastName: expect.any(String),
         email: expect.any(String),
-        role: 'operator',
+        role: 'operator'
       });
       expect(response.body.operators[0].password).toBeUndefined();
     });
@@ -170,11 +170,11 @@ describe('Operator Integration Tests', () => {
       // Get current time to create realistic shift schedules
       const now = new Date();
       const currentHour = now.getHours();
-      
+
       // Create an operator with a shift that's currently off (3 hours ahead and 3 hours behind)
       const offShiftStart = String((currentHour + 3) % 24).padStart(2, '0') + ':00';
       const offShiftEnd = String((currentHour + 8) % 24).padStart(2, '0') + ':00';
-      
+
       await Operator.create({
         operatorId: 'OPR002',
         firstName: 'Off Shift',
@@ -334,7 +334,7 @@ describe('Operator Integration Tests', () => {
 
     it('should return 404 for non-existent operator', async () => {
       const fakeId = new mongoose.Types.ObjectId();
-      
+
       const response = await adminAgent
         .get(`/api/v1/operators/${fakeId}`)
         .set('Authorization', `Bearer ${adminToken}`)
@@ -387,7 +387,7 @@ describe('Operator Integration Tests', () => {
           email: 'newop@wavemax.com',
           password: 'NewPassw0rd!'
         });
-      
+
       expect(loginRes.status).toBe(200);
     });
 
@@ -547,7 +547,7 @@ describe('Operator Integration Tests', () => {
           email: 'target@wavemax.com',
           password: 'NewStrongPassword951!'
         });
-      
+
       expect(loginRes.status).toBe(200);
     });
 
@@ -570,7 +570,7 @@ describe('Operator Integration Tests', () => {
           email: 'target@wavemax.com',
           password: 'StrongPassword951!'
         });
-      
+
       expect(loginRes.status).toBe(403);
       expect(loginRes.body.message).toContain('Account is inactive');
     });
@@ -717,7 +717,7 @@ describe('Operator Integration Tests', () => {
 
     it('should handle non-existent operator', async () => {
       const fakeId = new mongoose.Types.ObjectId();
-      
+
       const response = await adminAgent
         .delete(`/api/v1/operators/${fakeId}`)
         .set('Authorization', `Bearer ${adminToken}`)
@@ -763,7 +763,7 @@ describe('Operator Integration Tests', () => {
           email: 'pinreset@wavemax.com',
           password: 'NewPin417!'
         });
-      
+
       expect(loginRes.status).toBe(200);
     });
 

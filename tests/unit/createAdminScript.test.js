@@ -12,14 +12,14 @@ describe('Create Admin Script Tests', () => {
   beforeEach(async () => {
     // Clean up administrators collection
     await Administrator.deleteMany({});
-    
+
     // Ensure unique indexes are created
     try {
       await Administrator.collection.dropIndexes();
     } catch (e) {
       // Ignore if indexes don't exist
     }
-    
+
     await Administrator.createIndexes();
   });
 
@@ -30,10 +30,10 @@ describe('Create Admin Script Tests', () => {
   describe('Script File Structure', () => {
     test('should exist and be readable', () => {
       expect(fs.existsSync(scriptPath)).toBe(true);
-      
+
       const stats = fs.statSync(scriptPath);
       expect(stats.isFile()).toBe(true);
-      
+
       // Check if file is readable
       expect(() => {
         fs.accessSync(scriptPath, fs.constants.R_OK);
@@ -42,7 +42,7 @@ describe('Create Admin Script Tests', () => {
 
     test('should contain required functionality markers', () => {
       const scriptContent = fs.readFileSync(scriptPath, 'utf8');
-      
+
       // Check for key functionality
       expect(scriptContent).toContain('readline');
       expect(scriptContent).toContain('Administrator');
@@ -56,7 +56,7 @@ describe('Create Admin Script Tests', () => {
   describe('Admin ID Generation Logic', () => {
     test('should generate sequential admin IDs starting from ADM001', async () => {
       // Test the logic by creating admins directly and checking ID generation
-      
+
       // First admin
       const admin1 = new Administrator({
         adminId: 'ADM001',
@@ -125,7 +125,7 @@ describe('Create Admin Script Tests', () => {
       // Test next ID calculation
       const adminCount = await Administrator.countDocuments();
       const nextAdminId = 'ADM' + String(adminCount + 1).padStart(3, '0');
-      
+
       expect(nextAdminId).toBe('ADM004'); // Should be next number after count
     });
   });
@@ -187,7 +187,7 @@ describe('Create Admin Script Tests', () => {
     test('should validate all permission types', async () => {
       const allPermissions = [
         'manage_affiliates',
-        'customers.manage', 
+        'customers.manage',
         'orders.manage',
         'system_config',
         'reports.view'
@@ -294,12 +294,12 @@ describe('Create Admin Script Tests', () => {
       });
 
       const savedAdmin = await admin.save();
-      
+
       // Verify admin was created successfully
       expect(savedAdmin.email).toBe('emailtest@admin.com');
       expect(savedAdmin.firstName).toBe('Email');
       expect(savedAdmin.permissions).toContain('all');
-      
+
       // In the actual script, this would trigger a welcome email
       // The email service would be tested separately
     });
@@ -310,7 +310,7 @@ describe('Create Admin Script Tests', () => {
       const admin = new Administrator({
         adminId: 'ADM001',
         firstName: 'José-María',
-        lastName: "O'Connor",
+        lastName: 'O\'Connor',
         email: 'special@admin.com',
         password: 'UnrelatedStrongPassword417!',
         permissions: ['manage_affiliates']
@@ -318,7 +318,7 @@ describe('Create Admin Script Tests', () => {
 
       const savedAdmin = await admin.save();
       expect(savedAdmin.firstName).toBe('José-María');
-      expect(savedAdmin.lastName).toBe("O'Connor");
+      expect(savedAdmin.lastName).toBe('O\'Connor');
     });
 
     test('should normalize email addresses', async () => {
@@ -374,7 +374,7 @@ describe('Create Admin Script Tests', () => {
       });
 
       const savedAdmin = await admin.save();
-      
+
       // Verify all expected fields are present
       expect(savedAdmin.adminId).toBeDefined();
       expect(savedAdmin.firstName).toBeDefined();
@@ -388,7 +388,7 @@ describe('Create Admin Script Tests', () => {
 
     test('should work with password hashing middleware', async () => {
       const plainPassword = 'TestPassword417!';
-      
+
       const admin = new Administrator({
         adminId: 'ADM001',
         firstName: 'Password',
@@ -399,7 +399,7 @@ describe('Create Admin Script Tests', () => {
       });
 
       const savedAdmin = await admin.save();
-      
+
       // Password should be hashed, not stored as plain text
       expect(savedAdmin.password).toBeDefined();
       expect(savedAdmin.password).not.toBe(plainPassword);
@@ -411,9 +411,9 @@ describe('Create Admin Script Tests', () => {
     test('should handle database connection errors gracefully', () => {
       // This would test the script's error handling for database issues
       // In a real scenario, we'd mock mongoose connection failures
-      
+
       const scriptContent = fs.readFileSync(scriptPath, 'utf8');
-      
+
       // Check that script has error handling
       expect(scriptContent).toMatch(/(catch|error)/i);
       expect(scriptContent).toMatch(/(try|catch|finally)/i);
@@ -421,7 +421,7 @@ describe('Create Admin Script Tests', () => {
 
     test('should handle invalid input gracefully', () => {
       const scriptContent = fs.readFileSync(scriptPath, 'utf8');
-      
+
       // Check for input validation patterns
       expect(scriptContent).toMatch(/(trim|length|validation)/i);
     });
@@ -430,17 +430,17 @@ describe('Create Admin Script Tests', () => {
   describe('Security Considerations', () => {
     test('should not log or expose passwords', () => {
       const scriptContent = fs.readFileSync(scriptPath, 'utf8');
-      
+
       // Check that password is not logged (should use asterisks or hidden input)
       expect(scriptContent).toMatch(/(\*|hidden|mask)/i);
-      
+
       // Should not have console.log(password) or similar
       expect(scriptContent).not.toMatch(/console\.log.*password/i);
     });
 
     test('should generate secure random passwords when needed', () => {
       const scriptContent = fs.readFileSync(scriptPath, 'utf8');
-      
+
       // If the script generates passwords automatically, it should use secure methods
       if (scriptContent.includes('generatePassword') || scriptContent.includes('randomPassword')) {
         expect(scriptContent).toMatch(/(crypto|random|secure)/i);

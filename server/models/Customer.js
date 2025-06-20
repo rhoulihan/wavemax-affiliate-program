@@ -25,15 +25,15 @@ const customerSchema = new mongoose.Schema({
   specialInstructions: String,
   affiliateSpecialInstructions: String,
   username: { type: String, required: true, unique: true },
-  passwordSalt: { 
-    type: String, 
-    required: function() { 
+  passwordSalt: {
+    type: String,
+    required: function() {
       return this.registrationMethod === 'traditional' || !this.registrationMethod;
     }
   },
-  passwordHash: { 
-    type: String, 
-    required: function() { 
+  passwordHash: {
+    type: String,
+    required: function() {
       return this.registrationMethod === 'traditional' || !this.registrationMethod;
     }
   },

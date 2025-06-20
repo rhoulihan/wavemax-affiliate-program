@@ -5,42 +5,42 @@
  */
 
 (function(window) {
-    'use strict';
+  'use strict';
 
-    class PaymentForm {
-        constructor(options = {}) {
-            this.container = options.container || '#payment-form-container';
-            this.onSuccess = options.onSuccess || (() => {});
-            this.onError = options.onError || (() => {});
-            this.amount = options.amount || 0;
-            this.currency = options.currency || 'USD';
-            this.customerData = options.customerData || {};
-            this.formData = {};
-            this.selectedMethod = null;
-            this.isProcessing = false;
-            
-            // Initialize on DOM ready
-            if (document.readyState === 'loading') {
-                document.addEventListener('DOMContentLoaded', () => this.init());
-            } else {
-                this.init();
-            }
-        }
+  class PaymentForm {
+    constructor(options = {}) {
+      this.container = options.container || '#payment-form-container';
+      this.onSuccess = options.onSuccess || (() => {});
+      this.onError = options.onError || (() => {});
+      this.amount = options.amount || 0;
+      this.currency = options.currency || 'USD';
+      this.customerData = options.customerData || {};
+      this.formData = {};
+      this.selectedMethod = null;
+      this.isProcessing = false;
 
-        async init() {
-            await this.render();
-            this.attachEventListeners();
-            await this.loadPaymentMethods();
-        }
+      // Initialize on DOM ready
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', () => this.init());
+      } else {
+        this.init();
+      }
+    }
 
-        async render() {
-            const container = document.querySelector(this.container);
-            if (!container) {
-                console.error('Payment form container not found');
-                return;
-            }
+    async init() {
+      await this.render();
+      this.attachEventListeners();
+      await this.loadPaymentMethods();
+    }
 
-            container.innerHTML = `
+    async render() {
+      const container = document.querySelector(this.container);
+      if (!container) {
+        console.error('Payment form container not found');
+        return;
+      }
+
+      container.innerHTML = `
                 <div class="payment-form-wrapper">
                     <!-- Payment Method Selection -->
                     <div class="payment-methods-section mb-6">
@@ -181,30 +181,30 @@
                 </div>
             `;
 
-            // Update total amount display
-            this.updateTotalAmount();
-            
-            // Translate the form
-            if (window.i18n) {
-                window.i18n.translatePage();
-            }
-        }
+      // Update total amount display
+      this.updateTotalAmount();
 
-        async loadPaymentMethods() {
-            try {
-                const response = await window.PaymentService.getPaymentMethods();
-                const methodsList = document.getElementById('payment-methods-list');
-                
-                if (!response.success || !response.methods || response.methods.length === 0) {
-                    methodsList.innerHTML = `
+      // Translate the form
+      if (window.i18n) {
+        window.i18n.translatePage();
+      }
+    }
+
+    async loadPaymentMethods() {
+      try {
+        const response = await window.PaymentService.getPaymentMethods();
+        const methodsList = document.getElementById('payment-methods-list');
+
+        if (!response.success || !response.methods || response.methods.length === 0) {
+          methodsList.innerHTML = `
                         <div class="text-center py-4 text-gray-600">
                             <p data-i18n="payment.form.noMethodsAvailable">No payment methods available</p>
                         </div>
                     `;
-                    return;
-                }
+          return;
+        }
 
-                methodsList.innerHTML = response.methods.map(method => `
+        methodsList.innerHTML = response.methods.map(method => `
                     <div class="payment-method-option border rounded-lg p-4 cursor-pointer hover:border-blue-500 transition duration-200"
                          data-method-id="${method.id}" data-method-type="${method.type}">
                         <div class="flex items-center">
@@ -218,8 +218,8 @@
                     </div>
                 `).join('');
 
-                // Add new payment method option
-                methodsList.innerHTML += `
+        // Add new payment method option
+        methodsList.innerHTML += `
                     <div class="payment-method-option border border-dashed border-gray-300 rounded-lg p-4 cursor-pointer hover:border-blue-500 transition duration-200"
                          data-method-id="new" data-method-type="new">
                         <div class="flex items-center justify-center text-blue-600">
@@ -229,272 +229,272 @@
                     </div>
                 `;
 
-                // Translate new content
-                if (window.i18n) {
-                    window.i18n.translatePage();
-                }
+        // Translate new content
+        if (window.i18n) {
+          window.i18n.translatePage();
+        }
 
-                // Auto-select first method if available
-                const firstMethod = methodsList.querySelector('.payment-method-option');
-                if (firstMethod) {
-                    this.selectPaymentMethod(firstMethod);
-                }
+        // Auto-select first method if available
+        const firstMethod = methodsList.querySelector('.payment-method-option');
+        if (firstMethod) {
+          this.selectPaymentMethod(firstMethod);
+        }
 
-            } catch (error) {
-                console.error('Error loading payment methods:', error);
-                document.getElementById('payment-methods-list').innerHTML = `
+      } catch (error) {
+        console.error('Error loading payment methods:', error);
+        document.getElementById('payment-methods-list').innerHTML = `
                     <div class="text-center py-4 text-red-600">
                         <p data-i18n="payment.form.errorLoadingMethods">Error loading payment methods</p>
                     </div>
                 `;
-            }
+      }
+    }
+
+    getMethodIcon(type) {
+      const icons = {
+        'card': 'fa-credit-card',
+        'bank': 'fa-university',
+        'paypal': 'fa-paypal',
+        'apple_pay': 'fa-apple-pay',
+        'google_pay': 'fa-google-pay',
+        'default': 'fa-wallet'
+      };
+      return icons[type] || icons.default;
+    }
+
+    selectPaymentMethod(methodElement) {
+      // Remove previous selection
+      document.querySelectorAll('.payment-method-option').forEach(el => {
+        el.classList.remove('border-blue-500', 'bg-blue-50');
+        const indicator = el.querySelector('.radio-indicator');
+        if (indicator) {
+          indicator.classList.remove('bg-blue-600');
+          indicator.innerHTML = '';
         }
+      });
 
-        getMethodIcon(type) {
-            const icons = {
-                'card': 'fa-credit-card',
-                'bank': 'fa-university',
-                'paypal': 'fa-paypal',
-                'apple_pay': 'fa-apple-pay',
-                'google_pay': 'fa-google-pay',
-                'default': 'fa-wallet'
-            };
-            return icons[type] || icons.default;
-        }
+      // Add selection to clicked method
+      methodElement.classList.add('border-blue-500', 'bg-blue-50');
+      const indicator = methodElement.querySelector('.radio-indicator');
+      if (indicator) {
+        indicator.classList.add('bg-blue-600');
+        indicator.innerHTML = '<div class="w-2 h-2 bg-white rounded-full mx-auto mt-1"></div>';
+      }
 
-        selectPaymentMethod(methodElement) {
-            // Remove previous selection
-            document.querySelectorAll('.payment-method-option').forEach(el => {
-                el.classList.remove('border-blue-500', 'bg-blue-50');
-                const indicator = el.querySelector('.radio-indicator');
-                if (indicator) {
-                    indicator.classList.remove('bg-blue-600');
-                    indicator.innerHTML = '';
-                }
-            });
+      // Store selected method
+      this.selectedMethod = {
+        id: methodElement.dataset.methodId,
+        type: methodElement.dataset.methodType
+      };
 
-            // Add selection to clicked method
-            methodElement.classList.add('border-blue-500', 'bg-blue-50');
-            const indicator = methodElement.querySelector('.radio-indicator');
-            if (indicator) {
-                indicator.classList.add('bg-blue-600');
-                indicator.innerHTML = '<div class="w-2 h-2 bg-white rounded-full mx-auto mt-1"></div>';
-            }
+      // Show payment form
+      const form = document.getElementById('payment-form');
+      form.style.display = 'block';
 
-            // Store selected method
-            this.selectedMethod = {
-                id: methodElement.dataset.methodId,
-                type: methodElement.dataset.methodType
-            };
+      // Show/hide card section based on method type
+      const cardSection = document.getElementById('card-section');
+      if (this.selectedMethod.type === 'new' || this.selectedMethod.type === 'card') {
+        cardSection.style.display = 'block';
+        this.initializeCardElement();
+      } else {
+        cardSection.style.display = 'none';
+      }
 
-            // Show payment form
-            const form = document.getElementById('payment-form');
-            form.style.display = 'block';
+      // Enable submit button if terms are accepted
+      this.updateSubmitButton();
+    }
 
-            // Show/hide card section based on method type
-            const cardSection = document.getElementById('card-section');
-            if (this.selectedMethod.type === 'new' || this.selectedMethod.type === 'card') {
-                cardSection.style.display = 'block';
-                this.initializeCardElement();
-            } else {
-                cardSection.style.display = 'none';
-            }
-
-            // Enable submit button if terms are accepted
-            this.updateSubmitButton();
-        }
-
-        initializeCardElement() {
-            // This is where you would initialize Stripe Elements or similar
-            // For now, we'll just show a placeholder
-            const cardElement = document.getElementById('card-element');
-            cardElement.innerHTML = `
+    initializeCardElement() {
+      // This is where you would initialize Stripe Elements or similar
+      // For now, we'll just show a placeholder
+      const cardElement = document.getElementById('card-element');
+      cardElement.innerHTML = `
                 <div class="text-sm text-gray-600">
                     <p data-i18n="payment.form.cardElementPlaceholder">Card payment integration would be initialized here</p>
                     <p class="text-xs mt-2" data-i18n="payment.form.testMode">Test mode: Any valid card number will work</p>
                 </div>
             `;
-        }
-
-        updateTotalAmount() {
-            const totalElement = document.getElementById('total-amount');
-            if (totalElement) {
-                totalElement.textContent = window.i18n ? 
-                    window.i18n.formatCurrency(this.amount, this.currency) : 
-                    `$${this.amount.toFixed(2)}`;
-            }
-        }
-
-        updateSubmitButton() {
-            const submitBtn = document.getElementById('submit-payment');
-            const termsCheckbox = document.getElementById('terms-checkbox');
-            
-            if (submitBtn && termsCheckbox) {
-                submitBtn.disabled = !termsCheckbox.checked || !this.selectedMethod || this.isProcessing;
-            }
-        }
-
-        attachEventListeners() {
-            // Payment method selection
-            document.addEventListener('click', (e) => {
-                const methodOption = e.target.closest('.payment-method-option');
-                if (methodOption) {
-                    this.selectPaymentMethod(methodOption);
-                }
-            });
-
-            // Terms checkbox
-            const termsCheckbox = document.getElementById('terms-checkbox');
-            if (termsCheckbox) {
-                termsCheckbox.addEventListener('change', () => this.updateSubmitButton());
-            }
-
-            // Form submission
-            const form = document.getElementById('payment-form');
-            if (form) {
-                form.addEventListener('submit', (e) => this.handleSubmit(e));
-            }
-
-            // Pre-fill customer data if available
-            this.prefillCustomerData();
-        }
-
-        prefillCustomerData() {
-            if (this.customerData.name) {
-                const nameInput = document.getElementById('billing-name');
-                if (nameInput) nameInput.value = this.customerData.name;
-            }
-            
-            if (this.customerData.email) {
-                const emailInput = document.getElementById('billing-email');
-                if (emailInput) emailInput.value = this.customerData.email;
-            }
-            
-            if (this.customerData.phone) {
-                const phoneInput = document.getElementById('billing-phone');
-                if (phoneInput) phoneInput.value = this.customerData.phone;
-            }
-        }
-
-        async handleSubmit(e) {
-            e.preventDefault();
-            
-            if (this.isProcessing) return;
-            
-            // Show processing state
-            this.setProcessingState(true);
-            
-            // Hide previous messages
-            this.hideMessages();
-            
-            try {
-                // Collect form data
-                const formData = new FormData(e.target);
-                this.formData = Object.fromEntries(formData);
-                
-                // Validate form
-                const validation = window.PaymentValidation.validatePaymentForm(this.formData);
-                if (!validation.valid) {
-                    throw new Error(validation.errors.join(', '));
-                }
-                
-                // Process payment
-                const paymentData = {
-                    amount: this.amount,
-                    currency: this.currency,
-                    paymentMethodId: this.selectedMethod.id,
-                    billingDetails: {
-                        name: this.formData.billingName,
-                        email: this.formData.billingEmail,
-                        phone: this.formData.billingPhone,
-                        address: {
-                            line1: this.formData.billingAddress,
-                            postal_code: this.formData.billingZip
-                        }
-                    }
-                };
-                
-                const result = await window.PaymentService.processPayment(paymentData);
-                
-                if (result.success) {
-                    this.showSuccess();
-                    this.onSuccess(result);
-                } else {
-                    throw new Error(result.error || 'Payment failed');
-                }
-                
-            } catch (error) {
-                console.error('Payment error:', error);
-                this.showError(error.message);
-                this.onError(error);
-            } finally {
-                this.setProcessingState(false);
-            }
-        }
-
-        setProcessingState(processing) {
-            this.isProcessing = processing;
-            const submitBtn = document.getElementById('submit-payment');
-            
-            if (submitBtn) {
-                submitBtn.disabled = processing;
-                const buttonText = submitBtn.querySelector('.button-text');
-                const buttonSpinner = submitBtn.querySelector('.button-spinner');
-                
-                if (processing) {
-                    buttonText.classList.add('hidden');
-                    buttonSpinner.classList.remove('hidden');
-                } else {
-                    buttonText.classList.remove('hidden');
-                    buttonSpinner.classList.add('hidden');
-                }
-            }
-        }
-
-        hideMessages() {
-            document.getElementById('payment-errors')?.classList.add('hidden');
-            document.getElementById('payment-success')?.classList.add('hidden');
-        }
-
-        showError(message) {
-            const errorContainer = document.getElementById('payment-errors');
-            const errorMessage = document.getElementById('error-message');
-            
-            if (errorContainer && errorMessage) {
-                errorMessage.textContent = message;
-                errorContainer.classList.remove('hidden');
-                errorContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-            }
-        }
-
-        showSuccess() {
-            const successContainer = document.getElementById('payment-success');
-            if (successContainer) {
-                successContainer.classList.remove('hidden');
-                successContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-            }
-        }
-
-        // Public methods
-        updateAmount(amount, currency = 'USD') {
-            this.amount = amount;
-            this.currency = currency;
-            this.updateTotalAmount();
-        }
-
-        reset() {
-            const form = document.getElementById('payment-form');
-            if (form) {
-                form.reset();
-            }
-            this.selectedMethod = null;
-            this.formData = {};
-            this.hideMessages();
-            this.loadPaymentMethods();
-        }
     }
 
-    // Expose to global scope
-    window.PaymentForm = PaymentForm;
+    updateTotalAmount() {
+      const totalElement = document.getElementById('total-amount');
+      if (totalElement) {
+        totalElement.textContent = window.i18n ?
+          window.i18n.formatCurrency(this.amount, this.currency) :
+          `$${this.amount.toFixed(2)}`;
+      }
+    }
+
+    updateSubmitButton() {
+      const submitBtn = document.getElementById('submit-payment');
+      const termsCheckbox = document.getElementById('terms-checkbox');
+
+      if (submitBtn && termsCheckbox) {
+        submitBtn.disabled = !termsCheckbox.checked || !this.selectedMethod || this.isProcessing;
+      }
+    }
+
+    attachEventListeners() {
+      // Payment method selection
+      document.addEventListener('click', (e) => {
+        const methodOption = e.target.closest('.payment-method-option');
+        if (methodOption) {
+          this.selectPaymentMethod(methodOption);
+        }
+      });
+
+      // Terms checkbox
+      const termsCheckbox = document.getElementById('terms-checkbox');
+      if (termsCheckbox) {
+        termsCheckbox.addEventListener('change', () => this.updateSubmitButton());
+      }
+
+      // Form submission
+      const form = document.getElementById('payment-form');
+      if (form) {
+        form.addEventListener('submit', (e) => this.handleSubmit(e));
+      }
+
+      // Pre-fill customer data if available
+      this.prefillCustomerData();
+    }
+
+    prefillCustomerData() {
+      if (this.customerData.name) {
+        const nameInput = document.getElementById('billing-name');
+        if (nameInput) nameInput.value = this.customerData.name;
+      }
+
+      if (this.customerData.email) {
+        const emailInput = document.getElementById('billing-email');
+        if (emailInput) emailInput.value = this.customerData.email;
+      }
+
+      if (this.customerData.phone) {
+        const phoneInput = document.getElementById('billing-phone');
+        if (phoneInput) phoneInput.value = this.customerData.phone;
+      }
+    }
+
+    async handleSubmit(e) {
+      e.preventDefault();
+
+      if (this.isProcessing) return;
+
+      // Show processing state
+      this.setProcessingState(true);
+
+      // Hide previous messages
+      this.hideMessages();
+
+      try {
+        // Collect form data
+        const formData = new FormData(e.target);
+        this.formData = Object.fromEntries(formData);
+
+        // Validate form
+        const validation = window.PaymentValidation.validatePaymentForm(this.formData);
+        if (!validation.valid) {
+          throw new Error(validation.errors.join(', '));
+        }
+
+        // Process payment
+        const paymentData = {
+          amount: this.amount,
+          currency: this.currency,
+          paymentMethodId: this.selectedMethod.id,
+          billingDetails: {
+            name: this.formData.billingName,
+            email: this.formData.billingEmail,
+            phone: this.formData.billingPhone,
+            address: {
+              line1: this.formData.billingAddress,
+              postal_code: this.formData.billingZip
+            }
+          }
+        };
+
+        const result = await window.PaymentService.processPayment(paymentData);
+
+        if (result.success) {
+          this.showSuccess();
+          this.onSuccess(result);
+        } else {
+          throw new Error(result.error || 'Payment failed');
+        }
+
+      } catch (error) {
+        console.error('Payment error:', error);
+        this.showError(error.message);
+        this.onError(error);
+      } finally {
+        this.setProcessingState(false);
+      }
+    }
+
+    setProcessingState(processing) {
+      this.isProcessing = processing;
+      const submitBtn = document.getElementById('submit-payment');
+
+      if (submitBtn) {
+        submitBtn.disabled = processing;
+        const buttonText = submitBtn.querySelector('.button-text');
+        const buttonSpinner = submitBtn.querySelector('.button-spinner');
+
+        if (processing) {
+          buttonText.classList.add('hidden');
+          buttonSpinner.classList.remove('hidden');
+        } else {
+          buttonText.classList.remove('hidden');
+          buttonSpinner.classList.add('hidden');
+        }
+      }
+    }
+
+    hideMessages() {
+      document.getElementById('payment-errors')?.classList.add('hidden');
+      document.getElementById('payment-success')?.classList.add('hidden');
+    }
+
+    showError(message) {
+      const errorContainer = document.getElementById('payment-errors');
+      const errorMessage = document.getElementById('error-message');
+
+      if (errorContainer && errorMessage) {
+        errorMessage.textContent = message;
+        errorContainer.classList.remove('hidden');
+        errorContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+    }
+
+    showSuccess() {
+      const successContainer = document.getElementById('payment-success');
+      if (successContainer) {
+        successContainer.classList.remove('hidden');
+        successContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+    }
+
+    // Public methods
+    updateAmount(amount, currency = 'USD') {
+      this.amount = amount;
+      this.currency = currency;
+      this.updateTotalAmount();
+    }
+
+    reset() {
+      const form = document.getElementById('payment-form');
+      if (form) {
+        form.reset();
+      }
+      this.selectedMethod = null;
+      this.formData = {};
+      this.hideMessages();
+      this.loadPaymentMethods();
+    }
+  }
+
+  // Expose to global scope
+  window.PaymentForm = PaymentForm;
 
 })(window);

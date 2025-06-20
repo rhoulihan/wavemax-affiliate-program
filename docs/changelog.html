@@ -243,6 +243,7 @@
             <div class="version-nav">
                 <h3>Quick Navigation</h3>
                 <ul>
+                    <li><a href="#v1.8.0">v1.8.0 - Payment Processing Refactoring & Enhanced Workflows</a></li>
                     <li><a href="#v1.7.0">v1.7.0 - DocuSign W-9 Integration & Enhanced i18n</a></li>
                     <li><a href="#v1.6.0">v1.6.0 - Bag Tracking Removal & Dynamic Delivery Fees</a></li>
                     <li><a href="#v1.5.0">v1.5.0 - Dynamic Pricing & Revenue Features</a></li>
@@ -256,8 +257,82 @@
                 </ul>
             </div>
 
+            <div id="v1.8.0" class="release">
+                <h2>Version 1.8.0 <span class="tag new">Latest</span></h2>
+                <div class="release-date">Released on January 20, 2025</div>
+                
+                <h3>💳 Payment Processing Improvements</h3>
+                <ul>
+                    <li><span class="tag new">NEW</span> <strong>Generic Payment Methods:</strong> Unified payment processing architecture
+                        <ul>
+                            <li>Single <code>processPayment</code> method replacing registration and order-specific methods</li>
+                            <li><code>processPaymentTestMode</code> for development environments</li>
+                            <li>Simplified payment token management</li>
+                            <li>Consistent error handling across all payment types</li>
+                            <li>Support for any entity type (orders, registrations, etc.)</li>
+                        </ul>
+                    </li>
+                </ul>
+
+                <h3>📅 Schedule Pickup Workflow Enhancement</h3>
+                <ul>
+                    <li><span class="tag improved">IMPROVED</span> <strong>Integrated Payment Flow:</strong> Complete end-to-end pickup scheduling
+                        <ul>
+                            <li>Seamless transition from login to pickup form to payment</li>
+                            <li>Dynamic calculation of service fees based on weight</li>
+                            <li>Real-time display of WDF rates from system configuration</li>
+                            <li>Automatic order creation with payment processing</li>
+                            <li>Support for both authenticated and guest checkout flows</li>
+                        </ul>
+                    </li>
+                </ul>
+
+                <h3>📋 Order Confirmation Updates</h3>
+                <ul>
+                    <li><span class="tag improved">IMPROVED</span> <strong>Streamlined Display:</strong> Simplified confirmation page
+                        <ul>
+                            <li>Removed redundant delivery details section</li>
+                            <li>Clear order summary with itemized pricing</li>
+                            <li>Improved navigation options</li>
+                            <li>Fixed timing issues with data population</li>
+                            <li>Enhanced responsive design for mobile</li>
+                        </ul>
+                    </li>
+                </ul>
+
+                <h3>🌍 Translation System Enhancements</h3>
+                <ul>
+                    <li><span class="tag improved">IMPROVED</span> <strong>Payment Form i18n:</strong> Complete multi-language support
+                        <ul>
+                            <li>All payment-related UI elements fully translated</li>
+                            <li>Dynamic language switching for payment forms</li>
+                            <li>Improved placeholder system for email templates</li>
+                            <li>Consistent language persistence across payment flows</li>
+                            <li>Error messages in all supported languages</li>
+                        </ul>
+                    </li>
+                </ul>
+
+                <h3>🐛 Bug Fixes</h3>
+                <ul>
+                    <li><span class="tag fixed">FIXED</span> OAuth authentication redirect loop in affiliate dashboard</li>
+                    <li><span class="tag fixed">FIXED</span> Cross-origin window detection for payment forms</li>
+                    <li><span class="tag fixed">FIXED</span> Session persistence in embedded iframe contexts</li>
+                    <li><span class="tag fixed">FIXED</span> CSRF exemptions for payment provider callbacks</li>
+                    <li><span class="tag fixed">FIXED</span> Race conditions in order confirmation page</li>
+                </ul>
+
+                <h3>🛠️ Technical Improvements</h3>
+                <ul>
+                    <li><span class="tag improved">IMPROVED</span> Simplified payment controller architecture</li>
+                    <li><span class="tag improved">IMPROVED</span> Enhanced payment window monitoring</li>
+                    <li><span class="tag improved">IMPROVED</span> Better error handling for payment callbacks</li>
+                    <li><span class="tag improved">IMPROVED</span> Refined CSRF protection for external callbacks</li>
+                </ul>
+            </div>
+
             <div id="v1.7.0" class="release">
-                <h2>Version 1.7.0 <span class="tag new">Latest</span></h2>
+                <h2>Version 1.7.0</h2>
                 <div class="release-date">Released on June 16, 2025</div>
                 
                 <h3>📝 DocuSign W-9 Integration</h3>

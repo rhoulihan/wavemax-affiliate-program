@@ -7,14 +7,14 @@ describe('OAuthSession Model', () => {
   beforeEach(async () => {
     // Clear the collection before each test
     await OAuthSession.deleteMany({});
-    
+
     // Ensure indexes are properly created
     try {
       await OAuthSession.collection.dropIndexes();
     } catch (e) {
       // Ignore if indexes don't exist
     }
-    
+
     await OAuthSession.createIndexes();
   });
 
@@ -71,7 +71,7 @@ describe('OAuthSession Model', () => {
 
     test('should automatically set createdAt', async () => {
       const beforeSave = new Date();
-      
+
       const session = new OAuthSession({
         sessionId: 'auto-date-test',
         result: { provider: 'test' }
@@ -87,7 +87,7 @@ describe('OAuthSession Model', () => {
 
     test('should automatically set expiresAt to 5 minutes from now', async () => {
       const beforeSave = new Date();
-      
+
       const session = new OAuthSession({
         sessionId: 'expiry-test',
         result: { provider: 'test' }
@@ -103,7 +103,7 @@ describe('OAuthSession Model', () => {
 
     test('should enforce unique sessionId', async () => {
       const sessionId = 'unique-test-123';
-      
+
       // Create first session
       const session1 = new OAuthSession({
         sessionId: sessionId,
@@ -157,7 +157,7 @@ describe('OAuthSession Model', () => {
 
       const savedSession = await session.save();
       expect(savedSession.result).toEqual(complexResult);
-      
+
       // Verify nested objects are preserved
       expect(savedSession.result.profileData.skills).toEqual(['JavaScript', 'Node.js', 'React']);
       expect(savedSession.result.profileData.experience.current).toBe('Senior Developer at Tech Corp');
@@ -309,7 +309,7 @@ describe('OAuthSession Model', () => {
         // Create an expired session by manually setting expiresAt
         const expiredSessionId = 'cleanup-test-123';
         const expiredResult = { provider: 'google', socialId: 'expired-user' };
-        
+
         const expiredSession = new OAuthSession({
           sessionId: expiredSessionId,
           result: expiredResult,
@@ -362,18 +362,18 @@ describe('OAuthSession Model', () => {
       // Check detailed index information including TTL settings
       const indexesCursor = OAuthSession.collection.listIndexes();
       const indexesArray = await indexesCursor.toArray();
-      
-      const ttlIndex = indexesArray.find(index => 
+
+      const ttlIndex = indexesArray.find(index =>
         index.expireAfterSeconds !== undefined
       );
-      
+
       expect(ttlIndex).toBeDefined();
       expect(ttlIndex.expireAfterSeconds).toBe(0); // TTL with custom expiration date
     });
 
     test('should respect custom expiresAt when provided', async () => {
       const customExpiry = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes from now
-      
+
       const session = new OAuthSession({
         sessionId: 'custom-expiry-test',
         result: { provider: 'test' },
@@ -381,7 +381,7 @@ describe('OAuthSession Model', () => {
       });
 
       const savedSession = await session.save();
-      
+
       // Should use our custom expiry, not the default 5 minutes
       expect(savedSession.expiresAt.getTime()).toBe(customExpiry.getTime());
     });
@@ -413,7 +413,7 @@ describe('OAuthSession Model', () => {
       });
 
       const savedSession = await session.save();
-      
+
       // Most fields should be preserved (except function)
       expect(savedSession.result.stringField).toBe('text value');
       expect(savedSession.result.numberField).toBe(42);
@@ -422,7 +422,7 @@ describe('OAuthSession Model', () => {
       expect(savedSession.result.dateField).toBeInstanceOf(Date);
       expect(savedSession.result.arrayField).toEqual([1, 'two', { three: 3 }, null]);
       expect(savedSession.result.objectField.nested.deeply.value).toBe('preserved');
-      
+
       // Function won't be preserved in MongoDB but might still exist - check if it's callable
       if (savedSession.result.functionField) {
         expect(typeof savedSession.result.functionField).toBe('function');
@@ -457,7 +457,7 @@ describe('OAuthSession Model', () => {
     test('should handle MongoDB connection errors gracefully', async () => {
       // This test would require mocking MongoDB connection issues
       // For now, we'll test that the model handles basic validation errors
-      
+
       const invalidSession = new OAuthSession({
         // Missing required fields
       });

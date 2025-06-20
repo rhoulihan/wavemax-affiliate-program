@@ -23,7 +23,7 @@ async function testCallbackPool() {
     // Initialize pool
     console.log('\n1. Initializing callback pool...');
     await callbackPoolManager.initializePool();
-    
+
     // Get pool status
     console.log('\n2. Current pool status:');
     let status = await callbackPoolManager.getPoolStatus();
@@ -40,12 +40,12 @@ async function testCallbackPool() {
     for (let i = 0; i < 3; i++) {
       const token = `test-token-${Date.now()}-${i}`;
       tokens.push(token);
-      
+
       console.log(`\nAcquiring callback for token: ${token}`);
       const callback = await callbackPoolManager.acquireCallback(token);
       callbacks.push(callback);
-      
-      console.log(`Acquired callback:`, {
+
+      console.log('Acquired callback:', {
         formId: callback.formId,
         callbackPath: callback.callbackPath,
         callbackUrl: callback.callbackUrl
@@ -82,10 +82,10 @@ async function testCallbackPool() {
     // Test concurrent acquisition
     console.log('\n8. Testing concurrent acquisition...');
     const concurrentTokens = Array(5).fill().map((_, i) => `concurrent-${i}`);
-    const concurrentPromises = concurrentTokens.map(token => 
+    const concurrentPromises = concurrentTokens.map(token =>
       callbackPoolManager.acquireCallback(token)
     );
-    
+
     const concurrentResults = await Promise.all(concurrentPromises);
     console.log(`Successfully acquired ${concurrentResults.length} callbacks concurrently`);
 

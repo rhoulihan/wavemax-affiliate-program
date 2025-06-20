@@ -52,7 +52,7 @@ describe('PaymentExport Model Unit Tests', () => {
 
     it('should validate type enum values', () => {
       const validTypes = ['vendor', 'payment_summary', 'commission_detail'];
-      
+
       validTypes.forEach(type => {
         mockExport.type = type;
         // Add required fields for payment_summary and commission_detail
@@ -85,7 +85,7 @@ describe('PaymentExport Model Unit Tests', () => {
       mockExport.type = 'payment_summary';
       mockExport.periodStart = new Date('2025-01-01');
       mockExport.periodEnd = new Date('2025-01-31');
-      
+
       const error = mockExport.validateSync();
       expect(error).toBeUndefined();
       expect(mockExport.periodStart).toEqual(new Date('2025-01-01'));
@@ -96,7 +96,7 @@ describe('PaymentExport Model Unit Tests', () => {
       mockExport.type = 'commission_detail';
       mockExport.periodStart = new Date('2025-01-01');
       mockExport.periodEnd = new Date('2025-01-31');
-      
+
       const error = mockExport.validateSync();
       expect(error).toBeUndefined();
     });
@@ -114,7 +114,7 @@ describe('PaymentExport Model Unit Tests', () => {
           }
         ]
       };
-      
+
       const error = mockExport.validateSync();
       expect(error).toBeUndefined();
       expect(mockExport.exportData.vendors).toHaveLength(1);
@@ -140,7 +140,7 @@ describe('PaymentExport Model Unit Tests', () => {
           totalAmount: 150.50
         }
       };
-      
+
       const error = mockExport.validateSync();
       expect(error).toBeUndefined();
       expect(mockExport.exportData.payments[0].amount).toBe(150.50);
@@ -166,7 +166,7 @@ describe('PaymentExport Model Unit Tests', () => {
           totalAmount: 50
         }
       };
-      
+
       const error = mockExport.validateSync();
       expect(error).toBeUndefined();
       expect(mockExport.exportData.summary.totalAmount).toBe(50);
@@ -177,7 +177,7 @@ describe('PaymentExport Model Unit Tests', () => {
     it('should store multiple affiliate IDs for vendor export', () => {
       mockExport.type = 'vendor';
       mockExport.affiliateIds = ['AFF-001', 'AFF-002', 'AFF-003', 'AFF-004', 'AFF-005'];
-      
+
       const error = mockExport.validateSync();
       expect(error).toBeUndefined();
       expect(mockExport.affiliateIds).toHaveLength(5);
@@ -188,7 +188,7 @@ describe('PaymentExport Model Unit Tests', () => {
       mockExport.periodStart = new Date('2025-01-01');
       mockExport.periodEnd = new Date('2025-01-31');
       mockExport.affiliateIds = ['AFF-001'];
-      
+
       const error = mockExport.validateSync();
       expect(error).toBeUndefined();
       expect(mockExport.affiliateIds).toHaveLength(1);
@@ -205,7 +205,7 @@ describe('PaymentExport Model Unit Tests', () => {
     it('should have createdAt and updatedAt timestamps', () => {
       expect(mockExport.createdAt).toBeUndefined(); // Not set until save
       expect(mockExport.updatedAt).toBeUndefined(); // Not set until save
-      
+
       // Mongoose will add these on save
       const schema = PaymentExport.schema;
       expect(schema.options.timestamps).toBe(true);
@@ -215,27 +215,27 @@ describe('PaymentExport Model Unit Tests', () => {
   describe('Indexes', () => {
     it('should have required indexes defined', () => {
       const indexes = PaymentExport.schema.indexes();
-      
+
       // Check for type and generatedAt composite index
-      const hasTypeGeneratedAtIndex = indexes.some(index => 
+      const hasTypeGeneratedAtIndex = indexes.some(index =>
         index[0].type === 1 && index[0].generatedAt === -1
       );
-      
+
       // Check for period index
-      const hasPeriodIndex = indexes.some(index => 
+      const hasPeriodIndex = indexes.some(index =>
         index[0].periodStart === 1 && index[0].periodEnd === 1
       );
-      
+
       // Check for status index
-      const hasStatusIndex = indexes.some(index => 
+      const hasStatusIndex = indexes.some(index =>
         index[0].status === 1
       );
-      
+
       // Check for exportId unique index (from default)
-      const hasExportIdIndex = indexes.some(index => 
+      const hasExportIdIndex = indexes.some(index =>
         index[0].exportId === 1
       );
-      
+
       expect(hasTypeGeneratedAtIndex).toBe(true);
       expect(hasPeriodIndex).toBe(true);
       expect(hasStatusIndex).toBe(true);
@@ -251,7 +251,7 @@ describe('PaymentExport Model Unit Tests', () => {
           displayName: `Vendor ${i + 1}`
         }))
       };
-      
+
       const error = mockExport.validateSync();
       expect(error).toBeUndefined();
       expect(mockExport.exportData.vendors).toHaveLength(25);
@@ -275,7 +275,7 @@ describe('PaymentExport Model Unit Tests', () => {
           totalAmount: 5500
         }
       };
-      
+
       const error = mockExport.validateSync();
       expect(error).toBeUndefined();
       expect(mockExport.exportData.payments).toHaveLength(10);
@@ -300,7 +300,7 @@ describe('PaymentExport Model Unit Tests', () => {
           totalAmount: 500
         }
       };
-      
+
       const error = mockExport.validateSync();
       expect(error).toBeUndefined();
       expect(mockExport.exportData.payments).toHaveLength(50);
@@ -316,14 +316,14 @@ describe('PaymentExport Model Unit Tests', () => {
         filename: 'export1.csv',
         affiliateIds: []
       });
-      
+
       const export2 = new PaymentExport({
         type: 'vendor',
         generatedBy: new mongoose.Types.ObjectId(),
         filename: 'export2.csv',
         affiliateIds: []
       });
-      
+
       expect(export1.exportId).not.toBe(export2.exportId);
       expect(export1.exportId).toMatch(/^EXP-[a-f0-9-]{36}$/);
       expect(export2.exportId).toMatch(/^EXP-[a-f0-9-]{36}$/);

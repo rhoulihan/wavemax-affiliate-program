@@ -12,17 +12,17 @@ async function main() {
     console.log('Connecting to MongoDB...');
     await mongoose.connect(process.env.MONGODB_URI);
     console.log('✓ Connected to MongoDB\n');
-    
+
     // Check for administrators
     const adminCount = await Administrator.countDocuments();
     console.log(`Total administrators: ${adminCount}`);
-    
+
     if (adminCount > 0) {
       // Find the default admin
-      const defaultAdmin = await Administrator.findOne({ 
-        email: process.env.DEFAULT_ADMIN_EMAIL || 'admin@wavemaxlaundry.com' 
+      const defaultAdmin = await Administrator.findOne({
+        email: process.env.DEFAULT_ADMIN_EMAIL || 'admin@wavemaxlaundry.com'
       });
-      
+
       if (defaultAdmin) {
         console.log('\n✓ Default administrator found:');
         console.log(`  - Admin ID: ${defaultAdmin.adminId}`);
@@ -34,7 +34,7 @@ async function main() {
         console.log(`  - Created: ${defaultAdmin.createdAt}`);
       } else {
         console.log('\n⚠ Default administrator not found with expected email');
-        
+
         // List all administrators
         const allAdmins = await Administrator.find({}, 'adminId email firstName lastName');
         console.log('\nExisting administrators:');
@@ -45,7 +45,7 @@ async function main() {
     } else {
       console.log('\n❌ No administrators found in the database');
     }
-    
+
   } catch (error) {
     console.error('\n❌ Error:', error.message);
   } finally {

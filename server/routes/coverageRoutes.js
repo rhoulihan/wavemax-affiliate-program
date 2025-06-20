@@ -9,17 +9,17 @@ const path = require('path');
 const preventEmbeddedAccess = (req, res, next) => {
   // Check if request is coming from an iframe
   const referer = req.get('Referer');
-  const isEmbedded = req.get('Sec-Fetch-Dest') === 'iframe' || 
-                     req.get('X-Frame-Options') || 
+  const isEmbedded = req.get('Sec-Fetch-Dest') === 'iframe' ||
+                     req.get('X-Frame-Options') ||
                      (referer && referer.includes('/embed'));
-  
+
   if (isEmbedded) {
     return res.status(403).json({
       success: false,
       message: 'Coverage reports cannot be accessed from embedded contexts'
     });
   }
-  
+
   // Add X-Frame-Options to prevent embedding of coverage reports
   res.setHeader('X-Frame-Options', 'DENY');
   next();
@@ -29,7 +29,7 @@ const preventEmbeddedAccess = (req, res, next) => {
 const accessControl = (req, res, next) => {
   const isDevelopment = process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test';
   const hasSecretKey = req.query.key === process.env.COVERAGE_ACCESS_KEY;
-  
+
   if (!isDevelopment && !hasSecretKey) {
     return res.status(403).send(`
       <html>
@@ -72,7 +72,7 @@ const accessControl = (req, res, next) => {
       </html>
     `);
   }
-  
+
   next();
 };
 

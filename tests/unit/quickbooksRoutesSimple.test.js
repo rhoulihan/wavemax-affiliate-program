@@ -6,28 +6,28 @@ describe('QuickBooks Routes - Simple', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    
+
     // Create a simple express app with mock routes
     app = express();
     app.use(express.json());
-    
+
     // Mock auth middleware
     const mockAuth = (req, res, next) => {
       req.user = { _id: 'admin-123', role: 'administrator' };
       next();
     };
-    
+
     // Define routes directly
     app.get('/api/quickbooks/vendors/export', mockAuth, (req, res) => {
-      res.json({ 
+      res.json({
         success: true,
         export: { exportId: 'EXP-123' },
         vendorCount: 5
       });
     });
-    
+
     app.get('/api/quickbooks/payments/export', mockAuth, (req, res) => {
-      res.json({ 
+      res.json({
         success: true,
         export: { exportId: 'EXP-124' },
         summary: {
@@ -37,16 +37,16 @@ describe('QuickBooks Routes - Simple', () => {
         }
       });
     });
-    
+
     app.get('/api/quickbooks/commissions/export', mockAuth, (req, res) => {
-      res.json({ 
+      res.json({
         success: true,
         export: { exportId: 'EXP-125' }
       });
     });
-    
+
     app.get('/api/quickbooks/exports', mockAuth, (req, res) => {
-      res.json({ 
+      res.json({
         success: true,
         exports: [
           { exportId: 'EXP-123', type: 'vendor' },
@@ -81,10 +81,10 @@ describe('QuickBooks Routes - Simple', () => {
     it('should export payment summary', async () => {
       const response = await request(app)
         .get('/api/quickbooks/payments/export')
-        .query({ 
+        .query({
           startDate: '2025-01-01',
           endDate: '2025-01-31',
-          format: 'json' 
+          format: 'json'
         });
 
       expect(response.status).toBe(200);
@@ -98,11 +98,11 @@ describe('QuickBooks Routes - Simple', () => {
     it('should export commission detail', async () => {
       const response = await request(app)
         .get('/api/quickbooks/commissions/export')
-        .query({ 
+        .query({
           affiliateId: 'AFF-001',
           startDate: '2025-01-01',
           endDate: '2025-01-31',
-          format: 'json' 
+          format: 'json'
         });
 
       expect(response.status).toBe(200);

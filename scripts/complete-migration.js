@@ -16,11 +16,11 @@ async function main() {
 
     // Create demo operator
     console.log('\n=== Creating Demo Operator ===');
-    
+
     // First get the admin to use as createdBy
     const Administrator = require('../server/models/Administrator');
     const admin = await Administrator.findOne({ adminId: 'ADM001' });
-    
+
     const demoOperator = new Operator({
       operatorId: 'OPR001',
       firstName: 'Demo',
@@ -37,7 +37,7 @@ async function main() {
     console.log('✓ Demo operator created');
     console.log(`  Operator ID: ${demoOperator.operatorId}`);
     console.log(`  Email: ${demoOperator.email}`);
-    console.log(`  Password: Demo1234!`);
+    console.log('  Password: Demo1234!');
     console.log(`  Shift: ${demoOperator.shiftStart} - ${demoOperator.shiftEnd}`);
 
     console.log('\n✓ Migration completed successfully!');
@@ -48,7 +48,7 @@ async function main() {
     console.log('\n2. Operator Portal: https://wavemax.promo/operator-login-embed.html');
     console.log('   - Email: demo.operator@wavemax.com');
     console.log('   - Password: Demo1234!');
-    
+
   } catch (error) {
     if (error.code === 11000) {
       console.log('✓ Demo operator already exists');

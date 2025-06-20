@@ -64,7 +64,7 @@ const createTransport = () => {
     const apiInstance = new SibApiV3Sdk.TransactionalEmailsApi();
     const apiKey = apiInstance.authentications['api-key'];
     apiKey.apiKey = process.env.BREVO_API_KEY;
-    
+
     // Return a mock transport that uses Brevo API
     return {
       sendMail: async (mailOptions) => {
@@ -72,7 +72,7 @@ const createTransport = () => {
           // Parse the from field to extract name and email
           let senderName = process.env.BREVO_FROM_NAME || 'WaveMAX Laundry';
           let senderEmail = process.env.BREVO_FROM_EMAIL || 'no-reply@wavemax.promo';
-          
+
           if (mailOptions.from) {
             const fromMatch = mailOptions.from.match(/^"?([^"]*)"?\s*<(.+)>$/);
             if (fromMatch) {
@@ -82,34 +82,34 @@ const createTransport = () => {
               senderEmail = mailOptions.from;
             }
           }
-          
+
           // Create the email object for Brevo
           const sendSmtpEmail = new SibApiV3Sdk.SendSmtpEmail();
-          
+
           sendSmtpEmail.subject = mailOptions.subject;
           sendSmtpEmail.htmlContent = mailOptions.html;
-          sendSmtpEmail.sender = { 
-            name: senderName, 
-            email: senderEmail 
+          sendSmtpEmail.sender = {
+            name: senderName,
+            email: senderEmail
           };
-          
+
           // Handle multiple recipients
-          const recipients = Array.isArray(mailOptions.to) 
-            ? mailOptions.to 
+          const recipients = Array.isArray(mailOptions.to)
+            ? mailOptions.to
             : [mailOptions.to];
-            
+
           sendSmtpEmail.to = recipients.map(email => ({ email: email.trim() }));
-          
+
           // Add reply-to if specified
           if (mailOptions.replyTo) {
             sendSmtpEmail.replyTo = { email: mailOptions.replyTo };
           }
-          
+
           // Send the email via Brevo API
           const response = await apiInstance.sendTransacEmail(sendSmtpEmail);
-          
+
           console.log('Brevo email sent successfully:', response.messageId);
-          
+
           // Return response in nodemailer format
           return {
             messageId: response.messageId,
@@ -142,7 +142,7 @@ const loadTemplate = async (templateName, language = 'en') => {
   try {
     // First try to load language-specific template
     const langTemplatePath = path.join(__dirname, '../templates/emails', language, `${templateName}.html`);
-    
+
     try {
       const template = await readFile(langTemplatePath, 'utf8');
       return template;
@@ -191,7 +191,7 @@ const fillTemplate = (template, data) => {
   // Add BASE_URL to all template data
   const baseUrl = process.env.BASE_URL || 'https://wavemax.promo';
   data.BASE_URL = baseUrl;
-  
+
   // Use a regex to find all placeholders and replace them in one operation
   return template.replace(/\[([A-Za-z0-9_]+)\]/g, (match, placeholder) => {
     // First try the exact placeholder as-is, then try lowercase, then uppercase
@@ -408,17 +408,17 @@ exports.sendAffiliateWelcomeEmail = async (affiliate) => {
       REGISTRATION_URL: registrationUrl,
       landing_page_url: landingPageUrl,
       LANDING_PAGE_URL: landingPageUrl,
-      login_url: `https://www.wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program?login=affiliate`,
-      LOGIN_URL: `https://www.wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program?login=affiliate`,
-      dashboard_url: `https://www.wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program?login=affiliate`,
-      DASHBOARD_URL: `https://www.wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program?login=affiliate`,
+      login_url: 'https://www.wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program?login=affiliate',
+      LOGIN_URL: 'https://www.wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program?login=affiliate',
+      dashboard_url: 'https://www.wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program?login=affiliate',
+      DASHBOARD_URL: 'https://www.wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program?login=affiliate',
       current_year: new Date().getFullYear(),
       CURRENT_YEAR: new Date().getFullYear(),
       ...emailTranslations
     };
 
     const html = fillTemplate(template, data);
-    
+
     // Translate subject based on language
     const subjects = {
       en: 'Welcome to WaveMAX Laundry Affiliate Program',
@@ -992,8 +992,8 @@ exports.sendCustomerWelcomeEmail = async (customer, affiliate, bagInfo = {}) => 
     const template = await loadTemplate('customer-welcome', language);
 
     // Build affiliate name with fallback
-    const affiliateName = affiliate.businessName || 
-      `${affiliate.firstName || ''} ${affiliate.lastName || ''}`.trim() || 
+    const affiliateName = affiliate.businessName ||
+      `${affiliate.firstName || ''} ${affiliate.lastName || ''}`.trim() ||
       'Your WaveMAX Partner';
 
     // Extract bag information with defaults
@@ -1177,8 +1177,8 @@ exports.sendCustomerWelcomeEmail = async (customer, affiliate, bagInfo = {}) => 
       number_of_bags: numberOfBags,
       bag_fee: bagFee.toFixed(2),
       total_credit: totalCredit.toFixed(2),
-      login_url: `https://www.wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program?login=customer`,
-      schedule_url: `https://www.wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program?login=customer&pickup=true`,
+      login_url: 'https://www.wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program?login=customer',
+      schedule_url: 'https://www.wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program?login=customer&pickup=true',
       current_year: new Date().getFullYear(),
       ...emailTranslations
     };
@@ -1199,7 +1199,7 @@ exports.sendCustomerWelcomeEmail = async (customer, affiliate, bagInfo = {}) => 
       subject,
       html
     );
-    
+
     console.log('Customer welcome email sent successfully to:', customer.email);
   } catch (error) {
     console.error('Error sending customer welcome email:', error);
@@ -1322,13 +1322,11 @@ exports.sendCustomerOrderConfirmationEmail = async (customer, order, affiliate) 
       order_id: order.orderId,
       pickup_date: new Date(order.pickupDate).toLocaleDateString(),
       pickup_time: formatTimeSlot(order.pickupTime),
-      delivery_date: new Date(order.deliveryDate).toLocaleDateString(),
-      delivery_time: formatTimeSlot(order.deliveryTime),
       estimated_total: `$${order.estimatedTotal.toFixed(2)}`,
       affiliate_name: `${affiliate.firstName} ${affiliate.lastName}`,
       affiliate_phone: affiliate.phone,
       affiliate_email: affiliate.email,
-      login_url: `https://www.wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program?login=customer`,
+      login_url: 'https://www.wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program?login=customer',
       current_year: new Date().getFullYear(),
       ...emailTranslations
     };
@@ -1488,7 +1486,7 @@ exports.sendOrderStatusUpdateEmail = async (customer, order, status) => {
       status_message: statusMessages[status],
       weight_info: order.actualWeight ? `<div class="detail-row"><span class="detail-label">${language === 'es' ? 'Peso' : language === 'pt' ? 'Peso' : language === 'de' ? 'Gewicht' : 'Weight'}:</span> ${order.actualWeight} lbs</div>` : '',
       total_info: order.actualTotal ? `<div class="detail-row"><span class="detail-label">${language === 'es' ? 'Total Final' : language === 'pt' ? 'Total Final' : language === 'de' ? 'Endgültiger Betrag' : 'Final Total'}:</span> $${order.actualTotal.toFixed(2)}</div>` : '',
-      dashboard_url: `https://www.wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program?login=customer`,
+      dashboard_url: 'https://www.wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program?login=customer',
       current_year: new Date().getFullYear(),
       ...emailTranslations
     };
@@ -1601,8 +1599,8 @@ exports.sendOrderCancellationEmail = async (customer, order) => {
       order_id: order.orderId,
       pickup_date: new Date(order.pickupDate).toLocaleDateString(),
       cancellation_time: new Date().toLocaleTimeString(),
-      dashboard_url: `https://www.wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program?login=customer`,
-      schedule_url: `https://www.wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program?login=customer&pickup=true`,
+      dashboard_url: 'https://www.wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program?login=customer',
+      schedule_url: 'https://www.wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program?login=customer&pickup=true',
       current_year: new Date().getFullYear(),
       ...emailTranslations
     };

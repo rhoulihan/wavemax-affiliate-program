@@ -11,10 +11,10 @@ const paymentExportSchema = new mongoose.Schema({
     default: () => 'EXP-' + uuidv4(),
     unique: true
   },
-  type: { 
-    type: String, 
-    enum: ['vendor', 'payment_summary', 'commission_detail'], 
-    required: true 
+  type: {
+    type: String,
+    enum: ['vendor', 'payment_summary', 'commission_detail'],
+    required: true
   },
   // Period covered by this export
   periodStart: {
@@ -40,14 +40,14 @@ const paymentExportSchema = new mongoose.Schema({
     ref: 'Order'
   }],
   // Export metadata
-  generatedBy: { 
-    type: mongoose.Schema.Types.ObjectId, 
+  generatedBy: {
+    type: mongoose.Schema.Types.ObjectId,
     ref: 'Administrator',
     required: true
   },
-  generatedAt: { 
-    type: Date, 
-    default: Date.now 
+  generatedAt: {
+    type: Date,
+    default: Date.now
   },
   filename: {
     type: String,
@@ -68,15 +68,15 @@ const paymentExportSchema = new mongoose.Schema({
     default: 0
   },
   // Tracking
-  status: { 
-    type: String, 
-    enum: ['generated', 'downloaded', 'imported', 'failed'], 
-    default: 'generated' 
+  status: {
+    type: String,
+    enum: ['generated', 'downloaded', 'imported', 'failed'],
+    default: 'generated'
   },
   downloadedAt: Date,
-  downloadedBy: { 
-    type: mongoose.Schema.Types.ObjectId, 
-    ref: 'Administrator' 
+  downloadedBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Administrator'
   },
   downloadCount: {
     type: Number,
@@ -121,8 +121,8 @@ const paymentExportSchema = new mongoose.Schema({
     error: String,
     timestamp: Date
   }]
-}, { 
-  timestamps: true 
+}, {
+  timestamps: true
 });
 
 // Indexes

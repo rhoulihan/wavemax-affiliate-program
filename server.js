@@ -68,7 +68,7 @@ if (process.env.NODE_ENV !== 'test') {
   mongoose.connect(process.env.MONGODB_URI, mongoOptions)
     .then(async () => {
       logger.info('Connected to MongoDB');
-      
+
       // Initialize system configuration defaults
       try {
         const SystemConfig = require('./server/models/SystemConfig');
@@ -77,7 +77,7 @@ if (process.env.NODE_ENV !== 'test') {
       } catch (error) {
         logger.error('Error initializing system config:', { error: error.message });
       }
-      
+
       // Initialize default administrator account
       try {
         const { initializeDefaultAdmin } = require('./init-admin');
@@ -85,7 +85,7 @@ if (process.env.NODE_ENV !== 'test') {
       } catch (error) {
         logger.error('Error initializing default admin:', { error: error.message });
       }
-      
+
       // Initialize Paygistix callback pool
       try {
         const callbackPoolManager = require('./server/services/callbackPoolManager');
@@ -94,7 +94,7 @@ if (process.env.NODE_ENV !== 'test') {
       } catch (error) {
         logger.error('Error initializing callback pool:', { error: error.message });
       }
-      
+
       // Initialize data retention service
       try {
         const DataRetentionService = require('./server/services/dataRetentionService');
@@ -222,12 +222,12 @@ const session = require('express-session');
 const sessionMaxAge = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
 
 // Configure session store based on environment
-const sessionStore = process.env.NODE_ENV === 'test' 
+const sessionStore = process.env.NODE_ENV === 'test'
   ? undefined // Use default MemoryStore for tests
-  : MongoStore.create({ 
-      mongoUrl: process.env.MONGODB_URI,
-      touchAfter: 24 * 3600 // Lazy session update in seconds (24 hours)
-    });
+  : MongoStore.create({
+    mongoUrl: process.env.MONGODB_URI,
+    touchAfter: 24 * 3600 // Lazy session update in seconds (24 hours)
+  });
 
 app.use(session({
   name: 'wavemax.sid', // Explicit session cookie name
@@ -265,7 +265,7 @@ app.use((req, res, next) => {
     // Force reset cookie properties to ensure they're valid
     const originalMaxAge = req.session.cookie.maxAge;
     const originalExpires = req.session.cookie._expires;
-    
+
     // Always ensure maxAge is a valid number
     if (typeof originalMaxAge !== 'number' || isNaN(originalMaxAge) || originalMaxAge < 0) {
       // Create a new cookie object to avoid prototype issues
@@ -277,7 +277,7 @@ app.use((req, res, next) => {
         _expires: new Date(Date.now() + sessionMaxAge)
       };
     }
-    
+
     // Double-check the maxAge is still valid
     if (typeof req.session.cookie.maxAge !== 'number') {
       req.session.cookie.maxAge = sessionMaxAge;
@@ -296,7 +296,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 // Serve documentation if enabled
 if (process.env.SHOW_DOCS === 'true') {
   app.use('/docs', express.static(path.join(__dirname, 'docs')));
-  
+
   // Redirect /docs to /docs/index.html
   app.get('/docs', (req, res) => {
     res.redirect('/docs/index.html');

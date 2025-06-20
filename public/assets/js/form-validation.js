@@ -44,18 +44,18 @@
       if (!email || email.trim() === '') {
         return { isValid: false, message: 'Email address is required' };
       }
-      
+
       const trimmedEmail = email.trim().toLowerCase();
-      
+
       if (!ValidationRules.email.pattern.test(trimmedEmail)) {
         return { isValid: false, message: ValidationRules.email.message };
       }
-      
+
       // Additional checks
       if (trimmedEmail.length > 254) {
         return { isValid: false, message: 'Email address is too long' };
       }
-      
+
       // Check for common typos
       const commonDomainTypos = {
         'gmail.co': 'gmail.com',
@@ -63,16 +63,16 @@
         'hotmail.co': 'hotmail.com',
         'outlook.co': 'outlook.com'
       };
-      
+
       const domain = trimmedEmail.split('@')[1];
       if (commonDomainTypos[domain]) {
-        return { 
-          isValid: false, 
+        return {
+          isValid: false,
           message: `Did you mean ${trimmedEmail.replace(domain, commonDomainTypos[domain])}?`,
           suggestion: trimmedEmail.replace(domain, commonDomainTypos[domain])
         };
       }
-      
+
       return { isValid: true };
     },
 
@@ -81,18 +81,18 @@
       if (!phone || phone.trim() === '') {
         return { isValid: false, message: 'Phone number is required' };
       }
-      
+
       const trimmedPhone = phone.trim();
-      
+
       // First check if there are any invalid characters (letters, special chars except allowed formatting)
       const allowedCharsPattern = /^[0-9\-\(\)\s\+\.]+$/;
       if (!allowedCharsPattern.test(trimmedPhone)) {
         return { isValid: false, message: 'Phone number can only contain numbers and formatting characters (-, (, ), +, ., space)' };
       }
-      
+
       // Remove all non-digit characters for validation
       const digitsOnly = trimmedPhone.replace(/\D/g, '');
-      
+
       // Check for valid US phone number lengths
       if (digitsOnly.length === 10) {
         // Format as (555) 123-4567
@@ -105,7 +105,7 @@
       } else if (ValidationRules.phone.pattern.test(trimmedPhone)) {
         return { isValid: true, formatted: trimmedPhone };
       }
-      
+
       return { isValid: false, message: ValidationRules.phone.message };
     },
 
@@ -114,13 +114,13 @@
       if (!zipCode || zipCode.trim() === '') {
         return { isValid: false, message: 'ZIP code is required' };
       }
-      
+
       const trimmedZip = zipCode.trim();
-      
+
       if (!ValidationRules.zipCode.pattern.test(trimmedZip)) {
         return { isValid: false, message: ValidationRules.zipCode.message };
       }
-      
+
       return { isValid: true };
     },
 
@@ -129,13 +129,13 @@
       if (!state || state.trim() === '') {
         return { isValid: false, message: 'State is required' };
       }
-      
+
       const trimmedState = state.trim().toUpperCase();
-      
+
       if (!ValidationRules.state.validStates.includes(trimmedState)) {
         return { isValid: false, message: ValidationRules.state.message };
       }
-      
+
       return { isValid: true, formatted: trimmedState };
     },
 
@@ -144,13 +144,13 @@
       if (!name || name.trim() === '') {
         return { isValid: false, message: `${fieldName} is required` };
       }
-      
+
       const trimmedName = name.trim();
-      
+
       if (!ValidationRules.name.pattern.test(trimmedName)) {
         return { isValid: false, message: ValidationRules.name.message };
       }
-      
+
       return { isValid: true };
     },
 
@@ -159,13 +159,13 @@
       if (!businessName || businessName.trim() === '') {
         return { isValid: true }; // Optional field
       }
-      
+
       const trimmedName = businessName.trim();
-      
+
       if (!ValidationRules.businessName.pattern.test(trimmedName)) {
         return { isValid: false, message: ValidationRules.businessName.message };
       }
-      
+
       return { isValid: true };
     }
   };
@@ -175,20 +175,20 @@
     showError: function(fieldId, message, suggestion = null) {
       const field = document.getElementById(fieldId);
       if (!field) return;
-      
+
       // Remove existing error
       this.clearError(fieldId);
-      
+
       // Add error styling with validation-error class from CSS
       field.classList.add('validation-error');
       field.classList.remove('validation-success');
-      
+
       // Create error message element
       const errorDiv = document.createElement('div');
       errorDiv.id = `${fieldId}-error`;
       errorDiv.className = 'validation-message';
       errorDiv.textContent = message;
-      
+
       // Add suggestion if provided
       if (suggestion) {
         const suggestionSpan = document.createElement('span');
@@ -201,7 +201,7 @@
         };
         errorDiv.appendChild(suggestionSpan);
       }
-      
+
       // Insert after the field
       field.parentNode.insertBefore(errorDiv, field.nextSibling);
     },
@@ -209,7 +209,7 @@
     showSuccess: function(fieldId) {
       const field = document.getElementById(fieldId);
       if (!field) return;
-      
+
       // Clear error state and show success
       this.clearError(fieldId);
       field.classList.add('validation-success');
@@ -219,9 +219,9 @@
     clearError: function(fieldId) {
       const field = document.getElementById(fieldId);
       if (!field) return;
-      
+
       field.classList.remove('validation-error', 'validation-success');
-      
+
       const existingError = document.getElementById(`${fieldId}-error`);
       if (existingError) {
         existingError.remove();
@@ -231,42 +231,42 @@
     validateField: function(fieldId) {
       const field = document.getElementById(fieldId);
       if (!field) return false;
-      
+
       const value = field.value;
       let result;
-      
+
       switch (fieldId) {
-        case 'email':
-          result = ValidationUtils.validateEmail(value);
-          break;
-        case 'phone':
-          result = ValidationUtils.validatePhone(value);
-          if (result.isValid && result.formatted) {
-            field.value = result.formatted;
-          }
-          break;
-        case 'zipCode':
-          result = ValidationUtils.validateZipCode(value);
-          break;
-        case 'state':
-          result = ValidationUtils.validateState(value);
-          if (result.isValid && result.formatted) {
-            field.value = result.formatted;
-          }
-          break;
-        case 'firstName':
-          result = ValidationUtils.validateName(value, 'First name');
-          break;
-        case 'lastName':
-          result = ValidationUtils.validateName(value, 'Last name');
-          break;
-        case 'businessName':
-          result = ValidationUtils.validateBusinessName(value);
-          break;
-        default:
-          return true;
+      case 'email':
+        result = ValidationUtils.validateEmail(value);
+        break;
+      case 'phone':
+        result = ValidationUtils.validatePhone(value);
+        if (result.isValid && result.formatted) {
+          field.value = result.formatted;
+        }
+        break;
+      case 'zipCode':
+        result = ValidationUtils.validateZipCode(value);
+        break;
+      case 'state':
+        result = ValidationUtils.validateState(value);
+        if (result.isValid && result.formatted) {
+          field.value = result.formatted;
+        }
+        break;
+      case 'firstName':
+        result = ValidationUtils.validateName(value, 'First name');
+        break;
+      case 'lastName':
+        result = ValidationUtils.validateName(value, 'Last name');
+        break;
+      case 'businessName':
+        result = ValidationUtils.validateBusinessName(value);
+        break;
+      default:
+        return true;
       }
-      
+
       if (result.isValid) {
         this.showSuccess(fieldId);
         return true;
@@ -279,26 +279,26 @@
 
   // Track if validation has been initialized to prevent duplicate listeners
   let validationInitialized = false;
-  
+
   // Track which fields have been interacted with and need validation
   let fieldsRequiringValidation = new Set();
-  
+
   // Initialize validation when DOM is ready
   function initializeValidation() {
     if (validationInitialized) {
       console.log('[Form Validation] Already initialized, skipping...');
       return;
     }
-    
+
     console.log('[Form Validation] Initializing field validation...');
     console.log('[Form Validation] Document readyState:', document.readyState);
     console.log('[Form Validation] Current URL:', window.location.href);
-    
+
     // Fields to validate
     const fieldsToValidate = ['email', 'phone', 'zipCode', 'state', 'firstName', 'lastName', 'businessName'];
-    
+
     console.log('[Form Validation] Looking for fields:', fieldsToValidate);
-    
+
     let fieldsFound = 0;
     fieldsToValidate.forEach(fieldId => {
       const field = document.getElementById(fieldId);
@@ -306,12 +306,12 @@
       if (field) {
         fieldsFound++;
         console.log(`[Form Validation] Adding event listeners to ${fieldId}`);
-        
+
         // Track when user starts interacting with field (input event)
         field.addEventListener('input', () => {
           console.log(`[Form Validation] User started interacting with ${fieldId}`);
           fieldsRequiringValidation.add(fieldId);
-          
+
           // Only validate on input if field is already marked for validation
           if (fieldsRequiringValidation.has(fieldId)) {
             // Debounce validation
@@ -322,27 +322,27 @@
             }, 300);
           }
         });
-        
+
         // Real-time validation on blur with focus trap (only for fields that were interacted with)
         field.addEventListener('blur', (event) => {
           console.log(`[Form Validation] Blur event for ${fieldId}, value: "${field.value}"`);
-          
+
           // Only validate and trap focus if user has interacted with this field
           if (fieldsRequiringValidation.has(fieldId)) {
             const isValid = UIFeedback.validateField(fieldId);
             console.log(`[Form Validation] Validation result for ${fieldId}: ${isValid}`);
-            
+
             // If validation fails, prevent focus from leaving the field
             if (!isValid) {
               console.log(`[Form Validation] ${fieldId} invalid - preventing focus changes`);
-              
+
               // Prevent the blur event completely
               event.preventDefault();
               event.stopPropagation();
-              
+
               // Immediately refocus the field
               field.focus();
-              
+
               // Flash the border to draw attention to the error
               field.style.borderColor = '#ef4444';
               field.style.boxShadow = '0 0 0 3px rgba(239, 68, 68, 0.3)';
@@ -358,13 +358,13 @@
             // Allow blur without validation if user hasn't interacted with field
           }
         });
-        
+
         // Don't clear errors on focus - only clear when field becomes valid
         field.addEventListener('focus', () => {
           console.log(`[Form Validation] Focus event for ${fieldId} - keeping error state until valid`);
           // Don't clear errors here - let them persist until field is valid
         });
-        
+
         // For state field, auto-format to uppercase
         if (fieldId === 'state') {
           field.addEventListener('input', () => {
@@ -375,13 +375,13 @@
         }
       }
     });
-    
+
     // Add global click handler to prevent focus changes when any interacted field is invalid
     if (fieldsFound > 0) {
       document.addEventListener('click', (event) => {
         // Check if any interacted field is invalid
         let invalidField = null;
-        
+
         for (const fieldId of fieldsRequiringValidation) {
           const field = document.getElementById(fieldId);
           if (field) {
@@ -392,15 +392,15 @@
             }
           }
         }
-        
+
         // If there's an invalid field and user clicks on a different form element
-        if (invalidField && event.target !== invalidField && 
+        if (invalidField && event.target !== invalidField &&
             (event.target.tagName === 'INPUT' || event.target.tagName === 'BUTTON' || event.target.tagName === 'SELECT' || event.target.tagName === 'TEXTAREA')) {
-          
+
           console.log(`[Form Validation] Preventing click on ${event.target.id || event.target.tagName} while ${invalidField.id} is invalid`);
           event.preventDefault();
           event.stopPropagation();
-          
+
           // Flash the invalid field to draw attention
           invalidField.focus();
           invalidField.style.borderColor = '#ef4444';
@@ -411,7 +411,7 @@
         }
       }, true); // Use capture phase to catch events before they reach targets
     }
-    
+
     // Mark as initialized only if we found some fields
     if (fieldsFound > 0) {
       validationInitialized = true;
@@ -424,17 +424,17 @@
   // Validate entire form before submission
   function validateForm() {
     console.log('[Form Validation] Validating entire form...');
-    
+
     const fieldsToValidate = ['email', 'phone', 'zipCode', 'state', 'firstName', 'lastName'];
     let isValid = true;
-    
+
     fieldsToValidate.forEach(fieldId => {
       const fieldValid = UIFeedback.validateField(fieldId);
       if (!fieldValid) {
         isValid = false;
       }
     });
-    
+
     // Also validate business name if present
     const businessNameField = document.getElementById('businessName');
     if (businessNameField && businessNameField.value.trim()) {
@@ -443,7 +443,7 @@
         isValid = false;
       }
     }
-    
+
     console.log('[Form Validation] Form validation result:', isValid);
     return isValid;
   }
@@ -473,7 +473,7 @@
     console.log('[Form Validation] DOM already ready, initializing immediately...');
     initializeValidation();
   }
-  
+
   // Also try delayed initialization in case fields are loaded dynamically
   setTimeout(() => {
     console.log('[Form Validation] Delayed initialization attempt...');

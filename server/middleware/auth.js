@@ -62,6 +62,7 @@ exports.authenticate = async (req, res, next) => {
     // Add user data to the request object
     req.user = {
       id: decoded.id,
+      _id: decoded.id, // Add _id for compatibility
       role: decoded.role,
       ...(decoded.affiliateId && { affiliateId: decoded.affiliateId }),
       ...(decoded.customerId && { customerId: decoded.customerId }),
@@ -70,7 +71,7 @@ exports.authenticate = async (req, res, next) => {
       ...(decoded.permissions && { permissions: decoded.permissions }),
       ...(decoded.requirePasswordChange && { requirePasswordChange: decoded.requirePasswordChange })
     };
-    
+
     // Debug logging for W9 endpoint
     if (req.path.includes('/w9/')) {
       console.log('Auth middleware - W9 endpoint accessed:', {
@@ -82,8 +83,8 @@ exports.authenticate = async (req, res, next) => {
     }
 
     // Check if password change is required
-    if (decoded.requirePasswordChange && 
-        req.path !== '/change-password' && 
+    if (decoded.requirePasswordChange &&
+        req.path !== '/change-password' &&
         !req.path.includes('/auth/') &&
         req.method !== 'GET') {
       return res.status(403).json({

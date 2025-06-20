@@ -134,7 +134,7 @@ describe('Admin Creation Integration Tests', () => {
       };
 
       const admin = new Administrator(adminData);
-      
+
       try {
         await admin.save();
         fail('Should have thrown validation error');
@@ -278,7 +278,7 @@ describe('Admin Creation Integration Tests', () => {
 
     it('should find admin by adminId', async () => {
       const admin = await Administrator.findOne({ adminId: 'ADM002' });
-      
+
       expect(admin).toBeTruthy();
       expect(admin.firstName).toBe('Jane');
       expect(admin.lastName).toBe('Smith');
@@ -287,7 +287,7 @@ describe('Admin Creation Integration Tests', () => {
 
     it('should find admin by email', async () => {
       const admin = await Administrator.findOne({ email: 'bob@example.com' });
-      
+
       expect(admin).toBeTruthy();
       expect(admin.adminId).toBe('ADM003');
       expect(admin.firstName).toBe('Bob');
@@ -295,23 +295,23 @@ describe('Admin Creation Integration Tests', () => {
 
     it('should find active admins only', async () => {
       const activeAdmins = await Administrator.find({ isActive: true }).sort({ adminId: 1 });
-      
+
       expect(activeAdmins).toHaveLength(2);
       expect(activeAdmins.map(a => a.adminId)).toEqual(['ADM001', 'ADM003']);
     });
 
     it('should find admins with specific permissions', async () => {
-      const analyticsAdmins = await Administrator.find({ 
-        permissions: { $in: ['view_analytics'] } 
+      const analyticsAdmins = await Administrator.find({
+        permissions: { $in: ['view_analytics'] }
       }).sort({ adminId: 1 });
-      
+
       expect(analyticsAdmins).toHaveLength(2);
       expect(analyticsAdmins.map(a => a.adminId)).toEqual(['ADM002', 'ADM003']);
     });
 
     it('should get last admin for ID generation', async () => {
       const lastAdmin = await Administrator.findOne().sort({ adminId: -1 });
-      
+
       expect(lastAdmin).toBeTruthy();
       expect(lastAdmin.adminId).toBe('ADM003');
     });
