@@ -163,7 +163,7 @@ function initializeAffiliateDashboard() {
   const tabContents = document.querySelectorAll('.tab-content');
 
   // Function to switch to a specific tab
-  function switchToTab(tabId) {
+  function switchToTab(tabId, updateHistory = true) {
     // Remove active class from all buttons and tabs
     tabButtons.forEach(btn => {
       btn.classList.remove('border-blue-600');
@@ -190,12 +190,13 @@ function initializeAffiliateDashboard() {
       // Save current tab to localStorage
       localStorage.setItem('affiliateCurrentTab', tabId);
 
-      // Update URL with tab parameter for browser history
-      if (window.updateTabInUrl) {
+      // Update URL with tab parameter for browser history (only if not from popstate)
+      if (updateHistory && window.updateTabInUrl) {
         window.updateTabInUrl(tabId);
       }
 
-      // Load tab-specific data
+      // Always load tab-specific data
+      console.log('[Affiliate Dashboard] Loading data for tab:', tabId);
       if (tabId === 'pickups') {
         loadPickupRequests(affiliateId);
       } else if (tabId === 'customers') {
@@ -246,7 +247,8 @@ function initializeAffiliateDashboard() {
   window.addEventListener('message', function(event) {
     if (event.data && event.data.type === 'restore-tab' && event.data.tab) {
       console.log('[Affiliate Dashboard] Restoring tab from browser navigation:', event.data.tab);
-      switchToTab(event.data.tab);
+      // Don't update history when restoring from popstate
+      switchToTab(event.data.tab, false);
     }
   });
 

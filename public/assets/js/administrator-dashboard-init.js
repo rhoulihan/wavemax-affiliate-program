@@ -98,7 +98,7 @@
   const tabContents = document.querySelectorAll('.tab-content');
 
   // Function to switch to a specific tab
-  function switchToTab(targetTab) {
+  function switchToTab(targetTab, updateHistory = true) {
     // Find the tab element
     const tabElement = Array.from(tabs).find(t => t.dataset.tab === targetTab);
     if (!tabElement) return;
@@ -116,12 +116,13 @@
     // Save current tab to localStorage
     localStorage.setItem('adminCurrentTab', targetTab);
 
-    // Update URL with tab parameter for browser history
-    if (window.updateTabInUrl) {
+    // Update URL with tab parameter for browser history (only if not from popstate)
+    if (updateHistory && window.updateTabInUrl) {
       window.updateTabInUrl(targetTab);
     }
 
-    // Load tab data
+    // Always load tab data
+    console.log('[Admin Dashboard] Loading data for tab:', targetTab);
     loadTabData(targetTab);
   }
 
@@ -143,7 +144,8 @@
   window.addEventListener('message', function(event) {
     if (event.data && event.data.type === 'restore-tab' && event.data.tab) {
       console.log('[Admin Dashboard] Restoring tab from browser navigation:', event.data.tab);
-      switchToTab(event.data.tab);
+      // Don't update history when restoring from popstate
+      switchToTab(event.data.tab, false);
     }
   });
 

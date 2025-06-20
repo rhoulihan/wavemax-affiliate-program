@@ -790,12 +790,16 @@
             // If state contains tab information, notify the dashboard
             if (event.state && event.state.tab) {
                 // Wait for page to load then switch to the tab
-                setTimeout(() => {
+                const restoreTab = () => {
                     window.postMessage({
                         type: 'restore-tab',
                         tab: event.state.tab
                     }, window.location.origin);
-                }, 100);
+                };
+                
+                // Try multiple times to ensure dashboard is ready
+                setTimeout(restoreTab, 200);
+                setTimeout(restoreTab, 500);
             }
         });
         
@@ -808,12 +812,16 @@
             
             // Check if we have tab state from history
             if (window.history.state && window.history.state.tab) {
-                setTimeout(() => {
+                const restoreTab = () => {
                     window.postMessage({
                         type: 'restore-tab',
                         tab: window.history.state.tab
                     }, window.location.origin);
-                }, 100);
+                };
+                
+                // Try multiple times to ensure dashboard is ready
+                setTimeout(restoreTab, 200);
+                setTimeout(restoreTab, 500);
             }
             
             // Height observation is handled by embed-navigation.js
