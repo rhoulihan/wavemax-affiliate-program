@@ -16,6 +16,9 @@
       "previous": "Previous",
       "close": "Close",
       "confirm": "Confirm",
+      "refresh": "Refresh",
+      "applyFilters": "Apply Filters",
+      "clearFilters": "Clear Filters",
       "register": "Register",
       "learnMore": "Learn More",
       "customerLogin": "Customer Login",
@@ -39,7 +42,13 @@
       "termsAndConditions": "Terms and Conditions",
       "privacyPolicy": "Privacy Policy",
       "allRightsReserved": "All rights reserved",
-      "lastUpdated": "Last Updated:"
+      "lastUpdated": "Last Updated:",
+      "all": "All",
+      "active": "Active",
+      "inactive": "Inactive",
+      "allAffiliates": "All Affiliates",
+      "name": "Name",
+      "affiliateId": "Affiliate ID"
     },
     "username": "Username",
     "usernameDesc": "Your unique login identifier",
@@ -777,6 +786,7 @@
       "tabs": {
         "dashboard": "Dashboard",
         "operators": "Operators",
+        "customers": "Customers",
         "analytics": "Analytics",
         "affiliates": "Affiliates",
         "w9review": "W-9 Review",
@@ -842,6 +852,20 @@
         "accountCredentials": "Account Credentials",
         "personalInfo": "Personal Information",
         "scheduleInfo": "Schedule Information"
+      },
+      "customers": {
+        "title": "Customer Management",
+        "search": "Search Customers",
+        "filterByAffiliate": "Filter by Affiliate",
+        "filterByStatus": "Filter by Status",
+        "new": "New (No Orders)",
+        "noCustomers": "No customers found",
+        "orders": "Orders",
+        "joined": "Joined",
+        "printCard": "Print Card",
+        "printSelected": "Print Selected Cards",
+        "printSelectedCount": "Print {{count}} Selected Cards",
+        "selectAll": "Select All"
       },
       "analytics": {
         "title": "Analytics Overview",
@@ -979,6 +1003,7 @@
       "loading": {
         "dashboard": "Loading dashboard data...",
         "operators": "Loading operators...",
+        "customers": "Loading customers...",
         "analytics": "Loading analytics...",
         "affiliates": "Loading affiliates...",
         "w9documents": "Loading W-9 documents...",
@@ -988,6 +1013,7 @@
       "errors": {
         "dashboardLoadFailed": "Failed to load dashboard data",
         "operatorsLoadFailed": "Failed to load operators",
+        "customersLoadFailed": "Failed to load customers",
         "analyticsLoadFailed": "Error loading analytics",
         "affiliatesLoadFailed": "Error loading affiliates",
         "w9LoadFailed": "Failed to load W-9 documents",

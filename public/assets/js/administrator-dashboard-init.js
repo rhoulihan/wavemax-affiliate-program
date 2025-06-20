@@ -137,6 +137,9 @@
     case 'operators':
       await loadOperators();
       break;
+    case 'customers':
+      await loadCustomers();
+      break;
     case 'analytics':
       await loadAnalytics();
       break;
@@ -339,6 +342,301 @@
             </table>
         `;
     document.getElementById('operatorsList').innerHTML = tableHtml;
+  }
+
+  // Load customers
+  async function loadCustomers() {
+    try {
+      // Get filter values
+      const search = document.getElementById('customerSearchInput')?.value || '';
+      const affiliateFilter = document.getElementById('customerAffiliateFilter')?.value || 'all';
+      const statusFilter = document.getElementById('customerStatusFilter')?.value || 'all';
+      
+      // Build query params
+      const params = new URLSearchParams();
+      if (search) params.append('search', search);
+      if (affiliateFilter !== 'all') params.append('affiliateId', affiliateFilter);
+      if (statusFilter !== 'all') params.append('status', statusFilter);
+      
+      const response = await adminFetch(`/api/v1/customers/admin/list?${params.toString()}`);
+      const data = await response.json();
+      
+      if (response.ok && data.success) {
+        renderCustomersList(data.customers);
+        
+        // Load affiliates for filter if not already loaded
+        if (document.getElementById('customerAffiliateFilter').options.length === 1) {
+          await loadAffiliatesForFilter();
+        }
+      } else {
+        console.error('Customers load failed:', data);
+        document.getElementById('customersList').innerHTML = `<p style="padding: 20px; text-align: center; color: #666;">${t('administrator.dashboard.errors.customersLoadFailed', 'Failed to load customers')}</p>`;
+      }
+    } catch (error) {
+      console.error('Error loading customers:', error);
+      document.getElementById('customersList').innerHTML = `<p style="padding: 20px; text-align: center; color: #666;">${t('administrator.dashboard.errors.customersLoadFailed', 'Error loading customers')}</p>`;
+    }
+    
+    // Setup event handlers for customers tab
+    setupCustomersEventHandlers();
+  }
+  
+  // Render customers list
+  function renderCustomersList(customers) {
+    if (!customers || customers.length === 0) {
+      document.getElementById('customersList').innerHTML = `<p style="padding: 20px; text-align: center; color: #666;">${t('administrator.dashboard.customers.noCustomers', 'No customers found')}</p>`;
+      return;
+    }
+    
+    const listHtml = `
+      <div style="padding: 10px 20px; background: #f8f9fa; border-bottom: 1px solid #e9ecef;">
+        <label style="display: flex; align-items: center;">
+          <input type="checkbox" id="selectAllCustomers" style="margin-right: 10px;">
+          <span>${t('administrator.dashboard.customers.selectAll', 'Select All')}</span>
+        </label>
+      </div>
+      ${customers.map(customer => {
+        const hasOrders = customer.orderCount > 0;
+        const status = customer.isActive ? 'active' : 'inactive';
+        const statusBadge = customer.isActive ? 
+          `<span class="status-badge active">${t('common.labels.active', 'Active')}</span>` :
+          `<span class="status-badge inactive">${t('common.labels.inactive', 'Inactive')}</span>`;
+        
+        return `
+          <div class="customer-row">
+            <input type="checkbox" class="customer-checkbox" data-customer-id="${customer._id}" 
+                   data-customer-data='${JSON.stringify({
+                     id: customer.customerId,
+                     name: `${customer.firstName} ${customer.lastName}`,
+                     address: `${customer.address}, ${customer.city}, ${customer.state} ${customer.zipCode}`,
+                     phone: customer.phone,
+                     email: customer.email
+                   }).replace(/'/g, '&apos;')}'>
+            <div class="customer-info">
+              <div>
+                <div class="customer-name">${customer.firstName} ${customer.lastName}</div>
+                <div class="customer-id">ID: ${customer.customerId}</div>
+              </div>
+              <div>
+                <div class="customer-details">${customer.email}</div>
+                <div class="customer-details">${customer.phone}</div>
+              </div>
+              <div>
+                <div class="customer-details">${customer.address}</div>
+                <div class="customer-details">${customer.city}, ${customer.state} ${customer.zipCode}</div>
+              </div>
+              <div>
+                <div class="customer-details">${t('administrator.dashboard.customers.orders', 'Orders')}: ${customer.orderCount || 0}</div>
+                <div class="customer-details">${t('administrator.dashboard.customers.joined', 'Joined')}: ${new Date(customer.createdAt).toLocaleDateString()}</div>
+              </div>
+              <div class="customer-actions">
+                ${statusBadge}
+                <button class="btn btn-sm" onclick="printCustomerCard('${customer._id}')">${t('administrator.dashboard.customers.printCard', 'Print Card')}</button>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('')}
+    `;
+    
+    document.getElementById('customersList').innerHTML = listHtml;
+    
+    // Update selected count
+    updateSelectedCustomersCount();
+  }
+  
+  // Load affiliates for filter dropdown
+  async function loadAffiliatesForFilter() {
+    try {
+      const response = await adminFetch('/api/v1/affiliates');
+      const data = await response.json();
+      
+      if (response.ok && data.success) {
+        const select = document.getElementById('customerAffiliateFilter');
+        data.affiliates.forEach(affiliate => {
+          const option = document.createElement('option');
+          option.value = affiliate._id;
+          option.textContent = `${affiliate.businessName} (${affiliate.affiliateId})`;
+          select.appendChild(option);
+        });
+      }
+    } catch (error) {
+      console.error('Error loading affiliates for filter:', error);
+    }
+  }
+  
+  // Setup event handlers for customers tab
+  function setupCustomersEventHandlers() {
+    // Search input
+    const searchInput = document.getElementById('customerSearchInput');
+    if (searchInput && !searchInput.hasAttribute('data-initialized')) {
+      searchInput.setAttribute('data-initialized', 'true');
+      searchInput.addEventListener('input', debounce(() => {
+        loadCustomers();
+      }, 500));
+    }
+    
+    // Apply filters button
+    const applyFiltersBtn = document.getElementById('applyCustomerFiltersBtn');
+    if (applyFiltersBtn && !applyFiltersBtn.hasAttribute('data-initialized')) {
+      applyFiltersBtn.setAttribute('data-initialized', 'true');
+      applyFiltersBtn.addEventListener('click', loadCustomers);
+    }
+    
+    // Clear filters button
+    const clearFiltersBtn = document.getElementById('clearCustomerFiltersBtn');
+    if (clearFiltersBtn && !clearFiltersBtn.hasAttribute('data-initialized')) {
+      clearFiltersBtn.setAttribute('data-initialized', 'true');
+      clearFiltersBtn.addEventListener('click', () => {
+        document.getElementById('customerSearchInput').value = '';
+        document.getElementById('customerAffiliateFilter').value = 'all';
+        document.getElementById('customerStatusFilter').value = 'all';
+        loadCustomers();
+      });
+    }
+    
+    // Refresh button
+    const refreshBtn = document.getElementById('refreshCustomersBtn');
+    if (refreshBtn && !refreshBtn.hasAttribute('data-initialized')) {
+      refreshBtn.setAttribute('data-initialized', 'true');
+      refreshBtn.addEventListener('click', loadCustomers);
+    }
+    
+    // Print selected cards button
+    const printSelectedBtn = document.getElementById('printSelectedCardsBtn');
+    if (printSelectedBtn && !printSelectedBtn.hasAttribute('data-initialized')) {
+      printSelectedBtn.setAttribute('data-initialized', 'true');
+      printSelectedBtn.addEventListener('click', printSelectedCustomerCards);
+    }
+    
+    // Select all checkbox
+    setTimeout(() => {
+      const selectAllCheckbox = document.getElementById('selectAllCustomers');
+      if (selectAllCheckbox) {
+        selectAllCheckbox.addEventListener('change', function() {
+          const checkboxes = document.querySelectorAll('.customer-checkbox');
+          checkboxes.forEach(checkbox => {
+            checkbox.checked = this.checked;
+          });
+          updateSelectedCustomersCount();
+        });
+      }
+      
+      // Individual checkboxes
+      document.querySelectorAll('.customer-checkbox').forEach(checkbox => {
+        checkbox.addEventListener('change', updateSelectedCustomersCount);
+      });
+    }, 100);
+  }
+  
+  // Update selected customers count
+  function updateSelectedCustomersCount() {
+    const selectedCount = document.querySelectorAll('.customer-checkbox:checked').length;
+    const printButton = document.getElementById('printSelectedCardsBtn');
+    if (printButton) {
+      if (selectedCount > 0) {
+        printButton.style.display = 'block';
+        printButton.textContent = t('administrator.dashboard.customers.printSelectedCount', `Print ${selectedCount} Selected Cards`).replace('${count}', selectedCount);
+      } else {
+        printButton.style.display = 'none';
+      }
+    }
+  }
+  
+  // Print single customer card
+  window.printCustomerCard = async function(customerId) {
+    const checkbox = document.querySelector(`.customer-checkbox[data-customer-id="${customerId}"]`);
+    if (checkbox) {
+      const customerData = JSON.parse(checkbox.getAttribute('data-customer-data'));
+      await generateAndPrintCards([customerData]);
+    }
+  };
+  
+  // Print selected customer cards
+  async function printSelectedCustomerCards() {
+    const selectedCheckboxes = document.querySelectorAll('.customer-checkbox:checked');
+    const customers = [];
+    
+    selectedCheckboxes.forEach(checkbox => {
+      const customerData = JSON.parse(checkbox.getAttribute('data-customer-data'));
+      customers.push(customerData);
+    });
+    
+    if (customers.length > 0) {
+      await generateAndPrintCards(customers);
+    }
+  }
+  
+  // Generate and print customer cards
+  async function generateAndPrintCards(customers) {
+    const printContainer = document.getElementById('printContainer');
+    printContainer.innerHTML = '';
+    
+    for (const customer of customers) {
+      const card = document.createElement('div');
+      card.className = 'customer-card';
+      
+      // Generate QR code data
+      const qrData = JSON.stringify({
+        type: 'customer',
+        id: customer.id,
+        name: customer.name
+      });
+      
+      // Create QR code canvas
+      const qrCanvas = document.createElement('canvas');
+      qrCanvas.width = 120;
+      qrCanvas.height = 120;
+      
+      try {
+        await QRCode.toCanvas(qrCanvas, qrData, {
+          width: 120,
+          margin: 1,
+          errorCorrectionLevel: 'M'
+        });
+      } catch (err) {
+        console.error('QR Code generation failed:', err);
+      }
+      
+      card.innerHTML = `
+        <div class="card-header">
+          <div class="card-info">
+            <div class="card-logo">WaveMAX Laundry</div>
+            <div class="customer-name">${customer.name}</div>
+            <div class="customer-address">
+              ${customer.address}<br>
+              ${customer.phone}
+            </div>
+          </div>
+        </div>
+        <div class="customer-id-section">
+          Customer ID: ${customer.id}
+        </div>
+        <div class="qr-code">
+          ${qrCanvas.outerHTML}
+        </div>
+      `;
+      
+      printContainer.appendChild(card);
+    }
+    
+    // Trigger print
+    setTimeout(() => {
+      window.print();
+    }, 500);
+  }
+  
+  // Debounce helper
+  function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+      const later = () => {
+        clearTimeout(timeout);
+        func(...args);
+      };
+      clearTimeout(timeout);
+      timeout = setTimeout(later, wait);
+    };
   }
 
   // Store current analytics data

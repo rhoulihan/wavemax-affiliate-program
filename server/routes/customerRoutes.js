@@ -4,6 +4,7 @@ const express = require('express');
 const router = express.Router();
 const customerController = require('../controllers/customerController');
 const { authenticate, authorize } = require('../middleware/auth');
+const { checkRole } = require('../middleware/rbac');
 const { body } = require('express-validator');
 const { customPasswordValidator } = require('../utils/passwordValidator');
 
@@ -105,5 +106,12 @@ router.put('/:customerId/payment', authenticate, [
  * @access  Private (self only, development/test environments)
  */
 router.delete('/:customerId/delete-all-data', authenticate, authorize(['customer']), customerController.deleteCustomerData);
+
+/**
+ * @route   GET /api/customers/admin/list
+ * @desc    Get customers list for admin dashboard
+ * @access  Admin only
+ */
+router.get('/admin/list', authenticate, checkRole(['administrator']), customerController.getCustomersForAdmin);
 
 module.exports = router;
