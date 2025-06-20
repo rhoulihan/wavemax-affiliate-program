@@ -1958,6 +1958,14 @@ The project includes several test pages for development and integration testing:
 
 ## Recent Updates (January 2025)
 
+### Session Persistence & Navigation Features
+- **10-Minute Session Persistence**: Login sessions now persist across page refresh and browser navigation with automatic 10-minute inactivity timeout
+- **Browser Navigation Support**: Full support for browser back/forward buttons maintaining authentication state
+- **Tab State Persistence**: Dashboard tabs remember their state across refresh and browser navigation
+- **URL-Based Tab Tracking**: Tab selections are tracked in the URL for proper browser history integration
+- **Activity Tracking**: Automatic session renewal on user activity (clicks) to prevent premature logout
+- **Multi-Role Support**: Simultaneous login sessions for administrators, operators, affiliates, and customers
+
 ### Payment Processing Improvements
 - **Generic Payment Methods**: Introduced unified `processPayment` and `processPaymentTestMode` methods replacing dedicated registration/order payment methods
 - **Simplified Integration**: Single payment processing flow for all transaction types (registrations, orders, etc.)
@@ -1984,6 +1992,8 @@ The project includes several test pages for development and integration testing:
 - **Payment Window Detection**: Improved cross-origin window detection for payment forms
 - **Session Management**: Enhanced session handling for embedded iframe contexts
 - **CSRF Protection**: Refined CSRF exemptions for payment callbacks
+- **Tab Navigation**: Fixed translation function initialization error in operators tab
+- **Browser History**: Fixed tab content reload issues with browser back/forward navigation
 
 ## Acknowledgments
 

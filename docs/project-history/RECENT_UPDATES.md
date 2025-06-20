@@ -1,5 +1,26 @@
 # Recent Major Updates
 
+## Session Persistence & Browser Navigation (January 2025)
+- **10-Minute Session Management**: Comprehensive session persistence across page refresh and browser navigation
+  - SessionManager service manages authentication for all user roles (admin, operator, affiliate, customer)
+  - Automatic 10-minute inactivity timeout with session renewal on user activity
+  - Token and authentication data persisted in localStorage with timestamp tracking
+  - Special handling for administrator password change requirements
+  - Multi-role support allowing simultaneous logins for different user types
+  
+- **Browser Navigation Support**: Full browser back/forward button functionality
+  - Authentication state maintained across browser navigation
+  - Automatic route validation based on authentication status
+  - Protected routes redirect to appropriate login pages when unauthenticated
+  - Authenticated users redirected from login pages to dashboards
+  
+- **Tab State Persistence**: Dashboard tab selections persist across refresh and navigation
+  - Tab state saved to localStorage and URL parameters
+  - Browser history integration with pushState/popstate events
+  - Tab content automatically reloads when navigating with browser buttons
+  - Retry logic for message passing between iframe and dashboard
+  - Fixed translation function initialization errors in operators tab
+
 ## Payment Processing Refactoring (January 2025)
 - **Generic Payment Methods**: Unified payment processing architecture
   - Single `processPayment` method replacing registration-specific and order-specific methods
