@@ -365,12 +365,12 @@
 
   // Render operators list
   function renderOperatorsList(operators) {
+    const t = window.i18n ? window.i18n.t.bind(window.i18n) : (key) => key;
+    
     if (!operators || operators.length === 0) {
       document.getElementById('operatorsList').innerHTML = `<p style="padding: 20px; text-align: center; color: #666;">${t('administrator.dashboard.operators.noOperators', 'No operators found')}</p>`;
       return;
     }
-
-    const t = window.i18n ? window.i18n.t.bind(window.i18n) : (key) => key;
     const tableHtml = `
             <table>
                 <thead>
