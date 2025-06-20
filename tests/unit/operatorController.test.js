@@ -142,7 +142,7 @@ describe('Operator Controller', () => {
       Order.findById.mockResolvedValue(mockOrder);
       Operator.findById.mockResolvedValue({ _id: 'op123', save: jest.fn() });
       Order.countDocuments.mockResolvedValue(0);
-      
+
       // Mock the populate method
       mockOrder.populate = jest.fn().mockResolvedValue(mockOrder);
 
@@ -397,7 +397,7 @@ describe('Operator Controller', () => {
 
       Order.findById.mockResolvedValue(mockOrder);
       Operator.findById.mockResolvedValue({ _id: 'op456', save: jest.fn() });
-      
+
       // Mock the populate method
       mockOrder.populate = jest.fn().mockResolvedValue(mockOrder);
 
@@ -825,7 +825,7 @@ describe('Operator Controller', () => {
 
       Order.findById.mockResolvedValue(mockOrder);
       Operator.findById.mockResolvedValue({ _id: 'op456', save: jest.fn() });
-      
+
       mockOrder.populate = jest.fn().mockResolvedValue(mockOrder);
 
       await operatorController.performQualityCheck(req, res);

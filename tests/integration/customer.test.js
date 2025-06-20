@@ -338,8 +338,7 @@ describe('Customer Integration Tests', () => {
           affiliateId: 'AFF123',
           pickupDate: new Date('2025-05-25'),
           pickupTime: 'morning',
-          deliveryDate: new Date('2025-05-27'),
-          deliveryTime: 'afternoon',
+
           status: 'complete',
           estimatedWeight: 30,
           numberOfBags: 2,
@@ -355,8 +354,7 @@ describe('Customer Integration Tests', () => {
           affiliateId: 'AFF123',
           pickupDate: new Date('2025-05-26'),
           pickupTime: 'afternoon',
-          deliveryDate: new Date('2025-05-28'),
-          deliveryTime: 'morning',
+
           status: 'processing',
           estimatedWeight: 50,
           numberOfBags: 3,
@@ -478,8 +476,7 @@ describe('Customer Integration Tests', () => {
           affiliateId: 'AFF123',
           pickupDate: new Date('2025-05-01'),
           pickupTime: 'morning',
-          deliveryDate: new Date('2025-05-03'),
-          deliveryTime: 'afternoon',
+
           status: 'complete',
           estimatedWeight: 30,
           numberOfBags: 2,
@@ -497,8 +494,7 @@ describe('Customer Integration Tests', () => {
           affiliateId: 'AFF123',
           pickupDate: new Date('2025-05-10'),
           pickupTime: 'afternoon',
-          deliveryDate: new Date('2025-05-12'),
-          deliveryTime: 'morning',
+
           status: 'complete',
           estimatedWeight: 50,
           numberOfBags: 3,
@@ -516,8 +512,7 @@ describe('Customer Integration Tests', () => {
           affiliateId: 'AFF123',
           pickupDate: new Date('2025-05-20'),
           pickupTime: 'morning',
-          deliveryDate: new Date('2025-05-22'),
-          deliveryTime: 'evening',
+
           status: 'processing',
           estimatedWeight: 15,
           numberOfBags: 1,
@@ -600,8 +595,7 @@ describe('Customer Integration Tests', () => {
         affiliateId: 'AFF123',
         pickupDate: new Date(),
         pickupTime: 'morning',
-        deliveryDate: new Date(),
-        deliveryTime: 'afternoon',
+
         status: 'scheduled',
         estimatedWeight: 30,
         numberOfBags: 2,

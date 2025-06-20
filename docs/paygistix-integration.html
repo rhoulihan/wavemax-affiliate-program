@@ -350,6 +350,16 @@ Response:
                     </thead>
                     <tbody>
                         <tr>
+                            <td>POST</td>
+                            <td>/api/v1/payments/process-payment</td>
+                            <td>Process payment (generic method for all payment types)</td>
+                        </tr>
+                        <tr>
+                            <td>POST</td>
+                            <td>/api/v1/payments/process-payment-test</td>
+                            <td>Process test payment (development mode only)</td>
+                        </tr>
+                        <tr>
                             <td>GET</td>
                             <td>/api/v1/payments/config</td>
                             <td>Get payment form configuration</td>
@@ -371,11 +381,33 @@ Response:
                         </tr>
                         <tr>
                             <td>POST/GET</td>
-                            <td>/api/v1/payments/callback/form-{id}</td>
-                            <td>Handle form-specific Paygistix callbacks</td>
+                            <td>/api/v1/payments/callback/:callbackId</td>
+                            <td>Handle callback-specific Paygistix responses</td>
                         </tr>
                     </tbody>
                 </table>
+                
+                <h3>Process Payment API</h3>
+                <p>The unified <code>processPayment</code> endpoint handles all payment types:</p>
+                <pre>
+POST /api/v1/payments/process-payment
+
+Request Body:
+{
+    "amount": 33.13,
+    "description": "Order #ORD-2025-0001 - Laundry Service",
+    "entityType": "order",  // order, registration, etc.
+    "entityId": "507f1f77bcf86cd799439011",
+    "customerId": "CUST123456",
+    "saveCard": true
+}
+
+Response:
+{
+    "success": true,
+    "paymentUrl": "https://safepay.paymentlogistics.net/transaction.asp?...",
+    "tokenId": "507f1f77bcf86cd799439012"
+}</pre>
 
                 <h3>Payment Token Schema</h3>
                 <pre>

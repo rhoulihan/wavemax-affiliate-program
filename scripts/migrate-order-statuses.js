@@ -33,7 +33,7 @@ async function migrateOrderStatuses() {
 
       if (newStatus && newStatus !== oldStatus) {
         order.status = newStatus;
-        
+
         // Update timestamps based on new status
         if (newStatus === 'processing' && order.pickedUpAt && !order.processingStartedAt) {
           order.processingStartedAt = order.pickedUpAt;
@@ -53,7 +53,7 @@ async function migrateOrderStatuses() {
       }
     }
 
-    console.log(`\nMigration complete!`);
+    console.log('\nMigration complete!');
     console.log(`Updated: ${updated} orders`);
     console.log(`Skipped: ${skipped} orders`);
 

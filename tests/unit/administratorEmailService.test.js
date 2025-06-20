@@ -5,7 +5,7 @@ describe('Administrator Email Service Tests', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    
+
     mockAdmin = {
       adminId: 'ADM001',
       firstName: 'John',
@@ -21,7 +21,7 @@ describe('Administrator Email Service Tests', () => {
   describe('sendAdministratorWelcomeEmail', () => {
     it('should call sendAdministratorWelcomeEmail function', async () => {
       await emailService.sendAdministratorWelcomeEmail(mockAdmin);
-      
+
       expect(emailService.sendAdministratorWelcomeEmail).toHaveBeenCalledWith(mockAdmin);
     });
 
@@ -30,9 +30,9 @@ describe('Administrator Email Service Tests', () => {
         ...mockAdmin,
         permissions: ['system_config', 'operator_management', 'view_analytics', 'manage_affiliates']
       };
-      
+
       await emailService.sendAdministratorWelcomeEmail(adminWithAllPermissions);
-      
+
       expect(emailService.sendAdministratorWelcomeEmail).toHaveBeenCalledWith(adminWithAllPermissions);
     });
 
@@ -41,9 +41,9 @@ describe('Administrator Email Service Tests', () => {
         ...mockAdmin,
         permissions: ['view_analytics']
       };
-      
+
       await emailService.sendAdministratorWelcomeEmail(adminWithSinglePermission);
-      
+
       expect(emailService.sendAdministratorWelcomeEmail).toHaveBeenCalledWith(adminWithSinglePermission);
     });
 
@@ -52,9 +52,9 @@ describe('Administrator Email Service Tests', () => {
         ...mockAdmin,
         permissions: []
       };
-      
+
       await emailService.sendAdministratorWelcomeEmail(adminWithNoPermissions);
-      
+
       expect(emailService.sendAdministratorWelcomeEmail).toHaveBeenCalledWith(adminWithNoPermissions);
     });
   });
@@ -62,17 +62,17 @@ describe('Administrator Email Service Tests', () => {
   describe('sendAdministratorPasswordResetEmail', () => {
     it('should call sendAdministratorPasswordResetEmail function', async () => {
       const resetUrl = 'https://wavemax.promo/reset-password?token=abc123';
-      
+
       await emailService.sendAdministratorPasswordResetEmail(mockAdmin, resetUrl);
-      
+
       expect(emailService.sendAdministratorPasswordResetEmail).toHaveBeenCalledWith(mockAdmin, resetUrl);
     });
 
     it('should handle different reset URLs', async () => {
       const customResetUrl = 'https://custom.domain.com/reset?token=xyz789';
-      
+
       await emailService.sendAdministratorPasswordResetEmail(mockAdmin, customResetUrl);
-      
+
       expect(emailService.sendAdministratorPasswordResetEmail).toHaveBeenCalledWith(mockAdmin, customResetUrl);
     });
   });
@@ -126,21 +126,21 @@ describe('Administrator Email Service Tests', () => {
     it('should format permissions correctly as comma-separated string', () => {
       const permissions = ['system_config', 'operator_management', 'view_analytics'];
       const permissionsString = permissions.join(', ');
-      
+
       expect(permissionsString).toBe('system_config, operator_management, view_analytics');
     });
 
     it('should handle empty permissions array', () => {
       const permissions = [];
       const permissionsString = permissions.join(', ');
-      
+
       expect(permissionsString).toBe('');
     });
 
     it('should handle single permission', () => {
       const permissions = ['view_analytics'];
       const permissionsString = permissions.join(', ');
-      
+
       expect(permissionsString).toBe('view_analytics');
     });
   });
@@ -180,7 +180,7 @@ describe('Administrator Email Service Tests', () => {
         ...mockAdmin,
         adminId: 'ADM999'
       };
-      
+
       expect(adminWithDifferentId.adminId).toBe('ADM999');
       expect(adminWithDifferentId.adminId.startsWith('ADM')).toBe(true);
     });
@@ -190,7 +190,7 @@ describe('Administrator Email Service Tests', () => {
         ...mockAdmin,
         email: 'test.admin@company.com'
       };
-      
+
       expect(adminWithDifferentEmail.email).toBe('test.admin@company.com');
       expect(adminWithDifferentEmail.email.includes('@')).toBe(true);
     });

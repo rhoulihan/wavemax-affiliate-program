@@ -1,7 +1,7 @@
-const { 
-  checkRole, 
-  checkAllRoles, 
-  checkResourceOwnership, 
+const {
+  checkRole,
+  checkAllRoles,
+  checkResourceOwnership,
   checkAdminPermission,
   checkOperatorStatus,
   filterResponseFields,
@@ -301,7 +301,7 @@ describe('RBAC Middleware', () => {
     it('should reject when administrator not found', async () => {
       req.user = { role: 'administrator', id: '123' };
       Administrator.findById.mockResolvedValue(null);
-      
+
       const middleware = checkAdminPermission('manage_users');
       await middleware(req, res, next);
 
@@ -316,7 +316,7 @@ describe('RBAC Middleware', () => {
     it('should reject when administrator is not active', async () => {
       req.user = { role: 'administrator', id: '123' };
       Administrator.findById.mockResolvedValue({ isActive: false });
-      
+
       const middleware = checkAdminPermission('manage_users');
       await middleware(req, res, next);
 
@@ -329,13 +329,13 @@ describe('RBAC Middleware', () => {
     });
 
     it('should accept when administrator has required permission', async () => {
-      const mockAdmin = { 
-        isActive: true, 
-        hasPermission: jest.fn().mockReturnValue(true) 
+      const mockAdmin = {
+        isActive: true,
+        hasPermission: jest.fn().mockReturnValue(true)
       };
       req.user = { role: 'administrator', id: '123' };
       Administrator.findById.mockResolvedValue(mockAdmin);
-      
+
       const middleware = checkAdminPermission('manage_users');
       await middleware(req, res, next);
 
@@ -346,13 +346,13 @@ describe('RBAC Middleware', () => {
     });
 
     it('should handle array of required permissions', async () => {
-      const mockAdmin = { 
-        isActive: true, 
-        hasPermission: jest.fn().mockReturnValue(true) 
+      const mockAdmin = {
+        isActive: true,
+        hasPermission: jest.fn().mockReturnValue(true)
       };
       req.user = { role: 'administrator', id: '123' };
       Administrator.findById.mockResolvedValue(mockAdmin);
-      
+
       const middleware = checkAdminPermission(['manage_users', 'manage_settings']);
       await middleware(req, res, next);
 
@@ -362,15 +362,15 @@ describe('RBAC Middleware', () => {
     });
 
     it('should reject when administrator lacks any required permission', async () => {
-      const mockAdmin = { 
-        isActive: true, 
+      const mockAdmin = {
+        isActive: true,
         hasPermission: jest.fn()
           .mockReturnValueOnce(true)
-          .mockReturnValueOnce(false) 
+          .mockReturnValueOnce(false)
       };
       req.user = { role: 'administrator', id: '123' };
       Administrator.findById.mockResolvedValue(mockAdmin);
-      
+
       const middleware = checkAdminPermission(['manage_users', 'manage_settings']);
       await middleware(req, res, next);
 
@@ -386,7 +386,7 @@ describe('RBAC Middleware', () => {
       req.user = { role: 'administrator', id: '123' };
       Administrator.findById.mockRejectedValue(new Error('DB Error'));
       console.error = jest.fn();
-      
+
       const middleware = checkAdminPermission('manage_users');
       await middleware(req, res, next);
 
@@ -414,7 +414,7 @@ describe('RBAC Middleware', () => {
     it('should reject when operator not found', async () => {
       req.user = { role: 'operator', id: '123' };
       Operator.findById.mockResolvedValue(null);
-      
+
       const middleware = checkOperatorStatus();
       await middleware(req, res, next);
 
@@ -429,7 +429,7 @@ describe('RBAC Middleware', () => {
     it('should reject when operator is not active', async () => {
       req.user = { role: 'operator', id: '123' };
       Operator.findById.mockResolvedValue({ isActive: false });
-      
+
       const middleware = checkOperatorStatus();
       await middleware(req, res, next);
 
@@ -443,11 +443,11 @@ describe('RBAC Middleware', () => {
 
     it('should reject when operator is not on shift', async () => {
       req.user = { role: 'operator', id: '123' };
-      Operator.findById.mockResolvedValue({ 
-        isActive: true, 
-        isOnShift: false 
+      Operator.findById.mockResolvedValue({
+        isActive: true,
+        isOnShift: false
       });
-      
+
       const middleware = checkOperatorStatus();
       await middleware(req, res, next);
 
@@ -460,13 +460,13 @@ describe('RBAC Middleware', () => {
     });
 
     it('should accept active operator on shift', async () => {
-      const mockOperator = { 
-        isActive: true, 
-        isOnShift: true 
+      const mockOperator = {
+        isActive: true,
+        isOnShift: true
       };
       req.user = { role: 'operator', id: '123' };
       Operator.findById.mockResolvedValue(mockOperator);
-      
+
       const middleware = checkOperatorStatus();
       await middleware(req, res, next);
 
@@ -479,7 +479,7 @@ describe('RBAC Middleware', () => {
       req.user = { role: 'operator', id: '123' };
       Operator.findById.mockRejectedValue(new Error('DB Error'));
       console.error = jest.fn();
-      
+
       const middleware = checkOperatorStatus();
       await middleware(req, res, next);
 
@@ -535,7 +535,7 @@ describe('RBAC Middleware', () => {
 
     it('should filter fields based on role permissions', () => {
       req.user = { role: 'customer' };
-      const middleware = filterResponseFields({ 
+      const middleware = filterResponseFields({
         customer: ['id', 'name', 'email'],
         default: ['id']
       });
@@ -544,43 +544,43 @@ describe('RBAC Middleware', () => {
       const testData = { id: 1, name: 'John', email: 'john@example.com', secret: 'hidden' };
       res.json(testData);
 
-      expect(originalJson).toHaveBeenCalledWith({ 
-        id: 1, 
-        name: 'John', 
-        email: 'john@example.com' 
+      expect(originalJson).toHaveBeenCalledWith({
+        id: 1,
+        name: 'John',
+        email: 'john@example.com'
       });
     });
 
     it('should handle nested field permissions', () => {
       req.user = { role: 'affiliate' };
-      const middleware = filterResponseFields({ 
+      const middleware = filterResponseFields({
         affiliate: ['id', 'profile.name', 'profile.email']
       });
       middleware(req, res, next);
 
-      const testData = { 
-        id: 1, 
-        profile: { 
-          name: 'John', 
-          email: 'john@example.com', 
-          ssn: '123-45-6789' 
+      const testData = {
+        id: 1,
+        profile: {
+          name: 'John',
+          email: 'john@example.com',
+          ssn: '123-45-6789'
         },
         secret: 'hidden'
       };
       res.json(testData);
 
-      expect(originalJson).toHaveBeenCalledWith({ 
-        id: 1, 
-        profile: { 
-          name: 'John', 
-          email: 'john@example.com' 
+      expect(originalJson).toHaveBeenCalledWith({
+        id: 1,
+        profile: {
+          name: 'John',
+          email: 'john@example.com'
         }
       });
     });
 
     it('should handle array data', () => {
       req.user = { role: 'operator' };
-      const middleware = filterResponseFields({ 
+      const middleware = filterResponseFields({
         operator: ['id', 'status']
       });
       middleware(req, res, next);
@@ -599,20 +599,20 @@ describe('RBAC Middleware', () => {
 
     it('should handle standard response format with data property', () => {
       req.user = { role: 'customer' };
-      const middleware = filterResponseFields({ 
+      const middleware = filterResponseFields({
         customer: ['id', 'name']
       });
       middleware(req, res, next);
 
-      const testData = { 
-        success: true, 
+      const testData = {
+        success: true,
         message: 'Success',
         data: { id: 1, name: 'John', secret: 'hidden' }
       };
       res.json(testData);
 
-      expect(originalJson).toHaveBeenCalledWith({ 
-        success: true, 
+      expect(originalJson).toHaveBeenCalledWith({
+        success: true,
         message: 'Success',
         data: { id: 1, name: 'John' }
       });
@@ -620,7 +620,7 @@ describe('RBAC Middleware', () => {
 
     it('should use default permissions when role not specified', () => {
       req.user = { role: 'unknown_role' };
-      const middleware = filterResponseFields({ 
+      const middleware = filterResponseFields({
         admin: ['*'],
         default: ['id', 'public']
       });
@@ -629,21 +629,21 @@ describe('RBAC Middleware', () => {
       const testData = { id: 1, public: 'visible', private: 'hidden' };
       res.json(testData);
 
-      expect(originalJson).toHaveBeenCalledWith({ 
-        id: 1, 
+      expect(originalJson).toHaveBeenCalledWith({
+        id: 1,
         public: 'visible'
       });
     });
 
     it('should handle deeply nested fields', () => {
       req.user = { role: 'admin' };
-      const middleware = filterResponseFields({ 
+      const middleware = filterResponseFields({
         admin: ['id', 'data.user.profile.name', 'data.user.profile.email']
       });
       middleware(req, res, next);
 
-      const testData = { 
-        id: 1, 
+      const testData = {
+        id: 1,
         data: {
           user: {
             profile: {
@@ -656,8 +656,8 @@ describe('RBAC Middleware', () => {
       };
       res.json(testData);
 
-      expect(originalJson).toHaveBeenCalledWith({ 
-        id: 1, 
+      expect(originalJson).toHaveBeenCalledWith({
+        id: 1,
         data: {
           user: {
             profile: {
@@ -671,7 +671,7 @@ describe('RBAC Middleware', () => {
 
     it('should handle non-object data gracefully', () => {
       req.user = { role: 'customer' };
-      const middleware = filterResponseFields({ 
+      const middleware = filterResponseFields({
         customer: ['id']
       });
       middleware(req, res, next);
@@ -688,7 +688,7 @@ describe('RBAC Middleware', () => {
 
     it('should handle empty allowed fields', () => {
       req.user = { role: 'restricted' };
-      const middleware = filterResponseFields({ 
+      const middleware = filterResponseFields({
         restricted: []
       });
       middleware(req, res, next);

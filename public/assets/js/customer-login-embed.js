@@ -53,7 +53,7 @@
 
         // API call with full URL
         const loginFetch = window.CsrfUtils && window.CsrfUtils.csrfFetch ? window.CsrfUtils.csrfFetch : fetch;
-        
+
         loginFetch(`${baseUrl}/api/v1/auth/customer/login`, {
           method: 'POST',
           headers: {
@@ -127,9 +127,9 @@
               error: error.message
             });
             if (window.ModalSystem) {
-                window.ModalSystem.error(error.message || 'Invalid username or password', 'Login Failed');
+              window.ModalSystem.error(error.message || 'Invalid username or password', 'Login Failed');
             } else {
-                alert(error.message || 'Invalid username or password');
+              alert(error.message || 'Invalid username or password');
             }
           });
       });
@@ -149,55 +149,55 @@
       // Generate unique session ID for database polling
       const sessionId = 'oauth_' + Date.now() + '_' + Math.random().toString(36).substring(2);
       console.log('Generated Customer Login OAuth session ID:', sessionId);
-      
+
       const oauthUrl = `${baseUrl}/api/v1/auth/customer/${provider}?popup=true&state=${sessionId}&t=${Date.now()}`;
       console.log('🔗 Opening Customer Login OAuth URL:', oauthUrl);
-      
+
       const popup = window.open(
-        oauthUrl, 
+        oauthUrl,
         'customerSocialLogin',
         'width=500,height=600,scrollbars=yes,resizable=yes'
       );
-      
+
       console.log('Customer login popup opened:', {
         'popup exists': !!popup,
         'popup.closed': popup ? popup.closed : 'N/A'
       });
-      
+
       if (!popup || popup.closed) {
         if (window.ModalSystem) {
-            window.ModalSystem.error('Popup was blocked. Please allow popups for this site and try again.', 'Popup Blocked');
+          window.ModalSystem.error('Popup was blocked. Please allow popups for this site and try again.', 'Popup Blocked');
         } else {
-            alert('Popup was blocked. Please allow popups for this site and try again.');
+          alert('Popup was blocked. Please allow popups for this site and try again.');
         }
         return;
       }
-      
+
       // Database polling approach (more reliable than postMessage)
       let pollCount = 0;
       const maxPolls = 120; // 6 minutes max (120 * 3 seconds)
       let authResultReceived = false;
-      
+
       console.log('Starting database polling for Customer Login OAuth result...');
-      
+
       const pollForResult = setInterval(async () => {
         pollCount++;
-        
+
         try {
           // Check if popup is closed
           if (popup.closed) {
             console.log('Customer login popup closed, continuing to poll for result...');
           }
-          
+
           // Poll the database for result
           const response = await csrfFetch(`${baseUrl}/api/v1/auth/oauth-session/${sessionId}`);
-          
+
           console.log('🔍 Customer login polling response:', {
             ok: response.ok,
             status: response.status,
             statusText: response.statusText
           });
-          
+
           if (response.ok) {
             const data = await response.json();
             console.log('📊 Customer login response data:', data);
@@ -205,34 +205,34 @@
               console.log('📨 Customer login OAuth result received from database:', data.result);
               authResultReceived = true;
               clearInterval(pollForResult);
-              
+
               if (popup && !popup.closed) {
                 popup.close();
               }
-              
+
               // Handle the result
               try {
                 if (data.result.type === 'social-auth-login') {
                   console.log('Processing customer social-auth-login from database');
                   console.log('Full customer result data:', data.result);
-                  
+
                   // Store token and customer data
                   localStorage.setItem('customerToken', data.result.token);
-                  
+
                   // Store customer data if available
                   if (!data.result.customer || !data.result.customer.customerId) {
                     console.error('OAuth login successful but customer data is missing:', data.result);
                     if (window.ModalSystem) {
-                        window.ModalSystem.error('Login successful but customer information is missing. Please contact support.', 'Missing Information');
+                      window.ModalSystem.error('Login successful but customer information is missing. Please contact support.', 'Missing Information');
                     } else {
-                        alert('Login successful but customer information is missing. Please contact support.');
+                      alert('Login successful but customer information is missing. Please contact support.');
                     }
                     return;
                   }
-                  
+
                   localStorage.setItem('currentCustomer', JSON.stringify(data.result.customer));
                   console.log('Stored customer data:', data.result.customer);
-                  
+
                   // Notify parent of successful login
                   sendMessageToParent('login-success', {
                     userType: 'customer',
@@ -259,62 +259,62 @@
                     console.log('Redirecting to customer dashboard after social login');
                     window.location.href = '/embed-app.html?route=/customer-dashboard';
                   }
-                  
+
                 } else if (data.result.type === 'social-auth-success') {
                   console.log('Customer does not exist, redirecting to registration');
                   // New customer - redirect to registration with social token
                   if (window.ModalSystem) {
-                      window.ModalSystem.alert('Account not found. You will be redirected to registration to create a new customer account.', 'Account Not Found');
+                    window.ModalSystem.alert('Account not found. You will be redirected to registration to create a new customer account.', 'Account Not Found');
                   } else {
-                      alert('Account not found. You will be redirected to registration to create a new customer account.');
+                    alert('Account not found. You will be redirected to registration to create a new customer account.');
                   }
                   window.location.href = `/customer-register-embed.html?socialToken=${data.result.socialToken}&provider=${data.result.provider}`;
-                  
+
                 } else if (data.result.type === 'social-auth-account-conflict') {
                   console.log('Processing social-auth-account-conflict from database');
                   const accountType = data.result.accountType;
                   const message = data.result.message;
-                  
+
                   if (accountType === 'affiliate') {
                     const affiliateName = `${data.result.affiliateData.firstName} ${data.result.affiliateData.lastName}`;
                     const businessInfo = data.result.affiliateData.businessName ? ` (${data.result.affiliateData.businessName})` : '';
                     const confirmMessage = `${message}\n\nAffiliate: ${affiliateName}${businessInfo}\nEmail: ${data.result.affiliateData.email}\n\nClick OK to login as an affiliate, or Cancel to stay on customer login.`;
-                    
+
                     if (confirm(confirmMessage)) {
                       // Redirect to affiliate login
-                      window.location.href = `/embed-app.html?route=/affiliate-login`;
+                      window.location.href = '/embed-app.html?route=/affiliate-login';
                     }
                   } else {
                     if (window.ModalSystem) {
-                        window.ModalSystem.error(message, 'Login Error');
+                      window.ModalSystem.error(message, 'Login Error');
                     } else {
-                        alert(message);
+                      alert(message);
                     }
                   }
-                  
+
                 } else if (data.result.type === 'social-auth-error') {
                   console.log('Processing customer social-auth-error from database');
                   if (window.ModalSystem) {
-                      window.ModalSystem.error(data.result.message || 'Social authentication failed', 'Authentication Failed');
+                    window.ModalSystem.error(data.result.message || 'Social authentication failed', 'Authentication Failed');
                   } else {
-                      alert(data.result.message || 'Social authentication failed');
+                    alert(data.result.message || 'Social authentication failed');
                   }
-                  
+
                 } else {
                   console.log('Unknown customer login result type:', data.result.type);
                 }
               } catch (resultError) {
                 console.error('Error processing Customer Login OAuth result:', resultError);
                 if (window.ModalSystem) {
-                    window.ModalSystem.error('Error processing authentication result', 'Processing Error');
+                  window.ModalSystem.error('Error processing authentication result', 'Processing Error');
                 } else {
-                    alert('Error processing authentication result');
+                  alert('Error processing authentication result');
                 }
               }
               return;
             }
           }
-          
+
           // Check for timeout
           if (pollCount > maxPolls) {
             console.log('Customer login database polling timeout exceeded');
@@ -323,26 +323,26 @@
               popup.close();
             }
             if (window.ModalSystem) {
-                window.ModalSystem.error('Authentication timed out. Please try again.', 'Authentication Timeout');
+              window.ModalSystem.error('Authentication timed out. Please try again.', 'Authentication Timeout');
             } else {
-                alert('Authentication timed out. Please try again.');
+              alert('Authentication timed out. Please try again.');
             }
             return;
           }
-          
+
           // Log progress every 5 polls (15 seconds)
           if (pollCount % 5 === 0) {
             console.log(`🔄 Polling for Customer Login OAuth result... (${pollCount}/${maxPolls})`);
           }
-          
+
         } catch (error) {
           // 404 means no result yet, continue polling
           if (error.message && error.message.includes('404')) {
             return;
           }
-          
+
           console.error('Error polling for Customer Login OAuth result:', error);
-          
+
           // Don't stop polling for network errors, just log them
           if (pollCount % 10 === 0) {
             console.log('Network error during Customer Login polling, continuing...');

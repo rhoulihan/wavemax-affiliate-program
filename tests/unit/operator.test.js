@@ -286,7 +286,7 @@ describe('Operator Model', () => {
       // Try to update role
       saved.role = 'admin';
       await saved.save();
-      
+
       const reloaded = await Operator.findById(saved._id);
       expect(reloaded.role).toBe('operator'); // Should still be operator due to immutable
     });
@@ -305,7 +305,7 @@ describe('Operator Model', () => {
       });
 
       const saved = await operator.save();
-      
+
       // Reload with password field
       const withPassword = await Operator.findById(saved._id).select('+password');
       expect(withPassword.password).toBeDefined();
@@ -325,7 +325,7 @@ describe('Operator Model', () => {
       });
 
       await operator.save();
-      
+
       const found = await Operator.findById(operator._id).select('+password');
       expect(found.verifyPassword(plainPassword)).toBe(true);
     });
@@ -341,7 +341,7 @@ describe('Operator Model', () => {
       });
 
       await operator.save();
-      
+
       const found = await Operator.findById(operator._id).select('+password');
       expect(found.verifyPassword('WrongPassword123!')).toBe(false);
     });
@@ -358,7 +358,7 @@ describe('Operator Model', () => {
 
       const saved = await operator.save();
       const json = saved.toJSON();
-      
+
       expect(json.password).toBeUndefined();
       expect(json.passwordResetToken).toBeUndefined();
       expect(json.passwordResetExpires).toBeUndefined();
@@ -381,7 +381,7 @@ describe('Operator Model', () => {
 
     it('should increment login attempts', async () => {
       await operator.incLoginAttempts();
-      
+
       const updated = await Operator.findById(operator._id);
       expect(updated.loginAttempts).toBe(1);
     });
@@ -411,7 +411,7 @@ describe('Operator Model', () => {
 
       const lockDuration = operator.lockUntil - beforeLock;
       const thirtyMinutesInMs = 30 * 60 * 1000;
-      
+
       expect(lockDuration).toBeGreaterThan(thirtyMinutesInMs - 1000);
       expect(lockDuration).toBeLessThan(thirtyMinutesInMs + 1000);
     });
@@ -420,9 +420,9 @@ describe('Operator Model', () => {
       // Add some failed attempts
       await operator.incLoginAttempts();
       await operator.incLoginAttempts();
-      
+
       await operator.resetLoginAttempts();
-      
+
       const updated = await Operator.findById(operator._id);
       expect(updated.loginAttempts).toBe(0);
       expect(updated.lockUntil).toBeUndefined();
@@ -436,7 +436,7 @@ describe('Operator Model', () => {
       await operator.save();
 
       await operator.incLoginAttempts();
-      
+
       const updated = await Operator.findById(operator._id);
       expect(updated.loginAttempts).toBe(1);
       expect(updated.lockUntil).toBeUndefined();
@@ -465,7 +465,7 @@ describe('Operator Model', () => {
       });
 
       const resetToken = operator.generatePasswordResetToken();
-      
+
       expect(resetToken).toBeDefined();
       expect(resetToken.length).toBe(64); // 32 bytes hex = 64 chars
       expect(operator.passwordResetToken).toBeDefined();
@@ -485,10 +485,10 @@ describe('Operator Model', () => {
 
       const beforeGenerate = new Date();
       operator.generatePasswordResetToken();
-      
+
       const expiryDuration = operator.passwordResetExpires - beforeGenerate;
       const thirtyMinutesInMs = 30 * 60 * 1000;
-      
+
       expect(expiryDuration).toBeGreaterThan(thirtyMinutesInMs - 1000);
       expect(expiryDuration).toBeLessThan(thirtyMinutesInMs + 1000);
     });
@@ -512,7 +512,7 @@ describe('Operator Model', () => {
       it('should correctly identify operator on shift during normal hours', async () => {
         const now = new Date();
         const currentHour = now.getHours();
-        
+
         const operator = new Operator({
           firstName: 'John',
           lastName: 'Doe',
@@ -530,7 +530,7 @@ describe('Operator Model', () => {
       it('should correctly identify operator off shift', async () => {
         const now = new Date();
         const currentHour = now.getHours();
-        
+
         const operator = new Operator({
           firstName: 'John',
           lastName: 'Doe',
@@ -561,7 +561,7 @@ describe('Operator Model', () => {
         // Mock current time to be 23:00
         const now = new Date();
         const currentHour = now.getHours();
-        
+
         if (currentHour >= 22 || currentHour < 6) {
           expect(operator.isOnShift).toBe(true);
         } else {

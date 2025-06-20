@@ -1,11 +1,13 @@
-const CallbackPoolManager = require('../../server/services/callbackPoolManager');
-const CallbackPool = require('../../server/models/CallbackPool');
-const logger = require('../../server/utils/logger');
-
 // Mock dependencies
 jest.mock('../../server/models/CallbackPool');
 jest.mock('../../server/utils/logger');
-jest.mock('../../server/config/paygistix-forms.json', () => ({
+
+const callbackPoolManager = require('../../server/services/callbackPoolManager');
+const CallbackPool = require('../../server/models/CallbackPool');
+const logger = require('../../server/utils/logger');
+
+// Test configuration
+const testConfig = {
   baseUrl: 'https://test.example.com',
   lockTimeoutMinutes: 30,
   form: {
@@ -17,33 +19,38 @@ jest.mock('../../server/config/paygistix-forms.json', () => ({
     '/api/v1/payments/callback/form-2',
     '/api/v1/payments/callback/form-3'
   ]
-}), { virtual: true });
+};
 
 describe('CallbackPoolManager', () => {
+  beforeAll(() => {
+    // Set test configuration
+    callbackPoolManager.setTestConfig(testConfig);
+  });
+
   beforeEach(() => {
     jest.clearAllMocks();
     // Clear any existing intervals
-    if (CallbackPoolManager.cleanupInterval) {
-      clearInterval(CallbackPoolManager.cleanupInterval);
-      CallbackPoolManager.cleanupInterval = null;
+    if (callbackPoolManager.cleanupInterval) {
+      clearInterval(callbackPoolManager.cleanupInterval);
+      callbackPoolManager.cleanupInterval = null;
     }
   });
 
   afterEach(() => {
     // Clean up intervals after each test
-    if (CallbackPoolManager.cleanupInterval) {
-      clearInterval(CallbackPoolManager.cleanupInterval);
-      CallbackPoolManager.cleanupInterval = null;
+    if (callbackPoolManager.cleanupInterval) {
+      clearInterval(callbackPoolManager.cleanupInterval);
+      callbackPoolManager.cleanupInterval = null;
     }
   });
 
   describe('constructor', () => {
     it('should initialize with correct configuration', () => {
-      expect(CallbackPoolManager.baseUrl).toBe('https://test.example.com');
-      expect(CallbackPoolManager.lockTimeoutMinutes).toBe(30);
-      expect(CallbackPoolManager.formId).toBe('test-form-id');
-      expect(CallbackPoolManager.formHash).toBe('test-form-hash');
-      expect(CallbackPoolManager.cleanupInterval).toBeNull();
+      expect(callbackPoolManager.baseUrl).toBe('https://test.example.com');
+      expect(callbackPoolManager.lockTimeoutMinutes).toBe(30);
+      expect(callbackPoolManager.formId).toBe('test-form-id');
+      expect(callbackPoolManager.formHash).toBe('test-form-hash');
+      expect(callbackPoolManager.cleanupInterval).toBeNull();
     });
   });
 
@@ -51,10 +58,10 @@ describe('CallbackPoolManager', () => {
     it('should create or update callback entries for all paths', async () => {
       CallbackPool.findOneAndUpdate.mockResolvedValue({});
 
-      await CallbackPoolManager.initializePool();
+      await callbackPoolManager.initializePool();
 
       expect(CallbackPool.findOneAndUpdate).toHaveBeenCalledTimes(3);
-      
+
       // Check first callback path
       expect(CallbackPool.findOneAndUpdate).toHaveBeenCalledWith(
         { callbackPath: '/api/v1/payments/callback/form-1' },
@@ -93,9 +100,9 @@ describe('CallbackPoolManager', () => {
 
     it('should start cleanup job after initialization', async () => {
       CallbackPool.findOneAndUpdate.mockResolvedValue({});
-      const startCleanupJobSpy = jest.spyOn(CallbackPoolManager, 'startCleanupJob');
+      const startCleanupJobSpy = jest.spyOn(callbackPoolManager, 'startCleanupJob');
 
-      await CallbackPoolManager.initializePool();
+      await callbackPoolManager.initializePool();
 
       expect(startCleanupJobSpy).toHaveBeenCalled();
     });
@@ -111,7 +118,7 @@ describe('CallbackPoolManager', () => {
 
       CallbackPool.acquireCallback.mockResolvedValue(mockCallback);
 
-      const result = await CallbackPoolManager.acquireCallback('test-token-123');
+      const result = await callbackPoolManager.acquireCallback('test-token-123');
 
       expect(CallbackPool.acquireCallback).toHaveBeenCalledWith('test-token-123', 30);
       expect(result).toEqual({
@@ -132,7 +139,7 @@ describe('CallbackPoolManager', () => {
     it('should throw error when no callbacks available', async () => {
       CallbackPool.acquireCallback.mockResolvedValue(null);
 
-      await expect(CallbackPoolManager.acquireCallback('test-token-123'))
+      await expect(callbackPoolManager.acquireCallback('test-token-123'))
         .rejects.toThrow('No callback handlers available. All handlers are currently in use.');
 
       expect(CallbackPool.acquireCallback).toHaveBeenCalledWith('test-token-123', 30);
@@ -149,7 +156,7 @@ describe('CallbackPoolManager', () => {
 
       CallbackPool.releaseCallback.mockResolvedValue(mockCallback);
 
-      const result = await CallbackPoolManager.releaseCallback('test-token-123');
+      const result = await callbackPoolManager.releaseCallback('test-token-123');
 
       expect(CallbackPool.releaseCallback).toHaveBeenCalledWith('test-token-123');
       expect(result).toEqual(mockCallback);
@@ -162,7 +169,7 @@ describe('CallbackPoolManager', () => {
     it('should handle null callback gracefully', async () => {
       CallbackPool.releaseCallback.mockResolvedValue(null);
 
-      const result = await CallbackPoolManager.releaseCallback('test-token-123');
+      const result = await callbackPoolManager.releaseCallback('test-token-123');
 
       expect(CallbackPool.releaseCallback).toHaveBeenCalledWith('test-token-123');
       expect(result).toBeNull();
@@ -205,7 +212,7 @@ describe('CallbackPoolManager', () => {
         sort: jest.fn().mockResolvedValue(mockCallbacks)
       });
 
-      const result = await CallbackPoolManager.getPoolStatus();
+      const result = await callbackPoolManager.getPoolStatus();
 
       expect(CallbackPool.find).toHaveBeenCalledWith({});
       expect(result).toEqual({
@@ -246,7 +253,7 @@ describe('CallbackPoolManager', () => {
         sort: jest.fn().mockResolvedValue([])
       });
 
-      const result = await CallbackPoolManager.getPoolStatus();
+      const result = await callbackPoolManager.getPoolStatus();
 
       expect(result).toEqual({
         total: 0,
@@ -267,9 +274,9 @@ describe('CallbackPoolManager', () => {
     });
 
     it('should start cleanup interval', () => {
-      CallbackPoolManager.startCleanupJob();
+      callbackPoolManager.startCleanupJob();
 
-      expect(CallbackPoolManager.cleanupInterval).toBeDefined();
+      expect(callbackPoolManager.cleanupInterval).toBeDefined();
       expect(logger.info).toHaveBeenCalledWith(
         'Callback pool cleanup job started (runs every 5 minutes)'
       );
@@ -278,7 +285,7 @@ describe('CallbackPoolManager', () => {
     it('should run cleanup task every 5 minutes', async () => {
       CallbackPool.releaseExpiredLocks.mockResolvedValue(2);
 
-      CallbackPoolManager.startCleanupJob();
+      callbackPoolManager.startCleanupJob();
 
       // Fast forward 5 minutes
       jest.advanceTimersByTime(5 * 60 * 1000);
@@ -293,7 +300,7 @@ describe('CallbackPoolManager', () => {
     it('should handle cleanup errors gracefully', async () => {
       CallbackPool.releaseExpiredLocks.mockRejectedValue(new Error('Cleanup error'));
 
-      CallbackPoolManager.startCleanupJob();
+      callbackPoolManager.startCleanupJob();
 
       // Fast forward 5 minutes
       jest.advanceTimersByTime(5 * 60 * 1000);
@@ -310,7 +317,7 @@ describe('CallbackPoolManager', () => {
     it('should not log when no locks are released', async () => {
       CallbackPool.releaseExpiredLocks.mockResolvedValue(0);
 
-      CallbackPoolManager.startCleanupJob();
+      callbackPoolManager.startCleanupJob();
 
       // Fast forward 5 minutes
       jest.advanceTimersByTime(5 * 60 * 1000);
@@ -328,22 +335,22 @@ describe('CallbackPoolManager', () => {
   describe('stopCleanupJob', () => {
     it('should stop cleanup interval when running', () => {
       // Start the job first
-      CallbackPoolManager.startCleanupJob();
-      expect(CallbackPoolManager.cleanupInterval).toBeDefined();
+      callbackPoolManager.startCleanupJob();
+      expect(callbackPoolManager.cleanupInterval).toBeDefined();
 
       // Now stop it
-      CallbackPoolManager.stopCleanupJob();
+      callbackPoolManager.stopCleanupJob();
 
-      expect(CallbackPoolManager.cleanupInterval).toBeNull();
+      expect(callbackPoolManager.cleanupInterval).toBeNull();
       expect(logger.info).toHaveBeenCalledWith('Callback pool cleanup job stopped');
     });
 
     it('should handle stopping when no interval exists', () => {
-      CallbackPoolManager.cleanupInterval = null;
+      callbackPoolManager.cleanupInterval = null;
 
-      CallbackPoolManager.stopCleanupJob();
+      callbackPoolManager.stopCleanupJob();
 
-      expect(CallbackPoolManager.cleanupInterval).toBeNull();
+      expect(callbackPoolManager.cleanupInterval).toBeNull();
       expect(logger.info).not.toHaveBeenCalledWith(
         'Callback pool cleanup job stopped'
       );
@@ -360,7 +367,7 @@ describe('CallbackPoolManager', () => {
       };
       CallbackPool.acquireCallback.mockResolvedValue(mockCallback);
 
-      const acquired = await CallbackPoolManager.acquireCallback('test-token-123');
+      const acquired = await callbackPoolManager.acquireCallback('test-token-123');
       expect(acquired.callbackPath).toBe('/api/v1/payments/callback/form-1');
 
       // Release callback
@@ -371,7 +378,7 @@ describe('CallbackPoolManager', () => {
       };
       CallbackPool.releaseCallback.mockResolvedValue(releasedCallback);
 
-      const released = await CallbackPoolManager.releaseCallback('test-token-123');
+      const released = await callbackPoolManager.releaseCallback('test-token-123');
       expect(released.isLocked).toBe(false);
     });
 
@@ -392,15 +399,15 @@ describe('CallbackPoolManager', () => {
         })
         .mockResolvedValueOnce(null); // Fourth attempt fails
 
-      const result1 = await CallbackPoolManager.acquireCallback('token-1');
-      const result2 = await CallbackPoolManager.acquireCallback('token-2');
-      const result3 = await CallbackPoolManager.acquireCallback('token-3');
+      const result1 = await callbackPoolManager.acquireCallback('token-1');
+      const result2 = await callbackPoolManager.acquireCallback('token-2');
+      const result3 = await callbackPoolManager.acquireCallback('token-3');
 
       expect(result1.callbackPath).toBe('/api/v1/payments/callback/form-1');
       expect(result2.callbackPath).toBe('/api/v1/payments/callback/form-2');
       expect(result3.callbackPath).toBe('/api/v1/payments/callback/form-3');
 
-      await expect(CallbackPoolManager.acquireCallback('token-4'))
+      await expect(callbackPoolManager.acquireCallback('token-4'))
         .rejects.toThrow('No callback handlers available');
     });
   });

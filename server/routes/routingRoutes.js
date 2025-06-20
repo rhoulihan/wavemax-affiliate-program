@@ -4,7 +4,7 @@ const path = require('path');
 
 // Serve filmwalk application
 router.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, '../../public/filmwalk/index.html'));
+  res.sendFile(path.join(__dirname, '../../public/filmwalk/index.html'));
 });
 
 module.exports = router;

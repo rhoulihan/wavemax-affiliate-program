@@ -27,7 +27,7 @@
   // Handle messages from parent window
   function handleParentMessage(event) {
     console.log('[Embed Navigation] Message received:', event.data);
-    
+
     // Security: Only handle messages from trusted origins
     const trustedOrigins = [
       'https://www.wavemaxlaundry.com',
@@ -35,65 +35,65 @@
       'http://localhost',
       'http://127.0.0.1'
     ];
-    
-    const originAllowed = trustedOrigins.some(origin => 
+
+    const originAllowed = trustedOrigins.some(origin =>
       event.origin.startsWith(origin)
     );
-    
+
     if (!originAllowed) {
       console.log('[Embed Navigation] Message rejected - untrusted origin:', event.origin);
       return;
     }
-    
+
     if (!event.data || !event.data.type) return;
-    
+
     switch (event.data.type) {
-      case 'viewport-info':
-        console.log('[Embed Navigation] Viewport info received:', event.data.data);
-        // Handle viewport info
-        if (event.data.data) {
-          const viewportData = event.data.data;
-          
-          // Store viewport info for later use
-          window.viewportInfo = viewportData;
-          
-          // If language is included, apply it
-          if (viewportData.language && window.i18n) {
-            console.log('[Embed Navigation] Setting language from viewport info:', viewportData.language);
-            window.i18n.setLanguage(viewportData.language);
-          }
-          
-          // Handle mobile/desktop view adjustments
-          if (viewportData.isMobile || viewportData.isTablet) {
-            document.body.classList.add('is-mobile-view');
-            if (viewportData.isTablet) {
-              document.body.classList.add('is-tablet-view');
-            }
-          } else {
-            document.body.classList.remove('is-mobile-view', 'is-tablet-view');
-          }
+    case 'viewport-info':
+      console.log('[Embed Navigation] Viewport info received:', event.data.data);
+      // Handle viewport info
+      if (event.data.data) {
+        const viewportData = event.data.data;
+
+        // Store viewport info for later use
+        window.viewportInfo = viewportData;
+
+        // If language is included, apply it
+        if (viewportData.language && window.i18n) {
+          console.log('[Embed Navigation] Setting language from viewport info:', viewportData.language);
+          window.i18n.setLanguage(viewportData.language);
         }
-        break;
-        
-      case 'language-change':
-        console.log('[Embed Navigation] Language change received:', event.data.data);
-        if (event.data.data && event.data.data.language && window.i18n) {
-          console.log('[Embed Navigation] Applying language change:', event.data.data.language);
-          window.i18n.setLanguage(event.data.data.language);
-        }
-        break;
-        
-      case 'chrome-hidden':
-        console.log('[Embed Navigation] Chrome hidden status:', event.data.data);
-        if (event.data.data && event.data.data.hidden) {
-          document.body.classList.add('parent-chrome-hidden');
+
+        // Handle mobile/desktop view adjustments
+        if (viewportData.isMobile || viewportData.isTablet) {
+          document.body.classList.add('is-mobile-view');
+          if (viewportData.isTablet) {
+            document.body.classList.add('is-tablet-view');
+          }
         } else {
-          document.body.classList.remove('parent-chrome-hidden');
+          document.body.classList.remove('is-mobile-view', 'is-tablet-view');
         }
-        break;
-        
-      default:
-        console.log('[Embed Navigation] Unknown message type:', event.data.type);
+      }
+      break;
+
+    case 'language-change':
+      console.log('[Embed Navigation] Language change received:', event.data.data);
+      if (event.data.data && event.data.data.language && window.i18n) {
+        console.log('[Embed Navigation] Applying language change:', event.data.data.language);
+        window.i18n.setLanguage(event.data.data.language);
+      }
+      break;
+
+    case 'chrome-hidden':
+      console.log('[Embed Navigation] Chrome hidden status:', event.data.data);
+      if (event.data.data && event.data.data.hidden) {
+        document.body.classList.add('parent-chrome-hidden');
+      } else {
+        document.body.classList.remove('parent-chrome-hidden');
+      }
+      break;
+
+    default:
+      console.log('[Embed Navigation] Unknown message type:', event.data.type);
     }
   }
 
@@ -164,7 +164,7 @@
     if (window.parent !== window) {
       let lastSentHeight = 0;  // Track the last height we actually sent to parent
       let heightTimeout = null;
-      
+
       function sendHeight(force = false) {
         const height = Math.max(
           document.body.scrollHeight,
@@ -176,18 +176,18 @@
 
         // Only send if height has changed by more than 10px (increase or decrease)
         const heightDifference = Math.abs(height - lastSentHeight);
-        
+
         if (force || heightDifference > 10) {
           // Clear any pending timeout
           if (heightTimeout) {
             clearTimeout(heightTimeout);
           }
-          
+
           // Debounce height messages to prevent flooding
           heightTimeout = setTimeout(() => {
             console.log(`Height changed from ${lastSentHeight} to ${height} (diff: ${height - lastSentHeight}px)`);
             lastSentHeight = height;  // Update last sent height
-            
+
             window.parent.postMessage({
               type: 'resize',
               data: { height: height }
@@ -199,10 +199,10 @@
       // Expose sendHeight function globally for manual control
       window.embedNavigation = window.embedNavigation || {};
       window.embedNavigation.sendHeight = sendHeight;
-      
+
       // Check if auto-resize is disabled
       const autoResizeDisabled = document.body.hasAttribute('data-disable-auto-resize');
-      
+
       if (!autoResizeDisabled) {
         // Send initial height (force to ensure it's sent)
         sendHeight(true);
@@ -223,7 +223,7 @@
         // Still send initial height once (force)
         sendHeight(true);
       }
-      
+
       // Clean up on page unload
       window.addEventListener('beforeunload', function() {
         if (resizeObserver) {
@@ -233,7 +233,7 @@
           clearTimeout(heightTimeout);
         }
       });
-      
+
       // Also clean up on custom events
       window.addEventListener('page-cleanup', function() {
         if (resizeObserver) {
@@ -243,7 +243,7 @@
           clearTimeout(heightTimeout);
         }
       });
-      
+
       window.addEventListener('disconnect-observers', function() {
         if (resizeObserver) {
           resizeObserver.disconnect();

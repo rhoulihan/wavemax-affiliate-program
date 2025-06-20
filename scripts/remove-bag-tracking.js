@@ -39,7 +39,7 @@ const removeBagTracking = async () => {
     // 2. Remove bagIDs field from all orders
     console.log('\n2. Removing bagIDs field from orders...');
     const Order = require('../server/models/Order');
-    
+
     // Count orders with bagIDs
     const ordersWithBags = await Order.countDocuments({ bagIDs: { $exists: true } });
     console.log(`   Found ${ordersWithBags} orders with bagIDs field`);
@@ -48,7 +48,7 @@ const removeBagTracking = async () => {
       // Remove bagIDs field from all orders
       const result = await Order.updateMany(
         { bagIDs: { $exists: true } },
-        { $unset: { bagIDs: "" } }
+        { $unset: { bagIDs: '' } }
       );
       console.log(`   ✓ Removed bagIDs from ${result.modifiedCount} orders`);
     }
@@ -76,7 +76,7 @@ const removeBagTracking = async () => {
 // Run migration
 (async () => {
   await connectDB();
-  
+
   try {
     await removeBagTracking();
   } catch (error) {

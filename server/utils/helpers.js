@@ -36,27 +36,27 @@ const formatCurrency = (amount, currency = 'USD') => {
  */
 const formatDate = (date, format = 'short') => {
   if (!date) return '';
-  
+
   const dateObj = date instanceof Date ? date : new Date(date);
-  
+
   if (isNaN(dateObj.getTime())) return '';
 
   switch (format) {
-    case 'long':
-      return dateObj.toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
-      });
-    case 'iso':
-      return dateObj.toISOString().split('T')[0];
-    case 'short':
-    default:
-      return dateObj.toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit'
-      });
+  case 'long':
+    return dateObj.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+  case 'iso':
+    return dateObj.toISOString().split('T')[0];
+  case 'short':
+  default:
+    return dateObj.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit'
+    });
   }
 };
 
@@ -81,18 +81,18 @@ const generateRandomString = (length = 10) => {
  */
 const sanitizeForCSV = (str) => {
   if (str == null) return '';
-  
+
   // Convert to string
   str = String(str);
-  
+
   // Escape double quotes by doubling them
   str = str.replace(/"/g, '""');
-  
+
   // Wrap in quotes if contains comma, newline, or quotes
   if (str.includes(',') || str.includes('\n') || str.includes('"')) {
     str = `"${str}"`;
   }
-  
+
   return str;
 };
 

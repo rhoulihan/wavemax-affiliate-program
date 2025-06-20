@@ -23,15 +23,15 @@ async function calculateDeliveryFee(numberOfBags, affiliate = null) {
   // Get system defaults
   const systemMinimumFee = await SystemConfig.getValue('delivery_minimum_fee', 10.00);
   const systemPerBagFee = await SystemConfig.getValue('delivery_per_bag_fee', 2.00);
-  
+
   // Use affiliate overrides if available, otherwise use system defaults
   const minimumFee = affiliate?.minimumDeliveryFee ?? systemMinimumFee;
   const perBagFee = affiliate?.perBagDeliveryFee ?? systemPerBagFee;
-  
+
   // Calculate fee based on bags
   const calculatedFee = numberOfBags * perBagFee;
   const totalFee = Math.max(minimumFee, calculatedFee);
-  
+
   return {
     numberOfBags,
     minimumFee,
@@ -71,10 +71,6 @@ exports.createOrder = async (req, res) => {
       pickupTime,
       specialPickupInstructions,
       estimatedWeight,
-      serviceNotes,
-      deliveryDate,
-      deliveryTime,
-      specialDeliveryInstructions,
       numberOfBags
     } = req.body;
 
@@ -120,7 +116,7 @@ exports.createOrder = async (req, res) => {
     // Calculate delivery fee based on number of bags
     const bagCount = parseInt(numberOfBags) || 1; // Default to 1 bag if not specified
     const feeCalculation = await calculateDeliveryFee(bagCount, affiliate);
-    
+
     // Create new order
     const newOrder = new Order({
       customerId,
@@ -129,10 +125,6 @@ exports.createOrder = async (req, res) => {
       pickupTime,
       specialPickupInstructions,
       estimatedWeight,
-      serviceNotes,
-      deliveryDate,
-      deliveryTime,
-      specialDeliveryInstructions,
       numberOfBags: bagCount,
       feeBreakdown: {
         numberOfBags: feeCalculation.numberOfBags,
@@ -450,7 +442,7 @@ exports.bulkUpdateOrderStatus = async (req, res) => {
     }
 
     // Check authorization (admin or affiliated affiliate)
-    const isAuthorized = req.user.role === 'admin' || 
+    const isAuthorized = req.user.role === 'admin' ||
       (req.user.role === 'affiliate' && orders.every(order => order.affiliateId === req.user.affiliateId));
 
     if (!isAuthorized) {
@@ -483,7 +475,7 @@ exports.bulkUpdateOrderStatus = async (req, res) => {
 
         // Update order
         order.status = status;
-        
+
         // Update status timestamps (these are now handled in the model middleware)
         // The model's pre-save hook will automatically set the appropriate timestamps
 
@@ -536,7 +528,7 @@ exports.bulkCancelOrders = async (req, res) => {
 
     // Check authorization (admin or affiliated affiliate)
     const orders = await Order.find({ orderId: { $in: orderIds } });
-    
+
     if (orders.length === 0) {
       return res.status(404).json({
         success: false,
@@ -576,7 +568,7 @@ exports.bulkCancelOrders = async (req, res) => {
         order.cancelledBy = req.user.id;
         order.cancelReason = 'Bulk cancellation';
         await order.save();
-        
+
         results.push({
           orderId: order.orderId,
           success: true
@@ -644,7 +636,7 @@ exports.exportOrders = async (req, res) => {
 
     // Get unique customer IDs
     const customerIds = [...new Set(orders.map(order => order.customerId))];
-    
+
     // Fetch customer data
     const customers = await Customer.find({ customerId: { $in: customerIds } });
     const customerMap = {};
@@ -752,10 +744,10 @@ exports.exportOrders = async (req, res) => {
 exports.updatePaymentStatus = async (req, res) => {
   try {
     const { orderId } = req.params;
-    const { 
-      paymentStatus, 
-      paymentMethod, 
-      paymentReference, 
+    const {
+      paymentStatus,
+      paymentMethod,
+      paymentReference,
       paymentError,
       refundAmount,
       refundReason,
@@ -773,7 +765,7 @@ exports.updatePaymentStatus = async (req, res) => {
     }
 
     // Check authorization (admin or affiliated affiliate)
-    const isAuthorized = 
+    const isAuthorized =
       req.user.role === 'admin' ||
       (req.user.role === 'affiliate' && req.user.affiliateId === order.affiliateId);
 
@@ -806,11 +798,11 @@ exports.updatePaymentStatus = async (req, res) => {
     if (paymentMethod) order.paymentMethod = paymentMethod;
     if (paymentReference) order.paymentReference = paymentReference;
     if (paymentError) order.paymentError = paymentError;
-    
+
     if (paymentStatus === 'completed') {
       order.paymentDate = new Date();
     }
-    
+
     if (paymentStatus === 'refunded') {
       order.refundedAt = new Date();
       if (refundAmount) order.refundAmount = refundAmount;
@@ -908,7 +900,7 @@ exports.searchOrders = async (req, res) => {
       .sort({ createdAt: -1 })
       .skip((page - 1) * limit)
       .limit(parseInt(limit));
-    
+
     // Get customer data
     const customerIds = [...new Set(orders.map(order => order.customerId))];
     const customers = await Customer.find({ customerId: { $in: customerIds } });
@@ -984,7 +976,7 @@ exports.getOrderStatistics = async (req, res) => {
 
     // Calculate statistics
     const totalOrders = orders.length;
-    
+
     // Orders by status
     const ordersByStatus = {
       pending: 0,

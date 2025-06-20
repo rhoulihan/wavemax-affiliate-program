@@ -31,12 +31,48 @@
             right: 10px;
             z-index: 1000;
         }
+        
+        /* Tooltip styling */
+        .tooltip-hover {
+            position: relative;
+        }
+        
+        .tooltip-hover:hover::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #374151;
+            color: white;
+            padding: 0.5rem 0.75rem;
+            border-radius: 0.375rem;
+            white-space: nowrap;
+            font-size: 0.875rem;
+            font-weight: normal;
+            margin-bottom: 0.25rem;
+            z-index: 10;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        
+        .tooltip-hover:hover::before {
+            content: '';
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border-style: solid;
+            border-width: 6px 6px 0 6px;
+            border-color: #374151 transparent transparent transparent;
+            margin-bottom: -5px;
+            z-index: 10;
+        }
     </style>
 </head>
 <body class="bg-white font-sans">
     <!-- Pickup Scheduling Form -->
     <div class="embed-container">
-        <div class="max-w-3xl mx-auto bg-white rounded-lg shadow-md overflow-hidden">
+        <div class="max-w-3xl mx-auto bg-white rounded-lg shadow-md overflow-hidden mt-8">
             <div class="wavemax-blue text-white p-6">
                 <h2 class="text-2xl font-bold">Schedule a Laundry Pickup</h2>
                 <p class="mt-2" id="affiliateIntro">Use this form to schedule a pickup for your laundry.</p>
@@ -50,8 +86,8 @@
                     <p>Redirecting to login...</p>
                 </div>
                 
-                <!-- Pickup Details Section -->
-                <div id="pickupDetailsSection">
+                <!-- Page 1: Pickup Details Section -->
+                <div id="pickupDetailsSection" class="schedule-step">
                     <!-- Hidden fields for customer and affiliate data -->
                     <input type="hidden" id="customerId" name="customerId">
                     <input type="hidden" id="affiliateId" name="affiliateId">
@@ -97,7 +133,7 @@
                             </div>
                             
                             <div class="md:col-span-2">
-                                <label for="specialPickupInstructions" class="block text-gray-700 mb-2">Special Pickup Instructions (Optional)</label>
+                                <label for="specialPickupInstructions" class="block text-gray-700 mb-2">Special Instructions (Optional)</label>
                                 <textarea id="specialPickupInstructions" name="specialPickupInstructions" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" rows="2" placeholder="Ring doorbell, leave at front door, etc."></textarea>
                             </div>
                         </div>
@@ -121,57 +157,24 @@
                             </div>
                             
                             <div>
-                                <label for="estimatedWeight" class="block text-gray-700 mb-2">Estimated Weight (lbs) *</label>
+                                <label for="estimatedWeight" class="block text-gray-700 mb-2">
+                                    Estimated Weight (lbs) *
+                                    <span class="inline-block ml-1 text-yellow-600 cursor-help tooltip-hover" data-tooltip="Accuracy will prevent delays">
+                                        <svg class="w-4 h-4 inline" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
+                                        </svg>
+                                    </span>
+                                </label>
                                 <input type="number" id="estimatedWeight" name="estimatedWeight" required min="10" max="200" step="5" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="e.g., 25">
-                                <p class="text-sm text-gray-600 mt-1">Typical bag weighs 10-15 lbs</p>
+                                <p class="text-sm text-gray-600 mt-1">Typical bag weighs 25-30 lbs</p>
                             </div>
                             
-                            <div class="md:col-span-2">
-                                <label for="serviceNotes" class="block text-gray-700 mb-2">Service Notes (Optional)</label>
-                                <textarea id="serviceNotes" name="serviceNotes" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" rows="2" placeholder="Any special handling requests, sorting preferences, etc."></textarea>
-                            </div>
                         </div>
                     </div>
-                    
-                    <!-- Delivery Options -->
-                    <div>
-                        <h3 class="text-xl font-bold mb-4">Delivery Options</h3>
-                        <div class="grid md:grid-cols-2 gap-4">
-                            <div>
-                                <label for="deliveryDate" class="block text-gray-700 mb-2">Preferred Delivery Date *</label>
-                                <input type="date" id="deliveryDate" name="deliveryDate" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                            </div>
-                            
-                            <div>
-                                <label for="deliveryTime" class="block text-gray-700 mb-2">Preferred Time *</label>
-                                <select id="deliveryTime" name="deliveryTime" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                                    <option value="">Select a time</option>
-                                    <option value="morning">Morning (8am - 12pm)</option>
-                                    <option value="afternoon">Afternoon (12pm - 5pm)</option>
-                                    <option value="evening">Evening (5pm - 8pm)</option>
-                                </select>
-                            </div>
-                            
-                            <div class="md:col-span-2">
-                                <label for="specialDeliveryInstructions" class="block text-gray-700 mb-2">Special Delivery Instructions (Optional)</label>
-                                <textarea id="specialDeliveryInstructions" name="specialDeliveryInstructions" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" rows="2" placeholder="Leave on porch, text upon arrival, etc."></textarea>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Payment Information -->
-                    <div>
-                        <h3 class="text-xl font-bold mb-4">Payment Information</h3>
-                        <p class="text-sm text-gray-600 mb-4">Payment will be processed when your order is ready.</p>
-                        
-                        <!-- Hidden fields for context -->
-                        <input type="hidden" id="PAYCONTEXT" value="ORDER">
-                        <input type="hidden" id="AFFILIATEID" value="">
-                        
-                        <!-- Paygistix Payment Form Container -->
-                        <div id="paygistix-payment-container"></div>
-                    </div>
-                    
+                </div>
+                
+                <!-- Page 2: Summary and Payment Section -->
+                <div id="summaryPaymentSection" class="schedule-step" style="display: none;">
                     <!-- Service and Pricing Summary -->
                     <div class="border-t pt-6">
                         <h3 class="text-xl font-bold mb-4">Order Summary & Authorization</h3>
@@ -189,28 +192,62 @@
                                 <span class="font-bold">Estimated Weight:</span>
                                 <span id="estimatedWeightDisplay">0</span> lbs
                             </div>
+                            <div id="bagCreditSection" class="mb-2 text-green-600" style="display: none;">
+                                <span class="font-bold">Bag Credit:</span>
+                                -<span id="bagCreditAmount">$0.00</span> (<span id="bagCreditWeight">0</span> lbs)
+                            </div>
                             <div class="border-t pt-3 mb-3">
                                 <div class="font-bold text-lg">Estimated Total: <span id="estimatedTotal">$0.00</span></div>
                             </div>
                             <div class="bg-blue-50 border border-blue-200 p-3 rounded">
-                                <p class="text-sm font-bold text-blue-800 mb-1">Authorization Amount: <span id="authorizationAmount" class="text-lg">$0.00</span></p>
-                                <p class="text-xs text-blue-600">We will authorize your card for 10% above the estimated total to account for weight variations. You will only be charged for the actual weight of your laundry.</p>
+                                <p class="text-xs text-blue-600">You will be charged for the actual weight of your laundry. Any credits or overage will be deducted from or added to your next order. Orders more than 10% overweight will require additional processing that may cause delays.</p>
                             </div>
                         </div>
                     </div>
-                    
-                    <!-- Submit Button -->
-                    <div class="mt-6">
-                        <button type="submit" class="w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-blue-700 transition">Schedule Pickup</button>
+                </div>
+                
+                <!-- Hidden fields for context -->
+                <input type="hidden" id="PAYCONTEXT" value="ORDER">
+                <input type="hidden" id="AFFILIATEID" value="">
+                
+                <!-- Navigation Section -->
+                <div id="navigationSection" class="border-t pt-6">
+                    <div class="flex justify-between items-center">
+                        <button type="button" id="backButton" class="px-6 py-3 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition" style="display: none;">
+                            <span>← Back</span>
+                        </button>
+                        <div class="flex-1"></div>
+                        <button type="button" id="advanceButton" class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+                            <span>Next →</span>
+                        </button>
                     </div>
                 </div>
             </form>
+            
+            <!-- Payment Form Container (outside of order form to prevent nested form submission) -->
+            <div id="paymentFormContainer" style="display: none;">
+                <div id="paygistix-payment-container">
+                    <!-- Paygistix payment form will be loaded here -->
+                    <div class="text-center py-4">
+                        <span class="text-gray-600">Loading payment form...</span>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
-        <!-- i18n Scripts -->
+    <!-- Embed Scripts -->
     <script src="/assets/js/i18n.js"></script>
     <script src="/assets/js/language-switcher.js"></script>
+    <script src="/assets/js/embed-config.js"></script>
+    <script src="/assets/js/modal-utils.js"></script>
+    <script src="/assets/js/errorHandler.js"></script>
+    <script src="/assets/js/csrf-utils.js"></script>
+    <script src="/assets/js/swirl-spinner.js"></script>
+    <script src="/assets/js/paygistix-payment-form.js"></script>
+    <script src="/assets/js/schedule-pickup.js"></script>
+    <script src="/assets/js/schedule-pickup-navigation.js"></script>
+    
     <script>
         // PostMessage communication with parent window
         function sendMessageToParent(type, data) {
@@ -227,192 +264,6 @@
         function navigateParent(page) {
             sendMessageToParent('navigate', { page: page });
         }
-
-        // Set minimum date to today
-        const today = new Date().toISOString().split('T')[0];
-        document.getElementById('pickupDate').setAttribute('min', today);
-        document.getElementById('deliveryDate').setAttribute('min', today);
-
-        // Login functionality
-        document.getElementById('loginBtn').addEventListener('click', function() {
-            const username = document.getElementById('loginUsername').value;
-            const password = document.getElementById('loginPassword').value;
-
-            if (!username || !password) {
-                modalAlert('Please enter both username and password', 'Missing Information');
-                return;
-            }
-
-            // Send login attempt to parent
-            sendMessageToParent('form-submit', { form: 'schedule-pickup-login' });
-
-            // API call with full URL
-            fetch('https://wavemax.promo/api/v1/auth/customer/login', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                credentials: 'include',
-                body: JSON.stringify({ username, password })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    // Store customer data
-                    localStorage.setItem('customerToken', data.token);
-                    localStorage.setItem('currentCustomer', JSON.stringify(data.customer));
-
-                    // Populate customer info
-                    document.getElementById('customerId').value = data.customer.customerId;
-                    document.getElementById('customerName').textContent = 
-                        `${data.customer.firstName} ${data.customer.lastName}`;
-                    document.getElementById('customerPhone').textContent = data.customer.phone;
-                    document.getElementById('customerAddress').textContent = 
-                        `${data.customer.address}, ${data.customer.city}, ${data.customer.state} ${data.customer.zipCode}`;
-                    
-                    if (data.customer.affiliateId) {
-                        document.getElementById('affiliateId').value = data.customer.affiliateId;
-                    }
-
-                    // Show pickup form
-                    document.getElementById('loginSection').style.display = 'none';
-                    document.getElementById('pickupDetailsSection').style.display = 'block';
-
-                    // Notify parent of successful login
-                    sendMessageToParent('login-success', {
-                        userType: 'customer',
-                        customerId: data.customer.customerId,
-                        context: 'schedule-pickup'
-                    });
-                } else {
-                    sendMessageToParent('login-error', {
-                        message: data.message || 'Login failed',
-                        context: 'schedule-pickup'
-                    });
-                    modalAlert(data.message || 'Login failed. Please check your credentials.', 'Login Failed');
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                sendMessageToParent('login-error', {
-                    message: 'Login failed. Please try again.',
-                    context: 'schedule-pickup'
-                });
-                modalAlert('Login failed. Please try again.', 'Login Error');
-            });
-        });
-
-        // Form submission
-        document.getElementById('pickupScheduleForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-
-            // Validate dates
-            const pickupDate = new Date(document.getElementById('pickupDate').value);
-            const deliveryDate = new Date(document.getElementById('deliveryDate').value);
-            
-            if (deliveryDate <= pickupDate) {
-                modalAlert('Delivery date must be after pickup date', 'Invalid Dates');
-                return;
-            }
-
-            // Collect form data
-            const formData = {
-                customerId: document.getElementById('customerId').value,
-                affiliateId: document.getElementById('affiliateId').value,
-                pickupDate: document.getElementById('pickupDate').value,
-                pickupTime: document.getElementById('pickupTime').value,
-                deliveryDate: document.getElementById('deliveryDate').value,
-                deliveryTime: document.getElementById('deliveryTime').value,
-                estimatedSize: document.getElementById('estimatedSize').value,
-                specialPickupInstructions: document.getElementById('specialPickupInstructions').value,
-                specialDeliveryInstructions: document.getElementById('specialDeliveryInstructions').value,
-                serviceNotes: document.getElementById('serviceNotes').value
-            };
-
-            // Send form submission to parent
-            sendMessageToParent('form-submit', { form: 'schedule-pickup' });
-
-            // API call with full URL
-            fetch('https://wavemax.promo/api/v1/orders', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('customerToken')}`
-                },
-                credentials: 'include',
-                body: JSON.stringify(formData)
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    // Notify parent of successful order
-                    sendMessageToParent('order-created', {
-                        orderId: data.order.orderId,
-                        customerId: formData.customerId,
-                        affiliateId: formData.affiliateId
-                    });
-
-                    // Navigate to order confirmation
-                    navigateParent(`order-confirmation?orderId=${data.order.orderId}`);
-                } else {
-                    sendMessageToParent('order-error', {
-                        message: data.message || 'Failed to schedule pickup'
-                    });
-                    modalAlert(data.message || 'Failed to schedule pickup. Please try again.', 'Scheduling Failed');
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                sendMessageToParent('order-error', {
-                    message: 'Failed to schedule pickup. Please try again.'
-                });
-                modalAlert('Failed to schedule pickup. Please try again.', 'Scheduling Error');
-            });
-        });
-
-        // Check if already logged in
-        window.addEventListener('load', function() {
-            const token = localStorage.getItem('customerToken');
-            const customer = localStorage.getItem('currentCustomer');
-            
-            if (token && customer) {
-                try {
-                    const customerData = JSON.parse(customer);
-                    // Auto-populate and show pickup form
-                    document.getElementById('customerId').value = customerData.customerId;
-                    document.getElementById('customerName').textContent = 
-                        `${customerData.firstName} ${customerData.lastName}`;
-                    document.getElementById('customerPhone').textContent = customerData.phone;
-                    document.getElementById('customerAddress').textContent = 
-                        `${customerData.address}, ${customerData.city}, ${customerData.state} ${customerData.zipCode}`;
-                    
-                    if (customerData.affiliateId) {
-                        document.getElementById('affiliateId').value = customerData.affiliateId;
-                    }
-
-                    document.getElementById('loginSection').style.display = 'none';
-                    document.getElementById('pickupDetailsSection').style.display = 'block';
-                } catch (e) {
-                    console.error('Error parsing customer data:', e);
-                }
-            }
-
-            // Notify parent that iframe is loaded
-            sendMessageToParent('iframe-loaded', { page: 'schedule-pickup' });
-        });
-    </script>
-    <script src="/assets/js/modal-utils.js"></script>
-    <script src="/assets/js/csrf-utils.js"></script>
-    <script src="/assets/js/schedule-pickup.js"></script>
-    <script>
-        // Initialize i18n
-        document.addEventListener('DOMContentLoaded', async function() {
-            await window.i18n.init({ debugMode: false });
-            window.LanguageSwitcher.createSwitcher('language-switcher-container', {
-                style: 'dropdown',
-                showLabel: false
-            });
-        });
     </script>
 
 </body>

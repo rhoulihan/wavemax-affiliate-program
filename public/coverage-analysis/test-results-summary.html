@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WaveMAX Test Coverage Analysis - January 16, 2025</title>
+    <title>WaveMAX Test Coverage Analysis - June 19, 2025</title>
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -15,6 +15,12 @@
             background-color: #f5f5f5;
         }
         h1, h2, h3 { color: #1e3a8a; }
+        .date { 
+            text-align: center; 
+            color: #666; 
+            margin-top: -10px; 
+            margin-bottom: 20px; 
+        }
         .metric-card {
             background: white;
             border-radius: 8px;
@@ -107,28 +113,29 @@
 </head>
 <body>
     <h1>WaveMAX Test Coverage Analysis</h1>
+    <p class="date">Last Updated: June 19, 2025</p>
     
     <div class="metric-card">
         <h2>Overall Test Coverage</h2>
         <div class="coverage-grid">
-            <div class="coverage-item low-coverage">
+            <div class="coverage-item medium-coverage">
                 <h3>Statements</h3>
-                <div class="coverage-percentage">52.7%</div>
+                <div class="coverage-percentage">72.21%</div>
                 <div class="coverage-label">Target: 80%</div>
             </div>
-            <div class="coverage-item low-coverage">
+            <div class="coverage-item medium-coverage">
                 <h3>Branches</h3>
-                <div class="coverage-percentage">47.22%</div>
+                <div class="coverage-percentage">63.24%</div>
                 <div class="coverage-label">Target: 80%</div>
             </div>
-            <div class="coverage-item low-coverage">
+            <div class="coverage-item medium-coverage">
                 <h3>Functions</h3>
-                <div class="coverage-percentage">55.91%</div>
+                <div class="coverage-percentage">74.38%</div>
                 <div class="coverage-label">Target: 80%</div>
             </div>
-            <div class="coverage-item low-coverage">
+            <div class="coverage-item medium-coverage">
                 <h3>Lines</h3>
-                <div class="coverage-percentage">52.67%</div>
+                <div class="coverage-percentage">72.10%</div>
                 <div class="coverage-label">Target: 80%</div>
             </div>
         </div>
@@ -138,19 +145,19 @@
         <h2>Test Suite Summary</h2>
         <div class="test-stats">
             <div class="stat-item">
-                <div class="stat-number">66</div>
+                <div class="stat-number">77</div>
                 <div>Total Test Suites</div>
             </div>
             <div class="stat-item">
-                <div class="stat-number">46</div>
+                <div class="stat-number">70</div>
                 <div>Passed</div>
             </div>
             <div class="stat-item">
-                <div class="stat-number">20</div>
+                <div class="stat-number">7</div>
                 <div>Failed</div>
             </div>
             <div class="stat-item">
-                <div class="stat-number">1087</div>
+                <div class="stat-number">1628</div>
                 <div>Total Tests</div>
             </div>
         </div>
@@ -160,60 +167,75 @@
         <h2>🎯 Priority Areas for Coverage Improvement</h2>
         
         <div class="priority-item priority-high">
-            <h3>1. Critical: Payment Processing & QuickBooks Integration</h3>
-            <p><strong>Coverage: 0%</strong> - Files: quickbooksController.js, Payment.js, PaymentMethod.js</p>
-            <p><strong>Impact:</strong> Core financial functionality completely untested. High risk for production issues.</p>
-            <p><strong>Action:</strong> Create comprehensive unit and integration tests for all payment workflows.</p>
+            <h3>1. Critical: Routes Testing</h3>
+            <p><strong>Coverage: 64.35%</strong> - Most route files have low coverage, generalPaymentCallback.js at 12.19%</p>
+            <p><strong>Impact:</strong> API endpoints poorly tested, potential security and functionality issues.</p>
+            <p><strong>Action:</strong> Focus on paymentRoutes.test.js and orderRoutes.test.js which are currently hanging.</p>
         </div>
 
         <div class="priority-item priority-high">
-            <h3>2. Critical: Route Testing</h3>
-            <p><strong>Coverage: 6.63%</strong> - Most route files have 0% coverage</p>
-            <p><strong>Impact:</strong> API endpoints untested, potential security and functionality issues.</p>
-            <p><strong>Action:</strong> Implement supertest-based integration tests for all routes.</p>
+            <h3>2. Critical: CallbackPool and Payment System</h3>
+            <p><strong>Coverage: CallbackPool.js at 33.33%</strong> - Payment processing components</p>
+            <p><strong>Impact:</strong> Core payment callback handling system poorly tested.</p>
+            <p><strong>Action:</strong> Fix callbackPoolManager singleton issue preventing tests from running.</p>
         </div>
 
         <div class="priority-item priority-high">
-            <h3>3. High: Order Controller</h3>
-            <p><strong>Coverage: 31.91%</strong> - orderController.js</p>
-            <p><strong>Impact:</strong> Core business logic for order management inadequately tested.</p>
-            <p><strong>Action:</strong> Add tests for order creation, updates, status changes, and commission calculations.</p>
-        </div>
-
-        <div class="priority-item priority-high">
-            <h3>4. High: W9 Document Management</h3>
-            <p><strong>Coverage: 32.35%</strong> - w9Controller.js, w9Storage.js (25.24%)</p>
-            <p><strong>Impact:</strong> Tax compliance features poorly tested.</p>
-            <p><strong>Action:</strong> Test document upload, verification, storage, and audit trail functionality.</p>
+            <h3>3. High: W9 DocuSign Integration</h3>
+            <p><strong>Coverage: 65.38%</strong> - w9ControllerDocuSign.js, docusignService tests failing</p>
+            <p><strong>Impact:</strong> Tax compliance DocuSign integration has failing tests.</p>
+            <p><strong>Action:</strong> Fix PKCE storage tests and DocuSign integration tests.</p>
         </div>
 
         <div class="priority-item priority-medium">
-            <h3>5. Medium: Administrator Controller</h3>
-            <p><strong>Coverage: 46.62%</strong> - administratorController.js</p>
+            <h3>4. Medium: Administrator Controller</h3>
+            <p><strong>Coverage: 65.67%</strong> - administratorController.js</p>
             <p><strong>Impact:</strong> Admin management features need better coverage.</p>
-            <p><strong>Action:</strong> Focus on permission management, admin creation/update, and edge cases.</p>
+            <p><strong>Action:</strong> Focus on error handling paths and edge cases.</p>
+        </div>
+
+        <div class="priority-item priority-medium">
+            <h3>5. Medium: Auth Controller</h3>
+            <p><strong>Coverage: 69.54%</strong> - authController.js</p>
+            <p><strong>Impact:</strong> Authentication features need coverage improvement.</p>
+            <p><strong>Action:</strong> Test OAuth flows, password reset, and error scenarios.</p>
         </div>
 
         <div class="priority-item priority-medium">
             <h3>6. Medium: Customer Controller</h3>
-            <p><strong>Coverage: 51.01%</strong> - customerController.js</p>
-            <p><strong>Impact:</strong> Customer management features partially tested.</p>
-            <p><strong>Action:</strong> Add tests for customer registration, profile updates, and affiliate associations.</p>
-        </div>
-
-        <div class="priority-item priority-medium">
-            <h3>7. Medium: Email Service</h3>
-            <p><strong>Coverage: 0%</strong> - emailService.js (excluding recent Brevo tests)</p>
-            <p><strong>Impact:</strong> Critical communication system untested.</p>
-            <p><strong>Note:</strong> Basic unit tests added for Brevo, but comprehensive email workflow testing needed.</p>
+            <p><strong>Coverage: 74.74%</strong> - customerController.js</p>
+            <p><strong>Impact:</strong> Customer management has good coverage but room for improvement.</p>
+            <p><strong>Action:</strong> Focus on error handling and edge cases.</p>
         </div>
 
         <div class="priority-item priority-low">
-            <h3>8. Low: Authentication Controller</h3>
-            <p><strong>Coverage: 66.6%</strong> - authController.js</p>
-            <p><strong>Impact:</strong> Good coverage but room for improvement in edge cases.</p>
-            <p><strong>Action:</strong> Add tests for OAuth flows, password reset edge cases, and session management.</p>
+            <h3>7. Low: Models Coverage</h3>
+            <p><strong>Coverage: 83.03%</strong> - Most models well tested</p>
+            <p><strong>Impact:</strong> Good coverage overall, minor improvements needed.</p>
+            <p><strong>Action:</strong> Focus on PaymentToken.js (54.54%) and W9AuditLog.js (56.09%).</p>
         </div>
+
+        <div class="priority-item priority-low">
+            <h3>8. Success: Middleware Coverage</h3>
+            <p><strong>Coverage: 96.28%</strong> - Excellent coverage achieved</p>
+            <p><strong>Impact:</strong> Core middleware (auth, rbac, errorHandler) well tested.</p>
+            <p><strong>Note:</strong> Great example of comprehensive testing approach.</p>
+        </div>
+    </div>
+
+    <div class="metric-card">
+        <h2>⚠️ Failing Test Suites</h2>
+        <p>The following test suites are currently failing and need attention:</p>
+        <ul>
+            <li><strong>callbackPoolManager.test.js</strong> - Issues with singleton pattern in test environment</li>
+            <li><strong>docusignService.test.js</strong> - PKCE storage tests failing</li>
+            <li><strong>docusignW9Integration.client.test.js</strong> - Integration test failures</li>
+            <li><strong>paymentController.test.js</strong> - Related to callbackPoolManager issues</li>
+            <li><strong>payment.test.js (integration)</strong> - Integration test failures</li>
+            <li><strong>w9.test.js (integration)</strong> - W9 integration test failures</li>
+            <li><strong>quickbooks.test.js (integration)</strong> - QuickBooks integration test failures</li>
+        </ul>
+        <p><strong>Note:</strong> Additionally, paymentRoutes.test.js and orderRoutes.test.js are causing test runner to hang and were excluded from this run.</p>
     </div>
 
     <div class="metric-card">

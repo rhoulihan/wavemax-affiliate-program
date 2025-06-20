@@ -31,7 +31,7 @@ describe('Email Service', () => {
       const mockSendTransacEmail = jest.fn().mockResolvedValue({
         messageId: 'brevo-123'
       });
-      
+
       const SibApiV3Sdk = require('@getbrevo/brevo');
       SibApiV3Sdk.TransactionalEmailsApi = jest.fn().mockImplementation(() => ({
         sendTransacEmail: mockSendTransacEmail,
@@ -50,7 +50,7 @@ describe('Email Service', () => {
     it('should handle Brevo API errors gracefully', async () => {
       const SibApiV3Sdk = require('@getbrevo/brevo');
       const mockError = new Error('Brevo API Error');
-      
+
       SibApiV3Sdk.TransactionalEmailsApi = jest.fn().mockImplementation(() => ({
         sendTransacEmail: jest.fn().mockRejectedValue(mockError),
         authentications: {
@@ -67,7 +67,7 @@ describe('Email Service', () => {
   describe('Provider Selection', () => {
     it('should support multiple email providers', () => {
       const providers = ['console', 'ses', 'exchange', 'brevo', 'smtp'];
-      
+
       providers.forEach(provider => {
         process.env.EMAIL_PROVIDER = provider;
         // Verify that each provider can be configured

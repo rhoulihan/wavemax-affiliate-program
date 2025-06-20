@@ -8,8 +8,8 @@ class PaygistixPaymentForm {
         this.payContext = document.getElementById('PAYCONTEXT')?.value || 'ORDER';
         this.affiliateId = document.getElementById('AFFILIATEID')?.value || null;
         
-        // Affiliate settings
-        this.affiliateSettings = null;
+        // Affiliate settings (can be passed in config to avoid API call)
+        this.affiliateSettings = config.affiliateSettings || null;
         
         // Pre-filled amounts
         this.prefilledAmounts = {};
@@ -32,8 +32,8 @@ class PaygistixPaymentForm {
     
     async init() {
         try {
-            // Load affiliate settings if needed
-            if (this.payContext === 'ORDER' && this.affiliateId) {
+            // Load affiliate settings if needed (skip if already provided)
+            if (this.payContext === 'ORDER' && this.affiliateId && !this.affiliateSettings) {
                 await this.loadAffiliateSettings();
             }
             
@@ -47,10 +47,8 @@ class PaygistixPaymentForm {
             // Load Paygistix script
             this.loadPaygistixScript();
             
-            // Setup registration mode if in REGISTRATION context
-            if (this.payContext === 'REGISTRATION') {
-                this.setupRegistrationMode();
-            }
+            // Setup submit handler for both contexts
+            this.setupSubmitHandler();
             
             // Call success callback
             this.onSuccess();
@@ -611,6 +609,95 @@ class PaygistixPaymentForm {
         }
     }
     
+    // Public method to update WDF quantity
+    updateWDFQuantity(quantity) {
+        console.log('Updating WDF quantity to:', quantity);
+        
+        const wdfQtyInput = this.container.querySelector('input[name="pxQty1"]'); // WDF is always the first item
+        if (wdfQtyInput) {
+            wdfQtyInput.value = Math.max(0, Math.floor(quantity)); // Ensure non-negative integer
+            console.log('Set WDF quantity to:', wdfQtyInput.value);
+            
+            // Trigger change event to update totals
+            const event = new Event('change', { bubbles: true });
+            wdfQtyInput.dispatchEvent(event);
+            
+            // Update total if function exists
+            if (typeof window.updateTotal === 'function') {
+                window.updateTotal();
+            }
+        } else {
+            console.warn('WDF quantity input not found');
+        }
+    }
+    
+    // Public method to update delivery fee quantities based on fee breakdown
+    updateDeliveryFeeQuantities(feeBreakdown) {
+        console.log('Updating delivery fee quantities:', feeBreakdown);
+        
+        // First, reset all delivery fee quantities to 0
+        const allMDFInputs = this.container.querySelectorAll('input[name^="pxCode"][value^="MDF"]');
+        const allPBFInputs = this.container.querySelectorAll('input[name^="pxCode"][value^="PBF"]');
+        
+        // Reset MDF quantities
+        allMDFInputs.forEach(input => {
+            const row = input.closest('tr');
+            const qtyInput = row?.querySelector('.pxQty');
+            if (qtyInput) {
+                qtyInput.value = 0;
+            }
+        });
+        
+        // Reset PBF quantities
+        allPBFInputs.forEach(input => {
+            const row = input.closest('tr');
+            const qtyInput = row?.querySelector('.pxQty');
+            if (qtyInput) {
+                qtyInput.value = 0;
+            }
+        });
+        
+        if (!feeBreakdown) {
+            console.log('No fee breakdown provided');
+            return;
+        }
+        
+        // If minimum fee applies, set MDF quantity
+        if (feeBreakdown.minimumApplied) {
+            const mdfCode = `MDF${Math.round(feeBreakdown.minimumFee)}`;
+            const mdfInput = this.container.querySelector(`input[value="${mdfCode}"]`);
+            if (mdfInput) {
+                const row = mdfInput.closest('tr');
+                const qtyInput = row?.querySelector('.pxQty');
+                if (qtyInput) {
+                    qtyInput.value = 1;
+                    console.log(`Set ${mdfCode} quantity to 1`);
+                }
+            } else {
+                console.warn(`MDF code ${mdfCode} not found in form`);
+            }
+        } else {
+            // Per bag fee applies, set PBF quantity
+            const pbfCode = `PBF${Math.round(feeBreakdown.perBagFee)}`;
+            const pbfInput = this.container.querySelector(`input[value="${pbfCode}"]`);
+            if (pbfInput) {
+                const row = pbfInput.closest('tr');
+                const qtyInput = row?.querySelector('.pxQty');
+                if (qtyInput) {
+                    qtyInput.value = feeBreakdown.numberOfBags;
+                    console.log(`Set ${pbfCode} quantity to ${feeBreakdown.numberOfBags}`);
+                }
+            } else {
+                console.warn(`PBF code ${pbfCode} not found in form`);
+            }
+        }
+        
+        // Trigger change event to update totals
+        if (typeof window.updateTotal === 'function') {
+            window.updateTotal();
+        }
+    }
+    
     // Public method to get pre-filled amounts
     getPrefilledAmounts() {
         return this.prefilledAmounts;
@@ -619,8 +706,8 @@ class PaygistixPaymentForm {
     // Processing state management
     isProcessingPayment = false;
     
-    // Public method to handle registration payment
-    async processRegistrationPayment(customerData) {
+    // Public method to handle payment processing
+    async processPayment(customerData) {
         if (this.isProcessingPayment) {
             console.log('Payment already in progress');
             return;
@@ -635,27 +722,51 @@ class PaygistixPaymentForm {
                 throw new Error('Payment form not found');
             }
             
-            // Get the bag quantity
-            const bagQtyInput = form.querySelector('input[name="pxQty2"]');
-            const bagQuantity = parseInt(bagQtyInput?.value || '0');
+            // Collect all line items from the form
+            const items = [];
+            let totalAmount = 0;
             
-            if (bagQuantity <= 0) {
-                throw new Error('Please select the number of bags');
+            // Check each possible line item type
+            const lineItemConfigs = [
+                { qtyName: 'pxQty1', code: 'WDF', description: 'Wash, Dry, Fold', priceId: 'pxPrice1' },
+                { qtyName: 'pxQty2', code: 'BF', description: 'Bag Fee', priceId: 'pxPrice2' },
+                { qtyName: 'pxQty3', code: 'MDF', description: 'Minimum Delivery Fee', priceId: 'pxPrice3' },
+                { qtyName: 'pxQty4', code: 'PBF', description: 'Per-Bag Fee', priceId: 'pxPrice4' }
+            ];
+            
+            lineItemConfigs.forEach(config => {
+                const qtyInput = form.querySelector(`input[name="${config.qtyName}"]`);
+                const priceInput = form.querySelector(`input[name="${config.priceId}"]`);
+                
+                if (qtyInput && priceInput) {
+                    const quantity = parseInt(qtyInput.value || '0');
+                    const price = parseFloat(priceInput.value || '0') * 100; // Convert to cents
+                    
+                    if (quantity > 0 && price > 0) {
+                        items.push({
+                            code: config.code,
+                            description: config.description,
+                            price: price,
+                            quantity: quantity
+                        });
+                        totalAmount += price * quantity;
+                    }
+                }
+            });
+            
+            // If no items found, throw error
+            if (items.length === 0) {
+                throw new Error('No items selected for payment');
             }
             
-            // Calculate total
-            const bagPrice = 10.00; // $10 per bag
-            const totalAmount = bagQuantity * bagPrice * 100; // Convert to cents
+            // Get bag quantity if it exists (for registration context)
+            const bagQtyInput = form.querySelector('input[name="pxQty2"]');
+            const bagQuantity = parseInt(bagQtyInput?.value || '0');
             
             // Prepare payment data
             const paymentData = {
                 amount: totalAmount,
-                items: [{
-                    code: 'BF',
-                    description: 'Bag Fee',
-                    price: bagPrice * 100,
-                    quantity: bagQuantity
-                }],
+                items: items,
                 formId: this.paymentConfig.formId,
                 merchantId: this.paymentConfig.merchantId
             };
@@ -679,11 +790,18 @@ class PaygistixPaymentForm {
                 amount: totalAmount,
                 timestamp: Date.now(),
                 customerData: customerData,
-                numberOfBags: bagQuantity
+                payContext: this.payContext,
+                items: items
             };
             
-            // Store in sessionStorage for callback handler
-            sessionStorage.setItem('pendingRegistration', JSON.stringify(paymentSession));
+            // Add bag quantity if it exists
+            if (bagQuantity > 0) {
+                paymentSession.numberOfBags = bagQuantity;
+            }
+            
+            // Store in sessionStorage - use appropriate key based on context
+            const sessionKey = this.payContext === 'REGISTRATION' ? 'pendingRegistration' : 'pendingOrderPayment';
+            sessionStorage.setItem(sessionKey, JSON.stringify(paymentSession));
             
             // Add token as hidden field
             const tokenInput = document.createElement('input');
@@ -713,19 +831,33 @@ class PaygistixPaymentForm {
     
     async createPaymentToken(customerData, paymentData) {
         try {
-            const response = await fetch('/api/v1/payments/create-token', {
+            // Prepare request options
+            const requestOptions = {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': 'Bearer ' + (localStorage.getItem('token') || '')
+                    'Content-Type': 'application/json'
                 },
+                credentials: 'include',
                 body: JSON.stringify({
                     customerData,
                     paymentData
                 })
-            });
+            };
+            
+            // Add authorization header if token exists
+            const authToken = localStorage.getItem('token');
+            if (authToken) {
+                requestOptions.headers['Authorization'] = 'Bearer ' + authToken;
+            }
+            
+            // Use CSRF-aware fetch if available
+            const fetchFunction = window.CsrfUtils?.csrfFetch || fetch;
+            
+            const response = await fetchFunction('/api/v1/payments/create-token', requestOptions);
             
             if (!response.ok) {
+                const errorText = await response.text();
+                console.error('Payment token creation failed:', response.status, errorText);
                 throw new Error('Failed to create payment token');
             }
             
@@ -748,13 +880,24 @@ class PaygistixPaymentForm {
     
     async cancelPaymentToken(token) {
         try {
-            const response = await fetch(`/api/v1/payments/cancel-token/${token}`, {
+            const requestOptions = {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': 'Bearer ' + (localStorage.getItem('token') || '')
-                }
-            });
+                    'Content-Type': 'application/json'
+                },
+                credentials: 'include'
+            };
+            
+            // Add authorization header if token exists
+            const authToken = localStorage.getItem('token');
+            if (authToken) {
+                requestOptions.headers['Authorization'] = 'Bearer ' + authToken;
+            }
+            
+            // Use CSRF-aware fetch if available
+            const fetchFunction = window.CsrfUtils?.csrfFetch || fetch;
+            
+            const response = await fetchFunction(`/api/v1/payments/cancel-token/${token}`, requestOptions);
 
             if (!response.ok) {
                 throw new Error('Failed to cancel payment token');
@@ -908,7 +1051,7 @@ class PaygistixPaymentForm {
         }, startDelay); // Wait before starting monitoring
     }
 
-    setupRegistrationMode() {
+    setupSubmitHandler() {
         const submitBtn = this.container.querySelector('#pxSubmit');
         const form = this.container.querySelector('#paygistixPaymentForm');
         
@@ -921,19 +1064,38 @@ class PaygistixPaymentForm {
                 // Get customer data from the page
                 const customerData = this.gatherCustomerData();
                 if (customerData) {
-                    await this.processRegistrationPayment(customerData);
+                    await this.processPayment(customerData);
                 }
             });
         }
     }
     
     gatherCustomerData() {
-        // This method should be overridden or the data should be passed in
-        // For now, we'll try to gather from common form fields
+        // For ORDER context, get data from localStorage
+        if (this.payContext === 'ORDER') {
+            const customerStr = localStorage.getItem('currentCustomer');
+            if (customerStr) {
+                try {
+                    const customer = JSON.parse(customerStr);
+                    return {
+                        email: customer.email || '',
+                        firstName: customer.firstName || 'Order',
+                        lastName: customer.lastName || 'Customer',
+                        phone: customer.phone || '',
+                        affiliateId: customer.affiliateId || this.affiliateId
+                    };
+                } catch (error) {
+                    console.error('Error parsing customer data from localStorage:', error);
+                }
+            }
+        }
+        
+        // For REGISTRATION context, get data from form fields
         const email = document.querySelector('[name="email"], #email')?.value;
         const firstName = document.querySelector('[name="firstName"], #firstName')?.value;
         const lastName = document.querySelector('[name="lastName"], #lastName')?.value;
         const phone = document.querySelector('[name="phone"], #phone')?.value;
+        const numberOfBags = document.querySelector('[name="numberOfBags"], #numberOfBags')?.value;
         
         if (!email || !firstName || !lastName) {
             console.error('Missing required customer data');
@@ -945,6 +1107,7 @@ class PaygistixPaymentForm {
             firstName,
             lastName,
             phone: phone || '',
+            numberOfBags: numberOfBags || '',
             affiliateId: this.affiliateId
         };
     }
@@ -1310,6 +1473,15 @@ class PaygistixPaymentForm {
             spinner.hide();
         }
         
+        // Reset the payment button if it exists
+        const continueButton = document.getElementById('continueToPaymentBtn');
+        if (continueButton) {
+            console.log('Resetting payment button state');
+            continueButton.textContent = 'Complete Payment';
+            continueButton.disabled = false;
+            continueButton.classList.remove('opacity-50', 'cursor-not-allowed');
+        }
+        
         this.isProcessingPayment = false;
         
         // Call the registration failure callback if provided
@@ -1329,7 +1501,7 @@ class PaygistixPaymentForm {
     }
     
     // Test mode payment processing
-    async processRegistrationPaymentTestMode(customerData) {
+    async processPaymentTestMode(customerData) {
         if (this.isProcessingPayment) {
             console.log('Payment already in progress');
             return;
@@ -1338,26 +1510,73 @@ class PaygistixPaymentForm {
         this.isProcessingPayment = true;
         
         try {
-            // Get the bag quantity
-            const bagQuantity = parseInt(customerData.numberOfBags || '0');
-            
-            if (bagQuantity <= 0) {
-                throw new Error('Please select the number of bags');
+            // Get the form
+            const form = this.container.querySelector('form#paygistixPaymentForm');
+            if (!form) {
+                throw new Error('Payment form not found');
             }
             
-            // Calculate total
-            const bagPrice = 10.00; // $10 per bag
-            const totalAmount = bagQuantity * bagPrice * 100; // Convert to cents
+            // Collect all line items from the form
+            const items = [];
+            let totalAmount = 0;
+            
+            // Check each possible line item type
+            const lineItemConfigs = [
+                { qtyName: 'pxQty1', code: 'WDF', description: 'Wash, Dry, Fold', priceId: 'pxPrice1' },
+                { qtyName: 'pxQty2', code: 'BF', description: 'Bag Fee', priceId: 'pxPrice2' },
+                { qtyName: 'pxQty3', code: 'MDF', description: 'Minimum Delivery Fee', priceId: 'pxPrice3' },
+                { qtyName: 'pxQty4', code: 'PBF', description: 'Per-Bag Fee', priceId: 'pxPrice4' }
+            ];
+            
+            lineItemConfigs.forEach(config => {
+                const qtyInput = form.querySelector(`input[name="${config.qtyName}"]`);
+                const priceInput = form.querySelector(`input[name="${config.priceId}"]`);
+                
+                if (qtyInput && priceInput) {
+                    const quantity = parseInt(qtyInput.value || '0');
+                    const price = parseFloat(priceInput.value || '0') * 100; // Convert to cents
+                    
+                    if (quantity > 0 && price > 0) {
+                        items.push({
+                            code: config.code,
+                            description: config.description,
+                            price: price,
+                            quantity: quantity
+                        });
+                        totalAmount += price * quantity;
+                    }
+                }
+            });
+            
+            // If no items found, throw error
+            if (items.length === 0) {
+                throw new Error('No items selected for payment');
+            }
+            
+            // Get bag quantity if it exists (for backward compatibility)
+            const bagQtyInput = form.querySelector('input[name="pxQty2"]');
+            const bagQuantity = parseInt(bagQtyInput?.value || '0');
+            
+            // For backward compatibility, if numberOfBags is passed but not in form, use it
+            if (!bagQuantity && customerData.numberOfBags) {
+                const numberOfBags = parseInt(customerData.numberOfBags);
+                if (numberOfBags > 0) {
+                    // Add bag fee item
+                    const bagPrice = 10.00 * 100; // $10 per bag in cents
+                    items.push({
+                        code: 'BF',
+                        description: 'Bag Fee',
+                        price: bagPrice,
+                        quantity: numberOfBags
+                    });
+                    totalAmount += bagPrice * numberOfBags;
+                }
+            }
             
             // Prepare payment data
             const paymentData = {
                 amount: totalAmount,
-                items: [{
-                    code: 'BF',
-                    description: 'Bag Fee',
-                    price: bagPrice * 100,
-                    quantity: bagQuantity
-                }],
+                items: items,
                 formId: this.paymentConfig.formId,
                 merchantId: this.paymentConfig.merchantId
             };
@@ -1373,14 +1592,24 @@ class PaygistixPaymentForm {
                 amount: totalAmount,
                 timestamp: Date.now(),
                 customerData: customerData,
-                numberOfBags: bagQuantity
+                payContext: this.payContext,
+                items: items
             };
             
-            // Store in sessionStorage for test form
-            sessionStorage.setItem('pendingRegistration', JSON.stringify(paymentSession));
+            // Add bag quantity if it exists
+            if (bagQuantity > 0 || customerData.numberOfBags > 0) {
+                paymentSession.numberOfBags = bagQuantity || customerData.numberOfBags;
+            }
+            
+            // Store in sessionStorage - use appropriate key based on context
+            const sessionKey = this.payContext === 'REGISTRATION' ? 'pendingRegistration' : 'pendingOrderPayment';
+            sessionStorage.setItem(sessionKey, JSON.stringify(paymentSession));
             sessionStorage.setItem('testPaymentCustomerData', JSON.stringify(customerData));
             sessionStorage.setItem('testPaymentToken', paymentToken);
             sessionStorage.setItem('testPaymentCallbackUrl', formConfig.callbackUrl);
+            
+            // Store token for cancel handler
+            this.paymentToken = paymentToken;
             
             // Show payment processing modal with cancel button for test mode
             const self = this;
@@ -1394,9 +1623,11 @@ class PaygistixPaymentForm {
                         // Clear intervals
                         if (self.windowCheckInterval) {
                             clearInterval(self.windowCheckInterval);
+                            self.windowCheckInterval = null;
                         }
                         if (self.pollingInterval) {
                             clearInterval(self.pollingInterval);
+                            self.pollingInterval = null;
                         }
                         // Close payment window if open
                         if (self.testPaymentWindow && !self.testPaymentWindow.closed) {
@@ -1406,8 +1637,12 @@ class PaygistixPaymentForm {
                                 console.log('Could not close test window:', e);
                             }
                         }
+                        
+                        // Mark as not processing anymore
+                        self.isProcessingPayment = false;
+                        
                         // Cancel the payment token
-                        self.cancelPaymentToken(paymentToken).then(() => {
+                        self.cancelPaymentToken(self.paymentToken).then(() => {
                             console.log('Payment token cancelled via cancel button');
                             self.handlePaymentFailure(paymentSpinner, 'Payment cancelled by user', null);
                         }).catch(err => {

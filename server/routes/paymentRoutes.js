@@ -1,8 +1,6 @@
 const express = require('express');
 const router = express.Router();
 const paymentController = require('../controllers/paymentController');
-const fs = require('fs');
-const path = require('path');
 
 // Payment configuration endpoint (public)
 router.get('/config', paymentController.getConfig);
@@ -20,27 +18,33 @@ router.post('/update-status/:token', paymentController.updatePaymentStatus);
 router.get('/pool-stats', paymentController.getPoolStats);
 
 // Dynamic callback handler routes
-try {
-  const configPath = path.join(__dirname, '../config/paygistix-forms.json');
-  const configData = fs.readFileSync(configPath, 'utf8');
-  const config = JSON.parse(configData);
-  
-  // Create dynamic routes for each callback path
-  config.callbackPaths.forEach(callbackPath => {
-    // Remove /api/v1/payments prefix from callback path since it's already in the router base
-    const routePath = callbackPath.replace('/api/v1/payments', '');
-    
-    router.get(routePath, (req, res) => 
-      paymentController.handleFormCallback(req, res, callbackPath)
-    );
-    router.post(routePath, (req, res) => 
-      paymentController.handleFormCallback(req, res, callbackPath)
-    );
-    
-    console.log(`Registered payment callback route: ${callbackPath}`);
-  });
-} catch (error) {
-  console.error('Error loading callback routes:', error);
+// Only load in non-test environment to avoid file system issues during testing
+if (process.env.NODE_ENV !== 'test') {
+  const fs = require('fs');
+  const path = require('path');
+
+  try {
+    const configPath = path.join(__dirname, '../config/paygistix-forms.json');
+    const configData = fs.readFileSync(configPath, 'utf8');
+    const config = JSON.parse(configData);
+
+    // Create dynamic routes for each callback path
+    config.callbackPaths.forEach(callbackPath => {
+      // Remove /api/v1/payments prefix from callback path since it's already in the router base
+      const routePath = callbackPath.replace('/api/v1/payments', '');
+
+      router.get(routePath, (req, res) =>
+        paymentController.handleFormCallback(req, res, callbackPath)
+      );
+      router.post(routePath, (req, res) =>
+        paymentController.handleFormCallback(req, res, callbackPath)
+      );
+
+      console.log(`Registered payment callback route: ${callbackPath}`);
+    });
+  } catch (error) {
+    console.error('Error loading callback routes:', error);
+  }
 }
 
 module.exports = router;

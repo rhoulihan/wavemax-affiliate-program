@@ -1,5 +1,43 @@
 # Recent Major Updates
 
+## Payment Processing Refactoring (January 2025)
+- **Generic Payment Methods**: Unified payment processing architecture
+  - Single `processPayment` method replacing registration-specific and order-specific methods
+  - `processPaymentTestMode` for development environments with configurable scenarios
+  - Simplified payment token management and callback handling
+  - Consistent error handling across all payment types
+
+## Schedule Pickup Workflow Enhancement (January 2025)
+- **Integrated Payment Flow**: Complete end-to-end pickup scheduling with payment
+  - Seamless transition from login to pickup form to payment
+  - Dynamic calculation of service fees based on weight and delivery requirements
+  - Real-time display of WDF rates from system configuration
+  - Automatic order creation with payment processing
+  - Support for both authenticated and guest checkout flows
+
+## Order Confirmation Page Updates (January 2025)
+- **Streamlined User Experience**: Simplified confirmation display
+  - Removed redundant delivery details section
+  - Clear order summary with itemized pricing
+  - Improved navigation options back to main site or dashboard
+  - Fixed timing issues with data population
+  - Enhanced responsive design for mobile devices
+
+## Translation System Enhancements (January 2025)
+- **Payment Form Internationalization**: Complete multi-language support
+  - All payment-related UI elements fully translated
+  - Dynamic language switching for payment forms
+  - Improved placeholder system for email templates
+  - Consistent language persistence across payment flows
+  - Support for error messages in all supported languages
+
+## Bug Fixes and Stability Improvements (January 2025)
+- **OAuth Authentication**: Fixed redirect loop in affiliate dashboard OAuth login
+- **Payment Window Detection**: Improved cross-origin communication for payment forms
+- **Session Management**: Enhanced session persistence in embedded contexts
+- **CSRF Protection**: Refined exemptions for payment provider callbacks
+- **Data Display**: Resolved race conditions in order confirmation page
+
 ## DocuSign W-9 Integration (June 2025)
 - **Electronic W-9 Signatures**: Complete DocuSign integration for tax form collection
   - OAuth 2.0 Authorization Code Grant with PKCE for secure authentication

@@ -20,7 +20,7 @@ describe('Password Validation Integration Tests', () => {
     await Customer.deleteMany({});
     await Administrator.deleteMany({});
     await Operator.deleteMany({});
-    
+
     // Create agent and get CSRF token
     agent = createAgent(app);
     csrfToken = await getCsrfToken(app, agent);
@@ -73,9 +73,9 @@ describe('Password Validation Integration Tests', () => {
         const testResponse = await agent
           .post('/api/v1/affiliates/register')
           .set('x-csrf-token', csrfToken)
-          .send({...registrationData, email: ''});
+          .send({ ...registrationData, email: '' });
         console.log(`Email validation test - Status: ${testResponse.status}, Body:`, testResponse.body);
-        
+
         console.log(`Test password: ${weakPassword}, Status: ${response.status}, Body:`, response.body);
         expect(response.status).toBe(400);
         expect(response.body.success).toBe(false);
@@ -371,7 +371,7 @@ describe('Password Validation Integration Tests', () => {
 
   describe('Administrator Password Validation', () => {
     let adminToken;
-    
+
     beforeEach(async () => {
       // Create a test administrator for authentication
       const testAdmin = new Administrator({
@@ -393,7 +393,7 @@ describe('Password Validation Integration Tests', () => {
           email: 'setup@example.com',
           password: 'SecureM@ster7!9K'
         });
-      
+
       adminToken = loginResponse.body.token;
     });
 
@@ -419,7 +419,7 @@ describe('Password Validation Integration Tests', () => {
       if (response.body.errors) {
         expect(Array.isArray(response.body.errors)).toBe(true);
         // Check if errors array contains password-related validation
-        const hasPasswordError = response.body.errors.some(err => 
+        const hasPasswordError = response.body.errors.some(err =>
           (typeof err === 'string' && err.includes('Password')) ||
           (err.msg && err.msg.includes('Password'))
         );
@@ -452,7 +452,7 @@ describe('Password Validation Integration Tests', () => {
 
   describe('Operator Password Validation', () => {
     let adminToken;
-    
+
     beforeEach(async () => {
       // Create a test administrator for authentication
       const testAdmin = new Administrator({
@@ -474,7 +474,7 @@ describe('Password Validation Integration Tests', () => {
           email: 'opsetup@example.com',
           password: 'SecureM@ster7!9K'
         });
-      
+
       adminToken = loginResponse.body.token;
     });
 
@@ -501,7 +501,7 @@ describe('Password Validation Integration Tests', () => {
       if (response.body.errors) {
         expect(Array.isArray(response.body.errors)).toBe(true);
         // Check if errors array contains password-related validation
-        const hasPasswordError = response.body.errors.some(err => 
+        const hasPasswordError = response.body.errors.some(err =>
           (typeof err === 'string' && err.includes('Password')) ||
           (err.msg && err.msg.includes('Password'))
         );
@@ -589,7 +589,7 @@ describe('Password Validation Integration Tests', () => {
       if (resetResponse.body.errors) {
         expect(Array.isArray(resetResponse.body.errors)).toBe(true);
         // Check if errors array contains password-related validation
-        const hasPasswordError = resetResponse.body.errors.some(err => 
+        const hasPasswordError = resetResponse.body.errors.some(err =>
           (typeof err === 'string' && err.includes('Password')) ||
           (err.msg && err.msg.includes('Password'))
         );
@@ -655,7 +655,7 @@ describe('Password Validation Integration Tests', () => {
   describe('Login with Updated Passwords', () => {
     test('should successfully login with strong password', async () => {
       const strongPassword = 'LoginTest123!';
-      
+
       // Create affiliate with strong password
       const hashedPassword = hashPassword(strongPassword);
       const affiliate = new Affiliate({
@@ -728,7 +728,7 @@ describe('Password Validation Integration Tests', () => {
       if (response.body.errors) {
         expect(Array.isArray(response.body.errors)).toBe(true);
         // Check if errors array contains username-related validation
-        const hasUsernameError = response.body.errors.some(err => 
+        const hasUsernameError = response.body.errors.some(err =>
           (typeof err === 'string' && err.includes('username')) ||
           (err.msg && err.msg.includes('username'))
         );
@@ -742,7 +742,7 @@ describe('Password Validation Integration Tests', () => {
   describe('Password Strength Edge Cases', () => {
     test('should reject passwords with only special characters at the end', async () => {
       const weakPassword = 'SecureM@ster7!9K!!!'; // Master password + 3 consecutive ! chars
-      
+
       const registrationData = {
         firstName: 'Edge',
         lastName: 'Case',
@@ -783,7 +783,7 @@ describe('Password Validation Integration Tests', () => {
 
     test('should accept passwords with mixed character distribution', async () => {
       const strongPassword = 'M1x3d&Ch@r$Distr1but10n!';
-      
+
       const registrationData = {
         firstName: 'Mixed',
         lastName: 'Distribution',
@@ -817,7 +817,7 @@ describe('Password Validation Integration Tests', () => {
 
     test('should handle Unicode characters in passwords appropriately', async () => {
       const unicodePassword = 'Üñ1c0d3&P@ssw0rd!';
-      
+
       const registrationData = {
         firstName: 'Unicode',
         lastName: 'Test',

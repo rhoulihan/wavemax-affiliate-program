@@ -1,11 +1,11 @@
 // Initialization function for affiliate registration when dynamically loaded
 (function() {
   'use strict';
-  
+
   console.log('[affiliate-register-init] Script loading at:', new Date().toISOString());
   console.log('[affiliate-register-init] SwirlSpinner available?', !!window.SwirlSpinner);
   console.log('[affiliate-register-init] Document readyState:', document.readyState);
-  
+
   // Helper function to get translated spinner messages
   function getSpinnerMessage(key, params = {}) {
     // Default messages
@@ -16,7 +16,7 @@
       'messages.registrationSuccess': 'Registration successful!',
       'messages.redirecting': 'Redirecting...'
     };
-    
+
     // Try to get translation
     if (window.i18n && window.i18n.t && window.i18n.currentLanguage) {
       const translated = window.i18n.t(key, params);
@@ -25,7 +25,7 @@
         return translated;
       }
     }
-    
+
     // Fallback to default message
     let defaultMsg = defaults[key] || key;
     // Replace parameters in default message
@@ -36,50 +36,50 @@
     }
     return defaultMsg;
   }
-  
+
   // Note: Registration endpoints currently don't require CSRF tokens
   // But we'll prepare for future implementation
   const csrfFetch = window.CsrfUtils && window.CsrfUtils.csrfFetch ? window.CsrfUtils.csrfFetch : fetch;
 
-function initializeAffiliateRegistration() {
-  console.log('[Init] Starting affiliate registration initialization');
-  
-  // Initialize form validation first
-  if (window.FormValidation) {
-    console.log('[Init] Initializing form validation...');
-    window.FormValidation.initialize();
-  } else {
-    console.warn('[Init] FormValidation not available');
-  }
-  
-  // Configuration for embedded environment
-  const baseUrl = window.EMBED_CONFIG?.baseUrl || 'https://wavemax.promo';
-  const isEmbedded = window.EMBED_CONFIG?.isEmbedded || false;
-  
-  // Set language preference based on browser language
-  const languagePreferenceField = document.getElementById('languagePreference');
-  if (languagePreferenceField) {
-    // Get browser language
-    let browserLang = navigator.language || navigator.userLanguage || 'en';
-    // Extract just the language code (e.g., 'en' from 'en-US')
-    browserLang = browserLang.substring(0, 2).toLowerCase();
-    
-    // Check if it's one of our supported languages
-    const supportedLanguages = ['en', 'es', 'pt', 'de'];
-    const languagePreference = supportedLanguages.includes(browserLang) ? browserLang : 'en';
-    
-    // Set the value
-    languagePreferenceField.value = languagePreference;
-    console.log('Language preference set to:', languagePreference);
-  }
+  function initializeAffiliateRegistration() {
+    console.log('[Init] Starting affiliate registration initialization');
 
-  // Function to show modal when existing affiliate tries to register
-  function showExistingAffiliateModal(result) {
-    const affiliate = result.affiliate;
-    const affiliateName = `${affiliate.firstName} ${affiliate.lastName}`;
-    
-    // Create modal HTML - positioned at top of viewport for iframe visibility
-    const modalHTML = `
+    // Initialize form validation first
+    if (window.FormValidation) {
+      console.log('[Init] Initializing form validation...');
+      window.FormValidation.initialize();
+    } else {
+      console.warn('[Init] FormValidation not available');
+    }
+
+    // Configuration for embedded environment
+    const baseUrl = window.EMBED_CONFIG?.baseUrl || 'https://wavemax.promo';
+    const isEmbedded = window.EMBED_CONFIG?.isEmbedded || false;
+
+    // Set language preference based on browser language
+    const languagePreferenceField = document.getElementById('languagePreference');
+    if (languagePreferenceField) {
+    // Get browser language
+      let browserLang = navigator.language || navigator.userLanguage || 'en';
+      // Extract just the language code (e.g., 'en' from 'en-US')
+      browserLang = browserLang.substring(0, 2).toLowerCase();
+
+      // Check if it's one of our supported languages
+      const supportedLanguages = ['en', 'es', 'pt', 'de'];
+      const languagePreference = supportedLanguages.includes(browserLang) ? browserLang : 'en';
+
+      // Set the value
+      languagePreferenceField.value = languagePreference;
+      console.log('Language preference set to:', languagePreference);
+    }
+
+    // Function to show modal when existing affiliate tries to register
+    function showExistingAffiliateModal(result) {
+      const affiliate = result.affiliate;
+      const affiliateName = `${affiliate.firstName} ${affiliate.lastName}`;
+
+      // Create modal HTML - positioned at top of viewport for iframe visibility
+      const modalHTML = `
       <div id="existingAffiliateModal" class="fixed inset-0 bg-black bg-opacity-50 z-50" style="z-index: 9999; position: fixed; top: 0; left: 0; width: 100%; height: 100vh; display: flex; align-items: flex-start; justify-content: center; padding-top: 20px;">
         <div class="bg-white rounded-lg p-6 max-w-md mx-4 shadow-xl" style="margin-top: 0; position: relative;">
           <div class="text-center mb-6">
@@ -105,452 +105,463 @@ function initializeAffiliateRegistration() {
         </div>
       </div>
     `;
-    
-    // Add modal to page
-    document.body.insertAdjacentHTML('beforeend', modalHTML);
-    
-    // Scroll to top of the page to ensure modal is visible
-    window.scrollTo(0, 0);
-    
-    // Ensure modal is visible by also scrolling the document body to top
-    document.documentElement.scrollTop = 0;
-    document.body.scrollTop = 0;
-    
-    // Add event listeners
-    document.getElementById('loginToDashboard').addEventListener('click', function() {
-      console.log('User chose to login to dashboard');
-      
-      // Get affiliate ID from result
-      const affiliateId = result.affiliate.affiliateId;
-      console.log('Redirecting to affiliate dashboard, affiliateId:', affiliateId);
-      
-      // Always use direct window.location.href redirect like other successful logins
-      window.location.href = `/embed-app.html?route=/affiliate-dashboard&id=${affiliateId}`;
-      
-      // Close modal
-      document.getElementById('existingAffiliateModal').remove();
-    });
-    
-    document.getElementById('chooseAnotherMethod').addEventListener('click', function() {
-      console.log('User chose to use different login method');
-      // Close modal and let user try another method
-      document.getElementById('existingAffiliateModal').remove();
-      
-      // Optionally show a message about using a different account
-      alert('Please try logging in with a different Google account or use the username/password login method.');
-    });
-    
-    // Close modal when clicking outside
-    document.getElementById('existingAffiliateModal').addEventListener('click', function(e) {
-      if (e.target === this) {
-        this.remove();
-      }
-    });
-  }
 
-  // Show/hide payment method fields based on selection
-  const paymentMethodSelect = document.getElementById('paymentMethod');
-  const bankInfoContainer = document.getElementById('bankInfoContainer');
-  const paypalInfoContainer = document.getElementById('paypalInfoContainer');
-  const accountNumberInput = document.getElementById('accountNumber');
-  const routingNumberInput = document.getElementById('routingNumber');
-  const paypalEmailInput = document.getElementById('paypalEmail');
+      // Add modal to page
+      document.body.insertAdjacentHTML('beforeend', modalHTML);
 
-  if (paymentMethodSelect) {
-    paymentMethodSelect.addEventListener('change', function() {
-      // Reset required fields
-      accountNumberInput.required = false;
-      routingNumberInput.required = false;
-      paypalEmailInput.required = false;
+      // Scroll to top of the page to ensure modal is visible
+      window.scrollTo(0, 0);
 
-      // Hide all containers first
-      bankInfoContainer.style.display = 'none';
-      paypalInfoContainer.style.display = 'none';
+      // Ensure modal is visible by also scrolling the document body to top
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
 
-      // Show relevant container based on selection
-      if (this.value === 'directDeposit') {
-        bankInfoContainer.style.display = 'block';
-        accountNumberInput.required = true;
-        routingNumberInput.required = true;
-      } else if (this.value === 'paypal') {
-        paypalInfoContainer.style.display = 'block';
-        paypalEmailInput.required = true;
-      }
-    });
-  }
+      // Add event listeners
+      document.getElementById('loginToDashboard').addEventListener('click', function() {
+        console.log('User chose to login to dashboard');
 
-  // Social registration button handlers
-  const googleRegister = document.getElementById('googleRegister');
-  const facebookRegister = document.getElementById('facebookRegister');
-  const linkedinRegister = document.getElementById('linkedinRegister');
-
-  // Shared validation function for both OAuth and form submission
-  function validateFormFields(isSocialRegistration = false) {
-    const requiredFields = [];
-    let hasValidationErrors = false;
-    
-    // First, run field-specific validation if FormValidation is available
-    if (window.FormValidation) {
-      console.log('[Form Validation] Running comprehensive field validation...');
-      const formValid = window.FormValidation.validateForm();
-      if (!formValid) {
-        hasValidationErrors = true;
-        console.log('[Form Validation] Field validation failed');
-      }
-    }
-    
-    // Personal information always required (OAuth pre-fills these but they can be missing for validation during OAuth button click)
-    requiredFields.push(
-      { id: 'firstName', name: 'First Name' },
-      { id: 'lastName', name: 'Last Name' },
-      { id: 'email', name: 'Email' }
-    );
-    
-    // Check if address has been validated (business info section is hidden)
-    const businessInfoSection = document.querySelector('#businessInfoSection');
-    const addressValidated = window.addressValidated || (businessInfoSection && businessInfoSection.style.display === 'none');
-    
-    // Common required fields for both registration types
-    requiredFields.push(
-      { id: 'phone', name: 'Phone Number' }
-    );
-    
-    // Only validate address fields if they haven't been validated yet
-    if (!addressValidated) {
-      requiredFields.push(
-        { id: 'address', name: 'Address' },
-        { id: 'city', name: 'City' },
-        { id: 'state', name: 'State' },
-        { id: 'zipCode', name: 'ZIP Code' }
-      );
-    }
-    
-    // These fields are always required
-    requiredFields.push(
-      { id: 'minimumDeliveryFee', name: 'Minimum Delivery Fee' },
-      { id: 'perBagDeliveryFee', name: 'Per-Bag Delivery Fee' },
-      { id: 'paymentMethod', name: 'Payment Method' }
-    );
-    // Note: Service area fields are checked separately below with component-generated IDs
-
-    // Only require username and password for traditional registration (NOT OAuth)
-    // Check if this is OAuth by looking for socialToken or window.isOAuthUser
-    const formData = new FormData(document.getElementById('affiliateRegistrationForm'));
-    const hasSocialToken = formData.get('socialToken') || window.isOAuthUser;
-    
-    if (!isSocialRegistration && !hasSocialToken) {
-      requiredFields.push(
-        { id: 'username', name: 'Username' },
-        { id: 'password', name: 'Password' }
-      );
-    }
-
-    const missingFields = [];
-    for (const field of requiredFields) {
-      const element = document.getElementById(field.id);
-      if (!element || !element.value.trim()) {
-        missingFields.push(field.name);
-      }
-    }
-    
-    // Check service area separately (stored in hidden fields with component-generated IDs)
-    const serviceLatitude = document.getElementById('registrationServiceAreaComponent-latitude');
-    const serviceLongitude = document.getElementById('registrationServiceAreaComponent-longitude');
-    if (!serviceLatitude?.value || !serviceLongitude?.value) {
-      missingFields.push('Service Area (Please click on the map to set your service location)');
-    }
-
-    // Check payment method specific fields
-    const paymentMethod = document.getElementById('paymentMethod')?.value;
-    if (paymentMethod === 'directDeposit') {
-      const accountNumber = document.getElementById('accountNumber');
-      const routingNumber = document.getElementById('routingNumber');
-      if (!accountNumber?.value.trim()) missingFields.push('Account Number');
-      if (!routingNumber?.value.trim()) missingFields.push('Routing Number');
-    } else if (paymentMethod === 'paypal') {
-      const paypalEmail = document.getElementById('paypalEmail');
-      if (!paypalEmail?.value.trim()) missingFields.push('PayPal Email');
-    }
-
-    // If we have field validation errors, add them to missing fields
-    if (hasValidationErrors) {
-      if (missingFields.length === 0) {
-        missingFields.push('Please correct the highlighted field errors above');
-      }
-    }
-    
-    return missingFields;
-  }
-
-  function handleSocialAuth(provider) {
-    // No validation required before OAuth - the point is to authenticate first and auto-populate the form
-    console.log(`🚀 Starting ${provider} OAuth authentication...`);
-
-    // Show large spinner centered on the OAuth section
-    const socialAuthSection = document.getElementById('socialAuthSection');
-    console.log('[OAuth] SwirlSpinner available?', !!window.SwirlSpinner);
-    console.log('[OAuth] SwirlSpinnerUtils available?', !!window.SwirlSpinnerUtils);
-    console.log('[OAuth] socialAuthSection found?', !!socialAuthSection);
-    
-    // Define spinner in outer scope so it's accessible in the polling function
-    let sectionSpinner = null;
-    
-    // Create function to hide spinner
-    const hideSpinner = function() {
-      if (sectionSpinner) {
-        console.log('[OAuth] Hiding spinner');
-        sectionSpinner.hide();
-        sectionSpinner = null;
-      }
-    };
-    
-    if (socialAuthSection) {
-      const rect = socialAuthSection.getBoundingClientRect();
-      console.log('[OAuth] Section dimensions:', { width: rect.width, height: rect.height });
-      console.log('[OAuth] Section position style:', window.getComputedStyle(socialAuthSection).position);
-      
-      // Use SwirlSpinner
-      if (window.SwirlSpinner) {
-        try {
-          console.log('[OAuth] Creating SwirlSpinner with overlay...');
-          // Get translated message
-          const connectingMessage = getSpinnerMessage('spinner.connectingWith', { 
-            provider: provider.charAt(0).toUpperCase() + provider.slice(1) 
-          });
-          console.log('[OAuth] Using message:', connectingMessage);
-          
-          sectionSpinner = new window.SwirlSpinner({
-            container: socialAuthSection,
-            size: 'large',
-            overlay: true,
-            message: connectingMessage
-          }).show();
-          console.log('[OAuth] SwirlSpinner created successfully');
-          
-          // Check if spinner element was actually added
-          const spinnerElements = socialAuthSection.querySelectorAll('.swirl-spinner-overlay');
-          console.log('[OAuth] Spinner overlay elements found:', spinnerElements.length);
-        } catch (error) {
-          console.error('[OAuth] Error creating SwirlSpinner:', error);
+        // Store the token and affiliate data before redirecting
+        if (result.token) {
+          localStorage.setItem('affiliateToken', result.token);
+          console.log('Stored affiliate token');
         }
-      } else {
-        console.error('[OAuth] SwirlSpinner not available! This should not happen.');
-      }
+        
+        if (result.affiliate) {
+          localStorage.setItem('currentAffiliate', JSON.stringify(result.affiliate));
+          console.log('Stored affiliate data:', result.affiliate);
+        }
+
+        // Get affiliate ID from result
+        const affiliateId = result.affiliate.affiliateId;
+        console.log('Redirecting to affiliate dashboard, affiliateId:', affiliateId);
+
+        // Always use direct window.location.href redirect like other successful logins
+        window.location.href = `/embed-app.html?route=/affiliate-dashboard&id=${affiliateId}`;
+
+        // Close modal
+        document.getElementById('existingAffiliateModal').remove();
+      });
+
+      document.getElementById('chooseAnotherMethod').addEventListener('click', function() {
+        console.log('User chose to use different login method');
+        // Close modal and let user try another method
+        document.getElementById('existingAffiliateModal').remove();
+
+        // Optionally show a message about using a different account
+        alert('Please try logging in with a different Google account or use the username/password login method.');
+      });
+
+      // Close modal when clicking outside
+      document.getElementById('existingAffiliateModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+          this.remove();
+        }
+      });
     }
 
-    // For embedded context, use popup window to avoid iframe restrictions
-    if (isEmbedded || window.self !== window.top) {
-      // Generate unique session ID for database polling
-      const sessionId = 'oauth_' + Date.now() + '_' + Math.random().toString(36).substring(2);
-      console.log('Generated OAuth session ID:', sessionId);
-      
-      const oauthUrl = `${baseUrl}/api/v1/auth/${provider}?popup=true&state=${sessionId}&t=${Date.now()}`;
-      console.log('🔗 Opening OAuth URL:', oauthUrl);
-      
-      const popup = window.open(
-        oauthUrl, 
-        'socialAuth',
-        'width=500,height=600,scrollbars=yes,resizable=yes'
-      );
-      
-      console.log('Popup opened:', {
-        'popup exists': !!popup,
-        'popup.closed': popup ? popup.closed : 'N/A',
-        'popup type': typeof popup,
-        'popup URL': `${baseUrl}/api/v1/auth/${provider}?popup=true`
+    // Show/hide payment method fields based on selection
+    const paymentMethodSelect = document.getElementById('paymentMethod');
+    const bankInfoContainer = document.getElementById('bankInfoContainer');
+    const paypalInfoContainer = document.getElementById('paypalInfoContainer');
+    const accountNumberInput = document.getElementById('accountNumber');
+    const routingNumberInput = document.getElementById('routingNumber');
+    const paypalEmailInput = document.getElementById('paypalEmail');
+
+    if (paymentMethodSelect) {
+      paymentMethodSelect.addEventListener('change', function() {
+      // Reset required fields
+        accountNumberInput.required = false;
+        routingNumberInput.required = false;
+        paypalEmailInput.required = false;
+
+        // Hide all containers first
+        bankInfoContainer.style.display = 'none';
+        paypalInfoContainer.style.display = 'none';
+
+        // Show relevant container based on selection
+        if (this.value === 'directDeposit') {
+          bankInfoContainer.style.display = 'block';
+          accountNumberInput.required = true;
+          routingNumberInput.required = true;
+        } else if (this.value === 'paypal') {
+          paypalInfoContainer.style.display = 'block';
+          paypalEmailInput.required = true;
+        }
       });
-      
-      if (!popup || popup.closed) {
-        window.ErrorHandler.showError('Popup was blocked. Please allow popups for this site and try again.');
-        // Hide spinner
-        hideSpinner();
-        return;
+    }
+
+    // Social registration button handlers
+    const googleRegister = document.getElementById('googleRegister');
+    const facebookRegister = document.getElementById('facebookRegister');
+    const linkedinRegister = document.getElementById('linkedinRegister');
+
+    // Shared validation function for both OAuth and form submission
+    function validateFormFields(isSocialRegistration = false) {
+      const requiredFields = [];
+      let hasValidationErrors = false;
+
+      // First, run field-specific validation if FormValidation is available
+      if (window.FormValidation) {
+        console.log('[Form Validation] Running comprehensive field validation...');
+        const formValid = window.FormValidation.validateForm();
+        if (!formValid) {
+          hasValidationErrors = true;
+          console.log('[Form Validation] Field validation failed');
+        }
       }
-      
-      // Database polling approach (more reliable than postMessage)
-      let pollCount = 0;
-      const maxPolls = 120; // 6 minutes max (120 * 3 seconds)
-      let authResultReceived = false;
-      
-      console.log('Starting database polling for OAuth result...');
-      
-      const pollForResult = setInterval(async () => {
-        pollCount++;
-        
-        try {
+
+      // Personal information always required (OAuth pre-fills these but they can be missing for validation during OAuth button click)
+      requiredFields.push(
+        { id: 'firstName', name: 'First Name' },
+        { id: 'lastName', name: 'Last Name' },
+        { id: 'email', name: 'Email' }
+      );
+
+      // Check if address has been validated (business info section is hidden)
+      const businessInfoSection = document.querySelector('#businessInfoSection');
+      const addressValidated = window.addressValidated || (businessInfoSection && businessInfoSection.style.display === 'none');
+
+      // Common required fields for both registration types
+      requiredFields.push(
+        { id: 'phone', name: 'Phone Number' }
+      );
+
+      // Only validate address fields if they haven't been validated yet
+      if (!addressValidated) {
+        requiredFields.push(
+          { id: 'address', name: 'Address' },
+          { id: 'city', name: 'City' },
+          { id: 'state', name: 'State' },
+          { id: 'zipCode', name: 'ZIP Code' }
+        );
+      }
+
+      // These fields are always required
+      requiredFields.push(
+        { id: 'minimumDeliveryFee', name: 'Minimum Delivery Fee' },
+        { id: 'perBagDeliveryFee', name: 'Per-Bag Delivery Fee' },
+        { id: 'paymentMethod', name: 'Payment Method' }
+      );
+      // Note: Service area fields are checked separately below with component-generated IDs
+
+      // Only require username and password for traditional registration (NOT OAuth)
+      // Check if this is OAuth by looking for socialToken or window.isOAuthUser
+      const formData = new FormData(document.getElementById('affiliateRegistrationForm'));
+      const hasSocialToken = formData.get('socialToken') || window.isOAuthUser;
+
+      if (!isSocialRegistration && !hasSocialToken) {
+        requiredFields.push(
+          { id: 'username', name: 'Username' },
+          { id: 'password', name: 'Password' }
+        );
+      }
+
+      const missingFields = [];
+      for (const field of requiredFields) {
+        const element = document.getElementById(field.id);
+        if (!element || !element.value.trim()) {
+          missingFields.push(field.name);
+        }
+      }
+
+      // Check service area separately (stored in hidden fields with component-generated IDs)
+      const serviceLatitude = document.getElementById('registrationServiceAreaComponent-latitude');
+      const serviceLongitude = document.getElementById('registrationServiceAreaComponent-longitude');
+      if (!serviceLatitude?.value || !serviceLongitude?.value) {
+        missingFields.push('Service Area (Please click on the map to set your service location)');
+      }
+
+      // Check payment method specific fields
+      const paymentMethod = document.getElementById('paymentMethod')?.value;
+      if (paymentMethod === 'directDeposit') {
+        const accountNumber = document.getElementById('accountNumber');
+        const routingNumber = document.getElementById('routingNumber');
+        if (!accountNumber?.value.trim()) missingFields.push('Account Number');
+        if (!routingNumber?.value.trim()) missingFields.push('Routing Number');
+      } else if (paymentMethod === 'paypal') {
+        const paypalEmail = document.getElementById('paypalEmail');
+        if (!paypalEmail?.value.trim()) missingFields.push('PayPal Email');
+      }
+
+      // If we have field validation errors, add them to missing fields
+      if (hasValidationErrors) {
+        if (missingFields.length === 0) {
+          missingFields.push('Please correct the highlighted field errors above');
+        }
+      }
+
+      return missingFields;
+    }
+
+    function handleSocialAuth(provider) {
+    // No validation required before OAuth - the point is to authenticate first and auto-populate the form
+      console.log(`🚀 Starting ${provider} OAuth authentication...`);
+
+      // Show large spinner centered on the OAuth section
+      const socialAuthSection = document.getElementById('socialAuthSection');
+      console.log('[OAuth] SwirlSpinner available?', !!window.SwirlSpinner);
+      console.log('[OAuth] SwirlSpinnerUtils available?', !!window.SwirlSpinnerUtils);
+      console.log('[OAuth] socialAuthSection found?', !!socialAuthSection);
+
+      // Define spinner in outer scope so it's accessible in the polling function
+      let sectionSpinner = null;
+
+      // Create function to hide spinner
+      const hideSpinner = function() {
+        if (sectionSpinner) {
+          console.log('[OAuth] Hiding spinner');
+          sectionSpinner.hide();
+          sectionSpinner = null;
+        }
+      };
+
+      if (socialAuthSection) {
+        const rect = socialAuthSection.getBoundingClientRect();
+        console.log('[OAuth] Section dimensions:', { width: rect.width, height: rect.height });
+        console.log('[OAuth] Section position style:', window.getComputedStyle(socialAuthSection).position);
+
+        // Use SwirlSpinner
+        if (window.SwirlSpinner) {
+          try {
+            console.log('[OAuth] Creating SwirlSpinner with overlay...');
+            // Get translated message
+            const connectingMessage = getSpinnerMessage('spinner.connectingWith', {
+              provider: provider.charAt(0).toUpperCase() + provider.slice(1)
+            });
+            console.log('[OAuth] Using message:', connectingMessage);
+
+            sectionSpinner = new window.SwirlSpinner({
+              container: socialAuthSection,
+              size: 'large',
+              overlay: true,
+              message: connectingMessage
+            }).show();
+            console.log('[OAuth] SwirlSpinner created successfully');
+
+            // Check if spinner element was actually added
+            const spinnerElements = socialAuthSection.querySelectorAll('.swirl-spinner-overlay');
+            console.log('[OAuth] Spinner overlay elements found:', spinnerElements.length);
+          } catch (error) {
+            console.error('[OAuth] Error creating SwirlSpinner:', error);
+          }
+        } else {
+          console.error('[OAuth] SwirlSpinner not available! This should not happen.');
+        }
+      }
+
+      // For embedded context, use popup window to avoid iframe restrictions
+      if (isEmbedded || window.self !== window.top) {
+      // Generate unique session ID for database polling
+        const sessionId = 'oauth_' + Date.now() + '_' + Math.random().toString(36).substring(2);
+        console.log('Generated OAuth session ID:', sessionId);
+
+        const oauthUrl = `${baseUrl}/api/v1/auth/${provider}?popup=true&state=${sessionId}&t=${Date.now()}`;
+        console.log('🔗 Opening OAuth URL:', oauthUrl);
+
+        const popup = window.open(
+          oauthUrl,
+          'socialAuth',
+          'width=500,height=600,scrollbars=yes,resizable=yes'
+        );
+
+        console.log('Popup opened:', {
+          'popup exists': !!popup,
+          'popup.closed': popup ? popup.closed : 'N/A',
+          'popup type': typeof popup,
+          'popup URL': `${baseUrl}/api/v1/auth/${provider}?popup=true`
+        });
+
+        if (!popup || popup.closed) {
+          window.ErrorHandler.showError('Popup was blocked. Please allow popups for this site and try again.');
+          // Hide spinner
+          hideSpinner();
+          return;
+        }
+
+        // Database polling approach (more reliable than postMessage)
+        let pollCount = 0;
+        const maxPolls = 120; // 6 minutes max (120 * 3 seconds)
+        let authResultReceived = false;
+
+        console.log('Starting database polling for OAuth result...');
+
+        const pollForResult = setInterval(async () => {
+          pollCount++;
+
+          try {
           // Check if popup is closed
-          if (popup.closed) {
-            console.log('Popup closed, continuing to poll for result...');
-          }
-          
-          // Poll the database for result
-          const response = await csrfFetch(`${baseUrl}/api/v1/auth/oauth-session/${sessionId}`);
-          
-          // Handle 404 specifically - it's expected while waiting for OAuth completion
-          if (response.status === 404) {
-            // Session doesn't exist yet, continue polling
-            if (pollCount % 10 === 0) {
-              console.log('Waiting for OAuth authentication to complete...');
+            if (popup.closed) {
+              console.log('Popup closed, continuing to poll for result...');
             }
-            return;
-          }
-          
-          console.log('🔍 Polling response:', {
-            ok: response.ok,
-            status: response.status,
-            statusText: response.statusText
-          });
-          
-          if (response.ok) {
-            const data = await response.json();
-            console.log('📊 Response data:', data);
-            if (data.success && data.result) {
-              console.log('📨 OAuth result received from database:', data.result);
-              authResultReceived = true;
-              clearInterval(pollForResult);
-              
-              if (popup && !popup.closed) {
-                popup.close();
-              }
-              
-              // Handle the result
-              try {
-                if (data.result.type === 'social-auth-success') {
-                  console.log('Processing social-auth-success from database');
-                  console.log('Calling showSocialRegistrationCompletion with:', {
-                    socialToken: data.result.socialToken,
-                    provider: data.result.provider
-                  });
-                  showSocialRegistrationCompletion(data.result.socialToken, data.result.provider);
-                  // Hide spinner
-                  hideSpinner();
-                } else if (data.result.type === 'social-auth-login') {
-                console.log('Processing social-auth-login from database');
-                // Show modal dialog asking user what they want to do
-                showExistingAffiliateModal(data.result);
-                // Hide spinner
-                hideSpinner();
-              } else if (data.result.type === 'social-auth-error') {
-                console.log('Processing social-auth-error from database');
-                window.ErrorHandler.showError(data.result.message || 'Social authentication failed');
-                // Hide spinner
-                hideSpinner();
-              } else {
-                console.log('Unknown result type:', data.result.type);
-                // Hide spinner
-                hideSpinner();
-              }
-              } catch (resultError) {
-                console.error('Error processing OAuth result:', resultError);
-                window.ErrorHandler.showError('Error processing authentication result');
-                // Hide spinner
-                hideSpinner();
+
+            // Poll the database for result
+            const response = await csrfFetch(`${baseUrl}/api/v1/auth/oauth-session/${sessionId}`);
+
+            // Handle 404 specifically - it's expected while waiting for OAuth completion
+            if (response.status === 404) {
+            // Session doesn't exist yet, continue polling
+              if (pollCount % 10 === 0) {
+                console.log('Waiting for OAuth authentication to complete...');
               }
               return;
             }
-          }
-          
-          // Check for timeout
-          if (pollCount > maxPolls) {
-            console.log('Database polling timeout exceeded');
-            clearInterval(pollForResult);
-            if (popup && !popup.closed) {
-              popup.close();
+
+            console.log('🔍 Polling response:', {
+              ok: response.ok,
+              status: response.status,
+              statusText: response.statusText
+            });
+
+            if (response.ok) {
+              const data = await response.json();
+              console.log('📊 Response data:', data);
+              if (data.success && data.result) {
+                console.log('📨 OAuth result received from database:', data.result);
+                authResultReceived = true;
+                clearInterval(pollForResult);
+
+                if (popup && !popup.closed) {
+                  popup.close();
+                }
+
+                // Handle the result
+                try {
+                  if (data.result.type === 'social-auth-success') {
+                    console.log('Processing social-auth-success from database');
+                    console.log('Calling showSocialRegistrationCompletion with:', {
+                      socialToken: data.result.socialToken,
+                      provider: data.result.provider
+                    });
+                    showSocialRegistrationCompletion(data.result.socialToken, data.result.provider);
+                    // Hide spinner
+                    hideSpinner();
+                  } else if (data.result.type === 'social-auth-login') {
+                    console.log('Processing social-auth-login from database');
+                    // Show modal dialog asking user what they want to do
+                    showExistingAffiliateModal(data.result);
+                    // Hide spinner
+                    hideSpinner();
+                  } else if (data.result.type === 'social-auth-error') {
+                    console.log('Processing social-auth-error from database');
+                    window.ErrorHandler.showError(data.result.message || 'Social authentication failed');
+                    // Hide spinner
+                    hideSpinner();
+                  } else {
+                    console.log('Unknown result type:', data.result.type);
+                    // Hide spinner
+                    hideSpinner();
+                  }
+                } catch (resultError) {
+                  console.error('Error processing OAuth result:', resultError);
+                  window.ErrorHandler.showError('Error processing authentication result');
+                  // Hide spinner
+                  hideSpinner();
+                }
+                return;
+              }
             }
-            window.ErrorHandler.showError('Authentication timed out. Please try again.');
-            // Hide spinner
-            if (buttonSpinner) buttonSpinner.hide();
-            return;
-          }
-          
-          // Log progress every 5 polls (15 seconds)
-          if (pollCount % 5 === 0) {
-            console.log(`🔄 Polling for OAuth result... (${pollCount}/${maxPolls})`);
-          }
-          
-        } catch (error) {
+
+            // Check for timeout
+            if (pollCount > maxPolls) {
+              console.log('Database polling timeout exceeded');
+              clearInterval(pollForResult);
+              if (popup && !popup.closed) {
+                popup.close();
+              }
+              window.ErrorHandler.showError('Authentication timed out. Please try again.');
+              // Hide spinner
+              if (buttonSpinner) buttonSpinner.hide();
+              return;
+            }
+
+            // Log progress every 5 polls (15 seconds)
+            if (pollCount % 5 === 0) {
+              console.log(`🔄 Polling for OAuth result... (${pollCount}/${maxPolls})`);
+            }
+
+          } catch (error) {
           // 404 is expected - it means the OAuth session hasn't been created yet
           // This happens while the user is still on Google's auth page
-          if (error.message && error.message.includes('404')) {
+            if (error.message && error.message.includes('404')) {
             // Session not created yet, this is normal - continue polling
-            if (pollCount % 10 === 0) {
-              console.log('Waiting for user to complete OAuth authentication...');
+              if (pollCount % 10 === 0) {
+                console.log('Waiting for user to complete OAuth authentication...');
+              }
+              return;
             }
-            return;
+
+            console.error('Error polling for OAuth result:', error);
+
+            // Don't stop polling for network errors, just log them
+            if (pollCount % 10 === 0) {
+              console.log('Network error during polling, continuing...');
+            }
           }
-          
-          console.error('Error polling for OAuth result:', error);
-          
-          // Don't stop polling for network errors, just log them
-          if (pollCount % 10 === 0) {
-            console.log('Network error during polling, continuing...');
-          }
-        }
-      }, 3000); // Poll every 3 seconds instead of 1 second
-    } else {
+        }, 3000); // Poll every 3 seconds instead of 1 second
+      } else {
       // For non-embedded context, use direct navigation
-      window.location.href = `${baseUrl}/api/v1/auth/${provider}`;
+        window.location.href = `${baseUrl}/api/v1/auth/${provider}`;
+      }
     }
-  }
 
-  // Attach OAuth handlers immediately - spinner will use fallback if needed
-  console.log('[Init] Attaching OAuth handlers (will use fallback spinner if needed)');
-  
-  if (googleRegister) {
-    googleRegister.addEventListener('click', function() {
-      handleSocialAuth('google');
-    });
-  }
+    // Attach OAuth handlers immediately - spinner will use fallback if needed
+    console.log('[Init] Attaching OAuth handlers (will use fallback spinner if needed)');
 
-  if (facebookRegister) {
-    facebookRegister.addEventListener('click', function() {
-      handleSocialAuth('facebook');
-    });
-  }
+    if (googleRegister) {
+      googleRegister.addEventListener('click', function() {
+        handleSocialAuth('google');
+      });
+    }
 
-  if (linkedinRegister) {
-    linkedinRegister.addEventListener('click', function() {
-      handleSocialAuth('linkedin');
-    });
-  }
+    if (facebookRegister) {
+      facebookRegister.addEventListener('click', function() {
+        handleSocialAuth('facebook');
+      });
+    }
 
-  // Handle social registration completion
-  function handleSocialRegistrationCallback() {
-    const urlParams = new URLSearchParams(window.location.search);
-    const socialToken = urlParams.get('socialToken');
-    const provider = urlParams.get('provider');
-    const error = urlParams.get('error');
+    if (linkedinRegister) {
+      linkedinRegister.addEventListener('click', function() {
+        handleSocialAuth('linkedin');
+      });
+    }
 
-    if (error) {
-      let errorMessage = 'Social authentication failed. Please try again.';
-      switch(error) {
+    // Handle social registration completion
+    function handleSocialRegistrationCallback() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const socialToken = urlParams.get('socialToken');
+      const provider = urlParams.get('provider');
+      const error = urlParams.get('error');
+
+      if (error) {
+        let errorMessage = 'Social authentication failed. Please try again.';
+        switch(error) {
         case 'social_auth_failed':
           errorMessage = 'Social authentication failed. Please try again or use traditional registration.';
           break;
         case 'social_auth_error':
           errorMessage = 'An error occurred during social authentication. Please try again.';
           break;
+        }
+        window.ErrorHandler.showError(errorMessage);
+        return;
       }
-      window.ErrorHandler.showError(errorMessage);
-      return;
-    }
 
-    if (socialToken && provider) {
+      if (socialToken && provider) {
       // Pre-fill form with social data and show completion section
-      showSocialRegistrationCompletion(socialToken, provider);
+        showSocialRegistrationCompletion(socialToken, provider);
+      }
     }
-  }
 
-  function showSocialRegistrationCompletion(socialToken, provider) {
-    console.log('🎨 Showing social registration completion for provider:', provider);
-    
-    // Update the social auth section to show connected status
-    const socialAuthSection = document.getElementById('socialAuthSection');
-    console.log('🔍 Found social auth section:', socialAuthSection);
-    
-    if (socialAuthSection) {
-      console.log('✅ Updating social auth section with success message');
-      socialAuthSection.innerHTML = `
+    function showSocialRegistrationCompletion(socialToken, provider) {
+      console.log('🎨 Showing social registration completion for provider:', provider);
+
+      // Update the social auth section to show connected status
+      const socialAuthSection = document.getElementById('socialAuthSection');
+      console.log('🔍 Found social auth section:', socialAuthSection);
+
+      if (socialAuthSection) {
+        console.log('✅ Updating social auth section with success message');
+        socialAuthSection.innerHTML = `
         <h3 class="text-xl font-bold mb-4" data-i18n="affiliate.register.socialAccountConnected">Social Media Account Connected!</h3>
         <div class="bg-green-50 border border-green-200 rounded-lg p-6">
           <div class="flex items-center justify-center">
@@ -564,749 +575,749 @@ function initializeAffiliateRegistration() {
           </div>
         </div>
       `;
-      
-      // Trigger i18n update for the new content
-      if (window.i18n && window.i18n.updateContent) {
-        window.i18n.updateContent();
+
+        // Trigger i18n update for the new content
+        if (window.i18n && window.i18n.updateContent) {
+          window.i18n.updateContent();
+        }
       }
+
+      // Hide account setup section immediately for OAuth users
+      const accountSetupSection = document.getElementById('accountSetupSection');
+      if (accountSetupSection) {
+        accountSetupSection.style.display = 'none';
+        console.log('✅ Hidden account setup section for OAuth user');
+      }
+
+      // Note: Account setup section will remain hidden for OAuth users
+      window.isOAuthUser = true;
+
+      // Remove required attributes from username/password fields for OAuth users
+      const usernameField = document.getElementById('username');
+      const passwordField = document.getElementById('password');
+      const confirmPasswordField = document.getElementById('confirmPassword');
+
+      if (usernameField) usernameField.removeAttribute('required');
+      if (passwordField) passwordField.removeAttribute('required');
+      if (confirmPasswordField) confirmPasswordField.removeAttribute('required');
+
+      // Store social token for form submission
+      const form = document.getElementById('affiliateRegistrationForm');
+      console.log('📝 Found form:', form ? 'Yes' : 'No');
+      if (form) {
+      // Check if social token input already exists
+        let socialTokenInput = document.getElementById('socialToken');
+        if (!socialTokenInput) {
+          socialTokenInput = document.createElement('input');
+          socialTokenInput.type = 'hidden';
+          socialTokenInput.name = 'socialToken';
+          socialTokenInput.id = 'socialToken';
+          socialTokenInput.value = socialToken;
+          form.appendChild(socialTokenInput);
+          console.log('✅ Added social token to form');
+        } else {
+        // Update existing token
+          socialTokenInput.value = socialToken;
+          console.log('✅ Updated existing social token in form');
+        }
+      }
+
+      // Auto-populate form fields from social token (decode JWT payload)
+      try {
+        const payload = JSON.parse(atob(socialToken.split('.')[1]));
+        console.log('🔓 Decoded social token payload:', payload);
+
+        // Auto-fill personal information
+        if (payload.firstName) {
+          const firstNameField = document.getElementById('firstName');
+          if (firstNameField && !firstNameField.value) {
+            firstNameField.value = payload.firstName;
+            firstNameField.style.backgroundColor = '#f0fdf4'; // Light green to indicate auto-filled
+            console.log('✅ Pre-filled firstName:', payload.firstName);
+          }
+        }
+
+        if (payload.lastName) {
+          const lastNameField = document.getElementById('lastName');
+          if (lastNameField && !lastNameField.value) {
+            lastNameField.value = payload.lastName;
+            lastNameField.style.backgroundColor = '#f0fdf4'; // Light green to indicate auto-filled
+            console.log('✅ Pre-filled lastName:', payload.lastName);
+          }
+        }
+
+        if (payload.email) {
+          const emailField = document.getElementById('email');
+          if (emailField && !emailField.value) {
+            emailField.value = payload.email;
+            emailField.readOnly = true; // Make it read-only since it comes from OAuth
+            emailField.style.backgroundColor = '#f0fdf4'; // Light green to indicate auto-filled
+            console.log('✅ Pre-filled email:', payload.email);
+          }
+        }
+
+      } catch (e) {
+        console.log('Could not decode social token for pre-filling:', e);
+      }
+
+      // Ensure form submit handler is attached after OAuth
+      console.log('✅ Attaching form submit handler after OAuth completion');
+      attachFormSubmitHandler();
     }
 
-    // Hide account setup section immediately for OAuth users
-    const accountSetupSection = document.getElementById('accountSetupSection');
-    if (accountSetupSection) {
-      accountSetupSection.style.display = 'none';
-      console.log('✅ Hidden account setup section for OAuth user');
+    // Password strength validation
+    function validatePasswordStrength(password, username = '', email = '') {
+      const requirements = {
+        length: password.length >= 8,
+        uppercase: /[A-Z]/.test(password),
+        lowercase: /[a-z]/.test(password),
+        number: /\d/.test(password),
+        special: /[!@#$%^&*()_+\-=\[\]{}|;:,.<>?]/.test(password)
+      };
+
+      // Check against common patterns and user data
+      const hasSequential = /123|234|345|456|567|678|789|890|abc|bcd|cde|def|efg|fgh|ghi|hij|ijk|jkl|klm|lmn|mno|nop|opq|pqr|qrs|rst|stu|tuv|uvw|vwx|wxy|xyz/i.test(password);
+      const hasUsername = username && password.toLowerCase().includes(username.toLowerCase());
+      const hasEmail = email && password.toLowerCase().includes(email.split('@')[0].toLowerCase());
+      const hasRepeated = /(.)\1{2,}/.test(password);
+
+      requirements.noSequential = !hasSequential;
+      requirements.noUsername = !hasUsername;
+      requirements.noEmail = !hasEmail;
+      requirements.noRepeated = !hasRepeated;
+
+      const score = Object.values(requirements).filter(Boolean).length;
+      return { requirements, score, isValid: score >= 5 && requirements.length && requirements.uppercase && requirements.lowercase && requirements.number && requirements.special };
     }
-    
-    // Note: Account setup section will remain hidden for OAuth users
-    window.isOAuthUser = true;
-    
-    // Remove required attributes from username/password fields for OAuth users
-    const usernameField = document.getElementById('username');
+
+    function updatePasswordRequirements(password, username = '', email = '') {
+      const validation = validatePasswordStrength(password, username, email);
+      const requirements = validation.requirements;
+      const confirmPassword = document.getElementById('confirmPassword').value;
+
+      // Add password match requirement
+      requirements.match = password !== '' && password === confirmPassword;
+
+      // Update requirement indicators
+      const updateReq = (id, met) => {
+        const element = document.getElementById(id);
+        if (element) {
+          const indicator = element.querySelector('span');
+          indicator.textContent = met ? '✅' : '⚪';
+          element.className = met ? 'flex items-center text-green-600' : 'flex items-center text-gray-600';
+        }
+      };
+
+      updateReq('req-length', requirements.length);
+      updateReq('req-uppercase', requirements.uppercase);
+      updateReq('req-lowercase', requirements.lowercase);
+      updateReq('req-number', requirements.number);
+      updateReq('req-special', requirements.special);
+      updateReq('req-match', requirements.match);
+
+      // Update strength indicator
+      const strengthElement = document.getElementById('passwordStrength');
+      if (strengthElement) {
+        if (password.length === 0) {
+          strengthElement.innerHTML = '';
+        } else if (validation.isValid) {
+          strengthElement.innerHTML = '<span class="text-green-600 font-medium">✅ Strong password</span>';
+        } else {
+          const missing = [];
+          if (!requirements.length) missing.push('8+ characters');
+          if (!requirements.uppercase) missing.push('uppercase letter');
+          if (!requirements.lowercase) missing.push('lowercase letter');
+          if (!requirements.number) missing.push('number');
+          if (!requirements.special) missing.push('special character');
+
+          strengthElement.innerHTML = `<span class="text-red-600">❌ Missing: ${missing.join(', ')}</span>`;
+        }
+      }
+
+      return validation.isValid;
+    }
+
+    // Add password validation event listeners
     const passwordField = document.getElementById('password');
     const confirmPasswordField = document.getElementById('confirmPassword');
-    
-    if (usernameField) usernameField.removeAttribute('required');
-    if (passwordField) passwordField.removeAttribute('required');
-    if (confirmPasswordField) confirmPasswordField.removeAttribute('required');
+    const usernameField = document.getElementById('username');
+    const emailField = document.getElementById('email');
 
-    // Store social token for form submission
-    const form = document.getElementById('affiliateRegistrationForm');
-    console.log('📝 Found form:', form ? 'Yes' : 'No');
-    if (form) {
-      // Check if social token input already exists
-      let socialTokenInput = document.getElementById('socialToken');
-      if (!socialTokenInput) {
-        socialTokenInput = document.createElement('input');
-        socialTokenInput.type = 'hidden';
-        socialTokenInput.name = 'socialToken';
-        socialTokenInput.id = 'socialToken';
-        socialTokenInput.value = socialToken;
-        form.appendChild(socialTokenInput);
-        console.log('✅ Added social token to form');
-      } else {
-        // Update existing token
-        socialTokenInput.value = socialToken;
-        console.log('✅ Updated existing social token in form');
-      }
-    }
-
-    // Auto-populate form fields from social token (decode JWT payload)
-    try {
-      const payload = JSON.parse(atob(socialToken.split('.')[1]));
-      console.log('🔓 Decoded social token payload:', payload);
-      
-      // Auto-fill personal information
-      if (payload.firstName) {
-        const firstNameField = document.getElementById('firstName');
-        if (firstNameField && !firstNameField.value) {
-          firstNameField.value = payload.firstName;
-          firstNameField.style.backgroundColor = '#f0fdf4'; // Light green to indicate auto-filled
-          console.log('✅ Pre-filled firstName:', payload.firstName);
-        }
-      }
-      
-      if (payload.lastName) {
-        const lastNameField = document.getElementById('lastName');
-        if (lastNameField && !lastNameField.value) {
-          lastNameField.value = payload.lastName;
-          lastNameField.style.backgroundColor = '#f0fdf4'; // Light green to indicate auto-filled
-          console.log('✅ Pre-filled lastName:', payload.lastName);
-        }
-      }
-      
-      if (payload.email) {
-        const emailField = document.getElementById('email');
-        if (emailField && !emailField.value) {
-          emailField.value = payload.email;
-          emailField.readOnly = true; // Make it read-only since it comes from OAuth
-          emailField.style.backgroundColor = '#f0fdf4'; // Light green to indicate auto-filled
-          console.log('✅ Pre-filled email:', payload.email);
-        }
-      }
-      
-    } catch (e) {
-      console.log('Could not decode social token for pre-filling:', e);
-    }
-    
-    // Ensure form submit handler is attached after OAuth
-    console.log('✅ Attaching form submit handler after OAuth completion');
-    attachFormSubmitHandler();
-  }
-
-  // Password strength validation
-  function validatePasswordStrength(password, username = '', email = '') {
-    const requirements = {
-      length: password.length >= 8,
-      uppercase: /[A-Z]/.test(password),
-      lowercase: /[a-z]/.test(password),
-      number: /\d/.test(password),
-      special: /[!@#$%^&*()_+\-=\[\]{}|;:,.<>?]/.test(password)
-    };
-
-    // Check against common patterns and user data
-    const hasSequential = /123|234|345|456|567|678|789|890|abc|bcd|cde|def|efg|fgh|ghi|hij|ijk|jkl|klm|lmn|mno|nop|opq|pqr|qrs|rst|stu|tuv|uvw|vwx|wxy|xyz/i.test(password);
-    const hasUsername = username && password.toLowerCase().includes(username.toLowerCase());
-    const hasEmail = email && password.toLowerCase().includes(email.split('@')[0].toLowerCase());
-    const hasRepeated = /(.)\1{2,}/.test(password);
-
-    requirements.noSequential = !hasSequential;
-    requirements.noUsername = !hasUsername;
-    requirements.noEmail = !hasEmail;
-    requirements.noRepeated = !hasRepeated;
-
-    const score = Object.values(requirements).filter(Boolean).length;
-    return { requirements, score, isValid: score >= 5 && requirements.length && requirements.uppercase && requirements.lowercase && requirements.number && requirements.special };
-  }
-
-  function updatePasswordRequirements(password, username = '', email = '') {
-    const validation = validatePasswordStrength(password, username, email);
-    const requirements = validation.requirements;
-    const confirmPassword = document.getElementById('confirmPassword').value;
-    
-    // Add password match requirement
-    requirements.match = password !== '' && password === confirmPassword;
-
-    // Update requirement indicators
-    const updateReq = (id, met) => {
-      const element = document.getElementById(id);
-      if (element) {
-        const indicator = element.querySelector('span');
-        indicator.textContent = met ? '✅' : '⚪';
-        element.className = met ? 'flex items-center text-green-600' : 'flex items-center text-gray-600';
-      }
-    };
-
-    updateReq('req-length', requirements.length);
-    updateReq('req-uppercase', requirements.uppercase);
-    updateReq('req-lowercase', requirements.lowercase);
-    updateReq('req-number', requirements.number);
-    updateReq('req-special', requirements.special);
-    updateReq('req-match', requirements.match);
-
-    // Update strength indicator
-    const strengthElement = document.getElementById('passwordStrength');
-    if (strengthElement) {
-      if (password.length === 0) {
-        strengthElement.innerHTML = '';
-      } else if (validation.isValid) {
-        strengthElement.innerHTML = '<span class="text-green-600 font-medium">✅ Strong password</span>';
-      } else {
-        const missing = [];
-        if (!requirements.length) missing.push('8+ characters');
-        if (!requirements.uppercase) missing.push('uppercase letter');
-        if (!requirements.lowercase) missing.push('lowercase letter');
-        if (!requirements.number) missing.push('number');
-        if (!requirements.special) missing.push('special character');
-        
-        strengthElement.innerHTML = `<span class="text-red-600">❌ Missing: ${missing.join(', ')}</span>`;
-      }
-    }
-
-    return validation.isValid;
-  }
-
-  // Add password validation event listeners
-  const passwordField = document.getElementById('password');
-  const confirmPasswordField = document.getElementById('confirmPassword');
-  const usernameField = document.getElementById('username');
-  const emailField = document.getElementById('email');
-
-  if (passwordField) {
-    passwordField.addEventListener('input', function() {
-      updatePasswordRequirements(
-        this.value, 
-        usernameField?.value || '', 
-        emailField?.value || ''
-      );
-    });
-  }
-
-  if (usernameField) {
-    usernameField.addEventListener('input', function() {
-      if (passwordField?.value) {
+    if (passwordField) {
+      passwordField.addEventListener('input', function() {
         updatePasswordRequirements(
-          passwordField.value, 
-          this.value, 
+          this.value,
+          usernameField?.value || '',
           emailField?.value || ''
         );
-      }
-    });
-  }
-
-  if (emailField) {
-    emailField.addEventListener('input', function() {
-      if (passwordField?.value) {
-        updatePasswordRequirements(
-          passwordField.value, 
-          usernameField?.value || '', 
-          this.value
-        );
-      }
-    });
-  }
-
-  if (confirmPasswordField) {
-    confirmPasswordField.addEventListener('input', function() {
-      if (passwordField?.value) {
-        updatePasswordRequirements(
-          passwordField.value, 
-          usernameField?.value || '', 
-          emailField?.value || ''
-        );
-      }
-    });
-  }
-
-  // Check for social registration callback on page load
-  handleSocialRegistrationCallback();
-
-  // Function to attach form submit handler
-  function attachFormSubmitHandler() {
-    const form = document.getElementById('affiliateRegistrationForm');
-    console.log('[Form Init] Looking for form...');
-    console.log('[Form Init] Form found:', !!form);
-    
-    if (!form) {
-      console.log('[Form Init] Form not found, cannot attach handler');
-      return;
+      });
     }
-    
-    // Check if handler already attached
-    if (form.dataset.handlerAttached === 'true') {
-      console.log('[Form Init] Submit handler already attached, checking if it works...');
-      // For debugging: let's force re-attach if coming from OAuth
-      if (!window.location.search.includes('socialToken')) {
+
+    if (usernameField) {
+      usernameField.addEventListener('input', function() {
+        if (passwordField?.value) {
+          updatePasswordRequirements(
+            passwordField.value,
+            this.value,
+            emailField?.value || ''
+          );
+        }
+      });
+    }
+
+    if (emailField) {
+      emailField.addEventListener('input', function() {
+        if (passwordField?.value) {
+          updatePasswordRequirements(
+            passwordField.value,
+            usernameField?.value || '',
+            this.value
+          );
+        }
+      });
+    }
+
+    if (confirmPasswordField) {
+      confirmPasswordField.addEventListener('input', function() {
+        if (passwordField?.value) {
+          updatePasswordRequirements(
+            passwordField.value,
+            usernameField?.value || '',
+            emailField?.value || ''
+          );
+        }
+      });
+    }
+
+    // Check for social registration callback on page load
+    handleSocialRegistrationCallback();
+
+    // Function to attach form submit handler
+    function attachFormSubmitHandler() {
+      const form = document.getElementById('affiliateRegistrationForm');
+      console.log('[Form Init] Looking for form...');
+      console.log('[Form Init] Form found:', !!form);
+
+      if (!form) {
+        console.log('[Form Init] Form not found, cannot attach handler');
         return;
       }
-      console.log('[Form Init] OAuth flow detected, re-attaching handler anyway');
-    }
-    
-    console.log('[Form Init] Attaching submit handler to form');
-    
-    // Check if there are any existing submit handlers
-    const existingHandlers = form.onsubmit;
-    console.log('[Form Init] Existing onsubmit handler:', existingHandlers);
-    
-    form.addEventListener('submit', async function(e) {
-      console.log('[Form Submit] Form submission triggered');
-      e.preventDefault();
-      e.stopPropagation();
 
-      // Show spinner on form
-      const processingMessage = getSpinnerMessage('spinner.processingRegistration');
-      
-      const formSpinner = window.SwirlSpinnerUtils ? 
-        SwirlSpinnerUtils.showOnForm(form, {
-          message: processingMessage
-        }) : null;
+      // Check if handler already attached
+      if (form.dataset.handlerAttached === 'true') {
+        console.log('[Form Init] Submit handler already attached, checking if it works...');
+        // For debugging: let's force re-attach if coming from OAuth
+        if (!window.location.search.includes('socialToken')) {
+          return;
+        }
+        console.log('[Form Init] OAuth flow detected, re-attaching handler anyway');
+      }
 
-      try {
+      console.log('[Form Init] Attaching submit handler to form');
+
+      // Check if there are any existing submit handlers
+      const existingHandlers = form.onsubmit;
+      console.log('[Form Init] Existing onsubmit handler:', existingHandlers);
+
+      form.addEventListener('submit', async function(e) {
+        console.log('[Form Submit] Form submission triggered');
+        e.preventDefault();
+        e.stopPropagation();
+
+        // Show spinner on form
+        const processingMessage = getSpinnerMessage('spinner.processingRegistration');
+
+        const formSpinner = window.SwirlSpinnerUtils ?
+          SwirlSpinnerUtils.showOnForm(form, {
+            message: processingMessage
+          }) : null;
+
+        try {
         // Determine if this is a social registration first
-        const formData = new FormData(form);
-        const isSocialRegistration = formData.get('socialToken') || window.isOAuthUser;
+          const formData = new FormData(form);
+          const isSocialRegistration = formData.get('socialToken') || window.isOAuthUser;
 
-        // Validate required fields
-        const missingFields = validateFormFields(isSocialRegistration);
-        console.log('[Form Submit] Missing fields:', missingFields);
-        console.log('[Form Submit] Is OAuth user?', window.isOAuthUser);
-        console.log('[Form Submit] Has social token?', !!formData.get('socialToken'));
-        console.log('[Form Submit] Address validated?', window.addressValidated);
-        console.log('[Form Submit] Business info section display:', document.querySelector('#businessInfoSection')?.style.display);
-        
-        if (missingFields.length > 0) {
-          window.ErrorHandler.showError(
-            `Please fill in the following required fields: ${missingFields.join(', ')}`
-          );
-          // Hide spinner on validation error
-          if (formSpinner) formSpinner.hide();
-          return;
-        }
-        
-        // Additional validation for payment method
-        const paymentMethodValue = document.getElementById('paymentMethod')?.value;
-        console.log('[Form Submit] Payment method value:', paymentMethodValue);
-        if (!paymentMethodValue || paymentMethodValue === '') {
-          window.ErrorHandler.showError('Please select a payment method');
-          // Hide spinner
-          if (formSpinner) formSpinner.hide();
-          return;
-        }
+          // Validate required fields
+          const missingFields = validateFormFields(isSocialRegistration);
+          console.log('[Form Submit] Missing fields:', missingFields);
+          console.log('[Form Submit] Is OAuth user?', window.isOAuthUser);
+          console.log('[Form Submit] Has social token?', !!formData.get('socialToken'));
+          console.log('[Form Submit] Address validated?', window.addressValidated);
+          console.log('[Form Submit] Business info section display:', document.querySelector('#businessInfoSection')?.style.display);
 
-        // Check if passwords match (only for traditional registration)
-        if (!isSocialRegistration) {
-          const password = document.getElementById('password').value;
-          const confirmPassword = document.getElementById('confirmPassword').value;
+          if (missingFields.length > 0) {
+            window.ErrorHandler.showError(
+              `Please fill in the following required fields: ${missingFields.join(', ')}`
+            );
+            // Hide spinner on validation error
+            if (formSpinner) formSpinner.hide();
+            return;
+          }
 
-          if (password !== confirmPassword) {
-            window.ErrorHandler.showError('Passwords do not match!');
+          // Additional validation for payment method
+          const paymentMethodValue = document.getElementById('paymentMethod')?.value;
+          console.log('[Form Submit] Payment method value:', paymentMethodValue);
+          if (!paymentMethodValue || paymentMethodValue === '') {
+            window.ErrorHandler.showError('Please select a payment method');
             // Hide spinner
             if (formSpinner) formSpinner.hide();
             return;
           }
-        }
 
-        // Collect form data (reuse the formData from above)
-        const affiliateData = {};
+          // Check if passwords match (only for traditional registration)
+          if (!isSocialRegistration) {
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
 
-        formData.forEach((value, key) => {
-          affiliateData[key] = value;
-        });
-        
-        // Manually collect all form fields to ensure nothing is missed
-        // This is necessary because hidden sections may not be included in FormData
-        const formFields = [
-          'firstName', 'lastName', 'email', 'phone', 'businessName',
-          'address', 'city', 'state', 'zipCode',
-          'minimumDeliveryFee', 'perBagDeliveryFee',
-          'paymentMethod', 'accountNumber', 'routingNumber', 'paypalEmail',
-          'languagePreference', 'termsAgreement', 'socialToken'
-        ];
-        
-        formFields.forEach(fieldName => {
-          let element = document.getElementById(fieldName);
-          
-          // Special handling for socialToken which might not have an ID
-          if (!element && fieldName === 'socialToken') {
-            element = form.querySelector('input[name="socialToken"]');
+            if (password !== confirmPassword) {
+              window.ErrorHandler.showError('Passwords do not match!');
+              // Hide spinner
+              if (formSpinner) formSpinner.hide();
+              return;
+            }
           }
-          
-          if (element) {
+
+          // Collect form data (reuse the formData from above)
+          const affiliateData = {};
+
+          formData.forEach((value, key) => {
+            affiliateData[key] = value;
+          });
+
+          // Manually collect all form fields to ensure nothing is missed
+          // This is necessary because hidden sections may not be included in FormData
+          const formFields = [
+            'firstName', 'lastName', 'email', 'phone', 'businessName',
+            'address', 'city', 'state', 'zipCode',
+            'minimumDeliveryFee', 'perBagDeliveryFee',
+            'paymentMethod', 'accountNumber', 'routingNumber', 'paypalEmail',
+            'languagePreference', 'termsAgreement', 'socialToken'
+          ];
+
+          formFields.forEach(fieldName => {
+            let element = document.getElementById(fieldName);
+
+            // Special handling for socialToken which might not have an ID
+            if (!element && fieldName === 'socialToken') {
+              element = form.querySelector('input[name="socialToken"]');
+            }
+
+            if (element) {
             // Always include the value, even if empty, so the server knows the field exists
-            affiliateData[fieldName] = element.value || '';
-          }
-        });
-        
-        // Handle service area fields with component-generated IDs
-        const serviceLatField = document.getElementById('registrationServiceAreaComponent-latitude');
-        const serviceLngField = document.getElementById('registrationServiceAreaComponent-longitude');
-        const serviceRadiusField = document.getElementById('registrationServiceAreaComponent-radius');
-        
-        if (serviceLatField) affiliateData['serviceLatitude'] = serviceLatField.value || '';
-        if (serviceLngField) affiliateData['serviceLongitude'] = serviceLngField.value || '';
-        if (serviceRadiusField) affiliateData['serviceRadius'] = serviceRadiusField.value || '';
-        
-        // If address fields are empty but we have validated address, use those values
-        if (window.validatedAddress && window.addressValidated) {
-          if (!affiliateData.address && window.validatedAddress.address) {
-            affiliateData.address = window.validatedAddress.address;
-          }
-          if (!affiliateData.city && window.validatedAddress.city) {
-            affiliateData.city = window.validatedAddress.city;
-          }
-          if (!affiliateData.state && window.validatedAddress.state) {
-            affiliateData.state = window.validatedAddress.state;
-          }
-          if (!affiliateData.zipCode && window.validatedAddress.zipCode) {
-            affiliateData.zipCode = window.validatedAddress.zipCode;
-          }
-        }
-        
-        // Ensure checkbox values are properly captured
-        const termsCheckbox = document.getElementById('termsAgreement');
-        if (termsCheckbox) {
-          affiliateData.termsAgreement = termsCheckbox.checked;
-        }
-        
-        // Manually add payment fields if they're missing
-        if (!affiliateData.paymentMethod) {
-          const paymentMethodEl = document.getElementById('paymentMethod');
-          if (paymentMethodEl) {
-            affiliateData.paymentMethod = paymentMethodEl.value;
-          }
-        }
-        
-        if (!affiliateData.paypalEmail && affiliateData.paymentMethod === 'paypal') {
-          const paypalEmailEl = document.getElementById('paypalEmail');
-          if (paypalEmailEl) {
-            affiliateData.paypalEmail = paypalEmailEl.value;
-          }
-        }
-        
-        if (affiliateData.paymentMethod === 'directDeposit') {
-          if (!affiliateData.accountNumber) {
-            const accountNumberEl = document.getElementById('accountNumber');
-            if (accountNumberEl) {
-              affiliateData.accountNumber = accountNumberEl.value;
-            }
-          }
-          if (!affiliateData.routingNumber) {
-            const routingNumberEl = document.getElementById('routingNumber');
-            if (routingNumberEl) {
-              affiliateData.routingNumber = routingNumberEl.value;
-            }
-          }
-        }
-        
-        // Debug logging to verify all fields are present
-        console.log('Form submission data:', affiliateData);
-        console.log('Has address fields:', {
-          address: affiliateData.address,
-          city: affiliateData.city,
-          state: affiliateData.state,
-          zipCode: affiliateData.zipCode
-        });
-        console.log('Payment info:', {
-          paymentMethod: affiliateData.paymentMethod,
-          paypalEmail: affiliateData.paypalEmail,
-          accountNumber: affiliateData.accountNumber,
-          routingNumber: affiliateData.routingNumber
-        });
-        console.log('Is social registration?', isSocialRegistration);
-
-        // Determine endpoint based on whether this is a social registration
-        const endpoint = isSocialRegistration 
-          ? `${baseUrl}/api/v1/auth/social/register`
-          : `${baseUrl}/api/v1/affiliates/register`;
-
-        // API call to the server with proper base URL
-        const response = await csrfFetch(endpoint, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          credentials: 'include',
-          body: JSON.stringify(affiliateData)
-        });
-
-        if (!response.ok) {
-          console.error('Registration failed with status:', response.status);
-          const errorText = await response.text();
-          console.error('Error response:', errorText);
-          
-          try {
-            const errorData = JSON.parse(errorText);
-            if (errorData.errors && Array.isArray(errorData.errors)) {
-              console.error('Validation errors:');
-              errorData.errors.forEach(err => {
-                console.error(`- ${err.param || err.path}: ${err.msg}`);
-              });
-            }
-          } catch (e) {
-            // Not JSON error
-          }
-        }
-        
-        await window.ErrorHandler.handleFetchError(response);
-        const data = await response.json();
-
-        console.log('Registration response:', data);
-
-        // Store the affiliate data for the success page
-        localStorage.setItem('currentAffiliate', JSON.stringify({
-          ...affiliateData,
-          affiliateId: data.affiliateId
-        }));
-
-        // Keep the spinner visible during redirect
-        // Don't hide the formSpinner here - let it stay visible
-        console.log('Registration successful, redirecting to success page...');
-        
-        // Update spinner message to indicate success
-        if (formSpinner && formSpinner.updateMessage) {
-          const successPart = getSpinnerMessage('messages.registrationSuccess');
-          const redirectingPart = getSpinnerMessage('messages.redirecting');
-          const successMessage = successPart + ' ' + redirectingPart;
-          formSpinner.updateMessage(successMessage);
-        }
-        
-        // Handle redirect based on whether we're embedded
-        if (isEmbedded) {
-          // For embed-app, send navigation message
-          console.log('isEmbedded:', isEmbedded);
-          console.log('Sending navigation message to parent');
-          console.log('Window parent:', window.parent);
-          console.log('Window parent !== window:', window.parent !== window);
-
-          // Try multiple navigation approaches
-          try {
-            // First try postMessage
-            window.parent.postMessage({
-              type: 'navigate',
-              data: { url: '/affiliate-success' }
-            }, '*');
-            console.log('Navigation message sent successfully');
-
-            // Also try direct navigation as fallback
-            setTimeout(() => {
-              console.log('Trying direct navigation as fallback');
-              // Check if we're still on the same page
-              if (window.location.href.includes('affiliate-register')) {
-                window.location.href = '/embed-app.html?route=/affiliate-success';
-              }
-            }, 1000);
-          } catch (msgError) {
-            console.error('Error sending message:', msgError);
-            // Fallback to direct navigation
-            window.location.href = '/embed-app.html?route=/affiliate-success';
-          }
-        } else {
-          // Otherwise, normal redirect
-          window.location.href = '/embed-app.html?route=/affiliate-success';
-        }
-      } catch (error) {
-        console.error('Registration error:', error);
-
-        // If we're embedded and there's a connection error, notify parent
-        if (isEmbedded && error.message.includes('fetch')) {
-          window.parent.postMessage({
-            type: 'registration-error',
-            message: 'Unable to connect to registration server. Please try again later.'
-          }, '*');
-        }
-        
-        // Hide spinner
-        if (formSpinner) formSpinner.hide();
-      }
-    });
-    
-    // Mark form as having handler attached
-    form.dataset.handlerAttached = 'true';
-    console.log('[Form Init] Form submit handler attached successfully');
-  }
-  
-  // Call the function to attach handler
-  // Only call this on initial load, not after OAuth (OAuth calls it explicitly)
-  if (!window.location.search.includes('socialToken')) {
-    attachFormSubmitHandler();
-  }
-
-  // Listen for messages from parent window if embedded
-  if (isEmbedded) {
-    // Store ResizeObserver instance for cleanup
-    let resizeObserver = null;
-    
-    window.addEventListener('message', function(event) {
-      // Verify origin for security
-      if (event.origin !== baseUrl.replace(/\/$/, '')) {
-        return;
-      }
-
-      // Handle different message types
-      switch (event.data.type) {
-      case 'prefill-form':
-        // Allow parent to prefill form data
-        if (event.data.data) {
-          Object.keys(event.data.data).forEach(key => {
-            const field = document.getElementById(key);
-            if (field) {
-              field.value = event.data.data[key];
+              affiliateData[fieldName] = element.value || '';
             }
           });
-        }
-        break;
 
-      case 'get-form-height':
-        // Send form height to parent for iframe resizing
-        window.parent.postMessage({
-          type: 'form-height',
-          height: document.body.scrollHeight
-        }, event.origin);
-        break;
-      }
-    });
+          // Handle service area fields with component-generated IDs
+          const serviceLatField = document.getElementById('registrationServiceAreaComponent-latitude');
+          const serviceLngField = document.getElementById('registrationServiceAreaComponent-longitude');
+          const serviceRadiusField = document.getElementById('registrationServiceAreaComponent-radius');
 
-    // Notify parent that form is loaded
-    window.parent.postMessage({
-      type: 'form-loaded',
-      height: document.body.scrollHeight
-    }, '*');
+          if (serviceLatField) affiliateData['serviceLatitude'] = serviceLatField.value || '';
+          if (serviceLngField) affiliateData['serviceLongitude'] = serviceLngField.value || '';
+          if (serviceRadiusField) affiliateData['serviceRadius'] = serviceRadiusField.value || '';
 
-    // Track last sent height to prevent micro-adjustments
-    let lastSentHeight = 0;
-    let heightUpdateTimeout = null;
-    
-    // Monitor form height changes with throttling to prevent infinite loops
-    resizeObserver = new ResizeObserver(entries => {
-      // Check if we're still on the registration page
-      if (!window.location.href.includes('affiliate-success')) {
-        for (let entry of entries) {
-          const newHeight = entry.target.scrollHeight;
-          
-          // Only send height updates if the change is significant (more than 10px)
-          // and not too frequent (throttled)
-          if (Math.abs(newHeight - lastSentHeight) > 10) {
-            
-            // Clear any pending height update
-            if (heightUpdateTimeout) {
-              clearTimeout(heightUpdateTimeout);
+          // If address fields are empty but we have validated address, use those values
+          if (window.validatedAddress && window.addressValidated) {
+            if (!affiliateData.address && window.validatedAddress.address) {
+              affiliateData.address = window.validatedAddress.address;
             }
-            
-            // Throttle height updates to prevent rapid-fire changes
-            heightUpdateTimeout = setTimeout(() => {
-              console.log('Sending height to parent:', newHeight);
-              lastSentHeight = newHeight;
+            if (!affiliateData.city && window.validatedAddress.city) {
+              affiliateData.city = window.validatedAddress.city;
+            }
+            if (!affiliateData.state && window.validatedAddress.state) {
+              affiliateData.state = window.validatedAddress.state;
+            }
+            if (!affiliateData.zipCode && window.validatedAddress.zipCode) {
+              affiliateData.zipCode = window.validatedAddress.zipCode;
+            }
+          }
+
+          // Ensure checkbox values are properly captured
+          const termsCheckbox = document.getElementById('termsAgreement');
+          if (termsCheckbox) {
+            affiliateData.termsAgreement = termsCheckbox.checked;
+          }
+
+          // Manually add payment fields if they're missing
+          if (!affiliateData.paymentMethod) {
+            const paymentMethodEl = document.getElementById('paymentMethod');
+            if (paymentMethodEl) {
+              affiliateData.paymentMethod = paymentMethodEl.value;
+            }
+          }
+
+          if (!affiliateData.paypalEmail && affiliateData.paymentMethod === 'paypal') {
+            const paypalEmailEl = document.getElementById('paypalEmail');
+            if (paypalEmailEl) {
+              affiliateData.paypalEmail = paypalEmailEl.value;
+            }
+          }
+
+          if (affiliateData.paymentMethod === 'directDeposit') {
+            if (!affiliateData.accountNumber) {
+              const accountNumberEl = document.getElementById('accountNumber');
+              if (accountNumberEl) {
+                affiliateData.accountNumber = accountNumberEl.value;
+              }
+            }
+            if (!affiliateData.routingNumber) {
+              const routingNumberEl = document.getElementById('routingNumber');
+              if (routingNumberEl) {
+                affiliateData.routingNumber = routingNumberEl.value;
+              }
+            }
+          }
+
+          // Debug logging to verify all fields are present
+          console.log('Form submission data:', affiliateData);
+          console.log('Has address fields:', {
+            address: affiliateData.address,
+            city: affiliateData.city,
+            state: affiliateData.state,
+            zipCode: affiliateData.zipCode
+          });
+          console.log('Payment info:', {
+            paymentMethod: affiliateData.paymentMethod,
+            paypalEmail: affiliateData.paypalEmail,
+            accountNumber: affiliateData.accountNumber,
+            routingNumber: affiliateData.routingNumber
+          });
+          console.log('Is social registration?', isSocialRegistration);
+
+          // Determine endpoint based on whether this is a social registration
+          const endpoint = isSocialRegistration
+            ? `${baseUrl}/api/v1/auth/social/register`
+            : `${baseUrl}/api/v1/affiliates/register`;
+
+          // API call to the server with proper base URL
+          const response = await csrfFetch(endpoint, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            credentials: 'include',
+            body: JSON.stringify(affiliateData)
+          });
+
+          if (!response.ok) {
+            console.error('Registration failed with status:', response.status);
+            const errorText = await response.text();
+            console.error('Error response:', errorText);
+
+            try {
+              const errorData = JSON.parse(errorText);
+              if (errorData.errors && Array.isArray(errorData.errors)) {
+                console.error('Validation errors:');
+                errorData.errors.forEach(err => {
+                  console.error(`- ${err.param || err.path}: ${err.msg}`);
+                });
+              }
+            } catch (e) {
+            // Not JSON error
+            }
+          }
+
+          await window.ErrorHandler.handleFetchError(response);
+          const data = await response.json();
+
+          console.log('Registration response:', data);
+
+          // Store the affiliate data for the success page
+          localStorage.setItem('currentAffiliate', JSON.stringify({
+            ...affiliateData,
+            affiliateId: data.affiliateId
+          }));
+
+          // Keep the spinner visible during redirect
+          // Don't hide the formSpinner here - let it stay visible
+          console.log('Registration successful, redirecting to success page...');
+
+          // Update spinner message to indicate success
+          if (formSpinner && formSpinner.updateMessage) {
+            const successPart = getSpinnerMessage('messages.registrationSuccess');
+            const redirectingPart = getSpinnerMessage('messages.redirecting');
+            const successMessage = successPart + ' ' + redirectingPart;
+            formSpinner.updateMessage(successMessage);
+          }
+
+          // Handle redirect based on whether we're embedded
+          if (isEmbedded) {
+          // For embed-app, send navigation message
+            console.log('isEmbedded:', isEmbedded);
+            console.log('Sending navigation message to parent');
+            console.log('Window parent:', window.parent);
+            console.log('Window parent !== window:', window.parent !== window);
+
+            // Try multiple navigation approaches
+            try {
+            // First try postMessage
               window.parent.postMessage({
-                type: 'form-height',
-                height: newHeight
+                type: 'navigate',
+                data: { url: '/affiliate-success' }
               }, '*');
-            }, 200); // Wait 200ms before sending
+              console.log('Navigation message sent successfully');
+
+              // Also try direct navigation as fallback
+              setTimeout(() => {
+                console.log('Trying direct navigation as fallback');
+                // Check if we're still on the same page
+                if (window.location.href.includes('affiliate-register')) {
+                  window.location.href = '/embed-app.html?route=/affiliate-success';
+                }
+              }, 1000);
+            } catch (msgError) {
+              console.error('Error sending message:', msgError);
+              // Fallback to direct navigation
+              window.location.href = '/embed-app.html?route=/affiliate-success';
+            }
+          } else {
+          // Otherwise, normal redirect
+            window.location.href = '/embed-app.html?route=/affiliate-success';
+          }
+        } catch (error) {
+          console.error('Registration error:', error);
+
+          // If we're embedded and there's a connection error, notify parent
+          if (isEmbedded && error.message.includes('fetch')) {
+            window.parent.postMessage({
+              type: 'registration-error',
+              message: 'Unable to connect to registration server. Please try again later.'
+            }, '*');
+          }
+
+          // Hide spinner
+          if (formSpinner) formSpinner.hide();
+        }
+      });
+
+      // Mark form as having handler attached
+      form.dataset.handlerAttached = 'true';
+      console.log('[Form Init] Form submit handler attached successfully');
+    }
+
+    // Call the function to attach handler
+    // Only call this on initial load, not after OAuth (OAuth calls it explicitly)
+    if (!window.location.search.includes('socialToken')) {
+      attachFormSubmitHandler();
+    }
+
+    // Listen for messages from parent window if embedded
+    if (isEmbedded) {
+    // Store ResizeObserver instance for cleanup
+      let resizeObserver = null;
+
+      window.addEventListener('message', function(event) {
+      // Verify origin for security
+        if (event.origin !== baseUrl.replace(/\/$/, '')) {
+          return;
+        }
+
+        // Handle different message types
+        switch (event.data.type) {
+        case 'prefill-form':
+        // Allow parent to prefill form data
+          if (event.data.data) {
+            Object.keys(event.data.data).forEach(key => {
+              const field = document.getElementById(key);
+              if (field) {
+                field.value = event.data.data[key];
+              }
+            });
+          }
+          break;
+
+        case 'get-form-height':
+        // Send form height to parent for iframe resizing
+          window.parent.postMessage({
+            type: 'form-height',
+            height: document.body.scrollHeight
+          }, event.origin);
+          break;
+        }
+      });
+
+      // Notify parent that form is loaded
+      window.parent.postMessage({
+        type: 'form-loaded',
+        height: document.body.scrollHeight
+      }, '*');
+
+      // Track last sent height to prevent micro-adjustments
+      let lastSentHeight = 0;
+      let heightUpdateTimeout = null;
+
+      // Monitor form height changes with throttling to prevent infinite loops
+      resizeObserver = new ResizeObserver(entries => {
+      // Check if we're still on the registration page
+        if (!window.location.href.includes('affiliate-success')) {
+          for (let entry of entries) {
+            const newHeight = entry.target.scrollHeight;
+
+            // Only send height updates if the change is significant (more than 10px)
+            // and not too frequent (throttled)
+            if (Math.abs(newHeight - lastSentHeight) > 10) {
+
+              // Clear any pending height update
+              if (heightUpdateTimeout) {
+                clearTimeout(heightUpdateTimeout);
+              }
+
+              // Throttle height updates to prevent rapid-fire changes
+              heightUpdateTimeout = setTimeout(() => {
+                console.log('Sending height to parent:', newHeight);
+                lastSentHeight = newHeight;
+                window.parent.postMessage({
+                  type: 'form-height',
+                  height: newHeight
+                }, '*');
+              }, 200); // Wait 200ms before sending
+            }
+          }
+        } else {
+        // If we've navigated away, disconnect the observer
+          if (resizeObserver) {
+            resizeObserver.disconnect();
+            resizeObserver = null;
           }
         }
+      });
+      resizeObserver.observe(document.body);
+
+      // Initialize fee calculator
+      initializeFeeCalculator();
+    }
+
+    // Fee calculator functionality
+    function initializeFeeCalculator() {
+      const minFeeInput = document.getElementById('minimumDeliveryFee');
+      const perBagInput = document.getElementById('perBagDeliveryFee');
+
+      if (!minFeeInput || !perBagInput) return;
+
+      // Prevent Enter key from submitting form in delivery fee fields
+      const preventEnterSubmit = function(event) {
+        if (event.key === 'Enter' || event.keyCode === 13) {
+          event.preventDefault();
+          event.stopPropagation();
+
+          // Trigger input event to update pricing preview
+          this.dispatchEvent(new Event('input', { bubbles: true }));
+          this.dispatchEvent(new Event('change', { bubbles: true }));
+
+          // Optional: Move focus to next input field
+          if (this.id === 'minimumDeliveryFee') {
+            perBagInput.focus();
+          }
+
+          return false;
+        }
+      };
+
+      // Add keydown event listeners to prevent form submission on Enter
+      minFeeInput.addEventListener('keydown', preventEnterSubmit);
+      perBagInput.addEventListener('keydown', preventEnterSubmit);
+
+      // Initialize the pricing preview component
+      if (window.PricingPreviewComponent) {
+        window.registrationPricingPreview = window.PricingPreviewComponent.init(
+          'registrationPricingPreview',
+          'minimumDeliveryFee',
+          'perBagDeliveryFee',
+          {
+            titleText: 'Live Pricing Preview',
+            titleI18n: 'affiliate.register.livePricingPreview',
+            showNotes: true
+          }
+        );
+        console.log('Pricing preview component initialized for registration form');
       } else {
-        // If we've navigated away, disconnect the observer
+        console.warn('PricingPreviewComponent not available, falling back to legacy calculator');
+        // Fallback to legacy functionality
+        minFeeInput.addEventListener('input', updateFeeCalculator);
+        perBagInput.addEventListener('input', updateFeeCalculator);
+        updateFeeCalculator();
+      }
+
+      // Clean up function to remove event listeners
+      const cleanupFeeCalculator = function() {
+      // Remove keydown event listeners
+        minFeeInput.removeEventListener('keydown', preventEnterSubmit);
+        perBagInput.removeEventListener('keydown', preventEnterSubmit);
+
+        // Clean up pricing preview component if it exists
+        if (window.registrationPricingPreview && window.registrationPricingPreview.destroy) {
+          window.registrationPricingPreview.destroy();
+        }
+
+        // Disconnect resize observer
         if (resizeObserver) {
           resizeObserver.disconnect();
           resizeObserver = null;
         }
-      }
-    });
-    resizeObserver.observe(document.body);
-    
-    // Initialize fee calculator
-    initializeFeeCalculator();
-  }
+      };
 
-  // Fee calculator functionality
-  function initializeFeeCalculator() {
-    const minFeeInput = document.getElementById('minimumDeliveryFee');
-    const perBagInput = document.getElementById('perBagDeliveryFee');
-    
-    if (!minFeeInput || !perBagInput) return;
-    
-    // Prevent Enter key from submitting form in delivery fee fields
-    const preventEnterSubmit = function(event) {
-      if (event.key === 'Enter' || event.keyCode === 13) {
-        event.preventDefault();
-        event.stopPropagation();
-        
-        // Trigger input event to update pricing preview
-        this.dispatchEvent(new Event('input', { bubbles: true }));
-        this.dispatchEvent(new Event('change', { bubbles: true }));
-        
-        // Optional: Move focus to next input field
-        if (this.id === 'minimumDeliveryFee') {
-          perBagInput.focus();
-        }
-        
-        return false;
-      }
-    };
-    
-    // Add keydown event listeners to prevent form submission on Enter
-    minFeeInput.addEventListener('keydown', preventEnterSubmit);
-    perBagInput.addEventListener('keydown', preventEnterSubmit);
-    
-    // Initialize the pricing preview component
-    if (window.PricingPreviewComponent) {
-      window.registrationPricingPreview = window.PricingPreviewComponent.init(
-        'registrationPricingPreview',
-        'minimumDeliveryFee',
-        'perBagDeliveryFee',
-        {
-          titleText: 'Live Pricing Preview',
-          titleI18n: 'affiliate.register.livePricingPreview',
-          showNotes: true
-        }
-      );
-      console.log('Pricing preview component initialized for registration form');
-    } else {
-      console.warn('PricingPreviewComponent not available, falling back to legacy calculator');
-      // Fallback to legacy functionality
-      minFeeInput.addEventListener('input', updateFeeCalculator);
-      perBagInput.addEventListener('input', updateFeeCalculator);
-      updateFeeCalculator();
+      // Clean up before navigation
+      window.addEventListener('beforeunload', cleanupFeeCalculator);
+
+      // Also clean up on custom events from parent
+      window.addEventListener('page-cleanup', cleanupFeeCalculator);
+
+      window.addEventListener('disconnect-observers', cleanupFeeCalculator);
     }
-    
-    // Clean up function to remove event listeners
-    const cleanupFeeCalculator = function() {
-      // Remove keydown event listeners
-      minFeeInput.removeEventListener('keydown', preventEnterSubmit);
-      perBagInput.removeEventListener('keydown', preventEnterSubmit);
-      
-      // Clean up pricing preview component if it exists
-      if (window.registrationPricingPreview && window.registrationPricingPreview.destroy) {
-        window.registrationPricingPreview.destroy();
-      }
-      
-      // Disconnect resize observer
-      if (resizeObserver) {
-        resizeObserver.disconnect();
-        resizeObserver = null;
-      }
-    };
-    
-    // Clean up before navigation
-    window.addEventListener('beforeunload', cleanupFeeCalculator);
-    
-    // Also clean up on custom events from parent
-    window.addEventListener('page-cleanup', cleanupFeeCalculator);
-    
-    window.addEventListener('disconnect-observers', cleanupFeeCalculator);
-  }
 
-  // Delivery fee calculator update
-  function updateFeeCalculator() {
-    const minimumFee = parseFloat(document.getElementById('minimumDeliveryFee')?.value) || 25;
-    const perBagFee = parseFloat(document.getElementById('perBagDeliveryFee')?.value) || 10;
-    
-    // Constants for commission calculation
-    const WDF_RATE = 1.25; // $1.25 per pound
-    const LBS_PER_BAG = 30; // 30 lbs per bag average
-    const COMMISSION_RATE = 0.10; // 10% commission
-    
-    // Update all example calculations
-    [1, 3, 5, 10].forEach(bags => {
-      const calculatedFee = bags * perBagFee;
-      const deliveryFee = Math.max(minimumFee, calculatedFee); // Already round trip
-      
-      // Calculate WDF commission
-      const wdfRevenue = bags * LBS_PER_BAG * WDF_RATE;
-      const commission = wdfRevenue * COMMISSION_RATE;
-      
-      // Update delivery fee display
-      const feeElement = document.getElementById(`calc${bags}bag${bags > 1 ? 's' : ''}`);
-      if (feeElement) {
-        feeElement.textContent = `$${deliveryFee}`;
-        // Add visual indicator if minimum applies
-        if (deliveryFee === minimumFee && calculatedFee < minimumFee) {
-          feeElement.title = 'Minimum fee applies';
-        } else {
-          feeElement.title = `${bags} bags × $${perBagFee}/bag = $${calculatedFee}`;
+    // Delivery fee calculator update
+    function updateFeeCalculator() {
+      const minimumFee = parseFloat(document.getElementById('minimumDeliveryFee')?.value) || 25;
+      const perBagFee = parseFloat(document.getElementById('perBagDeliveryFee')?.value) || 10;
+
+      // Constants for commission calculation
+      const WDF_RATE = 1.25; // $1.25 per pound
+      const LBS_PER_BAG = 30; // 30 lbs per bag average
+      const COMMISSION_RATE = 0.10; // 10% commission
+
+      // Update all example calculations
+      [1, 3, 5, 10].forEach(bags => {
+        const calculatedFee = bags * perBagFee;
+        const deliveryFee = Math.max(minimumFee, calculatedFee); // Already round trip
+
+        // Calculate WDF commission
+        const wdfRevenue = bags * LBS_PER_BAG * WDF_RATE;
+        const commission = wdfRevenue * COMMISSION_RATE;
+
+        // Update delivery fee display
+        const feeElement = document.getElementById(`calc${bags}bag${bags > 1 ? 's' : ''}`);
+        if (feeElement) {
+          feeElement.textContent = `$${deliveryFee}`;
+          // Add visual indicator if minimum applies
+          if (deliveryFee === minimumFee && calculatedFee < minimumFee) {
+            feeElement.title = 'Minimum fee applies';
+          } else {
+            feeElement.title = `${bags} bags × $${perBagFee}/bag = $${calculatedFee}`;
+          }
         }
-      }
-      
-      // Calculate and update total earnings (delivery + commission)
-      const totalEarnings = deliveryFee + commission;
-      const totalElement = document.getElementById(`total${bags}bag${bags > 1 ? 's' : ''}`);
-      if (totalElement) {
-        totalElement.textContent = `$${totalEarnings.toFixed(2)}`;
-        totalElement.title = `Delivery: $${deliveryFee} + Commission: $${commission.toFixed(2)} = $${totalEarnings.toFixed(2)}`;
-      }
-      
-      // Update commission display
-      const commElement = document.getElementById(`comm${bags}bag${bags > 1 ? 's' : ''}`);
-      if (commElement) {
-        commElement.textContent = `$${commission.toFixed(2)}`;
-        commElement.title = `${bags} bags × ${LBS_PER_BAG} lbs × $${WDF_RATE}/lb × ${COMMISSION_RATE * 100}% = $${commission.toFixed(2)}`;
-      }
-    });
-  }
+
+        // Calculate and update total earnings (delivery + commission)
+        const totalEarnings = deliveryFee + commission;
+        const totalElement = document.getElementById(`total${bags}bag${bags > 1 ? 's' : ''}`);
+        if (totalElement) {
+          totalElement.textContent = `$${totalEarnings.toFixed(2)}`;
+          totalElement.title = `Delivery: $${deliveryFee} + Commission: $${commission.toFixed(2)} = $${totalEarnings.toFixed(2)}`;
+        }
+
+        // Update commission display
+        const commElement = document.getElementById(`comm${bags}bag${bags > 1 ? 's' : ''}`);
+        if (commElement) {
+          commElement.textContent = `$${commission.toFixed(2)}`;
+          commElement.title = `${bags} bags × ${LBS_PER_BAG} lbs × $${WDF_RATE}/lb × ${COMMISSION_RATE * 100}% = $${commission.toFixed(2)}`;
+        }
+      });
+    }
 
 
-  // OLD SERVICE AREA MAP IMPLEMENTATION - REPLACED BY SERVICE AREA COMPONENT
-  // Keeping for reference but commenting out to prevent conflicts
-  /*
+    // OLD SERVICE AREA MAP IMPLEMENTATION - REPLACED BY SERVICE AREA COMPONENT
+    // Keeping for reference but commenting out to prevent conflicts
+    /*
   // Initialize service area map
   let serviceAreaMap = window.affiliateServiceAreaMap || null;
   let serviceMarker = window.affiliateServiceMarker || null;
@@ -1319,11 +1330,11 @@ function initializeAffiliateRegistration() {
       console.log('Map already initialized, skipping');
       return;
     }
-    
+
     // Default to WaveMAX store location: 825 E Rundberg Lane, Austin, TX 78753
     const defaultLat = 30.3524;
     const defaultLng = -97.6841;
-    
+
     try {
       // Initialize map with a zoom level that will show a typical service area
       // Start with zoom 12 which shows about 10-15 mile radius well
@@ -1337,29 +1348,29 @@ function initializeAffiliateRegistration() {
       console.error('Error initializing map:', error);
       return;
     }
-    
+
     // Add OpenStreetMap tiles
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
       maxZoom: 19
     }).addTo(serviceAreaMap);
-    
+
     // Get radius slider and value display
     const radiusSlider = document.getElementById('radiusSlider');
     const radiusValue = document.getElementById('radiusValue');
     // NOTE: serviceRadius field is now created by component with ID: registrationServiceAreaComponent-radius
-    
+
     // NOTE: Default values are now set by the service area component
     // Old code that set serviceLatitude/serviceLongitude/serviceRadius directly is no longer needed
-    
+
     // Function to update service area
     function updateServiceArea(lat, lng, radius) {
       // NOTE: Hidden fields are now managed by the service area component
       // The component creates fields with IDs like:
       // - registrationServiceAreaComponent-latitude
-      // - registrationServiceAreaComponent-longitude  
+      // - registrationServiceAreaComponent-longitude
       // - registrationServiceAreaComponent-radius
-      
+
       // Remove existing marker and circle
       if (serviceMarker) {
         serviceAreaMap.removeLayer(serviceMarker);
@@ -1367,14 +1378,14 @@ function initializeAffiliateRegistration() {
       if (serviceCircle) {
         serviceAreaMap.removeLayer(serviceCircle);
       }
-      
+
       // Add new marker
       serviceMarker = L.marker([lat, lng], {
         title: 'Service Center',
         draggable: true
       }).addTo(serviceAreaMap);
       window.affiliateServiceMarker = serviceMarker;
-      
+
       // Add circle to show service area
       serviceCircle = L.circle([lat, lng], {
         color: '#3b82f6',
@@ -1383,13 +1394,13 @@ function initializeAffiliateRegistration() {
         radius: radius * 1609.34 // Convert miles to meters
       }).addTo(serviceAreaMap);
       window.affiliateServiceCircle = serviceCircle;
-      
+
       // Update info display
       const serviceAreaInfo = document.getElementById('serviceAreaInfo');
       if (serviceAreaInfo) {
         serviceAreaInfo.classList.remove('hidden');
       }
-      
+
       // Display the address
       const centerLocationElement = document.getElementById('centerLocation');
       if (centerLocationElement) {
@@ -1399,29 +1410,29 @@ function initializeAffiliateRegistration() {
           centerLocationElement.textContent = 'Loading address...';
         }
       }
-      
+
       // Always display coordinates
       const centerCoordinatesElement = document.getElementById('centerCoordinates');
       if (centerCoordinatesElement) {
         centerCoordinatesElement.textContent = `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
       }
-      
+
       // Ensure the entire service area is visible on the map
       // Only zoom out if necessary to show the full circle
       const bounds = serviceCircle.getBounds();
       const currentBounds = serviceAreaMap.getBounds();
-      
+
       // Check if the circle extends beyond current view
       if (!currentBounds.contains(bounds.getNorthEast()) || !currentBounds.contains(bounds.getSouthWest())) {
         // Fit the map to show the entire circle with some padding
         serviceAreaMap.fitBounds(bounds, { padding: [50, 50] });
       }
-      
+
       const coverageAreaElement = document.getElementById('coverageArea');
       if (coverageAreaElement) {
         coverageAreaElement.textContent = `${radius} mile radius`;
       }
-      
+
       // Handle marker drag
       serviceMarker.on('dragend', function(event) {
         const position = event.target.getLatLng();
@@ -1430,30 +1441,30 @@ function initializeAffiliateRegistration() {
         reverseGeocodeForServiceArea(position.lat, position.lng);
       });
     }
-    
+
     // Make updateServiceArea globally accessible
     window.updateServiceArea = updateServiceArea;
-    
+
     // Handle map click
     serviceAreaMap.on('click', function(e) {
       updateServiceArea(e.latlng.lat, e.latlng.lng, parseInt(radiusSlider.value));
       // Reverse geocode to get address
       reverseGeocodeForServiceArea(e.latlng.lat, e.latlng.lng);
     });
-    
+
     // Reverse geocode for service area - updates the display address
     function reverseGeocodeForServiceArea(lat, lng) {
       const centerLocationElement = document.getElementById('centerLocation');
       if (!centerLocationElement) return;
-      
+
       // Show loading state
       centerLocationElement.textContent = 'Loading address...';
-      
+
       if (window.parent !== window) {
         // Use bridge method when in iframe
         const requestId = 'service_area_reverse_' + Date.now();
         console.log('[Service Area Map] Using bridge for reverse geocoding');
-        
+
         // Request from parent
         window.parent.postMessage({
           type: 'geocode-reverse',
@@ -1463,40 +1474,40 @@ function initializeAffiliateRegistration() {
             requestId: requestId
           }
         }, '*');
-        
+
         // Set up one-time handler for this specific request
         const handleResponse = function(event) {
-          if (event.data && event.data.type === 'geocode-reverse-response' && 
+          if (event.data && event.data.type === 'geocode-reverse-response' &&
               event.data.data && event.data.data.requestId === requestId) {
             console.log('[Service Area Map] Received reverse geocoding response:', event.data.data);
-            
+
             if (event.data.data.address) {
               // Parse and format the address properly
               const parts = event.data.data.address.split(',').map(p => p.trim());
               let displayAddress = '';
-              
+
               // Extract components we want
               let street = '';
               let city = '';
               let state = '';
               let zipcode = '';
-              
+
               // Nominatim format often includes: house_number, street, neighborhood, city, county, state, zip, country
               // We want: street (no comma after number), city, state zipcode
-              
+
               if (parts.length >= 2) {
                 // First part might be house number, second is street, or first is full street
                 if (parts[0].match(/^\d+$/)) {
                   // First part is just a number, combine with street
                   street = parts[0] + ' ' + parts[1];
                   let startIdx = 2;
-                  
+
                   // Skip neighborhood/suburb names by looking for the city
                   // Cities usually come after neighborhoods but before county
                   for (let i = startIdx; i < parts.length; i++) {
                     const part = parts[i];
                     // Skip if it looks like a neighborhood or county
-                    if (part.toLowerCase().includes('county') || 
+                    if (part.toLowerCase().includes('county') ||
                         part.toLowerCase().includes('township')) {
                       continue;
                     }
@@ -1514,12 +1525,12 @@ function initializeAffiliateRegistration() {
                 } else {
                   // First part is the full street
                   street = parts[0];
-                  
+
                   // Process remaining parts
                   for (let i = 1; i < parts.length; i++) {
                     const part = parts[i];
                     // Skip if it looks like a neighborhood or county
-                    if (part.toLowerCase().includes('county') || 
+                    if (part.toLowerCase().includes('county') ||
                         part.toLowerCase().includes('township')) {
                       continue;
                     }
@@ -1536,7 +1547,7 @@ function initializeAffiliateRegistration() {
                   }
                 }
               }
-              
+
               // Build the formatted address
               displayAddress = street;
               if (city) {
@@ -1548,23 +1559,23 @@ function initializeAffiliateRegistration() {
                   displayAddress += ' ' + zipcode;
                 }
               }
-              
+
               // Fallback if we couldn't parse properly
               if (!street || !city) {
                 displayAddress = parts.slice(0, 3).join(', ');
               }
-              
+
               centerLocationElement.textContent = displayAddress;
               window.confirmedServiceAddress = displayAddress;
             } else {
               centerLocationElement.textContent = 'Address not found';
             }
-            
+
             // Remove this handler
             window.removeEventListener('message', handleResponse);
           }
         };
-        
+
         window.addEventListener('message', handleResponse);
       } else {
         // Direct Nominatim call when not in iframe
@@ -1576,29 +1587,29 @@ function initializeAffiliateRegistration() {
               // Parse and format the address properly
               const parts = data.display_name.split(',').map(p => p.trim());
               let displayAddress = '';
-              
+
               // Extract components we want
               let street = '';
               let city = '';
               let state = '';
               let zipcode = '';
-              
+
               // Nominatim format often includes: house_number, street, neighborhood, city, county, state, zip, country
               // We want: street (no comma after number), city, state zipcode
-              
+
               if (parts.length >= 2) {
                 // First part might be house number, second is street, or first is full street
                 if (parts[0].match(/^\d+$/)) {
                   // First part is just a number, combine with street
                   street = parts[0] + ' ' + parts[1];
                   let startIdx = 2;
-                  
+
                   // Skip neighborhood/suburb names by looking for the city
                   // Cities usually come after neighborhoods but before county
                   for (let i = startIdx; i < parts.length; i++) {
                     const part = parts[i];
                     // Skip if it looks like a neighborhood or county
-                    if (part.toLowerCase().includes('county') || 
+                    if (part.toLowerCase().includes('county') ||
                         part.toLowerCase().includes('township')) {
                       continue;
                     }
@@ -1616,12 +1627,12 @@ function initializeAffiliateRegistration() {
                 } else {
                   // First part is the full street
                   street = parts[0];
-                  
+
                   // Process remaining parts
                   for (let i = 1; i < parts.length; i++) {
                     const part = parts[i];
                     // Skip if it looks like a neighborhood or county
-                    if (part.toLowerCase().includes('county') || 
+                    if (part.toLowerCase().includes('county') ||
                         part.toLowerCase().includes('township')) {
                       continue;
                     }
@@ -1638,7 +1649,7 @@ function initializeAffiliateRegistration() {
                   }
                 }
               }
-              
+
               // Build the formatted address
               displayAddress = street;
               if (city) {
@@ -1650,12 +1661,12 @@ function initializeAffiliateRegistration() {
                   displayAddress += ' ' + zipcode;
                 }
               }
-              
+
               // Fallback if we couldn't parse properly
               if (!street || !city) {
                 displayAddress = parts.slice(0, 3).join(', ');
               }
-              
+
               centerLocationElement.textContent = displayAddress;
               window.confirmedServiceAddress = displayAddress;
             } else {
@@ -1668,21 +1679,21 @@ function initializeAffiliateRegistration() {
           });
       }
     }
-    
+
     // Address autocomplete removed - using form fields instead
-    
+
     // Handle radius slider change
     radiusSlider.addEventListener('input', function() {
       const radius = parseInt(this.value);
       radiusValue.textContent = radius;
-      
+
       // Update circle if marker exists
       if (serviceMarker) {
         const position = serviceMarker.getLatLng();
         updateServiceArea(position.lat, position.lng, radius);
       }
     });
-    
+
     // Check if we have pending map center from address validation
     if (window.pendingMapCenter) {
       console.log('[Service Area Map] Using pending map center from address validation');
@@ -1699,29 +1710,29 @@ function initializeAffiliateRegistration() {
       }
     }
   }
-  
+
   // Initialize map when container is visible and Leaflet is loaded
   function waitForLeafletAndInitialize_OLD() {
     console.log('[Service Area Map] waitForLeafletAndInitialize called');
-    
+
     // Remove any remaining event listeners to prevent duplicate calls
     window.removeEventListener('init-service-area-map', waitForLeafletAndInitialize_OLD);
     window.removeEventListener('dom-sections-ready', waitForLeafletAndInitialize_OLD);
-    
+
     const mapContainer = document.getElementById('serviceAreaMap');
-    
+
     if (!mapContainer) {
       console.log('[Service Area Map] Map container not found, skipping map initialization');
       return;
     }
-    
+
     // Check if Leaflet is loaded
     if (typeof L === 'undefined') {
       console.log('Leaflet not loaded yet, waiting...');
       // Try to load Leaflet dynamically if not present
       if (!document.querySelector('script[src*="leaflet"]')) {
         console.log('Loading Leaflet dynamically...');
-        
+
         // Add Leaflet CSS
         if (!document.querySelector('link[href*="leaflet"]')) {
           const leafletCSS = document.createElement('link');
@@ -1729,7 +1740,7 @@ function initializeAffiliateRegistration() {
           leafletCSS.href = 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css';
           document.head.appendChild(leafletCSS);
         }
-        
+
         // Add Leaflet JS
         const leafletJS = document.createElement('script');
         leafletJS.src = 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js';
@@ -1744,17 +1755,17 @@ function initializeAffiliateRegistration() {
       // Just return, Leaflet will call us back when loaded
       return;
     }
-    
+
     // Check if container has dimensions
     const rect = mapContainer.getBoundingClientRect();
     console.log('[Service Area Map] Container dimensions:', { width: rect.width, height: rect.height });
-    
+
     if (rect.width === 0 || rect.height === 0) {
       console.log('[Service Area Map] Map container has no dimensions yet');
       // Check if container is actually visible
       const section = document.getElementById('serviceAreaSection');
       console.log('[Service Area Map] Service area section display:', section ? section.style.display : 'section not found');
-      
+
       // Try one more time after a render frame
       requestAnimationFrame(() => {
         const rect2 = mapContainer.getBoundingClientRect();
@@ -1768,16 +1779,16 @@ function initializeAffiliateRegistration() {
       });
       return;
     }
-    
+
     console.log('Leaflet loaded and container ready, initializing map');
     console.log('Leaflet version:', L.version);
     initializeServiceAreaMap_OLD();
   }
   */
-  
-  // OLD MAP INITIALIZATION - REPLACED BY SERVICE AREA COMPONENT
-  // Commenting out to prevent conflicts with new component
-  /*
+
+    // OLD MAP INITIALIZATION - REPLACED BY SERVICE AREA COMPONENT
+    // Commenting out to prevent conflicts with new component
+    /*
   // Listen for trigger events to initialize map
   window.addEventListener('init-service-area-map', waitForLeafletAndInitialize, { once: true });
   window.addEventListener('dom-sections-ready', () => {
@@ -1787,7 +1798,7 @@ function initializeAffiliateRegistration() {
       waitForLeafletAndInitialize_OLD();
     });
   }, { once: true });
-  
+
   // Try initial initialization in case section is already visible
   if (document.getElementById('serviceAreaMap')) {
     const container = document.getElementById('serviceAreaMap').closest('.form-section-hidden');
@@ -1797,105 +1808,193 @@ function initializeAffiliateRegistration() {
     }
   }
   */
-  
-  // Set up address validation button
-  function setupAddressValidation() {
-    const validateButton = document.getElementById('validateAddress');
-    if (validateButton) {
-      validateButton.addEventListener('click', function() {
-        validateAndSetAddress();
-      });
-    }
-    
-    // Monitor address fields and geocode when complete
-    function validateAndSetAddress() {
-      const address = document.getElementById('address')?.value?.trim();
-      const city = document.getElementById('city')?.value?.trim();
-      const state = document.getElementById('state')?.value?.trim();
-      const zipCode = document.getElementById('zipCode')?.value?.trim();
-      
-      console.log('[Service Area Map] Validating address:', { address, city, state, zipCode });
-      
-      // Validate required fields
-      if (!address || !city || !state) {
-        alert('Please fill in all required address fields (Address, City, State) before validating.');
-        return;
-      }
-      
-      // Service area component will be initialized after address validation
-      console.log('[Service Area Map] Validating address for service area component');
-      
-      // Show loading state on button with swirl spinner
+
+    // Set up address validation button
+    function setupAddressValidation() {
       const validateButton = document.getElementById('validateAddress');
-      const originalText = validateButton.innerHTML;
-      
-      // Show spinner over the entire form while validating
-      const form = document.getElementById('affiliateRegistrationForm');
-      let formSpinner = null;
-      if (window.SwirlSpinner && form) {
-        // Get translated message
-        const validatingMessage = getSpinnerMessage('spinner.validatingAddress');
-        
-        formSpinner = new window.SwirlSpinner({
-          container: form,
-          size: 'large',
-          overlay: true,
-          message: validatingMessage
-        }).show();
+      if (validateButton) {
+        validateButton.addEventListener('click', function() {
+          validateAndSetAddress();
+        });
       }
-      
-      // Also update button text
-      validateButton.innerHTML = 'Validating...';
-      validateButton.disabled = true;
-      
-      // Always search for the address
-      if (true) {
+
+      // Monitor address fields and geocode when complete
+      function validateAndSetAddress() {
+        const address = document.getElementById('address')?.value?.trim();
+        const city = document.getElementById('city')?.value?.trim();
+        const state = document.getElementById('state')?.value?.trim();
+        const zipCode = document.getElementById('zipCode')?.value?.trim();
+
+        console.log('[Service Area Map] Validating address:', { address, city, state, zipCode });
+
+        // Validate required fields
+        if (!address || !city || !state) {
+          alert('Please fill in all required address fields (Address, City, State) before validating.');
+          return;
+        }
+
+        // Service area component will be initialized after address validation
+        console.log('[Service Area Map] Validating address for service area component');
+
+        // Show loading state on button with swirl spinner
+        const validateButton = document.getElementById('validateAddress');
+        const originalText = validateButton.innerHTML;
+
+        // Show spinner over the entire form while validating
+        const form = document.getElementById('affiliateRegistrationForm');
+        let formSpinner = null;
+        if (window.SwirlSpinner && form) {
+        // Get translated message
+          const validatingMessage = getSpinnerMessage('spinner.validatingAddress');
+
+          formSpinner = new window.SwirlSpinner({
+            container: form,
+            size: 'large',
+            overlay: true,
+            message: validatingMessage
+          }).show();
+        }
+
+        // Also update button text
+        validateButton.innerHTML = 'Validating...';
+        validateButton.disabled = true;
+
+        // Always search for the address
+        if (true) {
         // Build search queries prioritizing street address + zip code for accuracy
         // This approach works better for business locations by avoiding city/neighborhood ambiguity
-        const searchQueries = [];
-        
-        // FIRST PRIORITY: Street address + zip code only (most accurate for business locations)
-        if (address && zipCode) {
+          const searchQueries = [];
+
+          // FIRST PRIORITY: Street address + zip code only (most accurate for business locations)
+          if (address && zipCode) {
+            searchQueries.push({
+              query: `${address}, ${zipCode}, USA`,
+              description: `${address}, ${zipCode}`
+            });
+          }
+
+          // SECOND: Full address with zip
+          if (address && zipCode) {
+            searchQueries.push({
+              query: `${address}, ${city}, ${state} ${zipCode}, USA`,
+              description: `${address}, ${city}, ${state} ${zipCode}`
+            });
+          }
+
+          // THIRD: Full address without zip
+          if (address) {
+            searchQueries.push({
+              query: `${address}, ${city}, ${state}, USA`,
+              description: `${address}, ${city}, ${state}`
+            });
+          }
+
+          // LAST: Just city and state (fallback)
           searchQueries.push({
-            query: `${address}, ${zipCode}, USA`,
-            description: `${address}, ${zipCode}`
+            query: `${city}, ${state}, USA`,
+            description: `${city}, ${state} (City Center)`
           });
+
+          console.log('[Service Area Map] Will try multiple search queries:', searchQueries);
+
+          // Try geocoding with fallback
+          geocodeWithFallback(searchQueries, 0, originalText, formSpinner);
+
         }
-        
-        // SECOND: Full address with zip
-        if (address && zipCode) {
-          searchQueries.push({
-            query: `${address}, ${city}, ${state} ${zipCode}, USA`,
-            description: `${address}, ${city}, ${state} ${zipCode}`
-          });
-        }
-        
-        // THIRD: Full address without zip
-        if (address) {
-          searchQueries.push({
-            query: `${address}, ${city}, ${state}, USA`,
-            description: `${address}, ${city}, ${state}`
-          });
-        }
-        
-        // LAST: Just city and state (fallback)
-        searchQueries.push({
-          query: `${city}, ${state}, USA`,
-          description: `${city}, ${state} (City Center)`
-        });
-        
-        console.log('[Service Area Map] Will try multiple search queries:', searchQueries);
-        
-        // Try geocoding with fallback
-        geocodeWithFallback(searchQueries, 0, originalText, formSpinner);
-        
       }
-    }
-    
-    // Function to try multiple geocoding queries with fallback
-    function geocodeWithFallback(searchQueries, queryIndex, originalButtonText, formSpinner) {
-      if (queryIndex >= searchQueries.length) {
-        console.log('[Service Area Map] All geocoding queries failed');
+
+      // Function to try multiple geocoding queries with fallback
+      function geocodeWithFallback(searchQueries, queryIndex, originalButtonText, formSpinner) {
+        if (queryIndex >= searchQueries.length) {
+          console.log('[Service Area Map] All geocoding queries failed');
+          // Reset button state and hide spinner
+          const validateButton = document.getElementById('validateAddress');
+          if (formSpinner) {
+            formSpinner.hide();
+          }
+          if (validateButton && originalButtonText) {
+            validateButton.innerHTML = originalButtonText;
+            validateButton.disabled = false;
+          }
+          alert('Unable to find the address. Please check your address and try again.');
+          return;
+        }
+
+        const currentQuery = searchQueries[queryIndex];
+        console.log(`[Service Area Map] Trying geocoding query ${queryIndex + 1}/${searchQueries.length}:`, currentQuery.query);
+
+        // Get radius slider value
+        const radiusSlider = document.getElementById('radiusSlider');
+        const radiusValue = radiusSlider ? parseInt(radiusSlider.value) : 5;
+
+        if (window.parent !== window) {
+        // Use bridge method when in iframe
+          const requestId = 'form_address_' + Date.now() + '_' + queryIndex;
+
+          // Request from parent
+          window.parent.postMessage({
+            type: 'geocode-forward',
+            data: {
+              query: currentQuery.query,
+              requestId: requestId
+            }
+          }, '*');
+
+          // Set up one-time handler for this specific request
+          const handleResponse = function(event) {
+            if (event.data && event.data.type === 'geocode-forward-response' &&
+              event.data.data && event.data.data.requestId === requestId) {
+              console.log('[Service Area Map] Received geocoding response:', event.data.data);
+
+              if (event.data.data.results && event.data.data.results.length > 0) {
+              // Always show address confirmation modal
+                showAddressConfirmationModal(event.data.data.results, radiusValue, originalButtonText, formSpinner);
+              } else {
+              // No results, try next query
+                console.log('[Service Area Map] No results for query, trying next...');
+                geocodeWithFallback(searchQueries, queryIndex + 1, originalButtonText, formSpinner);
+              }
+
+              // Remove this handler
+              window.removeEventListener('message', handleResponse);
+            }
+          };
+
+          window.addEventListener('message', handleResponse);
+        } else {
+        // Direct Nominatim call when not in iframe
+          const AUSTIN_BOUNDS = {
+            minLat: 29.5451,
+            maxLat: 30.9889,
+            minLon: -98.6687,
+            maxLon: -96.8175
+          };
+
+          fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(currentQuery.query)}&limit=5&accept-language=en&viewbox=${AUSTIN_BOUNDS.minLon},${AUSTIN_BOUNDS.minLat},${AUSTIN_BOUNDS.maxLon},${AUSTIN_BOUNDS.maxLat}&bounded=0&countrycodes=us`)
+            .then(response => response.json())
+            .then(results => {
+              console.log('[Service Area Map] Nominatim results:', results);
+              if (results.length > 0) {
+              // Always show address confirmation modal
+                showAddressConfirmationModal(results, radiusValue, originalButtonText, formSpinner);
+              } else {
+              // No results, try next query
+                console.log('[Service Area Map] No results for query, trying next...');
+                geocodeWithFallback(searchQueries, queryIndex + 1, originalButtonText, formSpinner);
+              }
+            })
+            .catch(error => {
+              console.error('Geocoding error:', error);
+              // Try next query on error
+              geocodeWithFallback(searchQueries, queryIndex + 1, originalButtonText, formSpinner);
+            });
+        }
+      }
+
+      // Function to show address confirmation modal
+      function showAddressConfirmationModal(results, radiusValue, originalButtonText, formSpinner) {
+        console.log('[Service Area Map] Showing address confirmation modal with results:', results);
+
         // Reset button state and hide spinner
         const validateButton = document.getElementById('validateAddress');
         if (formSpinner) {
@@ -1905,127 +2004,39 @@ function initializeAffiliateRegistration() {
           validateButton.innerHTML = originalButtonText;
           validateButton.disabled = false;
         }
-        alert('Unable to find the address. Please check your address and try again.');
-        return;
-      }
-      
-      const currentQuery = searchQueries[queryIndex];
-      console.log(`[Service Area Map] Trying geocoding query ${queryIndex + 1}/${searchQueries.length}:`, currentQuery.query);
-      
-      // Get radius slider value
-      const radiusSlider = document.getElementById('radiusSlider');
-      const radiusValue = radiusSlider ? parseInt(radiusSlider.value) : 5;
-      
-      if (window.parent !== window) {
-        // Use bridge method when in iframe
-        const requestId = 'form_address_' + Date.now() + '_' + queryIndex;
-        
-        // Request from parent
-        window.parent.postMessage({
-          type: 'geocode-forward',
-          data: {
-            query: currentQuery.query,
-            requestId: requestId
-          }
-        }, '*');
-        
-        // Set up one-time handler for this specific request
-        const handleResponse = function(event) {
-          if (event.data && event.data.type === 'geocode-forward-response' && 
-              event.data.data && event.data.data.requestId === requestId) {
-            console.log('[Service Area Map] Received geocoding response:', event.data.data);
-            
-            if (event.data.data.results && event.data.data.results.length > 0) {
-              // Always show address confirmation modal
-              showAddressConfirmationModal(event.data.data.results, radiusValue, originalButtonText, formSpinner);
-            } else {
-              // No results, try next query
-              console.log('[Service Area Map] No results for query, trying next...');
-              geocodeWithFallback(searchQueries, queryIndex + 1, originalButtonText, formSpinner);
-            }
-            
-            // Remove this handler
-            window.removeEventListener('message', handleResponse);
-          }
-        };
-        
-        window.addEventListener('message', handleResponse);
-      } else {
-        // Direct Nominatim call when not in iframe
-        const AUSTIN_BOUNDS = {
-          minLat: 29.5451,
-          maxLat: 30.9889,
-          minLon: -98.6687,
-          maxLon: -96.8175
-        };
-        
-        fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(currentQuery.query)}&limit=5&accept-language=en&viewbox=${AUSTIN_BOUNDS.minLon},${AUSTIN_BOUNDS.minLat},${AUSTIN_BOUNDS.maxLon},${AUSTIN_BOUNDS.maxLat}&bounded=0&countrycodes=us`)
-          .then(response => response.json())
-          .then(results => {
-            console.log('[Service Area Map] Nominatim results:', results);
-            if (results.length > 0) {
-              // Always show address confirmation modal
-              showAddressConfirmationModal(results, radiusValue, originalButtonText, formSpinner);
-            } else {
-              // No results, try next query
-              console.log('[Service Area Map] No results for query, trying next...');
-              geocodeWithFallback(searchQueries, queryIndex + 1, originalButtonText, formSpinner);
-            }
-          })
-          .catch(error => {
-            console.error('Geocoding error:', error);
-            // Try next query on error
-            geocodeWithFallback(searchQueries, queryIndex + 1, originalButtonText, formSpinner);
-          });
-      }
-    }
-    
-    // Function to show address confirmation modal
-    function showAddressConfirmationModal(results, radiusValue, originalButtonText, formSpinner) {
-      console.log('[Service Area Map] Showing address confirmation modal with results:', results);
-      
-      // Reset button state and hide spinner
-      const validateButton = document.getElementById('validateAddress');
-      if (formSpinner) {
-        formSpinner.hide();
-      }
-      if (validateButton && originalButtonText) {
-        validateButton.innerHTML = originalButtonText;
-        validateButton.disabled = false;
-      }
-      
-      // Remove any existing modal
-      const existingModal = document.getElementById('addressSelectionModal');
-      if (existingModal) {
-        existingModal.remove();
-      }
-      
-      // Create modal HTML with proper i18n support
-      const i18n = window.i18next;
-      const isI18nReady = i18n && (i18n.isInitialized || i18n.isInitialized === undefined);
-      
-      console.log('[Service Area Map] i18next status:', {
-        i18n: !!i18n,
-        isInitialized: i18n ? i18n.isInitialized : 'no i18n',
-        isI18nReady,
-        language: i18n ? i18n.language : 'no i18n'
-      });
-      
-      const modalTitle = results.length > 1 
-        ? (isI18nReady ? i18n.t('affiliate.register.selectServiceLocation') : 'Select Your Service Location')
-        : (isI18nReady ? i18n.t('affiliate.register.confirmServiceLocation') : 'Confirm Your Service Location');
-      const modalDesc = results.length > 1 
-        ? (isI18nReady ? i18n.t('affiliate.register.selectCorrectLocation') : 'We found multiple possible locations. Please select the correct one:')
-        : (isI18nReady ? i18n.t('affiliate.register.confirmCorrectAddress') : 'Please confirm this is the correct address for your service area:');
-        
-      console.log('[Service Area Map] Modal translations:', {
-        modalTitle,
-        modalDesc,
-        cancelButton: isI18nReady ? i18n.t('common.buttons.cancel') : 'Cancel',
-        confirmButton: isI18nReady ? i18n.t('common.buttons.confirm') : 'Confirm'
-      });
-      
-      const modalHTML = `
+
+        // Remove any existing modal
+        const existingModal = document.getElementById('addressSelectionModal');
+        if (existingModal) {
+          existingModal.remove();
+        }
+
+        // Create modal HTML with proper i18n support
+        const i18n = window.i18next;
+        const isI18nReady = i18n && (i18n.isInitialized || i18n.isInitialized === undefined);
+
+        console.log('[Service Area Map] i18next status:', {
+          i18n: !!i18n,
+          isInitialized: i18n ? i18n.isInitialized : 'no i18n',
+          isI18nReady,
+          language: i18n ? i18n.language : 'no i18n'
+        });
+
+        const modalTitle = results.length > 1
+          ? (isI18nReady ? i18n.t('affiliate.register.selectServiceLocation') : 'Select Your Service Location')
+          : (isI18nReady ? i18n.t('affiliate.register.confirmServiceLocation') : 'Confirm Your Service Location');
+        const modalDesc = results.length > 1
+          ? (isI18nReady ? i18n.t('affiliate.register.selectCorrectLocation') : 'We found multiple possible locations. Please select the correct one:')
+          : (isI18nReady ? i18n.t('affiliate.register.confirmCorrectAddress') : 'Please confirm this is the correct address for your service area:');
+
+        console.log('[Service Area Map] Modal translations:', {
+          modalTitle,
+          modalDesc,
+          cancelButton: isI18nReady ? i18n.t('common.buttons.cancel') : 'Cancel',
+          confirmButton: isI18nReady ? i18n.t('common.buttons.confirm') : 'Confirm'
+        });
+
+        const modalHTML = `
         <div id="addressSelectionModal" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0, 0, 0, 0.5); z-index: 9999; overflow-y: auto;">
           <div style="display: flex; align-items: flex-start; justify-content: center; min-height: 100%; padding-top: 2rem; padding-left: 1rem; padding-right: 1rem;">
             <div class="bg-white rounded-lg w-full" style="max-width: 32rem; max-height: 90vh; overflow: hidden; margin-top: 0;">
@@ -2034,44 +2045,44 @@ function initializeAffiliateRegistration() {
                 <p class="text-sm text-gray-600 mb-4" data-i18n="${results.length > 1 ? 'affiliate.register.selectCorrectLocation' : 'affiliate.register.confirmCorrectAddress'}">${modalDesc}</p>
                 <div class="space-y-2 overflow-y-auto" style="max-height: 50vh;">
                   ${results.map((result, index) => {
-                    // Get the form address to compare
-                    const formAddress = document.getElementById('address')?.value?.trim() || '';
-                    const formCity = document.getElementById('city')?.value?.trim() || '';
-                    const formState = document.getElementById('state')?.value?.trim() || '';
-                    const formZip = document.getElementById('zipCode')?.value?.trim() || '';
-                    
-                    // Parse the display name
-                    const parts = result.display_name.split(',').map(p => p.trim());
-                    let displayAddress = '';
-                    
-                    // Try to extract the street address from the result
-                    if (parts.length > 0) {
-                      // If the first part looks like a street address (starts with number)
-                      if (/^\d+/.test(parts[0])) {
-                        displayAddress = parts[0];
-                      } else if (formAddress) {
-                        // Use the form address if we don't have a street address in results
-                        displayAddress = formAddress;
-                      } else {
-                        // Fall back to first part of result
-                        displayAddress = parts[0];
-                      }
-                    }
-                    
-                    // Build full address display with proper formatting
-                    // Format: "streetNumber streetName, city, state zipcode"
-                    let fullDisplay = displayAddress;
-                    if (formCity || (parts.length > 1 && parts[1])) {
-                      fullDisplay += ', ' + (formCity || parts[1]);
-                    }
-                    if (formState || (parts.length > 2 && parts[2])) {
-                      fullDisplay += ', ' + (formState || parts[2]);
-                      if (formZip) {
-                        fullDisplay += ' ' + formZip;
-                      }
-                    }
-                    
-                    return `
+    // Get the form address to compare
+    const formAddress = document.getElementById('address')?.value?.trim() || '';
+    const formCity = document.getElementById('city')?.value?.trim() || '';
+    const formState = document.getElementById('state')?.value?.trim() || '';
+    const formZip = document.getElementById('zipCode')?.value?.trim() || '';
+
+    // Parse the display name
+    const parts = result.display_name.split(',').map(p => p.trim());
+    let displayAddress = '';
+
+    // Try to extract the street address from the result
+    if (parts.length > 0) {
+      // If the first part looks like a street address (starts with number)
+      if (/^\d+/.test(parts[0])) {
+        displayAddress = parts[0];
+      } else if (formAddress) {
+        // Use the form address if we don't have a street address in results
+        displayAddress = formAddress;
+      } else {
+        // Fall back to first part of result
+        displayAddress = parts[0];
+      }
+    }
+
+    // Build full address display with proper formatting
+    // Format: "streetNumber streetName, city, state zipcode"
+    let fullDisplay = displayAddress;
+    if (formCity || (parts.length > 1 && parts[1])) {
+      fullDisplay += ', ' + (formCity || parts[1]);
+    }
+    if (formState || (parts.length > 2 && parts[2])) {
+      fullDisplay += ', ' + (formState || parts[2]);
+      if (formZip) {
+        fullDisplay += ' ' + formZip;
+      }
+    }
+
+    return `
                       <button class="address-option w-full text-left p-4 border-2 border-gray-200 rounded-lg hover:bg-blue-50 hover:border-blue-400 transition-all duration-200 shadow-sm hover:shadow-md" 
                               data-lat="${result.lat}" 
                               data-lon="${result.lon}"
@@ -2080,7 +2091,7 @@ function initializeAffiliateRegistration() {
                         <div class="text-xs text-gray-500 mt-2">${result.display_name}</div>
                       </button>
                     `;
-                  }).join('')}
+  }).join('')}
                 </div>
                 <div class="mt-4 flex justify-end space-x-2">
                   <button id="cancelAddressSelection" class="px-4 py-2 text-gray-600 hover:text-gray-800 border border-gray-300 rounded-lg" data-i18n="common.buttons.cancel">${isI18nReady ? i18n.t('common.buttons.cancel') : 'Cancel'}</button>
@@ -2091,314 +2102,314 @@ function initializeAffiliateRegistration() {
           </div>
         </div>
       `;
-      
-      // Add modal to page
-      document.body.insertAdjacentHTML('beforeend', modalHTML);
-      
-      // Apply translations after modal is added to DOM
-      if (window.i18n && window.i18n.updateContent) {
+
+        // Add modal to page
+        document.body.insertAdjacentHTML('beforeend', modalHTML);
+
+        // Apply translations after modal is added to DOM
+        if (window.i18n && window.i18n.updateContent) {
         // Use a slight delay to ensure DOM is ready
-        setTimeout(() => {
-          window.i18n.updateContent();
-        }, 100);
-      }
-      
-      // Ensure modal is visible by scrolling to top
-      const modal = document.getElementById('addressSelectionModal');
-      if (modal) {
-        modal.scrollTop = 0;
-        // Also try to scroll the window to top if in iframe
-        try {
-          window.scrollTo(0, 0);
-          if (window.parent && window.parent !== window) {
-            window.parent.postMessage({ type: 'scroll-to-top' }, '*');
-          }
-        } catch (e) {
+          setTimeout(() => {
+            window.i18n.updateContent();
+          }, 100);
+        }
+
+        // Ensure modal is visible by scrolling to top
+        const modal = document.getElementById('addressSelectionModal');
+        if (modal) {
+          modal.scrollTop = 0;
+          // Also try to scroll the window to top if in iframe
+          try {
+            window.scrollTo(0, 0);
+            if (window.parent && window.parent !== window) {
+              window.parent.postMessage({ type: 'scroll-to-top' }, '*');
+            }
+          } catch (e) {
           // Ignore cross-origin errors
-        }
-      }
-      
-      // Add event listeners
-      const selectAddress = function(lat, lon, addressText) {
-        console.log('[Service Area Map] Address confirmed:', lat, lon, addressText);
-        
-        // Get the actual form address for display
-        const formAddress = document.getElementById('address')?.value?.trim() || '';
-        const formCity = document.getElementById('city')?.value?.trim() || '';
-        const formState = document.getElementById('state')?.value?.trim() || '';
-        const formZip = document.getElementById('zipCode')?.value?.trim() || '';
-        
-        // Build full address display with proper formatting
-        // Format: "streetNumber streetName, city, state zipcode"
-        let fullAddress = formAddress;
-        if (formCity) {
-          fullAddress += ', ' + formCity;
-        }
-        if (formState) {
-          fullAddress += ', ' + formState;
-          if (formZip) {
-            fullAddress += ' ' + formZip;
           }
         }
-        
-        // Store the address for service area display
-        window.confirmedServiceAddress = fullAddress || addressText || 'Location set';
-        
-        // Store the validated address components globally so they're not lost when section is hidden
-        window.validatedAddress = {
-          address: formAddress,
-          city: formCity,
-          state: formState,
-          zipCode: formZip
-        };
-        
-        // Update service area info with address
-        const centerLocationElement = document.getElementById('centerLocation');
-        if (centerLocationElement) {
-          centerLocationElement.textContent = window.confirmedServiceAddress;
-        }
-        
-        // Update coordinates display
-        const centerCoordinatesElement = document.getElementById('centerCoordinates');
-        if (centerCoordinatesElement) {
-          centerCoordinatesElement.textContent = `${lat.toFixed(6)}, ${lon.toFixed(6)}`;
-        }
-        
-        // Show service area info
-        const serviceAreaInfo = document.getElementById('serviceAreaInfo');
-        if (serviceAreaInfo) {
-          serviceAreaInfo.classList.remove('hidden');
-        }
-        
-        // Update coverage area
-        const coverageAreaElement = document.getElementById('coverageArea');
-        if (coverageAreaElement) {
-          coverageAreaElement.textContent = `${radiusValue} mile radius`;
-        }
-        
-        // Store the selected coordinates and radius for component initialization
-        window.selectedServiceAreaData = {
-          latitude: lat,
-          longitude: lon,
-          radius: radiusValue,
-          address: window.confirmedServiceAddress || fullAddress || addressText
-        };
-        console.log('[Service Area Map] Stored service area data for component initialization:', window.selectedServiceAreaData);
-        
-        // Mark address as validated
-        window.addressValidated = true;
-        
-        // Hide business info section and show remaining form sections
-        const businessInfoSection = document.querySelector('#businessInfoSection');
-        if (businessInfoSection) {
-          businessInfoSection.style.display = 'none';
-          
-          // Remove required attribute from fields in hidden section to allow form submission
-          const requiredFields = businessInfoSection.querySelectorAll('input[required]');
-          requiredFields.forEach(field => {
-            field.removeAttribute('required');
-            console.log('[Address Validation] Removed required attribute from:', field.id);
-          });
-        }
-        
-        // Show all hidden sections EXCEPT service area (we'll show that after address confirmation)
-        const hiddenSections = document.querySelectorAll('.form-section-hidden');
-        hiddenSections.forEach(section => {
+
+        // Add event listeners
+        const selectAddress = function(lat, lon, addressText) {
+          console.log('[Service Area Map] Address confirmed:', lat, lon, addressText);
+
+          // Get the actual form address for display
+          const formAddress = document.getElementById('address')?.value?.trim() || '';
+          const formCity = document.getElementById('city')?.value?.trim() || '';
+          const formState = document.getElementById('state')?.value?.trim() || '';
+          const formZip = document.getElementById('zipCode')?.value?.trim() || '';
+
+          // Build full address display with proper formatting
+          // Format: "streetNumber streetName, city, state zipcode"
+          let fullAddress = formAddress;
+          if (formCity) {
+            fullAddress += ', ' + formCity;
+          }
+          if (formState) {
+            fullAddress += ', ' + formState;
+            if (formZip) {
+              fullAddress += ' ' + formZip;
+            }
+          }
+
+          // Store the address for service area display
+          window.confirmedServiceAddress = fullAddress || addressText || 'Location set';
+
+          // Store the validated address components globally so they're not lost when section is hidden
+          window.validatedAddress = {
+            address: formAddress,
+            city: formCity,
+            state: formState,
+            zipCode: formZip
+          };
+
+          // Update service area info with address
+          const centerLocationElement = document.getElementById('centerLocation');
+          if (centerLocationElement) {
+            centerLocationElement.textContent = window.confirmedServiceAddress;
+          }
+
+          // Update coordinates display
+          const centerCoordinatesElement = document.getElementById('centerCoordinates');
+          if (centerCoordinatesElement) {
+            centerCoordinatesElement.textContent = `${lat.toFixed(6)}, ${lon.toFixed(6)}`;
+          }
+
+          // Show service area info
+          const serviceAreaInfo = document.getElementById('serviceAreaInfo');
+          if (serviceAreaInfo) {
+            serviceAreaInfo.classList.remove('hidden');
+          }
+
+          // Update coverage area
+          const coverageAreaElement = document.getElementById('coverageArea');
+          if (coverageAreaElement) {
+            coverageAreaElement.textContent = `${radiusValue} mile radius`;
+          }
+
+          // Store the selected coordinates and radius for component initialization
+          window.selectedServiceAreaData = {
+            latitude: lat,
+            longitude: lon,
+            radius: radiusValue,
+            address: window.confirmedServiceAddress || fullAddress || addressText
+          };
+          console.log('[Service Area Map] Stored service area data for component initialization:', window.selectedServiceAreaData);
+
+          // Mark address as validated
+          window.addressValidated = true;
+
+          // Hide business info section and show remaining form sections
+          const businessInfoSection = document.querySelector('#businessInfoSection');
+          if (businessInfoSection) {
+            businessInfoSection.style.display = 'none';
+
+            // Remove required attribute from fields in hidden section to allow form submission
+            const requiredFields = businessInfoSection.querySelectorAll('input[required]');
+            requiredFields.forEach(field => {
+              field.removeAttribute('required');
+              console.log('[Address Validation] Removed required attribute from:', field.id);
+            });
+          }
+
+          // Show all hidden sections EXCEPT service area (we'll show that after address confirmation)
+          const hiddenSections = document.querySelectorAll('.form-section-hidden');
+          hiddenSections.forEach(section => {
           // Skip service area section for now
-          if (section.id !== 'serviceAreaSection') {
-            section.classList.remove('form-section-hidden');
-            section.style.display = '';
+            if (section.id !== 'serviceAreaSection') {
+              section.classList.remove('form-section-hidden');
+              section.style.display = '';
+            }
+          });
+
+          // If OAuth user, hide account setup section again
+          if (window.isOAuthUser) {
+            const accountSetup = document.getElementById('accountSetupSection');
+            if (accountSetup) {
+              accountSetup.style.display = 'none';
+            }
           }
-        });
-        
-        // If OAuth user, hide account setup section again
-        if (window.isOAuthUser) {
-          const accountSetup = document.getElementById('accountSetupSection');
-          if (accountSetup) {
-            accountSetup.style.display = 'none';
-          }
-        }
-        
-        // NOW show the service area section after address has been confirmed
-        const serviceAreaSection = document.getElementById('serviceAreaSection');
-        console.log('[Service Area] Found service area section:', !!serviceAreaSection);
-        if (serviceAreaSection) {
-          console.log('[Service Area] Current display:', serviceAreaSection.style.display);
-          console.log('[Service Area] Current classes:', serviceAreaSection.className);
-          serviceAreaSection.classList.remove('form-section-hidden');
-          serviceAreaSection.style.display = '';
-          console.log('[Service Area] After update - display:', serviceAreaSection.style.display);
-          
-          // Force reflow by accessing offsetHeight
-          serviceAreaSection.offsetHeight;
-          
-          // Initialize the service area component with stored data
-          console.log('[Service Area Map] Service area section shown, initializing component');
-          if (window.ServiceAreaComponent && window.selectedServiceAreaData) {
-            const data = window.selectedServiceAreaData;
-            // Small delay to ensure container is fully rendered
-            setTimeout(() => {
-              window.registrationServiceArea = window.ServiceAreaComponent.init('registrationServiceAreaComponent', {
-              latitude: data.latitude,
-              longitude: data.longitude,
-              radius: data.radius,
-              address: data.address,
-              editable: true,
-              showMap: true,
-              showControls: true,
-              showInfo: true,
-              // Store registration address for "Use Registration Address" button
-              registrationAddress: data.address,
-              registrationLat: data.latitude,
-              registrationLng: data.longitude,
-              onUpdate: function(serviceData) {
-                // Update hidden fields - component creates fields with containerId prefix
+
+          // NOW show the service area section after address has been confirmed
+          const serviceAreaSection = document.getElementById('serviceAreaSection');
+          console.log('[Service Area] Found service area section:', !!serviceAreaSection);
+          if (serviceAreaSection) {
+            console.log('[Service Area] Current display:', serviceAreaSection.style.display);
+            console.log('[Service Area] Current classes:', serviceAreaSection.className);
+            serviceAreaSection.classList.remove('form-section-hidden');
+            serviceAreaSection.style.display = '';
+            console.log('[Service Area] After update - display:', serviceAreaSection.style.display);
+
+            // Force reflow by accessing offsetHeight
+            serviceAreaSection.offsetHeight;
+
+            // Initialize the service area component with stored data
+            console.log('[Service Area Map] Service area section shown, initializing component');
+            if (window.ServiceAreaComponent && window.selectedServiceAreaData) {
+              const data = window.selectedServiceAreaData;
+              // Small delay to ensure container is fully rendered
+              setTimeout(() => {
+                window.registrationServiceArea = window.ServiceAreaComponent.init('registrationServiceAreaComponent', {
+                  latitude: data.latitude,
+                  longitude: data.longitude,
+                  radius: data.radius,
+                  address: data.address,
+                  editable: true,
+                  showMap: true,
+                  showControls: true,
+                  showInfo: true,
+                  // Store registration address for "Use Registration Address" button
+                  registrationAddress: data.address,
+                  registrationLat: data.latitude,
+                  registrationLng: data.longitude,
+                  onUpdate: function(serviceData) {
+                    // Update hidden fields - component creates fields with containerId prefix
+                    const latField = document.getElementById('registrationServiceAreaComponent-latitude');
+                    const lngField = document.getElementById('registrationServiceAreaComponent-longitude');
+                    const radiusField = document.getElementById('registrationServiceAreaComponent-radius');
+
+                    if (latField) latField.value = serviceData.latitude;
+                    if (lngField) lngField.value = serviceData.longitude;
+                    if (radiusField) radiusField.value = serviceData.radius;
+                    console.log('Service area updated:', serviceData);
+                  }
+                });
+
+                // Also update the hidden fields immediately with initial values
                 const latField = document.getElementById('registrationServiceAreaComponent-latitude');
                 const lngField = document.getElementById('registrationServiceAreaComponent-longitude');
                 const radiusField = document.getElementById('registrationServiceAreaComponent-radius');
-                
-                if (latField) latField.value = serviceData.latitude;
-                if (lngField) lngField.value = serviceData.longitude;
-                if (radiusField) radiusField.value = serviceData.radius;
-                console.log('Service area updated:', serviceData);
-              }
-              });
-              
-              // Also update the hidden fields immediately with initial values
-              const latField = document.getElementById('registrationServiceAreaComponent-latitude');
-              const lngField = document.getElementById('registrationServiceAreaComponent-longitude');
-              const radiusField = document.getElementById('registrationServiceAreaComponent-radius');
-              
-              if (latField) latField.value = data.latitude;
-              if (lngField) lngField.value = data.longitude;
-              if (radiusField) radiusField.value = data.radius;
-            }, 100); // Small delay to ensure DOM is ready
-          } else {
-            console.error('ServiceAreaComponent or selectedServiceAreaData not available');
+
+                if (latField) latField.value = data.latitude;
+                if (lngField) lngField.value = data.longitude;
+                if (radiusField) radiusField.value = data.radius;
+              }, 100); // Small delay to ensure DOM is ready
+            } else {
+              console.error('ServiceAreaComponent or selectedServiceAreaData not available');
+            }
           }
-        }
-        
-        // Scroll to service area section
-        setTimeout(() => {
-          const serviceAreaSection = document.getElementById('serviceAreaSection');
-          if (serviceAreaSection) {
-            serviceAreaSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+          // Scroll to service area section
+          setTimeout(() => {
+            const serviceAreaSection = document.getElementById('serviceAreaSection');
+            if (serviceAreaSection) {
+              serviceAreaSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+          }, 100);
+
+          // Remove modal
+          try {
+            const modal = document.getElementById('addressSelectionModal');
+            if (modal) {
+              modal.remove();
+              console.log('[Address Selection] Modal removed successfully');
+            } else {
+              console.error('[Address Selection] Modal not found to remove');
+            }
+          } catch (error) {
+            console.error('[Address Selection] Error removing modal:', error);
           }
-        }, 100);
-        
-        // Remove modal
-        try {
-          const modal = document.getElementById('addressSelectionModal');
-          if (modal) {
-            modal.remove();
-            console.log('[Address Selection] Modal removed successfully');
-          } else {
-            console.error('[Address Selection] Modal not found to remove');
-          }
-        } catch (error) {
-          console.error('[Address Selection] Error removing modal:', error);
-        }
-      };
-      
-      // Add click handlers for address options
-      document.querySelectorAll('.address-option').forEach(button => {
-        button.addEventListener('click', function() {
-          const lat = parseFloat(this.dataset.lat);
-          const lon = parseFloat(this.dataset.lon);
-          const addressText = this.querySelector('.font-semibold').textContent;
-          selectAddress(lat, lon, addressText);
+        };
+
+        // Add click handlers for address options
+        document.querySelectorAll('.address-option').forEach(button => {
+          button.addEventListener('click', function() {
+            const lat = parseFloat(this.dataset.lat);
+            const lon = parseFloat(this.dataset.lon);
+            const addressText = this.querySelector('.font-semibold').textContent;
+            selectAddress(lat, lon, addressText);
+          });
         });
-      });
-      
-      // Add handler for single address confirm button
-      const confirmButton = document.querySelector('.confirm-single-address');
-      if (confirmButton) {
-        confirmButton.addEventListener('click', function() {
-          const lat = parseFloat(this.dataset.lat);
-          const lon = parseFloat(this.dataset.lon);
-          const addressText = document.querySelector('.address-option .font-semibold')?.textContent || '';
-          selectAddress(lat, lon, addressText);
+
+        // Add handler for single address confirm button
+        const confirmButton = document.querySelector('.confirm-single-address');
+        if (confirmButton) {
+          confirmButton.addEventListener('click', function() {
+            const lat = parseFloat(this.dataset.lat);
+            const lon = parseFloat(this.dataset.lon);
+            const addressText = document.querySelector('.address-option .font-semibold')?.textContent || '';
+            selectAddress(lat, lon, addressText);
+          });
+        }
+
+        // Cancel button
+        document.getElementById('cancelAddressSelection').addEventListener('click', function() {
+          document.getElementById('addressSelectionModal').remove();
+        });
+
+        // Close on backdrop click
+        document.getElementById('addressSelectionModal').addEventListener('click', function(e) {
+          if (e.target === this) {
+            this.remove();
+          }
         });
       }
-      
-      // Cancel button
-      document.getElementById('cancelAddressSelection').addEventListener('click', function() {
-        document.getElementById('addressSelectionModal').remove();
-      });
-      
-      // Close on backdrop click
-      document.getElementById('addressSelectionModal').addEventListener('click', function(e) {
-        if (e.target === this) {
-          this.remove();
+
+      // Make validation function globally accessible
+      window.validateAndSetAddress = validateAndSetAddress;
+    }
+
+    // Set up address validation immediately - don't wait for map
+    setupAddressValidation();
+
+    // Add click handler directly to submit button as a fallback
+    const submitButton = document.getElementById('registerSubmitButton');
+    if (submitButton) {
+      console.log('[Init] Adding click handler to submit button');
+      submitButton.addEventListener('click', function(e) {
+        console.log('[Submit Button] Click detected');
+        const form = document.getElementById('affiliateRegistrationForm');
+        if (form) {
+        // Trigger form submit programmatically
+          const submitEvent = new Event('submit', {
+            bubbles: true,
+            cancelable: true
+          });
+          form.dispatchEvent(submitEvent);
         }
       });
     }
-    
-    // Make validation function globally accessible
-    window.validateAndSetAddress = validateAndSetAddress;
   }
-  
-  // Set up address validation immediately - don't wait for map
-  setupAddressValidation();
-  
-  // Add click handler directly to submit button as a fallback
-  const submitButton = document.getElementById('registerSubmitButton');
-  if (submitButton) {
-    console.log('[Init] Adding click handler to submit button');
-    submitButton.addEventListener('click', function(e) {
-      console.log('[Submit Button] Click detected');
-      const form = document.getElementById('affiliateRegistrationForm');
-      if (form) {
-        // Trigger form submit programmatically
-        const submitEvent = new Event('submit', {
-          bubbles: true,
-          cancelable: true
-        });
-        form.dispatchEvent(submitEvent);
-      }
-    });
-  }
-}
 
-// Track language preference changes
-function setupLanguagePreferenceTracking() {
+  // Track language preference changes
+  function setupLanguagePreferenceTracking() {
   // Listen for language changes from i18n
-  if (window.i18n) {
-    const originalSetLanguage = window.i18n.setLanguage;
-    window.i18n.setLanguage = async function(lang) {
+    if (window.i18n) {
+      const originalSetLanguage = window.i18n.setLanguage;
+      window.i18n.setLanguage = async function(lang) {
       // Call original function
-      const result = await originalSetLanguage.call(this, lang);
-      
-      // Update hidden field
-      const languagePreferenceField = document.getElementById('languagePreference');
-      if (languagePreferenceField) {
-        languagePreferenceField.value = lang;
-        console.log('Updated language preference field to:', lang);
-      }
-      
-      return result;
-    };
-  }
-  
-  // Set initial value based on current language
-  const languagePreferenceField = document.getElementById('languagePreference');
-  if (languagePreferenceField && window.i18n) {
-    const currentLang = window.i18n.getLanguage() || 'en';
-    languagePreferenceField.value = currentLang;
-    console.log('Set initial language preference to:', currentLang);
-  }
-}
+        const result = await originalSetLanguage.call(this, lang);
 
-// Initialize immediately when script loads
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', () => {
+        // Update hidden field
+        const languagePreferenceField = document.getElementById('languagePreference');
+        if (languagePreferenceField) {
+          languagePreferenceField.value = lang;
+          console.log('Updated language preference field to:', lang);
+        }
+
+        return result;
+      };
+    }
+
+    // Set initial value based on current language
+    const languagePreferenceField = document.getElementById('languagePreference');
+    if (languagePreferenceField && window.i18n) {
+      const currentLang = window.i18n.getLanguage() || 'en';
+      languagePreferenceField.value = currentLang;
+      console.log('Set initial language preference to:', currentLang);
+    }
+  }
+
+  // Initialize immediately when script loads
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+      initializeAffiliateRegistration();
+      setupLanguagePreferenceTracking();
+    });
+  } else {
+  // DOM is already loaded
     initializeAffiliateRegistration();
     setupLanguagePreferenceTracking();
-  });
-} else {
-  // DOM is already loaded
-  initializeAffiliateRegistration();
-  setupLanguagePreferenceTracking();
-}
+  }
 
 })(); // End IIFE

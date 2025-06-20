@@ -1,5 +1,5 @@
-const { 
-  CSRF_CONFIG, 
+const {
+  CSRF_CONFIG,
   shouldEnforceCsrf
 } = require('../../server/config/csrf-config');
 
@@ -11,7 +11,7 @@ describe('CSRF Configuration', () => {
       path: '/api/v1/test',
       method: 'POST'
     };
-    
+
     // Reset environment variables
     delete process.env.CSRF_PHASE;
   });
@@ -59,14 +59,14 @@ describe('CSRF Configuration', () => {
     it('should include critical security endpoints', () => {
       // Logout must be protected to prevent CSRF logout attacks
       expect(CSRF_CONFIG.CRITICAL_ENDPOINTS).toContain('/api/v1/auth/logout');
-      
+
       // Order operations must be protected
       expect(CSRF_CONFIG.CRITICAL_ENDPOINTS).toContain('/api/v1/orders');
       expect(CSRF_CONFIG.CRITICAL_ENDPOINTS).toContain('/api/v1/orders/:orderId/cancel');
-      
+
       // Password changes must be protected
       expect(CSRF_CONFIG.CRITICAL_ENDPOINTS).toContain('/api/v1/customers/:customerId/password');
-      
+
       // Data deletion must be protected
       expect(CSRF_CONFIG.CRITICAL_ENDPOINTS).toContain('/api/v1/affiliates/:affiliateId/delete-all-data');
       expect(CSRF_CONFIG.CRITICAL_ENDPOINTS).toContain('/api/v1/customers/:customerId/delete-all-data');

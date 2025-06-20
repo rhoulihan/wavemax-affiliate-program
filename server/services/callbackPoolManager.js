@@ -3,17 +3,50 @@ const logger = require('../utils/logger');
 
 class CallbackPoolManager {
   constructor() {
-    this.config = require('../config/paygistix-forms.json');
-    this.baseUrl = this.config.baseUrl;
-    this.lockTimeoutMinutes = this.config.lockTimeoutMinutes;
-    this.formId = this.config.form.formId;
-    this.formHash = this.config.form.formHash;
+    // Lazy load config to avoid issues in test environment
+    this._config = null;
     this.cleanupInterval = null;
+  }
+
+  get config() {
+    if (!this._config) {
+      if (process.env.NODE_ENV === 'test') {
+        // In test environment, use test config if set
+        this._config = this._testConfig || { callbackPaths: [], baseUrl: '', lockTimeoutMinutes: 10, form: {} };
+      } else {
+        this._config = require('../config/paygistix-forms.json');
+      }
+    }
+    return this._config;
+  }
+
+  // Method to set config for testing
+  setTestConfig(config) {
+    if (process.env.NODE_ENV === 'test') {
+      this._testConfig = config;
+      this._config = config; // Reset cached config
+    }
+  }
+
+  get baseUrl() {
+    return this.config.baseUrl;
+  }
+
+  get lockTimeoutMinutes() {
+    return this.config.lockTimeoutMinutes;
+  }
+
+  get formId() {
+    return this.config.form.formId;
+  }
+
+  get formHash() {
+    return this.config.form.formHash;
   }
 
   async initializePool() {
     logger.info('Initializing callback pool...');
-    
+
     // Create or update callback entries
     for (const callbackPath of this.config.callbackPaths) {
       await CallbackPool.findOneAndUpdate(
@@ -31,27 +64,27 @@ class CallbackPoolManager {
         { upsert: true, new: true }
       );
     }
-    
+
     logger.info(`Initialized ${this.config.callbackPaths.length} callback handlers`);
-    
+
     // Start cleanup job
     this.startCleanupJob();
   }
 
   async acquireCallback(paymentToken) {
     const callback = await CallbackPool.acquireCallback(paymentToken, this.lockTimeoutMinutes);
-    
+
     if (!callback) {
       throw new Error('No callback handlers available. All handlers are currently in use.');
     }
-    
+
     const callbackUrl = `${this.baseUrl}${callback.callbackPath}`;
-    
+
     logger.info(`Acquired callback handler for payment token ${paymentToken}:`, {
       callbackPath: callback.callbackPath,
       callbackUrl
     });
-    
+
     // Return form config with the assigned callback URL
     return {
       formId: this.formId,
@@ -63,19 +96,19 @@ class CallbackPoolManager {
 
   async releaseCallback(paymentToken) {
     const callback = await CallbackPool.releaseCallback(paymentToken);
-    
+
     if (callback) {
       logger.info(`Released callback handler for payment token ${paymentToken}:`, {
         callbackPath: callback.callbackPath
       });
     }
-    
+
     return callback;
   }
 
   async getPoolStatus() {
     const callbacks = await CallbackPool.find({}).sort('callbackPath');
-    
+
     const status = {
       total: callbacks.length,
       available: callbacks.filter(c => !c.isLocked).length,
@@ -89,7 +122,7 @@ class CallbackPoolManager {
         lastUsedAt: c.lastUsedAt
       }))
     };
-    
+
     return status;
   }
 
@@ -98,7 +131,7 @@ class CallbackPoolManager {
     this.cleanupInterval = setInterval(async () => {
       try {
         const released = await CallbackPool.releaseExpiredLocks(this.lockTimeoutMinutes);
-        
+
         if (released > 0) {
           logger.info(`Released ${released} expired callback locks`);
         }
@@ -106,7 +139,7 @@ class CallbackPoolManager {
         logger.error('Error in callback pool cleanup job:', error);
       }
     }, 5 * 60 * 1000);
-    
+
     logger.info('Callback pool cleanup job started (runs every 5 minutes)');
   }
 
@@ -119,4 +152,13 @@ class CallbackPoolManager {
   }
 }
 
-module.exports = new CallbackPoolManager();
+// Create singleton instance
+let instance = null;
+
+// Export a function that returns the singleton instance
+module.exports = (() => {
+  if (!instance) {
+    instance = new CallbackPoolManager();
+  }
+  return instance;
+})();

@@ -150,12 +150,12 @@ function initializeOrderConfirmation() {
     // Display delivery fee information
     const deliveryFeeElement = document.getElementById('deliveryFee');
     let deliveryFee = 25.00; // Default
-    
+
     if (order.deliveryFeeBreakdown) {
       // Use the breakdown info if available
       const breakdown = order.deliveryFeeBreakdown;
-      deliveryFee = breakdown.roundTripFee || breakdown.appliedFee * 2 || order.deliveryFee || 25.00;
-      
+      deliveryFee = breakdown.totalFee || breakdown.appliedFee || order.deliveryFee || 25.00;
+
       if (deliveryFeeElement) {
         deliveryFeeElement.textContent = `$${parseFloat(deliveryFee).toFixed(2)}`;
         // Optionally show breakdown
@@ -163,7 +163,7 @@ function initializeOrderConfirmation() {
         if (parent && breakdown.minimumApplied) {
           const note = document.createElement('small');
           note.className = 'text-gray-500 block';
-          note.textContent = `(Minimum fee applies)`;
+          note.textContent = '(Minimum fee applies)';
           parent.appendChild(note);
         }
       }
@@ -210,21 +210,19 @@ function initializeOrderConfirmation() {
 
       // Fetch WDF rate from system config or use default
       const wdfRate = await fetchWdfRate();
-      
+
       // Update WDF rate display
       const wdfRateDisplay = document.getElementById('wdfRateDisplay');
       if (wdfRateDisplay) {
         wdfRateDisplay.textContent = `$${wdfRate.toFixed(2)} per pound`;
       }
-      
+
       const estimatedWdfTotal = estimatedWeight * wdfRate;
       const estimatedTotal = estimatedWdfTotal + deliveryFee;
 
       document.getElementById('estimatedTotal').textContent = `$${estimatedTotal.toFixed(2)} (estimated)`;
     }
 
-    // Set special instructions
-    document.getElementById('serviceNotes').textContent = order.serviceNotes || 'None provided';
 
     // Fetch affiliate information
     fetchAffiliateInfo(affiliateId);

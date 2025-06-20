@@ -1,6 +1,4 @@
 const request = require('supertest');
-const mongoose = require('mongoose');
-const { MongoMemoryServer } = require('mongodb-memory-server');
 const app = require('../../server');
 const Affiliate = require('../../server/models/Affiliate');
 const Administrator = require('../../server/models/Administrator');
@@ -8,27 +6,11 @@ const Order = require('../../server/models/Order');
 const Customer = require('../../server/models/Customer');
 const PaymentExport = require('../../server/models/PaymentExport');
 const W9Document = require('../../server/models/W9Document');
-const { generateToken } = require('../../server/utils/auth');
+const { createTestToken } = require('../helpers/authHelper');
 
 describe('QuickBooks Export Integration Tests', () => {
-  let mongoServer;
   let adminToken;
   let testAdmin, testAffiliates, testCustomers, testOrders;
-
-  beforeAll(async () => {
-    // Start in-memory MongoDB
-    mongoServer = await MongoMemoryServer.create();
-    const mongoUri = mongoServer.getUri();
-    
-    // Connect to in-memory database
-    await mongoose.disconnect();
-    await mongoose.connect(mongoUri);
-  });
-
-  afterAll(async () => {
-    await mongoose.disconnect();
-    await mongoServer.stop();
-  });
 
   beforeEach(async () => {
     // Clear collections
@@ -38,19 +20,24 @@ describe('QuickBooks Export Integration Tests', () => {
     await Customer.deleteMany({});
     await PaymentExport.deleteMany({});
     await W9Document.deleteMany({});
-    
+
     // Create test administrator
     testAdmin = await Administrator.create({
       adminId: 'ADMIN-TEST-001',
       firstName: 'Test',
       lastName: 'Admin',
       email: 'admin@example.com',
-      password: 'Admin123!@#'
+      password: 'SecureP@ss4QuickB00ks!'  // Password that doesn't contain username/email and no sequential chars
     });
-    
-    adminToken = generateToken(testAdmin._id, 'administrator');
-    
+
+    adminToken = createTestToken(testAdmin.administratorId || testAdmin._id.toString(), 'administrator');
+
     // Create test affiliates with different W-9 statuses
+    const { hashPassword } = require('../../server/utils/encryption');
+    const johnHash = hashPassword('JohnDoeSecure!8');
+    const janeHash = hashPassword('JaneSmithSecure!9');
+    const bobHash = hashPassword('BobBrownSecure!7');
+
     testAffiliates = await Promise.all([
       // Verified affiliate 1
       Affiliate.create({
@@ -58,8 +45,23 @@ describe('QuickBooks Export Integration Tests', () => {
         firstName: 'John',
         lastName: 'Doe',
         email: 'john@example.com',
-        password: 'Test123!@#',
+        username: 'johndoe',
+        passwordHash: johnHash.hash,
+        passwordSalt: johnHash.salt,
         phoneNumber: '+1234567890',
+        businessName: 'John Doe LLC',
+        address: '123 Test St',
+        city: 'Austin',
+        state: 'TX',
+        zipCode: '78701',
+        phone: '+1234567890',
+        paymentMethod: 'check',
+        serviceArea: 'Downtown Austin',
+        serviceLatitude: 30.2672,
+        serviceLongitude: -97.7431,
+        serviceRadius: 10,
+        minimumDeliveryFee: 25,
+        perBagDeliveryFee: 5,
         w9Information: {
           status: 'verified',
           taxIdType: 'SSN',
@@ -81,8 +83,23 @@ describe('QuickBooks Export Integration Tests', () => {
         firstName: 'Jane',
         lastName: 'Smith',
         email: 'jane@example.com',
-        password: 'Test123!@#',
+        username: 'janesmith',
+        passwordHash: janeHash.hash,
+        passwordSalt: janeHash.salt,
         phoneNumber: '+1234567891',
+        businessName: 'Smith Services LLC',
+        address: '456 Oak Ave',
+        city: 'Dallas',
+        state: 'TX',
+        zipCode: '75201',
+        phone: '+1234567891',
+        paymentMethod: 'check',
+        serviceArea: 'Downtown Dallas',
+        serviceLatitude: 32.7767,
+        serviceLongitude: -96.7970,
+        serviceRadius: 15,
+        minimumDeliveryFee: 30,
+        perBagDeliveryFee: 6,
         w9Information: {
           status: 'verified',
           taxIdType: 'EIN',
@@ -100,38 +117,81 @@ describe('QuickBooks Export Integration Tests', () => {
         firstName: 'Bob',
         lastName: 'Wilson',
         email: 'bob@example.com',
-        password: 'Test123!@#',
+        username: 'bobwilson',
+        passwordHash: bobHash.hash,
+        passwordSalt: bobHash.salt,
         phoneNumber: '+1234567892',
+        phone: '+1234567892',
+        address: '789 Elm St',
+        city: 'Houston',
+        state: 'TX',
+        zipCode: '77001',
+        paymentMethod: 'directDeposit',
+        serviceArea: 'Houston Area',
+        serviceLatitude: 29.7604,
+        serviceLongitude: -95.3698,
+        serviceRadius: 20,
+        minimumDeliveryFee: 35,
+        perBagDeliveryFee: 7,
         w9Information: {
           status: 'pending_review'
         }
       })
     ]);
-    
+
     // Create test customers
+    const custHash1 = hashPassword('Customer1Pass!');
+    const custHash2 = hashPassword('Customer2Pass!');
+
     testCustomers = await Promise.all([
       Customer.create({
         customerId: 'CUST-001',
         firstName: 'Customer',
         lastName: 'One',
         email: 'customer1@example.com',
-        phoneNumber: '+1234567893'
+        username: 'customer1',
+        passwordHash: custHash1.hash,
+        passwordSalt: custHash1.salt,
+        phoneNumber: '+1234567893',
+        phone: '+1234567893',
+        address: '321 Customer St',
+        city: 'Austin',
+        state: 'TX',
+        zipCode: '78703',
+        serviceFrequency: 'weekly',
+        affiliateId: 'AFF-QB-001'
       }),
       Customer.create({
         customerId: 'CUST-002',
         firstName: 'Customer',
         lastName: 'Two',
         email: 'customer2@example.com',
-        phoneNumber: '+1234567894'
+        username: 'customer2',
+        passwordHash: custHash2.hash,
+        passwordSalt: custHash2.salt,
+        phoneNumber: '+1234567894',
+        phone: '+1234567894',
+        address: '654 Customer Ave',
+        city: 'Dallas',
+        state: 'TX',
+        zipCode: '75202',
+        serviceFrequency: 'weekly',
+        affiliateId: 'AFF-QB-002'
       })
     ]);
-    
+
     // Create test orders with commissions
     const baseDate = new Date();
     testOrders = await Promise.all([
       // Orders for John Doe (AFF-QB-001)
       Order.create({
         orderId: 'ORD-QB-001',
+        customerId: testCustomers[0].customerId,
+        affiliateId: testAffiliates[0].affiliateId,
+        pickupDate: new Date(baseDate.getTime() - 7 * 24 * 60 * 60 * 1000),
+        pickupTime: 'morning',
+        estimatedWeight: 15,
+
         customer: {
           _id: testCustomers[0]._id,
           customerId: testCustomers[0].customerId,
@@ -152,6 +212,12 @@ describe('QuickBooks Export Integration Tests', () => {
       }),
       Order.create({
         orderId: 'ORD-QB-002',
+        customerId: testCustomers[1].customerId,
+        affiliateId: testAffiliates[0].affiliateId,
+        pickupDate: new Date(baseDate.getTime() - 5 * 24 * 60 * 60 * 1000),
+        pickupTime: 'afternoon',
+        estimatedWeight: 20,
+
         customer: {
           _id: testCustomers[1]._id,
           customerId: testCustomers[1].customerId,
@@ -173,6 +239,12 @@ describe('QuickBooks Export Integration Tests', () => {
       // Orders for Jane Smith (AFF-QB-002)
       Order.create({
         orderId: 'ORD-QB-003',
+        customerId: testCustomers[0].customerId,
+        affiliateId: testAffiliates[1].affiliateId,
+        pickupDate: new Date(baseDate.getTime() - 4 * 24 * 60 * 60 * 1000),
+        pickupTime: 'evening',
+        estimatedWeight: 25,
+
         customer: {
           _id: testCustomers[0]._id,
           customerId: testCustomers[0].customerId,
@@ -194,6 +266,12 @@ describe('QuickBooks Export Integration Tests', () => {
       // Order for unverified affiliate (should not appear in payment exports)
       Order.create({
         orderId: 'ORD-QB-004',
+        customerId: testCustomers[0].customerId,
+        affiliateId: testAffiliates[2].affiliateId,
+        pickupDate: new Date(baseDate.getTime() - 2 * 24 * 60 * 60 * 1000),
+        pickupTime: 'morning',
+        estimatedWeight: 30,
+
         customer: {
           _id: testCustomers[0]._id,
           customerId: testCustomers[0].customerId
@@ -218,16 +296,16 @@ describe('QuickBooks Export Integration Tests', () => {
         .set('Authorization', `Bearer ${adminToken}`)
         .query({ format: 'csv' })
         .expect(200);
-      
+
       expect(response.headers['content-type']).toBe('text/csv');
       expect(response.headers['content-disposition']).toMatch(/attachment; filename="wavemax-vendors-.*\.csv"/);
-      
+
       const csvContent = response.text;
       expect(csvContent).toContain('Vendor,Company,Display Name as');
       expect(csvContent).toContain('John Doe,John Doe LLC,John Doe LLC');
       expect(csvContent).toContain('Jane Smith,Smith Enterprises,Smith Enterprises');
       expect(csvContent).not.toContain('Bob Wilson'); // Unverified
-      
+
       // Verify export was recorded
       const exportRecord = await PaymentExport.findOne({ type: 'vendor' });
       expect(exportRecord).toBeDefined();
@@ -240,7 +318,7 @@ describe('QuickBooks Export Integration Tests', () => {
         .set('Authorization', `Bearer ${adminToken}`)
         .query({ format: 'json' })
         .expect(200);
-      
+
       expect(response.body).toMatchObject({
         success: true,
         export: {
@@ -249,7 +327,7 @@ describe('QuickBooks Export Integration Tests', () => {
         },
         vendorCount: 2
       });
-      
+
       const exportRecord = await PaymentExport.findOne({ type: 'vendor' });
       expect(exportRecord.exportData.vendors).toHaveLength(2);
       expect(exportRecord.exportData.vendors[0]).toMatchObject({
@@ -263,12 +341,12 @@ describe('QuickBooks Export Integration Tests', () => {
     it('should handle no verified vendors gracefully', async () => {
       // Remove all verified affiliates
       await Affiliate.updateMany({}, { $set: { 'w9Information.status': 'pending_review' } });
-      
+
       const response = await request(app)
         .get('/api/v1/quickbooks/vendors')
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(404);
-      
+
       expect(response.body).toMatchObject({
         success: false,
         message: 'No verified vendors found for export'
@@ -281,7 +359,7 @@ describe('QuickBooks Export Integration Tests', () => {
       const startDate = new Date();
       startDate.setDate(startDate.getDate() - 7); // 7 days ago
       const endDate = new Date();
-      
+
       const response = await request(app)
         .get('/api/v1/quickbooks/payment-summary')
         .set('Authorization', `Bearer ${adminToken}`)
@@ -291,9 +369,9 @@ describe('QuickBooks Export Integration Tests', () => {
           format: 'csv'
         })
         .expect(200);
-      
+
       expect(response.headers['content-type']).toBe('text/csv');
-      
+
       const csvContent = response.text;
       expect(csvContent).toContain('Date,Vendor,Account Number,Description,Amount');
       expect(csvContent).toContain('John Doe LLC,AFF-QB-001');
@@ -307,7 +385,7 @@ describe('QuickBooks Export Integration Tests', () => {
       const startDate = new Date();
       startDate.setDate(startDate.getDate() - 7);
       const endDate = new Date();
-      
+
       const response = await request(app)
         .get('/api/v1/quickbooks/payment-summary')
         .set('Authorization', `Bearer ${adminToken}`)
@@ -317,7 +395,7 @@ describe('QuickBooks Export Integration Tests', () => {
           format: 'json'
         })
         .expect(200);
-      
+
       expect(response.body).toMatchObject({
         success: true,
         export: {
@@ -330,7 +408,7 @@ describe('QuickBooks Export Integration Tests', () => {
           totalOrders: 3
         }
       });
-      
+
       const exportRecord = await PaymentExport.findOne({ type: 'payment_summary' });
       expect(exportRecord.exportData.payments).toHaveLength(2);
       expect(exportRecord.exportData.payments.find(p => p.affiliateId === 'AFF-QB-001')).toMatchObject({
@@ -344,14 +422,14 @@ describe('QuickBooks Export Integration Tests', () => {
         .get('/api/v1/quickbooks/payment-summary')
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(400);
-      
+
       expect(response.body.message).toContain('Start date and end date are required');
     });
 
     it('should handle empty date range', async () => {
       const futureDate = new Date();
       futureDate.setFullYear(futureDate.getFullYear() + 1);
-      
+
       const response = await request(app)
         .get('/api/v1/quickbooks/payment-summary')
         .set('Authorization', `Bearer ${adminToken}`)
@@ -360,7 +438,7 @@ describe('QuickBooks Export Integration Tests', () => {
           endDate: futureDate.toISOString().split('T')[0]
         })
         .expect(404);
-      
+
       expect(response.body.message).toContain('No payable commissions found');
     });
   });
@@ -370,7 +448,7 @@ describe('QuickBooks Export Integration Tests', () => {
       const startDate = new Date();
       startDate.setDate(startDate.getDate() - 7);
       const endDate = new Date();
-      
+
       const response = await request(app)
         .get('/api/v1/quickbooks/commission-detail')
         .set('Authorization', `Bearer ${adminToken}`)
@@ -381,9 +459,9 @@ describe('QuickBooks Export Integration Tests', () => {
           format: 'csv'
         })
         .expect(200);
-      
+
       expect(response.headers['content-type']).toBe('text/csv');
-      
+
       const csvContent = response.text;
       expect(csvContent).toContain('Order ID,Date,Customer,Order Total,Commission Rate,Commission Amount');
       expect(csvContent).toContain('ORD-QB-001');
@@ -403,7 +481,7 @@ describe('QuickBooks Export Integration Tests', () => {
           // Missing endDate
         })
         .expect(400);
-      
+
       expect(response.body.message).toContain('Affiliate ID, start date, and end date are required');
     });
 
@@ -417,7 +495,7 @@ describe('QuickBooks Export Integration Tests', () => {
           endDate: '2025-01-31'
         })
         .expect(400);
-      
+
       expect(response.body.message).toContain('Affiliate does not have a verified W-9 on file');
     });
 
@@ -431,7 +509,7 @@ describe('QuickBooks Export Integration Tests', () => {
           endDate: '2025-01-31'
         })
         .expect(404);
-      
+
       expect(response.body.message).toContain('Affiliate not found');
     });
   });
@@ -443,7 +521,7 @@ describe('QuickBooks Export Integration Tests', () => {
         .get('/api/v1/quickbooks/vendors')
         .set('Authorization', `Bearer ${adminToken}`)
         .query({ format: 'csv' });
-      
+
       await request(app)
         .get('/api/v1/quickbooks/payment-summary')
         .set('Authorization', `Bearer ${adminToken}`)
@@ -459,7 +537,7 @@ describe('QuickBooks Export Integration Tests', () => {
         .get('/api/v1/quickbooks/history')
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(200);
-      
+
       expect(response.body).toMatchObject({
         success: true,
         exports: expect.arrayContaining([
@@ -485,7 +563,7 @@ describe('QuickBooks Export Integration Tests', () => {
         .set('Authorization', `Bearer ${adminToken}`)
         .query({ type: 'vendor' })
         .expect(200);
-      
+
       expect(response.body.exports).toHaveLength(1);
       expect(response.body.exports[0].type).toBe('vendor');
     });
@@ -498,13 +576,13 @@ describe('QuickBooks Export Integration Tests', () => {
           .set('Authorization', `Bearer ${adminToken}`)
           .query({ format: 'json' });
       }
-      
+
       const response = await request(app)
         .get('/api/v1/quickbooks/history')
         .set('Authorization', `Bearer ${adminToken}`)
         .query({ limit: '3' })
         .expect(200);
-      
+
       expect(response.body.exports).toHaveLength(3);
     });
   });
@@ -517,7 +595,7 @@ describe('QuickBooks Export Integration Tests', () => {
         '/api/v1/quickbooks/commission-detail',
         '/api/v1/quickbooks/history'
       ];
-      
+
       for (const endpoint of endpoints) {
         await request(app)
           .get(endpoint)
@@ -526,8 +604,8 @@ describe('QuickBooks Export Integration Tests', () => {
     });
 
     it('should not allow affiliate access to QuickBooks exports', async () => {
-      const affiliateToken = generateToken(testAffiliates[0]._id, 'affiliate');
-      
+      const affiliateToken = createTestToken(testAffiliates[0].affiliateId, 'affiliate');
+
       await request(app)
         .get('/api/v1/quickbooks/vendors')
         .set('Authorization', `Bearer ${affiliateToken}`)
@@ -542,17 +620,17 @@ describe('QuickBooks Export Integration Tests', () => {
         .set('Authorization', `Bearer ${adminToken}`)
         .query({ format: 'csv' })
         .expect(200);
-      
+
       const lines = response.text.split('\n');
       const headers = lines[0].split(',');
-      
+
       // Verify QuickBooks required columns
       expect(headers).toContain('Vendor');
       expect(headers).toContain('Company');
       expect(headers).toContain('Display Name as');
       expect(headers).toContain('Tax ID');
       expect(headers).toContain('Track payments for 1099');
-      
+
       // Verify data formatting
       const dataLine = lines[1];
       expect(dataLine).toContain('****1234'); // Masked tax ID
@@ -569,10 +647,10 @@ describe('QuickBooks Export Integration Tests', () => {
           format: 'csv'
         })
         .expect(200);
-      
+
       const lines = response.text.split('\n');
       const headers = lines[0].split(',');
-      
+
       // Verify QuickBooks bill/payment columns
       expect(headers).toContain('Date');
       expect(headers).toContain('Vendor');

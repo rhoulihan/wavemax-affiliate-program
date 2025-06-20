@@ -22,13 +22,13 @@ class TestLock {
 
   async acquireLock() {
     const startTime = Date.now();
-    
+
     while (Date.now() - startTime < LOCK_TIMEOUT) {
       try {
         // Try to read existing lock
         if (fs.existsSync(LOCK_FILE)) {
           const existingLock = JSON.parse(fs.readFileSync(LOCK_FILE, 'utf8'));
-          
+
           // Check if lock is stale (older than 30 seconds)
           if (Date.now() - existingLock.timestamp > LOCK_TIMEOUT) {
             console.log(`[${this.testName}] Removing stale lock from ${existingLock.testName}`);
@@ -62,7 +62,7 @@ class TestLock {
     try {
       if (fs.existsSync(LOCK_FILE)) {
         const existingLock = JSON.parse(fs.readFileSync(LOCK_FILE, 'utf8'));
-        
+
         // Only remove lock if we own it
         if (existingLock.processId === this.processId && existingLock.testName === this.testName) {
           fs.unlinkSync(LOCK_FILE);
@@ -84,7 +84,7 @@ class TestLock {
 // Helper function to run a test with lock protection
 async function runWithLock(testName, testFunction) {
   const lock = new TestLock(testName);
-  
+
   try {
     await lock.acquireLock();
     return await testFunction();

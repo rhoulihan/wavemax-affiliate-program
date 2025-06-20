@@ -90,7 +90,7 @@ describe('Affiliate Login Initialization', () => {
       const testURL = '?login=affiliate&customer=CUST123456';
       const urlParams = new URLSearchParams(testURL);
       const customerParam = urlParams.get('customer');
-      
+
       expect(customerParam).toBe('CUST123456');
     });
 
@@ -98,31 +98,31 @@ describe('Affiliate Login Initialization', () => {
       const testURL = '?login=affiliate';
       const urlParams = new URLSearchParams(testURL);
       const customerParam = urlParams.get('customer');
-      
+
       expect(customerParam).toBeNull();
     });
 
     test('should construct redirect URL correctly with customer parameter', () => {
       const affiliateId = 'AFF123456';
       const customerParam = 'CUST789012';
-      
+
       let redirectUrl = `/embed-app.html?route=/affiliate-dashboard&id=${affiliateId}`;
       if (customerParam) {
         redirectUrl += `&customer=${customerParam}`;
       }
-      
+
       expect(redirectUrl).toBe('/embed-app.html?route=/affiliate-dashboard&id=AFF123456&customer=CUST789012');
     });
 
     test('should construct redirect URL correctly without customer parameter', () => {
       const affiliateId = 'AFF123456';
       const customerParam = null;
-      
+
       let redirectUrl = `/embed-app.html?route=/affiliate-dashboard&id=${affiliateId}`;
       if (customerParam) {
         redirectUrl += `&customer=${customerParam}`;
       }
-      
+
       expect(redirectUrl).toBe('/embed-app.html?route=/affiliate-dashboard&id=AFF123456');
     });
   });
@@ -131,7 +131,7 @@ describe('Affiliate Login Initialization', () => {
     test('should validate customer ID format', () => {
       const validCustomerId = 'CUST123456';
       const invalidCustomerId = 'invalid-id';
-      
+
       // Valid customer ID should match pattern
       expect(validCustomerId).toMatch(/^CUST\d+$/);
       expect(invalidCustomerId).not.toMatch(/^CUST\d+$/);
@@ -140,7 +140,7 @@ describe('Affiliate Login Initialization', () => {
     test('should handle URL encoding correctly', () => {
       const customerParam = 'CUST123456';
       const encodedParam = encodeURIComponent(customerParam);
-      
+
       expect(encodedParam).toBe('CUST123456'); // Should not change for valid IDs
       expect(decodeURIComponent(encodedParam)).toBe(customerParam);
     });
@@ -150,7 +150,7 @@ describe('Affiliate Login Initialization', () => {
     test('should parse email-generated URLs correctly', () => {
       const emailURL = 'https://www.wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program?login=affiliate&customer=CUST789012';
       const url = new URL(emailURL);
-      
+
       expect(url.searchParams.get('login')).toBe('affiliate');
       expect(url.searchParams.get('customer')).toBe('CUST789012');
     });
@@ -158,7 +158,7 @@ describe('Affiliate Login Initialization', () => {
     test('should handle both login and customer parameters together', () => {
       const searchParams = '?login=affiliate&customer=CUST789012';
       const urlParams = new URLSearchParams(searchParams);
-      
+
       expect(urlParams.get('login')).toBe('affiliate');
       expect(urlParams.get('customer')).toBe('CUST789012');
       expect(urlParams.has('login')).toBe(true);
@@ -172,15 +172,15 @@ describe('Affiliate Login Initialization', () => {
       const originalURL = '?login=affiliate&customer=CUST789012';
       const urlParams = new URLSearchParams(originalURL);
       const customerParam = urlParams.get('customer');
-      
+
       // After successful login
       const affiliateId = 'AFF123456';
       let redirectUrl = `/embed-app.html?route=/affiliate-dashboard&id=${affiliateId}`;
-      
+
       if (customerParam) {
         redirectUrl += `&customer=${customerParam}`;
       }
-      
+
       expect(redirectUrl).toContain('customer=CUST789012');
       expect(redirectUrl).toContain('id=AFF123456');
       expect(redirectUrl).toContain('route=/affiliate-dashboard');
@@ -189,7 +189,7 @@ describe('Affiliate Login Initialization', () => {
     test('should handle multiple URL parameters correctly', () => {
       const complexURL = '?login=affiliate&customer=CUST789012&other=value&test=123';
       const urlParams = new URLSearchParams(complexURL);
-      
+
       expect(urlParams.get('login')).toBe('affiliate');
       expect(urlParams.get('customer')).toBe('CUST789012');
       expect(urlParams.get('other')).toBe('value');

@@ -28,15 +28,15 @@ router.get('/public', async (req, res) => {
 // Get specific public configuration by key (no authentication required)
 router.get('/public/:key', async (req, res) => {
   try {
-    const config = await SystemConfig.findOne({ 
-      key: req.params.key, 
-      isPublic: true 
+    const config = await SystemConfig.findOne({
+      key: req.params.key,
+      isPublic: true
     });
-    
+
     if (!config) {
       return res.status(404).json({ error: 'Configuration not found' });
     }
-    
+
     res.json({
       key: config.key,
       currentValue: config.value,
@@ -60,13 +60,13 @@ router.get('/', async (req, res) => {
   try {
     const { category } = req.query;
     let configs;
-    
+
     if (category) {
       configs = await SystemConfig.getByCategory(category);
     } else {
       configs = await SystemConfig.find().sort('category key');
     }
-    
+
     res.json(configs);
   } catch (error) {
     console.error('Error fetching configs:', error);
@@ -79,7 +79,7 @@ router.put('/:key', checkAdminPermission('system_config'), async (req, res) => {
   try {
     const { value } = req.body;
     const adminId = req.user.id;
-    
+
     const config = await SystemConfig.setValue(req.params.key, value, adminId);
     res.json({
       success: true,

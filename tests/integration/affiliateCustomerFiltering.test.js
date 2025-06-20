@@ -78,7 +78,7 @@ describe('Affiliate Customer Filtering Integration Tests', () => {
     test('should generate correct dashboard URL with customer parameter', () => {
       // Test the URL format that should be generated in emails
       const dashboardURL = `https://www.wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program?login=affiliate&customer=${testCustomer.customerId}`;
-      
+
       expect(dashboardURL).toContain(`customer=${testCustomer.customerId}`);
       expect(dashboardURL).toContain('login=affiliate');
       expect(dashboardURL).toMatch(/customer=CUST-[a-f0-9-]+/);
@@ -107,7 +107,7 @@ describe('Affiliate Customer Filtering Integration Tests', () => {
       // Create additional customer with proper password hash
       const alicePassword = 'alicepass123';
       const { salt: aliceSalt, hash: aliceHash } = encryptionUtil.hashPassword(alicePassword);
-      
+
       const additionalCustomer = new Customer({
         firstName: 'Alice',
         lastName: 'Brown',
@@ -160,7 +160,7 @@ describe('Affiliate Customer Filtering Integration Tests', () => {
     test('should handle complete flow from email generation to dashboard access', async () => {
       // Step 1: Simulate email URL generation
       const dashboardURL = `https://www.wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program?login=affiliate&customer=${testCustomer.customerId}`;
-      
+
       // Verify URL contains customer parameter
       expect(dashboardURL).toContain(`customer=${testCustomer.customerId}`);
       expect(dashboardURL).toContain('login=affiliate');
@@ -187,7 +187,7 @@ describe('Affiliate Customer Filtering Integration Tests', () => {
       // Verify dashboard can load customer data for highlighting
       expect(dashboardResponse.body.customers).toHaveLength(1);
       expect(dashboardResponse.body.customers[0].customerId).toBe(testCustomer.customerId);
-      
+
       // Step 4: Verify affiliate dashboard stats also load correctly
       const statsResponse = await request(app)
         .get(`/api/v1/affiliates/${testAffiliate.affiliateId}/dashboard`)
@@ -201,27 +201,27 @@ describe('Affiliate Customer Filtering Integration Tests', () => {
     test('should handle URL parameters correctly throughout the flow', async () => {
       // Simulate the URL structure that would come from email clicking
       const emailURL = `https://www.wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program?login=affiliate&customer=${testCustomer.customerId}`;
-      
+
       // Parse URL parameters like the frontend would
       const url = new URL(emailURL);
       const loginParam = url.searchParams.get('login');
       const customerParam = url.searchParams.get('customer');
-      
+
       expect(loginParam).toBe('affiliate');
       expect(customerParam).toBe(testCustomer.customerId);
-      
+
       // After login, the redirect URL would be constructed
       const redirectURL = `/embed-app.html?route=/affiliate-dashboard&id=${testAffiliate.affiliateId}&customer=${customerParam}`;
-      
+
       expect(redirectURL).toContain(testAffiliate.affiliateId);
       expect(redirectURL).toContain(testCustomer.customerId);
-      
+
       // Dashboard would then parse these parameters
       const redirectUrlObj = new URL(redirectURL, 'https://example.com');
       const routeParam = redirectUrlObj.searchParams.get('route');
       const idParam = redirectUrlObj.searchParams.get('id');
       const finalCustomerParam = redirectUrlObj.searchParams.get('customer');
-      
+
       expect(routeParam).toBe('/affiliate-dashboard');
       expect(idParam).toBe(testAffiliate.affiliateId);
       expect(finalCustomerParam).toBe(testCustomer.customerId);

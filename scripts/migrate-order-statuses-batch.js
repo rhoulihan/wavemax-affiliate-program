@@ -28,19 +28,19 @@ async function migrateOrderStatuses() {
     const statusCounts = await Order.aggregate([
       { $group: { _id: '$status', count: { $sum: 1 } } }
     ]);
-    
+
     console.log('\nCurrent status distribution:');
     statusCounts.forEach(s => console.log(`  ${s._id}: ${s.count}`));
 
     // Perform bulk updates for each status transition
     const updates = [];
-    
+
     for (const [oldStatus, newStatus] of Object.entries(statusMapping)) {
       if (oldStatus !== newStatus) {
         const result = await Order.updateMany(
           { status: oldStatus },
-          { 
-            $set: { 
+          {
+            $set: {
               status: newStatus,
               ...(newStatus === 'processing' ? { processingStartedAt: new Date() } : {}),
               ...(newStatus === 'processed' ? { processedAt: new Date() } : {}),
@@ -48,7 +48,7 @@ async function migrateOrderStatuses() {
             }
           }
         );
-        
+
         if (result.modifiedCount > 0) {
           console.log(`\nUpdated ${result.modifiedCount} orders from '${oldStatus}' to '${newStatus}'`);
           updates.push({ from: oldStatus, to: newStatus, count: result.modifiedCount });
@@ -60,7 +60,7 @@ async function migrateOrderStatuses() {
     const finalStatusCounts = await Order.aggregate([
       { $group: { _id: '$status', count: { $sum: 1 } } }
     ]);
-    
+
     console.log('\nFinal status distribution:');
     finalStatusCounts.forEach(s => console.log(`  ${s._id}: ${s.count}`));
 

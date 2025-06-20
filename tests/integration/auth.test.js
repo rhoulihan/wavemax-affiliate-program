@@ -671,7 +671,7 @@ describe('Authentication Integration Tests', () => {
         success: false,
         message: 'Token has been blacklisted'
       });
-      
+
       // Verify refresh token cannot be used after logout
       const refreshResponse = await agent
         .post('/api/v1/auth/refresh-token')
@@ -937,7 +937,7 @@ describe('Authentication Integration Tests', () => {
         .set('Authorization', `Bearer ${token2}`);
 
       expect(verify2After.status).toBe(200);
-      
+
       // Now logout with the second token
       await agent
         .post('/api/v1/auth/logout')
@@ -946,7 +946,7 @@ describe('Authentication Integration Tests', () => {
         .send({
           refreshToken: refreshToken2
         });
-        
+
       // Now second token should also be blacklisted
       const verify2AfterLogout = await agent
         .get('/api/v1/auth/verify')

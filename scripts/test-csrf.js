@@ -29,16 +29,16 @@ async function testEndpoint(method, path, description, shouldRequireCsrf = true)
       validateStatus: () => true // Don't throw on any status
     });
 
-    const requiresCsrf = response.status === 403 && 
+    const requiresCsrf = response.status === 403 &&
                         response.data.code === 'CSRF_VALIDATION_FAILED';
-    
+
     const passed = shouldRequireCsrf ? requiresCsrf : !requiresCsrf;
-    
+
     console.log(
       `${passed ? colors.green + '✓' : colors.red + '✗'} ${method} ${path} - ${description}`,
       `(${response.status}${requiresCsrf ? ' - CSRF Required' : ''})${colors.reset}`
     );
-    
+
     return passed;
   } catch (error) {
     console.log(
@@ -50,10 +50,10 @@ async function testEndpoint(method, path, description, shouldRequireCsrf = true)
 
 async function runTests() {
   console.log(`\\n${colors.yellow}Testing CSRF Protection on Critical Endpoints${colors.reset}\\n`);
-  
+
   let passed = 0;
   let total = 0;
-  
+
   // Test critical endpoints that should require CSRF
   const criticalTests = [
     ['POST', '/api/v1/orders', 'Order creation'],
@@ -65,15 +65,15 @@ async function runTests() {
     ['POST', '/api/v1/operators/orders/123/claim', 'Operator claim'],
     ['POST', '/api/v1/auth/logout', 'Logout']
   ];
-  
+
   console.log(`${colors.yellow}Critical Endpoints (Should Require CSRF):${colors.reset}`);
   for (const [method, path, desc] of criticalTests) {
     total++;
     if (await testEndpoint(method, path, desc, true)) passed++;
   }
-  
+
   console.log(`\\n${colors.yellow}Excluded Endpoints (Should NOT Require CSRF):${colors.reset}`);
-  
+
   // Test excluded endpoints
   const excludedTests = [
     ['POST', '/api/v1/auth/customer/login', 'Login endpoint'],
@@ -81,18 +81,18 @@ async function runTests() {
     ['GET', '/api/v1/customers/123/dashboard', 'Read-only endpoint'],
     ['GET', '/api/v1/affiliates/123/public', 'Public endpoint']
   ];
-  
+
   for (const [method, path, desc] of excludedTests) {
     total++;
     if (await testEndpoint(method, path, desc, false)) passed++;
   }
-  
+
   // Summary
   console.log(`\\n${colors.yellow}Test Summary:${colors.reset}`);
   console.log(`Total Tests: ${total}`);
   console.log(`Passed: ${colors.green}${passed}${colors.reset}`);
   console.log(`Failed: ${colors.red}${total - passed}${colors.reset}`);
-  
+
   if (passed === total) {
     console.log(`\\n${colors.green}✓ All CSRF protection tests passed!${colors.reset}\\n`);
   } else {

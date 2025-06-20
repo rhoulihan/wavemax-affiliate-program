@@ -7,45 +7,45 @@ const { encrypt, decrypt } = require('../utils/encryption');
 const { validatePasswordStrength } = require('../utils/passwordValidator');
 
 const administratorSchema = new mongoose.Schema({
-  adminId: { 
-    type: String, 
+  adminId: {
+    type: String,
     unique: true
   },
-  firstName: { 
-    type: String, 
+  firstName: {
+    type: String,
     required: true,
-    trim: true 
+    trim: true
   },
-  lastName: { 
-    type: String, 
+  lastName: {
+    type: String,
     required: true,
-    trim: true 
+    trim: true
   },
-  email: { 
-    type: String, 
-    unique: true, 
+  email: {
+    type: String,
+    unique: true,
     required: true,
     lowercase: true,
     trim: true,
     match: [/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/, 'Please enter a valid email']
   },
-  password: { 
-    type: String, 
+  password: {
+    type: String,
     required: true,
-    select: false 
+    select: false
   },
-  role: { 
-    type: String, 
+  role: {
+    type: String,
     default: 'administrator',
-    immutable: true 
+    immutable: true
   },
   permissions: [{
     type: String,
     enum: [
       'all', // Super admin - has all permissions
-      'system_config', 
-      'operator_management', 
-      'view_analytics', 
+      'system_config',
+      'operator_management',
+      'view_analytics',
       'manage_affiliates',
       'administrators.read',
       'administrators.create',
@@ -66,14 +66,14 @@ const administratorSchema = new mongoose.Schema({
       'system.configure'
     ]
   }],
-  isActive: { 
-    type: Boolean, 
-    default: true 
+  isActive: {
+    type: Boolean,
+    default: true
   },
   lastLogin: Date,
-  loginAttempts: { 
-    type: Number, 
-    default: 0 
+  loginAttempts: {
+    type: Number,
+    default: 0
   },
   lockUntil: Date,
   passwordResetToken: String,
@@ -86,13 +86,13 @@ const administratorSchema = new mongoose.Schema({
     password: String,
     changedAt: Date
   }],
-  createdAt: { 
-    type: Date, 
-    default: Date.now 
+  createdAt: {
+    type: Date,
+    default: Date.now
   },
-  updatedAt: { 
-    type: Date, 
-    default: Date.now 
+  updatedAt: {
+    type: Date,
+    default: Date.now
   }
 });
 
@@ -110,13 +110,13 @@ administratorSchema.index({ createdAt: -1 });
 administratorSchema.pre('save', async function(next) {
   // Update timestamp
   this.updatedAt = new Date();
-  
+
   // Generate admin ID if new
   if (this.isNew && !this.adminId) {
-    this.adminId = 'ADM' + Date.now().toString(36).toUpperCase() + 
+    this.adminId = 'ADM' + Date.now().toString(36).toUpperCase() +
                    crypto.randomBytes(3).toString('hex').toUpperCase();
   }
-  
+
   // Validate and hash password if modified
   if (this.isModified('password')) {
     // Validate password strength
@@ -124,17 +124,17 @@ administratorSchema.pre('save', async function(next) {
       username: this.email.split('@')[0], // Use email prefix as username
       email: this.email
     });
-    
+
     if (!validation.success) {
       const error = new Error(validation.errors.join('; '));
       error.name = 'ValidationError';
       throw error;
     }
-    
+
     const salt = crypto.randomBytes(16);
     const hashedPassword = crypto.pbkdf2Sync(this.password, salt, 100000, 64, 'sha512')
       .toString('hex') + ':' + salt.toString('hex');
-    
+
     // Store the old password in history before updating
     if (!this.isNew && this._id) {
       // Get the current (old) password from database
@@ -155,15 +155,15 @@ administratorSchema.pre('save', async function(next) {
       // Clear requirePasswordChange flag when password is changed
       this.requirePasswordChange = false;
     }
-    
+
     this.password = hashedPassword;
   }
-  
+
   // Set default permissions if none provided
   if (this.isNew && this.permissions.length === 0) {
     this.permissions = ['system_config', 'operator_management', 'view_analytics', 'manage_affiliates'];
   }
-  
+
   next();
 });
 
@@ -180,7 +180,7 @@ administratorSchema.methods.isPasswordInHistory = function(password) {
   if (!this.passwordHistory || this.passwordHistory.length === 0) {
     return false;
   }
-  
+
   return this.passwordHistory.some(historyEntry => {
     const [hash, salt] = historyEntry.password.split(':');
     const verifyHash = crypto.pbkdf2Sync(password, Buffer.from(salt, 'hex'), 100000, 64, 'sha512')
@@ -198,17 +198,17 @@ administratorSchema.methods.incLoginAttempts = function() {
       $unset: { lockUntil: 1 }
     });
   }
-  
+
   const updates = { $inc: { loginAttempts: 1 } };
-  
+
   // Lock account after 5 attempts for 2 hours
   const maxAttempts = 5;
   const lockTime = 2 * 60 * 60 * 1000; // 2 hours
-  
+
   if (this.loginAttempts + 1 >= maxAttempts && !this.isLocked) {
     updates.$set = { lockUntil: new Date(Date.now() + lockTime) };
   }
-  
+
   return this.updateOne(updates);
 };
 
@@ -223,14 +223,14 @@ administratorSchema.methods.resetLoginAttempts = function() {
 // Method to generate password reset token
 administratorSchema.methods.generatePasswordResetToken = function() {
   const resetToken = crypto.randomBytes(32).toString('hex');
-  
+
   this.passwordResetToken = crypto
     .createHash('sha256')
     .update(resetToken)
     .digest('hex');
-  
+
   this.passwordResetExpires = Date.now() + 30 * 60 * 1000; // 30 minutes
-  
+
   return resetToken;
 };
 

@@ -6,7 +6,7 @@ const Affiliate = require('../../server/models/Affiliate');
 const Administrator = require('../../server/models/Administrator');
 const W9Document = require('../../server/models/W9Document');
 const W9AuditLog = require('../../server/models/W9AuditLog');
-const { generateToken } = require('../../server/utils/auth');
+const { generateToken } = require('../../server/utils/encryption');
 const fs = require('fs').promises;
 const path = require('path');
 
@@ -20,11 +20,11 @@ describe('W-9 Integration Tests', () => {
     // Start in-memory MongoDB
     mongoServer = await MongoMemoryServer.create();
     const mongoUri = mongoServer.getUri();
-    
+
     // Connect to in-memory database
     await mongoose.disconnect();
     await mongoose.connect(mongoUri);
-    
+
     // Create test PDF buffer
     testPdfBuffer = Buffer.from('test pdf content for w9');
   });
@@ -40,7 +40,7 @@ describe('W-9 Integration Tests', () => {
     await Administrator.deleteMany({});
     await W9Document.deleteMany({});
     await W9AuditLog.deleteMany({});
-    
+
     // Create test affiliate
     testAffiliate = await Affiliate.create({
       affiliateId: 'AFF-TEST-001',
@@ -59,7 +59,7 @@ describe('W-9 Integration Tests', () => {
         status: 'not_submitted'
       }
     });
-    
+
     // Create test administrator
     testAdmin = await Administrator.create({
       adminId: 'ADMIN-TEST-001',
@@ -68,7 +68,7 @@ describe('W-9 Integration Tests', () => {
       email: 'admin@example.com',
       password: 'Admin123!@#'
     });
-    
+
     // Generate tokens
     affiliateToken = generateToken(testAffiliate._id, 'affiliate');
     adminToken = generateToken(testAdmin._id, 'administrator');
@@ -81,26 +81,26 @@ describe('W-9 Integration Tests', () => {
         .set('Authorization', `Bearer ${affiliateToken}`)
         .attach('w9document', testPdfBuffer, 'test-w9.pdf')
         .expect(200);
-      
+
       expect(response.body).toMatchObject({
         message: 'W-9 document uploaded successfully',
         documentId: expect.stringMatching(/^W9DOC-/),
         status: 'pending_review'
       });
-      
+
       // Verify document was created
       const document = await W9Document.findOne({ affiliateId: 'AFF-TEST-001' });
       expect(document).toBeDefined();
       expect(document.verificationStatus).toBe('pending');
-      
+
       // Verify affiliate status was updated
       const updatedAffiliate = await Affiliate.findById(testAffiliate._id);
       expect(updatedAffiliate.w9Information.status).toBe('pending_review');
-      
+
       // Verify audit log was created
-      const auditLog = await W9AuditLog.findOne({ 
+      const auditLog = await W9AuditLog.findOne({
         action: 'upload_success',
-        'targetInfo.affiliateId': 'AFF-TEST-001' 
+        'targetInfo.affiliateId': 'AFF-TEST-001'
       });
       expect(auditLog).toBeDefined();
     });
@@ -111,19 +111,19 @@ describe('W-9 Integration Tests', () => {
         .set('Authorization', `Bearer ${affiliateToken}`)
         .attach('w9document', Buffer.from('test'), 'test.txt')
         .expect(400);
-      
+
       expect(response.body.message).toContain('Only PDF files are allowed');
     });
 
     it('should reject files over 5MB', async () => {
       const largePdf = Buffer.alloc(6 * 1024 * 1024); // 6MB
-      
+
       const response = await request(app)
         .post('/api/v1/w9/upload')
         .set('Authorization', `Bearer ${affiliateToken}`)
         .attach('w9document', largePdf, 'large.pdf')
         .expect(413);
-      
+
       expect(response.body.message).toContain('too large');
     });
   });
@@ -134,7 +134,7 @@ describe('W-9 Integration Tests', () => {
         .get('/api/v1/w9/status')
         .set('Authorization', `Bearer ${affiliateToken}`)
         .expect(200);
-      
+
       expect(response.body).toMatchObject({
         status: 'not_submitted',
         canReceivePayments: false
@@ -147,13 +147,13 @@ describe('W-9 Integration Tests', () => {
         .post('/api/v1/w9/upload')
         .set('Authorization', `Bearer ${affiliateToken}`)
         .attach('w9document', testPdfBuffer, 'test-w9.pdf');
-      
+
       // Check status
       const response = await request(app)
         .get('/api/v1/w9/status')
         .set('Authorization', `Bearer ${affiliateToken}`)
         .expect(200);
-      
+
       expect(response.body).toMatchObject({
         status: 'pending_review',
         canReceivePayments: false,
@@ -177,7 +177,7 @@ describe('W-9 Integration Tests', () => {
         .get('/api/v1/w9/admin/pending')
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(200);
-      
+
       expect(response.body).toMatchObject({
         count: 1,
         affiliates: [
@@ -204,7 +204,7 @@ describe('W-9 Integration Tests', () => {
           quickbooksVendorId: 'QB-TEST-001'
         })
         .expect(200);
-      
+
       expect(response.body).toMatchObject({
         message: 'W-9 document verified successfully',
         affiliate: {
@@ -213,13 +213,13 @@ describe('W-9 Integration Tests', () => {
           w9Status: 'verified'
         }
       });
-      
+
       // Verify affiliate can now receive payments
       const updatedAffiliate = await Affiliate.findById(testAffiliate._id);
       expect(updatedAffiliate.canReceivePayments()).toBe(true);
-      
+
       // Verify audit log
-      const auditLog = await W9AuditLog.findOne({ 
+      const auditLog = await W9AuditLog.findOne({
         action: 'verify_success',
         'userInfo.userId': testAdmin._id.toString()
       });
@@ -235,7 +235,7 @@ describe('W-9 Integration Tests', () => {
           reason: 'Document is illegible, please upload a clearer copy'
         })
         .expect(200);
-      
+
       expect(response.body).toMatchObject({
         message: 'W-9 document rejected',
         affiliate: {
@@ -243,7 +243,7 @@ describe('W-9 Integration Tests', () => {
           w9Status: 'rejected'
         }
       });
-      
+
       // Verify document is marked as inactive
       const document = await W9Document.findOne({ affiliateId: 'AFF-TEST-001' });
       expect(document.isActive).toBe(false);
@@ -260,7 +260,7 @@ describe('W-9 Integration Tests', () => {
         .post('/api/v1/w9/upload')
         .set('Authorization', `Bearer ${affiliateToken}`)
         .attach('w9document', testPdfBuffer, 'test-w9.pdf');
-      
+
       uploadedDocumentId = uploadResponse.body.documentId;
     });
 
@@ -269,12 +269,12 @@ describe('W-9 Integration Tests', () => {
         .get('/api/v1/w9/download')
         .set('Authorization', `Bearer ${affiliateToken}`)
         .expect(200);
-      
+
       expect(response.headers['content-type']).toBe('application/pdf');
       expect(response.headers['content-disposition']).toContain('attachment');
-      
+
       // Verify audit log
-      const auditLog = await W9AuditLog.findOne({ 
+      const auditLog = await W9AuditLog.findOne({
         action: 'download_affiliate',
         'userInfo.userId': testAffiliate._id.toString()
       });
@@ -283,16 +283,16 @@ describe('W-9 Integration Tests', () => {
 
     it('should allow admin to download any W-9', async () => {
       const document = await W9Document.findOne({ affiliateId: 'AFF-TEST-001' });
-      
+
       const response = await request(app)
         .get(`/api/v1/w9/admin/${document.documentId}/download`)
         .set('Authorization', `Bearer ${adminToken}`)
         .expect(200);
-      
+
       expect(response.headers['content-type']).toBe('application/pdf');
-      
+
       // Verify audit log
-      const auditLog = await W9AuditLog.findOne({ 
+      const auditLog = await W9AuditLog.findOne({
         action: 'download_admin',
         'userInfo.userId': testAdmin._id.toString()
       });
@@ -307,7 +307,7 @@ describe('W-9 Integration Tests', () => {
         .post('/api/v1/w9/upload')
         .set('Authorization', `Bearer ${affiliateToken}`)
         .attach('w9document', testPdfBuffer, 'test-w9.pdf');
-      
+
       await request(app)
         .post(`/api/v1/w9/admin/${testAffiliate.affiliateId}/verify`)
         .set('Authorization', `Bearer ${adminToken}`)
@@ -326,7 +326,7 @@ describe('W-9 Integration Tests', () => {
           affiliateId: 'AFF-TEST-001'
         })
         .expect(200);
-      
+
       expect(response.body).toMatchObject({
         success: true,
         totalCount: expect.any(Number),
@@ -351,7 +351,7 @@ describe('W-9 Integration Tests', () => {
           endDate: new Date().toISOString()
         })
         .expect(200);
-      
+
       expect(response.headers['content-type']).toBe('text/csv');
       expect(response.text).toContain('Timestamp,Action');
       expect(response.text).toContain('upload_success');
@@ -365,12 +365,12 @@ describe('W-9 Integration Tests', () => {
         .post('/api/v1/w9/upload')
         .set('Authorization', `Bearer ${affiliateToken}`)
         .attach('w9document', testPdfBuffer, 'test-w9.pdf');
-      
+
       const document = await W9Document.findOne({ affiliateId: 'AFF-TEST-001' });
-      
+
       const expectedExpiry = new Date();
       expectedExpiry.setFullYear(expectedExpiry.getFullYear() + 3);
-      
+
       expect(document.expiryDate.getFullYear()).toBe(expectedExpiry.getFullYear());
     });
   });
@@ -399,20 +399,20 @@ describe('W-9 Integration Tests', () => {
         password: 'Other123!@#',
         phoneNumber: '+1234567891'
       });
-      
+
       // Upload W-9 for other affiliate
       const otherToken = generateToken(otherAffiliate._id, 'affiliate');
       await request(app)
         .post('/api/v1/w9/upload')
         .set('Authorization', `Bearer ${otherToken}`)
         .attach('w9document', testPdfBuffer, 'other-w9.pdf');
-      
+
       // Try to download with first affiliate's token
       const response = await request(app)
         .get('/api/v1/w9/download')
         .set('Authorization', `Bearer ${affiliateToken}`)
         .expect(404);
-      
+
       expect(response.body.message).toContain('No W-9 document found');
     });
   });

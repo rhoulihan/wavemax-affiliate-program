@@ -120,7 +120,7 @@ describe('TokenBlacklist Model', () => {
 
     it('should accept all valid userTypes', async () => {
       const validUserTypes = ['affiliate', 'customer', 'administrator', 'operator'];
-      
+
       for (const userType of validUserTypes) {
         const tokenData = {
           token: `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.test.${userType}`,
@@ -131,7 +131,7 @@ describe('TokenBlacklist Model', () => {
 
         const blacklistedToken = new TokenBlacklist(tokenData);
         const saved = await blacklistedToken.save();
-        
+
         expect(saved.userType).toBe(userType);
       }
     });
@@ -180,7 +180,7 @@ describe('TokenBlacklist Model', () => {
       it('should return null when token already blacklisted', async () => {
         // Ensure indexes are created
         await TokenBlacklist.ensureIndexes();
-        
+
         const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.duplicate.blacklist';
         const userId = 'user789';
         const userType = 'administrator';
@@ -251,7 +251,7 @@ describe('TokenBlacklist Model', () => {
     describe('isBlacklisted', () => {
       it('should return true for blacklisted token', async () => {
         const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.blacklisted.check';
-        
+
         // Blacklist the token first
         await TokenBlacklist.create({
           token,
@@ -266,7 +266,7 @@ describe('TokenBlacklist Model', () => {
 
       it('should return false for non-blacklisted token', async () => {
         const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.not.blacklisted';
-        
+
         const isBlacklisted = await TokenBlacklist.isBlacklisted(token);
         expect(isBlacklisted).toBe(false);
       });
@@ -285,7 +285,7 @@ describe('TokenBlacklist Model', () => {
     describe('cleanupExpired', () => {
       it('should delete expired tokens', async () => {
         const now = new Date();
-        
+
         // Create expired tokens
         await TokenBlacklist.create({
           token: 'expired1',

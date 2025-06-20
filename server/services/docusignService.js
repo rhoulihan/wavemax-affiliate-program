@@ -20,7 +20,7 @@ class DocuSignService {
     this.w9TemplateId = process.env.DOCUSIGN_W9_TEMPLATE_ID;
     this.webhookSecret = process.env.DOCUSIGN_WEBHOOK_SECRET;
     this.redirectUri = process.env.DOCUSIGN_REDIRECT_URI || 'https://wavemax.promo/api/auth/docusign/callback';
-    
+
     // Store directories for PKCE only
     this.pkceStoreDir = path.join(__dirname, '../../temp/pkce');
   }
@@ -44,19 +44,19 @@ class DocuSignService {
     try {
       // Ensure directory exists
       await fs.mkdir(this.pkceStoreDir, { recursive: true });
-      
+
       const filePath = path.join(this.pkceStoreDir, `${state}.json`);
       const data = {
         verifier,
         createdAt: Date.now()
       };
-      
+
       await fs.writeFile(filePath, JSON.stringify(data), 'utf8');
-      
+
       // Clean up old files (older than 10 minutes)
       const files = await fs.readdir(this.pkceStoreDir);
       const tenMinutesAgo = Date.now() - (10 * 60 * 1000);
-      
+
       for (const file of files) {
         if (file.endsWith('.json')) {
           const fullPath = path.join(this.pkceStoreDir, file);
@@ -84,10 +84,10 @@ class DocuSignService {
       const filePath = path.join(this.pkceStoreDir, `${state}.json`);
       const content = await fs.readFile(filePath, 'utf8');
       const data = JSON.parse(content);
-      
+
       // Delete the file after reading
       await fs.unlink(filePath);
-      
+
       return data.verifier;
     } catch (error) {
       logger.error('Failed to retrieve PKCE verifier:', error);
@@ -101,10 +101,10 @@ class DocuSignService {
   async getAuthorizationUrl(state = null) {
     const pkce = this.generatePKCE();
     const stateValue = state || crypto.randomBytes(16).toString('hex');
-    
+
     // Store verifier to file system
     await this.storePkceVerifier(stateValue, pkce.verifier);
-    
+
     const params = new URLSearchParams({
       response_type: 'code',
       client_id: this.integrationKey,
@@ -114,7 +114,7 @@ class DocuSignService {
       code_challenge: pkce.challenge,
       code_challenge_method: 'S256'
     });
-    
+
     return {
       url: `${this.oauthBaseUrl}/oauth/auth?${params.toString()}`,
       state: stateValue
@@ -125,14 +125,15 @@ class DocuSignService {
    * Exchange authorization code for access token
    */
   async exchangeCodeForToken(code, state) {
+    // Retrieve the verifier from file system
+    const verifier = await this.getPkceVerifier(state);
+    if (!verifier) {
+      logger.error('PKCE verifier not found for state:', state);
+      throw new Error('Invalid state parameter or session expired');
+    }
+
     try {
-      // Retrieve the verifier from file system
-      const verifier = await this.getPkceVerifier(state);
-      if (!verifier) {
-        logger.error('PKCE verifier not found for state:', state);
-        throw new Error('Invalid state parameter or session expired');
-      }
-      
+
       const params = new URLSearchParams({
         grant_type: 'authorization_code',
         code: code,
@@ -176,7 +177,7 @@ class DocuSignService {
         hasRefreshToken: !!response.data.refresh_token,
         expiresIn: response.data.expires_in
       });
-      
+
       return response.data;
     } catch (error) {
       logger.error('Failed to exchange code for token:', {
@@ -192,12 +193,13 @@ class DocuSignService {
    * Refresh access token using refresh token
    */
   async refreshAccessToken() {
+    // Get current token from database
+    const currentToken = await DocuSignToken.getCurrentToken();
+    if (!currentToken || !currentToken.refreshToken) {
+      throw new Error('No refresh token available');
+    }
+
     try {
-      // Get current token from database
-      const currentToken = await DocuSignToken.getCurrentToken();
-      if (!currentToken || !currentToken.refreshToken) {
-        throw new Error('No refresh token available');
-      }
 
       const params = new URLSearchParams({
         grant_type: 'refresh_token',
@@ -249,7 +251,7 @@ class DocuSignService {
   async getAccessToken() {
     // Get token from database
     const token = await DocuSignToken.getCurrentToken();
-    
+
     // Check if we have a valid token (with 60 second buffer)
     if (token && token.accessToken && token.expiresAt > new Date(Date.now() + 60000)) {
       // Update last used
@@ -293,7 +295,7 @@ class DocuSignService {
           uri: '/test-envelope'
         };
       }
-      
+
       const accessToken = await this.authenticate();
 
       const envelopeDefinition = {
@@ -306,15 +308,15 @@ class DocuSignService {
           tabs: {
             textTabs: [
               {
-                tabLabel: "Owner's First Name",
+                tabLabel: 'Owner\'s First Name',
                 value: affiliate.firstName || ''
               },
               {
-                tabLabel: "Owner's Last Name",
+                tabLabel: 'Owner\'s Last Name',
                 value: affiliate.lastName || ''
               },
               {
-                tabLabel: "Owner's Middle Initial",
+                tabLabel: 'Owner\'s Middle Initial',
                 value: '' // We don't have middle initial in our data
               },
               {
@@ -380,12 +382,12 @@ class DocuSignService {
         affiliateEmail: affiliate.email,
         templateId: this.w9TemplateId
       });
-      
+
       // Extract specific error message if available
-      const errorMessage = error.response?.data?.message || 
+      const errorMessage = error.response?.data?.message ||
                           error.response?.data?.errorDetails?.message ||
                           'Failed to create W9 signing request';
-      
+
       throw new Error(errorMessage);
     }
   }

@@ -24,7 +24,7 @@ router.get('/:id', authenticate, async (req, res, next) => {
   if (req.user.role === 'operator' && req.user.id === req.params.id) {
     return administratorController.getOperatorSelf(req, res);
   }
-  // Otherwise require admin permissions  
+  // Otherwise require admin permissions
   checkRole(['administrator'])(req, res, () => {
     checkAdminPermission(['operators.read'])(req, res, () => {
       administratorController.getOperatorById(req, res);

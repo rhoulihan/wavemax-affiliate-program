@@ -29,10 +29,10 @@
     requirements.noRepeated = !hasRepeated;
 
     const score = Object.values(requirements).filter(Boolean).length;
-    return { 
-      requirements, 
-      score, 
-      isValid: score >= 5 && requirements.length && requirements.uppercase && requirements.lowercase && requirements.number && requirements.special 
+    return {
+      requirements,
+      score,
+      isValid: score >= 5 && requirements.length && requirements.uppercase && requirements.lowercase && requirements.number && requirements.special
     };
   }
 
@@ -43,7 +43,7 @@
       if (!this.container) {
         throw new Error(`Container with id "${containerId}" not found`);
       }
-      
+
       // Add debounce timer
       this.updateTimer = null;
 
@@ -76,7 +76,7 @@
         },
         ...options
       };
-      
+
       // Override translation keys if provided
       if (options.translationKeys) {
         this.options.translationKeys = { ...this.options.translationKeys, ...options.translationKeys };
@@ -97,15 +97,15 @@
       // Get translation function
       const t = window.i18n && window.i18n.t ? window.i18n.t.bind(window.i18n) : (key) => key;
       const tk = this.options.translationKeys;
-      
+
       let html = '<div class="password-validator-component">';
-      
+
       // Two column layout on desktop, single column on mobile
       html += '<div class="grid md:grid-cols-2 gap-6">';
-      
+
       // Left column: Input fields
       html += '<div class="space-y-4">';
-      
+
       // Username field (optional)
       if (this.options.showUsername) {
         html += `
@@ -124,7 +124,7 @@
           </div>
         `;
       }
-      
+
       // Password field
       html += `
         <div>
@@ -139,7 +139,7 @@
           ${this.options.showStrengthIndicator ? '<div id="pvc-passwordStrength" class="mt-2 text-sm"></div>' : ''}
         </div>
       `;
-      
+
       // Confirm password field (optional)
       if (this.options.showConfirmPassword) {
         html += `
@@ -155,9 +155,9 @@
           </div>
         `;
       }
-      
+
       html += '</div>'; // End left column
-      
+
       // Right column: Password requirements (optional)
       if (this.options.showRequirements) {
         html += `
@@ -196,10 +196,10 @@
           </div>
         `;
       }
-      
+
       html += '</div>'; // End grid
       html += '</div>'; // End component wrapper
-      
+
       this.container.innerHTML = html;
     }
 
@@ -241,17 +241,17 @@
       if (this.updateTimer) {
         clearTimeout(this.updateTimer);
       }
-      
+
       // Debounce updates by 150ms to reduce DOM thrashing
       this.updateTimer = setTimeout(() => {
         this.performPasswordRequirementsUpdate();
       }, 150);
     }
-    
+
     performPasswordRequirementsUpdate() {
       const validation = validatePasswordStrength(this.state.password, this.state.username, this.state.email);
       const requirements = validation.requirements;
-      
+
       // Add password match requirement if showing confirm password
       if (this.options.showConfirmPassword) {
         requirements.match = this.state.password !== '' && this.state.password === this.state.confirmPassword;
@@ -282,7 +282,7 @@
       if (this.options.showStrengthIndicator) {
         const t = window.i18n && window.i18n.t ? window.i18n.t.bind(window.i18n) : (key) => key;
         const tk = this.options.translationKeys;
-        
+
         const strengthElement = document.getElementById('pvc-passwordStrength');
         if (strengthElement) {
           if (this.state.password.length === 0) {
@@ -297,7 +297,7 @@
             if (!requirements.number) missing.push('number');
             if (!requirements.special) missing.push('special character');
             if (this.options.showConfirmPassword && !requirements.match) missing.push('matching passwords');
-            
+
             strengthElement.innerHTML = `<span class="text-red-600">${t(tk.missingPrefix)}${missing.join(', ')}</span>`;
           }
         }
@@ -330,27 +330,27 @@
         const usernameField = document.getElementById('pvc-username');
         if (usernameField) usernameField.value = values.username;
       }
-      
+
       if (values.password !== undefined) {
         this.state.password = values.password;
         const passwordField = document.getElementById('pvc-password');
         if (passwordField) passwordField.value = values.password;
       }
-      
+
       if (values.confirmPassword !== undefined && this.options.showConfirmPassword) {
         this.state.confirmPassword = values.confirmPassword;
         const confirmPasswordField = document.getElementById('pvc-confirmPassword');
         if (confirmPasswordField) confirmPasswordField.value = values.confirmPassword;
       }
-      
+
       this.updatePasswordRequirements();
     }
 
     isValid() {
       const validation = validatePasswordStrength(this.state.password, this.state.username, this.state.email);
-      const passwordsMatch = !this.options.showConfirmPassword || 
+      const passwordsMatch = !this.options.showConfirmPassword ||
                            (this.state.password === this.state.confirmPassword);
-      
+
       return validation.isValid && passwordsMatch;
     }
 
@@ -361,30 +361,30 @@
         confirmPassword: '',
         email: this.options.email || ''
       };
-      
+
       // Clear input fields
       const fields = ['pvc-username', 'pvc-password', 'pvc-confirmPassword'];
       fields.forEach(id => {
         const field = document.getElementById(id);
         if (field) field.value = '';
       });
-      
+
       // Perform immediate update without debouncing
       this.performPasswordRequirementsUpdate();
     }
-    
+
     // Refresh translations when language changes
     refreshTranslations() {
       // Store current values
       const currentValues = this.getValues();
-      
+
       // Re-render with new translations
       this.render();
       this.attachEventListeners();
-      
+
       // Restore values
       this.setValues(currentValues);
-      
+
       // Update requirements display - perform immediate update
       this.performPasswordRequirementsUpdate();
     }

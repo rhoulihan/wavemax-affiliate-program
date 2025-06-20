@@ -21,7 +21,7 @@ class PaygistixConfig {
     ];
 
     const missing = required.filter(key => !process.env[key]);
-    
+
     if (missing.length > 0) {
       logger.warn(`Missing Paygistix hosted form configuration: ${missing.join(', ')}`);
     }

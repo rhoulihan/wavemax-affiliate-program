@@ -24,7 +24,7 @@ describe('Admin ID Generation Logic Tests', () => {
       if (!lastAdmin) {
         return 'ADM001';
       }
-      
+
       const lastNumber = parseInt(lastAdmin.adminId.substring(3));
       const nextNumber = lastNumber + 1;
       return `ADM${nextNumber.toString().padStart(3, '0')}`;
@@ -382,7 +382,7 @@ describe('Admin ID Generation Logic Tests', () => {
       }
 
       const results = await Promise.all(promises);
-      
+
       results.forEach(result => {
         expect(result).toBe('ADM002');
       });

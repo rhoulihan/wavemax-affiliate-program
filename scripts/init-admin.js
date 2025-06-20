@@ -9,12 +9,12 @@ async function initializeDefaultAdmin() {
   try {
     // Check if any administrator exists
     const existingAdminCount = await Administrator.countDocuments();
-    
+
     if (existingAdminCount > 0) {
       logger.info('Administrator accounts already exist, skipping default admin creation');
       return;
     }
-    
+
     // Create default administrator account
     const adminEmail = process.env.DEFAULT_ADMIN_EMAIL || 'admin@wavemaxlaundry.com';
     const defaultAdmin = new Administrator({
@@ -26,13 +26,13 @@ async function initializeDefaultAdmin() {
       isActive: true,
       requirePasswordChange: true // Force password change on first login
     });
-    
+
     await defaultAdmin.save();
-    
+
     logger.info('Default administrator account created successfully');
     logger.info(`Email: ${adminEmail}`);
     logger.info('Default Password: WaveMAX!2024 (must be changed on first login)');
-    
+
     return defaultAdmin;
   } catch (error) {
     logger.error('Failed to create default administrator:', { error: error.message });
@@ -46,7 +46,7 @@ module.exports = { initializeDefaultAdmin };
 // Allow running as standalone script
 if (require.main === module) {
   require('dotenv').config();
-  
+
   mongoose.connect(process.env.MONGODB_URI)
     .then(() => {
       logger.info('Connected to MongoDB');

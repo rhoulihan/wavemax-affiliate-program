@@ -357,7 +357,7 @@ exports.getCustomerOrders = async (req, res) => {
 
     // Determine user role
     const userRole = req.user ? req.user.role : 'public';
-    
+
     // Filter orders based on role
     const filteredOrders = getFilteredData('order', orders.map(o => o.toObject()), userRole);
 
@@ -414,28 +414,28 @@ exports.getCustomerDashboardStats = async (req, res) => {
 
     // Get all orders for statistics
     const allOrders = await Order.find({ customerId }).sort({ createdAt: -1 });
-    
+
     // Get active orders
-    const activeOrders = allOrders.filter(order => 
+    const activeOrders = allOrders.filter(order =>
       ['scheduled', 'picked_up', 'processing', 'ready_for_delivery'].includes(order.status)
     );
-    
+
     // Get completed orders
     const completedOrders = allOrders.filter(order => order.status === 'complete');
-    
+
     // Calculate statistics
     const totalOrders = allOrders.length;
     const activeOrdersCount = activeOrders.length;
     const completedOrdersCount = completedOrders.length;
-    
+
     // Calculate total spent and average order value
     let totalSpent = 0;
     completedOrders.forEach(order => {
       totalSpent += order.actualTotal || order.estimatedTotal || 0;
     });
-    
+
     const averageOrderValue = completedOrdersCount > 0 ? totalSpent / completedOrdersCount : 0;
-    
+
     // Get recent orders (limit to 5)
     const recentOrders = allOrders.slice(0, 5).map(order => ({
       orderId: order.orderId,
@@ -446,21 +446,21 @@ exports.getCustomerDashboardStats = async (req, res) => {
       actualTotal: order.actualTotal,
       createdAt: order.createdAt
     }));
-    
+
     // Get upcoming pickups
     const upcomingPickups = await Order.find({
       customerId,
       status: 'scheduled',
       pickupDate: { $gte: new Date() }
     }).sort({ pickupDate: 1 }).limit(5);
-    
+
     // Get affiliate info
     const affiliate = await Affiliate.findOne({ affiliateId: customer.affiliateId });
-    
+
     // Get last order date
     const lastOrder = completedOrders.length > 0 ? completedOrders[0] : null;
     const lastOrderDate = lastOrder ? lastOrder.deliveredAt || lastOrder.updatedAt : null;
-    
+
     res.status(200).json({
       success: true,
       dashboard: {

@@ -54,11 +54,7 @@ describe('Order Controller', () => {
         specialPickupInstructions: 'Ring doorbell',
         estimatedWeight: 30,
         numberOfBags: 2,
-        serviceNotes: 'Handle with care',
-        deliveryDate: '2025-05-27',
-        deliveryTime: 'afternoon',
-        specialDeliveryInstructions: 'Leave at door'
-      };
+
       req.user = { role: 'customer', customerId: 'CUST123' };
 
       Customer.findOne.mockResolvedValue(mockCustomer);
@@ -99,10 +95,7 @@ describe('Order Controller', () => {
         pickupDate: '2025-05-25',
         pickupTime: 'morning',
         estimatedWeight: 30,
-        numberOfBags: 2,
-        deliveryDate: '2025-05-27',
-        deliveryTime: 'afternoon'
-      };
+        numberOfBags: 2};
       req.user = { role: 'customer', customerId: 'CUST123' };
 
       Customer.findOne.mockResolvedValue(mockCustomer);
@@ -191,9 +184,7 @@ describe('Order Controller', () => {
         customerId: 'CUST123',
         affiliateId: 'AFF123',
         status: 'processing',
-        pickupDate: '2025-05-25',
-        deliveryDate: '2025-05-27'
-      };
+        pickupDate: '2025-05-25'};
 
       const mockCustomer = {
         customerId: 'CUST123',

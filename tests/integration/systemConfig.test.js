@@ -13,7 +13,7 @@ describe('System Config API Tests', () => {
     // Clear any existing test data
     await Administrator.deleteMany({ adminId: { $in: ['ADM998', 'ADM999'] } });
     await SystemConfig.deleteMany({});
-    
+
     // Create a test administrator
     testAdmin = await Administrator.create({
       adminId: 'ADM999',
@@ -27,11 +27,11 @@ describe('System Config API Tests', () => {
 
     // Generate admin token
     adminToken = jwt.sign(
-      { 
-        id: testAdmin._id, 
-        email: testAdmin.email, 
+      {
+        id: testAdmin._id,
+        email: testAdmin.email,
         role: 'administrator',
-        permissions: testAdmin.permissions 
+        permissions: testAdmin.permissions
       },
       process.env.JWT_SECRET,
       { expiresIn: '1h' }
@@ -58,7 +58,7 @@ describe('System Config API Tests', () => {
 
         expect(Array.isArray(response.body)).toBe(true);
         expect(response.body.length).toBeGreaterThan(0);
-        
+
         // Check that all returned configs are public
         response.body.forEach(config => {
           expect(config.isPublic).toBe(true);
@@ -151,7 +151,7 @@ describe('System Config API Tests', () => {
 
         expect(Array.isArray(response.body)).toBe(true);
         expect(response.body.length).toBeGreaterThan(0);
-        
+
         // Should include both public and private configs
         const publicCount = response.body.filter(c => c.isPublic).length;
         const privateCount = response.body.filter(c => !c.isPublic).length;
@@ -168,10 +168,10 @@ describe('System Config API Tests', () => {
       it('should return 403 for non-admin users', async () => {
         // Create a regular user token (affiliate)
         const affiliateToken = jwt.sign(
-          { 
-            id: 'test-affiliate-id', 
-            email: 'affiliate@test.com', 
-            role: 'affiliate' 
+          {
+            id: 'test-affiliate-id',
+            email: 'affiliate@test.com',
+            role: 'affiliate'
           },
           process.env.JWT_SECRET,
           { expiresIn: '1h' }
@@ -187,14 +187,14 @@ describe('System Config API Tests', () => {
     describe('PUT /api/v1/system/config/:key', () => {
       let agent;
       let csrfToken;
-      
+
       beforeEach(async () => {
         // Create agent with session support
         agent = createAgent(app);
-        
+
         // Get CSRF token for admin
         csrfToken = await getCsrfToken(app, agent);
-        
+
         // Ensure test admin still exists and is active
         const admin = await Administrator.findById(testAdmin._id);
         if (!admin) {
@@ -208,14 +208,14 @@ describe('System Config API Tests', () => {
             permissions: ['system_config', 'view_analytics'],
             isActive: true
           });
-          
+
           // Regenerate token
           adminToken = jwt.sign(
-            { 
-              id: testAdmin._id, 
-              email: testAdmin.email, 
+            {
+              id: testAdmin._id,
+              email: testAdmin.email,
               role: 'administrator',
-              permissions: testAdmin.permissions 
+              permissions: testAdmin.permissions
             },
             process.env.JWT_SECRET,
             { expiresIn: '1h' }
@@ -231,12 +231,12 @@ describe('System Config API Tests', () => {
           .set('Authorization', `Bearer ${adminToken}`)
           .set('X-CSRF-Token', csrfToken)
           .send({ value: newValue });
-        
+
         // Log the response for debugging
         if (response.status !== 200) {
           console.error('Update failed:', response.status, response.body);
         }
-        
+
         expect(response.status).toBe(200);
         expect(response.body.success).toBe(true);
         expect(response.body.config.key).toBe('wdf_base_rate_per_pound');
@@ -313,11 +313,11 @@ describe('System Config API Tests', () => {
         });
 
         const limitedToken = jwt.sign(
-          { 
-            id: limitedAdmin._id, 
-            email: limitedAdmin.email, 
+          {
+            id: limitedAdmin._id,
+            email: limitedAdmin.email,
             role: 'administrator',
-            permissions: limitedAdmin.permissions 
+            permissions: limitedAdmin.permissions
           },
           process.env.JWT_SECRET,
           { expiresIn: '1h' }
@@ -326,7 +326,7 @@ describe('System Config API Tests', () => {
         // Create new agent for limited admin
         const limitedAgent = createAgent(app);
         const limitedCsrfToken = await getCsrfToken(app, limitedAgent);
-        
+
         await limitedAgent
           .put('/api/v1/system/config/wdf_base_rate_per_pound')
           .set('Authorization', `Bearer ${limitedToken}`)
@@ -342,11 +342,11 @@ describe('System Config API Tests', () => {
     describe('POST /api/v1/system/config/initialize', () => {
       let agent;
       let csrfToken;
-      
+
       beforeEach(async () => {
         // Create agent with session support
         agent = createAgent(app);
-        
+
         // Get CSRF token
         csrfToken = await getCsrfToken(app, agent);
       });
@@ -401,8 +401,7 @@ describe('System Config API Tests', () => {
         affiliateId: '507f1f77bcf86cd799439012',
         pickupDate: new Date(),
         pickupTime: 'morning',
-        deliveryDate: new Date(Date.now() + 86400000),
-        deliveryTime: 'afternoon',
+
         estimatedWeight: 30,
         numberOfBags: 2,
         deliveryFee: 5.00,
@@ -417,7 +416,7 @@ describe('System Config API Tests', () => {
 
       // Reset to default
       await SystemConfig.setValue('wdf_base_rate_per_pound', 1.25);
-      
+
       // Cleanup
       await Order.deleteOne({ _id: mockOrder._id });
     });

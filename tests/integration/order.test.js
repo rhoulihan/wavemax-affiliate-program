@@ -106,11 +106,6 @@ describe('Order Integration Tests', () => {
           specialPickupInstructions: 'Ring doorbell',
           estimatedWeight: 30,
           numberOfBags: 2,
-          serviceNotes: 'Handle with care',
-          deliveryDate: '2025-05-27',
-          deliveryTime: 'afternoon',
-          specialDeliveryInstructions: 'Leave at door'
-        });
 
       expect(response.status).toBe(201);
       expect(response.body).toMatchObject({
@@ -140,10 +135,7 @@ describe('Order Integration Tests', () => {
           pickupDate: '2025-05-25',
           pickupTime: 'morning',
           estimatedWeight: 15,
-          numberOfBags: 1,
-          deliveryDate: '2025-05-27',
-          deliveryTime: 'evening'
-        });
+          numberOfBags: 1});
 
       expect(response.status).toBe(201);
       expect(response.body.success).toBe(true);
@@ -160,10 +152,7 @@ describe('Order Integration Tests', () => {
           pickupDate: '2025-05-25',
           pickupTime: 'morning',
           estimatedWeight: 30,
-          numberOfBags: 2,
-          deliveryDate: '2025-05-27',
-          deliveryTime: 'afternoon'
-        });
+          numberOfBags: 2});
 
       expect(response.status).toBe(400);
       expect(response.body).toMatchObject({
@@ -183,10 +172,7 @@ describe('Order Integration Tests', () => {
           pickupDate: '2025-05-25',
           pickupTime: 'morning',
           estimatedWeight: 30,
-          numberOfBags: 2,
-          deliveryDate: '2025-05-27',
-          deliveryTime: 'afternoon'
-        });
+          numberOfBags: 2});
 
       expect(response.status).toBe(400);
       expect(response.body).toMatchObject({
@@ -225,10 +211,7 @@ describe('Order Integration Tests', () => {
           pickupDate: '2025-05-25',
           pickupTime: 'morning',
           estimatedWeight: 30,
-          numberOfBags: 2,
-          deliveryDate: '2025-05-27',
-          deliveryTime: 'afternoon'
-        });
+          numberOfBags: 2});
 
       expect(response.status).toBe(403);
       expect(response.body).toMatchObject({
@@ -262,8 +245,7 @@ describe('Order Integration Tests', () => {
         affiliateId: 'AFF123',
         pickupDate: new Date('2025-05-25'),
         pickupTime: 'morning',
-        deliveryDate: new Date('2025-05-27'),
-        deliveryTime: 'afternoon',
+
         status: 'processing',
         estimatedWeight: 30,
         numberOfBags: 2,
@@ -350,8 +332,7 @@ describe('Order Integration Tests', () => {
         affiliateId: 'AFF123',
         pickupDate: new Date('2025-05-25'),
         pickupTime: 'morning',
-        deliveryDate: new Date('2025-05-27'),
-        deliveryTime: 'afternoon',
+
         status: 'scheduled',
         estimatedWeight: 30,
         numberOfBags: 2,
@@ -476,8 +457,7 @@ describe('Order Integration Tests', () => {
         affiliateId: 'AFF123',
         pickupDate: new Date('2025-05-25'),
         pickupTime: 'morning',
-        deliveryDate: new Date('2025-05-27'),
-        deliveryTime: 'afternoon',
+
         status: 'scheduled',
         estimatedWeight: 30,
         numberOfBags: 2,
@@ -570,8 +550,7 @@ describe('Order Integration Tests', () => {
           affiliateId: 'AFF123',
           pickupDate: new Date('2025-05-25'),
           pickupTime: 'morning',
-          deliveryDate: new Date('2025-05-27'),
-          deliveryTime: 'afternoon',
+
           status: 'pending',
           estimatedWeight: 30,
           numberOfBags: 2,
@@ -586,8 +565,7 @@ describe('Order Integration Tests', () => {
           affiliateId: 'AFF123',
           pickupDate: new Date('2025-05-25'),
           pickupTime: 'morning',
-          deliveryDate: new Date('2025-05-27'),
-          deliveryTime: 'afternoon',
+
           status: 'pending',
           estimatedWeight: 50,
           numberOfBags: 3,
@@ -602,8 +580,7 @@ describe('Order Integration Tests', () => {
           affiliateId: 'AFF123',
           pickupDate: new Date('2025-05-26'),
           pickupTime: 'afternoon',
-          deliveryDate: new Date('2025-05-28'),
-          deliveryTime: 'morning',
+
           status: 'pending',
           estimatedWeight: 15,
           numberOfBags: 1,
@@ -701,8 +678,7 @@ describe('Order Integration Tests', () => {
           affiliateId: 'AFF123',
           pickupDate: new Date(`2025-05-${String(i).padStart(2, '0')}`),
           pickupTime: i % 3 === 0 ? 'morning' : i % 3 === 1 ? 'afternoon' : 'evening',
-          deliveryDate: new Date(`2025-05-${String(i + 2).padStart(2, '0')}`),
-          deliveryTime: 'afternoon',
+
           status: i <= 10 ? 'complete' : 'processing',
           estimatedWeight: i % 3 === 0 ? 15 : i % 3 === 1 ? 30 : 50,
           numberOfBags: i % 3 === 0 ? 1 : i % 3 === 1 ? 2 : 3,
@@ -806,8 +782,7 @@ describe('Order Integration Tests', () => {
         affiliateId: 'AFF123',
         pickupDate: new Date('2025-05-25'),
         pickupTime: 'morning',
-        deliveryDate: new Date('2025-05-27'),
-        deliveryTime: 'afternoon',
+
         status: 'complete',
         estimatedWeight: 30,
         numberOfBags: 2,
@@ -944,8 +919,7 @@ describe('Order Integration Tests', () => {
           affiliateId: 'AFF123',
           pickupDate: new Date('2025-05-20'),
           pickupTime: 'morning',
-          deliveryDate: new Date('2025-05-22'),
-          deliveryTime: 'afternoon',
+
           status: 'complete',
           estimatedWeight: 30,
           numberOfBags: 2,
@@ -962,8 +936,7 @@ describe('Order Integration Tests', () => {
           affiliateId: 'AFF123',
           pickupDate: new Date('2025-05-21'),
           pickupTime: 'afternoon',
-          deliveryDate: new Date('2025-05-23'),
-          deliveryTime: 'morning',
+
           status: 'processing',
           estimatedWeight: 50,
           numberOfBags: 3,
@@ -978,8 +951,7 @@ describe('Order Integration Tests', () => {
           affiliateId: 'AFF123',
           pickupDate: new Date('2025-05-25'),
           pickupTime: 'evening',
-          deliveryDate: new Date('2025-05-27'),
-          deliveryTime: 'evening',
+
           status: 'scheduled',
           estimatedWeight: 15,
           numberOfBags: 1,
@@ -1112,10 +1084,7 @@ describe('Order Integration Tests', () => {
           pickupDate: '2025-05-25',
           pickupTime: 'morning',
           estimatedWeight: 30,
-          numberOfBags: 2,
-          deliveryDate: '2025-05-27',
-          deliveryTime: 'afternoon'
-        });
+          numberOfBags: 2});
 
       expect(createResponse.status).toBe(201);
       const orderId = createResponse.body.orderId;
@@ -1157,10 +1126,7 @@ describe('Order Integration Tests', () => {
           pickupDate: '2025-05-26',
           pickupTime: 'morning',
           estimatedWeight: 50,
-          numberOfBags: 3,
-          deliveryDate: '2025-05-28',
-          deliveryTime: 'evening'
-        });
+          numberOfBags: 3});
 
       expect(response.status).toBe(201);
 
@@ -1207,10 +1173,7 @@ describe('Order Integration Tests', () => {
             pickupDate: '2025-05-25',
             pickupTime: 'morning',
             estimatedWeight: 30,
-          numberOfBags: 2,
-            deliveryDate: '2025-05-27',
-            deliveryTime: 'afternoon'
-          });
+          numberOfBags: 2});
         
         orderIds.push(response.body.orderId);
       }
@@ -1249,10 +1212,7 @@ describe('Order Integration Tests', () => {
           pickupDate: '2025-05-26',
           pickupTime: 'morning',
           estimatedWeight: 15,
-          numberOfBags: 1,
-          deliveryDate: '2025-05-28',
-          deliveryTime: 'afternoon'
-        });
+          numberOfBags: 1});
 
       expect(response.status).toBe(201);
 

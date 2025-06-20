@@ -25,6 +25,8 @@ Paygistix is WaveMAX's payment processing solution that provides secure, reliabl
 - Payment window close detection
 - Test payment form for development
 - Comprehensive fraud protection
+- **NEW: Generic payment processing methods** for all transaction types
+- **NEW: Unified payment flow** for registrations, orders, and other payments
 
 ### Prerequisites
 - Node.js 16.0.0 or higher
@@ -231,6 +233,30 @@ const paymentController = require('../controllers/paymentController');
 const { body } = require('express-validator');
 const { requireAuth } = require('../middleware/auth');
 
+// Generic payment processing endpoints (NEW)
+router.post('/process-payment',
+    requireAuth,
+    [
+        body('amount').isNumeric().withMessage('Invalid amount'),
+        body('description').notEmpty().withMessage('Description required'),
+        body('entityType').notEmpty().withMessage('Entity type required'),
+        body('entityId').notEmpty().withMessage('Entity ID required')
+    ],
+    paymentController.processPayment
+);
+
+router.post('/process-payment-test',
+    requireAuth,
+    [
+        body('amount').isNumeric().withMessage('Invalid amount'),
+        body('description').notEmpty().withMessage('Description required'),
+        body('entityType').notEmpty().withMessage('Entity type required'),
+        body('entityId').notEmpty().withMessage('Entity ID required')
+    ],
+    paymentController.processPaymentTestMode
+);
+
+// Legacy endpoints (being phased out)
 router.post('/payment-intent',
     requireAuth,
     [
@@ -278,6 +304,54 @@ module.exports = router;
 ### Step 5: Frontend Integration
 
 The WaveMAX implementation uses Paygistix's hosted payment form approach for PCI compliance. The payment form is dynamically populated with a unique callback URL from the callback pool.
+
+#### Generic Payment Processing (NEW)
+
+The new unified payment flow simplifies payment processing for all transaction types:
+
+```javascript
+// Generic payment processing for any entity type
+async function processPayment(entityType, entityId, amount, description) {
+    try {
+        const response = await fetch('/api/v1/payments/process-payment', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${authToken}`,
+                'X-CSRF-Token': csrfToken
+            },
+            body: JSON.stringify({
+                amount,
+                description,
+                entityType,
+                entityId,
+                customerId: getCurrentCustomerId(),
+                saveCard: shouldSaveCard()
+            })
+        });
+        
+        const data = await response.json();
+        if (data.success) {
+            // Open payment window
+            window.open(data.paymentUrl, 'payment', 'width=800,height=600');
+            // Monitor payment status
+            pollPaymentStatus(data.tokenId);
+        }
+    } catch (error) {
+        console.error('Payment processing error:', error);
+    }
+}
+
+// Example usage for different payment types
+// Order payment
+processPayment('order', orderId, 33.13, 'Order #ORD-2025-0001');
+
+// Registration payment
+processPayment('registration', registrationId, 25.00, 'Customer Registration Fee');
+
+// Custom payment
+processPayment('custom', customId, 50.00, 'Special Service Fee');
+```
 
 ```javascript
 // public/assets/js/paygistix-payment-form.js

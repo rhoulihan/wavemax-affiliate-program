@@ -17,15 +17,15 @@ async function main() {
 
     // Create demo operator
     console.log('\n=== Creating Demo Operator ===');
-    
+
     // First get the admin to use as createdBy
     const admin = await Administrator.findOne({ adminId: 'ADM001' });
-    
+
     if (!admin) {
       console.error('✗ Administrator not found. Please run the initial migration first.');
       process.exit(1);
     }
-    
+
     const demoOperator = new Operator({
       operatorId: 'OPR001',
       firstName: 'Demo',
@@ -43,7 +43,7 @@ async function main() {
     console.log('✓ Demo operator created successfully!');
     console.log(`  Operator ID: ${demoOperator.operatorId}`);
     console.log(`  Email: ${demoOperator.email}`);
-    console.log(`  Password: Demo1234!`);
+    console.log('  Password: Demo1234!');
     console.log(`  Shift: ${demoOperator.shiftStart} - ${demoOperator.shiftEnd}`);
 
     console.log('\n✓ Migration completed successfully!');
@@ -62,7 +62,7 @@ async function main() {
     console.log('- Operators can only login during their shift hours (8:00 AM - 4:00 PM for demo)');
     console.log('- Administrators can create additional operators through the admin portal');
     console.log('- System configuration can be managed from the admin portal');
-    
+
   } catch (error) {
     if (error.code === 11000) {
       console.log('✓ Demo operator already exists');

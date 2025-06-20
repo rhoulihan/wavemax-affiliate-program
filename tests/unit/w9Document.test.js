@@ -46,10 +46,10 @@ describe('W9Document Model Unit Tests', () => {
     it('should set expiry date to 3 years from now', () => {
       const threeYearsFromNow = new Date();
       threeYearsFromNow.setFullYear(threeYearsFromNow.getFullYear() + 3);
-      
+
       const expiryYear = mockDocument.expiryDate.getFullYear();
       const expectedYear = threeYearsFromNow.getFullYear();
-      
+
       expect(expiryYear).toBe(expectedYear);
     });
 
@@ -75,21 +75,21 @@ describe('W9Document Model Unit Tests', () => {
         mockDocument.verificationStatus = 'verified';
         mockDocument.expiryDate = new Date(Date.now() + 86400000); // Tomorrow
         mockDocument.deletedAt = null;
-        
+
         expect(mockDocument.isValid()).toBe(true);
       });
 
       it('should return false for inactive document', () => {
         mockDocument.isActive = false;
         mockDocument.verificationStatus = 'verified';
-        
+
         expect(mockDocument.isValid()).toBe(false);
       });
 
       it('should return false for unverified document', () => {
         mockDocument.isActive = true;
         mockDocument.verificationStatus = 'pending';
-        
+
         expect(mockDocument.isValid()).toBe(false);
       });
 
@@ -97,7 +97,7 @@ describe('W9Document Model Unit Tests', () => {
         mockDocument.isActive = true;
         mockDocument.verificationStatus = 'verified';
         mockDocument.expiryDate = new Date(Date.now() - 86400000); // Yesterday
-        
+
         expect(mockDocument.isValid()).toBe(false);
       });
 
@@ -105,7 +105,7 @@ describe('W9Document Model Unit Tests', () => {
         mockDocument.isActive = true;
         mockDocument.verificationStatus = 'verified';
         mockDocument.deletedAt = new Date();
-        
+
         expect(mockDocument.isValid()).toBe(false);
       });
     });
@@ -114,12 +114,12 @@ describe('W9Document Model Unit Tests', () => {
       it('should soft delete document with metadata', async () => {
         // Mock the save method
         mockDocument.save = jest.fn().mockResolvedValue(mockDocument);
-        
+
         const deletedBy = 'admin123';
         const reason = 'Document replaced with newer version';
-        
+
         await mockDocument.softDelete(deletedBy, reason);
-        
+
         expect(mockDocument.deletedAt).toBeDefined();
         expect(mockDocument.deletedBy).toBe(deletedBy);
         expect(mockDocument.deletionReason).toBe(reason);
@@ -149,7 +149,7 @@ describe('W9Document Model Unit Tests', () => {
         });
 
         const result = await W9Document.findActiveForAffiliate('AFF-123');
-        
+
         expect(W9Document.findOne).toHaveBeenCalledWith({
           affiliateId: 'AFF-123',
           isActive: true,
@@ -172,7 +172,7 @@ describe('W9Document Model Unit Tests', () => {
         });
 
         const result = await W9Document.findPendingReview();
-        
+
         expect(W9Document.find).toHaveBeenCalledWith({
           verificationStatus: 'pending',
           isActive: true,
@@ -186,21 +186,21 @@ describe('W9Document Model Unit Tests', () => {
   describe('Indexes', () => {
     it('should have required indexes defined', () => {
       const indexes = W9Document.schema.indexes();
-      
+
       // Check for composite index
-      const hasAffiliateActiveIndex = indexes.some(index => 
+      const hasAffiliateActiveIndex = indexes.some(index =>
         index[0].affiliateId === 1 && index[0].isActive === 1
       );
-      
+
       // Check for single field indexes
-      const hasVerificationStatusIndex = indexes.some(index => 
+      const hasVerificationStatusIndex = indexes.some(index =>
         index[0].verificationStatus === 1
       );
-      
-      const hasExpiryDateIndex = indexes.some(index => 
+
+      const hasExpiryDateIndex = indexes.some(index =>
         index[0].expiryDate === 1
       );
-      
+
       expect(hasAffiliateActiveIndex).toBe(true);
       expect(hasVerificationStatusIndex).toBe(true);
       expect(hasExpiryDateIndex).toBe(true);
@@ -212,7 +212,7 @@ describe('W9Document Model Unit Tests', () => {
       mockDocument.verificationStatus = 'pending';
       mockDocument.verificationStatus = 'verified';
       mockDocument.verifiedAt = new Date();
-      
+
       const error = mockDocument.validateSync();
       expect(error).toBeUndefined();
       expect(mockDocument.verificationStatus).toBe('verified');
@@ -221,7 +221,7 @@ describe('W9Document Model Unit Tests', () => {
     it('should allow transition from pending to rejected', () => {
       mockDocument.verificationStatus = 'pending';
       mockDocument.verificationStatus = 'rejected';
-      
+
       const error = mockDocument.validateSync();
       expect(error).toBeUndefined();
       expect(mockDocument.verificationStatus).toBe('rejected');
@@ -233,7 +233,7 @@ describe('W9Document Model Unit Tests', () => {
       mockDocument.legalHold = true;
       mockDocument.legalHoldReason = 'Audit requirement';
       mockDocument.legalHoldDate = new Date();
-      
+
       const error = mockDocument.validateSync();
       expect(error).toBeUndefined();
       expect(mockDocument.legalHold).toBe(true);

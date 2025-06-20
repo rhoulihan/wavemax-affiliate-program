@@ -20,7 +20,7 @@ async function ensureCsrfToken() {
 async function authenticatedFetch(url, options = {}) {
   const baseUrl = window.EMBED_CONFIG?.baseUrl || 'https://wavemax.promo';
   const fullUrl = url.startsWith('http') ? url : `${baseUrl}${url}`;
-  
+
   // Add authorization header
   const token = localStorage.getItem('affiliateToken');
   console.log('Auth token from localStorage:', token ? 'Token exists' : 'No token found');
@@ -28,16 +28,16 @@ async function authenticatedFetch(url, options = {}) {
     'Authorization': `Bearer ${token}`,
     ...options.headers
   };
-  
+
   // Add CSRF token for non-GET requests
   if (options.method && options.method !== 'GET') {
     await ensureCsrfToken();
     headers['x-csrf-token'] = csrfToken;
     console.log('Request headers:', headers);
   }
-  
+
   console.log('Making request to:', fullUrl, 'with method:', options.method || 'GET');
-  
+
   return fetch(fullUrl, {
     ...options,
     headers,
@@ -49,7 +49,7 @@ async function authenticatedFetch(url, options = {}) {
 function formatDashboardAddress(displayName) {
   const parts = displayName.split(',').map(p => p.trim());
   let street = '', city = '', state = '', zipcode = '';
-  
+
   // Parse address components
   if (parts.length >= 2) {
     if (parts[0].match(/^\d+$/)) {
@@ -78,7 +78,7 @@ function formatDashboardAddress(displayName) {
       }
     }
   }
-  
+
   // Build formatted address
   let formatted = street;
   if (city) formatted += ', ' + city;
@@ -86,7 +86,7 @@ function formatDashboardAddress(displayName) {
     formatted += ', ' + state;
     if (zipcode) formatted += ' ' + zipcode;
   }
-  
+
   return formatted || parts.slice(0, 3).join(', ');
 }
 
@@ -98,7 +98,7 @@ function initializeAffiliateDashboard() {
   // Check authentication
   const token = localStorage.getItem('affiliateToken');
   const currentAffiliate = JSON.parse(localStorage.getItem('currentAffiliate'));
-  
+
   console.log('Dashboard initialization - Token:', token ? 'exists' : 'missing');
   console.log('Dashboard initialization - Affiliate:', currentAffiliate ? currentAffiliate.affiliateId : 'missing');
 
@@ -139,7 +139,7 @@ function initializeAffiliateDashboard() {
   // Try both window.location.search and the global urlParams if available
   const urlParams = new URLSearchParams(window.location.search);
   let filterCustomerId = urlParams.get('customer');
-  
+
   // Also check if embed-app.html has parsed parameters globally
   if (!filterCustomerId && window.location.search.includes('customer=')) {
     const searchParams = window.location.search;
@@ -148,7 +148,7 @@ function initializeAffiliateDashboard() {
       filterCustomerId = customerMatch[1];
     }
   }
-  
+
   console.log('Dashboard initialization - customer filter:', filterCustomerId);
 
   if (filterCustomerId) {
@@ -308,7 +308,7 @@ function switchToCustomersTab(affiliateId, customerIdToHighlight) {
   // Switch to customers tab
   const tabButtons = document.querySelectorAll('.tab-btn');
   const tabContents = document.querySelectorAll('.tab-content');
-  
+
   // Remove active class from all buttons and tabs
   tabButtons.forEach(btn => {
     btn.classList.remove('border-blue-600');
@@ -343,7 +343,7 @@ function initializePricingPreview(affiliateData) {
     console.warn('PricingPreviewComponent still not available');
     return;
   }
-  
+
   // Initialize the pricing preview in the settings tab
   window.settingsPricingPreview = window.PricingPreviewComponent.init(
     'settingsPricingPreview',
@@ -356,17 +356,17 @@ function initializePricingPreview(affiliateData) {
     }
   );
   console.log('Pricing preview initialized (delayed):', !!window.settingsPricingPreview);
-  
+
   // Set initial values
   const minimumFee = parseFloat(affiliateData.minimumDeliveryFee) || 25;
   const perBagFee = parseFloat(affiliateData.perBagDeliveryFee) || 10;
-  
+
   // Update inputs
   const minInput = document.getElementById('settingsMinimumDeliveryFee');
   const perBagInput = document.getElementById('settingsPerBagDeliveryFee');
   if (minInput) minInput.value = minimumFee;
   if (perBagInput) perBagInput.value = perBagFee;
-  
+
   // Trigger update
   if (window.settingsPricingPreview) {
     window.settingsPricingPreview.update();
@@ -422,17 +422,17 @@ async function loadAffiliateData(affiliateId) {
       const landingPageLink = `https://www.wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program?route=/affiliate-landing&code=${affiliateId}`;
       const landingPageElement = document.getElementById('landingPageLink');
       if (landingPageElement) landingPageElement.value = landingPageLink;
-      
+
       // Store affiliate data in localStorage for other uses
       localStorage.setItem('currentAffiliate', JSON.stringify(data));
-      
+
       // Initialize service area component if available
       if (window.ServiceAreaComponent) {
         console.log('Initializing service area component in loadAffiliateData');
         const lat = parseFloat(data.serviceLatitude) || 30.3524;
         const lng = parseFloat(data.serviceLongitude) || -97.6841;
         const hasAddress = data.serviceArea && data.serviceArea.trim() !== '';
-        
+
         window.settingsServiceArea = window.ServiceAreaComponent.init('settingsServiceAreaComponent', {
           latitude: lat,
           longitude: lng,
@@ -446,24 +446,24 @@ async function loadAffiliateData(affiliateId) {
             console.log('Service area updated:', serviceData);
           }
         });
-        
+
         // If no address is stored, trigger reverse geocoding
         if (!hasAddress && lat && lng) {
           console.log('No address stored, triggering reverse geocoding for coordinates:', lat, lng);
           // Trigger reverse geocoding through the component
           if (window.parent !== window) {
             const requestId = 'dashboard_init_' + Date.now();
-            
+
             window.parent.postMessage({
               type: 'geocode-reverse',
               data: { lat, lng, requestId }
             }, '*');
-            
+
             // Set up one-time handler for the response
             const handleResponse = function(event) {
-              if (event.data && event.data.type === 'geocode-reverse-response' && 
+              if (event.data && event.data.type === 'geocode-reverse-response' &&
                   event.data.data && event.data.data.requestId === requestId) {
-                
+
                 if (event.data.data.address) {
                   // Format the address
                   const formattedAddress = formatDashboardAddress(event.data.data.address);
@@ -477,16 +477,16 @@ async function loadAffiliateData(affiliateId) {
                     window.settingsServiceArea.config.address = formattedAddress;
                   }
                 }
-                
+
                 window.removeEventListener('message', handleResponse);
               }
             };
-            
+
             window.addEventListener('message', handleResponse);
           }
         }
       }
-      
+
       // Check if this is an OAuth account and hide change password section if so
       if (data.registrationMethod && data.registrationMethod !== 'traditional') {
         // This is an OAuth account, hide the change password section
@@ -496,7 +496,7 @@ async function loadAffiliateData(affiliateId) {
           console.log('Hiding change password section for OAuth account:', data.registrationMethod);
         }
       }
-      
+
       // Initialize pricing preview component if available
       console.log('Checking for PricingPreviewComponent:', !!window.PricingPreviewComponent);
       if (window.PricingPreviewComponent) {
@@ -513,17 +513,17 @@ async function loadAffiliateData(affiliateId) {
           }
         );
         console.log('Pricing preview initialized:', !!window.settingsPricingPreview);
-        
+
         // Set initial values
         const minimumFee = parseFloat(data.minimumDeliveryFee) || 25;
         const perBagFee = parseFloat(data.perBagDeliveryFee) || 10;
-        
+
         // Update inputs
         const minInput = document.getElementById('settingsMinimumDeliveryFee');
         const perBagInput = document.getElementById('settingsPerBagDeliveryFee');
         if (minInput) minInput.value = minimumFee;
         if (perBagInput) perBagInput.value = perBagFee;
-        
+
         // Trigger update
         if (window.settingsPricingPreview) {
           window.settingsPricingPreview.update();
@@ -669,9 +669,9 @@ async function loadCustomersWithHighlight(affiliateId, highlightCustomerId) {
         customers.forEach(customer => {
           const row = document.createElement('tr');
           const isHighlighted = highlightCustomerId && customer.customerId === highlightCustomerId;
-          
+
           row.className = `border-b ${isHighlighted ? 'bg-blue-50 border-blue-200' : 'hover:bg-gray-50'}`;
-          
+
           row.innerHTML = `
             <td class="py-3 px-4">
               ${isHighlighted ? '<span class="font-bold text-blue-800">★ </span>' : ''}
@@ -957,7 +957,7 @@ async function loadSettingsData(affiliateId) {
         if (businessNameField) businessNameField.value = data.businessName || '';
         if (minimumDeliveryFeeField) minimumDeliveryFeeField.value = data.minimumDeliveryFee || 25;
         if (perBagDeliveryFeeField) perBagDeliveryFeeField.value = data.perBagDeliveryFee || 5;
-        
+
         // Initialize or update service area component
         if (window.ServiceAreaComponent) {
           if (window.settingsServiceArea) {
@@ -982,7 +982,7 @@ async function loadSettingsData(affiliateId) {
             });
           }
         }
-        
+
         // Initialize pricing preview component
         if (window.PricingPreviewComponent) {
           console.log('Initializing pricing preview in loadSettingsData');
@@ -996,16 +996,16 @@ async function loadSettingsData(affiliateId) {
         // Generate and display registration link with wavemaxlaundry.com format
         const registrationLink = `https://www.wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program?affid=${affiliateId}`;
         if (registrationLinkField) registrationLinkField.value = registrationLink;
-        
+
         // Load W-9 status
         loadW9Status();
-        
+
         // Set up W-9 event listeners
         const w9UploadForm = document.getElementById('w9UploadFormElement');
         if (w9UploadForm) {
           w9UploadForm.addEventListener('submit', handleW9Upload);
         }
-        
+
         // Download button removed - using DocuSign for W9 management
 
         // Set landing page link
@@ -1036,7 +1036,7 @@ function enableEditMode() {
 
   document.getElementById('editBtn').style.display = 'none';
   document.getElementById('formButtons').style.display = 'block';
-  
+
   // Enable service area editing
   if (window.settingsServiceArea && window.ServiceAreaComponent) {
     // Update the component to show map and controls
@@ -1046,7 +1046,7 @@ function enableEditMode() {
       showControls: true
     });
   }
-  
+
   // The pricing preview component handles its own event listeners
   // No need to add additional listeners here
 }
@@ -1063,7 +1063,7 @@ function disableEditMode() {
 
   document.getElementById('editBtn').style.display = 'block';
   document.getElementById('formButtons').style.display = 'none';
-  
+
   // Disable service area editing
   if (window.settingsServiceArea && window.ServiceAreaComponent) {
     // Update the component to hide map and controls
@@ -1073,7 +1073,7 @@ function disableEditMode() {
       showControls: false
     });
   }
-  
+
   // The pricing preview component handles its own event listeners
   // No need to remove listeners here
 }
@@ -1091,7 +1091,7 @@ async function saveSettings(affiliateId) {
       minimumDeliveryFee: parseFloat(formData.get('minimumDeliveryFee')) || null,
       perBagDeliveryFee: parseFloat(formData.get('perBagDeliveryFee')) || null
     };
-    
+
     // Get service area data from component
     if (window.settingsServiceArea && window.ServiceAreaComponent) {
       const serviceAreaData = window.ServiceAreaComponent.getData('settingsServiceAreaComponent');
@@ -1191,7 +1191,7 @@ function checkAndShowDeleteSection() {
   console.log('Checking environment for delete section visibility...');
   const baseUrl = window.EMBED_CONFIG?.baseUrl || 'https://wavemax.promo';
   console.log('Fetching environment from:', `${baseUrl}/api/v1/environment`);
-  
+
   fetch(`${baseUrl}/api/v1/environment`)
     .then(response => response.json())
     .then(data => {
@@ -1225,7 +1225,7 @@ async function deleteAllData(affiliateId) {
   try {
     // Get CSRF token first
     await ensureCsrfToken();
-    
+
     const response = await authenticatedFetch(`/api/v1/affiliates/${affiliateId}/delete-all-data`, {
       method: 'DELETE',
       headers: {
@@ -1265,12 +1265,12 @@ async function deleteAllData(affiliateId) {
 function updateFeeCalculatorPreview() {
   const minFeeInput = document.getElementById('settingsMinimumDeliveryFee');
   const perBagInput = document.getElementById('settingsPerBagDeliveryFee');
-  
+
   if (!minFeeInput || !perBagInput) return;
-  
+
   const minFee = parseFloat(minFeeInput.value) || 25;
   const perBag = parseFloat(perBagInput.value) || 5;
-  
+
   // Calculate fees for different bag quantities (round trip = x2)
   const bags = [1, 3, 5, 10];
   bags.forEach(qty => {
@@ -1297,7 +1297,7 @@ let w9Status = null;
 async function loadW9Status() {
   try {
     const response = await authenticatedFetch('/api/v1/w9/status');
-    
+
     if (response.ok) {
       w9Status = await response.json();
       updateW9Display();
@@ -1311,41 +1311,41 @@ async function loadW9Status() {
 
 function updateW9Display() {
   if (!w9Status) return;
-  
+
   // Update status text
   const statusText = document.getElementById('w9StatusText');
   const statusAlert = document.getElementById('w9StatusAlert');
   const uploadForm = document.getElementById('w9UploadForm');
   // Download button removed - using DocuSign only
-  
+
   if (statusText) {
     statusText.textContent = w9Status.statusDisplay;
     statusText.className = 'ml-2 font-semibold ';
-    
+
     // Add color coding based on status
     switch (w9Status.status) {
-      case 'not_submitted':
-        statusText.className += 'text-red-600';
-        break;
-      case 'pending_review':
-        statusText.className += 'text-yellow-600';
-        break;
-      case 'verified':
-        statusText.className += 'text-green-600';
-        break;
-      case 'rejected':
-        statusText.className += 'text-red-600';
-        break;
-      case 'expired':
-        statusText.className += 'text-orange-600';
-        break;
+    case 'not_submitted':
+      statusText.className += 'text-red-600';
+      break;
+    case 'pending_review':
+      statusText.className += 'text-yellow-600';
+      break;
+    case 'verified':
+      statusText.className += 'text-green-600';
+      break;
+    case 'rejected':
+      statusText.className += 'text-red-600';
+      break;
+    case 'expired':
+      statusText.className += 'text-orange-600';
+      break;
     }
   }
-  
+
   // Update status alert
   if (statusAlert) {
     let alertHTML = '';
-    
+
     if (w9Status.status === 'not_submitted') {
       alertHTML = `
         <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative">
@@ -1379,10 +1379,10 @@ function updateW9Display() {
       `;
       if (uploadForm) uploadForm.style.display = 'block';
     }
-    
+
     statusAlert.innerHTML = alertHTML;
   }
-  
+
   // Update dates
   if (w9Status.submittedAt) {
     const submittedDateDiv = document.getElementById('w9SubmittedDate');
@@ -1392,7 +1392,7 @@ function updateW9Display() {
       submittedDateText.textContent = new Date(w9Status.submittedAt).toLocaleDateString();
     }
   }
-  
+
   if (w9Status.verifiedAt) {
     const verifiedDateDiv = document.getElementById('w9VerifiedDate');
     const verifiedDateText = document.getElementById('w9VerifiedDateText');
@@ -1401,31 +1401,31 @@ function updateW9Display() {
       verifiedDateText.textContent = new Date(w9Status.verifiedAt).toLocaleDateString();
     }
   }
-  
+
   // Update tax info (only shown if verified)
   if (w9Status.status === 'verified' && w9Status.taxInfo) {
     const taxInfoDiv = document.getElementById('w9TaxInfo');
     const taxIdType = document.getElementById('w9TaxIdType');
     const taxIdLast4 = document.getElementById('w9TaxIdLast4');
-    
+
     if (taxInfoDiv && taxIdType && taxIdLast4) {
       taxInfoDiv.style.display = 'block';
       taxIdType.textContent = w9Status.taxInfo.type;
       taxIdLast4.textContent = '***-**-' + w9Status.taxInfo.last4;
     }
   }
-  
+
   // Update rejection reason
   if (w9Status.status === 'rejected' && w9Status.rejectionReason) {
     const rejectionDiv = document.getElementById('w9RejectionReason');
     const rejectionText = document.getElementById('w9RejectionReasonText');
-    
+
     if (rejectionDiv && rejectionText) {
       rejectionDiv.style.display = 'block';
       rejectionText.textContent = w9Status.rejectionReason;
     }
   }
-  
+
   // Re-apply i18n translations
   if (window.i18next && window.i18next.isInitialized) {
     window.applyTranslations();
@@ -1434,47 +1434,47 @@ function updateW9Display() {
 
 async function handleW9Upload(event) {
   event.preventDefault();
-  
+
   const fileInput = document.getElementById('w9File');
   const file = fileInput.files[0];
-  
+
   if (!file) {
     alert('Please select a file to upload');
     return;
   }
-  
+
   if (file.type !== 'application/pdf') {
     alert('Only PDF files are accepted');
     return;
   }
-  
+
   if (file.size > 5 * 1024 * 1024) {
     alert('File size must be less than 5MB');
     return;
   }
-  
+
   // Show progress
   document.getElementById('w9UploadProgress').style.display = 'block';
   document.getElementById('w9UploadSuccess').style.display = 'none';
   document.getElementById('w9UploadError').style.display = 'none';
-  
+
   const formData = new FormData();
   formData.append('w9document', file);
-  
+
   try {
     const response = await authenticatedFetch('/api/v1/w9/upload', {
       method: 'POST',
       body: formData
     });
-    
+
     if (response.ok) {
       const result = await response.json();
       document.getElementById('w9UploadProgress').style.display = 'none';
       document.getElementById('w9UploadSuccess').style.display = 'block';
-      
+
       // Reset form
       fileInput.value = '';
-      
+
       // Reload W-9 status
       setTimeout(() => {
         loadW9Status();
@@ -1497,7 +1497,7 @@ async function handleW9Upload(event) {
 async function downloadSubmittedW9() {
   try {
     const response = await authenticatedFetch('/api/v1/w9/download');
-    
+
     if (response.ok) {
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);

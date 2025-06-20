@@ -1,208 +1,208 @@
 (function() {
-    'use strict';
+  'use strict';
 
-    // Translation helper
-    function t(key, fallback) {
-        return window.i18n && window.i18n.t ? window.i18n.t(key) : fallback;
-    }
+  // Translation helper
+  function t(key, fallback) {
+    return window.i18n && window.i18n.t ? window.i18n.t(key) : fallback;
+  }
 
 
-    // Load CSRF utilities
-    if (!window.CsrfUtils) {
-        console.error('CSRF utilities not loaded. Please include csrf-utils.js before this script.');
-        return;
-    }
+  // Load CSRF utilities
+  if (!window.CsrfUtils) {
+    console.error('CSRF utilities not loaded. Please include csrf-utils.js before this script.');
+    return;
+  }
 
-    // Configuration
-    const config = window.EMBED_CONFIG || {
-        baseUrl: 'https://wavemax.promo'
-    };
-    const BASE_URL = config.baseUrl;
+  // Configuration
+  const config = window.EMBED_CONFIG || {
+    baseUrl: 'https://wavemax.promo'
+  };
+  const BASE_URL = config.baseUrl;
 
-    // Authentication check
-    const token = localStorage.getItem('adminToken');
-    const adminData = JSON.parse(localStorage.getItem('adminData') || '{}');
-    const requirePasswordChange = localStorage.getItem('requirePasswordChange');
+  // Authentication check
+  const token = localStorage.getItem('adminToken');
+  const adminData = JSON.parse(localStorage.getItem('adminData') || '{}');
+  const requirePasswordChange = localStorage.getItem('requirePasswordChange');
 
-    // Redirect to login if no token or if password change is still required
-    if (!token || requirePasswordChange === 'true') {
-        // Clear everything and redirect to login
+  // Redirect to login if no token or if password change is still required
+  if (!token || requirePasswordChange === 'true') {
+    // Clear everything and redirect to login
+    localStorage.removeItem('adminToken');
+    localStorage.removeItem('adminRefreshToken');
+    localStorage.removeItem('adminData');
+    localStorage.removeItem('requirePasswordChange');
+    window.location.href = '/administrator-login-embed.html';
+    return;
+  }
+
+  // Update user info
+  const userName = `${adminData.firstName} ${adminData.lastName}`;
+  const userNameElement = document.getElementById('userName');
+  if (userNameElement) {
+    userNameElement.textContent = userName;
+  }
+
+  // Logout functionality
+  const logoutBtn = document.getElementById('logoutBtn');
+  if (logoutBtn) {
+    logoutBtn.addEventListener('click', async () => {
+      if (confirm(t('administrator.dashboard.confirmLogout', 'Are you sure you want to logout?'))) {
+        try {
+          // Call logout endpoint
+          await adminFetch('/api/v1/auth/logout', { method: 'POST' });
+        } catch (error) {
+          console.error('Logout error:', error);
+        }
+
+        // Clear local storage
         localStorage.removeItem('adminToken');
         localStorage.removeItem('adminRefreshToken');
         localStorage.removeItem('adminData');
         localStorage.removeItem('requirePasswordChange');
+
+        // Redirect to login
         window.location.href = '/administrator-login-embed.html';
-        return;
-    }
-
-    // Update user info
-    const userName = `${adminData.firstName} ${adminData.lastName}`;
-    const userNameElement = document.getElementById('userName');
-    if (userNameElement) {
-        userNameElement.textContent = userName;
-    }
-
-    // Logout functionality
-    const logoutBtn = document.getElementById('logoutBtn');
-    if (logoutBtn) {
-        logoutBtn.addEventListener('click', async () => {
-            if (confirm(t('administrator.dashboard.confirmLogout', 'Are you sure you want to logout?'))) {
-                try {
-                    // Call logout endpoint
-                    await adminFetch('/api/v1/auth/logout', { method: 'POST' });
-                } catch (error) {
-                    console.error('Logout error:', error);
-                }
-                
-                // Clear local storage
-                localStorage.removeItem('adminToken');
-                localStorage.removeItem('adminRefreshToken');
-                localStorage.removeItem('adminData');
-                localStorage.removeItem('requirePasswordChange');
-                
-                // Redirect to login
-                window.location.href = '/administrator-login-embed.html';
-            }
-        });
-    }
-
-    // Tab navigation
-    const tabs = document.querySelectorAll('.nav-tab');
-    const tabContents = document.querySelectorAll('.tab-content');
-
-    tabs.forEach(tab => {
-        tab.addEventListener('click', () => {
-            const targetTab = tab.dataset.tab;
-            
-            // Update active states
-            tabs.forEach(t => t.classList.remove('active'));
-            tabContents.forEach(tc => tc.classList.remove('active'));
-            
-            tab.classList.add('active');
-            document.getElementById(`${targetTab}-tab`).classList.add('active');
-            
-            // Load tab data
-            loadTabData(targetTab);
-        });
+      }
     });
+  }
 
-    // Create authenticated fetch with CSRF support
-    const authenticatedFetch = window.CsrfUtils.createAuthenticatedFetch(() => token);
+  // Tab navigation
+  const tabs = document.querySelectorAll('.nav-tab');
+  const tabContents = document.querySelectorAll('.tab-content');
 
-    // Wrapper to handle 401 responses
-    async function adminFetch(url, options = {}) {
-        // Add base URL and ensure headers
-        const fullUrl = `${BASE_URL}${url}`;
-        options.headers = options.headers || {};
-        options.headers['Content-Type'] = options.headers['Content-Type'] || 'application/json';
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      const targetTab = tab.dataset.tab;
 
-        const response = await authenticatedFetch(fullUrl, options);
+      // Update active states
+      tabs.forEach(t => t.classList.remove('active'));
+      tabContents.forEach(tc => tc.classList.remove('active'));
 
-        if (response.status === 401) {
-            // Token expired, redirect to login
-            localStorage.removeItem('adminToken');
-            localStorage.removeItem('adminRefreshToken');
-            localStorage.removeItem('adminData');
-            window.location.href = '/administrator-login-embed.html';
-            return;
-        }
+      tab.classList.add('active');
+      document.getElementById(`${targetTab}-tab`).classList.add('active');
 
-        return response;
+      // Load tab data
+      loadTabData(targetTab);
+    });
+  });
+
+  // Create authenticated fetch with CSRF support
+  const authenticatedFetch = window.CsrfUtils.createAuthenticatedFetch(() => token);
+
+  // Wrapper to handle 401 responses
+  async function adminFetch(url, options = {}) {
+    // Add base URL and ensure headers
+    const fullUrl = `${BASE_URL}${url}`;
+    options.headers = options.headers || {};
+    options.headers['Content-Type'] = options.headers['Content-Type'] || 'application/json';
+
+    const response = await authenticatedFetch(fullUrl, options);
+
+    if (response.status === 401) {
+      // Token expired, redirect to login
+      localStorage.removeItem('adminToken');
+      localStorage.removeItem('adminRefreshToken');
+      localStorage.removeItem('adminData');
+      window.location.href = '/administrator-login-embed.html';
+      return;
     }
 
-    // Clear loading states from all containers
-    function clearLoadingStates() {
-        const loadingContainers = ['dashboardStats', 'recentActivity', 'operatorsList', 'analyticsOverview', 'affiliatesList', 'systemConfigForm'];
-        loadingContainers.forEach(id => {
-            const element = document.getElementById(id);
-            if (element && element.querySelector('.loading')) {
-                // Only clear if it still has loading state
-                const loadingDiv = element.querySelector('.loading');
-                if (loadingDiv) {
-                    element.innerHTML = '';
-                }
-            }
-        });
+    return response;
+  }
+
+  // Clear loading states from all containers
+  function clearLoadingStates() {
+    const loadingContainers = ['dashboardStats', 'recentActivity', 'operatorsList', 'analyticsOverview', 'affiliatesList', 'systemConfigForm'];
+    loadingContainers.forEach(id => {
+      const element = document.getElementById(id);
+      if (element && element.querySelector('.loading')) {
+        // Only clear if it still has loading state
+        const loadingDiv = element.querySelector('.loading');
+        if (loadingDiv) {
+          element.innerHTML = '';
+        }
+      }
+    });
+  }
+
+  // Load tab data
+  async function loadTabData(tab) {
+    // Clear any remaining loading states
+    clearLoadingStates();
+
+    switch(tab) {
+    case 'dashboard':
+      await loadDashboard();
+      break;
+    case 'operators':
+      await loadOperators();
+      break;
+    case 'analytics':
+      await loadAnalytics();
+      break;
+    case 'affiliates':
+      await loadAffiliates();
+      break;
+    case 'w9review':
+      await loadW9Documents();
+      break;
+    case 'quickbooks':
+      await loadQuickBooksTab();
+      break;
+    case 'auditlog':
+      await loadAuditLog();
+      break;
+    case 'config':
+      await loadSystemConfig();
+      break;
+    }
+  }
+
+  // Load dashboard
+  async function loadDashboard() {
+    try {
+      const response = await adminFetch('/api/v1/administrators/dashboard');
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        renderDashboardStats(data.dashboard);
+        renderRecentActivity(data.dashboard.recentActivity || []);
+      } else {
+        console.error('Dashboard data not loaded:', data.message);
+        document.getElementById('dashboardStats').innerHTML = `<p style="padding: 20px; text-align: center; color: #666;">${t('administrator.dashboard.errors.dashboardLoadFailed', 'Failed to load dashboard data')}</p>`;
+      }
+    } catch (error) {
+      console.error('Error loading dashboard:', error);
+      document.getElementById('dashboardStats').innerHTML = `<p style="padding: 20px; text-align: center; color: #666;">${t('administrator.dashboard.errors.dashboardLoadFailed', 'Error loading dashboard')}</p>`;
+    }
+  }
+
+  // Render dashboard stats
+  function renderDashboardStats(data) {
+    const dashboardElement = document.getElementById('dashboardStats');
+
+    if (!data) {
+      dashboardElement.innerHTML = `<p style="padding: 20px; text-align: center; color: #666;">${t('common.messages.noData', 'No dashboard data available')}</p>`;
+      return;
     }
 
-    // Load tab data
-    async function loadTabData(tab) {
-        // Clear any remaining loading states
-        clearLoadingStates();
-        
-        switch(tab) {
-            case 'dashboard':
-                await loadDashboard();
-                break;
-            case 'operators':
-                await loadOperators();
-                break;
-            case 'analytics':
-                await loadAnalytics();
-                break;
-            case 'affiliates':
-                await loadAffiliates();
-                break;
-            case 'w9review':
-                await loadW9Documents();
-                break;
-            case 'quickbooks':
-                await loadQuickBooksTab();
-                break;
-            case 'auditlog':
-                await loadAuditLog();
-                break;
-            case 'config':
-                await loadSystemConfig();
-                break;
-        }
-    }
+    const orderStats = data.orderStats || {};
+    const systemHealth = data.systemHealth || {};
+    const avgProcessingTime = Math.round(orderStats.averageProcessingTime || 0);
+    const avgProcessingHours = Math.floor(avgProcessingTime / 60);
+    const avgProcessingMins = Math.round(avgProcessingTime % 60);
+    const processingTimeDisplay = avgProcessingHours > 0 ?
+      `${avgProcessingHours}h ${avgProcessingMins}m` :
+      `${avgProcessingMins}m`;
 
-    // Load dashboard
-    async function loadDashboard() {
-        try {
-            const response = await adminFetch('/api/v1/administrators/dashboard');
-            const data = await response.json();
-
-            if (response.ok && data.success) {
-                renderDashboardStats(data.dashboard);
-                renderRecentActivity(data.dashboard.recentActivity || []);
-            } else {
-                console.error('Dashboard data not loaded:', data.message);
-                document.getElementById('dashboardStats').innerHTML = `<p style="padding: 20px; text-align: center; color: #666;">${t('administrator.dashboard.errors.dashboardLoadFailed', 'Failed to load dashboard data')}</p>`;
-            }
-        } catch (error) {
-            console.error('Error loading dashboard:', error);
-            document.getElementById('dashboardStats').innerHTML = `<p style="padding: 20px; text-align: center; color: #666;">${t('administrator.dashboard.errors.dashboardLoadFailed', 'Error loading dashboard')}</p>`;
-        }
-    }
-
-    // Render dashboard stats
-    function renderDashboardStats(data) {
-        const dashboardElement = document.getElementById('dashboardStats');
-        
-        if (!data) {
-            dashboardElement.innerHTML = `<p style="padding: 20px; text-align: center; color: #666;">${t('common.messages.noData', 'No dashboard data available')}</p>`;
-            return;
-        }
-
-        const orderStats = data.orderStats || {};
-        const systemHealth = data.systemHealth || {};
-        const avgProcessingTime = Math.round(orderStats.averageProcessingTime || 0);
-        const avgProcessingHours = Math.floor(avgProcessingTime / 60);
-        const avgProcessingMins = Math.round(avgProcessingTime % 60);
-        const processingTimeDisplay = avgProcessingHours > 0 ? 
-            `${avgProcessingHours}h ${avgProcessingMins}m` : 
-            `${avgProcessingMins}m`;
-        
-        const statsHtml = `
+    const statsHtml = `
             <div class="stat-card">
                 <h3>${t('administrator.dashboard.stats.activeOperators', 'Active Operators')}</h3>
                 <div class="stat-value">${systemHealth.onShiftOperators || 0}</div>
                 <div class="stat-change">${t('administrator.dashboard.stats.total', 'Total')}: ${systemHealth.activeOperators || 0}</div>
             </div>
             <div class="stat-card">
-                <h3>${t('administrator.dashboard.stats.todaysOrders', "Today's Orders")}</h3>
+                <h3>${t('administrator.dashboard.stats.todaysOrders', 'Today\'s Orders')}</h3>
                 <div class="stat-value">${orderStats.today || 0}</div>
                 <div class="stat-change">${t('administrator.dashboard.stats.thisWeek', 'This week')}: ${orderStats.thisWeek || 0}</div>
             </div>
@@ -224,17 +224,17 @@
                 <div class="stat-change">${t('administrator.dashboard.stats.thisMonth', 'This month')}: ${orderStats.thisMonth || 0}</div>
             </div>
         `;
-        dashboardElement.innerHTML = statsHtml;
+    dashboardElement.innerHTML = statsHtml;
+  }
+
+  // Render recent activity
+  function renderRecentActivity(activities) {
+    if (!activities || activities.length === 0) {
+      document.getElementById('recentActivity').innerHTML = `<p style="padding: 20px; text-align: center; color: #666;">${t('administrator.dashboard.recentActivity.noActivity', 'No recent activity')}</p>`;
+      return;
     }
 
-    // Render recent activity
-    function renderRecentActivity(activities) {
-        if (!activities || activities.length === 0) {
-            document.getElementById('recentActivity').innerHTML = `<p style="padding: 20px; text-align: center; color: #666;">${t('administrator.dashboard.recentActivity.noActivity', 'No recent activity')}</p>`;
-            return;
-        }
-
-        const tableHtml = `
+    const tableHtml = `
             <table>
                 <thead>
                     <tr>
@@ -256,56 +256,56 @@
                 </tbody>
             </table>
         `;
-        document.getElementById('recentActivity').innerHTML = tableHtml;
+    document.getElementById('recentActivity').innerHTML = tableHtml;
+  }
+
+  // Load operators
+  async function loadOperators() {
+    try {
+      const response = await adminFetch('/api/v1/administrators/operators');
+
+      // Log the response for debugging
+      console.log('Operators endpoint response:', {
+        status: response.status,
+        statusText: response.statusText,
+        ok: response.ok,
+        headers: Object.fromEntries(response.headers.entries())
+      });
+
+      const text = await response.text();
+      console.log('Response body:', text);
+
+      let data;
+      try {
+        data = JSON.parse(text);
+      } catch (e) {
+        console.error('Failed to parse response as JSON:', e);
+        document.getElementById('operatorsList').innerHTML = '<p style="padding: 20px; text-align: center; color: #666;">Error: Invalid response format</p>';
+        return;
+      }
+
+      if (response.ok && data.success) {
+        renderOperatorsList(data.operators);
+      } else {
+        console.error('Operators load failed:', data);
+        const errorMsg = data.message || data.error || 'Failed to load operators';
+        document.getElementById('operatorsList').innerHTML = `<p style="padding: 20px; text-align: center; color: #666;">${t('administrator.dashboard.errors.operatorsLoadFailed', errorMsg)}</p>`;
+      }
+    } catch (error) {
+      console.error('Error loading operators:', error);
+      document.getElementById('operatorsList').innerHTML = `<p style="padding: 20px; text-align: center; color: #666;">${t('administrator.dashboard.errors.operatorsLoadFailed', 'Error loading operators')}</p>`;
+    }
+  }
+
+  // Render operators list
+  function renderOperatorsList(operators) {
+    if (!operators || operators.length === 0) {
+      document.getElementById('operatorsList').innerHTML = `<p style="padding: 20px; text-align: center; color: #666;">${t('administrator.dashboard.operators.noOperators', 'No operators found')}</p>`;
+      return;
     }
 
-    // Load operators
-    async function loadOperators() {
-        try {
-            const response = await adminFetch('/api/v1/administrators/operators');
-            
-            // Log the response for debugging
-            console.log('Operators endpoint response:', {
-                status: response.status,
-                statusText: response.statusText,
-                ok: response.ok,
-                headers: Object.fromEntries(response.headers.entries())
-            });
-            
-            const text = await response.text();
-            console.log('Response body:', text);
-            
-            let data;
-            try {
-                data = JSON.parse(text);
-            } catch (e) {
-                console.error('Failed to parse response as JSON:', e);
-                document.getElementById('operatorsList').innerHTML = `<p style="padding: 20px; text-align: center; color: #666;">Error: Invalid response format</p>`;
-                return;
-            }
-
-            if (response.ok && data.success) {
-                renderOperatorsList(data.operators);
-            } else {
-                console.error('Operators load failed:', data);
-                const errorMsg = data.message || data.error || 'Failed to load operators';
-                document.getElementById('operatorsList').innerHTML = `<p style="padding: 20px; text-align: center; color: #666;">${t('administrator.dashboard.errors.operatorsLoadFailed', errorMsg)}</p>`;
-            }
-        } catch (error) {
-            console.error('Error loading operators:', error);
-            document.getElementById('operatorsList').innerHTML = `<p style="padding: 20px; text-align: center; color: #666;">${t('administrator.dashboard.errors.operatorsLoadFailed', 'Error loading operators')}</p>`;
-        }
-    }
-
-    // Render operators list
-    function renderOperatorsList(operators) {
-        if (!operators || operators.length === 0) {
-            document.getElementById('operatorsList').innerHTML = `<p style="padding: 20px; text-align: center; color: #666;">${t('administrator.dashboard.operators.noOperators', 'No operators found')}</p>`;
-            return;
-        }
-
-        const t = window.i18n ? window.i18n.t.bind(window.i18n) : (key) => key;
-        const tableHtml = `
+    const t = window.i18n ? window.i18n.t.bind(window.i18n) : (key) => key;
+    const tableHtml = `
             <table>
                 <thead>
                     <tr>
@@ -338,108 +338,108 @@
                 </tbody>
             </table>
         `;
-        document.getElementById('operatorsList').innerHTML = tableHtml;
-    }
+    document.getElementById('operatorsList').innerHTML = tableHtml;
+  }
 
-    // Store current analytics data
-    let currentAnalyticsData = null;
-    let currentDashboardData = null;
-    let currentDateRange = 'month'; // Default to last 30 days
+  // Store current analytics data
+  let currentAnalyticsData = null;
+  let currentDashboardData = null;
+  let currentDateRange = 'month'; // Default to last 30 days
 
-    // Load analytics with date range
-    async function loadAnalytics(range = currentDateRange) {
-        try {
-            // Update current range
-            currentDateRange = range;
-            
-            // Determine period for API call
-            let period = 'month';
-            switch(range) {
-                case 'today':
-                    period = 'day';
-                    break;
-                case 'week':
-                    period = 'week';
-                    break;
-                case 'month':
-                    period = 'month';
-                    break;
-            }
-            
-            const [ordersResponse, dashboardResponse] = await Promise.all([
-                adminFetch(`/api/v1/administrators/analytics/orders?period=${period}`),
-                adminFetch('/api/v1/administrators/dashboard')
-            ]);
-            
-            // Check response status before parsing
-            if (!ordersResponse.ok || !dashboardResponse.ok) {
-                console.error('One or more API calls failed:', {
-                    orders: ordersResponse.ok ? 'OK' : `Failed (${ordersResponse.status})`,
-                    dashboard: dashboardResponse.ok ? 'OK' : `Failed (${dashboardResponse.status})`
-                });
-                return;
-            }
-            
-            const ordersData = await ordersResponse.json();
-            const dashboardData = await dashboardResponse.json();
+  // Load analytics with date range
+  async function loadAnalytics(range = currentDateRange) {
+    try {
+      // Update current range
+      currentDateRange = range;
 
-            if (ordersData && dashboardData) {
-                // Create analytics data
-                const analyticsData = {
-                    ...ordersData,
-                    dashboardData: dashboardData.dashboard,
-                    dateRange: range
-                };
-                
-                // Store data for re-rendering
-                currentAnalyticsData = analyticsData;
-                currentDashboardData = dashboardData.dashboard;
-                
-                renderAnalyticsOverview(ordersData);
-                renderAnalyticsCharts(analyticsData, dashboardData.dashboard);
-                
-                // Set up date range toggle handlers
-                setupDateRangeToggle();
-            }
-        } catch (error) {
-            console.error('Error loading analytics:', error);
-        }
-    }
+      // Determine period for API call
+      let period = 'month';
+      switch(range) {
+      case 'today':
+        period = 'day';
+        break;
+      case 'week':
+        period = 'week';
+        break;
+      case 'month':
+        period = 'month';
+        break;
+      }
 
-    // Set up date range toggle handlers
-    function setupDateRangeToggle() {
-        const toggleButtons = document.querySelectorAll('.date-range-toggle .toggle-btn');
-        toggleButtons.forEach(btn => {
-            btn.addEventListener('click', async (e) => {
-                // Update active state
-                toggleButtons.forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                
-                // Get selected range
-                const range = btn.dataset.range;
-                
-                // Reload all analytics with new date range
-                await loadAnalytics(range);
-            });
+      const [ordersResponse, dashboardResponse] = await Promise.all([
+        adminFetch(`/api/v1/administrators/analytics/orders?period=${period}`),
+        adminFetch('/api/v1/administrators/dashboard')
+      ]);
+
+      // Check response status before parsing
+      if (!ordersResponse.ok || !dashboardResponse.ok) {
+        console.error('One or more API calls failed:', {
+          orders: ordersResponse.ok ? 'OK' : `Failed (${ordersResponse.status})`,
+          dashboard: dashboardResponse.ok ? 'OK' : `Failed (${dashboardResponse.status})`
         });
+        return;
+      }
+
+      const ordersData = await ordersResponse.json();
+      const dashboardData = await dashboardResponse.json();
+
+      if (ordersData && dashboardData) {
+        // Create analytics data
+        const analyticsData = {
+          ...ordersData,
+          dashboardData: dashboardData.dashboard,
+          dateRange: range
+        };
+
+        // Store data for re-rendering
+        currentAnalyticsData = analyticsData;
+        currentDashboardData = dashboardData.dashboard;
+
+        renderAnalyticsOverview(ordersData);
+        renderAnalyticsCharts(analyticsData, dashboardData.dashboard);
+
+        // Set up date range toggle handlers
+        setupDateRangeToggle();
+      }
+    } catch (error) {
+      console.error('Error loading analytics:', error);
     }
+  }
+
+  // Set up date range toggle handlers
+  function setupDateRangeToggle() {
+    const toggleButtons = document.querySelectorAll('.date-range-toggle .toggle-btn');
+    toggleButtons.forEach(btn => {
+      btn.addEventListener('click', async (e) => {
+        // Update active state
+        toggleButtons.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+
+        // Get selected range
+        const range = btn.dataset.range;
+
+        // Reload all analytics with new date range
+        await loadAnalytics(range);
+      });
+    });
+  }
 
 
-    // Render analytics overview
-    function renderAnalyticsOverview(data) {
-        const t = window.i18n ? window.i18n.t.bind(window.i18n) : (key) => key;
-        
-        // Handle both direct summary and nested analytics.summary structures
-        const summary = data.summary || (data.analytics && data.analytics.summary) || {};
-        
-        // Provide default values if data is missing
-        const totalOrders = summary.totalOrders || 0;
-        const completedOrders = summary.completedOrders || 0;
-        const totalRevenue = summary.totalRevenue || 0;
-        const avgOrderValue = summary.averageOrderValue || summary.avgOrderValue || 0;
-        const completionRate = totalOrders > 0 ? Math.round((completedOrders / totalOrders) * 100) : 0;
-        
-        const overviewHtml = `
+  // Render analytics overview
+  function renderAnalyticsOverview(data) {
+    const t = window.i18n ? window.i18n.t.bind(window.i18n) : (key) => key;
+
+    // Handle both direct summary and nested analytics.summary structures
+    const summary = data.summary || (data.analytics && data.analytics.summary) || {};
+
+    // Provide default values if data is missing
+    const totalOrders = summary.totalOrders || 0;
+    const completedOrders = summary.completedOrders || 0;
+    const totalRevenue = summary.totalRevenue || 0;
+    const avgOrderValue = summary.averageOrderValue || summary.avgOrderValue || 0;
+    const completionRate = totalOrders > 0 ? Math.round((completedOrders / totalOrders) * 100) : 0;
+
+    const overviewHtml = `
             <div class="stat-card">
                 <h3>${t('administrator.dashboard.analytics.totalOrders')}</h3>
                 <div class="stat-value">${totalOrders}</div>
@@ -461,319 +461,319 @@
                 <div class="stat-change">${t('administrator.dashboard.analytics.perOrder')}</div>
             </div>
         `;
-        document.getElementById('analyticsOverview').innerHTML = overviewHtml;
-    }
+    document.getElementById('analyticsOverview').innerHTML = overviewHtml;
+  }
 
-    // Chart instances storage
-    let chartInstances = {
-        revenue: null,
-        processingTime: null,
-        orderStatus: null,
-        dailyOrders: null
+  // Chart instances storage
+  let chartInstances = {
+    revenue: null,
+    processingTime: null,
+    orderStatus: null,
+    dailyOrders: null
+  };
+
+  // Render analytics charts
+  function renderAnalyticsCharts(ordersData, dashboardData) {
+    // Destroy existing charts before creating new ones
+    Object.values(chartInstances).forEach(chart => {
+      if (chart) chart.destroy();
+    });
+
+    // Revenue Chart
+    renderRevenueChart(ordersData);
+
+    // Processing Time Distribution Chart
+    renderProcessingTimeChart(ordersData);
+
+    // Order Status Distribution Chart
+    renderOrderStatusChart(dashboardData);
+
+    // Daily Orders Trend Chart
+    renderDailyOrdersChart(ordersData);
+  }
+
+  // Render revenue chart
+  function renderRevenueChart(data) {
+    const ctx = document.getElementById('revenueChart');
+    if (!ctx) return;
+
+    const timeline = data.analytics?.timeline || [];
+    const labels = timeline.map(item => item._id);
+    const revenues = timeline.map(item => item.totalRevenue || 0);
+
+    chartInstances.revenue = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: labels,
+        datasets: [{
+          label: t('administrator.dashboard.analytics.revenue', 'Revenue'),
+          data: revenues,
+          borderColor: '#4A90E2',
+          backgroundColor: 'rgba(74, 144, 226, 0.1)',
+          tension: 0.4,
+          fill: true
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            display: false
+          },
+          tooltip: {
+            callbacks: {
+              label: function(context) {
+                return '$' + context.parsed.y.toFixed(2);
+              }
+            }
+          }
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            ticks: {
+              callback: function(value) {
+                return '$' + value;
+              }
+            }
+          }
+        }
+      }
+    });
+  }
+
+  // Render processing time chart (daily average scheduled to completion time)
+  function renderProcessingTimeChart(data) {
+    const ctx = document.getElementById('processingTimeChart');
+    if (!ctx) return;
+
+    // Use timeline data to show daily average completion times
+    const timeline = data.analytics?.timeline || [];
+    const labels = timeline.map(item => {
+      const date = new Date(item._id);
+      return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    });
+
+    // Calculate average processing time in hours for each day
+    const avgProcessingTimes = timeline.map(item => {
+      const avgMinutes = item.averageProcessingTime || 0;
+      return Math.round(avgMinutes / 60 * 10) / 10; // Convert to hours with 1 decimal place
+    });
+
+    chartInstances.processingTime = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: labels,
+        datasets: [{
+          label: t('administrator.dashboard.analytics.avgProcessingHours', 'Avg Hours to Complete'),
+          data: avgProcessingTimes,
+          backgroundColor: 'rgba(40, 167, 69, 0.1)',
+          borderColor: '#28a745',
+          borderWidth: 2,
+          tension: 0.4,
+          fill: true,
+          pointBackgroundColor: '#28a745',
+          pointBorderColor: '#fff',
+          pointBorderWidth: 2,
+          pointRadius: 4,
+          pointHoverRadius: 6
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            display: false
+          },
+          tooltip: {
+            callbacks: {
+              label: function(context) {
+                return context.parsed.y.toFixed(1) + ' hours';
+              }
+            }
+          }
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            ticks: {
+              callback: function(value) {
+                return value + 'h';
+              }
+            },
+            suggestedMax: 48, // 48 hours max
+            grid: {
+              drawBorder: false
+            }
+          },
+          x: {
+            grid: {
+              display: false
+            }
+          }
+        },
+        interaction: {
+          intersect: false,
+          mode: 'index'
+        }
+      }
+    });
+  }
+
+  // Render order status distribution chart
+  function renderOrderStatusChart(data, range = currentOrderStatusRange) {
+    const ctx = document.getElementById('orderStatusChart');
+    if (!ctx) return;
+
+    // Use dashboard data for status distribution
+    const statusDistribution = data.orderStats?.statusDistribution || [];
+    const statusCounts = {};
+
+    // Build status counts from dashboard data
+    statusDistribution.forEach(item => {
+      statusCounts[item._id] = item.count;
+    });
+
+    // Convert to array format for chart
+    const statusArray = Object.entries(statusCounts)
+      .filter(([status, count]) => count > 0) // Only show statuses with orders
+      .map(([status, count]) => ({ status, count }));
+
+    const labels = statusArray.map(item => {
+      const statusLabels = {
+        'pending': t('administrator.dashboard.orderStatus.pending', 'Pending'),
+        'scheduled': t('administrator.dashboard.orderStatus.scheduled', 'Scheduled'),
+        'processing': t('administrator.dashboard.orderStatus.processing', 'Processing'),
+        'processed': t('administrator.dashboard.orderStatus.processed', 'Processed'),
+        'complete': t('administrator.dashboard.orderStatus.complete', 'Complete'),
+        'cancelled': t('administrator.dashboard.orderStatus.cancelled', 'Cancelled')
+      };
+      return statusLabels[item.status] || item.status;
+    });
+    const counts = statusArray.map(item => item.count);
+
+    const colors = {
+      'pending': '#ffc107',
+      'scheduled': '#17a2b8',
+      'processing': '#007bff',
+      'processed': '#28a745',
+      'complete': '#20c997',
+      'cancelled': '#dc3545'
     };
 
-    // Render analytics charts
-    function renderAnalyticsCharts(ordersData, dashboardData) {
-        // Destroy existing charts before creating new ones
-        Object.values(chartInstances).forEach(chart => {
-            if (chart) chart.destroy();
-        });
+    const backgroundColors = statusArray.map(item => colors[item.status] || '#6c757d');
 
-        // Revenue Chart
-        renderRevenueChart(ordersData);
-        
-        // Processing Time Distribution Chart
-        renderProcessingTimeChart(ordersData);
-        
-        // Order Status Distribution Chart
-        renderOrderStatusChart(dashboardData);
-        
-        // Daily Orders Trend Chart
-        renderDailyOrdersChart(ordersData);
-    }
-
-    // Render revenue chart
-    function renderRevenueChart(data) {
-        const ctx = document.getElementById('revenueChart');
-        if (!ctx) return;
-
-        const timeline = data.analytics?.timeline || [];
-        const labels = timeline.map(item => item._id);
-        const revenues = timeline.map(item => item.totalRevenue || 0);
-
-        chartInstances.revenue = new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: labels,
-                datasets: [{
-                    label: t('administrator.dashboard.analytics.revenue', 'Revenue'),
-                    data: revenues,
-                    borderColor: '#4A90E2',
-                    backgroundColor: 'rgba(74, 144, 226, 0.1)',
-                    tension: 0.4,
-                    fill: true
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        display: false
-                    },
-                    tooltip: {
-                        callbacks: {
-                            label: function(context) {
-                                return '$' + context.parsed.y.toFixed(2);
-                            }
-                        }
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        ticks: {
-                            callback: function(value) {
-                                return '$' + value;
-                            }
-                        }
-                    }
-                }
+    chartInstances.orderStatus = new Chart(ctx, {
+      type: 'doughnut',
+      data: {
+        labels: labels,
+        datasets: [{
+          data: counts,
+          backgroundColor: backgroundColors,
+          borderWidth: 2,
+          borderColor: '#fff'
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            position: 'right',
+            labels: {
+              padding: 15,
+              usePointStyle: true
             }
-        });
-    }
-
-    // Render processing time chart (daily average scheduled to completion time)
-    function renderProcessingTimeChart(data) {
-        const ctx = document.getElementById('processingTimeChart');
-        if (!ctx) return;
-
-        // Use timeline data to show daily average completion times
-        const timeline = data.analytics?.timeline || [];
-        const labels = timeline.map(item => {
-            const date = new Date(item._id);
-            return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-        });
-        
-        // Calculate average processing time in hours for each day
-        const avgProcessingTimes = timeline.map(item => {
-            const avgMinutes = item.averageProcessingTime || 0;
-            return Math.round(avgMinutes / 60 * 10) / 10; // Convert to hours with 1 decimal place
-        });
-
-        chartInstances.processingTime = new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: labels,
-                datasets: [{
-                    label: t('administrator.dashboard.analytics.avgProcessingHours', 'Avg Hours to Complete'),
-                    data: avgProcessingTimes,
-                    backgroundColor: 'rgba(40, 167, 69, 0.1)',
-                    borderColor: '#28a745',
-                    borderWidth: 2,
-                    tension: 0.4,
-                    fill: true,
-                    pointBackgroundColor: '#28a745',
-                    pointBorderColor: '#fff',
-                    pointBorderWidth: 2,
-                    pointRadius: 4,
-                    pointHoverRadius: 6
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        display: false
-                    },
-                    tooltip: {
-                        callbacks: {
-                            label: function(context) {
-                                return context.parsed.y.toFixed(1) + ' hours';
-                            }
-                        }
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        ticks: {
-                            callback: function(value) {
-                                return value + 'h';
-                            }
-                        },
-                        suggestedMax: 48, // 48 hours max
-                        grid: {
-                            drawBorder: false
-                        }
-                    },
-                    x: {
-                        grid: {
-                            display: false
-                        }
-                    }
-                },
-                interaction: {
-                    intersect: false,
-                    mode: 'index'
-                }
-            }
-        });
-    }
-
-    // Render order status distribution chart
-    function renderOrderStatusChart(data, range = currentOrderStatusRange) {
-        const ctx = document.getElementById('orderStatusChart');
-        if (!ctx) return;
-
-        // Use dashboard data for status distribution
-        const statusDistribution = data.orderStats?.statusDistribution || [];
-        const statusCounts = {};
-        
-        // Build status counts from dashboard data
-        statusDistribution.forEach(item => {
-            statusCounts[item._id] = item.count;
-        });
-
-        // Convert to array format for chart
-        const statusArray = Object.entries(statusCounts)
-            .filter(([status, count]) => count > 0) // Only show statuses with orders
-            .map(([status, count]) => ({ status, count }));
-
-        const labels = statusArray.map(item => {
-            const statusLabels = {
-                'pending': t('administrator.dashboard.orderStatus.pending', 'Pending'),
-                'scheduled': t('administrator.dashboard.orderStatus.scheduled', 'Scheduled'),
-                'processing': t('administrator.dashboard.orderStatus.processing', 'Processing'),
-                'processed': t('administrator.dashboard.orderStatus.processed', 'Processed'),
-                'complete': t('administrator.dashboard.orderStatus.complete', 'Complete'),
-                'cancelled': t('administrator.dashboard.orderStatus.cancelled', 'Cancelled')
-            };
-            return statusLabels[item.status] || item.status;
-        });
-        const counts = statusArray.map(item => item.count);
-
-        const colors = {
-            'pending': '#ffc107',
-            'scheduled': '#17a2b8',
-            'processing': '#007bff',
-            'processed': '#28a745',
-            'complete': '#20c997',
-            'cancelled': '#dc3545'
-        };
-
-        const backgroundColors = statusArray.map(item => colors[item.status] || '#6c757d');
-
-        chartInstances.orderStatus = new Chart(ctx, {
-            type: 'doughnut',
-            data: {
-                labels: labels,
-                datasets: [{
-                    data: counts,
-                    backgroundColor: backgroundColors,
-                    borderWidth: 2,
-                    borderColor: '#fff'
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        position: 'right',
-                        labels: {
-                            padding: 15,
-                            usePointStyle: true
-                        }
-                    },
-                    title: {
-                        display: false
-                    }
-                }
-            }
-        });
-    }
-
-    // Render daily orders trend chart
-    function renderDailyOrdersChart(data) {
-        const ctx = document.getElementById('dailyOrdersChart');
-        if (!ctx) return;
-
-        const timeline = data.analytics?.timeline || [];
-        const labels = timeline.map(item => {
-            const date = new Date(item._id);
-            return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-        });
-        const totalOrders = timeline.map(item => item.totalOrders || 0);
-        const completedOrders = timeline.map(item => item.completedOrders || 0);
-
-        chartInstances.dailyOrders = new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: labels,
-                datasets: [
-                    {
-                        label: t('administrator.dashboard.analytics.totalOrders', 'Total Orders'),
-                        data: totalOrders,
-                        backgroundColor: 'rgba(74, 144, 226, 0.6)',
-                        borderColor: '#4A90E2',
-                        borderWidth: 1
-                    },
-                    {
-                        label: t('administrator.dashboard.analytics.completedOrders', 'Completed Orders'),
-                        data: completedOrders,
-                        backgroundColor: 'rgba(40, 167, 69, 0.6)',
-                        borderColor: '#28a745',
-                        borderWidth: 1
-                    }
-                ]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        display: true,
-                        position: 'top'
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        ticks: {
-                            stepSize: 1
-                        }
-                    }
-                }
-            }
-        });
-    }
-
-    // Load affiliates
-    async function loadAffiliates() {
-        try {
-            const response = await adminFetch('/api/v1/administrators/analytics/affiliates?period=month');
-            const data = await response.json();
-
-            if (response.ok) {
-                renderAffiliatesList(data.topAffiliates);
-            }
-        } catch (error) {
-            console.error('Error loading affiliates:', error);
+          },
+          title: {
+            display: false
+          }
         }
+      }
+    });
+  }
+
+  // Render daily orders trend chart
+  function renderDailyOrdersChart(data) {
+    const ctx = document.getElementById('dailyOrdersChart');
+    if (!ctx) return;
+
+    const timeline = data.analytics?.timeline || [];
+    const labels = timeline.map(item => {
+      const date = new Date(item._id);
+      return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    });
+    const totalOrders = timeline.map(item => item.totalOrders || 0);
+    const completedOrders = timeline.map(item => item.completedOrders || 0);
+
+    chartInstances.dailyOrders = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: labels,
+        datasets: [
+          {
+            label: t('administrator.dashboard.analytics.totalOrders', 'Total Orders'),
+            data: totalOrders,
+            backgroundColor: 'rgba(74, 144, 226, 0.6)',
+            borderColor: '#4A90E2',
+            borderWidth: 1
+          },
+          {
+            label: t('administrator.dashboard.analytics.completedOrders', 'Completed Orders'),
+            data: completedOrders,
+            backgroundColor: 'rgba(40, 167, 69, 0.6)',
+            borderColor: '#28a745',
+            borderWidth: 1
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            display: true,
+            position: 'top'
+          }
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            ticks: {
+              stepSize: 1
+            }
+          }
+        }
+      }
+    });
+  }
+
+  // Load affiliates
+  async function loadAffiliates() {
+    try {
+      const response = await adminFetch('/api/v1/administrators/analytics/affiliates?period=month');
+      const data = await response.json();
+
+      if (response.ok) {
+        renderAffiliatesList(data.topAffiliates);
+      }
+    } catch (error) {
+      console.error('Error loading affiliates:', error);
+    }
+  }
+
+  // Render affiliates list
+  function renderAffiliatesList(affiliates) {
+    if (!affiliates || affiliates.length === 0) {
+      const noDataText = window.i18n ? window.i18n.t('administrator.dashboard.affiliates.noData') : 'No affiliate data available';
+      document.getElementById('affiliatesList').innerHTML = `<p style="padding: 20px; text-align: center; color: #666;">${noDataText}</p>`;
+      return;
     }
 
-    // Render affiliates list
-    function renderAffiliatesList(affiliates) {
-        if (!affiliates || affiliates.length === 0) {
-            const noDataText = window.i18n ? window.i18n.t('administrator.dashboard.affiliates.noData') : 'No affiliate data available';
-            document.getElementById('affiliatesList').innerHTML = `<p style="padding: 20px; text-align: center; color: #666;">${noDataText}</p>`;
-            return;
-        }
-
-        const t = window.i18n ? window.i18n.t.bind(window.i18n) : (key) => key;
-        const tableHtml = `
+    const t = window.i18n ? window.i18n.t.bind(window.i18n) : (key) => key;
+    const tableHtml = `
             <table>
                 <thead>
                     <tr>
@@ -799,76 +799,76 @@
                 </tbody>
             </table>
         `;
-        document.getElementById('affiliatesList').innerHTML = tableHtml;
-    }
+    document.getElementById('affiliatesList').innerHTML = tableHtml;
+  }
 
-    // Store current W-9 filter state
-    let currentW9Filter = 'pending';
-    let currentW9Search = '';
-    let w9Documents = [];
+  // Store current W-9 filter state
+  let currentW9Filter = 'pending';
+  let currentW9Search = '';
+  let w9Documents = [];
 
-    // Load W-9 documents
-    async function loadW9Documents() {
-        try {
-            const response = await adminFetch('/api/v1/w9/admin/pending?status=' + currentW9Filter);
-            const data = await response.json();
+  // Load W-9 documents
+  async function loadW9Documents() {
+    try {
+      const response = await adminFetch('/api/v1/w9/admin/pending?status=' + currentW9Filter);
+      const data = await response.json();
 
-            if (response.ok) {
-                w9Documents = data.documents || [];
-                updateW9Count();
-                renderW9DocumentsList();
-            } else {
-                document.getElementById('w9DocumentsList').innerHTML = `
+      if (response.ok) {
+        w9Documents = data.documents || [];
+        updateW9Count();
+        renderW9DocumentsList();
+      } else {
+        document.getElementById('w9DocumentsList').innerHTML = `
                     <p style="padding: 20px; text-align: center; color: #666;">${t('administrator.dashboard.errors.w9LoadFailed', 'Failed to load W-9 documents')}</p>
                 `;
-            }
-        } catch (error) {
-            console.error('Error loading W-9 documents:', error);
-            document.getElementById('w9DocumentsList').innerHTML = `
+      }
+    } catch (error) {
+      console.error('Error loading W-9 documents:', error);
+      document.getElementById('w9DocumentsList').innerHTML = `
                 <p style="padding: 20px; text-align: center; color: #666;">${t('administrator.dashboard.errors.w9LoadFailed', 'Error loading W-9 documents')}</p>
             `;
-        }
     }
+  }
 
-    // Update W-9 pending count
-    function updateW9Count() {
-        const pendingCount = w9Documents.filter(doc => doc.w9Status === 'pending_review').length;
-        const badge = document.getElementById('pendingW9Count');
-        if (badge) {
-            badge.textContent = `${pendingCount} ${t('administrator.dashboard.w9review.pending', 'Pending')}`;
-            badge.style.display = pendingCount > 0 ? 'inline-block' : 'none';
-        }
+  // Update W-9 pending count
+  function updateW9Count() {
+    const pendingCount = w9Documents.filter(doc => doc.w9Status === 'pending_review').length;
+    const badge = document.getElementById('pendingW9Count');
+    if (badge) {
+      badge.textContent = `${pendingCount} ${t('administrator.dashboard.w9review.pending', 'Pending')}`;
+      badge.style.display = pendingCount > 0 ? 'inline-block' : 'none';
     }
+  }
 
-    // Render W-9 documents list
-    function renderW9DocumentsList() {
-        const filteredDocs = w9Documents.filter(doc => {
-            // Apply status filter
-            if (currentW9Filter !== 'all' && doc.w9Status !== currentW9Filter) {
-                return false;
-            }
-            
-            // Apply search filter
-            if (currentW9Search) {
-                const search = currentW9Search.toLowerCase();
-                return (
-                    doc.affiliateName.toLowerCase().includes(search) ||
+  // Render W-9 documents list
+  function renderW9DocumentsList() {
+    const filteredDocs = w9Documents.filter(doc => {
+      // Apply status filter
+      if (currentW9Filter !== 'all' && doc.w9Status !== currentW9Filter) {
+        return false;
+      }
+
+      // Apply search filter
+      if (currentW9Search) {
+        const search = currentW9Search.toLowerCase();
+        return (
+          doc.affiliateName.toLowerCase().includes(search) ||
                     doc.affiliateEmail.toLowerCase().includes(search) ||
                     doc.affiliateId.toLowerCase().includes(search)
-                );
-            }
-            
-            return true;
-        });
+        );
+      }
 
-        if (filteredDocs.length === 0) {
-            document.getElementById('w9DocumentsList').innerHTML = `
+      return true;
+    });
+
+    if (filteredDocs.length === 0) {
+      document.getElementById('w9DocumentsList').innerHTML = `
                 <p style="padding: 20px; text-align: center; color: #666;">${t('administrator.dashboard.w9review.noDocuments', 'No W-9 documents found')}</p>
             `;
-            return;
-        }
+      return;
+    }
 
-        const docsHtml = filteredDocs.map(doc => `
+    const docsHtml = filteredDocs.map(doc => `
             <div class="w9-row">
                 <div class="w9-info">
                     <div class="w9-affiliate-name">${doc.affiliateName}</div>
@@ -892,220 +892,220 @@
             </div>
         `).join('');
 
-        document.getElementById('w9DocumentsList').innerHTML = docsHtml;
-    }
+    document.getElementById('w9DocumentsList').innerHTML = docsHtml;
+  }
 
-    // Get W-9 status label
-    function getW9StatusLabel(status) {
-        const labels = {
-            'pending_review': t('administrator.dashboard.w9review.pendingReview', 'Pending Review'),
-            'verified': t('administrator.dashboard.w9review.verified', 'Verified'),
-            'rejected': t('administrator.dashboard.w9review.rejected', 'Rejected')
-        };
-        return labels[status] || status;
-    }
+  // Get W-9 status label
+  function getW9StatusLabel(status) {
+    const labels = {
+      'pending_review': t('administrator.dashboard.w9review.pendingReview', 'Pending Review'),
+      'verified': t('administrator.dashboard.w9review.verified', 'Verified'),
+      'rejected': t('administrator.dashboard.w9review.rejected', 'Rejected')
+    };
+    return labels[status] || status;
+  }
 
-    // Download W-9 document
-    window.downloadW9 = async function(affiliateId) {
-        try {
-            const response = await adminFetch(`/api/v1/w9/admin/${affiliateId}/download`);
-            
-            if (response.ok) {
-                // Get filename from Content-Disposition header
-                const contentDisposition = response.headers.get('Content-Disposition');
-                let filename = `W9_${affiliateId}.pdf`;
-                if (contentDisposition) {
-                    const match = contentDisposition.match(/filename="(.+)"/);
-                    if (match) filename = match[1];
-                }
-                
-                // Create blob and download
-                const blob = await response.blob();
-                const url = window.URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = filename;
-                document.body.appendChild(a);
-                a.click();
-                window.URL.revokeObjectURL(url);
-                document.body.removeChild(a);
-            } else {
-                const error = await response.json();
-                alert(error.message || t('administrator.dashboard.w9review.downloadFailed', 'Failed to download W-9 document'));
-            }
-        } catch (error) {
-            console.error('Error downloading W-9:', error);
-            alert(t('administrator.dashboard.errors.networkError', 'Network error. Please try again.'));
+  // Download W-9 document
+  window.downloadW9 = async function(affiliateId) {
+    try {
+      const response = await adminFetch(`/api/v1/w9/admin/${affiliateId}/download`);
+
+      if (response.ok) {
+        // Get filename from Content-Disposition header
+        const contentDisposition = response.headers.get('Content-Disposition');
+        let filename = `W9_${affiliateId}.pdf`;
+        if (contentDisposition) {
+          const match = contentDisposition.match(/filename="(.+)"/);
+          if (match) filename = match[1];
         }
+
+        // Create blob and download
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+      } else {
+        const error = await response.json();
+        alert(error.message || t('administrator.dashboard.w9review.downloadFailed', 'Failed to download W-9 document'));
+      }
+    } catch (error) {
+      console.error('Error downloading W-9:', error);
+      alert(t('administrator.dashboard.errors.networkError', 'Network error. Please try again.'));
+    }
+  };
+
+  // Open W-9 verification modal
+  window.openW9VerificationModal = function(affiliateId) {
+    const doc = w9Documents.find(d => d.affiliateId === affiliateId);
+    if (!doc) return;
+
+    // Populate modal fields
+    document.getElementById('verifyAffiliateId').value = affiliateId;
+    document.getElementById('verifyAffiliateName').textContent = doc.affiliateName;
+    document.getElementById('verifyAffiliateEmail').textContent = doc.affiliateEmail;
+    document.getElementById('verifyAffiliateIdDisplay').textContent = affiliateId;
+
+    // Reset form
+    document.getElementById('w9VerificationForm').reset();
+    document.getElementById('verifyAffiliateId').value = affiliateId;
+
+    // Show modal
+    document.getElementById('w9VerificationModal').style.display = 'flex';
+  };
+
+  // Close W-9 verification modal
+  window.closeW9VerificationModal = function() {
+    document.getElementById('w9VerificationModal').style.display = 'none';
+  };
+
+  // Open W-9 rejection modal
+  window.openW9RejectionModal = function(affiliateId) {
+    document.getElementById('rejectAffiliateId').value = affiliateId;
+    document.getElementById('w9RejectionForm').reset();
+    document.getElementById('rejectAffiliateId').value = affiliateId;
+    document.getElementById('w9RejectionModal').style.display = 'flex';
+  };
+
+  // Close W-9 rejection modal
+  window.closeW9RejectionModal = function() {
+    document.getElementById('w9RejectionModal').style.display = 'none';
+  };
+
+  // Handle W-9 verification form submission
+  document.getElementById('w9VerificationForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const affiliateId = document.getElementById('verifyAffiliateId').value;
+    const verificationData = {
+      taxIdType: document.getElementById('taxIdType').value,
+      taxIdLast4: document.getElementById('taxIdLast4').value,
+      businessName: document.getElementById('businessName').value,
+      quickbooksVendorId: document.getElementById('quickbooksVendorId').value,
+      notes: document.getElementById('verificationNotes').value
     };
 
-    // Open W-9 verification modal
-    window.openW9VerificationModal = function(affiliateId) {
-        const doc = w9Documents.find(d => d.affiliateId === affiliateId);
-        if (!doc) return;
-        
-        // Populate modal fields
-        document.getElementById('verifyAffiliateId').value = affiliateId;
-        document.getElementById('verifyAffiliateName').textContent = doc.affiliateName;
-        document.getElementById('verifyAffiliateEmail').textContent = doc.affiliateEmail;
-        document.getElementById('verifyAffiliateIdDisplay').textContent = affiliateId;
-        
-        // Reset form
-        document.getElementById('w9VerificationForm').reset();
-        document.getElementById('verifyAffiliateId').value = affiliateId;
-        
-        // Show modal
-        document.getElementById('w9VerificationModal').style.display = 'flex';
+    try {
+      const response = await adminFetch(`/api/v1/w9/admin/${affiliateId}/verify`, {
+        method: 'POST',
+        body: JSON.stringify(verificationData)
+      });
+
+      if (response.ok) {
+        alert(t('administrator.dashboard.w9review.verifySuccess', 'W-9 document verified successfully'));
+        closeW9VerificationModal();
+        loadW9Documents(); // Reload the list
+      } else {
+        const error = await response.json();
+        alert(error.message || t('administrator.dashboard.w9review.verifyFailed', 'Failed to verify W-9 document'));
+      }
+    } catch (error) {
+      console.error('Error verifying W-9:', error);
+      alert(t('administrator.dashboard.errors.networkError', 'Network error. Please try again.'));
+    }
+  });
+
+  // Handle W-9 rejection form submission
+  document.getElementById('w9RejectionForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const affiliateId = document.getElementById('rejectAffiliateId').value;
+    const rejectionData = {
+      reason: document.getElementById('rejectionReason').value
     };
 
-    // Close W-9 verification modal
-    window.closeW9VerificationModal = function() {
-        document.getElementById('w9VerificationModal').style.display = 'none';
-    };
+    try {
+      const response = await adminFetch(`/api/v1/w9/admin/${affiliateId}/reject`, {
+        method: 'POST',
+        body: JSON.stringify(rejectionData)
+      });
 
-    // Open W-9 rejection modal
-    window.openW9RejectionModal = function(affiliateId) {
-        document.getElementById('rejectAffiliateId').value = affiliateId;
-        document.getElementById('w9RejectionForm').reset();
-        document.getElementById('rejectAffiliateId').value = affiliateId;
-        document.getElementById('w9RejectionModal').style.display = 'flex';
-    };
+      if (response.ok) {
+        alert(t('administrator.dashboard.w9review.rejectSuccess', 'W-9 document rejected successfully'));
+        closeW9RejectionModal();
+        loadW9Documents(); // Reload the list
+      } else {
+        const error = await response.json();
+        alert(error.message || t('administrator.dashboard.w9review.rejectFailed', 'Failed to reject W-9 document'));
+      }
+    } catch (error) {
+      console.error('Error rejecting W-9:', error);
+      alert(t('administrator.dashboard.errors.networkError', 'Network error. Please try again.'));
+    }
+  });
 
-    // Close W-9 rejection modal
-    window.closeW9RejectionModal = function() {
-        document.getElementById('w9RejectionModal').style.display = 'none';
-    };
+  // W-9 filter and search handlers
+  const w9StatusFilter = document.getElementById('w9StatusFilter');
+  const w9SearchInput = document.getElementById('w9SearchInput');
+  const refreshW9ListBtn = document.getElementById('refreshW9ListBtn');
 
-    // Handle W-9 verification form submission
-    document.getElementById('w9VerificationForm').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        
-        const affiliateId = document.getElementById('verifyAffiliateId').value;
-        const verificationData = {
-            taxIdType: document.getElementById('taxIdType').value,
-            taxIdLast4: document.getElementById('taxIdLast4').value,
-            businessName: document.getElementById('businessName').value,
-            quickbooksVendorId: document.getElementById('quickbooksVendorId').value,
-            notes: document.getElementById('verificationNotes').value
-        };
-
-        try {
-            const response = await adminFetch(`/api/v1/w9/admin/${affiliateId}/verify`, {
-                method: 'POST',
-                body: JSON.stringify(verificationData)
-            });
-
-            if (response.ok) {
-                alert(t('administrator.dashboard.w9review.verifySuccess', 'W-9 document verified successfully'));
-                closeW9VerificationModal();
-                loadW9Documents(); // Reload the list
-            } else {
-                const error = await response.json();
-                alert(error.message || t('administrator.dashboard.w9review.verifyFailed', 'Failed to verify W-9 document'));
-            }
-        } catch (error) {
-            console.error('Error verifying W-9:', error);
-            alert(t('administrator.dashboard.errors.networkError', 'Network error. Please try again.'));
-        }
+  if (w9StatusFilter) {
+    w9StatusFilter.addEventListener('change', (e) => {
+      currentW9Filter = e.target.value;
+      loadW9Documents();
     });
+  }
 
-    // Handle W-9 rejection form submission
-    document.getElementById('w9RejectionForm').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        
-        const affiliateId = document.getElementById('rejectAffiliateId').value;
-        const rejectionData = {
-            reason: document.getElementById('rejectionReason').value
-        };
-
-        try {
-            const response = await adminFetch(`/api/v1/w9/admin/${affiliateId}/reject`, {
-                method: 'POST',
-                body: JSON.stringify(rejectionData)
-            });
-
-            if (response.ok) {
-                alert(t('administrator.dashboard.w9review.rejectSuccess', 'W-9 document rejected successfully'));
-                closeW9RejectionModal();
-                loadW9Documents(); // Reload the list
-            } else {
-                const error = await response.json();
-                alert(error.message || t('administrator.dashboard.w9review.rejectFailed', 'Failed to reject W-9 document'));
-            }
-        } catch (error) {
-            console.error('Error rejecting W-9:', error);
-            alert(t('administrator.dashboard.errors.networkError', 'Network error. Please try again.'));
-        }
+  if (w9SearchInput) {
+    w9SearchInput.addEventListener('input', (e) => {
+      currentW9Search = e.target.value;
+      renderW9DocumentsList();
     });
+  }
 
-    // W-9 filter and search handlers
-    const w9StatusFilter = document.getElementById('w9StatusFilter');
-    const w9SearchInput = document.getElementById('w9SearchInput');
-    const refreshW9ListBtn = document.getElementById('refreshW9ListBtn');
+  if (refreshW9ListBtn) {
+    refreshW9ListBtn.addEventListener('click', () => {
+      loadW9Documents();
+    });
+  }
 
-    if (w9StatusFilter) {
-        w9StatusFilter.addEventListener('change', (e) => {
-            currentW9Filter = e.target.value;
-            loadW9Documents();
-        });
-    }
+  // QuickBooks Export functionality
+  let exportHistory = [];
+  let searchTimeout = null;
+  let affiliateSearchResults = [];
 
-    if (w9SearchInput) {
-        w9SearchInput.addEventListener('input', (e) => {
-            currentW9Search = e.target.value;
-            renderW9DocumentsList();
-        });
-    }
+  // Load QuickBooks tab
+  async function loadQuickBooksTab() {
+    await loadExportHistory();
+    setupQuickBooksEventHandlers();
+  }
 
-    if (refreshW9ListBtn) {
-        refreshW9ListBtn.addEventListener('click', () => {
-            loadW9Documents();
-        });
-    }
+  // Load export history
+  async function loadExportHistory() {
+    try {
+      const response = await adminFetch('/api/v1/quickbooks/history?limit=20');
+      const data = await response.json();
 
-    // QuickBooks Export functionality
-    let exportHistory = [];
-    let searchTimeout = null;
-    let affiliateSearchResults = [];
-
-    // Load QuickBooks tab
-    async function loadQuickBooksTab() {
-        await loadExportHistory();
-        setupQuickBooksEventHandlers();
-    }
-
-    // Load export history
-    async function loadExportHistory() {
-        try {
-            const response = await adminFetch('/api/v1/quickbooks/history?limit=20');
-            const data = await response.json();
-
-            if (response.ok) {
-                exportHistory = data.exports || [];
-                renderExportHistory();
-            } else {
-                document.getElementById('exportHistoryList').innerHTML = `
+      if (response.ok) {
+        exportHistory = data.exports || [];
+        renderExportHistory();
+      } else {
+        document.getElementById('exportHistoryList').innerHTML = `
                     <p style="padding: 20px; text-align: center; color: #666;">${t('administrator.dashboard.errors.exportHistoryLoadFailed', 'Failed to load export history')}</p>
                 `;
-            }
-        } catch (error) {
-            console.error('Error loading export history:', error);
-            document.getElementById('exportHistoryList').innerHTML = `
+      }
+    } catch (error) {
+      console.error('Error loading export history:', error);
+      document.getElementById('exportHistoryList').innerHTML = `
                 <p style="padding: 20px; text-align: center; color: #666;">${t('administrator.dashboard.errors.exportHistoryLoadFailed', 'Error loading export history')}</p>
             `;
-        }
     }
+  }
 
-    // Render export history
-    function renderExportHistory() {
-        if (exportHistory.length === 0) {
-            document.getElementById('exportHistoryList').innerHTML = `
+  // Render export history
+  function renderExportHistory() {
+    if (exportHistory.length === 0) {
+      document.getElementById('exportHistoryList').innerHTML = `
                 <p style="padding: 20px; text-align: center; color: #666;">${t('administrator.dashboard.quickbooks.noExports', 'No exports found')}</p>
             `;
-            return;
-        }
+      return;
+    }
 
-        const historyHtml = `
+    const historyHtml = `
             <table>
                 <thead>
                     <tr>
@@ -1118,24 +1118,24 @@
                 </thead>
                 <tbody>
                     ${exportHistory.map(exp => {
-                        const typeLabels = {
-                            'vendor': t('administrator.dashboard.quickbooks.vendorExport', 'Vendor Export'),
-                            'payment_summary': t('administrator.dashboard.quickbooks.paymentSummary', 'Payment Summary'),
-                            'commission_detail': t('administrator.dashboard.quickbooks.commissionDetail', 'Commission Detail')
-                        };
-                        
-                        let details = '';
-                        if (exp.type === 'vendor') {
-                            details = `${exp.affiliateIds.length} vendors`;
-                        } else if (exp.type === 'payment_summary') {
-                            const start = new Date(exp.periodStart).toLocaleDateString();
-                            const end = new Date(exp.periodEnd).toLocaleDateString();
-                            details = `${start} - ${end}`;
-                        } else if (exp.type === 'commission_detail') {
-                            details = `Affiliate: ${exp.affiliateIds[0]}`;
-                        }
-                        
-                        return `
+    const typeLabels = {
+      'vendor': t('administrator.dashboard.quickbooks.vendorExport', 'Vendor Export'),
+      'payment_summary': t('administrator.dashboard.quickbooks.paymentSummary', 'Payment Summary'),
+      'commission_detail': t('administrator.dashboard.quickbooks.commissionDetail', 'Commission Detail')
+    };
+
+    let details = '';
+    if (exp.type === 'vendor') {
+      details = `${exp.affiliateIds.length} vendors`;
+    } else if (exp.type === 'payment_summary') {
+      const start = new Date(exp.periodStart).toLocaleDateString();
+      const end = new Date(exp.periodEnd).toLocaleDateString();
+      details = `${start} - ${end}`;
+    } else if (exp.type === 'commission_detail') {
+      details = `Affiliate: ${exp.affiliateIds[0]}`;
+    }
+
+    return `
                             <tr>
                                 <td>${exp.exportId}</td>
                                 <td>${typeLabels[exp.type] || exp.type}</td>
@@ -1144,223 +1144,223 @@
                                 <td>${details}</td>
                             </tr>
                         `;
-                    }).join('')}
+  }).join('')}
                 </tbody>
             </table>
         `;
-        
-        document.getElementById('exportHistoryList').innerHTML = historyHtml;
+
+    document.getElementById('exportHistoryList').innerHTML = historyHtml;
+  }
+
+  // Setup QuickBooks event handlers
+  function setupQuickBooksEventHandlers() {
+    // Export vendors button
+    const exportVendorsBtn = document.getElementById('exportVendorsBtn');
+    if (exportVendorsBtn && !exportVendorsBtn.hasAttribute('data-initialized')) {
+      exportVendorsBtn.setAttribute('data-initialized', 'true');
+      exportVendorsBtn.addEventListener('click', exportVendors);
     }
 
-    // Setup QuickBooks event handlers
-    function setupQuickBooksEventHandlers() {
-        // Export vendors button
-        const exportVendorsBtn = document.getElementById('exportVendorsBtn');
-        if (exportVendorsBtn && !exportVendorsBtn.hasAttribute('data-initialized')) {
-            exportVendorsBtn.setAttribute('data-initialized', 'true');
-            exportVendorsBtn.addEventListener('click', exportVendors);
-        }
-
-        // Payment summary button
-        const openPaymentSummaryBtn = document.getElementById('openPaymentSummaryBtn');
-        if (openPaymentSummaryBtn && !openPaymentSummaryBtn.hasAttribute('data-initialized')) {
-            openPaymentSummaryBtn.setAttribute('data-initialized', 'true');
-            openPaymentSummaryBtn.addEventListener('click', () => {
-                document.getElementById('paymentSummaryModal').style.display = 'flex';
-            });
-        }
-
-        // Commission detail button
-        const openCommissionDetailBtn = document.getElementById('openCommissionDetailBtn');
-        if (openCommissionDetailBtn && !openCommissionDetailBtn.hasAttribute('data-initialized')) {
-            openCommissionDetailBtn.setAttribute('data-initialized', 'true');
-            openCommissionDetailBtn.addEventListener('click', () => {
-                document.getElementById('commissionDetailModal').style.display = 'flex';
-            });
-        }
-
-        // Refresh export history button
-        const refreshExportHistoryBtn = document.getElementById('refreshExportHistoryBtn');
-        if (refreshExportHistoryBtn && !refreshExportHistoryBtn.hasAttribute('data-initialized')) {
-            refreshExportHistoryBtn.setAttribute('data-initialized', 'true');
-            refreshExportHistoryBtn.addEventListener('click', loadExportHistory);
-        }
-
-        // Payment summary form
-        const paymentSummaryForm = document.getElementById('paymentSummaryForm');
-        if (paymentSummaryForm && !paymentSummaryForm.hasAttribute('data-initialized')) {
-            paymentSummaryForm.setAttribute('data-initialized', 'true');
-            paymentSummaryForm.addEventListener('submit', handlePaymentSummaryExport);
-        }
-
-        // Commission detail form
-        const commissionDetailForm = document.getElementById('commissionDetailForm');
-        if (commissionDetailForm && !commissionDetailForm.hasAttribute('data-initialized')) {
-            commissionDetailForm.setAttribute('data-initialized', 'true');
-            commissionDetailForm.addEventListener('submit', handleCommissionDetailExport);
-        }
-
-        // Affiliate search
-        const detailAffiliateSearch = document.getElementById('detailAffiliateSearch');
-        if (detailAffiliateSearch && !detailAffiliateSearch.hasAttribute('data-initialized')) {
-            detailAffiliateSearch.setAttribute('data-initialized', 'true');
-            detailAffiliateSearch.addEventListener('input', handleAffiliateSearch);
-        }
+    // Payment summary button
+    const openPaymentSummaryBtn = document.getElementById('openPaymentSummaryBtn');
+    if (openPaymentSummaryBtn && !openPaymentSummaryBtn.hasAttribute('data-initialized')) {
+      openPaymentSummaryBtn.setAttribute('data-initialized', 'true');
+      openPaymentSummaryBtn.addEventListener('click', () => {
+        document.getElementById('paymentSummaryModal').style.display = 'flex';
+      });
     }
 
-    // Export vendors
-    async function exportVendors() {
-        try {
-            const response = await adminFetch('/api/v1/quickbooks/vendors?format=csv');
-            
-            if (response.ok) {
-                // Download CSV file
-                const blob = await response.blob();
-                const url = window.URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `wavemax-vendors-${new Date().toISOString().split('T')[0]}.csv`;
-                document.body.appendChild(a);
-                a.click();
-                window.URL.revokeObjectURL(url);
-                document.body.removeChild(a);
-                
-                // Reload export history
-                await loadExportHistory();
-            } else {
-                const error = await response.json();
-                alert(error.message || t('administrator.dashboard.quickbooks.exportFailed', 'Export failed'));
-            }
-        } catch (error) {
-            console.error('Error exporting vendors:', error);
-            alert(t('administrator.dashboard.errors.networkError', 'Network error. Please try again.'));
-        }
+    // Commission detail button
+    const openCommissionDetailBtn = document.getElementById('openCommissionDetailBtn');
+    if (openCommissionDetailBtn && !openCommissionDetailBtn.hasAttribute('data-initialized')) {
+      openCommissionDetailBtn.setAttribute('data-initialized', 'true');
+      openCommissionDetailBtn.addEventListener('click', () => {
+        document.getElementById('commissionDetailModal').style.display = 'flex';
+      });
     }
 
-    // Handle payment summary export
-    async function handlePaymentSummaryExport(e) {
-        e.preventDefault();
-        
-        const startDate = document.getElementById('summaryStartDate').value;
-        const endDate = document.getElementById('summaryEndDate').value;
-        const format = document.getElementById('summaryFormat').value;
-
-        try {
-            const response = await adminFetch(`/api/v1/quickbooks/payment-summary?startDate=${startDate}&endDate=${endDate}&format=${format}`);
-            
-            if (response.ok) {
-                if (format === 'csv') {
-                    // Download CSV file
-                    const blob = await response.blob();
-                    const url = window.URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = `wavemax-payments-${startDate}-to-${endDate}.csv`;
-                    document.body.appendChild(a);
-                    a.click();
-                    window.URL.revokeObjectURL(url);
-                    document.body.removeChild(a);
-                } else {
-                    // Show JSON response
-                    const data = await response.json();
-                    alert(t('administrator.dashboard.quickbooks.exportSuccess', 'Export successful! Check export history for details.'));
-                }
-                
-                closePaymentSummaryModal();
-                await loadExportHistory();
-            } else {
-                const error = await response.json();
-                alert(error.message || t('administrator.dashboard.quickbooks.exportFailed', 'Export failed'));
-            }
-        } catch (error) {
-            console.error('Error exporting payment summary:', error);
-            alert(t('administrator.dashboard.errors.networkError', 'Network error. Please try again.'));
-        }
+    // Refresh export history button
+    const refreshExportHistoryBtn = document.getElementById('refreshExportHistoryBtn');
+    if (refreshExportHistoryBtn && !refreshExportHistoryBtn.hasAttribute('data-initialized')) {
+      refreshExportHistoryBtn.setAttribute('data-initialized', 'true');
+      refreshExportHistoryBtn.addEventListener('click', loadExportHistory);
     }
 
-    // Handle commission detail export
-    async function handleCommissionDetailExport(e) {
-        e.preventDefault();
-        
-        const affiliateId = document.getElementById('detailAffiliateId').value;
-        const startDate = document.getElementById('detailStartDate').value;
-        const endDate = document.getElementById('detailEndDate').value;
-        const format = document.getElementById('detailFormat').value;
-
-        if (!affiliateId) {
-            alert(t('administrator.dashboard.quickbooks.selectAffiliateError', 'Please select an affiliate'));
-            return;
-        }
-
-        try {
-            const response = await adminFetch(`/api/v1/quickbooks/commission-detail?affiliateId=${affiliateId}&startDate=${startDate}&endDate=${endDate}&format=${format}`);
-            
-            if (response.ok) {
-                if (format === 'csv') {
-                    // Download CSV file
-                    const blob = await response.blob();
-                    const url = window.URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = `wavemax-commission-${affiliateId}-${startDate}-to-${endDate}.csv`;
-                    document.body.appendChild(a);
-                    a.click();
-                    window.URL.revokeObjectURL(url);
-                    document.body.removeChild(a);
-                } else {
-                    // Show JSON response
-                    const data = await response.json();
-                    alert(t('administrator.dashboard.quickbooks.exportSuccess', 'Export successful! Check export history for details.'));
-                }
-                
-                closeCommissionDetailModal();
-                await loadExportHistory();
-            } else {
-                const error = await response.json();
-                alert(error.message || t('administrator.dashboard.quickbooks.exportFailed', 'Export failed'));
-            }
-        } catch (error) {
-            console.error('Error exporting commission detail:', error);
-            alert(t('administrator.dashboard.errors.networkError', 'Network error. Please try again.'));
-        }
+    // Payment summary form
+    const paymentSummaryForm = document.getElementById('paymentSummaryForm');
+    if (paymentSummaryForm && !paymentSummaryForm.hasAttribute('data-initialized')) {
+      paymentSummaryForm.setAttribute('data-initialized', 'true');
+      paymentSummaryForm.addEventListener('submit', handlePaymentSummaryExport);
     }
 
-    // Handle affiliate search
-    async function handleAffiliateSearch(e) {
-        const searchTerm = e.target.value.trim();
-        
-        if (searchTerm.length < 2) {
-            document.getElementById('affiliateSearchResults').style.display = 'none';
-            return;
-        }
-
-        // Clear previous timeout
-        if (searchTimeout) clearTimeout(searchTimeout);
-
-        // Debounce search
-        searchTimeout = setTimeout(async () => {
-            try {
-                const response = await adminFetch(`/api/v1/affiliates?search=${encodeURIComponent(searchTerm)}&status=active&limit=10`);
-                const data = await response.json();
-
-                if (response.ok && data.affiliates) {
-                    affiliateSearchResults = data.affiliates;
-                    renderAffiliateSearchResults();
-                }
-            } catch (error) {
-                console.error('Error searching affiliates:', error);
-            }
-        }, 300);
+    // Commission detail form
+    const commissionDetailForm = document.getElementById('commissionDetailForm');
+    if (commissionDetailForm && !commissionDetailForm.hasAttribute('data-initialized')) {
+      commissionDetailForm.setAttribute('data-initialized', 'true');
+      commissionDetailForm.addEventListener('submit', handleCommissionDetailExport);
     }
 
-    // Render affiliate search results
-    function renderAffiliateSearchResults() {
-        const resultsDiv = document.getElementById('affiliateSearchResults');
-        
-        if (affiliateSearchResults.length === 0) {
-            resultsDiv.innerHTML = `<div style="padding: 10px; color: #666;">${t('administrator.dashboard.quickbooks.noAffiliatesFound', 'No affiliates found')}</div>`;
+    // Affiliate search
+    const detailAffiliateSearch = document.getElementById('detailAffiliateSearch');
+    if (detailAffiliateSearch && !detailAffiliateSearch.hasAttribute('data-initialized')) {
+      detailAffiliateSearch.setAttribute('data-initialized', 'true');
+      detailAffiliateSearch.addEventListener('input', handleAffiliateSearch);
+    }
+  }
+
+  // Export vendors
+  async function exportVendors() {
+    try {
+      const response = await adminFetch('/api/v1/quickbooks/vendors?format=csv');
+
+      if (response.ok) {
+        // Download CSV file
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `wavemax-vendors-${new Date().toISOString().split('T')[0]}.csv`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+
+        // Reload export history
+        await loadExportHistory();
+      } else {
+        const error = await response.json();
+        alert(error.message || t('administrator.dashboard.quickbooks.exportFailed', 'Export failed'));
+      }
+    } catch (error) {
+      console.error('Error exporting vendors:', error);
+      alert(t('administrator.dashboard.errors.networkError', 'Network error. Please try again.'));
+    }
+  }
+
+  // Handle payment summary export
+  async function handlePaymentSummaryExport(e) {
+    e.preventDefault();
+
+    const startDate = document.getElementById('summaryStartDate').value;
+    const endDate = document.getElementById('summaryEndDate').value;
+    const format = document.getElementById('summaryFormat').value;
+
+    try {
+      const response = await adminFetch(`/api/v1/quickbooks/payment-summary?startDate=${startDate}&endDate=${endDate}&format=${format}`);
+
+      if (response.ok) {
+        if (format === 'csv') {
+          // Download CSV file
+          const blob = await response.blob();
+          const url = window.URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `wavemax-payments-${startDate}-to-${endDate}.csv`;
+          document.body.appendChild(a);
+          a.click();
+          window.URL.revokeObjectURL(url);
+          document.body.removeChild(a);
         } else {
-            resultsDiv.innerHTML = affiliateSearchResults.map(affiliate => `
+          // Show JSON response
+          const data = await response.json();
+          alert(t('administrator.dashboard.quickbooks.exportSuccess', 'Export successful! Check export history for details.'));
+        }
+
+        closePaymentSummaryModal();
+        await loadExportHistory();
+      } else {
+        const error = await response.json();
+        alert(error.message || t('administrator.dashboard.quickbooks.exportFailed', 'Export failed'));
+      }
+    } catch (error) {
+      console.error('Error exporting payment summary:', error);
+      alert(t('administrator.dashboard.errors.networkError', 'Network error. Please try again.'));
+    }
+  }
+
+  // Handle commission detail export
+  async function handleCommissionDetailExport(e) {
+    e.preventDefault();
+
+    const affiliateId = document.getElementById('detailAffiliateId').value;
+    const startDate = document.getElementById('detailStartDate').value;
+    const endDate = document.getElementById('detailEndDate').value;
+    const format = document.getElementById('detailFormat').value;
+
+    if (!affiliateId) {
+      alert(t('administrator.dashboard.quickbooks.selectAffiliateError', 'Please select an affiliate'));
+      return;
+    }
+
+    try {
+      const response = await adminFetch(`/api/v1/quickbooks/commission-detail?affiliateId=${affiliateId}&startDate=${startDate}&endDate=${endDate}&format=${format}`);
+
+      if (response.ok) {
+        if (format === 'csv') {
+          // Download CSV file
+          const blob = await response.blob();
+          const url = window.URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `wavemax-commission-${affiliateId}-${startDate}-to-${endDate}.csv`;
+          document.body.appendChild(a);
+          a.click();
+          window.URL.revokeObjectURL(url);
+          document.body.removeChild(a);
+        } else {
+          // Show JSON response
+          const data = await response.json();
+          alert(t('administrator.dashboard.quickbooks.exportSuccess', 'Export successful! Check export history for details.'));
+        }
+
+        closeCommissionDetailModal();
+        await loadExportHistory();
+      } else {
+        const error = await response.json();
+        alert(error.message || t('administrator.dashboard.quickbooks.exportFailed', 'Export failed'));
+      }
+    } catch (error) {
+      console.error('Error exporting commission detail:', error);
+      alert(t('administrator.dashboard.errors.networkError', 'Network error. Please try again.'));
+    }
+  }
+
+  // Handle affiliate search
+  async function handleAffiliateSearch(e) {
+    const searchTerm = e.target.value.trim();
+
+    if (searchTerm.length < 2) {
+      document.getElementById('affiliateSearchResults').style.display = 'none';
+      return;
+    }
+
+    // Clear previous timeout
+    if (searchTimeout) clearTimeout(searchTimeout);
+
+    // Debounce search
+    searchTimeout = setTimeout(async () => {
+      try {
+        const response = await adminFetch(`/api/v1/affiliates?search=${encodeURIComponent(searchTerm)}&status=active&limit=10`);
+        const data = await response.json();
+
+        if (response.ok && data.affiliates) {
+          affiliateSearchResults = data.affiliates;
+          renderAffiliateSearchResults();
+        }
+      } catch (error) {
+        console.error('Error searching affiliates:', error);
+      }
+    }, 300);
+  }
+
+  // Render affiliate search results
+  function renderAffiliateSearchResults() {
+    const resultsDiv = document.getElementById('affiliateSearchResults');
+
+    if (affiliateSearchResults.length === 0) {
+      resultsDiv.innerHTML = `<div style="padding: 10px; color: #666;">${t('administrator.dashboard.quickbooks.noAffiliatesFound', 'No affiliates found')}</div>`;
+    } else {
+      resultsDiv.innerHTML = affiliateSearchResults.map(affiliate => `
                 <div style="padding: 10px; cursor: pointer; border-bottom: 1px solid #eee;" 
                      onmouseover="this.style.backgroundColor='#f8f9fa'" 
                      onmouseout="this.style.backgroundColor=''"
@@ -1369,185 +1369,185 @@
                     <small>${affiliate.email} | ID: ${affiliate.affiliateId}</small>
                 </div>
             `).join('');
-        }
-        
-        resultsDiv.style.display = 'block';
     }
 
-    // Select affiliate
-    window.selectAffiliate = function(affiliateId, affiliateName) {
-        document.getElementById('detailAffiliateId').value = affiliateId;
-        document.getElementById('selectedAffiliateName').textContent = affiliateName;
-        document.getElementById('selectedAffiliate').style.display = 'block';
-        document.getElementById('affiliateSearchResults').style.display = 'none';
-        document.getElementById('detailAffiliateSearch').value = '';
-    };
+    resultsDiv.style.display = 'block';
+  }
 
-    // Modal close functions
-    window.closePaymentSummaryModal = function() {
-        document.getElementById('paymentSummaryModal').style.display = 'none';
-        document.getElementById('paymentSummaryForm').reset();
-    };
+  // Select affiliate
+  window.selectAffiliate = function(affiliateId, affiliateName) {
+    document.getElementById('detailAffiliateId').value = affiliateId;
+    document.getElementById('selectedAffiliateName').textContent = affiliateName;
+    document.getElementById('selectedAffiliate').style.display = 'block';
+    document.getElementById('affiliateSearchResults').style.display = 'none';
+    document.getElementById('detailAffiliateSearch').value = '';
+  };
 
-    window.closeCommissionDetailModal = function() {
-        document.getElementById('commissionDetailModal').style.display = 'none';
-        document.getElementById('commissionDetailForm').reset();
-        document.getElementById('detailAffiliateId').value = '';
-        document.getElementById('selectedAffiliate').style.display = 'none';
-        document.getElementById('affiliateSearchResults').style.display = 'none';
-    };
+  // Modal close functions
+  window.closePaymentSummaryModal = function() {
+    document.getElementById('paymentSummaryModal').style.display = 'none';
+    document.getElementById('paymentSummaryForm').reset();
+  };
 
-    // Audit Log functionality
-    let currentAuditFilters = {
-        action: '',
-        affiliateId: '',
-        dateFrom: '',
-        dateTo: ''
-    };
+  window.closeCommissionDetailModal = function() {
+    document.getElementById('commissionDetailModal').style.display = 'none';
+    document.getElementById('commissionDetailForm').reset();
+    document.getElementById('detailAffiliateId').value = '';
+    document.getElementById('selectedAffiliate').style.display = 'none';
+    document.getElementById('affiliateSearchResults').style.display = 'none';
+  };
 
-    // Load audit log
-    async function loadAuditLog() {
-        try {
-            // Set up event listeners
-            setupAuditLogEventListeners();
-            
-            // Load initial data
-            await loadAuditLogData();
-        } catch (error) {
-            console.error('Error loading audit log:', error);
-            document.getElementById('auditLogContent').innerHTML = `
+  // Audit Log functionality
+  let currentAuditFilters = {
+    action: '',
+    affiliateId: '',
+    dateFrom: '',
+    dateTo: ''
+  };
+
+  // Load audit log
+  async function loadAuditLog() {
+    try {
+      // Set up event listeners
+      setupAuditLogEventListeners();
+
+      // Load initial data
+      await loadAuditLogData();
+    } catch (error) {
+      console.error('Error loading audit log:', error);
+      document.getElementById('auditLogContent').innerHTML = `
                 <p style="padding: 20px; text-align: center; color: #dc3545;">
                     ${t('administrator.dashboard.auditlog.loadError', 'Error loading audit logs')}
                 </p>
             `;
-        }
+    }
+  }
+
+  // Set up audit log event listeners
+  function setupAuditLogEventListeners() {
+    // Apply filters button
+    const applyFiltersBtn = document.getElementById('applyAuditFiltersBtn');
+    if (applyFiltersBtn) {
+      applyFiltersBtn.addEventListener('click', async () => {
+        currentAuditFilters = {
+          action: document.getElementById('auditActionFilter').value,
+          affiliateId: document.getElementById('auditAffiliateFilter').value,
+          dateFrom: document.getElementById('auditDateFromFilter').value,
+          dateTo: document.getElementById('auditDateToFilter').value
+        };
+        await loadAuditLogData();
+      });
     }
 
-    // Set up audit log event listeners
-    function setupAuditLogEventListeners() {
-        // Apply filters button
-        const applyFiltersBtn = document.getElementById('applyAuditFiltersBtn');
-        if (applyFiltersBtn) {
-            applyFiltersBtn.addEventListener('click', async () => {
-                currentAuditFilters = {
-                    action: document.getElementById('auditActionFilter').value,
-                    affiliateId: document.getElementById('auditAffiliateFilter').value,
-                    dateFrom: document.getElementById('auditDateFromFilter').value,
-                    dateTo: document.getElementById('auditDateToFilter').value
-                };
-                await loadAuditLogData();
-            });
-        }
+    // Clear filters button
+    const clearFiltersBtn = document.getElementById('clearAuditFiltersBtn');
+    if (clearFiltersBtn) {
+      clearFiltersBtn.addEventListener('click', async () => {
+        // Clear filter inputs
+        document.getElementById('auditActionFilter').value = '';
+        document.getElementById('auditAffiliateFilter').value = '';
+        document.getElementById('auditDateFromFilter').value = '';
+        document.getElementById('auditDateToFilter').value = '';
 
-        // Clear filters button
-        const clearFiltersBtn = document.getElementById('clearAuditFiltersBtn');
-        if (clearFiltersBtn) {
-            clearFiltersBtn.addEventListener('click', async () => {
-                // Clear filter inputs
-                document.getElementById('auditActionFilter').value = '';
-                document.getElementById('auditAffiliateFilter').value = '';
-                document.getElementById('auditDateFromFilter').value = '';
-                document.getElementById('auditDateToFilter').value = '';
-                
-                // Reset current filters
-                currentAuditFilters = {
-                    action: '',
-                    affiliateId: '',
-                    dateFrom: '',
-                    dateTo: ''
-                };
-                
-                await loadAuditLogData();
-            });
-        }
+        // Reset current filters
+        currentAuditFilters = {
+          action: '',
+          affiliateId: '',
+          dateFrom: '',
+          dateTo: ''
+        };
 
-        // Refresh button
-        const refreshBtn = document.getElementById('refreshAuditLogBtn');
-        if (refreshBtn) {
-            refreshBtn.addEventListener('click', async () => {
-                await loadAuditLogData();
-            });
-        }
-
-        // Export button
-        const exportBtn = document.getElementById('exportAuditLogBtn');
-        if (exportBtn) {
-            exportBtn.addEventListener('click', async () => {
-                await exportAuditLog();
-            });
-        }
+        await loadAuditLogData();
+      });
     }
 
-    // Load audit log data
-    async function loadAuditLogData() {
-        const container = document.getElementById('auditLogContent');
-        container.innerHTML = `
+    // Refresh button
+    const refreshBtn = document.getElementById('refreshAuditLogBtn');
+    if (refreshBtn) {
+      refreshBtn.addEventListener('click', async () => {
+        await loadAuditLogData();
+      });
+    }
+
+    // Export button
+    const exportBtn = document.getElementById('exportAuditLogBtn');
+    if (exportBtn) {
+      exportBtn.addEventListener('click', async () => {
+        await exportAuditLog();
+      });
+    }
+  }
+
+  // Load audit log data
+  async function loadAuditLogData() {
+    const container = document.getElementById('auditLogContent');
+    container.innerHTML = `
             <div class="loading">
                 <div class="spinner"></div>
                 <p>${t('administrator.dashboard.auditlog.loading', 'Loading audit logs...')}</p>
             </div>
         `;
 
-        try {
-            // Build query string
-            const params = new URLSearchParams();
-            if (currentAuditFilters.action) params.append('action', currentAuditFilters.action);
-            if (currentAuditFilters.affiliateId) params.append('affiliateId', currentAuditFilters.affiliateId);
-            if (currentAuditFilters.dateFrom) params.append('startDate', currentAuditFilters.dateFrom);
-            if (currentAuditFilters.dateTo) params.append('endDate', currentAuditFilters.dateTo);
-            params.append('limit', '100');
+    try {
+      // Build query string
+      const params = new URLSearchParams();
+      if (currentAuditFilters.action) params.append('action', currentAuditFilters.action);
+      if (currentAuditFilters.affiliateId) params.append('affiliateId', currentAuditFilters.affiliateId);
+      if (currentAuditFilters.dateFrom) params.append('startDate', currentAuditFilters.dateFrom);
+      if (currentAuditFilters.dateTo) params.append('endDate', currentAuditFilters.dateTo);
+      params.append('limit', '100');
 
-            const response = await adminFetch(`/api/v1/w9/admin/audit-logs?${params.toString()}`);
-            const data = await response.json();
+      const response = await adminFetch(`/api/v1/w9/admin/audit-logs?${params.toString()}`);
+      const data = await response.json();
 
-            if (response.ok && data.success) {
-                renderAuditLogTable(data.logs);
-            } else {
-                container.innerHTML = `
+      if (response.ok && data.success) {
+        renderAuditLogTable(data.logs);
+      } else {
+        container.innerHTML = `
                     <p style="padding: 20px; text-align: center; color: #dc3545;">
                         ${data.message || t('administrator.dashboard.auditlog.loadError', 'Failed to load audit logs')}
                     </p>
                 `;
-            }
-        } catch (error) {
-            console.error('Error loading audit logs:', error);
-            container.innerHTML = `
+      }
+    } catch (error) {
+      console.error('Error loading audit logs:', error);
+      container.innerHTML = `
                 <p style="padding: 20px; text-align: center; color: #dc3545;">
                     ${t('administrator.dashboard.auditlog.loadError', 'Error loading audit logs')}
                 </p>
             `;
-        }
     }
+  }
 
-    // Render audit log table
-    function renderAuditLogTable(logs) {
-        const container = document.getElementById('auditLogContent');
-        
-        if (!logs || logs.length === 0) {
-            container.innerHTML = `
+  // Render audit log table
+  function renderAuditLogTable(logs) {
+    const container = document.getElementById('auditLogContent');
+
+    if (!logs || logs.length === 0) {
+      container.innerHTML = `
                 <p style="padding: 20px; text-align: center; color: #666;">
                     ${t('administrator.dashboard.auditlog.noLogs', 'No audit logs found')}
                 </p>
             `;
-            return;
-        }
+      return;
+    }
 
-        const actionLabels = {
-            'upload_attempt': 'Upload Attempt',
-            'upload_success': 'Upload Success',
-            'upload_failure': 'Upload Failure',
-            'download_affiliate': 'Download (Affiliate)',
-            'download_admin': 'Download (Admin)',
-            'verify_attempt': 'Verify Attempt',
-            'verify_success': 'Verify Success',
-            'reject': 'Reject',
-            'expire': 'Expire',
-            'delete': 'Delete',
-            'quickbooks_export': 'QuickBooks Export',
-            'legal_hold': 'Legal Hold'
-        };
+    const actionLabels = {
+      'upload_attempt': 'Upload Attempt',
+      'upload_success': 'Upload Success',
+      'upload_failure': 'Upload Failure',
+      'download_affiliate': 'Download (Affiliate)',
+      'download_admin': 'Download (Admin)',
+      'verify_attempt': 'Verify Attempt',
+      'verify_success': 'Verify Success',
+      'reject': 'Reject',
+      'expire': 'Expire',
+      'delete': 'Delete',
+      'quickbooks_export': 'QuickBooks Export',
+      'legal_hold': 'Legal Hold'
+    };
 
-        const tableHtml = `
+    const tableHtml = `
             <table>
                 <thead>
                     <tr>
@@ -1561,31 +1561,31 @@
                 </thead>
                 <tbody>
                     ${logs.map(log => {
-                        // Format timestamp
-                        const timestamp = new Date(log.timestamp).toLocaleString();
-                        
-                        // Format user info
-                        const user = log.userInfo ? 
-                            `${log.userInfo.userName} (${log.userInfo.userType})` : 
-                            'System';
-                        
-                        // Format details
-                        let detailsHtml = '';
-                        if (log.details) {
-                            if (log.details.success !== undefined) {
-                                detailsHtml += `<span class="status-badge ${log.details.success ? 'active' : 'inactive'}">
+    // Format timestamp
+    const timestamp = new Date(log.timestamp).toLocaleString();
+
+    // Format user info
+    const user = log.userInfo ?
+      `${log.userInfo.userName} (${log.userInfo.userType})` :
+      'System';
+
+    // Format details
+    let detailsHtml = '';
+    if (log.details) {
+      if (log.details.success !== undefined) {
+        detailsHtml += `<span class="status-badge ${log.details.success ? 'active' : 'inactive'}">
                                     ${log.details.success ? 'Success' : 'Failed'}
                                 </span>`;
-                            }
-                            if (log.details.reason) {
-                                detailsHtml += `<br><small>${log.details.reason}</small>`;
-                            }
-                            if (log.details.error) {
-                                detailsHtml += `<br><small class="text-danger">${log.details.error}</small>`;
-                            }
-                        }
-                        
-                        return `
+      }
+      if (log.details.reason) {
+        detailsHtml += `<br><small>${log.details.reason}</small>`;
+      }
+      if (log.details.error) {
+        detailsHtml += `<br><small class="text-danger">${log.details.error}</small>`;
+      }
+    }
+
+    return `
                             <tr>
                                 <td>${timestamp}</td>
                                 <td>${actionLabels[log.action] || log.action}</td>
@@ -1595,392 +1595,392 @@
                                 <td>${log.metadata?.ipAddress || '-'}</td>
                             </tr>
                         `;
-                    }).join('')}
+  }).join('')}
                 </tbody>
             </table>
         `;
 
-        container.innerHTML = tableHtml;
+    container.innerHTML = tableHtml;
+  }
+
+  // Export audit log
+  async function exportAuditLog() {
+    try {
+      // Build query string with current filters
+      const params = new URLSearchParams();
+      if (currentAuditFilters.action) params.append('action', currentAuditFilters.action);
+      if (currentAuditFilters.affiliateId) params.append('affiliateId', currentAuditFilters.affiliateId);
+      if (currentAuditFilters.dateFrom) params.append('startDate', currentAuditFilters.dateFrom);
+      if (currentAuditFilters.dateTo) params.append('endDate', currentAuditFilters.dateTo);
+      params.append('format', 'csv');
+
+      const response = await adminFetch(`/api/v1/w9/admin/audit-logs/export?${params.toString()}`);
+
+      if (response.ok) {
+        // Get the filename from the Content-Disposition header
+        const contentDisposition = response.headers.get('Content-Disposition');
+        const filenameMatch = contentDisposition && contentDisposition.match(/filename="(.+)"/);
+        const filename = filenameMatch ? filenameMatch[1] : 'audit-log-export.csv';
+
+        // Download the file
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.style.display = 'none';
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+      } else {
+        const error = await response.json();
+        alert(error.message || t('administrator.dashboard.auditlog.exportFailed', 'Export failed'));
+      }
+    } catch (error) {
+      console.error('Error exporting audit log:', error);
+      alert(t('administrator.dashboard.auditlog.exportError', 'Error exporting audit log'));
     }
+  }
 
-    // Export audit log
-    async function exportAuditLog() {
-        try {
-            // Build query string with current filters
-            const params = new URLSearchParams();
-            if (currentAuditFilters.action) params.append('action', currentAuditFilters.action);
-            if (currentAuditFilters.affiliateId) params.append('affiliateId', currentAuditFilters.affiliateId);
-            if (currentAuditFilters.dateFrom) params.append('startDate', currentAuditFilters.dateFrom);
-            if (currentAuditFilters.dateTo) params.append('endDate', currentAuditFilters.dateTo);
-            params.append('format', 'csv');
+  // Load system config
+  async function loadSystemConfig() {
+    try {
+      const response = await adminFetch('/api/v1/administrators/config');
+      const data = await response.json();
 
-            const response = await adminFetch(`/api/v1/w9/admin/audit-logs/export?${params.toString()}`);
-            
-            if (response.ok) {
-                // Get the filename from the Content-Disposition header
-                const contentDisposition = response.headers.get('Content-Disposition');
-                const filenameMatch = contentDisposition && contentDisposition.match(/filename="(.+)"/);
-                const filename = filenameMatch ? filenameMatch[1] : 'audit-log-export.csv';
-                
-                // Download the file
-                const blob = await response.blob();
-                const url = window.URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.style.display = 'none';
-                a.href = url;
-                a.download = filename;
-                document.body.appendChild(a);
-                a.click();
-                window.URL.revokeObjectURL(url);
-                document.body.removeChild(a);
-            } else {
-                const error = await response.json();
-                alert(error.message || t('administrator.dashboard.auditlog.exportFailed', 'Export failed'));
-            }
-        } catch (error) {
-            console.error('Error exporting audit log:', error);
-            alert(t('administrator.dashboard.auditlog.exportError', 'Error exporting audit log'));
-        }
+      if (response.ok) {
+        renderSystemConfig(data.configs);
+      }
+    } catch (error) {
+      console.error('Error loading system config:', error);
     }
+  }
 
-    // Load system config
-    async function loadSystemConfig() {
-        try {
-            const response = await adminFetch('/api/v1/administrators/config');
-            const data = await response.json();
+  // Render system config
+  function renderSystemConfig(configs) {
+    const groupedConfigs = configs.reduce((acc, config) => {
+      if (!acc[config.category]) acc[config.category] = [];
+      acc[config.category].push(config);
+      return acc;
+    }, {});
 
-            if (response.ok) {
-                renderSystemConfig(data.configs);
-            }
-        } catch (error) {
-            console.error('Error loading system config:', error);
-        }
-    }
+    let configHtml = '<form id="configForm">';
 
-    // Render system config
-    function renderSystemConfig(configs) {
-        const groupedConfigs = configs.reduce((acc, config) => {
-            if (!acc[config.category]) acc[config.category] = [];
-            acc[config.category].push(config);
-            return acc;
-        }, {});
+    for (const [category, items] of Object.entries(groupedConfigs)) {
+      configHtml += `<h3 style="margin: 20px 0 10px; text-transform: capitalize;">${category}</h3>`;
 
-        let configHtml = '<form id="configForm">';
-        
-        for (const [category, items] of Object.entries(groupedConfigs)) {
-            configHtml += `<h3 style="margin: 20px 0 10px; text-transform: capitalize;">${category}</h3>`;
-            
-            items.forEach(config => {
-                configHtml += `<div class="form-group">`;
-                configHtml += `<label for="config_${config.key}">${config.description}</label>`;
-                
-                if (config.dataType === 'boolean') {
-                    const enabledText = window.i18n ? window.i18n.t('administrator.dashboard.config.enabled') : 'Enabled';
-                    const disabledText = window.i18n ? window.i18n.t('administrator.dashboard.config.disabled') : 'Disabled';
-                    configHtml += `
+      items.forEach(config => {
+        configHtml += '<div class="form-group">';
+        configHtml += `<label for="config_${config.key}">${config.description}</label>`;
+
+        if (config.dataType === 'boolean') {
+          const enabledText = window.i18n ? window.i18n.t('administrator.dashboard.config.enabled') : 'Enabled';
+          const disabledText = window.i18n ? window.i18n.t('administrator.dashboard.config.disabled') : 'Disabled';
+          configHtml += `
                         <select id="config_${config.key}" name="${config.key}" data-type="${config.dataType}">
                             <option value="true" ${config.value === true ? 'selected' : ''}>${enabledText}</option>
                             <option value="false" ${config.value === false ? 'selected' : ''}>${disabledText}</option>
                         </select>
                     `;
-                } else if (config.dataType === 'number') {
-                    configHtml += `<input type="number" id="config_${config.key}" name="${config.key}" value="${config.value}" data-type="${config.dataType}">`;
-                } else if (config.dataType === 'object' || config.dataType === 'array') {
-                    configHtml += `<textarea id="config_${config.key}" name="${config.key}" data-type="${config.dataType}" rows="3">${JSON.stringify(config.value, null, 2)}</textarea>`;
-                } else {
-                    configHtml += `<input type="text" id="config_${config.key}" name="${config.key}" value="${config.value}" data-type="${config.dataType}">`;
-                }
-                
-                configHtml += `</div>`;
-            });
+        } else if (config.dataType === 'number') {
+          configHtml += `<input type="number" id="config_${config.key}" name="${config.key}" value="${config.value}" data-type="${config.dataType}">`;
+        } else if (config.dataType === 'object' || config.dataType === 'array') {
+          configHtml += `<textarea id="config_${config.key}" name="${config.key}" data-type="${config.dataType}" rows="3">${JSON.stringify(config.value, null, 2)}</textarea>`;
+        } else {
+          configHtml += `<input type="text" id="config_${config.key}" name="${config.key}" value="${config.value}" data-type="${config.dataType}">`;
         }
-        
-        configHtml += '</form>';
-        document.getElementById('systemConfig').innerHTML = configHtml;
+
+        configHtml += '</div>';
+      });
     }
 
-    // Modal handling
-    const operatorModal = document.getElementById('operatorModal');
-    const operatorForm = document.getElementById('operatorForm');
-    let editingOperatorId = null;
-    let passwordValidator = null;
+    configHtml += '</form>';
+    document.getElementById('systemConfig').innerHTML = configHtml;
+  }
 
-    // Initialize password validator component
-    function initPasswordValidator() {
-        const container = document.getElementById('operatorPasswordValidator');
-        if (container && window.PasswordValidatorComponent) {
-            passwordValidator = new window.PasswordValidatorComponent('operatorPasswordValidator', {
-                showUsername: true,
-                showConfirmPassword: true,
-                showStrengthIndicator: true,
-                showRequirements: true,
-                usernameRequired: true,
-                passwordRequired: true
-            });
+  // Modal handling
+  const operatorModal = document.getElementById('operatorModal');
+  const operatorForm = document.getElementById('operatorForm');
+  let editingOperatorId = null;
+  let passwordValidator = null;
 
-            // Listen for email changes to update validation
-            const emailField = document.getElementById('email');
-            if (emailField) {
-                emailField.addEventListener('input', (e) => {
-                    if (passwordValidator) {
-                        passwordValidator.options.email = e.target.value;
-                        passwordValidator.updatePasswordRequirements();
-                    }
-                });
-            }
-        }
+  // Initialize password validator component
+  function initPasswordValidator() {
+    const container = document.getElementById('operatorPasswordValidator');
+    if (container && window.PasswordValidatorComponent) {
+      passwordValidator = new window.PasswordValidatorComponent('operatorPasswordValidator', {
+        showUsername: true,
+        showConfirmPassword: true,
+        showStrengthIndicator: true,
+        showRequirements: true,
+        usernameRequired: true,
+        passwordRequired: true
+      });
+
+      // Listen for email changes to update validation
+      const emailField = document.getElementById('email');
+      if (emailField) {
+        emailField.addEventListener('input', (e) => {
+          if (passwordValidator) {
+            passwordValidator.options.email = e.target.value;
+            passwordValidator.updatePasswordRequirements();
+          }
+        });
+      }
+    }
+  }
+
+  document.getElementById('addOperatorBtn').addEventListener('click', () => {
+    editingOperatorId = null;
+    const titleText = window.i18n ? window.i18n.t('administrator.dashboard.operators.addOperator') : 'Add Operator';
+    document.getElementById('operatorModalTitle').textContent = titleText;
+    operatorForm.reset();
+
+    // Show password container for new operators
+    const passwordContainer = document.getElementById('operatorPasswordContainer');
+    if (passwordContainer) {
+      passwordContainer.style.display = 'block';
+      if (!passwordValidator) {
+        initPasswordValidator();
+      } else {
+        passwordValidator.reset();
+      }
     }
 
-    document.getElementById('addOperatorBtn').addEventListener('click', () => {
-        editingOperatorId = null;
-        const titleText = window.i18n ? window.i18n.t('administrator.dashboard.operators.addOperator') : 'Add Operator';
+    operatorModal.classList.add('active');
+  });
+
+  document.getElementById('closeOperatorModal').addEventListener('click', () => {
+    operatorModal.classList.remove('active');
+  });
+
+  document.getElementById('cancelOperatorBtn').addEventListener('click', () => {
+    operatorModal.classList.remove('active');
+  });
+
+  // Handle operator form submission
+  operatorForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const formData = new FormData(operatorForm);
+    const operatorData = {
+      firstName: formData.get('firstName'),
+      lastName: formData.get('lastName'),
+      email: formData.get('email'),
+      shiftStart: formData.get('shiftStart'),
+      shiftEnd: formData.get('shiftEnd')
+    };
+
+    // Add username and password for new operators
+    if (!editingOperatorId) {
+      if (!passwordValidator || !passwordValidator.isValid()) {
+        alert('Please fill in all required fields and ensure the password meets all requirements.');
+        return;
+      }
+
+      const credentials = passwordValidator.getValues();
+      operatorData.username = credentials.username;
+      operatorData.password = credentials.password;
+    }
+
+    try {
+      const url = editingOperatorId
+        ? `/api/v1/administrators/operators/${editingOperatorId}`
+        : '/api/v1/administrators/operators';
+
+      const method = editingOperatorId ? 'PUT' : 'POST';
+
+      const response = await adminFetch(url, {
+        method,
+        body: JSON.stringify(operatorData)
+      });
+
+      if (response.ok) {
+        operatorModal.classList.remove('active');
+        loadOperators();
+        alert(editingOperatorId ? t('administrator.dashboard.operators.operatorUpdated', 'Operator updated successfully') : t('administrator.dashboard.operators.operatorCreated', 'Operator created successfully'));
+      } else {
+        const error = await response.json();
+        alert(error.message || t('administrator.dashboard.operators.operatorSaveFailed', 'Failed to save operator'));
+      }
+    } catch (error) {
+      console.error('Error saving operator:', error);
+      alert(t('administrator.dashboard.errors.networkError', 'Network error. Please try again.'));
+    }
+  });
+
+  // Save config
+  document.getElementById('saveConfigBtn').addEventListener('click', async () => {
+    const form = document.getElementById('configForm');
+    const updates = [];
+
+    for (const input of form.elements) {
+      if (input.name) {
+        let value = input.value;
+        const dataType = input.dataset.type;
+
+        // Parse value based on type
+        if (dataType === 'boolean') {
+          value = value === 'true';
+        } else if (dataType === 'number') {
+          value = parseFloat(value);
+        } else if (dataType === 'object' || dataType === 'array') {
+          try {
+            value = JSON.parse(value);
+          } catch (e) {
+            alert(t('administrator.dashboard.config.invalidJson', 'Invalid JSON for') + ` ${input.name}`);
+            return;
+          }
+        }
+
+        updates.push({ key: input.name, value });
+      }
+    }
+
+    try {
+      const response = await adminFetch('/api/v1/administrators/config', {
+        method: 'PUT',
+        body: JSON.stringify({ updates })
+      });
+
+      if (response.ok) {
+        alert(t('administrator.dashboard.config.configSaved', 'Configuration saved successfully'));
+      } else {
+        const error = await response.json();
+        alert(error.message || t('administrator.dashboard.config.configSaveFailed', 'Failed to save configuration'));
+      }
+    } catch (error) {
+      console.error('Error saving config:', error);
+      alert(t('administrator.dashboard.errors.networkError', 'Network error. Please try again.'));
+    }
+  });
+
+  // Logout
+  document.getElementById('logoutBtn').addEventListener('click', () => {
+    if (confirm(t('administrator.dashboard.confirmLogout', 'Are you sure you want to logout?'))) {
+      localStorage.removeItem('adminToken');
+      localStorage.removeItem('adminRefreshToken');
+      localStorage.removeItem('adminData');
+      window.location.href = '/administrator-login-embed.html';
+    }
+  });
+
+  // Global functions for inline handlers
+  window.editOperator = async (operatorId) => {
+    try {
+      const response = await adminFetch(`/api/v1/administrators/operators/${operatorId}`);
+      const data = await response.json();
+
+      if (response.ok) {
+        editingOperatorId = operatorId;
+        const titleText = window.i18n ? window.i18n.t('administrator.dashboard.operators.editOperator') : 'Edit Operator';
         document.getElementById('operatorModalTitle').textContent = titleText;
-        operatorForm.reset();
-        
-        // Show password container for new operators
+
+        // Hide password container for editing
         const passwordContainer = document.getElementById('operatorPasswordContainer');
         if (passwordContainer) {
-            passwordContainer.style.display = 'block';
-            if (!passwordValidator) {
-                initPasswordValidator();
-            } else {
-                passwordValidator.reset();
-            }
+          passwordContainer.style.display = 'none';
         }
-        
+
+        // Fill form with operator data
+        document.getElementById('firstName').value = data.operator.firstName;
+        document.getElementById('lastName').value = data.operator.lastName;
+        document.getElementById('email').value = data.operator.email;
+        document.getElementById('shiftStart').value = data.operator.shiftStart || '';
+        document.getElementById('shiftEnd').value = data.operator.shiftEnd || '';
+
         operatorModal.classList.add('active');
-    });
-
-    document.getElementById('closeOperatorModal').addEventListener('click', () => {
-        operatorModal.classList.remove('active');
-    });
-
-    document.getElementById('cancelOperatorBtn').addEventListener('click', () => {
-        operatorModal.classList.remove('active');
-    });
-
-    // Handle operator form submission
-    operatorForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        
-        const formData = new FormData(operatorForm);
-        const operatorData = {
-            firstName: formData.get('firstName'),
-            lastName: formData.get('lastName'),
-            email: formData.get('email'),
-            shiftStart: formData.get('shiftStart'),
-            shiftEnd: formData.get('shiftEnd')
-        };
-
-        // Add username and password for new operators
-        if (!editingOperatorId) {
-            if (!passwordValidator || !passwordValidator.isValid()) {
-                alert('Please fill in all required fields and ensure the password meets all requirements.');
-                return;
-            }
-            
-            const credentials = passwordValidator.getValues();
-            operatorData.username = credentials.username;
-            operatorData.password = credentials.password;
-        }
-
-        try {
-            const url = editingOperatorId 
-                ? `/api/v1/administrators/operators/${editingOperatorId}`
-                : '/api/v1/administrators/operators';
-            
-            const method = editingOperatorId ? 'PUT' : 'POST';
-            
-            const response = await adminFetch(url, {
-                method,
-                body: JSON.stringify(operatorData)
-            });
-
-            if (response.ok) {
-                operatorModal.classList.remove('active');
-                loadOperators();
-                alert(editingOperatorId ? t('administrator.dashboard.operators.operatorUpdated', 'Operator updated successfully') : t('administrator.dashboard.operators.operatorCreated', 'Operator created successfully'));
-            } else {
-                const error = await response.json();
-                alert(error.message || t('administrator.dashboard.operators.operatorSaveFailed', 'Failed to save operator'));
-            }
-        } catch (error) {
-            console.error('Error saving operator:', error);
-            alert(t('administrator.dashboard.errors.networkError', 'Network error. Please try again.'));
-        }
-    });
-
-    // Save config
-    document.getElementById('saveConfigBtn').addEventListener('click', async () => {
-        const form = document.getElementById('configForm');
-        const updates = [];
-
-        for (const input of form.elements) {
-            if (input.name) {
-                let value = input.value;
-                const dataType = input.dataset.type;
-
-                // Parse value based on type
-                if (dataType === 'boolean') {
-                    value = value === 'true';
-                } else if (dataType === 'number') {
-                    value = parseFloat(value);
-                } else if (dataType === 'object' || dataType === 'array') {
-                    try {
-                        value = JSON.parse(value);
-                    } catch (e) {
-                        alert(t('administrator.dashboard.config.invalidJson', 'Invalid JSON for') + ` ${input.name}`);
-                        return;
-                    }
-                }
-
-                updates.push({ key: input.name, value });
-            }
-        }
-
-        try {
-            const response = await adminFetch('/api/v1/administrators/config', {
-                method: 'PUT',
-                body: JSON.stringify({ updates })
-            });
-
-            if (response.ok) {
-                alert(t('administrator.dashboard.config.configSaved', 'Configuration saved successfully'));
-            } else {
-                const error = await response.json();
-                alert(error.message || t('administrator.dashboard.config.configSaveFailed', 'Failed to save configuration'));
-            }
-        } catch (error) {
-            console.error('Error saving config:', error);
-            alert(t('administrator.dashboard.errors.networkError', 'Network error. Please try again.'));
-        }
-    });
-
-    // Logout
-    document.getElementById('logoutBtn').addEventListener('click', () => {
-        if (confirm(t('administrator.dashboard.confirmLogout', 'Are you sure you want to logout?'))) {
-            localStorage.removeItem('adminToken');
-            localStorage.removeItem('adminRefreshToken');
-            localStorage.removeItem('adminData');
-            window.location.href = '/administrator-login-embed.html';
-        }
-    });
-
-    // Global functions for inline handlers
-    window.editOperator = async (operatorId) => {
-        try {
-            const response = await adminFetch(`/api/v1/administrators/operators/${operatorId}`);
-            const data = await response.json();
-
-            if (response.ok) {
-                editingOperatorId = operatorId;
-                const titleText = window.i18n ? window.i18n.t('administrator.dashboard.operators.editOperator') : 'Edit Operator';
-                document.getElementById('operatorModalTitle').textContent = titleText;
-                
-                // Hide password container for editing
-                const passwordContainer = document.getElementById('operatorPasswordContainer');
-                if (passwordContainer) {
-                    passwordContainer.style.display = 'none';
-                }
-                
-                // Fill form with operator data
-                document.getElementById('firstName').value = data.operator.firstName;
-                document.getElementById('lastName').value = data.operator.lastName;
-                document.getElementById('email').value = data.operator.email;
-                document.getElementById('shiftStart').value = data.operator.shiftStart || '';
-                document.getElementById('shiftEnd').value = data.operator.shiftEnd || '';
-                
-                operatorModal.classList.add('active');
-            }
-        } catch (error) {
-            console.error('Error loading operator:', error);
-            alert(t('administrator.dashboard.errors.operatorsLoadFailed', 'Failed to load operator details'));
-        }
-    };
-
-    window.resetPin = async (operatorId) => {
-        if (!confirm(t('administrator.dashboard.operators.confirmResetPin', 'Reset PIN for this operator? They will receive a new PIN via email.'))) {
-            return;
-        }
-
-        try {
-            const response = await adminFetch(`/api/v1/administrators/operators/${operatorId}/reset-pin`, {
-                method: 'POST',
-                body: JSON.stringify({})
-            });
-
-            if (response.ok) {
-                alert(t('administrator.dashboard.operators.pinResetSuccess', 'PIN reset successfully. New PIN has been sent to the operator.'));
-            } else {
-                const error = await response.json();
-                alert(error.message || t('administrator.dashboard.operators.pinResetFailed', 'Failed to reset PIN'));
-            }
-        } catch (error) {
-            console.error('Error resetting PIN:', error);
-            alert(t('administrator.dashboard.errors.networkError', 'Network error. Please try again.'));
-        }
-    };
-
-    // Remove loading spinners before loading data
-    function removeLoadingSpinners() {
-        // Remove any swirl spinners
-        const swirlSpinners = document.querySelectorAll('.swirl-spinner-container');
-        swirlSpinners.forEach(spinner => spinner.remove());
-        
-        // Also remove standard loading divs
-        const loadingDivs = document.querySelectorAll('.loading');
-        loadingDivs.forEach(div => {
-            if (div.querySelector('.spinner')) {
-                div.remove();
-            }
-        });
+      }
+    } catch (error) {
+      console.error('Error loading operator:', error);
+      alert(t('administrator.dashboard.errors.operatorsLoadFailed', 'Failed to load operator details'));
     }
-    
-    // Load initial data
-    removeLoadingSpinners();
-    loadDashboard();
+  };
 
-    // Refresh current tab when translations are ready
-    window.addEventListener('i18nReady', function() {
-        const activeTab = document.querySelector('.nav-tab.active');
-        if (activeTab) {
-            const tabName = activeTab.getAttribute('data-tab');
-            loadTabData(tabName);
-        }
-    });
+  window.resetPin = async (operatorId) => {
+    if (!confirm(t('administrator.dashboard.operators.confirmResetPin', 'Reset PIN for this operator? They will receive a new PIN via email.'))) {
+      return;
+    }
 
-    // Listen for language changes
-    window.addEventListener('languageChanged', function(event) {
-        console.log('Language changed to:', event.detail.language);
-        
-        // Re-translate the page
-        if (window.i18n && window.i18n.translatePage) {
-            window.i18n.translatePage();
-        }
-        
-        // Refresh password validator translations if it exists
-        if (passwordValidator && passwordValidator.refreshTranslations) {
-            passwordValidator.refreshTranslations();
-        }
-        
-        // Update dynamic content in the active tab
-        const activeTab = document.querySelector('.nav-tab.active');
-        if (activeTab) {
-            const tabName = activeTab.getAttribute('data-tab');
-            loadTabData(tabName);
-        }
+    try {
+      const response = await adminFetch(`/api/v1/administrators/operators/${operatorId}/reset-pin`, {
+        method: 'POST',
+        body: JSON.stringify({})
+      });
+
+      if (response.ok) {
+        alert(t('administrator.dashboard.operators.pinResetSuccess', 'PIN reset successfully. New PIN has been sent to the operator.'));
+      } else {
+        const error = await response.json();
+        alert(error.message || t('administrator.dashboard.operators.pinResetFailed', 'Failed to reset PIN'));
+      }
+    } catch (error) {
+      console.error('Error resetting PIN:', error);
+      alert(t('administrator.dashboard.errors.networkError', 'Network error. Please try again.'));
+    }
+  };
+
+  // Remove loading spinners before loading data
+  function removeLoadingSpinners() {
+    // Remove any swirl spinners
+    const swirlSpinners = document.querySelectorAll('.swirl-spinner-container');
+    swirlSpinners.forEach(spinner => spinner.remove());
+
+    // Also remove standard loading divs
+    const loadingDivs = document.querySelectorAll('.loading');
+    loadingDivs.forEach(div => {
+      if (div.querySelector('.spinner')) {
+        div.remove();
+      }
     });
-    
-    // Listen for language changes from parent iframe bridge
-    // This is how the affiliate dashboard handles language changes
-    window.addEventListener('message', function(event) {
-        // Handle language change messages from parent iframe
-        if (event.data && event.data.type === 'language-change') {
-            const language = event.data.data?.language;
-            if (language && window.i18n && window.i18n.setLanguage) {
-                console.log('[Admin Dashboard] Received language change from parent:', language);
-                window.i18n.setLanguage(language);
-            }
-        }
-    });
+  }
+
+  // Load initial data
+  removeLoadingSpinners();
+  loadDashboard();
+
+  // Refresh current tab when translations are ready
+  window.addEventListener('i18nReady', function() {
+    const activeTab = document.querySelector('.nav-tab.active');
+    if (activeTab) {
+      const tabName = activeTab.getAttribute('data-tab');
+      loadTabData(tabName);
+    }
+  });
+
+  // Listen for language changes
+  window.addEventListener('languageChanged', function(event) {
+    console.log('Language changed to:', event.detail.language);
+
+    // Re-translate the page
+    if (window.i18n && window.i18n.translatePage) {
+      window.i18n.translatePage();
+    }
+
+    // Refresh password validator translations if it exists
+    if (passwordValidator && passwordValidator.refreshTranslations) {
+      passwordValidator.refreshTranslations();
+    }
+
+    // Update dynamic content in the active tab
+    const activeTab = document.querySelector('.nav-tab.active');
+    if (activeTab) {
+      const tabName = activeTab.getAttribute('data-tab');
+      loadTabData(tabName);
+    }
+  });
+
+  // Listen for language changes from parent iframe bridge
+  // This is how the affiliate dashboard handles language changes
+  window.addEventListener('message', function(event) {
+    // Handle language change messages from parent iframe
+    if (event.data && event.data.type === 'language-change') {
+      const language = event.data.data?.language;
+      if (language && window.i18n && window.i18n.setLanguage) {
+        console.log('[Admin Dashboard] Received language change from parent:', language);
+        window.i18n.setLanguage(language);
+      }
+    }
+  });
 })();

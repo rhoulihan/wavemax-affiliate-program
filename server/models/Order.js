@@ -25,15 +25,6 @@ const orderSchema = new mongoose.Schema({
     required: true,
     min: 0.1
   },
-  serviceNotes: String,
-  // Delivery information
-  deliveryDate: { type: Date, required: true },
-  deliveryTime: {
-    type: String,
-    enum: ['morning', 'afternoon', 'evening'],
-    required: true
-  },
-  specialDeliveryInstructions: String,
   // Order status
   status: {
     type: String,
@@ -76,20 +67,20 @@ const orderSchema = new mongoose.Schema({
   refundReference: String,
   refundedAt: Date,
   // Operator processing fields
-  assignedOperator: { 
-    type: mongoose.Schema.Types.ObjectId, 
-    ref: 'Operator' 
+  assignedOperator: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Operator'
   },
   processingStarted: Date,
   processingCompleted: Date,
   operatorNotes: String,
-  qualityCheckPassed: { 
-    type: Boolean, 
-    default: null 
+  qualityCheckPassed: {
+    type: Boolean,
+    default: null
   },
-  qualityCheckBy: { 
-    type: mongoose.Schema.Types.ObjectId, 
-    ref: 'Operator' 
+  qualityCheckBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Operator'
   },
   qualityCheckNotes: String,
   processingTimeMinutes: Number, // Auto-calculated
@@ -118,7 +109,7 @@ orderSchema.pre('save', async function(next) {
       this.baseRate = 1.25;
     }
   }
-  
+
   if (this.isNew || this.isModified('estimatedWeight') || this.isModified('baseRate') || this.isModified('feeBreakdown')) {
     // Calculate estimated total using the provided estimated weight
     const totalFee = this.feeBreakdown?.totalFee || 0;

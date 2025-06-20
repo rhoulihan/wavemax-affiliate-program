@@ -154,7 +154,7 @@ describe('Administrator Model', () => {
 
     it('should accept valid permissions', async () => {
       const validPermissions = ['system_config', 'operator_management', 'view_analytics', 'manage_affiliates'];
-      
+
       const admin = new Administrator({
         firstName: 'John',
         lastName: 'Doe',
@@ -224,10 +224,10 @@ describe('Administrator Model', () => {
       });
 
       const saved = await admin.save();
-      
+
       // Need to select password field explicitly
       const adminWithPassword = await Administrator.findById(saved._id).select('+password');
-      
+
       expect(adminWithPassword.password).toBeDefined();
       expect(adminWithPassword.password).not.toBe(plainPassword);
       expect(adminWithPassword.password).toContain(':'); // Should have salt separator
@@ -243,10 +243,10 @@ describe('Administrator Model', () => {
       });
 
       await admin.save();
-      
+
       const adminWithPassword = await Administrator.findByEmailWithPassword('john@wavemax.com');
       const isValid = adminWithPassword.verifyPassword(plainPassword);
-      
+
       expect(isValid).toBe(true);
     });
 
@@ -259,10 +259,10 @@ describe('Administrator Model', () => {
       });
 
       await admin.save();
-      
+
       const adminWithPassword = await Administrator.findByEmailWithPassword('john@wavemax.com');
       const isValid = adminWithPassword.verifyPassword('WrongPassword123!');
-      
+
       expect(isValid).toBe(false);
     });
 
@@ -276,7 +276,7 @@ describe('Administrator Model', () => {
 
       const saved = await admin.save();
       const json = saved.toJSON();
-      
+
       expect(json.password).toBeUndefined();
       expect(json.passwordResetToken).toBeUndefined();
       expect(json.passwordResetExpires).toBeUndefined();
@@ -295,7 +295,7 @@ describe('Administrator Model', () => {
 
       await admin.save();
       await admin.incLoginAttempts();
-      
+
       const updated = await Administrator.findById(admin._id);
       expect(updated.loginAttempts).toBe(1);
     });
@@ -311,7 +311,7 @@ describe('Administrator Model', () => {
 
       await admin.save();
       await admin.incLoginAttempts();
-      
+
       const updated = await Administrator.findById(admin._id);
       expect(updated.loginAttempts).toBe(5);
       expect(updated.lockUntil).toBeDefined();
@@ -331,7 +331,7 @@ describe('Administrator Model', () => {
 
       await admin.save();
       await admin.resetLoginAttempts();
-      
+
       const updated = await Administrator.findById(admin._id);
       expect(updated.loginAttempts).toBe(0);
       expect(updated.lockUntil).toBeUndefined();
@@ -350,7 +350,7 @@ describe('Administrator Model', () => {
 
       await admin.save();
       await admin.incLoginAttempts();
-      
+
       const updated = await Administrator.findById(admin._id);
       expect(updated.loginAttempts).toBe(1);
       expect(updated.lockUntil).toBeUndefined();
@@ -365,14 +365,14 @@ describe('Administrator Model', () => {
       });
 
       await admin.save();
-      
+
       // Not locked initially
       expect(admin.isLocked).toBe(false);
-      
+
       // Lock the account
       admin.lockUntil = new Date(Date.now() + 60000);
       expect(admin.isLocked).toBe(true);
-      
+
       // Expired lock
       admin.lockUntil = new Date(Date.now() - 60000);
       expect(admin.isLocked).toBe(false);
@@ -389,9 +389,9 @@ describe('Administrator Model', () => {
       });
 
       await admin.save();
-      
+
       const resetToken = admin.generatePasswordResetToken();
-      
+
       expect(resetToken).toBeDefined();
       expect(resetToken).toHaveLength(64); // 32 bytes in hex
       expect(admin.passwordResetToken).toBeDefined();
@@ -409,13 +409,13 @@ describe('Administrator Model', () => {
       });
 
       await admin.save();
-      
+
       const now = Date.now();
       admin.generatePasswordResetToken();
-      
+
       const expiryTime = admin.passwordResetExpires.getTime();
       const timeDiff = expiryTime - now;
-      
+
       // Should be approximately 30 minutes (with some tolerance)
       expect(timeDiff).toBeGreaterThan(29 * 60 * 1000);
       expect(timeDiff).toBeLessThan(31 * 60 * 1000);
@@ -433,7 +433,7 @@ describe('Administrator Model', () => {
       });
 
       await admin.save();
-      
+
       expect(admin.hasPermission('system_config')).toBe(true);
       expect(admin.hasPermission('view_analytics')).toBe(true);
       expect(admin.hasPermission('operator_management')).toBe(false);
@@ -449,7 +449,7 @@ describe('Administrator Model', () => {
       });
 
       await admin.save();
-      
+
       expect(admin.hasAllPermissions(['system_config', 'view_analytics'])).toBe(true);
       expect(admin.hasAllPermissions(['system_config', 'operator_management'])).toBe(false);
       expect(admin.hasAllPermissions([])).toBe(true); // Empty array should return true
@@ -465,7 +465,7 @@ describe('Administrator Model', () => {
       });
 
       await admin.save();
-      
+
       expect(admin.hasAnyPermission(['system_config', 'operator_management'])).toBe(true);
       expect(admin.hasAnyPermission(['operator_management', 'manage_affiliates'])).toBe(false);
       expect(admin.hasAnyPermission([])).toBe(false); // Empty array should return false
@@ -481,7 +481,7 @@ describe('Administrator Model', () => {
       });
 
       const saved = await admin.save();
-      
+
       expect(saved.permissions).toEqual([
         'system_config',
         'operator_management',
@@ -519,7 +519,7 @@ describe('Administrator Model', () => {
       ]);
 
       const activeAdmins = await Administrator.findActive();
-      
+
       expect(activeAdmins).toHaveLength(2);
       expect(activeAdmins.every(admin => admin.isActive === true)).toBe(true);
     });
@@ -533,7 +533,7 @@ describe('Administrator Model', () => {
       });
 
       const admin = await Administrator.findByEmailWithPassword('john@wavemax.com');
-      
+
       expect(admin).toBeDefined();
       expect(admin.email).toBe('john@wavemax.com');
       expect(admin.password).toBeDefined(); // Password should be included
@@ -548,7 +548,7 @@ describe('Administrator Model', () => {
       });
 
       const admin = await Administrator.findByEmailWithPassword('JOHN@WAVEMAX.COM');
-      
+
       expect(admin).toBeDefined();
       expect(admin.email).toBe('john@wavemax.com');
     });
@@ -569,7 +569,7 @@ describe('Administrator Model', () => {
       });
 
       const saved = await admin.save();
-      
+
       expect(saved.createdAt).toBeDefined();
       expect(saved.updatedAt).toBeDefined();
       expect(saved.createdAt).toBeInstanceOf(Date);
@@ -586,13 +586,13 @@ describe('Administrator Model', () => {
 
       const saved = await admin.save();
       const originalUpdatedAt = saved.updatedAt;
-      
+
       // Wait a bit to ensure timestamp difference
       await new Promise(resolve => setTimeout(resolve, 100));
-      
+
       saved.firstName = 'Jane';
       await saved.save();
-      
+
       expect(saved.updatedAt.getTime()).toBeGreaterThan(originalUpdatedAt.getTime());
     });
   });
@@ -615,7 +615,7 @@ describe('Administrator Model', () => {
 
       const saved1 = await admin1.save();
       const saved2 = await admin2.save();
-      
+
       expect(saved1.adminId).toBeDefined();
       expect(saved2.adminId).toBeDefined();
       expect(saved1.adminId).not.toBe(saved2.adminId);

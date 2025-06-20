@@ -45,17 +45,17 @@ describe('Auth Controller', () => {
       cookie: jest.fn().mockReturnThis(),
       clearCookie: jest.fn().mockReturnThis()
     };
-    
+
     // Default mocks
     crypto.randomBytes.mockReturnValue({ toString: jest.fn().mockReturnValue('mock-token') });
     jwt.sign.mockReturnValue('mock-jwt-token');
     jwt.verify.mockReturnValue({ id: 'user123', role: 'affiliate' });
-    
+
     // Mock encryption utilities
     encryptionUtil.hashData = jest.fn().mockReturnValue('hashed-token');
     encryptionUtil.hashPassword = jest.fn().mockReturnValue({ salt: 'salt', hash: 'hash' });
     encryptionUtil.verifyPassword = jest.fn().mockReturnValue(true);
-    
+
     jest.clearAllMocks();
   });
 
@@ -485,7 +485,7 @@ describe('Auth Controller', () => {
   describe('administratorLogin', () => {
     test('should successfully login administrator', async () => {
       req.body = { email: 'admin@example.com', password: 'AdminPass123!' };
-      
+
       const mockAdmin = {
         _id: 'admin123',
         adminId: 'ADM001',
@@ -495,7 +495,7 @@ describe('Auth Controller', () => {
         verifyPassword: jest.fn().mockReturnValue(true),
         resetLoginAttempts: jest.fn()
       };
-      
+
       Administrator.findOne.mockReturnValue({
         select: jest.fn().mockResolvedValue(mockAdmin)
       });
@@ -518,14 +518,14 @@ describe('Auth Controller', () => {
 
     test('should handle locked account', async () => {
       req.body = { email: 'locked@example.com', password: 'password' };
-      
+
       const mockAdmin = {
         _id: 'admin123',
         email: 'locked@example.com',
         isActive: true,
         isLocked: true
       };
-      
+
       Administrator.findOne.mockReturnValue({
         select: jest.fn().mockResolvedValue(mockAdmin)
       });
@@ -541,13 +541,13 @@ describe('Auth Controller', () => {
 
     test('should handle inactive administrator', async () => {
       req.body = { email: 'inactive@example.com', password: 'password' };
-      
+
       const mockAdmin = {
         email: 'inactive@example.com',
         isActive: false,
         isLocked: false
       };
-      
+
       Administrator.findOne.mockReturnValue({
         select: jest.fn().mockResolvedValue(mockAdmin)
       });
@@ -565,7 +565,7 @@ describe('Auth Controller', () => {
   describe('operatorLogin', () => {
     test('should successfully login operator with PIN', async () => {
       req.body = { email: 'operator@example.com', password: '1234' };
-      
+
       const mockOperator = {
         _id: 'op123',
         operatorId: 'OP001',
@@ -576,7 +576,7 @@ describe('Auth Controller', () => {
         verifyPassword: jest.fn().mockReturnValue(true),
         resetLoginAttempts: jest.fn()
       };
-      
+
       Operator.findByEmailWithPassword = jest.fn().mockResolvedValue(mockOperator);
       RefreshToken.prototype.save = jest.fn().mockResolvedValue(true);
 
@@ -597,14 +597,14 @@ describe('Auth Controller', () => {
 
     test('should increment login attempts on failure', async () => {
       req.body = { email: 'operator@example.com', password: 'wrong' };
-      
+
       const mockOperator = {
         email: 'operator@example.com',
         isActive: true,
         verifyPassword: jest.fn().mockReturnValue(false),
         incLoginAttempts: jest.fn()
       };
-      
+
       Operator.findByEmailWithPassword = jest.fn().mockResolvedValue(mockOperator);
 
       await authController.operatorLogin(req, res);
@@ -619,7 +619,7 @@ describe('Auth Controller', () => {
       req.user = { id: 'user123', role: 'affiliate' };
       req.headers.authorization = 'Bearer mock-jwt-token';
       req.body = { refreshToken: 'refresh-token' };
-      
+
       TokenBlacklist.blacklistToken = jest.fn().mockResolvedValue(true);
       RefreshToken.findOneAndDelete.mockResolvedValue(true);
       jwt.decode.mockReturnValue({ exp: Math.floor(Date.now() / 1000) + 3600 });
@@ -638,13 +638,13 @@ describe('Auth Controller', () => {
   describe('forgotPassword', () => {
     test('should send password reset email for affiliate', async () => {
       req.body = { email: 'affiliate@example.com', userType: 'affiliate' };
-      
+
       const mockAffiliate = {
         _id: 'aff123',
         email: 'affiliate@example.com',
         save: jest.fn().mockResolvedValue(true)
       };
-      
+
       Affiliate.findOne.mockResolvedValue(mockAffiliate);
       emailService.sendAffiliatePasswordResetEmail = jest.fn().mockResolvedValue(true);
 
@@ -660,7 +660,7 @@ describe('Auth Controller', () => {
 
     test('should handle non-existent email gracefully', async () => {
       req.body = { email: 'notfound@example.com', userType: 'customer' };
-      
+
       Customer.findOne.mockResolvedValue(null);
 
       await authController.forgotPassword(req, res);
@@ -681,14 +681,14 @@ describe('Auth Controller', () => {
         password: 'NewPass123!',
         userType: 'affiliate'
       };
-      
+
       const mockAffiliate = {
         _id: 'aff123',
         resetToken: 'valid-token',
         resetTokenExpiry: Date.now() + 3600000,
         save: jest.fn().mockResolvedValue(true)
       };
-      
+
       Affiliate.findOne.mockResolvedValue(mockAffiliate);
       encryptionUtil.hashPassword.mockReturnValue({
         salt: 'new-salt',
@@ -717,7 +717,7 @@ describe('Auth Controller', () => {
         password: 'NewPass123!',
         userType: 'customer'
       };
-      
+
       Customer.findOne.mockResolvedValue(null);
 
       await authController.resetPassword(req, res);

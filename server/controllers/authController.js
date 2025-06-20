@@ -65,8 +65,10 @@ exports.affiliateLogin = async (req, res) => {
   try {
     const { username, password } = req.body;
 
-    // Find affiliate by username
-    const affiliate = await Affiliate.findOne({ username });
+    // Find affiliate by username (case-insensitive)
+    const affiliate = await Affiliate.findOne({
+      username: { $regex: new RegExp('^' + username + '$', 'i') }
+    });
 
     if (!affiliate) {
       logLoginAttempt(false, 'affiliate', username, req, 'User not found');
@@ -260,7 +262,7 @@ exports.administratorLogin = async (req, res) => {
     if (!isPasswordValid) {
       // Increment failed login attempts
       await administrator.incLoginAttempts();
-      
+
       logLoginAttempt(false, 'administrator', email, req, 'Invalid password');
       return res.status(401).json({
         success: false,
@@ -469,10 +471,10 @@ exports.customerLogin = async (req, res) => {
       });
     }
 
-    // Find customer by username or email
+    // Find customer by username or email (case-insensitive)
     const customer = await Customer.findOne({
       $or: [
-        { username: loginIdentifier },
+        { username: { $regex: new RegExp('^' + loginIdentifier + '$', 'i') } },
         { email: loginIdentifier.toLowerCase() }
       ]
     });
@@ -730,8 +732,8 @@ exports.verifyToken = async (req, res) => {
 
     // Check if this is an administrator with password change required
     let requirePasswordChange = false;
-    if (req.user.role === 'administrator' && req.user.permissions && 
-        req.user.permissions.length === 1 && 
+    if (req.user.role === 'administrator' && req.user.permissions &&
+        req.user.permissions.length === 1 &&
         req.user.permissions[0] === 'change_password_required') {
       requirePasswordChange = true;
     }
@@ -769,7 +771,7 @@ exports.logout = async (req, res) => {
     // Get the access token from the authorization header
     const authHeader = req.headers.authorization || req.headers['x-auth-token'];
     let accessToken;
-    
+
     if (authHeader) {
       if (authHeader.startsWith('Bearer ')) {
         accessToken = authHeader.substring(7);
@@ -781,7 +783,7 @@ exports.logout = async (req, res) => {
     // Note: In a production system, you might want to blacklist ALL active tokens
     // for this user, not just the one used in the logout request.
     // This would require tracking all issued tokens per user.
-    
+
     // Blacklist the access token if provided
     if (accessToken && req.user) {
       try {
@@ -832,41 +834,41 @@ exports.logout = async (req, res) => {
 exports.handleSocialCallback = async (req, res) => {
   try {
     const user = req.user;
-    
+
     // Check if this is a customer OAuth request (state starts with 'customer_')
     const isCustomerRequest = req.query.state && req.query.state.startsWith('customer');
-    
+
     if (isCustomerRequest) {
       // This is a customer OAuth request, delegate to customer handler
       return exports.handleCustomerSocialCallback(req, res);
     }
-    
+
     // Extract sessionId from state parameter for database storage
     // State parameter now contains just the sessionId (or null for non-popup requests)
-    const sessionId = req.query.state && req.query.state.startsWith('oauth_') 
-      ? req.query.state 
+    const sessionId = req.query.state && req.query.state.startsWith('oauth_')
+      ? req.query.state
       : null;
-      
+
     console.log('OAuth Callback State Parameter Debug:', {
       state: req.query.state,
       sessionId: sessionId,
       allParams: req.query
     });
-    
+
     if (!user) {
       // Check if this is a popup request (for embedded contexts)
-      const isPopup = req.query.popup === 'true' || 
+      const isPopup = req.query.popup === 'true' ||
                      sessionId !== null ||  // If we have a sessionId, it's a popup request
                      req.headers.referer?.includes('accounts.google.com') ||
                      req.headers.referer?.includes('facebook.com') ||
                      req.headers.referer?.includes('linkedin.com');
-      
+
       if (isPopup) {
         const message = {
           type: 'social-auth-error',
           message: 'Social authentication failed'
         };
-        
+
         // Store in database if sessionId is provided
         if (sessionId) {
           try {
@@ -876,7 +878,7 @@ exports.handleSocialCallback = async (req, res) => {
             console.error('Error storing OAuth session:', dbError);
           }
         }
-        
+
         return res.send(`
           <script>
             try {
@@ -901,17 +903,17 @@ exports.handleSocialCallback = async (req, res) => {
           </script>
         `);
       }
-      
+
       return res.redirect('/affiliate-register-embed.html?error=social_auth_failed');
     }
-    
+
     // Check if this is a popup request (for embedded contexts)
-    const isPopup = req.query.popup === 'true' || 
+    const isPopup = req.query.popup === 'true' ||
                    sessionId !== null ||  // If we have a sessionId, it's a popup request
                    req.headers.referer?.includes('accounts.google.com') ||
                    req.headers.referer?.includes('facebook.com') ||
                    req.headers.referer?.includes('linkedin.com');
-    
+
     console.log('OAuth Callback Debug:', {
       popup: req.query.popup,
       state: req.query.state,
@@ -919,7 +921,7 @@ exports.handleSocialCallback = async (req, res) => {
       isPopup,
       userIsNew: user?.isNewUser
     });
-    
+
     // If this is an existing user, log them in
     if (!user.isNewUser) {
       // Generate tokens
@@ -928,16 +930,16 @@ exports.handleSocialCallback = async (req, res) => {
         affiliateId: user.affiliateId,
         role: 'affiliate'
       });
-      
+
       const refreshToken = await generateRefreshToken(
-        user._id, 
-        'affiliate', 
+        user._id,
+        'affiliate',
         req.ip
       );
-      
+
       // Log successful login
       logLoginAttempt(true, 'affiliate', user.username, req, 'Social login successful');
-      
+
       if (isPopup) {
         const message = {
           type: 'social-auth-login',
@@ -953,7 +955,7 @@ exports.handleSocialCallback = async (req, res) => {
             registrationMethod: user.registrationMethod
           }
         };
-        
+
         // Store in database if sessionId is provided
         if (sessionId) {
           try {
@@ -963,7 +965,7 @@ exports.handleSocialCallback = async (req, res) => {
             console.error('Error storing OAuth session:', dbError);
           }
         }
-        
+
         return res.send(`
           <script>
             try {
@@ -988,11 +990,11 @@ exports.handleSocialCallback = async (req, res) => {
           </script>
         `);
       }
-      
+
       // Redirect to dashboard with tokens
       return res.redirect(`/affiliate-dashboard-embed.html?token=${token}&refreshToken=${refreshToken}`);
     }
-    
+
     // Handle case where social account already exists as a customer
     if (user.isExistingCustomer) {
       const message = {
@@ -1006,7 +1008,7 @@ exports.handleSocialCallback = async (req, res) => {
           email: user.customer.email
         }
       };
-      
+
       if (isPopup) {
         // Store in database if sessionId is provided
         if (sessionId) {
@@ -1017,7 +1019,7 @@ exports.handleSocialCallback = async (req, res) => {
             console.error('Error storing OAuth session:', dbError);
           }
         }
-        
+
         return res.send(`
           <script>
             try {
@@ -1039,10 +1041,10 @@ exports.handleSocialCallback = async (req, res) => {
           </script>
         `);
       }
-      
+
       return res.redirect('/affiliate-register-embed.html?error=account_exists_as_customer');
     }
-    
+
     // For new users, create a temporary social token and redirect to complete registration
     const socialToken = jwt.sign({
       provider: user.provider,
@@ -1054,14 +1056,14 @@ exports.handleSocialCallback = async (req, res) => {
       refreshToken: user.refreshToken,
       profileData: user.profileData
     }, process.env.JWT_SECRET, { expiresIn: '15m' });
-    
+
     if (isPopup) {
       const message = {
         type: 'social-auth-success',
         socialToken: socialToken,
         provider: user.provider
       };
-      
+
       // Store in database if sessionId is provided
       if (sessionId) {
         try {
@@ -1071,7 +1073,7 @@ exports.handleSocialCallback = async (req, res) => {
           console.error('Error storing OAuth session:', dbError);
         }
       }
-      
+
       return res.send(`
         <script>
           console.log('Popup script executing for social-auth-success');
@@ -1108,20 +1110,20 @@ exports.handleSocialCallback = async (req, res) => {
         </script>
       `);
     }
-    
+
     // Redirect to registration page with social data
     res.redirect(`/affiliate-register-embed.html?socialToken=${socialToken}&provider=${user.provider}`);
-    
+
   } catch (error) {
     console.error('Social callback error:', error);
-    
+
     // Check if this is a popup request
-    const isPopup = req.query.popup === 'true' || 
+    const isPopup = req.query.popup === 'true' ||
                    req.query.state === 'popup=true' ||
                    req.headers.referer?.includes('accounts.google.com') ||
                    req.headers.referer?.includes('facebook.com') ||
                    req.headers.referer?.includes('linkedin.com');
-    
+
     if (isPopup) {
       return res.send(`
         <script>
@@ -1150,7 +1152,7 @@ exports.handleSocialCallback = async (req, res) => {
         </script>
       `);
     }
-    
+
     res.redirect('/affiliate-register-embed.html?error=social_auth_error');
   }
 };
@@ -1168,7 +1170,7 @@ exports.completeSocialRegistration = async (req, res) => {
         errors: errors.array()
       });
     }
-    
+
     const {
       socialToken,
       phone,
@@ -1190,14 +1192,14 @@ exports.completeSocialRegistration = async (req, res) => {
       paypalEmail,
       languagePreference
     } = req.body;
-    
+
     // Verify social token
     let socialData;
     try {
       socialData = jwt.verify(socialToken, process.env.JWT_SECRET);
       // Sanitize social data to prevent XSS attacks
       socialData = sanitizeInput(socialData);
-      
+
       // Validate that required fields are not empty after sanitization
       if (!socialData.firstName || !socialData.lastName || !socialData.email) {
         return res.status(400).json({
@@ -1211,19 +1213,19 @@ exports.completeSocialRegistration = async (req, res) => {
         message: 'Invalid or expired social authentication token'
       });
     }
-    
+
     // For OAuth users, username and password are not required - OAuth provides authentication
     // Generate username from social data for account identification
     const baseUsername = (socialData.firstName + socialData.lastName).toLowerCase().replace(/[^a-z0-9]/g, '');
     let generatedUsername = baseUsername;
     let counter = 1;
-    
+
     // Check for uniqueness and append number if needed
     while (await Affiliate.findOne({ username: generatedUsername })) {
       generatedUsername = `${baseUsername}${counter}`;
       counter++;
     }
-    
+
     // Generate a secure random password for backup login (not exposed to user)
     const crypto = require('crypto');
     const generatedPassword = crypto.randomBytes(32).toString('hex') + 'A1!'; // Ensures password requirements
@@ -1232,27 +1234,27 @@ exports.completeSocialRegistration = async (req, res) => {
     const existingAffiliate = await Affiliate.findOne({
       $or: [{ email: socialData.email }, { username: generatedUsername }]
     });
-    
+
     if (existingAffiliate) {
       return res.status(409).json({
         success: false,
         message: 'Email or username already exists'
       });
     }
-    
+
     // Check if social account is already registered
     const socialAccountKey = `socialAccounts.${socialData.provider}.id`;
     const existingSocialAffiliate = await Affiliate.findOne({
       [socialAccountKey]: socialData.socialId
     });
-    
+
     if (existingSocialAffiliate) {
       return res.status(400).json({
         success: false,
         message: 'This social media account is already registered with another affiliate account'
       });
     }
-    
+
     // Create new affiliate with social account data
     // affiliateId will be auto-generated by the model using UUID
     const affiliate = new Affiliate({
@@ -1290,9 +1292,9 @@ exports.completeSocialRegistration = async (req, res) => {
       },
       lastLogin: new Date()
     });
-    
+
     await affiliate.save();
-    
+
     // Send welcome email
     try {
       await emailService.sendAffiliateWelcomeEmail(affiliate);
@@ -1300,32 +1302,32 @@ exports.completeSocialRegistration = async (req, res) => {
       console.error('Welcome email error:', emailError);
       // Continue even if email fails
     }
-    
+
     // Generate tokens
     const token = generateToken({
       id: affiliate._id,
       affiliateId: affiliate.affiliateId,
       userType: 'affiliate'
     });
-    
+
     const refreshToken = await generateRefreshToken(
-      affiliate._id, 
-      'affiliate', 
+      affiliate._id,
+      'affiliate',
       req.ip
     );
-    
+
     // Log successful registration and login
     logAuditEvent(AuditEvents.ACCOUNT_CREATED, {
       action: 'SOCIAL_REGISTRATION',
       userId: affiliate._id,
       userType: 'affiliate',
-      details: { 
-        affiliateId: affiliate.affiliateId, 
+      details: {
+        affiliateId: affiliate.affiliateId,
         provider: socialData.provider,
         registrationMethod: 'social'
       }
     }, req);
-    
+
     res.status(201).json({
       success: true,
       message: 'Social registration completed successfully',
@@ -1342,7 +1344,7 @@ exports.completeSocialRegistration = async (req, res) => {
       refreshToken,
       expiresIn: '1h'
     });
-    
+
   } catch (error) {
     console.error('Social registration error:', error);
     res.status(500).json({
@@ -1358,7 +1360,7 @@ exports.completeSocialRegistration = async (req, res) => {
 exports.linkSocialAccount = async (req, res) => {
   try {
     const { provider, socialToken } = req.body;
-    
+
     // Verify social token
     let socialData;
     try {
@@ -1369,7 +1371,7 @@ exports.linkSocialAccount = async (req, res) => {
         message: 'Invalid or expired social authentication token'
       });
     }
-    
+
     // Find affiliate by email from social data (for test scenarios) or use authenticated user
     let affiliate = req.user;
     if (!affiliate && socialData.email) {
@@ -1386,29 +1388,29 @@ exports.linkSocialAccount = async (req, res) => {
         message: 'Authentication required'
       });
     }
-    
+
     // Check if this social account is already linked to this affiliate
-    if (affiliate.socialAccounts && affiliate.socialAccounts[socialData.provider] && 
+    if (affiliate.socialAccounts && affiliate.socialAccounts[socialData.provider] &&
         affiliate.socialAccounts[socialData.provider].id === socialData.socialId) {
       return res.status(400).json({
         success: false,
         message: 'This social media account is already linked to your account'
       });
     }
-    
+
     // Check if this social account is already linked to another affiliate
     const existingLink = await Affiliate.findOne({
       [`socialAccounts.${socialData.provider}.id`]: socialData.socialId,
       _id: { $ne: affiliate._id }
     });
-    
+
     if (existingLink) {
       return res.status(409).json({
         success: false,
         message: 'This social media account is already linked to another affiliate'
       });
     }
-    
+
     // Link the social account
     affiliate.socialAccounts[socialData.provider] = {
       id: socialData.socialId,
@@ -1418,25 +1420,25 @@ exports.linkSocialAccount = async (req, res) => {
       refreshToken: socialData.refreshToken,
       linkedAt: new Date()
     };
-    
+
     await affiliate.save();
-    
+
     // Log the account linking
     logAuditEvent(AuditEvents.ACCOUNT_UPDATED, {
       action: 'SOCIAL_ACCOUNT_LINKED',
       userId: affiliate._id,
       userType: 'affiliate',
-      details: { 
+      details: {
         provider: provider,
         socialAccountId: socialData.socialId
       }
     }, req);
-    
+
     res.status(200).json({
       success: true,
       message: `${provider.charAt(0).toUpperCase() + provider.slice(1)} account linked successfully`
     });
-    
+
   } catch (error) {
     console.error('Social account linking error:', error);
     res.status(500).json({
@@ -1459,46 +1461,46 @@ exports.socialLogin = async (req, res) => {
         errors: errors.array()
       });
     }
-    
+
     const { provider, socialId, accessToken, refreshToken } = req.body;
-    
+
     // Find affiliate with this social account
     const socialAccountKey = `socialAccounts.${provider}.id`;
     const affiliate = await Affiliate.findOne({
       [socialAccountKey]: socialId
     });
-    
+
     if (!affiliate) {
       // Try to find customer with this social account
       const customer = await Customer.findOne({
         [socialAccountKey]: socialId
       });
-      
+
       if (!customer) {
         return res.status(404).json({
           success: false,
           message: 'No account found with this social media account'
         });
       }
-      
+
       // Handle customer social login
       customer.lastLogin = new Date();
       await customer.save();
-      
+
       const token = generateToken({
         id: customer._id,
         customerId: customer.customerId,
         role: 'customer'
       });
-      
+
       const refreshTokenValue = await generateRefreshToken(
         customer._id,
         'customer',
         req.ip
       );
-      
+
       logLoginAttempt(true, 'customer', customer.username, req, 'Social login successful');
-      
+
       return res.status(200).json({
         success: true,
         token: token,
@@ -1511,7 +1513,7 @@ exports.socialLogin = async (req, res) => {
         }
       });
     }
-    
+
     // Update social account tokens if provided
     if (accessToken || refreshToken) {
       if (accessToken) {
@@ -1522,24 +1524,24 @@ exports.socialLogin = async (req, res) => {
       }
       await affiliate.save();
     }
-    
+
     // Update last login
     affiliate.lastLogin = new Date();
     await affiliate.save();
-    
+
     // Generate tokens
     const token = generateToken({
       id: affiliate._id,
       affiliateId: affiliate.affiliateId,
       role: 'affiliate'
     });
-    
+
     const refreshTokenValue = await generateRefreshToken(
       affiliate._id,
       'affiliate',
       req.ip
     );
-    
+
     // Log successful login
     logLoginAttempt(true, 'affiliate', affiliate.username, req, 'Social login successful');
     logAuditEvent(AuditEvents.AUTH_LOGIN, {
@@ -1549,7 +1551,7 @@ exports.socialLogin = async (req, res) => {
       loginMethod: 'social',
       provider: provider
     }, req);
-    
+
     res.status(200).json({
       success: true,
       token: token,
@@ -1562,7 +1564,7 @@ exports.socialLogin = async (req, res) => {
         registrationMethod: affiliate.registrationMethod
       }
     });
-    
+
   } catch (error) {
     console.error('Social login error:', error);
     res.status(500).json({
@@ -1578,39 +1580,39 @@ exports.socialLogin = async (req, res) => {
 exports.pollOAuthSession = async (req, res) => {
   try {
     const { sessionId } = req.params;
-    
+
     if (!sessionId) {
       return res.status(400).json({
         success: false,
         message: 'Session ID is required'
       });
     }
-    
+
     const OAuthSession = require('../models/OAuthSession');
     const sessionResult = await OAuthSession.consumeSession(sessionId);
-    
+
     console.log('OAuth Session Polling Debug:', {
       sessionId,
       sessionResult: sessionResult ? 'found' : 'not found',
       resultData: sessionResult
     });
-    
+
     if (!sessionResult) {
       return res.status(404).json({
         success: false,
         message: 'Session not found or expired'
       });
     }
-    
+
     // Return the complete session result which includes the type field
     const response = {
       success: true,
       result: sessionResult
     };
-    
+
     console.log('Sending OAuth response:', response);
     res.json(response);
-    
+
   } catch (error) {
     console.error('OAuth session polling error:', error);
     res.status(500).json({
@@ -1626,7 +1628,7 @@ exports.pollOAuthSession = async (req, res) => {
 exports.handleCustomerSocialCallback = async (req, res) => {
   try {
     const user = req.user;
-    
+
     // Extract sessionId from state parameter for database storage
     // State format: 'customer_oauth_1234...' or 'customer' or 'oauth_1234...'
     let sessionId = null;
@@ -1637,27 +1639,27 @@ exports.handleCustomerSocialCallback = async (req, res) => {
         sessionId = req.query.state;
       }
     }
-      
+
     console.log('Customer OAuth Callback State Parameter Debug:', {
       state: req.query.state,
       sessionId: sessionId,
       allParams: req.query
     });
-    
+
     if (!user) {
       // Check if this is a popup request (for embedded contexts)
-      const isPopup = req.query.popup === 'true' || 
+      const isPopup = req.query.popup === 'true' ||
                      sessionId !== null ||
                      req.headers.referer?.includes('accounts.google.com') ||
                      req.headers.referer?.includes('facebook.com') ||
                      req.headers.referer?.includes('linkedin.com');
-      
+
       if (isPopup) {
         const message = {
           type: 'social-auth-error',
           message: 'Social authentication failed'
         };
-        
+
         // Store in database if sessionId is provided
         if (sessionId) {
           try {
@@ -1667,7 +1669,7 @@ exports.handleCustomerSocialCallback = async (req, res) => {
             console.error('Error storing Customer OAuth session:', dbError);
           }
         }
-        
+
         return res.send(`
           <script>
             try {
@@ -1689,17 +1691,17 @@ exports.handleCustomerSocialCallback = async (req, res) => {
           </script>
         `);
       }
-      
+
       return res.redirect('/customer-register-embed.html?error=social_auth_failed');
     }
-    
+
     // Check if this is a popup request (for embedded contexts)
-    const isPopup = req.query.popup === 'true' || 
+    const isPopup = req.query.popup === 'true' ||
                    sessionId !== null ||
                    req.headers.referer?.includes('accounts.google.com') ||
                    req.headers.referer?.includes('facebook.com') ||
                    req.headers.referer?.includes('linkedin.com');
-    
+
     console.log('Customer OAuth Callback Debug:', {
       popup: req.query.popup,
       state: req.query.state,
@@ -1707,7 +1709,7 @@ exports.handleCustomerSocialCallback = async (req, res) => {
       isPopup,
       userIsNew: user?.isNewUser
     });
-    
+
     // If this is an existing customer, log them in
     if (!user.isNewUser && user.customerId) {
       // Generate tokens
@@ -1716,16 +1718,16 @@ exports.handleCustomerSocialCallback = async (req, res) => {
         customerId: user.customerId,
         userType: 'customer'
       });
-      
+
       const refreshToken = await generateRefreshToken(
-        user._id, 
-        'customer', 
+        user._id,
+        'customer',
         req.ip
       );
-      
+
       // Log successful login
       logLoginAttempt(true, 'customer', user.username, req, 'Social login successful');
-      
+
       if (isPopup) {
         const message = {
           type: 'social-auth-login',
@@ -1740,7 +1742,7 @@ exports.handleCustomerSocialCallback = async (req, res) => {
             affiliateId: user.affiliateId
           }
         };
-        
+
         // Store in database if sessionId is provided
         if (sessionId) {
           try {
@@ -1750,7 +1752,7 @@ exports.handleCustomerSocialCallback = async (req, res) => {
             console.error('Error storing Customer OAuth session:', dbError);
           }
         }
-        
+
         return res.send(`
           <script>
             try {
@@ -1772,11 +1774,11 @@ exports.handleCustomerSocialCallback = async (req, res) => {
           </script>
         `);
       }
-      
+
       // Redirect to customer dashboard with tokens
       return res.redirect(`/customer-dashboard-embed.html?token=${token}&refreshToken=${refreshToken}`);
     }
-    
+
     // Handle case where social account already exists as an affiliate
     if (user.isExistingAffiliate) {
       const message = {
@@ -1791,7 +1793,7 @@ exports.handleCustomerSocialCallback = async (req, res) => {
           businessName: user.affiliate.businessName
         }
       };
-      
+
       if (isPopup) {
         // Store in database if sessionId is provided
         if (sessionId) {
@@ -1802,7 +1804,7 @@ exports.handleCustomerSocialCallback = async (req, res) => {
             console.error('Error storing Customer OAuth session:', dbError);
           }
         }
-        
+
         return res.send(`
           <script>
             try {
@@ -1824,10 +1826,10 @@ exports.handleCustomerSocialCallback = async (req, res) => {
           </script>
         `);
       }
-      
+
       return res.redirect('/customer-register-embed.html?error=account_exists_as_affiliate');
     }
-    
+
     // For new customers, create a temporary social token and redirect to complete registration
     const socialToken = jwt.sign({
       provider: user.provider,
@@ -1839,14 +1841,14 @@ exports.handleCustomerSocialCallback = async (req, res) => {
       refreshToken: user.refreshToken,
       profileData: user.profileData
     }, process.env.JWT_SECRET, { expiresIn: '15m' });
-    
+
     if (isPopup) {
       const message = {
         type: 'social-auth-success',
         socialToken: socialToken,
         provider: user.provider
       };
-      
+
       // Store in database if sessionId is provided
       if (sessionId) {
         try {
@@ -1856,7 +1858,7 @@ exports.handleCustomerSocialCallback = async (req, res) => {
           console.error('Error storing Customer OAuth session:', dbError);
         }
       }
-      
+
       return res.send(`
         <script>
           console.log('Customer popup script executing for social-auth-success');
@@ -1887,20 +1889,20 @@ exports.handleCustomerSocialCallback = async (req, res) => {
         </script>
       `);
     }
-    
+
     // Redirect to customer registration page with social data
     res.redirect(`/customer-register-embed.html?socialToken=${socialToken}&provider=${user.provider}`);
-    
+
   } catch (error) {
     console.error('Customer social callback error:', error);
-    
+
     // Check if this is a popup request
-    const isPopup = req.query.popup === 'true' || 
+    const isPopup = req.query.popup === 'true' ||
                    req.query.state === 'popup=true' ||
                    req.headers.referer?.includes('accounts.google.com') ||
                    req.headers.referer?.includes('facebook.com') ||
                    req.headers.referer?.includes('linkedin.com');
-    
+
     if (isPopup) {
       return res.send(`
         <script>
@@ -1926,7 +1928,7 @@ exports.handleCustomerSocialCallback = async (req, res) => {
         </script>
       `);
     }
-    
+
     res.redirect('/customer-register-embed.html?error=social_auth_error');
   }
 };
@@ -1944,7 +1946,7 @@ exports.completeSocialCustomerRegistration = async (req, res) => {
         errors: errors.array()
       });
     }
-    
+
     const {
       socialToken,
       affiliateId,
@@ -1959,14 +1961,14 @@ exports.completeSocialCustomerRegistration = async (req, res) => {
       username,
       password
     } = req.body;
-    
+
     // Verify social token
     let socialData;
     try {
       socialData = jwt.verify(socialToken, process.env.JWT_SECRET);
       // Sanitize social data to prevent XSS attacks
       socialData = sanitizeInput(socialData);
-      
+
       // Validate that required fields are not empty after sanitization
       if (!socialData.firstName || !socialData.lastName || !socialData.email) {
         return res.status(400).json({
@@ -1980,48 +1982,48 @@ exports.completeSocialCustomerRegistration = async (req, res) => {
         message: 'Invalid or expired social authentication token'
       });
     }
-    
+
     // For OAuth users, username and password are not required - OAuth provides authentication
     // Generate username from social data for account identification
     const baseUsername = (socialData.firstName + socialData.lastName).toLowerCase().replace(/[^a-z0-9]/g, '');
     let generatedUsername = baseUsername;
     let counter = 1;
-    
+
     // Check for uniqueness and append number if needed
     while (await Customer.findOne({ username: generatedUsername })) {
       generatedUsername = `${baseUsername}${counter}`;
       counter++;
     }
-    
+
     // Generate a secure random password for backup login (not exposed to user)
     const crypto = require('crypto');
     const generatedPassword = crypto.randomBytes(32).toString('hex') + 'A1!'; // Ensures password requirements
-    
+
     // Check if email already exists
     const existingCustomer = await Customer.findOne({
       email: socialData.email
     });
-    
+
     if (existingCustomer) {
       return res.status(409).json({
         success: false,
         message: 'Email already exists'
       });
     }
-    
+
     // Check if social account is already registered
     const socialAccountKey = `socialAccounts.${socialData.provider}.id`;
     const existingSocialCustomer = await Customer.findOne({
       [socialAccountKey]: socialData.socialId
     });
-    
+
     if (existingSocialCustomer) {
       return res.status(400).json({
         success: false,
         message: 'This social media account is already registered with another customer account'
       });
     }
-    
+
     // Verify affiliate exists
     const Affiliate = require('../models/Affiliate');
     const affiliate = await Affiliate.findOne({ affiliateId });
@@ -2031,10 +2033,10 @@ exports.completeSocialCustomerRegistration = async (req, res) => {
         message: 'Invalid affiliate ID'
       });
     }
-    
+
     // Hash password for backup login
     const { salt, hash } = encryptionUtil.hashPassword(generatedPassword);
-    
+
     // Create new customer with social account data
     // customerId will be auto-generated by the model using UUID
     const customer = new Customer({
@@ -2066,9 +2068,9 @@ exports.completeSocialCustomerRegistration = async (req, res) => {
       },
       lastLogin: new Date()
     });
-    
+
     await customer.save();
-    
+
     // Send welcome email
     try {
       await emailService.sendCustomerWelcomeEmail(customer);
@@ -2076,33 +2078,33 @@ exports.completeSocialCustomerRegistration = async (req, res) => {
       console.error('Customer welcome email error:', emailError);
       // Continue even if email fails
     }
-    
+
     // Generate tokens
     const token = generateToken({
       id: customer._id,
       customerId: customer.customerId,
       userType: 'customer'
     });
-    
+
     const refreshToken = await generateRefreshToken(
-      customer._id, 
-      'customer', 
+      customer._id,
+      'customer',
       req.ip
     );
-    
+
     // Log successful registration and login
     logAuditEvent(AuditEvents.ACCOUNT_CREATED, {
       action: 'SOCIAL_CUSTOMER_REGISTRATION',
       userId: customer._id,
       userType: 'customer',
-      details: { 
+      details: {
         customerId: customer.customerId,
-        affiliateId: customer.affiliateId, 
+        affiliateId: customer.affiliateId,
         provider: socialData.provider,
         registrationMethod: 'social'
       }
     }, req);
-    
+
     res.status(201).json({
       success: true,
       message: 'Customer social registration completed successfully',
@@ -2120,7 +2122,7 @@ exports.completeSocialCustomerRegistration = async (req, res) => {
       refreshToken,
       expiresIn: '1h'
     });
-    
+
   } catch (error) {
     console.error('Customer social registration error:', error);
     res.status(500).json({
@@ -2139,18 +2141,18 @@ exports.completeSocialCustomerRegistration = async (req, res) => {
 exports.checkUsername = async (req, res) => {
   try {
     const { username } = req.body;
-    
+
     if (!username || username.trim().length < 3) {
       return res.status(400).json({
         success: false,
         message: 'Username must be at least 3 characters'
       });
     }
-    
+
     const trimmedUsername = username.trim();
-    
+
     console.log('Checking username availability for:', trimmedUsername);
-    
+
     // Check across all user types - using exact match with case-insensitive
     const [affiliate, customer, administrator, operator] = await Promise.all([
       Affiliate.findOne({ username: { $regex: `^${trimmedUsername}$`, $options: 'i' } }),
@@ -2158,7 +2160,7 @@ exports.checkUsername = async (req, res) => {
       Administrator.findOne({ username: { $regex: `^${trimmedUsername}$`, $options: 'i' } }),
       Operator.findOne({ username: { $regex: `^${trimmedUsername}$`, $options: 'i' } })
     ]);
-    
+
     console.log('Username check results:', {
       username: trimmedUsername,
       affiliateFound: !!affiliate,
@@ -2166,14 +2168,14 @@ exports.checkUsername = async (req, res) => {
       administratorFound: !!administrator,
       operatorFound: !!operator
     });
-    
+
     const isAvailable = !affiliate && !customer && !administrator && !operator;
-    
+
     res.json({
       success: true,
       available: isAvailable
     });
-    
+
   } catch (error) {
     console.error('Check username error:', error);
     res.status(500).json({
@@ -2192,18 +2194,18 @@ exports.checkUsername = async (req, res) => {
 exports.checkEmail = async (req, res) => {
   try {
     const { email } = req.body;
-    
+
     if (!email || !email.trim()) {
       return res.status(400).json({
         success: false,
         message: 'Email is required'
       });
     }
-    
+
     const trimmedEmail = email.trim().toLowerCase();
-    
+
     console.log('Checking email availability for:', trimmedEmail);
-    
+
     // Check across all user types
     const [affiliate, customer, administrator, operator] = await Promise.all([
       Affiliate.findOne({ email: trimmedEmail }),
@@ -2211,7 +2213,7 @@ exports.checkEmail = async (req, res) => {
       Administrator.findOne({ email: trimmedEmail }),
       Operator.findOne({ email: trimmedEmail })
     ]);
-    
+
     console.log('Email check results:', {
       email: trimmedEmail,
       affiliateFound: !!affiliate,
@@ -2219,14 +2221,14 @@ exports.checkEmail = async (req, res) => {
       administratorFound: !!administrator,
       operatorFound: !!operator
     });
-    
+
     const isAvailable = !affiliate && !customer && !administrator && !operator;
-    
+
     res.json({
       success: true,
       available: isAvailable
     });
-    
+
   } catch (error) {
     console.error('Check email error:', error);
     res.status(500).json({

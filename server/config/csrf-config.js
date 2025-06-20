@@ -11,11 +11,11 @@ const csrfProtection = csrf({
   cookie: false, // Use req.session instead of cookies
   value: (req) => {
     // Check multiple locations for CSRF token
-    return req.body._csrf || 
-           req.query._csrf || 
-           req.headers['csrf-token'] || 
-           req.headers['xsrf-token'] || 
-           req.headers['x-csrf-token'] || 
+    return req.body._csrf ||
+           req.query._csrf ||
+           req.headers['csrf-token'] ||
+           req.headers['xsrf-token'] ||
+           req.headers['x-csrf-token'] ||
            req.headers['x-xsrf-token'];
   }
 });
@@ -27,15 +27,15 @@ const CSRF_CONFIG = {
     // Public information endpoints (GET only)
     '/api/v1/affiliates/:affiliateId/public',
     '/api/affiliates/:affiliateId/public',
-    
+
     // Health check endpoints
     '/api/health',
     '/api/v1/health',
-    
+
     // Username and email availability check (public endpoints)
     '/api/v1/auth/check-username',
     '/api/v1/auth/check-email',
-    
+
     // OAuth endpoints (GET only - these handle their own security)
     '/api/v1/auth/google',
     '/api/v1/auth/facebook',
@@ -49,7 +49,7 @@ const CSRF_CONFIG = {
     '/api/v1/auth/customer/google/callback',
     '/api/v1/auth/customer/facebook/callback',
     '/api/v1/auth/customer/linkedin/callback',
-    
+
     // DocuSign webhook endpoints (external callbacks)
     '/api/v1/w9/docusign-webhook',
     '/api/auth/docusign/callback'
@@ -93,7 +93,7 @@ const CSRF_CONFIG = {
   CRITICAL_ENDPOINTS: [
     // Logout (prevents logout CSRF)
     '/api/v1/auth/logout',
-    
+
     // Order management
     '/api/v1/orders',
     '/api/v1/orders/:orderId',
@@ -101,20 +101,20 @@ const CSRF_CONFIG = {
     '/api/v1/orders/:orderId/cancel',
     '/api/v1/orders/:orderId/payment-status',
     '/api/v1/orders/bulk/status',
-    
+
     // Password changes
     '/api/v1/customers/:customerId/password',
-    
+
     // Data deletion
     '/api/v1/affiliates/:affiliateId/delete-all-data',
     '/api/v1/customers/:customerId/delete-all-data',
-    
+
     // Admin operations
     '/api/v1/administrators/operators',
     '/api/v1/administrators/operators/:operatorId',
     '/api/v1/administrators/operators/:operatorId/reset-pin',
     '/api/v1/administrators/config',
-    
+
     // Operator critical actions
     '/api/v1/operators/orders/:orderId/claim',
     '/api/v1/operators/orders/:orderId/status',
@@ -138,7 +138,7 @@ const CSRF_CONFIG = {
     '/api/v1/affiliates/:affiliateId/dashboard',
     '/api/v1/operators/dashboard',
     '/api/v1/administrators/dashboard',
-    
+
     // List/search endpoints (GET only)
     '/api/v1/customers/:customerId/orders',
     '/api/v1/affiliates/:affiliateId/customers',
@@ -178,7 +178,7 @@ function shouldEnforceCsrf(req) {
 
   // For now, still exclude auth and registration endpoints
   // These will be protected with rate limiting and CAPTCHA instead
-  if (matchesPattern(CSRF_CONFIG.AUTH_ENDPOINTS) || 
+  if (matchesPattern(CSRF_CONFIG.AUTH_ENDPOINTS) ||
       matchesPattern(CSRF_CONFIG.REGISTRATION_ENDPOINTS)) {
     return false;
   }
@@ -242,7 +242,7 @@ const conditionalCsrf = (req, res, next) => {
         path: req.path,
         method: req.method
       });
-      
+
       auditLogger.logSuspiciousActivity(
         'CSRF_VALIDATION_FAILED',
         {
@@ -264,7 +264,7 @@ const conditionalCsrf = (req, res, next) => {
         message: 'Your request was rejected due to security validation. Please refresh and try again.'
       });
     }
-    
+
     if (err) {
       // Other CSRF errors
       console.error('CSRF middleware error:', err);
@@ -283,9 +283,9 @@ const conditionalCsrf = (req, res, next) => {
 const csrfTokenEndpoint = (req, res, next) => {
   // Initialize session if it doesn't exist
   if (!req.session) {
-    return res.status(500).json({ 
+    return res.status(500).json({
       success: false,
-      error: 'Session not initialized' 
+      error: 'Session not initialized'
     });
   }
 
@@ -299,21 +299,21 @@ const csrfTokenEndpoint = (req, res, next) => {
   csrfProtection(req, res, (err) => {
     if (err) {
       console.error('CSRF token generation error:', err);
-      return res.status(500).json({ 
+      return res.status(500).json({
         success: false,
-        error: 'Failed to generate CSRF token' 
+        error: 'Failed to generate CSRF token'
       });
     }
-    
+
     const token = req.csrfToken();
     console.log('=== Generated CSRF token ===');
     console.log('Token:', token);
     console.log('Session ID:', req.sessionID);
     console.log('CSRF Secret:', req.session?.csrfSecret?.substring(0, 10) + '...');
     console.log('===========================');
-    
+
     // Return token
-    res.json({ 
+    res.json({
       success: true,
       csrfToken: token
     });

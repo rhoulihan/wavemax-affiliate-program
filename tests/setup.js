@@ -13,7 +13,7 @@ process.env.BASE_URL = 'https://wavemax.promo';
 
 // Get MongoDB URI and append test database name
 const baseUri = process.env.MONGODB_URI || 'mongodb://localhost:27017/wavemax_affiliate';
-const testUri = baseUri.includes('?') 
+const testUri = baseUri.includes('?')
   ? baseUri.replace(/\/[^/\?]+\?/, '/wavemax_test?')
   : baseUri.replace(/\/[^/]+$/, '/wavemax_test');
 

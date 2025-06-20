@@ -125,7 +125,7 @@ async function loadDashboardData() {
         document.getElementById('activeOrders').textContent = stats.activeOrders || 0;
         document.getElementById('completedOrders').textContent = stats.completedOrders || 0;
         document.getElementById('totalSpent').textContent = `$${(stats.totalSpent || 0).toFixed(2)}`;
-        
+
         // Display bag credit
         if (statsResult.dashboard.bagCredit) {
           const bagCredit = statsResult.dashboard.bagCredit;
@@ -477,7 +477,7 @@ async function checkAndShowDeleteSection() {
   try {
     const response = await fetch('/api/v1/environment');
     const data = await response.json();
-    
+
     if (data.enableDeleteDataFeature === true) {
       const deleteSection = document.getElementById('deleteDataSection');
       if (deleteSection) {
@@ -494,17 +494,17 @@ async function deleteAllData() {
   if (!confirm('Are you absolutely sure? This will delete ALL your data permanently!')) {
     return;
   }
-  
+
   if (!confirm('This is your last chance to cancel. Do you really want to delete everything?')) {
     return;
   }
-  
+
   try {
     const token = localStorage.getItem('customerToken');
-    
+
     // Use CSRF-enabled fetch if available
     const authenticatedFetch = window.CsrfUtils ? window.CsrfUtils.createAuthenticatedFetch(() => token) : fetch;
-    
+
     const response = await authenticatedFetch(`/api/v1/customers/${customerId}/delete-all-data`, {
       method: 'DELETE',
       headers: {
@@ -513,9 +513,9 @@ async function deleteAllData() {
       },
       credentials: 'include'
     });
-    
+
     const data = await response.json();
-    
+
     if (data.success) {
       alert('All data has been deleted successfully.');
       handleLogout();

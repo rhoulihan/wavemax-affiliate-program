@@ -11,10 +11,10 @@ describe('Encryption Utility - Enhanced Coverage', () => {
   beforeEach(() => {
     // Save original environment
     originalEnv = { ...process.env };
-    
+
     // Set up a valid encryption key for most tests
     process.env.ENCRYPTION_KEY = crypto.randomBytes(32).toString('hex');
-    
+
     // Spy on console.error
     consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
   });
@@ -22,10 +22,10 @@ describe('Encryption Utility - Enhanced Coverage', () => {
   afterEach(() => {
     // Restore original environment
     process.env = originalEnv;
-    
+
     // Restore console
     consoleErrorSpy.mockRestore();
-    
+
     // Restore any mocked crypto functions
     jest.restoreAllMocks();
   });
@@ -41,21 +41,21 @@ describe('Encryption Utility - Enhanced Coverage', () => {
 
     test('should throw error with invalid encryption key length', () => {
       process.env.ENCRYPTION_KEY = 'too-short';
-      
+
       expect(() => {
         encryptionUtil.encrypt('test data');
       }).toThrow('Failed to encrypt data');
-      
+
       expect(consoleErrorSpy).toHaveBeenCalled();
     });
 
     test('should throw error when encryption key is missing', () => {
       delete process.env.ENCRYPTION_KEY;
-      
+
       expect(() => {
         encryptionUtil.encrypt('test data');
       }).toThrow('Failed to encrypt data');
-      
+
       expect(consoleErrorSpy).toHaveBeenCalled();
     });
 
@@ -64,11 +64,11 @@ describe('Encryption Utility - Enhanced Coverage', () => {
       jest.spyOn(crypto, 'createCipheriv').mockImplementation(() => {
         throw new Error('Crypto error');
       });
-      
+
       expect(() => {
         encryptionUtil.encrypt('test data');
       }).toThrow('Failed to encrypt data');
-      
+
       expect(consoleErrorSpy).toHaveBeenCalledWith(
         'Encryption error:',
         expect.any(Error)
@@ -97,16 +97,16 @@ describe('Encryption Utility - Enhanced Coverage', () => {
           encryptionUtil.decrypt(obj);
         }).toThrow('Failed to decrypt data');
       });
-      
+
       expect(consoleErrorSpy).toHaveBeenCalled();
     });
 
     test('should throw error with tampered data', () => {
       const encrypted = encryptionUtil.encrypt('test data');
-      
+
       // Tamper with auth tag
       encrypted.authTag = crypto.randomBytes(16).toString('hex');
-      
+
       expect(() => {
         encryptionUtil.decrypt(encrypted);
       }).toThrow('Failed to decrypt data');
@@ -114,10 +114,10 @@ describe('Encryption Utility - Enhanced Coverage', () => {
 
     test('should throw error with wrong encryption key', () => {
       const encrypted = encryptionUtil.encrypt('test data');
-      
+
       // Change the key
       process.env.ENCRYPTION_KEY = crypto.randomBytes(32).toString('hex');
-      
+
       expect(() => {
         encryptionUtil.decrypt(encrypted);
       }).toThrow('Failed to decrypt data');
@@ -125,10 +125,10 @@ describe('Encryption Utility - Enhanced Coverage', () => {
 
     test('should handle corrupted encrypted data', () => {
       const encrypted = encryptionUtil.encrypt('test data');
-      
+
       // Corrupt the encrypted data
       encrypted.encryptedData = encrypted.encryptedData.slice(0, -4) + 'XXXX';
-      
+
       expect(() => {
         encryptionUtil.decrypt(encrypted);
       }).toThrow('Failed to decrypt data');
@@ -140,11 +140,11 @@ describe('Encryption Utility - Enhanced Coverage', () => {
       jest.spyOn(crypto, 'randomBytes').mockImplementation(() => {
         throw new Error('Random generation failed');
       });
-      
+
       expect(() => {
         encryptionUtil.hashPassword('password123');
       }).toThrow('Failed to hash password');
-      
+
       expect(consoleErrorSpy).toHaveBeenCalledWith(
         'Password hashing error:',
         expect.any(Error)
@@ -155,11 +155,11 @@ describe('Encryption Utility - Enhanced Coverage', () => {
       jest.spyOn(crypto, 'pbkdf2Sync').mockImplementation(() => {
         throw new Error('PBKDF2 failed');
       });
-      
+
       expect(() => {
         encryptionUtil.hashPassword('password123');
       }).toThrow('Failed to hash password');
-      
+
       expect(consoleErrorSpy).toHaveBeenCalledWith(
         'Password hashing error:',
         expect.any(Error)
@@ -180,16 +180,16 @@ describe('Encryption Utility - Enhanced Coverage', () => {
       // Generate valid salt and hash
       const salt = crypto.randomBytes(16).toString('hex');
       const hash = crypto.randomBytes(64).toString('hex');
-      
+
       // Mock pbkdf2Sync to throw
       jest.spyOn(crypto, 'pbkdf2Sync').mockImplementation(() => {
         throw new Error('PBKDF2 failed');
       });
-      
+
       expect(() => {
         encryptionUtil.verifyPassword('password', salt, hash);
       }).toThrow('Failed to verify password');
-      
+
       expect(consoleErrorSpy).toHaveBeenCalledWith(
         'Password verification error:',
         expect.any(Error)
@@ -198,25 +198,25 @@ describe('Encryption Utility - Enhanced Coverage', () => {
 
     test('should handle invalid inputs gracefully', () => {
       const { salt, hash } = encryptionUtil.hashPassword('test');
-      
+
       // Null/undefined password
       expect(() => {
         encryptionUtil.verifyPassword(null, salt, hash);
       }).toThrow('Failed to verify password');
-      
+
       expect(() => {
         encryptionUtil.verifyPassword(undefined, salt, hash);
       }).toThrow('Failed to verify password');
-      
+
       // Null/undefined salt
       expect(() => {
         encryptionUtil.verifyPassword('password', null, hash);
       }).toThrow('Failed to verify password');
-      
+
       expect(() => {
         encryptionUtil.verifyPassword('password', undefined, hash);
       }).toThrow('Failed to verify password');
-      
+
       // Null/undefined hash (returns false, doesn't throw)
       expect(encryptionUtil.verifyPassword('password', salt, null)).toBe(false);
       expect(encryptionUtil.verifyPassword('password', salt, undefined)).toBe(false);
@@ -234,10 +234,10 @@ describe('Encryption Utility - Enhanced Coverage', () => {
     test('should generate tokens of correct length', () => {
       const defaultToken = encryptionUtil.generateToken();
       expect(defaultToken).toHaveLength(64); // 32 bytes * 2
-      
+
       const customToken = encryptionUtil.generateToken(16);
       expect(customToken).toHaveLength(32); // 16 bytes * 2
-      
+
       const longToken = encryptionUtil.generateToken(64);
       expect(longToken).toHaveLength(128); // 64 bytes * 2
     });
@@ -254,7 +254,7 @@ describe('Encryption Utility - Enhanced Coverage', () => {
       jest.spyOn(crypto, 'randomBytes').mockImplementation(() => {
         throw new Error('Random generation failed');
       });
-      
+
       expect(() => {
         encryptionUtil.generateToken();
       }).toThrow('Random generation failed');
@@ -278,7 +278,7 @@ describe('Encryption Utility - Enhanced Coverage', () => {
       jest.spyOn(crypto, 'randomBytes').mockImplementation(() => {
         throw new Error('Random generation failed');
       });
-      
+
       expect(() => {
         encryptionUtil.generateBarcode();
       }).toThrow('Random generation failed');
@@ -313,16 +313,16 @@ describe('Encryption Utility - Enhanced Coverage', () => {
     test('should produce different IVs for same input', () => {
       const data = 'test data';
       const results = [];
-      
+
       for (let i = 0; i < 10; i++) {
         results.push(encryptionUtil.encrypt(data));
       }
-      
+
       // All IVs should be different
       const ivs = results.map(r => r.iv);
       const uniqueIvs = new Set(ivs);
       expect(uniqueIvs.size).toBe(10);
-      
+
       // But all should decrypt to same value
       results.forEach(encrypted => {
         expect(encryptionUtil.decrypt(encrypted)).toBe(data);
@@ -331,15 +331,15 @@ describe('Encryption Utility - Enhanced Coverage', () => {
 
     test('should validate encryption output structure', () => {
       const encrypted = encryptionUtil.encrypt('test');
-      
+
       expect(encrypted).toHaveProperty('iv');
       expect(encrypted).toHaveProperty('encryptedData');
       expect(encrypted).toHaveProperty('authTag');
-      
+
       expect(typeof encrypted.iv).toBe('string');
       expect(typeof encrypted.encryptedData).toBe('string');
       expect(typeof encrypted.authTag).toBe('string');
-      
+
       // All should be hex strings
       expect(encrypted.iv).toMatch(/^[a-f0-9]+$/);
       expect(encrypted.encryptedData).toMatch(/^[a-f0-9]+$/);

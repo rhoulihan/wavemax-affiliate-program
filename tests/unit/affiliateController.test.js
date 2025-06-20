@@ -735,14 +735,14 @@ describe('Affiliate Controller', () => {
       req.query = { status: 'pending', page: 1, limit: 10 };
 
       Transaction.countDocuments.mockResolvedValue(1);
-      
+
       // First call - for paginated results
       Transaction.find.mockReturnValueOnce({
         sort: jest.fn().mockReturnThis(),
         skip: jest.fn().mockReturnThis(),
         limit: jest.fn().mockResolvedValue([mockTransactions[1]])
       });
-      
+
       // Second call - for all transactions (summary calculation)
       Transaction.find.mockResolvedValueOnce(mockTransactions);
 
@@ -921,7 +921,7 @@ describe('Affiliate Controller', () => {
     it('should delete all affiliate data in development environment', async () => {
       process.env.ENABLE_DELETE_DATA_FEATURE = 'true';
       req.params.affiliateId = 'AFF123';
-      
+
       const mockAffiliate = { affiliateId: 'AFF123', _id: 'affiliate-object-id' };
       const mockCustomers = [
         { customerId: 'CUST1', _id: 'customer-object-id-1' },

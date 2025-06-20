@@ -17,11 +17,11 @@ process.env.OAUTH_CALLBACK_URI = 'https://test.example.com';
 
 // Clear require cache completely
 Object.keys(require.cache).forEach(key => {
-  if (key.includes('passport-config') || 
+  if (key.includes('passport-config') ||
       key.includes('passport-google-oauth20') ||
       key.includes('passport-facebook') ||
       key.includes('passport-linkedin-oauth2') ||
-      key.includes('server/models') || 
+      key.includes('server/models') ||
       key.includes('auditLogger')) {
     delete require.cache[key];
   }
@@ -52,7 +52,7 @@ const FacebookStrategy = require('passport-facebook').Strategy;
 describe('Facebook OAuth Passport Configuration - Isolated', () => {
   let capturedMockCalls = [];
   let capturedPassportCalls = [];
-  
+
   beforeAll(() => {
     // Clear all environment variables
     delete process.env.GOOGLE_CLIENT_ID;
@@ -70,16 +70,16 @@ describe('Facebook OAuth Passport Configuration - Isolated', () => {
 
     // Clear require cache completely
     Object.keys(require.cache).forEach(key => {
-      if (key.includes('passport-config') || 
-          key.includes('server/models') || 
+      if (key.includes('passport-config') ||
+          key.includes('server/models') ||
           key.includes('auditLogger')) {
         delete require.cache[key];
       }
     });
-    
+
     // Require passport config after all mocks are set up
     require('../../server/config/passport-config');
-    
+
     // Capture mock calls before Jest clears them
     capturedMockCalls = [...FacebookStrategy.mock.calls];
     capturedPassportCalls = [...passport.use.mock.calls];
@@ -88,12 +88,12 @@ describe('Facebook OAuth Passport Configuration - Isolated', () => {
   test('should handle Facebook OAuth callback correctly', () => {
     // Use captured mock calls since Jest clears them
     expect(capturedMockCalls.length).toBeGreaterThan(0);
-    
+
     // Get the callback function passed to FacebookStrategy
     const facebookStrategyCall = capturedMockCalls[0];
     expect(facebookStrategyCall).toBeDefined();
     expect(facebookStrategyCall.length).toBeGreaterThan(1);
-    
+
     const facebookCallback = facebookStrategyCall[1];
 
     // Verify the callback function exists and is callable
@@ -105,14 +105,14 @@ describe('Facebook OAuth Passport Configuration - Isolated', () => {
     // Use captured mock calls
     expect(capturedMockCalls.length).toBeGreaterThan(0);
     const facebookConfig = capturedMockCalls[0][0];
-    
+
     expect(facebookConfig.profileFields).toEqual(['id', 'emails', 'name', 'picture.type(large)']);
   });
 
   test('should configure Facebook strategy with correct parameters', () => {
     // Use captured mock calls
     expect(capturedMockCalls.length).toBeGreaterThan(0);
-    
+
     const facebookConfig = capturedMockCalls[0][0];
     expect(facebookConfig).toMatchObject({
       clientID: 'test-facebook-app-id',

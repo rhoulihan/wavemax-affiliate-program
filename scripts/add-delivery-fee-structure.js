@@ -53,10 +53,10 @@ async function addDeliveryFeeStructure() {
 
     // Show current delivery-related configs
     console.log('\n📊 Current delivery fee configuration:');
-    const deliveryConfigs = await SystemConfig.find({ 
-      key: { $regex: 'delivery' } 
+    const deliveryConfigs = await SystemConfig.find({
+      key: { $regex: 'delivery' }
     }).sort('key');
-    
+
     deliveryConfigs.forEach(config => {
       console.log(`   ${config.key}: $${config.value.toFixed(2)} - ${config.description}`);
     });

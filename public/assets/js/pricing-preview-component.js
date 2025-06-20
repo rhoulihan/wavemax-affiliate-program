@@ -112,11 +112,11 @@
     [1, 3, 5, 10].forEach(bags => {
       const calculatedFee = bags * perBagFee;
       const deliveryFee = Math.max(minimumFee, calculatedFee);
-      
+
       // Calculate WDF commission
       const wdfRevenue = bags * LBS_PER_BAG * WDF_RATE;
       const commission = wdfRevenue * COMMISSION_RATE;
-      
+
       // Update delivery fee display
       const feeElement = document.getElementById(`${containerId}-calc${bags}bag${bags > 1 ? 's' : ''}`);
       if (feeElement) {
@@ -130,14 +130,14 @@
           feeElement.classList.remove('font-semibold');
         }
       }
-      
+
       // Update commission display
       const commElement = document.getElementById(`${containerId}-comm${bags}bag${bags > 1 ? 's' : ''}`);
       if (commElement) {
         commElement.textContent = `$${commission.toFixed(2)}`;
         commElement.title = `${bags} bags × ${LBS_PER_BAG} lbs × $${WDF_RATE}/lb × ${COMMISSION_RATE * 100}% = $${commission.toFixed(2)}`;
       }
-      
+
       // Calculate and update total earnings (delivery + commission)
       const totalEarnings = deliveryFee + commission;
       const totalElement = document.getElementById(`${containerId}-total${bags}bag${bags > 1 ? 's' : ''}`);

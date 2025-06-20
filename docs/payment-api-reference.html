@@ -215,6 +215,8 @@
         <div class="nav-section">
             <h4>Payment Endpoints</h4>
             <ul>
+                <li><a href="#process-payment">Process Payment (Generic)</a></li>
+                <li><a href="#process-payment-test">Process Payment Test Mode</a></li>
                 <li><a href="#create-payment-intent">Create Payment Intent</a></li>
                 <li><a href="#process-payment">Process Payment</a></li>
                 <li><a href="#get-payment">Get Payment</a></li>
@@ -327,6 +329,129 @@ function generateSignature(method, path, timestamp, body, apiSecret) {
             </section>
 
             <!-- Payment Endpoints -->
+            <!-- Generic Payment Processing -->
+            <div class="endpoint" id="process-payment">
+                <div class="endpoint-header">
+                    <span class="method method-post">POST</span>
+                    <span class="endpoint-path">/process-payment</span>
+                </div>
+                
+                <p>Process a payment using the unified payment flow. This endpoint handles all payment types including registrations, orders, and other transactions.</p>
+                
+                <h3>Request Body</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Parameter</th>
+                            <th>Type</th>
+                            <th>Description</th>
+                            <th>Required</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><span class="param-name">amount</span></td>
+                            <td><span class="param-type">number</span></td>
+                            <td>Payment amount in dollars (will be converted to cents)</td>
+                            <td><span class="required">Yes</span></td>
+                        </tr>
+                        <tr>
+                            <td><span class="param-name">description</span></td>
+                            <td><span class="param-type">string</span></td>
+                            <td>Payment description for display</td>
+                            <td><span class="required">Yes</span></td>
+                        </tr>
+                        <tr>
+                            <td><span class="param-name">entityType</span></td>
+                            <td><span class="param-type">string</span></td>
+                            <td>Type of entity: order, registration, etc.</td>
+                            <td><span class="required">Yes</span></td>
+                        </tr>
+                        <tr>
+                            <td><span class="param-name">entityId</span></td>
+                            <td><span class="param-type">string</span></td>
+                            <td>ID of the associated entity</td>
+                            <td><span class="required">Yes</span></td>
+                        </tr>
+                        <tr>
+                            <td><span class="param-name">customerId</span></td>
+                            <td><span class="param-type">string</span></td>
+                            <td>Customer ID for the payment</td>
+                            <td>No</td>
+                        </tr>
+                        <tr>
+                            <td><span class="param-name">saveCard</span></td>
+                            <td><span class="param-type">boolean</span></td>
+                            <td>Whether to save the card for future use</td>
+                            <td>No</td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+                <h3>Example Request</h3>
+                <pre>
+curl -X POST https://api.wavemax.com/api/v1/payments/process-payment \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -H "Content-Type: application/json" \
+  -H "X-CSRF-Token: YOUR_CSRF_TOKEN" \
+  -d '{
+    "amount": 33.13,
+    "description": "Order #ORD-2025-0001 - Laundry Service",
+    "entityType": "order",
+    "entityId": "507f1f77bcf86cd799439011",
+    "customerId": "CUST123456",
+    "saveCard": true
+  }'</pre>
+                
+                <h3>Success Response</h3>
+                <div class="response-example">
+                    <span class="status-code status-success">200 OK</span>
+                    <pre>{
+    "success": true,
+    "paymentUrl": "https://safepay.paymentlogistics.net/transaction.asp?params...",
+    "tokenId": "507f1f77bcf86cd799439012"
+}</pre>
+                </div>
+            </div>
+
+            <div class="endpoint" id="process-payment-test">
+                <div class="endpoint-header">
+                    <span class="method method-post">POST</span>
+                    <span class="endpoint-path">/process-payment-test</span>
+                </div>
+                
+                <p>Process a test payment in development mode. Only available when ENABLE_TEST_PAYMENT_FORM is enabled.</p>
+                
+                <h3>Request Body</h3>
+                <p>Same as /process-payment endpoint</p>
+                
+                <h3>Additional Test Parameters</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Parameter</th>
+                            <th>Type</th>
+                            <th>Description</th>
+                            <th>Required</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><span class="param-name">testScenario</span></td>
+                            <td><span class="param-type">string</span></td>
+                            <td>Test scenario: success, failure, timeout</td>
+                            <td>No</td>
+                        </tr>
+                        <tr>
+                            <td><span class="param-name">simulateDelay</span></td>
+                            <td><span class="param-type">number</span></td>
+                            <td>Delay in milliseconds before response</td>
+                            <td>No</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
             <div class="endpoint" id="create-payment-intent">
                 <div class="endpoint-header">
                     <span class="method method-post">POST</span>

@@ -23,13 +23,13 @@ describe('QuickBooks Controller', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    
+
     req = {
       user: { _id: 'admin123' },
       query: {},
       params: {}
     };
-    
+
     res = {
       status: jest.fn().mockReturnThis(),
       json: jest.fn(),
@@ -75,17 +75,17 @@ describe('QuickBooks Controller', () => {
 
     it('should export vendors as JSON', async () => {
       req.query = { format: 'json' };
-      
+
       Affiliate.find.mockReturnValue({
         select: jest.fn().mockResolvedValue(mockAffiliates)
       });
-      
+
       PaymentExport.create.mockResolvedValue({
         exportId: 'EXP-123',
         type: 'vendor',
         affiliateIds: ['AFF-001', 'AFF-002']
       });
-      
+
       W9AuditService.logQuickBooksExport = jest.fn().mockResolvedValue(true);
 
       await quickbooksController.exportVendors(req, res);
@@ -93,7 +93,7 @@ describe('QuickBooks Controller', () => {
       expect(Affiliate.find).toHaveBeenCalledWith({
         'w9Information.status': 'verified'
       });
-      
+
       expect(PaymentExport.create).toHaveBeenCalledWith({
         type: 'vendor',
         exportedBy: 'admin123',
@@ -119,9 +119,9 @@ describe('QuickBooks Controller', () => {
           ]
         }
       });
-      
+
       expect(W9AuditService.logQuickBooksExport).toHaveBeenCalled();
-      
+
       expect(res.json).toHaveBeenCalledWith({
         success: true,
         export: expect.any(Object),
@@ -131,21 +131,21 @@ describe('QuickBooks Controller', () => {
 
     it('should export vendors as CSV', async () => {
       req.query = { format: 'csv' };
-      
+
       Affiliate.find.mockReturnValue({
         select: jest.fn().mockResolvedValue(mockAffiliates)
       });
-      
+
       PaymentExport.create.mockResolvedValue({
         exportId: 'EXP-123',
         type: 'vendor'
       });
-      
+
       const mockStringifier = {
         getHeaderString: jest.fn().mockReturnValue('header\n'),
         stringifyRecords: jest.fn().mockReturnValue('data\n')
       };
-      
+
       csvWriter.createObjectCsvStringifier.mockReturnValue(mockStringifier);
       W9AuditService.logQuickBooksExport = jest.fn().mockResolvedValue(true);
 
@@ -158,7 +158,7 @@ describe('QuickBooks Controller', () => {
           { id: 'taxId', title: 'Tax ID' }
         ])
       });
-      
+
       expect(mockStringifier.stringifyRecords).toHaveBeenCalledWith(
         expect.arrayContaining([
           expect.objectContaining({
@@ -168,7 +168,7 @@ describe('QuickBooks Controller', () => {
           })
         ])
       );
-      
+
       expect(res.setHeader).toHaveBeenCalledWith('Content-Type', 'text/csv');
       expect(res.setHeader).toHaveBeenCalledWith(
         'Content-Disposition',
@@ -204,14 +204,14 @@ describe('QuickBooks Controller', () => {
         'QuickBooks vendor export error:',
         expect.any(Error)
       );
-      
+
       expect(res.status).toHaveBeenCalledWith(500);
       expect(res.json).toHaveBeenCalledWith({
         success: false,
         message: 'Failed to export vendors',
         error: 'Database error'
       });
-      
+
       consoleErrorSpy.mockRestore();
     });
   });
@@ -264,11 +264,11 @@ describe('QuickBooks Controller', () => {
         endDate: '2025-01-31',
         format: 'json'
       };
-      
+
       Order.find.mockReturnValue({
         populate: jest.fn().mockResolvedValue(mockOrders)
       });
-      
+
       PaymentExport.create.mockResolvedValue({
         exportId: 'EXP-124',
         type: 'payment_summary'
@@ -285,7 +285,7 @@ describe('QuickBooks Controller', () => {
         'affiliate.affiliateId': { $exists: true },
         'affiliate.commission': { $gt: 0 }
       });
-      
+
       expect(PaymentExport.create).toHaveBeenCalledWith({
         type: 'payment_summary',
         periodStart: new Date('2025-01-01'),
@@ -317,7 +317,7 @@ describe('QuickBooks Controller', () => {
           ]
         }
       });
-      
+
       expect(res.json).toHaveBeenCalledWith({
         success: true,
         export: expect.any(Object),
@@ -337,20 +337,20 @@ describe('QuickBooks Controller', () => {
         endDate: '2025-01-31',
         format: 'csv'
       };
-      
+
       Order.find.mockReturnValue({
         populate: jest.fn().mockResolvedValue(mockOrders)
       });
-      
+
       PaymentExport.create.mockResolvedValue({
         exportId: 'EXP-124'
       });
-      
+
       const mockStringifier = {
         getHeaderString: jest.fn().mockReturnValue('header\n'),
         stringifyRecords: jest.fn().mockReturnValue('data\n')
       };
-      
+
       csvWriter.createObjectCsvStringifier.mockReturnValue(mockStringifier);
 
       await quickbooksController.exportPaymentSummary(req, res);
@@ -364,7 +364,7 @@ describe('QuickBooks Controller', () => {
           })
         ])
       );
-      
+
       expect(res.setHeader).toHaveBeenCalledWith('Content-Type', 'text/csv');
       expect(res.send).toHaveBeenCalledWith('header\ndata\n');
     });
@@ -386,7 +386,7 @@ describe('QuickBooks Controller', () => {
         startDate: '2025-01-01',
         endDate: '2025-01-31'
       };
-      
+
       Order.find.mockReturnValue({
         populate: jest.fn().mockResolvedValue([])
       });
@@ -406,7 +406,7 @@ describe('QuickBooks Controller', () => {
         endDate: '2025-01-31',
         format: 'json'
       };
-      
+
       const ordersWithUnverified = [
         ...mockOrders,
         {
@@ -420,11 +420,11 @@ describe('QuickBooks Controller', () => {
           }
         }
       ];
-      
+
       Order.find.mockReturnValue({
         populate: jest.fn().mockResolvedValue(ordersWithUnverified)
       });
-      
+
       PaymentExport.create.mockResolvedValue({ exportId: 'EXP-125' });
 
       await quickbooksController.exportPaymentSummary(req, res);
@@ -477,13 +477,13 @@ describe('QuickBooks Controller', () => {
         endDate: '2025-01-31',
         format: 'json'
       };
-      
+
       Affiliate.findOne.mockResolvedValue(mockAffiliate);
-      
+
       Order.find.mockReturnValue({
         sort: jest.fn().mockResolvedValue(mockOrders)
       });
-      
+
       PaymentExport.create.mockResolvedValue({
         exportId: 'EXP-126',
         type: 'commission_detail'
@@ -492,7 +492,7 @@ describe('QuickBooks Controller', () => {
       await quickbooksController.exportCommissionDetail(req, res);
 
       expect(Affiliate.findOne).toHaveBeenCalledWith({ affiliateId: 'AFF-001' });
-      
+
       expect(Order.find).toHaveBeenCalledWith({
         status: 'complete',
         completedAt: {
@@ -502,7 +502,7 @@ describe('QuickBooks Controller', () => {
         'affiliate.affiliateId': 'mongo-id-123',
         'affiliate.commission': { $gt: 0 }
       });
-      
+
       expect(res.json).toHaveBeenCalledWith({
         success: true,
         export: expect.any(Object)
@@ -527,7 +527,7 @@ describe('QuickBooks Controller', () => {
         startDate: '2025-01-01',
         endDate: '2025-01-31'
       };
-      
+
       Affiliate.findOne.mockResolvedValue(null);
 
       await quickbooksController.exportCommissionDetail(req, res);
@@ -545,7 +545,7 @@ describe('QuickBooks Controller', () => {
         startDate: '2025-01-01',
         endDate: '2025-01-31'
       };
-      
+
       Affiliate.findOne.mockResolvedValue({
         ...mockAffiliate,
         w9Information: { status: 'pending' }
@@ -567,7 +567,7 @@ describe('QuickBooks Controller', () => {
         { exportId: 'EXP-1', type: 'vendor' },
         { exportId: 'EXP-2', type: 'payment_summary' }
       ];
-      
+
       PaymentExport.find.mockReturnValue({
         populate: jest.fn().mockReturnThis(),
         sort: jest.fn().mockReturnThis(),
@@ -577,7 +577,7 @@ describe('QuickBooks Controller', () => {
       await quickbooksController.getExportHistory(req, res);
 
       expect(PaymentExport.find).toHaveBeenCalledWith({});
-      
+
       expect(res.json).toHaveBeenCalledWith({
         success: true,
         exports: mockExports
@@ -586,7 +586,7 @@ describe('QuickBooks Controller', () => {
 
     it('should filter by type', async () => {
       req.query = { type: 'vendor' };
-      
+
       PaymentExport.find.mockReturnValue({
         populate: jest.fn().mockReturnThis(),
         sort: jest.fn().mockReturnThis(),

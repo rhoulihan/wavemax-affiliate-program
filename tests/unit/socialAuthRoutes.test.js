@@ -7,7 +7,7 @@ describe('Social Auth Routes - Simple Tests', () => {
   beforeEach(() => {
     app = express();
     app.use(express.json());
-    
+
     // Mock the routes with simple implementations
     app.get('/api/auth/google', (req, res) => {
       if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET) {
@@ -18,11 +18,11 @@ describe('Social Auth Routes - Simple Tests', () => {
       }
       res.redirect('https://accounts.google.com/oauth');
     });
-    
+
     app.get('/api/auth/google/callback', (req, res) => {
       res.json({ success: true, provider: 'google' });
     });
-    
+
     app.get('/api/auth/facebook', (req, res) => {
       if (!process.env.FACEBOOK_APP_ID || !process.env.FACEBOOK_APP_SECRET) {
         return res.status(404).json({
@@ -32,11 +32,11 @@ describe('Social Auth Routes - Simple Tests', () => {
       }
       res.redirect('https://facebook.com/oauth');
     });
-    
+
     app.get('/api/auth/facebook/callback', (req, res) => {
       res.json({ success: true, provider: 'facebook' });
     });
-    
+
     app.get('/api/auth/linkedin', (req, res) => {
       if (!process.env.LINKEDIN_CLIENT_ID || !process.env.LINKEDIN_CLIENT_SECRET) {
         return res.status(404).json({
@@ -46,72 +46,72 @@ describe('Social Auth Routes - Simple Tests', () => {
       }
       res.redirect('https://linkedin.com/oauth');
     });
-    
+
     app.get('/api/auth/linkedin/callback', (req, res) => {
       res.json({ success: true, provider: 'linkedin' });
     });
-    
+
     app.post('/api/auth/social/register', (req, res) => {
       const requiredFields = ['socialToken', 'phone', 'address', 'city', 'state', 'zipCode', 'serviceLatitude', 'serviceLongitude', 'serviceRadius', 'paymentMethod'];
       const errors = [];
-      
+
       requiredFields.forEach(field => {
         if (!req.body[field]) {
           errors.push({ msg: `${field} is required`, param: field });
         }
       });
-      
+
       if (req.body.serviceRadius && (req.body.serviceRadius < 1 || req.body.serviceRadius > 50)) {
         errors.push({ msg: 'Service radius must be between 1 and 50 miles', param: 'serviceRadius' });
       }
-      
+
       if (req.body.paymentMethod && !['directDeposit', 'check', 'paypal'].includes(req.body.paymentMethod)) {
         errors.push({ msg: 'Invalid payment method', param: 'paymentMethod' });
       }
-      
+
       if (errors.length > 0) {
         return res.status(400).json({ errors });
       }
-      
+
       res.status(201).json({ success: true, message: 'Registration completed' });
     });
-    
+
     app.post('/api/auth/social/link', (req, res) => {
       const errors = [];
-      
+
       if (!req.body.provider || !['google', 'facebook', 'linkedin'].includes(req.body.provider)) {
         errors.push({ msg: 'Invalid social media provider', param: 'provider' });
       }
-      
+
       if (!req.body.socialToken) {
         errors.push({ msg: 'Social authentication token is required', param: 'socialToken' });
       }
-      
+
       if (errors.length > 0) {
         return res.status(400).json({ errors });
       }
-      
+
       res.json({ success: true, message: 'Account linked' });
     });
-    
+
     app.post('/api/auth/social/callback', (req, res) => {
       const errors = [];
-      
+
       if (!req.body.provider || !['google', 'facebook', 'linkedin'].includes(req.body.provider)) {
         errors.push({ msg: 'Invalid social media provider', param: 'provider' });
       }
-      
+
       if (!req.body.socialId) {
         errors.push({ msg: 'Social ID is required', param: 'socialId' });
       }
-      
+
       if (errors.length > 0) {
         return res.status(400).json({ errors });
       }
-      
+
       res.json({ success: true, token: 'jwt-token' });
     });
-    
+
     app.get('/api/auth/customer/google', (req, res) => {
       if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET) {
         return res.status(404).json({
@@ -122,44 +122,44 @@ describe('Social Auth Routes - Simple Tests', () => {
       const state = req.query.state ? `customer_${req.query.state}` : 'customer';
       res.redirect(`https://accounts.google.com/oauth?state=${state}`);
     });
-    
+
     app.get('/api/auth/customer/google/callback', (req, res) => {
       const queryString = new URLSearchParams(req.query).toString();
       res.redirect(`/api/v1/auth/google/callback?${queryString}`);
     });
-    
+
     app.get('/api/auth/customer/facebook/callback', (req, res) => {
       res.json({ success: true, provider: 'facebook', isCustomer: true });
     });
-    
+
     app.get('/api/auth/customer/linkedin/callback', (req, res) => {
       res.json({ success: true, provider: 'linkedin', isCustomer: true });
     });
-    
+
     app.post('/api/auth/customer/social/register', (req, res) => {
       const requiredFields = ['socialToken', 'affiliateId', 'phone', 'address', 'city', 'state', 'zipCode', 'serviceFrequency'];
       const errors = [];
-      
+
       requiredFields.forEach(field => {
         if (!req.body[field]) {
-          const fieldName = field === 'affiliateId' ? 'Affiliate ID' : 
-                           field === 'phone' ? 'Phone number' : 
-                           field.charAt(0).toUpperCase() + field.slice(1);
+          const fieldName = field === 'affiliateId' ? 'Affiliate ID' :
+            field === 'phone' ? 'Phone number' :
+              field.charAt(0).toUpperCase() + field.slice(1);
           errors.push({ msg: `${fieldName} is required`, param: field });
         }
       });
-      
+
       if (req.body.serviceFrequency && !['weekly', 'biweekly', 'monthly'].includes(req.body.serviceFrequency)) {
         errors.push({ msg: 'Invalid service frequency', param: 'serviceFrequency' });
       }
-      
+
       if (errors.length > 0) {
         return res.status(400).json({ errors });
       }
-      
+
       res.status(201).json({ success: true, message: 'Customer registered' });
     });
-    
+
     // Error handler
     app.use((err, req, res, next) => {
       res.status(500).json({ error: err.message });
@@ -296,7 +296,7 @@ describe('Social Auth Routes - Simple Tests', () => {
       const response = await request(app)
         .post('/api/auth/social/register')
         .send({
-          socialToken: 'valid-token',
+          socialToken: 'valid-token'
           // Missing required fields
         });
 
@@ -475,7 +475,7 @@ describe('Social Auth Routes - Simple Tests', () => {
       const response = await request(app)
         .post('/api/auth/customer/social/register')
         .send({
-          socialToken: 'valid-token',
+          socialToken: 'valid-token'
           // Missing required fields
         });
 

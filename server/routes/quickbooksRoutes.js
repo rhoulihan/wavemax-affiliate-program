@@ -9,31 +9,31 @@ const { authenticate, authorize } = require('../middleware/auth');
  */
 
 // Export all verified vendors (affiliates with W-9s) to QuickBooks format
-router.get('/vendors', 
-    authenticate, 
-    authorize(['administrator']), 
-    quickbooksController.exportVendors
+router.get('/vendors',
+  authenticate,
+  authorize(['administrator']),
+  quickbooksController.exportVendors
 );
 
 // Export payment summary for a date range
 router.get('/payment-summary',
-    authenticate,
-    authorize(['administrator']),
-    quickbooksController.exportPaymentSummary
+  authenticate,
+  authorize(['administrator']),
+  quickbooksController.exportPaymentSummary
 );
 
 // Export detailed commission report for a specific affiliate
 router.get('/commission-detail',
-    authenticate,
-    authorize(['administrator']),
-    quickbooksController.exportCommissionDetail
+  authenticate,
+  authorize(['administrator']),
+  quickbooksController.exportCommissionDetail
 );
 
 // Get export history
 router.get('/history',
-    authenticate,
-    authorize(['administrator']),
-    quickbooksController.getExportHistory
+  authenticate,
+  authorize(['administrator']),
+  quickbooksController.getExportHistory
 );
 
 module.exports = router;

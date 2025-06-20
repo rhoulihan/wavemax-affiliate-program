@@ -40,29 +40,29 @@ describe('Administrator Controller', () => {
       status: jest.fn().mockReturnThis(),
       json: jest.fn().mockReturnThis()
     };
-    
+
     // Default mocks
     validationResult.mockReturnValue({
       isEmpty: jest.fn().mockReturnValue(true),
       array: jest.fn().mockReturnValue([])
     });
-    
+
     fieldFilter.mockImplementation((data) => data);
-    
+
     jest.clearAllMocks();
   });
 
   describe('getAdministrators', () => {
     test('should get administrators with pagination', async () => {
       req.query = { page: 1, limit: 20 };
-      
+
       const mockAdmins = [{
         _id: '507f1f77bcf86cd799439011',
         adminId: 'ADM001',
         firstName: 'John',
         toObject: jest.fn().mockReturnValue({ adminId: 'ADM001', firstName: 'John' })
       }];
-      
+
       Administrator.find.mockReturnValue({
         select: jest.fn().mockReturnThis(),
         sort: jest.fn().mockReturnThis(),
@@ -115,7 +115,7 @@ describe('Administrator Controller', () => {
 
       Administrator.findOne.mockResolvedValue(null);
       Administrator.countDocuments.mockResolvedValue(1);
-      
+
       const mockAdmin = {
         _id: 'new-id',
         adminId: 'ADM002',
@@ -160,7 +160,7 @@ describe('Administrator Controller', () => {
         _id: '507f1f77bcf86cd799439011',
         toObject: jest.fn().mockReturnValue({ adminId: 'ADM001' })
       };
-      
+
       Administrator.findByIdAndUpdate.mockReturnValue({
         select: jest.fn().mockResolvedValue(mockAdmin)
       });
@@ -226,7 +226,7 @@ describe('Administrator Controller', () => {
       req.body = { newPassword: 'NewPass123!' };
 
       validatePasswordStrength.mockReturnValue({ success: true });
-      
+
       const mockAdmin = {
         _id: '507f1f77bcf86cd799439011',
         save: jest.fn().mockResolvedValue(true)
@@ -277,7 +277,7 @@ describe('Administrator Controller', () => {
 
     test('getOperators should return operators list', async () => {
       req.query = { page: 1, limit: 20 };
-      
+
       const mockOperators = [{
         _id: 'op1',
         operatorId: 'OP001',
@@ -345,7 +345,7 @@ describe('Administrator Controller', () => {
         processingStatusDistribution: [],
         averageProcessingTime: [{ avg: 45 }]
       }]);
-      
+
       Operator.aggregate.mockResolvedValue([]);
       Affiliate.aggregate.mockResolvedValue([]);
       Operator.countDocuments.mockResolvedValue(10);
@@ -353,7 +353,7 @@ describe('Administrator Controller', () => {
       Affiliate.countDocuments.mockResolvedValue(20);
       Customer.countDocuments.mockResolvedValue(100);
       Order.countDocuments.mockResolvedValue(5);
-      
+
       // Mock for recent activity
       Order.find.mockReturnValue({
         sort: jest.fn().mockReturnThis(),

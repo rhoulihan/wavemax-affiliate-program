@@ -5,6 +5,15 @@ All notable changes to the WaveMAX Laundry Affiliate Program will be documented 
 ## [Unreleased]
 
 ### Added
+- Generic payment processing methods (`processPayment` and `processPaymentTestMode`)
+  - Unified payment flow for all transaction types
+  - Simplified integration with single payment endpoint
+  - Enhanced test mode for development scenarios
+- Schedule pickup workflow improvements
+  - Integrated payment processing during pickup scheduling
+  - Real-time pricing calculations for WDF and delivery fees
+  - Improved user flow from login to payment completion
+  - Full translation support for pickup forms
 - DocuSign W-9 Integration (Completed)
   - OAuth 2.0 Authorization Code Grant with PKCE implementation
   - Template-based W-9 signing using DocuSign template ID

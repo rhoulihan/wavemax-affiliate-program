@@ -36,7 +36,7 @@ describe('Enhanced Auth Controller - OAuth Methods', () => {
 
     // Reset all mocks
     jest.clearAllMocks();
-    
+
     // Setup RefreshToken mock
     RefreshToken.mockImplementation(() => ({
       save: jest.fn().mockResolvedValue({
@@ -59,7 +59,7 @@ describe('Enhanced Auth Controller - OAuth Methods', () => {
         lastName: 'Doe',
         profileData: { picture: 'https://example.com/photo.jpg' }
       };
-      req.query = { 
+      req.query = {
         state: 'oauth_test-session-id',  // OAuth prefix required for sessionId
         popup: 'true'  // Ensure popup mode
       };
@@ -68,7 +68,7 @@ describe('Enhanced Auth Controller - OAuth Methods', () => {
     test('should create OAuth session and redirect for affiliate context', async () => {
       // Mock user not found to trigger OAuth session creation for new user
       Affiliate.findOne = jest.fn().mockResolvedValue(null);
-      
+
       OAuthSession.createSession = jest.fn().mockResolvedValue({
         sessionId: 'oauth_test-session-id'
       });
@@ -593,7 +593,7 @@ describe('Enhanced Auth Controller - OAuth Methods', () => {
     test('should handle user not found error', async () => {
       // Clear req.user to simulate unauthenticated request
       req.user = null;
-      
+
       // Remove email from social data to force authentication required path
       jwt.verify = jest.fn().mockReturnValue({
         provider: 'linkedin',
@@ -602,7 +602,7 @@ describe('Enhanced Auth Controller - OAuth Methods', () => {
         lastName: 'Doe'
         // No email property
       });
-      
+
       Affiliate.findOne = jest.fn()
         .mockResolvedValueOnce(null); // No existing social account
 

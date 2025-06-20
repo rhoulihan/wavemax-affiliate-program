@@ -81,7 +81,7 @@ describe('Payment Model Unit Tests', () => {
 
     it('should validate currency enum', () => {
       const validCurrencies = ['USD', 'EUR', 'GBP', 'CAD', 'AUD'];
-      
+
       validCurrencies.forEach(currency => {
         mockPayment.currency = currency;
         const error = mockPayment.validateSync();
@@ -102,7 +102,7 @@ describe('Payment Model Unit Tests', () => {
         'succeeded', 'failed', 'canceled', 'refunded',
         'partially_refunded', 'disputed'
       ];
-      
+
       validStatuses.forEach(status => {
         mockPayment.status = status;
         const error = mockPayment.validateSync();
@@ -199,7 +199,7 @@ describe('Payment Model Unit Tests', () => {
         mockPayment.status = 'captured';
         mockPayment.capturedAmount = 100;
         mockPayment.refundedAmount = 30;
-        
+
         expect(mockPayment.canRefund(50)).toBe(true);
         expect(mockPayment.canRefund(70)).toBe(true);
         expect(mockPayment.canRefund(71)).toBe(false);
@@ -239,7 +239,7 @@ describe('Payment Model Unit Tests', () => {
 
       it('should add refund to refunds array', () => {
         mockPayment.addRefund('REF-123', 20, 'Customer request');
-        
+
         expect(mockPayment.refunds).toHaveLength(1);
         expect(mockPayment.refunds[0]).toMatchObject({
           refundId: 'REF-123',
@@ -256,7 +256,7 @@ describe('Payment Model Unit Tests', () => {
       it('should update lastRefundAt', () => {
         const beforeRefund = new Date();
         mockPayment.addRefund('REF-123', 20, 'Customer request');
-        
+
         expect(mockPayment.lastRefundAt).toBeDefined();
         expect(mockPayment.lastRefundAt.getTime()).toBeGreaterThanOrEqual(beforeRefund.getTime());
       });
@@ -274,7 +274,7 @@ describe('Payment Model Unit Tests', () => {
       it('should handle multiple refunds', () => {
         mockPayment.addRefund('REF-123', 30, 'First refund');
         mockPayment.addRefund('REF-124', 20, 'Second refund');
-        
+
         expect(mockPayment.refunds).toHaveLength(2);
         expect(mockPayment.refundedAmount).toBe(50);
         expect(mockPayment.status).toBe('partially_refunded');
@@ -283,7 +283,7 @@ describe('Payment Model Unit Tests', () => {
       it('should handle refund that exceeds captured amount', () => {
         mockPayment.refundedAmount = 80;
         mockPayment.addRefund('REF-125', 30, 'Final refund');
-        
+
         expect(mockPayment.refundedAmount).toBe(110);
         expect(mockPayment.status).toBe('refunded');
       });
@@ -303,13 +303,13 @@ describe('Payment Model Unit Tests', () => {
       it('should find payments by orderId', async () => {
         const orderId = new mongoose.Types.ObjectId();
         const mockPayments = [{ _id: '1' }, { _id: '2' }];
-        
+
         Payment.find.mockReturnValue({
           sort: jest.fn().mockResolvedValue(mockPayments)
         });
 
         const result = await Payment.findByOrder(orderId);
-        
+
         expect(Payment.find).toHaveBeenCalledWith({ orderId });
         expect(result).toEqual(mockPayments);
       });
@@ -319,16 +319,16 @@ describe('Payment Model Unit Tests', () => {
       it('should find successful payments by customer with default limit', async () => {
         const customerId = new mongoose.Types.ObjectId();
         const mockPayments = [{ _id: '1' }, { _id: '2' }];
-        
+
         const mockQuery = {
           sort: jest.fn().mockReturnThis(),
           limit: jest.fn().mockResolvedValue(mockPayments)
         };
-        
+
         Payment.find.mockReturnValue(mockQuery);
 
         const result = await Payment.findSuccessfulByCustomer(customerId);
-        
+
         expect(Payment.find).toHaveBeenCalledWith({
           customerId,
           status: { $in: ['captured', 'succeeded'] }
@@ -340,16 +340,16 @@ describe('Payment Model Unit Tests', () => {
       it('should accept custom limit', async () => {
         const customerId = new mongoose.Types.ObjectId();
         const mockPayments = [{ _id: '1' }];
-        
+
         const mockQuery = {
           sort: jest.fn().mockReturnThis(),
           limit: jest.fn().mockResolvedValue(mockPayments)
         };
-        
+
         Payment.find.mockReturnValue(mockQuery);
 
         const result = await Payment.findSuccessfulByCustomer(customerId, 5);
-        
+
         expect(mockQuery.limit).toHaveBeenCalledWith(5);
         expect(result).toEqual(mockPayments);
       });
@@ -359,7 +359,7 @@ describe('Payment Model Unit Tests', () => {
       it('should calculate revenue for a period', async () => {
         const startDate = new Date('2025-01-01');
         const endDate = new Date('2025-01-31');
-        
+
         const mockResult = [
           {
             currency: 'USD',
@@ -369,11 +369,11 @@ describe('Payment Model Unit Tests', () => {
             count: 50
           }
         ];
-        
+
         Payment.aggregate.mockResolvedValue(mockResult);
 
         const result = await Payment.calculateRevenue(startDate, endDate);
-        
+
         expect(Payment.aggregate).toHaveBeenCalledWith([
           {
             $match: {
@@ -400,7 +400,7 @@ describe('Payment Model Unit Tests', () => {
             }
           }
         ]);
-        
+
         expect(result).toEqual(mockResult);
       });
     });
@@ -431,7 +431,7 @@ describe('Payment Model Unit Tests', () => {
         amount: 25.50,
         reason: 'Customer requested refund'
       });
-      
+
       const error = mockPayment.validateSync();
       expect(error).toBeUndefined();
       expect(mockPayment.refunds[0].refundId).toBe('REF-123');
@@ -443,7 +443,7 @@ describe('Payment Model Unit Tests', () => {
         amount: 25.50,
         reason: 'Customer requested refund'
       });
-      
+
       const error = mockPayment.validateSync();
       expect(error).toBeDefined();
       expect(error.errors['refunds.0.refundId']).toBeDefined();
@@ -454,7 +454,7 @@ describe('Payment Model Unit Tests', () => {
         refundId: 'REF-123',
         reason: 'Customer requested refund'
       });
-      
+
       const error = mockPayment.validateSync();
       expect(error).toBeDefined();
       expect(error.errors['refunds.0.amount']).toBeDefined();
@@ -466,7 +466,7 @@ describe('Payment Model Unit Tests', () => {
         amount: -10,
         reason: 'Invalid refund'
       });
-      
+
       const error = mockPayment.validateSync();
       expect(error).toBeDefined();
       expect(error.errors['refunds.0.amount']).toBeDefined();
@@ -474,13 +474,13 @@ describe('Payment Model Unit Tests', () => {
 
     it('should set default createdAt for refund', () => {
       const beforeCreate = new Date();
-      
+
       mockPayment.refunds.push({
         refundId: 'REF-123',
         amount: 25.50,
         reason: 'Customer requested refund'
       });
-      
+
       const refund = mockPayment.refunds[0];
       expect(refund.createdAt).toBeDefined();
       expect(refund.createdAt.getTime()).toBeGreaterThanOrEqual(beforeCreate.getTime());
@@ -493,7 +493,7 @@ describe('Payment Model Unit Tests', () => {
         'warning_needs_response', 'warning_under_review', 'warning_closed',
         'needs_response', 'under_review', 'charge_refunded', 'won', 'lost'
       ];
-      
+
       validStatuses.forEach(status => {
         mockPayment.hasDispute = true;
         mockPayment.disputeStatus = status;
@@ -509,7 +509,7 @@ describe('Payment Model Unit Tests', () => {
       mockPayment.disputeAmount = 50;
       mockPayment.disputeCreatedAt = new Date();
       mockPayment.disputeUpdatedAt = new Date();
-      
+
       const error = mockPayment.validateSync();
       expect(error).toBeUndefined();
     });
@@ -517,7 +517,7 @@ describe('Payment Model Unit Tests', () => {
     it('should validate dispute amount is non-negative', () => {
       mockPayment.hasDispute = true;
       mockPayment.disputeAmount = -10;
-      
+
       const error = mockPayment.validateSync();
       expect(error).toBeDefined();
       expect(error.errors.disputeAmount).toBeDefined();
@@ -531,7 +531,7 @@ describe('Payment Model Unit Tests', () => {
         ['key2', { nested: 'object' }],
         ['key3', 123]
       ]);
-      
+
       const error = mockPayment.validateSync();
       expect(error).toBeUndefined();
       expect(mockPayment.metadata.get('key1')).toBe('value1');
@@ -548,7 +548,7 @@ describe('Payment Model Unit Tests', () => {
           order_id: '12345'
         }
       };
-      
+
       const error = mockPayment.validateSync();
       expect(error).toBeUndefined();
     });
@@ -558,9 +558,9 @@ describe('Payment Model Unit Tests', () => {
     it('should remove __v and response fields from JSON', () => {
       mockPayment.__v = 1;
       mockPayment.response = { sensitive: 'data' };
-      
+
       const json = mockPayment.toJSON();
-      
+
       expect(json.__v).toBeUndefined();
       expect(json.response).toBeUndefined();
       expect(json.paygistixId).toBeDefined();

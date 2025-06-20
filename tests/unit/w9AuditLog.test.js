@@ -50,7 +50,7 @@ describe('W9AuditLog Model Unit Tests', () => {
 
     it('should validate action enum values', () => {
       const invalidActions = ['invalid_action', 'fake_action'];
-      
+
       invalidActions.forEach(action => {
         mockLogEntry.action = action;
         const error = mockLogEntry.validateSync();
@@ -68,7 +68,7 @@ describe('W9AuditLog Model Unit Tests', () => {
         'encryption_failed', 'decryption_failed',
         'access_denied', 'quickbooks_export'
       ];
-      
+
       validActions.forEach(action => {
         mockLogEntry.action = action;
         const error = mockLogEntry.validateSync();
@@ -89,7 +89,7 @@ describe('W9AuditLog Model Unit Tests', () => {
   describe('User Info Validation', () => {
     it('should validate userType enum', () => {
       const validUserTypes = ['affiliate', 'administrator', 'system'];
-      
+
       validUserTypes.forEach(userType => {
         mockLogEntry.performedBy.userType = userType;
         const error = mockLogEntry.validateSync();
@@ -148,16 +148,16 @@ describe('W9AuditLog Model Unit Tests', () => {
         expect(saveSpy).toHaveBeenCalled();
         expect(result).toBeDefined();
         expect(result.action).toBe(action);
-        
+
         saveSpy.mockRestore();
       });
 
       it('should handle logging errors gracefully', async () => {
         const error = new Error('Database error');
-        
+
         // Mock save to throw error
         const saveSpy = jest.spyOn(W9AuditLog.prototype, 'save').mockRejectedValue(error);
-        
+
         // Mock console.error to prevent test output pollution
         const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
 
@@ -175,7 +175,7 @@ describe('W9AuditLog Model Unit Tests', () => {
           })
         );
         expect(result).toBeNull();
-        
+
         consoleErrorSpy.mockRestore();
         saveSpy.mockRestore();
       });
@@ -185,23 +185,23 @@ describe('W9AuditLog Model Unit Tests', () => {
   describe('Indexes', () => {
     it('should have required indexes defined', () => {
       const indexes = W9AuditLog.schema.indexes();
-      
+
       // Check for action index
-      const hasActionIndex = indexes.some(index => 
+      const hasActionIndex = indexes.some(index =>
         index[0].action === 1
       );
-      
+
       // Check for timestamp index
-      const hasTimestampIndex = indexes.some(index => 
+      const hasTimestampIndex = indexes.some(index =>
         index[0].timestamp === -1
       );
-      
+
       // Check for composite index
-      const hasCompositeIndex = indexes.some(index => 
-        index[0]['target.affiliateId'] === 1 && 
+      const hasCompositeIndex = indexes.some(index =>
+        index[0]['target.affiliateId'] === 1 &&
         index[0].timestamp === -1
       );
-      
+
       expect(hasActionIndex).toBe(true);
       expect(hasTimestampIndex).toBe(true);
       expect(hasCompositeIndex).toBe(true);
@@ -212,7 +212,7 @@ describe('W9AuditLog Model Unit Tests', () => {
     it('should track archived status', () => {
       mockLogEntry.archived = true;
       mockLogEntry.archivedAt = new Date();
-      
+
       const error = mockLogEntry.validateSync();
       expect(error).toBeUndefined();
       expect(mockLogEntry.archived).toBe(true);
@@ -229,7 +229,7 @@ describe('W9AuditLog Model Unit Tests', () => {
         fileName: 'tax-w9-2025.pdf',
         encryptionApplied: true
       };
-      
+
       const error = mockLogEntry.validateSync();
       expect(error).toBeUndefined();
     });
@@ -242,7 +242,7 @@ describe('W9AuditLog Model Unit Tests', () => {
         taxIdLast4: '1234',
         quickbooksVendorId: 'QB-VENDOR-123'
       };
-      
+
       const error = mockLogEntry.validateSync();
       expect(error).toBeUndefined();
     });
@@ -254,7 +254,7 @@ describe('W9AuditLog Model Unit Tests', () => {
         reason: 'Document is illegible',
         emailSent: true
       };
-      
+
       const error = mockLogEntry.validateSync();
       expect(error).toBeUndefined();
     });
@@ -268,7 +268,7 @@ describe('W9AuditLog Model Unit Tests', () => {
         format: 'csv',
         exportId: 'EXP-123'
       };
-      
+
       const error = mockLogEntry.validateSync();
       expect(error).toBeUndefined();
     });
@@ -286,7 +286,7 @@ describe('W9AuditLog Model Unit Tests', () => {
         success: true,
         reason: 'Document age exceeds 3 year retention policy'
       };
-      
+
       const error = mockLogEntry.validateSync();
       expect(error).toBeUndefined();
       expect(mockLogEntry.performedBy.userType).toBe('system');
