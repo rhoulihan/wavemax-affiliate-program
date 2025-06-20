@@ -73,6 +73,7 @@
         localStorage.removeItem('adminRefreshToken');
         localStorage.removeItem('adminData');
         localStorage.removeItem('requirePasswordChange');
+        localStorage.removeItem('adminCurrentTab');
 
         // Clear session manager data
         if (window.SessionManager) {
@@ -96,21 +97,40 @@
   const tabs = document.querySelectorAll('.nav-tab');
   const tabContents = document.querySelectorAll('.tab-content');
 
+  // Function to switch to a specific tab
+  function switchToTab(targetTab) {
+    // Find the tab element
+    const tabElement = Array.from(tabs).find(t => t.dataset.tab === targetTab);
+    if (!tabElement) return;
+
+    // Update active states
+    tabs.forEach(t => t.classList.remove('active'));
+    tabContents.forEach(tc => tc.classList.remove('active'));
+
+    tabElement.classList.add('active');
+    const contentElement = document.getElementById(`${targetTab}-tab`);
+    if (contentElement) {
+      contentElement.classList.add('active');
+    }
+
+    // Save current tab to localStorage
+    localStorage.setItem('adminCurrentTab', targetTab);
+
+    // Load tab data
+    loadTabData(targetTab);
+  }
+
+  // Add click handlers to tabs
   tabs.forEach(tab => {
     tab.addEventListener('click', () => {
       const targetTab = tab.dataset.tab;
-
-      // Update active states
-      tabs.forEach(t => t.classList.remove('active'));
-      tabContents.forEach(tc => tc.classList.remove('active'));
-
-      tab.classList.add('active');
-      document.getElementById(`${targetTab}-tab`).classList.add('active');
-
-      // Load tab data
-      loadTabData(targetTab);
+      switchToTab(targetTab);
     });
   });
+
+  // Restore last active tab or default to dashboard
+  const savedTab = localStorage.getItem('adminCurrentTab') || 'dashboard';
+  switchToTab(savedTab);
 
   // Create authenticated fetch with CSRF support
   const authenticatedFetch = window.CsrfUtils.createAuthenticatedFetch(() => token);
@@ -2376,7 +2396,7 @@
 
   // Load initial data
   removeLoadingSpinners();
-  loadDashboard();
+  // Dashboard is loaded when we restore the saved tab above
 
   // Refresh current tab when translations are ready
   window.addEventListener('i18nReady', function() {
@@ -2401,11 +2421,10 @@
       passwordValidator.refreshTranslations();
     }
 
-    // Update dynamic content in the active tab
-    const activeTab = document.querySelector('.nav-tab.active');
-    if (activeTab) {
-      const tabName = activeTab.getAttribute('data-tab');
-      loadTabData(tabName);
+    // Tab content is already loaded when we restore the saved tab
+    // Just refresh translations for the current content
+    if (window.i18n && window.i18n.translatePage) {
+      window.i18n.translatePage();
     }
   });
 

@@ -156,40 +156,39 @@ function initializeAffiliateDashboard() {
 
   console.log('Dashboard initialization - customer filter:', filterCustomerId);
 
-  if (filterCustomerId) {
-    // Switch to customers tab and filter by customer ID with a delay to ensure DOM is ready
-    setTimeout(() => {
-      switchToCustomersTab(affiliateId, filterCustomerId);
-    }, 500);
-  } else {
-    // Load pickups data for the default active tab
-    loadPickupRequests(affiliateId);
-  }
+  // Tab loading is handled below when we restore the saved tab or switch to customers
 
   // Setup tab navigation
   const tabButtons = document.querySelectorAll('.tab-btn');
   const tabContents = document.querySelectorAll('.tab-content');
 
-  tabButtons.forEach(button => {
-    button.addEventListener('click', function() {
-      // Remove active class from all buttons and tabs
-      tabButtons.forEach(btn => {
-        btn.classList.remove('border-blue-600');
-        btn.classList.remove('text-blue-600');
-        btn.classList.add('border-transparent');
-      });
+  // Function to switch to a specific tab
+  function switchToTab(tabId) {
+    // Remove active class from all buttons and tabs
+    tabButtons.forEach(btn => {
+      btn.classList.remove('border-blue-600');
+      btn.classList.remove('text-blue-600');
+      btn.classList.add('border-transparent');
+    });
 
-      tabContents.forEach(content => {
-        content.classList.remove('active');
-      });
+    tabContents.forEach(content => {
+      content.classList.remove('active');
+    });
 
-      // Add active class to clicked button and corresponding tab
-      this.classList.add('border-blue-600');
-      this.classList.add('text-blue-600');
-      this.classList.remove('border-transparent');
+    // Find and activate the tab button
+    const targetButton = document.querySelector(`[data-tab="${tabId}"]`);
+    if (targetButton) {
+      targetButton.classList.add('border-blue-600');
+      targetButton.classList.add('text-blue-600');
+      targetButton.classList.remove('border-transparent');
 
-      const tabId = this.getAttribute('data-tab');
-      document.getElementById(`${tabId}-tab`).classList.add('active');
+      const tabContent = document.getElementById(`${tabId}-tab`);
+      if (tabContent) {
+        tabContent.classList.add('active');
+      }
+
+      // Save current tab to localStorage
+      localStorage.setItem('affiliateCurrentTab', tabId);
 
       // Load tab-specific data
       if (tabId === 'pickups') {
@@ -201,8 +200,36 @@ function initializeAffiliateDashboard() {
       } else if (tabId === 'settings') {
         loadSettingsData(affiliateId);
       }
+    }
+  }
+
+  // Add click handlers to tab buttons
+  tabButtons.forEach(button => {
+    button.addEventListener('click', function() {
+      const tabId = this.getAttribute('data-tab');
+      switchToTab(tabId);
     });
   });
+
+  // Restore last active tab or use customer filter or default to pickups
+  if (filterCustomerId) {
+    // If filtering by customer, switch to customers tab
+    setTimeout(() => {
+      switchToTab('customers');
+      // Apply the filter after tab loads
+      setTimeout(() => {
+        const searchInput = document.getElementById('searchInput');
+        if (searchInput) {
+          searchInput.value = filterCustomerId;
+          searchInput.dispatchEvent(new Event('input'));
+        }
+      }, 300);
+    }, 500);
+  } else {
+    // Restore saved tab or default to pickups
+    const savedTab = localStorage.getItem('affiliateCurrentTab') || 'pickups';
+    switchToTab(savedTab);
+  }
 
   // Logout functionality
   const logoutBtn = document.getElementById('logoutBtn');
@@ -213,6 +240,7 @@ function initializeAffiliateDashboard() {
       console.log('Logout button clicked');
       localStorage.removeItem('affiliateToken');
       localStorage.removeItem('currentAffiliate');
+      localStorage.removeItem('affiliateCurrentTab');
 
       // Clear session manager data
       if (window.SessionManager) {
