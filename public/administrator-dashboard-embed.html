@@ -623,11 +623,11 @@
         }
 
         .customer-card {
-            width: 5in;
-            height: 7in;
+            width: 4in;
+            height: 6in;
             border: 1px solid #ddd;
-            border-radius: 12px;
-            padding: 30px;
+            border-radius: 8px;
+            padding: 24px;
             margin: 10px;
             background: white;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
@@ -682,13 +682,13 @@
 
         .customer-card .qr-code {
             position: absolute;
-            bottom: 30px;
-            right: 30px;
-            width: 150px;
-            height: 150px;
+            bottom: 24px;
+            right: 24px;
+            width: 100px;
+            height: 100px;
             background: white;
             border: 2px solid #ddd;
-            padding: 10px;
+            padding: 8px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -710,8 +710,19 @@
         }
 
         @media print {
-            body > *:not(.print-container) {
-                display: none !important;
+            @page {
+                size: 4in 6in;
+                margin: 0;
+            }
+            
+            /* Hide everything except print container */
+            body * {
+                visibility: hidden;
+            }
+            
+            .print-container,
+            .print-container * {
+                visibility: visible;
             }
             
             .print-container {
@@ -719,24 +730,25 @@
                 position: absolute;
                 top: 0;
                 left: 0;
-                width: 100%;
+                width: 4in;
             }
             
             .customer-card {
-                float: none !important;
-                margin: 0.5in auto !important;
+                width: 4in !important;
+                height: 6in !important;
+                margin: 0 !important;
+                padding: 0.375in !important;
                 page-break-after: always;
+                page-break-inside: avoid;
                 box-shadow: none !important;
-                border: 2px solid #000 !important;
+                border: none !important;
+                display: block !important;
+                visibility: visible !important;
+                box-sizing: border-box !important;
             }
             
             .customer-card:last-child {
                 page-break-after: auto;
-            }
-            
-            @page {
-                size: 5.5in 7.5in;
-                margin: 0.25in;
             }
         }
         
