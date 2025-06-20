@@ -129,6 +129,9 @@
         </div>
     </div>
 
+    <!-- Session Manager -->
+    <script src="/assets/js/session-manager.js"></script>
+
     <script>
         // Single page embedded application
         const BASE_URL = window.location.protocol + '//' + window.location.host;
@@ -198,7 +201,7 @@
                 }
             }
             
-            const route = params.get('route') || '/';
+            let route = params.get('route') || '/';
             
             // If route is customer-login with affid, redirect to registration
             if (route === '/customer-login' && affid) {
@@ -206,7 +209,13 @@
                 return '/customer-register';
             }
             
-            console.log('Route from URL:', route);
+            // Use SessionManager to validate route based on authentication
+            if (window.SessionManager) {
+                route = window.SessionManager.getAuthenticatedRoute(route);
+                console.log('SessionManager adjusted route to:', route);
+            }
+            
+            console.log('Final route:', route);
             return route;
         }
         

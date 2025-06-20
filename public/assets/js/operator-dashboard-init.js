@@ -17,8 +17,21 @@
   const token = localStorage.getItem('operatorToken');
   const operatorData = JSON.parse(localStorage.getItem('operatorData') || '{}');
 
+  // Update session activity if authenticated
+  if (token && window.SessionManager) {
+    window.SessionManager.updateActivity('operator');
+  }
+
   if (!token) {
-    window.location.href = '/operator-login-embed.html';
+    // Use embed navigation if available
+    if (window.parent !== window) {
+      window.parent.postMessage({
+        type: 'navigate',
+        data: { page: '/operator-login' }
+      }, '*');
+    } else {
+      window.location.href = '/embed-app.html?route=/operator-login';
+    }
     return;
   }
 
@@ -47,7 +60,21 @@
       localStorage.removeItem('operatorToken');
       localStorage.removeItem('operatorRefreshToken');
       localStorage.removeItem('operatorData');
-      window.location.href = '/operator-login-embed.html';
+      
+      // Clear session manager data
+      if (window.SessionManager) {
+        window.SessionManager.clearAuth('operator');
+      }
+
+      // Use embed navigation
+      if (window.parent !== window) {
+        window.parent.postMessage({
+          type: 'navigate',
+          data: { page: '/operator-login' }
+        }, '*');
+      } else {
+        window.location.href = '/embed-app.html?route=/operator-login';
+      }
       return;
     }
 
@@ -482,7 +509,21 @@
         localStorage.removeItem('operatorToken');
         localStorage.removeItem('operatorRefreshToken');
         localStorage.removeItem('operatorData');
-        window.location.href = '/operator-login-embed.html';
+        
+        // Clear session manager data
+        if (window.SessionManager) {
+          window.SessionManager.clearAuth('operator');
+        }
+
+        // Use embed navigation
+        if (window.parent !== window) {
+          window.parent.postMessage({
+            type: 'navigate',
+            data: { page: '/operator-login' }
+          }, '*');
+        } else {
+          window.location.href = '/embed-app.html?route=/operator-login';
+        }
       } else {
         const error = await response.json();
         alert(error.error || 'Failed to clock out');

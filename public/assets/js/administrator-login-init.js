@@ -115,6 +115,15 @@
           localStorage.setItem('adminRefreshToken', data.refreshToken);
           localStorage.setItem('adminData', JSON.stringify(data.user || data.administrator));
 
+          // Use SessionManager to set auth data
+          if (window.SessionManager) {
+            window.SessionManager.setAuth('administrator', {
+              token: data.token,
+              refreshToken: data.refreshToken,
+              userData: data.user || data.administrator
+            });
+          }
+
           // Show success message
           const successMsg = window.i18n
             ? `${window.i18n.t('common.messages.loginSuccess')} ${window.i18n.t('common.messages.redirecting')}`

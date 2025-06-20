@@ -24,6 +24,11 @@
   const adminData = JSON.parse(localStorage.getItem('adminData') || '{}');
   const requirePasswordChange = localStorage.getItem('requirePasswordChange');
 
+  // Update session activity if authenticated
+  if (token && window.SessionManager) {
+    window.SessionManager.updateActivity('administrator');
+  }
+
   // Redirect to login if no token or if password change is still required
   if (!token || requirePasswordChange === 'true') {
     // Clear everything and redirect to login
@@ -31,7 +36,16 @@
     localStorage.removeItem('adminRefreshToken');
     localStorage.removeItem('adminData');
     localStorage.removeItem('requirePasswordChange');
-    window.location.href = '/administrator-login-embed.html';
+    
+    // Use embed navigation if available
+    if (window.parent !== window) {
+      window.parent.postMessage({
+        type: 'navigate',
+        data: { page: '/administrator-login' }
+      }, '*');
+    } else {
+      window.location.href = '/embed-app.html?route=/administrator-login';
+    }
     return;
   }
 
@@ -60,8 +74,20 @@
         localStorage.removeItem('adminData');
         localStorage.removeItem('requirePasswordChange');
 
-        // Redirect to login
-        window.location.href = '/administrator-login-embed.html';
+        // Clear session manager data
+        if (window.SessionManager) {
+          window.SessionManager.clearAuth('administrator');
+        }
+
+        // Use embed navigation
+        if (window.parent !== window) {
+          window.parent.postMessage({
+            type: 'navigate',
+            data: { page: '/administrator-login' }
+          }, '*');
+        } else {
+          window.location.href = '/embed-app.html?route=/administrator-login';
+        }
       }
     });
   }
