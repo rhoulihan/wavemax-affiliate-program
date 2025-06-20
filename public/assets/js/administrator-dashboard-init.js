@@ -598,16 +598,17 @@
         name: customer.name
       });
       
-      // Create QR code canvas
-      const qrCanvas = document.createElement('canvas');
-      qrCanvas.width = 120;
-      qrCanvas.height = 120;
-      
+      // Create QR code as data URL for better print compatibility
+      let qrImageUrl = '';
       try {
-        await QRCode.toCanvas(qrCanvas, qrData, {
-          width: 120,
-          margin: 1,
-          errorCorrectionLevel: 'M'
+        qrImageUrl = await QRCode.toDataURL(qrData, {
+          width: 150,
+          margin: 2,
+          errorCorrectionLevel: 'M',
+          color: {
+            dark: '#000000',
+            light: '#FFFFFF'
+          }
         });
       } catch (err) {
         console.error('QR Code generation failed:', err);
@@ -620,15 +621,17 @@
             <div class="customer-name">${customer.name}</div>
             <div class="customer-address">
               ${customer.address}<br>
-              ${customer.phone}
+              ${customer.phone}<br>
+              ${customer.email || ''}
             </div>
           </div>
         </div>
         <div class="customer-id-section">
-          Customer ID: ${customer.id}
+          <strong>Customer ID:</strong><br>
+          ${customer.id}
         </div>
         <div class="qr-code">
-          ${qrCanvas.outerHTML}
+          ${qrImageUrl ? `<img src="${qrImageUrl}" alt="QR Code" />` : '<div style="text-align: center; color: #999;">QR Code Error</div>'}
         </div>
       `;
       
