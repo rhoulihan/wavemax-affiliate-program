@@ -243,6 +243,7 @@
             <div class="version-nav">
                 <h3>Quick Navigation</h3>
                 <ul>
+                    <li><a href="#v1.9.0">v1.9.0 - Session Persistence & Browser Navigation</a></li>
                     <li><a href="#v1.8.0">v1.8.0 - Payment Processing Refactoring & Enhanced Workflows</a></li>
                     <li><a href="#v1.7.0">v1.7.0 - DocuSign W-9 Integration & Enhanced i18n</a></li>
                     <li><a href="#v1.6.0">v1.6.0 - Bag Tracking Removal & Dynamic Delivery Fees</a></li>
@@ -257,9 +258,52 @@
                 </ul>
             </div>
 
-            <div id="v1.8.0" class="release">
-                <h2>Version 1.8.0 <span class="tag new">Latest</span></h2>
+            <div id="v1.9.0" class="release">
+                <h2>Version 1.9.0 <span class="tag new">Latest</span></h2>
                 <div class="release-date">Released on January 20, 2025</div>
+                
+                <h3>🔄 Session Persistence & Browser Navigation</h3>
+                <ul>
+                    <li><span class="tag new">NEW</span> <strong>10-Minute Session Management:</strong> Comprehensive session persistence
+                        <ul>
+                            <li>SessionManager service for all user roles (admin, operator, affiliate, customer)</li>
+                            <li>Automatic 10-minute inactivity timeout with activity-based renewal</li>
+                            <li>Token and authentication data persisted in localStorage</li>
+                            <li>Special handling for administrator password change requirements</li>
+                            <li>Multi-role support allowing simultaneous logins</li>
+                        </ul>
+                    </li>
+                    <li><span class="tag new">NEW</span> <strong>Browser Navigation Support:</strong> Full browser back/forward functionality
+                        <ul>
+                            <li>Authentication state maintained across browser navigation</li>
+                            <li>Automatic route validation based on authentication status</li>
+                            <li>Protected routes redirect to appropriate login pages</li>
+                            <li>Authenticated users redirected from login pages to dashboards</li>
+                        </ul>
+                    </li>
+                    <li><span class="tag new">NEW</span> <strong>Tab State Persistence:</strong> Dashboard tabs remember their state
+                        <ul>
+                            <li>Tab state saved to localStorage and URL parameters</li>
+                            <li>Browser history integration with pushState/popstate events</li>
+                            <li>Tab content automatically reloads on browser navigation</li>
+                            <li>Retry logic for iframe-dashboard message passing</li>
+                        </ul>
+                    </li>
+                </ul>
+
+                <h3>🐛 Bug Fixes</h3>
+                <ul>
+                    <li><span class="tag fixed">FIXED</span> Session persistence issues across page refresh</li>
+                    <li><span class="tag fixed">FIXED</span> Tab focus loss on dashboard refresh</li>
+                    <li><span class="tag fixed">FIXED</span> Browser back/forward not updating tab content</li>
+                    <li><span class="tag fixed">FIXED</span> Translation function initialization error in operators tab</li>
+                    <li><span class="tag fixed">FIXED</span> Tab content not reloading on browser navigation</li>
+                </ul>
+            </div>
+
+            <div id="v1.8.0" class="release">
+                <h2>Version 1.8.0</h2>
+                <div class="release-date">Released on January 19, 2025</div>
                 
                 <h3>💳 Payment Processing Improvements</h3>
                 <ul>

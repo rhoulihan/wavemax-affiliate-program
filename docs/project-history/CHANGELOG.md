@@ -5,6 +5,15 @@ All notable changes to the WaveMAX Laundry Affiliate Program will be documented 
 ## [Unreleased]
 
 ### Added
+- Session persistence and browser navigation support
+  - 10-minute session persistence across page refresh and browser navigation
+  - SessionManager service for all user roles (admin, operator, affiliate, customer)
+  - Automatic activity tracking and session renewal
+  - Browser back/forward button support maintaining authentication state
+  - Tab state persistence across refresh with URL parameter tracking
+  - Browser history integration using pushState/popstate events
+  - Message passing retry logic for iframe-dashboard communication
+  - Multi-role authentication support for simultaneous logins
 - Generic payment processing methods (`processPayment` and `processPaymentTestMode`)
   - Unified payment flow for all transaction types
   - Simplified integration with single payment endpoint
@@ -122,6 +131,11 @@ All notable changes to the WaveMAX Laundry Affiliate Program will be documented 
   - Migrated existing data to maintain order history without bag associations
 
 ### Fixed
+- Session persistence issues across page refresh and browser navigation
+- Tab focus loss on dashboard refresh - now persists via localStorage and URL parameters
+- Browser back/forward navigation not updating tab content - fixed with retry logic
+- Translation function initialization error in operators tab ("Cannot access 't' before initialization")
+- Tab content not reloading on browser navigation - added proper event handling
 - Customer dashboard now properly displays bag credit information
 - Delivery fee calculations now use dynamic pricing model consistently
 - Fixed affiliate fee structure persistence in database
