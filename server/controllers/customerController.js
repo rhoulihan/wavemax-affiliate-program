@@ -687,6 +687,89 @@ exports.updateCustomerPassword = async (req, res) => {
   }
 };
 
+/**
+ * Get customers list for admin dashboard
+ * @access Admin only
+ */
+exports.getCustomersForAdmin = async (req, res) => {
+  try {
+    // Build query
+    const query = {};
+    
+    // Search filter
+    if (req.query.search) {
+      const searchRegex = new RegExp(req.query.search, 'i');
+      query.$or = [
+        { firstName: searchRegex },
+        { lastName: searchRegex },
+        { email: searchRegex },
+        { phone: searchRegex },
+        { customerId: searchRegex }
+      ];
+    }
+    
+    // Affiliate filter
+    if (req.query.affiliateId && req.query.affiliateId !== 'all') {
+      query.affiliateId = req.query.affiliateId;
+    }
+    
+    // Status filter
+    if (req.query.status && req.query.status !== 'all') {
+      if (req.query.status === 'active') {
+        query.isActive = true;
+      } else if (req.query.status === 'inactive') {
+        query.isActive = false;
+      } else if (req.query.status === 'new') {
+        // We'll handle this after the initial query
+      }
+    }
+    
+    // Get customers
+    let customers = await Customer.find(query)
+      .select('-passwordHash -passwordSalt -__v')
+      .populate('affiliateId', 'businessName affiliateId')
+      .sort({ createdAt: -1 })
+      .limit(500);
+    
+    // Get order counts for each customer
+    const customerIds = customers.map(c => c._id);
+    const orderCounts = await Order.aggregate([
+      { $match: { customerId: { $in: customerIds } } },
+      { $group: { _id: '$customerId', count: { $sum: 1 } } }
+    ]);
+    
+    // Create a map of order counts
+    const orderCountMap = {};
+    orderCounts.forEach(oc => {
+      orderCountMap[oc._id.toString()] = oc.count;
+    });
+    
+    // Add order counts to customers
+    customers = customers.map(customer => {
+      const customerObj = customer.toObject();
+      customerObj.orderCount = orderCountMap[customer._id.toString()] || 0;
+      return customerObj;
+    });
+    
+    // Filter for new customers if requested
+    if (req.query.status === 'new') {
+      customers = customers.filter(c => c.orderCount === 0);
+    }
+    
+    res.status(200).json({
+      success: true,
+      customers,
+      total: customers.length
+    });
+  } catch (error) {
+    console.error('Get customers for admin error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to retrieve customers'
+    });
+  }
+};
+
 
 
 module.exports = exports;
