@@ -54,32 +54,52 @@
     // Check if user is authenticated for a specific role
     isAuthenticated(role) {
       const keys = this.STORAGE_KEYS[role];
-      if (!keys) return false;
+      if (!keys) {
+        console.log(`[SessionManager] No keys found for role: ${role}`);
+        return false;
+      }
 
       const token = localStorage.getItem(keys.token);
       const lastActivity = localStorage.getItem(keys.lastActivity);
 
-      if (!token) return false;
+      console.log(`[SessionManager] ${role} - Token exists:`, !!token);
+      console.log(`[SessionManager] ${role} - Last activity:`, lastActivity);
+
+      if (!token) {
+        console.log(`[SessionManager] ${role} - No token found`);
+        return false;
+      }
 
       // Check if session has expired
       if (lastActivity) {
         const lastActivityTime = parseInt(lastActivity, 10);
         const currentTime = Date.now();
-        if (currentTime - lastActivityTime > this.SESSION_TIMEOUT) {
+        const timeDiff = currentTime - lastActivityTime;
+        console.log(`[SessionManager] ${role} - Time since last activity:`, timeDiff, 'ms');
+        
+        if (timeDiff > this.SESSION_TIMEOUT) {
+          console.log(`[SessionManager] ${role} - Session expired`);
           // Session expired, clear auth data
           this.clearAuth(role);
           return false;
         }
+      } else {
+        console.log(`[SessionManager] ${role} - No last activity timestamp found`);
+        // If no lastActivity is set, consider it a new session and set it
+        this.updateActivity(role);
       }
 
       // Special check for admin password change requirement
       if (role === 'administrator') {
         const requirePasswordChange = localStorage.getItem(keys.requirePasswordChange);
+        console.log(`[SessionManager] ${role} - Require password change:`, requirePasswordChange);
         if (requirePasswordChange === 'true') {
+          console.log(`[SessionManager] ${role} - Password change required, auth denied`);
           return false;
         }
       }
 
+      console.log(`[SessionManager] ${role} - Authentication valid`);
       return true;
     },
 
@@ -103,19 +123,26 @@
 
     // Get the appropriate route based on authentication status
     getAuthenticatedRoute(requestedRoute) {
+      console.log('[SessionManager] getAuthenticatedRoute called with:', requestedRoute);
+      
       // Check each role to see if user is authenticated
       for (const [role, protectedRoutes] of Object.entries(this.PROTECTED_ROUTES)) {
-        if (this.isAuthenticated(role)) {
+        const isAuth = this.isAuthenticated(role);
+        console.log(`[SessionManager] Checking ${role} authentication:`, isAuth);
+        
+        if (isAuth) {
           // User is authenticated for this role
           
           // If requesting a protected route for this role, allow it
           if (protectedRoutes.includes(requestedRoute)) {
+            console.log(`[SessionManager] Allowing protected route ${requestedRoute} for ${role}`);
             this.updateActivity(role);
             return requestedRoute;
           }
           
           // If requesting the login page for this role, redirect to dashboard
           if (requestedRoute === this.LOGIN_ROUTES[role]) {
+            console.log(`[SessionManager] Redirecting ${role} from login to dashboard`);
             this.updateActivity(role);
             return `/${role}-dashboard`;
           }
@@ -129,11 +156,13 @@
       for (const [role, protectedRoutes] of Object.entries(this.PROTECTED_ROUTES)) {
         if (protectedRoutes.includes(requestedRoute)) {
           // Route requires auth but user is not authenticated
+          console.log(`[SessionManager] Route ${requestedRoute} requires auth, redirecting to ${this.LOGIN_ROUTES[role]}`);
           return this.LOGIN_ROUTES[role];
         }
       }
 
       // Route doesn't require auth or is a login page
+      console.log(`[SessionManager] Route ${requestedRoute} doesn't require auth`);
       return requestedRoute;
     },
 
