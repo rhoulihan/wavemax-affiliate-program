@@ -821,6 +821,7 @@
       "customers": {
         "title": "Gestão de Clientes",
         "search": "Pesquisar Clientes",
+        "searchPlaceholder": "Nome, E-mail, Telefone ou ID do Cliente",
         "filterByAffiliate": "Filtrar por Afiliado",
         "filterByStatus": "Filtrar por Status",
         "new": "Novo (Sem Pedidos)",
@@ -907,14 +908,25 @@
         "confirmVerify": "Tem certeza de que deseja verificar este documento W-9?",
         "confirmReject": "Tem certeza de que deseja rejeitar este documento W-9?",
         "rejectionReason": "Motivo da Rejeição",
-        "rejectionReasonPlaceholder": "Digite o motivo da rejeição...",
+        "rejectionReasonPlaceholder": "Por favor, forneça uma razão clara para a rejeição",
         "processing": "Processando...",
         "verifySuccess": "Documento W-9 verificado com sucesso",
         "rejectSuccess": "Documento W-9 rejeitado",
         "processingError": "Erro ao processar documento W-9",
         "loadingDocument": "Carregando documento...",
         "documentLoadError": "Erro ao carregar documento",
-        "noRejectionReason": "Por favor, forneça um motivo para a rejeição"
+        "noRejectionReason": "Por favor, forneça um motivo para a rejeição",
+        "filterByStatus": "Filtrar por Status",
+        "searchAffiliate": "Buscar Afiliado",
+        "searchPlaceholder": "Nome, E-mail ou ID do Afiliado",
+        "taxIdLast4": "ID Fiscal (Últimos 4 Dígitos)",
+        "taxIdLast4Placeholder": "1234",
+        "businessNamePlaceholder": "Deixe em branco se usar nome pessoal",
+        "quickbooksVendorId": "ID do Fornecedor QuickBooks",
+        "quickbooksVendorIdPlaceholder": "QB-VENDOR-123",
+        "notes": "Notas de Verificação",
+        "notesPlaceholder": "Notas opcionais sobre a verificação",
+        "rejectionHelp": "Esta mensagem será enviada ao afiliado"
       },
       "quickbooks": {
         "title": "Integração QuickBooks",
@@ -950,7 +962,8 @@
         "noDataForPeriod": "Nenhum dado encontrado para o período selecionado",
         "vendorListTitle": "Lista de Fornecedores",
         "paymentSummaryTitle": "Resumo de Pagamentos",
-        "commissionDetailTitle": "Relatório Detalhado de Comissões"
+        "commissionDetailTitle": "Relatório Detalhado de Comissões",
+        "searchAffiliatePlaceholder": "Digite para pesquisar..."
       },
       "auditlog": {
         "title": "Registro de Auditoria W-9",
@@ -964,6 +977,7 @@
         "actionType": "Tipo de Ação",
         "allActions": "Todas as Ações",
         "affiliateId": "ID do Afiliado",
+        "affiliateIdPlaceholder": "Pesquisar por ID do Afiliado",
         "dateFrom": "Data Inicial",
         "dateTo": "Data Final",
         "applyFilters": "Aplicar Filtros",
