@@ -584,26 +584,32 @@
   
   // Generate and print customer cards
   async function generateAndPrintCards(customers) {
-    const printContainer = document.getElementById('printContainer');
+    let printContainer = document.getElementById('printContainer');
+    
+    // If print container doesn't exist, create it
+    if (!printContainer) {
+      console.warn('Print container not found, creating one');
+      printContainer = document.createElement('div');
+      printContainer.id = 'printContainer';
+      printContainer.className = 'print-container';
+      document.body.appendChild(printContainer);
+    }
+    
     printContainer.innerHTML = '';
     
     for (const customer of customers) {
       const card = document.createElement('div');
       card.className = 'customer-card';
       
-      // Generate QR code data
-      const qrData = JSON.stringify({
-        type: 'customer',
-        id: customer.id,
-        name: customer.name
-      });
+      // Generate QR code URL
+      const qrData = `https://www.wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program/customer?cust=${customer.id}`;
       
       // Create QR code as data URL for better print compatibility
       let qrImageUrl = '';
       try {
         qrImageUrl = await QRCode.toDataURL(qrData, {
           width: 150,
-          margin: 2,
+          margin: 1,
           errorCorrectionLevel: 'M',
           color: {
             dark: '#000000',
@@ -626,10 +632,6 @@
             </div>
           </div>
         </div>
-        <div class="customer-id-section">
-          <strong>Customer ID:</strong><br>
-          ${customer.id}
-        </div>
         <div class="qr-code">
           ${qrImageUrl ? `<img src="${qrImageUrl}" alt="QR Code" />` : '<div style="text-align: center; color: #999;">QR Code Error</div>'}
         </div>
@@ -638,10 +640,111 @@
       printContainer.appendChild(card);
     }
     
-    // Trigger print
+    // Debug: Log the print container content
+    console.log('Print container HTML:', printContainer.innerHTML);
+    console.log('Number of cards generated:', customers.length);
+    
+    // Ensure print styles are applied
+    if (!document.getElementById('printStyles')) {
+      const printStyles = document.createElement('style');
+      printStyles.id = 'printStyles';
+      printStyles.textContent = `
+        @media print {
+          @page {
+            size: 4in 6in;
+            margin: 0;
+          }
+          
+          body * {
+            visibility: hidden !important;
+          }
+          
+          .print-container,
+          .print-container * {
+            visibility: visible !important;
+          }
+          
+          .print-container {
+            display: block !important;
+            position: absolute !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 4in !important;
+            z-index: 9999 !important;
+          }
+          
+          .customer-card {
+            display: block !important;
+            visibility: visible !important;
+            width: 4in !important;
+            height: 6in !important;
+            margin: 0 !important;
+            padding: 0.375in !important;
+            border: none !important;
+            page-break-after: always !important;
+            page-break-inside: avoid !important;
+            box-sizing: border-box !important;
+            position: relative !important;
+            background: white !important;
+          }
+          
+          .customer-card .card-header {
+            margin-bottom: 0.25in !important;
+          }
+          
+          .customer-card .card-logo {
+            font-size: 1.25rem !important;
+            font-weight: bold !important;
+            color: #000 !important;
+            margin-bottom: 0.125in !important;
+          }
+          
+          .customer-card .customer-name {
+            font-size: 1.1rem !important;
+            font-weight: 600 !important;
+            margin-bottom: 0.125in !important;
+          }
+          
+          .customer-card .customer-address {
+            font-size: 0.8rem !important;
+            line-height: 1.3 !important;
+            color: #333 !important;
+          }
+          
+          .customer-card .qr-code {
+            position: absolute !important;
+            bottom: 0.375in !important;
+            right: 0.375in !important;
+            width: 1.25in !important;
+            height: 1.25in !important;
+            padding: 0 !important;
+            border: none !important;
+          }
+          
+          .customer-card .qr-code img {
+            width: 100% !important;
+            height: 100% !important;
+          }
+        }
+      `;
+      document.head.appendChild(printStyles);
+    }
+    
+    // Force layout recalculation
+    printContainer.offsetHeight;
+    
+    // Show print instructions
+    alert('Print Settings:\n\n1. Set Paper Size to 4x6 inches (or Index Card 4x6)\n2. Set Orientation to Portrait\n3. Set Margins to None\n4. Disable Headers and Footers\n\nClick OK to open print dialog.');
+    
+    // Trigger print with longer delay to ensure rendering
     setTimeout(() => {
       window.print();
-    }, 500);
+      
+      // Clean up print container after printing
+      setTimeout(() => {
+        printContainer.innerHTML = '';
+      }, 1000);
+    }, 1000);
   }
   
   // Debounce helper
