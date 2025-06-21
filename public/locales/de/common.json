@@ -759,6 +759,11 @@
         "auditlog": "Audit-Protokoll",
         "config": "Konfiguration"
       },
+      "subtabs": {
+        "overview": "Übersicht",
+        "charts": "Diagramme",
+        "recentActivity": "Letzte Aktivitäten"
+      },
       "stats": {
         "activeOperators": "Aktive Operatoren",
         "todaysOrders": "Heutige Bestellungen",

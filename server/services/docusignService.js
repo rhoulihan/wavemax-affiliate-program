@@ -283,8 +283,10 @@ class DocuSignService {
 
   /**
    * Create W9 envelope for affiliate
+   * @param {Object} affiliate - The affiliate object
+   * @param {boolean} useEmbeddedSigning - Whether to use embedded signing (default: false for admin-initiated)
    */
-  async createW9Envelope(affiliate) {
+  async createW9Envelope(affiliate, useEmbeddedSigning = false) {
     try {
       // Check if we're in test mode (until JWT consent is granted)
       if (process.env.DOCUSIGN_TEST_MODE === 'true') {
@@ -298,14 +300,11 @@ class DocuSignService {
 
       const accessToken = await this.authenticate();
 
-      const envelopeDefinition = {
-        templateId: this.w9TemplateId,
-        templateRoles: [{
-          email: affiliate.email,
-          name: `${affiliate.firstName} ${affiliate.lastName}`,
-          roleName: 'Signer 1', // Updated to match template role name
-          clientUserId: affiliate._id.toString(), // For embedded signing
-          tabs: {
+      const templateRole = {
+        email: affiliate.email,
+        name: `${affiliate.firstName} ${affiliate.lastName}`,
+        roleName: 'Signer 1', // Updated to match template role name
+        tabs: {
             textTabs: [
               {
                 tabLabel: 'Owner\'s First Name',
@@ -334,10 +333,36 @@ class DocuSignService {
               {
                 tabLabel: '5-Digit Zip Code',
                 value: affiliate.zipCode ? affiliate.zipCode.substring(0, 5) : ''
+              },
+              // Business/DBA name if applicable
+              {
+                tabLabel: 'Business name',
+                value: affiliate.businessName || ''
+              },
+              // Add common W9 text fields
+              {
+                tabLabel: 'Business Name',
+                value: affiliate.businessName || ''
+              },
+              {
+                tabLabel: 'DBA',
+                value: affiliate.businessName || ''
               }
             ]
+            // Note: SSN/EIN fields are intentionally not pre-filled for security
+            // The signer must enter their tax ID information directly in DocuSign
+            // The template should have the appropriate SSN or EIN input fields configured
           }
-        }],
+        };
+
+      // Only add clientUserId for embedded signing
+      if (useEmbeddedSigning) {
+        templateRole.clientUserId = affiliate._id.toString();
+      }
+
+      const envelopeDefinition = {
+        templateId: this.w9TemplateId,
+        templateRoles: [templateRole],
         status: 'sent',
         eventNotification: {
           url: `${process.env.BACKEND_URL}/api/v1/w9/docusign-webhook`,

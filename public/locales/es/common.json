@@ -759,6 +759,11 @@
         "auditlog": "Registro de Auditoría",
         "config": "Configuración"
       },
+      "subtabs": {
+        "overview": "Resumen",
+        "charts": "Gráficos",
+        "recentActivity": "Actividad Reciente"
+      },
       "stats": {
         "activeOperators": "Operadores Activos",
         "todaysOrders": "Pedidos de Hoy",

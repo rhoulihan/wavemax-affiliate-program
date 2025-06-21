@@ -1,390 +1,463 @@
 #!/usr/bin/env node
 
 /**
- * Sample Data Generation Script
- * Creates 10 affiliates, each with 10 customers, and orders for each customer
- * All passwords: R8der50!2025
- *
- * New Features:
- * - Orders spread over 90 days
- * - 95% of orders complete within 24 hours
- * - Orders spread across all customers
- * - Today has exactly 25 orders
- * - In-progress orders have a mix of states
+ * Generate Sample Data Script
+ * Creates realistic test data for the WaveMAX Laundry Affiliate Program
+ * 
+ * Creates:
+ * - 20 affiliates
+ * - 10-20 customers per affiliate
+ * - 7-12 orders per customer over the last 60 days
+ * - 1-2 bags per order averaging 30 lbs each
+ * - ~1/3 of customers have an order in process (placed within last 24 hours)
+ * - All other orders are completed with 20-30 hours processing time
  */
 
+require('dotenv').config();
 const mongoose = require('mongoose');
+const { faker } = require('@faker-js/faker');
 const crypto = require('crypto');
-const path = require('path');
-require('dotenv').config({ path: path.join(__dirname, '..', '.env') });
 
-// Models
+// Import models
+const Administrator = require('../server/models/Administrator');
 const Affiliate = require('../server/models/Affiliate');
 const Customer = require('../server/models/Customer');
 const Order = require('../server/models/Order');
 const SystemConfig = require('../server/models/SystemConfig');
-const encryptionUtil = require('../server/utils/encryption');
 
-// Connect to MongoDB
-const connectDB = async () => {
-  try {
-    await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/wavemax', {
-      useNewUrlParser: true,
-      useUnifiedTopology: true
-    });
-    console.log('MongoDB connected successfully');
-  } catch (error) {
-    console.error('MongoDB connection error:', error);
-    process.exit(1);
-  }
-};
+// Set seed for consistent data
+faker.seed(12345);
 
-// Generate unique affiliate names and data
-const affiliateData = [
-  { firstName: 'John', lastName: 'Anderson', email: 'john.anderson@example.com', company: 'Anderson Enterprises' },
-  { firstName: 'Sarah', lastName: 'Martinez', email: 'sarah.martinez@example.com', company: 'Martinez Solutions' },
-  { firstName: 'Michael', lastName: 'Thompson', email: 'michael.thompson@example.com', company: 'Thompson Services' },
-  { firstName: 'Emily', lastName: 'Rodriguez', email: 'emily.rodriguez@example.com', company: 'Rodriguez Group' },
-  { firstName: 'David', lastName: 'Wilson', email: 'david.wilson@example.com', company: 'Wilson Industries' },
-  { firstName: 'Jessica', lastName: 'Garcia', email: 'jessica.garcia@example.com', company: 'Garcia Corp' },
-  { firstName: 'Robert', lastName: 'Brown', email: 'robert.brown@example.com', company: 'Brown Holdings' },
-  { firstName: 'Lisa', lastName: 'Davis', email: 'lisa.davis@example.com', company: 'Davis Ventures' },
-  { firstName: 'William', lastName: 'Miller', email: 'william.miller@example.com', company: 'Miller Associates' },
-  { firstName: 'Amanda', lastName: 'Johnson', email: 'amanda.johnson@example.com', company: 'Johnson LLC' }
-];
+// Configuration
+const NUM_AFFILIATES = 20;
+const MIN_CUSTOMERS_PER_AFFILIATE = 10;
+const MAX_CUSTOMERS_PER_AFFILIATE = 20;
+const MIN_ORDERS_PER_CUSTOMER = 7;
+const MAX_ORDERS_PER_CUSTOMER = 12;
+const MIN_BAGS_PER_ORDER = 1;
+const MAX_BAGS_PER_ORDER = 2;
+const AVG_LBS_PER_BAG = 30;
+const LBS_VARIANCE = 10; // +/- 10 lbs
+const DAYS_HISTORY = 60;
+const MIN_PROCESSING_HOURS = 20;
+const MAX_PROCESSING_HOURS = 30;
+const DEFAULT_PASSWORD = 'TestPass123!';
 
-// Generate customer names (10 per affiliate)
-const customerFirstNames = ['James', 'Mary', 'John', 'Patricia', 'Robert', 'Jennifer', 'Michael', 'Linda', 'William', 'Elizabeth'];
-const customerLastNames = ['Smith', 'Johnson', 'Williams', 'Brown', 'Jones', 'Garcia', 'Miller', 'Davis', 'Rodriguez', 'Martinez'];
+// Austin, TX area zip codes
+const AUSTIN_ZIP_CODES = ['78701', '78702', '78703', '78704', '78705', '78731', '78745', '78746', '78748', '78749'];
 
-// Generate unique email
-const generateUniqueEmail = (firstName, lastName, index) => {
-  return `${firstName.toLowerCase()}.${lastName.toLowerCase()}${index}@example.com`;
-};
-
-// Generate order date spread over 90 days
-const generateOrderDate = (daysAgo) => {
-  const date = new Date();
-  date.setDate(date.getDate() - daysAgo);
-  date.setHours(Math.floor(Math.random() * 24));
-  date.setMinutes(Math.floor(Math.random() * 60));
-  return date;
-};
-
-// Determine order status based on age and completion rate
-const determineOrderStatus = (orderDate, isToday) => {
-  const now = new Date();
-  const hoursOld = (now - orderDate) / (1000 * 60 * 60);
-
-  // For today's orders, ensure mix of in-progress states
-  if (isToday) {
-    const rand = Math.random();
-    if (rand < 0.2) return 'pending';
-    if (rand < 0.4) return 'scheduled';
-    if (rand < 0.6) return 'processing';
-    if (rand < 0.8) return 'processed';
-    return 'complete';
-  }
-
-  // For older orders
-  if (hoursOld < 24) {
-    // Recent orders - mix of states
-    const rand = Math.random();
-    if (rand < 0.05) return 'pending';
-    if (rand < 0.15) return 'scheduled';
-    if (rand < 0.30) return 'processing';
-    if (rand < 0.50) return 'processed';
-    return 'complete';
-  } else {
-    // Orders older than 24 hours - 95% complete
-    const rand = Math.random();
-    if (rand < 0.95) return 'complete';
-    if (rand < 0.97) return 'processing'; // 2% still processing (delays)
-    if (rand < 0.99) return 'processed';  // 2% processed but not delivered
-    return 'cancelled';  // 1% cancelled
-  }
-};
-
-// Generate sample data
-const generateSampleData = async () => {
-  try {
-    // Clean existing data if requested
-    if (process.argv.includes('--clean')) {
-      console.log('Cleaning existing data...');
-      await Affiliate.deleteMany({});
-      await Customer.deleteMany({});
-      await Order.deleteMany({});
-      console.log('Existing data cleaned');
-    }
-
-    const { salt: passwordSalt, hash: passwordHash } = encryptionUtil.hashPassword('R8der50!2025');
-
-    // Initialize SystemConfig
-    await SystemConfig.initializeDefaults();
-    console.log('System configuration initialized');
-
-    let totalAffiliates = 0;
-    let totalCustomers = 0;
-    let totalOrders = 0;
-    let todayOrders = 0;
-
-    const allCustomers = [];
-    const allAffiliates = [];
-
-    // Create affiliates
-    for (let i = 0; i < affiliateData.length; i++) {
-      const affiliateInfo = affiliateData[i];
-
-      // Create affiliate
-      const affiliate = new Affiliate({
-        firstName: affiliateInfo.firstName,
-        lastName: affiliateInfo.lastName,
-        email: affiliateInfo.email,
-        username: affiliateInfo.email.split('@')[0],
-        passwordSalt: passwordSalt,
-        passwordHash: passwordHash,
-        phone: `555-${String(1000 + i).padStart(4, '0')}`,
-        businessName: affiliateInfo.company,
-        taxId: `XX-${String(1000000 + i).padStart(7, '0')}`,
-        address: `${100 + i} Main Street`,
-        city: 'Sample City',
-        state: 'CA',
-        zipCode: `90${String(200 + i).padStart(3, '0')}`,
-        serviceLatitude: 34.0522 + (Math.random() * 0.1 - 0.05), // Los Angeles area
-        serviceLongitude: -118.2437 + (Math.random() * 0.1 - 0.05),
-        serviceRadius: 5,
-        minimumDeliveryFee: 25,
-        perBagDeliveryFee: 5,
-        referralCode: crypto.randomBytes(4).toString('hex').toUpperCase(),
-        isActive: true,
-        agreedToTerms: true,
-        preferredLanguage: 'en',
-        registrationMethod: 'traditional',
-        paymentMethod: 'directDeposit',
-        accountNumber: encryptionUtil.encrypt('123456789'),
-        routingNumber: encryptionUtil.encrypt('987654321')
-      });
-
-      await affiliate.save();
-      totalAffiliates++;
-      allAffiliates.push(affiliate);
-      console.log(`Created affiliate: ${affiliate.firstName} ${affiliate.lastName} (${affiliate.affiliateId})`);
-
-      // Create customers for this affiliate
-      for (let j = 0; j < 10; j++) {
-        const customerFirstName = customerFirstNames[j];
-        const customerLastName = customerLastNames[j];
-        const customerEmail = generateUniqueEmail(customerFirstName, customerLastName, i * 10 + j);
-
-        const customer = new Customer({
-          firstName: customerFirstName,
-          lastName: customerLastName,
-          email: customerEmail,
-          username: customerEmail.split('@')[0],
-          passwordSalt: passwordSalt,
-          passwordHash: passwordHash,
-          phone: `555-${String(2000 + i * 10 + j).padStart(4, '0')}`,
-          address: `${200 + j} Oak Avenue`,
-          city: 'Sample City',
-          state: 'CA',
-          zipCode: `90${String(300 + i).padStart(3, '0')}`,
-          affiliateId: affiliate.affiliateId,
-          referredBy: affiliate.referralCode,
-          isActive: true,
-          preferredLanguage: 'en',
-          registrationMethod: 'traditional'
-        });
-
-        await customer.save();
-        totalCustomers++;
-        allCustomers.push({ customer, affiliate });
-
-        console.log(`  - Created customer: ${customer.firstName} ${customer.lastName}`);
-      }
-    }
-
-    // Create orders spread over 90 days
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    // First, create exactly 25 orders for today
-    console.log('\nCreating orders for today...');
-    for (let i = 0; i < 25; i++) {
-      const customerData = allCustomers[Math.floor(Math.random() * allCustomers.length)];
-      const customer = customerData.customer;
-      const affiliate = customerData.affiliate;
-
-      const numBags = Math.floor(Math.random() * 2) + 2; // 2-3 bags
-      const orderDate = generateOrderDate(0); // Today
-      const status = determineOrderStatus(orderDate, true);
-
-      const order = await createOrder(customer, affiliate, orderDate, status, numBags);
-      totalOrders++;
-      todayOrders++;
-    }
-
-    // Then create orders for the previous 89 days
-    console.log('\nCreating historical orders...');
-    const ordersPerDay = 15; // Average orders per day for historical data
-
-    for (let daysAgo = 1; daysAgo < 90; daysAgo++) {
-      const numOrdersToday = Math.floor(Math.random() * 10) + 10; // 10-20 orders per day
-
-      for (let i = 0; i < numOrdersToday; i++) {
-        const customerData = allCustomers[Math.floor(Math.random() * allCustomers.length)];
-        const customer = customerData.customer;
-        const affiliate = customerData.affiliate;
-
-        const numBags = Math.floor(Math.random() * 2) + 2; // 2-3 bags
-        const orderDate = generateOrderDate(daysAgo);
-        const status = determineOrderStatus(orderDate, false);
-
-        const order = await createOrder(customer, affiliate, orderDate, status, numBags);
-        totalOrders++;
-      }
-    }
-
-    // Display summary
-    console.log('\n=== Sample Data Generation Complete ===');
-    console.log(`Total Affiliates: ${totalAffiliates}`);
-    console.log(`Total Customers: ${totalCustomers}`);
-    console.log(`Total Orders: ${totalOrders}`);
-    console.log(`Orders Today: ${todayOrders}`);
-
-    // Get status distribution
-    const statusCounts = await Order.aggregate([
-      { $group: { _id: '$status', count: { $sum: 1 } } },
-      { $sort: { _id: 1 } }
-    ]);
-
-    console.log('\nOrder Status Distribution:');
-    statusCounts.forEach(s => {
-      console.log(`  ${s._id}: ${s.count}`);
-    });
-
-    // Get in-progress orders (not complete or cancelled)
-    const inProgressCount = await Order.countDocuments({
-      status: { $in: ['pending', 'scheduled', 'processing', 'processed'] }
-    });
-    console.log(`\nIn-Progress Orders: ${inProgressCount}`);
-
-    // Get delayed orders (processing > 24 hours)
-    const delayedCount = await Order.countDocuments({
-      status: 'processing',
-      processingStartedAt: { $lte: new Date(Date.now() - 24 * 60 * 60 * 1000) }
-    });
-    console.log(`Delayed Orders (>24h): ${delayedCount}`);
-
-    console.log('\nAll passwords: R8der50!2025');
-    console.log('\nSample logins:');
-    console.log('Affiliate: john.anderson@example.com / R8der50!2025');
-    console.log('Customer: james.smith0@example.com / R8der50!2025');
-
-  } catch (error) {
-    console.error('Error generating sample data:', error);
-    throw error;
-  }
-};
-
-// Helper function to create an order
-async function createOrder(customer, affiliate, orderDate, status, numBags) {
-  const baseRate = 1.89; // Per pound
-  const estimatedWeight = numBags * 30; // 30 pounds per bag
-  const actualWeight = ['pending', 'scheduled'].includes(status) ? undefined : estimatedWeight + (Math.random() * 10 - 5);
-
-  const pickupDate = new Date(orderDate);
-  if (status === 'pending' || status === 'scheduled') {
-    // Future pickup for pending/scheduled orders
-    pickupDate.setDate(pickupDate.getDate() + Math.floor(Math.random() * 7) + 1);
-  }
-
-  const deliveryDate = new Date(pickupDate);
-  deliveryDate.setDate(deliveryDate.getDate() + 2);
-
-  const order = new Order({
-    customerId: customer.customerId,
-    affiliateId: affiliate.affiliateId,
-    pickupDate: pickupDate,
-    pickupTime: ['morning', 'afternoon', 'evening'][Math.floor(Math.random() * 3)],
-    deliveryDate: deliveryDate,
-    deliveryTime: ['morning', 'afternoon', 'evening'][Math.floor(Math.random() * 3)],
-    estimatedWeight: estimatedWeight,
-    actualWeight: actualWeight,
-    numberOfBags: numBags,
-    baseRate: baseRate,
-    deliveryFee: Math.max(affiliate.minimumDeliveryFee, numBags * affiliate.perBagDeliveryFee),
-    minimumDeliveryFee: affiliate.minimumDeliveryFee,
-    perBagDeliveryFee: affiliate.perBagDeliveryFee,
-    status: status,
-    washInstructions: `Standard wash for ${customer.firstName}`,
-    specialPickupInstructions: 'Ring doorbell',
-    specialDeliveryInstructions: 'Leave at door if no answer',
-    createdAt: orderDate,
-    updatedAt: orderDate
-  });
-
-  // Set status timestamps based on status
-  if (status !== 'pending') {
-    order.scheduledAt = new Date(orderDate.getTime() + 30 * 60 * 1000); // 30 mins after creation
-  }
-
-  if (['processing', 'processed', 'complete'].includes(status)) {
-    order.processingStartedAt = new Date(orderDate.getTime() + 2 * 60 * 60 * 1000); // 2 hours after creation
-  }
-
-  if (['processed', 'complete'].includes(status)) {
-    const processingDuration = status === 'complete' && Math.random() < 0.95
-      ? Math.random() * 20 * 60 * 60 * 1000 // 95% within 20 hours
-      : (24 + Math.random() * 48) * 60 * 60 * 1000; // 5% take 24-72 hours
-    order.processedAt = new Date(order.processingStartedAt.getTime() + processingDuration);
-  }
-
-  if (status === 'complete') {
-    order.completedAt = new Date(order.processedAt.getTime() + 2 * 60 * 60 * 1000); // 2 hours after processed
-    order.paymentStatus = 'completed';
-    order.paidAt = order.completedAt;
-
-    // Calculate totals for completed orders
-    if (actualWeight) {
-      const deliveryFee = order.deliveryFee || 0;
-      order.actualTotal = parseFloat(((actualWeight * baseRate) + deliveryFee).toFixed(2));
-    }
-  }
-
-  if (status === 'cancelled') {
-    order.cancelledAt = new Date(orderDate.getTime() + 4 * 60 * 60 * 1000); // 4 hours after creation
-    order.cancellationReason = 'Customer request';
-  }
-
-  await order.save();
-  return order;
+// Helper functions
+function getRandomInt(min, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-// Main execution
-const main = async () => {
+function getRandomFloat(min, max, decimals = 2) {
+  return parseFloat((Math.random() * (max - min) + min).toFixed(decimals));
+}
+
+function getRandomElement(array) {
+  return array[Math.floor(Math.random() * array.length)];
+}
+
+function hashPassword(password) {
+  // Generate a random salt
+  const salt = crypto.randomBytes(16).toString('hex');
+  
+  // Hash the password with PBKDF2
+  const hash = crypto.pbkdf2Sync(
+    password,
+    salt,
+    100000, // 100,000 iterations
+    64,     // 64 bytes
+    'sha512'
+  ).toString('hex');
+  
+  return { salt, hash };
+}
+
+function generateAustinAddress() {
+  const streetNumber = faker.number.int({ min: 100, max: 9999 });
+  const streetName = faker.location.street();
+  const zipCode = getRandomElement(AUSTIN_ZIP_CODES);
+  
+  return {
+    street: `${streetNumber} ${streetName}`,
+    city: 'Austin',
+    state: 'TX',
+    zipCode: zipCode
+  };
+}
+
+// Connect to MongoDB
+async function connectDB() {
   try {
-    await connectDB();
-
-    // Confirm before proceeding
-    console.log('This script will create sample data in the database.');
-    if (process.argv.includes('--clean')) {
-      console.log('WARNING: --clean flag detected. This will DELETE existing affiliates, customers, and orders!');
-    }
-    console.log('Press Ctrl+C to cancel or wait 5 seconds to continue...\n');
-
-    await new Promise(resolve => setTimeout(resolve, 5000));
-
-    await generateSampleData();
-
-    console.log('\nDisconnecting from database...');
-    await mongoose.disconnect();
-    process.exit(0);
+    await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/wavemax');
+    console.log('✓ Connected to MongoDB');
   } catch (error) {
-    console.error('Script failed:', error);
-    await mongoose.disconnect();
+    console.error('✗ MongoDB connection error:', error);
     process.exit(1);
   }
-};
+}
+
+// Initialize system configuration
+async function initializeSystemConfig() {
+  try {
+    await SystemConfig.initializeDefaults();
+    console.log('✓ System configuration initialized');
+  } catch (error) {
+    console.error('✗ Error initializing system config:', error);
+  }
+}
+
+// Clean existing data
+async function cleanData() {
+  console.log('\n🧹 Cleaning existing sample data...');
+  
+  // Only delete test data (affiliates with email ending in @example.com)
+  const testAffiliates = await Affiliate.find({ email: /@example\.com$/ });
+  const testAffiliateIds = testAffiliates.map(a => a._id);
+  
+  if (testAffiliateIds.length > 0) {
+    // Delete related data
+    await Order.deleteMany({ affiliateId: { $in: testAffiliateIds } });
+    await Customer.deleteMany({ affiliateId: { $in: testAffiliateIds } });
+    await Affiliate.deleteMany({ _id: { $in: testAffiliateIds } });
+    
+    console.log(`✓ Cleaned ${testAffiliateIds.length} test affiliates and related data`);
+  } else {
+    console.log('✓ No test data to clean');
+  }
+}
+
+// Generate affiliates
+async function generateAffiliates() {
+  console.log('\n👥 Generating affiliates...');
+  const affiliates = [];
+  
+  for (let i = 1; i <= NUM_AFFILIATES; i++) {
+    const firstName = faker.person.firstName();
+    const lastName = faker.person.lastName();
+    const address = generateAustinAddress();
+    
+    const longitude = -97.7431 + (Math.random() - 0.5) * 0.2; // Austin longitude +/- variance
+    const latitude = 30.2672 + (Math.random() - 0.5) * 0.2;   // Austin latitude +/- variance
+    const paymentMethod = getRandomElement(['directDeposit', 'check', 'paypal']);
+    
+    // Hash the password
+    const { salt, hash } = hashPassword(DEFAULT_PASSWORD);
+    
+    const affiliateData = {
+      affiliateId: `AFF${String(i).padStart(3, '0')}`,
+      username: `${firstName.toLowerCase()}.${lastName.toLowerCase()}${i}`,
+      email: `${firstName.toLowerCase()}.${lastName.toLowerCase()}${i}@example.com`,
+      firstName,
+      lastName,
+      businessName: faker.company.name() + ' Services',
+      phone: faker.phone.number({ style: 'national' }),
+      address: address.street,
+      city: address.city,
+      state: address.state,
+      zipCode: address.zipCode,
+      serviceLatitude: latitude,
+      serviceLongitude: longitude,
+      serviceRadius: getRandomInt(5, 15), // 5-15 miles radius
+      minimumDeliveryFee: getRandomFloat(10, 15),
+      perBagDeliveryFee: getRandomFloat(5, 8),
+      paymentMethod: paymentMethod,
+      isActive: true,
+      termsAccepted: true,
+      registrationDate: faker.date.past(1),
+      registrationMethod: 'traditional',
+      passwordSalt: salt,
+      passwordHash: hash
+    };
+    
+    // Add payment-specific fields based on payment method
+    if (paymentMethod === 'directDeposit') {
+      affiliateData.accountNumber = faker.finance.accountNumber();
+      affiliateData.routingNumber = faker.finance.routingNumber();
+    } else if (paymentMethod === 'paypal') {
+      affiliateData.paypalEmail = `${firstName.toLowerCase()}.${lastName.toLowerCase()}@paypal.com`;
+    }
+    
+    const affiliate = new Affiliate(affiliateData);
+    
+    await affiliate.save();
+    affiliates.push(affiliate);
+    
+    process.stdout.write(`\r✓ Created ${i}/${NUM_AFFILIATES} affiliates`);
+  }
+  
+  console.log('\n✓ All affiliates created');
+  return affiliates;
+}
+
+// Generate customers for each affiliate
+async function generateCustomers(affiliates) {
+  console.log('\n👤 Generating customers...');
+  const allCustomers = [];
+  let totalCustomers = 0;
+  
+  for (const affiliate of affiliates) {
+    const numCustomers = getRandomInt(MIN_CUSTOMERS_PER_AFFILIATE, MAX_CUSTOMERS_PER_AFFILIATE);
+    const customers = [];
+    
+    for (let i = 1; i <= numCustomers; i++) {
+      const firstName = faker.person.firstName();
+      const lastName = faker.person.lastName();
+      const address = generateAustinAddress();
+      
+      // Hash the password for customer
+      const { salt, hash } = hashPassword(DEFAULT_PASSWORD);
+      
+      const customer = new Customer({
+        customerId: `CUST${Date.now()}${getRandomInt(1000, 9999)}`,
+        username: `${firstName.toLowerCase()}.${lastName.toLowerCase()}${totalCustomers + i}`,
+        email: `${firstName.toLowerCase()}.${lastName.toLowerCase()}${totalCustomers + i}@example.com`,
+        passwordSalt: salt,
+        passwordHash: hash,
+        firstName,
+        lastName,
+        phone: faker.phone.number({ style: 'national' }),
+        address: address.street,
+        city: address.city,
+        state: address.state,
+        zipCode: address.zipCode,
+        affiliateId: affiliate._id,
+        specialInstructions: faker.lorem.words(5),
+        paymentMethods: [{
+          type: 'card',
+          isDefault: true,
+          cardLast4: faker.finance.creditCardNumber().slice(-4),
+          cardBrand: getRandomElement(['visa', 'mastercard', 'amex', 'discover']),
+          expiryMonth: getRandomInt(1, 12),
+          expiryYear: getRandomInt(2025, 2030)
+        }],
+        registrationDate: faker.date.between({
+          from: new Date(Date.now() - DAYS_HISTORY * 24 * 60 * 60 * 1000),
+          to: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) // At least 7 days ago
+        }),
+        isActive: true,
+        registrationMethod: 'traditional'
+      });
+      
+      await customer.save();
+      customers.push(customer);
+    }
+    
+    totalCustomers += customers.length;
+    allCustomers.push(...customers);
+    process.stdout.write(`\r✓ Created ${totalCustomers} customers`);
+  }
+  
+  console.log(`\n✓ All customers created (${totalCustomers} total)`);
+  return allCustomers;
+}
+
+// Generate orders for customers
+async function generateOrders(customers) {
+  console.log('\n📦 Generating orders...');
+  let totalOrders = 0;
+  const now = new Date();
+  const twentyFourHoursAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+  
+  // Shuffle customers and select ~1/3 for in-process orders
+  const shuffledCustomers = [...customers].sort(() => Math.random() - 0.5);
+  const numInProcessCustomers = Math.floor(customers.length / 3);
+  const inProcessCustomers = new Set(shuffledCustomers.slice(0, numInProcessCustomers).map(c => c._id.toString()));
+  
+  for (const customer of customers) {
+    const numOrders = getRandomInt(MIN_ORDERS_PER_CUSTOMER, MAX_ORDERS_PER_CUSTOMER);
+    const affiliate = await Affiliate.findById(customer.affiliateId);
+    const hasInProcessOrder = inProcessCustomers.has(customer._id.toString());
+    
+    for (let i = 1; i <= numOrders; i++) {
+      const isLastOrder = i === numOrders;
+      const isInProcess = hasInProcessOrder && isLastOrder;
+      
+      // Determine order date - distribute evenly over time
+      let orderDate;
+      if (isInProcess) {
+        // In-process order: placed within last 24 hours
+        orderDate = faker.date.between({ from: twentyFourHoursAgo, to: now });
+      } else {
+        // Completed order: randomly spread over the last 60 days with some variation
+        // Use a more natural distribution - slightly weighted towards recent days
+        const daysAgo = Math.floor(Math.random() * (DAYS_HISTORY - 2)) + 2;
+        
+        // Add some weight to recent days (20% chance to be in last 7 days)
+        if (Math.random() < 0.2) {
+          const recentDaysAgo = getRandomInt(2, 7);
+          orderDate = new Date(now.getTime() - recentDaysAgo * 24 * 60 * 60 * 1000);
+        } else {
+          orderDate = new Date(now.getTime() - daysAgo * 24 * 60 * 60 * 1000);
+        }
+        
+        // Add randomness within the day
+        orderDate.setHours(getRandomInt(8, 20), getRandomInt(0, 59), getRandomInt(0, 59), 0);
+      }
+      
+      // Generate bags for the order
+      const numBags = getRandomInt(MIN_BAGS_PER_ORDER, MAX_BAGS_PER_ORDER);
+      const bags = [];
+      let totalWeight = 0;
+      
+      for (let j = 1; j <= numBags; j++) {
+        const weight = getRandomFloat(
+          AVG_LBS_PER_BAG - LBS_VARIANCE,
+          AVG_LBS_PER_BAG + LBS_VARIANCE,
+          1
+        );
+        bags.push({
+          bagNumber: j,
+          weight: weight,
+          description: `Bag ${j} - Mixed laundry`
+        });
+        totalWeight += weight;
+      }
+      
+      // Calculate pricing
+      const wdfRate = 1.25; // $1.25 per pound
+      const wdfTotal = totalWeight * wdfRate;
+      const deliveryFee = Math.max(
+        affiliate.minimumDeliveryFee,
+        numBags * affiliate.perBagDeliveryFee
+      );
+      const orderTotal = wdfTotal + deliveryFee;
+      const affiliateCommission = wdfTotal * 0.10; // 10% commission
+      
+      // Determine order status and dates
+      let status, pickupDate, processingStartDate, processingEndDate, deliveryDate;
+      
+      if (isInProcess) {
+        // In-process order
+        status = getRandomElement(['scheduled', 'processing', 'processed']);
+        pickupDate = new Date(orderDate.getTime() + getRandomInt(1, 4) * 60 * 60 * 1000); // 1-4 hours after order
+        
+        if (status === 'processing' || status === 'processed') {
+          processingStartDate = new Date(pickupDate.getTime() + getRandomInt(1, 2) * 60 * 60 * 1000);
+        }
+        if (status === 'processed') {
+          // Processed but not yet delivered
+          const processingHours = getRandomInt(MIN_PROCESSING_HOURS, MAX_PROCESSING_HOURS);
+          processingEndDate = new Date(processingStartDate.getTime() + processingHours * 60 * 60 * 1000);
+        }
+      } else {
+        // Completed order
+        status = 'complete';
+        pickupDate = new Date(orderDate.getTime() + getRandomInt(2, 6) * 60 * 60 * 1000); // 2-6 hours after order
+        processingStartDate = new Date(pickupDate.getTime() + getRandomInt(1, 3) * 60 * 60 * 1000);
+        const processingHours = getRandomInt(MIN_PROCESSING_HOURS, MAX_PROCESSING_HOURS);
+        processingEndDate = new Date(processingStartDate.getTime() + processingHours * 60 * 60 * 1000);
+        deliveryDate = new Date(processingEndDate.getTime() + getRandomInt(1, 3) * 60 * 60 * 1000);
+      }
+      
+      const order = new Order({
+        orderId: `ORD${Date.now()}${getRandomInt(1000, 9999)}`,
+        customerId: customer.customerId,
+        affiliateId: affiliate.affiliateId,
+        status,
+        pickupDate: pickupDate,
+        pickupTime: getRandomElement(['morning', 'afternoon', 'evening']),
+        estimatedWeight: totalWeight,
+        actualWeight: (status !== 'pending' && status !== 'scheduled') ? totalWeight : undefined,
+        numberOfBags: numBags,
+        baseRate: wdfRate,
+        feeBreakdown: {
+          numberOfBags: numBags,
+          minimumFee: affiliate.minimumDeliveryFee,
+          perBagFee: affiliate.perBagDeliveryFee,
+          totalFee: deliveryFee,
+          minimumApplied: deliveryFee === affiliate.minimumDeliveryFee
+        },
+        estimatedTotal: orderTotal,
+        actualTotal: (status === 'complete') ? orderTotal : undefined,
+        affiliateCommission,
+        paymentStatus: (status === 'complete') ? 'completed' : 'pending',
+        paymentMethod: 'card',
+        paymentDate: (status === 'complete') ? deliveryDate : undefined,
+        processingStarted: processingStartDate,
+        processingCompleted: processingEndDate,
+        scheduledAt: pickupDate, // Add scheduledAt
+        completedAt: deliveryDate, // Add completedAt for completed orders
+        specialPickupInstructions: faker.lorem.words(3),
+        washInstructions: faker.lorem.words(2),
+        createdAt: orderDate
+      });
+      
+      await order.save();
+      totalOrders++;
+    }
+    
+    process.stdout.write(`\r✓ Created ${totalOrders} orders`);
+  }
+  
+  console.log(`\n✓ All orders created (${totalOrders} total)`);
+  
+  // Print summary statistics
+  const inProcessOrders = await Order.countDocuments({ 
+    status: { $in: ['scheduled', 'pickedUp', 'processing'] } 
+  });
+  const completedOrders = await Order.countDocuments({ status: 'complete' });
+  
+  console.log('\n📊 Order Statistics:');
+  console.log(`   - In-process orders: ${inProcessOrders}`);
+  console.log(`   - Completed orders: ${completedOrders}`);
+  console.log(`   - Total orders: ${totalOrders}`);
+}
+
+// Main function
+async function main() {
+  try {
+    console.log('🚀 WaveMAX Sample Data Generator');
+    console.log('================================\n');
+    
+    // Connect to database
+    await connectDB();
+    
+    // Initialize system config
+    await initializeSystemConfig();
+    
+    // Clean existing test data
+    const args = process.argv.slice(2);
+    if (args.includes('--clean')) {
+      await cleanData();
+    }
+    
+    // Generate data
+    const affiliates = await generateAffiliates();
+    const customers = await generateCustomers(affiliates);
+    await generateOrders(customers);
+    
+    // Print sample login credentials
+    console.log('\n🔐 Sample Login Credentials:');
+    console.log('   All passwords: TestPass123!\n');
+    
+    const sampleAffiliate = affiliates[0];
+    console.log('   Sample Affiliate:');
+    console.log(`   - Username: ${sampleAffiliate.username}`);
+    console.log(`   - Email: ${sampleAffiliate.email}\n`);
+    
+    const sampleCustomer = await Customer.findOne({ affiliateId: sampleAffiliate._id });
+    if (sampleCustomer) {
+      console.log('   Sample Customer:');
+      console.log(`   - Username: ${sampleCustomer.username}`);
+      console.log(`   - Email: ${sampleCustomer.email}`);
+    }
+    
+    console.log('\n✅ Sample data generation complete!');
+    
+  } catch (error) {
+    console.error('\n❌ Error generating sample data:', error);
+  } finally {
+    await mongoose.connection.close();
+    console.log('\n👋 Database connection closed');
+  }
+}
 
 // Run the script
-main();
+if (require.main === module) {
+  main();
+}
+
+module.exports = main;
