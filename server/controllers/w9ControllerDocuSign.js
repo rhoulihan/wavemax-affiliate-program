@@ -210,8 +210,8 @@ exports.initiateW9Signing = async (req, res) => {
       }
     }
 
-    // Create new DocuSign envelope
-    const envelope = await docusignService.createW9Envelope(affiliate);
+    // Create new DocuSign envelope with embedded signing for affiliate-initiated
+    const envelope = await docusignService.createW9Envelope(affiliate, true);
 
     // Get embedded signing URL
     const signingUrl = await docusignService.getEmbeddedSigningUrl(
@@ -661,6 +661,106 @@ exports.checkAuthorizationStatus = async (req, res) => {
     logger.error('Failed to check authorization status:', error);
     res.status(500).json({
       error: 'Failed to check authorization status'
+    });
+  }
+};
+
+/**
+ * Admin: Send W-9 DocuSign envelope to affiliate
+ */
+exports.sendW9ToAffiliate = async (req, res) => {
+  try {
+    const { affiliateId } = req.body;
+    const adminId = req.user.id;
+
+    // Find affiliate
+    const affiliate = await Affiliate.findOne({ affiliateId });
+    if (!affiliate) {
+      return res.status(404).json({
+        success: false,
+        message: 'Affiliate not found'
+      });
+    }
+
+    // Check if affiliate already has a pending or completed W9
+    if (affiliate.w9Information && 
+        (affiliate.w9Information.status === 'verified' || 
+         affiliate.w9Information.status === 'submitted')) {
+      return res.status(400).json({
+        success: false,
+        message: 'Affiliate already has a submitted or verified W9'
+      });
+    }
+
+    // Create and send DocuSign envelope
+    const envelope = await docusignService.createW9Envelope(affiliate);
+
+    // Update affiliate W9 information
+    if (!affiliate.w9Information) {
+      affiliate.w9Information = {};
+    }
+    affiliate.w9Information.status = 'pending_review';
+    affiliate.w9Information.docusignEnvelopeId = envelope.envelopeId;
+    affiliate.w9Information.docusignStatus = 'sent';
+    affiliate.w9Information.submittedAt = new Date();
+    affiliate.w9Information.docusignInitiatedAt = new Date();
+    await affiliate.save();
+
+    // Create audit log
+    await W9AuditLog.create({
+      action: 'upload_attempt',
+      performedBy: {
+        userId: adminId,
+        userType: 'administrator',
+        userEmail: req.user.email,
+        userName: `${req.user.firstName} ${req.user.lastName}`,
+        ipAddress: req.ip,
+        userAgent: req.headers['user-agent']
+      },
+      target: {
+        affiliateId: affiliate.affiliateId,
+        affiliateName: `${affiliate.firstName} ${affiliate.lastName}`
+      },
+      details: {
+        method: 'docusign',
+        envelopeId: envelope.envelopeId,
+        sentBy: 'administrator',
+        success: true
+      }
+    });
+
+    res.json({
+      success: true,
+      message: 'W9 form sent successfully',
+      envelopeId: envelope.envelopeId
+    });
+
+  } catch (error) {
+    logger.error('Failed to send W9 to affiliate:', error);
+    
+    // Check if it's an authentication issue
+    if (error.message.includes('authorization required') || error.message.includes('No valid access token')) {
+      return res.status(401).json({
+        success: false,
+        message: 'DocuSign authorization required. Please authorize DocuSign integration in settings.',
+        error: 'Authorization required'
+      });
+    }
+    
+    // Check if it's a template issue
+    if (error.message.includes('template')) {
+      return res.status(400).json({
+        success: false,
+        message: 'DocuSign template not configured. Please check W9 template ID in settings.',
+        error: 'Template configuration error'
+      });
+    }
+    
+    res.status(500).json({
+      success: false,
+      message: 'Failed to send W9 form',
+      error: error.message,
+      details: process.env.NODE_ENV === 'development' ? error.stack : undefined
     });
   }
 };

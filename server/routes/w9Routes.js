@@ -29,11 +29,11 @@ const upload = multer({
 /**
  * @route   GET /api/v1/w9/check-auth
  * @desc    Check if DocuSign is authorized
- * @access  Private (Affiliate)
+ * @access  Private (Affiliate or Admin)
  */
 router.get('/check-auth',
   authenticate,
-  authorize(['affiliate']),
+  authorize(['affiliate', 'administrator']),
   w9ControllerDocuSign.checkDocuSignAuth
 );
 
@@ -73,11 +73,11 @@ router.post('/docusign-webhook',
 /**
  * @route   GET /api/v1/w9/authorization-status
  * @desc    Check if DocuSign authorization is complete
- * @access  Private (Affiliate)
+ * @access  Private (Affiliate or Admin)
  */
 router.get('/authorization-status',
   authenticate,
-  authorize(['affiliate']),
+  authorize(['affiliate', 'administrator']),
   w9ControllerDocuSign.checkAuthorizationStatus
 );
 
@@ -206,6 +206,20 @@ router.get('/admin/audit-logs/export',
   authenticate,
   authorize(['administrator']),
   w9Controller.exportAuditLogs
+);
+
+/**
+ * @route   POST /api/w9/send-docusign
+ * @desc    Send W-9 DocuSign envelope to affiliate (Admin only)
+ * @access  Private (Admin)
+ */
+router.post('/send-docusign',
+  authenticate,
+  authorize(['administrator']),
+  [
+    body('affiliateId').notEmpty().withMessage('Affiliate ID is required')
+  ],
+  w9ControllerDocuSign.sendW9ToAffiliate
 );
 
 module.exports = router;

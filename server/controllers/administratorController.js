@@ -1261,19 +1261,19 @@ exports.getOrderAnalytics = async (req, res) => {
       },
       {
         $addFields: {
-          // Calculate completion time in minutes (from scheduled to completed)
+          // Calculate completion time in minutes (from processing started to completed)
           completionTimeMinutes: {
             $cond: [
               {
                 $and: [
                   { $eq: ['$status', 'complete'] },
-                  { $ne: ['$scheduledAt', null] },
-                  { $ne: ['$completedAt', null] }
+                  { $ne: ['$processingStarted', null] },
+                  { $ne: ['$processingCompleted', null] }
                 ]
               },
               {
                 $divide: [
-                  { $subtract: ['$completedAt', '$scheduledAt'] },
+                  { $subtract: ['$processingCompleted', '$processingStarted'] },
                   60000 // Convert milliseconds to minutes
                 ]
               },
@@ -1287,7 +1287,7 @@ exports.getOrderAnalytics = async (req, res) => {
           _id: {
             $dateToString: {
               format: groupByFormat[groupBy] || groupByFormat.day,
-              date: '$completedAt' // Group by completion date for completed orders
+              date: '$createdAt' // Group by creation date to include all orders
             }
           },
           totalOrders: { $sum: 1 },
@@ -1542,6 +1542,8 @@ exports.getAffiliateAnalytics = async (req, res) => {
           serviceLatitude: 1,
           serviceLongitude: 1,
           serviceRadius: 1,
+          w9Status: '$w9Information.status',
+          email: 1,
           metrics: {
             totalCustomers: { $size: '$customers' },
             activeCustomers: {

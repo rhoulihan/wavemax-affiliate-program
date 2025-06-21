@@ -96,6 +96,38 @@
   // Tab navigation
   const tabs = document.querySelectorAll('.nav-tab');
   const tabContents = document.querySelectorAll('.tab-content');
+  
+  // Sub-tab navigation
+  function initializeSubTabs() {
+    const subTabs = document.querySelectorAll('.sub-nav-tab');
+    const subTabContents = document.querySelectorAll('.sub-tab-content');
+    
+    subTabs.forEach(subTab => {
+      subTab.addEventListener('click', () => {
+        const targetSubTab = subTab.dataset.subtab;
+        
+        // Update active states
+        subTabs.forEach(t => t.classList.remove('active'));
+        subTabContents.forEach(tc => tc.classList.remove('active'));
+        
+        subTab.classList.add('active');
+        const contentElement = document.getElementById(`${targetSubTab}-subtab`);
+        if (contentElement) {
+          contentElement.classList.add('active');
+        }
+        
+        // Save current sub-tab to localStorage
+        localStorage.setItem('adminCurrentSubTab', targetSubTab);
+      });
+    });
+    
+    // Restore saved sub-tab or default to overview
+    const savedSubTab = localStorage.getItem('adminCurrentSubTab') || 'overview';
+    const savedSubTabElement = Array.from(subTabs).find(t => t.dataset.subtab === savedSubTab);
+    if (savedSubTabElement) {
+      savedSubTabElement.click();
+    }
+  }
 
   // Function to switch to a specific tab
   function switchToTab(targetTab, updateHistory = true) {
@@ -126,6 +158,9 @@
     loadTabData(targetTab);
   }
 
+  // Create authenticated fetch with CSRF support
+  const authenticatedFetch = window.CsrfUtils.createAuthenticatedFetch(() => token);
+
   // Add click handlers to tabs
   tabs.forEach(tab => {
     tab.addEventListener('click', () => {
@@ -133,24 +168,6 @@
       switchToTab(targetTab);
     });
   });
-
-  // Check URL for tab parameter first, then localStorage, then default
-  const urlParams = new URLSearchParams(window.location.search);
-  const urlTab = urlParams.get('tab');
-  const savedTab = urlTab || localStorage.getItem('adminCurrentTab') || 'dashboard';
-  switchToTab(savedTab);
-
-  // Listen for tab restore messages from browser navigation
-  window.addEventListener('message', function(event) {
-    if (event.data && event.data.type === 'restore-tab' && event.data.tab) {
-      console.log('[Admin Dashboard] Restoring tab from browser navigation:', event.data.tab);
-      // Don't update history when restoring from popstate
-      switchToTab(event.data.tab, false);
-    }
-  });
-
-  // Create authenticated fetch with CSRF support
-  const authenticatedFetch = window.CsrfUtils.createAuthenticatedFetch(() => token);
 
   // Wrapper to handle 401 responses
   async function adminFetch(url, options = {}) {
@@ -175,7 +192,7 @@
 
   // Clear loading states from all containers
   function clearLoadingStates() {
-    const loadingContainers = ['dashboardStats', 'recentActivity', 'operatorsList', 'analyticsOverview', 'affiliatesList', 'systemConfigForm'];
+    const loadingContainers = ['dashboardStats', 'recentActivity', 'operatorsList', 'kpiOverview', 'orderAnalytics', 'affiliatesList', 'systemConfigForm'];
     loadingContainers.forEach(id => {
       const element = document.getElementById(id);
       if (element && element.querySelector('.loading')) {
@@ -203,9 +220,6 @@
     case 'customers':
       await loadCustomers();
       break;
-    case 'analytics':
-      await loadAnalytics();
-      break;
     case 'affiliates':
       await loadAffiliates();
       break;
@@ -226,17 +240,29 @@
 
   // Load dashboard
   async function loadDashboard() {
+    // Initialize sub-tabs
+    initializeSubTabs();
+    
+    // Initialize date range toggle for KPIs
+    initializeDateRangeToggle();
+    
     try {
-      const response = await adminFetch('/api/v1/administrators/dashboard');
-      const data = await response.json();
+      // Load dashboard stats
+      const dashboardResponse = await adminFetch('/api/v1/administrators/dashboard');
+      const dashboardData = await dashboardResponse.json();
 
-      if (response.ok && data.success) {
-        renderDashboardStats(data.dashboard);
-        renderRecentActivity(data.dashboard.recentActivity || []);
+      if (dashboardResponse.ok && dashboardData.success) {
+        renderDashboardStats(dashboardData.dashboard);
+        renderRecentActivity(dashboardData.dashboard.recentActivity || []);
       } else {
-        console.error('Dashboard data not loaded:', data.message);
+        console.error('Dashboard data not loaded:', dashboardData.message);
         document.getElementById('dashboardStats').innerHTML = `<p style="padding: 20px; text-align: center; color: #666;">${t('administrator.dashboard.errors.dashboardLoadFailed', 'Failed to load dashboard data')}</p>`;
       }
+      
+      // Load analytics data with default period
+      const defaultPeriod = localStorage.getItem('analyticsPeriod') || 'month';
+      await loadAnalyticsForDashboard(defaultPeriod);
+      
     } catch (error) {
       console.error('Error loading dashboard:', error);
       document.getElementById('dashboardStats').innerHTML = `<p style="padding: 20px; text-align: center; color: #666;">${t('administrator.dashboard.errors.dashboardLoadFailed', 'Error loading dashboard')}</p>`;
@@ -323,6 +349,167 @@
             </table>
         `;
     document.getElementById('recentActivity').innerHTML = tableHtml;
+  }
+  
+  // Initialize date range toggle for dashboard analytics
+  function initializeDateRangeToggle() {
+    const toggleButtons = document.querySelectorAll('.date-range-toggle .toggle-btn');
+    toggleButtons.forEach(btn => {
+      btn.addEventListener('click', async (e) => {
+        // Update active state
+        toggleButtons.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        
+        // Get selected range and save it
+        const range = btn.dataset.range;
+        localStorage.setItem('analyticsPeriod', range);
+        
+        // Reload analytics with new date range
+        await loadAnalyticsForDashboard(range);
+      });
+    });
+  }
+  
+  // Load analytics data for dashboard
+  async function loadAnalyticsForDashboard(range = 'month') {
+    try {
+      // Determine period for API call
+      let period = 'month';
+      switch(range) {
+      case 'today':
+        period = 'day';
+        break;
+      case 'week':
+        period = 'week';
+        break;
+      case 'month':
+        period = 'month';
+        break;
+      }
+      
+      const [ordersResponse, dashboardResponse] = await Promise.all([
+        adminFetch(`/api/v1/administrators/analytics/orders?period=${period}`),
+        adminFetch('/api/v1/administrators/dashboard')
+      ]);
+      
+      // Check response status before parsing
+      if (!ordersResponse.ok || !dashboardResponse.ok) {
+        console.error('One or more API calls failed:', {
+          orders: ordersResponse.ok ? 'OK' : `Failed (${ordersResponse.status})`,
+          dashboard: dashboardResponse.ok ? 'OK' : `Failed (${dashboardResponse.status})`
+        });
+        return;
+      }
+      
+      const ordersData = await ordersResponse.json();
+      const dashboardData = await dashboardResponse.json();
+      
+      if (ordersData && dashboardData) {
+        console.log('Orders data structure:', ordersData);
+        // Render KPI overview in overview tab
+        renderKPIOverview(ordersData);
+        
+        // Create analytics data for charts
+        const analyticsData = {
+          ...ordersData,
+          dashboardData: dashboardData.dashboard,
+          dateRange: range
+        };
+        
+        // Store data for charts
+        currentAnalyticsData = analyticsData;
+        currentDashboardData = dashboardData.dashboard;
+        
+        // Render charts in charts tab
+        renderAnalyticsCharts(analyticsData, dashboardData.dashboard);
+        
+        // Render detailed analytics in charts tab
+        renderDetailedAnalytics(ordersData);
+      }
+    } catch (error) {
+      console.error('Error loading analytics for dashboard:', error);
+      document.getElementById('kpiOverview').innerHTML = `<p style="padding: 20px; text-align: center; color: #666;">${t('administrator.dashboard.errors.analyticsLoadFailed', 'Error loading analytics data')}</p>`;
+    }
+  }
+  
+  // Render KPI overview
+  function renderKPIOverview(data) {
+    const t = window.i18n ? window.i18n.t.bind(window.i18n) : (key) => key;
+    
+    // Handle both direct summary and nested analytics.summary structures
+    const summary = data.summary || (data.analytics && data.analytics.summary) || {};
+    
+    // Provide default values if data is missing
+    const totalOrders = summary.totalOrders || 0;
+    const completedOrders = summary.completedOrders || 0;
+    const totalRevenue = summary.totalRevenue || 0;
+    const avgOrderValue = summary.averageOrderValue || summary.avgOrderValue || 0;
+    const completionRate = totalOrders > 0 ? Math.round((completedOrders / totalOrders) * 100) : 0;
+    
+    // Format revenue to 2 decimal places
+    const formattedRevenue = totalRevenue.toFixed(2);
+    
+    const overviewHtml = `
+            <div class="stat-card">
+                <h3>${t('administrator.dashboard.analytics.totalOrders')}</h3>
+                <div class="stat-value">${totalOrders}</div>
+                <div class="stat-change">${t('administrator.dashboard.stats.thisWeek')}</div>
+            </div>
+            <div class="stat-card">
+                <h3>${t('administrator.dashboard.analytics.completed')}</h3>
+                <div class="stat-value">${completedOrders}</div>
+                <div class="stat-change">${completionRate}% ${t('administrator.dashboard.analytics.completionRate')}</div>
+            </div>
+            <div class="stat-card">
+                <h3>${t('administrator.dashboard.analytics.revenue')}</h3>
+                <div class="stat-value">$${formattedRevenue}</div>
+                <div class="stat-change">${t('administrator.dashboard.stats.thisMonth')}</div>
+            </div>
+            <div class="stat-card">
+                <h3>${t('administrator.dashboard.analytics.avgOrderValue')}</h3>
+                <div class="stat-value">$${avgOrderValue.toFixed(2)}</div>
+                <div class="stat-change">${t('administrator.dashboard.analytics.perOrder')}</div>
+            </div>
+        `;
+    document.getElementById('kpiOverview').innerHTML = overviewHtml;
+  }
+  
+  // Render detailed analytics table
+  function renderDetailedAnalytics(data) {
+    const analyticsContainer = document.getElementById('orderAnalytics');
+    
+    if (!data || !data.analytics || !data.analytics.ordersByStatus) {
+      analyticsContainer.innerHTML = `<p style="padding: 20px; text-align: center; color: #666;">${t('common.messages.noData', 'No analytics data available')}</p>`;
+      return;
+    }
+    
+    const ordersByStatus = data.analytics.ordersByStatus;
+    const tableHtml = `
+            <table>
+                <thead>
+                    <tr>
+                        <th>${t('administrator.dashboard.analytics.status', 'Status')}</th>
+                        <th>${t('administrator.dashboard.analytics.count', 'Count')}</th>
+                        <th>${t('administrator.dashboard.analytics.percentage', 'Percentage')}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${Object.entries(ordersByStatus).map(([status, count]) => {
+                      const percentage = data.summary.totalOrders > 0 
+                        ? ((count / data.summary.totalOrders) * 100).toFixed(1)
+                        : 0;
+                      return `
+                            <tr>
+                                <td>${status}</td>
+                                <td>${count}</td>
+                                <td>${percentage}%</td>
+                            </tr>
+                        `;
+                    }).join('')}
+                </tbody>
+            </table>
+        `;
+    analyticsContainer.innerHTML = tableHtml;
   }
 
   // Load operators
@@ -919,8 +1106,26 @@
     if (!ctx) return;
 
     const timeline = data.analytics?.timeline || [];
-    const labels = timeline.map(item => item._id);
-    const revenues = timeline.map(item => item.totalRevenue || 0);
+    
+    // Create a complete timeline with all days
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() - 30);
+    const endDate = new Date();
+    
+    const completeTimeline = [];
+    const dataMap = new Map(timeline.map(item => [item._id, item]));
+    
+    for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
+      const dateStr = d.toISOString().split('T')[0];
+      const dayData = dataMap.get(dateStr) || { _id: dateStr, totalRevenue: 0 };
+      completeTimeline.push(dayData);
+    }
+    
+    const labels = completeTimeline.map(item => {
+      const date = new Date(item._id);
+      return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    });
+    const revenues = completeTimeline.map(item => item.totalRevenue || 0);
 
     chartInstances.revenue = new Chart(ctx, {
       type: 'line',
@@ -971,14 +1176,32 @@
 
     // Use timeline data to show daily average completion times
     const timeline = data.analytics?.timeline || [];
-    const labels = timeline.map(item => {
+    
+    // Create a complete timeline with all days
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() - 30);
+    const endDate = new Date();
+    
+    const completeTimeline = [];
+    const dataMap = new Map(timeline.map(item => [item._id, item]));
+    
+    for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
+      const dateStr = d.toISOString().split('T')[0];
+      const dayData = dataMap.get(dateStr) || { _id: dateStr, averageProcessingTime: null };
+      completeTimeline.push(dayData);
+    }
+    
+    const labels = completeTimeline.map(item => {
       const date = new Date(item._id);
       return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
     });
 
     // Calculate average processing time in hours for each day
-    const avgProcessingTimes = timeline.map(item => {
-      const avgMinutes = item.averageProcessingTime || 0;
+    const avgProcessingTimes = completeTimeline.map(item => {
+      if (item.averageProcessingTime === null || item.averageProcessingTime === 0) {
+        return null; // Return null for days without data
+      }
+      const avgMinutes = item.averageProcessingTime;
       return Math.round(avgMinutes / 60 * 10) / 10; // Convert to hours with 1 decimal place
     });
 
@@ -998,7 +1221,8 @@
           pointBorderColor: '#fff',
           pointBorderWidth: 2,
           pointRadius: 4,
-          pointHoverRadius: 6
+          pointHoverRadius: 6,
+          spanGaps: true // Connect lines across null values
         }]
       },
       options: {
@@ -1044,7 +1268,7 @@
   }
 
   // Render order status distribution chart
-  function renderOrderStatusChart(data, range = currentOrderStatusRange) {
+  function renderOrderStatusChart(data, range = 'month') {
     const ctx = document.getElementById('orderStatusChart');
     if (!ctx) return;
 
@@ -1122,12 +1346,47 @@
     if (!ctx) return;
 
     const timeline = data.analytics?.timeline || [];
-    const labels = timeline.map(item => {
+    
+    // Create a complete timeline with all days
+    const endDate = new Date();
+    const startDate = new Date();
+    
+    // Determine the date range based on the data's date range
+    const dateRange = data.dateRange || 'month';
+    switch(dateRange) {
+      case 'today':
+        startDate.setHours(0, 0, 0, 0);
+        break;
+      case 'week':
+        startDate.setDate(startDate.getDate() - 7);
+        break;
+      case 'month':
+      default:
+        startDate.setDate(startDate.getDate() - 30);
+        break;
+    }
+    
+    // Create a map of existing data
+    const dataMap = new Map(timeline.map(item => [item._id, item]));
+    
+    // Build complete timeline
+    const completeTimeline = [];
+    for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
+      const dateStr = d.toISOString().split('T')[0];
+      const dayData = dataMap.get(dateStr) || { 
+        _id: dateStr, 
+        totalOrders: 0,
+        completedOrders: 0 
+      };
+      completeTimeline.push(dayData);
+    }
+    
+    const labels = completeTimeline.map(item => {
       const date = new Date(item._id);
       return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
     });
-    const totalOrders = timeline.map(item => item.totalOrders || 0);
-    const completedOrders = timeline.map(item => item.completedOrders || 0);
+    const totalOrders = completeTimeline.map(item => item.totalOrders || 0);
+    const completedOrders = completeTimeline.map(item => item.completedOrders || 0);
 
     chartInstances.dailyOrders = new Chart(ctx, {
       type: 'bar',
@@ -1177,11 +1436,30 @@
       const response = await adminFetch('/api/v1/administrators/analytics/affiliates?period=month');
       const data = await response.json();
 
-      if (response.ok) {
-        renderAffiliatesList(data.topAffiliates);
+      console.log('Affiliates API response:', data);
+      
+      if (response.ok && data.success) {
+        // Check different possible data structures
+        const affiliatesData = data.topAffiliates || 
+                               (data.analytics && data.analytics.affiliates) || 
+                               data.affiliates || 
+                               data;
+        renderAffiliatesList(affiliatesData);
+      } else {
+        console.error('Affiliates API error:', data);
+        document.getElementById('affiliatesList').innerHTML = `
+          <p style="padding: 20px; text-align: center; color: #dc3545;">
+            ${data.message || t('administrator.dashboard.affiliates.loadError', 'Error loading affiliates')}
+          </p>
+        `;
       }
     } catch (error) {
       console.error('Error loading affiliates:', error);
+      document.getElementById('affiliatesList').innerHTML = `
+        <p style="padding: 20px; text-align: center; color: #dc3545;">
+          ${t('administrator.dashboard.affiliates.loadError', 'Error loading affiliates')}
+        </p>
+      `;
     }
   }
 
@@ -1204,23 +1482,79 @@
                         <th>${t('administrator.dashboard.affiliates.orders')}</th>
                         <th>${t('administrator.dashboard.affiliates.revenue')}</th>
                         <th>${t('administrator.dashboard.affiliates.commission')}</th>
+                        <th>${t('administrator.dashboard.affiliates.w9Status')}</th>
                     </tr>
                 </thead>
                 <tbody>
-                    ${affiliates.map(aff => `
+                    ${affiliates.map(aff => {
+                        // Handle different data structures
+                        const name = aff.name || `${aff.firstName || ''} ${aff.lastName || ''}`.trim() || 'N/A';
+                        const metrics = aff.metrics || aff;
+                        const totalCustomers = metrics.totalCustomers || 0;
+                        const totalOrders = metrics.totalOrders || 0;
+                        const totalRevenue = metrics.totalRevenue || 0;
+                        const totalCommission = metrics.totalCommission || 0;
+                        const w9Status = aff.w9Status || 'not_submitted';
+                        
+                        // Determine W9 status display
+                        let w9StatusDisplay = '';
+                        if (w9Status === 'submitted') {
+                            w9StatusDisplay = '<span class="status-badge active">Submitted</span>';
+                        } else if (w9Status === 'verified') {
+                            w9StatusDisplay = '<span class="status-badge active">Verified</span>';
+                        } else if (w9Status === 'sent') {
+                            w9StatusDisplay = '<span class="status-badge pending">Sent</span>';
+                        } else if (totalRevenue >= 600) {
+                            // Show Send W9 button for affiliates with >$600 revenue and no W9
+                            w9StatusDisplay = `
+                                <span class="status-badge inactive">Not Submitted</span>
+                                <button class="btn btn-sm btn-primary mt-1 send-w9-btn" 
+                                        data-affiliate-id="${aff.affiliateId}" 
+                                        data-email="${aff.email}" 
+                                        data-name="${name}">
+                                    Send W9
+                                </button>
+                            `;
+                        } else {
+                            w9StatusDisplay = '<span class="status-badge inactive">Not Required</span>';
+                        }
+                        
+                        return `
                         <tr>
                             <td>${aff.affiliateId}</td>
-                            <td>${aff.name}</td>
-                            <td>${aff.totalCustomers}</td>
-                            <td>${aff.totalOrders}</td>
-                            <td>$${aff.totalRevenue.toFixed(2)}</td>
-                            <td>$${aff.totalCommission.toFixed(2)}</td>
+                            <td>${name}</td>
+                            <td>${totalCustomers}</td>
+                            <td>${totalOrders}</td>
+                            <td>$${totalRevenue.toFixed(2)}</td>
+                            <td>$${totalCommission.toFixed(2)}</td>
+                            <td>${w9StatusDisplay}</td>
                         </tr>
-                    `).join('')}
+                    `}).join('')}
                 </tbody>
             </table>
         `;
     document.getElementById('affiliatesList').innerHTML = tableHtml;
+    
+    // Add event listeners for Send W9 buttons using event delegation
+    // Only add once to prevent duplicate handlers
+    const affiliatesContainer = document.getElementById('affiliatesList');
+    if (!affiliatesContainer.hasAttribute('data-w9-handler')) {
+      affiliatesContainer.setAttribute('data-w9-handler', 'true');
+      affiliatesContainer.addEventListener('click', async (e) => {
+        if (e.target.classList.contains('send-w9-btn')) {
+          e.preventDefault();
+          e.stopPropagation();
+          
+          // Prevent double-clicks
+          if (e.target.disabled) return;
+          
+          const affiliateId = e.target.getAttribute('data-affiliate-id');
+          const email = e.target.getAttribute('data-email');
+          const name = e.target.getAttribute('data-name');
+          await handleSendW9Click(affiliateId, email, name, e.target);
+        }
+      });
+    }
   }
 
   // Store current W-9 filter state
@@ -2068,16 +2402,42 @@
       const response = await adminFetch('/api/v1/administrators/config');
       const data = await response.json();
 
+      console.log('System config response:', data);
+      
       if (response.ok) {
-        renderSystemConfig(data.configs);
+        // Check if data has configurations or configs array, or if data itself is the array
+        const configs = data.configurations || data.configs || data;
+        renderSystemConfig(configs);
+      } else {
+        console.error('Config API error:', data);
+        document.getElementById('systemConfig').innerHTML = `
+          <p style="padding: 20px; text-align: center; color: #dc3545;">
+            ${data.message || t('administrator.dashboard.config.loadError', 'Error loading configuration')}
+          </p>
+        `;
       }
     } catch (error) {
       console.error('Error loading system config:', error);
+      document.getElementById('systemConfig').innerHTML = `
+        <p style="padding: 20px; text-align: center; color: #dc3545;">
+          ${t('administrator.dashboard.config.loadError', 'Error loading configuration')}
+        </p>
+      `;
     }
   }
 
   // Render system config
   function renderSystemConfig(configs) {
+    // Check if configs is valid
+    if (!configs || !Array.isArray(configs)) {
+      document.getElementById('systemConfig').innerHTML = `
+        <p style="padding: 20px; text-align: center; color: #666;">
+          ${t('administrator.dashboard.config.noConfigData', 'No configuration data available')}
+        </p>
+      `;
+      return;
+    }
+    
     const groupedConfigs = configs.reduce((acc, config) => {
       if (!acc[config.category]) acc[config.category] = [];
       acc[config.category].push(config);
@@ -2115,7 +2475,112 @@
     }
 
     configHtml += '</form>';
+    
+    // Add DocuSign Authorization section
+    configHtml += `
+      <div class="docusign-auth-section" style="margin-top: 40px; padding: 20px; border: 1px solid #ddd; border-radius: 8px; background-color: #f8f9fa;">
+        <h3 style="margin: 0 0 15px;">${t('administrator.dashboard.config.docusignTitle', 'DocuSign Integration')}</h3>
+        <p style="margin-bottom: 15px;">${t('administrator.dashboard.config.docusignDesc', 'Authorize DocuSign to enable W9 form sending to affiliates.')}</p>
+        <div id="docusignAuthStatus" style="margin-bottom: 15px;">
+          <span class="spinner" style="display: inline-block; margin-right: 10px;"></span>
+          ${t('administrator.dashboard.config.checkingAuth', 'Checking authorization status...')}
+        </div>
+        <button id="authorizeDocuSignBtn" class="btn btn-primary" style="display: none;">
+          ${t('administrator.dashboard.config.authorizeDocuSign', 'Authorize DocuSign')}
+        </button>
+      </div>
+    `;
+    
     document.getElementById('systemConfig').innerHTML = configHtml;
+    
+    // Check DocuSign authorization status
+    checkDocuSignAuth();
+  }
+
+  // Check DocuSign authorization status
+  async function checkDocuSignAuth() {
+    try {
+      const response = await adminFetch('/api/v1/w9/check-auth');
+      const data = await response.json();
+      
+      const statusDiv = document.getElementById('docusignAuthStatus');
+      const authBtn = document.getElementById('authorizeDocuSignBtn');
+      
+      if (data.authorized) {
+        statusDiv.innerHTML = `
+          <span style="color: #28a745;">✓</span> 
+          ${t('administrator.dashboard.config.docusignAuthorized', 'DocuSign is authorized and ready to use.')}
+        `;
+        authBtn.style.display = 'none';
+      } else {
+        statusDiv.innerHTML = `
+          <span style="color: #dc3545;">✗</span> 
+          ${t('administrator.dashboard.config.docusignNotAuthorized', 'DocuSign is not authorized. Click the button below to authorize.')}
+        `;
+        authBtn.style.display = 'inline-block';
+        
+        // Store authorization URL and state
+        authBtn.dataset.authUrl = data.authorizationUrl;
+        authBtn.dataset.authState = data.state;
+        
+        // Add click handler
+        authBtn.onclick = () => authorizeDocuSign(data.authorizationUrl, data.state);
+      }
+    } catch (error) {
+      console.error('Error checking DocuSign auth:', error);
+      const statusDiv = document.getElementById('docusignAuthStatus');
+      statusDiv.innerHTML = `
+        <span style="color: #dc3545;">✗</span> 
+        ${t('administrator.dashboard.config.docusignCheckError', 'Error checking authorization status.')}
+      `;
+    }
+  }
+  
+  // Authorize DocuSign
+  function authorizeDocuSign(authUrl, state) {
+    // Open DocuSign authorization in a new window
+    const authWindow = window.open(authUrl, 'DocuSignAuth', 'width=600,height=700');
+    
+    // Store state for verification
+    localStorage.setItem('docusign-auth-state', state);
+    
+    // Poll for completion
+    const pollInterval = setInterval(async () => {
+      // Check if window is closed
+      if (authWindow.closed) {
+        clearInterval(pollInterval);
+        
+        // Check if authorization was successful
+        const storedAuth = localStorage.getItem('docusign-auth-success');
+        if (storedAuth) {
+          const authData = JSON.parse(storedAuth);
+          if (authData.state === state) {
+            // Authorization successful
+            localStorage.removeItem('docusign-auth-success');
+            localStorage.removeItem('docusign-auth-state');
+            
+            // Recheck authorization status
+            await checkDocuSignAuth();
+            
+            alert(t('administrator.dashboard.config.docusignAuthSuccess', 'DocuSign authorization successful!'));
+          }
+        }
+      }
+      
+      // Also check authorization status periodically
+      try {
+        const response = await adminFetch('/api/v1/w9/authorization-status');
+        const data = await response.json();
+        if (data.authorized) {
+          clearInterval(pollInterval);
+          if (!authWindow.closed) authWindow.close();
+          await checkDocuSignAuth();
+          alert(t('administrator.dashboard.config.docusignAuthSuccess', 'DocuSign authorization successful!'));
+        }
+      } catch (error) {
+        // Ignore errors during polling
+      }
+    }, 2000);
   }
 
   // Modal handling
@@ -2284,6 +2749,60 @@
       window.location.href = '/administrator-login-embed.html';
     }
   });
+
+  // Handle Send W9 button click
+  async function handleSendW9Click(affiliateId, email, name, button) {
+    try {
+      const confirmMessage = t('administrator.dashboard.affiliates.confirmSendW9', 
+        `Send W9 form to ${name} at ${email}?`);
+      
+      if (!confirm(confirmMessage)) {
+        return;
+      }
+      
+      // Show loading state
+      button.disabled = true;
+      button.textContent = t('administrator.dashboard.affiliates.sending', 'Sending...');
+      
+      const response = await adminFetch('/api/v1/w9/send-docusign', {
+        method: 'POST',
+        body: JSON.stringify({ affiliateId })
+      });
+      
+      const data = await response.json();
+      
+      if (response.ok && data.success) {
+        alert(t('administrator.dashboard.affiliates.w9Sent', 'W9 form sent successfully!'));
+        // Reload the affiliates table to update status
+        await loadAffiliates();
+      } else {
+        // Show more specific error message based on response
+        let errorMessage = data.message || t('administrator.dashboard.affiliates.w9SendFailed', 'Failed to send W9 form');
+        
+        // Add specific guidance for common errors
+        if (response.status === 401 || data.error === 'Authorization required') {
+          errorMessage = t('administrator.dashboard.affiliates.docusignAuthRequired', 
+            'DocuSign authorization required. Please authorize DocuSign integration in system settings.');
+        } else if (data.error === 'Template configuration error') {
+          errorMessage = t('administrator.dashboard.affiliates.docusignTemplateError', 
+            'DocuSign W9 template not configured. Please check template ID in system settings.');
+        }
+        
+        alert(errorMessage);
+        // Re-enable button
+        button.disabled = false;
+        button.textContent = t('administrator.dashboard.affiliates.sendW9', 'Send W9');
+      }
+    } catch (error) {
+      console.error('Error sending W9:', error);
+      alert(t('administrator.dashboard.affiliates.w9SendError', 'Error sending W9 form. Please try again.'));
+      // Re-enable button
+      if (button) {
+        button.disabled = false;
+        button.textContent = t('administrator.dashboard.affiliates.sendW9', 'Send W9');
+      }
+    }
+  }
 
   // Global functions for inline handlers
   window.editOperator = async (operatorId) => {
@@ -2456,5 +2975,19 @@
         window.i18n.setLanguage(language);
       }
     }
+    
+    // Handle tab restore messages from browser navigation
+    if (event.data && event.data.type === 'restore-tab' && event.data.tab) {
+      console.log('[Admin Dashboard] Restoring tab from browser navigation:', event.data.tab);
+      // Don't update history when restoring from popstate
+      switchToTab(event.data.tab, false);
+    }
   });
+  
+  // Initialize the dashboard by loading the default tab
+  // Check URL for tab parameter first, then localStorage, then default
+  const urlParams = new URLSearchParams(window.location.search);
+  const urlTab = urlParams.get('tab');
+  const savedTab = urlTab || localStorage.getItem('adminCurrentTab') || 'dashboard';
+  switchToTab(savedTab);
 })();

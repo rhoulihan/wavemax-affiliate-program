@@ -794,6 +794,11 @@
         "auditlog": "Audit Log",
         "config": "Configuration"
       },
+      "subtabs": {
+        "overview": "Overview",
+        "charts": "Charts",
+        "recentActivity": "Recent Activity"
+      },
       "stats": {
         "activeOperators": "Active Operators",
         "todaysOrders": "Today's Orders",
@@ -915,7 +920,16 @@
         "customers": "Customers",
         "orders": "Orders",
         "revenue": "Revenue",
-        "commission": "Commission"
+        "commission": "Commission",
+        "w9Status": "W9 Status",
+        "sendW9": "Send W9",
+        "sending": "Sending...",
+        "confirmSendW9": "Send W9 form to this affiliate?",
+        "w9Sent": "W9 form sent successfully!",
+        "w9SendFailed": "Failed to send W9 form",
+        "w9SendError": "Error sending W9 form. Please try again.",
+        "docusignAuthRequired": "DocuSign authorization required. Please authorize DocuSign integration in system settings.",
+        "docusignTemplateError": "DocuSign W9 template not configured. Please check template ID in system settings."
       },
       "w9review": {
         "title": "W-9 Document Review",
@@ -1016,7 +1030,17 @@
         "configSaveFailed": "Failed to save configuration",
         "invalidJson": "Invalid JSON for",
         "enabled": "Enabled",
-        "disabled": "Disabled"
+        "disabled": "Disabled",
+        "docusignTitle": "DocuSign Integration",
+        "docusignDesc": "Authorize DocuSign to enable W9 form sending to affiliates.",
+        "checkingAuth": "Checking authorization status...",
+        "authorizeDocuSign": "Authorize DocuSign",
+        "docusignAuthorized": "DocuSign is authorized and ready to use.",
+        "docusignNotAuthorized": "DocuSign is not authorized. Click the button below to authorize.",
+        "docusignCheckError": "Error checking authorization status.",
+        "docusignAuthSuccess": "DocuSign authorization successful!",
+        "noConfigData": "No configuration data available",
+        "loadError": "Error loading configuration"
       },
       "loading": {
         "dashboard": "Loading dashboard data...",
