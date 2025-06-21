@@ -960,16 +960,17 @@ describe('Authentication Integration Tests', () => {
   describe('POST /api/v1/auth/administrator/login', () => {
     it('should login administrator with valid credentials', async () => {
       // Create test administrator
-      const admin = new Administrator({
+      const { salt, hash } = encryptionUtil.hashPassword(getStrongPassword('admin', 1));
+      const admin = await Administrator.create({
         adminId: 'ADM001',
         firstName: 'Admin',
         lastName: 'User',
         email: 'admin@example.com',
-        password: getStrongPassword('admin', 1),
+        passwordSalt: salt,
+        passwordHash: hash,
         permissions: ['system_config', 'operator_management'],
         isActive: true
       });
-      await admin.save();
 
       const response = await agent
         .post('/api/v1/auth/administrator/login')
@@ -994,16 +995,17 @@ describe('Authentication Integration Tests', () => {
     });
 
     it('should fail with invalid administrator credentials', async () => {
-      const admin = new Administrator({
+      const { salt, hash } = encryptionUtil.hashPassword(getStrongPassword('admin', 1));
+      const admin = await Administrator.create({
         adminId: 'ADM001',
         firstName: 'Admin',
         lastName: 'User',
         email: 'admin@example.com',
-        password: getStrongPassword('admin', 1),
+        passwordSalt: salt,
+        passwordHash: hash,
         permissions: ['system_config'],
         isActive: true
       });
-      await admin.save();
 
       const response = await agent
         .post('/api/v1/auth/administrator/login')
@@ -1021,16 +1023,17 @@ describe('Authentication Integration Tests', () => {
     });
 
     it('should fail when administrator is inactive', async () => {
-      const admin = new Administrator({
+      const { salt, hash } = encryptionUtil.hashPassword(getStrongPassword('admin', 1));
+      const admin = await Administrator.create({
         adminId: 'ADM001',
         firstName: 'Admin',
         lastName: 'User',
         email: 'admin@example.com',
-        password: getStrongPassword('admin', 1),
+        passwordSalt: salt,
+        passwordHash: hash,
         permissions: ['system_config'],
         isActive: false
       });
-      await admin.save();
 
       const response = await agent
         .post('/api/v1/auth/administrator/login')
@@ -1051,14 +1054,15 @@ describe('Authentication Integration Tests', () => {
   describe('POST /api/v1/auth/operator/login', () => {
     it('should login operator with valid credentials', async () => {
       // Create a dummy administrator for the createdBy field
-      const admin = new Administrator({
+      const { salt: adminSalt, hash: adminHash } = encryptionUtil.hashPassword(getStrongPassword('admin', 1));
+      const admin = await Administrator.create({
         adminId: 'ADMIN001',
         firstName: 'Admin',
         lastName: 'User',
         email: 'admin@example.com',
-        password: getStrongPassword('admin', 1)
+        passwordSalt: adminSalt,
+        passwordHash: adminHash
       });
-      await admin.save();
 
       // Create test operator with always valid shift times
       const operator = new Operator({
@@ -1099,14 +1103,15 @@ describe('Authentication Integration Tests', () => {
 
     it('should fail with invalid operator credentials', async () => {
       // Create a dummy administrator for the createdBy field
-      const admin = new Administrator({
+      const { salt: adminSalt2, hash: adminHash2 } = encryptionUtil.hashPassword(getStrongPassword('admin', 1));
+      const admin = await Administrator.create({
         adminId: 'ADMIN002',
         firstName: 'Admin',
         lastName: 'User2',
         email: 'admin2@example.com',
-        password: getStrongPassword('admin', 1)
+        passwordSalt: adminSalt2,
+        passwordHash: adminHash2
       });
-      await admin.save();
 
       const operator = new Operator({
         operatorId: 'OPR001',
@@ -1139,14 +1144,15 @@ describe('Authentication Integration Tests', () => {
 
     it('should fail when operator is inactive', async () => {
       // Create a dummy administrator for the createdBy field
-      const admin = new Administrator({
+      const { salt: adminSalt3, hash: adminHash3 } = encryptionUtil.hashPassword(getStrongPassword('admin', 1));
+      const admin = await Administrator.create({
         adminId: 'ADMIN003',
         firstName: 'Admin',
         lastName: 'User3',
         email: 'admin3@example.com',
-        password: getStrongPassword('admin', 1)
+        passwordSalt: adminSalt3,
+        passwordHash: adminHash3
       });
-      await admin.save();
 
       const operator = new Operator({
         operatorId: 'OPR001',

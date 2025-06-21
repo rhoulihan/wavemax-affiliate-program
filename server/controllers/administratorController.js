@@ -15,6 +15,7 @@ const { validatePasswordStrength } = require('../utils/passwordValidator');
 const { validationResult } = require('express-validator');
 const crypto = require('crypto');
 const mongoose = require('mongoose');
+const encryptionUtil = require('../utils/encryption');
 
 // Administrator Management
 
@@ -152,13 +153,17 @@ exports.createAdministrator = async (req, res) => {
     const adminCount = await Administrator.countDocuments();
     const adminId = `ADM${String(adminCount + 1).padStart(3, '0')}`;
 
+    // Hash the password
+    const { salt, hash } = encryptionUtil.hashPassword(password);
+
     // Create new administrator
     const administrator = new Administrator({
       adminId,
       firstName,
       lastName,
       email: email.toLowerCase(),
-      password,
+      passwordSalt: salt,
+      passwordHash: hash,
       permissions,
       createdAt: new Date()
     });

@@ -140,6 +140,9 @@ function initializeAffiliateDashboard() {
   // Load settings data on initial load
   loadSettingsData(affiliateId);
 
+  // Fetch admin support email for W9 notifications
+  fetchAdminSupportEmail();
+
   // Check URL parameters for specific customer filtering
   // Try both window.location.search and the global urlParams if available
   const urlParams = new URLSearchParams(window.location.search);
@@ -597,6 +600,9 @@ async function loadAffiliateData(affiliateId) {
           }
         }, 500);
       }
+
+      // Check W9 status and show notification if needed
+      checkW9NotificationRequired(data);
     }
   } catch (error) {
     console.error('Error loading affiliate data:', error);
@@ -1014,8 +1020,27 @@ async function loadSettingsData(affiliateId) {
         if (emailField) emailField.value = data.email || '';
         if (phoneField) phoneField.value = data.phone || '';
         if (businessNameField) businessNameField.value = data.businessName || '';
-        if (minimumDeliveryFeeField) minimumDeliveryFeeField.value = data.minimumDeliveryFee || 25;
-        if (perBagDeliveryFeeField) perBagDeliveryFeeField.value = data.perBagDeliveryFee || 5;
+        
+        // Set select dropdown values
+        if (minimumDeliveryFeeField) {
+          const mdfValue = String(data.minimumDeliveryFee || 25);
+          // Ensure the value exists in the dropdown options
+          if (minimumDeliveryFeeField.querySelector(`option[value="${mdfValue}"]`)) {
+            minimumDeliveryFeeField.value = mdfValue;
+          } else {
+            minimumDeliveryFeeField.value = '25'; // Default to $25
+          }
+        }
+        
+        if (perBagDeliveryFeeField) {
+          const pbfValue = String(data.perBagDeliveryFee || 10);
+          // Ensure the value exists in the dropdown options
+          if (perBagDeliveryFeeField.querySelector(`option[value="${pbfValue}"]`)) {
+            perBagDeliveryFeeField.value = pbfValue;
+          } else {
+            perBagDeliveryFeeField.value = '10'; // Default to $10
+          }
+        }
 
         // Initialize or update service area component
         if (window.ServiceAreaComponent) {
@@ -1057,16 +1082,6 @@ async function loadSettingsData(affiliateId) {
         if (registrationLinkField) registrationLinkField.value = registrationLink;
 
         // Load W-9 status
-        loadW9Status();
-
-        // Set up W-9 event listeners
-        const w9UploadForm = document.getElementById('w9UploadFormElement');
-        if (w9UploadForm) {
-          w9UploadForm.addEventListener('submit', handleW9Upload);
-        }
-
-        // Download button removed - using DocuSign for W9 management
-
         // Set landing page link
         const landingPageLinkField = document.getElementById('landingPageLink');
         const landingPageLink = `https://www.wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program?route=/affiliate-landing&code=${affiliateId}`;
@@ -1091,6 +1106,13 @@ function enableEditMode() {
       input.removeAttribute('readonly');
       input.classList.remove('bg-gray-100');
     }
+  });
+
+  // Enable select dropdowns
+  const selects = document.querySelectorAll('#settingsForm select');
+  selects.forEach(select => {
+    select.removeAttribute('disabled');
+    select.classList.remove('bg-gray-100');
   });
 
   document.getElementById('editBtn').style.display = 'none';
@@ -1118,6 +1140,13 @@ function disableEditMode() {
       input.setAttribute('readonly', true);
       input.classList.add('bg-gray-100');
     }
+  });
+
+  // Disable select dropdowns
+  const selects = document.querySelectorAll('#settingsForm select');
+  selects.forEach(select => {
+    select.setAttribute('disabled', true);
+    select.classList.add('bg-gray-100');
   });
 
   document.getElementById('editBtn').style.display = 'block';
@@ -1350,230 +1379,137 @@ function updateFeeCalculatorPreview() {
   });
 }
 
-// W-9 Tax Information Functions
-let w9Status = null;
+// W9-related functions removed - W9 management now handled through admin dashboard
 
-async function loadW9Status() {
+// W9 Notification Functions
+async function checkW9NotificationRequired(affiliateData) {
   try {
-    const response = await authenticatedFetch('/api/v1/w9/status');
-
-    if (response.ok) {
-      w9Status = await response.json();
-      updateW9Display();
-    } else {
-      console.error('Failed to load W-9 status');
+    // Check if W9 status needs attention
+    const w9Status = affiliateData.w9Information?.status || 'not_submitted';
+    
+    // Only show modal for statuses that need action
+    if (w9Status === 'verified') {
+      return; // No notification needed
     }
+
+    // Check year-to-date revenue for $600 threshold
+    const ytdRevenue = await getYearToDateRevenue(affiliateData.affiliateId);
+    
+    // Only show notification if revenue exceeds $600 or status needs attention
+    if (ytdRevenue < 600 && w9Status === 'not_submitted') {
+      return; // No notification needed yet
+    }
+
+    // Show appropriate modal based on status
+    showW9NotificationModal(w9Status, affiliateData, ytdRevenue);
   } catch (error) {
-    console.error('Error loading W-9 status:', error);
+    console.error('Error checking W9 notification requirements:', error);
   }
 }
 
-function updateW9Display() {
-  if (!w9Status) return;
+async function getYearToDateRevenue(affiliateId) {
+  try {
+    const baseUrl = window.EMBED_CONFIG?.baseUrl || 'https://wavemax.promo';
+    const currentYear = new Date().getFullYear();
+    
+    // Fetch year-to-date stats
+    const response = await authenticatedFetch(`${baseUrl}/api/v1/affiliates/${affiliateId}/stats/ytd`);
+    
+    if (!response.ok) {
+      // Fallback to dashboard stats if YTD endpoint doesn't exist
+      const dashboardResponse = await authenticatedFetch(`${baseUrl}/api/v1/affiliates/${affiliateId}/dashboard`);
+      if (dashboardResponse.ok) {
+        const data = await dashboardResponse.json();
+        return data.totalEarnings || 0;
+      }
+      return 0;
+    }
+    
+    const data = await response.json();
+    return data.totalRevenue || data.totalEarnings || 0;
+  } catch (error) {
+    console.error('Error fetching year-to-date revenue:', error);
+    return 0;
+  }
+}
 
-  // Update status text
-  const statusText = document.getElementById('w9StatusText');
-  const statusAlert = document.getElementById('w9StatusAlert');
-  const uploadForm = document.getElementById('w9UploadForm');
-  // Download button removed - using DocuSign only
+function showW9NotificationModal(status, affiliateData, ytdRevenue) {
+  const modal = document.getElementById('w9NotificationModal');
+  const title = document.getElementById('w9ModalTitle');
+  const content = document.getElementById('w9ModalContent');
+  const closeBtn = document.getElementById('w9ModalCloseBtn');
+  
+  if (!modal || !title || !content) return;
 
-  if (statusText) {
-    statusText.textContent = w9Status.statusDisplay;
-    statusText.className = 'ml-2 font-semibold ';
-
-    // Add color coding based on status
-    switch (w9Status.status) {
+  // Set content based on status
+  switch (status) {
     case 'not_submitted':
-      statusText.className += 'text-red-600';
+      title.textContent = 'W-9 Form Required';
+      content.innerHTML = `
+        <p class="mb-3">Your year-to-date revenue of <strong>$${ytdRevenue.toFixed(2)}</strong> exceeds the IRS threshold of $600.</p>
+        <p class="mb-3">You will receive a W-9 form via DocuSign to the email address: <strong>${affiliateData.email}</strong></p>
+        <p class="text-sm text-gray-600">Please complete the form promptly. Additional payments cannot be processed until your W-9 is completed and reviewed.</p>
+      `;
       break;
+      
     case 'pending_review':
-      statusText.className += 'text-yellow-600';
+      title.textContent = 'W-9 Form Pending Review';
+      content.innerHTML = `
+        <p class="mb-3">A W-9 form has been sent to you via DocuSign at: <strong>${affiliateData.email}</strong></p>
+        <p class="mb-3">Please check your email (including spam folder) and complete the form if you haven't already.</p>
+        <p class="text-sm text-gray-600">Payments will resume once your W-9 has been completed and reviewed by our team.</p>
+      `;
       break;
-    case 'verified':
-      statusText.className += 'text-green-600';
-      break;
+      
     case 'rejected':
-      statusText.className += 'text-red-600';
+      // Get admin email for support
+      const adminEmail = localStorage.getItem('adminSupportEmail') || 'support@wavemaxlaundry.com';
+      title.textContent = 'W-9 Processing Issue';
+      content.innerHTML = `
+        <p class="mb-3">There was a problem processing your W-9 form.</p>
+        <p class="mb-3">Please contact WaveMAX support for assistance:</p>
+        <p class="text-center"><a href="mailto:${adminEmail}" class="text-blue-600 hover:underline font-semibold">${adminEmail}</a></p>
+      `;
       break;
+      
     case 'expired':
-      statusText.className += 'text-orange-600';
+      title.textContent = 'W-9 Form Expired';
+      content.innerHTML = `
+        <p class="mb-3">Your W-9 form has expired and needs to be renewed.</p>
+        <p class="mb-3">You will receive a new W-9 form via DocuSign to: <strong>${affiliateData.email}</strong></p>
+        <p class="text-sm text-gray-600">Please complete the form promptly to continue receiving payments.</p>
+      `;
       break;
-    }
   }
 
-  // Update status alert
-  if (statusAlert) {
-    let alertHTML = '';
+  // Show modal
+  modal.classList.remove('hidden');
 
-    if (w9Status.status === 'not_submitted') {
-      alertHTML = `
-        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative">
-          <strong class="font-bold" data-i18n="affiliate.dashboard.settings.w9Required">W-9 Required!</strong>
-          <span class="block sm:inline" data-i18n="affiliate.dashboard.settings.w9RequiredMessage">You must submit a W-9 form before payments can be processed.</span>
-        </div>
-      `;
-      if (uploadForm) uploadForm.style.display = 'block';
-    } else if (w9Status.status === 'pending_review') {
-      alertHTML = `
-        <div class="bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded relative">
-          <strong class="font-bold" data-i18n="affiliate.dashboard.settings.w9UnderReview">W-9 Under Review</strong>
-          <span class="block sm:inline" data-i18n="affiliate.dashboard.settings.w9UnderReviewMessage">Your W-9 is being reviewed by our team.</span>
-        </div>
-      `;
-      // Download button removed - DocuSign handles document access
-    } else if (w9Status.status === 'verified') {
-      alertHTML = `
-        <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative">
-          <strong class="font-bold" data-i18n="affiliate.dashboard.settings.w9Verified">W-9 Verified</strong>
-          <span class="block sm:inline" data-i18n="affiliate.dashboard.settings.w9VerifiedMessage">Your W-9 has been verified. You can receive payments.</span>
-        </div>
-      `;
-      // Download button removed - DocuSign handles document access
-    } else if (w9Status.status === 'rejected') {
-      alertHTML = `
-        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative">
-          <strong class="font-bold" data-i18n="affiliate.dashboard.settings.w9Rejected">W-9 Rejected</strong>
-          <span class="block sm:inline" data-i18n="affiliate.dashboard.settings.w9RejectedMessage">Your W-9 was rejected. Please submit a new one.</span>
-        </div>
-      `;
-      if (uploadForm) uploadForm.style.display = 'block';
-    }
-
-    statusAlert.innerHTML = alertHTML;
-  }
-
-  // Update dates
-  if (w9Status.submittedAt) {
-    const submittedDateDiv = document.getElementById('w9SubmittedDate');
-    const submittedDateText = document.getElementById('w9SubmittedDateText');
-    if (submittedDateDiv && submittedDateText) {
-      submittedDateDiv.style.display = 'block';
-      submittedDateText.textContent = new Date(w9Status.submittedAt).toLocaleDateString();
-    }
-  }
-
-  if (w9Status.verifiedAt) {
-    const verifiedDateDiv = document.getElementById('w9VerifiedDate');
-    const verifiedDateText = document.getElementById('w9VerifiedDateText');
-    if (verifiedDateDiv && verifiedDateText) {
-      verifiedDateDiv.style.display = 'block';
-      verifiedDateText.textContent = new Date(w9Status.verifiedAt).toLocaleDateString();
-    }
-  }
-
-  // Update tax info (only shown if verified)
-  if (w9Status.status === 'verified' && w9Status.taxInfo) {
-    const taxInfoDiv = document.getElementById('w9TaxInfo');
-    const taxIdType = document.getElementById('w9TaxIdType');
-    const taxIdLast4 = document.getElementById('w9TaxIdLast4');
-
-    if (taxInfoDiv && taxIdType && taxIdLast4) {
-      taxInfoDiv.style.display = 'block';
-      taxIdType.textContent = w9Status.taxInfo.type;
-      taxIdLast4.textContent = '***-**-' + w9Status.taxInfo.last4;
-    }
-  }
-
-  // Update rejection reason
-  if (w9Status.status === 'rejected' && w9Status.rejectionReason) {
-    const rejectionDiv = document.getElementById('w9RejectionReason');
-    const rejectionText = document.getElementById('w9RejectionReasonText');
-
-    if (rejectionDiv && rejectionText) {
-      rejectionDiv.style.display = 'block';
-      rejectionText.textContent = w9Status.rejectionReason;
-    }
-  }
-
-  // Re-apply i18n translations
-  if (window.i18next && window.i18next.isInitialized) {
-    window.applyTranslations();
-  }
+  // Close button handler - only way to dismiss modal
+  closeBtn.onclick = function() {
+    modal.classList.add('hidden');
+  };
 }
 
-async function handleW9Upload(event) {
-  event.preventDefault();
-
-  const fileInput = document.getElementById('w9File');
-  const file = fileInput.files[0];
-
-  if (!file) {
-    alert('Please select a file to upload');
-    return;
-  }
-
-  if (file.type !== 'application/pdf') {
-    alert('Only PDF files are accepted');
-    return;
-  }
-
-  if (file.size > 5 * 1024 * 1024) {
-    alert('File size must be less than 5MB');
-    return;
-  }
-
-  // Show progress
-  document.getElementById('w9UploadProgress').style.display = 'block';
-  document.getElementById('w9UploadSuccess').style.display = 'none';
-  document.getElementById('w9UploadError').style.display = 'none';
-
-  const formData = new FormData();
-  formData.append('w9document', file);
-
+// Fetch admin support email on page load
+async function fetchAdminSupportEmail() {
   try {
-    const response = await authenticatedFetch('/api/v1/w9/upload', {
-      method: 'POST',
-      body: formData
-    });
-
+    const baseUrl = window.EMBED_CONFIG?.baseUrl || 'https://wavemax.promo';
+    // Try to get the primary administrator's email
+    const response = await authenticatedFetch(`${baseUrl}/api/v1/administrators`);
+    
     if (response.ok) {
-      const result = await response.json();
-      document.getElementById('w9UploadProgress').style.display = 'none';
-      document.getElementById('w9UploadSuccess').style.display = 'block';
-
-      // Reset form
-      fileInput.value = '';
-
-      // Reload W-9 status
-      setTimeout(() => {
-        loadW9Status();
-        document.getElementById('w9UploadSuccess').style.display = 'none';
-      }, 3000);
-    } else {
-      const error = await response.json();
-      document.getElementById('w9UploadProgress').style.display = 'none';
-      document.getElementById('w9UploadError').style.display = 'block';
-      document.getElementById('w9UploadErrorText').textContent = error.message || 'Failed to upload W-9';
+      const data = await response.json();
+      // Get the first administrator's email (usually the primary admin)
+      if (data.administrators && data.administrators.length > 0) {
+        const adminEmail = data.administrators[0].email;
+        localStorage.setItem('adminSupportEmail', adminEmail);
+      }
     }
   } catch (error) {
-    console.error('Upload error:', error);
-    document.getElementById('w9UploadProgress').style.display = 'none';
-    document.getElementById('w9UploadError').style.display = 'block';
-    document.getElementById('w9UploadErrorText').textContent = 'An error occurred while uploading the file';
-  }
-}
-
-async function downloadSubmittedW9() {
-  try {
-    const response = await authenticatedFetch('/api/v1/w9/download');
-
-    if (response.ok) {
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.style.display = 'none';
-      a.href = url;
-      a.download = 'W9_Submitted.pdf';
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
-    } else {
-      alert('Failed to download W-9');
-    }
-  } catch (error) {
-    console.error('Download error:', error);
-    alert('An error occurred while downloading the W-9');
+    console.error('Error fetching admin support email:', error);
+    // Use default fallback email
+    localStorage.setItem('adminSupportEmail', 'support@wavemaxlaundry.com');
   }
 }
 

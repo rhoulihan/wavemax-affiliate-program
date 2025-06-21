@@ -1,5 +1,6 @@
 const Affiliate = require('../models/Affiliate');
 const Order = require('../models/Order');
+const Customer = require('../models/Customer');
 const PaymentExport = require('../models/PaymentExport');
 const SystemConfig = require('../models/SystemConfig');
 const { formatCurrency } = require('../utils/helpers');
@@ -145,14 +146,25 @@ exports.exportPaymentSummary = async (req, res) => {
     const orders = await Order.find({
       status: 'complete',
       completedAt: { $gte: start, $lte: end },
-      'affiliate.affiliateId': { $exists: true },
-      'affiliate.commission': { $gt: 0 }
-    }).populate('affiliate.affiliateId', 'firstName lastName affiliateId w9Information');
+      affiliateId: { $exists: true },
+      affiliateCommission: { $gt: 0 }
+    });
+    
+    // Manually populate affiliate data
+    const affiliateIds = [...new Set(orders.map(o => o.affiliateId))];
+    const affiliates = await Affiliate.find({ affiliateId: { $in: affiliateIds } });
+    const affiliateMap = {};
+    affiliates.forEach(aff => { affiliateMap[aff.affiliateId] = aff; });
+    
+    // Attach affiliate data to orders
+    orders.forEach(order => {
+      order.affiliateData = affiliateMap[order.affiliateId];
+    });
 
     // Filter out orders where affiliate doesn't have verified W-9
     const validOrders = orders.filter(order =>
-      order.affiliate.affiliateId &&
-            order.affiliate.affiliateId.w9Information?.status === 'verified'
+      order.affiliateData &&
+            order.affiliateData.w9Information?.status === 'verified'
     );
 
     if (validOrders.length === 0) {
@@ -165,10 +177,10 @@ exports.exportPaymentSummary = async (req, res) => {
     // Group by affiliate
     const affiliatePayments = {};
     validOrders.forEach(order => {
-      const affiliateId = order.affiliate.affiliateId.affiliateId;
+      const affiliateId = order.affiliateId;
       if (!affiliatePayments[affiliateId]) {
         affiliatePayments[affiliateId] = {
-          affiliate: order.affiliate.affiliateId,
+          affiliate: order.affiliateData,
           orders: [],
           totalCommission: 0
         };
@@ -176,10 +188,10 @@ exports.exportPaymentSummary = async (req, res) => {
       affiliatePayments[affiliateId].orders.push({
         orderId: order.orderId,
         completedAt: order.completedAt,
-        orderTotal: order.totalPrice,
-        commission: order.affiliate.commission
+        orderTotal: order.actualTotal || order.estimatedTotal,
+        commission: order.affiliateCommission
       });
-      affiliatePayments[affiliateId].totalCommission += order.affiliate.commission;
+      affiliatePayments[affiliateId].totalCommission += order.affiliateCommission;
     });
 
     // Create export record
@@ -307,9 +319,20 @@ exports.exportCommissionDetail = async (req, res) => {
     const orders = await Order.find({
       status: 'complete',
       completedAt: { $gte: start, $lte: end },
-      'affiliate.affiliateId': affiliate._id,
-      'affiliate.commission': { $gt: 0 }
+      affiliateId: affiliate.affiliateId,
+      affiliateCommission: { $gt: 0 }
     }).sort({ completedAt: 1 });
+    
+    // Manually populate customer data
+    const customerIds = [...new Set(orders.map(o => o.customerId))];
+    const customers = await Customer.find({ customerId: { $in: customerIds } });
+    const customerMap = {};
+    customers.forEach(cust => { customerMap[cust.customerId] = cust; });
+    
+    // Attach customer data to orders
+    orders.forEach(order => {
+      order.customerData = customerMap[order.customerId];
+    });
 
     if (orders.length === 0) {
       return res.status(404).json({
@@ -320,7 +343,7 @@ exports.exportCommissionDetail = async (req, res) => {
 
     // Create export record
     const exportId = `EXP-${Date.now()}`;
-    const totalCommission = orders.reduce((sum, order) => sum + order.affiliate.commission, 0);
+    const totalCommission = orders.reduce((sum, order) => sum + order.affiliateCommission, 0);
     const exportData = {
       type: 'commission_detail',
       periodStart: start,
@@ -341,12 +364,12 @@ exports.exportCommissionDetail = async (req, res) => {
         orders: orders.map(order => ({
           orderId: order.orderId,
           completedAt: order.completedAt,
-          customerName: `${order.customer.firstName} ${order.customer.lastName}`,
-          orderTotal: order.totalPrice,
-          commission: order.affiliate.commission,
-          commissionRate: order.affiliate.commissionRate
+          customerName: order.customerData ? `${order.customerData.firstName} ${order.customerData.lastName}` : 'Unknown',
+          orderTotal: order.actualTotal || order.estimatedTotal,
+          commission: order.affiliateCommission,
+          commissionRate: 10 // Default commission rate
         })),
-        totalCommission: orders.reduce((sum, order) => sum + order.affiliate.commission, 0)
+        totalCommission: orders.reduce((sum, order) => sum + order.affiliateCommission, 0)
       }
     };
 
@@ -368,10 +391,10 @@ exports.exportCommissionDetail = async (req, res) => {
       const records = orders.map(order => ({
         orderId: order.orderId,
         date: order.completedAt.toISOString().split('T')[0],
-        customer: `${order.customer.firstName} ${order.customer.lastName}`,
-        orderTotal: order.totalPrice.toFixed(2),
-        commissionRate: `${order.affiliate.commissionRate}%`,
-        commission: order.affiliate.commission.toFixed(2)
+        customer: order.customerData ? `${order.customerData.firstName} ${order.customerData.lastName}` : 'Unknown',
+        orderTotal: (order.actualTotal || order.estimatedTotal || 0).toFixed(2),
+        commissionRate: '10%', // Default commission rate
+        commission: order.affiliateCommission.toFixed(2)
       }));
 
       const csvContent = csvStringifier.getHeaderString() + csvStringifier.stringifyRecords(records);

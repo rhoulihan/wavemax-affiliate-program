@@ -85,7 +85,9 @@ describe('Auth Controller', () => {
 
       await authController.affiliateLogin(req, res);
 
-      expect(Affiliate.findOne).toHaveBeenCalledWith({ username: 'testaffiliate' });
+      expect(Affiliate.findOne).toHaveBeenCalledWith({ 
+        username: { $regex: new RegExp('^testaffiliate$', 'i') } 
+      });
       expect(encryptionUtil.verifyPassword).toHaveBeenCalledWith(
         'password123',
         'salt',
@@ -185,7 +187,7 @@ describe('Auth Controller', () => {
 
       expect(Customer.findOne).toHaveBeenCalledWith({
         $or: [
-          { username: 'testcustomer' },
+          { username: { $regex: new RegExp('^testcustomer$', 'i') } },
           { email: 'testcustomer' }
         ]
       });
@@ -264,7 +266,7 @@ describe('Auth Controller', () => {
 
       expect(Customer.findOne).toHaveBeenCalledWith({
         $or: [
-          { username: 'jane@example.com' },
+          { username: { $regex: new RegExp('^jane@example.com$', 'i') } },
           { email: 'jane@example.com' }
         ]
       });
@@ -313,7 +315,7 @@ describe('Auth Controller', () => {
       // Should use emailOrUsername value, not username
       expect(Customer.findOne).toHaveBeenCalledWith({
         $or: [
-          { username: 'testcustomer' },
+          { username: { $regex: new RegExp('^testcustomer$', 'i') } },
           { email: 'testcustomer' }
         ]
       });
@@ -496,9 +498,7 @@ describe('Auth Controller', () => {
         resetLoginAttempts: jest.fn()
       };
 
-      Administrator.findOne.mockReturnValue({
-        select: jest.fn().mockResolvedValue(mockAdmin)
-      });
+      Administrator.findOne.mockResolvedValue(mockAdmin);
       RefreshToken.prototype.save = jest.fn().mockResolvedValue(true);
 
       await authController.administratorLogin(req, res);
@@ -526,9 +526,7 @@ describe('Auth Controller', () => {
         isLocked: true
       };
 
-      Administrator.findOne.mockReturnValue({
-        select: jest.fn().mockResolvedValue(mockAdmin)
-      });
+      Administrator.findOne.mockResolvedValue(mockAdmin);
 
       await authController.administratorLogin(req, res);
 
@@ -548,9 +546,7 @@ describe('Auth Controller', () => {
         isLocked: false
       };
 
-      Administrator.findOne.mockReturnValue({
-        select: jest.fn().mockResolvedValue(mockAdmin)
-      });
+      Administrator.findOne.mockResolvedValue(mockAdmin);
 
       await authController.administratorLogin(req, res);
 

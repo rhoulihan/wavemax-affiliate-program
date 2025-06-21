@@ -164,8 +164,8 @@ This document contains important operational knowledge and workarounds discovere
 ### Running Tests
 1. **Timeout issues**: The `npm test` command requires extended timeout
    - **Issue**: Default Bash tool timeout (2 minutes) is insufficient for full test suite
-   - **Solution**: Use 12-minute timeout when running tests
-   - **Command**: When running via Bash tool, specify timeout: 720000 (12 minutes)
+   - **Solution**: Use 20-minute timeout when running tests
+   - **Command**: When running via Bash tool, specify timeout: 1200000 (20 minutes)
    - **Discovered**: 2025-01-07
 2. **Memory issues**: Use `npm run test:memory` instead of `npm test` for large test suites
 3. **Individual test files**: `npm test -- path/to/test.js`
@@ -175,7 +175,7 @@ This document contains important operational knowledge and workarounds discovere
 When the command "run coverage test" is issued, the system performs the following automated workflow:
 
 1. **Run Full Test Suite with Coverage**:
-   - Sets bash timeout to 12 minutes (720000ms)
+   - Sets bash timeout to 20 minutes (1200000ms)
    - Executes: `npm run test:coverage 2>&1 | tee test-coverage-results.txt`
    - Captures all output including coverage data
 

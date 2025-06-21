@@ -374,12 +374,14 @@ describe('Password Validation Integration Tests', () => {
 
     beforeEach(async () => {
       // Create a test administrator for authentication
+      const { salt, hash } = hashPassword('SecureM@ster7!9K');
       const testAdmin = new Administrator({
         adminId: 'ADMIN001',
         firstName: 'Test',
         lastName: 'Admin',
         email: 'setup@example.com',
-        password: 'SecureM@ster7!9K',
+        passwordSalt: salt,
+        passwordHash: hash,
         permissions: ['administrators.create'],
         isActive: true
       });
@@ -455,12 +457,14 @@ describe('Password Validation Integration Tests', () => {
 
     beforeEach(async () => {
       // Create a test administrator for authentication
+      const { salt, hash } = hashPassword('SecureM@ster7!9K');
       const testAdmin = new Administrator({
         adminId: 'ADMIN002',
         firstName: 'Test',
         lastName: 'Admin',
         email: 'opsetup@example.com',
-        password: 'SecureM@ster7!9K',
+        passwordSalt: salt,
+        passwordHash: hash,
         permissions: ['operators.create'],
         isActive: true
       });

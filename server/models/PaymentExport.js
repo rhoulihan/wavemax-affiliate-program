@@ -55,7 +55,7 @@ const paymentExportSchema = new mongoose.Schema({
   },
   format: {
     type: String,
-    enum: ['csv', 'qbo', 'iif'], // QuickBooks formats
+    enum: ['csv', 'qbo', 'iif', 'json'], // QuickBooks formats + json for API responses
     default: 'csv'
   },
   // Export content summary

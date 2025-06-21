@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const Administrator = require('../../server/models/Administrator');
 const emailService = require('../../server/utils/emailService');
+const encryptionUtil = require('../../server/utils/encryption');
 
 jest.mock('../../server/utils/auditLogger', () => ({
   log: jest.fn().mockResolvedValue(true),
@@ -31,12 +32,16 @@ describe('Admin Creation Integration Tests', () => {
 
   describe('Direct Database Admin Creation', () => {
     it('should create admin with sequential ID when no admins exist', async () => {
+      const password = 'StrongPassword417!';
+      const { salt, hash } = encryptionUtil.hashPassword(password);
+      
       const adminData = {
         adminId: 'ADM001',
         firstName: 'John',
         lastName: 'Doe',
         email: 'john.doe@example.com',
-        password: 'StrongPassword417!',
+        passwordSalt: salt,
+        passwordHash: hash,
         permissions: ['system_config', 'operator_management'],
         isActive: true
       };
@@ -53,22 +58,26 @@ describe('Admin Creation Integration Tests', () => {
     });
 
     it('should create admin with next sequential ID when admins exist', async () => {
+      const { salt: salt1, hash: hash1 } = encryptionUtil.hashPassword('StrongPassword417!');
       await new Administrator({
         adminId: 'ADM001',
         firstName: 'First',
         lastName: 'Admin',
         email: 'first@example.com',
-        password: 'StrongPassword417!',
+        passwordSalt: salt1,
+        passwordHash: hash1,
         permissions: ['system_config'],
         isActive: true
       }).save();
 
+      const { salt: salt2, hash: hash2 } = encryptionUtil.hashPassword('StrongPassword417!');
       await new Administrator({
         adminId: 'ADM002',
         firstName: 'Second',
         lastName: 'Admin',
         email: 'second@example.com',
-        password: 'StrongPassword417!',
+        passwordSalt: salt2,
+        passwordHash: hash2,
         permissions: ['operator_management'],
         isActive: true
       }).save();
@@ -83,12 +92,14 @@ describe('Admin Creation Integration Tests', () => {
     });
 
     it('should handle admin creation with all permissions', async () => {
+      const { salt, hash } = encryptionUtil.hashPassword('StrongPassword417!');
       const adminData = {
         adminId: 'ADM001',
         firstName: 'Super',
         lastName: 'Admin',
         email: 'super@example.com',
-        password: 'StrongPassword417!',
+        passwordSalt: salt,
+        passwordHash: hash,
         permissions: ['system_config', 'operator_management', 'view_analytics', 'manage_affiliates'],
         isActive: true
       };
@@ -104,12 +115,14 @@ describe('Admin Creation Integration Tests', () => {
     });
 
     it('should handle admin creation with partial permissions', async () => {
+      const { salt, hash } = encryptionUtil.hashPassword('StrongPassword417!');
       const adminData = {
         adminId: 'ADM001',
         firstName: 'Limited',
         lastName: 'Admin',
         email: 'limited@example.com',
-        password: 'StrongPassword417!',
+        passwordSalt: salt,
+        passwordHash: hash,
         permissions: ['view_analytics'],
         isActive: true
       };
@@ -124,11 +137,13 @@ describe('Admin Creation Integration Tests', () => {
 
   describe('Admin Model Validation', () => {
     it('should require email field', async () => {
+      const { salt, hash } = encryptionUtil.hashPassword('StrongPassword417!');
       const adminData = {
         adminId: 'ADM001',
         firstName: 'John',
         lastName: 'Doe',
-        password: 'StrongPassword417!',
+        passwordSalt: salt,
+        passwordHash: hash,
         permissions: ['system_config'],
         isActive: true
       };
@@ -144,22 +159,26 @@ describe('Admin Creation Integration Tests', () => {
     });
 
     it('should save admins with different adminIds successfully', async () => {
+      const { salt: salt1, hash: hash1 } = encryptionUtil.hashPassword('StrongPassword417!');
       const adminData1 = {
         adminId: 'ADM001',
         firstName: 'John',
         lastName: 'Doe',
         email: 'john@example.com',
-        password: 'StrongPassword417!',
+        passwordSalt: salt1,
+        passwordHash: hash1,
         permissions: ['system_config'],
         isActive: true
       };
 
+      const { salt: salt2, hash: hash2 } = encryptionUtil.hashPassword('StrongPassword849!');
       const adminData2 = {
         adminId: 'ADM002', // Different ID
         firstName: 'Jane',
         lastName: 'Smith',
         email: 'jane@example.com',
-        password: 'StrongPassword849!',
+        passwordSalt: salt2,
+        passwordHash: hash2,
         permissions: ['operator_management'],
         isActive: true
       };
@@ -172,22 +191,26 @@ describe('Admin Creation Integration Tests', () => {
     });
 
     it('should save admins with different emails successfully', async () => {
+      const { salt: salt1, hash: hash1 } = encryptionUtil.hashPassword('StrongPassword417!');
       const adminData1 = {
         adminId: 'ADM001',
         firstName: 'John',
         lastName: 'Doe',
         email: 'john@example.com',
-        password: 'StrongPassword417!',
+        passwordSalt: salt1,
+        passwordHash: hash1,
         permissions: ['system_config'],
         isActive: true
       };
 
+      const { salt: salt2, hash: hash2 } = encryptionUtil.hashPassword('StrongPassword849!');
       const adminData2 = {
         adminId: 'ADM002',
         firstName: 'Jane',
         lastName: 'Smith',
         email: 'jane@example.com', // Different email
-        password: 'StrongPassword849!',
+        passwordSalt: salt2,
+        passwordHash: hash2,
         permissions: ['operator_management'],
         isActive: true
       };
@@ -203,12 +226,14 @@ describe('Admin Creation Integration Tests', () => {
   describe('Password Handling', () => {
     it('should hash password before saving', async () => {
       const plainPassword = 'StrongPassword417!';
+      const { salt, hash } = encryptionUtil.hashPassword(plainPassword);
       const adminData = {
         adminId: 'ADM001',
         firstName: 'John',
         lastName: 'Doe',
         email: 'john@example.com',
-        password: plainPassword,
+        passwordSalt: salt,
+        passwordHash: hash,
         permissions: ['system_config'],
         isActive: true
       };
@@ -216,18 +241,21 @@ describe('Admin Creation Integration Tests', () => {
       const admin = new Administrator(adminData);
       const savedAdmin = await admin.save();
 
-      expect(savedAdmin.password).not.toBe(plainPassword);
-      expect(savedAdmin.password).toContain(':'); // pbkdf2 hash pattern with salt
+      expect(savedAdmin.passwordHash).toBeDefined();
+      expect(savedAdmin.passwordSalt).toBeDefined();
+      expect(savedAdmin.passwordHash).not.toBe(plainPassword);
     });
 
     it('should validate password with verifyPassword method', async () => {
       const plainPassword = 'StrongPassword417!';
+      const { salt, hash } = encryptionUtil.hashPassword(plainPassword);
       const adminData = {
         adminId: 'ADM001',
         firstName: 'John',
         lastName: 'Doe',
         email: 'john@example.com',
-        password: plainPassword,
+        passwordSalt: salt,
+        passwordHash: hash,
         permissions: ['system_config'],
         isActive: true
       };
@@ -245,13 +273,18 @@ describe('Admin Creation Integration Tests', () => {
 
   describe('Admin Query Operations', () => {
     beforeEach(async () => {
+      const { salt: salt1, hash: hash1 } = encryptionUtil.hashPassword('StrongPassword417!');
+      const { salt: salt2, hash: hash2 } = encryptionUtil.hashPassword('StrongPassword849!');
+      const { salt: salt3, hash: hash3 } = encryptionUtil.hashPassword('StrongPassword295!');
+      
       await Administrator.create([
         {
           adminId: 'ADM001',
           firstName: 'John',
           lastName: 'Doe',
           email: 'john@example.com',
-          password: 'StrongPassword417!',
+          passwordSalt: salt1,
+          passwordHash: hash1,
           permissions: ['system_config', 'operator_management'],
           isActive: true
         },
@@ -260,7 +293,8 @@ describe('Admin Creation Integration Tests', () => {
           firstName: 'Jane',
           lastName: 'Smith',
           email: 'jane@example.com',
-          password: 'StrongPassword849!',
+          passwordSalt: salt2,
+          passwordHash: hash2,
           permissions: ['view_analytics'],
           isActive: false
         },
@@ -269,7 +303,8 @@ describe('Admin Creation Integration Tests', () => {
           firstName: 'Bob',
           lastName: 'Johnson',
           email: 'bob@example.com',
-          password: 'StrongPassword295!',
+          passwordSalt: salt3,
+          passwordHash: hash3,
           permissions: ['manage_affiliates', 'view_analytics'],
           isActive: true
         }
@@ -319,12 +354,14 @@ describe('Admin Creation Integration Tests', () => {
 
   describe('Email Integration', () => {
     it('should call email service after admin creation', async () => {
+      const { salt, hash } = encryptionUtil.hashPassword('StrongPassword417!');
       const adminData = {
         adminId: 'ADM001',
         firstName: 'John',
         lastName: 'Doe',
         email: 'john@example.com',
-        password: 'StrongPassword417!',
+        passwordSalt: salt,
+        passwordHash: hash,
         permissions: ['system_config'],
         isActive: true
       };
@@ -342,12 +379,14 @@ describe('Admin Creation Integration Tests', () => {
         new Error('Email service unavailable')
       );
 
+      const { salt, hash } = encryptionUtil.hashPassword('StrongPassword417!');
       const adminData = {
         adminId: 'ADM001',
         firstName: 'John',
         lastName: 'Doe',
         email: 'john@example.com',
-        password: 'StrongPassword417!',
+        passwordSalt: salt,
+        passwordHash: hash,
         permissions: ['system_config'],
         isActive: true
       };

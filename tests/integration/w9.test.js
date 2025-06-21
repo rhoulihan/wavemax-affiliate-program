@@ -1,37 +1,23 @@
 const request = require('supertest');
 const mongoose = require('mongoose');
-const { MongoMemoryServer } = require('mongodb-memory-server');
 const app = require('../../server');
 const Affiliate = require('../../server/models/Affiliate');
 const Administrator = require('../../server/models/Administrator');
 const W9Document = require('../../server/models/W9Document');
 const W9AuditLog = require('../../server/models/W9AuditLog');
-const { generateToken } = require('../../server/utils/encryption');
+const encryptionUtil = require('../../server/utils/encryption');
+const jwt = require('jsonwebtoken');
 const fs = require('fs').promises;
 const path = require('path');
 
 describe('W-9 Integration Tests', () => {
-  let mongoServer;
   let affiliateToken, adminToken;
   let testAffiliate, testAdmin;
   let testPdfBuffer;
 
   beforeAll(async () => {
-    // Start in-memory MongoDB
-    mongoServer = await MongoMemoryServer.create();
-    const mongoUri = mongoServer.getUri();
-
-    // Connect to in-memory database
-    await mongoose.disconnect();
-    await mongoose.connect(mongoUri);
-
     // Create test PDF buffer
     testPdfBuffer = Buffer.from('test pdf content for w9');
-  });
-
-  afterAll(async () => {
-    await mongoose.disconnect();
-    await mongoServer.stop();
   });
 
   beforeEach(async () => {
@@ -42,36 +28,60 @@ describe('W-9 Integration Tests', () => {
     await W9AuditLog.deleteMany({});
 
     // Create test affiliate
+    const { salt: affSalt, hash: affHash } = encryptionUtil.hashPassword('Test123!@#');
     testAffiliate = await Affiliate.create({
       affiliateId: 'AFF-TEST-001',
       firstName: 'Test',
       lastName: 'Affiliate',
       email: 'test@example.com',
-      password: 'Test123!@#',
-      phoneNumber: '+1234567890',
-      address: {
-        street: '123 Test St',
-        city: 'Test City',
-        state: 'TS',
-        zipCode: '12345'
-      },
+      username: 'testaffiliate',
+      phone: '123-456-7890',
+      address: '123 Test St',
+      city: 'Test City',
+      state: 'TS',
+      zipCode: '12345',
+      serviceLatitude: 40.7128,
+      serviceLongitude: -74.0060,
+      serviceRadius: 5,
+      passwordSalt: affSalt,
+      passwordHash: affHash,
+      paymentMethod: 'check',
+      registrationMethod: 'traditional',
       w9Information: {
         status: 'not_submitted'
       }
     });
 
     // Create test administrator
+    const { salt, hash } = encryptionUtil.hashPassword('Admin123!@#');
     testAdmin = await Administrator.create({
       adminId: 'ADMIN-TEST-001',
       firstName: 'Test',
       lastName: 'Admin',
       email: 'admin@example.com',
-      password: 'Admin123!@#'
+      passwordSalt: salt,
+      passwordHash: hash
     });
 
     // Generate tokens
-    affiliateToken = generateToken(testAffiliate._id, 'affiliate');
-    adminToken = generateToken(testAdmin._id, 'administrator');
+    affiliateToken = jwt.sign(
+      { 
+        id: testAffiliate._id, 
+        role: 'affiliate',
+        affiliateId: testAffiliate.affiliateId 
+      },
+      process.env.JWT_SECRET || 'test-secret',
+      { expiresIn: '1h' }
+    );
+    adminToken = jwt.sign(
+      { 
+        id: testAdmin._id, 
+        role: 'administrator',
+        adminId: testAdmin.adminId
+      },
+      process.env.JWT_SECRET || 'test-secret',
+      { expiresIn: '1h' }
+    );
   });
 
   describe('W-9 Upload Flow', () => {
@@ -83,7 +93,7 @@ describe('W-9 Integration Tests', () => {
         .expect(200);
 
       expect(response.body).toMatchObject({
-        message: 'W-9 document uploaded successfully',
+        message: 'W-9 document uploaded successfully and is pending review',
         documentId: expect.stringMatching(/^W9DOC-/),
         status: 'pending_review'
       });
@@ -391,17 +401,37 @@ describe('W-9 Integration Tests', () => {
 
     it('should not allow affiliate to download other affiliates W-9', async () => {
       // Create another affiliate
+      const { salt: otherSalt, hash: otherHash } = encryptionUtil.hashPassword('Other123!@#');
       const otherAffiliate = await Affiliate.create({
         affiliateId: 'AFF-OTHER-001',
         firstName: 'Other',
         lastName: 'Affiliate',
         email: 'other@example.com',
-        password: 'Other123!@#',
-        phoneNumber: '+1234567891'
+        username: 'otheraffiliate',
+        phone: '123-456-7891',
+        address: '456 Other St',
+        city: 'Other City',
+        state: 'OS',
+        zipCode: '54321',
+        serviceLatitude: 40.7128,
+        serviceLongitude: -74.0060,
+        serviceRadius: 5,
+        passwordSalt: otherSalt,
+        passwordHash: otherHash,
+        paymentMethod: 'check',
+        registrationMethod: 'traditional'
       });
 
       // Upload W-9 for other affiliate
-      const otherToken = generateToken(otherAffiliate._id, 'affiliate');
+      const otherToken = jwt.sign(
+        { 
+          id: otherAffiliate._id, 
+          role: 'affiliate',
+          affiliateId: otherAffiliate.affiliateId
+        },
+        process.env.JWT_SECRET || 'test-secret',
+        { expiresIn: '1h' }
+      );
       await request(app)
         .post('/api/v1/w9/upload')
         .set('Authorization', `Bearer ${otherToken}`)

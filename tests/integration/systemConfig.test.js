@@ -4,6 +4,7 @@ const SystemConfig = require('../../server/models/SystemConfig');
 const Administrator = require('../../server/models/Administrator');
 const jwt = require('jsonwebtoken');
 const { createAgent, getCsrfToken } = require('../helpers/csrfHelper');
+const encryptionUtil = require('../../server/utils/encryption');
 
 describe('System Config API Tests', () => {
   let adminToken;
@@ -15,10 +16,12 @@ describe('System Config API Tests', () => {
     await SystemConfig.deleteMany({});
 
     // Create a test administrator
+    const { salt, hash } = encryptionUtil.hashPassword('Test@Admin#2025!');
     testAdmin = await Administrator.create({
       adminId: 'ADM999',
       email: 'test.admin@wavemax.com',
-      password: 'Test@Admin#2025!',
+      passwordSalt: salt,
+      passwordHash: hash,
       firstName: 'Test',
       lastName: 'Admin',
       permissions: ['system_config', 'view_analytics'],
@@ -302,10 +305,12 @@ describe('System Config API Tests', () => {
 
       it('should require system_config permission', async () => {
         // Create admin without system_config permission
+        const { salt: limitedSalt, hash: limitedHash } = encryptionUtil.hashPassword('Limited@Admin#2025!');
         const limitedAdmin = await Administrator.create({
           adminId: 'ADM998',
           email: 'limited.admin@wavemax.com',
-          password: 'Limited@Admin#2025!',
+          passwordSalt: limitedSalt,
+          passwordHash: limitedHash,
           firstName: 'Limited',
           lastName: 'Admin',
           permissions: ['view_analytics'], // No system_config

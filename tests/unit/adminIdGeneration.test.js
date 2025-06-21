@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const Administrator = require('../../server/models/Administrator');
+const { hashPassword } = require('../../server/utils/encryption');
 
 jest.mock('../../server/utils/auditLogger', () => ({
   log: jest.fn().mockResolvedValue(true),
@@ -17,6 +18,17 @@ describe('Admin ID Generation Logic Tests', () => {
   afterEach(async () => {
     await Administrator.deleteMany({});
   });
+
+  // Helper function to create admin data with hashed password
+  const createAdminData = (adminData) => {
+    const { salt, hash } = hashPassword(adminData.password || 'StrongPassword123!');
+    const { password, ...rest } = adminData;
+    return {
+      ...rest,
+      passwordSalt: salt,
+      passwordHash: hash
+    };
+  };
 
   describe('generateAdminId function logic', () => {
     const generateAdminId = async () => {
@@ -36,7 +48,7 @@ describe('Admin ID Generation Logic Tests', () => {
     });
 
     it('should generate ADM002 when ADM001 exists', async () => {
-      await new Administrator({
+      await new Administrator(createAdminData({
         adminId: 'ADM001',
         firstName: 'John',
         lastName: 'Doe',
@@ -46,7 +58,7 @@ describe('Admin ID Generation Logic Tests', () => {
         permissions: ['system_config'],
         isActive: true,
         createdBy: 'system'
-      }).save();
+      })).save();
 
       const result = await generateAdminId();
       expect(result).toBe('ADM002');
@@ -54,7 +66,7 @@ describe('Admin ID Generation Logic Tests', () => {
 
     it('should generate ADM003 when ADM001 and ADM002 exist', async () => {
       await Administrator.create([
-        {
+        createAdminData({
           adminId: 'ADM001',
           firstName: 'John',
           lastName: 'Doe',
@@ -64,8 +76,8 @@ describe('Admin ID Generation Logic Tests', () => {
           permissions: ['system_config'],
           isActive: true,
           createdBy: 'system'
-        },
-        {
+        }),
+        createAdminData({
           adminId: 'ADM002',
           firstName: 'Jane',
           lastName: 'Smith',
@@ -75,7 +87,7 @@ describe('Admin ID Generation Logic Tests', () => {
           permissions: ['operator_management'],
           isActive: true,
           createdBy: 'system'
-        }
+        })
       ]);
 
       const result = await generateAdminId();
@@ -84,7 +96,7 @@ describe('Admin ID Generation Logic Tests', () => {
 
     it('should handle non-sequential admin IDs correctly', async () => {
       await Administrator.create([
-        {
+        createAdminData({
           adminId: 'ADM001',
           firstName: 'John',
           lastName: 'Doe',
@@ -94,8 +106,8 @@ describe('Admin ID Generation Logic Tests', () => {
           permissions: ['system_config'],
           isActive: true,
           createdBy: 'system'
-        },
-        {
+        }),
+        createAdminData({
           adminId: 'ADM005',
           firstName: 'Jane',
           lastName: 'Smith',
@@ -105,7 +117,7 @@ describe('Admin ID Generation Logic Tests', () => {
           permissions: ['operator_management'],
           isActive: true,
           createdBy: 'system'
-        }
+        })
       ]);
 
       const result = await generateAdminId();
@@ -113,7 +125,7 @@ describe('Admin ID Generation Logic Tests', () => {
     });
 
     it('should handle double-digit admin IDs', async () => {
-      await new Administrator({
+      await new Administrator(createAdminData({
         adminId: 'ADM012',
         firstName: 'John',
         lastName: 'Doe',
@@ -123,14 +135,14 @@ describe('Admin ID Generation Logic Tests', () => {
         permissions: ['system_config'],
         isActive: true,
         createdBy: 'system'
-      }).save();
+      })).save();
 
       const result = await generateAdminId();
       expect(result).toBe('ADM013');
     });
 
     it('should handle triple-digit admin IDs', async () => {
-      await new Administrator({
+      await new Administrator(createAdminData({
         adminId: 'ADM099',
         firstName: 'John',
         lastName: 'Doe',
@@ -140,14 +152,14 @@ describe('Admin ID Generation Logic Tests', () => {
         permissions: ['system_config'],
         isActive: true,
         createdBy: 'system'
-      }).save();
+      })).save();
 
       const result = await generateAdminId();
       expect(result).toBe('ADM100');
     });
 
     it('should handle large admin ID numbers', async () => {
-      await new Administrator({
+      await new Administrator(createAdminData({
         adminId: 'ADM999',
         firstName: 'John',
         lastName: 'Doe',
@@ -157,7 +169,7 @@ describe('Admin ID Generation Logic Tests', () => {
         permissions: ['system_config'],
         isActive: true,
         createdBy: 'system'
-      }).save();
+      })).save();
 
       const result = await generateAdminId();
       expect(result).toBe('ADM1000');
@@ -229,7 +241,7 @@ describe('Admin ID Generation Logic Tests', () => {
   describe('Admin ID generation with mixed data', () => {
     it('should work correctly with inactive administrators', async () => {
       await Administrator.create([
-        {
+        createAdminData({
           adminId: 'ADM001',
           firstName: 'Active',
           lastName: 'Admin',
@@ -239,8 +251,8 @@ describe('Admin ID Generation Logic Tests', () => {
           permissions: ['system_config'],
           isActive: true,
           createdBy: 'system'
-        },
-        {
+        }),
+        createAdminData({
           adminId: 'ADM002',
           firstName: 'Inactive',
           lastName: 'Admin',
@@ -250,7 +262,7 @@ describe('Admin ID Generation Logic Tests', () => {
           permissions: ['operator_management'],
           isActive: false,
           createdBy: 'system'
-        }
+        })
       ]);
 
       const lastAdmin = await Administrator.findOne().sort({ adminId: -1 });
@@ -266,7 +278,7 @@ describe('Admin ID Generation Logic Tests', () => {
       const yesterday = new Date(now.getTime() - 24 * 60 * 60 * 1000);
 
       await Administrator.create([
-        {
+        createAdminData({
           adminId: 'ADM002',
           firstName: 'Second',
           lastName: 'Admin',
@@ -277,8 +289,8 @@ describe('Admin ID Generation Logic Tests', () => {
           isActive: true,
           createdBy: 'system',
           createdAt: now
-        },
-        {
+        }),
+        createAdminData({
           adminId: 'ADM001',
           firstName: 'First',
           lastName: 'Admin',
@@ -289,7 +301,7 @@ describe('Admin ID Generation Logic Tests', () => {
           isActive: true,
           createdBy: 'system',
           createdAt: yesterday
-        }
+        })
       ]);
 
       const lastAdmin = await Administrator.findOne().sort({ adminId: -1 });
@@ -299,7 +311,7 @@ describe('Admin ID Generation Logic Tests', () => {
 
     it('should work correctly with different permissions', async () => {
       await Administrator.create([
-        {
+        createAdminData({
           adminId: 'ADM001',
           firstName: 'Limited',
           lastName: 'Admin',
@@ -309,8 +321,8 @@ describe('Admin ID Generation Logic Tests', () => {
           permissions: ['view_analytics'],
           isActive: true,
           createdBy: 'system'
-        },
-        {
+        }),
+        createAdminData({
           adminId: 'ADM003',
           firstName: 'Super',
           lastName: 'Admin',
@@ -320,7 +332,7 @@ describe('Admin ID Generation Logic Tests', () => {
           permissions: ['system_config', 'operator_management', 'view_analytics', 'manage_affiliates'],
           isActive: true,
           createdBy: 'system'
-        }
+        })
       ]);
 
       const lastAdmin = await Administrator.findOne().sort({ adminId: -1 });
@@ -335,7 +347,7 @@ describe('Admin ID Generation Logic Tests', () => {
   describe('Performance and reliability', () => {
     it('should handle database query efficiently', async () => {
       await Administrator.create([
-        {
+        createAdminData({
           adminId: 'ADM050',
           firstName: 'Admin',
           lastName: '50',
@@ -345,7 +357,7 @@ describe('Admin ID Generation Logic Tests', () => {
           permissions: ['system_config'],
           isActive: true,
           createdBy: 'system'
-        }
+        })
       ]);
 
       const startTime = process.hrtime();
@@ -358,7 +370,7 @@ describe('Admin ID Generation Logic Tests', () => {
 
     it('should handle concurrent admin creation scenario', async () => {
       await Administrator.create([
-        {
+        createAdminData({
           adminId: 'ADM001',
           firstName: 'First',
           lastName: 'Admin',
@@ -368,7 +380,7 @@ describe('Admin ID Generation Logic Tests', () => {
           permissions: ['system_config'],
           isActive: true,
           createdBy: 'system'
-        }
+        })
       ]);
 
       const promises = [];

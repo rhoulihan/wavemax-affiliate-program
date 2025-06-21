@@ -1498,12 +1498,14 @@
                         
                         // Determine W9 status display
                         let w9StatusDisplay = '';
-                        if (w9Status === 'submitted') {
-                            w9StatusDisplay = '<span class="status-badge active">Submitted</span>';
+                        if (w9Status === 'pending_review') {
+                            w9StatusDisplay = '<span class="status-badge pending">Pending Review</span>';
                         } else if (w9Status === 'verified') {
                             w9StatusDisplay = '<span class="status-badge active">Verified</span>';
-                        } else if (w9Status === 'sent') {
-                            w9StatusDisplay = '<span class="status-badge pending">Sent</span>';
+                        } else if (w9Status === 'rejected') {
+                            w9StatusDisplay = '<span class="status-badge inactive">Rejected</span>';
+                        } else if (w9Status === 'expired') {
+                            w9StatusDisplay = '<span class="status-badge inactive">Expired</span>';
                         } else if (totalRevenue >= 600) {
                             // Show Send W9 button for affiliates with >$600 revenue and no W9
                             w9StatusDisplay = `

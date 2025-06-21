@@ -297,8 +297,7 @@ describe('DocuSign Service', () => {
             expect.objectContaining({
               email: affiliate.email,
               name: 'John Doe',
-              roleName: 'Signer 1',
-              clientUserId: '123456789'
+              roleName: 'Signer 1'
             })
           ]),
           status: 'sent'

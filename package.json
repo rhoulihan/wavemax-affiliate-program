@@ -16,7 +16,8 @@
     "test:memory:batch": "./tests/runMemoryOptimizedTests.sh",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "seed": "node scripts/seed.js"
+    "generate:sample-data": "node scripts/generate-sample-data.js",
+    "generate:sample-data:clean": "node scripts/generate-sample-data.js --clean"
   },
   "repository": {
     "type": "git",
@@ -65,6 +66,7 @@
     "xss": "^1.0.15"
   },
   "devDependencies": {
+    "@faker-js/faker": "^9.8.0",
     "eslint": "^8.54.0",
     "jest": "^29.7.0",
     "jsdom": "^26.1.0",
