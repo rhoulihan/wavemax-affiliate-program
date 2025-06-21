@@ -445,7 +445,11 @@ app.get('/', (req, res) => {
 
 // Direct routes for legal pages (for Google and external access)
 app.get('/terms-of-service', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'terms-of-service.html'));
+  res.sendFile(path.join(__dirname, 'public', 'terms-and-conditions.html'));
+});
+
+app.get('/terms-and-conditions', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'terms-and-conditions.html'));
 });
 
 app.get('/privacy-policy', (req, res) => {

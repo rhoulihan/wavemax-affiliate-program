@@ -96,7 +96,10 @@ describe('QuickBooks Controller', () => {
 
       expect(PaymentExport.create).toHaveBeenCalledWith({
         type: 'vendor',
-        exportedBy: 'admin123',
+        generatedBy: 'admin123',
+        filename: expect.stringContaining('wavemax-vendors-EXP-'),
+        format: 'json',
+        recordCount: 2,
         affiliateIds: ['AFF-001', 'AFF-002'],
         exportData: {
           vendors: [
@@ -290,8 +293,13 @@ describe('QuickBooks Controller', () => {
         type: 'payment_summary',
         periodStart: new Date('2025-01-01'),
         periodEnd: expect.any(Date),
-        exportedBy: 'admin123',
+        generatedBy: 'admin123',
+        filename: expect.stringContaining('wavemax-payment-summary-EXP-'),
+        format: 'json',
         affiliateIds: ['AFF-001'],
+        orderIds: ['ORD-001', 'ORD-002'],
+        totalAmount: 30,
+        recordCount: 1,
         exportData: {
           payments: [
             {

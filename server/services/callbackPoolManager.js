@@ -75,7 +75,8 @@ class CallbackPoolManager {
     const callback = await CallbackPool.acquireCallback(paymentToken, this.lockTimeoutMinutes);
 
     if (!callback) {
-      throw new Error('No callback handlers available. All handlers are currently in use.');
+      logger.warn('No callback handlers available. All handlers are currently in use.');
+      return null;
     }
 
     const callbackUrl = `${this.baseUrl}${callback.callbackPath}`;

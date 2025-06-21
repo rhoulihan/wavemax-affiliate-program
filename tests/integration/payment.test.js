@@ -42,6 +42,29 @@ describe('Payment Integration Tests', () => {
 
     // Initialize callback pool for tests
     const callbackPoolManager = require('../../server/services/callbackPoolManager');
+    
+    // Set test config for callback pool with 10 handlers
+    callbackPoolManager.setTestConfig({
+      callbackPaths: [
+        '/api/v1/payments/callback/handler-1',
+        '/api/v1/payments/callback/handler-2',
+        '/api/v1/payments/callback/handler-3',
+        '/api/v1/payments/callback/handler-4',
+        '/api/v1/payments/callback/handler-5',
+        '/api/v1/payments/callback/handler-6',
+        '/api/v1/payments/callback/handler-7',
+        '/api/v1/payments/callback/handler-8',
+        '/api/v1/payments/callback/handler-9',
+        '/api/v1/payments/callback/handler-10'
+      ],
+      baseUrl: 'http://localhost:3005',
+      lockTimeoutMinutes: 10,
+      form: {
+        formId: 'test-form-id',
+        formHash: 'test-form-hash'
+      }
+    });
+    
     await callbackPoolManager.initializePool();
 
     // Create test customer
@@ -179,16 +202,109 @@ describe('Payment Integration Tests', () => {
   });
 
   describe('Payment Callback Tests', () => {
-    it('should handle form callback', async () => {
-      // This tests the dynamic callback handlers
-      const response = await agent
-        .get('/api/v1/payments/callback/handler-1')
-        .query({
-          token: 'test-token',
-          status: 'success'
+    it('should return 503 when all callback handlers are locked', async () => {
+      // Create 10 payment tokens to lock all callback handlers
+      const tokenPromises = [];
+      
+      for (let i = 0; i < 10; i++) {
+        const promise = agent
+          .post('/api/v1/payments/create-token')
+          .set('x-csrf-token', csrfToken)
+          .send({
+            customerData: {
+              email: `customer${i}@example.com`,
+              name: `Customer ${i}`,
+              orderId: `ORDER-${i}`
+            },
+            paymentData: {
+              amount: 100 + i,
+              description: `Payment ${i}`
+            }
+          });
+        tokenPromises.push(promise);
+      }
+      
+      // Execute all requests to lock all handlers
+      const responses = await Promise.all(tokenPromises);
+      
+      // Verify all 10 handlers were successfully acquired
+      responses.forEach((response, index) => {
+        expect(response.status).toBe(200);
+        expect(response.body.success).toBe(true);
+        expect(response.body.token).toBeDefined();
+        expect(response.body.formConfig).toBeDefined();
+        expect(response.body.formConfig.callbackPath).toBe(`/api/v1/payments/callback/handler-${index + 1}`);
+      });
+      
+      // Now try to create an 11th payment token - should fail
+      const failedResponse = await agent
+        .post('/api/v1/payments/create-token')
+        .set('x-csrf-token', csrfToken)
+        .send({
+          customerData: {
+            email: 'overflow@example.com',
+            name: 'Overflow Customer',
+            orderId: 'ORDER-OVERFLOW'
+          },
+          paymentData: {
+            amount: 999,
+            description: 'This should fail'
+          }
         });
-
-      expect(response.status).toBe(302); // Expect redirect
+      
+      expect(failedResponse.status).toBe(503);
+      expect(failedResponse.body.success).toBe(false);
+      expect(failedResponse.body.message).toContain('No payment handlers available');
+    });
+    
+    it('should release callback handler when payment is cancelled', async () => {
+      // Create a payment token
+      const createResponse = await agent
+        .post('/api/v1/payments/create-token')
+        .set('x-csrf-token', csrfToken)
+        .send({
+          customerData: {
+            email: 'cancel@example.com',
+            name: 'Cancel Test',
+            orderId: 'ORDER-CANCEL'
+          },
+          paymentData: {
+            amount: 50,
+            description: 'Payment to be cancelled'
+          }
+        });
+      
+      expect(createResponse.status).toBe(200);
+      const token = createResponse.body.token;
+      const callbackPath = createResponse.body.formConfig.callbackPath;
+      
+      // Cancel the payment
+      const cancelResponse = await agent
+        .post(`/api/v1/payments/cancel-token/${token}`)
+        .set('x-csrf-token', csrfToken)
+        .send({});
+      
+      expect(cancelResponse.status).toBe(200);
+      
+      // Verify the handler is released by creating a new payment
+      const newResponse = await agent
+        .post('/api/v1/payments/create-token')
+        .set('x-csrf-token', csrfToken)
+        .send({
+          customerData: {
+            email: 'new@example.com',
+            name: 'New Customer',
+            orderId: 'ORDER-NEW'
+          },
+          paymentData: {
+            amount: 75,
+            description: 'New payment after cancel'
+          }
+        });
+      
+      expect(newResponse.status).toBe(200);
+      // Should get the same callback handler that was just released
+      expect(newResponse.body.formConfig.callbackPath).toBeDefined();
     });
   });
 

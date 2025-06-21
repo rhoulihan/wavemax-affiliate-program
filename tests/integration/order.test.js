@@ -105,7 +105,8 @@ describe('Order Integration Tests', () => {
           pickupTime: 'morning',
           specialPickupInstructions: 'Ring doorbell',
           estimatedWeight: 30,
-          numberOfBags: 2,
+          numberOfBags: 2
+        });
 
       expect(response.status).toBe(201);
       expect(response.body).toMatchObject({

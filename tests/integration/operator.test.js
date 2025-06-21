@@ -5,6 +5,7 @@ const Administrator = require('../../server/models/Administrator');
 const Order = require('../../server/models/Order');
 const { getCsrfToken, createAgent } = require('../helpers/csrfHelper');
 const mongoose = require('mongoose');
+const encryptionUtil = require('../../server/utils/encryption');
 
 describe('Operator Integration Tests', () => {
   let agent;
@@ -36,12 +37,14 @@ describe('Operator Integration Tests', () => {
     csrfToken = await getCsrfToken(app, agent);
 
     // Create test administrator
+    const { salt, hash } = encryptionUtil.hashPassword('CompletelyUniquePassword417!');
     testAdmin = await Administrator.create({
       adminId: 'ADMIN001',
       firstName: 'Super',
       lastName: 'User',
       email: 'superuser@wavemax.com',
-      password: 'CompletelyUniquePassword417!',
+      passwordSalt: salt,
+      passwordHash: hash,
       permissions: ['all']
     });
 
@@ -241,12 +244,14 @@ describe('Operator Integration Tests', () => {
 
     it('should require operator management permissions', async () => {
       // Create limited admin
+      const { salt: limitedSalt, hash: limitedHash } = encryptionUtil.hashPassword('StrongPassword951!');
       const limitedAdmin = await Administrator.create({
         adminId: 'LIMITED001',
         firstName: 'Limited',
         lastName: 'Admin',
         email: 'limited@wavemax.com',
-        password: 'StrongPassword951!',
+        passwordSalt: limitedSalt,
+        passwordHash: limitedHash,
         permissions: ['customers.read'] // No operator permissions
       });
 
@@ -457,12 +462,14 @@ describe('Operator Integration Tests', () => {
 
     it('should require operators.manage permission', async () => {
       // Create limited admin
+      const { salt: limitedSalt2, hash: limitedHash2 } = encryptionUtil.hashPassword('StrongPassword951!');
       const limitedAdmin = await Administrator.create({
         adminId: 'LIMITED002',
         firstName: 'Limited',
         lastName: 'Admin',
         email: 'limited2@wavemax.com',
-        password: 'StrongPassword951!',
+        passwordSalt: limitedSalt2,
+        passwordHash: limitedHash2,
         permissions: ['customers.manage'] // No operator permissions
       });
 
@@ -690,12 +697,14 @@ describe('Operator Integration Tests', () => {
 
     it('should require operators.manage permission', async () => {
       // Create limited admin
+      const { salt: limitedSalt3, hash: limitedHash3 } = encryptionUtil.hashPassword('StrongPassword951!');
       const limitedAdmin = await Administrator.create({
         adminId: 'LIMITED003',
         firstName: 'Limited',
         lastName: 'Admin',
         email: 'limited3@wavemax.com',
-        password: 'StrongPassword951!',
+        passwordSalt: limitedSalt3,
+        passwordHash: limitedHash3,
         permissions: ['customers.manage'] // No operator permissions
       });
 

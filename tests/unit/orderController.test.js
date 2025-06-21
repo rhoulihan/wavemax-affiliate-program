@@ -31,7 +31,8 @@ describe('Order Controller', () => {
       const mockCustomer = {
         customerId: 'CUST123',
         firstName: 'Jane',
-        lastName: 'Smith'
+        lastName: 'Smith',
+        save: jest.fn().mockResolvedValue(true)
       };
 
       const mockAffiliate = {
@@ -53,7 +54,8 @@ describe('Order Controller', () => {
         pickupTime: 'morning',
         specialPickupInstructions: 'Ring doorbell',
         estimatedWeight: 30,
-        numberOfBags: 2,
+        numberOfBags: 2
+      };
 
       req.user = { role: 'customer', customerId: 'CUST123' };
 
@@ -80,7 +82,7 @@ describe('Order Controller', () => {
     });
 
     it('should handle email sending failures gracefully', async () => {
-      const mockCustomer = { customerId: 'CUST123' };
+      const mockCustomer = { customerId: 'CUST123', save: jest.fn().mockResolvedValue(true) };
       const mockAffiliate = { affiliateId: 'AFF123', deliveryFee: 5.99 };
       const mockOrder = {
         orderId: 'ORD123456',
@@ -137,7 +139,7 @@ describe('Order Controller', () => {
     });
 
     it('should return error for invalid affiliate', async () => {
-      const mockCustomer = { customerId: 'CUST123' };
+      const mockCustomer = { customerId: 'CUST123', save: jest.fn().mockResolvedValue(true) };
 
       req.body = {
         customerId: 'CUST123',
@@ -280,7 +282,7 @@ describe('Order Controller', () => {
         save: jest.fn()
       };
 
-      const mockCustomer = { customerId: 'CUST123' };
+      const mockCustomer = { customerId: 'CUST123', save: jest.fn().mockResolvedValue(true) };
       const mockAffiliate = { affiliateId: 'AFF123' };
 
       req.params.orderId = 'ORD123';
@@ -357,7 +359,7 @@ describe('Order Controller', () => {
         save: jest.fn()
       };
 
-      const mockCustomer = { customerId: 'CUST123' };
+      const mockCustomer = { customerId: 'CUST123', save: jest.fn().mockResolvedValue(true) };
       const mockAffiliate = { affiliateId: 'AFF123' };
 
       req.params.orderId = 'ORD123';
@@ -390,7 +392,7 @@ describe('Order Controller', () => {
         save: jest.fn()
       };
 
-      const mockCustomer = { customerId: 'CUST123' };
+      const mockCustomer = { customerId: 'CUST123', save: jest.fn().mockResolvedValue(true) };
       const mockAffiliate = { affiliateId: 'AFF123' };
 
       req.params.orderId = 'ORD123';

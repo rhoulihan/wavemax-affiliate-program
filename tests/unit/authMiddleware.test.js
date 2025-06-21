@@ -48,6 +48,7 @@ describe('Auth Middleware', () => {
       expect(TokenBlacklist.isBlacklisted).toHaveBeenCalledWith('validtoken');
       expect(req.user).toEqual({
         id: 'user123',
+        _id: 'user123',
         role: 'affiliate',
         affiliateId: 'AFF123'
       });
@@ -71,6 +72,7 @@ describe('Auth Middleware', () => {
       expect(TokenBlacklist.isBlacklisted).toHaveBeenCalledWith('validtoken');
       expect(req.user).toEqual({
         id: 'user123',
+        _id: 'user123',
         role: 'customer',
         customerId: 'CUST123'
       });

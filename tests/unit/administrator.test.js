@@ -1,8 +1,23 @@
 const mongoose = require('mongoose');
 const Administrator = require('../../server/models/Administrator');
 const crypto = require('crypto');
+const { hashPassword } = require('../../server/utils/encryption');
 
 describe('Administrator Model', () => {
+  // Helper function to create admin data with hashed password
+  const createAdminData = (adminData) => {
+    if (adminData.password) {
+      const { salt, hash } = hashPassword(adminData.password);
+      const { password, ...rest } = adminData;
+      return {
+        ...rest,
+        passwordSalt: salt,
+        passwordHash: hash
+      };
+    }
+    return adminData;
+  };
+
   beforeEach(async () => {
     // Clear the collection before each test
     await Administrator.deleteMany({});
@@ -10,12 +25,12 @@ describe('Administrator Model', () => {
 
   describe('Schema Validation', () => {
     it('should create a valid administrator', async () => {
-      const adminData = {
+      const adminData = createAdminData({
         firstName: 'John',
         lastName: 'Doe',
         email: 'john.doe@wavemax.com',
         password: 'SecurePassword417!'
-      };
+      });
 
       const admin = new Administrator(adminData);
       const saved = await admin.save();
@@ -48,16 +63,17 @@ describe('Administrator Model', () => {
       expect(error.errors.firstName).toBeDefined();
       expect(error.errors.lastName).toBeDefined();
       expect(error.errors.email).toBeDefined();
-      expect(error.errors.password).toBeDefined();
+      expect(error.errors.passwordHash).toBeDefined();
+      expect(error.errors.passwordSalt).toBeDefined();
     });
 
     it('should enforce email format validation', async () => {
-      const admin = new Administrator({
+      const admin = new Administrator(createAdminData({
         firstName: 'John',
         lastName: 'Doe',
         email: 'invalid-email',
         password: 'StrongPassword417!'
-      });
+      }));
 
       let error;
       try {
@@ -75,19 +91,20 @@ describe('Administrator Model', () => {
       // Ensure indexes are created
       await Administrator.ensureIndexes();
 
-      const adminData = {
+      const adminData = createAdminData({
         firstName: 'John',
         lastName: 'Doe',
         email: 'john.doe@wavemax.com',
         password: 'StrongPassword417!'
-      };
+      });
 
       await new Administrator(adminData).save();
 
-      const duplicate = new Administrator({
+      const duplicate = new Administrator(createAdminData({
         ...adminData,
-        firstName: 'Jane'
-      });
+        firstName: 'Jane',
+        password: 'StrongPassword417!'
+      }));
 
       let error;
       try {
@@ -104,22 +121,22 @@ describe('Administrator Model', () => {
       // Ensure indexes are created
       await Administrator.ensureIndexes();
 
-      const admin1 = new Administrator({
+      const admin1 = new Administrator(createAdminData({
         adminId: 'ADM123456',
         firstName: 'John',
         lastName: 'Doe',
         email: 'john.doe@wavemax.com',
         password: 'StrongPassword417!'
-      });
+      }));
       await admin1.save();
 
-      const admin2 = new Administrator({
+      const admin2 = new Administrator(createAdminData({
         adminId: 'ADM123456',
         firstName: 'Jane',
         lastName: 'Smith',
         email: 'jane.smith@wavemax.com',
         password: 'StrongPassword849!'
-      });
+      }));
 
       let error;
       try {
@@ -133,13 +150,13 @@ describe('Administrator Model', () => {
     });
 
     it('should validate permission enum values', async () => {
-      const admin = new Administrator({
+      const admin = new Administrator(createAdminData({
         firstName: 'John',
         lastName: 'Doe',
         email: 'john@wavemax.com',
         password: 'StrongPassword417!',
         permissions: ['invalid_permission']
-      });
+      }));
 
       let error;
       try {
@@ -155,25 +172,25 @@ describe('Administrator Model', () => {
     it('should accept valid permissions', async () => {
       const validPermissions = ['system_config', 'operator_management', 'view_analytics', 'manage_affiliates'];
 
-      const admin = new Administrator({
+      const admin = new Administrator(createAdminData({
         firstName: 'John',
         lastName: 'Doe',
         email: 'john@wavemax.com',
         password: 'StrongPassword417!',
         permissions: validPermissions
-      });
+      }));
 
       const saved = await admin.save();
       expect(saved.permissions).toEqual(validPermissions);
     });
 
     it('should trim whitespace from string fields', async () => {
-      const admin = new Administrator({
+      const admin = new Administrator(createAdminData({
         firstName: '  John  ',
         lastName: '  Doe  ',
         email: '  john@wavemax.com  ',
         password: 'StrongPassword417!'
-      });
+      }));
 
       const saved = await admin.save();
       expect(saved.firstName).toBe('John');
@@ -182,24 +199,24 @@ describe('Administrator Model', () => {
     });
 
     it('should convert email to lowercase', async () => {
-      const admin = new Administrator({
+      const admin = new Administrator(createAdminData({
         firstName: 'John',
         lastName: 'Doe',
         email: 'John.Doe@WaveMAX.com',
         password: 'StrongPassword417!'
-      });
+      }));
 
       const saved = await admin.save();
       expect(saved.email).toBe('john.doe@wavemax.com');
     });
 
     it('should not allow role to be changed after creation', async () => {
-      const admin = new Administrator({
+      const admin = new Administrator(createAdminData({
         firstName: 'John',
         lastName: 'Doe',
         email: 'john@wavemax.com',
         password: 'StrongPassword417!'
-      });
+      }));
 
       const saved = await admin.save();
       expect(saved.role).toBe('administrator');
@@ -214,33 +231,34 @@ describe('Administrator Model', () => {
   });
 
   describe('Password Handling', () => {
-    it('should hash password on save', async () => {
+    it('should store password as hash and salt', async () => {
       const plainPassword = 'SecurePassword417!';
-      const admin = new Administrator({
+      const admin = new Administrator(createAdminData({
         firstName: 'John',
         lastName: 'Doe',
         email: 'john@wavemax.com',
         password: plainPassword
-      });
+      }));
 
       const saved = await admin.save();
 
-      // Need to select password field explicitly
-      const adminWithPassword = await Administrator.findById(saved._id).select('+password');
+      // Check that password is stored as hash and salt
+      const adminWithPassword = await Administrator.findById(saved._id).select('+passwordHash +passwordSalt');
 
-      expect(adminWithPassword.password).toBeDefined();
-      expect(adminWithPassword.password).not.toBe(plainPassword);
-      expect(adminWithPassword.password).toContain(':'); // Should have salt separator
+      expect(adminWithPassword.passwordHash).toBeDefined();
+      expect(adminWithPassword.passwordSalt).toBeDefined();
+      expect(adminWithPassword.passwordHash).not.toBe(plainPassword);
+      expect(adminWithPassword.password).toBeUndefined(); // password field should not exist
     });
 
     it('should verify correct password', async () => {
       const plainPassword = 'SecurePassword417!';
-      const admin = new Administrator({
+      const admin = new Administrator(createAdminData({
         firstName: 'John',
         lastName: 'Doe',
         email: 'john@wavemax.com',
         password: plainPassword
-      });
+      }));
 
       await admin.save();
 
@@ -251,12 +269,12 @@ describe('Administrator Model', () => {
     });
 
     it('should reject incorrect password', async () => {
-      const admin = new Administrator({
+      const admin = new Administrator(createAdminData({
         firstName: 'John',
         lastName: 'Doe',
         email: 'john@wavemax.com',
         password: 'CorrectPassword417!'
-      });
+      }));
 
       await admin.save();
 
@@ -267,17 +285,19 @@ describe('Administrator Model', () => {
     });
 
     it('should not expose password in JSON output', async () => {
-      const admin = new Administrator({
+      const admin = new Administrator(createAdminData({
         firstName: 'John',
         lastName: 'Doe',
         email: 'john@wavemax.com',
         password: 'StrongPassword417!'
-      });
+      }));
 
       const saved = await admin.save();
       const json = saved.toJSON();
 
       expect(json.password).toBeUndefined();
+      expect(json.passwordHash).toBeUndefined();
+      expect(json.passwordSalt).toBeUndefined();
       expect(json.passwordResetToken).toBeUndefined();
       expect(json.passwordResetExpires).toBeUndefined();
       expect(json.__v).toBeUndefined();
@@ -286,12 +306,12 @@ describe('Administrator Model', () => {
 
   describe('Login Attempts and Account Locking', () => {
     it('should increment login attempts', async () => {
-      const admin = new Administrator({
+      const admin = new Administrator(createAdminData({
         firstName: 'John',
         lastName: 'Doe',
         email: 'john@wavemax.com',
         password: 'StrongPassword417!'
-      });
+      }));
 
       await admin.save();
       await admin.incLoginAttempts();
@@ -301,13 +321,13 @@ describe('Administrator Model', () => {
     });
 
     it('should lock account after 5 failed attempts', async () => {
-      const admin = new Administrator({
+      const admin = new Administrator(createAdminData({
         firstName: 'John',
         lastName: 'Doe',
         email: 'john@wavemax.com',
         password: 'StrongPassword417!',
         loginAttempts: 4
-      });
+      }));
 
       await admin.save();
       await admin.incLoginAttempts();
@@ -320,14 +340,14 @@ describe('Administrator Model', () => {
     });
 
     it('should reset login attempts on successful login', async () => {
-      const admin = new Administrator({
+      const admin = new Administrator(createAdminData({
         firstName: 'John',
         lastName: 'Doe',
         email: 'john@wavemax.com',
         password: 'StrongPassword417!',
         loginAttempts: 3,
         lockUntil: new Date(Date.now() + 60000)
-      });
+      }));
 
       await admin.save();
       await admin.resetLoginAttempts();
@@ -339,14 +359,14 @@ describe('Administrator Model', () => {
     });
 
     it('should reset attempts if lock has expired', async () => {
-      const admin = new Administrator({
+      const admin = new Administrator(createAdminData({
         firstName: 'John',
         lastName: 'Doe',
         email: 'john@wavemax.com',
         password: 'StrongPassword417!',
         loginAttempts: 5,
         lockUntil: new Date(Date.now() - 60000) // Expired lock
-      });
+      }));
 
       await admin.save();
       await admin.incLoginAttempts();
@@ -357,12 +377,12 @@ describe('Administrator Model', () => {
     });
 
     it('should correctly identify locked accounts', async () => {
-      const admin = new Administrator({
+      const admin = new Administrator(createAdminData({
         firstName: 'John',
         lastName: 'Doe',
         email: 'john@wavemax.com',
         password: 'StrongPassword417!'
-      });
+      }));
 
       await admin.save();
 
@@ -381,12 +401,12 @@ describe('Administrator Model', () => {
 
   describe('Password Reset', () => {
     it('should generate password reset token', async () => {
-      const admin = new Administrator({
+      const admin = new Administrator(createAdminData({
         firstName: 'John',
         lastName: 'Doe',
         email: 'john@wavemax.com',
         password: 'StrongPassword417!'
-      });
+      }));
 
       await admin.save();
 
@@ -401,12 +421,12 @@ describe('Administrator Model', () => {
     });
 
     it('should set password reset expiry to 30 minutes', async () => {
-      const admin = new Administrator({
+      const admin = new Administrator(createAdminData({
         firstName: 'John',
         lastName: 'Doe',
         email: 'john@wavemax.com',
         password: 'StrongPassword417!'
-      });
+      }));
 
       await admin.save();
 
@@ -424,13 +444,13 @@ describe('Administrator Model', () => {
 
   describe('Permissions', () => {
     it('should check single permission correctly', async () => {
-      const admin = new Administrator({
+      const admin = new Administrator(createAdminData({
         firstName: 'John',
         lastName: 'Doe',
         email: 'john@wavemax.com',
         password: 'StrongPassword417!',
         permissions: ['system_config', 'view_analytics']
-      });
+      }));
 
       await admin.save();
 
@@ -440,13 +460,13 @@ describe('Administrator Model', () => {
     });
 
     it('should check multiple permissions with AND operation', async () => {
-      const admin = new Administrator({
+      const admin = new Administrator(createAdminData({
         firstName: 'John',
         lastName: 'Doe',
         email: 'john@wavemax.com',
         password: 'StrongPassword417!',
         permissions: ['system_config', 'view_analytics']
-      });
+      }));
 
       await admin.save();
 
@@ -456,13 +476,13 @@ describe('Administrator Model', () => {
     });
 
     it('should check multiple permissions with OR operation', async () => {
-      const admin = new Administrator({
+      const admin = new Administrator(createAdminData({
         firstName: 'John',
         lastName: 'Doe',
         email: 'john@wavemax.com',
         password: 'StrongPassword417!',
         permissions: ['system_config', 'view_analytics']
-      });
+      }));
 
       await admin.save();
 
@@ -472,13 +492,13 @@ describe('Administrator Model', () => {
     });
 
     it('should set default permissions if none provided', async () => {
-      const admin = new Administrator({
+      const admin = new Administrator(createAdminData({
         firstName: 'John',
         lastName: 'Doe',
         email: 'john@wavemax.com',
         password: 'StrongPassword417!',
         permissions: []
-      });
+      }));
 
       const saved = await admin.save();
 
@@ -495,27 +515,27 @@ describe('Administrator Model', () => {
     it('should find active administrators', async () => {
       // Create mix of active and inactive admins
       await Administrator.create([
-        {
+        createAdminData({
           firstName: 'Active',
           lastName: 'Admin1',
           email: 'active1@wavemax.com',
           password: 'StrongPassword417!',
           isActive: true
-        },
-        {
+        }),
+        createAdminData({
           firstName: 'Inactive',
           lastName: 'Admin',
           email: 'inactive@wavemax.com',
           password: 'StrongPassword417!',
           isActive: false
-        },
-        {
+        }),
+        createAdminData({
           firstName: 'Active',
           lastName: 'Admin2',
           email: 'active2@wavemax.com',
           password: 'StrongPassword417!',
           isActive: true
-        }
+        })
       ]);
 
       const activeAdmins = await Administrator.findActive();
@@ -525,27 +545,28 @@ describe('Administrator Model', () => {
     });
 
     it('should find administrator by email with password', async () => {
-      await Administrator.create({
+      await Administrator.create(createAdminData({
         firstName: 'John',
         lastName: 'Doe',
         email: 'john@wavemax.com',
         password: 'StrongPassword417!'
-      });
+      }));
 
       const admin = await Administrator.findByEmailWithPassword('john@wavemax.com');
 
       expect(admin).toBeDefined();
       expect(admin.email).toBe('john@wavemax.com');
-      expect(admin.password).toBeDefined(); // Password should be included
+      expect(admin.passwordHash).toBeDefined(); // Password hash should be included
+      expect(admin.passwordSalt).toBeDefined(); // Password salt should be included
     });
 
     it('should handle case-insensitive email search', async () => {
-      await Administrator.create({
+      await Administrator.create(createAdminData({
         firstName: 'John',
         lastName: 'Doe',
         email: 'john@wavemax.com',
         password: 'StrongPassword417!'
-      });
+      }));
 
       const admin = await Administrator.findByEmailWithPassword('JOHN@WAVEMAX.COM');
 
@@ -561,12 +582,12 @@ describe('Administrator Model', () => {
 
   describe('Timestamps', () => {
     it('should auto-generate timestamps on creation', async () => {
-      const admin = new Administrator({
+      const admin = new Administrator(createAdminData({
         firstName: 'John',
         lastName: 'Doe',
         email: 'john@wavemax.com',
         password: 'StrongPassword417!'
-      });
+      }));
 
       const saved = await admin.save();
 
@@ -577,12 +598,12 @@ describe('Administrator Model', () => {
     });
 
     it('should update updatedAt on modification', async () => {
-      const admin = new Administrator({
+      const admin = new Administrator(createAdminData({
         firstName: 'John',
         lastName: 'Doe',
         email: 'john@wavemax.com',
         password: 'StrongPassword417!'
-      });
+      }));
 
       const saved = await admin.save();
       const originalUpdatedAt = saved.updatedAt;
@@ -599,19 +620,19 @@ describe('Administrator Model', () => {
 
   describe('Admin ID Generation', () => {
     it('should auto-generate unique admin ID', async () => {
-      const admin1 = new Administrator({
+      const admin1 = new Administrator(createAdminData({
         firstName: 'John',
         lastName: 'Doe',
         email: 'john@wavemax.com',
         password: 'StrongPassword417!'
-      });
+      }));
 
-      const admin2 = new Administrator({
+      const admin2 = new Administrator(createAdminData({
         firstName: 'Jane',
         lastName: 'Smith',
         email: 'jane@wavemax.com',
         password: 'StrongPassword849!'
-      });
+      }));
 
       const saved1 = await admin1.save();
       const saved2 = await admin2.save();
@@ -624,13 +645,13 @@ describe('Administrator Model', () => {
 
     it('should not override provided admin ID', async () => {
       const customId = 'ADMCUSTOM123';
-      const admin = new Administrator({
+      const admin = new Administrator(createAdminData({
         adminId: customId,
         firstName: 'John',
         lastName: 'Doe',
         email: 'john@wavemax.com',
         password: 'StrongPassword417!'
-      });
+      }));
 
       const saved = await admin.save();
       expect(saved.adminId).toBe(customId);
