@@ -1123,6 +1123,7 @@
       "orderDate": "Fecha del Pedido:",
       "status": "Estado:",
       "pickupDetails": "Detalles de Recogida",
+      "deliveryDetails": "Detalles de Entrega",
       "date": "Fecha:",
       "time": "Hora:",
       "specialInstructions": "Instrucciones Especiales:",
