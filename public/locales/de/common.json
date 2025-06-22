@@ -1137,6 +1137,7 @@
       "orderDate": "Bestelldatum:",
       "status": "Status:",
       "pickupDetails": "Abholdetails",
+      "deliveryDetails": "Lieferdetails",
       "date": "Datum:",
       "time": "Zeit:",
       "specialInstructions": "Besondere Anweisungen:",
