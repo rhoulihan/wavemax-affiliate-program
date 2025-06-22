@@ -1,9 +1,9 @@
 const quickbooksController = require('../../server/controllers/quickbooksController');
 const Affiliate = require('../../server/models/Affiliate');
 const Order = require('../../server/models/Order');
+const Customer = require('../../server/models/Customer');
 const PaymentExport = require('../../server/models/PaymentExport');
 const SystemConfig = require('../../server/models/SystemConfig');
-const W9AuditService = require('../../server/services/w9AuditService');
 // Mock csv-writer
 jest.mock('csv-writer', () => ({
   createObjectCsvStringifier: jest.fn()
@@ -13,9 +13,9 @@ const csvWriter = require('csv-writer');
 // Mock dependencies
 jest.mock('../../server/models/Affiliate');
 jest.mock('../../server/models/Order');
+jest.mock('../../server/models/Customer');
 jest.mock('../../server/models/PaymentExport');
 jest.mock('../../server/models/SystemConfig');
-jest.mock('../../server/services/w9AuditService');
 jest.mock('csv-writer');
 
 describe('QuickBooks Controller', () => {
@@ -86,7 +86,7 @@ describe('QuickBooks Controller', () => {
         affiliateIds: ['AFF-001', 'AFF-002']
       });
 
-      W9AuditService.logQuickBooksExport = jest.fn().mockResolvedValue(true);
+      // W9AuditService removed - no longer needed
 
       await quickbooksController.exportVendors(req, res);
 
@@ -123,7 +123,7 @@ describe('QuickBooks Controller', () => {
         }
       });
 
-      expect(W9AuditService.logQuickBooksExport).toHaveBeenCalled();
+      // W9AuditService assertions removed
 
       expect(res.json).toHaveBeenCalledWith({
         success: true,
@@ -150,7 +150,7 @@ describe('QuickBooks Controller', () => {
       };
 
       csvWriter.createObjectCsvStringifier.mockReturnValue(mockStringifier);
-      W9AuditService.logQuickBooksExport = jest.fn().mockResolvedValue(true);
+      // W9AuditService removed - no longer needed
 
       await quickbooksController.exportVendors(req, res);
 
@@ -268,9 +268,17 @@ describe('QuickBooks Controller', () => {
         format: 'json'
       };
 
-      Order.find.mockReturnValue({
-        populate: jest.fn().mockResolvedValue(mockOrders)
-      });
+      Order.find.mockResolvedValue(mockOrders.map(order => ({
+        ...order,
+        affiliateId: order.affiliate.affiliateId.affiliateId,
+        affiliateCommission: order.affiliate.commission,
+        actualTotal: order.totalPrice,
+        estimatedTotal: order.totalPrice
+      })));
+      
+      Affiliate.find.mockResolvedValue([
+        mockOrders[0].affiliate.affiliateId
+      ]);
 
       PaymentExport.create.mockResolvedValue({
         exportId: 'EXP-124',
@@ -285,8 +293,8 @@ describe('QuickBooks Controller', () => {
           $gte: new Date('2025-01-01'),
           $lte: expect.any(Date)
         },
-        'affiliate.affiliateId': { $exists: true },
-        'affiliate.commission': { $gt: 0 }
+        affiliateId: { $exists: true },
+        affiliateCommission: { $gt: 0 }
       });
 
       expect(PaymentExport.create).toHaveBeenCalledWith({
@@ -346,9 +354,17 @@ describe('QuickBooks Controller', () => {
         format: 'csv'
       };
 
-      Order.find.mockReturnValue({
-        populate: jest.fn().mockResolvedValue(mockOrders)
-      });
+      Order.find.mockResolvedValue(mockOrders.map(order => ({
+        ...order,
+        affiliateId: order.affiliate.affiliateId.affiliateId,
+        affiliateCommission: order.affiliate.commission,
+        actualTotal: order.totalPrice,
+        estimatedTotal: order.totalPrice
+      })));
+      
+      Affiliate.find.mockResolvedValue([
+        mockOrders[0].affiliate.affiliateId
+      ]);
 
       PaymentExport.create.mockResolvedValue({
         exportId: 'EXP-124'
@@ -395,9 +411,8 @@ describe('QuickBooks Controller', () => {
         endDate: '2025-01-31'
       };
 
-      Order.find.mockReturnValue({
-        populate: jest.fn().mockResolvedValue([])
-      });
+      Order.find.mockResolvedValue([]);
+      Affiliate.find.mockResolvedValue([]);
 
       await quickbooksController.exportPaymentSummary(req, res);
 
@@ -429,9 +444,18 @@ describe('QuickBooks Controller', () => {
         }
       ];
 
-      Order.find.mockReturnValue({
-        populate: jest.fn().mockResolvedValue(ordersWithUnverified)
-      });
+      Order.find.mockResolvedValue(ordersWithUnverified.map(order => ({
+        ...order,
+        affiliateId: order.affiliate.affiliateId.affiliateId,
+        affiliateCommission: order.affiliate.commission,
+        actualTotal: order.totalPrice || 150,
+        estimatedTotal: order.totalPrice || 150
+      })));
+      
+      Affiliate.find.mockResolvedValue([
+        mockOrders[0].affiliate.affiliateId,
+        ordersWithUnverified[2].affiliate.affiliateId
+      ]);
 
       PaymentExport.create.mockResolvedValue({ exportId: 'EXP-125' });
 
@@ -462,19 +486,38 @@ describe('QuickBooks Controller', () => {
     const mockOrders = [
       {
         orderId: 'ORD-001',
-        customer: { firstName: 'John', lastName: 'Doe' },
+        customerId: 'CUST-001',
         status: 'complete',
         completedAt: new Date('2025-01-15'),
-        totalPrice: 100,
-        affiliate: { commission: 10, commissionRate: 0.1 }
+        actualTotal: 100,
+        estimatedTotal: 100,
+        affiliateId: 'AFF-001',
+        affiliateCommission: 10,
+        affiliateCommissionRate: 0.1
       },
       {
         orderId: 'ORD-002',
-        customer: { firstName: 'Jane', lastName: 'Smith' },
+        customerId: 'CUST-002',
         status: 'complete',
         completedAt: new Date('2025-01-16'),
-        totalPrice: 200,
-        affiliate: { commission: 20, commissionRate: 0.1 }
+        actualTotal: 200,
+        estimatedTotal: 200,
+        affiliateId: 'AFF-001',
+        affiliateCommission: 20,
+        affiliateCommissionRate: 0.1
+      }
+    ];
+    
+    const mockCustomers = [
+      {
+        customerId: 'CUST-001',
+        firstName: 'John',
+        lastName: 'Doe'
+      },
+      {
+        customerId: 'CUST-002',
+        firstName: 'Jane',
+        lastName: 'Smith'
       }
     ];
 
@@ -491,6 +534,8 @@ describe('QuickBooks Controller', () => {
       Order.find.mockReturnValue({
         sort: jest.fn().mockResolvedValue(mockOrders)
       });
+      
+      Customer.find.mockResolvedValue(mockCustomers);
 
       PaymentExport.create.mockResolvedValue({
         exportId: 'EXP-126',
@@ -507,8 +552,8 @@ describe('QuickBooks Controller', () => {
           $gte: new Date('2025-01-01'),
           $lte: expect.any(Date)
         },
-        'affiliate.affiliateId': 'mongo-id-123',
-        'affiliate.commission': { $gt: 0 }
+        affiliateId: 'AFF-001',
+        affiliateCommission: { $gt: 0 }
       });
 
       expect(res.json).toHaveBeenCalledWith({

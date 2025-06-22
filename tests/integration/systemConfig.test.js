@@ -202,10 +202,12 @@ describe('System Config API Tests', () => {
         const admin = await Administrator.findById(testAdmin._id);
         if (!admin) {
           // Recreate admin and token if it was deleted
+          const { salt, hash } = encryptionUtil.hashPassword('Test@Admin#2025!');
           testAdmin = await Administrator.create({
             adminId: 'ADM999',
             email: 'test.admin@wavemax.com',
-            password: 'Test@Admin#2025!',
+            passwordSalt: salt,
+            passwordHash: hash,
             firstName: 'Test',
             lastName: 'Admin',
             permissions: ['system_config', 'view_analytics'],

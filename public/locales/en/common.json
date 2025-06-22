@@ -24,7 +24,8 @@
       "customerLogin": "Customer Login",
       "signUpToday": "Sign Up Today",
       "registerNow": "Register now",
-      "copy": "Copy"
+      "copy": "Copy",
+      "understand": "I Understand"
     },
     "labels": {
       "username": "Username",
@@ -521,6 +522,13 @@
         "pendingCommissions": "Pending Commissions",
         "activeOrders": "Active Orders",
         "totalEarnings": "Total Earnings"
+      },
+      "marketingLinks": {
+        "title": "Your Marketing Links",
+        "landingPage": "Customer Landing Page",
+        "landingPageDesc": "Share this professional page to showcase your services",
+        "registrationLink": "Direct Registration Link",
+        "registrationDesc": "Direct link for customers to register"
       },
       "pickups": {
         "title": "Upcoming Pickups & Deliveries"

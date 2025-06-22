@@ -37,8 +37,8 @@
 
     // Protected routes that require authentication
     PROTECTED_ROUTES: {
-      affiliate: ['/affiliate-dashboard', '/affiliate-success'],
-      customer: ['/customer-dashboard', '/customer-success', '/schedule-pickup', '/order-confirmation'],
+      affiliate: ['/affiliate-dashboard'],
+      customer: ['/customer-dashboard', '/schedule-pickup', '/order-confirmation'],
       administrator: ['/administrator-dashboard'],
       operator: ['/operator-dashboard']
     },

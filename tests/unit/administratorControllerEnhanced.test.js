@@ -482,7 +482,8 @@ describe('Administrator Controller - Enhanced Coverage', () => {
         await resetAdministratorPassword(req, res);
 
         expect(validatePasswordStrength).toHaveBeenCalledWith(req.body.newPassword, '', '');
-        expect(mockAdmin.password).toBe(req.body.newPassword);
+        expect(mockAdmin.passwordHash).toBeDefined();
+        expect(mockAdmin.passwordSalt).toBeDefined();
         expect(mockAdmin.save).toHaveBeenCalled();
         expect(res.json).toHaveBeenCalledWith({
           success: true,

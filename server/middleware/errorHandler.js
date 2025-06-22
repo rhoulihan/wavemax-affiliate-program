@@ -76,6 +76,33 @@ const errorHandler = (err, req, res, next) => {
     message = 'Invalid data format';
   }
 
+  // Multer errors
+  else if (err.name === 'MulterError') {
+    statusCode = 400;
+    if (err.code === 'LIMIT_FILE_SIZE') {
+      statusCode = 413;
+      message = 'File too large';
+    } else if (err.code === 'LIMIT_FILE_COUNT') {
+      message = 'Too many files';
+    } else if (err.code === 'LIMIT_FIELD_KEY') {
+      message = 'Field name too long';
+    } else if (err.code === 'LIMIT_FIELD_VALUE') {
+      message = 'Field value too long';
+    } else if (err.code === 'LIMIT_FIELD_COUNT') {
+      message = 'Too many fields';
+    } else if (err.code === 'LIMIT_UNEXPECTED_FILE') {
+      message = 'Unexpected file field';
+    } else {
+      message = err.message;
+    }
+  }
+
+  // Custom multer file filter errors
+  else if (err.message && err.message.includes('Only PDF files are allowed')) {
+    statusCode = 400;
+    message = err.message;
+  }
+
   // For non-500 errors in production, use the original message if it's safe
   else if (statusCode !== 500 && process.env.NODE_ENV === 'production') {
     message = err.message || message;

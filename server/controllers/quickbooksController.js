@@ -5,7 +5,7 @@ const PaymentExport = require('../models/PaymentExport');
 const SystemConfig = require('../models/SystemConfig');
 const { formatCurrency } = require('../utils/helpers');
 const csv = require('csv-writer').createObjectCsvStringifier;
-const W9AuditService = require('../services/w9AuditService');
+// W9AuditService removed - W9 management now handled by DocuSign
 
 /**
  * QuickBooks Export Controller
@@ -90,22 +90,16 @@ exports.exportVendors = async (req, res) => {
 
       const csvContent = csvStringifier.getHeaderString() + csvStringifier.stringifyRecords(records);
 
-      // Log QuickBooks export
-      await W9AuditService.logQuickBooksExport(req, 'vendor', exportRecord.exportId, {
-        format: 'csv',
-        recordCount: affiliates.length
-      });
+      // Audit logging removed - using standard logger instead
+      console.log(`QuickBooks vendor export: CSV, ${affiliates.length} records, exportId: ${exportRecord.exportId}`);
 
       res.setHeader('Content-Type', 'text/csv');
       res.setHeader('Content-Disposition', `attachment; filename="wavemax-vendors-${exportRecord.exportId}.csv"`);
       return res.send(csvContent);
     }
 
-    // Log QuickBooks export for JSON format
-    await W9AuditService.logQuickBooksExport(req, 'vendor', exportRecord.exportId, {
-      format: 'json',
-      recordCount: affiliates.length
-    });
+    // Audit logging removed - using standard logger instead
+    console.log(`QuickBooks vendor export: JSON, ${affiliates.length} records, exportId: ${exportRecord.exportId}`);
 
     // Return JSON format
     res.json({

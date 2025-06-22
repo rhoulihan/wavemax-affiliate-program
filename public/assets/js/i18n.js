@@ -95,6 +95,7 @@
         }
 
         const translations = await response.json();
+        // Use the full translations object, not just the 'common' part
         this.translations[lang] = translations;
         this.loadedLanguages.add(lang);
 

@@ -44,6 +44,12 @@ beforeAll(async () => {
   try {
     await mongoose.connect(testUri);
     console.log('Connected to test database:', testUri.replace(/\/\/[^:]+:[^@]+@/, '//***:***@'));
+    
+    // Create necessary directories for file uploads
+    const fs = require('fs').promises;
+    const path = require('path');
+    const uploadsDir = path.join(__dirname, '../uploads/w9');
+    await fs.mkdir(uploadsDir, { recursive: true });
   } catch (error) {
     console.error('Failed to connect to test database:', error);
     throw error;

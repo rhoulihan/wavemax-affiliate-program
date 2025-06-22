@@ -258,12 +258,10 @@ exports.updateAdministrator = async (req, res) => {
 
     // Hash password if updating
     if (updates.password) {
-      const admin = await Administrator.findById(id);
-      if (admin) {
-        admin.password = updates.password;
-        await admin.save();
-        delete updates.password;
-      }
+      const { salt, hash } = encryptionUtil.hashPassword(updates.password);
+      updates.passwordSalt = salt;
+      updates.passwordHash = hash;
+      delete updates.password;
     }
 
     const administrator = await Administrator.findByIdAndUpdate(
@@ -411,7 +409,9 @@ exports.resetAdministratorPassword = async (req, res) => {
     }
 
     // Reset password
-    administrator.password = newPassword;
+    const { salt, hash } = encryptionUtil.hashPassword(newPassword);
+    administrator.passwordSalt = salt;
+    administrator.passwordHash = hash;
     administrator.loginAttempts = 0;
     administrator.lockUntil = undefined;
     await administrator.save();
