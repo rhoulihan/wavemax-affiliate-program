@@ -6,6 +6,7 @@ const Customer = require('../../server/models/Customer');
 const Affiliate = require('../../server/models/Affiliate');
 const { getCsrfToken, createAgent } = require('../helpers/csrfHelper');
 const mongoose = require('mongoose');
+const encryptionUtil = require('../../server/utils/encryption');
 
 // Mock auditLogger to prevent errors
 jest.mock('../../server/utils/auditLogger', () => ({
@@ -32,6 +33,16 @@ describe('Administrator Integration Tests', () => {
   let csrfToken;
   let adminToken;
   let testAdmin;
+  
+  // Helper function to create admin data with hashed password
+  const createAdminData = (data) => {
+    if (data.password) {
+      const { salt, hash } = encryptionUtil.hashPassword(data.password);
+      const { password, ...rest } = data;
+      return { ...rest, passwordSalt: salt, passwordHash: hash };
+    }
+    return data;
+  };
 
   beforeEach(async () => {
     // Clear database
@@ -48,7 +59,7 @@ describe('Administrator Integration Tests', () => {
     csrfToken = await getCsrfToken(app, adminAgent);
 
     // Create test administrator
-    testAdmin = new Administrator({
+    testAdmin = new Administrator(createAdminData({
       adminId: 'ADMIN001',
       firstName: 'Super',
       lastName: 'Admin',
@@ -56,7 +67,7 @@ describe('Administrator Integration Tests', () => {
       password: 'CompletelyDifferentPassword417!',
       permissions: ['all'],
       createdAt: new Date()
-    });
+    }));
     await testAdmin.save();
 
     // Login as admin to get token
@@ -74,7 +85,7 @@ describe('Administrator Integration Tests', () => {
     it('should get all administrators with admin token', async () => {
       // Create additional administrators
       await Administrator.create([
-        {
+        createAdminData({
           adminId: 'ADMIN002',
           firstName: 'John',
           lastName: 'Doe',
@@ -82,8 +93,8 @@ describe('Administrator Integration Tests', () => {
           password: 'StrongPassword417!',
           permissions: ['administrators.read', 'operators.manage'],
           createdAt: new Date()
-        },
-        {
+        }),
+        createAdminData({
           adminId: 'ADMIN003',
           firstName: 'Jane',
           lastName: 'Smith',
@@ -92,7 +103,7 @@ describe('Administrator Integration Tests', () => {
           permissions: ['customers.manage'],
           isActive: false,
           createdAt: new Date()
-        }
+        })
       ]);
 
       const response = await adminAgent
@@ -115,7 +126,7 @@ describe('Administrator Integration Tests', () => {
     });
 
     it('should filter by active status', async () => {
-      await Administrator.create({
+      await Administrator.create(createAdminData({
         adminId: 'ADMIN002',
         firstName: 'Inactive',
         lastName: 'Admin',
@@ -124,7 +135,7 @@ describe('Administrator Integration Tests', () => {
         permissions: ['customers.manage'],
         isActive: false,
         createdAt: new Date()
-      });
+      }));
 
       const response = await adminAgent
         .get('/api/v1/administrators?active=true')
@@ -140,7 +151,7 @@ describe('Administrator Integration Tests', () => {
       // Create 15 administrators
       const admins = [];
       for (let i = 1; i <= 15; i++) {
-        admins.push({
+        admins.push(createAdminData({
           adminId: `ADMIN${String(i).padStart(3, '0')}`,
           firstName: `Admin${i}`,
           lastName: 'Test',
@@ -148,7 +159,7 @@ describe('Administrator Integration Tests', () => {
           password: 'StrongPassword417!',
           permissions: ['customers.read'],
           createdAt: new Date(Date.now() - i * 60000) // Different timestamps
-        });
+        }));
       }
       await Administrator.create(admins);
 
@@ -206,7 +217,7 @@ describe('Administrator Integration Tests', () => {
 
   describe('GET /api/v1/administrators/:id', () => {
     it('should get administrator by ID', async () => {
-      const admin = await Administrator.create({
+      const admin = await Administrator.create(createAdminData({
         adminId: 'ADMIN002',
         firstName: 'John',
         lastName: 'Doe',
@@ -214,7 +225,7 @@ describe('Administrator Integration Tests', () => {
         password: 'StrongPassword417!',
         permissions: ['customers.manage', 'operators.manage'],
         createdAt: new Date()
-      });
+      }));
 
       const response = await adminAgent
         .get(`/api/v1/administrators/${admin._id}`)
@@ -363,14 +374,14 @@ describe('Administrator Integration Tests', () => {
 
     it('should require administrators.create permission', async () => {
       // Create limited admin
-      const limitedAdmin = await Administrator.create({
+      const limitedAdmin = await Administrator.create(createAdminData({
         adminId: 'LIMITED001',
         firstName: 'Limited',
         lastName: 'Admin',
         email: 'limited@wavemax.com',
         password: 'StrongPassword417!',
         permissions: ['customers.read'] // No admin permissions
-      });
+      }));
 
       // Create new agent for limited admin
       const limitedAgent = createAgent(app);
@@ -404,7 +415,7 @@ describe('Administrator Integration Tests', () => {
     let targetAdmin;
 
     beforeEach(async () => {
-      targetAdmin = await Administrator.create({
+      targetAdmin = await Administrator.create(createAdminData({
         adminId: 'TARGET001',
         firstName: 'Target',
         lastName: 'Admin',
@@ -412,7 +423,7 @@ describe('Administrator Integration Tests', () => {
         password: 'StrongPassword417!',
         permissions: ['customers.read'],
         isActive: true
-      });
+      }));
     });
 
     it('should update administrator details', async () => {
@@ -462,8 +473,13 @@ describe('Administrator Integration Tests', () => {
       expect(response.status).toBe(200);
 
       // Verify new password works
-      const loginRes = await agent
+      // Create a new agent for login verification
+      const newAgent = createAgent(app);
+      const newCsrfToken = await getCsrfToken(app, newAgent);
+      
+      const loginRes = await newAgent
         .post('/api/v1/auth/administrator/login')
+        .set('X-CSRF-Token', newCsrfToken)
         .send({
           email: 'target@wavemax.com',
           password: 'NewStrongPassword849!'
@@ -537,14 +553,14 @@ describe('Administrator Integration Tests', () => {
 
     it('should require administrators.update permission', async () => {
       // Create limited admin
-      const limitedAdmin = await Administrator.create({
+      const limitedAdmin = await Administrator.create(createAdminData({
         adminId: 'LIMITED002',
         firstName: 'Limited',
         lastName: 'Admin',
         email: 'limited2@wavemax.com',
         password: 'StrongPassword417!',
         permissions: ['customers.read'] // No admin permissions
-      });
+      }));
 
       // Create new agent for limited admin
       const limitedAgent = createAgent(app);
@@ -574,14 +590,14 @@ describe('Administrator Integration Tests', () => {
     let targetAdmin;
 
     beforeEach(async () => {
-      targetAdmin = await Administrator.create({
+      targetAdmin = await Administrator.create(createAdminData({
         adminId: 'DELETE001',
         firstName: 'Delete',
         lastName: 'Me',
         email: 'delete@wavemax.com',
         password: 'StrongPassword417!',
         permissions: ['customers.read']
-      });
+      }));
     });
 
     it('should delete administrator', async () => {
@@ -624,14 +640,14 @@ describe('Administrator Integration Tests', () => {
 
     it('should require administrators.delete permission', async () => {
       // Create limited admin
-      const limitedAdmin = await Administrator.create({
+      const limitedAdmin = await Administrator.create(createAdminData({
         adminId: 'LIMITED003',
         firstName: 'Limited',
         lastName: 'Admin',
         email: 'limited3@wavemax.com',
         password: 'StrongPassword417!',
         permissions: ['customers.manage'] // No admin delete permission
-      });
+      }));
 
       // Create new agent for limited admin
       const limitedAgent = createAgent(app);
@@ -670,14 +686,14 @@ describe('Administrator Integration Tests', () => {
     let targetAdmin;
 
     beforeEach(async () => {
-      targetAdmin = await Administrator.create({
+      targetAdmin = await Administrator.create(createAdminData({
         adminId: 'RESET001',
         firstName: 'Reset',
         lastName: 'Password',
         email: 'reset@wavemax.com',
         password: 'OldStrongPassword417!',
         permissions: ['customers.read']
-      });
+      }));
     });
 
     it('should reset administrator password', async () => {
@@ -694,8 +710,13 @@ describe('Administrator Integration Tests', () => {
       expect(response.body.message).toContain('Password reset successfully');
 
       // Verify new password works
-      const loginRes = await agent
+      // Create a new agent for login verification
+      const newAgent = createAgent(app);
+      const newCsrfToken = await getCsrfToken(app, newAgent);
+      
+      const loginRes = await newAgent
         .post('/api/v1/auth/administrator/login')
+        .set('X-CSRF-Token', newCsrfToken)
         .send({
           email: 'reset@wavemax.com',
           password: 'NewStrongPassword849!'
@@ -704,8 +725,12 @@ describe('Administrator Integration Tests', () => {
       expect(loginRes.status).toBe(200);
 
       // Verify old password doesn't work
-      const oldLoginRes = await agent
+      const oldAgent = createAgent(app);
+      const oldCsrfToken = await getCsrfToken(app, oldAgent);
+      
+      const oldLoginRes = await oldAgent
         .post('/api/v1/auth/administrator/login')
+        .set('X-CSRF-Token', oldCsrfToken)
         .send({
           email: 'reset@wavemax.com',
           password: 'OldStrongPassword417!'
@@ -751,14 +776,14 @@ describe('Administrator Integration Tests', () => {
 
     it('should require administrators.update permission', async () => {
       // Create limited admin
-      const limitedAdmin = await Administrator.create({
+      const limitedAdmin = await Administrator.create(createAdminData({
         adminId: 'LIMITED004',
         firstName: 'Limited',
         lastName: 'Admin',
         email: 'limited4@wavemax.com',
         password: 'StrongPassword417!',
         permissions: ['customers.read'] // No admin update permission
-      });
+      }));
 
       // Create new agent for limited admin
       const limitedAgent = createAgent(app);

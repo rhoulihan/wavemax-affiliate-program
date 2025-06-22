@@ -21,7 +21,8 @@
       "customerLogin": "Kundenlogin",
       "signUpToday": "Heute registrieren",
       "registerNow": "Jetzt registrieren",
-      "copy": "Kopieren"
+      "copy": "Kopieren",
+      "understand": "Ich verstehe"
     },
     "labels": {
       "username": "Benutzername",
@@ -489,6 +490,13 @@
         "pendingCommissions": "Ausstehende Provisionen",
         "activeOrders": "Aktive Bestellungen",
         "totalEarnings": "Gesamtverdienste"
+      },
+      "marketingLinks": {
+        "title": "Ihre Marketing-Links",
+        "landingPage": "Kunden-Landingpage",
+        "landingPageDesc": "Teilen Sie diese professionelle Seite, um Ihre Dienstleistungen zu präsentieren",
+        "registrationLink": "Direkter Registrierungslink",
+        "registrationDesc": "Direkter Link für Kunden zur Registrierung"
       },
       "pickups": {
         "title": "Anstehende Abholungen & Lieferungen"

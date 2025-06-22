@@ -2,8 +2,6 @@
 // These methods will replace the existing upload-based methods
 
 const Affiliate = require('../models/Affiliate');
-const W9Document = require('../models/W9Document');
-const W9AuditLog = require('../models/W9AuditLog');
 const docusignService = require('../services/docusignService');
 const logger = require('../utils/logger');
 
@@ -231,9 +229,9 @@ exports.initiateW9Signing = async (req, res) => {
     affiliate.markModified('w9Information');
     await affiliate.save();
 
-    // Create audit log
-    await W9AuditLog.create({
-      action: 'upload_attempt',  // Using existing action enum value
+    // Log the action
+    logger.info('W9 upload attempt via DocuSign', {
+      action: 'upload_attempt',
       performedBy: {
         userId: affiliate._id.toString(),
         userType: 'affiliate',
@@ -384,41 +382,19 @@ exports.handleDocuSignWebhook = async (req, res) => {
         affiliate.w9Information.businessName = result.taxInfo.businessName;
       }
 
-      // Download and store the completed W9
-      try {
-        const w9File = await docusignService.downloadCompletedW9(result.envelopeId);
-
-        // Create W9Document record
-        const w9Document = new W9Document({
-          affiliateId: affiliate._id,
-          filename: w9File.filename,
-          contentType: w9File.contentType,
-          uploadedAt: new Date(),
-          fileSize: w9File.data.length,
-          metadata: {
-            docusignEnvelopeId: result.envelopeId,
-            completedAt: result.completedAt
-          }
-        });
-
-        // Store file data
-        w9Document.data = w9File.data;
-        await w9Document.save();
-
-        affiliate.w9Information.documentId = w9Document._id;
-      } catch (error) {
-        logger.error('Failed to download completed W9:', error);
-      }
+      // Note: W9 documents are now stored and managed entirely within DocuSign
+      // No local file storage is performed
     }
 
     affiliate.markModified('w9Information');
     await affiliate.save();
 
-    // Create audit log
-    await W9AuditLog.create({
-      action: 'upload_success',  // Using existing enum value
+    // Note: Audit logging is handled by DocuSign's built-in audit trail
+    logger.info(`W9 status updated for affiliate ${affiliate.affiliateId}:`, {
+      status: result.status,
+      envelopeId: result.envelopeId,
+      docusignStatus: result.docusignStatus,
       performedBy: {
-        userId: 'system',
         userType: 'system',
         userEmail: 'system@docusign',
         userName: 'DocuSign System',
@@ -542,9 +518,9 @@ exports.cancelW9Signing = async (req, res) => {
     affiliate.w9Information.docusignEnvelopeId = null;
     await affiliate.save();
 
-    // Create audit log
-    await W9AuditLog.create({
-      action: 'delete',  // Using existing enum value
+    // Log the cancellation
+    logger.info('W9 signing cancelled by affiliate', {
+      action: 'delete',
       performedBy: {
         userId: affiliate._id.toString(),
         userType: 'affiliate',
@@ -610,9 +586,9 @@ exports.resendW9Request = async (req, res) => {
     affiliate.w9Information.submittedAt = new Date();
     await affiliate.save();
 
-    // Create audit log
-    await W9AuditLog.create({
-      action: 'upload_attempt',  // Using existing enum value
+    // Log the resend action
+    logger.info('W9 request resent by administrator', {
+      action: 'upload_attempt',
       performedBy: {
         userId: req.user.id,
         userType: 'administrator',
@@ -706,8 +682,8 @@ exports.sendW9ToAffiliate = async (req, res) => {
     affiliate.w9Information.docusignInitiatedAt = new Date();
     await affiliate.save();
 
-    // Create audit log
-    await W9AuditLog.create({
+    // Log the W9 send action
+    logger.info('W9 sent to affiliate by administrator', {
       action: 'upload_attempt',
       performedBy: {
         userId: adminId,

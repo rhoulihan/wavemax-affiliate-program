@@ -53,14 +53,59 @@
                     <h1 class="text-2xl font-bold" id="welcomeMessage" data-i18n="affiliate.dashboard.title">Affiliate Dashboard</h1>
                     <p class="text-gray-600" id="affiliateId">Loading affiliate information...</p>
                 </div>
-                <div class="mt-4 md:mt-0">
+                <div class="mt-4 md:mt-0 flex items-center space-x-3">
+                    <!-- Marketing Links Hover Button -->
+                    <div class="relative" style="display: inline-block;">
+                        <button id="marketingLinksBtn" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition flex items-center">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path>
+                            </svg>
+                            <span data-i18n="affiliate.dashboard.marketingLinks.title">Your Marketing Links</span>
+                        </button>
+                        
+                        <!-- Marketing Links Modal (Hidden by default) -->
+                        <div id="marketingLinksModal" class="absolute top-full right-0 mt-2 w-96 bg-white rounded-lg shadow-xl border border-gray-200 p-6 z-50" style="display: none; min-width: 450px;">
+                            <h3 class="text-lg font-bold text-gray-800 mb-4" data-i18n="affiliate.dashboard.marketingLinks.title">Your Marketing Links</h3>
+                            
+                            <!-- Landing Page Link -->
+                            <div class="mb-4">
+                                <label class="block text-sm font-medium text-gray-700 mb-2" data-i18n="affiliate.dashboard.marketingLinks.landingPage">Customer Landing Page</label>
+                                <div class="flex">
+                                    <input type="text" id="landingPageLink" class="flex-1 px-3 py-2 border border-gray-300 rounded-l-md bg-gray-50 text-sm" readonly>
+                                    <button type="button" id="copyLandingPageLinkBtn" class="bg-blue-600 text-white px-4 py-2 rounded-r-md hover:bg-blue-700 transition flex items-center">
+                                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path>
+                                        </svg>
+                                        <span data-i18n="common.buttons.copy">Copy</span>
+                                    </button>
+                                </div>
+                                <p class="text-xs text-gray-500 mt-1" data-i18n="affiliate.dashboard.marketingLinks.landingPageDesc">Share this professional page to showcase your services</p>
+                            </div>
+                            
+                            <!-- Registration Link -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2" data-i18n="affiliate.dashboard.marketingLinks.registrationLink">Direct Registration Link</label>
+                                <div class="flex">
+                                    <input type="text" id="registrationLink" class="flex-1 px-3 py-2 border border-gray-300 rounded-l-md bg-gray-50 text-sm" readonly>
+                                    <button type="button" id="copyRegistrationLinkBtn" class="bg-blue-600 text-white px-4 py-2 rounded-r-md hover:bg-blue-700 transition flex items-center">
+                                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path>
+                                        </svg>
+                                        <span data-i18n="common.buttons.copy">Copy</span>
+                                    </button>
+                                </div>
+                                <p class="text-xs text-gray-500 mt-1" data-i18n="affiliate.dashboard.marketingLinks.registrationDesc">Direct link for customers to register</p>
+                            </div>
+                        </div>
+                    </div>
+                    
                     <button id="logoutBtn" class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition" data-i18n="common.buttons.logout">Logout</button>
                 </div>
             </div>
         </div>
 
         <!-- Stats Cards -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-4">
             <div class="bg-white rounded-lg shadow-md p-6">
                 <h3 class="text-lg font-bold text-gray-600 mb-2" data-i18n="affiliate.dashboard.metrics.totalCustomers">Total Customers</h3>
                 <p class="text-3xl font-bold" id="totalCustomers">0</p>
@@ -276,30 +321,6 @@
                     <form id="settingsForm">
                         <input type="hidden" name="_csrf" value="{{csrfToken}}">
 
-                        <!-- Marketing Links Section -->
-                        <div class="mb-6">
-                            <h3 class="text-lg font-bold mb-4" data-i18n="affiliate.dashboard.settings.marketingLinks">Marketing Links</h3>
-                            
-                            <!-- Landing Page Link -->
-                            <div class="mb-4">
-                                <label for="landingPageLink" class="block text-gray-700 mb-2" data-i18n="affiliate.dashboard.settings.customerLandingPage">Customer Landing Page</label>
-                                <div class="flex">
-                                    <input type="text" id="landingPageLink" class="w-full px-4 py-2 border rounded-l-lg bg-gray-100" readonly>
-                                    <button type="button" id="copyLandingPageLinkBtn" class="bg-blue-600 text-white px-4 py-2 rounded-r-lg hover:bg-blue-700 transition" data-i18n="common.buttons.copy">Copy</button>
-                                </div>
-                                <p class="text-sm text-gray-600 mt-1" data-i18n="affiliate.dashboard.settings.landingPageDesc">Professional landing page to showcase your services and pricing to potential customers</p>
-                            </div>
-                            
-                            <!-- Registration Link -->
-                            <div class="mb-4">
-                                <label for="registrationLink" class="block text-gray-700 mb-2" data-i18n="affiliate.dashboard.settings.directRegistrationUrl">Direct Registration URL</label>
-                                <div class="flex">
-                                    <input type="text" id="registrationLink" class="w-full px-4 py-2 border rounded-l-lg bg-gray-100" readonly>
-                                    <button type="button" id="copyRegistrationLinkBtn" class="bg-blue-600 text-white px-4 py-2 rounded-r-lg hover:bg-blue-700 transition" data-i18n="common.buttons.copy">Copy</button>
-                                </div>
-                                <p class="text-sm text-gray-600 mt-1" data-i18n="affiliate.dashboard.settings.registrationLinkDesc">Direct link for customers to register under your affiliate account</p>
-                            </div>
-                        </div>
 
                         <div class="mb-6">
                             <div class="flex justify-between items-center mb-4">

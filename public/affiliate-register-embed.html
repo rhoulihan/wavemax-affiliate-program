@@ -327,10 +327,27 @@
                             <!-- Component will be initialized here -->
                         </div>
                     </div>
+                    </div>
+                    
+                    <!-- Navigation Buttons for Service Area -->
+                    <div id="serviceAreaNavigation" class="mt-6 flex justify-between" style="display: none;">
+                        <button type="button" id="serviceAreaBackButton" class="bg-gray-200 text-gray-700 font-bold py-3 px-6 rounded-lg hover:bg-gray-300 transition flex items-center">
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                            </svg>
+                            <span data-i18n="common.buttons.back">Back</span>
+                        </button>
+                        <button type="button" id="serviceAreaNextButton" class="bg-blue-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-blue-700 transition flex items-center">
+                            <span data-i18n="common.buttons.next">Next</span>
+                            <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                            </svg>
+                        </button>
+                    </div>
                 </div>
                 
                 <!-- Service Information (Initially Hidden) -->
-                <div class="form-section-hidden" style="display: none;">
+                <div id="serviceInfoSection" class="form-section-hidden" style="display: none;">
                     <h3 class="text-xl font-bold mb-4" data-i18n="affiliate.register.serviceInfo">Service Information</h3>
                     <div class="grid md:grid-cols-2 gap-4">
                         
@@ -389,7 +406,7 @@
                 
                 
                 <!-- Payment Information (Initially Hidden) -->
-                <div class="form-section-hidden" style="display: none;">
+                <div id="paymentInfoSection" class="form-section-hidden" style="display: none;">
                     <h3 class="text-xl font-bold mb-4" data-i18n="affiliate.register.paymentInfo">Payment Information</h3>
                     <div class="grid md:grid-cols-2 gap-4">
                         <div class="md:col-span-2">
@@ -431,9 +448,17 @@
                 </div>
                 
                 <!-- Submit Button (Initially Hidden) -->
-                <div class="form-section-hidden" style="display: none;">
-                    <div class="mt-6">
+                <div id="submitSection" class="form-section-hidden" style="display: none;">
+                    <div class="mt-6 space-y-3">
                         <button type="submit" id="registerSubmitButton" class="w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-blue-700 transition" data-i18n="affiliate.register.submitButton">Register as an Affiliate</button>
+                        
+                        <!-- Back Button -->
+                        <button type="button" id="backButton" class="w-full bg-gray-200 text-gray-700 font-bold py-3 px-4 rounded-lg hover:bg-gray-300 transition flex items-center justify-center" style="display: none;">
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                            </svg>
+                            <span data-i18n="common.buttons.back">Back</span>
+                        </button>
                     </div>
                 </div>
             </form>
@@ -443,6 +468,8 @@
     <!-- Embedded version specific scripts -->
     <!-- Configuration must be set before other scripts -->
     <script src="/assets/js/embed-config.js"></script>
+    <!-- Embed navigation for iframe communication -->
+    <script src="/assets/js/embed-navigation.js"></script>
     <!-- i18n Scripts -->
     <script src="/assets/js/i18n.js"></script>
     <script src="/assets/js/language-switcher.js"></script>

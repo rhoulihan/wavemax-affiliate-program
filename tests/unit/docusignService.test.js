@@ -43,6 +43,34 @@ describe('DocuSign Service', () => {
   beforeEach(async () => {
     await DocuSignToken.deleteMany({});
     jest.clearAllMocks();
+    
+    // Clean up PKCE directory
+    try {
+      const pkceDir = path.join(__dirname, '../../temp/pkce');
+      const files = await fs.readdir(pkceDir);
+      for (const file of files) {
+        if (file.endsWith('.json')) {
+          await fs.unlink(path.join(pkceDir, file));
+        }
+      }
+    } catch (err) {
+      // Directory might not exist yet
+    }
+  });
+  
+  afterEach(async () => {
+    // Clean up PKCE directory after each test
+    try {
+      const pkceDir = path.join(__dirname, '../../temp/pkce');
+      const files = await fs.readdir(pkceDir);
+      for (const file of files) {
+        if (file.endsWith('.json')) {
+          await fs.unlink(path.join(pkceDir, file));
+        }
+      }
+    } catch (err) {
+      // Ignore errors
+    }
   });
 
   describe('PKCE Generation', () => {

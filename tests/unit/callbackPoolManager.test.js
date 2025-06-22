@@ -136,13 +136,14 @@ describe('CallbackPoolManager', () => {
       );
     });
 
-    it('should throw error when no callbacks available', async () => {
+    it('should return null when no callbacks available', async () => {
       CallbackPool.acquireCallback.mockResolvedValue(null);
 
-      await expect(callbackPoolManager.acquireCallback('test-token-123'))
-        .rejects.toThrow('No callback handlers available. All handlers are currently in use.');
-
+      const result = await callbackPoolManager.acquireCallback('test-token-123');
+      
+      expect(result).toBeNull();
       expect(CallbackPool.acquireCallback).toHaveBeenCalledWith('test-token-123', 30);
+      expect(logger.warn).toHaveBeenCalledWith('No callback handlers available. All handlers are currently in use.');
     });
   });
 
@@ -407,8 +408,9 @@ describe('CallbackPoolManager', () => {
       expect(result2.callbackPath).toBe('/api/v1/payments/callback/form-2');
       expect(result3.callbackPath).toBe('/api/v1/payments/callback/form-3');
 
-      await expect(callbackPoolManager.acquireCallback('token-4'))
-        .rejects.toThrow('No callback handlers available');
+      const result4 = await callbackPoolManager.acquireCallback('token-4');
+      expect(result4).toBeNull();
+      expect(logger.warn).toHaveBeenCalledWith('No callback handlers available. All handlers are currently in use.');
     });
   });
 });

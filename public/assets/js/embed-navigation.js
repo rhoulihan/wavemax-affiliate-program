@@ -166,33 +166,43 @@
       let heightTimeout = null;
 
       function sendHeight(force = false) {
-        const height = Math.max(
+        // Get all possible height values
+        const heights = [
           document.body.scrollHeight,
           document.body.offsetHeight,
           document.documentElement.clientHeight,
           document.documentElement.scrollHeight,
-          document.documentElement.offsetHeight
-        );
+          document.documentElement.offsetHeight,
+          document.body.clientHeight
+        ];
+        
+        // For shrinking content, we need the actual content height, not the viewport
+        // Remove any artificial minimums to allow proper shrinking
+        const height = Math.max(...heights.filter(h => h > 0));
 
-        // Only send if height has changed by more than 10px (increase or decrease)
+        // Only send if height has changed by more than 5px (increase or decrease)
+        // Lower threshold for better responsiveness
         const heightDifference = Math.abs(height - lastSentHeight);
 
-        if (force || heightDifference > 10) {
+        if (force || heightDifference > 5) {
           // Clear any pending timeout
           if (heightTimeout) {
             clearTimeout(heightTimeout);
           }
 
-          // Debounce height messages to prevent flooding
+          // Shorter debounce for more responsive resizing
           heightTimeout = setTimeout(() => {
-            console.log(`Height changed from ${lastSentHeight} to ${height} (diff: ${height - lastSentHeight}px)`);
+            console.log(`[Resize] Height changed from ${lastSentHeight} to ${height} (diff: ${height - lastSentHeight}px)`);
             lastSentHeight = height;  // Update last sent height
 
             window.parent.postMessage({
               type: 'resize',
-              data: { height: height }
+              data: { 
+                height: height,
+                timestamp: Date.now() // Add timestamp for debugging
+              }
             }, '*');
-          }, 200); // 200ms debounce
+          }, 100); // 100ms debounce (reduced from 200ms)
         }
       }
 
@@ -203,6 +213,7 @@
       // Check if auto-resize is disabled
       const autoResizeDisabled = document.body.hasAttribute('data-disable-auto-resize');
       let resizeObserver = null; // Define at function scope
+      let mutationObserver = null; // Define at function scope
 
       if (!autoResizeDisabled) {
         // Send initial height (force to ensure it's sent)
@@ -213,46 +224,58 @@
           sendHeight();
         });
         resizeObserver.observe(document.body);
+        
+        // Also observe documentElement for more comprehensive monitoring
+        resizeObserver.observe(document.documentElement);
 
         // Also send height on window resize
         window.addEventListener('resize', () => sendHeight());
 
         // Send height after images load (force to ensure proper height)
         window.addEventListener('load', () => sendHeight(true));
+        
+        // Monitor for DOM changes that might affect height
+        mutationObserver = new MutationObserver(() => {
+          // Check for display changes that affect layout
+          sendHeight();
+        });
+        
+        // Watch for style and class changes that might hide/show content
+        mutationObserver.observe(document.body, {
+          attributes: true,
+          attributeFilter: ['style', 'class'],
+          childList: true,
+          subtree: true
+        });
+        
+        // Listen for custom height update events
+        window.addEventListener('content-changed', () => sendHeight(true));
+        window.addEventListener('section-toggled', () => sendHeight(true));
       } else {
         console.log('[Embed Navigation] Auto-resize disabled, manual resize control enabled');
         // Still send initial height once (force)
         sendHeight(true);
       }
 
-      // Clean up on page unload
-      window.addEventListener('beforeunload', function() {
+      // Clean up function
+      const cleanupObservers = function() {
         if (resizeObserver) {
           resizeObserver.disconnect();
+        }
+        if (mutationObserver) {
+          mutationObserver.disconnect();
         }
         if (heightTimeout) {
           clearTimeout(heightTimeout);
         }
-      });
+      };
+
+      // Clean up on page unload
+      window.addEventListener('beforeunload', cleanupObservers);
 
       // Also clean up on custom events
-      window.addEventListener('page-cleanup', function() {
-        if (resizeObserver) {
-          resizeObserver.disconnect();
-        }
-        if (heightTimeout) {
-          clearTimeout(heightTimeout);
-        }
-      });
-
-      window.addEventListener('disconnect-observers', function() {
-        if (resizeObserver) {
-          resizeObserver.disconnect();
-        }
-        if (heightTimeout) {
-          clearTimeout(heightTimeout);
-        }
-      });
+      window.addEventListener('page-cleanup', cleanupObservers);
+      window.addEventListener('disconnect-observers', cleanupObservers);
     }
   }
 

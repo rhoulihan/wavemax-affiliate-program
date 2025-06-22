@@ -140,6 +140,36 @@
         let viewportInfo = null;
         let chromeHidden = false;
         
+        // Helper function to check if any user is authenticated
+        function isAnyUserAuthenticated() {
+            // First check if SessionManager exists and has the method we need
+            if (!window.SessionManager || typeof window.SessionManager.isAuthenticated !== 'function') {
+                return false;
+            }
+            
+            // Check all possible user types
+            const userTypes = ['administrator', 'affiliate', 'customer', 'operator'];
+            return userTypes.some(type => window.SessionManager.isAuthenticated(type));
+        }
+        
+        // Helper function to check if a specific user type is authenticated
+        function isUserAuthenticated(userType) {
+            if (!window.SessionManager || typeof window.SessionManager.isAuthenticated !== 'function') {
+                return false;
+            }
+            return window.SessionManager.isAuthenticated(userType);
+        }
+        
+        // Helper function to get the currently authenticated user type
+        function getAuthenticatedUserType() {
+            if (!window.SessionManager || typeof window.SessionManager.isAuthenticated !== 'function') {
+                return null;
+            }
+            
+            const userTypes = ['administrator', 'affiliate', 'customer', 'operator'];
+            return userTypes.find(type => window.SessionManager.isAuthenticated(type)) || null;
+        }
+        
         const EMBED_PAGES = {
             '/': '/embed-landing.html',
             '/landing': '/embed-landing.html',
@@ -204,10 +234,18 @@
             
             let route = params.get('route');
             
-            // If no route in URL, check localStorage for saved route
+            // If no route in URL, check localStorage for saved route ONLY if authenticated
             if (!route) {
-                route = localStorage.getItem('currentRoute') || '/';
-                console.log('No route in URL, using saved route:', route);
+                // Check if user is authenticated before using saved route
+                if (isAnyUserAuthenticated()) {
+                    route = localStorage.getItem('currentRoute') || '/';
+                    console.log('No route in URL, authenticated user, using saved route:', route);
+                } else {
+                    // No auth, clear saved route and use default
+                    localStorage.removeItem('currentRoute');
+                    route = '/';
+                    console.log('No route in URL, no auth, using default route');
+                }
             }
             
             // If route is customer-login with affid, redirect to registration
@@ -332,8 +370,19 @@
                 container.innerHTML = html;
                 currentRoute = route;
                 
-                // Store the current route for persistence
-                localStorage.setItem('currentRoute', route);
+                // Store the current route for persistence ONLY if authenticated
+                if (isAnyUserAuthenticated()) {
+                    localStorage.setItem('currentRoute', route);
+                } else {
+                    // Clear any saved route if not authenticated
+                    localStorage.removeItem('currentRoute');
+                }
+                
+                // Immediately translate any content that's already loaded
+                if (window.i18n && window.i18n.translatePage) {
+                    console.log('Translating page content after HTML load');
+                    window.i18n.translatePage();
+                }
                 
                 // Set data-route attribute on body for route-specific styling
                 document.body.setAttribute('data-route', route);
@@ -499,6 +548,12 @@
                     // All scripts loaded, send height again
                     setTimeout(() => {
                         sendHeight(true); // Force send after scripts load
+                        
+                        // Trigger translation for dynamically loaded content
+                        if (window.i18n && window.i18n.translatePage) {
+                            console.log('Triggering i18n translation after scripts loaded');
+                            window.i18n.translatePage();
+                        }
                     }, 200);
                 }
             }
@@ -506,12 +561,17 @@
             loadNextScript();
         }
         
-        // Navigate to a route
-        function navigateTo(route, params = {}, options = {}) {
+        // Navigate to a route (expose globally for iframe content)
+        window.navigateTo = function navigateTo(route, params = {}, options = {}) {
             console.log('Navigating to:', route, 'with params:', params);
             
-            // Store the current route in localStorage for persistence
-            localStorage.setItem('currentRoute', route);
+            // Store the current route in localStorage for persistence ONLY if authenticated
+            if (isAnyUserAuthenticated()) {
+                localStorage.setItem('currentRoute', route);
+            } else {
+                // Clear any saved route if not authenticated
+                localStorage.removeItem('currentRoute');
+            }
             
             // Update URL parameter
             const url = new URL(window.location);

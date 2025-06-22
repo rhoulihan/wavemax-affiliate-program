@@ -809,10 +809,10 @@ describe('Affiliate Controller', () => {
         activeOrderCount: 3,
         totalEarnings: 25,
         monthEarnings: 25,
-        weekEarnings: 25,
+        weekEarnings: 10,  // Only the first order is in current week
         pendingEarnings: 25,
         monthlyOrders: 2,
-        weeklyOrders: 2
+        weeklyOrders: 1   // Only one order in current week
       });
       expect(response.stats.nextPayoutDate).toBeDefined();
     });

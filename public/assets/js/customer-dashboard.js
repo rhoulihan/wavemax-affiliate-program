@@ -472,6 +472,7 @@ async function saveProfile() {
 function handleLogout() {
   localStorage.removeItem('customerToken');
   localStorage.removeItem('currentCustomer');
+  localStorage.removeItem('currentRoute');
   
   // Clear session manager data
   if (window.SessionManager) {

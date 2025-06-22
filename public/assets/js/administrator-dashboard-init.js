@@ -74,6 +74,7 @@
         localStorage.removeItem('adminData');
         localStorage.removeItem('requirePasswordChange');
         localStorage.removeItem('adminCurrentTab');
+        localStorage.removeItem('currentRoute');
 
         // Clear session manager data
         if (window.SessionManager) {

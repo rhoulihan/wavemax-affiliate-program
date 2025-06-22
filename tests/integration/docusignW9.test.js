@@ -2,7 +2,6 @@ const request = require('supertest');
 const app = require('../../server');
 const Affiliate = require('../../server/models/Affiliate');
 const DocuSignToken = require('../../server/models/DocuSignToken');
-const W9AuditLog = require('../../server/models/W9AuditLog');
 const docusignService = require('../../server/services/docusignService');
 
 // Mock DocuSign service to avoid external API calls
@@ -18,7 +17,6 @@ describe('DocuSign W9 Integration Tests', () => {
     // Clear collections
     await Affiliate.deleteMany({});
     await DocuSignToken.deleteMany({});
-    await W9AuditLog.deleteMany({});
 
     // Create test affiliate with all required fields
     testAffiliate = await Affiliate.create({

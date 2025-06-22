@@ -297,14 +297,15 @@
     // No validation required before OAuth - the point is to authenticate first and auto-populate the form
       console.log(`🚀 Starting ${provider} OAuth authentication...`);
 
-      // Show large spinner centered on the OAuth section
-      const socialAuthSection = document.getElementById('socialAuthSection');
+      // Show large spinner centered on the entire form
+      const formContainer = document.getElementById('affiliateRegistrationForm');
       console.log('[OAuth] SwirlSpinner available?', !!window.SwirlSpinner);
       console.log('[OAuth] SwirlSpinnerUtils available?', !!window.SwirlSpinnerUtils);
-      console.log('[OAuth] socialAuthSection found?', !!socialAuthSection);
+      console.log('[OAuth] Form container found?', !!formContainer);
 
       // Define spinner in outer scope so it's accessible in the polling function
       let sectionSpinner = null;
+      let originalFormPosition = null;
 
       // Create function to hide spinner
       const hideSpinner = function() {
@@ -312,18 +313,29 @@
           console.log('[OAuth] Hiding spinner');
           sectionSpinner.hide();
           sectionSpinner = null;
+          
+          // Restore original form position if it was changed
+          if (formContainer && originalFormPosition !== null) {
+            formContainer.style.position = originalFormPosition;
+          }
         }
       };
 
-      if (socialAuthSection) {
-        const rect = socialAuthSection.getBoundingClientRect();
-        console.log('[OAuth] Section dimensions:', { width: rect.width, height: rect.height });
-        console.log('[OAuth] Section position style:', window.getComputedStyle(socialAuthSection).position);
+      if (formContainer) {
+        const rect = formContainer.getBoundingClientRect();
+        console.log('[OAuth] Form dimensions:', { width: rect.width, height: rect.height });
+        console.log('[OAuth] Form position style:', window.getComputedStyle(formContainer).position);
+
+        // Ensure the form container has relative positioning for the overlay to work properly
+        originalFormPosition = formContainer.style.position || '';
+        if (!originalFormPosition || originalFormPosition === 'static') {
+          formContainer.style.position = 'relative';
+        }
 
         // Use SwirlSpinner
         if (window.SwirlSpinner) {
           try {
-            console.log('[OAuth] Creating SwirlSpinner with overlay...');
+            console.log('[OAuth] Creating SwirlSpinner with overlay on entire form...');
             // Get translated message
             const connectingMessage = getSpinnerMessage('spinner.connectingWith', {
               provider: provider.charAt(0).toUpperCase() + provider.slice(1)
@@ -331,7 +343,7 @@
             console.log('[OAuth] Using message:', connectingMessage);
 
             sectionSpinner = new window.SwirlSpinner({
-              container: socialAuthSection,
+              container: formContainer,
               size: 'large',
               overlay: true,
               message: connectingMessage
@@ -339,7 +351,7 @@
             console.log('[OAuth] SwirlSpinner created successfully');
 
             // Check if spinner element was actually added
-            const spinnerElements = socialAuthSection.querySelectorAll('.swirl-spinner-overlay');
+            const spinnerElements = formContainer.querySelectorAll('.swirl-spinner-overlay');
             console.log('[OAuth] Spinner overlay elements found:', spinnerElements.length);
           } catch (error) {
             console.error('[OAuth] Error creating SwirlSpinner:', error);
@@ -824,13 +836,28 @@
         e.preventDefault();
         e.stopPropagation();
 
-        // Show spinner on form
+        // Show spinner on entire page container
         const processingMessage = getSpinnerMessage('spinner.processingRegistration');
+        
+        // Get the main embed container to cover everything
+        const embedContainer = document.querySelector('.embed-container');
+        const spinnerContainer = embedContainer || form.closest('.bg-white') || form;
 
-        const formSpinner = window.SwirlSpinnerUtils ?
-          SwirlSpinnerUtils.showOnForm(form, {
-            message: processingMessage
-          }) : null;
+        const formSpinner = window.SwirlSpinner ? 
+          new window.SwirlSpinner({
+            container: spinnerContainer,
+            size: 'large',
+            overlay: true,
+            message: processingMessage,
+            overlayStyle: {
+              position: 'fixed',
+              top: '0',
+              left: '0',
+              right: '0',
+              bottom: '0',
+              zIndex: '9999'
+            }
+          }).show() : null;
 
         try {
         // Determine if this is a social registration first
@@ -1022,11 +1049,25 @@
           const data = await response.json();
 
           console.log('Registration response:', data);
+          
+          // Check if we have a successful response with affiliateId
+          if (!data.affiliateId && !data.affiliate?.affiliateId) {
+            console.error('No affiliateId in response:', data);
+            throw new Error('Registration completed but no affiliate ID received');
+          }
+          
+          const affiliateId = data.affiliateId || data.affiliate?.affiliateId;
 
+          // Store the token if provided (for auto-login after registration)
+          if (data.token) {
+            localStorage.setItem('affiliateToken', data.token);
+            console.log('Stored affiliate token for new registration');
+          }
+          
           // Store the affiliate data for the success page
           localStorage.setItem('currentAffiliate', JSON.stringify({
             ...affiliateData,
-            affiliateId: data.affiliateId
+            affiliateId: affiliateId
           }));
 
           // Keep the spinner visible during redirect
@@ -1035,54 +1076,77 @@
 
           // Update spinner message to indicate success
           if (formSpinner && formSpinner.updateMessage) {
-            const successPart = getSpinnerMessage('messages.registrationSuccess');
-            const redirectingPart = getSpinnerMessage('messages.redirecting');
+            const successPart = getSpinnerMessage('common.messages.registrationSuccess');
+            const redirectingPart = getSpinnerMessage('common.messages.redirecting');
             const successMessage = successPart + ' ' + redirectingPart;
             formSpinner.updateMessage(successMessage);
           }
 
-          // Handle redirect based on whether we're embedded
-          if (isEmbedded) {
-          // For embed-app, send navigation message
-            console.log('isEmbedded:', isEmbedded);
-            console.log('Sending navigation message to parent');
-            console.log('Window parent:', window.parent);
-            console.log('Window parent !== window:', window.parent !== window);
-
-            // Try multiple navigation approaches
-            try {
-            // First try postMessage
-              window.parent.postMessage({
-                type: 'navigate',
-                data: { url: '/affiliate-success' }
-              }, '*');
-              console.log('Navigation message sent successfully');
-
-              // Also try direct navigation as fallback
-              setTimeout(() => {
-                console.log('Trying direct navigation as fallback');
-                // Check if we're still on the same page
-                if (window.location.href.includes('affiliate-register')) {
-                  window.location.href = '/embed-app.html?route=/affiliate-success';
-                }
-              }, 1000);
-            } catch (msgError) {
-              console.error('Error sending message:', msgError);
-              // Fallback to direct navigation
+          // Handle redirect
+          console.log('=== NAVIGATION DEBUG ===');
+          console.log('window.location:', window.location.href);
+          console.log('Attempting navigation to affiliate success page');
+          
+          // Update spinner message while redirecting
+          if (formSpinner && formSpinner.updateMessage) {
+            formSpinner.updateMessage(getSpinnerMessage('common.messages.registrationSuccess') + ' ' + getSpinnerMessage('common.messages.redirecting'));
+          }
+          
+          // Navigate to success page
+          // Since we're in a nested iframe (wavemaxlaundry.com > embed-app.html > affiliate-register)
+          // We need to navigate within our own frame context
+          console.log('Current URL:', window.location.href);
+          
+          // Check if we're in embed-app.html iframe
+          if (window.location.href.includes('embed-app.html')) {
+            // We're already in embed-app.html, just change the route parameter
+            const url = new URL(window.location.href);
+            url.searchParams.set('route', '/affiliate-success');
+            console.log('Navigating to:', url.href);
+            window.location.href = url.href;
+          } else if (window.parent !== window) {
+            // We're in an iframe but not embed-app.html
+            // Try to use the navigateTo function if available
+            if (window.parent.navigateTo && typeof window.parent.navigateTo === 'function') {
+              console.log('Using parent navigateTo function');
+              window.parent.navigateTo('/affiliate-success');
+            } else {
+              // Fallback: navigate to embed-app.html with success route
+              console.log('Using fallback navigation');
               window.location.href = '/embed-app.html?route=/affiliate-success';
             }
           } else {
-          // Otherwise, normal redirect
+            // Not in iframe at all
+            console.log('Not in iframe, using direct navigation');
             window.location.href = '/embed-app.html?route=/affiliate-success';
           }
         } catch (error) {
           console.error('Registration error:', error);
+          
+          // Show user-friendly error message
+          let errorMessage = 'An error occurred during registration. Please try again.';
+          
+          if (error.message.includes('fetch')) {
+            errorMessage = 'Unable to connect to registration server. Please try again later.';
+          } else if (error.message.includes('affiliate ID')) {
+            errorMessage = 'Registration processing error. Please contact support.';
+          } else if (error.message) {
+            errorMessage = error.message;
+          }
+          
+          // Show error using ErrorHandler
+          if (window.ErrorHandler) {
+            window.ErrorHandler.showError(errorMessage);
+          } else {
+            alert(errorMessage);
+          }
 
           // If we're embedded and there's a connection error, notify parent
-          if (isEmbedded && error.message.includes('fetch')) {
+          const inIframe = window.parent !== window;
+          if (inIframe && error.message.includes('fetch')) {
             window.parent.postMessage({
               type: 'registration-error',
-              message: 'Unable to connect to registration server. Please try again later.'
+              message: errorMessage
             }, '*');
           }
 
@@ -1818,6 +1882,175 @@
         });
       }
 
+      // Set up back button (this is now used when going back from final sections to service area)
+      const backButton = document.getElementById('backButton');
+      if (backButton) {
+        backButton.addEventListener('click', function() {
+          console.log('[Navigation] Final section back button clicked');
+          
+          // Hide all the final sections
+          const sectionsToHide = [
+            'serviceInfoSection',
+            'paymentInfoSection',
+            'termsSection',
+            'submitSection'
+          ];
+          
+          sectionsToHide.forEach(sectionId => {
+            const section = document.getElementById(sectionId);
+            if (section) {
+              section.style.display = 'none';
+            }
+          });
+          
+          // Hide this back button
+          backButton.style.display = 'none';
+          
+          // Show service area section and its navigation again
+          const serviceAreaSection = document.getElementById('serviceAreaSection');
+          const serviceAreaNav = document.getElementById('serviceAreaNavigation');
+          
+          if (serviceAreaSection) {
+            serviceAreaSection.style.display = '';
+          }
+          if (serviceAreaNav) {
+            serviceAreaNav.style.display = 'flex';
+          }
+          
+          // Scroll to service area
+          setTimeout(() => {
+            if (serviceAreaSection) {
+              serviceAreaSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+            
+            // Trigger height recalculation
+            window.dispatchEvent(new Event('section-toggled'));
+          }, 100);
+        });
+      }
+
+      // Set up service area navigation buttons
+      const serviceAreaBackButton = document.getElementById('serviceAreaBackButton');
+      if (serviceAreaBackButton) {
+        serviceAreaBackButton.addEventListener('click', function() {
+          console.log('[Navigation] Service area back button clicked');
+          
+          // Hide service area section and navigation
+          const serviceAreaSection = document.getElementById('serviceAreaSection');
+          const serviceAreaNav = document.getElementById('serviceAreaNavigation');
+          if (serviceAreaSection) {
+            serviceAreaSection.style.display = 'none';
+          }
+          if (serviceAreaNav) {
+            serviceAreaNav.style.display = 'none';
+          }
+          
+          // Show the first sections again (OAuth, personal info, business info)
+          const socialAuthSection = document.getElementById('socialAuthSection');
+          const personalInfoSection = document.getElementById('personalInfoSection');
+          const businessInfoSection = document.getElementById('businessInfoSection');
+          
+          if (socialAuthSection) {
+            socialAuthSection.style.display = '';
+          }
+          
+          if (personalInfoSection) {
+            personalInfoSection.style.display = '';
+            // Re-add required attributes
+            const fields = personalInfoSection.querySelectorAll('input#firstName, input#lastName, input#email, input#phone');
+            fields.forEach(field => {
+              field.setAttribute('required', 'required');
+            });
+          }
+          
+          if (businessInfoSection) {
+            businessInfoSection.style.display = '';
+            // Re-add required attributes
+            const fields = businessInfoSection.querySelectorAll('input#address, input#city, input#state, input#zipCode');
+            fields.forEach(field => {
+              field.setAttribute('required', 'required');
+            });
+          }
+          
+          // Reset address validation state
+          window.addressValidated = false;
+          
+          // Scroll to top
+          const form = document.getElementById('affiliateRegistrationForm');
+          if (form) {
+            form.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }
+          
+          // Trigger height recalculation
+          window.dispatchEvent(new Event('section-toggled'));
+        });
+      }
+      
+      const serviceAreaNextButton = document.getElementById('serviceAreaNextButton');
+      if (serviceAreaNextButton) {
+        serviceAreaNextButton.addEventListener('click', function() {
+          console.log('[Navigation] Service area next button clicked');
+          
+          // Validate that service area has been set
+          const latField = document.getElementById('registrationServiceAreaComponent-latitude');
+          const lngField = document.getElementById('registrationServiceAreaComponent-longitude');
+          const radiusField = document.getElementById('registrationServiceAreaComponent-radius');
+          
+          if (!latField || !latField.value || !lngField || !lngField.value || !radiusField || !radiusField.value) {
+            alert('Please set your service area before continuing.');
+            return;
+          }
+          
+          // Hide service area section and navigation
+          const serviceAreaSection = document.getElementById('serviceAreaSection');
+          const serviceAreaNav = document.getElementById('serviceAreaNavigation');
+          if (serviceAreaSection) {
+            serviceAreaSection.style.display = 'none';
+          }
+          if (serviceAreaNav) {
+            serviceAreaNav.style.display = 'none';
+          }
+          
+          // Show all remaining sections
+          const sectionsToShow = [
+            'serviceInfoSection',
+            'paymentInfoSection', 
+            'termsSection',
+            'submitSection'
+          ];
+          
+          sectionsToShow.forEach(sectionId => {
+            const section = document.getElementById(sectionId);
+            if (section) {
+              section.classList.remove('form-section-hidden');
+              section.style.display = '';
+            }
+          });
+          
+          // Show the old back button in the submit section
+          const oldBackButton = document.getElementById('backButton');
+          if (oldBackButton) {
+            oldBackButton.style.display = 'flex';
+          }
+          
+          // Initialize pricing preview if needed
+          if (window.PricingPreviewComponent) {
+            window.PricingPreviewComponent.init('registrationPricingPreview');
+          }
+          
+          // Scroll to service info section
+          setTimeout(() => {
+            const serviceInfoSection = document.getElementById('serviceInfoSection');
+            if (serviceInfoSection) {
+              serviceInfoSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+            
+            // Trigger height recalculation after scroll
+            window.dispatchEvent(new Event('section-toggled'));
+          }, 100);
+        });
+      }
+
       // Monitor address fields and geocode when complete
       function validateAndSetAddress() {
         const address = document.getElementById('address')?.value?.trim();
@@ -2199,7 +2432,7 @@
           // Mark address as validated
           window.addressValidated = true;
 
-          // Hide business info section and show remaining form sections
+          // Hide business info section, OAuth section, and personal info section after address validation
           const businessInfoSection = document.querySelector('#businessInfoSection');
           if (businessInfoSection) {
             businessInfoSection.style.display = 'none';
@@ -2212,15 +2445,27 @@
             });
           }
 
-          // Show all hidden sections EXCEPT service area (we'll show that after address confirmation)
-          const hiddenSections = document.querySelectorAll('.form-section-hidden');
-          hiddenSections.forEach(section => {
-          // Skip service area section for now
-            if (section.id !== 'serviceAreaSection') {
-              section.classList.remove('form-section-hidden');
-              section.style.display = '';
-            }
-          });
+          // Hide OAuth section after successful address validation
+          const socialAuthSection = document.getElementById('socialAuthSection');
+          if (socialAuthSection) {
+            socialAuthSection.style.display = 'none';
+          }
+
+          // Hide personal information section after successful address validation
+          const personalInfoSection = document.getElementById('personalInfoSection');
+          if (personalInfoSection) {
+            personalInfoSection.style.display = 'none';
+            
+            // Remove required attribute from fields in hidden section to allow form submission
+            const requiredFields = personalInfoSection.querySelectorAll('input[required]');
+            requiredFields.forEach(field => {
+              field.removeAttribute('required');
+              console.log('[Address Validation] Removed required attribute from personal info field:', field.id);
+            });
+          }
+
+          // IMPORTANT: Only show the service area section, keep all other sections hidden
+          // Don't show any other hidden sections yet - they'll be shown when Next is clicked
 
           // If OAuth user, hide account setup section again
           if (window.isOAuthUser) {
@@ -2228,6 +2473,12 @@
             if (accountSetup) {
               accountSetup.style.display = 'none';
             }
+          }
+
+          // Hide the old back button (we'll use the new navigation buttons)
+          const oldBackButton = document.getElementById('backButton');
+          if (oldBackButton) {
+            oldBackButton.style.display = 'none';
           }
 
           // NOW show the service area section after address has been confirmed
@@ -2239,6 +2490,12 @@
             serviceAreaSection.classList.remove('form-section-hidden');
             serviceAreaSection.style.display = '';
             console.log('[Service Area] After update - display:', serviceAreaSection.style.display);
+            
+            // Show the service area navigation buttons
+            const serviceAreaNav = document.getElementById('serviceAreaNavigation');
+            if (serviceAreaNav) {
+              serviceAreaNav.style.display = 'flex';
+            }
 
             // Force reflow by accessing offsetHeight
             serviceAreaSection.offsetHeight;
@@ -2294,6 +2551,14 @@
             const serviceAreaSection = document.getElementById('serviceAreaSection');
             if (serviceAreaSection) {
               serviceAreaSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+            
+            // Trigger height recalculation after hiding sections and showing service area
+            window.dispatchEvent(new Event('section-toggled'));
+            
+            // Also try manual height update if available
+            if (window.embedNavigation && window.embedNavigation.sendHeight) {
+              window.embedNavigation.sendHeight(true);
             }
           }, 100);
 

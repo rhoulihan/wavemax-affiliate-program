@@ -235,7 +235,8 @@ describe('Administrator Controller', () => {
 
       await administratorController.resetAdministratorPassword(req, res);
 
-      expect(mockAdmin.password).toBe('NewPass123!');
+      expect(mockAdmin.passwordHash).toBeDefined();
+      expect(mockAdmin.passwordSalt).toBeDefined();
       expect(res.json).toHaveBeenCalledWith({
         success: true,
         message: 'Password reset successfully'

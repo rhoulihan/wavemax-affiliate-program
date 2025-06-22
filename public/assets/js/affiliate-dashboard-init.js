@@ -221,7 +221,6 @@ function initializeAffiliateDashboard() {
   });
 
   // Check URL for tab parameter first, then handle customer filter, then localStorage
-  const urlParams = new URLSearchParams(window.location.search);
   const urlTab = urlParams.get('tab');
   
   if (filterCustomerId) {
@@ -265,6 +264,7 @@ function initializeAffiliateDashboard() {
       localStorage.removeItem('affiliateToken');
       localStorage.removeItem('currentAffiliate');
       localStorage.removeItem('affiliateCurrentTab');
+      localStorage.removeItem('currentRoute');
 
       // Clear session manager data
       if (window.SessionManager) {
@@ -308,6 +308,124 @@ function initializeAffiliateDashboard() {
     copyLandingBtn.addEventListener('click', function() {
       copyLandingPageLink();
     });
+  }
+
+  // Marketing Links Hover Modal
+  const marketingLinksBtn = document.getElementById('marketingLinksBtn');
+  const marketingLinksModal = document.getElementById('marketingLinksModal');
+  let modalTimeout;
+
+  if (marketingLinksBtn && marketingLinksModal) {
+    // Show modal on hover
+    marketingLinksBtn.addEventListener('mouseenter', function() {
+      clearTimeout(modalTimeout);
+      marketingLinksModal.style.display = 'block';
+    });
+
+    // Keep modal open when hovering over it
+    marketingLinksModal.addEventListener('mouseenter', function() {
+      clearTimeout(modalTimeout);
+    });
+
+    // Hide modal when mouse leaves button
+    marketingLinksBtn.addEventListener('mouseleave', function() {
+      modalTimeout = setTimeout(() => {
+        marketingLinksModal.style.display = 'none';
+      }, 300); // Small delay to allow moving to modal
+    });
+
+    // Hide modal when mouse leaves modal
+    marketingLinksModal.addEventListener('mouseleave', function() {
+      modalTimeout = setTimeout(() => {
+        marketingLinksModal.style.display = 'none';
+      }, 300);
+    });
+
+    // Also show/hide on click for mobile devices
+    marketingLinksBtn.addEventListener('click', function(e) {
+      e.preventDefault();
+      if (marketingLinksModal.style.display === 'none') {
+        marketingLinksModal.style.display = 'block';
+      } else {
+        marketingLinksModal.style.display = 'none';
+      }
+    });
+
+    // Hide modal when clicking outside
+    document.addEventListener('click', function(e) {
+      if (!marketingLinksBtn.contains(e.target) && !marketingLinksModal.contains(e.target)) {
+        marketingLinksModal.style.display = 'none';
+      }
+    });
+  }
+
+  // Update translations for dynamically loaded content
+  // This is needed because the modal content might not be translated on initial load
+  function updateDashboardTranslations() {
+    if (window.i18n && window.i18n.translatePage) {
+      console.log('Updating translations for dashboard content');
+      
+      // Debug: Check what translations are available
+      if (window.i18n.translations && window.i18n.currentLanguage) {
+        console.log('Current language:', window.i18n.currentLanguage);
+        console.log('Available translations:', window.i18n.translations[window.i18n.currentLanguage]);
+        
+        // Try to access the marketing links translations
+        try {
+          const trans = window.i18n.translations[window.i18n.currentLanguage];
+          console.log('Affiliate section:', trans?.affiliate);
+          console.log('Dashboard section:', trans?.affiliate?.dashboard);
+          console.log('Marketing links translations:', trans?.affiliate?.dashboard?.marketingLinks);
+        } catch (e) {
+          console.error('Error accessing translations:', e);
+        }
+      }
+      
+      // Call the standard translate page function
+      window.i18n.translatePage();
+      
+      // Force update specific elements that might not be translating
+      const elementsToTranslate = [
+        { id: 'marketingLinksBtn', selector: '[data-i18n]' },
+        { id: 'marketingLinksModal', selector: '[data-i18n]' }
+      ];
+      
+      elementsToTranslate.forEach(({ id, selector }) => {
+        const container = document.getElementById(id);
+        if (container) {
+          const elements = container.querySelectorAll(selector);
+          elements.forEach(element => {
+            const key = element.getAttribute('data-i18n');
+            if (key && window.i18n && window.i18n.t) {
+              const translation = window.i18n.t(key);
+              console.log(`Forcing translation - Key: "${key}", Result: "${translation}"`);
+              
+              // Only update if we got a valid translation (not the key itself)
+              if (translation && translation !== key && !translation.includes('.')) {
+                element.textContent = translation;
+                console.log(`Updated element with translation: "${translation}"`);
+              } else {
+                console.warn(`Translation failed for key: "${key}"`);
+              }
+            }
+          });
+        }
+      });
+    }
+  }
+  
+  // Call after a delay to ensure all content is loaded
+  setTimeout(updateDashboardTranslations, 500);
+  
+  // Also call when showing the modal for the first time
+  if (marketingLinksBtn) {
+    marketingLinksBtn.addEventListener('mouseenter', function() {
+      // Update translations when modal is first shown
+      if (window.i18n && !this.dataset.translationsUpdated) {
+        updateDashboardTranslations();
+        this.dataset.translationsUpdated = 'true';
+      }
+    }, { once: true });
   }
 
   // Settings form edit mode
