@@ -73,4 +73,13 @@ router.get('/performance', operatorController.getPerformanceStats);
 router.get('/customers/:customerId', operatorController.getCustomerDetails);
 router.post('/customers/:customerId/notes', operatorController.addCustomerNote);
 
+// Scanner Interface Routes
+router.post('/scan-customer', operatorController.scanCustomer);
+router.post('/scan-bag', operatorController.scanBag);
+router.post('/orders/:orderId/receive', operatorController.receiveOrder);
+router.post('/orders/:orderId/process-bag', operatorController.markBagProcessed);
+router.post('/orders/:orderId/ready', operatorController.markOrderReady); // Deprecated
+router.post('/confirm-pickup', operatorController.confirmPickup);
+router.get('/stats/today', operatorController.getTodayStats);
+
 module.exports = router;

@@ -654,3 +654,399 @@ exports.addCustomerNote = async (req, res) => {
     res.status(500).json({ error: 'Failed to add customer note' });
   }
 };
+
+// Scan customer card
+exports.scanCustomer = async (req, res) => {
+  try {
+    const { customerId } = req.body;
+    const operatorId = req.user.id;
+
+    // Find customer
+    const customer = await Customer.findOne({ customerId });
+    if (!customer) {
+      return res.status(404).json({
+        success: false,
+        error: 'Customer not found',
+        message: 'Invalid customer ID'
+      });
+    }
+
+    // Find current active order for this customer
+    const currentOrder = await Order.findOne({
+      customerId: customer.customerId,
+      status: { $in: ['scheduled', 'processing'] }
+    })
+    .sort({ createdAt: -1 })
+    .populate('affiliateId', 'businessName contactPerson');
+
+    if (!currentOrder) {
+      return res.status(404).json({
+        success: false,
+        error: 'No active order',
+        message: 'No active order found for this customer',
+        customer: {
+          name: `${customer.firstName} ${customer.lastName}`,
+          customerId: customer.customerId
+        }
+      });
+    }
+
+    // Determine action based on order status and bags processed
+    let action;
+    if (currentOrder.bagsWeighed < currentOrder.numberOfBags) {
+      // Not all bags weighed yet - first scan
+      action = 'weight_input';
+    } else if (currentOrder.bagsProcessed < currentOrder.numberOfBags) {
+      // All bags weighed but not all processed - second scan after WDF
+      action = 'process_complete';
+    } else if (currentOrder.bagsPickedUp < currentOrder.numberOfBags) {
+      // All bags processed, ready for pickup - third scan
+      action = 'pickup_scan';
+    } else {
+      action = 'status_check';
+    }
+
+    // Format response
+    const response = {
+      success: true,
+      currentOrder: true,
+      action,
+      order: {
+        orderId: currentOrder.orderId,
+        customerName: `${customer.firstName} ${customer.lastName}`,
+        affiliateName: currentOrder.affiliateId ? 
+          currentOrder.affiliateId.businessName : 'N/A',
+        numberOfBags: currentOrder.numberOfBags,
+        bagsWeighed: currentOrder.bagsWeighed,
+        bagsProcessed: currentOrder.bagsProcessed,
+        bagsPickedUp: currentOrder.bagsPickedUp,
+        estimatedWeight: currentOrder.estimatedWeight,
+        actualWeight: currentOrder.actualWeight,
+        status: currentOrder.status,
+        processingStatus: currentOrder.orderProcessingStatus
+      }
+    };
+
+    await auditLogger.log('operator', operatorId, 'customer.card_scanned', {
+      customerId: customer.customerId,
+      orderId: currentOrder.orderId,
+      action
+    });
+
+    res.json(response);
+  } catch (error) {
+    logger.error('Error scanning customer card:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to scan customer card',
+      message: 'An error occurred while processing the scan'
+    });
+  }
+};
+
+// Scan bag for processing (bags have customer ID as QR code)
+exports.scanBag = async (req, res) => {
+  try {
+    const { bagId } = req.body;
+    
+    // Check if this is a process_complete scan (when action is already determined)
+    // Since bags have customer ID as QR code, redirect to scanCustomer
+    return exports.scanCustomer(req, res);
+  } catch (error) {
+    logger.error('Error scanning bag:', error);
+    res.status(500).json({ 
+      success: false,
+      error: 'Failed to scan bag',
+      message: 'An error occurred while processing the scan' 
+    });
+  }
+};
+
+// Receive order with weights
+exports.receiveOrder = async (req, res) => {
+  try {
+    const { orderId } = req.params;
+    const { bagWeights, totalWeight } = req.body;
+    const operatorId = req.user.id;
+
+    const order = await Order.findOne({ orderId });
+    if (!order) {
+      return res.status(404).json({ 
+        success: false,
+        error: 'Order not found' 
+      });
+    }
+
+    // Update order with actual weight and bag tracking
+    order.actualWeight = totalWeight;
+    order.status = 'processing';
+    order.orderProcessingStatus = 'assigned';
+    order.assignedOperator = operatorId;
+    order.processingStarted = new Date();
+    order.bagsWeighed = bagWeights.length;
+    
+    // Store individual bag weights
+    order.bagWeights = bagWeights.map(bw => ({
+      bagNumber: bw.bagNumber,
+      weight: bw.weight,
+      receivedAt: new Date()
+    }));
+    
+    await order.save();
+
+    await auditLogger.log('operator', operatorId, 'order.received', {
+      orderId,
+      totalWeight,
+      numberOfBags: bagWeights.length
+    });
+
+    res.json({
+      success: true,
+      message: 'Order received and marked as in progress',
+      order
+    });
+  } catch (error) {
+    logger.error('Error receiving order:', error);
+    res.status(500).json({ 
+      success: false,
+      error: 'Failed to receive order' 
+    });
+  }
+};
+
+// Mark bag as processed after WDF
+exports.markBagProcessed = async (req, res) => {
+  try {
+    const { orderId } = req.params;
+    const operatorId = req.user.id;
+
+    const order = await Order.findOne({ orderId })
+      .populate('affiliateId', 'email contactPerson')
+      .populate('customerId', 'firstName lastName');
+
+    if (!order) {
+      return res.status(404).json({ 
+        success: false,
+        error: 'Order not found' 
+      });
+    }
+
+    // Increment processed bags count
+    order.bagsProcessed = Math.min((order.bagsProcessed || 0) + 1, order.numberOfBags);
+    
+    // Check if all bags are now processed
+    if (order.bagsProcessed === order.numberOfBags) {
+      // All bags processed, update order status
+      order.orderProcessingStatus = 'ready';
+      order.processedAt = new Date();
+      order.status = 'processed';
+      
+      // Notify affiliate that order is ready for pickup
+      const emailService = require('../utils/emailService');
+      if (order.affiliateId && order.affiliateId.email) {
+        const customerName = order.customerId ? 
+          `${order.customerId.firstName} ${order.customerId.lastName}` : 'N/A';
+        
+        await emailService.sendOrderReadyNotification(
+          order.affiliateId.email,
+          {
+            affiliateName: order.affiliateId.contactPerson,
+            orderId: order.orderId,
+            customerName: customerName,
+            numberOfBags: order.numberOfBags,
+            totalWeight: order.actualWeight
+          }
+        );
+      }
+    }
+    
+    await order.save();
+
+    await auditLogger.log('operator', operatorId, 'bag.processed', {
+      orderId,
+      bagNumber: order.bagsProcessed,
+      totalBags: order.numberOfBags,
+      allBagsProcessed: order.bagsProcessed === order.numberOfBags,
+      affiliateNotified: order.bagsProcessed === order.numberOfBags
+    });
+
+    res.json({
+      success: true,
+      message: `Bag ${order.bagsProcessed} of ${order.numberOfBags} marked as processed`,
+      bagsProcessed: order.bagsProcessed,
+      totalBags: order.numberOfBags,
+      orderReady: order.bagsProcessed === order.numberOfBags
+    });
+  } catch (error) {
+    logger.error('Error marking bag as processed:', error);
+    res.status(500).json({ 
+      success: false,
+      error: 'Failed to mark bag as processed' 
+    });
+  }
+};
+
+// Mark order as ready for pickup (deprecated - use markBagProcessed instead)
+exports.markOrderReady = async (req, res) => {
+  try {
+    const { orderId } = req.params;
+    const operatorId = req.user.id;
+
+    const order = await Order.findOne({ orderId })
+      .populate('affiliateId', 'email contactPerson')
+      .populate('customerId', 'firstName lastName');
+
+    if (!order) {
+      return res.status(404).json({ 
+        success: false,
+        error: 'Order not found' 
+      });
+    }
+
+    // Update order status
+    order.orderProcessingStatus = 'ready';
+    order.processedAt = new Date();
+    order.status = 'processed';
+    order.bagsProcessed = order.numberOfBags; // All bags are processed
+    await order.save();
+
+    // Only notify affiliate when ALL bags are processed
+    const emailService = require('../utils/emailService');
+    if (order.affiliateId && order.affiliateId.email && order.bagsProcessed === order.numberOfBags) {
+      const customerName = order.customerId ? 
+        `${order.customerId.firstName} ${order.customerId.lastName}` : 'N/A';
+      
+      await emailService.sendOrderReadyNotification(
+        order.affiliateId.email,
+        {
+          affiliateName: order.affiliateId.contactPerson,
+          orderId: order.orderId,
+          customerName: customerName,
+          numberOfBags: order.numberOfBags,
+          totalWeight: order.actualWeight
+        }
+      );
+    }
+
+    await auditLogger.log('operator', operatorId, 'order.marked_ready', {
+      orderId,
+      affiliateNotified: order.bagsProcessed === order.numberOfBags,
+      bagsProcessed: order.bagsProcessed,
+      totalBags: order.numberOfBags
+    });
+
+    res.json({
+      success: true,
+      message: 'Order marked as ready for pickup',
+      order
+    });
+  } catch (error) {
+    logger.error('Error marking order ready:', error);
+    res.status(500).json({ 
+      success: false,
+      error: 'Failed to mark order as ready' 
+    });
+  }
+};
+
+// Confirm pickup by affiliate
+exports.confirmPickup = async (req, res) => {
+  try {
+    const { orderId, numberOfBags } = req.body;
+    const operatorId = req.user.id;
+
+    const order = await Order.findOne({ orderId })
+      .populate('customerId', 'email firstName lastName');
+
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        error: 'Order not found'
+      });
+    }
+
+    // Update bags picked up count
+    const bagsToPickup = numberOfBags || 1; // Default to 1 if not specified
+    order.bagsPickedUp = Math.min(order.bagsPickedUp + bagsToPickup, order.numberOfBags);
+
+    // Check if all bags have been picked up
+    if (order.bagsPickedUp >= order.numberOfBags) {
+      // All bags picked up, complete the order
+      order.status = 'complete';
+      order.completedAt = new Date();
+
+      // Notify customer
+      const emailService = require('../utils/emailService');
+      if (order.customerId && order.customerId.email) {
+        await emailService.sendOrderPickedUpNotification(
+          order.customerId.email,
+          {
+            customerName: `${order.customerId.firstName} ${order.customerId.lastName}`,
+            orderId: order.orderId,
+            numberOfBags: order.numberOfBags
+          }
+        );
+      }
+    }
+
+    await order.save();
+
+    await auditLogger.log('operator', operatorId, 'bags.pickup_confirmed', {
+      orderId,
+      bagsPickedUp: bagsToPickup,
+      totalBagsPickedUp: order.bagsPickedUp,
+      orderComplete: order.status === 'complete'
+    });
+
+    res.json({
+      success: true,
+      message: 'Pickup confirmed',
+      bagsPickedUp: order.bagsPickedUp,
+      totalBags: order.numberOfBags,
+      orderComplete: order.status === 'complete'
+    });
+  } catch (error) {
+    logger.error('Error confirming pickup:', error);
+    res.status(500).json({ 
+      success: false,
+      error: 'Failed to confirm pickup' 
+    });
+  }
+};
+
+// Get today's stats for scanner interface
+exports.getTodayStats = async (req, res) => {
+  try {
+    const operatorId = req.user.id;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    // Get orders processed today
+    const ordersProcessed = await Order.countDocuments({
+      assignedOperator: operatorId,
+      processingStarted: { $gte: today }
+    });
+
+    // Get total bags scanned today (sum of bagsWeighed from today's orders)
+    const todayOrders = await Order.find({
+      assignedOperator: operatorId,
+      processingStarted: { $gte: today }
+    });
+    
+    const bagsScanned = todayOrders.reduce((total, order) => total + (order.bagsWeighed || 0), 0);
+
+    // Get orders ready for pickup
+    const ordersReady = await Order.countDocuments({
+      orderProcessingStatus: 'ready'
+    });
+
+    res.json({
+      ordersProcessed,
+      bagsScanned,
+      ordersReady
+    });
+  } catch (error) {
+    logger.error('Error fetching today stats:', error);
+    res.status(500).json({ error: 'Failed to fetch stats' });
+  }
+};

@@ -170,6 +170,70 @@ exports.createOrder = async (req, res) => {
 };
 
 /**
+ * Get bags for an order (for label printing)
+ */
+exports.getOrderBags = async (req, res) => {
+  try {
+    const { orderId } = req.params;
+    
+    // Find order
+    const order = await Order.findOne({ orderId })
+      .populate('customerId', 'firstName lastName')
+      .populate('affiliateId', 'businessName');
+    
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        message: 'Order not found'
+      });
+    }
+    
+    // Check authorization
+    const isAuthorized = 
+      req.user.role === 'admin' ||
+      req.user.role === 'operator' ||
+      (req.user.role === 'affiliate' && req.user.affiliateId === order.affiliateId.affiliateId) ||
+      (req.user.role === 'customer' && req.user.customerId === order.customerId.customerId);
+    
+    if (!isAuthorized) {
+      return res.status(403).json({
+        success: false,
+        message: 'Unauthorized'
+      });
+    }
+    
+    // Get bags for the order
+    const Bag = require('../models/Bag');
+    const bags = await Bag.find({ orderId }).sort({ bagNumber: 1 });
+    
+    res.json({
+      success: true,
+      order: {
+        orderId: order.orderId,
+        customerName: `${order.customerId.firstName} ${order.customerId.lastName}`,
+        affiliateName: order.affiliateId.businessName,
+        pickupDate: order.pickupDate,
+        numberOfBags: order.numberOfBags,
+        status: order.status
+      },
+      bags: bags.map(bag => ({
+        bagId: bag.bagId,
+        bagNumber: bag.bagNumber,
+        qrCode: bag.qrCode,
+        status: bag.status,
+        weight: bag.weight
+      }))
+    });
+  } catch (error) {
+    console.error('Get order bags error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch order bags'
+    });
+  }
+};
+
+/**
  * Get order details
  */
 exports.getOrderDetails = async (req, res) => {

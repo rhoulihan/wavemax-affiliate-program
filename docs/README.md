@@ -18,6 +18,7 @@ Technical implementation documentation for specific features:
 - [Service Area Component](./implementation/service-area-component-complete.md) - Address validation implementation
 - [Bag Fee Line Item](./implementation/BAG_FEE_LINE_ITEM.md) - Delivery fee structure
 - [Admin Setup Changes](./implementation/ADMIN_SETUP_CHANGES.md) - Administrator configuration
+- [Operator Scanning Workflow](./implementation/OPERATOR_SCANNING_WORKFLOW.md) - Three-stage QR code scanning process
 
 ### 📊 [System Monitoring](../monitoring/)
 System health and connectivity monitoring:

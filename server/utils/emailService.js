@@ -2189,6 +2189,88 @@ View monitoring dashboard: https://wavemax.promo/monitoring-dashboard.html
   return sendEmail(mailOptions.to, mailOptions.subject, mailOptions.html);
 };
 
+// Send order ready for pickup notification to affiliate
+exports.sendOrderReadyNotification = async (affiliateEmail, data) => {
+  const subject = `Order ${data.orderId} Ready for Pickup`;
+  
+  const html = `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+      <div style="background-color: #2ecc71; color: white; padding: 20px; text-align: center;">
+        <h2 style="margin: 0;">Order Ready for Pickup!</h2>
+      </div>
+      
+      <div style="padding: 20px; background-color: #f8f9fa;">
+        <p>Hello ${data.affiliateName},</p>
+        
+        <p>Great news! The following order has been processed and is ready for pickup:</p>
+        
+        <div style="background-color: white; padding: 20px; border-radius: 8px; margin: 20px 0;">
+          <h3 style="color: #2c3e50; margin-top: 0;">Order Details</h3>
+          <p><strong>Order ID:</strong> ${data.orderId}</p>
+          <p><strong>Customer:</strong> ${data.customerName}</p>
+          <p><strong>Number of Bags:</strong> ${data.numberOfBags}</p>
+          <p><strong>Total Weight:</strong> ${data.totalWeight} lbs</p>
+        </div>
+        
+        <div style="background-color: #e8f8f5; border-left: 4px solid #2ecc71; padding: 15px; margin: 20px 0;">
+          <p style="margin: 0;"><strong>Please pick up this order at your earliest convenience.</strong></p>
+        </div>
+        
+        <p>Thank you for your prompt service!</p>
+        
+        <hr style="border: none; border-top: 1px solid #ddd; margin: 30px 0;">
+        
+        <p style="color: #666; font-size: 12px; text-align: center;">
+          This is an automated notification from WaveMAX Laundry Services.<br>
+          If you have any questions, please contact our support team.
+        </p>
+      </div>
+    </div>
+  `;
+
+  return sendEmail(affiliateEmail, subject, html);
+};
+
+// Send order picked up notification to customer
+exports.sendOrderPickedUpNotification = async (customerEmail, data) => {
+  const subject = `Your Laundry is On Its Way!`;
+  
+  const html = `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+      <div style="background-color: #3498db; color: white; padding: 20px; text-align: center;">
+        <h2 style="margin: 0;">Your Laundry is On Its Way!</h2>
+      </div>
+      
+      <div style="padding: 20px; background-color: #f8f9fa;">
+        <p>Hello ${data.customerName},</p>
+        
+        <p>Good news! Your clean laundry has been picked up from our facility and is on its way back to you.</p>
+        
+        <div style="background-color: white; padding: 20px; border-radius: 8px; margin: 20px 0;">
+          <h3 style="color: #2c3e50; margin-top: 0;">Order Information</h3>
+          <p><strong>Order ID:</strong> ${data.orderId}</p>
+          <p><strong>Number of Bags:</strong> ${data.numberOfBags}</p>
+        </div>
+        
+        <div style="background-color: #e8f5ff; border-left: 4px solid #3498db; padding: 15px; margin: 20px 0;">
+          <p style="margin: 0;">Your laundry service provider will deliver your clean clothes shortly. Please be available to receive your order.</p>
+        </div>
+        
+        <p>Thank you for choosing WaveMAX Laundry Services!</p>
+        
+        <hr style="border: none; border-top: 1px solid #ddd; margin: 30px 0;">
+        
+        <p style="color: #666; font-size: 12px; text-align: center;">
+          This is an automated notification from WaveMAX Laundry Services.<br>
+          If you have any questions, please contact your laundry service provider.
+        </p>
+      </div>
+    </div>
+  `;
+
+  return sendEmail(customerEmail, subject, html);
+};
+
 // Export the sendEmail function for direct use
 exports.sendEmail = sendEmail;
 
