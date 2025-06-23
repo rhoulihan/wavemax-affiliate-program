@@ -78,12 +78,12 @@ if (process.env.NODE_ENV !== 'test') {
         logger.error('Error initializing system config:', { error: error.message });
       }
 
-      // Initialize default administrator account
+      // Initialize default accounts (admin and operator)
       try {
-        const { initializeDefaultAdmin } = require('./init-admin');
-        await initializeDefaultAdmin();
+        const { initializeDefaults } = require('./init-defaults');
+        await initializeDefaults();
       } catch (error) {
-        logger.error('Error initializing default admin:', { error: error.message });
+        logger.error('Error initializing default accounts:', { error: error.message });
       }
 
       // Initialize Paygistix callback pool
