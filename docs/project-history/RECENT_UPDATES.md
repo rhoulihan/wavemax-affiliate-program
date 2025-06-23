@@ -1,5 +1,35 @@
 # Recent Major Updates
 
+## Operator QR Code Scanning Workflow (June 2025)
+- **Three-Stage Order Processing**: Comprehensive bag tracking through the laundry lifecycle
+  - Stage 1: Receiving & Weighing - Scan customer card and input bag weights
+  - Stage 2: After WDF Processing - Scan to mark bags as processed
+  - Stage 3: Affiliate Pickup - Scan during bag handoff with auto-dismiss confirmation
+  
+- **Customer Card Integration**: Simplified QR code system using customer IDs
+  - All bags for a customer use the same QR code (Customer ID format: CUST123456)
+  - Administrator dashboard generates printable customer cards with QR codes
+  - Manual entry fallback for damaged or missing QR codes
+  - No individual bag tracking - counts managed at order level
+  
+- **Operator Interface**: Streamlined scanning experience
+  - Single "Scan to Process Order" page with hidden input field for scanner
+  - Real-time statistics showing orders processed, bags scanned, and orders ready
+  - Support for keyboard-based QR scanners (e.g., Amazon ASIN B0DNDNYJ53)
+  - Automatic workflow progression without manual confirmation steps
+  - Mobile-responsive design for handheld devices
+  
+- **Automated Notifications**: Email alerts at key workflow stages
+  - Affiliate notification when all bags are processed and ready for pickup
+  - Customer notification when all bags have been picked up by affiliate
+  - Integration with existing email templates and i18n support
+  
+- **Technical Implementation**: Backend infrastructure updates
+  - Updated Order model with bag tracking fields (bagsWeighed, bagsProcessed, bagsPickedUp)
+  - New operator API endpoints for scanning and order management
+  - Comprehensive audit logging for all scan operations
+  - Support for concurrent orders and multiple operators
+
 ## Connectivity Monitoring System (June 2025)
 - **Real-time Service Monitoring**: Comprehensive monitoring of all external dependencies
   - Monitors MongoDB, SMTP, Payment Gateway, DocuSign, QuickBooks, and DNS health

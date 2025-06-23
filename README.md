@@ -74,6 +74,10 @@ The system implements a comprehensive role-based access control (RBAC) system wi
    - Perform quality checks
    - Update order status
    - Manage shift schedules
+   - Three-stage QR code scanning workflow:
+     - Scan customer cards to weigh incoming bags
+     - Scan after WDF (Wash/Dry/Fold) completion
+     - Scan during affiliate pickup
 
 ## Project Structure
 
@@ -98,6 +102,7 @@ wavemax-affiliate-program/
 │   │       ├── errorHandler.js                # Client-side error handling
 │   │       ├── operator-dashboard-init.js     # Operator dashboard
 │   │       ├── operator-login-init.js         # Operator login
+│   │       ├── operator-scan-init.js          # Operator QR scanner interface
 │   │       ├── order-confirmation.js          # Order confirmation
 │   │       └── schedule-pickup.js             # Pickup scheduling
 │   ├── embed-app.html                     # Main application (Single Entry Point)
@@ -116,6 +121,7 @@ wavemax-affiliate-program/
 │   ├── customer-dashboard-embed.html      # Customer dashboard
 │   ├── operator-dashboard-embed.html      # Operator dashboard
 │   ├── operator-login-embed.html          # Operator login
+│   ├── operator-scan-embed.html           # Operator QR scanner interface
 │   ├── schedule-pickup-embed.html         # Pickup scheduling
 │   └── order-confirmation-embed.html      # Order confirmation
 │
@@ -390,13 +396,52 @@ If URL parameters are not being passed to the iframe:
 - Comprehensive W-9 audit trails
 - QuickBooks export history tracking
 
+## Operator Workflow & QR Code Scanning
+
+### Overview
+The WaveMAX Affiliate Program includes a comprehensive operator workflow for processing laundry orders using QR code scanning. Operators use handheld QR code scanners (keyboard-based) to track bags through the entire laundry process.
+
+### Workflow Stages
+
+1. **Receiving & Weighing** (First Scan)
+   - Operator scans customer card (QR code = Customer ID)
+   - System prompts for bag weights
+   - Order status changes to "processing"
+   - All bags for a customer use the SAME QR code
+
+2. **After WDF Processing** (Second Scan)
+   - Operator scans customer card after wash/dry/fold completion
+   - Marks bags as processed
+   - When all bags are processed, affiliate is notified for pickup
+   - Order status changes to "ready"
+
+3. **Affiliate Pickup** (Third Scan)
+   - Operator scans during bag handoff to affiliate
+   - Auto-dismiss confirmation after 5 seconds
+   - When all bags are picked up, customer is notified
+   - Order status changes to "complete"
+
+### Operator Features
+- **Simple Interface**: Single "Scan to Process Order" screen
+- **QR Scanner Support**: Works with keyboard-input scanners (e.g., Amazon ASIN B0DNDNYJ53)
+- **Manual Entry Option**: Fallback for damaged QR codes
+- **Real-time Stats**: Track orders processed, bags scanned, and orders ready
+- **Automatic Notifications**: Email alerts sent at appropriate workflow stages
+- **No Manual Confirmation**: Scanning automatically progresses orders
+
+### Technical Implementation
+- Customer cards contain only the customer ID (e.g., "CUST123456")
+- All bags for one customer share the same QR code
+- Bag counts tracked at order level, not individual bags
+- Automatic workflow progression based on scan counts
+
 ## W-9 Tax Compliance & QuickBooks Integration
 
 ### W-9 Collection System
 
 The WaveMAX Affiliate Program includes a comprehensive W-9 collection and verification system with DocuSign integration:
 
-#### Features
+### Features
 - **DocuSign eSignature Integration**: Electronic W-9 completion with legally binding signatures
 - **Automated Workflow**: Direct signing experience with pre-filled affiliate information
 - **Real-time Status Tracking**: Monitor signing progress through DocuSign webhooks
@@ -2009,6 +2054,14 @@ The project includes several test pages for development and integration testing:
 - `/wavemax-development-prompt.html` - AI development framework documentation
 
 ## Recent Updates (January 2025)
+
+### Operator QR Code Scanning Workflow
+- **Three-Stage Scanning Process**: Complete order tracking from receiving through delivery
+- **Customer Card Scanning**: All bags for a customer use the same QR code (Customer ID)
+- **Automatic Workflow Progression**: No manual confirmation needed - scanning advances order status
+- **Real-time Statistics**: Dashboard showing orders processed, bags scanned, and orders ready
+- **Email Notifications**: Automatic alerts to affiliates when orders are ready, customers when orders are picked up
+- **Simple Interface**: Single "Scan to Process Order" screen optimized for handheld scanners
 
 ### Session Persistence & Navigation Features
 - **10-Minute Session Persistence**: Login sessions now persist across page refresh and browser navigation with automatic 10-minute inactivity timeout

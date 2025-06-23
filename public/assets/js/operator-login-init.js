@@ -101,9 +101,9 @@
           }, '*');
         }
 
-        // Redirect to dashboard
+        // Redirect to scanner interface
         setTimeout(() => {
-          window.location.href = '/operator-dashboard-embed.html';
+          window.location.href = '/operator-scan-embed.html';
         }, 1000);
       } else {
         // Handle specific error cases
@@ -161,7 +161,7 @@
               : (currentTime >= shiftStart || currentTime <= shiftEnd);
 
             if (isWithinShift) {
-              window.location.href = '/operator-dashboard-embed.html';
+              window.location.href = '/operator-scan-embed.html';
             } else {
               // Clear tokens if outside shift
               localStorage.removeItem('operatorToken');

@@ -36,6 +36,15 @@ const orderSchema = new mongoose.Schema({
   washInstructions: String,
   // Bag information
   numberOfBags: { type: Number, default: 1, min: 1 },
+  bagsWeighed: { type: Number, default: 0 },
+  bagsProcessed: { type: Number, default: 0 }, // Bags scanned after WDF process
+  bagsPickedUp: { type: Number, default: 0 },
+  // Individual bag weights
+  bagWeights: [{
+    bagNumber: Number,
+    weight: Number,
+    receivedAt: Date
+  }],
   // Payment information
   baseRate: { type: Number }, // Per pound WDF rate - fetched from SystemConfig
   // Fee breakdown structure

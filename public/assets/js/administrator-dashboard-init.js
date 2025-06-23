@@ -892,8 +892,9 @@
         yPosition += 0.2;
       });
       
-      // Generate QR code URL
-      const qrData = `https://www.wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program/customer?cust=${customer.id}`;
+      // Generate QR code data - just the customer ID for operator scanning
+      // When scanned by operator, this will lookup the customer's current order
+      const qrData = customer.id;
       
       // Create QR code
       try {

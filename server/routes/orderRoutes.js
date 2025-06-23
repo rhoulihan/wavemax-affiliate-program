@@ -68,6 +68,13 @@ router.post('/bulk/cancel', authenticate, [
 router.get('/:orderId', authenticate, orderController.getOrderDetails);
 
 /**
+ * @route   GET /api/orders/:orderId/bags
+ * @desc    Get bags for an order (for label printing)
+ * @access  Private (operator, affiliate, or admin)
+ */
+router.get('/:orderId/bags', authenticate, orderController.getOrderBags);
+
+/**
  * @route   PUT /api/orders/:orderId/status
  * @desc    Update order status
  * @access  Private (affiliate or admin)
