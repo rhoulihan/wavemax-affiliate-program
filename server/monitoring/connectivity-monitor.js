@@ -48,12 +48,6 @@ const SERVICES = [
     critical: false,
   },
   {
-    name: 'Brevo Email API',
-    type: 'https',
-    url: 'https://api.brevo.com',
-    critical: false,
-  },
-  {
     name: 'DNS Resolution',
     type: 'dns',
     hostname: 'google.com',

@@ -33,9 +33,6 @@
   "author": "WaveMAX Laundry",
   "license": "MIT",
   "dependencies": {
-    "@aws-sdk/client-ses": "^3.817.0",
-    "@aws-sdk/credential-provider-ini": "^3.817.0",
-    "@getbrevo/brevo": "^2.2.0",
     "axios": "^1.9.0",
     "compression": "1.7.4",
     "connect-mongo": "^5.1.0",

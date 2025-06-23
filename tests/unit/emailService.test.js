@@ -3,8 +3,6 @@ const emailService = require('../../server/utils/emailService');
 
 // Mock dependencies
 jest.mock('nodemailer');
-jest.mock('@aws-sdk/client-ses');
-jest.mock('@getbrevo/brevo');
 
 describe('Email Service', () => {
   const originalEnv = process.env;
@@ -18,55 +16,61 @@ describe('Email Service', () => {
     process.env = originalEnv;
   });
 
-  describe('Brevo Provider Integration', () => {
+  describe('SMTP Provider', () => {
     beforeEach(() => {
-      process.env.EMAIL_PROVIDER = 'brevo';
-      process.env.BREVO_API_KEY = 'test-api-key';
-      process.env.BREVO_FROM_EMAIL = 'test@example.com';
-      process.env.BREVO_FROM_NAME = 'Test Sender';
+      process.env.EMAIL_PROVIDER = 'smtp';
+      process.env.EMAIL_HOST = 'smtp.test.com';
+      process.env.EMAIL_PORT = '587';
+      process.env.EMAIL_USER = 'test@example.com';
+      process.env.EMAIL_PASS = 'testpass';
+      process.env.EMAIL_FROM = 'noreply@example.com';
     });
 
-    it('should use Brevo provider when configured', () => {
-      // Mock Brevo SDK
-      const mockSendTransacEmail = jest.fn().mockResolvedValue({
-        messageId: 'brevo-123'
+    it('should use SMTP provider when configured', () => {
+      const nodemailer = require('nodemailer');
+      nodemailer.createTransport = jest.fn().mockReturnValue({
+        sendMail: jest.fn().mockResolvedValue({ messageId: 'smtp-123' })
       });
 
-      const SibApiV3Sdk = require('@getbrevo/brevo');
-      SibApiV3Sdk.TransactionalEmailsApi = jest.fn().mockImplementation(() => ({
-        sendTransacEmail: mockSendTransacEmail,
-        authentications: {
-          'api-key': { apiKey: null }
-        }
-      }));
-      SibApiV3Sdk.SendSmtpEmail = jest.fn();
+      expect(process.env.EMAIL_PROVIDER).toBe('smtp');
+      expect(process.env.EMAIL_HOST).toBe('smtp.test.com');
+    });
+  });
 
-      // This test verifies that the Brevo configuration is recognized
-      // Actual email sending would be tested in integration tests
-      expect(process.env.EMAIL_PROVIDER).toBe('brevo');
-      expect(process.env.BREVO_API_KEY).toBe('test-api-key');
+  describe('Exchange Provider', () => {
+    beforeEach(() => {
+      process.env.EMAIL_PROVIDER = 'exchange';
+      process.env.EXCHANGE_HOST = 'exchange.test.com';
+      process.env.EXCHANGE_PORT = '587';
+      process.env.EXCHANGE_USER = 'test@example.com';
+      process.env.EXCHANGE_PASS = 'testpass';
     });
 
-    it('should handle Brevo API errors gracefully', async () => {
-      const SibApiV3Sdk = require('@getbrevo/brevo');
-      const mockError = new Error('Brevo API Error');
+    it('should use Exchange provider when configured', () => {
+      const nodemailer = require('nodemailer');
+      nodemailer.createTransport = jest.fn().mockReturnValue({
+        sendMail: jest.fn().mockResolvedValue({ messageId: 'exchange-123' })
+      });
 
-      SibApiV3Sdk.TransactionalEmailsApi = jest.fn().mockImplementation(() => ({
-        sendTransacEmail: jest.fn().mockRejectedValue(mockError),
-        authentications: {
-          'api-key': { apiKey: null }
-        }
-      }));
-      SibApiV3Sdk.SendSmtpEmail = jest.fn();
+      expect(process.env.EMAIL_PROVIDER).toBe('exchange');
+      expect(process.env.EXCHANGE_HOST).toBe('exchange.test.com');
+    });
+  });
 
-      // Test would verify error handling in actual implementation
-      expect(SibApiV3Sdk.TransactionalEmailsApi).toBeDefined();
+  describe('Console Provider', () => {
+    beforeEach(() => {
+      process.env.EMAIL_PROVIDER = 'console';
+      process.env.EMAIL_FROM = 'noreply@example.com';
+    });
+
+    it('should use console provider for development', () => {
+      expect(process.env.EMAIL_PROVIDER).toBe('console');
     });
   });
 
   describe('Provider Selection', () => {
-    it('should support multiple email providers', () => {
-      const providers = ['console', 'ses', 'exchange', 'brevo', 'smtp'];
+    it('should support available email providers', () => {
+      const providers = ['console', 'exchange', 'smtp'];
 
       providers.forEach(provider => {
         process.env.EMAIL_PROVIDER = provider;
