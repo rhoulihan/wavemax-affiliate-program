@@ -5,6 +5,27 @@ All notable changes to the WaveMAX Laundry Affiliate Program will be documented 
 ## [Unreleased]
 
 ### Added
+- Connectivity Monitoring System
+  - Real-time monitoring of all external service dependencies
+  - Health checks for MongoDB, SMTP, Paygistix, DocuSign, QuickBooks, and DNS
+  - Web-based monitoring dashboard at `/monitoring-dashboard.html`
+  - Email alerts for critical service failures with one-hour cooldown
+  - Historical tracking with last 60 checks per service
+  - Availability percentage calculations and response time metrics
+  - Automatic monitoring startup with PM2 integration
+- Mailcow Email Server Integration  
+  - Self-hosted email server configuration
+  - SMTP authentication with TLS support
+  - Reliable email delivery for all system notifications
+
+### Changed
+- Email Service Configuration
+  - Removed Amazon SES integration
+  - Removed Brevo (Sendinblue) integration
+  - Consolidated to SMTP and Exchange providers only
+  - Simplified email configuration with standard SMTP settings
+
+### Added
 - Session persistence and browser navigation support
   - 10-minute session persistence across page refresh and browser navigation
   - SessionManager service for all user roles (admin, operator, affiliate, customer)

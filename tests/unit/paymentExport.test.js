@@ -344,4 +344,351 @@ describe('PaymentExport Model Unit Tests', () => {
       expect(error).toBeUndefined();
     });
   });
+
+  describe('Instance Methods', () => {
+    describe('markDownloaded()', () => {
+      beforeEach(async () => {
+        await PaymentExport.deleteMany({});
+      });
+
+      it('should mark export as downloaded', async () => {
+        const adminId = new mongoose.Types.ObjectId();
+        const exportDoc = await PaymentExport.create({
+          type: 'vendor',
+          generatedBy: new mongoose.Types.ObjectId(),
+          filename: 'test-export.csv',
+          status: 'generated'
+        });
+
+        await exportDoc.markDownloaded(adminId);
+
+        const updated = await PaymentExport.findById(exportDoc._id);
+        expect(updated.downloadedAt).toBeInstanceOf(Date);
+        expect(updated.downloadedBy.toString()).toBe(adminId.toString());
+        expect(updated.downloadCount).toBe(1);
+        expect(updated.status).toBe('downloaded');
+      });
+
+      it('should increment download count on multiple downloads', async () => {
+        const adminId = new mongoose.Types.ObjectId();
+        const exportDoc = await PaymentExport.create({
+          type: 'vendor',
+          generatedBy: new mongoose.Types.ObjectId(),
+          filename: 'test-export.csv',
+          status: 'generated'
+        });
+
+        await exportDoc.markDownloaded(adminId);
+        const afterFirst = await PaymentExport.findById(exportDoc._id);
+        expect(afterFirst.downloadCount).toBe(1);
+
+        await afterFirst.markDownloaded(adminId);
+        const afterSecond = await PaymentExport.findById(exportDoc._id);
+        expect(afterSecond.downloadCount).toBe(2);
+      });
+
+      it('should not change status if already downloaded', async () => {
+        const adminId = new mongoose.Types.ObjectId();
+        const exportDoc = await PaymentExport.create({
+          type: 'vendor',
+          generatedBy: new mongoose.Types.ObjectId(),
+          filename: 'test-export.csv',
+          status: 'imported'
+        });
+
+        await exportDoc.markDownloaded(adminId);
+
+        const updated = await PaymentExport.findById(exportDoc._id);
+        expect(updated.status).toBe('imported'); // Should remain 'imported'
+        expect(updated.downloadCount).toBe(1);
+      });
+
+      it('should update downloadedAt timestamp', async () => {
+        const adminId = new mongoose.Types.ObjectId();
+        const exportDoc = await PaymentExport.create({
+          type: 'vendor',
+          generatedBy: new mongoose.Types.ObjectId(),
+          filename: 'test-export.csv'
+        });
+
+        const beforeDownload = new Date();
+        await new Promise(resolve => setTimeout(resolve, 10));
+        await exportDoc.markDownloaded(adminId);
+
+        const updated = await PaymentExport.findById(exportDoc._id);
+        expect(updated.downloadedAt.getTime()).toBeGreaterThan(beforeDownload.getTime());
+      });
+    });
+
+    describe('updateImportStatus()', () => {
+      beforeEach(async () => {
+        await PaymentExport.deleteMany({});
+      });
+
+      it('should update import status to success', async () => {
+        const exportDoc = await PaymentExport.create({
+          type: 'vendor',
+          generatedBy: new mongoose.Types.ObjectId(),
+          filename: 'test-export.csv',
+          status: 'downloaded'
+        });
+
+        await exportDoc.updateImportStatus('success', 'admin@example.com', 'Imported 10 vendors');
+
+        const updated = await PaymentExport.findById(exportDoc._id);
+        expect(updated.quickbooksImportDate).toBeInstanceOf(Date);
+        expect(updated.quickbooksImportedBy).toBe('admin@example.com');
+        expect(updated.quickbooksImportStatus).toBe('success');
+        expect(updated.quickbooksImportNotes).toBe('Imported 10 vendors');
+        expect(updated.status).toBe('imported');
+      });
+
+      it('should update import status to failed', async () => {
+        const exportDoc = await PaymentExport.create({
+          type: 'vendor',
+          generatedBy: new mongoose.Types.ObjectId(),
+          filename: 'test-export.csv',
+          status: 'downloaded'
+        });
+
+        await exportDoc.updateImportStatus('failed', 'admin@example.com', 'Connection error');
+
+        const updated = await PaymentExport.findById(exportDoc._id);
+        expect(updated.quickbooksImportStatus).toBe('failed');
+        expect(updated.quickbooksImportNotes).toBe('Connection error');
+        expect(updated.status).toBe('downloaded'); // Should not change to 'imported'
+      });
+
+      it('should handle partial import status', async () => {
+        const exportDoc = await PaymentExport.create({
+          type: 'payment_summary',
+          generatedBy: new mongoose.Types.ObjectId(),
+          filename: 'payments.csv',
+          periodStart: new Date('2025-01-01'),
+          periodEnd: new Date('2025-01-31')
+        });
+
+        await exportDoc.updateImportStatus('partial', 'user@example.com', '8 of 10 imported');
+
+        const updated = await PaymentExport.findById(exportDoc._id);
+        expect(updated.quickbooksImportStatus).toBe('partial');
+        expect(updated.quickbooksImportNotes).toBe('8 of 10 imported');
+        expect(updated.status).toBe('generated'); // Original status unchanged
+      });
+    });
+  });
+
+  describe('Static Methods', () => {
+    beforeEach(async () => {
+      await PaymentExport.deleteMany({});
+      
+      // Create test data
+      await PaymentExport.create([
+        {
+          type: 'payment_summary',
+          generatedBy: new mongoose.Types.ObjectId(),
+          filename: 'jan-payments.csv',
+          periodStart: new Date('2025-01-01'),
+          periodEnd: new Date('2025-01-31')
+        },
+        {
+          type: 'payment_summary',
+          generatedBy: new mongoose.Types.ObjectId(),
+          filename: 'feb-payments.csv',
+          periodStart: new Date('2025-02-01'),
+          periodEnd: new Date('2025-02-28')
+        },
+        {
+          type: 'commission_detail',
+          generatedBy: new mongoose.Types.ObjectId(),
+          filename: 'jan-commission.csv',
+          periodStart: new Date('2025-01-01'),
+          periodEnd: new Date('2025-01-31')
+        },
+        {
+          type: 'vendor',
+          generatedBy: new mongoose.Types.ObjectId(),
+          filename: 'vendors.csv'
+        }
+      ]);
+    });
+
+    describe('findByPeriod()', () => {
+      it('should find exports within period', async () => {
+        const results = await PaymentExport.findByPeriod(
+          new Date('2025-01-01'),
+          new Date('2025-01-31')
+        );
+
+        expect(results).toHaveLength(2); // Jan payment_summary and commission_detail
+        expect(results.every(r => 
+          r.periodStart >= new Date('2025-01-01') && 
+          r.periodEnd <= new Date('2025-01-31')
+        )).toBe(true);
+      });
+
+      it('should filter by type when specified', async () => {
+        const results = await PaymentExport.findByPeriod(
+          new Date('2025-01-01'),
+          new Date('2025-01-31'),
+          'payment_summary'
+        );
+
+        expect(results).toHaveLength(1);
+        expect(results[0].type).toBe('payment_summary');
+        expect(results[0].filename).toBe('jan-payments.csv');
+      });
+
+      it('should return empty array when no matches', async () => {
+        const results = await PaymentExport.findByPeriod(
+          new Date('2025-03-01'),
+          new Date('2025-03-31')
+        );
+
+        expect(results).toHaveLength(0);
+      });
+
+      it('should sort by generatedAt descending', async () => {
+        // Create exports with different timestamps
+        await PaymentExport.create({
+          type: 'payment_summary',
+          generatedBy: new mongoose.Types.ObjectId(),
+          filename: 'jan-payments-2.csv',
+          periodStart: new Date('2025-01-01'),
+          periodEnd: new Date('2025-01-31'),
+          generatedAt: new Date('2025-01-20')
+        });
+
+        const results = await PaymentExport.findByPeriod(
+          new Date('2025-01-01'),
+          new Date('2025-01-31'),
+          'payment_summary'
+        );
+
+        expect(results).toHaveLength(2);
+        // Most recent first
+        expect(results[0].generatedAt.getTime()).toBeGreaterThan(results[1].generatedAt.getTime());
+      });
+    });
+
+    describe('existsForPeriod()', () => {
+      it('should find existing export for period', async () => {
+        const exists = await PaymentExport.existsForPeriod(
+          new Date('2025-01-01'),
+          new Date('2025-01-31'),
+          'payment_summary'
+        );
+
+        expect(exists).toBeTruthy();
+        expect(exists.type).toBe('payment_summary');
+      });
+
+      it('should not find export for different period', async () => {
+        const exists = await PaymentExport.existsForPeriod(
+          new Date('2025-03-01'),
+          new Date('2025-03-31'),
+          'payment_summary'
+        );
+
+        expect(exists).toBeFalsy();
+      });
+
+      it('should exclude failed exports', async () => {
+        await PaymentExport.create({
+          type: 'payment_summary',
+          generatedBy: new mongoose.Types.ObjectId(),
+          filename: 'march-failed.csv',
+          periodStart: new Date('2025-03-01'),
+          periodEnd: new Date('2025-03-31'),
+          status: 'failed'
+        });
+
+        const exists = await PaymentExport.existsForPeriod(
+          new Date('2025-03-01'),
+          new Date('2025-03-31'),
+          'payment_summary'
+        );
+
+        expect(exists).toBeFalsy();
+      });
+
+      it('should find export with non-failed status', async () => {
+        await PaymentExport.create({
+          type: 'commission_detail',
+          generatedBy: new mongoose.Types.ObjectId(),
+          filename: 'feb-commission.csv',
+          periodStart: new Date('2025-02-01'),
+          periodEnd: new Date('2025-02-28'),
+          status: 'imported'
+        });
+
+        const exists = await PaymentExport.existsForPeriod(
+          new Date('2025-02-01'),
+          new Date('2025-02-28'),
+          'commission_detail'
+        );
+
+        expect(exists).toBeTruthy();
+        expect(exists.status).toBe('imported');
+      });
+    });
+  });
+
+  describe('Virtual Properties', () => {
+    describe('ageInDays', () => {
+      it('should calculate age in days correctly', async () => {
+        // Create a date exactly 5 days ago (at midnight to avoid fractional days)
+        const fiveDaysAgo = new Date();
+        fiveDaysAgo.setDate(fiveDaysAgo.getDate() - 5);
+        fiveDaysAgo.setHours(0, 0, 0, 0);
+        
+        const exportDoc = await PaymentExport.create({
+          type: 'vendor',
+          generatedBy: new mongoose.Types.ObjectId(),
+          filename: 'test.csv',
+          generatedAt: fiveDaysAgo
+        });
+
+        // Should be 5 or 6 days depending on current time of day
+        expect(exportDoc.ageInDays).toBeGreaterThanOrEqual(5);
+        expect(exportDoc.ageInDays).toBeLessThanOrEqual(6);
+      });
+
+      it('should return 1 for exports created today', async () => {
+        const exportDoc = await PaymentExport.create({
+          type: 'vendor',
+          generatedBy: new mongoose.Types.ObjectId(),
+          filename: 'today.csv',
+          generatedAt: new Date()
+        });
+
+        expect(exportDoc.ageInDays).toBe(1);
+      });
+
+      it('should handle exports created in the past correctly', async () => {
+        const exportDoc = new PaymentExport({
+          type: 'vendor',
+          generatedBy: new mongoose.Types.ObjectId(),
+          filename: 'old.csv',
+          generatedAt: new Date('2025-01-01')
+        });
+
+        const expectedDays = Math.ceil((Date.now() - new Date('2025-01-01').getTime()) / (1000 * 60 * 60 * 24));
+        expect(exportDoc.ageInDays).toBe(expectedDays);
+      });
+
+      it('should update as time passes', async () => {
+        const generatedAt = new Date(Date.now() - 23 * 60 * 60 * 1000); // 23 hours ago
+        const exportDoc = new PaymentExport({
+          type: 'vendor',
+          generatedBy: new mongoose.Types.ObjectId(),
+          filename: 'yesterday.csv',
+          generatedAt
+        });
+
+        // Should be 1 day (since we use Math.ceil)
+        expect(exportDoc.ageInDays).toBe(1);
+      });
+    });
+  });
 });

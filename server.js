@@ -394,6 +394,18 @@ apiV1Router.get('/environment', (req, res) => {
 });
 
 
+// Monitoring routes - use /monitoring/status instead of /api/monitoring/status
+const monitoringModule = require('./server/monitoring/connectivity-monitor');
+app.get('/monitoring/status', (req, res) => {
+  try {
+    const status = monitoringModule.getMonitoringStatus();
+    res.json(status);
+  } catch (error) {
+    logger.error('Monitoring status error:', error);
+    res.status(500).json({ error: 'Failed to get monitoring status' });
+  }
+});
+
 // Mount versioned API
 app.use('/api/v1', apiV1Router);
 
@@ -523,6 +535,10 @@ app.use((err, req, res, next) => {
 if (process.env.NODE_ENV !== 'test') {
   app.listen(PORT, () => {
     logger.info(`Server running on port ${PORT} in ${process.env.NODE_ENV || 'development'} mode`);
+    
+    // Start connectivity monitoring
+    const { startMonitoring } = require('./server/monitoring/connectivity-monitor');
+    startMonitoring();
   });
 }
 

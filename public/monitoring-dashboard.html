@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WaveMAX Service Monitoring Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        .status-summary {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .overall-status {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 18px;
+            font-weight: 500;
+        }
+
+        .status-indicator {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        .status-healthy { background-color: #4caf50; }
+        .status-degraded { background-color: #ff9800; }
+        .status-critical { background-color: #f44336; }
+        .status-unknown { background-color: #9e9e9e; }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        .uptime-info {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 20px;
+        }
+
+        .service-card {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            padding: 20px;
+            transition: transform 0.2s;
+        }
+
+        .service-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+
+        .service-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .service-name {
+            font-size: 18px;
+            font-weight: 500;
+        }
+
+        .service-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            text-transform: uppercase;
+        }
+
+        .badge-up {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .badge-down {
+            background-color: #ffebee;
+            color: #c62828;
+        }
+
+        .critical-badge {
+            background-color: #fff3e0;
+            color: #ef6c00;
+            font-size: 10px;
+            padding: 2px 8px;
+            margin-left: 5px;
+        }
+
+        .service-metrics {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .metric {
+            padding: 10px;
+            background-color: #f5f5f5;
+            border-radius: 6px;
+        }
+
+        .metric-label {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 4px;
+        }
+
+        .metric-value {
+            font-size: 16px;
+            font-weight: 500;
+        }
+
+        .response-chart {
+            height: 60px;
+            background-color: #f5f5f5;
+            border-radius: 6px;
+            position: relative;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+
+        .chart-bar {
+            position: absolute;
+            bottom: 0;
+            width: 3px;
+            background-color: #4caf50;
+            transition: height 0.3s;
+        }
+
+        .chart-bar.failed {
+            background-color: #f44336;
+        }
+
+        .last-check {
+            font-size: 12px;
+            color: #666;
+            text-align: right;
+        }
+
+        .error-message {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #ffebee;
+            border-radius: 6px;
+            font-size: 12px;
+            color: #c62828;
+        }
+
+        .refresh-button {
+            background-color: #2196f3;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .refresh-button:hover {
+            background-color: #1976d2;
+        }
+
+        .auto-refresh {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 14px;
+        }
+
+        .loading {
+            opacity: 0.6;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>WaveMAX Service Monitoring Dashboard</h1>
+            <div class="status-summary">
+                <div class="overall-status">
+                    <span>System Health:</span>
+                    <div class="status-indicator" id="overall-status"></div>
+                    <span id="overall-status-text">Loading...</span>
+                </div>
+                <div class="uptime-info" id="uptime-info">System uptime: Calculating...</div>
+                <div class="auto-refresh">
+                    <input type="checkbox" id="auto-refresh" checked>
+                    <label for="auto-refresh">Auto-refresh (60s)</label>
+                    <button class="refresh-button" onclick="fetchMonitoringData()">Refresh Now</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="services-grid" id="services-grid">
+            <!-- Service cards will be dynamically inserted here -->
+        </div>
+    </div>
+
+    <script>
+        let autoRefreshInterval;
+        let lastData = null;
+
+        function formatUptime(milliseconds) {
+            const seconds = Math.floor(milliseconds / 1000);
+            const minutes = Math.floor(seconds / 60);
+            const hours = Math.floor(minutes / 60);
+            const days = Math.floor(hours / 24);
+
+            if (days > 0) {
+                return `${days}d ${hours % 24}h ${minutes % 60}m`;
+            } else if (hours > 0) {
+                return `${hours}h ${minutes % 60}m`;
+            } else {
+                return `${minutes}m`;
+            }
+        }
+
+        function formatDate(dateString) {
+            if (!dateString) return 'Never';
+            const date = new Date(dateString);
+            const now = new Date();
+            const diff = now - date;
+
+            if (diff < 60000) {
+                return 'Just now';
+            } else if (diff < 3600000) {
+                return `${Math.floor(diff / 60000)}m ago`;
+            } else if (diff < 86400000) {
+                return `${Math.floor(diff / 3600000)}h ago`;
+            } else {
+                return date.toLocaleString();
+            }
+        }
+
+        function renderResponseChart(history, containerId) {
+            const container = document.getElementById(containerId);
+            if (!container || !history || history.length === 0) return;
+
+            container.innerHTML = '';
+            const maxHeight = 50;
+            const barWidth = Math.max(3, container.clientWidth / 60);
+
+            // Get max response time for scaling
+            const maxResponseTime = Math.max(...history.map(h => h.responseTime || 0));
+
+            history.slice(-60).forEach((entry, index) => {
+                const bar = document.createElement('div');
+                bar.className = `chart-bar ${entry.success ? '' : 'failed'}`;
+                bar.style.left = `${index * barWidth}px`;
+                bar.style.width = `${barWidth - 1}px`;
+                
+                const height = entry.responseTime 
+                    ? (entry.responseTime / maxResponseTime) * maxHeight 
+                    : (entry.success ? 5 : maxHeight);
+                
+                bar.style.height = `${height}px`;
+                bar.title = `${entry.success ? 'Success' : 'Failed'} - ${entry.responseTime}ms`;
+                
+                container.appendChild(bar);
+            });
+        }
+
+        function renderServiceCard(name, data) {
+            const cardId = `service-${name.replace(/\s+/g, '-').toLowerCase()}`;
+            
+            return `
+                <div class="service-card ${data.status === 'down' ? 'loading' : ''}">
+                    <div class="service-header">
+                        <div class="service-name">
+                            ${name}
+                            ${data.critical ? '<span class="critical-badge">CRITICAL</span>' : ''}
+                        </div>
+                        <div class="service-status">
+                            <div class="status-indicator status-${data.status === 'up' ? 'healthy' : 'critical'}"></div>
+                            <span class="status-badge badge-${data.status}">${data.status}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="service-metrics">
+                        <div class="metric">
+                            <div class="metric-label">Availability</div>
+                            <div class="metric-value">${data.availability}</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-label">Response Time</div>
+                            <div class="metric-value">${data.responseTime}ms</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-label">Total Checks</div>
+                            <div class="metric-value">${data.totalChecks}</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-label">Failed Checks</div>
+                            <div class="metric-value">${data.failedChecks}</div>
+                        </div>
+                    </div>
+                    
+                    <div class="response-chart" id="chart-${cardId}"></div>
+                    
+                    <div class="last-check">
+                        Last check: ${formatDate(data.lastCheck)}
+                    </div>
+                    
+                    ${data.lastError ? `<div class="error-message">Last error: ${data.lastError}</div>` : ''}
+                </div>
+            `;
+        }
+
+        function updateDashboard(data) {
+            if (!data) {
+                console.error('No data received from monitoring endpoint');
+                return;
+            }
+            
+            lastData = data;
+            
+            // Update overall status
+            const overallStatus = document.getElementById('overall-status');
+            const overallStatusText = document.getElementById('overall-status-text');
+            const health = data.overallHealth || 'unknown';
+            overallStatus.className = `status-indicator status-${health}`;
+            overallStatusText.textContent = health.charAt(0).toUpperCase() + health.slice(1);
+            
+            // Update uptime
+            document.getElementById('uptime-info').textContent = `System uptime: ${formatUptime(data.uptime)}`;
+            
+            // Update services grid
+            const servicesGrid = document.getElementById('services-grid');
+            servicesGrid.innerHTML = Object.entries(data.services)
+                .map(([name, serviceData]) => renderServiceCard(name, serviceData))
+                .join('');
+            
+            // Render charts after DOM update
+            setTimeout(() => {
+                Object.entries(data.services).forEach(([name, serviceData]) => {
+                    const cardId = `service-${name.replace(/\s+/g, '-').toLowerCase()}`;
+                    renderResponseChart(serviceData.history, `chart-${cardId}`);
+                });
+            }, 100);
+        }
+
+        async function fetchMonitoringData() {
+            try {
+                const response = await fetch('/monitoring/status');
+                const data = await response.json();
+                updateDashboard(data);
+            } catch (error) {
+                console.error('Failed to fetch monitoring data:', error);
+            }
+        }
+
+        function toggleAutoRefresh() {
+            const checkbox = document.getElementById('auto-refresh');
+            if (checkbox.checked) {
+                autoRefreshInterval = setInterval(fetchMonitoringData, 60000);
+            } else {
+                clearInterval(autoRefreshInterval);
+            }
+        }
+
+        // Initialize
+        document.getElementById('auto-refresh').addEventListener('change', toggleAutoRefresh);
+        fetchMonitoringData();
+        toggleAutoRefresh();
+    </script>
+</body>
+</html>

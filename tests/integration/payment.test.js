@@ -228,13 +228,18 @@ describe('Payment Integration Tests', () => {
       const responses = await Promise.all(tokenPromises);
       
       // Verify all 10 handlers were successfully acquired
-      responses.forEach((response, index) => {
+      const acquiredPaths = new Set();
+      responses.forEach((response) => {
         expect(response.status).toBe(200);
         expect(response.body.success).toBe(true);
         expect(response.body.token).toBeDefined();
         expect(response.body.formConfig).toBeDefined();
-        expect(response.body.formConfig.callbackPath).toBe(`/api/v1/payments/callback/handler-${index + 1}`);
+        expect(response.body.formConfig.callbackPath).toMatch(/^\/api\/v1\/payments\/callback\/handler-\d+$/);
+        acquiredPaths.add(response.body.formConfig.callbackPath);
       });
+      
+      // Verify we got 10 unique callback paths
+      expect(acquiredPaths.size).toBe(10);
       
       // Now try to create an 11th payment token - should fail
       const failedResponse = await agent

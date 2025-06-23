@@ -19,6 +19,12 @@ Technical implementation documentation for specific features:
 - [Bag Fee Line Item](./implementation/BAG_FEE_LINE_ITEM.md) - Delivery fee structure
 - [Admin Setup Changes](./implementation/ADMIN_SETUP_CHANGES.md) - Administrator configuration
 
+### 📊 [System Monitoring](../monitoring/)
+System health and connectivity monitoring:
+- [Monitoring Dashboard](../monitoring-dashboard.html) - Real-time service health dashboard
+- [Mailcow Email Setup](./mailcow-email-setup.md) - Self-hosted email server configuration
+- [Mailcow Installation Guide](./mailcow-installation.md) - Email server installation steps
+
 ### 📚 [Integration Guides](./guides/)
 Step-by-step guides for integrating and using the system:
 - [Embed Integration Guide](./guides/embed-integration-guide.md) - How to embed the application

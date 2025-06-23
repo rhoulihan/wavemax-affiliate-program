@@ -6,9 +6,7 @@ const fs = require('fs');
 const path = require('path');
 const { promisify } = require('util');
 const readFile = promisify(fs.readFile);
-const { SESClient } = require('@aws-sdk/client-ses');
-const { defaultProvider } = require('@aws-sdk/credential-provider-node');
-const SibApiV3Sdk = require('@getbrevo/brevo');
+// Removed SES and Brevo dependencies - using SMTP only
 
 // Create email transport
 const createTransport = () => {
@@ -26,19 +24,6 @@ const createTransport = () => {
         return { messageId: `console-${Date.now()}` };
       }
     };
-  }
-  // Check if using Amazon SES
-  else if (process.env.EMAIL_PROVIDER === 'ses') {
-    // Create SES client with v3 SDK
-    const sesClient = new SESClient({
-      region: process.env.AWS_REGION || 'us-east-1',
-      credentials: defaultProvider()
-    });
-
-    // Create SES transporter
-    return nodemailer.createTransport({
-      SES: { ses: sesClient, aws: require('@aws-sdk/client-ses') }
-    });
   }
   // Check if using MS Exchange Server
   else if (process.env.EMAIL_PROVIDER === 'exchange') {
@@ -58,72 +43,7 @@ const createTransport = () => {
       logger: process.env.NODE_ENV === 'development'
     });
   }
-  // Check if using Brevo
-  else if (process.env.EMAIL_PROVIDER === 'brevo') {
-    // Create a custom transport for Brevo API
-    const apiInstance = new SibApiV3Sdk.TransactionalEmailsApi();
-    const apiKey = apiInstance.authentications['api-key'];
-    apiKey.apiKey = process.env.BREVO_API_KEY;
-
-    // Return a mock transport that uses Brevo API
-    return {
-      sendMail: async (mailOptions) => {
-        try {
-          // Parse the from field to extract name and email
-          let senderName = process.env.BREVO_FROM_NAME || 'WaveMAX Laundry';
-          let senderEmail = process.env.BREVO_FROM_EMAIL || 'no-reply@wavemax.promo';
-
-          if (mailOptions.from) {
-            const fromMatch = mailOptions.from.match(/^"?([^"]*)"?\s*<(.+)>$/);
-            if (fromMatch) {
-              senderName = fromMatch[1] || senderName;
-              senderEmail = fromMatch[2] || senderEmail;
-            } else if (mailOptions.from.includes('@')) {
-              senderEmail = mailOptions.from;
-            }
-          }
-
-          // Create the email object for Brevo
-          const sendSmtpEmail = new SibApiV3Sdk.SendSmtpEmail();
-
-          sendSmtpEmail.subject = mailOptions.subject;
-          sendSmtpEmail.htmlContent = mailOptions.html;
-          sendSmtpEmail.sender = {
-            name: senderName,
-            email: senderEmail
-          };
-
-          // Handle multiple recipients
-          const recipients = Array.isArray(mailOptions.to)
-            ? mailOptions.to
-            : [mailOptions.to];
-
-          sendSmtpEmail.to = recipients.map(email => ({ email: email.trim() }));
-
-          // Add reply-to if specified
-          if (mailOptions.replyTo) {
-            sendSmtpEmail.replyTo = { email: mailOptions.replyTo };
-          }
-
-          // Send the email via Brevo API
-          const response = await apiInstance.sendTransacEmail(sendSmtpEmail);
-
-          console.log('Brevo email sent successfully:', response.messageId);
-
-          // Return response in nodemailer format
-          return {
-            messageId: response.messageId,
-            accepted: recipients,
-            rejected: [],
-            response: `250 Message sent: ${response.messageId}`
-          };
-        } catch (error) {
-          console.error('Brevo email send error:', error);
-          throw error;
-        }
-      }
-    };
-  } else {
+ else {
     // Use standard SMTP transport for non-SES configuration
     return nodemailer.createTransport({
       host: process.env.EMAIL_HOST,
@@ -218,15 +138,11 @@ const sendEmail = async (to, subject, html) => {
   try {
     const transporter = createTransport();
 
-    const from = process.env.EMAIL_PROVIDER === 'ses'
-      ? process.env.SES_FROM_EMAIL
-      : process.env.EMAIL_PROVIDER === 'console'
-        ? process.env.EMAIL_FROM || 'noreply@wavemax.promo'
-        : process.env.EMAIL_PROVIDER === 'exchange'
-          ? process.env.EXCHANGE_FROM_EMAIL || process.env.EXCHANGE_USER
-          : process.env.EMAIL_PROVIDER === 'brevo'
-            ? `"${process.env.BREVO_FROM_NAME || 'WaveMAX Laundry'}" <${process.env.BREVO_FROM_EMAIL || 'no-reply@wavemax.promo'}>`
-            : `"WaveMAX Laundry" <${process.env.EMAIL_USER}>`;
+    const from = process.env.EMAIL_PROVIDER === 'console'
+      ? process.env.EMAIL_FROM || 'noreply@wavemax.promo'
+      : process.env.EMAIL_PROVIDER === 'exchange'
+        ? process.env.EXCHANGE_FROM_EMAIL || process.env.EXCHANGE_USER
+        : `"WaveMAX Laundry" <${process.env.EMAIL_FROM || process.env.EMAIL_USER}>`;
 
     const info = await transporter.sendMail({
       from,
@@ -2206,5 +2122,74 @@ const formatSize = (size) => {
     return size;
   }
 };
+
+/**
+ * Send service down alert email
+ */
+exports.sendServiceDownAlert = async function({ serviceName, error, timestamp, serviceData }) {
+  const mailOptions = {
+    from: `"WaveMAX Monitoring" <${process.env.EMAIL_FROM || 'no-reply@wavemax.promo'}>`,
+    to: process.env.ALERT_EMAIL || process.env.DEFAULT_ADMIN_EMAIL || 'admin@wavemax.com',
+    subject: `⚠️ CRITICAL: ${serviceName} Service Down - ${new Date().toISOString()}`,
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <div style="background-color: #dc3545; color: white; padding: 20px; border-radius: 8px 8px 0 0;">
+          <h2 style="margin: 0;">Service Down Alert</h2>
+        </div>
+        <div style="background-color: #fff; border: 1px solid #ddd; border-radius: 0 0 8px 8px; padding: 20px;">
+          <h3 style="color: #dc3545;">Critical Service Failure Detected</h3>
+          
+          <div style="background-color: #f8d7da; border: 1px solid #f5c6cb; border-radius: 4px; padding: 15px; margin: 20px 0;">
+            <p style="margin: 0;"><strong>Service:</strong> ${serviceName}</p>
+            <p style="margin: 5px 0 0;"><strong>Status:</strong> DOWN</p>
+            <p style="margin: 5px 0 0;"><strong>Error:</strong> ${error || 'Connection timeout'}</p>
+            <p style="margin: 5px 0 0;"><strong>Time:</strong> ${timestamp.toLocaleString()}</p>
+          </div>
+          
+          <h4>Service Statistics:</h4>
+          <ul style="list-style: none; padding: 0;">
+            <li>• <strong>Last Success:</strong> ${serviceData.lastSuccess ? new Date(serviceData.lastSuccess).toLocaleString() : 'Never'}</li>
+            <li>• <strong>Total Checks:</strong> ${serviceData.totalChecks}</li>
+            <li>• <strong>Failed Checks:</strong> ${serviceData.failedChecks}</li>
+            <li>• <strong>Availability:</strong> ${((serviceData.uptime / serviceData.totalChecks) * 100).toFixed(2)}%</li>
+          </ul>
+          
+          <div style="background-color: #fff3cd; border: 1px solid #ffeaa7; border-radius: 4px; padding: 15px; margin: 20px 0;">
+            <p style="margin: 0;"><strong>Action Required:</strong></p>
+            <p style="margin: 5px 0 0;">This critical service requires immediate attention. Please investigate and resolve the issue as soon as possible.</p>
+          </div>
+          
+          <p style="margin-top: 20px;">
+            <a href="https://wavemax.promo/monitoring-dashboard.html" style="background-color: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px; display: inline-block;">View Monitoring Dashboard</a>
+          </p>
+        </div>
+      </div>
+    `,
+    text: `
+CRITICAL SERVICE DOWN ALERT
+
+Service: ${serviceName}
+Status: DOWN
+Error: ${error || 'Connection timeout'}
+Time: ${timestamp.toLocaleString()}
+
+Service Statistics:
+- Last Success: ${serviceData.lastSuccess ? new Date(serviceData.lastSuccess).toLocaleString() : 'Never'}
+- Total Checks: ${serviceData.totalChecks}
+- Failed Checks: ${serviceData.failedChecks}
+- Availability: ${((serviceData.uptime / serviceData.totalChecks) * 100).toFixed(2)}%
+
+ACTION REQUIRED: This critical service requires immediate attention.
+
+View monitoring dashboard: https://wavemax.promo/monitoring-dashboard.html
+    `
+  };
+
+  // Use the internal sendEmail function
+  return sendEmail(mailOptions.to, mailOptions.subject, mailOptions.html);
+};
+
+// Export the sendEmail function for direct use
+exports.sendEmail = sendEmail;
 
 module.exports = exports;
