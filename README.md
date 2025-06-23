@@ -822,38 +822,67 @@ To get your Brevo API key:
 
 6. Access the application at `http://localhost:3000`
 
-### Setting Up Administrator Account
+### Setting Up Default Accounts
 
-The system automatically creates a default administrator account on first startup:
+The system automatically creates default administrator and operator accounts on first startup:
 
-1. When the server starts for the first time, it will automatically create a default administrator account with:
+#### Default Administrator Account
+
+1. **Automatic Creation**: When the server starts for the first time, it creates:
    - **Email**: Set by `DEFAULT_ADMIN_EMAIL` environment variable (defaults to admin@wavemaxlaundry.com)
    - **Password**: WaveMAX!2024
    - **Permissions**: All (super admin)
 
 2. **First Login Process**:
-   - Navigate to the administrator login page:
-     ```
-     http://localhost:3000/embed-app.html?route=/administrator-login
-     ```
+   - Navigate to: `http://localhost:3000/embed-app.html?route=/administrator-login`
    - Log in with the default credentials
    - You will be immediately prompted to change your password
-   - The new password must:
-     - Be at least 12 characters long
-     - Contain uppercase and lowercase letters
-     - Contain numbers and special characters
+   - Password requirements:
+     - At least 12 characters long
+     - Contains uppercase and lowercase letters
+     - Contains numbers and special characters
      - Not match any of your previous 5 passwords
 
-3. **Security Features**:
-   - Password change is mandatory on first login
-   - Previous passwords are tracked to prevent reuse
-   - Account lockout after 5 failed login attempts
-   - Comprehensive audit logging of all authentication events
+#### Default Operator Account
 
-**Important**: 
-- The default password should be changed immediately after first login
-- For production deployments, set `DEFAULT_ADMIN_EMAIL` in your environment variables
+1. **Automatic Creation**: A default operator account is also created:
+   - **Username**: operator1
+   - **Password**: Operator!2024
+   - **Shift**: 24 hours (00:00 - 23:59)
+   - **Workstation**: W1
+   - **Operator ID**: OP001
+
+2. **Operator Login**:
+   - Navigate to: `http://localhost:3000/embed-app.html?route=/operator-login`
+   - Use the default credentials
+   - Access the QR code scanning interface
+
+#### Manual Database Setup
+
+If you need to reinitialize the database or create default accounts manually:
+
+```bash
+# Complete database setup (indexes, system config, default accounts)
+node scripts/setup-database.js
+
+# Or initialize only default accounts
+node scripts/init-defaults.js
+```
+
+#### Docker Setup
+
+When using Docker, MongoDB indexes are created automatically via `init-mongo.js`. After containers start:
+
+```bash
+# Run database setup to create default accounts
+docker-compose exec app node scripts/setup-database.js
+```
+
+**Security Notes**: 
+- Change default passwords immediately after first login
+- For production, set `DEFAULT_ADMIN_EMAIL` in environment variables
 - Never commit credentials to version control
+- Consider creating specific operator accounts with appropriate shift schedules
 
 ### Environment Variables
 

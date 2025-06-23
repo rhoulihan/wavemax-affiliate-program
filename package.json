@@ -17,6 +17,8 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "generate:sample-data": "node scripts/generate-sample-data.js",
+    "setup:database": "node scripts/setup-database.js",
+    "init:defaults": "node scripts/init-defaults.js",
     "generate:sample-data:clean": "node scripts/generate-sample-data.js --clean"
   },
   "repository": {
