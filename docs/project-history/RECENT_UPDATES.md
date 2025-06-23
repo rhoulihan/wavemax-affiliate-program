@@ -1,5 +1,32 @@
 # Recent Major Updates
 
+## Connectivity Monitoring System (June 2025)
+- **Real-time Service Monitoring**: Comprehensive monitoring of all external dependencies
+  - Monitors MongoDB, SMTP, Payment Gateway, DocuSign, QuickBooks, and DNS health
+  - Health checks run every 60 seconds with configurable timeout
+  - Maintains historical data for the last 60 checks per service
+  - Calculates availability percentages and tracks response times
+  
+- **Web-based Monitoring Dashboard**: Real-time visibility into system health
+  - Available at `/monitoring-dashboard.html` 
+  - Overall system health status (healthy/degraded/critical)
+  - Individual service status cards with availability metrics
+  - Response time charts for performance tracking
+  - Auto-refresh every 60 seconds with manual refresh option
+  
+- **Email Alert System**: Proactive notifications for service failures
+  - Automatic alerts when critical services (MongoDB, Payment Gateway, DNS) fail
+  - One-hour cooldown between alerts for the same service
+  - Detailed service statistics in alert emails
+  - Configurable alert recipients via ALERT_EMAIL environment variable
+
+## Email Service Consolidation (June 2025)
+- **Simplified Email Configuration**: Removed Amazon SES and Brevo integrations
+  - Consolidated to SMTP and Exchange providers only
+  - Self-hosted Mailcow server integration for reliable email delivery
+  - Simplified configuration with standard SMTP settings
+  - Improved email deliverability with proper authentication
+
 ## Session Persistence & Browser Navigation (January 2025)
 - **10-Minute Session Management**: Comprehensive session persistence across page refresh and browser navigation
   - SessionManager service manages authentication for all user roles (admin, operator, affiliate, customer)

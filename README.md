@@ -26,6 +26,8 @@ The WaveMAX Affiliate Program enables individuals to register as affiliates, onb
 - **Advanced Address Validation**: Intelligent geocoding with manual confirmation and reverse geocoding display
 - **W-9 Tax Compliance**: DocuSign-integrated electronic W-9 collection with automated verification workflow
 - **QuickBooks Integration**: Export vendors, payment summaries, and commission details for accounting
+- **Connectivity Monitoring**: Real-time monitoring of external service dependencies with alerting
+- **Service Health Dashboard**: Web-based dashboard showing system health and availability metrics
 
 ## Documentation
 
@@ -678,26 +680,18 @@ The application supports multiple email providers for sending notifications:
 ### Supported Email Providers
 
 1. **Standard SMTP** (`EMAIL_PROVIDER=smtp`)
-   - Works with any SMTP server (Gmail, SendGrid, Mailgun, etc.)
+   - Works with any SMTP server (Gmail, SendGrid, Mailgun, Mailcow, etc.)
    - Simple username/password authentication
+   - Currently configured with self-hosted Mailcow server
 
-2. **Amazon SES** (`EMAIL_PROVIDER=ses`)
-   - High-volume, cost-effective email service
-   - Requires AWS credentials and verified domain/email
-
-3. **MS Exchange Server** (`EMAIL_PROVIDER=exchange`)
+2. **MS Exchange Server** (`EMAIL_PROVIDER=exchange`)
    - Support for Microsoft Exchange Server (on-premise or Office 365)
    - Compatible with Exchange 2013, 2016, 2019, and Exchange Online
    - Supports both standard and self-signed certificates
 
-4. **Console Logging** (`EMAIL_PROVIDER=console`)
+3. **Console Logging** (`EMAIL_PROVIDER=console`)
    - Development/testing mode
    - Logs emails to console instead of sending
-
-5. **Brevo** (`EMAIL_PROVIDER=brevo`)
-   - Modern email API service (formerly Sendinblue)
-   - High deliverability rates and advanced analytics
-   - API-based delivery (no SMTP configuration needed)
 
 ### Exchange Server Setup Example
 
@@ -827,7 +821,7 @@ The system automatically creates a default administrator account on first startu
 | `JWT_SECRET` | Secret for JWT signing | Yes |
 | `SESSION_SECRET` | Express session secret | Yes |
 | `DEFAULT_ADMIN_EMAIL` | Email for default administrator account | No |
-| `EMAIL_PROVIDER` | Email service (ses/smtp/exchange/console) | Yes |
+| `EMAIL_PROVIDER` | Email service (smtp/exchange/console) | Yes |
 | `CORS_ORIGIN` | Allowed CORS origins | Yes |
 | `LOG_LEVEL` | Logging level | No |
 | `LOG_DIR` | Directory for log files | No |
@@ -862,13 +856,16 @@ WaveMAX uses Paygistix's secure hosted payment form for processing customer paym
 | `EMAIL_USER` | SMTP username | Yes |
 | `EMAIL_PASS` | SMTP password | Yes |
 
-#### Amazon SES Configuration (when EMAIL_PROVIDER=ses)
-| Variable | Description | Required |
-|----------|-------------|----------|
-| `AWS_REGION` | AWS region for SES | Yes |
-| `AWS_ACCESS_KEY_ID` | AWS access key | Yes |
-| `AWS_SECRET_ACCESS_KEY` | AWS secret key | Yes |
-| `SES_FROM_EMAIL` | Verified sender email | Yes |
+| `EMAIL_FROM` | From email address | Yes |
+| `EMAIL_SECURE` | Use TLS/SSL (true/false) | No |
+
+#### Mailcow Email Server Configuration
+
+The system is currently configured to use a self-hosted Mailcow email server:
+- **Host**: mail.wavemax.promo
+- **Port**: 587 (STARTTLS)
+- **Authentication**: SMTP AUTH with username/password
+- **From Address**: no-reply@wavemax.promo
 
 #### MS Exchange Server Configuration (when EMAIL_PROVIDER=exchange)
 | Variable | Description | Required |
@@ -879,10 +876,6 @@ WaveMAX uses Paygistix's secure hosted payment form for processing customer paym
 | `EXCHANGE_PASS` | Exchange password | Yes |
 | `EXCHANGE_FROM_EMAIL` | Sender email address | No |
 | `EXCHANGE_REJECT_UNAUTHORIZED` | Validate SSL certificates (default: true) | No |
-
-#### Brevo Configuration (when EMAIL_PROVIDER=brevo)
-| Variable | Description | Required |
-|----------|-------------|----------|
 | `BREVO_API_KEY` | Brevo API key with send permissions | Yes |
 | `BREVO_FROM_EMAIL` | Sender email address | Yes |
 | `BREVO_FROM_NAME` | Sender display name | No |
@@ -1511,6 +1504,65 @@ mongorestore --gzip --archive=backup.gz
 4. **MongoDB Connection Issues**
    - Verify MongoDB is running: `sudo systemctl status mongod`
    - Check connection string in `.env`
+
+## Connectivity Monitoring
+
+The system includes a comprehensive monitoring solution to track the health of all external service dependencies.
+
+### Monitoring Features
+
+- **Real-time Health Checks**: Monitors all critical services every 60 seconds
+- **Service Dashboard**: Web-based dashboard at `/monitoring-dashboard.html`
+- **Email Alerts**: Automatic notifications when critical services fail
+- **Historical Tracking**: Maintains last 60 checks for trend analysis
+- **Availability Metrics**: Calculates uptime percentage for each service
+
+### Monitored Services
+
+1. **MongoDB Atlas** (Critical)
+   - Database connectivity and response time
+   - Connection pool health
+
+2. **Email Services**
+   - SMTP server availability (Mailcow)
+   - Email sending capability
+
+3. **Payment Gateway** (Critical)
+   - Paygistix API availability
+   - Response time monitoring
+
+4. **Third-party APIs**
+   - DocuSign API for W-9 processing
+   - QuickBooks API for accounting integration
+   - DNS resolution health
+
+### Accessing the Monitoring Dashboard
+
+The monitoring dashboard is available at:
+```
+https://your-domain.com/monitoring-dashboard.html
+```
+
+Features include:
+- Overall system health status
+- Individual service status cards
+- Response time charts
+- Availability percentages
+- Last check timestamps
+- Error messages for failed services
+
+### Alert Configuration
+
+Critical service failures trigger email alerts with:
+- Service name and failure details
+- Historical statistics
+- Link to monitoring dashboard
+- One-hour cooldown between alerts
+
+Configure alert recipients with:
+```
+ALERT_EMAIL=ops-team@yourdomain.com
+```
 
 ## Security Best Practices
 

@@ -6,6 +6,12 @@ const w9ControllerDocuSign = require('../../server/controllers/w9ControllerDocuS
 
 // Mock DocuSign service
 jest.mock('../../server/services/docusignService');
+// Mock logger
+jest.mock('../../server/utils/logger', () => ({
+  info: jest.fn(),
+  error: jest.fn(),
+  warn: jest.fn()
+}));
 
 // Create Express app for testing
 const app = express();
@@ -408,7 +414,7 @@ describe('W9 Controller DocuSign Methods', () => {
       expect(response.body).toEqual({ error: 'Affiliate not found' });
     });
 
-    it('should download and store completed W9 document', async () => {
+    it('should process completed W9 without downloading document', async () => {
       testAffiliate.w9Information.docusignEnvelopeId = 'test_envelope_id';
       await testAffiliate.save();
 
@@ -420,20 +426,24 @@ describe('W9 Controller DocuSign Methods', () => {
         taxInfo: { taxIdType: 'EIN', taxIdLast4: '5678' },
         completedAt: new Date()
       });
-      docusignService.downloadCompletedW9.mockResolvedValue({
-        data: Buffer.from('PDF content'),
-        contentType: 'application/pdf',
-        filename: 'w9_test.pdf'
-      });
 
-      await request(app)
+      const response = await request(app)
         .post('/api/v1/w9/docusign-webhook')
         .set('x-docusign-signature-1', 'valid_signature')
         .set('Content-Type', 'application/json')
         .send({ envelopeId: 'test_envelope_id', status: 'completed' })
         .expect(200);
 
-      expect(docusignService.downloadCompletedW9).toHaveBeenCalledWith('test_envelope_id');
+      expect(response.body).toEqual({
+        message: 'Webhook processed successfully',
+        envelopeId: 'test_envelope_id'
+      });
+
+      // Verify affiliate was updated
+      const updatedAffiliate = await Affiliate.findById(testAffiliate._id);
+      expect(updatedAffiliate.w9Information.status).toBe('verified');
+      expect(updatedAffiliate.w9Information.taxIdType).toBe('EIN');
+      expect(updatedAffiliate.w9Information.taxIdLast4).toBe('5678');
     });
   });
 
@@ -473,6 +483,452 @@ describe('W9 Controller DocuSign Methods', () => {
 
       expect(response.body).toEqual({
         error: 'Failed to check authorization status'
+      });
+    });
+  });
+
+  describe('Get W9 Signing Status', () => {
+    let mockAffiliate;
+
+    beforeEach(() => {
+      // Add route for this endpoint
+      app.get('/api/v1/w9/status', mockAuth, w9ControllerDocuSign.getW9SigningStatus);
+    });
+
+    it('should return W9 status for affiliate', async () => {
+      // Mock Affiliate.findById to return test affiliate
+      jest.spyOn(Affiliate, 'findById').mockImplementation(() => ({
+        select: jest.fn().mockResolvedValue({
+          ...testAffiliate._doc,
+          getW9StatusDisplay: () => 'Not Submitted'
+        })
+      }));
+
+      const response = await request(app)
+        .get('/api/v1/w9/status')
+        .expect(200);
+
+      expect(response.body).toMatchObject({
+        status: 'not_submitted',
+        statusDisplay: 'Not Submitted'
+      });
+      // docusignStatus and envelopeId might not be included if undefined
+    });
+
+    it('should include tax info for verified W9', async () => {
+      const verifiedAffiliate = {
+        ...testAffiliate._doc,
+        w9Information: {
+          status: 'verified',
+          taxIdType: 'SSN',
+          taxIdLast4: '1234',
+          businessName: 'Test Business',
+          verifiedAt: new Date()
+        },
+        getW9StatusDisplay: () => 'Verified'
+      };
+
+      jest.spyOn(Affiliate, 'findById').mockImplementation(() => ({
+        select: jest.fn().mockResolvedValue(verifiedAffiliate)
+      }));
+
+      const response = await request(app)
+        .get('/api/v1/w9/status')
+        .expect(200);
+
+      expect(response.body).toMatchObject({
+        status: 'verified',
+        statusDisplay: 'Verified',
+        taxInfo: {
+          taxIdType: 'SSN',
+          taxIdLast4: '1234',
+          businessName: 'Test Business'
+        }
+      });
+    });
+
+    it('should check DocuSign status for in-progress envelopes', async () => {
+      const inProgressAffiliate = {
+        ...testAffiliate._doc,
+        w9Information: {
+          status: 'not_submitted',
+          docusignEnvelopeId: 'envelope_123',
+          docusignStatus: 'sent'
+        },
+        getW9StatusDisplay: () => 'In Progress'
+      };
+
+      jest.spyOn(Affiliate, 'findById').mockImplementation(() => ({
+        select: jest.fn().mockResolvedValue(inProgressAffiliate)
+      }));
+
+      docusignService.getEnvelopeStatus.mockResolvedValue({
+        status: 'delivered'
+      });
+
+      const response = await request(app)
+        .get('/api/v1/w9/status')
+        .expect(200);
+
+      expect(response.body).toMatchObject({
+        status: 'not_submitted',
+        docusignStatus: 'delivered',
+        envelopeId: 'envelope_123',
+        lastChecked: expect.any(String)
+      });
+      expect(docusignService.getEnvelopeStatus).toHaveBeenCalledWith('envelope_123');
+    });
+
+    it('should handle affiliate not found', async () => {
+      jest.spyOn(Affiliate, 'findById').mockImplementation(() => ({
+        select: jest.fn().mockResolvedValue(null)
+      }));
+
+      const response = await request(app)
+        .get('/api/v1/w9/status')
+        .expect(404);
+
+      expect(response.body).toEqual({
+        error: 'Affiliate not found'
+      });
+    });
+
+    it('should handle errors gracefully', async () => {
+      jest.spyOn(Affiliate, 'findById').mockImplementation(() => ({
+        select: jest.fn().mockRejectedValue(new Error('Database error'))
+      }));
+
+      const response = await request(app)
+        .get('/api/v1/w9/status')
+        .expect(500);
+
+      expect(response.body).toEqual({
+        error: 'Failed to retrieve W9 status'
+      });
+    });
+  });
+
+  describe('Cancel W9 Signing', () => {
+    beforeEach(() => {
+      // Add route for this endpoint
+      app.post('/api/v1/w9/cancel', mockAuth, w9ControllerDocuSign.cancelW9Signing);
+    });
+
+    it('should cancel W9 signing successfully', async () => {
+      // Update test affiliate with envelope in progress
+      testAffiliate.w9Information.docusignEnvelopeId = 'envelope_to_cancel';
+      testAffiliate.w9Information.docusignStatus = 'sent';
+      await testAffiliate.save();
+
+      // Mock Affiliate.findById
+      jest.spyOn(Affiliate, 'findById').mockResolvedValue(testAffiliate);
+      docusignService.voidEnvelope.mockResolvedValue(true);
+
+      const response = await request(app)
+        .post('/api/v1/w9/cancel')
+        .expect(200);
+
+      expect(response.body).toEqual({
+        message: 'W9 signing cancelled successfully'
+      });
+
+      // Verify envelope was voided
+      expect(docusignService.voidEnvelope).toHaveBeenCalledWith(
+        'envelope_to_cancel',
+        'Cancelled by affiliate'
+      );
+
+      // Verify affiliate was updated
+      const updatedAffiliate = await Affiliate.findOne({ affiliateId: 'AFF000001' });
+      expect(updatedAffiliate.w9Information.status).toBe('not_submitted');
+      expect(updatedAffiliate.w9Information.docusignStatus).toBe('voided');
+      expect(updatedAffiliate.w9Information.docusignEnvelopeId).toBeNull();
+    });
+
+    it('should handle no W9 signing in progress', async () => {
+      // Clear envelope ID
+      testAffiliate.w9Information.docusignEnvelopeId = null;
+      await testAffiliate.save();
+
+      jest.spyOn(Affiliate, 'findById').mockResolvedValue(testAffiliate);
+
+      const response = await request(app)
+        .post('/api/v1/w9/cancel')
+        .expect(400);
+
+      expect(response.body).toEqual({
+        error: 'No W9 signing in progress'
+      });
+    });
+
+    it('should handle affiliate not found', async () => {
+      jest.spyOn(Affiliate, 'findById').mockResolvedValue(null);
+
+      const response = await request(app)
+        .post('/api/v1/w9/cancel')
+        .expect(404);
+
+      expect(response.body).toEqual({
+        error: 'Affiliate not found'
+      });
+    });
+
+    it('should handle void envelope errors', async () => {
+      testAffiliate.w9Information.docusignEnvelopeId = 'envelope_123';
+      await testAffiliate.save();
+
+      jest.spyOn(Affiliate, 'findById').mockResolvedValue(testAffiliate);
+      docusignService.voidEnvelope.mockRejectedValue(new Error('Void failed'));
+
+      const response = await request(app)
+        .post('/api/v1/w9/cancel')
+        .expect(500);
+
+      expect(response.body).toEqual({
+        error: 'Failed to cancel W9 signing'
+      });
+    });
+  });
+
+  describe('Resend W9 Request', () => {
+    let adminAuth;
+
+    beforeEach(() => {
+      // Admin auth middleware
+      adminAuth = (req, res, next) => {
+        req.user = {
+          id: 'admin_123',
+          email: 'admin@example.com',
+          name: 'Test Admin',
+          role: 'administrator'
+        };
+        req.ip = '127.0.0.1';
+        req.headers['user-agent'] = 'admin-agent';
+        next();
+      };
+      // Add route for this endpoint
+      app.post('/api/v1/w9/resend/:affiliateId', adminAuth, w9ControllerDocuSign.resendW9Request);
+    });
+
+    it('should resend W9 request successfully', async () => {
+      jest.spyOn(Affiliate, 'findById').mockResolvedValue(testAffiliate);
+      docusignService.voidEnvelope.mockResolvedValue(true);
+      docusignService.createW9Envelope.mockResolvedValue({
+        envelopeId: 'new_envelope_123',
+        status: 'sent'
+      });
+
+      const response = await request(app)
+        .post(`/api/v1/w9/resend/${testAffiliate._id}`)
+        .expect(200);
+
+      expect(response.body).toEqual({
+        message: 'W9 request resent successfully',
+        envelopeId: 'new_envelope_123'
+      });
+
+      // Should not void envelope if none exists
+      expect(docusignService.voidEnvelope).not.toHaveBeenCalled();
+
+      // Verify new envelope was created
+      expect(docusignService.createW9Envelope).toHaveBeenCalledWith(testAffiliate);
+    });
+
+    it('should handle affiliate not found', async () => {
+      jest.spyOn(Affiliate, 'findById').mockResolvedValue(null);
+
+      const response = await request(app)
+        .post('/api/v1/w9/resend/invalid_id')
+        .expect(404);
+
+      expect(response.body).toEqual({
+        error: 'Affiliate not found'
+      });
+    });
+
+    it('should continue if voiding existing envelope fails', async () => {
+      testAffiliate.w9Information.docusignEnvelopeId = 'old_envelope';
+      await testAffiliate.save();
+
+      jest.spyOn(Affiliate, 'findById').mockResolvedValue(testAffiliate);
+      docusignService.voidEnvelope.mockRejectedValue(new Error('Void failed'));
+      docusignService.createW9Envelope.mockResolvedValue({
+        envelopeId: 'new_envelope_456',
+        status: 'sent'
+      });
+
+      const response = await request(app)
+        .post(`/api/v1/w9/resend/${testAffiliate._id}`)
+        .expect(200);
+
+      expect(response.body).toEqual({
+        message: 'W9 request resent successfully',
+        envelopeId: 'new_envelope_456'
+      });
+    });
+
+    it('should handle envelope creation errors', async () => {
+      jest.spyOn(Affiliate, 'findById').mockResolvedValue(testAffiliate);
+      docusignService.createW9Envelope.mockRejectedValue(new Error('Creation failed'));
+
+      const response = await request(app)
+        .post(`/api/v1/w9/resend/${testAffiliate._id}`)
+        .expect(500);
+
+      expect(response.body).toEqual({
+        error: 'Failed to resend W9 request'
+      });
+    });
+  });
+
+  describe('Send W9 To Affiliate', () => {
+    let adminAuth;
+
+    beforeEach(() => {
+      // Admin auth middleware
+      adminAuth = (req, res, next) => {
+        req.user = {
+          id: 'admin_456',
+          email: 'admin@example.com',
+          firstName: 'Admin',
+          lastName: 'User',
+          role: 'administrator'
+        };
+        req.ip = '127.0.0.1';
+        req.headers['user-agent'] = 'admin-agent';
+        next();
+      };
+      // Add route for this endpoint
+      app.post('/api/v1/admin/w9/send', adminAuth, w9ControllerDocuSign.sendW9ToAffiliate);
+    });
+
+    it('should send W9 to affiliate successfully', async () => {
+      jest.spyOn(Affiliate, 'findOne').mockResolvedValue(testAffiliate);
+      docusignService.createW9Envelope.mockResolvedValue({
+        envelopeId: 'sent_envelope_123',
+        status: 'sent'
+      });
+
+      const response = await request(app)
+        .post('/api/v1/admin/w9/send')
+        .send({ affiliateId: 'AFF000001' })
+        .expect(200);
+
+      expect(response.body).toEqual({
+        success: true,
+        message: 'W9 form sent successfully',
+        envelopeId: 'sent_envelope_123'
+      });
+
+      // Verify envelope was created
+      expect(docusignService.createW9Envelope).toHaveBeenCalledWith(testAffiliate);
+    });
+
+    it('should handle affiliate not found', async () => {
+      jest.spyOn(Affiliate, 'findOne').mockResolvedValue(null);
+
+      const response = await request(app)
+        .post('/api/v1/admin/w9/send')
+        .send({ affiliateId: 'INVALID' })
+        .expect(404);
+
+      expect(response.body).toEqual({
+        success: false,
+        message: 'Affiliate not found'
+      });
+    });
+
+    it('should prevent sending to affiliate with verified W9', async () => {
+      const verifiedAffiliate = {
+        ...testAffiliate._doc,
+        w9Information: {
+          status: 'verified'
+        }
+      };
+      jest.spyOn(Affiliate, 'findOne').mockResolvedValue(verifiedAffiliate);
+
+      const response = await request(app)
+        .post('/api/v1/admin/w9/send')
+        .send({ affiliateId: 'AFF000001' })
+        .expect(400);
+
+      expect(response.body).toEqual({
+        success: false,
+        message: 'Affiliate already has a submitted or verified W9'
+      });
+    });
+
+    it('should prevent sending to affiliate with submitted W9', async () => {
+      const submittedAffiliate = {
+        ...testAffiliate._doc,
+        w9Information: {
+          status: 'submitted'
+        }
+      };
+      jest.spyOn(Affiliate, 'findOne').mockResolvedValue(submittedAffiliate);
+
+      const response = await request(app)
+        .post('/api/v1/admin/w9/send')
+        .send({ affiliateId: 'AFF000001' })
+        .expect(400);
+
+      expect(response.body).toEqual({
+        success: false,
+        message: 'Affiliate already has a submitted or verified W9'
+      });
+    });
+
+    it('should handle authorization errors', async () => {
+      jest.spyOn(Affiliate, 'findOne').mockResolvedValue(testAffiliate);
+      docusignService.createW9Envelope.mockRejectedValue(
+        new Error('No valid access token')
+      );
+
+      const response = await request(app)
+        .post('/api/v1/admin/w9/send')
+        .send({ affiliateId: 'AFF000001' })
+        .expect(401);
+
+      expect(response.body).toEqual({
+        success: false,
+        message: 'DocuSign authorization required. Please authorize DocuSign integration in settings.',
+        error: 'Authorization required'
+      });
+    });
+
+    it('should handle template configuration errors', async () => {
+      jest.spyOn(Affiliate, 'findOne').mockResolvedValue(testAffiliate);
+      docusignService.createW9Envelope.mockRejectedValue(
+        new Error('DocuSign template not configured')
+      );
+
+      const response = await request(app)
+        .post('/api/v1/admin/w9/send')
+        .send({ affiliateId: 'AFF000001' })
+        .expect(400);
+
+      expect(response.body).toEqual({
+        success: false,
+        message: 'DocuSign template not configured. Please check W9 template ID in settings.',
+        error: 'Template configuration error'
+      });
+    });
+
+    it('should handle general errors', async () => {
+      jest.spyOn(Affiliate, 'findOne').mockResolvedValue(testAffiliate);
+      docusignService.createW9Envelope.mockRejectedValue(
+        new Error('Unknown error')
+      );
+
+      const response = await request(app)
+        .post('/api/v1/admin/w9/send')
+        .send({ affiliateId: 'AFF000001' })
+        .expect(500);
+
+      expect(response.body).toMatchObject({
+        success: false,
+        message: 'Failed to send W9 form',
+        error: 'Unknown error'
       });
     });
   });

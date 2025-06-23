@@ -5,7 +5,8 @@ const Administrator = require('../../server/models/Administrator');
 const Order = require('../../server/models/Order');
 const Customer = require('../../server/models/Customer');
 const PaymentExport = require('../../server/models/PaymentExport');
-const W9Document = require('../../server/models/W9Document');
+// W9Document model removed - W9 handling now done through DocuSign
+// const W9Document = require('../../server/models/W9Document');
 const { createTestToken } = require('../helpers/authHelper');
 const encryptionUtil = require('../../server/utils/encryption');
 const jwt = require('jsonwebtoken');
@@ -21,7 +22,7 @@ describe('QuickBooks Export Integration Tests', () => {
     await Order.deleteMany({});
     await Customer.deleteMany({});
     await PaymentExport.deleteMany({});
-    await W9Document.deleteMany({});
+    // await W9Document.deleteMany({}); // W9Document model removed
 
     // Create test administrator
     const { salt: adminSalt, hash: adminHash } = encryptionUtil.hashPassword('SecureP@ss4QuickB00ks!');
