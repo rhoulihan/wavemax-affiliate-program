@@ -289,6 +289,9 @@
             console.log('Loading page for route:', route);
             console.log('Current window.location.search:', window.location.search);
             
+            // Update current route
+            currentRoute = route;
+            
             // Clean up current page before loading new one
             cleanupCurrentPage();
             
@@ -650,6 +653,15 @@
             
             // Load the new page
             loadPage(route);
+            
+            // Notify parent of route change
+            if (window.parent !== window) {
+                console.log('[EMBED-APP] Notifying parent of route change:', route);
+                window.parent.postMessage({
+                    type: 'route-changed',
+                    data: { route: route }
+                }, '*');
+            }
         }
         
         // Use embed-navigation.js for height management
@@ -892,7 +904,17 @@
             console.log('Popstate event:', event.state);
             
             const route = getRouteFromUrl();
+            currentRoute = route;
             loadPage(route);
+            
+            // Notify parent of route change
+            if (window.parent !== window) {
+                console.log('[EMBED-APP] Notifying parent of route change (popstate):', route);
+                window.parent.postMessage({
+                    type: 'route-changed',
+                    data: { route: route }
+                }, '*');
+            }
             
             // If state contains tab information, notify the dashboard
             if (event.state && event.state.tab) {
@@ -915,7 +937,17 @@
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
             const initialRoute = getRouteFromUrl();
+            currentRoute = initialRoute;
             loadPage(initialRoute);
+            
+            // Notify parent of initial route
+            if (window.parent !== window) {
+                console.log('[EMBED-APP] Notifying parent of initial route:', initialRoute);
+                window.parent.postMessage({
+                    type: 'route-changed',
+                    data: { route: initialRoute }
+                }, '*');
+            }
             
             // Check if we have tab state from history
             if (window.history.state && window.history.state.tab) {
