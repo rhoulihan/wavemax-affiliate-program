@@ -464,6 +464,7 @@ exports.sendAffiliateNewCustomerEmail = async (affiliate, customer, bagInfo = {}
 
     const data = {
       business_name: affiliate.businessName || affiliate.firstName || 'Affiliate',
+      BUSINESS_NAME: affiliate.businessName || affiliate.firstName || 'Affiliate',
       affiliate_first_name: affiliate.firstName,
       affiliate_name: affiliate.businessName || `${affiliate.firstName} ${affiliate.lastName}`,
       customer_first_name: customer.firstName,
