@@ -614,9 +614,41 @@
         // Store scroll position
         lastScrollPosition = window.pageYOffset;
 
-        // Hide ALL direct children of body except the iframe and its container
-        const bodyChildren = document.body.children;
+        // First, hide specific known elements that might not be direct children
+        const elementsToHide = [
+            '.navbar', '.topbar', '.middlebar', '.footer', '.page-header',
+            'nav', 'header', 'footer', '.wrapper', '.page-wrapper'
+        ];
+        
         let hiddenCount = 0;
+        
+        // Hide specific elements first
+        elementsToHide.forEach(selector => {
+            const elements = document.querySelectorAll(selector);
+            elements.forEach(element => {
+                // Skip if this element contains the iframe
+                if (element === iframe || element.contains(iframe)) {
+                    return;
+                }
+                
+                // Skip if already hidden
+                if (element.style.display === 'none' || 
+                    window.getComputedStyle(element).display === 'none' ||
+                    element.hasAttribute('data-operator-hidden')) {
+                    return;
+                }
+                
+                // Hide the element
+                element.setAttribute('data-operator-hidden', 'true');
+                element.setAttribute('data-original-display', element.style.display || '');
+                element.style.display = 'none';
+                hiddenCount++;
+                console.log('[Parent-Iframe Bridge] Hiding specific element:', element.tagName, element.className || element.id || '(no class/id)');
+            });
+        });
+        
+        // Then hide ALL direct children of body except the iframe and its container
+        const bodyChildren = document.body.children;
         
         for (let i = 0; i < bodyChildren.length; i++) {
             const element = bodyChildren[i];
@@ -632,8 +664,10 @@
                 continue;
             }
             
-            // Skip if already hidden
-            if (element.style.display === 'none' || window.getComputedStyle(element).display === 'none') {
+            // Skip if already hidden or marked as hidden
+            if (element.style.display === 'none' || 
+                window.getComputedStyle(element).display === 'none' ||
+                element.hasAttribute('data-operator-hidden')) {
                 continue;
             }
             
@@ -642,7 +676,7 @@
             element.setAttribute('data-original-display', element.style.display || '');
             element.style.display = 'none';
             hiddenCount++;
-            console.log('[Parent-Iframe Bridge] Hiding element:', element.tagName, element.className || element.id || '(no class/id)');
+            console.log('[Parent-Iframe Bridge] Hiding body child:', element.tagName, element.className || element.id || '(no class/id)');
         }
         
         console.log('[Parent-Iframe Bridge] Hidden', hiddenCount, 'elements');
