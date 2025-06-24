@@ -59,40 +59,67 @@
   // Logout functionality
   const logoutBtn = document.getElementById('logoutBtn');
   if (logoutBtn) {
-    logoutBtn.addEventListener('click', async () => {
-      if (confirm(t('administrator.dashboard.confirmLogout', 'Are you sure you want to logout?'))) {
-        try {
-          // Call logout endpoint
-          await adminFetch('/api/v1/auth/logout', { method: 'POST' });
-        } catch (error) {
-          console.error('Logout error:', error);
-        }
-
-        // Clear local storage
-        localStorage.removeItem('adminToken');
-        localStorage.removeItem('adminRefreshToken');
-        localStorage.removeItem('adminData');
-        localStorage.removeItem('requirePasswordChange');
-        localStorage.removeItem('adminCurrentTab');
-        localStorage.removeItem('currentRoute');
-
-        // Clear session manager data
-        if (window.SessionManager) {
-          window.SessionManager.clearAuth('administrator');
-        }
-
-        // Use embed navigation
-        if (window.parent !== window) {
-          window.parent.postMessage({
-            type: 'navigate',
-            data: { page: '/administrator-login' }
-          }, '*');
-        } else {
-          window.location.href = '/embed-app.html?route=/administrator-login';
-        }
+    logoutBtn.addEventListener('click', () => {
+      // Show the logout modal
+      const logoutModal = document.getElementById('logoutModal');
+      if (logoutModal) {
+        logoutModal.style.display = 'flex';
       }
     });
   }
+
+  // Global logout functions
+  window.closeLogoutModal = function() {
+    const logoutModal = document.getElementById('logoutModal');
+    if (logoutModal) {
+      logoutModal.style.display = 'none';
+    }
+  };
+
+  // Close modal when clicking outside
+  const logoutModal = document.getElementById('logoutModal');
+  if (logoutModal) {
+    logoutModal.addEventListener('click', function(e) {
+      if (e.target === logoutModal) {
+        closeLogoutModal();
+      }
+    });
+  }
+
+  window.confirmLogout = async function() {
+    try {
+      // Call logout endpoint
+      await adminFetch('/api/v1/auth/logout', { method: 'POST' });
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
+
+    // Clear local storage
+    localStorage.removeItem('adminToken');
+    localStorage.removeItem('adminRefreshToken');
+    localStorage.removeItem('adminData');
+    localStorage.removeItem('requirePasswordChange');
+    localStorage.removeItem('adminCurrentTab');
+    localStorage.removeItem('currentRoute');
+
+    // Clear session manager data
+    if (window.SessionManager) {
+      window.SessionManager.clearAuth('administrator');
+    }
+
+    // Close modal
+    closeLogoutModal();
+
+    // Use embed navigation
+    if (window.parent !== window) {
+      window.parent.postMessage({
+        type: 'navigate',
+        data: { page: '/administrator-login' }
+      }, '*');
+    } else {
+      window.location.href = '/embed-app.html?route=/administrator-login';
+    }
+  };
 
   // Tab navigation
   const tabs = document.querySelectorAll('.nav-tab');
@@ -224,14 +251,8 @@
     case 'affiliates':
       await loadAffiliates();
       break;
-    case 'w9review':
-      await loadW9Documents();
-      break;
     case 'quickbooks':
       await loadQuickBooksTab();
-      break;
-    case 'auditlog':
-      await loadAuditLog();
       break;
     case 'config':
       await loadSystemConfig();
@@ -1561,266 +1582,6 @@
     }
   }
 
-  // Store current W-9 filter state
-  let currentW9Filter = 'pending';
-  let currentW9Search = '';
-  let w9Documents = [];
-
-  // Load W-9 documents
-  async function loadW9Documents() {
-    try {
-      const response = await adminFetch('/api/v1/w9/admin/pending?status=' + currentW9Filter);
-      const data = await response.json();
-
-      if (response.ok) {
-        w9Documents = data.documents || [];
-        updateW9Count();
-        renderW9DocumentsList();
-      } else {
-        document.getElementById('w9DocumentsList').innerHTML = `
-                    <p style="padding: 20px; text-align: center; color: #666;">${t('administrator.dashboard.errors.w9LoadFailed', 'Failed to load W-9 documents')}</p>
-                `;
-      }
-    } catch (error) {
-      console.error('Error loading W-9 documents:', error);
-      document.getElementById('w9DocumentsList').innerHTML = `
-                <p style="padding: 20px; text-align: center; color: #666;">${t('administrator.dashboard.errors.w9LoadFailed', 'Error loading W-9 documents')}</p>
-            `;
-    }
-  }
-
-  // Update W-9 pending count
-  function updateW9Count() {
-    const pendingCount = w9Documents.filter(doc => doc.w9Status === 'pending_review').length;
-    const badge = document.getElementById('pendingW9Count');
-    if (badge) {
-      badge.textContent = `${pendingCount} ${t('administrator.dashboard.w9review.pending', 'Pending')}`;
-      badge.style.display = pendingCount > 0 ? 'inline-block' : 'none';
-    }
-  }
-
-  // Render W-9 documents list
-  function renderW9DocumentsList() {
-    const filteredDocs = w9Documents.filter(doc => {
-      // Apply status filter
-      if (currentW9Filter !== 'all' && doc.w9Status !== currentW9Filter) {
-        return false;
-      }
-
-      // Apply search filter
-      if (currentW9Search) {
-        const search = currentW9Search.toLowerCase();
-        return (
-          doc.affiliateName.toLowerCase().includes(search) ||
-                    doc.affiliateEmail.toLowerCase().includes(search) ||
-                    doc.affiliateId.toLowerCase().includes(search)
-        );
-      }
-
-      return true;
-    });
-
-    if (filteredDocs.length === 0) {
-      document.getElementById('w9DocumentsList').innerHTML = `
-                <p style="padding: 20px; text-align: center; color: #666;">${t('administrator.dashboard.w9review.noDocuments', 'No W-9 documents found')}</p>
-            `;
-      return;
-    }
-
-    const docsHtml = filteredDocs.map(doc => `
-            <div class="w9-row">
-                <div class="w9-info">
-                    <div class="w9-affiliate-name">${doc.affiliateName}</div>
-                    <div class="w9-affiliate-details">
-                        ${doc.affiliateEmail} | ID: ${doc.affiliateId}
-                        ${doc.submittedAt ? ` | Submitted: ${new Date(doc.submittedAt).toLocaleDateString()}` : ''}
-                    </div>
-                </div>
-                <div class="w9-status">
-                    <span class="status-badge status-${doc.w9Status === 'pending_review' ? 'pending' : doc.w9Status}">
-                        ${getW9StatusLabel(doc.w9Status)}
-                    </span>
-                </div>
-                <div class="w9-actions">
-                    <button class="btn btn-sm download-w9-btn" data-affiliate-id="${doc.affiliateId}">${t('administrator.dashboard.w9review.download', 'Download')}</button>
-                    ${doc.w9Status === 'pending_review' ? `
-                        <button class="btn btn-sm btn-primary verify-w9-btn" data-affiliate-id="${doc.affiliateId}">${t('administrator.dashboard.w9review.verify', 'Verify')}</button>
-                        <button class="btn btn-sm btn-secondary reject-w9-btn" data-affiliate-id="${doc.affiliateId}">${t('administrator.dashboard.w9review.reject', 'Reject')}</button>
-                    ` : ''}
-                </div>
-            </div>
-        `).join('');
-
-    document.getElementById('w9DocumentsList').innerHTML = docsHtml;
-  }
-
-  // Get W-9 status label
-  function getW9StatusLabel(status) {
-    const labels = {
-      'pending_review': t('administrator.dashboard.w9review.pendingReview', 'Pending Review'),
-      'verified': t('administrator.dashboard.w9review.verified', 'Verified'),
-      'rejected': t('administrator.dashboard.w9review.rejected', 'Rejected')
-    };
-    return labels[status] || status;
-  }
-
-  // Download W-9 document
-  window.downloadW9 = async function(affiliateId) {
-    try {
-      const response = await adminFetch(`/api/v1/w9/admin/${affiliateId}/download`);
-
-      if (response.ok) {
-        // Get filename from Content-Disposition header
-        const contentDisposition = response.headers.get('Content-Disposition');
-        let filename = `W9_${affiliateId}.pdf`;
-        if (contentDisposition) {
-          const match = contentDisposition.match(/filename="(.+)"/);
-          if (match) filename = match[1];
-        }
-
-        // Create blob and download
-        const blob = await response.blob();
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = filename;
-        document.body.appendChild(a);
-        a.click();
-        window.URL.revokeObjectURL(url);
-        document.body.removeChild(a);
-      } else {
-        const error = await response.json();
-        alert(error.message || t('administrator.dashboard.w9review.downloadFailed', 'Failed to download W-9 document'));
-      }
-    } catch (error) {
-      console.error('Error downloading W-9:', error);
-      alert(t('administrator.dashboard.errors.networkError', 'Network error. Please try again.'));
-    }
-  };
-
-  // Open W-9 verification modal
-  window.openW9VerificationModal = function(affiliateId) {
-    const doc = w9Documents.find(d => d.affiliateId === affiliateId);
-    if (!doc) return;
-
-    // Populate modal fields
-    document.getElementById('verifyAffiliateId').value = affiliateId;
-    document.getElementById('verifyAffiliateName').textContent = doc.affiliateName;
-    document.getElementById('verifyAffiliateEmail').textContent = doc.affiliateEmail;
-    document.getElementById('verifyAffiliateIdDisplay').textContent = affiliateId;
-
-    // Reset form
-    document.getElementById('w9VerificationForm').reset();
-    document.getElementById('verifyAffiliateId').value = affiliateId;
-
-    // Show modal
-    document.getElementById('w9VerificationModal').style.display = 'flex';
-  };
-
-  // Close W-9 verification modal
-  window.closeW9VerificationModal = function() {
-    document.getElementById('w9VerificationModal').style.display = 'none';
-  };
-
-  // Open W-9 rejection modal
-  window.openW9RejectionModal = function(affiliateId) {
-    document.getElementById('rejectAffiliateId').value = affiliateId;
-    document.getElementById('w9RejectionForm').reset();
-    document.getElementById('rejectAffiliateId').value = affiliateId;
-    document.getElementById('w9RejectionModal').style.display = 'flex';
-  };
-
-  // Close W-9 rejection modal
-  window.closeW9RejectionModal = function() {
-    document.getElementById('w9RejectionModal').style.display = 'none';
-  };
-
-  // Handle W-9 verification form submission
-  document.getElementById('w9VerificationForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-
-    const affiliateId = document.getElementById('verifyAffiliateId').value;
-    const verificationData = {
-      taxIdType: document.getElementById('taxIdType').value,
-      taxIdLast4: document.getElementById('taxIdLast4').value,
-      businessName: document.getElementById('businessName').value,
-      quickbooksVendorId: document.getElementById('quickbooksVendorId').value,
-      notes: document.getElementById('verificationNotes').value
-    };
-
-    try {
-      const response = await adminFetch(`/api/v1/w9/admin/${affiliateId}/verify`, {
-        method: 'POST',
-        body: JSON.stringify(verificationData)
-      });
-
-      if (response.ok) {
-        alert(t('administrator.dashboard.w9review.verifySuccess', 'W-9 document verified successfully'));
-        closeW9VerificationModal();
-        loadW9Documents(); // Reload the list
-      } else {
-        const error = await response.json();
-        alert(error.message || t('administrator.dashboard.w9review.verifyFailed', 'Failed to verify W-9 document'));
-      }
-    } catch (error) {
-      console.error('Error verifying W-9:', error);
-      alert(t('administrator.dashboard.errors.networkError', 'Network error. Please try again.'));
-    }
-  });
-
-  // Handle W-9 rejection form submission
-  document.getElementById('w9RejectionForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-
-    const affiliateId = document.getElementById('rejectAffiliateId').value;
-    const rejectionData = {
-      reason: document.getElementById('rejectionReason').value
-    };
-
-    try {
-      const response = await adminFetch(`/api/v1/w9/admin/${affiliateId}/reject`, {
-        method: 'POST',
-        body: JSON.stringify(rejectionData)
-      });
-
-      if (response.ok) {
-        alert(t('administrator.dashboard.w9review.rejectSuccess', 'W-9 document rejected successfully'));
-        closeW9RejectionModal();
-        loadW9Documents(); // Reload the list
-      } else {
-        const error = await response.json();
-        alert(error.message || t('administrator.dashboard.w9review.rejectFailed', 'Failed to reject W-9 document'));
-      }
-    } catch (error) {
-      console.error('Error rejecting W-9:', error);
-      alert(t('administrator.dashboard.errors.networkError', 'Network error. Please try again.'));
-    }
-  });
-
-  // W-9 filter and search handlers
-  const w9StatusFilter = document.getElementById('w9StatusFilter');
-  const w9SearchInput = document.getElementById('w9SearchInput');
-  const refreshW9ListBtn = document.getElementById('refreshW9ListBtn');
-
-  if (w9StatusFilter) {
-    w9StatusFilter.addEventListener('change', (e) => {
-      currentW9Filter = e.target.value;
-      loadW9Documents();
-    });
-  }
-
-  if (w9SearchInput) {
-    w9SearchInput.addEventListener('input', (e) => {
-      currentW9Search = e.target.value;
-      renderW9DocumentsList();
-    });
-  }
-
-  if (refreshW9ListBtn) {
-    refreshW9ListBtn.addEventListener('click', () => {
-      loadW9Documents();
-    });
-  }
 
   // QuickBooks Export functionality
   let exportHistory = [];
@@ -2154,254 +1915,47 @@
     document.getElementById('affiliateSearchResults').style.display = 'none';
   };
 
-  // Audit Log functionality
-  let currentAuditFilters = {
-    action: '',
-    affiliateId: '',
-    dateFrom: '',
-    dateTo: ''
-  };
-
-  // Load audit log
-  async function loadAuditLog() {
-    try {
-      // Set up event listeners
-      setupAuditLogEventListeners();
-
-      // Load initial data
-      await loadAuditLogData();
-    } catch (error) {
-      console.error('Error loading audit log:', error);
-      document.getElementById('auditLogContent').innerHTML = `
-                <p style="padding: 20px; text-align: center; color: #dc3545;">
-                    ${t('administrator.dashboard.auditlog.loadError', 'Error loading audit logs')}
-                </p>
-            `;
-    }
-  }
-
-  // Set up audit log event listeners
-  function setupAuditLogEventListeners() {
-    // Apply filters button
-    const applyFiltersBtn = document.getElementById('applyAuditFiltersBtn');
-    if (applyFiltersBtn) {
-      applyFiltersBtn.addEventListener('click', async () => {
-        currentAuditFilters = {
-          action: document.getElementById('auditActionFilter').value,
-          affiliateId: document.getElementById('auditAffiliateFilter').value,
-          dateFrom: document.getElementById('auditDateFromFilter').value,
-          dateTo: document.getElementById('auditDateToFilter').value
-        };
-        await loadAuditLogData();
-      });
-    }
-
-    // Clear filters button
-    const clearFiltersBtn = document.getElementById('clearAuditFiltersBtn');
-    if (clearFiltersBtn) {
-      clearFiltersBtn.addEventListener('click', async () => {
-        // Clear filter inputs
-        document.getElementById('auditActionFilter').value = '';
-        document.getElementById('auditAffiliateFilter').value = '';
-        document.getElementById('auditDateFromFilter').value = '';
-        document.getElementById('auditDateToFilter').value = '';
-
-        // Reset current filters
-        currentAuditFilters = {
-          action: '',
-          affiliateId: '',
-          dateFrom: '',
-          dateTo: ''
-        };
-
-        await loadAuditLogData();
-      });
-    }
-
-    // Refresh button
-    const refreshBtn = document.getElementById('refreshAuditLogBtn');
-    if (refreshBtn) {
-      refreshBtn.addEventListener('click', async () => {
-        await loadAuditLogData();
-      });
-    }
-
-    // Export button
-    const exportBtn = document.getElementById('exportAuditLogBtn');
-    if (exportBtn) {
-      exportBtn.addEventListener('click', async () => {
-        await exportAuditLog();
-      });
-    }
-  }
-
-  // Load audit log data
-  async function loadAuditLogData() {
-    const container = document.getElementById('auditLogContent');
-    container.innerHTML = `
-            <div class="loading">
-                <div class="spinner"></div>
-                <p>${t('administrator.dashboard.auditlog.loading', 'Loading audit logs...')}</p>
-            </div>
-        `;
-
-    try {
-      // Build query string
-      const params = new URLSearchParams();
-      if (currentAuditFilters.action) params.append('action', currentAuditFilters.action);
-      if (currentAuditFilters.affiliateId) params.append('affiliateId', currentAuditFilters.affiliateId);
-      if (currentAuditFilters.dateFrom) params.append('startDate', currentAuditFilters.dateFrom);
-      if (currentAuditFilters.dateTo) params.append('endDate', currentAuditFilters.dateTo);
-      params.append('limit', '100');
-
-      const response = await adminFetch(`/api/v1/w9/admin/audit-logs?${params.toString()}`);
-      const data = await response.json();
-
-      if (response.ok && data.success) {
-        renderAuditLogTable(data.logs);
-      } else {
-        container.innerHTML = `
-                    <p style="padding: 20px; text-align: center; color: #dc3545;">
-                        ${data.message || t('administrator.dashboard.auditlog.loadError', 'Failed to load audit logs')}
-                    </p>
-                `;
-      }
-    } catch (error) {
-      console.error('Error loading audit logs:', error);
-      container.innerHTML = `
-                <p style="padding: 20px; text-align: center; color: #dc3545;">
-                    ${t('administrator.dashboard.auditlog.loadError', 'Error loading audit logs')}
-                </p>
-            `;
-    }
-  }
-
-  // Render audit log table
-  function renderAuditLogTable(logs) {
-    const container = document.getElementById('auditLogContent');
-
-    if (!logs || logs.length === 0) {
-      container.innerHTML = `
-                <p style="padding: 20px; text-align: center; color: #666;">
-                    ${t('administrator.dashboard.auditlog.noLogs', 'No audit logs found')}
-                </p>
-            `;
-      return;
-    }
-
-    const actionLabels = {
-      'upload_attempt': 'Upload Attempt',
-      'upload_success': 'Upload Success',
-      'upload_failure': 'Upload Failure',
-      'download_affiliate': 'Download (Affiliate)',
-      'download_admin': 'Download (Admin)',
-      'verify_attempt': 'Verify Attempt',
-      'verify_success': 'Verify Success',
-      'reject': 'Reject',
-      'expire': 'Expire',
-      'delete': 'Delete',
-      'quickbooks_export': 'QuickBooks Export',
-      'legal_hold': 'Legal Hold'
-    };
-
-    const tableHtml = `
-            <table>
-                <thead>
-                    <tr>
-                        <th>${t('administrator.dashboard.auditlog.timestamp', 'Timestamp')}</th>
-                        <th>${t('administrator.dashboard.auditlog.action', 'Action')}</th>
-                        <th>${t('administrator.dashboard.auditlog.user', 'User')}</th>
-                        <th>${t('administrator.dashboard.auditlog.affiliate', 'Affiliate')}</th>
-                        <th>${t('administrator.dashboard.auditlog.details', 'Details')}</th>
-                        <th>${t('administrator.dashboard.auditlog.ipAddress', 'IP Address')}</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    ${logs.map(log => {
-    // Format timestamp
-    const timestamp = new Date(log.timestamp).toLocaleString();
-
-    // Format user info
-    const user = log.userInfo ?
-      `${log.userInfo.userName} (${log.userInfo.userType})` :
-      'System';
-
-    // Format details
-    let detailsHtml = '';
-    if (log.details) {
-      if (log.details.success !== undefined) {
-        detailsHtml += `<span class="status-badge ${log.details.success ? 'active' : 'inactive'}">
-                                    ${log.details.success ? 'Success' : 'Failed'}
-                                </span>`;
-      }
-      if (log.details.reason) {
-        detailsHtml += `<br><small>${log.details.reason}</small>`;
-      }
-      if (log.details.error) {
-        detailsHtml += `<br><small class="text-danger">${log.details.error}</small>`;
-      }
-    }
-
-    return `
-                            <tr>
-                                <td>${timestamp}</td>
-                                <td>${actionLabels[log.action] || log.action}</td>
-                                <td>${user}</td>
-                                <td>${log.targetInfo?.affiliateId || '-'}</td>
-                                <td>${detailsHtml || '-'}</td>
-                                <td>${log.metadata?.ipAddress || '-'}</td>
-                            </tr>
-                        `;
-  }).join('')}
-                </tbody>
-            </table>
-        `;
-
-    container.innerHTML = tableHtml;
-  }
-
-  // Export audit log
-  async function exportAuditLog() {
-    try {
-      // Build query string with current filters
-      const params = new URLSearchParams();
-      if (currentAuditFilters.action) params.append('action', currentAuditFilters.action);
-      if (currentAuditFilters.affiliateId) params.append('affiliateId', currentAuditFilters.affiliateId);
-      if (currentAuditFilters.dateFrom) params.append('startDate', currentAuditFilters.dateFrom);
-      if (currentAuditFilters.dateTo) params.append('endDate', currentAuditFilters.dateTo);
-      params.append('format', 'csv');
-
-      const response = await adminFetch(`/api/v1/w9/admin/audit-logs/export?${params.toString()}`);
-
-      if (response.ok) {
-        // Get the filename from the Content-Disposition header
-        const contentDisposition = response.headers.get('Content-Disposition');
-        const filenameMatch = contentDisposition && contentDisposition.match(/filename="(.+)"/);
-        const filename = filenameMatch ? filenameMatch[1] : 'audit-log-export.csv';
-
-        // Download the file
-        const blob = await response.blob();
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.style.display = 'none';
-        a.href = url;
-        a.download = filename;
-        document.body.appendChild(a);
-        a.click();
-        window.URL.revokeObjectURL(url);
-        document.body.removeChild(a);
-      } else {
-        const error = await response.json();
-        alert(error.message || t('administrator.dashboard.auditlog.exportFailed', 'Export failed'));
-      }
-    } catch (error) {
-      console.error('Error exporting audit log:', error);
-      alert(t('administrator.dashboard.auditlog.exportError', 'Error exporting audit log'));
-    }
-  }
 
   // Load system config
   async function loadSystemConfig() {
+    // Set up sub-tab handlers for config tab
+    setupConfigSubTabs();
+    
+    // Load system settings by default
+    await loadSystemSettings();
+  }
+
+  // Set up config sub-tab handlers
+  function setupConfigSubTabs() {
+    const subTabButtons = document.querySelectorAll('#config-tab .sub-nav-tab');
+    subTabButtons.forEach(button => {
+      button.addEventListener('click', async (e) => {
+        // Remove active class from all sub-tabs and sub-tab contents
+        document.querySelectorAll('#config-tab .sub-nav-tab').forEach(tab => tab.classList.remove('active'));
+        document.querySelectorAll('#config-tab .sub-tab-content').forEach(content => content.classList.remove('active'));
+        
+        // Add active class to clicked tab
+        button.classList.add('active');
+        
+        // Show corresponding sub-tab content
+        const subtab = button.getAttribute('data-subtab');
+        const subtabContent = document.getElementById(`${subtab}-subtab`);
+        if (subtabContent) {
+          subtabContent.classList.add('active');
+        }
+        
+        // Load appropriate content
+        if (subtab === 'system-settings') {
+          await loadSystemSettings();
+        } else if (subtab === 'env-variables') {
+          await loadEnvironmentVariables();
+        }
+      });
+    });
+  }
+
+  // Load system settings
+  async function loadSystemSettings() {
     try {
       const response = await adminFetch('/api/v1/administrators/config');
       const data = await response.json();
@@ -2430,6 +1984,194 @@
     }
   }
 
+  // Load environment variables
+  async function loadEnvironmentVariables() {
+    const container = document.getElementById('envVariables');
+    container.innerHTML = `
+      <div class="loading">
+        <div class="spinner"></div>
+        <p>${t('administrator.dashboard.config.loadingEnv', 'Loading environment variables...')}</p>
+      </div>
+    `;
+
+    try {
+      const response = await adminFetch('/api/v1/administrators/env-variables');
+      const data = await response.json();
+
+      if (response.ok) {
+        renderEnvironmentVariables(data.variables || data, data.sensitiveValues || {}, data.isSuperAdmin || false);
+      } else {
+        container.innerHTML = `
+          <p style="padding: 20px; text-align: center; color: #dc3545;">
+            ${data.message || t('administrator.dashboard.config.envLoadError', 'Error loading environment variables')}
+          </p>
+        `;
+      }
+    } catch (error) {
+      console.error('Error loading environment variables:', error);
+      container.innerHTML = `
+        <p style="padding: 20px; text-align: center; color: #dc3545;">
+          ${t('administrator.dashboard.config.envLoadError', 'Error loading environment variables')}
+        </p>
+      `;
+    }
+  }
+
+  // Render environment variables
+  function renderEnvironmentVariables(variables, sensitiveValues, isSuperAdmin) {
+    const container = document.getElementById('envVariables');
+    
+    if (!variables || Object.keys(variables).length === 0) {
+      container.innerHTML = `
+        <p style="padding: 20px; text-align: center; color: #666;">
+          ${t('administrator.dashboard.config.noEnvVars', 'No environment variables found')}
+        </p>
+      `;
+      return;
+    }
+
+    // Store sensitive values for toggle functionality
+    window.envSensitiveValues = sensitiveValues || {};
+    window.envVisibleStates = {};
+
+    // Group variables by category
+    const categories = {
+      'Application': ['NODE_ENV', 'PORT', 'BASE_URL', 'FRONTEND_URL', 'BACKEND_URL', 'CORS_ORIGIN', 'OAUTH_CALLBACK_URI', 'TRUST_PROXY', 'COOKIE_SECURE'],
+      'Database': ['MONGODB_URI'],
+      'Security & Authentication': ['JWT_SECRET', 'SESSION_SECRET', 'ENCRYPTION_KEY'],
+      'Email': ['EMAIL_PROVIDER', 'EMAIL_FROM', 'EMAIL_HOST', 'EMAIL_PORT', 'EMAIL_USER', 'EMAIL_PASS', 'EMAIL_SECURE'],
+      'DocuSign': ['DOCUSIGN_INTEGRATION_KEY', 'DOCUSIGN_USER_ID', 'DOCUSIGN_ACCOUNT_ID', 'DOCUSIGN_BASE_URL', 'DOCUSIGN_OAUTH_BASE_URL', 'DOCUSIGN_CLIENT_SECRET', 'DOCUSIGN_REDIRECT_URI', 'DOCUSIGN_PRIVATE_KEY', 'DOCUSIGN_WEBHOOK_SECRET', 'DOCUSIGN_W9_TEMPLATE_ID'],
+      'Payment - Paygistix': ['PAYGISTIX_MERCHANT_ID', 'PAYGISTIX_FORM_ID', 'PAYGISTIX_FORM_HASH', 'PAYGISTIX_FORM_ACTION_URL', 'PAYGISTIX_RETURN_URL', 'PAYGISTIX_ENVIRONMENT'],
+      'AWS (Optional)': ['AWS_S3_BUCKET', 'AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY', 'AWS_REGION'],
+      'Stripe (Deprecated)': ['STRIPE_PUBLISHABLE_KEY', 'STRIPE_SECRET_KEY'],
+      'Features': ['SHOW_DOCS', 'ENABLE_TEST_PAYMENT_FORM', 'ENABLE_DELETE_DATA_FEATURE', 'CSRF_PHASE', 'RELAX_RATE_LIMITING'],
+      'Rate Limiting': ['RATE_LIMIT_WINDOW_MS', 'RATE_LIMIT_MAX_REQUESTS', 'AUTH_RATE_LIMIT_MAX'],
+      'Social Login': ['GOOGLE_CLIENT_ID', 'GOOGLE_CLIENT_SECRET', 'FACEBOOK_APP_ID', 'FACEBOOK_APP_SECRET', 'LINKEDIN_CLIENT_ID', 'LINKEDIN_CLIENT_SECRET'],
+      'Logging': ['LOG_LEVEL', 'LOG_DIR'],
+      'Business Configuration': ['BAG_FEE'],
+      'Default Accounts': ['DEFAULT_ADMIN_EMAIL'],
+      'Other': []
+    };
+
+    // Sort variables into categories
+    const sortedVars = {};
+    Object.keys(variables).forEach(key => {
+      let placed = false;
+      for (const [category, patterns] of Object.entries(categories)) {
+        if (category !== 'Other' && patterns.some(pattern => key.includes(pattern))) {
+          if (!sortedVars[category]) sortedVars[category] = {};
+          sortedVars[category][key] = variables[key];
+          placed = true;
+          break;
+        }
+      }
+      if (!placed) {
+        if (!sortedVars['Other']) sortedVars['Other'] = {};
+        sortedVars['Other'][key] = variables[key];
+      }
+    });
+
+    let html = '<div style="padding: 20px;">';
+    
+    if (isSuperAdmin) {
+      html += `
+        <div style="margin-bottom: 20px; padding: 15px; background: #fff3cd; border: 1px solid #ffeeba; border-radius: 4px;">
+          <p style="margin: 0; color: #856404;">
+            <strong>Super Admin Mode:</strong> You can view sensitive values by clicking the eye icon next to masked values.
+          </p>
+        </div>
+      `;
+    }
+    
+    for (const [category, vars] of Object.entries(sortedVars)) {
+      if (Object.keys(vars).length === 0) continue;
+      
+      html += `
+        <div class="form-section">
+          <h3 class="section-title">${category}</h3>
+          <table style="width: 100%; border-collapse: collapse;">
+            <thead>
+              <tr style="background: #f8f9fa;">
+                <th style="padding: 10px; text-align: left; border-bottom: 2px solid #dee2e6;">Variable</th>
+                <th style="padding: 10px; text-align: left; border-bottom: 2px solid #dee2e6;">Value</th>
+              </tr>
+            </thead>
+            <tbody>
+      `;
+      
+      for (const [key, value] of Object.entries(vars)) {
+        const isSensitive = key.includes('SECRET') || key.includes('PASSWORD') || key.includes('KEY') || key.includes('TOKEN');
+        const hasSensitiveValue = isSuperAdmin && sensitiveValues[key];
+        
+        // Mask sensitive values
+        let displayValue = value;
+        if (isSensitive && value) {
+          displayValue = '••••••••';
+        } else if (!value) {
+          displayValue = '(not set)';
+        }
+        
+        html += `
+          <tr>
+            <td style="padding: 8px; border-bottom: 1px solid #dee2e6; font-family: monospace; font-size: 13px;">${key}</td>
+            <td style="padding: 8px; border-bottom: 1px solid #dee2e6; font-family: monospace; font-size: 13px;">
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <span id="env-value-${key}" style="color: ${value ? '#333' : '#999'};">${displayValue}</span>
+                ${hasSensitiveValue ? `
+                  <button 
+                    type="button" 
+                    class="btn btn-sm" 
+                    onclick="toggleEnvValue('${key}')"
+                    style="padding: 2px 8px; font-size: 12px; background: #6c757d; color: white; border: none; border-radius: 3px; cursor: pointer;"
+                    title="Toggle visibility"
+                  >
+                    <span id="env-toggle-icon-${key}">👁️</span>
+                  </button>
+                ` : ''}
+              </div>
+            </td>
+          </tr>
+        `;
+      }
+      
+      html += `
+            </tbody>
+          </table>
+        </div>
+      `;
+    }
+    
+    html += '</div>';
+    container.innerHTML = html;
+    
+    // Set up refresh button handler
+    const refreshBtn = document.getElementById('refreshEnvBtn');
+    if (refreshBtn) {
+      refreshBtn.onclick = () => loadEnvironmentVariables();
+    }
+  }
+
+  // Toggle environment variable visibility
+  window.toggleEnvValue = function(key) {
+    const valueSpan = document.getElementById(`env-value-${key}`);
+    const iconSpan = document.getElementById(`env-toggle-icon-${key}`);
+    
+    if (!valueSpan || !window.envSensitiveValues[key]) return;
+    
+    // Toggle visibility state
+    window.envVisibleStates[key] = !window.envVisibleStates[key];
+    
+    if (window.envVisibleStates[key]) {
+      // Show actual value
+      valueSpan.textContent = window.envSensitiveValues[key];
+      iconSpan.textContent = '🙈';
+    } else {
+      // Hide value
+      valueSpan.textContent = '••••••••';
+      iconSpan.textContent = '👁️';
+    }
+  };
+
   // Render system config
   function renderSystemConfig(configs) {
     // Check if configs is valid
@@ -2448,34 +2190,56 @@
       return acc;
     }, {});
 
-    let configHtml = '<form id="configForm">';
+    let configHtml = '<form id="configForm" style="padding: 20px;">';
 
     for (const [category, items] of Object.entries(groupedConfigs)) {
-      configHtml += `<h3 style="margin: 20px 0 10px; text-transform: capitalize;">${category}</h3>`;
+      configHtml += `
+        <div class="form-section">
+          <h3 class="section-title" style="text-transform: capitalize;">${category}</h3>
+          <div class="form-row">
+      `;
 
-      items.forEach(config => {
-        configHtml += '<div class="form-group">';
+      items.forEach((config, index) => {
+        // Use full width for textareas (object/array types)
+        const isFullWidth = config.dataType === 'object' || config.dataType === 'array';
+        
+        if (isFullWidth && index % 2 === 1) {
+          // Close the current row and start a new one for full-width items
+          configHtml += '</div><div class="form-row">';
+        }
+        
+        configHtml += `<div class="form-group ${isFullWidth ? 'full-width' : ''}">`;
         configHtml += `<label for="config_${config.key}">${config.description}</label>`;
 
         if (config.dataType === 'boolean') {
           const enabledText = window.i18n ? window.i18n.t('administrator.dashboard.config.enabled') : 'Enabled';
           const disabledText = window.i18n ? window.i18n.t('administrator.dashboard.config.disabled') : 'Disabled';
           configHtml += `
-                        <select id="config_${config.key}" name="${config.key}" data-type="${config.dataType}">
-                            <option value="true" ${config.value === true ? 'selected' : ''}>${enabledText}</option>
-                            <option value="false" ${config.value === false ? 'selected' : ''}>${disabledText}</option>
-                        </select>
-                    `;
+            <select id="config_${config.key}" name="${config.key}" data-type="${config.dataType}">
+              <option value="true" ${config.value === true ? 'selected' : ''}>${enabledText}</option>
+              <option value="false" ${config.value === false ? 'selected' : ''}>${disabledText}</option>
+            </select>
+          `;
         } else if (config.dataType === 'number') {
           configHtml += `<input type="number" id="config_${config.key}" name="${config.key}" value="${config.value}" data-type="${config.dataType}">`;
         } else if (config.dataType === 'object' || config.dataType === 'array') {
-          configHtml += `<textarea id="config_${config.key}" name="${config.key}" data-type="${config.dataType}" rows="3">${JSON.stringify(config.value, null, 2)}</textarea>`;
+          configHtml += `<textarea id="config_${config.key}" name="${config.key}" data-type="${config.dataType}" rows="3" style="font-family: monospace; font-size: 12px;">${JSON.stringify(config.value, null, 2)}</textarea>`;
         } else {
           configHtml += `<input type="text" id="config_${config.key}" name="${config.key}" value="${config.value}" data-type="${config.dataType}">`;
         }
 
         configHtml += '</div>';
+        
+        if (isFullWidth && index < items.length - 1) {
+          // Start a new row after full-width items
+          configHtml += '</div><div class="form-row">';
+        }
       });
+      
+      configHtml += `
+          </div>
+        </div>
+      `;
     }
 
     configHtml += '</form>';
@@ -2896,24 +2660,6 @@
     if (e.target.classList.contains('print-card-btn')) {
       const customerId = e.target.getAttribute('data-customer-id');
       printCustomerCard(customerId);
-    }
-    
-    // Download W9 button
-    if (e.target.classList.contains('download-w9-btn')) {
-      const affiliateId = e.target.getAttribute('data-affiliate-id');
-      downloadW9(affiliateId);
-    }
-    
-    // Verify W9 button
-    if (e.target.classList.contains('verify-w9-btn')) {
-      const affiliateId = e.target.getAttribute('data-affiliate-id');
-      openW9VerificationModal(affiliateId);
-    }
-    
-    // Reject W9 button
-    if (e.target.classList.contains('reject-w9-btn')) {
-      const affiliateId = e.target.getAttribute('data-affiliate-id');
-      openW9RejectionModal(affiliateId);
     }
     
     // Select affiliate link

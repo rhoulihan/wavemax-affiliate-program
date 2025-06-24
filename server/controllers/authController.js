@@ -348,6 +348,98 @@ exports.administratorLogin = async (req, res) => {
 /**
  * Operator login controller
  */
+/**
+ * Operator auto-login from store IP
+ */
+exports.operatorAutoLogin = async (req, res) => {
+  try {
+    // Get client IP address
+    const clientIp = req.ip || req.connection.remoteAddress || req.socket.remoteAddress || req.headers['x-forwarded-for'];
+    const cleanIp = clientIp.replace(/^::ffff:/, ''); // Remove IPv6 prefix if present
+    
+    console.log('Auto-login attempt from IP:', cleanIp);
+    
+    // Check if request is from store IP
+    const storeIp = process.env.STORE_IP_ADDRESS;
+    if (!storeIp || cleanIp !== storeIp) {
+      return res.status(403).json({
+        success: false,
+        message: 'Auto-login not allowed from this location'
+      });
+    }
+    
+    // Find default operator
+    const defaultOperatorId = process.env.DEFAULT_OPERATOR_ID || 'OP001';
+    const operator = await Operator.findOne({ operatorId: defaultOperatorId });
+    
+    if (!operator) {
+      console.error('Default operator not found:', defaultOperatorId);
+      return res.status(404).json({
+        success: false,
+        message: 'Default operator not configured'
+      });
+    }
+    
+    // Check if operator is active
+    if (!operator.isActive) {
+      return res.status(403).json({
+        success: false,
+        message: 'Default operator account is inactive'
+      });
+    }
+    
+    // Reset login attempts
+    await operator.resetLoginAttempts();
+    
+    // Generate token
+    const token = generateToken({
+      id: operator._id,
+      operatorId: operator.operatorId,
+      email: operator.email,
+      name: operator.name,
+      permissions: operator.permissions,
+      role: 'operator'
+    });
+    
+    // Generate refresh token
+    const refreshToken = await generateRefreshToken(
+      operator._id,
+      'operator',
+      cleanIp
+    );
+    
+    // Update last login
+    operator.lastLogin = new Date();
+    await operator.save();
+    
+    // Log successful auto-login
+    logLoginAttempt(true, 'operator', operator.email, req, 'Auto-login from store IP');
+    
+    // Prepare response with redirect to scan-a-bag
+    res.json({
+      success: true,
+      message: 'Auto-login successful',
+      token,
+      refreshToken: refreshToken.token,
+      operator: {
+        id: operator._id,
+        operatorId: operator.operatorId,
+        email: operator.email,
+        name: operator.name,
+        permissions: operator.permissions
+      },
+      redirect: '/operator-scan' // Direct to operator scan page
+    });
+    
+  } catch (error) {
+    console.error('Operator auto-login error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error during auto-login'
+    });
+  }
+};
+
 exports.operatorLogin = async (req, res) => {
   try {
     const { email, password } = req.body;

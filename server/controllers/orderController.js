@@ -278,7 +278,9 @@ exports.getOrderDetails = async (req, res) => {
           name: `${customer.firstName} ${customer.lastName}`,
           phone: customer.phone,
           email: customer.email,
-          address: `${customer.address}, ${customer.city}, ${customer.state} ${customer.zipCode}`
+          address: `${customer.address}, ${customer.city}, ${customer.state} ${customer.zipCode}`,
+          bagCredit: customer.bagCredit,
+          bagCreditApplied: customer.bagCreditApplied
         } : null,
         affiliateId: order.affiliateId,
         affiliate: affiliate ? {

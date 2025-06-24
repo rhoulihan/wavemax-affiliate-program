@@ -1,6 +1,12 @@
 (function() {
   'use strict';
 
+  // Only run this script on the operator login page
+  if (!document.getElementById('loginForm') || !document.getElementById('clock')) {
+    console.log('Not on operator login page, skipping initialization');
+    return;
+  }
+
   // Note: Login endpoints currently don't require CSRF tokens
   // But we'll prepare for future implementation
   const csrfFetch = window.CsrfUtils && window.CsrfUtils.csrfFetch ? window.CsrfUtils.csrfFetch : fetch;
@@ -13,17 +19,67 @@
 
   // Clock display
   function updateClock() {
+    const clockElement = document.getElementById('clock');
+    if (!clockElement) return; // Guard against missing element
+    
     const now = new Date();
     const timeString = now.toLocaleTimeString('en-US', {
       hour: '2-digit',
       minute: '2-digit',
       hour12: true
     });
-    document.getElementById('clock').textContent = timeString;
+    clockElement.textContent = timeString;
   }
 
-  updateClock();
-  setInterval(updateClock, 1000);
+  // Track clock interval for cleanup (store on window for external cleanup)
+  window.operatorClockInterval = null;
+  
+  // Only start clock if we're on the login page
+  if (document.getElementById('clock')) {
+    updateClock();
+    window.operatorClockInterval = setInterval(updateClock, 1000);
+  }
+
+  // Check for auto-login on page load
+  async function checkAutoLogin() {
+    try {
+      const response = await fetch(`${BASE_URL}/api/v1/auth/operator/login`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        credentials: 'include'
+      });
+
+      const result = await response.json();
+      
+      if (response.ok && result.success) {
+        // Store tokens
+        localStorage.setItem('operatorToken', result.token);
+        localStorage.setItem('operatorRefreshToken', result.refreshToken);
+        localStorage.setItem('operatorData', JSON.stringify(result.operator));
+        
+        // Redirect to operator scan page
+        // Clear clock interval before navigation
+        if (window.operatorClockInterval) {
+          clearInterval(window.operatorClockInterval);
+          window.operatorClockInterval = null;
+        }
+        
+        // Use navigateTo if available (when in embed-app.html)
+        if (window.navigateTo) {
+          window.navigateTo('/operator-scan');
+        } else {
+          window.location.href = '/embed-app.html?route=/operator-scan';
+        }
+      }
+    } catch (error) {
+      console.log('Auto-login not available:', error.message);
+    }
+  }
+
+  // Check for auto-login when page loads
+  checkAutoLogin();
 
   // DOM elements
   const loginForm = document.getElementById('loginForm');
@@ -42,8 +98,9 @@
   }
 
   // Handle login form submission
-  loginForm.addEventListener('submit', async function(e) {
-    e.preventDefault();
+  if (loginForm) {
+    loginForm.addEventListener('submit', async function(e) {
+      e.preventDefault();
 
     const email = document.getElementById('email').value.trim();
     const password = document.getElementById('password').value;
@@ -87,7 +144,7 @@
 
         // Show success message
         errorMessage.style.display = 'none';
-        submitText.textContent = 'SUCCESS!';
+        submitText.textContent = 'CLOCKED IN!';
         submitBtn.style.background = '#27ae60';
 
         // Notify parent window if embedded
@@ -103,7 +160,17 @@
 
         // Redirect to scanner interface
         setTimeout(() => {
-          window.location.href = '/operator-scan-embed.html';
+          // Clear clock interval before navigation
+          if (clockInterval) {
+            clearInterval(clockInterval);
+          }
+          
+          // Use navigateTo if available (when in embed-app.html)
+          if (window.navigateTo) {
+            window.navigateTo('/operator-scan');
+          } else {
+            window.location.href = '/embed-app.html?route=/operator-scan';
+          }
         }, 1000);
       } else {
         // Handle specific error cases
@@ -133,6 +200,7 @@
       }
     }
   });
+  }
 
   // Check if already logged in
   const existingToken = localStorage.getItem('operatorToken');
@@ -161,7 +229,12 @@
               : (currentTime >= shiftStart || currentTime <= shiftEnd);
 
             if (isWithinShift) {
-              window.location.href = '/operator-scan-embed.html';
+              // Use navigateTo if available (when in embed-app.html)
+              if (window.navigateTo) {
+                window.navigateTo('/operator-scan');
+              } else {
+                window.location.href = '/embed-app.html?route=/operator-scan';
+              }
             } else {
               // Clear tokens if outside shift
               localStorage.removeItem('operatorToken');

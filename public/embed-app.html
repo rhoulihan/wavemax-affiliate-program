@@ -187,7 +187,6 @@
             '/administrator-login': '/administrator-login-embed.html',
             '/administrator-dashboard': '/administrator-dashboard-embed.html',
             '/operator-login': '/operator-login-embed.html',
-            '/operator-dashboard': '/operator-dashboard-embed.html',
             '/operator-scan': '/operator-scan-embed.html',
             '/terms-of-service': '/terms-and-conditions-embed.html',
             '/terms-and-conditions': '/terms-and-conditions-embed.html',
@@ -398,10 +397,48 @@
                         data: { route: route }
                     }, '*');
                     
-                    // Always hide chrome on mobile for any route
-                    if (viewportInfo && viewportInfo.isMobile) {
-                        console.log('[EMBED-APP] Mobile device on route change, hiding chrome');
-                        requestChromeHide();
+                    // Hide chrome for mobile OR operator routes
+                    if ((viewportInfo && viewportInfo.isMobile) || route.startsWith('/operator-')) {
+                        console.log('[EMBED-APP] Hiding chrome for:', route.startsWith('/operator-') ? 'operator route' : 'mobile device');
+                        
+                        // For operator routes on desktop, we need to work around the parent's limitation
+                        if (route.startsWith('/operator-') && (!viewportInfo || !viewportInfo.isMobile)) {
+                            console.log('[EMBED-APP] Operator route on desktop - using mobile emulation workaround');
+                            
+                            // First, update our local viewport info to pretend we're mobile
+                            viewportInfo = {
+                                ...viewportInfo,
+                                isMobile: true,
+                                width: 375,
+                                height: 667
+                            };
+                            
+                            // Apply mobile classes
+                            if (window.MobileUtils) {
+                                window.MobileUtils.addBodyClasses();
+                            }
+                            
+                            // Then request chrome hide (which parent will accept because we're "mobile")
+                            requestChromeHide();
+                        } else {
+                            // Normal mobile or already handled
+                            requestChromeHide();
+                        }
+                    } else if (!route.startsWith('/operator-') && chromeHidden && viewportInfo && !viewportInfo.isMobile) {
+                        // Show chrome again if leaving operator routes on desktop
+                        console.log('[EMBED-APP] Showing chrome - left operator route on desktop');
+                        
+                        // Reset viewport info if we faked it
+                        if (viewportInfo.width === 375 && viewportInfo.height === 667) {
+                            viewportInfo = {
+                                ...viewportInfo,
+                                isMobile: false,
+                                width: window.innerWidth,
+                                height: window.innerHeight
+                            };
+                        }
+                        
+                        requestChromeShow();
                     }
                 }
                 
@@ -470,15 +507,18 @@
         
         // Load page-specific scripts
         function loadPageScripts() {
-            // Clean up old scripts first (except embed-navigation.js and utility scripts)
-            const existingScripts = document.querySelectorAll('script[src*="/assets/js/"]');
-            existingScripts.forEach(script => {
-                if (!script.src.includes('embed-navigation.js') && 
-                    !script.src.includes('csrf-utils.js') && 
-                    !script.src.includes('errorHandler.js')) {
-                    script.remove();
-                }
+            // Clean up old page-specific scripts
+            const oldScripts = document.querySelectorAll('script[data-page-script="true"]');
+            oldScripts.forEach(script => {
+                console.log('Removing script:', script.src);
+                script.remove();
             });
+            
+            // Also clean up any lingering intervals from operator login
+            if (window.operatorClockInterval) {
+                clearInterval(window.operatorClockInterval);
+                window.operatorClockInterval = null;
+            }
             
             // Map of routes to their required scripts
             const pageScripts = {
@@ -494,12 +534,11 @@
                 '/customer-dashboard': ['/assets/js/i18n.js', '/assets/js/language-switcher.js', '/assets/js/modal-utils.js', '/assets/js/errorHandler.js', '/assets/js/csrf-utils.js', '/assets/js/customer-dashboard.js'],
                 '/customer-success': ['/assets/js/i18n.js', '/assets/js/language-switcher.js', '/assets/js/customer-success-embed.js'],
                 '/schedule-pickup': ['/assets/js/i18n.js', '/assets/js/language-switcher.js', '/assets/js/embed-config.js', '/assets/js/modal-utils.js', '/assets/js/errorHandler.js', '/assets/js/csrf-utils.js', '/assets/js/swirl-spinner.js', '/assets/js/paygistix-payment-form.js', '/assets/js/schedule-pickup.js', '/assets/js/schedule-pickup-navigation.js'],
-                '/order-confirmation': ['/assets/js/i18n.js', '/assets/js/language-switcher.js', '/assets/js/modal-utils.js', '/assets/js/errorHandler.js', '/assets/js/order-confirmation.js'],
+                '/order-confirmation': ['/assets/js/i18n.js', '/assets/js/language-switcher.js', '/assets/js/order-confirmation-embed.js'],
                 '/administrator-login': ['/assets/js/i18n.js', '/assets/js/language-switcher.js', '/assets/js/modal-utils.js', '/assets/js/errorHandler.js', '/assets/js/csrf-utils.js', '/assets/js/administrator-login-init.js'],
                 '/administrator-dashboard': ['https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js', '/assets/js/i18n.js', '/assets/js/language-switcher.js', '/assets/js/modal-utils.js', '/assets/js/errorHandler.js', '/assets/js/csrf-utils.js', '/assets/js/password-validator-component.js', '/assets/js/qrcode.min.js', '/assets/js/jspdf.min.js', '/assets/js/administrator-dashboard-init.js', '/assets/js/admin-operator-fix.js'],
                 '/operator-login': ['/assets/js/i18n.js', '/assets/js/language-switcher.js', '/assets/js/modal-utils.js', '/assets/js/errorHandler.js', '/assets/js/csrf-utils.js', '/assets/js/operator-login-init.js'],
-                '/operator-dashboard': ['/assets/js/i18n.js', '/assets/js/language-switcher.js', '/assets/js/modal-utils.js', '/assets/js/errorHandler.js', '/assets/js/csrf-utils.js', '/assets/js/operator-dashboard-init.js'],
-                '/operator-scan': ['/assets/js/i18n.js', '/assets/js/language-switcher.js', '/assets/js/modal-utils.js', '/assets/js/operator-scan-init.js']
+                '/operator-scan': ['/assets/js/i18n.js', '/assets/js/language-switcher.js', '/assets/js/modal-utils.js', '/assets/js/errorHandler.js', '/assets/js/csrf-utils.js', '/assets/js/operator-scan-init.js']
             };
             
             const scripts = pageScripts[currentRoute] || [];

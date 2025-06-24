@@ -87,6 +87,13 @@ router.post('/administrator/login',
 );
 
 /**
+ * @route   GET /api/auth/operator/login
+ * @desc    Auto-login operator from store IP
+ * @access  Public (restricted by IP)
+ */
+router.get('/operator/login', authController.operatorAutoLogin);
+
+/**
  * @route   POST /api/auth/operator/login
  * @desc    Login operator
  * @access  Public

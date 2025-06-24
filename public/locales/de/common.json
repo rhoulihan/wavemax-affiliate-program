@@ -685,20 +685,6 @@
       "subtitle": "Geben Sie Ihre 4-stellige PIN ein, um auf das System zuzugreifen",
       "pinPlaceholder": "4-stellige PIN eingeben",
       "invalidPin": "Ungültige PIN. Bitte versuchen Sie es erneut."
-    },
-    "dashboard": {
-      "title": "Operator-Dashboard",
-      "welcome": "Willkommen, {{name}}!",
-      "todaysPickups": "Heutige Abholungen",
-      "todaysDeliveries": "Heutige Lieferungen",
-      "processOrder": "Bestellung verarbeiten",
-      "scanBarcode": "Barcode scannen",
-      "metrics": {
-        "pickupsCompleted": "Abholungen abgeschlossen",
-        "deliveriesCompleted": "Lieferungen abgeschlossen",
-        "ordersProcessed": "Bestellungen verarbeitet",
-        "efficiency": "Effizienzrate"
-      }
     }
   },
   "administrator": {

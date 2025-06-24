@@ -52,9 +52,6 @@ router.patch('/:id/stats', checkRole(['administrator']), checkAdminPermission(['
 // Operator-specific routes (require operator role)
 router.use(checkRole(['operator']));
 
-// Dashboard
-router.get('/dashboard', operatorController.getDashboard);
-
 // Order Management
 router.get('/orders/queue', operatorController.getOrderQueue);
 router.post('/orders/:orderId/claim', operatorController.claimOrder);

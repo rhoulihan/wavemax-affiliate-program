@@ -506,8 +506,8 @@ exports.changeAdministratorPassword = async (req, res) => {
       });
     }
 
-    // Update password (pre-save hook will handle hashing and history)
-    administrator.password = newPassword;
+    // Update password using the setPassword method (handles hashing and history)
+    administrator.setPassword(newPassword);
     administrator.requirePasswordChange = false; // Clear the flag after password change
     await administrator.save();
 
@@ -778,9 +778,9 @@ exports.getOperators = async (req, res) => {
  */
 exports.getOperatorById = async (req, res) => {
   try {
-    const { id } = req.params;
+    const { operatorId } = req.params;
 
-    const operator = await Operator.findById(id)
+    const operator = await Operator.findById(operatorId)
       .populate('createdBy', 'firstName lastName');
 
     if (!operator) {
@@ -2278,6 +2278,156 @@ exports.getOperatorSelf = async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'An error occurred while fetching the profile'
+    });
+  }
+};
+
+/**
+ * Get environment variables (sanitized for display)
+ */
+exports.getEnvironmentVariables = async (req, res) => {
+  try {
+    // Define which environment variables to expose
+    const allowedVars = [
+      // Application
+      'NODE_ENV',
+      'PORT',
+      'BASE_URL',
+      'FRONTEND_URL',
+      'BACKEND_URL',
+      'CORS_ORIGIN',
+      'OAUTH_CALLBACK_URI',
+      'TRUST_PROXY',
+      'COOKIE_SECURE',
+      
+      // Database
+      'MONGODB_URI',
+      
+      // Security & Authentication
+      'JWT_SECRET',
+      'SESSION_SECRET',
+      'ENCRYPTION_KEY',
+      
+      // Email
+      'EMAIL_PROVIDER',
+      'EMAIL_FROM',
+      'EMAIL_HOST',
+      'EMAIL_PORT',
+      'EMAIL_USER',
+      'EMAIL_PASS',
+      'EMAIL_SECURE',
+      
+      // DocuSign
+      'DOCUSIGN_INTEGRATION_KEY',
+      'DOCUSIGN_USER_ID',
+      'DOCUSIGN_ACCOUNT_ID',
+      'DOCUSIGN_BASE_URL',
+      'DOCUSIGN_OAUTH_BASE_URL',
+      'DOCUSIGN_CLIENT_SECRET',
+      'DOCUSIGN_REDIRECT_URI',
+      'DOCUSIGN_PRIVATE_KEY',
+      'DOCUSIGN_WEBHOOK_SECRET',
+      'DOCUSIGN_W9_TEMPLATE_ID',
+      
+      // Payment - Paygistix
+      'PAYGISTIX_MERCHANT_ID',
+      'PAYGISTIX_FORM_ID',
+      'PAYGISTIX_FORM_HASH',
+      'PAYGISTIX_FORM_ACTION_URL',
+      'PAYGISTIX_RETURN_URL',
+      'PAYGISTIX_ENVIRONMENT',
+      
+      // AWS (Optional)
+      'AWS_S3_BUCKET',
+      'AWS_ACCESS_KEY_ID',
+      'AWS_SECRET_ACCESS_KEY',
+      'AWS_REGION',
+      
+      // Stripe (Deprecated but still in env)
+      'STRIPE_PUBLISHABLE_KEY',
+      'STRIPE_SECRET_KEY',
+      
+      // Features
+      'SHOW_DOCS',
+      'ENABLE_TEST_PAYMENT_FORM',
+      'ENABLE_DELETE_DATA_FEATURE',
+      'CSRF_PHASE',
+      'RELAX_RATE_LIMITING',
+      
+      // Rate Limiting
+      'RATE_LIMIT_WINDOW_MS',
+      'RATE_LIMIT_MAX_REQUESTS',
+      'AUTH_RATE_LIMIT_MAX',
+      
+      // Social Login
+      'GOOGLE_CLIENT_ID',
+      'GOOGLE_CLIENT_SECRET',
+      'FACEBOOK_APP_ID',
+      'FACEBOOK_APP_SECRET',
+      'LINKEDIN_CLIENT_ID',
+      'LINKEDIN_CLIENT_SECRET',
+      
+      // Logging
+      'LOG_LEVEL',
+      'LOG_DIR',
+      
+      // Business Configuration
+      'BAG_FEE',
+      
+      // Default Accounts
+      'DEFAULT_ADMIN_EMAIL'
+    ];
+
+    // Check if user is super-admin (has all permissions or specific super-admin flag)
+    const isSuperAdmin = req.user.permissions?.includes('*') || 
+                        req.user.isSuperAdmin || 
+                        req.user.email === process.env.DEFAULT_ADMIN_EMAIL;
+
+    // Collect environment variables
+    const variables = {};
+    const sensitiveValues = {};
+    
+    for (const varName of allowedVars) {
+      const value = process.env[varName] || '';
+      
+      // Check if this is a sensitive variable
+      const isSensitive = varName.includes('SECRET') || 
+                         varName.includes('PASSWORD') || 
+                         varName.includes('KEY') || 
+                         varName.includes('TOKEN');
+      
+      if (isSensitive && isSuperAdmin && value) {
+        // Store actual value for super-admins
+        sensitiveValues[varName] = value;
+        variables[varName] = '••••••••'; // Still mask in main object
+      } else {
+        variables[varName] = value;
+      }
+    }
+
+    // Log access for audit
+    await logAuditEvent(
+      AuditEvents.ADMIN_VIEW_ENV_VARS,
+      req.user,
+      { 
+        action: 'view_environment_variables',
+        viewedSensitive: isSuperAdmin && Object.keys(sensitiveValues).length > 0
+      },
+      req
+    );
+
+    res.json({
+      success: true,
+      variables,
+      sensitiveValues: isSuperAdmin ? sensitiveValues : {},
+      isSuperAdmin
+    });
+
+  } catch (error) {
+    console.error('Error fetching environment variables:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch environment variables'
     });
   }
 };

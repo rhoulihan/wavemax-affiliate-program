@@ -4,6 +4,7 @@
 const mongoose = require('mongoose');
 const crypto = require('crypto');
 const encryptionUtil = require('../utils/encryption');
+const { mongooseValidators } = require('../utils/validators');
 const { validatePasswordStrength } = require('../utils/passwordValidator');
 
 const administratorSchema = new mongoose.Schema({
@@ -27,7 +28,7 @@ const administratorSchema = new mongoose.Schema({
     required: true,
     lowercase: true,
     trim: true,
-    match: [/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/, 'Please enter a valid email']
+    validate: mongooseValidators.email
   },
   passwordSalt: {
     type: String,
@@ -130,6 +131,33 @@ administratorSchema.pre('save', async function(next) {
 
   next();
 });
+
+// Method to set a new password (handles hashing)
+administratorSchema.methods.setPassword = function(password) {
+  const { salt, hash } = encryptionUtil.hashPassword(password);
+  
+  // Save current password to history before changing
+  if (this.passwordHash && this.passwordSalt) {
+    if (!this.passwordHistory) {
+      this.passwordHistory = [];
+    }
+    
+    // Add current password to history
+    this.passwordHistory.push({
+      passwordHash: this.passwordHash,
+      passwordSalt: this.passwordSalt,
+      changedAt: new Date()
+    });
+    
+    // Keep only last 5 passwords
+    if (this.passwordHistory.length > 5) {
+      this.passwordHistory = this.passwordHistory.slice(-5);
+    }
+  }
+  
+  this.passwordSalt = salt;
+  this.passwordHash = hash;
+};
 
 // Method to verify password (now using passwordSalt and passwordHash)
 administratorSchema.methods.verifyPassword = function(password) {
