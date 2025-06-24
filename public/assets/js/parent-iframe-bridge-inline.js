@@ -638,10 +638,14 @@
                     return;
                 }
                 
-                // Hide the element
+                // Store original display value
+                const originalDisplay = window.getComputedStyle(element).display;
                 element.setAttribute('data-operator-hidden', 'true');
                 element.setAttribute('data-original-display', element.style.display || '');
-                element.style.display = 'none';
+                element.setAttribute('data-original-computed-display', originalDisplay);
+                
+                // Force hide with important
+                element.style.setProperty('display', 'none', 'important');
                 hiddenCount++;
                 console.log('[Parent-Iframe Bridge] Hiding specific element:', element.tagName, element.className || element.id || '(no class/id)');
             });
@@ -671,15 +675,44 @@
                 continue;
             }
             
-            // Hide the element
+            // Store original display value
+            const originalDisplay = window.getComputedStyle(element).display;
             element.setAttribute('data-operator-hidden', 'true');
             element.setAttribute('data-original-display', element.style.display || '');
-            element.style.display = 'none';
+            element.setAttribute('data-original-computed-display', originalDisplay);
+            
+            // Force hide with important
+            element.style.setProperty('display', 'none', 'important');
             hiddenCount++;
             console.log('[Parent-Iframe Bridge] Hiding body child:', element.tagName, element.className || element.id || '(no class/id)');
         }
         
         console.log('[Parent-Iframe Bridge] Hidden', hiddenCount, 'elements');
+        
+        // Inject a style tag to ensure everything stays hidden
+        const hideStyle = document.createElement('style');
+        hideStyle.id = 'operator-hide-chrome-styles';
+        hideStyle.innerHTML = `
+            [data-operator-hidden="true"] {
+                display: none !important;
+            }
+            body.operator-mode > *:not(script):not(style):not(:has(#wavemax-iframe)) {
+                display: none !important;
+            }
+            body.operator-mode .wrapper,
+            body.operator-mode .navbar,
+            body.operator-mode .topbar,
+            body.operator-mode .middlebar,
+            body.operator-mode .footer,
+            body.operator-mode .page-header,
+            body.operator-mode nav,
+            body.operator-mode header,
+            body.operator-mode footer {
+                display: none !important;
+            }
+        `;
+        document.head.appendChild(hideStyle);
+        document.body.classList.add('operator-mode');
 
         // Adjust iframe container to full viewport
         if (iframe) {
@@ -758,14 +791,31 @@
         
         hiddenElements.forEach(element => {
             const originalDisplay = element.getAttribute('data-original-display') || '';
-            element.style.display = originalDisplay;
+            const originalComputedDisplay = element.getAttribute('data-original-computed-display') || '';
+            
+            // Remove the important display none
+            element.style.removeProperty('display');
+            
+            // Restore original inline display if there was one
+            if (originalDisplay) {
+                element.style.display = originalDisplay;
+            }
+            
             element.removeAttribute('data-operator-hidden');
             element.removeAttribute('data-original-display');
+            element.removeAttribute('data-original-computed-display');
             restoredCount++;
             console.log('[Parent-Iframe Bridge] Restoring element:', element.tagName, element.className || element.id || '(no class/id)');
         });
         
         console.log('[Parent-Iframe Bridge] Restored', restoredCount, 'elements');
+        
+        // Remove the operator mode class and style tag
+        document.body.classList.remove('operator-mode');
+        const hideStyle = document.getElementById('operator-hide-chrome-styles');
+        if (hideStyle) {
+            hideStyle.remove();
+        }
         
         // Restore iframe container styles
         if (iframe) {
