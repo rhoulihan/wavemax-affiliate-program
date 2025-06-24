@@ -543,14 +543,8 @@
             window.SessionManager.clearAuth('operator');
         }
         
-        // Reload the parent page instead of navigating within iframe
-        if (window.parent !== window) {
-            console.log('[Operator] Reloading parent page after logout');
-            window.parent.location.reload();
-        } else {
-            // If not in iframe, go to landing page
-            window.location.href = '/';
-        }
+        // Redirect to the parent page URL
+        window.top.location.href = 'https://www.wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program';
     };
 
     // Initialize on DOM ready
