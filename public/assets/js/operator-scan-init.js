@@ -543,20 +543,13 @@
             window.SessionManager.clearAuth('operator');
         }
         
-        // Notify parent to show chrome again
+        // Reload the parent page instead of navigating within iframe
         if (window.parent !== window) {
-            console.log('[Operator] Notifying parent to show chrome after logout');
-            window.parent.postMessage({
-                type: 'operator-logout',
-                data: {}
-            }, '*');
-        }
-        
-        // Use navigateTo if available (when in embed-app.html)
-        if (window.navigateTo) {
-            window.navigateTo('/');  // Go to landing page
+            console.log('[Operator] Reloading parent page after logout');
+            window.parent.location.reload();
         } else {
-            window.location.href = '/embed-app.html';  // Default route is landing page
+            // If not in iframe, go to landing page
+            window.location.href = '/';
         }
     };
 
