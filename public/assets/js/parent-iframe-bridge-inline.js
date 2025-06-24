@@ -332,11 +332,6 @@
                 showChrome();
                 break;
                 
-            case 'operator-logout':
-                console.log('[Parent-Iframe Bridge] Operator logout - showing all page elements');
-                showChrome();
-                break;
-                
             case 'resize':
                 // Existing resize functionality
                 if (event.data.data && event.data.data.height) {
