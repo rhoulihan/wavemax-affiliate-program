@@ -81,6 +81,13 @@
       // Load customer data into the form
       await loadCustomerIntoForm(customer, token);
 
+      // Check for active orders before allowing scheduling
+      const hasActiveOrder = await checkForActiveOrders(token);
+      if (hasActiveOrder) {
+        // Customer has an active order, don't allow new scheduling
+        return;
+      }
+
       // Fetch system config for delivery fees
       await fetchSystemFeeConfig();
 
@@ -98,6 +105,142 @@
       console.error('Error initializing schedule pickup:', error);
       // If there's an error, redirect to login
       window.location.href = '/embed-app.html?login=customer&pickup=true';
+    }
+  }
+
+  // Function to check for active orders
+  async function checkForActiveOrders(token) {
+    try {
+      const baseUrl = window.EMBED_CONFIG?.baseUrl || 'https://wavemax.promo';
+      const response = await fetch(`${baseUrl}/api/v1/orders/check-active`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        credentials: 'include'
+      });
+
+      if (!response.ok) {
+        console.error('Failed to check active orders:', response.status);
+        return false;
+      }
+
+      const data = await response.json();
+      
+      if (data.hasActiveOrder) {
+        console.log('Customer has active order:', data.activeOrder);
+        
+        // Format the pickup date nicely
+        const pickupDate = new Date(data.activeOrder.pickupDate).toLocaleDateString('en-US', {
+          weekday: 'long',
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric'
+        });
+        
+        // Map status to user-friendly text
+        const statusMessages = {
+          'pending': 'scheduled for pickup',
+          'processing': 'currently being processed',
+          'processed': 'ready for delivery'
+        };
+        
+        const statusMessage = statusMessages[data.activeOrder.status] || data.activeOrder.status;
+        
+        // Hide the pickup form and show a message
+        const pickupDetailsSection = document.getElementById('pickupDetailsSection');
+        if (pickupDetailsSection) {
+          pickupDetailsSection.innerHTML = `
+            <div class="active-order-notice">
+              <div class="notice-icon">
+                <svg class="w-16 h-16 text-blue-500 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+              </div>
+              <h2 class="text-2xl font-bold text-gray-800 mb-4">You Have an Active Order</h2>
+              <div class="notice-content">
+                <p class="text-lg text-gray-600 mb-4">
+                  You already have an order (${data.activeOrder.orderId}) that is ${statusMessage}.
+                </p>
+                <p class="text-gray-600 mb-6">
+                  Please wait for this order to be completed before scheduling a new pickup.
+                </p>
+                <div class="order-details">
+                  <h3 class="font-semibold text-gray-700 mb-2">Order Details:</h3>
+                  <ul class="text-gray-600">
+                    <li><strong>Order ID:</strong> ${data.activeOrder.orderId}</li>
+                    <li><strong>Status:</strong> ${data.activeOrder.status.charAt(0).toUpperCase() + data.activeOrder.status.slice(1)}</li>
+                    <li><strong>Pickup Date:</strong> ${pickupDate}</li>
+                    <li><strong>Pickup Time:</strong> ${data.activeOrder.pickupTime || 'N/A'}</li>
+                  </ul>
+                </div>
+                <div class="mt-6">
+                  <a href="/embed-app.html?route=/customer-dashboard" class="btn btn-primary">
+                    View Order Status
+                  </a>
+                </div>
+              </div>
+            </div>
+            <style>
+              .active-order-notice {
+                max-width: 600px;
+                margin: 40px auto;
+                padding: 40px;
+                background: #f8f9fa;
+                border-radius: 12px;
+                text-align: center;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+              }
+              .notice-icon {
+                margin-bottom: 20px;
+              }
+              .notice-content {
+                background: white;
+                padding: 30px;
+                border-radius: 8px;
+                margin-top: 20px;
+              }
+              .order-details {
+                background: #f8f9fa;
+                padding: 20px;
+                border-radius: 8px;
+                text-align: left;
+                margin: 20px 0;
+              }
+              .order-details ul {
+                list-style: none;
+                padding: 0;
+                margin: 0;
+              }
+              .order-details li {
+                padding: 5px 0;
+              }
+              .btn {
+                display: inline-block;
+                padding: 12px 24px;
+                background: #3b82f6;
+                color: white;
+                text-decoration: none;
+                border-radius: 6px;
+                font-weight: 500;
+                transition: background 0.2s;
+              }
+              .btn:hover {
+                background: #2563eb;
+              }
+            </style>
+          `;
+        }
+        
+        return true;
+      }
+      
+      return false;
+    } catch (error) {
+      console.error('Error checking active orders:', error);
+      // On error, allow them to continue (fail open)
+      return false;
     }
   }
 

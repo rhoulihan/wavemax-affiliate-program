@@ -7,6 +7,13 @@ const { authenticate, authorize } = require('../middleware/auth');
 const { body } = require('express-validator');
 
 /**
+ * @route   GET /api/orders/check-active
+ * @desc    Check if customer has active orders
+ * @access  Private (customer)
+ */
+router.get('/check-active', authenticate, orderController.checkActiveOrders);
+
+/**
  * @route   POST /api/orders
  * @desc    Create a new order
  * @access  Private (customer, affiliate, or admin)

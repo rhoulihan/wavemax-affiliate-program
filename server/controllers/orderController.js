@@ -46,6 +46,54 @@ async function calculateDeliveryFee(numberOfBags, affiliate = null) {
 // ============================================================================
 
 /**
+ * Check if customer has active orders
+ */
+exports.checkActiveOrders = async (req, res) => {
+  try {
+    // Get customer ID from authenticated user
+    const customerId = req.user.customerId;
+    
+    if (!customerId) {
+      return res.status(400).json({
+        success: false,
+        message: 'Customer ID not found in session'
+      });
+    }
+
+    // Check for active orders
+    const activeOrder = await Order.findOne({
+      customerId: customerId,
+      status: { $in: ['pending', 'processing', 'processed'] }
+    }).select('orderId status createdAt pickupDate pickupTime');
+
+    if (activeOrder) {
+      return res.json({
+        success: true,
+        hasActiveOrder: true,
+        activeOrder: {
+          orderId: activeOrder.orderId,
+          status: activeOrder.status,
+          createdAt: activeOrder.createdAt,
+          pickupDate: activeOrder.pickupDate,
+          pickupTime: activeOrder.pickupTime
+        }
+      });
+    }
+
+    res.json({
+      success: true,
+      hasActiveOrder: false
+    });
+  } catch (error) {
+    console.error('Error checking active orders:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to check active orders'
+    });
+  }
+};
+
+/**
  * Create a new order
  */
 exports.createOrder = async (req, res) => {
