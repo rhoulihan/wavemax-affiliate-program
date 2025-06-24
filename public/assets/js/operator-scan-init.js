@@ -146,8 +146,7 @@
 
             const token = localStorage.getItem('operatorToken');
             
-            // All scans go to scan-bag endpoint with the scanned data
-            // The backend will determine if it's a customer ID or bag ID
+            // Use scan-bag endpoint (which internally calls scan-customer)
             const response = await csrfFetch(`${BASE_URL}/api/v1/operators/scan-bag`, {
                 method: 'POST',
                 headers: {
@@ -156,8 +155,7 @@
                 },
                 body: JSON.stringify({ 
                     bagId: scanData,
-                    // Also send as customerId if it starts with CUST for backward compatibility
-                    ...(scanData.startsWith('CUST') && { customerId: scanData })
+                    customerId: scanData  // Backend expects customerId in req.body for scanCustomer
                 })
             });
 
