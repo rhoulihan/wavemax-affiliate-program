@@ -323,11 +323,8 @@
         switch (event.data.type) {
             case 'hide-chrome':
                 console.log('[Parent-Iframe Bridge] Hide chrome requested. isMobile:', isMobile, 'isTablet:', isTablet);
-                if (isMobile || isTablet) {
-                    hideChrome();
-                } else {
-                    console.log('[Parent-Iframe Bridge] Hide chrome ignored - not mobile/tablet');
-                }
+                // Always hide chrome when requested by iframe (for operator routes)
+                hideChrome();
                 break;
                 
             case 'show-chrome':
@@ -349,15 +346,19 @@
                 break;
                 
             case 'route-changed':
-                console.log('[Parent-Iframe Bridge] Route changed. chromeHidden:', chromeHidden, 'isMobile:', isMobile);
-                // On mobile, always keep chrome hidden
-                if (isMobile && !chromeHidden) {
-                    console.log('[Parent-Iframe Bridge] Route changed on mobile, hiding chrome');
-                    hideChrome();
+                const route = event.data.data && event.data.data.route ? event.data.data.route : '/';
+                console.log('[Parent-Iframe Bridge] Route changed to:', route, 'chromeHidden:', chromeHidden, 'isMobile:', isMobile);
+                
+                // Hide chrome for operator routes OR mobile
+                if (route.startsWith('/operator-') || isMobile) {
+                    if (!chromeHidden) {
+                        console.log('[Parent-Iframe Bridge] Hiding chrome for:', route.startsWith('/operator-') ? 'operator route' : 'mobile');
+                        hideChrome();
+                    }
                 }
-                // On desktop, show chrome if it was hidden
-                else if (!isMobile && chromeHidden) {
-                    console.log('[Parent-Iframe Bridge] Route changed on desktop, showing chrome');
+                // Show chrome if not on operator route AND not mobile
+                else if (!route.startsWith('/operator-') && !isMobile && chromeHidden) {
+                    console.log('[Parent-Iframe Bridge] Showing chrome - not operator route or mobile');
                     showChrome();
                 }
                 break;
