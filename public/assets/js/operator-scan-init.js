@@ -543,6 +543,15 @@
             window.SessionManager.clearAuth('operator');
         }
         
+        // Notify parent to show chrome again
+        if (window.parent !== window) {
+            console.log('[Operator] Notifying parent to show chrome after logout');
+            window.parent.postMessage({
+                type: 'operator-logout',
+                data: {}
+            }, '*');
+        }
+        
         // Use navigateTo if available (when in embed-app.html)
         if (window.navigateTo) {
             window.navigateTo('/');  // Go to landing page

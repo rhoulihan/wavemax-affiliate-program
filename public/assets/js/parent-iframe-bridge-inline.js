@@ -332,6 +332,11 @@
                 showChrome();
                 break;
                 
+            case 'operator-logout':
+                console.log('[Parent-Iframe Bridge] Operator logout - showing all page elements');
+                showChrome();
+                break;
+                
             case 'resize':
                 // Existing resize functionality
                 if (event.data.data && event.data.data.height) {
@@ -604,77 +609,96 @@
             return;
         }
 
-        console.log('[Parent-Iframe Bridge] hideChrome: Starting to hide header/footer');
-        
-        // Find all elements to hide - WaveMAX CMS specific selectors
-        const topbar = document.querySelector('.topbar');
-        const middlebar = document.querySelector('.middlebar');
-        const wrapper = document.querySelector('.wrapper');
-        const header = document.querySelector('.navbar');
-        const pageHeader = document.querySelector('.page-header');
-        const footer = document.querySelector('.footer');
-        
-        console.log('[Parent-Iframe Bridge] Elements found:', {
-            topbar: !!topbar,
-            middlebar: !!middlebar,
-            wrapper: !!wrapper,
-            navbar: !!header,
-            pageHeader: !!pageHeader,
-            footer: !!footer
-        });
+        console.log('[Parent-Iframe Bridge] hideChrome: Starting to hide all page elements except iframe');
         
         // Store scroll position
         lastScrollPosition = window.pageYOffset;
 
-        // Hide topbar
-        if (topbar) {
-            topbar.style.display = 'none';
-            topbar.setAttribute('data-mobile-hidden', 'true');
+        // Hide ALL direct children of body except the iframe and its container
+        const bodyChildren = document.body.children;
+        let hiddenCount = 0;
+        
+        for (let i = 0; i < bodyChildren.length; i++) {
+            const element = bodyChildren[i];
+            
+            // Skip if this is the iframe or contains the iframe
+            if (element === iframe || element.contains(iframe)) {
+                console.log('[Parent-Iframe Bridge] Skipping element that contains iframe:', element.tagName, element.className);
+                continue;
+            }
+            
+            // Skip if it's a script or style tag
+            if (element.tagName === 'SCRIPT' || element.tagName === 'STYLE') {
+                continue;
+            }
+            
+            // Skip if already hidden
+            if (element.style.display === 'none' || window.getComputedStyle(element).display === 'none') {
+                continue;
+            }
+            
+            // Hide the element
+            element.setAttribute('data-operator-hidden', 'true');
+            element.setAttribute('data-original-display', element.style.display || '');
+            element.style.display = 'none';
+            hiddenCount++;
+            console.log('[Parent-Iframe Bridge] Hiding element:', element.tagName, element.className || element.id || '(no class/id)');
         }
-
-        // Hide middlebar
-        if (middlebar) {
-            middlebar.style.display = 'none';
-            middlebar.setAttribute('data-mobile-hidden', 'true');
-        }
-
-        // Hide wrapper (contains navbar) or navbar directly
-        if (wrapper) {
-            wrapper.style.display = 'none';
-            wrapper.setAttribute('data-mobile-hidden', 'true');
-        } else if (header) {
-            // Fallback if wrapper not found
-            header.style.transition = 'transform 0.3s ease-in-out';
-            header.style.transform = 'translateY(-100%)';
-            header.setAttribute('data-mobile-hidden', 'true');
-        }
-
-        // Hide page header
-        if (pageHeader) {
-            pageHeader.style.display = 'none';
-            pageHeader.setAttribute('data-mobile-hidden', 'true');
-        }
-
-        // Hide footer
-        if (footer) {
-            footer.style.transition = 'transform 0.3s ease-in-out';
-            footer.style.transform = 'translateY(100%)';
-            footer.setAttribute('data-mobile-hidden', 'true');
-        }
+        
+        console.log('[Parent-Iframe Bridge] Hidden', hiddenCount, 'elements');
 
         // Adjust iframe container to full viewport
         if (iframe) {
-            const container = iframe.parentElement;
-            if (container) {
-                container.style.transition = 'all 0.3s ease-in-out';
-                container.style.minHeight = '100vh';
-                container.style.paddingTop = '0';
-                container.style.paddingBottom = '0';
+            // Find all parent containers up to body
+            let currentElement = iframe;
+            while (currentElement && currentElement !== document.body) {
+                // Remove any padding/margin from containers
+                if (currentElement.style) {
+                    currentElement.setAttribute('data-operator-original-padding', JSON.stringify({
+                        paddingTop: currentElement.style.paddingTop || '',
+                        paddingBottom: currentElement.style.paddingBottom || '',
+                        paddingLeft: currentElement.style.paddingLeft || '',
+                        paddingRight: currentElement.style.paddingRight || '',
+                        marginTop: currentElement.style.marginTop || '',
+                        marginBottom: currentElement.style.marginBottom || '',
+                        marginLeft: currentElement.style.marginLeft || '',
+                        marginRight: currentElement.style.marginRight || '',
+                        minHeight: currentElement.style.minHeight || ''
+                    }));
+                    
+                    currentElement.style.padding = '0';
+                    currentElement.style.margin = '0';
+                    currentElement.style.minHeight = '100vh';
+                    currentElement.style.width = '100%';
+                    currentElement.style.maxWidth = '100%';
+                }
+                currentElement = currentElement.parentElement;
             }
             
-            // Make iframe full height
+            // Make iframe full viewport
             iframe.style.minHeight = '100vh';
+            iframe.style.width = '100%';
+            iframe.style.maxWidth = '100%';
+            iframe.style.margin = '0';
+            iframe.style.padding = '0';
+            iframe.style.border = 'none';
         }
+        
+        // Also set body to remove any padding/margin
+        document.body.setAttribute('data-operator-original-body-style', JSON.stringify({
+            paddingTop: document.body.style.paddingTop || '',
+            paddingBottom: document.body.style.paddingBottom || '',
+            paddingLeft: document.body.style.paddingLeft || '',
+            paddingRight: document.body.style.paddingRight || '',
+            marginTop: document.body.style.marginTop || '',
+            marginBottom: document.body.style.marginBottom || '',
+            marginLeft: document.body.style.marginLeft || '',
+            marginRight: document.body.style.marginRight || ''
+        }));
+        
+        document.body.style.padding = '0';
+        document.body.style.margin = '0';
+        document.body.style.overflow = 'hidden'; // Prevent scrolling on parent
 
         chromeHidden = true;
 
@@ -692,64 +716,73 @@
     function showChrome() {
         if (!chromeHidden) return;
 
-        console.log('[Parent-Iframe Bridge] Showing header/footer');
+        console.log('[Parent-Iframe Bridge] Showing all hidden page elements');
         
-        // Find all hidden elements
-        const topbar = document.querySelector('.topbar[data-mobile-hidden="true"]');
-        const middlebar = document.querySelector('.middlebar[data-mobile-hidden="true"]');
-        const wrapper = document.querySelector('.wrapper[data-mobile-hidden="true"]');
-        const header = document.querySelector('.navbar[data-mobile-hidden="true"]');
-        const pageHeader = document.querySelector('.page-header[data-mobile-hidden="true"]:not([data-permanently-hidden="true"])');
-        const footer = document.querySelector('.footer[data-mobile-hidden="true"]');
-
-        // Show topbar
-        if (topbar) {
-            topbar.style.display = '';
-            topbar.removeAttribute('data-mobile-hidden');
-        }
-
-        // Show middlebar
-        if (middlebar) {
-            middlebar.style.display = '';
-            middlebar.removeAttribute('data-mobile-hidden');
-        }
-
-        // Show wrapper or header
-        if (wrapper) {
-            wrapper.style.display = '';
-            wrapper.removeAttribute('data-mobile-hidden');
-        } else if (header) {
-            header.style.transform = 'translateY(0)';
-            setTimeout(() => {
-                header.removeAttribute('data-mobile-hidden');
-            }, 300);
-        }
-
-        // Show page header
-        if (pageHeader) {
-            pageHeader.style.display = '';
-            pageHeader.removeAttribute('data-mobile-hidden');
-        }
-
-        // Show footer  
-        if (footer) {
-            footer.style.transform = 'translateY(0)';
-            setTimeout(() => {
-                footer.removeAttribute('data-mobile-hidden');
-            }, 300);
-        }
-
-        // Reset iframe container
+        // Restore all hidden elements
+        const hiddenElements = document.querySelectorAll('[data-operator-hidden="true"]');
+        let restoredCount = 0;
+        
+        hiddenElements.forEach(element => {
+            const originalDisplay = element.getAttribute('data-original-display') || '';
+            element.style.display = originalDisplay;
+            element.removeAttribute('data-operator-hidden');
+            element.removeAttribute('data-original-display');
+            restoredCount++;
+            console.log('[Parent-Iframe Bridge] Restoring element:', element.tagName, element.className || element.id || '(no class/id)');
+        });
+        
+        console.log('[Parent-Iframe Bridge] Restored', restoredCount, 'elements');
+        
+        // Restore iframe container styles
         if (iframe) {
-            const container = iframe.parentElement;
-            if (container) {
-                container.style.minHeight = '';
-                container.style.paddingTop = '';
-                container.style.paddingBottom = '';
+            // Restore all parent containers
+            let currentElement = iframe;
+            while (currentElement && currentElement !== document.body) {
+                const originalPadding = currentElement.getAttribute('data-operator-original-padding');
+                if (originalPadding) {
+                    try {
+                        const styles = JSON.parse(originalPadding);
+                        currentElement.style.paddingTop = styles.paddingTop;
+                        currentElement.style.paddingBottom = styles.paddingBottom;
+                        currentElement.style.paddingLeft = styles.paddingLeft;
+                        currentElement.style.paddingRight = styles.paddingRight;
+                        currentElement.style.marginTop = styles.marginTop;
+                        currentElement.style.marginBottom = styles.marginBottom;
+                        currentElement.style.marginLeft = styles.marginLeft;
+                        currentElement.style.marginRight = styles.marginRight;
+                        currentElement.style.minHeight = styles.minHeight;
+                        currentElement.removeAttribute('data-operator-original-padding');
+                    } catch (e) {
+                        console.error('[Parent-Iframe Bridge] Error restoring container styles:', e);
+                    }
+                }
+                currentElement = currentElement.parentElement;
             }
             
+            // Reset iframe styles
             iframe.style.minHeight = '';
         }
+        
+        // Restore body styles
+        const originalBodyStyle = document.body.getAttribute('data-operator-original-body-style');
+        if (originalBodyStyle) {
+            try {
+                const styles = JSON.parse(originalBodyStyle);
+                document.body.style.paddingTop = styles.paddingTop;
+                document.body.style.paddingBottom = styles.paddingBottom;
+                document.body.style.paddingLeft = styles.paddingLeft;
+                document.body.style.paddingRight = styles.paddingRight;
+                document.body.style.marginTop = styles.marginTop;
+                document.body.style.marginBottom = styles.marginBottom;
+                document.body.style.marginLeft = styles.marginLeft;
+                document.body.style.marginRight = styles.marginRight;
+                document.body.removeAttribute('data-operator-original-body-style');
+            } catch (e) {
+                console.error('[Parent-Iframe Bridge] Error restoring body styles:', e);
+            }
+        }
+        
+        document.body.style.overflow = ''; // Restore scrolling
 
         chromeHidden = false;
 
