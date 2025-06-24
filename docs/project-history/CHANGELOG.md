@@ -4,6 +4,43 @@ All notable changes to the WaveMAX Laundry Affiliate Program will be documented 
 
 ## [Unreleased]
 
+## [1.0.1] - 2024-12-24
+
+### Added
+- Store IP-based session renewal for operators
+  - Automatic token renewal for operators working from store locations
+  - Configuration via `STORE_IP_ADDRESS`, `ADDITIONAL_STORE_IPS`, and `STORE_IP_RANGES`
+  - Prevents session timeouts during work shifts
+  - CIDR range support for network-based authentication
+- Enhanced parent-iframe bridge chrome management
+  - Automatic hiding of all page elements outside iframe
+  - Persistent chrome hiding across viewport and route changes
+  - Mutation observers to prevent unwanted element visibility
+
+### Changed
+- Simplified order status management
+  - Removed `orderProcessingStatus` field from Order model
+  - Consolidated to single `status` field with clearer state flow
+  - New status progression: pending → processing → processed → complete → cancelled
+  - Orders cannot be cancelled once processing begins
+- Operator scanning workflow labels
+  - Stage 1: "Receive" - Scan to weigh bags
+  - Stage 2: "Notify" - Scan when WDF is done
+  - Stage 3: "Pickup" - Scan as bags leave
+- Operator interface UI improvements
+  - Consistent WaveMAX blue branding (#1e3a8a, #3b82f6) replacing green
+  - Bags weighed count updates only on blur with valid weight entry
+  - Weight input modal stays visible with multiple display strategies
+
+### Fixed
+- Weight input modal auto-closing issue in cross-origin iframe context
+- Mongoose populate errors with string-based ID relationships
+- Content Security Policy violations from inline event handlers
+- Audit logger multi-line comment syntax causing server crashes
+- Authentication error handling now redirects to affiliate landing page
+- Page header reappearing on viewport resize for embedded pages
+- 500 error when marking bags as processed due to populate calls
+
 ### Added
 - Connectivity Monitoring System
   - Real-time monitoring of all external service dependencies

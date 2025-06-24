@@ -753,10 +753,22 @@
                     } else if (messageData.isMobile && chromeHidden) {
                         console.log('[EMBED-APP] Mobile detected but chrome already hidden');
                     } else if (!messageData.isMobile && chromeHidden) {
-                        console.log('[EMBED-APP] Desktop detected, showing chrome');
-                        requestChromeShow();
+                        // Only show chrome if NOT on operator route
+                        if (!currentRoute.startsWith('/operator-')) {
+                            console.log('[EMBED-APP] Desktop detected and not on operator route, showing chrome');
+                            requestChromeShow();
+                        } else {
+                            console.log('[EMBED-APP] Desktop detected but on operator route, keeping chrome hidden');
+                            // Re-request hide to ensure it stays hidden
+                            requestChromeHide();
+                        }
                     } else {
                         console.log('[EMBED-APP] Desktop mode, chrome visible');
+                        // If on operator route, hide chrome even in desktop mode
+                        if (currentRoute.startsWith('/operator-')) {
+                            console.log('[EMBED-APP] On operator route, hiding chrome');
+                            requestChromeHide();
+                        }
                     }
                     
                     // Handle language if provided

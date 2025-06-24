@@ -428,11 +428,11 @@ exports.cancelOrder = async (req, res) => {
       });
     }
 
-    // Check if order can be cancelled
-    if (!['pending', 'scheduled'].includes(order.status)) {
+    // Check if order can be cancelled - only pending orders can be cancelled
+    if (order.status !== 'pending') {
       return res.status(400).json({
         success: false,
-        message: `Orders in ${order.status} status cannot be cancelled`
+        message: `Orders in ${order.status} status cannot be cancelled. Only pending orders can be cancelled.`
       });
     }
 

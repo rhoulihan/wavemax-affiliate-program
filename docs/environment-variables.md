@@ -119,6 +119,41 @@ This document provides comprehensive information about all environment variables
   - `3`: All state-changing endpoints
 - **Example**: `CSRF_PHASE=1`
 
+## Store IP Configuration
+
+### STORE_IP_ADDRESS
+- **Type**: String (IP Address)
+- **Description**: Primary store IP address for automatic operator session renewal
+- **Example**: `STORE_IP_ADDRESS=70.114.167.145`
+
+### ADDITIONAL_STORE_IPS
+- **Type**: String (Comma-separated IP addresses)
+- **Description**: Additional store IP addresses for operator session renewal
+- **Example**: `ADDITIONAL_STORE_IPS=192.168.1.100,10.0.0.50`
+
+### STORE_IP_RANGES
+- **Type**: String (Comma-separated CIDR ranges)
+- **Description**: Store network IP ranges in CIDR notation
+- **Example**: `STORE_IP_RANGES=192.168.1.0/24,10.0.0.0/16`
+
+### STORE_SESSION_CHECK_INTERVAL
+- **Type**: Number (Milliseconds)
+- **Default**: `300000` (5 minutes)
+- **Description**: How often to check if operator token needs renewal
+- **Example**: `STORE_SESSION_CHECK_INTERVAL=300000`
+
+### STORE_SESSION_RENEW_THRESHOLD
+- **Type**: Number (Milliseconds)
+- **Default**: `1800000` (30 minutes)
+- **Description**: Renew token when it has less than this much time left
+- **Example**: `STORE_SESSION_RENEW_THRESHOLD=1800000`
+
+### STORE_SESSION_MAX_DURATION
+- **Type**: Number (Milliseconds)
+- **Default**: `86400000` (24 hours)
+- **Description**: Maximum session duration for operators at store IPs
+- **Example**: `STORE_SESSION_MAX_DURATION=86400000`
+
 ## Email Configuration
 
 ### EMAIL_PROVIDER

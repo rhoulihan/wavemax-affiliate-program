@@ -28,7 +28,7 @@ const orderSchema = new mongoose.Schema({
   // Order status
   status: {
     type: String,
-    enum: ['pending', 'scheduled', 'processing', 'processed', 'complete', 'cancelled'],
+    enum: ['pending', 'processing', 'processed', 'complete', 'cancelled'],
     default: 'pending'
   },
   // Laundry details
@@ -93,11 +93,6 @@ const orderSchema = new mongoose.Schema({
   },
   qualityCheckNotes: String,
   processingTimeMinutes: Number, // Auto-calculated
-  orderProcessingStatus: {
-    type: String,
-    enum: ['pending', 'assigned', 'washing', 'drying', 'folding', 'quality_check', 'ready', 'completed'],
-    default: 'pending'
-  },
   // Timestamps
   createdAt: { type: Date, default: Date.now }, // When order was created (pending state)
   scheduledAt: Date, // When affiliate accepted the order

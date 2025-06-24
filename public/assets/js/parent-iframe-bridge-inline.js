@@ -41,6 +41,7 @@
     let lastScrollPosition = 0;
     let iframe = null;
     let lastIframeHeight = 0;
+    let isEmbedPage = true; // Always treat as embed page
 
     // Initialize when DOM is ready
     if (document.readyState === 'loading') {
@@ -78,6 +79,9 @@
         // Always hide the page header element immediately
         hidePageHeader();
         
+        // Also hide all page chrome for embed pages
+        hideAllPageChrome();
+        
         // Remove padding and borders from iframe container for all embedded content
         removeContainerPaddingAndBorders();
 
@@ -86,11 +90,9 @@
         window.addEventListener('resize', debounce(detectViewport, 250));
         window.addEventListener('orientationchange', detectViewport);
         
-        // If mobile is detected on init, hide chrome immediately
-        if (isMobile || isTablet) {
-            console.log('[Parent-Iframe Bridge] Mobile/tablet detected on init, hiding chrome');
-            hideChrome();
-        }
+        // Always hide chrome on init for embed pages
+        console.log('[Parent-Iframe Bridge] Embed page detected, hiding chrome');
+        hideChrome();
 
         // Set up message listener
         window.addEventListener('message', handleMessage);
@@ -107,7 +109,62 @@
         setTimeout(() => sendViewportInfo(), 1000);
         setTimeout(() => sendViewportInfo(), 2000);
         
+        // Set up periodic check to ensure page chrome stays hidden
+        setInterval(() => {
+            hidePageHeader();
+            hideAllPageChrome();
+        }, 1000);
+        
+        // Set up a global mutation observer to catch any DOM changes
+        setupGlobalObserver();
+        
         console.log('[Parent-Iframe Bridge] Initialized successfully');
+    }
+    
+    function setupGlobalObserver() {
+        console.log('[Parent-Iframe Bridge] Setting up global mutation observer');
+        
+        const observer = new MutationObserver((mutations) => {
+            let needsHiding = false;
+            
+            mutations.forEach((mutation) => {
+                if (mutation.type === 'childList') {
+                    // Check if any chrome elements were added
+                    mutation.addedNodes.forEach(node => {
+                        if (node.nodeType === 1 && (
+                            node.matches && (
+                                node.matches('header, nav, footer, .header, .navbar, .page-header') ||
+                                node.querySelector('header, nav, footer, .header, .navbar, .page-header')
+                            )
+                        )) {
+                            needsHiding = true;
+                        }
+                    });
+                } else if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
+                    // Check if any hidden element was shown
+                    if (mutation.target.hasAttribute('data-permanently-hidden') || 
+                        mutation.target.hasAttribute('data-embed-hidden')) {
+                        const display = window.getComputedStyle(mutation.target).display;
+                        if (display !== 'none') {
+                            needsHiding = true;
+                        }
+                    }
+                }
+            });
+            
+            if (needsHiding) {
+                console.log('[Parent-Iframe Bridge] Global observer detected changes, re-hiding chrome');
+                hidePageHeader();
+                hideAllPageChrome();
+            }
+        });
+        
+        observer.observe(document.body, {
+            childList: true,
+            subtree: true,
+            attributes: true,
+            attributeFilter: ['style', 'class']
+        });
     }
 
     function hidePageHeader() {
@@ -115,11 +172,69 @@
         const pageHeader = document.querySelector('section.page-header.page-header-modern.bg-color-light-scale-1.page-header-sm');
         if (pageHeader) {
             console.log('[Parent-Iframe Bridge] Hiding page header element');
-            pageHeader.style.display = 'none';
+            pageHeader.style.setProperty('display', 'none', 'important');
             pageHeader.setAttribute('data-permanently-hidden', 'true');
+            pageHeader.setAttribute('data-operator-hidden', 'true');
+            
+            // Set up mutation observer to keep it hidden
+            if (!pageHeader.hasAttribute('data-observer-attached')) {
+                pageHeader.setAttribute('data-observer-attached', 'true');
+                
+                const observer = new MutationObserver((mutations) => {
+                    mutations.forEach((mutation) => {
+                        if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
+                            const currentDisplay = pageHeader.style.display;
+                            if (currentDisplay !== 'none') {
+                                console.log('[Parent-Iframe Bridge] Page header was shown, hiding it again');
+                                pageHeader.style.setProperty('display', 'none', 'important');
+                            }
+                        }
+                    });
+                });
+                
+                observer.observe(pageHeader, {
+                    attributes: true,
+                    attributeFilter: ['style']
+                });
+            }
         } else {
             console.log('[Parent-Iframe Bridge] Page header element not found');
         }
+    }
+    
+    function hideAllPageChrome() {
+        console.log('[Parent-Iframe Bridge] Hiding all page chrome elements');
+        
+        // List of selectors for all page chrome elements
+        const chromeSelectors = [
+            'header', 
+            'nav', 
+            'footer',
+            '.header',
+            '.navbar',
+            '.navigation',
+            '.top-bar',
+            '.topbar',
+            '.middlebar',
+            '.footer',
+            '.site-footer',
+            '.page-header',
+            '.breadcrumb',
+            '.breadcrumbs',
+            'section.page-header'
+        ];
+        
+        chromeSelectors.forEach(selector => {
+            const elements = document.querySelectorAll(selector);
+            elements.forEach(element => {
+                // Skip if element contains the iframe
+                if (element.contains(iframe)) return;
+                
+                element.style.setProperty('display', 'none', 'important');
+                element.setAttribute('data-embed-hidden', 'true');
+                element.setAttribute('data-permanently-hidden', 'true');
+            });
+        });
     }
     
     function removeContainerPaddingAndBorders() {
@@ -177,6 +292,50 @@
         const styleTag = document.createElement('style');
         styleTag.id = 'wavemax-iframe-overrides';
         styleTag.innerHTML = `
+            /* Ensure permanently hidden elements stay hidden */
+            [data-permanently-hidden="true"] {
+                display: none !important;
+                visibility: hidden !important;
+                opacity: 0 !important;
+                position: absolute !important;
+                left: -9999px !important;
+                top: -9999px !important;
+                width: 0 !important;
+                height: 0 !important;
+                overflow: hidden !important;
+            }
+            
+            /* Hide embed-hidden elements */
+            [data-embed-hidden="true"] {
+                display: none !important;
+                visibility: hidden !important;
+                opacity: 0 !important;
+            }
+            
+            /* Specific page header hiding */
+            section.page-header.page-header-modern.bg-color-light-scale-1.page-header-sm {
+                display: none !important;
+                visibility: hidden !important;
+                opacity: 0 !important;
+                height: 0 !important;
+                overflow: hidden !important;
+            }
+            
+            /* Hide all common header/footer elements when iframe is present */
+            body:has(#wavemax-iframe) header,
+            body:has(#wavemax-iframe) nav,
+            body:has(#wavemax-iframe) footer,
+            body:has(#wavemax-iframe) .header,
+            body:has(#wavemax-iframe) .navbar,
+            body:has(#wavemax-iframe) .topbar,
+            body:has(#wavemax-iframe) .middlebar,
+            body:has(#wavemax-iframe) .page-header,
+            body:has(#wavemax-iframe) .site-header,
+            body:has(#wavemax-iframe) .site-footer {
+                display: none !important;
+                visibility: hidden !important;
+                opacity: 0 !important;
+            }
             /* Target the iframe */
             #wavemax-iframe {
                 width: 100% !important;
@@ -258,12 +417,11 @@
         if (oldMobile !== isMobile || oldTablet !== isTablet) {
             console.log('[Parent-Iframe Bridge] Viewport category changed, sending update');
             sendViewportInfo();
-            
-            // Show chrome again if switching from mobile to desktop
-            if (oldMobile && !isMobile && chromeHidden) {
-                showChrome();
-            }
         }
+        
+        // Always hide chrome on any viewport change
+        console.log('[Parent-Iframe Bridge] Viewport changed, ensuring chrome stays hidden');
+        hideChrome();
     }
 
     function sendViewportInfo() {
@@ -328,8 +486,8 @@
                 break;
                 
             case 'show-chrome':
-                console.log('[Parent-Iframe Bridge] Show chrome requested');
-                showChrome();
+                console.log('[Parent-Iframe Bridge] Show chrome requested, but hiding instead for embed page');
+                hideChrome();
                 break;
                 
             case 'resize':
@@ -349,18 +507,12 @@
                 const route = event.data.data && event.data.data.route ? event.data.data.route : '/';
                 console.log('[Parent-Iframe Bridge] Route changed to:', route, 'chromeHidden:', chromeHidden, 'isMobile:', isMobile);
                 
-                // Hide chrome for operator routes OR mobile
-                if (route.startsWith('/operator-') || isMobile) {
-                    if (!chromeHidden) {
-                        console.log('[Parent-Iframe Bridge] Hiding chrome for:', route.startsWith('/operator-') ? 'operator route' : 'mobile');
-                        hideChrome();
-                    }
-                }
-                // Show chrome if not on operator route AND not mobile
-                else if (!route.startsWith('/operator-') && !isMobile && chromeHidden) {
-                    console.log('[Parent-Iframe Bridge] Showing chrome - not operator route or mobile');
-                    showChrome();
-                }
+                // Store current route for future reference
+                window.currentEmbedRoute = route;
+                
+                // Always hide chrome on route changes
+                console.log('[Parent-Iframe Bridge] Route changed, ensuring chrome stays hidden');
+                hideChrome();
                 break;
                 
             // GEOCODING CASES
@@ -626,10 +778,11 @@
                     return;
                 }
                 
-                // Skip if already hidden
+                // Skip if already hidden or permanently hidden
                 if (element.style.display === 'none' || 
                     window.getComputedStyle(element).display === 'none' ||
-                    element.hasAttribute('data-operator-hidden')) {
+                    element.hasAttribute('data-operator-hidden') ||
+                    element.hasAttribute('data-permanently-hidden')) {
                     return;
                 }
                 
@@ -663,10 +816,11 @@
                 continue;
             }
             
-            // Skip if already hidden or marked as hidden
+            // Skip if already hidden, marked as hidden, or permanently hidden
             if (element.style.display === 'none' || 
                 window.getComputedStyle(element).display === 'none' ||
-                element.hasAttribute('data-operator-hidden')) {
+                element.hasAttribute('data-operator-hidden') ||
+                element.hasAttribute('data-permanently-hidden')) {
                 continue;
             }
             
@@ -689,6 +843,9 @@
         hideStyle.id = 'operator-hide-chrome-styles';
         hideStyle.innerHTML = `
             [data-operator-hidden="true"] {
+                display: none !important;
+            }
+            [data-permanently-hidden="true"] {
                 display: none !important;
             }
             body.operator-mode > *:not(script):not(style):not(:has(#wavemax-iframe)) {
@@ -776,15 +933,24 @@
     }
 
     function showChrome() {
-        if (!chromeHidden) return;
-
-        console.log('[Parent-Iframe Bridge] Showing all hidden page elements');
+        // Always re-hide chrome instead of showing it
+        console.log('[Parent-Iframe Bridge] showChrome called, but re-hiding chrome instead');
+        hideChrome();
+        return;
         
-        // Restore all hidden elements
+        // Restore all hidden elements EXCEPT permanently hidden ones
         const hiddenElements = document.querySelectorAll('[data-operator-hidden="true"]');
         let restoredCount = 0;
+        let skippedCount = 0;
         
         hiddenElements.forEach(element => {
+            // Skip permanently hidden elements
+            if (element.hasAttribute('data-permanently-hidden')) {
+                console.log('[Parent-Iframe Bridge] Skipping permanently hidden element:', element.tagName, element.className || element.id || '(no class/id)');
+                skippedCount++;
+                return;
+            }
+            
             const originalDisplay = element.getAttribute('data-original-display') || '';
             const originalComputedDisplay = element.getAttribute('data-original-computed-display') || '';
             
@@ -803,7 +969,7 @@
             console.log('[Parent-Iframe Bridge] Restoring element:', element.tagName, element.className || element.id || '(no class/id)');
         });
         
-        console.log('[Parent-Iframe Bridge] Restored', restoredCount, 'elements');
+        console.log('[Parent-Iframe Bridge] Restored', restoredCount, 'elements, skipped', skippedCount, 'permanently hidden');
         
         // Remove the operator mode class and style tag
         document.body.classList.remove('operator-mode');

@@ -83,6 +83,7 @@
     if (method.toUpperCase() !== 'GET' && method.toUpperCase() !== 'HEAD' && method.toUpperCase() !== 'OPTIONS') {
       await ensureCsrfToken();
       headers['x-csrf-token'] = csrfToken;
+      console.log('Added CSRF token to headers:', csrfToken ? 'Present' : 'Missing');
     }
     return headers;
   }
@@ -101,7 +102,12 @@
 
     // Add CSRF token to headers for state-changing requests
     if (method.toUpperCase() !== 'GET' && method.toUpperCase() !== 'HEAD' && method.toUpperCase() !== 'OPTIONS') {
-      options.headers = await addCsrfHeader(options.headers || {}, method);
+      // Ensure headers object exists
+      if (!options.headers) {
+        options.headers = {};
+      }
+      // Add CSRF header while preserving existing headers
+      await addCsrfHeader(options.headers, method);
     }
 
     try {
@@ -115,7 +121,10 @@
           clearCsrfToken();
 
           // Retry with fresh token
-          options.headers = await addCsrfHeader(options.headers || {}, method);
+          if (!options.headers) {
+            options.headers = {};
+          }
+          await addCsrfHeader(options.headers, method);
           return fetch(url, options);
         }
       }
