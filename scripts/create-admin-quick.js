@@ -9,10 +9,10 @@ const Administrator = require('../server/models/Administrator');
 const encryptionUtil = require('../server/utils/encryption');
 
 // Configuration - CHANGE THESE VALUES
-const ADMIN_EMAIL = 'admin@wavemaxlaundry.com';
-const ADMIN_PASSWORD = 'Admin@2025!';  // Change this to a secure password
-const ADMIN_FIRST_NAME = 'Admin';
-const ADMIN_LAST_NAME = 'User';
+const ADMIN_EMAIL = process.env.DEFAULT_ADMIN_EMAIL || 'admin@wavemaxlaundry.com';
+const ADMIN_PASSWORD = 'WaveMAX!2024';  // Default password as per README
+const ADMIN_FIRST_NAME = 'System';
+const ADMIN_LAST_NAME = 'Administrator';
 
 async function main() {
   try {

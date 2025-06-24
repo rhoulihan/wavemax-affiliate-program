@@ -44,6 +44,8 @@ Comprehensive documentation is organized in the [`docs/`](docs/) directory:
 - [Changelog](docs/project-history/CHANGELOG.md) - Detailed change history
 - [Backlog](docs/development/BACKLOG.md) - Upcoming features and known issues
 - [Operating Best Practices](docs/development/OPERATING_BEST_PRACTICES.md) - Known issues and workarounds
+- [Environment Variables](docs/environment-variables.md) - Complete guide to all environment configuration
+- [Facebook OAuth Setup](docs/facebook-oauth-setup.md) - Facebook authentication configuration guide
 
 ## System Architecture
 
@@ -798,9 +800,14 @@ To get your Brevo API key:
    npm install
    ```
 
-3. Configure environment variables:
+3. Set up environment variables:
    ```bash
-   cp .env.example .env
+   # Copy the example environment file
+   cp env.example .env
+   
+   # Edit .env with your configuration
+   # See docs/environment-variables.md for detailed descriptions
+   nano .env
    ```
 
 4. Generate secure keys:

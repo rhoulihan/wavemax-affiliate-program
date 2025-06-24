@@ -716,24 +716,20 @@
   },
   "operator": {
     "login": {
-      "title": "Operator Portal",
-      "subtitle": "Enter your 4-digit PIN to access the system",
-      "pinPlaceholder": "Enter 4-digit PIN",
-      "invalidPin": "Invalid PIN. Please try again."
-    },
-    "dashboard": {
-      "title": "Operator Dashboard",
-      "welcome": "Welcome, {{name}}!",
-      "todaysPickups": "Today's Pickups",
-      "todaysDeliveries": "Today's Deliveries",
-      "processOrder": "Process Order",
-      "scanBarcode": "Scan Barcode",
-      "metrics": {
-        "pickupsCompleted": "Pickups Completed",
-        "deliveriesCompleted": "Deliveries Completed",
-        "ordersProcessed": "Orders Processed",
-        "efficiency": "Efficiency Rate"
-      }
+      "title": "Operator Login - WaveMAX",
+      "subtitle": "Operator Portal",
+      "email": "Email Address",
+      "password": "Password",
+      "clockIn": "Clock In",
+      "clockingIn": "Clocking In...",
+      "needHelp": "Need help? Contact your supervisor",
+      "shiftNoticeTitle": "Shift Notice:",
+      "shiftNoticeText": "You can only clock in during your scheduled shift hours. All activity is monitored.",
+      "invalidCredentials": "Invalid email or password",
+      "accountLocked": "Account locked. Please try again later.",
+      "accountInactive": "Account inactive. Contact your supervisor.",
+      "outsideShiftHours": "Login only allowed during shift hours",
+      "shiftEnded": "Your shift has ended. Please login again during your shift hours."
     }
   },
   "administrator": {
@@ -1048,7 +1044,13 @@
         "docusignCheckError": "Error checking authorization status.",
         "docusignAuthSuccess": "DocuSign authorization successful!",
         "noConfigData": "No configuration data available",
-        "loadError": "Error loading configuration"
+        "loadError": "Error loading configuration",
+        "systemSettings": "System Settings",
+        "envVariables": "Environment Variables",
+        "envTitle": "Environment Variables",
+        "loadingEnv": "Loading environment variables...",
+        "envLoadError": "Error loading environment variables",
+        "noEnvVars": "No environment variables found"
       },
       "loading": {
         "dashboard": "Loading dashboard data...",
@@ -1126,6 +1128,7 @@
       "estimatedSize": "Estimated Laundry Size:",
       "wdfService": "Wash, Dry, Fold Service:",
       "deliveryFee": "Pickup/Delivery Fee:",
+      "bagCredit": "Bag Credit (First Order):",
       "estimatedTotal": "Estimated Total:",
       "nextSteps": "Next Steps",
       "step1": "Have your laundry ready for pickup at the scheduled time",

@@ -41,6 +41,9 @@ router.post('/reports/export', checkAdminPermission(['view_analytics']), adminis
 router.get('/config', checkAdminPermission(['system_config']), administratorController.getSystemConfig);
 router.put('/config', checkAdminPermission(['system_config']), administratorController.updateSystemConfig);
 
+// Environment Variables
+router.get('/env-variables', checkAdminPermission(['system_config']), administratorController.getEnvironmentVariables);
+
 // System Health
 router.get('/system/health', administratorController.getSystemHealth);
 

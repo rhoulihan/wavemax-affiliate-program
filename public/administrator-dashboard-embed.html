@@ -295,7 +295,7 @@
             font-weight: 500;
         }
 
-        input, select {
+        input, select, textarea {
             width: 100%;
             padding: 10px 12px;
             border: 1px solid #ddd;
@@ -303,7 +303,12 @@
             font-size: 14px;
         }
 
-        input:focus, select:focus {
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        input:focus, select:focus, textarea:focus {
             outline: none;
             border-color: #4A90E2;
             box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
@@ -367,6 +372,10 @@
             
             .form-group.full-width {
                 grid-column: span 1;
+            }
+            
+            .form-row {
+                grid-template-columns: 1fr;
             }
         }
 
@@ -576,41 +585,6 @@
             padding: 20px;
         }
 
-        /* W-9 specific styles */
-        .w9-row {
-            display: flex;
-            align-items: center;
-            padding: 15px 20px;
-            border-bottom: 1px solid #e9ecef;
-            transition: background-color 0.2s;
-        }
-
-        .w9-row:hover {
-            background-color: #f8f9fa;
-        }
-
-        .w9-info {
-            flex: 1;
-        }
-
-        .w9-affiliate-name {
-            font-weight: 600;
-            margin-bottom: 5px;
-        }
-
-        .w9-affiliate-details {
-            font-size: 0.875rem;
-            color: #666;
-        }
-
-        .w9-status {
-            margin: 0 20px;
-        }
-
-        .w9-actions {
-            display: flex;
-            gap: 10px;
-        }
 
         .status-badge {
             padding: 4px 12px;
@@ -818,9 +792,7 @@
             <button class="nav-tab" data-tab="operators" data-i18n="administrator.dashboard.tabs.operators">Operators</button>
             <button class="nav-tab" data-tab="customers" data-i18n="administrator.dashboard.tabs.customers">Customers</button>
             <button class="nav-tab" data-tab="affiliates" data-i18n="administrator.dashboard.tabs.affiliates">Affiliates</button>
-            <button class="nav-tab" data-tab="w9review" data-i18n="administrator.dashboard.tabs.w9review">W-9 Review</button>
             <button class="nav-tab" data-tab="quickbooks" data-i18n="administrator.dashboard.tabs.quickbooks">QuickBooks</button>
-            <button class="nav-tab" data-tab="auditlog" data-i18n="administrator.dashboard.tabs.auditlog">Audit Log</button>
             <button class="nav-tab" data-tab="config" data-i18n="administrator.dashboard.tabs.config">Config</button>
         </nav>
 
@@ -1026,131 +998,7 @@
             </div>
         </div>
 
-        <!-- W-9 Review Tab -->
-        <div class="tab-content" id="w9review-tab">
-            <div class="card">
-                <div class="card-header">
-                    <h2 class="card-title" data-i18n="administrator.dashboard.w9review.title">W-9 Document Review</h2>
-                    <div style="display: flex; gap: 10px;">
-                        <span class="badge" id="pendingW9Count" style="background: #ffc107; color: #000;">0 Pending</span>
-                        <button class="btn btn-secondary" id="refreshW9ListBtn" data-i18n="common.buttons.refresh">Refresh</button>
-                    </div>
-                </div>
-                
-                <!-- Filter Section -->
-                <div style="padding: 20px; border-bottom: 1px solid #e9ecef;">
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="w9StatusFilter" data-i18n="administrator.dashboard.w9review.filterByStatus">Filter by Status</label>
-                            <select id="w9StatusFilter" class="form-control">
-                                <option value="all" data-i18n="common.labels.all">All</option>
-                                <option value="pending" selected data-i18n="administrator.dashboard.w9review.pending">Pending Review</option>
-                                <option value="verified" data-i18n="administrator.dashboard.w9review.verified">Verified</option>
-                                <option value="rejected" data-i18n="administrator.dashboard.w9review.rejected">Rejected</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="w9SearchInput" data-i18n="administrator.dashboard.w9review.searchAffiliate">Search Affiliate</label>
-                            <input type="text" id="w9SearchInput" class="form-control" placeholder="Name, Email, or Affiliate ID" data-i18n-placeholder="administrator.dashboard.w9review.searchPlaceholder">
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- W-9 Documents List -->
-                <div id="w9DocumentsList">
-                    <div class="loading">
-                        <div class="spinner"></div>
-                        <p data-i18n="administrator.dashboard.loading.w9documents">Loading W-9 documents...</p>
-                    </div>
-                </div>
-            </div>
-        </div>
 
-        <!-- W-9 Verification Modal -->
-        <div id="w9VerificationModal" class="modal" style="display: none;">
-            <div class="modal-content" style="max-width: 600px;">
-                <div class="modal-header">
-                    <h3 data-i18n="administrator.dashboard.w9review.verifyTitle">Verify W-9 Document</h3>
-                    <button class="modal-close" onclick="closeW9VerificationModal()">&times;</button>
-                </div>
-                <div class="modal-body">
-                    <form id="w9VerificationForm">
-                        <input type="hidden" id="verifyAffiliateId">
-                        
-                        <div class="form-group">
-                            <label data-i18n="administrator.dashboard.w9review.affiliateInfo">Affiliate Information</label>
-                            <div class="info-box" style="background: #f8f9fa; padding: 15px; border-radius: 6px; margin-bottom: 20px;">
-                                <p><strong data-i18n="common.labels.name">Name:</strong> <span id="verifyAffiliateName"></span></p>
-                                <p><strong data-i18n="common.labels.email">Email:</strong> <span id="verifyAffiliateEmail"></span></p>
-                                <p><strong data-i18n="common.labels.affiliateId">Affiliate ID:</strong> <span id="verifyAffiliateIdDisplay"></span></p>
-                            </div>
-                        </div>
-                        
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="taxIdType" data-i18n="administrator.dashboard.w9review.taxIdType">Tax ID Type</label>
-                                <select id="taxIdType" class="form-control" required>
-                                    <option value="">Select Type</option>
-                                    <option value="SSN">SSN (Social Security Number)</option>
-                                    <option value="EIN">EIN (Employer ID Number)</option>
-                                </select>
-                            </div>
-                            
-                            <div class="form-group">
-                                <label for="taxIdLast4" data-i18n="administrator.dashboard.w9review.taxIdLast4">Tax ID (Last 4 Digits)</label>
-                                <input type="text" id="taxIdLast4" class="form-control" pattern="[0-9]{4}" maxlength="4" required placeholder="1234" data-i18n-placeholder="administrator.dashboard.w9review.taxIdLast4Placeholder">
-                            </div>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="businessName" data-i18n="administrator.dashboard.w9review.businessName">Legal Business Name (if different)</label>
-                            <input type="text" id="businessName" class="form-control" placeholder="Leave blank if using personal name" data-i18n-placeholder="administrator.dashboard.w9review.businessNamePlaceholder">
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="quickbooksVendorId" data-i18n="administrator.dashboard.w9review.quickbooksVendorId">QuickBooks Vendor ID</label>
-                            <input type="text" id="quickbooksVendorId" class="form-control" placeholder="QB-VENDOR-123" data-i18n-placeholder="administrator.dashboard.w9review.quickbooksVendorIdPlaceholder">
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="verificationNotes" data-i18n="administrator.dashboard.w9review.notes">Verification Notes</label>
-                            <textarea id="verificationNotes" class="form-control" rows="3" placeholder="Optional notes about the verification" data-i18n-placeholder="administrator.dashboard.w9review.notesPlaceholder"></textarea>
-                        </div>
-                        
-                        <div class="form-actions" style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px;">
-                            <button type="button" class="btn btn-secondary" onclick="closeW9VerificationModal()" data-i18n="common.buttons.cancel">Cancel</button>
-                            <button type="submit" class="btn btn-primary" data-i18n="administrator.dashboard.w9review.verifyButton">Verify W-9</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-
-        <!-- W-9 Rejection Modal -->
-        <div id="w9RejectionModal" class="modal" style="display: none;">
-            <div class="modal-content" style="max-width: 500px;">
-                <div class="modal-header">
-                    <h3 data-i18n="administrator.dashboard.w9review.rejectTitle">Reject W-9 Document</h3>
-                    <button class="modal-close" onclick="closeW9RejectionModal()">&times;</button>
-                </div>
-                <div class="modal-body">
-                    <form id="w9RejectionForm">
-                        <input type="hidden" id="rejectAffiliateId">
-                        
-                        <div class="form-group">
-                            <label data-i18n="administrator.dashboard.w9review.rejectionReason">Rejection Reason</label>
-                            <textarea id="rejectionReason" class="form-control" rows="4" required placeholder="Please provide a clear reason for rejection" data-i18n-placeholder="administrator.dashboard.w9review.rejectionReasonPlaceholder"></textarea>
-                            <small class="text-muted" data-i18n="administrator.dashboard.w9review.rejectionHelp">This message will be sent to the affiliate</small>
-                        </div>
-                        
-                        <div class="form-actions" style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px;">
-                            <button type="button" class="btn btn-secondary" onclick="closeW9RejectionModal()" data-i18n="common.buttons.cancel">Cancel</button>
-                            <button type="submit" class="btn btn-danger" data-i18n="administrator.dashboard.w9review.rejectButton">Reject W-9</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
 
         <!-- QuickBooks Export Tab -->
         <div class="tab-content" id="quickbooks-tab">
@@ -1201,81 +1049,41 @@
             </div>
         </div>
 
-        <!-- Audit Log Tab -->
-        <div class="tab-content" id="auditlog-tab">
-            <div class="card">
-                <div class="card-header">
-                    <h2 class="card-title" data-i18n="administrator.dashboard.auditlog.title">W-9 Audit Log</h2>
-                    <div style="display: flex; gap: 10px; align-items: center;">
-                        <button class="btn btn-secondary" id="refreshAuditLogBtn" data-i18n="administrator.dashboard.auditlog.refresh">Refresh</button>
-                        <button class="btn btn-primary" id="exportAuditLogBtn" data-i18n="administrator.dashboard.auditlog.export">Export CSV</button>
-                    </div>
-                </div>
-                
-                <!-- Filters -->
-                <div style="padding: 20px; background: #f8f9fa; border-bottom: 1px solid #e9ecef;">
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
-                        <div>
-                            <label for="auditActionFilter" data-i18n="administrator.dashboard.auditlog.actionType">Action Type</label>
-                            <select id="auditActionFilter" class="form-control">
-                                <option value="" data-i18n="administrator.dashboard.auditlog.allActions">All Actions</option>
-                                <option value="upload_attempt">Upload Attempt</option>
-                                <option value="upload_success">Upload Success</option>
-                                <option value="upload_failure">Upload Failure</option>
-                                <option value="download_affiliate">Download (Affiliate)</option>
-                                <option value="download_admin">Download (Admin)</option>
-                                <option value="verify_attempt">Verify Attempt</option>
-                                <option value="verify_success">Verify Success</option>
-                                <option value="reject">Reject</option>
-                                <option value="expire">Expire</option>
-                                <option value="delete">Delete</option>
-                                <option value="quickbooks_export">QuickBooks Export</option>
-                                <option value="legal_hold">Legal Hold</option>
-                            </select>
-                        </div>
-                        
-                        <div>
-                            <label for="auditAffiliateFilter" data-i18n="administrator.dashboard.auditlog.affiliateId">Affiliate ID</label>
-                            <input type="text" id="auditAffiliateFilter" class="form-control" placeholder="Search by Affiliate ID" data-i18n-placeholder="administrator.dashboard.auditlog.affiliateIdPlaceholder">
-                        </div>
-                        
-                        <div>
-                            <label for="auditDateFromFilter" data-i18n="administrator.dashboard.auditlog.dateFrom">Date From</label>
-                            <input type="date" id="auditDateFromFilter" class="form-control">
-                        </div>
-                        
-                        <div>
-                            <label for="auditDateToFilter" data-i18n="administrator.dashboard.auditlog.dateTo">Date To</label>
-                            <input type="date" id="auditDateToFilter" class="form-control">
-                        </div>
-                    </div>
-                    
-                    <div style="margin-top: 15px; display: flex; gap: 10px;">
-                        <button class="btn btn-primary" id="applyAuditFiltersBtn" data-i18n="administrator.dashboard.auditlog.applyFilters">Apply Filters</button>
-                        <button class="btn btn-secondary" id="clearAuditFiltersBtn" data-i18n="administrator.dashboard.auditlog.clearFilters">Clear Filters</button>
-                    </div>
-                </div>
-                
-                <!-- Audit Log Table -->
-                <div id="auditLogContent" style="padding: 20px;">
-                    <div class="loading">
-                        <div class="spinner"></div>
-                        <p data-i18n="administrator.dashboard.auditlog.loading">Loading audit logs...</p>
-                    </div>
-                </div>
-            </div>
-        </div>
 
         <!-- System Config Tab -->
         <div class="tab-content" id="config-tab">
-            <div class="card">
-                <div class="card-header">
-                    <h2 class="card-title" data-i18n="administrator.dashboard.config.title">System Configuration</h2>
-                    <button class="btn btn-secondary" id="saveConfigBtn" data-i18n="administrator.dashboard.config.save">Save Changes</button>
+            <!-- Sub-tabs for Config -->
+            <div class="sub-nav-tabs">
+                <button class="sub-nav-tab active" data-subtab="system-settings" data-i18n="administrator.dashboard.config.systemSettings">System Settings</button>
+                <button class="sub-nav-tab" data-subtab="env-variables" data-i18n="administrator.dashboard.config.envVariables">Environment Variables</button>
+            </div>
+
+            <!-- System Settings Sub-tab -->
+            <div class="sub-tab-content active" id="system-settings-subtab">
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title" data-i18n="administrator.dashboard.config.title">System Configuration</h2>
+                        <button class="btn btn-secondary" id="saveConfigBtn" data-i18n="administrator.dashboard.config.save">Save Changes</button>
+                    </div>
+                    <div id="systemConfig">
+                        <div class="loading">
+                            <div class="spinner"></div>
+                        </div>
+                    </div>
                 </div>
-                <div id="systemConfig">
-                    <div class="loading">
-                        <div class="spinner"></div>
+            </div>
+
+            <!-- Environment Variables Sub-tab -->
+            <div class="sub-tab-content" id="env-variables-subtab">
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title" data-i18n="administrator.dashboard.config.envTitle">Environment Variables</h2>
+                        <button class="btn btn-secondary" id="refreshEnvBtn" data-i18n="common.buttons.refresh">Refresh</button>
+                    </div>
+                    <div id="envVariables">
+                        <div class="loading">
+                            <div class="spinner"></div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -1364,6 +1172,25 @@
         </div>
     </div>
 
+    <!-- Logout Confirmation Modal -->
+    <div class="modal" id="logoutModal" style="display: none;">
+        <div class="modal-content" style="max-width: 400px;">
+            <div class="modal-header">
+                <h3 data-i18n="administrator.dashboard.logout.title">Confirm Logout</h3>
+                <button class="modal-close" onclick="closeLogoutModal()">&times;</button>
+            </div>
+            <div class="modal-body" style="padding: 30px;">
+                <p style="text-align: center; font-size: 16px; margin-bottom: 30px;" data-i18n="administrator.dashboard.logout.message">
+                    Are you sure you want to logout?
+                </p>
+                <div class="form-actions" style="justify-content: center;">
+                    <button type="button" class="btn btn-secondary" onclick="closeLogoutModal()" data-i18n="common.buttons.cancel">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="confirmLogout()" style="background: #dc3545; border-color: #dc3545;" data-i18n="common.buttons.logout">Logout</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Add/Edit Operator Modal -->
     <div class="modal" id="operatorModal">
         <div class="modal-content">
@@ -1437,7 +1264,7 @@
     <script src="/assets/js/language-switcher.js"></script>
     <script src="/assets/js/csrf-utils.js"></script>
     <script src="/assets/js/password-validator-component.js"></script>
-    <script src="/assets/js/administrator-dashboard-init.js"></script>
+    <script src="/assets/js/administrator-dashboard-init.js?v=20250623"></script>
     <script>
         // Initialize i18n
         document.addEventListener('DOMContentLoaded', async function() {

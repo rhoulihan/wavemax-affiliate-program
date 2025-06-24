@@ -40,7 +40,7 @@
       affiliate: ['/affiliate-dashboard'],
       customer: ['/customer-dashboard', '/schedule-pickup', '/order-confirmation'],
       administrator: ['/administrator-dashboard'],
-      operator: ['/operator-dashboard']
+      operator: ['/operator-scan']
     },
 
     // Login routes

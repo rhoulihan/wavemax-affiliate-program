@@ -6,6 +6,9 @@
         baseUrl: 'https://wavemax.promo'
     };
     const BASE_URL = config.baseUrl;
+    
+    // Use csrfFetch if available, otherwise fall back to regular fetch
+    const csrfFetch = window.CsrfUtils && window.CsrfUtils.csrfFetch ? window.CsrfUtils.csrfFetch : fetch;
 
     // State
     let currentOrder = null;
@@ -60,7 +63,7 @@
     async function loadStats() {
         try {
             const token = localStorage.getItem('operatorToken');
-            const response = await fetch(`${BASE_URL}/api/v1/operators/stats/today`, {
+            const response = await csrfFetch(`${BASE_URL}/api/v1/operators/stats/today`, {
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }
@@ -98,6 +101,14 @@
                 closeModal();
             }
         });
+
+        // Logout button
+        const logoutBtn = document.getElementById('logoutBtn');
+        if (logoutBtn) {
+            logoutBtn.addEventListener('click', function() {
+                logout();
+            });
+        }
     }
 
     // Focus scanner input
@@ -135,48 +146,27 @@
 
             const token = localStorage.getItem('operatorToken');
             
-            // First check if this is a customer ID (starts with CUST)
-            if (scanData.startsWith('CUST')) {
-                // This is a customer card scan
-                const response = await fetch(`${BASE_URL}/api/v1/operators/scan-customer`, {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ customerId: scanData })
-                });
+            // All scans go to scan-bag endpoint with the scanned data
+            // The backend will determine if it's a customer ID or bag ID
+            const response = await csrfFetch(`${BASE_URL}/api/v1/operators/scan-bag`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ 
+                    bagId: scanData,
+                    // Also send as customerId if it starts with CUST for backward compatibility
+                    ...(scanData.startsWith('CUST') && { customerId: scanData })
+                })
+            });
 
-                const data = await response.json();
+            const data = await response.json();
 
-                if (response.ok && data.success) {
-                    if (data.currentOrder) {
-                        // Customer has a current order, process it
-                        handleScanResponse(data);
-                    } else {
-                        showError('No active order found for this customer');
-                    }
-                } else {
-                    showError(data.message || 'Customer not found');
-                }
+            if (response.ok && data.success) {
+                handleScanResponse(data);
             } else {
-                // This is a bag scan
-                const response = await fetch(`${BASE_URL}/api/v1/operators/scan-bag`, {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ bagId: scanData })
-                });
-
-                const data = await response.json();
-
-                if (response.ok && data.success) {
-                    handleScanResponse(data);
-                } else {
-                    showError(data.message || 'Invalid bag ID');
-                }
+                showError(data.message || 'Invalid scan');
             }
         } catch (error) {
             console.error('Scan error:', error);
@@ -284,7 +274,7 @@
     async function markBagProcessed() {
         try {
             const token = localStorage.getItem('operatorToken');
-            const response = await fetch(`${BASE_URL}/api/v1/operators/orders/${currentOrder.orderId}/process-bag`, {
+            const response = await csrfFetch(`${BASE_URL}/api/v1/operators/orders/${currentOrder.orderId}/process-bag`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -412,7 +402,7 @@
 
         try {
             const token = localStorage.getItem('operatorToken');
-            const response = await fetch(`${BASE_URL}/api/v1/operators/orders/${currentOrder.orderId}/receive`, {
+            const response = await csrfFetch(`${BASE_URL}/api/v1/operators/orders/${currentOrder.orderId}/receive`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -443,7 +433,7 @@
     window.confirmReady = async function() {
         try {
             const token = localStorage.getItem('operatorToken');
-            const response = await fetch(`${BASE_URL}/api/v1/operators/orders/${currentOrder.orderId}/ready`, {
+            const response = await csrfFetch(`${BASE_URL}/api/v1/operators/orders/${currentOrder.orderId}/ready`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -473,7 +463,7 @@
         try {
             const token = localStorage.getItem('operatorToken');
             
-            const response = await fetch(`${BASE_URL}/api/v1/operators/confirm-pickup`, {
+            const response = await csrfFetch(`${BASE_URL}/api/v1/operators/confirm-pickup`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -547,7 +537,18 @@
         localStorage.removeItem('operatorToken');
         localStorage.removeItem('operatorRefreshToken');
         localStorage.removeItem('operatorData');
-        window.location.href = '/operator-login-embed.html';
+        
+        // Clear session manager data if available
+        if (window.SessionManager) {
+            window.SessionManager.clearAuth('operator');
+        }
+        
+        // Use navigateTo if available (when in embed-app.html)
+        if (window.navigateTo) {
+            window.navigateTo('/');  // Go to landing page
+        } else {
+            window.location.href = '/embed-app.html';  // Default route is landing page
+        }
     };
 
     // Initialize on DOM ready

@@ -89,24 +89,6 @@
                     </div>
                 </div>
                 
-                <!-- Delivery Details -->
-                <div>
-                    <h3 class="text-xl font-bold mb-4" data-i18n="orders.confirmation.deliveryDetails">Delivery Details</h3>
-                    <div class="bg-gray-50 p-4 rounded-lg">
-                        <div class="mb-2">
-                            <span class="font-bold" data-i18n="orders.confirmation.date">Date:</span>
-                            <span id="deliveryDate">Loading...</span>
-                        </div>
-                        <div class="mb-2">
-                            <span class="font-bold" data-i18n="orders.confirmation.time">Time:</span>
-                            <span id="deliveryTime">Loading...</span>
-                        </div>
-                        <div>
-                            <span class="font-bold" data-i18n="orders.confirmation.specialInstructions">Special Instructions:</span>
-                            <span id="deliveryInstructions">None provided</span>
-                        </div>
-                    </div>
-                </div>
                 
                 <!-- Service Notes -->
                 <div>
@@ -162,6 +144,12 @@
                                     <span id="feeBreakdown"></span>
                                 </div>
                             </div>
+                            <div class="py-3" id="bagCreditSection" style="display: none;">
+                                <div class="flex justify-between text-green-600">
+                                    <span data-i18n="orders.confirmation.bagCredit">Bag Credit (First Order):</span>
+                                    <span id="bagCreditAmount">-$0.00</span>
+                                </div>
+                            </div>
                             <div class="pt-3 font-bold">
                                 <div class="flex justify-between">
                                     <span data-i18n="orders.confirmation.estimatedTotal">Estimated Total:</span>
@@ -187,166 +175,13 @@
                 
                 <!-- Actions -->
                 <div class="flex justify-center space-x-4">
-                    <a href="#" id="viewOrdersBtn" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition" data-i18n="common.navigation.dashboard">Go to Dashboard</a>
+                    <a href="#" id="viewOrdersBtn" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition" data-i18n="navigation.dashboard">Go to Dashboard</a>
                     <a href="#" id="scheduleAnotherBtn" class="bg-gray-600 text-white px-6 py-2 rounded-lg hover:bg-gray-700 transition" data-i18n="orders.confirmation.scheduleAnother">Schedule Another Pickup</a>
                 </div>
             </div>
         </div>
     </div>
 
-        <!-- i18n Scripts -->
-    <script src="/assets/js/i18n.js"></script>
-    <script src="/assets/js/language-switcher.js"></script>
-    <script>
-        // PostMessage communication with parent window
-        function sendMessageToParent(type, data) {
-            if (window.parent && window.parent !== window) {
-                window.parent.postMessage({
-                    type: type,
-                    source: 'wavemax-embed',
-                    data: data
-                }, '*');
-            }
-        }
-
-        // Navigate parent frame
-        function navigateParent(page) {
-            sendMessageToParent('navigate', { page: page });
-        }
-
-        // Get URL parameters
-        function getUrlParameter(name) {
-            const urlParams = new URLSearchParams(window.location.search);
-            return urlParams.get(name);
-        }
-
-        // Time slot mapping
-        const timeSlotMapping = {
-            'morning': 'Morning (8am - 12pm)',
-            'afternoon': 'Afternoon (12pm - 5pm)',
-            'evening': 'Evening (5pm - 8pm)'
-        };
-
-        // Size mapping
-        const sizeMapping = {
-            'small': 'Small (1-2 bags, approx. 10-15 lbs)',
-            'medium': 'Medium (3-4 bags, approx. 16-30 lbs)',
-            'large': 'Large (5+ bags, approx. 31+ lbs)'
-        };
-
-        // Load order details
-        function loadOrderDetails() {
-            const orderId = getUrlParameter('orderId');
-            if (!orderId) {
-                document.querySelector('.p-6').innerHTML = '<p class="text-red-600">No order ID provided</p>';
-                return;
-            }
-
-            const token = localStorage.getItem('customerToken');
-            
-            fetch(`https://wavemax.promo/api/v1/orders/${orderId}`, {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                },
-                credentials: 'include'
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success && data.order) {
-                    const order = data.order;
-                    
-                    // Order Information
-                    document.getElementById('orderId').textContent = order.orderId;
-                    document.getElementById('orderDate').textContent = new Date(order.createdAt).toLocaleString();
-                    document.getElementById('orderStatus').textContent = order.status.replace(/_/g, ' ');
-                    
-                    // Pickup Details
-                    document.getElementById('pickupDate').textContent = new Date(order.pickupDate).toLocaleDateString();
-                    document.getElementById('pickupTime').textContent = timeSlotMapping[order.pickupTime] || order.pickupTime;
-                    document.getElementById('pickupInstructions').textContent = order.specialPickupInstructions || 'None provided';
-                    
-                    // Service Notes
-                    document.getElementById('serviceNotes').textContent = order.serviceNotes || 'None provided';
-                    
-                    // Order Summary
-                    document.getElementById('estimatedSize').textContent = sizeMapping[order.estimatedSize] || order.estimatedSize;
-                    
-                    // Display fee breakdown
-                    if (order.feeBreakdown) {
-                        const fee = order.feeBreakdown;
-                        document.getElementById('deliveryFee').textContent = `$${fee.totalFee.toFixed(2)}`;
-                        const calculatedFee = fee.numberOfBags * fee.perBagFee;
-                        const breakdownText = `${fee.numberOfBags} bag${fee.numberOfBags > 1 ? 's' : ''} × $${fee.perBagFee}/bag = $${calculatedFee.toFixed(2)} ${fee.minimumApplied ? `(minimum $${fee.minimumFee} applies)` : ''}`;
-                        document.getElementById('feeBreakdown').textContent = breakdownText;
-                    } else {
-                        // Fallback for old orders
-                        document.getElementById('deliveryFee').textContent = `$${(order.deliveryFee || 0).toFixed(2)}`;
-                    }
-                    
-                    if (order.estimatedTotal) {
-                        document.getElementById('estimatedTotal').textContent = `$${order.estimatedTotal.toFixed(2)}`;
-                    }
-                    
-                    // Load affiliate info if available
-                    if (order.affiliateId) {
-                        loadAffiliateInfo(order.affiliateId);
-                    } else {
-                        document.getElementById('affiliateInfo').innerHTML = '<p class="text-gray-500">No affiliate assigned</p>';
-                    }
-                    
-                    // Notify parent of order view
-                    sendMessageToParent('order-viewed', {
-                        orderId: order.orderId,
-                        status: order.status
-                    });
-                } else {
-                    document.querySelector('.p-6').innerHTML = '<p class="text-red-600">Order not found</p>';
-                }
-            })
-            .catch(error => {
-                console.error('Error loading order:', error);
-                document.querySelector('.p-6').innerHTML = '<p class="text-red-600">Error loading order details</p>';
-            });
-        }
-
-        // Load affiliate information
-        function loadAffiliateInfo(affiliateId) {
-            fetch(`https://wavemax.promo/api/v1/affiliates/${affiliateId}/public`, {
-                credentials: 'include'
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success && data.affiliate) {
-                    const affiliate = data.affiliate;
-                    document.getElementById('affiliateName').textContent = 
-                        `${affiliate.firstName} ${affiliate.lastName} (${affiliate.businessName})`;
-                    document.getElementById('affiliateContact').textContent = affiliate.phone;
-                } else {
-                    document.getElementById('affiliateInfo').innerHTML = '<p class="text-gray-500">Affiliate information not available</p>';
-                }
-            })
-            .catch(error => {
-                console.error('Error loading affiliate:', error);
-                document.getElementById('affiliateInfo').innerHTML = '<p class="text-gray-500">Error loading affiliate information</p>';
-            });
-        }
-
-        // Initialize on page load
-        document.addEventListener('DOMContentLoaded', async function() {
-            // Initialize i18n first
-            await window.i18n.init({ debugMode: false });
-            window.LanguageSwitcher.createSwitcher('language-switcher-container', {
-                style: 'dropdown',
-                showLabel: false
-            });
-            
-            // Then load order details
-            loadOrderDetails();
-            
-            // Notify parent that iframe is loaded
-            sendMessageToParent('iframe-loaded', { page: 'order-confirmation' });
-        });
-    </script>
 
 </body>
 </html>

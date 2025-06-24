@@ -685,20 +685,6 @@
       "subtitle": "Ingresa tu PIN de 4 dígitos para acceder al sistema",
       "pinPlaceholder": "Ingresa PIN de 4 dígitos",
       "invalidPin": "PIN inválido. Por favor intenta nuevamente."
-    },
-    "dashboard": {
-      "title": "Panel de Operador",
-      "welcome": "¡Bienvenido, {{name}}!",
-      "todaysPickups": "Recogidas de Hoy",
-      "todaysDeliveries": "Entregas de Hoy",
-      "processOrder": "Procesar Pedido",
-      "scanBarcode": "Escanear Código de Barras",
-      "metrics": {
-        "pickupsCompleted": "Recogidas Completadas",
-        "deliveriesCompleted": "Entregas Completadas",
-        "ordersProcessed": "Pedidos Procesados",
-        "efficiency": "Tasa de Eficiencia"
-      }
     }
   },
   "administrator": {

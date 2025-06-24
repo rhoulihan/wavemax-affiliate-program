@@ -36,66 +36,6 @@ describe('Operator Controller', () => {
     jest.clearAllMocks();
   });
 
-  describe('getDashboard', () => {
-    it('should return operator dashboard data', async () => {
-      const mockOperator = {
-        _id: 'op123',
-        operatorId: 'OPR001',
-        firstName: 'John',
-        lastName: 'Doe',
-        workStation: 'WS001',
-        shiftStart: '08:00',
-        shiftEnd: '16:00',
-        totalOrdersProcessed: 100,
-        averageProcessingTime: 45,
-        qualityScore: 98
-      };
-
-      const mockTodayStats = [{
-        totalOrders: 10,
-        completedOrders: 8,
-        totalWeight: 50.5,
-        avgProcessingTime: 42
-      }];
-
-      const mockCurrentShiftOrders = [
-        { _id: '1', orderNumber: 'ORD001', orderProcessingStatus: 'washing' }
-      ];
-
-      Operator.findById.mockReturnValue({
-        select: jest.fn().mockResolvedValue(mockOperator)
-      });
-      Order.aggregate.mockResolvedValue(mockTodayStats);
-      Order.find.mockReturnValue({
-        populate: jest.fn().mockReturnThis(),
-        sort: jest.fn().mockReturnThis(),
-        limit: jest.fn().mockResolvedValue(mockCurrentShiftOrders)
-      });
-      Order.countDocuments.mockResolvedValue(5);
-
-      await operatorController.getDashboard(req, res);
-
-      expect(Operator.findById).toHaveBeenCalledWith('op123');
-      expect(res.json).toHaveBeenCalledWith({
-        operator: {
-          name: 'John Doe',
-          operatorId: 'OPR001',
-          workStation: 'WS001',
-          shiftStart: '08:00',
-          shiftEnd: '16:00'
-        },
-        todayStats: mockTodayStats[0],
-        currentShiftOrders: mockCurrentShiftOrders,
-        pendingOrdersCount: 5,
-        performance: {
-          ordersProcessed: 100,
-          avgProcessingTime: 45,
-          qualityScore: 98
-        }
-      });
-    });
-  });
-
   describe('getOrderQueue', () => {
     it('should return available orders for operator workstation', async () => {
       const mockOperator = {
@@ -704,29 +644,6 @@ describe('Operator Controller', () => {
 
   // Additional error handling tests
   describe('Error handling in existing functions', () => {
-    it('should handle error in getDashboard when operator not found', async () => {
-      Operator.findById.mockReturnValue({
-        select: jest.fn().mockResolvedValue(null)
-      });
-
-      await operatorController.getDashboard(req, res);
-
-      expect(res.status).toHaveBeenCalledWith(404);
-      expect(res.json).toHaveBeenCalledWith({ error: 'Operator not found' });
-    });
-
-    it('should handle database error in getDashboard', async () => {
-      Operator.findById.mockReturnValue({
-        select: jest.fn().mockRejectedValue(new Error('Database error'))
-      });
-
-      await operatorController.getDashboard(req, res);
-
-      expect(logger.error).toHaveBeenCalledWith('Error fetching operator dashboard:', expect.any(Error));
-      expect(res.status).toHaveBeenCalledWith(500);
-      expect(res.json).toHaveBeenCalledWith({ error: 'Failed to fetch dashboard' });
-    });
-
     it('should handle error in getOrderQueue', async () => {
       req.query = { status: 'pending' };
 

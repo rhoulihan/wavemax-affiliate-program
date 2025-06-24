@@ -33,6 +33,7 @@ Step-by-step guides for integrating and using the system:
 - [Embed Test Pages Guide](./guides/embed-test-pages-guide.md) - Testing embedded implementations
 - [i18n Best Practices](./guides/i18n-best-practices.md) - Internationalization guidelines
 - [DocuSign W9 Migration Guide](./guides/docusign-w9-migration-guide.md) - Migrating to electronic W-9 signatures
+- [Facebook OAuth Setup Guide](./facebook-oauth-setup.md) - Complete Facebook OAuth configuration
 
 ### 🛠️ [Development](./development/)
 Development tools, best practices, and ongoing work:
