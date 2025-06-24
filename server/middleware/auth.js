@@ -8,6 +8,7 @@ const Operator = require('../models/Operator');
 const TokenBlacklist = require('../models/TokenBlacklist');
 
 const rateLimit = require('express-rate-limit');
+const storeIPConfig = require('../config/storeIPs');
 
 // Rate limiter for authentication
 exports.authLimiter = rateLimit({
@@ -49,6 +50,49 @@ exports.authenticate = async (req, res, next) => {
 
     // Verify the token
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    
+    // Get client IP
+    const clientIP = req.headers['x-forwarded-for'] || 
+                    req.headers['x-real-ip'] || 
+                    req.connection.remoteAddress ||
+                    req.socket.remoteAddress ||
+                    req.ip;
+    
+    // Check if this is an operator from a store IP
+    const isStoreIP = storeIPConfig.isWhitelisted(clientIP);
+    const isOperator = decoded.role === 'operator';
+    
+    // If operator from store IP, check if token needs renewal
+    if (isOperator && isStoreIP) {
+      const tokenExp = decoded.exp * 1000; // Convert to milliseconds
+      const now = Date.now();
+      const timeUntilExpiry = tokenExp - now;
+      
+      // If token expires within threshold, renew it
+      if (timeUntilExpiry < storeIPConfig.sessionRenewal.renewThreshold) {
+        // Generate new token with extended expiration
+        const newTokenData = {
+          id: decoded.id,
+          role: decoded.role,
+          operatorId: decoded.operatorId,
+          permissions: decoded.permissions
+        };
+        
+        // Set expiration to max session duration for store IPs
+        const newToken = jwt.sign(
+          newTokenData,
+          process.env.JWT_SECRET,
+          { expiresIn: '24h' } // 24 hours for store operators
+        );
+        
+        // Add new token to response header
+        res.setHeader('X-Renewed-Token', newToken);
+        res.setHeader('X-Token-Renewed', 'true');
+        
+        // Log token renewal
+        console.log(`Token renewed for operator ${decoded.operatorId} from store IP ${clientIP}`);
+      }
+    }
 
     // Check if token is blacklisted
     const isBlacklisted = await TokenBlacklist.isBlacklisted(token);

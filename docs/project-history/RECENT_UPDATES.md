@@ -1,5 +1,35 @@
 # Recent Major Updates
 
+## Order Status Simplification & Operator Workflow Updates (December 2024)
+- **Simplified Order Status**: Removed `orderProcessingStatus` field and consolidated to single `status` field
+  - New status flow: `pending` → `processing` → `processed` → `complete` → `cancelled`
+  - Orders cannot be cancelled once in `processing` status
+  - Cleaner state management throughout the order lifecycle
+
+- **Operator Workflow Improvements**:
+  - Fixed weight input modal auto-closing issue with multiple strategies
+  - Modal now properly stays open during weight entry
+  - Bags weighed count only updates when weight is entered and focus changes
+  - Consistent WaveMAX branding (blue theme) across all operator interfaces
+  
+- **Store IP Session Management**: Automatic session renewal for operators at physical stores
+  - Uses existing `STORE_IP_ADDRESS` environment variable
+  - Sessions auto-renew when operators work from whitelisted store IPs
+  - Prevents timeout interruptions during work shifts
+  - Supports additional IPs via `ADDITIONAL_STORE_IPS` and IP ranges via `STORE_IP_RANGES`
+
+- **Embedded Page Chrome Management**: Enhanced parent-iframe bridge functionality
+  - All page chrome (headers, footers, navigation) automatically hidden on embedded pages
+  - Chrome stays hidden across viewport changes and route navigation
+  - Permanent hiding of page header element with mutation observers
+  - Full viewport utilization for embedded content
+
+- **Bug Fixes**:
+  - Fixed Mongoose populate errors by handling string-based ID relationships
+  - Fixed Content Security Policy violations by removing inline event handlers
+  - Fixed audit logger syntax errors preventing app startup
+  - Fixed authentication error handling to redirect to landing page
+
 ## Operator QR Code Scanning Workflow (June 2025)
 - **Three-Stage Order Processing**: Comprehensive bag tracking through the laundry lifecycle
   - Stage 1: Receiving & Weighing - Scan customer card and input bag weights

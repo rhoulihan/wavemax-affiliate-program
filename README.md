@@ -77,9 +77,10 @@ The system implements a comprehensive role-based access control (RBAC) system wi
    - Update order status
    - Manage shift schedules
    - Three-stage QR code scanning workflow:
-     - Scan customer cards to weigh incoming bags
-     - Scan after WDF (Wash/Dry/Fold) completion
-     - Scan during affiliate pickup
+     - **Receive**: Scan customer QR to weigh incoming bags
+     - **Notify**: Scan when WDF (Wash/Dry/Fold) is done to notify affiliate
+     - **Pickup**: Scan as bags leave during affiliate pickup
+   - Automatic session renewal for operators at store locations
 
 ## Project Structure
 
