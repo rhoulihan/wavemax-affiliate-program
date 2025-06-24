@@ -608,6 +608,7 @@
         
         // Find all elements to hide - WaveMAX CMS specific selectors
         const topbar = document.querySelector('.topbar');
+        const middlebar = document.querySelector('.middlebar');
         const wrapper = document.querySelector('.wrapper');
         const header = document.querySelector('.navbar');
         const pageHeader = document.querySelector('.page-header');
@@ -615,6 +616,7 @@
         
         console.log('[Parent-Iframe Bridge] Elements found:', {
             topbar: !!topbar,
+            middlebar: !!middlebar,
             wrapper: !!wrapper,
             navbar: !!header,
             pageHeader: !!pageHeader,
@@ -628,6 +630,12 @@
         if (topbar) {
             topbar.style.display = 'none';
             topbar.setAttribute('data-mobile-hidden', 'true');
+        }
+
+        // Hide middlebar
+        if (middlebar) {
+            middlebar.style.display = 'none';
+            middlebar.setAttribute('data-mobile-hidden', 'true');
         }
 
         // Hide wrapper (contains navbar) or navbar directly
@@ -688,6 +696,7 @@
         
         // Find all hidden elements
         const topbar = document.querySelector('.topbar[data-mobile-hidden="true"]');
+        const middlebar = document.querySelector('.middlebar[data-mobile-hidden="true"]');
         const wrapper = document.querySelector('.wrapper[data-mobile-hidden="true"]');
         const header = document.querySelector('.navbar[data-mobile-hidden="true"]');
         const pageHeader = document.querySelector('.page-header[data-mobile-hidden="true"]:not([data-permanently-hidden="true"])');
@@ -697,6 +706,12 @@
         if (topbar) {
             topbar.style.display = '';
             topbar.removeAttribute('data-mobile-hidden');
+        }
+
+        // Show middlebar
+        if (middlebar) {
+            middlebar.style.display = '';
+            middlebar.removeAttribute('data-mobile-hidden');
         }
 
         // Show wrapper or header
