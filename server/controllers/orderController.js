@@ -87,6 +87,22 @@ exports.createOrder = async (req, res) => {
     }
     console.log('Found customer:', customer.firstName, customer.lastName);
 
+    // Check if customer already has an active order
+    const activeOrder = await Order.findOne({
+      customerId: customerId,
+      status: { $in: ['pending', 'processing', 'processed'] }
+    });
+
+    if (activeOrder) {
+      console.log('Customer already has an active order:', activeOrder.orderId);
+      return res.status(400).json({
+        success: false,
+        message: 'You already have an active order. Please wait for it to be completed before placing a new order.',
+        activeOrderId: activeOrder.orderId,
+        activeOrderStatus: activeOrder.status
+      });
+    }
+
     // Verify affiliate exists
     console.log('Looking for affiliate with ID:', affiliateId);
     const affiliate = await Affiliate.findOne({ affiliateId });
