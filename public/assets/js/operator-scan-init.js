@@ -146,16 +146,15 @@
 
             const token = localStorage.getItem('operatorToken');
             
-            // Use scan-bag endpoint (which internally calls scan-customer)
-            const response = await csrfFetch(`${BASE_URL}/api/v1/operators/scan-bag`, {
+            // Use scan-customer endpoint - bags have customer IDs on them
+            const response = await csrfFetch(`${BASE_URL}/api/v1/operators/scan-customer`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({ 
-                    bagId: scanData,
-                    customerId: scanData  // Backend expects customerId in req.body for scanCustomer
+                    customerId: scanData
                 })
             });
 
