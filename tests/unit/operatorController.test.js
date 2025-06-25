@@ -8,12 +8,17 @@ const { logAuditEvent } = require('../../server/utils/auditLogger');
 jest.mock('../../server/models/Operator');
 jest.mock('../../server/models/Order');
 jest.mock('../../server/models/Customer');
+jest.mock('../../server/models/Affiliate');
 jest.mock('../../server/utils/auditLogger');
 jest.mock('../../server/utils/logger', () => ({
   error: jest.fn(),
   info: jest.fn(),
   warn: jest.fn(),
   debug: jest.fn()
+}));
+jest.mock('../../server/utils/emailService', () => ({
+  sendOrderReadyNotification: jest.fn(),
+  sendOrderPickedUpNotification: jest.fn()
 }));
 
 describe('Operator Controller', () => {
@@ -956,6 +961,805 @@ describe('Operator Controller', () => {
           page: 2,
           pages: 3
         }
+      });
+    });
+  });
+
+  describe('scanCustomer', () => {
+    it('should scan customer and return current order', async () => {
+      const mockCustomer = {
+        customerId: 'CUST123',
+        firstName: 'John',
+        lastName: 'Doe',
+        email: 'john@example.com'
+      };
+
+      const mockOrder = {
+        orderId: 'ORD123',
+        customerId: 'CUST123',
+        status: 'pending',
+        numberOfBags: 2,
+        estimatedWeight: 30,
+        bagsWeighed: 0,
+        bagsProcessed: 0,
+        bagsPickedUp: 0,
+        actualWeight: undefined
+      };
+
+      req.body = { customerId: 'CUST123' };
+
+      Customer.findOne.mockResolvedValue(mockCustomer);
+      Order.findOne.mockReturnValue({
+        sort: jest.fn().mockResolvedValue(mockOrder)
+      });
+
+      await operatorController.scanCustomer(req, res);
+
+      expect(Customer.findOne).toHaveBeenCalledWith({ customerId: 'CUST123' });
+      expect(res.json).toHaveBeenCalledWith({
+        success: true,
+        currentOrder: true,
+        action: 'weight_input',
+        order: {
+          orderId: 'ORD123',
+          customerName: 'John Doe',
+          affiliateName: 'N/A',
+          numberOfBags: 2,
+          bagsWeighed: 0,
+          bagsProcessed: 0,
+          bagsPickedUp: 0,
+          estimatedWeight: 30,
+          actualWeight: undefined,
+          status: 'pending'
+        }
+      });
+    });
+
+    it('should handle customer not found', async () => {
+      req.body = { customerId: 'INVALID' };
+      Customer.findOne.mockResolvedValue(null);
+
+      await operatorController.scanCustomer(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(404);
+      expect(res.json).toHaveBeenCalledWith({
+        success: false,
+        error: 'Customer not found',
+        message: 'Invalid customer ID'
+      });
+    });
+  });
+
+  describe('scanBag', () => {
+    it('should redirect to scanCustomer', async () => {
+      const mockCustomer = {
+        customerId: 'CUST123',
+        firstName: 'John',
+        lastName: 'Doe'
+      };
+
+      const mockOrder = {
+        orderId: 'ORD123',
+        customerId: 'CUST123',
+        status: 'pending',
+        numberOfBags: 2,
+        bagsWeighed: 0,
+        bagsProcessed: 0,
+        bagsPickedUp: 0
+      };
+
+      req.body = { bagId: 'CUST123' };
+
+      Customer.findOne.mockResolvedValue(mockCustomer);
+      Order.findOne.mockReturnValue({
+        sort: jest.fn().mockResolvedValue(mockOrder)
+      });
+
+      await operatorController.scanBag(req, res);
+
+      // It should call scanCustomer internally
+      expect(Customer.findOne).toHaveBeenCalled();
+    });
+
+    it('should handle error in scanBag', async () => {
+      req.body = { bagId: 'INVALID' };
+      
+      // Force an error by making scanCustomer throw
+      Customer.findOne.mockRejectedValue(new Error('Database error'));
+
+      await operatorController.scanBag(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(500);
+      expect(res.json).toHaveBeenCalledWith({
+        success: false,
+        error: 'Failed to scan customer card',
+        message: 'An error occurred while processing the scan'
+      });
+    });
+  });
+
+  describe('receiveOrder', () => {
+    it('should receive order and update status', async () => {
+      const mockOrder = {
+        _id: 'order123',
+        orderId: 'ORD123',
+        status: 'pending',
+        bagsWeighed: 0,
+        save: jest.fn().mockResolvedValue(true)
+      };
+
+      req.params = { orderId: 'ORD123' };
+      req.body = { 
+        bagWeights: [
+          { bagNumber: 1, weight: 10 },
+          { bagNumber: 2, weight: 15 }
+        ],
+        totalWeight: 25
+      };
+
+      Order.findOne.mockResolvedValue(mockOrder);
+
+      await operatorController.receiveOrder(req, res);
+
+      expect(mockOrder.status).toBe('processing');
+      expect(mockOrder.actualWeight).toBe(25);
+      expect(mockOrder.assignedOperator).toBe('op123');
+      expect(mockOrder.processingStarted).toBeDefined();
+      expect(mockOrder.bagsWeighed).toBe(2);
+      expect(mockOrder.bagWeights).toHaveLength(2);
+      expect(mockOrder.save).toHaveBeenCalled();
+      expect(res.json).toHaveBeenCalledWith({
+        success: true,
+        message: 'Order received and marked as in progress',
+        order: mockOrder
+      });
+    });
+
+    it('should handle order not found', async () => {
+      req.params = { orderId: 'ORD999' };
+      req.body = { bagWeights: [], totalWeight: 0 };
+      
+      Order.findOne.mockResolvedValue(null);
+
+      await operatorController.receiveOrder(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(404);
+      expect(res.json).toHaveBeenCalledWith({
+        success: false,
+        error: 'Order not found'
+      });
+    });
+  });
+
+  describe('markBagProcessed', () => {
+    it('should mark bag as processed', async () => {
+      const mockOrder = {
+        _id: 'order123',
+        orderId: 'ORD123',
+        status: 'processing',
+        numberOfBags: 2,
+        bagsProcessed: 0,
+        save: jest.fn().mockResolvedValue(true)
+      };
+
+      req.params = { orderId: 'ORD123' };
+
+      Order.findOne.mockResolvedValue(mockOrder);
+
+      await operatorController.markBagProcessed(req, res);
+
+      expect(mockOrder.bagsProcessed).toBe(1);
+      expect(mockOrder.save).toHaveBeenCalled();
+      expect(res.json).toHaveBeenCalledWith({
+        success: true,
+        message: 'Bag 1 of 2 marked as processed',
+        bagsProcessed: 1,
+        totalBags: 2,
+        orderReady: false
+      });
+    });
+
+    it('should update order status when all bags processed', async () => {
+      const mockOrder = {
+        _id: 'order123',
+        orderId: 'ORD123',
+        customerId: 'CUST123',
+        affiliateId: 'AFF123',
+        status: 'processing',
+        numberOfBags: 2,
+        bagsProcessed: 1,
+        actualWeight: 25,
+        save: jest.fn().mockResolvedValue(true)
+      };
+
+      const mockAffiliate = {
+        affiliateId: 'AFF123',
+        email: 'affiliate@example.com',
+        contactPerson: 'John Doe'
+      };
+
+      const mockCustomer = {
+        customerId: 'CUST123',
+        firstName: 'Jane',
+        lastName: 'Smith'
+      };
+
+      req.params = { orderId: 'ORD123' };
+
+      Order.findOne.mockResolvedValue(mockOrder);
+      
+      // Mock the require for Affiliate model
+      const Affiliate = require('../../server/models/Affiliate');
+      Affiliate.findOne.mockResolvedValue(mockAffiliate);
+      Customer.findOne.mockResolvedValue(mockCustomer);
+      
+      // Mock email service
+      const emailService = require('../../server/utils/emailService');
+      emailService.sendOrderReadyNotification = jest.fn().mockResolvedValue(true);
+
+      await operatorController.markBagProcessed(req, res);
+
+      expect(mockOrder.bagsProcessed).toBe(2);
+      expect(mockOrder.status).toBe('processed');
+      expect(mockOrder.processedAt).toBeDefined();
+      expect(emailService.sendOrderReadyNotification).toHaveBeenCalledWith(
+        'affiliate@example.com',
+        expect.objectContaining({
+          affiliateName: 'John Doe',
+          orderId: 'ORD123',
+          customerName: 'Jane Smith',
+          numberOfBags: 2,
+          totalWeight: 25
+        })
+      );
+      expect(res.json).toHaveBeenCalledWith({
+        success: true,
+        message: 'Bag 2 of 2 marked as processed',
+        bagsProcessed: 2,
+        totalBags: 2,
+        orderReady: true
+      });
+    });
+  });
+
+  describe('confirmPickup', () => {
+    it('should confirm pickup and complete order', async () => {
+      const mockOrder = {
+        _id: 'order123',
+        orderId: 'ORD123',
+        customerId: 'CUST123',
+        status: 'processed',
+        numberOfBags: 2,
+        bagsPickedUp: 0,
+        save: jest.fn().mockResolvedValue(true)
+      };
+
+      const mockCustomer = {
+        customerId: 'CUST123',
+        firstName: 'Jane',
+        lastName: 'Smith',
+        email: 'jane@example.com'
+      };
+
+      req.body = { orderId: 'ORD123', numberOfBags: 2 };
+
+      Order.findOne.mockResolvedValue(mockOrder);
+      Customer.findOne.mockResolvedValue(mockCustomer);
+
+      // Mock email service
+      const emailService = require('../../server/utils/emailService');
+      emailService.sendOrderPickedUpNotification = jest.fn().mockResolvedValue(true);
+
+      await operatorController.confirmPickup(req, res);
+
+      expect(mockOrder.bagsPickedUp).toBe(2);
+      expect(mockOrder.status).toBe('complete');
+      expect(mockOrder.completedAt).toBeDefined();
+      expect(mockOrder.save).toHaveBeenCalled();
+      expect(emailService.sendOrderPickedUpNotification).toHaveBeenCalledWith(
+        'jane@example.com',
+        expect.objectContaining({
+          customerName: 'Jane Smith',
+          orderId: 'ORD123',
+          numberOfBags: 2
+        })
+      );
+      expect(res.json).toHaveBeenCalledWith({
+        success: true,
+        message: 'Pickup confirmed',
+        bagsPickedUp: 2,
+        totalBags: 2,
+        orderComplete: true
+      });
+    });
+
+    it('should handle partial pickup', async () => {
+      const mockOrder = {
+        _id: 'order123',
+        orderId: 'ORD123',
+        status: 'processed',
+        numberOfBags: 2,
+        bagsPickedUp: 0,
+        save: jest.fn().mockResolvedValue(true)
+      };
+
+      req.body = { orderId: 'ORD123', numberOfBags: 1 };
+
+      Order.findOne.mockResolvedValue(mockOrder);
+
+      await operatorController.confirmPickup(req, res);
+
+      expect(mockOrder.bagsPickedUp).toBe(1);
+      expect(mockOrder.status).toBe('processed'); // Should remain processed
+      expect(res.json).toHaveBeenCalledWith({
+        success: true,
+        message: 'Pickup confirmed',
+        bagsPickedUp: 1,
+        totalBags: 2,
+        orderComplete: false
+      });
+    });
+  });
+
+  describe('getTodayStats', () => {
+    it('should return today\'s operator statistics', async () => {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      const mockOrders = [
+        { bagsWeighed: 3 },
+        { bagsWeighed: 2 },
+        { bagsWeighed: 4 }
+      ];
+
+      Order.countDocuments.mockImplementation((query) => {
+        if (query.orderProcessingStatus === 'ready') {
+          return Promise.resolve(5);
+        }
+        return Promise.resolve(3); // Orders processed today
+      });
+      
+      Order.find.mockResolvedValue(mockOrders);
+
+      await operatorController.getTodayStats(req, res);
+
+      expect(Order.countDocuments).toHaveBeenCalledWith({
+        assignedOperator: 'op123',
+        processingStarted: { $gte: today }
+      });
+      
+      expect(res.json).toHaveBeenCalledWith({
+        ordersProcessed: 3,
+        bagsScanned: 9, // 3 + 2 + 4
+        ordersReady: 5
+      });
+    });
+
+    it('should handle no orders for today', async () => {
+      Order.countDocuments.mockResolvedValue(0);
+      Order.find.mockResolvedValue([]);
+
+      await operatorController.getTodayStats(req, res);
+
+      expect(res.json).toHaveBeenCalledWith({
+        ordersProcessed: 0,
+        bagsScanned: 0,
+        ordersReady: 0
+      });
+    });
+  });
+
+  describe('getWorkstationStatus', () => {
+    it('should return workstation status for all workstations', async () => {
+      const mockOperator = {
+        _id: 'op123',
+        firstName: 'John',
+        lastName: 'Doe',
+        operatorId: 'OPR001'
+      };
+
+      Operator.findOne.mockImplementation(({ workStation }) => {
+        if (workStation === 'W1') {
+          return {
+            select: jest.fn().mockResolvedValue(mockOperator)
+          };
+        }
+        return {
+          select: jest.fn().mockResolvedValue(null)
+        };
+      });
+      
+      Order.countDocuments.mockResolvedValue(2);
+
+      await operatorController.getWorkstationStatus(req, res);
+
+      expect(res.json).toHaveBeenCalledWith({
+        workstations: expect.arrayContaining([
+          expect.objectContaining({
+            workstation: 'W1',
+            type: 'washing',
+            operator: expect.objectContaining({
+              name: 'John Doe',
+              operatorId: 'OPR001'
+            }),
+            activeOrders: 2,
+            available: true
+          })
+        ])
+      });
+    });
+
+    it('should handle database error', async () => {
+      Operator.findOne.mockImplementation(() => {
+        throw new Error('Database error');
+      });
+
+      await operatorController.getWorkstationStatus(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(500);
+      expect(res.json).toHaveBeenCalledWith({
+        error: 'Failed to fetch workstation status'
+      });
+    });
+  });
+
+  describe('Additional coverage tests', () => {
+    it('should handle error in getMyOrders', async () => {
+      Order.find.mockImplementation(() => {
+        throw new Error('Database error');
+      });
+      
+      await operatorController.getMyOrders(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(500);
+      expect(res.json).toHaveBeenCalledWith({
+        error: 'Failed to fetch orders'
+      });
+    });
+
+    it('should handle different performance stat periods', async () => {
+      const mockOperator = {
+        _id: 'op123',
+        firstName: 'John',
+        lastName: 'Doe',
+        operatorId: 'OPR001',
+        qualityScore: 95
+      };
+
+      Operator.findById.mockResolvedValue(mockOperator);
+      Order.aggregate.mockResolvedValue([]);
+
+      // Test day period
+      req.query = { period: 'day' };
+      await operatorController.getPerformanceStats(req, res);
+      expect(res.json).toHaveBeenCalled();
+
+      // Test month period
+      req.query = { period: 'month' };
+      await operatorController.getPerformanceStats(req, res);
+      expect(res.json).toHaveBeenCalled();
+    });
+
+    it('should handle error in getPerformanceStats', async () => {
+      req.query = { period: 'week' };
+      Operator.findById.mockResolvedValue({ _id: 'op123' });
+      Order.aggregate.mockRejectedValue(new Error('Aggregation error'));
+
+      await operatorController.getPerformanceStats(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(500);
+      expect(res.json).toHaveBeenCalledWith({
+        error: 'Failed to fetch performance stats'
+      });
+    });
+
+    it('should handle error in getCustomerDetails', async () => {
+      req.params.customerId = 'cust123';
+      Customer.findById = jest.fn().mockReturnValue({
+        select: jest.fn().mockRejectedValue(new Error('Database error'))
+      });
+
+      await operatorController.getCustomerDetails(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(500);
+      expect(res.json).toHaveBeenCalledWith({
+        error: 'Failed to fetch customer details'
+      });
+    });
+
+    it('should handle no active order in scanCustomer', async () => {
+      const mockCustomer = {
+        customerId: 'CUST123',
+        firstName: 'John',
+        lastName: 'Doe'
+      };
+
+      req.body = { customerId: 'CUST123' };
+      Customer.findOne.mockResolvedValue(mockCustomer);
+      Order.findOne.mockReturnValue({
+        sort: jest.fn().mockResolvedValue(null)
+      });
+
+      await operatorController.scanCustomer(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(404);
+      expect(res.json).toHaveBeenCalledWith({
+        success: false,
+        error: 'No active order',
+        message: 'No active order found for this customer',
+        customer: {
+          name: 'John Doe',
+          customerId: 'CUST123'
+        }
+      });
+    });
+
+    it('should handle different scan actions in scanCustomer', async () => {
+      const mockCustomer = {
+        customerId: 'CUST123',
+        firstName: 'John',
+        lastName: 'Doe'
+      };
+
+      // Test process_complete action
+      const mockOrderProcessComplete = {
+        orderId: 'ORD123',
+        customerId: 'CUST123',
+        status: 'processing',
+        numberOfBags: 2,
+        bagsWeighed: 2,
+        bagsProcessed: 1,
+        bagsPickedUp: 0,
+        estimatedWeight: 30
+      };
+
+      req.body = { customerId: 'CUST123' };
+      Customer.findOne.mockResolvedValue(mockCustomer);
+      Order.findOne.mockReturnValue({
+        sort: jest.fn().mockResolvedValue(mockOrderProcessComplete)
+      });
+
+      await operatorController.scanCustomer(req, res);
+
+      expect(res.json).toHaveBeenCalledWith(expect.objectContaining({
+        action: 'process_complete'
+      }));
+
+      // Test pickup_scan action
+      const mockOrderPickupScan = {
+        orderId: 'ORD124',
+        customerId: 'CUST123',
+        status: 'processed',
+        numberOfBags: 2,
+        bagsWeighed: 2,
+        bagsProcessed: 2,
+        bagsPickedUp: 1,
+        estimatedWeight: 30
+      };
+
+      Order.findOne.mockReturnValue({
+        sort: jest.fn().mockResolvedValue(mockOrderPickupScan)
+      });
+
+      await operatorController.scanCustomer(req, res);
+
+      expect(res.json).toHaveBeenCalledWith(expect.objectContaining({
+        action: 'pickup_scan'
+      }));
+    });
+
+    it('should handle affiliate lookup in scanCustomer', async () => {
+      const mockCustomer = {
+        customerId: 'CUST123',
+        firstName: 'John',
+        lastName: 'Doe'
+      };
+
+      const mockOrder = {
+        orderId: 'ORD123',
+        customerId: 'CUST123',
+        affiliateId: 'AFF123',
+        status: 'pending',
+        numberOfBags: 2,
+        bagsWeighed: 0,
+        bagsProcessed: 0,
+        bagsPickedUp: 0,
+        estimatedWeight: 30
+      };
+
+      const mockAffiliate = {
+        affiliateId: 'AFF123',
+        businessName: 'Test Affiliate'
+      };
+
+      req.body = { customerId: 'CUST123' };
+      Customer.findOne.mockResolvedValue(mockCustomer);
+      Order.findOne.mockReturnValue({
+        sort: jest.fn().mockResolvedValue(mockOrder)
+      });
+      
+      const Affiliate = require('../../server/models/Affiliate');
+      Affiliate.findOne.mockResolvedValue(mockAffiliate);
+
+      await operatorController.scanCustomer(req, res);
+
+      expect(res.json).toHaveBeenCalledWith(expect.objectContaining({
+        order: expect.objectContaining({
+          affiliateName: 'Test Affiliate'
+        })
+      }));
+    });
+
+    it('should handle error in scanCustomer', async () => {
+      req.body = { customerId: 'CUST123' };
+      Customer.findOne.mockRejectedValue(new Error('Database error'));
+
+      await operatorController.scanCustomer(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(500);
+      expect(res.json).toHaveBeenCalledWith({
+        success: false,
+        error: 'Failed to scan customer card',
+        message: 'An error occurred while processing the scan'
+      });
+    });
+
+    it('should handle error in receiveOrder', async () => {
+      req.params.orderId = 'ORD123';
+      req.body = { bagWeights: [], totalWeight: 25 };
+      Order.findOne.mockRejectedValue(new Error('Database error'));
+
+      await operatorController.receiveOrder(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(500);
+      expect(res.json).toHaveBeenCalledWith({
+        success: false,
+        error: 'Failed to receive order'
+      });
+    });
+
+    it('should handle order not found in markBagProcessed', async () => {
+      req.params.orderId = 'NONEXISTENT';
+      Order.findOne.mockResolvedValue(null);
+
+      await operatorController.markBagProcessed(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(404);
+      expect(res.json).toHaveBeenCalledWith({
+        success: false,
+        error: 'Order not found'
+      });
+    });
+
+    it('should handle error in markBagProcessed', async () => {
+      req.params.orderId = 'ORD123';
+      Order.findOne.mockRejectedValue(new Error('Database error'));
+
+      await operatorController.markBagProcessed(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(500);
+      expect(res.json).toHaveBeenCalledWith({
+        success: false,
+        error: 'Failed to mark bag as processed'
+      });
+    });
+
+    it('should handle order not found in confirmPickup', async () => {
+      req.body = { orderId: 'NONEXISTENT', numberOfBags: 1 };
+      Order.findOne.mockResolvedValue(null);
+
+      await operatorController.confirmPickup(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(404);
+      expect(res.json).toHaveBeenCalledWith({
+        success: false,
+        error: 'Order not found'
+      });
+    });
+
+    it('should handle error in confirmPickup', async () => {
+      req.body = { orderId: 'ORD123', numberOfBags: 1 };
+      Order.findOne.mockRejectedValue(new Error('Database error'));
+
+      await operatorController.confirmPickup(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(500);
+      expect(res.json).toHaveBeenCalledWith({
+        success: false,
+        error: 'Failed to confirm pickup'
+      });
+    });
+
+    it('should handle error in getTodayStats', async () => {
+      Order.countDocuments.mockRejectedValue(new Error('Database error'));
+
+      await operatorController.getTodayStats(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(500);
+      expect(res.json).toHaveBeenCalledWith({
+        error: 'Failed to fetch stats'
+      });
+    });
+
+    it('should handle markOrderReady (deprecated function)', async () => {
+      const mockOrder = {
+        orderId: 'ORD123',
+        orderProcessingStatus: 'quality_check',
+        numberOfBags: 2,
+        save: jest.fn()
+      };
+
+      req.params.orderId = 'ORD123';
+      Order.findOne.mockResolvedValue(mockOrder);
+
+      await operatorController.markOrderReady(req, res);
+
+      expect(mockOrder.orderProcessingStatus).toBe('ready');
+      expect(mockOrder.status).toBe('processed');
+      expect(mockOrder.bagsProcessed).toBe(2);
+      expect(res.json).toHaveBeenCalledWith({
+        success: true,
+        message: 'Order marked as ready for pickup',
+        order: mockOrder
+      });
+    });
+
+    it('should handle markOrderReady with affiliate notification', async () => {
+      const mockOrder = {
+        orderId: 'ORD123',
+        affiliateId: 'AFF123',
+        customerId: 'CUST123',
+        numberOfBags: 2,
+        actualWeight: 25,
+        save: jest.fn()
+      };
+
+      const mockAffiliate = {
+        affiliateId: 'AFF123',
+        email: 'affiliate@example.com',
+        businessName: 'Test Affiliate'
+      };
+
+      const mockCustomer = {
+        customerId: 'CUST123',
+        firstName: 'John',
+        lastName: 'Doe'
+      };
+
+      req.params.orderId = 'ORD123';
+      Order.findOne.mockResolvedValue(mockOrder);
+      
+      const Affiliate = require('../../server/models/Affiliate');
+      Affiliate.findOne.mockResolvedValue(mockAffiliate);
+      Customer.findOne.mockResolvedValue(mockCustomer);
+
+      const emailService = require('../../server/utils/emailService');
+      emailService.sendOrderReadyNotification.mockResolvedValue();
+
+      await operatorController.markOrderReady(req, res);
+
+      expect(emailService.sendOrderReadyNotification).toHaveBeenCalledWith(
+        'affiliate@example.com',
+        expect.objectContaining({
+          affiliateName: 'Test Affiliate',
+          orderId: 'ORD123',
+          customerName: 'John Doe',
+          numberOfBags: 2,
+          totalWeight: 25
+        })
+      );
+    });
+
+    it('should handle errors in markOrderReady', async () => {
+      req.params.orderId = 'ORD123';
+      Order.findOne.mockRejectedValue(new Error('Database error'));
+
+      await operatorController.markOrderReady(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(500);
+      expect(res.json).toHaveBeenCalledWith({
+        success: false,
+        error: 'Failed to mark order as ready'
       });
     });
   });
