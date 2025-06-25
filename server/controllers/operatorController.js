@@ -2,7 +2,7 @@ const Operator = require('../models/Operator');
 const Order = require('../models/Order');
 const Customer = require('../models/Customer');
 const logger = require('../utils/logger');
-const { logAuditEvent } = require('../utils/auditLogger');
+const { logAuditEvent, AuditEvents } = require('../utils/auditLogger');
 
 // Get order queue
 exports.getOrderQueue = async (req, res) => {
@@ -90,12 +90,13 @@ exports.claimOrder = async (req, res) => {
     operator.updatedAt = new Date();
     await operator.save();
 
-    // TODO: Fix audit logging
-    // await logAuditEvent('ORDER_CLAIMED', {
-    //   operatorId,
-    //   orderId,
-    //   orderNumber: order.orderNumber
-    // });
+    await logAuditEvent(AuditEvents.ORDER_STATUS_CHANGED, {
+      operatorId,
+      orderId,
+      orderNumber: order.orderNumber,
+      action: 'order_claimed',
+      newStatus: 'assigned'
+    }, req);
 
     res.json({
       message: 'Order claimed successfully',
@@ -159,12 +160,13 @@ exports.updateOrderStatus = async (req, res) => {
 
     await order.save();
 
-    // await auditLogger.log('operator', operatorId, 'order.status_updated', {
-    //   orderId,
-    //   orderNumber: order.orderNumber,
-    //   oldStatus: order.orderProcessingStatus,
-    //   newStatus: status
-    // });
+    await logAuditEvent(AuditEvents.ORDER_STATUS_CHANGED, {
+      operatorId,
+      orderId,
+      orderNumber: order.orderNumber,
+      oldStatus: order.orderProcessingStatus,
+      newStatus: status
+    }, req);
 
     res.json({
       message: 'Order status updated',
@@ -228,12 +230,14 @@ exports.performQualityCheck = async (req, res) => {
       await operator.save();
     }
 
-    // await auditLogger.log('operator', operatorId, 'order.quality_check', {
-    //   orderId,
-    //   orderNumber: order.orderNumber,
-    //   passed,
-    //   issues
-    // });
+    await logAuditEvent(AuditEvents.ORDER_STATUS_CHANGED, {
+      operatorId,
+      orderId,
+      orderNumber: order.orderNumber,
+      action: 'quality_check',
+      passed,
+      issues
+    }, req);
 
     res.json({
       message: `Quality check ${passed ? 'passed' : 'failed'}`,
@@ -373,10 +377,12 @@ exports.updateShiftStatus = async (req, res) => {
 
     await operator.save();
 
-    // await auditLogger.log('operator', operatorId, `shift.${action}`, {
-    //   workstation,
-    //   timestamp: new Date()
-    // });
+    await logAuditEvent(AuditEvents.ACCOUNT_UPDATED, {
+      operatorId,
+      action: `shift_${action}`,
+      workstation,
+      timestamp: new Date()
+    }, req);
 
     res.json({
       message: `Shift ${action}ed successfully`,
@@ -556,10 +562,12 @@ exports.addCustomerNote = async (req, res) => {
     customer.notes.push(operatorNote);
     await customer.save();
 
-    // await auditLogger.log('operator', operatorId, 'customer.note_added', {
-    //   customerId,
-    //   note: note.substring(0, 100) // Log first 100 chars
-    // });
+    await logAuditEvent(AuditEvents.ACCOUNT_UPDATED, {
+      operatorId,
+      action: 'customer_note_added',
+      customerId,
+      note: note.substring(0, 100) // Log first 100 chars
+    }, req);
 
     res.json({
       message: 'Note added successfully',
@@ -653,12 +661,13 @@ exports.scanCustomer = async (req, res) => {
       }
     };
 
-    // TODO: Fix audit logging format
-    // // await auditLogger.log('operator', operatorId, 'customer.card_scanned', {
-    //   customerId: customer.customerId,
-    //   orderId: currentOrder.orderId,
-    //   action
-    // });
+    await logAuditEvent(AuditEvents.SENSITIVE_DATA_ACCESS, {
+      operatorId,
+      customerId: customer.customerId,
+      orderId: currentOrder.orderId,
+      action: 'customer_card_scanned',
+      scanAction: action
+    }, req);
 
     res.json(response);
   } catch (error) {
@@ -734,14 +743,14 @@ exports.receiveOrder = async (req, res) => {
     
     await order.save();
 
-    // TODO: Fix audit logging
-    // await logAuditEvent('ORDER_STATUS_CHANGED', {
-    //   operatorId,
-    //   orderId,
-    //   action: 'order.received',
-    //   totalWeight,
-    //   numberOfBags: bagWeights.length
-    // });
+    await logAuditEvent(AuditEvents.ORDER_STATUS_CHANGED, {
+      operatorId,
+      orderId,
+      action: 'order_received',
+      totalWeight,
+      numberOfBags: bagWeights.length,
+      newStatus: 'processing'
+    }, req);
 
     res.json({
       success: true,
@@ -813,13 +822,15 @@ exports.markBagProcessed = async (req, res) => {
     
     await order.save();
 
-    // await auditLogger.log('operator', operatorId, 'bag.processed', {
-    //   orderId,
-    //   bagNumber: order.bagsProcessed,
-    //   totalBags: order.numberOfBags,
-    //   allBagsProcessed: order.bagsProcessed === order.numberOfBags,
-    //   affiliateNotified: order.bagsProcessed === order.numberOfBags
-    // });
+    await logAuditEvent(AuditEvents.ORDER_STATUS_CHANGED, {
+      operatorId,
+      orderId,
+      action: 'bag_processed',
+      bagNumber: order.bagsProcessed,
+      totalBags: order.numberOfBags,
+      allBagsProcessed: order.bagsProcessed === order.numberOfBags,
+      affiliateNotified: order.bagsProcessed === order.numberOfBags
+    }, req);
 
     res.json({
       success: true,
@@ -888,12 +899,15 @@ exports.markOrderReady = async (req, res) => {
       }
     }
 
-    // await auditLogger.log('operator', operatorId, 'order.marked_ready', {
-    //   orderId,
-    //   affiliateNotified: order.bagsProcessed === order.numberOfBags,
-    //   bagsProcessed: order.bagsProcessed,
-    //   totalBags: order.numberOfBags
-    // });
+    await logAuditEvent(AuditEvents.ORDER_STATUS_CHANGED, {
+      operatorId,
+      orderId,
+      action: 'order_marked_ready',
+      affiliateNotified: order.bagsProcessed === order.numberOfBags,
+      bagsProcessed: order.bagsProcessed,
+      totalBags: order.numberOfBags,
+      newStatus: 'ready'
+    }, req);
 
     res.json({
       success: true,
@@ -953,12 +967,15 @@ exports.confirmPickup = async (req, res) => {
 
     await order.save();
 
-    // await auditLogger.log('operator', operatorId, 'bags.pickup_confirmed', {
-    //   orderId,
-    //   bagsPickedUp: bagsToPickup,
-    //   totalBagsPickedUp: order.bagsPickedUp,
-    //   orderComplete: order.status === 'complete'
-    // });
+    await logAuditEvent(AuditEvents.ORDER_STATUS_CHANGED, {
+      operatorId,
+      orderId,
+      action: 'bags_pickup_confirmed',
+      bagsPickedUp: bagsToPickup,
+      totalBagsPickedUp: order.bagsPickedUp,
+      orderComplete: order.status === 'complete',
+      newStatus: order.status
+    }, req);
 
     res.json({
       success: true,
