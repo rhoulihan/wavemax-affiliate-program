@@ -10,6 +10,11 @@ jest.mock('../../server/models/TokenBlacklist', () => ({
   isBlacklisted: jest.fn()
 }));
 
+// Mock storeIPConfig
+jest.mock('../../server/config/storeIPs', () => ({
+  isWhitelisted: jest.fn().mockReturnValue(false)
+}));
+
 describe('Auth Middleware', () => {
   let req, res, next;
 
@@ -18,11 +23,19 @@ describe('Auth Middleware', () => {
       headers: {},
       user: null,
       path: '/api/test',
-      get: jest.fn().mockReturnValue('Mozilla/5.0')
+      get: jest.fn().mockReturnValue('Mozilla/5.0'),
+      connection: {
+        remoteAddress: '127.0.0.1'
+      },
+      socket: {
+        remoteAddress: '127.0.0.1'
+      },
+      ip: '127.0.0.1'
     };
     res = {
       status: jest.fn().mockReturnThis(),
-      json: jest.fn()
+      json: jest.fn(),
+      setHeader: jest.fn()
     };
     next = jest.fn();
     jest.clearAllMocks();

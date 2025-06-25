@@ -364,7 +364,7 @@ describe('Affiliate API', () => {
       pickupDate: new Date(),
       pickupTime: 'morning',
 
-      status: 'scheduled',
+      status: 'pending',
       estimatedWeight: 30,
       numberOfBags: 2,
       deliveryFee: 20
