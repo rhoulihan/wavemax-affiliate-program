@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WaveMAX Test Coverage Summary - June 24, 2025</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        h1, h2, h3 {
+            color: #2c3e50;
+        }
+        .summary-card {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .metric {
+            display: inline-block;
+            margin: 10px 20px 10px 0;
+        }
+        .metric-label {
+            font-size: 14px;
+            color: #666;
+            text-transform: uppercase;
+        }
+        .metric-value {
+            font-size: 32px;
+            font-weight: bold;
+        }
+        .metric-value.good { color: #27ae60; }
+        .metric-value.warning { color: #f39c12; }
+        .metric-value.poor { color: #e74c3c; }
+        .coverage-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .coverage-item {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 6px;
+            text-align: center;
+        }
+        .coverage-percentage {
+            font-size: 28px;
+            font-weight: bold;
+            margin: 5px 0;
+        }
+        .coverage-label {
+            font-size: 14px;
+            color: #666;
+        }
+        .coverage-fraction {
+            font-size: 12px;
+            color: #999;
+        }
+        .test-failures {
+            background: #fee;
+            border: 1px solid #fcc;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 20px 0;
+        }
+        .test-failures h3 {
+            color: #c00;
+            margin-top: 0;
+        }
+        .failure-item {
+            margin: 10px 0;
+            padding: 10px;
+            background: white;
+            border-radius: 4px;
+        }
+        .failure-suite {
+            font-weight: bold;
+            color: #666;
+        }
+        .failure-test {
+            color: #333;
+            margin-left: 20px;
+        }
+        .timestamp {
+            text-align: right;
+            color: #666;
+            font-size: 14px;
+            margin-top: 20px;
+        }
+        .progress-bar {
+            background: #e0e0e0;
+            height: 20px;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 5px 0;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #27ae60, #2ecc71);
+            transition: width 0.3s ease;
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        .status-passed { background: #d4edda; color: #155724; }
+        .status-failed { background: #f8d7da; color: #721c24; }
+        .status-skipped { background: #fff3cd; color: #856404; }
+        .improvement-note {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>WaveMAX Affiliate Program - Test Coverage Summary</h1>
+    
+    <div class="summary-card">
+        <h2>Test Suite Results</h2>
+        <div class="metric">
+            <div class="metric-label">Total Tests</div>
+            <div class="metric-value">1,685</div>
+        </div>
+        <div class="metric">
+            <div class="metric-label">Passed</div>
+            <div class="metric-value good">1,622</div>
+        </div>
+        <div class="metric">
+            <div class="metric-label">Failed</div>
+            <div class="metric-value poor">31</div>
+        </div>
+        <div class="metric">
+            <div class="metric-label">Skipped</div>
+            <div class="metric-value warning">32</div>
+        </div>
+        
+        <div style="margin-top: 20px;">
+            <h3>Test Suites</h3>
+            <div class="metric">
+                <span class="status-badge status-passed">68 Passed</span>
+                <span class="status-badge status-failed">7 Failed</span>
+                <span class="status-badge status-skipped">3 Skipped</span>
+                <span style="margin-left: 10px; color: #666;">Total: 78</span>
+            </div>
+        </div>
+        
+        <div style="margin-top: 20px;">
+            <strong>Pass Rate:</strong> 96.3% (1,622/1,685)
+        </div>
+    </div>
+
+    <div class="summary-card">
+        <h2>Code Coverage Metrics</h2>
+        <div class="coverage-grid">
+            <div class="coverage-item">
+                <div class="coverage-label">Statements</div>
+                <div class="coverage-percentage good">72.13%</div>
+                <div class="coverage-fraction">3889/5391</div>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: 72.13%"></div>
+                </div>
+            </div>
+            <div class="coverage-item">
+                <div class="coverage-label">Branches</div>
+                <div class="coverage-percentage warning">62.51%</div>
+                <div class="coverage-fraction">1886/3017</div>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: 62.51%; background: linear-gradient(90deg, #f39c12, #f1c40f);"></div>
+                </div>
+            </div>
+            <div class="coverage-item">
+                <div class="coverage-label">Functions</div>
+                <div class="coverage-percentage good">73.89%</div>
+                <div class="coverage-fraction">436/590</div>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: 73.89%"></div>
+                </div>
+            </div>
+            <div class="coverage-item">
+                <div class="coverage-label">Lines</div>
+                <div class="coverage-percentage good">72.21%</div>
+                <div class="coverage-fraction">3807/5272</div>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: 72.21%"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="test-failures">
+        <h3>Failed Test Suites (7)</h3>
+        <div class="failure-item">
+            <div class="failure-suite">authMiddleware.test.js (3 failures)</div>
+            <div class="failure-test">• should authenticate valid Bearer token - TokenBlacklist.isBlacklisted not called</div>
+            <div class="failure-test">• should authenticate valid x-auth-token header - TokenBlacklist.isBlacklisted not called</div>
+            <div class="failure-test">• should reject blacklisted token - TokenBlacklist.isBlacklisted not called</div>
+            <div style="color: #666; font-size: 14px; margin-top: 5px;">
+                Issue: Remote address detection failing in tests (req.socket undefined)
+            </div>
+        </div>
+        <div class="failure-item">
+            <div class="failure-suite">userOAuthController.test.js</div>
+            <div class="failure-test">OAuth authentication callback handling and user creation tests</div>
+        </div>
+        <div class="failure-item">
+            <div class="failure-suite">adminController.test.js</div>
+            <div class="failure-test">Operator management endpoints - create, update, and list operators</div>
+        </div>
+        <div class="failure-item">
+            <div class="failure-suite">operatorRoutes.test.js</div>
+            <div class="failure-test">Route authorization and controller integration</div>
+        </div>
+        <div class="failure-item">
+            <div class="failure-suite">affiliateController.test.js</div>
+            <div class="failure-test">Dashboard, profile updates, and customer management</div>
+        </div>
+        <div class="failure-item">
+            <div class="failure-suite">systemController.test.js</div>
+            <div class="failure-test">System configuration and monitoring endpoints</div>
+        </div>
+        <div class="failure-item">
+            <div class="failure-suite">server.test.js</div>
+            <div class="failure-test">Server initialization and startup tests</div>
+        </div>
+    </div>
+
+    <div class="improvement-note">
+        <h3>📊 Coverage Analysis</h3>
+        <p><strong>Strengths:</strong></p>
+        <ul>
+            <li>Overall coverage remains strong at 72%+ for statements and lines</li>
+            <li>Function coverage is good at 73.89%</li>
+            <li>1,622 tests passing successfully</li>
+        </ul>
+        <p><strong>Areas for Improvement:</strong></p>
+        <ul>
+            <li>Branch coverage at 62.51% - focus on testing error paths and edge cases</li>
+            <li>Auth middleware tests need mock fixes for remote address handling</li>
+            <li>OAuth controller tests require updates for recent flow changes</li>
+        </ul>
+    </div>
+
+    <div class="summary-card">
+        <h2>Recent Changes & Impacts</h2>
+        <ul>
+            <li>✅ <strong>Active Order Check:</strong> Added endpoint and frontend validation for duplicate order prevention</li>
+            <li>✅ <strong>Email Templates:</strong> Fixed placeholder replacement for affiliate business names</li>
+            <li>✅ <strong>Store IP Sessions:</strong> Implemented automatic renewal for operator sessions</li>
+            <li>✅ <strong>Order Status Simplification:</strong> Removed orderProcessingStatus field, consolidated to single status</li>
+            <li>✅ <strong>Operator Workflow:</strong> Fixed weight modal issues and updated UI to WaveMAX branding</li>
+        </ul>
+    </div>
+
+    <div class="summary-card">
+        <h2>Test Execution Details</h2>
+        <ul>
+            <li><strong>Total Execution Time:</strong> 536.522 seconds (~9 minutes)</li>
+            <li><strong>Test Runner:</strong> Jest with --coverage --runInBand --forceExit</li>
+            <li><strong>Environment:</strong> MongoDB test database (wavemax_test)</li>
+            <li><strong>Memory Mode:</strong> Standard (consider using test:memory for large suites)</li>
+        </ul>
+    </div>
+
+    <div class="timestamp">
+        Last Updated: June 24, 2025 23:32 UTC<br>
+        Next Steps: Fix auth middleware mocks, update OAuth tests, improve branch coverage
+    </div>
+</body>
+</html>

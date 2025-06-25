@@ -334,7 +334,7 @@ describe('Order Integration Tests', () => {
         pickupDate: new Date('2025-05-25'),
         pickupTime: 'morning',
 
-        status: 'scheduled',
+        status: 'pending',
         estimatedWeight: 30,
         numberOfBags: 2,
         baseRate: 1.89,
@@ -404,13 +404,13 @@ describe('Order Integration Tests', () => {
         .set('Authorization', `Bearer ${affiliateToken}`)
         .set('X-CSRF-Token', csrfToken)
         .send({
-          status: 'scheduled'
+          status: 'pending'
         });
 
       expect(response.status).toBe(400);
       expect(response.body).toMatchObject({
         success: false,
-        message: 'Invalid status transition from complete to scheduled'
+        message: 'Invalid status transition from complete to pending'
       });
     });
 
@@ -459,7 +459,7 @@ describe('Order Integration Tests', () => {
         pickupDate: new Date('2025-05-25'),
         pickupTime: 'morning',
 
-        status: 'scheduled',
+        status: 'pending',
         estimatedWeight: 30,
         numberOfBags: 2,
         baseRate: 1.89,
@@ -516,7 +516,7 @@ describe('Order Integration Tests', () => {
       expect(response.status).toBe(400);
       expect(response.body).toMatchObject({
         success: false,
-        message: 'Orders in processing status cannot be cancelled'
+        message: 'Orders in processing status cannot be cancelled. Only pending orders can be cancelled.'
       });
     });
 
@@ -953,7 +953,7 @@ describe('Order Integration Tests', () => {
           pickupDate: new Date('2025-05-25'),
           pickupTime: 'evening',
 
-          status: 'scheduled',
+          status: 'pending',
           estimatedWeight: 15,
           numberOfBags: 1,
           baseRate: 1.89,
@@ -1051,7 +1051,7 @@ describe('Order Integration Tests', () => {
         statistics: {
           totalOrders: 3,
           ordersByStatus: {
-            scheduled: 1,
+            pending: 1,
             processing: 1,
             complete: 1
           },
@@ -1160,28 +1160,56 @@ describe('Order Integration Tests', () => {
     });
 
     it('should calculate commission for multiple orders', async () => {
-      // Create multiple orders to simulate weekly earnings
+      // Create orders for different customers to avoid duplicate prevention
+      const customers = [];
       const orderIds = [];
       
+      // Create 3 different customers
       for (let i = 0; i < 3; i++) {
+        const hashedPassword = await encryptionUtil.hashPassword('password123');
+        const customer = await Customer.create({
+          customerId: `CUST-COMM-${i}`,
+          firstName: `Test${i}`,
+          lastName: 'Customer',
+          email: `test${i}@example.com`,
+          username: `testcust${i}`,
+          phone: '555-0123',
+          address: '123 Test St',
+          city: 'Austin',
+          state: 'TX',
+          zipCode: '78701',
+          passwordHash: hashedPassword.hash,
+          passwordSalt: hashedPassword.salt,
+          affiliateId: 'AFF123',
+          verificationToken: 'verified',
+          isActive: true
+        });
+        customers.push(customer);
+        
+        // Create order for this customer (use affiliate token since they can create for any customer)
         const response = await agent
           .post('/api/v1/orders')
-          .set('Authorization', `Bearer ${customerToken}`)
+          .set('Authorization', `Bearer ${affiliateToken}`)
           .set('X-CSRF-Token', csrfToken)
           .send({
-            customerId: 'CUST123',
+            customerId: customer.customerId,
             affiliateId: 'AFF123',
             pickupDate: '2025-05-25',
             pickupTime: 'morning',
             estimatedWeight: 30,
-          numberOfBags: 2});
+            numberOfBags: 2
+          });
         
+        expect(response.status).toBe(201);
         orderIds.push(response.body.orderId);
       }
 
       // Update all orders with actual weights
       for (const orderId of orderIds) {
         const order = await Order.findOne({ orderId });
+        if (!order) {
+          throw new Error(`Order not found with orderId: ${orderId}`);
+        }
         order.actualWeight = 20; // 20 lbs each
         order.status = 'complete';
         await order.save();

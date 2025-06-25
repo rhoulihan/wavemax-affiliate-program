@@ -418,9 +418,8 @@ exports.updateOrderStatus = async (req, res) => {
 
     // Check for valid status transition
     const validTransitions = {
-      pending: ['scheduled', 'cancelled'],
-      scheduled: ['processing', 'cancelled'],
-      processing: ['processed'],
+      pending: ['processing', 'cancelled'],
+      processing: ['processed', 'cancelled'],
       processed: ['complete'],
       complete: [],
       cancelled: []

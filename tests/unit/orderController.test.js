@@ -278,7 +278,7 @@ describe('Order Controller', () => {
         orderId: 'ORD123',
         customerId: 'CUST123',
         affiliateId: 'AFF123',
-        status: 'scheduled',
+        status: 'pending',
         save: jest.fn()
       };
 
@@ -311,7 +311,7 @@ describe('Order Controller', () => {
     it('should update actual weight when processing', async () => {
       const mockOrder = {
         orderId: 'ORD123',
-        status: 'scheduled', // Use valid status
+        status: 'pending', // Use valid status
         save: jest.fn()
       };
 
@@ -338,7 +338,7 @@ describe('Order Controller', () => {
       };
 
       req.params.orderId = 'ORD123';
-      req.body = { status: 'scheduled' };
+      req.body = { status: 'pending' };
       req.user = { role: 'admin' };
 
       Order.findOne.mockResolvedValue(mockOrder);
@@ -348,7 +348,7 @@ describe('Order Controller', () => {
       expect(res.status).toHaveBeenCalledWith(400);
       expect(res.json).toHaveBeenCalledWith({
         success: false,
-        message: 'Invalid status transition from complete to scheduled'
+        message: 'Invalid status transition from complete to pending'
       });
     });
 
@@ -388,7 +388,7 @@ describe('Order Controller', () => {
         orderId: 'ORD123',
         customerId: 'CUST123',
         affiliateId: 'AFF123',
-        status: 'scheduled',
+        status: 'pending',
         save: jest.fn()
       };
 
@@ -434,7 +434,7 @@ describe('Order Controller', () => {
       expect(res.status).toHaveBeenCalledWith(400);
       expect(res.json).toHaveBeenCalledWith({
         success: false,
-        message: 'Orders in processing status cannot be cancelled'
+        message: 'Orders in processing status cannot be cancelled. Only pending orders can be cancelled.'
       });
     });
   });

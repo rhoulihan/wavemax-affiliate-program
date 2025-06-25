@@ -596,7 +596,7 @@ describe('Customer Integration Tests', () => {
         pickupDate: new Date(),
         pickupTime: 'morning',
 
-        status: 'scheduled',
+        status: 'pending',
         estimatedWeight: 30,
         numberOfBags: 2,
         deliveryFee: 25,
