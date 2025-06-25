@@ -623,7 +623,7 @@ describe('Affiliate Controller', () => {
           orderId: 'ORD001',
           customerId: 'CUST001',
           pickupDate: new Date(),
-          status: 'scheduled',
+          status: 'pending',
           estimatedWeight: 30,
           numberOfBags: 2,
           createdAt: new Date()
@@ -645,7 +645,7 @@ describe('Affiliate Controller', () => {
       req.params.affiliateId = 'AFF123';
       req.user = { role: 'affiliate', affiliateId: 'AFF123' };
       req.query = {
-        status: 'scheduled',
+        status: 'pending',
         date: 'today',
         page: '1',
         limit: '10'
@@ -663,7 +663,7 @@ describe('Affiliate Controller', () => {
 
       expect(Order.find).toHaveBeenCalledWith(expect.objectContaining({
         affiliateId: 'AFF123',
-        status: 'scheduled',
+        status: 'pending',
         pickupDate: expect.any(Object)
       }));
 
