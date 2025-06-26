@@ -290,7 +290,7 @@ describe('Operator Integration Tests', () => {
       });
 
       const response = await adminAgent
-        .get(`/api/v1/operators/${operator._id}`)
+        .get(`/api/v1/administrators/operators/${operator._id}`)
         .set('Authorization', `Bearer ${adminToken}`)
         .set('x-csrf-token', adminCsrfToken);
 
