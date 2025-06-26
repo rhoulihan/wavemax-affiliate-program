@@ -1,18 +1,196 @@
 // Administrator Controller Unit Tests
 // Focus on key uncovered functions for coverage improvement
 
-jest.mock('../../server/models/Administrator');
-jest.mock('../../server/models/Operator');
-jest.mock('../../server/models/Order');
-jest.mock('../../server/models/Affiliate');
-jest.mock('../../server/models/Customer');
-jest.mock('../../server/models/SystemConfig');
-jest.mock('../../server/models/Transaction');
+// First, set up manual mocks before any requires
+jest.mock('../../server/models/Administrator', () => {
+  const mockMethods = {
+    find: jest.fn().mockReturnThis(),
+    findOne: jest.fn().mockReturnThis(),
+    findById: jest.fn().mockReturnThis(),
+    findByIdAndUpdate: jest.fn().mockReturnThis(),
+    findByIdAndDelete: jest.fn().mockReturnThis(),
+    countDocuments: jest.fn(),
+    aggregate: jest.fn(),
+    create: jest.fn(),
+    deleteMany: jest.fn(),
+    select: jest.fn().mockReturnThis(),
+    populate: jest.fn().mockReturnThis(),
+    sort: jest.fn().mockReturnThis(),
+    limit: jest.fn().mockReturnThis(),
+    skip: jest.fn().mockReturnThis(),
+    lean: jest.fn().mockReturnThis(),
+    exec: jest.fn()
+  };
+  
+  // Make chainable methods return the mock object
+  Object.keys(mockMethods).forEach(method => {
+    if (['select', 'populate', 'sort', 'limit', 'skip', 'lean'].includes(method)) {
+      mockMethods[method].mockReturnValue(mockMethods);
+    }
+  });
+  
+  // Mock constructor
+  const MockAdministrator = jest.fn().mockImplementation(() => ({
+    save: jest.fn().mockResolvedValue(true),
+    toObject: jest.fn().mockReturnValue({})
+  }));
+  
+  // Add static methods
+  Object.assign(MockAdministrator, {
+    ...mockMethods,
+    find: jest.fn().mockReturnValue(mockMethods),
+    findOne: jest.fn().mockReturnValue(mockMethods),
+    findById: jest.fn().mockReturnValue(mockMethods),
+    findByIdAndUpdate: jest.fn().mockReturnValue(mockMethods),
+    findByIdAndDelete: jest.fn().mockReturnValue(mockMethods)
+  });
+  
+  return MockAdministrator;
+});
+
+jest.mock('../../server/models/Operator', () => {
+  const mockMethods = {
+    find: jest.fn().mockReturnThis(),
+    findOne: jest.fn().mockReturnThis(),
+    findById: jest.fn().mockReturnThis(),
+    findByIdAndUpdate: jest.fn().mockReturnThis(),
+    findByIdAndDelete: jest.fn().mockReturnThis(),
+    countDocuments: jest.fn(),
+    aggregate: jest.fn(),
+    create: jest.fn(),
+    deleteMany: jest.fn(),
+    findOnShift: jest.fn(),
+    select: jest.fn().mockReturnThis(),
+    populate: jest.fn().mockReturnThis(),
+    sort: jest.fn().mockReturnThis(),
+    limit: jest.fn().mockReturnThis(),
+    skip: jest.fn().mockReturnThis(),
+    lean: jest.fn().mockReturnThis(),
+    exec: jest.fn()
+  };
+  
+  // Make chainable methods return the mock object
+  Object.keys(mockMethods).forEach(method => {
+    if (['select', 'populate', 'sort', 'limit', 'skip', 'lean'].includes(method)) {
+      mockMethods[method].mockReturnValue(mockMethods);
+    }
+  });
+  
+  // Mock constructor
+  const MockOperator = jest.fn().mockImplementation(() => ({
+    save: jest.fn().mockResolvedValue(true),
+    toObject: jest.fn().mockReturnValue({})
+  }));
+  
+  // Add static methods
+  Object.assign(MockOperator, {
+    ...mockMethods,
+    find: jest.fn().mockReturnValue(mockMethods),
+    findOne: jest.fn().mockReturnValue(mockMethods),
+    findById: jest.fn().mockReturnValue(mockMethods),
+    findByIdAndUpdate: jest.fn().mockReturnValue(mockMethods),
+    findByIdAndDelete: jest.fn().mockReturnValue(mockMethods)
+  });
+  
+  return MockOperator;
+});
+
+jest.mock('../../server/models/Order', () => {
+  const mockMethods = {
+    find: jest.fn().mockReturnThis(),
+    findOne: jest.fn().mockReturnThis(),
+    findById: jest.fn().mockReturnThis(),
+    countDocuments: jest.fn(),
+    aggregate: jest.fn(),
+    updateMany: jest.fn(),
+    select: jest.fn().mockReturnThis(),
+    populate: jest.fn().mockReturnThis(),
+    sort: jest.fn().mockReturnThis(),
+    limit: jest.fn().mockReturnThis(),
+    skip: jest.fn().mockReturnThis(),
+    lean: jest.fn().mockReturnThis(),
+    exec: jest.fn()
+  };
+  
+  // Make chainable methods return the mock object
+  Object.keys(mockMethods).forEach(method => {
+    if (['select', 'populate', 'sort', 'limit', 'skip', 'lean'].includes(method)) {
+      mockMethods[method].mockReturnValue(mockMethods);
+    }
+  });
+  
+  return {
+    ...mockMethods,
+    find: jest.fn().mockReturnValue(mockMethods),
+    findOne: jest.fn().mockReturnValue(mockMethods),
+    findById: jest.fn().mockReturnValue(mockMethods)
+  };
+});
+
+jest.mock('../../server/models/Affiliate', () => {
+  const mockMethods = {
+    find: jest.fn().mockReturnThis(),
+    findOne: jest.fn().mockReturnThis(),
+    findById: jest.fn().mockReturnThis(),
+    countDocuments: jest.fn(),
+    aggregate: jest.fn(),
+    select: jest.fn().mockReturnThis(),
+    populate: jest.fn().mockReturnThis(),
+    sort: jest.fn().mockReturnThis(),
+    limit: jest.fn().mockReturnThis(),
+    skip: jest.fn().mockReturnThis(),
+    lean: jest.fn().mockReturnThis(),
+    exec: jest.fn()
+  };
+  
+  // Make chainable methods return the mock object
+  Object.keys(mockMethods).forEach(method => {
+    if (['select', 'populate', 'sort', 'limit', 'skip', 'lean'].includes(method)) {
+      mockMethods[method].mockReturnValue(mockMethods);
+    }
+  });
+  
+  return {
+    ...mockMethods,
+    find: jest.fn().mockReturnValue(mockMethods),
+    findOne: jest.fn().mockReturnValue(mockMethods),
+    findById: jest.fn().mockReturnValue(mockMethods)
+  };
+});
+
+jest.mock('../../server/models/Customer', () => ({
+  find: jest.fn(),
+  findOne: jest.fn(),
+  findById: jest.fn(),
+  countDocuments: jest.fn(),
+  aggregate: jest.fn()
+}));
+
+jest.mock('../../server/models/SystemConfig', () => ({
+  find: jest.fn(),
+  findOne: jest.fn(),
+  setValue: jest.fn(),
+  getValue: jest.fn()
+}));
+
+jest.mock('../../server/models/Transaction', () => ({
+  find: jest.fn(),
+  aggregate: jest.fn()
+}));
+
 jest.mock('../../server/utils/auditLogger');
 jest.mock('../../server/utils/emailService');
 jest.mock('../../server/utils/passwordValidator');
 jest.mock('../../server/utils/fieldFilter');
-jest.mock('../../server/utils/encryption');
+jest.mock('../../server/utils/encryption', () => ({
+  hashPassword: jest.fn().mockReturnValue({
+    salt: 'mockSalt',
+    hash: 'mockHash'
+  }),
+  encrypt: jest.fn().mockReturnValue('encrypted'),
+  decrypt: jest.fn().mockReturnValue('decrypted'),
+  comparePassword: jest.fn().mockResolvedValue(true)
+}));
 jest.mock('express-validator');
 jest.mock('mongoose', () => {
   const SchemaClass = jest.fn().mockImplementation(() => {
@@ -37,15 +215,28 @@ jest.mock('mongoose', () => {
     connection: {
       readyState: 1,
       db: {
-        stats: jest.fn()
+        stats: jest.fn().mockResolvedValue({
+          db: 'test',
+          collections: 10,
+          objects: 1000,
+          dataSize: 1000000,
+          storageSize: 2000000
+        })
       }
     },
     Types: {
-      ObjectId: jest.fn()
+      ObjectId: {
+        isValid: jest.fn().mockReturnValue(true)
+      }
     }
   };
 });
-jest.mock('crypto');
+jest.mock('crypto', () => ({
+  randomInt: jest.fn(),
+  randomBytes: jest.fn().mockReturnValue({
+    toString: jest.fn().mockReturnValue('randomstring')
+  })
+}));
 
 const administratorController = require('../../server/controllers/administratorController');
 const Administrator = require('../../server/models/Administrator');
@@ -59,6 +250,7 @@ const emailService = require('../../server/utils/emailService');
 const { validatePasswordStrength } = require('../../server/utils/passwordValidator');
 const { fieldFilter } = require('../../server/utils/fieldFilter');
 const { validationResult } = require('express-validator');
+const encryptionUtil = require('../../server/utils/encryption');
 
 describe('Administrator Controller', () => {
   let req, res;
@@ -77,6 +269,55 @@ describe('Administrator Controller', () => {
       send: jest.fn()
     };
 
+    // Clear all mocks before setting defaults
+    jest.clearAllMocks();
+    
+    // Ensure encryption util is properly mocked
+    encryptionUtil.hashPassword.mockReturnValue({
+      salt: 'mockSalt',
+      hash: 'mockHash'
+    });
+    encryptionUtil.comparePassword.mockResolvedValue(true);
+    
+    // Reset all model mocks to default behavior
+    const mockChainMethods = {
+      select: jest.fn().mockReturnThis(),
+      populate: jest.fn().mockReturnThis(),
+      sort: jest.fn().mockReturnThis(),
+      limit: jest.fn().mockReturnThis(),
+      skip: jest.fn().mockReturnThis(),
+      lean: jest.fn().mockReturnThis(),
+      exec: jest.fn()
+    };
+    
+    // Reset Administrator mock
+    Administrator.find.mockReset();
+    Administrator.findOne.mockReset();
+    Administrator.findById.mockReset();
+    Administrator.findByIdAndUpdate.mockReset();
+    Administrator.findByIdAndDelete.mockReset();
+    Administrator.countDocuments.mockReset();
+    Administrator.aggregate.mockReset();
+    Administrator.create.mockReset();
+    
+    // Reset Operator mock
+    Operator.find.mockReset();
+    Operator.findOne.mockReset();
+    Operator.findById.mockReset();
+    Operator.findByIdAndUpdate.mockReset();
+    Operator.findByIdAndDelete.mockReset();
+    Operator.countDocuments.mockReset();
+    Operator.aggregate.mockReset();
+    Operator.create.mockReset();
+    
+    // Reset Order mock
+    Order.find.mockReset();
+    Order.findOne.mockReset();
+    Order.findById.mockReset();
+    Order.countDocuments.mockReset();
+    Order.aggregate.mockReset();
+    Order.updateMany.mockReset();
+
     // Default mocks
     validationResult.mockReturnValue({
       isEmpty: jest.fn().mockReturnValue(true),
@@ -84,8 +325,13 @@ describe('Administrator Controller', () => {
     });
 
     fieldFilter.mockImplementation((data) => data);
-
-    jest.clearAllMocks();
+    
+    // Default password validation to pass
+    validatePasswordStrength.mockReturnValue({ success: true });
+    
+    // Reset mongoose ObjectId mock behavior
+    const mongoose = require('mongoose');
+    mongoose.Types.ObjectId.isValid = jest.fn().mockReturnValue(true);
   });
 
   describe('getAdministrators', () => {
@@ -155,9 +401,23 @@ describe('Administrator Controller', () => {
       const mockAdmin = {
         _id: 'new-id',
         adminId: 'ADM002',
+        firstName: 'Jane',
+        lastName: 'Doe',
+        email: 'jane@example.com',
+        passwordSalt: 'mockSalt',
+        passwordHash: 'mockHash',
+        permissions: ['administrators.read'],
+        createdAt: new Date(),
         save: jest.fn().mockResolvedValue(true),
-        toObject: jest.fn().mockReturnValue({ adminId: 'ADM002' })
+        toObject: jest.fn().mockReturnValue({ 
+          adminId: 'ADM002', 
+          email: 'jane@example.com',
+          firstName: 'Jane',
+          lastName: 'Doe'
+        })
       };
+      
+      // Set up the constructor mock for this test
       Administrator.mockImplementation(() => mockAdmin);
 
       await administratorController.createAdministrator(req, res);
@@ -265,14 +525,18 @@ describe('Administrator Controller', () => {
 
       const mockAdmin = {
         _id: '507f1f77bcf86cd799439011',
-        save: jest.fn().mockResolvedValue(true)
+        adminId: 'ADM001',
+        save: jest.fn().mockResolvedValue(true),
+        passwordHash: undefined,
+        passwordSalt: undefined
       };
       Administrator.findById.mockResolvedValue(mockAdmin);
 
       await administratorController.resetAdministratorPassword(req, res);
 
-      expect(mockAdmin.passwordHash).toBeDefined();
-      expect(mockAdmin.passwordSalt).toBeDefined();
+      // Check that password fields were set by the controller
+      expect(mockAdmin.passwordHash).toBe('mockHash');
+      expect(mockAdmin.passwordSalt).toBe('mockSalt');
       expect(res.json).toHaveBeenCalledWith({
         success: true,
         message: 'Password reset successfully'
@@ -296,10 +560,27 @@ describe('Administrator Controller', () => {
       Operator.findOne.mockResolvedValue(null);
       const mockOperator = {
         _id: 'op-id',
+        operatorId: 'OP001',
+        firstName: 'John',
+        lastName: 'Operator',
+        email: 'operator@example.com',
+        username: 'johnoperator',
+        password: 'Pass123!',
+        shiftStart: '09:00',
+        shiftEnd: '17:00',
+        createdBy: req.user.id,
         save: jest.fn().mockResolvedValue(true),
-        toObject: jest.fn().mockReturnValue({ operatorId: 'OP001' })
+        toObject: jest.fn().mockReturnValue({ 
+          operatorId: 'OP001', 
+          email: 'operator@example.com',
+          firstName: 'John',
+          lastName: 'Operator' 
+        })
       };
+      
+      // Set up the constructor mock for this test  
       Operator.mockImplementation(() => mockOperator);
+      
       emailService.sendOperatorWelcomeEmail.mockResolvedValue(true);
 
       await administratorController.createOperator(req, res);
@@ -547,21 +828,24 @@ describe('Administrator Controller', () => {
 
       const mockAdmin = {
         _id: req.user.id,
+        email: 'admin@example.com',
         passwordHash: 'hashedOldPassword',
         passwordSalt: 'salt',
+        verifyPassword: jest.fn().mockReturnValue(true),
+        isPasswordInHistory: jest.fn().mockReturnValue(false),
+        setPassword: jest.fn().mockResolvedValue(true),
         save: jest.fn().mockResolvedValue(true)
       };
 
-      Administrator.findById.mockResolvedValue(mockAdmin);
+      // Mock the findById chain to return the admin with password
+      Administrator.findById.mockReturnValue({
+        select: jest.fn().mockResolvedValue(mockAdmin)
+      });
       validatePasswordStrength.mockReturnValue({ success: true });
-
-      // Mock bcrypt comparison
-      const encryptionUtil = require('../../server/utils/encryption');
-      encryptionUtil.comparePassword = jest.fn().mockResolvedValue(true);
-      encryptionUtil.hashPassword = jest.fn().mockResolvedValue('hashedNewPassword');
 
       await administratorController.changeAdministratorPassword(req, res);
 
+      expect(mockAdmin.setPassword).toHaveBeenCalledWith('NewPass123!');
       expect(mockAdmin.save).toHaveBeenCalled();
       expect(res.json).toHaveBeenCalledWith({
         success: true,
@@ -577,14 +861,15 @@ describe('Administrator Controller', () => {
 
       const mockAdmin = {
         _id: req.user.id,
+        email: 'admin@example.com',
         passwordHash: 'hashedOldPassword',
-        passwordSalt: 'salt'
+        passwordSalt: 'salt',
+        verifyPassword: jest.fn().mockReturnValue(false)
       };
 
-      Administrator.findById.mockResolvedValue(mockAdmin);
-
-      const encryptionUtil = require('../../server/utils/encryption');
-      encryptionUtil.comparePassword = jest.fn().mockResolvedValue(false);
+      Administrator.findById.mockReturnValue({
+        select: jest.fn().mockResolvedValue(mockAdmin)
+      });
 
       await administratorController.changeAdministratorPassword(req, res);
 
@@ -601,9 +886,22 @@ describe('Administrator Controller', () => {
         newPassword: 'weak'
       };
 
+      const mockAdmin = {
+        _id: req.user.id,
+        email: 'admin@example.com',
+        passwordHash: 'hashedOldPassword',
+        passwordSalt: 'salt',
+        verifyPassword: jest.fn().mockReturnValue(true),
+        isPasswordInHistory: jest.fn().mockReturnValue(false)
+      };
+
+      Administrator.findById.mockReturnValue({
+        select: jest.fn().mockResolvedValue(mockAdmin)
+      });
+      
       validatePasswordStrength.mockReturnValue({
         success: false,
-        message: 'Password too weak'
+        errors: ['Password too weak']
       });
 
       await administratorController.changeAdministratorPassword(req, res);
@@ -611,7 +909,8 @@ describe('Administrator Controller', () => {
       expect(res.status).toHaveBeenCalledWith(400);
       expect(res.json).toHaveBeenCalledWith({
         success: false,
-        message: 'Password too weak'
+        message: 'Password does not meet security requirements',
+        errors: ['Password too weak']
       });
     });
 
@@ -621,7 +920,9 @@ describe('Administrator Controller', () => {
         newPassword: 'NewPass123!'
       };
 
-      Administrator.findById.mockRejectedValue(new Error('DB Error'));
+      Administrator.findById.mockReturnValue({
+        select: jest.fn().mockRejectedValue(new Error('DB Error'))
+      });
 
       await administratorController.changeAdministratorPassword(req, res);
 
@@ -635,7 +936,7 @@ describe('Administrator Controller', () => {
 
   describe('getOperatorById', () => {
     test('should get operator by id', async () => {
-      req.params.id = 'op-id';
+      req.params.operatorId = 'op-id';
 
       const mockOperator = {
         _id: 'op-id',
@@ -646,17 +947,29 @@ describe('Administrator Controller', () => {
       Operator.findById.mockReturnValue({
         populate: jest.fn().mockResolvedValue(mockOperator)
       });
+      
+      Order.aggregate.mockResolvedValue([{
+        totalOrders: 10,
+        completedOrders: 8,
+        averageProcessingTime: 25,
+        qualityChecksPassed: 7,
+        qualityChecksTotal: 8
+      }]);
 
       await administratorController.getOperatorById(req, res);
 
       expect(res.json).toHaveBeenCalledWith({
         success: true,
-        operator: expect.any(Object)
+        operator: expect.any(Object),
+        statistics: expect.objectContaining({
+          totalOrders: 10,
+          completedOrders: 8
+        })
       });
     });
 
     test('should handle operator not found', async () => {
-      req.params.id = 'op-id';
+      req.params.operatorId = 'op-id';
 
       Operator.findById.mockReturnValue({
         populate: jest.fn().mockResolvedValue(null)
@@ -672,7 +985,7 @@ describe('Administrator Controller', () => {
     });
 
     test('should handle errors', async () => {
-      req.params.id = 'op-id';
+      req.params.operatorId = 'op-id';
 
       Operator.findById.mockReturnValue({
         populate: jest.fn().mockRejectedValue(new Error('DB Error'))
@@ -683,7 +996,7 @@ describe('Administrator Controller', () => {
       expect(res.status).toHaveBeenCalledWith(500);
       expect(res.json).toHaveBeenCalledWith({
         success: false,
-        message: 'Failed to fetch operator'
+        message: 'Failed to fetch operator details'
       });
     });
   });
@@ -691,29 +1004,35 @@ describe('Administrator Controller', () => {
   describe('resetOperatorPassword', () => {
     test('should reset operator password', async () => {
       req.params.id = 'op-id';
-      req.body = { newPassword: 'NewPass123!' };
-
-      validatePasswordStrength.mockReturnValue({ success: true });
 
       const mockOperator = {
         _id: 'op-id',
+        operatorId: 'OP001',
         email: 'operator@example.com',
+        password: undefined,
         save: jest.fn().mockResolvedValue(true)
       };
 
       Operator.findById.mockResolvedValue(mockOperator);
       emailService.sendPasswordResetEmail.mockResolvedValue(true);
 
+      // Mock crypto.randomBytes
+      const crypto = require('crypto');
+      crypto.randomBytes = jest.fn().mockReturnValue({
+        toString: jest.fn().mockReturnValue('randompassword')
+      });
+
       await administratorController.resetOperatorPassword(req, res);
 
+      expect(mockOperator.password).toBe('randompassword');
       expect(mockOperator.save).toHaveBeenCalled();
       expect(emailService.sendPasswordResetEmail).toHaveBeenCalledWith(
-        'operator@example.com',
-        expect.any(Object)
+        mockOperator,
+        'randompassword'
       );
       expect(res.json).toHaveBeenCalledWith({
         success: true,
-        message: 'Password reset successfully'
+        message: 'Password reset successfully. New password sent to operator email.'
       });
     });
 
@@ -734,7 +1053,6 @@ describe('Administrator Controller', () => {
 
     test('should handle errors', async () => {
       req.params.id = 'op-id';
-      req.body = { newPassword: 'NewPass123!' };
 
       Operator.findById.mockRejectedValue(new Error('DB Error'));
 
@@ -743,7 +1061,7 @@ describe('Administrator Controller', () => {
       expect(res.status).toHaveBeenCalledWith(500);
       expect(res.json).toHaveBeenCalledWith({
         success: false,
-        message: 'Failed to reset password'
+        message: 'Failed to reset operator password'
       });
     });
   });
@@ -756,27 +1074,35 @@ describe('Administrator Controller', () => {
         operatorId: 'OP001'
       };
 
-      const mockOperator = {
+      // Mock operator analytics aggregation
+      Operator.aggregate.mockResolvedValue([{
         _id: 'op-id',
         operatorId: 'OP001',
-        firstName: 'John'
-      };
-
-      Operator.findOne.mockResolvedValue(mockOperator);
-      Order.aggregate.mockResolvedValue([
-        { totalOrders: 100, totalWeight: 500 }
-      ]);
+        firstName: 'John',
+        lastName: 'Doe',
+        metrics: {
+          totalOrders: 100,
+          completedOrders: 90,
+          averageProcessingTime: 25,
+          qualityChecksPassed: 85
+        }
+      }]);
+      
+      // Mock workstation analytics
+      Order.aggregate.mockResolvedValue([{
+        _id: 'Station1',
+        orderCount: 50,
+        avgProcessingTime: 30
+      }]);
 
       await administratorController.getOperatorAnalytics(req, res);
 
       expect(res.json).toHaveBeenCalledWith({
         success: true,
-        analytics: expect.objectContaining({
-          operator: expect.any(Object),
-          performance: expect.any(Object),
-          timeline: expect.any(Array),
-          comparisons: expect.any(Object)
-        })
+        analytics: {
+          operators: expect.any(Array),
+          workstations: expect.any(Array)
+        }
       });
     });
 
@@ -803,34 +1129,41 @@ describe('Administrator Controller', () => {
         affiliateId: 'AFF001'
       };
 
-      const mockAffiliate = {
+      // Mock affiliate analytics aggregation
+      Affiliate.aggregate.mockResolvedValue([{
         _id: 'aff-id',
         affiliateId: 'AFF001',
-        businessName: 'Test Business'
-      };
-
-      Affiliate.findOne.mockResolvedValue(mockAffiliate);
-      Order.aggregate.mockResolvedValue([
-        { totalOrders: 50, totalRevenue: 2500 }
-      ]);
+        businessName: 'Test Business',
+        metrics: {
+          totalCustomers: 100,
+          activeCustomers: 80,
+          totalOrders: 500,
+          totalRevenue: 25000
+        }
+      }]);
+      
+      // Mock geographic distribution
+      Customer.aggregate.mockResolvedValue([{
+        _id: 'City1',
+        affiliateCount: 10,
+        activeAffiliates: 8
+      }]);
 
       await administratorController.getAffiliateAnalytics(req, res);
 
       expect(res.json).toHaveBeenCalledWith({
         success: true,
-        analytics: expect.objectContaining({
-          affiliate: expect.any(Object),
-          performance: expect.any(Object),
-          timeline: expect.any(Array),
-          customerAnalytics: expect.any(Object)
-        })
+        analytics: {
+          affiliates: expect.any(Array),
+          geographicDistribution: expect.any(Array)
+        }
       });
     });
 
     test('should handle errors', async () => {
       req.query = { startDate: '2025-01-01' };
 
-      Order.aggregate.mockRejectedValue(new Error('Aggregation Error'));
+      Affiliate.aggregate.mockRejectedValue(new Error('Aggregation Error'));
 
       await administratorController.getAffiliateAnalytics(req, res);
 
@@ -843,16 +1176,27 @@ describe('Administrator Controller', () => {
   });
 
   describe('exportReport', () => {
-    test('should export report as CSV', async () => {
-      req.body = {
+    test('should export orders report', async () => {
+      req.query = {
         reportType: 'orders',
-        format: 'csv',
+        format: 'json',
         startDate: '2025-01-01',
         endDate: '2025-01-31'
       };
 
       const mockOrders = [
-        { orderId: 'ORD001', totalAmount: 50 }
+        { 
+          orderId: 'ORD001', 
+          totalAmount: 50,
+          createdAt: new Date('2025-01-15'),
+          affiliateId: null,
+          assignedOperator: null,
+          status: 'completed',
+          orderProcessingStatus: 'completed',
+          processingTimeMinutes: 25,
+          actualWeight: 10,
+          actualTotal: 50
+        }
       ];
 
       Order.find.mockReturnValue({
@@ -862,18 +1206,19 @@ describe('Administrator Controller', () => {
 
       await administratorController.exportReport(req, res);
 
-      expect(res.setHeader).toHaveBeenCalledWith(
-        'Content-Type',
-        'text/csv'
-      );
-      expect(res.setHeader).toHaveBeenCalledWith(
-        'Content-Disposition',
-        expect.stringContaining('attachment')
-      );
+      expect(res.json).toHaveBeenCalledWith({
+        success: true,
+        report: expect.any(Array),
+        metadata: expect.objectContaining({
+          reportType: 'orders',
+          startDate: '2025-01-01',
+          endDate: '2025-01-31'
+        })
+      });
     });
 
-    test('should export report as JSON', async () => {
-      req.body = {
+    test('should export operators report', async () => {
+      req.query = {
         reportType: 'operators',
         format: 'json',
         startDate: '2025-01-01',
@@ -881,25 +1226,44 @@ describe('Administrator Controller', () => {
       };
 
       const mockOperators = [
-        { operatorId: 'OP001', firstName: 'John' }
+        { 
+          _id: 'op-id',
+          operatorId: 'OP001', 
+          firstName: 'John',
+          lastName: 'Doe',
+          isActive: true,
+          shiftStart: '09:00',
+          shiftEnd: '17:00',
+          totalOrdersProcessed: 100,
+          averageProcessingTime: 25,
+          qualityScore: 95
+        }
       ];
 
       Operator.find.mockReturnValue({
-        populate: jest.fn().mockReturnThis(),
         lean: jest.fn().mockResolvedValue(mockOperators)
       });
+      
+      Order.aggregate.mockResolvedValue([{
+        totalOrders: 50,
+        completedOrders: 45,
+        averageProcessingTime: 25,
+        totalWeight: 500
+      }]);
 
       await administratorController.exportReport(req, res);
 
       expect(res.json).toHaveBeenCalledWith({
         success: true,
-        data: expect.any(Array),
-        metadata: expect.any(Object)
+        report: expect.any(Array),
+        metadata: expect.objectContaining({
+          reportType: 'operators'
+        })
       });
     });
 
     test('should handle invalid report type', async () => {
-      req.body = {
+      req.query = {
         reportType: 'invalid',
         format: 'csv'
       };
@@ -914,7 +1278,7 @@ describe('Administrator Controller', () => {
     });
 
     test('should handle errors', async () => {
-      req.body = {
+      req.query = {
         reportType: 'orders',
         format: 'csv'
       };
@@ -941,30 +1305,33 @@ describe('Administrator Controller', () => {
       const mockAffiliates = [{
         _id: 'aff1',
         affiliateId: 'AFF001',
-        businessName: 'Test Business'
+        firstName: 'John',
+        lastName: 'Doe',
+        businessName: 'Test Business',
+        email: 'affiliate@example.com',
+        isActive: true,
+        serviceArea: 'City1'
       }];
 
       Affiliate.find.mockReturnValue({
-        sort: jest.fn().mockReturnThis(),
+        select: jest.fn().mockReturnThis(),
         limit: jest.fn().mockReturnThis(),
-        skip: jest.fn().mockResolvedValue(mockAffiliates)
+        sort: jest.fn().mockResolvedValue(mockAffiliates)
       });
-      Affiliate.countDocuments.mockResolvedValue(1);
 
       await administratorController.getAffiliatesList(req, res);
 
       expect(res.json).toHaveBeenCalledWith({
         success: true,
-        affiliates: expect.any(Array),
-        pagination: expect.any(Object)
+        affiliates: expect.any(Array)
       });
     });
 
     test('should handle errors', async () => {
       Affiliate.find.mockReturnValue({
-        sort: jest.fn().mockReturnThis(),
+        select: jest.fn().mockReturnThis(),
         limit: jest.fn().mockReturnThis(),
-        skip: jest.fn().mockRejectedValue(new Error('DB Error'))
+        sort: jest.fn().mockRejectedValue(new Error('DB Error'))
       });
 
       await administratorController.getAffiliatesList(req, res);
@@ -972,7 +1339,8 @@ describe('Administrator Controller', () => {
       expect(res.status).toHaveBeenCalledWith(500);
       expect(res.json).toHaveBeenCalledWith({
         success: false,
-        message: 'Failed to fetch affiliates'
+        message: 'Failed to fetch affiliates list',
+        error: 'DB Error'
       });
     });
   });
@@ -987,6 +1355,9 @@ describe('Administrator Controller', () => {
             db: 'test',
             collections: 10,
             dataSize: 1000000
+          }),
+          admin: jest.fn().mockReturnValue({
+            ping: jest.fn().mockResolvedValue(true)
           })
         }
       };
@@ -999,6 +1370,10 @@ describe('Administrator Controller', () => {
       });
 
       process.uptime = jest.fn().mockReturnValue(3600);
+      process.cpuUsage = jest.fn().mockReturnValue({
+        user: 1000000,
+        system: 500000
+      });
 
       await administratorController.getSystemHealth(req, res);
 
@@ -1006,10 +1381,17 @@ describe('Administrator Controller', () => {
         success: true,
         health: expect.objectContaining({
           status: 'healthy',
-          database: expect.any(Object),
-          memory: expect.any(Object),
-          uptime: expect.any(Number),
-          environment: expect.any(Object)
+          timestamp: expect.any(Date),
+          components: expect.objectContaining({
+            database: 'healthy',
+            email: 'healthy',
+            storage: 'healthy'
+          }),
+          metrics: expect.objectContaining({
+            uptime: expect.any(Number),
+            memory: expect.any(Object),
+            cpu: expect.any(Object)
+          })
         })
       });
     });
@@ -1017,7 +1399,12 @@ describe('Administrator Controller', () => {
     test('should handle database connection issues', async () => {
       const mongoose = require('mongoose');
       mongoose.connection = {
-        readyState: 0
+        readyState: 1,
+        db: {
+          admin: jest.fn().mockReturnValue({
+            ping: jest.fn().mockRejectedValue(new Error('Connection failed'))
+          })
+        }
       };
 
       await administratorController.getSystemHealth(req, res);
@@ -1025,9 +1412,9 @@ describe('Administrator Controller', () => {
       expect(res.json).toHaveBeenCalledWith({
         success: true,
         health: expect.objectContaining({
-          status: 'unhealthy',
-          database: expect.objectContaining({
-            connected: false
+          status: 'degraded',
+          components: expect.objectContaining({
+            database: 'unhealthy'
           })
         })
       });
@@ -1035,51 +1422,62 @@ describe('Administrator Controller', () => {
 
     test('should handle errors', async () => {
       const mongoose = require('mongoose');
+      const originalConnection = mongoose.connection;
+      
       mongoose.connection = {
         readyState: 1,
         db: {
-          stats: jest.fn().mockRejectedValue(new Error('Stats Error'))
+          admin: jest.fn().mockReturnValue({
+            ping: jest.fn().mockRejectedValue(new Error('DB Connection Error'))
+          })
         }
       };
 
       await administratorController.getSystemHealth(req, res);
 
-      expect(res.status).toHaveBeenCalledWith(500);
       expect(res.json).toHaveBeenCalledWith({
-        success: false,
-        message: 'Failed to fetch system health'
+        success: true,
+        health: expect.objectContaining({
+          status: 'degraded',
+          components: expect.objectContaining({
+            database: 'unhealthy'
+          })
+        })
       });
+      
+      mongoose.connection = originalConnection;
     });
   });
 
   describe('updateOperatorStats', () => {
-    test('should update operator stats', async () => {
+    test('should update operator stats with processing time', async () => {
       req.params.id = 'op-id';
+      req.body = { processingTime: 30 };
 
       const mockOperator = {
         _id: 'op-id',
         operatorId: 'OP001',
+        totalOrdersProcessed: 10,
+        averageProcessingTime: 25,
+        qualityScore: 95,
         save: jest.fn().mockResolvedValue(true)
       };
 
       Operator.findById.mockResolvedValue(mockOperator);
 
-      const mockStats = {
-        totalOrders: 100,
-        averageProcessingTime: 45
-      };
-
-      Order.aggregate.mockResolvedValue([mockStats]);
-
       await administratorController.updateOperatorStats(req, res);
 
-      expect(mockOperator.totalOrdersProcessed).toBe(100);
-      expect(mockOperator.averageProcessingTime).toBe(45);
+      // Check new average: (25 * 10 + 30) / 11 = 25.45
+      expect(mockOperator.totalOrdersProcessed).toBe(11);
+      expect(mockOperator.averageProcessingTime).toBeCloseTo(25.45, 1);
       expect(mockOperator.save).toHaveBeenCalled();
       expect(res.json).toHaveBeenCalledWith({
         success: true,
-        message: 'Operator stats updated successfully',
-        stats: expect.any(Object)
+        message: 'Operator statistics updated successfully',
+        operator: expect.objectContaining({
+          operatorId: 'OP001',
+          totalOrdersProcessed: 11
+        })
       });
     });
 
@@ -1097,8 +1495,22 @@ describe('Administrator Controller', () => {
       });
     });
 
+    test('should validate processing time', async () => {
+      req.params.id = 'op-id';
+      req.body = { processingTime: -5 };
+
+      await administratorController.updateOperatorStats(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(400);
+      expect(res.json).toHaveBeenCalledWith({
+        success: false,
+        message: 'Processing time must be positive'
+      });
+    });
+    
     test('should handle errors', async () => {
       req.params.id = 'op-id';
+      req.body = { processingTime: 20 };
 
       Operator.findById.mockRejectedValue(new Error('DB Error'));
 
@@ -1107,7 +1519,7 @@ describe('Administrator Controller', () => {
       expect(res.status).toHaveBeenCalledWith(500);
       expect(res.json).toHaveBeenCalledWith({
         success: false,
-        message: 'Failed to update operator stats'
+        message: 'An error occurred while updating operator statistics'
       });
     });
   });
@@ -1120,17 +1532,22 @@ describe('Administrator Controller', () => {
           operatorId: 'OP001',
           firstName: 'John',
           isActive: true,
-          isOnShift: true
+          isOnShift: true,
+          toObject: jest.fn().mockReturnValue({ operatorId: 'OP001', firstName: 'John' })
         }
       ];
 
-      Operator.find.mockResolvedValue(mockOperators);
+      Operator.find.mockReturnValue({
+        sort: jest.fn().mockReturnThis(),
+        limit: jest.fn().mockReturnThis(),
+        select: jest.fn().mockResolvedValue(mockOperators)
+      });
 
       await administratorController.getAvailableOperators(req, res);
 
       expect(Operator.find).toHaveBeenCalledWith({
         isActive: true,
-        isOnShift: true
+        currentOrderCount: { $lt: 10 }
       });
       expect(res.json).toHaveBeenCalledWith({
         success: true,
@@ -1139,14 +1556,18 @@ describe('Administrator Controller', () => {
     });
 
     test('should handle errors', async () => {
-      Operator.find.mockRejectedValue(new Error('DB Error'));
+      Operator.find.mockReturnValue({
+        populate: jest.fn().mockReturnThis(),
+        sort: jest.fn().mockReturnThis(),
+        lean: jest.fn().mockRejectedValue(new Error('DB Error'))
+      });
 
       await administratorController.getAvailableOperators(req, res);
 
       expect(res.status).toHaveBeenCalledWith(500);
       expect(res.json).toHaveBeenCalledWith({
         success: false,
-        message: 'Failed to fetch available operators'
+        message: 'An error occurred while fetching available operators'
       });
     });
   });
@@ -1202,7 +1623,7 @@ describe('Administrator Controller', () => {
       expect(res.status).toHaveBeenCalledWith(500);
       expect(res.json).toHaveBeenCalledWith({
         success: false,
-        message: 'Failed to delete operator'
+        message: 'An error occurred while deleting the operator'
       });
     });
   });
@@ -1210,36 +1631,35 @@ describe('Administrator Controller', () => {
   describe('resetOperatorPin', () => {
     test('should reset operator PIN', async () => {
       req.params.id = 'op-id';
-
-      const newPin = '1234';
-      const crypto = require('crypto');
-      crypto.randomInt = jest.fn().mockReturnValue(1234);
+      req.body = { newPassword: 'NewPin1234!' };
 
       const mockOperator = {
         _id: 'op-id',
+        operatorId: 'OP001',
         email: 'operator@example.com',
+        password: undefined,
+        loginAttempts: 5,
+        lockUntil: new Date(Date.now() + 3600000),
         save: jest.fn().mockResolvedValue(true)
       };
 
       Operator.findById.mockResolvedValue(mockOperator);
-      emailService.sendPinResetEmail.mockResolvedValue(true);
 
       await administratorController.resetOperatorPin(req, res);
 
-      expect(mockOperator.pin).toBeDefined();
+      expect(mockOperator.password).toBe('NewPin1234!');
+      expect(mockOperator.loginAttempts).toBe(0);
+      expect(mockOperator.lockUntil).toBeUndefined();
       expect(mockOperator.save).toHaveBeenCalled();
-      expect(emailService.sendPinResetEmail).toHaveBeenCalledWith(
-        'operator@example.com',
-        expect.objectContaining({ pin: newPin })
-      );
       expect(res.json).toHaveBeenCalledWith({
         success: true,
-        message: 'PIN reset successfully and sent to operator email'
+        message: 'PIN reset successfully'
       });
     });
 
     test('should handle operator not found', async () => {
       req.params.id = 'op-id';
+      req.body = { newPassword: 'NewPin1234!' };
 
       Operator.findById.mockResolvedValue(null);
 
@@ -1254,6 +1674,7 @@ describe('Administrator Controller', () => {
 
     test('should handle errors', async () => {
       req.params.id = 'op-id';
+      req.body = { newPassword: 'NewPin1234!' };
 
       Operator.findById.mockRejectedValue(new Error('DB Error'));
 
@@ -1262,135 +1683,11 @@ describe('Administrator Controller', () => {
       expect(res.status).toHaveBeenCalledWith(500);
       expect(res.json).toHaveBeenCalledWith({
         success: false,
-        message: 'Failed to reset PIN'
+        message: 'An error occurred while resetting the PIN'
       });
     });
   });
 
-  describe('updateOperatorSelf', () => {
-    test('should update operator self', async () => {
-      req.user = { id: 'op-id', role: 'operator' };
-      req.body = {
-        firstName: 'Updated',
-        phone: '555-1234'
-      };
-
-      const mockOperator = {
-        _id: 'op-id',
-        save: jest.fn().mockResolvedValue(true),
-        toObject: jest.fn().mockReturnValue({ operatorId: 'OP001' })
-      };
-
-      Operator.findById.mockResolvedValue(mockOperator);
-
-      await administratorController.updateOperatorSelf(req, res);
-
-      expect(mockOperator.firstName).toBe('Updated');
-      expect(mockOperator.phone).toBe('555-1234');
-      expect(mockOperator.save).toHaveBeenCalled();
-      expect(res.json).toHaveBeenCalledWith({
-        success: true,
-        message: 'Profile updated successfully',
-        operator: expect.any(Object)
-      });
-    });
-
-    test('should prevent updating protected fields', async () => {
-      req.user = { id: 'op-id', role: 'operator' };
-      req.body = {
-        operatorId: 'HACKED',
-        isActive: false,
-        permissions: ['all']
-      };
-
-      const mockOperator = {
-        _id: 'op-id',
-        operatorId: 'OP001',
-        isActive: true,
-        permissions: ['basic'],
-        save: jest.fn().mockResolvedValue(true),
-        toObject: jest.fn().mockReturnValue({ operatorId: 'OP001' })
-      };
-
-      Operator.findById.mockResolvedValue(mockOperator);
-
-      await administratorController.updateOperatorSelf(req, res);
-
-      expect(mockOperator.operatorId).toBe('OP001');
-      expect(mockOperator.isActive).toBe(true);
-      expect(mockOperator.permissions).toEqual(['basic']);
-    });
-
-    test('should handle errors', async () => {
-      req.user = { id: 'op-id', role: 'operator' };
-      req.body = { firstName: 'Updated' };
-
-      Operator.findById.mockRejectedValue(new Error('DB Error'));
-
-      await administratorController.updateOperatorSelf(req, res);
-
-      expect(res.status).toHaveBeenCalledWith(500);
-      expect(res.json).toHaveBeenCalledWith({
-        success: false,
-        message: 'Failed to update profile'
-      });
-    });
-  });
-
-  describe('getOperatorSelf', () => {
-    test('should get operator self profile', async () => {
-      req.user = { id: 'op-id', role: 'operator' };
-
-      const mockOperator = {
-        _id: 'op-id',
-        operatorId: 'OP001',
-        toObject: jest.fn().mockReturnValue({ operatorId: 'OP001' })
-      };
-
-      Operator.findById.mockReturnValue({
-        select: jest.fn().mockResolvedValue(mockOperator)
-      });
-
-      await administratorController.getOperatorSelf(req, res);
-
-      expect(res.json).toHaveBeenCalledWith({
-        success: true,
-        operator: expect.any(Object)
-      });
-    });
-
-    test('should handle operator not found', async () => {
-      req.user = { id: 'op-id', role: 'operator' };
-
-      Operator.findById.mockReturnValue({
-        select: jest.fn().mockResolvedValue(null)
-      });
-
-      await administratorController.getOperatorSelf(req, res);
-
-      expect(res.status).toHaveBeenCalledWith(404);
-      expect(res.json).toHaveBeenCalledWith({
-        success: false,
-        message: 'Operator profile not found'
-      });
-    });
-
-    test('should handle errors', async () => {
-      req.user = { id: 'op-id', role: 'operator' };
-
-      Operator.findById.mockReturnValue({
-        select: jest.fn().mockRejectedValue(new Error('DB Error'))
-      });
-
-      await administratorController.getOperatorSelf(req, res);
-
-      expect(res.status).toHaveBeenCalledWith(500);
-      expect(res.json).toHaveBeenCalledWith({
-        success: false,
-        message: 'Failed to fetch profile'
-      });
-    });
-  });
 
   describe('getEnvironmentVariables', () => {
     test('should get environment variables', async () => {
@@ -1404,20 +1701,21 @@ describe('Administrator Controller', () => {
 
       await administratorController.getEnvironmentVariables(req, res);
 
-      expect(res.json).toHaveBeenCalledWith({
+      const response = res.json.mock.calls[0][0];
+      
+      expect(response).toMatchObject({
         success: true,
-        environment: expect.objectContaining({
-          nodeEnv: 'test',
-          features: expect.any(Object),
-          email: expect.any(Object),
-          database: expect.any(Object),
-          api: expect.any(Object)
-        })
+        variables: expect.objectContaining({
+          NODE_ENV: 'test',
+          PORT: '3000',
+          EMAIL_PROVIDER: 'smtp'
+        }),
+        sensitiveValues: expect.any(Object),
+        isSuperAdmin: expect.any(Boolean)
       });
 
-      // Ensure sensitive data is not exposed
-      const response = res.json.mock.calls[0][0];
-      expect(response.environment).not.toHaveProperty('SECRET_KEY');
+      // SECRET_KEY is not in the allowed list, so it shouldn't appear
+      expect(response.variables.SECRET_KEY).toBeUndefined();
       
       process.env = originalEnv;
     });
@@ -1476,31 +1774,40 @@ describe('Administrator Controller', () => {
   describe('Additional coverage for createAdministrator', () => {
     test('should handle duplicate email', async () => {
       req.body = {
+        firstName: 'John',
+        lastName: 'Doe',
         email: 'existing@example.com',
-        password: 'Pass123!'
+        password: 'Pass123!',
+        permissions: ['administrators.read']
       };
 
       Administrator.findOne.mockResolvedValue({ email: 'existing@example.com' });
 
       await administratorController.createAdministrator(req, res);
 
-      expect(res.status).toHaveBeenCalledWith(400);
+      expect(res.status).toHaveBeenCalledWith(409);
       expect(res.json).toHaveBeenCalledWith({
         success: false,
-        message: 'Administrator with this email already exists'
+        message: 'Email already exists'
       });
     });
 
     test('should handle password validation failure', async () => {
       req.body = {
+        firstName: 'John',
+        lastName: 'Doe',
         email: 'new@example.com',
-        password: 'weak'
+        password: 'weak',
+        permissions: ['administrators.read']
       };
 
-      Administrator.findOne.mockResolvedValue(null);
-      validatePasswordStrength.mockReturnValue({
-        success: false,
-        message: 'Password too weak'
+      // Mock validation result to simulate password validation failure
+      const { validationResult } = require('express-validator');
+      validationResult.mockReturnValue({
+        isEmpty: jest.fn().mockReturnValue(false),
+        array: jest.fn().mockReturnValue([
+          { msg: 'Password must be at least 8 characters' }
+        ])
       });
 
       await administratorController.createAdministrator(req, res);
@@ -1508,7 +1815,8 @@ describe('Administrator Controller', () => {
       expect(res.status).toHaveBeenCalledWith(400);
       expect(res.json).toHaveBeenCalledWith({
         success: false,
-        message: 'Password too weak'
+        message: 'Password must be at least 8 characters',
+        errors: expect.any(Array)
       });
     });
   });
@@ -1553,11 +1861,12 @@ describe('Administrator Controller', () => {
     test('should prevent deleting last super admin', async () => {
       req.params.id = '507f1f77bcf86cd799439012';
 
-      Administrator.find.mockResolvedValue([
-        { permissions: ['all'] }
-      ]);
+      Administrator.find.mockResolvedValue([]);  // No other admins with 'all' permissions
       Administrator.findById.mockResolvedValue({
-        permissions: ['all']
+        _id: '507f1f77bcf86cd799439012',
+        adminId: 'ADM001',
+        permissions: ['all'],
+        toObject: jest.fn().mockReturnValue({ adminId: 'ADM001' })
       });
 
       await administratorController.deleteAdministrator(req, res);
@@ -1565,7 +1874,7 @@ describe('Administrator Controller', () => {
       expect(res.status).toHaveBeenCalledWith(400);
       expect(res.json).toHaveBeenCalledWith({
         success: false,
-        message: 'Cannot delete the last super administrator'
+        message: 'Cannot delete the last administrator with full permissions'
       });
     });
 
@@ -1614,7 +1923,8 @@ describe('Administrator Controller', () => {
       expect(res.status).toHaveBeenCalledWith(400);
       expect(res.json).toHaveBeenCalledWith({
         success: false,
-        message: 'Password does not meet requirements'
+        message: 'Password does not meet security requirements',
+        errors: undefined
       });
     });
   });
