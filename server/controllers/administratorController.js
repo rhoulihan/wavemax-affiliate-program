@@ -241,6 +241,24 @@ exports.updateAdministrator = async (req, res) => {
       });
     }
 
+    // Check if trying to remove 'all' permission from last super admin
+    if (updates.permissions && id === req.user.id) {
+      const currentAdmin = await Administrator.findById(id);
+      if (currentAdmin && currentAdmin.permissions.includes('all') && !updates.permissions.includes('all')) {
+        // Check if this is the last super admin
+        const superAdminCount = await Administrator.countDocuments({ 
+          permissions: 'all',
+          isActive: true 
+        });
+        if (superAdminCount <= 1) {
+          return res.status(400).json({
+            success: false,
+            message: 'Cannot remove super admin permissions from the last active super administrator'
+          });
+        }
+      }
+    }
+
     // Check email uniqueness if updating email
     if (updates.email) {
       const existingAdmin = await Administrator.findOne({

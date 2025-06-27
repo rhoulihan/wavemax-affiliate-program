@@ -99,7 +99,7 @@ console.log('[SwirlSpinner] Script file loaded');
           // Make container relative if not already
           const position = window.getComputedStyle(this.options.container).position;
           if (position === 'static') {
-            this.options.container.style.position = 'relative';
+            this.options.container.classList.add('swirl-spinner-relative');
           }
         }
 
@@ -131,13 +131,9 @@ console.log('[SwirlSpinner] Script file loaded');
 
         // Clean up any style changes on container
         if (this.options.container) {
-          // Remove any inline styles that might have been added
-          if (this.options.container.style.pointerEvents === 'none') {
-            this.options.container.style.pointerEvents = '';
-          }
-          if (this.options.container.style.opacity === '0.5') {
-            this.options.container.style.opacity = '';
-          }
+          // Remove any classes that might have been added
+          this.options.container.classList.remove('swirl-spinner-relative');
+          this.options.container.classList.remove('swirl-spinner-form-disabled');
         }
 
         return this;
@@ -217,7 +213,7 @@ console.log('[SwirlSpinner] Script file loaded');
             });
 
             // Also remove any pointer-events restrictions
-            form.style.pointerEvents = '';
+            form.classList.remove('swirl-spinner-form-disabled');
 
             // Clean up any lingering overlay elements
             const overlays = form.querySelectorAll('.swirl-spinner-overlay');
@@ -232,7 +228,7 @@ console.log('[SwirlSpinner] Script file loaded');
               const messageEl = spinner.element?.querySelector('.swirl-spinner-message');
               if (messageEl && messageEl.nextSibling?.tagName !== 'P') {
                 const subEl = document.createElement('p');
-                subEl.style.cssText = 'color: #6b7280; margin-top: 5px; font-size: 14px;';
+                subEl.className = 'swirl-spinner-submessage';
                 subEl.textContent = submessage;
                 messageEl.parentNode.appendChild(subEl);
               }
@@ -259,9 +255,7 @@ console.log('[SwirlSpinner] Script file loaded');
         if (options.showCancelButton) {
           const cancelBtn = document.createElement('button');
           cancelBtn.textContent = 'Cancel Payment';
-          cancelBtn.style.cssText = 'margin-top: 20px; padding: 10px 20px; background: #dc2626; color: white; border: none; border-radius: 6px; font-size: 16px; cursor: pointer; font-weight: 600;';
-          cancelBtn.onmouseover = () => cancelBtn.style.background = '#b91c1c';
-          cancelBtn.onmouseout = () => cancelBtn.style.background = '#dc2626';
+          cancelBtn.className = 'swirl-spinner-cancel-btn';
 
           if (options.onCancel) {
             cancelBtn.onclick = options.onCancel;
@@ -290,7 +284,7 @@ console.log('[SwirlSpinner] Script file loaded');
               const messageEl = spinner.element?.querySelector('.swirl-spinner-message');
               if (messageEl && messageEl.nextSibling?.tagName !== 'P') {
                 const subEl = document.createElement('p');
-                subEl.style.cssText = 'color: #6b7280; margin-top: 5px; font-size: 14px;';
+                subEl.className = 'swirl-spinner-submessage';
                 subEl.textContent = submessage;
                 messageEl.parentNode.appendChild(subEl);
               }
@@ -301,226 +295,8 @@ console.log('[SwirlSpinner] Script file loaded');
       }
     };
 
-    // Add CSS styles dynamically
-    function injectStyles() {
-      if (document.getElementById('swirl-spinner-styles')) {
-        return;
-      }
-
-      const styles = `
-            .swirl-spinner {
-                width: 80px;
-                height: 80px;
-                display: inline-block;
-                position: relative;
-            }
-
-            .swirl-spinner svg {
-                width: 100%;
-                height: 100%;
-            }
-
-            /* Animate dots along elliptical path */
-            .swirl-dot1 {
-                animation: swirl-ellipticalOrbit1 2s linear infinite;
-            }
-
-            .swirl-dot2 {
-                animation: swirl-ellipticalOrbit2 2s linear infinite;
-            }
-
-            .swirl-dot3 {
-                animation: swirl-ellipticalOrbit3 2s linear infinite;
-            }
-
-            .swirl-dot4 {
-                animation: swirl-ellipticalOrbit4 2s linear infinite;
-            }
-
-            @keyframes swirl-ellipticalOrbit1 {
-                0% {
-                    transform: translate(0px, 0px);
-                }
-                25% {
-                    transform: translate(20px, -8px);
-                }
-                50% {
-                    transform: translate(0px, -16px);
-                }
-                75% {
-                    transform: translate(-20px, -8px);
-                }
-                100% {
-                    transform: translate(0px, 0px);
-                }
-            }
-
-            @keyframes swirl-ellipticalOrbit2 {
-                0% {
-                    transform: translate(0px, -16px);
-                }
-                25% {
-                    transform: translate(-20px, -8px);
-                }
-                50% {
-                    transform: translate(0px, 0px);
-                }
-                75% {
-                    transform: translate(20px, -8px);
-                }
-                100% {
-                    transform: translate(0px, -16px);
-                }
-            }
-
-            @keyframes swirl-ellipticalOrbit3 {
-                0% {
-                    transform: translate(0px, 0px);
-                }
-                25% {
-                    transform: translate(20px, 8px);
-                }
-                50% {
-                    transform: translate(0px, 16px);
-                }
-                75% {
-                    transform: translate(-20px, 8px);
-                }
-                100% {
-                    transform: translate(0px, 0px);
-                }
-            }
-
-            @keyframes swirl-ellipticalOrbit4 {
-                0% {
-                    transform: translate(0px, 16px);
-                }
-                25% {
-                    transform: translate(-20px, 8px);
-                }
-                50% {
-                    transform: translate(0px, 0px);
-                }
-                75% {
-                    transform: translate(20px, 8px);
-                }
-                100% {
-                    transform: translate(0px, 16px);
-                }
-            }
-
-            .spinner-small {
-                width: 40px;
-                height: 40px;
-            }
-
-            .spinner-large {
-                width: 120px;
-                height: 120px;
-            }
-
-            /* Speed variations */
-            .swirl-spinner-smooth .swirl-dot1 {
-                animation: swirl-ellipticalOrbit1 3s cubic-bezier(0.4, 0.0, 0.2, 1) infinite;
-            }
-            .swirl-spinner-smooth .swirl-dot2 {
-                animation: swirl-ellipticalOrbit2 3s cubic-bezier(0.4, 0.0, 0.2, 1) infinite;
-            }
-            .swirl-spinner-smooth .swirl-dot3 {
-                animation: swirl-ellipticalOrbit3 3s cubic-bezier(0.4, 0.0, 0.2, 1) infinite;
-            }
-            .swirl-spinner-smooth .swirl-dot4 {
-                animation: swirl-ellipticalOrbit4 3s cubic-bezier(0.4, 0.0, 0.2, 1) infinite;
-            }
-
-            .swirl-spinner-fast .swirl-dot1 {
-                animation: swirl-ellipticalOrbit1 1s linear infinite;
-            }
-            .swirl-spinner-fast .swirl-dot2 {
-                animation: swirl-ellipticalOrbit2 1s linear infinite;
-            }
-            .swirl-spinner-fast .swirl-dot3 {
-                animation: swirl-ellipticalOrbit3 1s linear infinite;
-            }
-            .swirl-spinner-fast .swirl-dot4 {
-                animation: swirl-ellipticalOrbit4 1s linear infinite;
-            }
-
-            .swirl-spinner-wrapper {
-                display: inline-flex;
-                flex-direction: column;
-                align-items: center;
-                gap: 10px;
-                position: relative;
-                z-index: 10000;
-            }
-
-            .swirl-spinner-message {
-                color: #333;
-                font-size: 14px;
-                text-align: center;
-            }
-
-            .swirl-spinner-overlay {
-                position: absolute;
-                top: 0;
-                left: 0;
-                right: 0;
-                bottom: 0;
-                background: rgba(255, 255, 255, 0.75);
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                z-index: 9999;
-                border-radius: inherit;
-                backdrop-filter: blur(1px);
-                -webkit-backdrop-filter: blur(1px);
-            }
-
-            .swirl-spinner-global {
-                position: fixed;
-                top: 0;
-                left: 0;
-                right: 0;
-                bottom: 0;
-                background: rgba(0, 0, 0, 0.5);
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                z-index: 9999;
-            }
-
-            .swirl-spinner-global .swirl-spinner-wrapper {
-                background: white;
-                padding: 30px;
-                border-radius: 8px;
-                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-            }
-
-            /* Integration with buttons */
-            button .swirl-spinner {
-                width: 1.2em;
-                height: 1.2em;
-                vertical-align: middle;
-            }
-
-            button .swirl-spinner svg {
-                vertical-align: top;
-            }
-        `;
-
-      const styleSheet = document.createElement('style');
-      styleSheet.id = 'swirl-spinner-styles';
-      styleSheet.textContent = styles;
-      document.head.appendChild(styleSheet);
-    }
-
-    // Initialize styles on load
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', injectStyles);
-    } else {
-      injectStyles();
-    }
+    // Note: Styles are now loaded via external CSS file to comply with CSP
+    // The swirl-spinner.css file must be included in the HTML
 
     // Export to window
     window.SwirlSpinner = SwirlSpinner;

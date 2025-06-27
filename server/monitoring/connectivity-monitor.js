@@ -372,6 +372,8 @@ module.exports = {
   startMonitoring,
   getMonitoringStatus,
   getMonitoringDashboard,
+  checkService,
+  runMonitoringCycle,
   SERVICES,
   monitoringData,
 };
