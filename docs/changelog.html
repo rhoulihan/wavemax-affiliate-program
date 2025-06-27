@@ -244,6 +244,7 @@
                 <h3>Quick Navigation</h3>
                 <ul>
                     <li><a href="#v1.9.0">v1.9.0 - Session Persistence & Browser Navigation</a></li>
+                    <li><a href="#v1.8.1">v1.8.1 - Test Coverage Achievement & Backup System</a></li>
                     <li><a href="#v1.8.0">v1.8.0 - Payment Processing Refactoring & Enhanced Workflows</a></li>
                     <li><a href="#v1.7.0">v1.7.0 - DocuSign W-9 Integration & Enhanced i18n</a></li>
                     <li><a href="#v1.6.0">v1.6.0 - Bag Tracking Removal & Dynamic Delivery Fees</a></li>
@@ -259,7 +260,7 @@
             </div>
 
             <div id="v1.9.0" class="release">
-                <h2>Version 1.9.0 <span class="tag new">Latest</span></h2>
+                <h2>Version 1.9.0</h2>
                 <div class="release-date">Released on January 20, 2025</div>
                 
                 <h3>🔄 Session Persistence & Browser Navigation</h3>
@@ -298,6 +299,95 @@
                     <li><span class="tag fixed">FIXED</span> Browser back/forward not updating tab content</li>
                     <li><span class="tag fixed">FIXED</span> Translation function initialization error in operators tab</li>
                     <li><span class="tag fixed">FIXED</span> Tab content not reloading on browser navigation</li>
+                </ul>
+            </div>
+
+            <div id="v1.8.1" class="release">
+                <h2>Version 1.8.1 <span class="tag new">Latest</span></h2>
+                <div class="release-date">Released on June 27, 2025</div>
+                
+                <h3>✅ Test Coverage Achievement</h3>
+                <ul>
+                    <li><span class="tag improved">IMPROVED</span> <strong>85.04% Code Coverage:</strong> Comprehensive test suite improvements
+                        <ul>
+                            <li>5,182 total lines of executable code</li>
+                            <li>4,407 lines covered by tests</li>
+                            <li>All 81 test suites passing</li>
+                            <li>1,906 tests passing (only 2 skipped)</li>
+                            <li>Zero failing tests</li>
+                            <li>Test execution time: 9 minutes 29 seconds</li>
+                        </ul>
+                    </li>
+                    <li><span class="tag improved">IMPROVED</span> <strong>Test Suite Fixes:</strong> Fixed all failing tests
+                        <ul>
+                            <li>Fixed 36 failing tests in administratorController.test.js</li>
+                            <li>Fixed audit logging in operatorController</li>
+                            <li>Added comprehensive tests for storeIPs configuration</li>
+                            <li>Improved administratorController coverage from 36.92% to 53.24%</li>
+                            <li>Improved operatorController coverage from 54.7% to 98.26%</li>
+                        </ul>
+                    </li>
+                </ul>
+
+                <h3>💾 Backup and Recovery System</h3>
+                <ul>
+                    <li><span class="tag new">NEW</span> <strong>Automated Backup System:</strong> Comprehensive server backup solution
+                        <ul>
+                            <li>Daily automated backups at 2:00 AM via cron</li>
+                            <li>7-day retention policy with automatic cleanup</li>
+                            <li>Backs up MongoDB database (if configured)</li>
+                            <li>Backs up all project files (excluding node_modules, .git, logs)</li>
+                            <li>Backs up PM2 configuration and process list</li>
+                            <li>Backs up Nginx configuration</li>
+                            <li>Stores system information and cron jobs</li>
+                        </ul>
+                    </li>
+                    <li><span class="tag new">NEW</span> <strong>Recovery Script:</strong> Interactive restoration system
+                        <ul>
+                            <li>Interactive backup selection from available backups</li>
+                            <li>Safety backup creation before restoration</li>
+                            <li>Automatic service management (PM2, Nginx)</li>
+                            <li>MongoDB database restoration</li>
+                            <li>NPM dependency reinstallation</li>
+                            <li>Comprehensive logging of all operations</li>
+                        </ul>
+                    </li>
+                    <li><span class="tag new">NEW</span> <strong>Backup Status Monitoring:</strong> Easy backup system monitoring
+                        <ul>
+                            <li>Status check script showing current backups</li>
+                            <li>Backup size calculations</li>
+                            <li>Next scheduled backup time</li>
+                            <li>Recent backup log entries</li>
+                        </ul>
+                    </li>
+                </ul>
+
+                <h3>📚 Documentation Updates</h3>
+                <ul>
+                    <li><span class="tag improved">IMPROVED</span> <strong>Test Coverage Report:</strong> Enhanced HTML coverage summary
+                        <ul>
+                            <li>Added codebase statistics section</li>
+                            <li>Visual statistics cards for coverage metrics</li>
+                            <li>Coverage formula display</li>
+                            <li>Gap analysis showing path to 90% coverage</li>
+                            <li>Interactive coverage breakdown by category</li>
+                        </ul>
+                    </li>
+                    <li><span class="tag improved">IMPROVED</span> <strong>Main Documentation:</strong> Updated documentation index
+                        <ul>
+                            <li>Added link to test coverage report</li>
+                            <li>Added backup system documentation reference</li>
+                            <li>Updated version information</li>
+                            <li>Enhanced development guide with backup info</li>
+                        </ul>
+                    </li>
+                </ul>
+
+                <h3>🔧 Infrastructure</h3>
+                <ul>
+                    <li><span class="tag improved">IMPROVED</span> Backup files stored in /root/recover directory</li>
+                    <li><span class="tag improved">IMPROVED</span> Comprehensive README for backup/recovery procedures</li>
+                    <li><span class="tag improved">IMPROVED</span> Manual recovery steps documented for troubleshooting</li>
                 </ul>
             </div>
 
