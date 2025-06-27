@@ -118,6 +118,8 @@
     <div class="metric-card" style="background: #e8f8f5; border: 2px solid #30cfd0;">
         <h2>✅ Excellent Test Coverage Progress - 85.04% Coverage!</h2>
         <p><strong>EXCELLENT PROGRESS:</strong> The project has achieved 85.04% test coverage, exceeding the 80% target and making great progress towards 90%!</p>
+        <p><strong>Codebase Size:</strong> <span style="font-size: 1.2em; font-weight: bold;">5,182 lines of executable code</span> analyzed across all project files</p>
+        <p><strong>Coverage Details:</strong> 4,407 lines covered by tests | 775 lines not covered</p>
         <p><strong>Current Status:</strong> All 81 test suites passed! 1,906 tests passing (2 skipped). No failing tests!</p>
         <p><strong>Key Achievements:</strong></p>
         <ul>
@@ -132,6 +134,27 @@
     
     <div class="metric-card">
         <h2>Overall Test Coverage</h2>
+        <div style="background: #f0f8ff; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #1e3a8a;">
+            <h3 style="margin-top: 0; color: #1e3a8a;">📊 Codebase Statistics</h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+                <div>
+                    <strong>Total Lines of Code:</strong><br>
+                    <span style="font-size: 1.5em; color: #1e3a8a;">5,182</span>
+                </div>
+                <div>
+                    <strong>Lines Covered:</strong><br>
+                    <span style="font-size: 1.5em; color: #30cfd0;">4,407</span>
+                </div>
+                <div>
+                    <strong>Lines Not Covered:</strong><br>
+                    <span style="font-size: 1.5em; color: #f5576c;">775</span>
+                </div>
+                <div>
+                    <strong>Coverage Ratio:</strong><br>
+                    <span style="font-size: 1.5em; color: #1e3a8a;">4,407/5,182</span>
+                </div>
+            </div>
+        </div>
         <div class="coverage-grid">
             <div class="coverage-item high-coverage">
                 <h3>Statements</h3>
@@ -158,6 +181,10 @@
 
     <div class="metric-card">
         <h2>Test Suite Summary</h2>
+        <div style="text-align: center; margin-bottom: 20px; padding: 10px; background: #f9f9f9; border-radius: 8px;">
+            <p style="margin: 5px 0; font-size: 1.1em;"><strong>Test Coverage Formula:</strong> Lines Covered ÷ Total Lines = Coverage %</p>
+            <p style="margin: 5px 0; font-size: 1.2em; color: #1e3a8a;"><strong>4,407 ÷ 5,182 = 85.04%</strong></p>
+        </div>
         <div class="test-stats">
             <div class="stat-item">
                 <div class="stat-number">81</div>
@@ -367,6 +394,13 @@
 
     <div class="metric-card">
         <h2>Next Steps to Reach 90% Coverage</h2>
+        <div style="background: #fffacd; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #ffd700;">
+            <h3 style="margin-top: 0; color: #ff8c00;">📈 Coverage Gap Analysis</h3>
+            <p><strong>Current Coverage:</strong> 85.04% (4,407 lines)</p>
+            <p><strong>90% Target:</strong> 4,664 lines needed</p>
+            <p><strong>Gap to Close:</strong> Need to cover 257 more lines (out of 775 uncovered)</p>
+            <p><strong>Strategy:</strong> Focus on files with the most uncovered lines for maximum impact</p>
+        </div>
         <ol>
             <li><strong>✅ All Tests Fixed:</strong> All test suites are now passing successfully!</li>
             <li><strong>Improve Branch Coverage:</strong> Currently at 73.12%, needs to reach 80%+ 
@@ -390,6 +424,7 @@
 
     <div class="timestamp">
         <p>Generated: June 27, 2025</p>
+        <p>Codebase Size: 5,182 lines of executable code</p>
         <p>Total Execution Time: 9 minutes 29 seconds with full coverage analysis</p>
         <p>Coverage Report: <a href="/coverage/index.html">View Detailed Coverage Report</a></p>
     </div>
