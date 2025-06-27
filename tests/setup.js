@@ -39,11 +39,31 @@ jest.mock('../server/utils/emailService', () => ({
   sendOperatorPasswordResetEmail: jest.fn().mockResolvedValue({ MessageId: 'test-message-id' })
 }));
 
+// Global connection promise to prevent multiple connections
+let connectionPromise = null;
+
 // Set up MongoDB connection before tests
 beforeAll(async () => {
   try {
-    await mongoose.connect(testUri);
-    console.log('Connected to test database:', testUri.replace(/\/\/[^:]+:[^@]+@/, '//***:***@'));
+    // Only connect if not already connected or connecting
+    if (mongoose.connection.readyState === 0) {
+      if (!connectionPromise) {
+        connectionPromise = mongoose.connect(testUri, {
+          serverSelectionTimeoutMS: 30000, // 30 second timeout
+          socketTimeoutMS: 45000,
+          connectTimeoutMS: 30000,
+          maxPoolSize: 10,
+          minPoolSize: 5
+        });
+      }
+      await connectionPromise;
+      console.log('Connected to test database:', testUri.replace(/\/\/[^:]+:[^@]+@/, '//***:***@'));
+    } else if (mongoose.connection.readyState === 2) {
+      // Connecting - wait for it
+      await new Promise((resolve) => {
+        mongoose.connection.once('connected', resolve);
+      });
+    }
     
     // Create necessary directories for file uploads
     const fs = require('fs').promises;

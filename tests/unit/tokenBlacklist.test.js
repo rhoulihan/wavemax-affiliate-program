@@ -349,19 +349,4 @@ describe('TokenBlacklist Model', () => {
     });
   });
 
-  describe('Index Configuration', () => {
-    it.skip('should have required indexes', async () => {
-      // Skipping as index creation may vary in test environment
-      // In production, TokenBlacklist has:
-      // - Unique index on token field
-      // - TTL index on expiresAt field with 86400 seconds (24 hours)
-    });
-  });
-
-  describe('TTL Behavior', () => {
-    it.skip('should have TTL index configured for 24 hours', async () => {
-      // Skipping as index creation may vary in test environment
-      // In production, TTL index removes expired tokens after 24 hours
-    });
-  });
 });

@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Swirl Spinner Demo - WaveMAX Laundry</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <link href="/assets/css/swirl-spinner.css" rel="stylesheet">
     <script src="/assets/js/swirl-spinner.js"></script>
     <style>
         .demo-form {
@@ -48,7 +49,7 @@
                 <div class="text-center">
                     <h3 class="font-medium mb-4">Small Size</h3>
                     <div id="small-spinner-container" class="flex justify-center mb-4" style="height: 60px;"></div>
-                    <button onclick="toggleSpinner('small')" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+                    <button id="toggle-small" data-size="small" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
                         Toggle Small
                     </button>
                 </div>
@@ -56,7 +57,7 @@
                 <div class="text-center">
                     <h3 class="font-medium mb-4">Default Size</h3>
                     <div id="default-spinner-container" class="flex justify-center mb-4" style="height: 100px;"></div>
-                    <button onclick="toggleSpinner('default')" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+                    <button id="toggle-default" data-size="default" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
                         Toggle Default
                     </button>
                 </div>
@@ -64,7 +65,7 @@
                 <div class="text-center">
                     <h3 class="font-medium mb-4">Large Size</h3>
                     <div id="large-spinner-container" class="flex justify-center mb-4" style="height: 140px;"></div>
-                    <button onclick="toggleSpinner('large')" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+                    <button id="toggle-large" data-size="large" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
                         Toggle Large
                     </button>
                 </div>
@@ -96,7 +97,7 @@
                 <div class="text-center">
                     <h3 class="font-medium mb-4">Smooth (3s)</h3>
                     <div id="smooth-spinner-container" class="flex justify-center mb-4" style="height: 100px;"></div>
-                    <button onclick="toggleSpeedSpinner('smooth')" class="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700">
+                    <button id="toggle-smooth" data-speed="smooth" class="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700">
                         Toggle Smooth
                     </button>
                 </div>
@@ -104,7 +105,7 @@
                 <div class="text-center">
                     <h3 class="font-medium mb-4">Normal (2s)</h3>
                     <div id="normal-spinner-container" class="flex justify-center mb-4" style="height: 100px;"></div>
-                    <button onclick="toggleSpeedSpinner('normal')" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+                    <button id="toggle-normal" data-speed="normal" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
                         Toggle Normal
                     </button>
                 </div>
@@ -112,7 +113,7 @@
                 <div class="text-center">
                     <h3 class="font-medium mb-4">Fast (1s)</h3>
                     <div id="fast-spinner-container" class="flex justify-center mb-4" style="height: 100px;"></div>
-                    <button onclick="toggleSpeedSpinner('fast')" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
+                    <button id="toggle-fast" data-speed="fast" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
                         Toggle Fast
                     </button>
                 </div>
@@ -144,7 +145,7 @@
             
             <div class="text-center">
                 <div id="message-spinner-container" class="flex justify-center mb-4" style="height: 120px;"></div>
-                <button onclick="toggleMessageSpinner()" class="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700">
+                <button id="toggle-message" class="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700">
                     Toggle with Message
                 </button>
             </div>
@@ -182,13 +183,13 @@
                 <div>
                     <h3 class="font-medium mb-4">Button Spinner</h3>
                     <div class="space-y-4">
-                        <button id="save-button" onclick="simulateSave()" class="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700 w-full">
+                        <button id="save-button" class="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700 w-full">
                             Save Changes
                         </button>
-                        <button id="load-button" onclick="simulateLoad()" class="bg-purple-600 text-white px-6 py-2 rounded hover:bg-purple-700 w-full">
+                        <button id="load-button" class="bg-purple-600 text-white px-6 py-2 rounded hover:bg-purple-700 w-full">
                             Load Data
                         </button>
-                        <button onclick="showGlobalSpinner()" class="bg-gray-600 text-white px-6 py-2 rounded hover:bg-gray-700 w-full">
+                        <button id="show-global" class="bg-gray-600 text-white px-6 py-2 rounded hover:bg-gray-700 w-full">
                             Show Global Spinner
                         </button>
                     </div>
@@ -382,99 +383,6 @@ spinner.<span class="function">hide</span>();</div>
         </div>
     </div>
 
-    <script>
-        // Demo functionality
-        const spinners = {};
-
-        function toggleSpinner(size) {
-            const containerId = `${size}-spinner-container`;
-            const container = document.getElementById(containerId);
-            
-            if (spinners[size]) {
-                spinners[size].hide();
-                spinners[size] = null;
-            } else {
-                spinners[size] = new SwirlSpinner({
-                    size: size,
-                    container: container
-                }).show();
-            }
-        }
-
-        function toggleSpeedSpinner(speed) {
-            const container = document.getElementById(`${speed}-spinner-container`);
-            
-            if (spinners[speed]) {
-                spinners[speed].hide();
-                spinners[speed] = null;
-            } else {
-                spinners[speed] = new SwirlSpinner({
-                    speed: speed,
-                    container: container
-                }).show();
-            }
-        }
-
-        function toggleMessageSpinner() {
-            const container = document.getElementById('message-spinner-container');
-            
-            if (spinners.message) {
-                spinners.message.hide();
-                spinners.message = null;
-            } else {
-                spinners.message = new SwirlSpinner({
-                    message: 'Loading your data...',
-                    container: container
-                }).show();
-            }
-        }
-
-        // Form demo
-        document.getElementById('demo-form').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            
-            const spinner = SwirlSpinnerUtils.showOnForm(this, {
-                message: 'Submitting form...'
-            });
-            
-            // Simulate API call
-            await new Promise(resolve => setTimeout(resolve, 3000));
-            
-            spinner.hide();
-            alert('Form submitted successfully!');
-        });
-
-        // Button demos
-        async function simulateSave() {
-            const button = document.getElementById('save-button');
-            const spinner = SwirlSpinnerUtils.showOnButton(button);
-            
-            await new Promise(resolve => setTimeout(resolve, 2000));
-            
-            spinner.hide();
-            alert('Changes saved!');
-        }
-
-        async function simulateLoad() {
-            const button = document.getElementById('load-button');
-            const spinner = SwirlSpinnerUtils.showOnButton(button, { pulse: true });
-            
-            await new Promise(resolve => setTimeout(resolve, 2500));
-            
-            spinner.hide();
-            alert('Data loaded!');
-        }
-
-        function showGlobalSpinner() {
-            const spinner = SwirlSpinnerUtils.showGlobal({
-                message: 'Please wait while we process your request...'
-            });
-            
-            setTimeout(() => {
-                spinner.hide();
-                alert('Process completed!');
-            }, 3000);
-        }
-    </script>
+    <script src="/assets/js/swirl-spinner-demo.js"></script>
 </body>
 </html>

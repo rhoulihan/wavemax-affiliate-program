@@ -297,45 +297,6 @@ describe('Affiliate API', () => {
     });
   });
 
-  test.skip('should update payment information', async () => { // TODO: Implement PUT /api/v1/affiliates/:affiliateId/payment endpoint
-    const res = await agent
-      .put(`/api/v1/affiliates/${testAffiliate.affiliateId}/payment`)
-      .set('Authorization', `Bearer ${authToken}`)
-      .set('X-CSRF-Token', csrfToken)
-      .send({
-        paymentMethod: 'check',
-        bankAccountNumber: '123456789',
-        bankRoutingNumber: '987654321',
-        preferredPaymentDay: 'friday'
-      });
-
-    expect(res.statusCode).toEqual(200);
-    expect(res.body).toHaveProperty('success', true);
-    expect(res.body).toHaveProperty('message', 'Payment information updated successfully');
-
-    // Verify the update
-    const updatedAffiliate = await Affiliate.findOne({ affiliateId: testAffiliate.affiliateId });
-    expect(updatedAffiliate.paymentMethod).toBe('check');
-    expect(updatedAffiliate.bankAccountNumber).toBe('123456789');
-    expect(updatedAffiliate.bankRoutingNumber).toBe('987654321');
-    expect(updatedAffiliate.preferredPaymentDay).toBe('friday');
-  });
-
-  test.skip('should handle commission-related endpoints', async () => { // TODO: Implement GET /api/v1/affiliates/:affiliateId/commission-summary endpoint
-    // Test getting commission summary
-    const res = await agent
-      .get(`/api/v1/affiliates/${testAffiliate.affiliateId}/commission-summary`)
-      .set('Authorization', `Bearer ${authToken}`);
-
-    expect(res.statusCode).toEqual(200);
-    expect(res.body).toHaveProperty('success', true);
-    expect(res.body).toHaveProperty('summary');
-    expect(res.body.summary).toHaveProperty('currentMonth');
-    expect(res.body.summary).toHaveProperty('lastMonth');
-    expect(res.body.summary).toHaveProperty('yearToDate');
-    expect(res.body.summary).toHaveProperty('lifetime');
-    expect(res.body.summary).toHaveProperty('pendingPayouts');
-  });
 
   test('Delete all affiliate data (development only)', async () => {
     // Enable delete feature

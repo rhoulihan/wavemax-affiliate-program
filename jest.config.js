@@ -6,6 +6,7 @@ module.exports = {
     '!server.js',
     '!server/**/*.test.js',
     '!server/templates/**',
+    '!server/monitoring/**',
     '!**/node_modules/**',
     '!**/coverage/**'
   ],

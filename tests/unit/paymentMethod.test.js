@@ -512,34 +512,6 @@ describe('PaymentMethod Model Unit Tests', () => {
       });
     });
 
-    describe('Pre-save default handling', () => {
-      it.skip('should remove default from other payment methods when setting default', async () => {
-        // Skipping: Testing Mongoose internals is fragile and not recommended
-        // The actual middleware functionality is tested through integration tests
-      });
-
-      it.skip('should prevent modification of paygistixId', async () => {
-        // Skipping: Testing Mongoose internals is fragile and not recommended
-        // The actual middleware functionality is tested through integration tests
-      });
-
-      it.skip('should prevent modification of customerId', async () => {
-        // Skipping: Testing Mongoose internals is fragile and not recommended
-        // The actual middleware functionality is tested through integration tests
-      });
-    });
-
-    describe('Pre-save auto-default', () => {
-      it.skip('should set first payment method as default', async () => {
-        // Skipping: Testing Mongoose internals is fragile and not recommended
-        // The actual middleware functionality is tested through integration tests
-      });
-
-      it.skip('should not set as default if other active methods exist', async () => {
-        // Skipping: Testing Mongoose internals is fragile and not recommended
-        // The actual middleware functionality is tested through integration tests
-      });
-    });
   });
 
   describe('Metadata Field', () => {

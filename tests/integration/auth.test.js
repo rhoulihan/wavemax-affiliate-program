@@ -1,4 +1,5 @@
 const request = require('supertest');
+const mongoose = require('mongoose');
 const app = require('../../server');
 const Affiliate = require('../../server/models/Affiliate');
 const Customer = require('../../server/models/Customer');

@@ -467,5 +467,853 @@ describe('Customer Controller', () => {
         message: 'An error occurred while deleting data'
       });
     });
+
+    it('should return 404 for non-existent customer', async () => {
+      process.env.ENABLE_DELETE_DATA_FEATURE = 'true';
+
+      Customer.findOne.mockResolvedValue(null);
+
+      await customerController.deleteCustomerData(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(404);
+      expect(res.json).toHaveBeenCalledWith({
+        success: false,
+        message: 'Customer not found'
+      });
+    });
+  });
+
+  describe('getCustomerDashboardStats', () => {
+    it('should return dashboard stats for authorized customer', async () => {
+      const mockCustomer = {
+        customerId: 'CUST123',
+        affiliateId: 'AFF123',
+        bagCredit: 20.00,
+        bagCreditApplied: true,
+        numberOfBags: 2
+      };
+
+      const mockAffiliate = {
+        affiliateId: 'AFF123',
+        firstName: 'John',
+        lastName: 'Doe',
+        minimumDeliveryFee: 5.00,
+        perBagDeliveryFee: 2.50
+      };
+
+      const mockOrders = [
+        {
+          orderId: 'ORD001',
+          customerId: 'CUST123',
+          status: 'complete',
+          actualTotal: 50,
+          createdAt: new Date('2024-01-01'),
+          deliveredAt: new Date('2024-01-02')
+        },
+        {
+          orderId: 'ORD002',
+          customerId: 'CUST123',
+          status: 'complete',
+          estimatedTotal: 75,
+          createdAt: new Date('2024-01-10')
+        },
+        {
+          orderId: 'ORD003',
+          customerId: 'CUST123',
+          status: 'processing',
+          estimatedTotal: 60,
+          createdAt: new Date('2024-01-15')
+        },
+        {
+          orderId: 'ORD004',
+          customerId: 'CUST123',
+          status: 'scheduled',
+          pickupDate: new Date('2024-02-01'),
+          pickupTime: '10:00 AM',
+          estimatedSize: 'Large',
+          estimatedTotal: 80,
+          createdAt: new Date('2024-01-20')
+        }
+      ];
+
+      const mockUpcomingPickups = [{
+        orderId: 'ORD004',
+        pickupDate: new Date('2024-02-01'),
+        pickupTime: '10:00 AM',
+        estimatedSize: 'Large',
+        estimatedTotal: 80
+      }];
+
+      req.params.customerId = 'CUST123';
+      req.user = { role: 'customer', customerId: 'CUST123' };
+
+      Customer.findOne.mockResolvedValue(mockCustomer);
+      Affiliate.findOne.mockResolvedValue(mockAffiliate);
+      
+      // Mock Order.find for all orders
+      const orderFindMock = {
+        sort: jest.fn().mockResolvedValue(mockOrders)
+      };
+      Order.find.mockImplementation((query) => {
+        if (query.status === 'scheduled') {
+          return {
+            sort: jest.fn().mockReturnThis(),
+            limit: jest.fn().mockResolvedValue(mockUpcomingPickups)
+          };
+        }
+        return orderFindMock;
+      });
+
+      await customerController.getCustomerDashboardStats(req, res);
+
+      expect(Customer.findOne).toHaveBeenCalledWith({ customerId: 'CUST123' });
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.json).toHaveBeenCalledWith({
+        success: true,
+        dashboard: {
+          statistics: {
+            totalOrders: 4,
+            completedOrders: 2,
+            activeOrders: 2,
+            totalSpent: 125,
+            averageOrderValue: 62.5,
+            lastOrderDate: expect.any(Date)
+          },
+          recentOrders: expect.arrayContaining([
+            expect.objectContaining({ orderId: 'ORD001' }),
+            expect.objectContaining({ orderId: 'ORD002' }),
+            expect.objectContaining({ orderId: 'ORD003' }),
+            expect.objectContaining({ orderId: 'ORD004' })
+          ]),
+          upcomingPickups: expect.arrayContaining([
+            expect.objectContaining({
+              orderId: 'ORD004',
+              pickupTime: '10:00 AM'
+            })
+          ]),
+          affiliate: {
+            affiliateId: 'AFF123',
+            firstName: 'John',
+            lastName: 'Doe',
+            minimumDeliveryFee: 5.00,
+            perBagDeliveryFee: 2.50
+          },
+          bagCredit: {
+            amount: 20.00,
+            applied: true,
+            numberOfBags: 2
+          }
+        }
+      });
+    });
+
+    it('should return 404 for non-existent customer', async () => {
+      req.params.customerId = 'NONEXISTENT';
+      req.user = { role: 'admin' };
+
+      Customer.findOne.mockResolvedValue(null);
+
+      await customerController.getCustomerDashboardStats(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(404);
+      expect(res.json).toHaveBeenCalledWith({
+        success: false,
+        message: 'Customer not found'
+      });
+    });
+
+    it('should return 403 for unauthorized access', async () => {
+      req.params.customerId = 'CUST123';
+      req.user = { role: 'customer', customerId: 'CUST456' };
+
+      Customer.findOne.mockResolvedValue({ customerId: 'CUST123', affiliateId: 'AFF999' });
+
+      await customerController.getCustomerDashboardStats(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(403);
+      expect(res.json).toHaveBeenCalledWith({
+        success: false,
+        message: 'Unauthorized'
+      });
+    });
+
+    it('should allow affiliate access to their customer dashboard', async () => {
+      const mockCustomer = {
+        customerId: 'CUST123',
+        affiliateId: 'AFF123',
+        bagCredit: 0,
+        bagCreditApplied: false,
+        numberOfBags: 1
+      };
+
+      req.params.customerId = 'CUST123';
+      req.user = { role: 'affiliate', affiliateId: 'AFF123' };
+
+      Customer.findOne.mockResolvedValue(mockCustomer);
+      Order.find.mockImplementation((query) => {
+        if (query.status === 'scheduled') {
+          return {
+            sort: jest.fn().mockReturnThis(),
+            limit: jest.fn().mockResolvedValue([])
+          };
+        }
+        // For general query (all orders)
+        return {
+          sort: jest.fn().mockResolvedValue([])
+        };
+      });
+      Affiliate.findOne.mockResolvedValue(null);
+
+      await customerController.getCustomerDashboardStats(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.json).toHaveBeenCalledWith({
+        success: true,
+        dashboard: expect.objectContaining({
+          statistics: expect.objectContaining({
+            totalOrders: 0,
+            completedOrders: 0,
+            activeOrders: 0,
+            totalSpent: 0,
+            averageOrderValue: 0
+          })
+        })
+      });
+    });
+
+    it('should handle database errors gracefully', async () => {
+      req.params.customerId = 'CUST123';
+      req.user = { role: 'admin' };
+
+      Customer.findOne.mockRejectedValue(new Error('Database error'));
+
+      await customerController.getCustomerDashboardStats(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(500);
+      expect(res.json).toHaveBeenCalledWith({
+        success: false,
+        message: 'An error occurred while retrieving dashboard statistics'
+      });
+    });
+  });
+
+  describe('updatePaymentInfo', () => {
+    it('should successfully update payment information', async () => {
+      const mockCustomer = {
+        customerId: 'CUST123',
+        save: jest.fn()
+      };
+
+      req.params.customerId = 'CUST123';
+      req.user = { role: 'customer', customerId: 'CUST123' };
+      req.body = {
+        cardholderName: 'Jane Smith',
+        cardNumber: '4111111111111111',
+        expiryDate: '12/25',
+        billingZip: '78701'
+      };
+
+      Customer.findOne.mockResolvedValue(mockCustomer);
+
+      await customerController.updatePaymentInfo(req, res);
+
+      expect(mockCustomer.cardholderName).toBe('Jane Smith');
+      expect(mockCustomer.lastFourDigits).toBe('1111');
+      expect(mockCustomer.expiryDate).toBe('12/25');
+      expect(mockCustomer.billingZip).toBe('78701');
+      expect(mockCustomer.savePaymentInfo).toBe(true);
+      expect(mockCustomer.save).toHaveBeenCalled();
+
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.json).toHaveBeenCalledWith({
+        success: true,
+        message: 'Payment information updated successfully',
+        lastFourDigits: '1111'
+      });
+    });
+
+    it('should return 404 for non-existent customer', async () => {
+      req.params.customerId = 'NONEXISTENT';
+      req.user = { role: 'admin' };
+
+      Customer.findOne.mockResolvedValue(null);
+
+      await customerController.updatePaymentInfo(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(404);
+      expect(res.json).toHaveBeenCalledWith({
+        success: false,
+        message: 'Customer not found'
+      });
+    });
+
+    it('should return 403 for unauthorized access', async () => {
+      req.params.customerId = 'CUST123';
+      req.user = { role: 'customer', customerId: 'CUST456' };
+
+      Customer.findOne.mockResolvedValue({ customerId: 'CUST123' });
+
+      await customerController.updatePaymentInfo(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(403);
+      expect(res.json).toHaveBeenCalledWith({
+        success: false,
+        message: 'Unauthorized'
+      });
+    });
+
+    it('should allow admin to update customer payment info', async () => {
+      const mockCustomer = {
+        customerId: 'CUST123',
+        save: jest.fn()
+      };
+
+      req.params.customerId = 'CUST123';
+      req.user = { role: 'admin' };
+      req.body = {
+        cardholderName: 'Admin Update',
+        cardNumber: '5555555555554444',
+        expiryDate: '06/26',
+        billingZip: '12345'
+      };
+
+      Customer.findOne.mockResolvedValue(mockCustomer);
+
+      await customerController.updatePaymentInfo(req, res);
+
+      expect(mockCustomer.lastFourDigits).toBe('4444');
+      expect(res.status).toHaveBeenCalledWith(200);
+    });
+
+    it('should handle database errors', async () => {
+      req.params.customerId = 'CUST123';
+      req.user = { role: 'admin' };
+
+      Customer.findOne.mockRejectedValue(new Error('Database error'));
+
+      await customerController.updatePaymentInfo(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(500);
+      expect(res.json).toHaveBeenCalledWith({
+        success: false,
+        message: 'An error occurred while updating payment information'
+      });
+    });
+  });
+
+  describe('updateCustomerPassword', () => {
+    it('should successfully update password', async () => {
+      const mockCustomer = {
+        customerId: 'CUST123',
+        passwordSalt: 'oldsalt',
+        passwordHash: 'oldhash',
+        save: jest.fn()
+      };
+
+      req.params.customerId = 'CUST123';
+      req.user = { role: 'customer', customerId: 'CUST123' };
+      req.body = {
+        currentPassword: 'oldpassword',
+        newPassword: 'newpassword123'
+      };
+
+      Customer.findOne.mockResolvedValue(mockCustomer);
+      encryptionUtil.verifyPassword = jest.fn().mockReturnValue(true);
+      encryptionUtil.hashPassword.mockReturnValue({
+        salt: 'newsalt',
+        hash: 'newhash'
+      });
+
+      await customerController.updateCustomerPassword(req, res);
+
+      expect(encryptionUtil.verifyPassword).toHaveBeenCalledWith(
+        'oldpassword',
+        'oldsalt',
+        'oldhash'
+      );
+      expect(mockCustomer.passwordSalt).toBe('newsalt');
+      expect(mockCustomer.passwordHash).toBe('newhash');
+      expect(mockCustomer.save).toHaveBeenCalled();
+
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.json).toHaveBeenCalledWith({
+        success: true,
+        message: 'Password updated successfully'
+      });
+    });
+
+    it('should reject incorrect current password', async () => {
+      const mockCustomer = {
+        customerId: 'CUST123',
+        passwordSalt: 'salt',
+        passwordHash: 'hash'
+      };
+
+      req.params.customerId = 'CUST123';
+      req.user = { role: 'customer', customerId: 'CUST123' };
+      req.body = {
+        currentPassword: 'wrongpassword',
+        newPassword: 'newpassword123'
+      };
+
+      Customer.findOne.mockResolvedValue(mockCustomer);
+      encryptionUtil.verifyPassword = jest.fn().mockReturnValue(false);
+
+      await customerController.updateCustomerPassword(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(401);
+      expect(res.json).toHaveBeenCalledWith({
+        success: false,
+        message: 'Current password is incorrect'
+      });
+    });
+
+    it('should validate new password length', async () => {
+      const mockCustomer = {
+        customerId: 'CUST123',
+        passwordSalt: 'salt',
+        passwordHash: 'hash'
+      };
+
+      req.params.customerId = 'CUST123';
+      req.user = { role: 'customer', customerId: 'CUST123' };
+      req.body = {
+        currentPassword: 'oldpass',
+        newPassword: 'short'
+      };
+
+      Customer.findOne.mockResolvedValue(mockCustomer);
+      encryptionUtil.verifyPassword = jest.fn().mockReturnValue(true);
+
+      await customerController.updateCustomerPassword(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(400);
+      expect(res.json).toHaveBeenCalledWith({
+        success: false,
+        message: 'New password must be at least 8 characters long'
+      });
+    });
+
+    it('should return 404 for non-existent customer', async () => {
+      req.params.customerId = 'NONEXISTENT';
+      req.user = { role: 'admin' };
+
+      Customer.findOne.mockResolvedValue(null);
+
+      await customerController.updateCustomerPassword(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(404);
+      expect(res.json).toHaveBeenCalledWith({
+        success: false,
+        message: 'Customer not found'
+      });
+    });
+
+    it('should return 403 for unauthorized access', async () => {
+      req.params.customerId = 'CUST123';
+      req.user = { role: 'customer', customerId: 'CUST456' };
+
+      Customer.findOne.mockResolvedValue({ customerId: 'CUST123' });
+
+      await customerController.updateCustomerPassword(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(403);
+      expect(res.json).toHaveBeenCalledWith({
+        success: false,
+        message: 'Unauthorized'
+      });
+    });
+
+    it('should handle missing new password', async () => {
+      const mockCustomer = {
+        customerId: 'CUST123',
+        passwordSalt: 'salt',
+        passwordHash: 'hash'
+      };
+
+      req.params.customerId = 'CUST123';
+      req.user = { role: 'customer', customerId: 'CUST123' };
+      req.body = {
+        currentPassword: 'oldpass',
+        newPassword: ''
+      };
+
+      Customer.findOne.mockResolvedValue(mockCustomer);
+      encryptionUtil.verifyPassword = jest.fn().mockReturnValue(true);
+
+      await customerController.updateCustomerPassword(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(400);
+      expect(res.json).toHaveBeenCalledWith({
+        success: false,
+        message: 'New password must be at least 8 characters long'
+      });
+    });
+
+    it('should handle database errors', async () => {
+      req.params.customerId = 'CUST123';
+      req.user = { role: 'admin' };
+
+      Customer.findOne.mockRejectedValue(new Error('Database error'));
+
+      await customerController.updateCustomerPassword(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(500);
+      expect(res.json).toHaveBeenCalledWith({
+        success: false,
+        message: 'An error occurred while updating password'
+      });
+    });
+  });
+
+  describe('getCustomersForAdmin', () => {
+    beforeEach(() => {
+      req.user = { role: 'admin' };
+    });
+
+    it('should return all customers for admin', async () => {
+      const mockCustomers = [
+        { customerId: 'CUST001', firstName: 'John', lastName: 'Doe', affiliateId: 'AFF001', toObject: jest.fn().mockReturnThis() },
+        { customerId: 'CUST002', firstName: 'Jane', lastName: 'Smith', affiliateId: 'AFF002', toObject: jest.fn().mockReturnThis() }
+      ];
+
+      const mockAffiliates = [
+        { affiliateId: 'AFF001', businessName: 'Biz1', firstName: 'Aff', lastName: 'One' },
+        { affiliateId: 'AFF002', businessName: 'Biz2', firstName: 'Aff', lastName: 'Two' }
+      ];
+
+      const mockOrderCounts = [
+        { _id: 'CUST001', count: 5 },
+        { _id: 'CUST002', count: 0 }
+      ];
+
+      req.query = {};
+
+      Customer.find.mockReturnValue({
+        select: jest.fn().mockReturnThis(),
+        sort: jest.fn().mockReturnThis(),
+        limit: jest.fn().mockResolvedValue(mockCustomers)
+      });
+
+      Affiliate.find.mockReturnValue({
+        select: jest.fn().mockResolvedValue(mockAffiliates)
+      });
+
+      Order.aggregate.mockResolvedValue(mockOrderCounts);
+
+      await customerController.getCustomersForAdmin(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.json).toHaveBeenCalledWith({
+        success: true,
+        customers: expect.arrayContaining([
+          expect.objectContaining({
+            customerId: 'CUST001',
+            orderCount: 5,
+            affiliate: expect.objectContaining({ affiliateId: 'AFF001' })
+          }),
+          expect.objectContaining({
+            customerId: 'CUST002',
+            orderCount: 0,
+            affiliate: expect.objectContaining({ affiliateId: 'AFF002' })
+          })
+        ]),
+        total: 2
+      });
+    });
+
+    it('should filter customers by search query', async () => {
+      req.query = { search: 'john' };
+
+      const mockCustomers = [
+        { customerId: 'CUST001', firstName: 'John', lastName: 'Doe', affiliateId: 'AFF001', toObject: jest.fn().mockReturnThis() }
+      ];
+
+      Customer.find.mockReturnValue({
+        select: jest.fn().mockReturnThis(),
+        sort: jest.fn().mockReturnThis(),
+        limit: jest.fn().mockResolvedValue(mockCustomers)
+      });
+
+      Affiliate.find.mockReturnValue({
+        select: jest.fn().mockResolvedValue([])
+      });
+
+      Order.aggregate.mockResolvedValue([]);
+
+      await customerController.getCustomersForAdmin(req, res);
+
+      expect(Customer.find).toHaveBeenCalledWith({
+        $or: expect.arrayContaining([
+          { firstName: expect.any(RegExp) },
+          { lastName: expect.any(RegExp) },
+          { email: expect.any(RegExp) },
+          { phone: expect.any(RegExp) },
+          { customerId: expect.any(RegExp) }
+        ])
+      });
+    });
+
+    it('should filter customers by affiliate', async () => {
+      req.query = { affiliateId: 'AFF001' };
+
+      Customer.find.mockReturnValue({
+        select: jest.fn().mockReturnThis(),
+        sort: jest.fn().mockReturnThis(),
+        limit: jest.fn().mockResolvedValue([])
+      });
+
+      Affiliate.find.mockReturnValue({
+        select: jest.fn().mockResolvedValue([])
+      });
+
+      Order.aggregate.mockResolvedValue([]);
+
+      await customerController.getCustomersForAdmin(req, res);
+
+      expect(Customer.find).toHaveBeenCalledWith({
+        affiliateId: 'AFF001'
+      });
+    });
+
+    it('should filter customers by active status', async () => {
+      req.query = { status: 'active' };
+
+      Customer.find.mockReturnValue({
+        select: jest.fn().mockReturnThis(),
+        sort: jest.fn().mockReturnThis(),
+        limit: jest.fn().mockResolvedValue([])
+      });
+
+      Affiliate.find.mockReturnValue({
+        select: jest.fn().mockResolvedValue([])
+      });
+
+      Order.aggregate.mockResolvedValue([]);
+
+      await customerController.getCustomersForAdmin(req, res);
+
+      expect(Customer.find).toHaveBeenCalledWith({
+        isActive: true
+      });
+    });
+
+    it('should filter customers by inactive status', async () => {
+      req.query = { status: 'inactive' };
+
+      Customer.find.mockReturnValue({
+        select: jest.fn().mockReturnThis(),
+        sort: jest.fn().mockReturnThis(),
+        limit: jest.fn().mockResolvedValue([])
+      });
+
+      Affiliate.find.mockReturnValue({
+        select: jest.fn().mockResolvedValue([])
+      });
+
+      Order.aggregate.mockResolvedValue([]);
+
+      await customerController.getCustomersForAdmin(req, res);
+
+      expect(Customer.find).toHaveBeenCalledWith({
+        isActive: false
+      });
+    });
+
+    it('should filter new customers with no orders', async () => {
+      req.query = { status: 'new' };
+
+      const mockCustomers = [
+        { customerId: 'CUST001', firstName: 'John', affiliateId: 'AFF001', toObject: jest.fn().mockReturnThis() },
+        { customerId: 'CUST002', firstName: 'Jane', affiliateId: 'AFF001', toObject: jest.fn().mockReturnThis() }
+      ];
+
+      Customer.find.mockReturnValue({
+        select: jest.fn().mockReturnThis(),
+        sort: jest.fn().mockReturnThis(),
+        limit: jest.fn().mockResolvedValue(mockCustomers)
+      });
+
+      Affiliate.find.mockReturnValue({
+        select: jest.fn().mockResolvedValue([])
+      });
+
+      Order.aggregate.mockResolvedValue([
+        { _id: 'CUST001', count: 5 }
+      ]);
+
+      await customerController.getCustomersForAdmin(req, res);
+
+      expect(res.json).toHaveBeenCalledWith({
+        success: true,
+        customers: expect.arrayContaining([
+          expect.objectContaining({
+            customerId: 'CUST002',
+            orderCount: 0
+          })
+        ]),
+        total: 1
+      });
+    });
+
+    it('should handle combined filters', async () => {
+      req.query = {
+        search: 'smith',
+        affiliateId: 'AFF002',
+        status: 'active'
+      };
+
+      Customer.find.mockReturnValue({
+        select: jest.fn().mockReturnThis(),
+        sort: jest.fn().mockReturnThis(),
+        limit: jest.fn().mockResolvedValue([])
+      });
+
+      Affiliate.find.mockReturnValue({
+        select: jest.fn().mockResolvedValue([])
+      });
+
+      Order.aggregate.mockResolvedValue([]);
+
+      await customerController.getCustomersForAdmin(req, res);
+
+      expect(Customer.find).toHaveBeenCalledWith({
+        $or: expect.any(Array),
+        affiliateId: 'AFF002',
+        isActive: true
+      });
+    });
+
+    it('should handle database errors', async () => {
+      Customer.find.mockImplementation(() => {
+        throw new Error('Database error');
+      });
+
+      await customerController.getCustomersForAdmin(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(500);
+      expect(res.json).toHaveBeenCalledWith({
+        success: false,
+        message: 'Failed to retrieve customers'
+      });
+    });
+
+    it('should ignore "all" filter values', async () => {
+      req.query = {
+        affiliateId: 'all',
+        status: 'all'
+      };
+
+      Customer.find.mockReturnValue({
+        select: jest.fn().mockReturnThis(),
+        sort: jest.fn().mockReturnThis(),
+        limit: jest.fn().mockResolvedValue([])
+      });
+
+      Affiliate.find.mockReturnValue({
+        select: jest.fn().mockResolvedValue([])
+      });
+
+      Order.aggregate.mockResolvedValue([]);
+
+      await customerController.getCustomersForAdmin(req, res);
+
+      expect(Customer.find).toHaveBeenCalledWith({});
+    });
+  });
+
+  describe('validation errors', () => {
+    it('should return validation errors for registerCustomer', async () => {
+      validationResult.mockReturnValue({
+        isEmpty: () => false,
+        array: () => [
+          { msg: 'Email is required', param: 'email' },
+          { msg: 'Password is too short', param: 'password' }
+        ]
+      });
+
+      await customerController.registerCustomer(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(400);
+      expect(res.json).toHaveBeenCalledWith({
+        success: false,
+        errors: [
+          { msg: 'Email is required', param: 'email' },
+          { msg: 'Password is too short', param: 'password' }
+        ]
+      });
+    });
+  });
+
+  describe('error handling for registration', () => {
+    beforeEach(() => {
+      validationResult.mockReturnValue({
+        isEmpty: () => true,
+        array: () => []
+      });
+    });
+
+    it('should handle database save errors during registration', async () => {
+      const mockAffiliate = { affiliateId: 'AFF123' };
+      const mockCustomer = {
+        save: jest.fn().mockRejectedValue(new Error('Database save failed'))
+      };
+
+      req.body = {
+        firstName: 'Test',
+        lastName: 'User',
+        email: 'test@example.com',
+        username: 'testuser',
+        password: 'password123',
+        affiliateId: 'AFF123'
+      };
+
+      Affiliate.findOne.mockResolvedValue(mockAffiliate);
+      Customer.findOne.mockResolvedValue(null);
+      Customer.mockImplementation(() => mockCustomer);
+      SystemConfig.getValue.mockResolvedValue(10.00);
+      encryptionUtil.generateUniqueCustomerId.mockResolvedValue('CUST999');
+      encryptionUtil.hashPassword.mockReturnValue({ hash: 'hash', salt: 'salt' });
+
+      await customerController.registerCustomer(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(500);
+      expect(res.json).toHaveBeenCalledWith({
+        success: false,
+        message: 'An error occurred during registration'
+      });
+    });
+
+    it('should handle missing payment info gracefully', async () => {
+      const mockAffiliate = { affiliateId: 'AFF123' };
+
+      req.body = {
+        firstName: 'Test',
+        lastName: 'User',
+        email: 'test@example.com',
+        username: 'testuser',
+        password: 'password123',
+        affiliateId: 'AFF123',
+        savePaymentInfo: false
+      };
+
+      const mockCustomer = {
+        customerId: 'CUST999',
+        email: 'test@example.com',
+        save: jest.fn().mockResolvedValue(true)
+      };
+
+      Affiliate.findOne.mockResolvedValue(mockAffiliate);
+      Customer.findOne.mockResolvedValue(null);
+      Customer.mockImplementation(() => mockCustomer);
+      SystemConfig.getValue.mockResolvedValue(10.00);
+      encryptionUtil.generateUniqueCustomerId.mockResolvedValue('CUST999');
+      encryptionUtil.hashPassword.mockReturnValue({ hash: 'hash', salt: 'salt' });
+
+      await customerController.registerCustomer(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(201);
+      expect(mockCustomer.savePaymentInfo).toBeUndefined();
+    });
   });
 });

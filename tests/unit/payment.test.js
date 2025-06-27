@@ -407,16 +407,6 @@ describe('Payment Model Unit Tests', () => {
   });
 
   describe('Middleware', () => {
-    it.skip('should prevent modification of paygistixId', async () => {
-      // Skipping: Testing Mongoose internals is fragile and not recommended
-      // The actual middleware functionality is tested through integration tests
-    });
-
-    it.skip('should prevent modification of orderId', async () => {
-      // Skipping: Testing Mongoose internals is fragile and not recommended
-      // The actual middleware functionality is tested through integration tests
-    });
-
     it('should have pre-save middleware defined', () => {
       const preSaveHooks = Payment.schema.s.hooks._pres.get('save');
       expect(preSaveHooks).toBeDefined();
