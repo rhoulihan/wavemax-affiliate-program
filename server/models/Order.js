@@ -80,8 +80,6 @@ const orderSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Operator'
   },
-  processingStarted: Date,
-  processingCompleted: Date,
   operatorNotes: String,
   qualityCheckPassed: {
     type: Boolean,
@@ -95,7 +93,6 @@ const orderSchema = new mongoose.Schema({
   processingTimeMinutes: Number, // Auto-calculated
   // Timestamps
   createdAt: { type: Date, default: Date.now }, // When order was created (pending state)
-  scheduledAt: Date, // When affiliate accepted the order
   processingStartedAt: Date, // When order was received and WDF started
   processedAt: Date, // When order is ready for affiliate pickup
   completedAt: Date, // When affiliate delivered the order
@@ -135,9 +132,6 @@ orderSchema.pre('save', async function(next) {
   if (this.isModified('status')) {
     const now = new Date();
     switch (this.status) {
-    case 'scheduled':
-      if (!this.scheduledAt) this.scheduledAt = now;
-      break;
     case 'processing':
       if (!this.processingStartedAt) this.processingStartedAt = now;
       break;
@@ -149,28 +143,6 @@ orderSchema.pre('save', async function(next) {
       break;
     case 'cancelled':
       if (!this.cancelledAt) this.cancelledAt = now;
-      break;
-    }
-  }
-
-  // Update order processing status timestamps
-  if (this.isModified('orderProcessingStatus')) {
-    const now = new Date();
-    switch (this.orderProcessingStatus) {
-    case 'washing':
-    case 'drying':
-    case 'folding':
-      if (!this.processingStarted) {
-        this.processingStarted = now;
-      }
-      break;
-    case 'completed':
-      this.processingCompleted = now;
-      // Calculate processing time in minutes
-      if (this.processingStarted) {
-        const diffMs = now - this.processingStarted;
-        this.processingTimeMinutes = Math.round(diffMs / 60000);
-      }
       break;
     }
   }
