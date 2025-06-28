@@ -121,26 +121,6 @@ router.post('/social/register', [
 ], authController.completeSocialRegistration);
 
 /**
- * @route   POST /api/auth/social/link
- * @desc    Link social media account to existing affiliate
- * @access  Private
- */
-router.post('/social/link', [
-  body('provider').isIn(['google', 'facebook', 'linkedin']).withMessage('Invalid social media provider'),
-  body('socialToken').notEmpty().withMessage('Social authentication token is required')
-], authController.linkSocialAccount);
-
-/**
- * @route   POST /api/auth/social/callback
- * @desc    Handle social login callback for existing users
- * @access  Public
- */
-router.post('/social/callback', [
-  body('provider').isIn(['google', 'facebook', 'linkedin']).withMessage('Invalid social media provider'),
-  body('socialId').notEmpty().withMessage('Social ID is required')
-], authController.socialLogin);
-
-/**
  * @route   GET /api/auth/customer/google
  * @desc    Start Google OAuth authentication for customers
  * @access  Public

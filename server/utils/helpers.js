@@ -60,59 +60,7 @@ const formatDate = (date, format = 'short') => {
   }
 };
 
-/**
- * Generate a random string of specified length
- * @param {number} length - The length of the string to generate
- * @returns {string} - Random string
- */
-const generateRandomString = (length = 10) => {
-  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  let result = '';
-  for (let i = 0; i < length; i++) {
-    result += characters.charAt(Math.floor(Math.random() * characters.length));
-  }
-  return result;
-};
-
-/**
- * Sanitize a string for use in CSV files
- * @param {string} str - The string to sanitize
- * @returns {string} - Sanitized string
- */
-const sanitizeForCSV = (str) => {
-  if (str == null) return '';
-
-  // Convert to string
-  str = String(str);
-
-  // Escape double quotes by doubling them
-  str = str.replace(/"/g, '""');
-
-  // Wrap in quotes if contains comma, newline, or quotes
-  if (str.includes(',') || str.includes('\n') || str.includes('"')) {
-    str = `"${str}"`;
-  }
-
-  return str;
-};
-
-/**
- * Calculate percentage
- * @param {number} value - The value
- * @param {number} total - The total
- * @param {number} decimals - Number of decimal places
- * @returns {number} - Percentage
- */
-const calculatePercentage = (value, total, decimals = 2) => {
-  if (!total || total === 0) return 0;
-  const percentage = (value / total) * 100;
-  return Math.round(percentage * Math.pow(10, decimals)) / Math.pow(10, decimals);
-};
-
 module.exports = {
   formatCurrency,
-  formatDate,
-  generateRandomString,
-  sanitizeForCSV,
-  calculatePercentage
+  formatDate
 };
