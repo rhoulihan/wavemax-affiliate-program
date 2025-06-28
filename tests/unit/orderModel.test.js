@@ -38,7 +38,7 @@ describe('Order Model - Additional Coverage', () => {
     });
 
     describe('Status Timestamp Updates', () => {
-      it('should set scheduledAt timestamp when status changes to scheduled', async () => {
+      it('should set processingStartedAt timestamp when status changes to processing', async () => {
         const order = new Order({
           orderId: 'ORD002',
           customerId: 'CUST002',
@@ -50,9 +50,9 @@ describe('Order Model - Additional Coverage', () => {
         });
 
         await order.save();
-        expect(order.scheduledAt).toBeUndefined();
+        expect(order.processingStartedAt).toBeUndefined();
 
-        // Change status to processing (since 'scheduled' is not a valid enum)
+        // Change status to processing
         order.status = 'processing';
         await order.save();
 
@@ -84,133 +84,126 @@ describe('Order Model - Additional Coverage', () => {
       });
     });
 
-    describe('Order Processing Status Timestamps', () => {
-      it('should set processingStarted when orderProcessingStatus changes to washing', async () => {
+    describe('Actual Weight and Commission Calculations', () => {
+      it('should calculate actual total and commission when actual weight is set', async () => {
         const order = new Order({
           orderId: 'ORD004',
           customerId: 'CUST004',
           affiliateId: 'AFF004',
           status: 'processing',
-          orderProcessingStatus: 'pending',
           pickupDate: new Date(),
           pickupTime: 'morning',
-          estimatedWeight: 20
+          estimatedWeight: 20,
+          feeBreakdown: {
+            totalFee: 25
+          }
         });
 
         await order.save();
-        expect(order.processingStarted).toBeUndefined();
+        expect(order.estimatedTotal).toBeDefined();
+        expect(order.actualTotal).toBeUndefined();
 
-        // Change processing status to washing
-        order.orderProcessingStatus = 'washing';
+        // Set actual weight
+        order.actualWeight = 30;
         await order.save();
 
-        expect(order.processingStarted).toBeDefined();
-        expect(order.processingStarted).toBeInstanceOf(Date);
+        // Check calculations (assuming baseRate = 1.25)
+        expect(order.actualTotal).toBe(62.5); // (30 * 1.25) + 25
+        expect(order.affiliateCommission).toBe(28.75); // (30 * 1.25 * 0.1) + 25
       });
 
-      it('should set processingStarted when orderProcessingStatus changes to drying', async () => {
+      it('should set processedAt timestamp when status changes to processed', async () => {
         const order = new Order({
           orderId: 'ORD005',
           customerId: 'CUST005',
           affiliateId: 'AFF005',
           status: 'processing',
-          orderProcessingStatus: 'pending',
           pickupDate: new Date(),
           pickupTime: 'afternoon',
           estimatedWeight: 20
         });
 
         await order.save();
+        expect(order.processedAt).toBeUndefined();
         
-        order.orderProcessingStatus = 'drying';
+        order.status = 'processed';
         await order.save();
 
-        expect(order.processingStarted).toBeDefined();
-        expect(order.processingStarted).toBeInstanceOf(Date);
+        expect(order.processedAt).toBeDefined();
+        expect(order.processedAt).toBeInstanceOf(Date);
       });
 
-      it('should set processingStarted when orderProcessingStatus changes to folding', async () => {
+      it('should set completedAt timestamp when status changes to complete', async () => {
         const order = new Order({
           orderId: 'ORD006',
           customerId: 'CUST006',
           affiliateId: 'AFF006',
-          status: 'processing',
-          orderProcessingStatus: 'pending',
+          status: 'processed',
           pickupDate: new Date(),
           pickupTime: 'evening',
           estimatedWeight: 20
         });
 
         await order.save();
+        expect(order.completedAt).toBeUndefined();
         
-        order.orderProcessingStatus = 'folding';
+        order.status = 'complete';
         await order.save();
 
-        expect(order.processingStarted).toBeDefined();
-        expect(order.processingStarted).toBeInstanceOf(Date);
+        expect(order.completedAt).toBeDefined();
+        expect(order.completedAt).toBeInstanceOf(Date);
       });
 
-      it('should not overwrite existing processingStarted timestamp', async () => {
-        const existingTimestamp = new Date('2024-01-01T10:00:00Z');
+      it('should set cancelledAt timestamp when status changes to cancelled', async () => {
         const order = new Order({
           orderId: 'ORD007',
           customerId: 'CUST007',
           affiliateId: 'AFF007',
-          status: 'processing',
-          orderProcessingStatus: 'washing',
-          processingStarted: existingTimestamp,
+          status: 'pending',
           pickupDate: new Date(),
           pickupTime: 'morning',
           estimatedWeight: 20
         });
 
         await order.save();
+        expect(order.cancelledAt).toBeUndefined();
         
-        // Change to another processing status
-        order.orderProcessingStatus = 'drying';
+        order.status = 'cancelled';
         await order.save();
 
-        // processingStarted should remain unchanged
-        expect(order.processingStarted.getTime()).toBe(existingTimestamp.getTime());
+        expect(order.cancelledAt).toBeDefined();
+        expect(order.cancelledAt).toBeInstanceOf(Date);
       });
 
-      it('should set processingCompleted and calculate processing time when status changes to completed', async () => {
-        const startTime = new Date('2024-01-01T10:00:00Z');
+      it('should properly calculate commission with different fee structures', async () => {
         const order = new Order({
           orderId: 'ORD008',
           customerId: 'CUST008',
           affiliateId: 'AFF008',
           status: 'processing',
-          orderProcessingStatus: 'folding',
-          processingStarted: startTime,
           pickupDate: new Date(),
           pickupTime: 'afternoon',
-          estimatedWeight: 20
+          estimatedWeight: 20,
+          actualWeight: 50,
+          feeBreakdown: {
+            totalFee: 0 // Zero delivery fee scenario
+          }
         });
 
         await order.save();
         
-        // Mock current time to be 45 minutes later
-        const completedTime = new Date('2024-01-01T10:45:00Z');
-        jest.spyOn(Date, 'now').mockReturnValue(completedTime.getTime());
-        
-        // Change to completed
-        order.orderProcessingStatus = 'completed';
-        await order.save();
-
-        expect(order.processingCompleted).toBeDefined();
-        expect(order.processingTimeMinutes).toBe(45);
-        
-        Date.now.mockRestore();
+        // Commission should be 10% of WDF only when delivery fee is 0
+        expect(order.affiliateCommission).toBe(6.25); // 50 * 1.25 * 0.1
       });
 
-      it('should handle completion without processingStarted timestamp', async () => {
+      it('should not overwrite existing timestamps', async () => {
+        const existingProcessingTime = new Date('2024-01-01T10:00:00Z');
         const order = new Order({
           orderId: 'ORD009',
           customerId: 'CUST009',
           affiliateId: 'AFF009',
           status: 'processing',
-          orderProcessingStatus: 'pending',
+          processingStartedAt: existingProcessingTime,
           pickupDate: new Date(),
           pickupTime: 'evening',
           estimatedWeight: 20
@@ -218,23 +211,21 @@ describe('Order Model - Additional Coverage', () => {
 
         await order.save();
         
-        // Change directly to completed without setting processingStarted
-        order.orderProcessingStatus = 'completed';
+        // Change status again
+        order.estimatedWeight = 25;
         await order.save();
 
-        expect(order.processingCompleted).toBeDefined();
-        expect(order.processingTimeMinutes).toBeUndefined();
+        expect(order.processingStartedAt.getTime()).toBe(existingProcessingTime.getTime());
       });
     });
 
     describe('Edge Cases', () => {
-      it('should handle multiple status changes in single save', async () => {
+      it('should handle status change to processing', async () => {
         const order = new Order({
           orderId: 'ORD010',
           customerId: 'CUST010',
           affiliateId: 'AFF010',
           status: 'pending',
-          orderProcessingStatus: 'pending',
           pickupDate: new Date(),
           pickupTime: 'morning',
           estimatedWeight: 20
@@ -242,41 +233,34 @@ describe('Order Model - Additional Coverage', () => {
 
         await order.save();
         
-        // Change both statuses at once
+        // Change status
         order.status = 'processing';
-        order.orderProcessingStatus = 'washing';
         await order.save();
 
         expect(order.processingStartedAt).toBeDefined();
-        expect(order.processingStarted).toBeDefined();
+        expect(order.processingStartedAt).toBeInstanceOf(Date);
       });
 
-      it('should calculate processing time correctly for long durations', async () => {
-        const startTime = new Date('2024-01-01T10:00:00Z');
+      it('should calculate commission for large orders', async () => {
         const order = new Order({
           orderId: 'ORD011',
           customerId: 'CUST011',
           affiliateId: 'AFF011',
           status: 'processing',
-          orderProcessingStatus: 'washing',
-          processingStarted: startTime,
           pickupDate: new Date(),
           pickupTime: 'afternoon',
-          estimatedWeight: 20
+          estimatedWeight: 100,
+          actualWeight: 150,
+          feeBreakdown: {
+            totalFee: 50
+          }
         });
 
         await order.save();
         
-        // Mock current time to be 3 hours later
-        const completedTime = new Date('2024-01-01T13:00:00Z');
-        jest.spyOn(Date, 'now').mockReturnValue(completedTime.getTime());
-        
-        order.orderProcessingStatus = 'completed';
-        await order.save();
-
-        expect(order.processingTimeMinutes).toBe(180); // 3 hours = 180 minutes
-        
-        Date.now.mockRestore();
+        // Check calculations
+        expect(order.actualTotal).toBe(237.5); // (150 * 1.25) + 50
+        expect(order.affiliateCommission).toBe(68.75); // (150 * 1.25 * 0.1) + 50
       });
     });
   });

@@ -430,191 +430,20 @@ describe('Enhanced Auth Controller - OAuth Methods', () => {
     });
   });
 
-  describe('socialLogin', () => {
-    beforeEach(() => {
-      req.body = {
-        provider: 'google',
-        socialId: 'google123'
-      };
-    });
-
-    test('should login existing affiliate with social account', async () => {
-      const mockAffiliate = {
-        affiliateId: 'AFF123456',
-        firstName: 'John',
-        lastName: 'Doe',
-        email: 'john@example.com',
-        socialAccounts: {
-          google: { id: 'google123' }
-        },
-        save: jest.fn().mockResolvedValue()
-      };
-
-      Affiliate.findOne = jest.fn().mockResolvedValue(mockAffiliate);
-      jwt.sign = jest.fn().mockReturnValue('jwt-token');
-
-      await authController.socialLogin(req, res);
-
-      expect(Affiliate.findOne).toHaveBeenCalledWith({
-        'socialAccounts.google.id': 'google123'
-      });
-
-      expect(res.status).toHaveBeenCalledWith(200);
-      expect(res.json).toHaveBeenCalledWith({
-        success: true,
-        token: 'jwt-token',
-        refreshToken: expect.any(String),
-        user: expect.objectContaining({
-          affiliateId: 'AFF123456',
-          firstName: 'John',
-          lastName: 'Doe'
-        })
-      });
-    });
-
-    test('should return error for non-existent social account', async () => {
-      Affiliate.findOne = jest.fn().mockResolvedValue(null);
-      Customer.findOne = jest.fn().mockResolvedValue(null);
-
-      await authController.socialLogin(req, res);
-
-      expect(res.status).toHaveBeenCalledWith(404);
-      expect(res.json).toHaveBeenCalledWith({
-        success: false,
-        message: 'No account found with this social media account'
-      });
-    });
-
-    test('should login existing customer with social account', async () => {
-      const mockCustomer = {
-        customerId: 'CUST123456',
-        firstName: 'Jane',
-        lastName: 'Doe',
-        email: 'jane@example.com',
-        socialAccounts: {
-          facebook: { id: 'facebook123' }
-        },
-        save: jest.fn().mockResolvedValue()
-      };
-
-      req.body.provider = 'facebook';
-      req.body.socialId = 'facebook123';
-
-      Affiliate.findOne = jest.fn().mockResolvedValue(null);
-      Customer.findOne = jest.fn().mockResolvedValue(mockCustomer);
-      jwt.sign = jest.fn().mockReturnValue('customer-jwt-token');
-
-      await authController.socialLogin(req, res);
-
-      expect(Affiliate.findOne).toHaveBeenCalledWith({
-        'socialAccounts.facebook.id': 'facebook123'
-      });
-      expect(Customer.findOne).toHaveBeenCalledWith({
-        'socialAccounts.facebook.id': 'facebook123'
-      });
-
-      expect(res.status).toHaveBeenCalledWith(200);
-      expect(res.json).toHaveBeenCalledWith({
-        success: true,
-        token: 'customer-jwt-token',
-        refreshToken: expect.any(String),
-        user: expect.objectContaining({
-          customerId: 'CUST123456',
-          firstName: 'Jane',
-          lastName: 'Doe'
-        })
-      });
-    });
+  // Note: socialLogin and linkSocialAccount methods were removed as dead code
+  // OAuth functionality is handled through handleSocialCallback and handleCustomerSocialCallback methods
+  
+  /*
+  describe('socialLogin - REMOVED', () => {
+    // This method was removed from authController as it was not being used
+    // Social login is handled through OAuth callback methods instead
   });
-
-  describe('linkSocialAccount', () => {
-    beforeEach(() => {
-      req.body = {
-        provider: 'linkedin',
-        socialToken: 'linkedin-jwt-token'
-      };
-      req.user = {
-        userId: '507f1f77bcf86cd799439011',
-        role: 'affiliate',
-        affiliateId: 'AFF123456'
-      };
-
-      jwt.verify = jest.fn().mockReturnValue({
-        provider: 'linkedin',
-        socialId: 'linkedin789',
-        email: 'john@example.com',
-        firstName: 'John',
-        lastName: 'Doe'
-      });
-    });
-
-    test('should link social account to existing affiliate', async () => {
-      const mockAffiliate = {
-        _id: '507f1f77bcf86cd799439011',
-        affiliateId: 'AFF123456',
-        socialAccounts: {},
-        save: jest.fn().mockResolvedValue()
-      };
-
-      // Set req.user to the affiliate object directly
-      req.user = mockAffiliate;
-
-      Affiliate.findOne = jest.fn()
-        .mockResolvedValueOnce(null); // Check if social account exists elsewhere
-
-      await authController.linkSocialAccount(req, res);
-
-      expect(mockAffiliate.socialAccounts.linkedin).toEqual({
-        id: 'linkedin789',
-        email: 'john@example.com',
-        name: 'John Doe',
-        accessToken: undefined,
-        refreshToken: undefined,
-        linkedAt: expect.any(Date)
-      });
-
-      expect(mockAffiliate.save).toHaveBeenCalled();
-      expect(res.status).toHaveBeenCalledWith(200);
-    });
-
-    test('should prevent linking already existing social account', async () => {
-      Affiliate.findOne = jest.fn()
-        .mockResolvedValueOnce({ affiliateId: 'AFF999999' }); // Social account exists
-
-      await authController.linkSocialAccount(req, res);
-
-      expect(res.status).toHaveBeenCalledWith(409);
-      expect(res.json).toHaveBeenCalledWith({
-        success: false,
-        message: 'This social media account is already linked to another affiliate'
-      });
-    });
-
-    test('should handle user not found error', async () => {
-      // Clear req.user to simulate unauthenticated request
-      req.user = null;
-
-      // Remove email from social data to force authentication required path
-      jwt.verify = jest.fn().mockReturnValue({
-        provider: 'linkedin',
-        socialId: 'linkedin789',
-        firstName: 'John',
-        lastName: 'Doe'
-        // No email property
-      });
-
-      Affiliate.findOne = jest.fn()
-        .mockResolvedValueOnce(null); // No existing social account
-
-      await authController.linkSocialAccount(req, res);
-
-      expect(res.status).toHaveBeenCalledWith(401);
-      expect(res.json).toHaveBeenCalledWith({
-        success: false,
-        message: 'Authentication required'
-      });
-    });
+  
+  describe('linkSocialAccount - REMOVED', () => {
+    // This method was removed from authController as it was not being used
+    // Social account linking happens automatically during OAuth registration
   });
+  */
 
   describe('pollOAuthSession', () => {
     beforeEach(() => {

@@ -1,9 +1,6 @@
 const {
   formatCurrency,
-  formatDate,
-  generateRandomString,
-  sanitizeForCSV,
-  calculatePercentage
+  formatDate
 } = require('../../server/utils/helpers');
 
 describe('Helpers Utility Functions', () => {
@@ -86,108 +83,9 @@ describe('Helpers Utility Functions', () => {
     });
   });
 
-  describe('generateRandomString', () => {
-    it('should generate a string of default length 10', () => {
-      const result = generateRandomString();
-      expect(result).toHaveLength(10);
-      expect(result).toMatch(/^[A-Za-z0-9]+$/);
-    });
-
-    it('should generate strings of specified length', () => {
-      expect(generateRandomString(5)).toHaveLength(5);
-      expect(generateRandomString(20)).toHaveLength(20);
-      expect(generateRandomString(0)).toHaveLength(0);
-    });
-
-    it('should generate different strings on each call', () => {
-      const results = new Set();
-      for (let i = 0; i < 10; i++) {
-        results.add(generateRandomString());
-      }
-      expect(results.size).toBeGreaterThan(5); // Very unlikely to get duplicates
-    });
-
-    it('should only use alphanumeric characters', () => {
-      const result = generateRandomString(100);
-      expect(result).toMatch(/^[A-Za-z0-9]*$/);
-    });
-  });
-
-  describe('sanitizeForCSV', () => {
-    it('should return empty string for null and undefined', () => {
-      expect(sanitizeForCSV(null)).toBe('');
-      expect(sanitizeForCSV(undefined)).toBe('');
-    });
-
-    it('should convert non-string values to strings', () => {
-      expect(sanitizeForCSV(123)).toBe('123');
-      expect(sanitizeForCSV(true)).toBe('true');
-      expect(sanitizeForCSV(false)).toBe('false');
-    });
-
-    it('should leave simple strings unchanged', () => {
-      expect(sanitizeForCSV('hello')).toBe('hello');
-      expect(sanitizeForCSV('test123')).toBe('test123');
-    });
-
-    it('should escape double quotes by doubling them', () => {
-      expect(sanitizeForCSV('She said "hello"')).toBe('"She said ""hello"""');
-      expect(sanitizeForCSV('""')).toBe('""""""');
-    });
-
-    it('should wrap strings containing commas in quotes', () => {
-      expect(sanitizeForCSV('hello, world')).toBe('"hello, world"');
-      expect(sanitizeForCSV('a,b,c')).toBe('"a,b,c"');
-    });
-
-    it('should wrap strings containing newlines in quotes', () => {
-      expect(sanitizeForCSV('hello\nworld')).toBe('"hello\nworld"');
-      expect(sanitizeForCSV('line1\nline2\nline3')).toBe('"line1\nline2\nline3"');
-    });
-
-    it('should handle complex strings with multiple special characters', () => {
-      expect(sanitizeForCSV('John "JD" Doe, CEO\nAcme Corp')).toBe('"John ""JD"" Doe, CEO\nAcme Corp"');
-    });
-  });
-
-  describe('calculatePercentage', () => {
-    it('should calculate percentage correctly', () => {
-      expect(calculatePercentage(50, 100)).toBe(50);
-      expect(calculatePercentage(25, 100)).toBe(25);
-      expect(calculatePercentage(75, 150)).toBe(50);
-    });
-
-    it('should handle zero total', () => {
-      expect(calculatePercentage(10, 0)).toBe(0);
-      expect(calculatePercentage(0, 0)).toBe(0);
-    });
-
-    it('should handle null or undefined total', () => {
-      expect(calculatePercentage(10, null)).toBe(0);
-      expect(calculatePercentage(10, undefined)).toBe(0);
-    });
-
-    it('should respect decimal places parameter', () => {
-      expect(calculatePercentage(1, 3, 0)).toBe(33);
-      expect(calculatePercentage(1, 3, 1)).toBe(33.3);
-      expect(calculatePercentage(1, 3, 2)).toBe(33.33);
-      expect(calculatePercentage(1, 3, 3)).toBe(33.333);
-    });
-
-    it('should round correctly', () => {
-      expect(calculatePercentage(2, 3, 2)).toBe(66.67);
-      expect(calculatePercentage(1, 6, 2)).toBe(16.67);
-    });
-
-    it('should handle edge cases', () => {
-      expect(calculatePercentage(0, 100)).toBe(0);
-      expect(calculatePercentage(100, 100)).toBe(100);
-      expect(calculatePercentage(200, 100)).toBe(200);
-    });
-
-    it('should handle negative values', () => {
-      expect(calculatePercentage(-50, 100)).toBe(-50);
-      expect(calculatePercentage(50, -100)).toBe(-50);
-    });
-  });
+  // Note: The following functions were removed from helpers.js:
+  // - generateRandomString
+  // - sanitizeForCSV  
+  // - calculatePercentage
+  // These were identified as dead code and removed in the cleanup
 });
