@@ -1,0 +1,842 @@
+
+> wavemax-affiliate-program@1.0.0 test:coverage
+> jest --coverage --runInBand --forceExit
+
+  console.log
+    Connected to test database: mongodb+srv://***:***@cluster0.yiy75zr.mongodb.net/wavemax_test?retryWrites=true&w=majority
+
+      at Object.log (tests/setup.js:49:13)
+
+PASS tests/unit/logger.test.js
+  Logger Utility
+    ✓ should export logger methods (61 ms)
+    ✓ should be a winston logger instance (15 ms)
+
+  console.log
+    Connected to test database: mongodb+srv://***:***@cluster0.yiy75zr.mongodb.net/wavemax_test?retryWrites=true&w=majority
+
+      at Object.log (tests/setup.js:49:13)
+
+PASS tests/unit/encryption.test.js
+  Encryption Utility
+    ✓ should hash password correctly (50 ms)
+    ✓ should verify password correctly (169 ms)
+    ✓ should encrypt and decrypt data correctly (2 ms)
+
+  console.log
+    Connected to test database: mongodb+srv://***:***@cluster0.yiy75zr.mongodb.net/wavemax_test?retryWrites=true&w=majority
+
+      at Object.log (tests/setup.js:49:13)
+
+PASS tests/unit/paygistixService.test.js
+  Paygistix Service
+    getConfig
+      ✓ should return client config from paygistixConfig (2 ms)
+    isConfigured
+      ✓ should return true when properly configured (1 ms)
+      ✓ should return false when not configured
+
+  console.log
+    Connected to test database: mongodb+srv://***:***@cluster0.yiy75zr.mongodb.net/wavemax_test?retryWrites=true&w=majority
+
+      at Object.log (tests/setup.js:49:13)
+
+PASS tests/unit/paginationMiddleware.test.js
+  Pagination Middleware
+    ✓ should set default pagination values when no query params provided (1 ms)
+    ✓ should parse page and limit from query params
+    ✓ should enforce minimum values (1 ms)
+    ✓ should enforce maximum limit
+    ✓ should handle non-numeric values
+    ✓ should calculate skip correctly for different pages (1 ms)
+    ✓ should handle floating point numbers
+    ✓ should preserve other query parameters (1 ms)
+
+  console.log
+    Connected to test database: mongodb+srv://***:***@cluster0.yiy75zr.mongodb.net/wavemax_test?retryWrites=true&w=majority
+
+      at Object.log (tests/setup.js:49:13)
+
+PASS tests/unit/passportGoogleOnly.test.js
+  Google OAuth Passport Configuration - Isolated
+    ✓ should handle Google OAuth callback correctly (1 ms)
+    ✓ should configure Google strategy with correct parameters (1 ms)
+    ✓ should support state parameter for context detection
+
+  console.log
+    Connected to test database: mongodb+srv://***:***@cluster0.yiy75zr.mongodb.net/wavemax_test?retryWrites=true&w=majority
+
+      at Object.log (tests/setup.js:49:13)
+
+PASS tests/unit/quickbooksRoutesSimple.test.js
+  QuickBooks Routes - Simple
+    GET /api/quickbooks/vendors/export
+      ✓ should export vendors (19 ms)
+      ✓ should export vendors as CSV (4 ms)
+    GET /api/quickbooks/payments/export
+      ✓ should export payment summary (3 ms)
+    GET /api/quickbooks/commissions/export
+      ✓ should export commission detail (3 ms)
+    GET /api/quickbooks/exports
+      ✓ should get export history (3 ms)
+      ✓ should filter export history by type (2 ms)
+
+  console.log
+    Connected to test database: mongodb+srv://***:***@cluster0.yiy75zr.mongodb.net/wavemax_test?retryWrites=true&w=majority
+
+      at Object.log (tests/setup.js:49:13)
+
+PASS tests/unit/passportFacebookOnly.test.js
+  Facebook OAuth Passport Configuration - Isolated
+    ✓ should handle Facebook OAuth callback correctly (1 ms)
+    ✓ should configure Facebook strategy with profile fields (1 ms)
+    ✓ should configure Facebook strategy with correct parameters
+
+  console.log
+    Connected to test database: mongodb+srv://***:***@cluster0.yiy75zr.mongodb.net/wavemax_test?retryWrites=true&w=majority
+
+      at Object.log (tests/setup.js:49:13)
+
+PASS tests/unit/passportLinkedInOnly.test.js
+  LinkedIn OAuth Passport Configuration - Isolated
+    ✓ should handle LinkedIn OAuth callback correctly (1 ms)
+    ✓ should configure LinkedIn strategy with correct scope
+    ✓ should configure LinkedIn strategy with correct parameters (1 ms)
+
+  console.log
+    Connected to test database: mongodb+srv://***:***@cluster0.yiy75zr.mongodb.net/wavemax_test?retryWrites=true&w=majority
+
+      at Object.log (tests/setup.js:49:13)
+
+PASS tests/unit/orderRoutesSimple.test.js
+  Order Routes - Simple
+    POST /api/orders
+      ✓ should create order with valid data (16 ms)
+    GET /api/orders/export
+      ✓ should export orders (3 ms)
+    GET /api/orders/search
+      ✓ should search orders (2 ms)
+    GET /api/orders/statistics
+      ✓ should get order statistics (2 ms)
+    PUT /api/orders/bulk/status
+      ✓ should bulk update order status (3 ms)
+    POST /api/orders/bulk/cancel
+      ✓ should bulk cancel orders (3 ms)
+    GET /api/orders/:orderId
+      ✓ should get order details (2 ms)
+    PUT /api/orders/:orderId/status
+      ✓ should update order status (3 ms)
+    POST /api/orders/:orderId/cancel
+      ✓ should cancel order (3 ms)
+    PUT /api/orders/:orderId/payment-status
+      ✓ should update payment status (3 ms)
+
+  console.log
+    Connected to test database: mongodb+srv://***:***@cluster0.yiy75zr.mongodb.net/wavemax_test?retryWrites=true&w=majority
+
+      at Object.log (tests/setup.js:49:13)
+
+  console.log
+    DocuSignToken saved: {
+      tokenId: 'default',
+      expiresAt: 2025-06-27T13:30:29.144Z,
+      status: 'active'
+    }
+
+      at Function.log [as saveToken] (server/models/DocuSignToken.js:118:13)
+
+  console.log
+    DocuSignToken saved: {
+      tokenId: 'default',
+      expiresAt: 2025-06-27T13:30:29.789Z,
+      status: 'active'
+    }
+
+      at Function.log [as saveToken] (server/models/DocuSignToken.js:118:13)
+
+  console.log
+    DocuSignToken saved: {
+      tokenId: 'default',
+      expiresAt: 2025-06-27T14:30:29.822Z,
+      status: 'active'
+    }
+
+      at Function.log [as saveToken] (server/models/DocuSignToken.js:118:13)
+
+  console.log
+    DocuSignToken saved: {
+      tokenId: 'default',
+      expiresAt: 2025-06-27T13:30:30.444Z,
+      status: 'active'
+    }
+
+      at Function.log [as saveToken] (server/models/DocuSignToken.js:118:13)
+
+  console.log
+    DocuSignToken saved: {
+      tokenId: 'default',
+      expiresAt: 2025-06-27T13:30:30.815Z,
+      status: 'active'
+    }
+
+      at Function.log [as saveToken] (server/models/DocuSignToken.js:118:13)
+
+  console.log
+    DocuSignToken saved: {
+      tokenId: 'default',
+      expiresAt: 2025-06-27T13:30:32.660Z,
+      status: 'active'
+    }
+
+      at Function.log [as saveToken] (server/models/DocuSignToken.js:118:13)
+
+  console.log
+    DocuSignToken saved: {
+      tokenId: 'default',
+      expiresAt: 2025-06-27T13:30:33.018Z,
+      status: 'active'
+    }
+
+      at Function.log [as saveToken] (server/models/DocuSignToken.js:118:13)
+
+PASS tests/unit/docusignToken.test.js (5.269 s)
+  DocuSignToken Model
+    saveToken
+      ✓ should save a new token with all fields (807 ms)
+      ✓ should update existing token if one exists (659 ms)
+      ✓ should calculate expiration time correctly (369 ms)
+    getCurrentToken
+      ✓ should return the most recent token (377 ms)
+      ✓ should return null if no tokens exist (353 ms)
+    clearTokens
+      ✓ should remove all tokens (730 ms)
+    token expiration
+      ✓ should identify expired tokens (385 ms)
+      ✓ should handle tokens without refresh token (117 ms)
+    lastUsed tracking
+      ✓ should update lastUsed when token is accessed (996 ms)
+
+  console.log
+    Connected to test database: mongodb+srv://***:***@cluster0.yiy75zr.mongodb.net/wavemax_test?retryWrites=true&w=majority
+
+      at Object.log (tests/setup.js:49:13)
+
+PASS tests/unit/orderRoutes.isolated.test.js
+  Order Routes - Isolated V2
+    ✓ POST /api/orders - should create a new order (17 ms)
+    ✓ GET /api/orders/export - should export orders (5 ms)
+    ✓ GET /api/orders/search - should search orders (3 ms)
+    ✓ GET /api/orders/statistics - should get statistics (3 ms)
+    ✓ PUT /api/orders/bulk/status - should bulk update (3 ms)
+    ✓ POST /api/orders/bulk/cancel - should bulk cancel (4 ms)
+    ✓ GET /api/orders/:orderId - should get order details (3 ms)
+    ✓ PUT /api/orders/:orderId/status - should update status (3 ms)
+    ✓ POST /api/orders/:orderId/cancel - should cancel order (3 ms)
+    ✓ PUT /api/orders/:orderId/payment-status - should update payment (4 ms)
+    ✓ Error handling - should return 404 for unknown routes (3 ms)
+    ✓ Error handling - should handle controller errors (3 ms)
+
+  console.log
+    Connected to test database: mongodb+srv://***:***@cluster0.yiy75zr.mongodb.net/wavemax_test?retryWrites=true&w=majority
+
+      at Object.log (tests/setup.js:49:13)
+
+PASS tests/unit/authRoutesSimple.test.js
+  Auth Routes - Simple
+    POST /api/auth/login
+      ✓ should login with valid credentials (9 ms)
+      ✓ should reject invalid credentials (3 ms)
+    POST /api/auth/register
+      ✓ should register new user (3 ms)
+    POST /api/auth/logout
+      ✓ should logout with valid token (3 ms)
+      ✓ should reject logout without token (2 ms)
+    POST /api/auth/forgot-password
+      ✓ should send password reset email (2 ms)
+    POST /api/auth/reset-password
+      ✓ should reset password with valid token (2 ms)
+    GET /api/auth/verify-email/:token
+      ✓ should verify email with valid token (2 ms)
+    POST /api/auth/refresh-token
+      ✓ should refresh token (4 ms)
+    GET /api/auth/me
+      ✓ should get current user with valid token (2 ms)
+      ✓ should reject without token (1 ms)
+
+  console.log
+    Connected to test database: mongodb+srv://***:***@cluster0.yiy75zr.mongodb.net/wavemax_test?retryWrites=true&w=majority
+
+      at Object.log (tests/setup.js:49:13)
+
+PASS tests/unit/helpers.test.js
+  Helpers Utility Functions
+    formatCurrency
+      ✓ should format a number as USD currency by default (15 ms)
+      ✓ should handle null and undefined amounts (1 ms)
+      ✓ should handle NaN values
+      ✓ should parse string amounts
+      ✓ should format with different currencies (1 ms)
+      ✓ should handle negative amounts
+      ✓ should round to 2 decimal places
+    formatDate
+      ✓ should format date with short format by default (4 ms)
+      ✓ should format date with long format (1 ms)
+      ✓ should format date with ISO format
+      ✓ should handle string dates (1 ms)
+      ✓ should handle null and undefined dates (1 ms)
+      ✓ should handle invalid dates
+      ✓ should handle different format cases (1 ms)
+    generateRandomString
+      ✓ should generate a string of default length 10
+      ✓ should generate strings of specified length (1 ms)
+      ✓ should generate different strings on each call
+      ✓ should only use alphanumeric characters (5 ms)
+    sanitizeForCSV
+      ✓ should return empty string for null and undefined
+      ✓ should convert non-string values to strings
+      ✓ should leave simple strings unchanged (1 ms)
+      ✓ should escape double quotes by doubling them
+      ✓ should wrap strings containing commas in quotes
+      ✓ should wrap strings containing newlines in quotes
+      ✓ should handle complex strings with multiple special characters
+    calculatePercentage
+      ✓ should calculate percentage correctly
+      ✓ should handle zero total
+      ✓ should handle null or undefined total
+      ✓ should respect decimal places parameter (1 ms)
+      ✓ should round correctly
+      ✓ should handle edge cases (1 ms)
+      ✓ should handle negative values
+
+  console.log
+    Connected to test database: mongodb+srv://***:***@cluster0.yiy75zr.mongodb.net/wavemax_test?retryWrites=true&w=majority
+
+      at Object.log (tests/setup.js:49:13)
+
+PASS tests/unit/affiliateLoginInit.test.js
+  Affiliate Login Initialization
+    Module Loading
+      ✓ should initialize when form is found (4 ms)
+      ✓ should handle missing form gracefully
+    URL Parameter Handling Logic
+      ✓ should correctly parse customer parameter from URL
+      ✓ should handle URL without customer parameter
+      ✓ should construct redirect URL correctly with customer parameter (1 ms)
+      ✓ should construct redirect URL correctly without customer parameter
+    URL Validation
+      ✓ should validate customer ID format
+      ✓ should handle URL encoding correctly (1 ms)
+    Integration with Email URLs
+      ✓ should parse email-generated URLs correctly
+      ✓ should handle both login and customer parameters together (1 ms)
+    Parameter Preservation Logic
+      ✓ should preserve customer parameter through login flow (1 ms)
+      ✓ should handle multiple URL parameters correctly
+
+  console.log
+    Connected to test database: mongodb+srv://***:***@cluster0.yiy75zr.mongodb.net/wavemax_test?retryWrites=true&w=majority
+
+      at Object.log (tests/setup.js:49:13)
+
+PASS tests/unit/administratorEmailService.test.js
+  Administrator Email Service Tests
+    sendAdministratorWelcomeEmail
+      ✓ should call sendAdministratorWelcomeEmail function (2 ms)
+      ✓ should handle admin with different permission sets (1 ms)
+      ✓ should handle admin with single permission
+      ✓ should handle admin with no permissions
+    sendAdministratorPasswordResetEmail
+      ✓ should call sendAdministratorPasswordResetEmail function
+      ✓ should handle different reset URLs
+    Email template data processing
+      ✓ should replace uppercase placeholders correctly
+      ✓ should handle missing placeholders gracefully (1 ms)
+      ✓ should include current year in template data
+      ✓ should format permissions correctly as comma-separated string
+      ✓ should handle empty permissions array
+      ✓ should handle single permission (1 ms)
+    Email service integration
+      ✓ should be available as a module export
+      ✓ should not throw error when sending welcome email (1 ms)
+      ✓ should not throw error when sending password reset email
+    Admin data validation
+      ✓ should handle admin with required fields
+      ✓ should handle admin with different adminId formats
+      ✓ should handle admin with different email formats
+
+  console.log
+    Connected to test database: mongodb+srv://***:***@cluster0.yiy75zr.mongodb.net/wavemax_test?retryWrites=true&w=majority
+
+      at Object.log (tests/setup.js:49:13)
+
+PASS tests/unit/paymentRoutes.isolated.test.js
+  Payment Routes - Isolated
+    GET /api/v1/payments/config
+      ✓ should return payment configuration (7 ms)
+    POST /api/v1/payments/log-submission
+      ✓ should log payment submission (5 ms)
+    POST /api/v1/payments/create-token
+      ✓ should create payment token (3 ms)
+    GET /api/v1/payments/check-status/:token
+      ✓ should check payment status (3 ms)
+    POST /api/v1/payments/cancel-token/:token
+      ✓ should cancel payment token (3 ms)
+    POST /api/v1/payments/update-status/:token
+      ✓ should update payment status (3 ms)
+    GET /api/v1/payments/pool-stats
+      ✓ should return pool statistics (7 ms)
+    Error Handling
+      ✓ should handle controller errors gracefully (2 ms)
+      ✓ should handle missing routes with 404 (3 ms)
+    Request Validation
+      ✓ should pass through request headers (2 ms)
+      ✓ should handle JSON parsing errors (3 ms)
+
+  console.log
+    Connected to test database: mongodb+srv://***:***@cluster0.yiy75zr.mongodb.net/wavemax_test?retryWrites=true&w=majority
+
+      at Object.log (tests/setup.js:49:13)
+
+  console.log
+    Authorization failed for path: /api/test - User role: customer Allowed roles: [ 'admin', 'affiliate' ]
+
+      at log (server/middleware/auth.js:184:15)
+
+  console.log
+    Authorization failed for path: /api/test - User role: undefined Allowed roles: [ 'admin' ]
+
+      at log (server/middleware/auth.js:184:15)
+
+  console.log
+    Authorization failed - No user object on request for path: /api/test
+
+      at log (server/middleware/auth.js:176:15)
+
+PASS tests/unit/authMiddleware.test.js
+  Auth Middleware
+    authenticate
+      ✓ should authenticate valid Bearer token (358 ms)
+      ✓ should authenticate valid x-auth-token header (235 ms)
+      ✓ should reject request with no token (214 ms)
+      ✓ should reject request with invalid token (209 ms)
+      ✓ should reject request with expired token (205 ms)
+      ✓ should handle malformed Authorization header (207 ms)
+      ✓ should reject blacklisted token (216 ms)
+    authorize
+      ✓ should authorize user with correct role (206 ms)
+      ✓ should authorize user with one of multiple roles (227 ms)
+      ✓ should reject user with incorrect role (212 ms)
+      ✓ should reject user with no role (207 ms)
+      ✓ should reject when user is not set (210 ms)
+    authLimiter
+      ✓ should be a function (208 ms)
+      ✓ should have rate limit configuration (205 ms)
+
+  console.log
+    Connected to test database: mongodb+srv://***:***@cluster0.yiy75zr.mongodb.net/wavemax_test?retryWrites=true&w=majority
+
+      at Object.log (tests/setup.js:49:13)
+
+PASS tests/unit/createAdminDirectly.test.js
+  Create Admin Directly Script Unit Tests
+    generateAdminId function
+      ✓ should generate ADM001 when no administrators exist (1 ms)
+      ✓ should generate next sequential ID when administrators exist
+      ✓ should handle double-digit admin IDs correctly
+    Permission selection
+      ✓ should handle "all" permission selection
+      ✓ should handle specific permission selection (1 ms)
+      ✓ should filter out invalid permission numbers
+    Database operations
+      ✓ should connect to MongoDB successfully (1 ms)
+      ✓ should create administrator with correct data (1 ms)
+      ✓ should handle database save errors
+    Email functionality
+      ✓ should send welcome email after admin creation
+      ✓ should handle email sending errors gracefully
+    Input validation
+      ✓ should handle empty input fields
+      ✓ should handle whitespace in permission input (1 ms)
+    Error handling
+      ✓ should handle MongoDB connection errors
+      ✓ should close database connection in finally block
+      ✓ should close readline interface in finally block (1 ms)
+
+  console.log
+    Connected to test database: mongodb+srv://***:***@cluster0.yiy75zr.mongodb.net/wavemax_test?retryWrites=true&w=majority
+
+      at Object.log (tests/setup.js:49:13)
+
+PASS tests/unit/paygistixConfig.test.js
+  Paygistix Config
+    validateEnvironment
+      ✓ should warn when required environment variables are missing (2 ms)
+      ✓ should not warn when all required variables are present (1 ms)
+    getEnvironment
+      ✓ should return configured environment
+      ✓ should default to production if not configured
+    getMerchantId
+      ✓ should return merchant ID when configured (1 ms)
+      ✓ should throw error when not configured (9 ms)
+    getFormId
+      ✓ should return form ID when configured (1 ms)
+      ✓ should throw error when not configured (1 ms)
+    getFormHash
+      ✓ should return form hash when configured (1 ms)
+      ✓ should throw error when not configured (1 ms)
+    getFormActionUrl
+      ✓ should return configured form action URL (1 ms)
+      ✓ should return default URL when not configured (1 ms)
+    getReturnUrl
+      ✓ should return configured return URL (1 ms)
+      ✓ should return default URL when not configured
+    isConfigured
+      ✓ should return true when all required config is present
+      ✓ should return false and log error when config is incomplete (1 ms)
+    getClientConfig
+      ✓ should return complete client config when properly configured (1 ms)
+      ✓ should throw and log error when config is missing (1 ms)
+      ✓ should set testModeEnabled to false when not configured
+    getFullConfig
+      ✓ should return complete config including hash
+      ✓ should throw and log error when config is missing (1 ms)
+
+  console.log
+    Connected to test database: mongodb+srv://***:***@cluster0.yiy75zr.mongodb.net/wavemax_test?retryWrites=true&w=majority
+
+      at Object.log (tests/setup.js:49:13)
+
+PASS tests/unit/affiliateDashboardInit.test.js
+  Affiliate Dashboard Customer Filtering
+    URL Parameter Detection Logic
+      ✓ should detect customer parameter from URL search params (1 ms)
+      ✓ should handle URL without customer parameter (1 ms)
+      ✓ should parse customer parameter from complex URL
+      ✓ should handle regex pattern matching for customer parameter
+    Customer Highlighting Logic
+      ✓ should identify highlighted customer correctly
+      ✓ should generate correct CSS classes for highlighted customer
+      ✓ should generate correct HTML content for highlighted customer (1 ms)
+      ✓ should not highlight non-matching customers
+    Tab Switching Logic
+      ✓ should determine correct tab activation based on customer parameter
+      ✓ should not switch tabs when no customer parameter
+      ✓ should handle empty string customer parameter
+    Authentication Check Logic
+      ✓ should identify authenticated state correctly
+      ✓ should identify unauthenticated state when missing token (1 ms)
+      ✓ should identify unauthenticated state when missing affiliate
+    Customer Data Processing
+      ✓ should handle empty customer list
+      ✓ should process customer list without filtering (1 ms)
+      ✓ should filter customer list by customer ID
+    URL Construction and Validation
+      ✓ should construct API URLs correctly
+      ✓ should validate customer ID format (1 ms)
+    Timing and Delays
+      ✓ should calculate correct delay for tab switching
+      ✓ should handle immediate execution when no customer parameter
+
+  console.log
+    Connected to test database: mongodb+srv://***:***@cluster0.yiy75zr.mongodb.net/wavemax_test?retryWrites=true&w=majority
+
+      at Object.log (tests/setup.js:49:13)
+
+PASS tests/unit/paymentRoutes.test.js
+  Payment Routes
+    Static Routes
+      GET /api/v1/payments/config
+        ✓ should return payment configuration (7 ms)
+      POST /api/v1/payments/log-submission
+        ✓ should log payment submission (7 ms)
+      POST /api/v1/payments/create-token
+        ✓ should create payment token (3 ms)
+      GET /api/v1/payments/check-status/:token
+        ✓ should check payment status (3 ms)
+      POST /api/v1/payments/cancel-token/:token
+        ✓ should cancel payment token (3 ms)
+      POST /api/v1/payments/update-status/:token
+        ✓ should update payment status (3 ms)
+      GET /api/v1/payments/pool-stats
+        ✓ should return pool statistics (2 ms)
+    Dynamic Callback Routes
+      ✓ should handle GET callback routes (2 ms)
+      ✓ should handle POST callback routes (2 ms)
+      ✓ should handle multiple callback paths (3 ms)
+    Error Handling
+      ✓ should handle controller errors gracefully (3 ms)
+      ✓ should handle missing routes with 404 (3 ms)
+      ✓ should handle JSON parsing errors (3 ms)
+    Request Validation
+      ✓ should pass through request headers (2 ms)
+      ✓ should handle empty request bodies (2 ms)
+
+  console.log
+    Connected to test database: mongodb+srv://***:***@cluster0.yiy75zr.mongodb.net/wavemax_test?retryWrites=true&w=majority
+
+      at Object.log (tests/setup.js:49:13)
+
+PASS tests/unit/coverageRoutes.test.js
+  Coverage Routes
+    Access Control Middleware
+      ✓ should allow access in development environment (14 ms)
+      ✓ should allow access in test environment (3 ms)
+      ✓ should deny access in production without key (1 ms)
+      ✓ should allow access in production with valid key (3 ms)
+      ✓ should deny access in production with invalid key (4 ms)
+    Embedded Access Prevention
+      ✓ should deny access when Sec-Fetch-Dest is iframe (3 ms)
+      ✓ should deny access when X-Frame-Options is present (2 ms)
+      ✓ should deny access when referer contains /embed (2 ms)
+      ✓ should allow access with normal referer (3 ms)
+    Route Handlers
+      ✓ should serve index.html at root path (3 ms)
+      ✓ should serve critical-files page (4 ms)
+      ✓ should serve test-templates page (4 ms)
+      ✓ should serve action-plan page (9 ms)
+      ✓ should return 404 for non-existent pages (3 ms)
+    Static File Headers
+      ✓ should set no-cache headers for static files (3 ms)
+    Environment Variable Handling
+      ✓ should handle missing COVERAGE_ACCESS_KEY (2 ms)
+      ✓ should handle empty COVERAGE_ACCESS_KEY (3 ms)
+    Multiple Middleware Interaction
+      ✓ should check embedded access before access control (2 ms)
+      ✓ should apply X-Frame-Options even with valid access (2 ms)
+    HTML Response Validation
+      ✓ should return valid HTML for access denied page (3 ms)
+      ✓ should return valid HTML for 404 page (2 ms)
+    Query Parameter Handling
+      ✓ should ignore extra query parameters (2 ms)
+      ✓ should handle URL-encoded keys (2 ms)
+    Edge Cases
+      ✓ should handle root path without trailing slash (3 ms)
+      ✓ should handle specific route handlers (3 ms)
+
+  console.log
+    Connected to test database: mongodb+srv://***:***@cluster0.yiy75zr.mongodb.net/wavemax_test?retryWrites=true&w=majority
+
+      at Object.log (tests/setup.js:49:13)
+
+PASS tests/unit/errorHandler.test.js
+  Error Handler Middleware
+    errorHandler
+      ✓ should handle generic errors with 500 status (14 ms)
+      ✓ should handle custom status codes
+      ✓ should handle Mongoose validation errors
+      ✓ should handle MongoDB duplicate key errors (1 ms)
+      ✓ should handle JWT errors (1 ms)
+      ✓ should handle JWT token expiration errors (1 ms)
+      ✓ should handle rate limiting errors (1 ms)
+      ✓ should handle CastError (invalid MongoDB ObjectId)
+      ✓ should include user context when available (1 ms)
+      ✓ should handle errors with customer context (1 ms)
+      ✓ should hide error details in production (1 ms)
+      ✓ should show error details in development (1 ms)
+      ✓ should use original message for non-500 errors in production (1 ms)
+      ✓ should handle errors without message (1 ms)
+      ✓ should handle errors with code property
+      ✓ should log all console error sections (2 ms)
+    AppError
+      ✓ should create custom error with status code
+      ✓ should have stack trace
+      ✓ should work with error handler (1 ms)
+    Edge cases
+      ✓ should handle null error (4 ms)
+      ✓ should handle undefined error (1 ms)
+      ✓ should handle non-error objects (1 ms)
+      ✓ should handle errors thrown from within error handler (1 ms)
+
+  console.log
+    Connected to test database: mongodb+srv://***:***@cluster0.yiy75zr.mongodb.net/wavemax_test?retryWrites=true&w=majority
+
+      at Object.log (tests/setup.js:49:13)
+
+PASS tests/unit/orderWithSystemConfig.test.js (9.544 s)
+  Order Model with SystemConfig Integration
+    Dynamic WDF Pricing
+      ✓ should fetch base rate from SystemConfig on order creation (818 ms)
+      ✓ should use default rate when SystemConfig is not available (912 ms)
+      ✓ should calculate estimated total using SystemConfig rate (644 ms)
+      ✓ should calculate actual total using SystemConfig rate (629 ms)
+    Commission Calculations
+      ✓ should calculate affiliate commission correctly with custom WDF rate (644 ms)
+      ✓ should calculate commission for zero delivery fee (627 ms)
+      ✓ should handle commission calculation for large orders (632 ms)
+    Edge Cases
+      ✓ should handle commission when only estimated size is available (636 ms)
+      ✓ should update calculations when base rate changes (776 ms)
+      ✓ should validate minimum and maximum base rates (871 ms)
+    Revenue Calculator Scenarios
+      ✓ should match revenue calculator example - 10 customers scenario (1161 ms)
+      ✓ should match revenue calculator with different parameters (645 ms)
+
+  console.log
+    Connected to test database: mongodb+srv://***:***@cluster0.yiy75zr.mongodb.net/wavemax_test?retryWrites=true&w=majority
+
+      at Object.log (tests/setup.js:49:13)
+
+  console.error
+    Error fetching public configs: Error: Database error
+        at Object.<anonymous> (/var/www/wavemax/wavemax-affiliate-program/tests/unit/systemConfigRoutes.test.js:88:55)
+        at Promise.then.completed (/var/www/wavemax/wavemax-affiliate-program/node_modules/jest-circus/build/utils.js:298:28)
+        at new Promise (<anonymous>)
+        at callAsyncCircusFn (/var/www/wavemax/wavemax-affiliate-program/node_modules/jest-circus/build/utils.js:231:10)
+        at _callCircusTest (/var/www/wavemax/wavemax-affiliate-program/node_modules/jest-circus/build/run.js:316:40)
+        at processTicksAndRejections (node:internal/process/task_queues:95:5)
+        at _runTest (/var/www/wavemax/wavemax-affiliate-program/node_modules/jest-circus/build/run.js:252:3)
+        at _runTestsForDescribeBlock (/var/www/wavemax/wavemax-affiliate-program/node_modules/jest-circus/build/run.js:126:9)
+        at _runTestsForDescribeBlock (/var/www/wavemax/wavemax-affiliate-program/node_modules/jest-circus/build/run.js:121:9)
+        at _runTestsForDescribeBlock (/var/www/wavemax/wavemax-affiliate-program/node_modules/jest-circus/build/run.js:121:9)
+        at run (/var/www/wavemax/wavemax-affiliate-program/node_modules/jest-circus/build/run.js:71:3)
+        at runAndTransformResultsToJestFormat (/var/www/wavemax/wavemax-affiliate-program/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapterInit.js:122:21)
+        at jestAdapter (/var/www/wavemax/wavemax-affiliate-program/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapter.js:79:19)
+        at runTestInternal (/var/www/wavemax/wavemax-affiliate-program/node_modules/jest-runner/build/runTest.js:367:16)
+        at runTest (/var/www/wavemax/wavemax-affiliate-program/node_modules/jest-runner/build/runTest.js:444:34)
+
+      21 |     res.json(formattedConfigs);
+      22 |   } catch (error) {
+    > 23 |     console.error('Error fetching public configs:', error);
+         |             ^
+      24 |     res.status(500).json({ error: 'Failed to fetch public configurations' });
+      25 |   }
+      26 | });
+
+      at error (server/routes/systemConfigRoutes.js:23:13)
+
+  console.error
+    Error fetching config: Error: Database error
+        at Object.<anonymous> (/var/www/wavemax/wavemax-affiliate-program/tests/unit/systemConfigRoutes.test.js:141:46)
+        at Promise.then.completed (/var/www/wavemax/wavemax-affiliate-program/node_modules/jest-circus/build/utils.js:298:28)
+        at new Promise (<anonymous>)
+        at callAsyncCircusFn (/var/www/wavemax/wavemax-affiliate-program/node_modules/jest-circus/build/utils.js:231:10)
+        at _callCircusTest (/var/www/wavemax/wavemax-affiliate-program/node_modules/jest-circus/build/run.js:316:40)
+        at processTicksAndRejections (node:internal/process/task_queues:95:5)
+        at _runTest (/var/www/wavemax/wavemax-affiliate-program/node_modules/jest-circus/build/run.js:252:3)
+        at _runTestsForDescribeBlock (/var/www/wavemax/wavemax-affiliate-program/node_modules/jest-circus/build/run.js:126:9)
+        at _runTestsForDescribeBlock (/var/www/wavemax/wavemax-affiliate-program/node_modules/jest-circus/build/run.js:121:9)
+        at _runTestsForDescribeBlock (/var/www/wavemax/wavemax-affiliate-program/node_modules/jest-circus/build/run.js:121:9)
+        at run (/var/www/wavemax/wavemax-affiliate-program/node_modules/jest-circus/build/run.js:71:3)
+        at runAndTransformResultsToJestFormat (/var/www/wavemax/wavemax-affiliate-program/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapterInit.js:122:21)
+        at jestAdapter (/var/www/wavemax/wavemax-affiliate-program/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapter.js:79:19)
+        at runTestInternal (/var/www/wavemax/wavemax-affiliate-program/node_modules/jest-runner/build/runTest.js:367:16)
+        at runTest (/var/www/wavemax/wavemax-affiliate-program/node_modules/jest-runner/build/runTest.js:444:34)
+
+      47 |     });
+      48 |   } catch (error) {
+    > 49 |     console.error('Error fetching config:', error);
+         |             ^
+      50 |     res.status(500).json({ error: 'Failed to fetch configuration' });
+      51 |   }
+      52 | });
+
+      at error (server/routes/systemConfigRoutes.js:49:13)
+
+  console.error
+    Error fetching configs: Error: Database error
+        at Object.<anonymous> (/var/www/wavemax/wavemax-affiliate-program/tests/unit/systemConfigRoutes.test.js:190:43)
+        at Promise.then.completed (/var/www/wavemax/wavemax-affiliate-program/node_modules/jest-circus/build/utils.js:298:28)
+        at new Promise (<anonymous>)
+        at callAsyncCircusFn (/var/www/wavemax/wavemax-affiliate-program/node_modules/jest-circus/build/utils.js:231:10)
+        at _callCircusTest (/var/www/wavemax/wavemax-affiliate-program/node_modules/jest-circus/build/run.js:316:40)
+        at processTicksAndRejections (node:internal/process/task_queues:95:5)
+        at _runTest (/var/www/wavemax/wavemax-affiliate-program/node_modules/jest-circus/build/run.js:252:3)
+        at _runTestsForDescribeBlock (/var/www/wavemax/wavemax-affiliate-program/node_modules/jest-circus/build/run.js:126:9)
+        at _runTestsForDescribeBlock (/var/www/wavemax/wavemax-affiliate-program/node_modules/jest-circus/build/run.js:121:9)
+        at _runTestsForDescribeBlock (/var/www/wavemax/wavemax-affiliate-program/node_modules/jest-circus/build/run.js:121:9)
+        at run (/var/www/wavemax/wavemax-affiliate-program/node_modules/jest-circus/build/run.js:71:3)
+        at runAndTransformResultsToJestFormat (/var/www/wavemax/wavemax-affiliate-program/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapterInit.js:122:21)
+        at jestAdapter (/var/www/wavemax/wavemax-affiliate-program/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapter.js:79:19)
+        at runTestInternal (/var/www/wavemax/wavemax-affiliate-program/node_modules/jest-runner/build/runTest.js:367:16)
+        at runTest (/var/www/wavemax/wavemax-affiliate-program/node_modules/jest-runner/build/runTest.js:444:34)
+
+      70 |     res.json(configs);
+      71 |   } catch (error) {
+    > 72 |     console.error('Error fetching configs:', error);
+         |             ^
+      73 |     res.status(500).json({ error: 'Failed to fetch configurations' });
+      74 |   }
+      75 | });
+
+      at error (server/routes/systemConfigRoutes.js:72:13)
+
+  console.error
+    Error updating config: Error: Invalid value
+        at Object.<anonymous> (/var/www/wavemax/wavemax-affiliate-program/tests/unit/systemConfigRoutes.test.js:286:47)
+        at Promise.then.completed (/var/www/wavemax/wavemax-affiliate-program/node_modules/jest-circus/build/utils.js:298:28)
+        at new Promise (<anonymous>)
+        at callAsyncCircusFn (/var/www/wavemax/wavemax-affiliate-program/node_modules/jest-circus/build/utils.js:231:10)
+        at _callCircusTest (/var/www/wavemax/wavemax-affiliate-program/node_modules/jest-circus/build/run.js:316:40)
+        at processTicksAndRejections (node:internal/process/task_queues:95:5)
+        at _runTest (/var/www/wavemax/wavemax-affiliate-program/node_modules/jest-circus/build/run.js:252:3)
+        at _runTestsForDescribeBlock (/var/www/wavemax/wavemax-affiliate-program/node_modules/jest-circus/build/run.js:126:9)
+        at _runTestsForDescribeBlock (/var/www/wavemax/wavemax-affiliate-program/node_modules/jest-circus/build/run.js:121:9)
+        at _runTestsForDescribeBlock (/var/www/wavemax/wavemax-affiliate-program/node_modules/jest-circus/build/run.js:121:9)
+        at run (/var/www/wavemax/wavemax-affiliate-program/node_modules/jest-circus/build/run.js:71:3)
+        at runAndTransformResultsToJestFormat (/var/www/wavemax/wavemax-affiliate-program/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapterInit.js:122:21)
+        at jestAdapter (/var/www/wavemax/wavemax-affiliate-program/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapter.js:79:19)
+        at runTestInternal (/var/www/wavemax/wavemax-affiliate-program/node_modules/jest-runner/build/runTest.js:367:16)
+        at runTest (/var/www/wavemax/wavemax-affiliate-program/node_modules/jest-runner/build/runTest.js:444:34)
+
+      92 |     });
+      93 |   } catch (error) {
+    > 94 |     console.error('Error updating config:', error);
+         |             ^
+      95 |     res.status(400).json({ error: error.message });
+      96 |   }
+      97 | });
+
+      at error (server/routes/systemConfigRoutes.js:94:13)
+
+  console.error
+    Error initializing configs: Error: Init failed
+        at Object.<anonymous> (/var/www/wavemax/wavemax-affiliate-program/tests/unit/systemConfigRoutes.test.js:312:57)
+        at Promise.then.completed (/var/www/wavemax/wavemax-affiliate-program/node_modules/jest-circus/build/utils.js:298:28)
+        at new Promise (<anonymous>)
+        at callAsyncCircusFn (/var/www/wavemax/wavemax-affiliate-program/node_modules/jest-circus/build/utils.js:231:10)
+        at _callCircusTest (/var/www/wavemax/wavemax-affiliate-program/node_modules/jest-circus/build/run.js:316:40)
+        at processTicksAndRejections (node:internal/process/task_queues:95:5)
+        at _runTest (/var/www/wavemax/wavemax-affiliate-program/node_modules/jest-circus/build/run.js:252:3)
+        at _runTestsForDescribeBlock (/var/www/wavemax/wavemax-affiliate-program/node_modules/jest-circus/build/run.js:126:9)
+        at _runTestsForDescribeBlock (/var/www/wavemax/wavemax-affiliate-program/node_modules/jest-circus/build/run.js:121:9)
+        at _runTestsForDescribeBlock (/var/www/wavemax/wavemax-affiliate-program/node_modules/jest-circus/build/run.js:121:9)
+        at run (/var/www/wavemax/wavemax-affiliate-program/node_modules/jest-circus/build/run.js:71:3)
+        at runAndTransformResultsToJestFormat (/var/www/wavemax/wavemax-affiliate-program/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapterInit.js:122:21)
+        at jestAdapter (/var/www/wavemax/wavemax-affiliate-program/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapter.js:79:19)
+        at runTestInternal (/var/www/wavemax/wavemax-affiliate-program/node_modules/jest-runner/build/runTest.js:367:16)
+        at runTest (/var/www/wavemax/wavemax-affiliate-program/node_modules/jest-runner/build/runTest.js:444:34)
+
+      103 |     res.json({ message: 'Default configurations initialized' });
+      104 |   } catch (error) {
+    > 105 |     console.error('Error initializing configs:', error);
+          |             ^
+      106 |     res.status(500).json({ error: 'Failed to initialize configurations' });
+      107 |   }
+      108 | });
+
+      at error (server/routes/systemConfigRoutes.js:105:13)
+
+PASS tests/unit/systemConfigRoutes.test.js
+  System Config Routes
+    GET /api/system-config/public
+      ✓ should return public configurations (22 ms)
+      ✓ should handle errors when fetching public configs (7 ms)
+    GET /api/system-config/public/:key
+      ✓ should return specific public configuration (4 ms)
+      ✓ should return 404 for non-existent public config (2 ms)
+      ✓ should handle errors when fetching specific config (4 ms)
+    GET /api/system-config (authenticated)
+      ✓ should return all configurations for admin (2 ms)
+      ✓ should filter configurations by category (2 ms)
+      ✓ should handle errors when fetching all configs (3 ms)
+      ✓ should require authentication (2 ms)
+      ○ skipped should require administrator role
+    PUT /api/system-config/:key
+      ✓ should update configuration value (7 ms)
+      ✓ should handle validation errors (4 ms)
+      ○ skipped should require system_config permission
+    POST /api/system-config/initialize
+      ✓ should initialize default configurations (3 ms)
+      ✓ should handle errors during initialization (3 ms)
+      ✓ should require authentication and admin role (3 ms)
+
