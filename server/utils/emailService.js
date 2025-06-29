@@ -8,53 +8,22 @@ const { promisify } = require('util');
 const readFile = promisify(fs.readFile);
 // Removed SES and Brevo dependencies - using SMTP only
 
-// Create email transport
+// Create email transport for Mailcow SMTP
 const createTransport = () => {
-  // Check if using console (for development/testing)
-  if (process.env.EMAIL_PROVIDER === 'console') {
-    // Return a mock transport that logs to console
-    return {
-      sendMail: async (mailOptions) => {
-        console.log('=== EMAIL CONSOLE LOG ===');
-        console.log('From:', mailOptions.from);
-        console.log('To:', mailOptions.to);
-        console.log('Subject:', mailOptions.subject);
-        console.log('HTML Preview: [HTML content logged to console]');
-        console.log('========================');
-        return { messageId: `console-${Date.now()}` };
-      }
-    };
-  }
-  // Check if using MS Exchange Server
-  else if (process.env.EMAIL_PROVIDER === 'exchange') {
-    return nodemailer.createTransport({
-      host: process.env.EXCHANGE_HOST,
-      port: parseInt(process.env.EXCHANGE_PORT) || 587,
-      secure: process.env.EXCHANGE_PORT === '465',
-      auth: {
-        user: process.env.EXCHANGE_USER,
-        pass: process.env.EXCHANGE_PASS
-      },
-      tls: {
-        ciphers: 'SSLv3',
-        rejectUnauthorized: process.env.EXCHANGE_REJECT_UNAUTHORIZED !== 'false'
-      },
-      debug: process.env.NODE_ENV === 'development',
-      logger: process.env.NODE_ENV === 'development'
-    });
-  }
- else {
-    // Use standard SMTP transport for non-SES configuration
-    return nodemailer.createTransport({
-      host: process.env.EMAIL_HOST,
-      port: process.env.EMAIL_PORT,
-      secure: process.env.EMAIL_PORT === '465',
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS
-      }
-    });
-  }
+  // Always use SMTP transport for Mailcow
+  return nodemailer.createTransport({
+    host: process.env.EMAIL_HOST || 'localhost',
+    port: parseInt(process.env.EMAIL_PORT) || 587,
+    secure: process.env.EMAIL_PORT === '465',
+    auth: {
+      user: process.env.EMAIL_USER,
+      pass: process.env.EMAIL_PASS
+    },
+    // Mailcow specific settings
+    tls: {
+      rejectUnauthorized: process.env.NODE_ENV === 'production'
+    }
+  });
 };
 
 // Load email template
@@ -138,11 +107,8 @@ const sendEmail = async (to, subject, html) => {
   try {
     const transporter = createTransport();
 
-    const from = process.env.EMAIL_PROVIDER === 'console'
-      ? process.env.EMAIL_FROM || 'noreply@wavemax.promo'
-      : process.env.EMAIL_PROVIDER === 'exchange'
-        ? process.env.EXCHANGE_FROM_EMAIL || process.env.EXCHANGE_USER
-        : `"WaveMAX Laundry" <${process.env.EMAIL_FROM || process.env.EMAIL_USER}>`;
+    // Simplified from address for Mailcow SMTP
+    const from = `"WaveMAX Laundry" <${process.env.EMAIL_FROM || process.env.EMAIL_USER || 'noreply@wavemax.promo'}>`;
 
     const info = await transporter.sendMail({
       from,

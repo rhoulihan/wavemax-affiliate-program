@@ -36,7 +36,11 @@ jest.mock('../server/utils/emailService', () => ({
   sendOperatorWelcomeEmail: jest.fn().mockResolvedValue({ MessageId: 'test-message-id' }),
   sendOperatorPinResetEmail: jest.fn().mockResolvedValue({ MessageId: 'test-message-id' }),
   sendOperatorShiftReminderEmail: jest.fn().mockResolvedValue({ MessageId: 'test-message-id' }),
-  sendOperatorPasswordResetEmail: jest.fn().mockResolvedValue({ MessageId: 'test-message-id' })
+  sendOperatorPasswordResetEmail: jest.fn().mockResolvedValue({ MessageId: 'test-message-id' }),
+  sendServiceDownAlert: jest.fn().mockResolvedValue({ MessageId: 'test-message-id' }),
+  sendOrderReadyNotification: jest.fn().mockResolvedValue({ MessageId: 'test-message-id' }),
+  sendOrderPickedUpNotification: jest.fn().mockResolvedValue({ MessageId: 'test-message-id' }),
+  sendEmail: jest.fn().mockResolvedValue({ MessageId: 'test-message-id' })
 }));
 
 // Global connection promise to prevent multiple connections

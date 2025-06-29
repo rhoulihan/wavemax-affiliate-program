@@ -576,4 +576,143 @@ describe('DocuSign Service', () => {
       );
     });
   });
+
+  describe('hasValidToken', () => {
+    it('should return true when a valid token exists', async () => {
+      // Mock a valid token in database
+      const mockToken = {
+        accessToken: 'valid_access_token',
+        expiresAt: new Date(Date.now() + 3600000) // 1 hour from now
+      };
+      
+      jest.spyOn(DocuSignToken, 'findOne').mockResolvedValue(mockToken);
+      
+      const result = await docusignService.hasValidToken();
+      
+      expect(result).toBe(true);
+    });
+
+    it('should return false when no valid token exists', async () => {
+      // Mock no token found
+      jest.spyOn(DocuSignToken, 'findOne').mockResolvedValue(null);
+      
+      const result = await docusignService.hasValidToken();
+      
+      expect(result).toBe(false);
+    });
+
+    it('should return false when token is expired', async () => {
+      // Mock an expired token
+      const mockToken = {
+        accessToken: 'expired_token',
+        expiresAt: new Date(Date.now() - 3600000) // 1 hour ago
+      };
+      
+      jest.spyOn(DocuSignToken, 'findOne').mockResolvedValue(mockToken);
+      
+      const result = await docusignService.hasValidToken();
+      
+      expect(result).toBe(false);
+    });
+  });
+
+  describe('authenticate', () => {
+    it('should return access token when authentication succeeds', async () => {
+      const mockToken = {
+        accessToken: 'valid_access_token',
+        expiresAt: new Date(Date.now() + 3600000)
+      };
+      
+      jest.spyOn(DocuSignToken, 'findOne').mockResolvedValue(mockToken);
+      
+      const result = await docusignService.authenticate();
+      
+      expect(result).toBe('valid_access_token');
+    });
+
+    it('should throw error when authentication fails', async () => {
+      jest.spyOn(DocuSignToken, 'findOne').mockResolvedValue(null);
+      
+      await expect(docusignService.authenticate()).rejects.toThrow(
+        'User authorization required. Please complete the OAuth flow.'
+      );
+    });
+  });
+
+  describe('extractTaxInfoFromTabs', () => {
+    it('should extract SSN tax info from tabs', () => {
+      const tabs = {
+        ssnTabs: [{
+          value: '123456789'
+        }]
+      };
+      
+      const result = docusignService.extractTaxInfoFromTabs(tabs);
+      
+      expect(result).toEqual({
+        taxIdType: 'SSN',
+        taxIdLast4: '6789'
+      });
+    });
+
+    it('should extract EIN tax info from tabs', () => {
+      const tabs = {
+        textTabs: [{
+          tabLabel: 'EIN',
+          value: '12-3456789'
+        }]
+      };
+      
+      const result = docusignService.extractTaxInfoFromTabs(tabs);
+      
+      expect(result).toEqual({
+        taxIdType: 'EIN',
+        taxIdLast4: '6789'
+      });
+    });
+
+    it('should extract business name from tabs', () => {
+      const tabs = {
+        textTabs: [
+          {
+            tabLabel: 'EIN',
+            value: '12-3456789'
+          },
+          {
+            tabLabel: 'BusinessName',
+            value: 'Test Business LLC'
+          }
+        ]
+      };
+      
+      const result = docusignService.extractTaxInfoFromTabs(tabs);
+      
+      expect(result).toEqual({
+        taxIdType: 'EIN',
+        taxIdLast4: '6789',
+        businessName: 'Test Business LLC'
+      });
+    });
+
+    it('should return empty object when no tax info found', () => {
+      const tabs = {
+        textTabs: [{
+          tabLabel: 'OtherField',
+          value: 'Some value'
+        }]
+      };
+      
+      const result = docusignService.extractTaxInfoFromTabs(tabs);
+      
+      expect(result).toEqual({});
+    });
+
+    it('should handle empty tabs', () => {
+      const tabs = {};
+      
+      const result = docusignService.extractTaxInfoFromTabs(tabs);
+      
+      expect(result).toEqual({});
+    });
+  });
 });
