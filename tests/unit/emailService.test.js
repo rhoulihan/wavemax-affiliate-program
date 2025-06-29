@@ -1,117 +1,100 @@
 // Email Service Unit Tests
-// Testing email service functionality
+// Testing email service mock functionality
 
-describe('Email Service', () => {
-  let consoleLogSpy;
-  let consoleErrorSpy;
-  
+const emailService = require('../../server/utils/emailService');
+
+describe('Email Service Mock', () => {
   beforeEach(() => {
-    // Setup console spies
-    consoleLogSpy = jest.spyOn(console, 'log').mockImplementation();
-    consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
-  });
-
-  afterEach(() => {
-    consoleLogSpy.mockRestore();
-    consoleErrorSpy.mockRestore();
+    // Clear all mocks before each test
     jest.clearAllMocks();
   });
 
-  describe('Email Functions', () => {
-    it('should have basic email functionality', () => {
-      // This is a placeholder test to ensure the test suite runs
-      // The actual email service is tested through integration tests
-      expect(true).toBe(true);
+  describe('All Email Functions', () => {
+    it('should have all required email functions mocked', () => {
+      expect(typeof emailService.sendAffiliateWelcomeEmail).toBe('function');
+      expect(typeof emailService.sendAffiliateNewCustomerEmail).toBe('function');
+      expect(typeof emailService.sendAffiliateNewOrderEmail).toBe('function');
+      expect(typeof emailService.sendAffiliateCommissionEmail).toBe('function');
+      expect(typeof emailService.sendAffiliateOrderCancellationEmail).toBe('function');
+      expect(typeof emailService.sendAffiliatePasswordResetEmail).toBe('function');
+      expect(typeof emailService.sendCustomerWelcomeEmail).toBe('function');
+      expect(typeof emailService.sendCustomerOrderConfirmationEmail).toBe('function');
+      expect(typeof emailService.sendOrderStatusUpdateEmail).toBe('function');
+      expect(typeof emailService.sendOrderCancellationEmail).toBe('function');
+      expect(typeof emailService.sendCustomerPasswordResetEmail).toBe('function');
+      expect(typeof emailService.sendAdministratorWelcomeEmail).toBe('function');
+      expect(typeof emailService.sendAdministratorPasswordResetEmail).toBe('function');
+      expect(typeof emailService.sendOperatorWelcomeEmail).toBe('function');
+      expect(typeof emailService.sendOperatorPinResetEmail).toBe('function');
+      expect(typeof emailService.sendOperatorShiftReminderEmail).toBe('function');
+      expect(typeof emailService.sendOperatorPasswordResetEmail).toBe('function');
+      expect(typeof emailService.sendServiceDownAlert).toBe('function');
+      expect(typeof emailService.sendOrderReadyNotification).toBe('function');
+      expect(typeof emailService.sendOrderPickedUpNotification).toBe('function');
+      expect(typeof emailService.sendEmail).toBe('function');
+      expect(typeof emailService.sendPasswordResetEmail).toBe('function');
     });
 
-    it('should log email operations', async () => {
-      // Simulate email logging
-      const logEmail = (to, subject) => {
-        console.log('Sending email to:', to);
-        console.log('Subject:', subject);
-      };
-
-      logEmail('test@example.com', 'Test Email');
-
-      expect(consoleLogSpy).toHaveBeenCalledWith('Sending email to:', 'test@example.com');
-      expect(consoleLogSpy).toHaveBeenCalledWith('Subject:', 'Test Email');
-    });
-
-    it('should handle email errors', async () => {
-      // Simulate error handling
-      const sendEmailWithError = () => {
-        try {
-          throw new Error('Email service unavailable');
-        } catch (error) {
-          console.error('Email error:', error.message);
-        }
-      };
-
-      sendEmailWithError();
-
-      expect(consoleErrorSpy).toHaveBeenCalledWith('Email error:', 'Email service unavailable');
-    });
-  });
-
-  describe('Email Templates', () => {
-    it('should process email templates', () => {
-      // Simple template processing test
-      const processTemplate = (template, data) => {
-        return template.replace(/{{(\w+)}}/g, (match, key) => data[key] || '');
-      };
-
-      const template = 'Hello {{name}}, your order {{orderId}} is ready!';
-      const data = { name: 'John', orderId: '12345' };
+    it('should return expected mock response for all functions', async () => {
+      // Test each function returns the expected mock response
+      const expectedResponse = { MessageId: 'test-message-id' };
       
-      const result = processTemplate(template, data);
+      // Affiliate functions
+      expect(await emailService.sendAffiliateWelcomeEmail({})).toEqual(expectedResponse);
+      expect(await emailService.sendAffiliateNewCustomerEmail({}, {})).toEqual(expectedResponse);
+      expect(await emailService.sendAffiliateNewOrderEmail({}, {}, {})).toEqual(expectedResponse);
+      expect(await emailService.sendAffiliateCommissionEmail({}, {}, {})).toEqual(expectedResponse);
+      expect(await emailService.sendAffiliateOrderCancellationEmail({}, {}, {})).toEqual(expectedResponse);
+      expect(await emailService.sendAffiliatePasswordResetEmail({}, '')).toEqual(expectedResponse);
       
-      expect(result).toBe('Hello John, your order 12345 is ready!');
+      // Customer functions  
+      expect(await emailService.sendCustomerWelcomeEmail({}, {}, {})).toEqual(expectedResponse);
+      expect(await emailService.sendCustomerOrderConfirmationEmail({}, {}, {})).toEqual(expectedResponse);
+      expect(await emailService.sendOrderStatusUpdateEmail({}, {}, '')).toEqual(expectedResponse);
+      expect(await emailService.sendOrderCancellationEmail({}, {})).toEqual(expectedResponse);
+      expect(await emailService.sendCustomerPasswordResetEmail({}, '')).toEqual(expectedResponse);
+      
+      // Administrator functions
+      expect(await emailService.sendAdministratorWelcomeEmail({})).toEqual(expectedResponse);
+      expect(await emailService.sendAdministratorPasswordResetEmail({}, '')).toEqual(expectedResponse);
+      
+      // Operator functions
+      expect(await emailService.sendOperatorWelcomeEmail({}, '')).toEqual(expectedResponse);
+      expect(await emailService.sendOperatorPinResetEmail({}, '')).toEqual(expectedResponse);
+      expect(await emailService.sendOperatorShiftReminderEmail({})).toEqual(expectedResponse);
+      expect(await emailService.sendOperatorPasswordResetEmail({}, '')).toEqual(expectedResponse);
+      
+      // Service alert functions
+      expect(await emailService.sendServiceDownAlert({})).toEqual(expectedResponse);
+      expect(await emailService.sendOrderReadyNotification('', {})).toEqual(expectedResponse);
+      expect(await emailService.sendOrderPickedUpNotification('', {})).toEqual(expectedResponse);
+      
+      // Generic functions
+      expect(await emailService.sendEmail({})).toEqual(expectedResponse);
+      expect(await emailService.sendPasswordResetEmail({}, '')).toEqual(expectedResponse);
     });
 
-    it('should handle missing template variables', () => {
-      // Test template with missing data
-      const processTemplate = (template, data) => {
-        return template.replace(/{{(\w+)}}/g, (match, key) => data[key] || '');
-      };
-
-      const template = 'Hello {{name}}, your balance is {{balance}}';
-      const data = { name: 'John' };
+    it('should track function calls correctly', async () => {
+      const affiliate = { email: 'test@example.com' };
       
-      const result = processTemplate(template, data);
+      // Call the function multiple times
+      await emailService.sendAffiliateWelcomeEmail(affiliate);
+      await emailService.sendAffiliateWelcomeEmail(affiliate);
       
-      expect(result).toBe('Hello John, your balance is ');
+      // Verify it was called with correct arguments
+      expect(emailService.sendAffiliateWelcomeEmail).toHaveBeenCalledWith(affiliate);
+      expect(emailService.sendAffiliateWelcomeEmail).toHaveBeenCalledTimes(2);
     });
-  });
 
-  describe('Email Validation', () => {
-    it('should validate email addresses', () => {
-      const isValidEmail = (email) => {
-        const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        return regex.test(email);
-      };
-
-      expect(isValidEmail('test@example.com')).toBe(true);
-      expect(isValidEmail('invalid-email')).toBe(false);
-      expect(isValidEmail('test@')).toBe(false);
-      expect(isValidEmail('@example.com')).toBe(false);
-    });
-  });
-
-  describe('Email Queue', () => {
-    it('should queue emails for sending', () => {
-      const emailQueue = [];
+    it('should handle errors when mocked to reject', async () => {
+      // Temporarily override the mock to simulate an error
+      emailService.sendAffiliateWelcomeEmail.mockRejectedValueOnce(new Error('Email service error'));
       
-      const queueEmail = (email) => {
-        emailQueue.push(email);
-        console.log('Email queued:', email.to);
-      };
-
-      queueEmail({ to: 'user1@example.com', subject: 'Test 1' });
-      queueEmail({ to: 'user2@example.com', subject: 'Test 2' });
-
-      expect(emailQueue).toHaveLength(2);
-      expect(consoleLogSpy).toHaveBeenCalledWith('Email queued:', 'user1@example.com');
-      expect(consoleLogSpy).toHaveBeenCalledWith('Email queued:', 'user2@example.com');
+      await expect(emailService.sendAffiliateWelcomeEmail({ email: 'test@example.com' }))
+        .rejects.toThrow('Email service error');
+        
+      // Verify the mock is restored
+      expect(await emailService.sendAffiliateWelcomeEmail({})).toEqual({ MessageId: 'test-message-id' });
     });
   });
 });
