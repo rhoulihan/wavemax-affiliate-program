@@ -7,20 +7,11 @@ const Administrator = require('../models/Administrator');
 const Operator = require('../models/Operator');
 const TokenBlacklist = require('../models/TokenBlacklist');
 
-const rateLimit = require('express-rate-limit');
 const storeIPConfig = require('../config/storeIPs');
 
-// Rate limiter for authentication
-exports.authLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: process.env.NODE_ENV === 'test' ? 1000 : 20, // Higher limit for tests
-  message: { success: false, message: 'Too many login attempts, please try again later' },
-  standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
-  legacyHeaders: false, // Disable the `X-RateLimit-*` headers
-  // Skip successful requests
-  skipSuccessfulRequests: true,
-  skip: () => process.env.NODE_ENV === 'test' // Skip rate limiting in test environment
-});
+// Import rate limiters from centralized configuration
+const { authLimiter } = require('./rateLimiting');
+exports.authLimiter = authLimiter;
 
 /**
  * Middleware to authenticate requests using JWT

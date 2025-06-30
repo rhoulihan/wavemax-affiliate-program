@@ -20,6 +20,13 @@ const cryptoWrapper = {
 };
 
 /**
+ * Escape special regex characters to prevent ReDoS attacks
+ */
+const escapeRegex = (string) => {
+  return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+};
+
+/**
  * Generate JWT token
  */
 const generateToken = (data, expiresIn = '1h') => {
@@ -73,7 +80,7 @@ exports.affiliateLogin = async (req, res) => {
 
     // Find affiliate by username (case-insensitive)
     const affiliate = await Affiliate.findOne({
-      username: { $regex: new RegExp('^' + username + '$', 'i') }
+      username: { $regex: new RegExp('^' + escapeRegex(username) + '$', 'i') }
     });
 
     if (!affiliate) {
@@ -572,7 +579,7 @@ exports.customerLogin = async (req, res) => {
     // Find customer by username or email (case-insensitive)
     const customer = await Customer.findOne({
       $or: [
-        { username: { $regex: new RegExp('^' + loginIdentifier + '$', 'i') } },
+        { username: { $regex: new RegExp('^' + escapeRegex(loginIdentifier) + '$', 'i') } },
         { email: loginIdentifier.toLowerCase() }
       ]
     });
@@ -693,8 +700,14 @@ exports.forgotPassword = async (req, res) => {
     const resetToken = cryptoWrapper.randomBytes(32).toString('hex');
     const resetTokenExpiry = Date.now() + 3600000; // 1 hour
 
-    // Store token and expiry (in a real implementation, these would be fields on the user models)
-    user.resetToken = resetToken;
+    // Hash the token before storing it
+    const hashedResetToken = crypto
+      .createHash('sha256')
+      .update(resetToken)
+      .digest('hex');
+
+    // Store hashed token and expiry
+    user.resetToken = hashedResetToken;
     user.resetTokenExpiry = resetTokenExpiry;
     await user.save();
 
@@ -743,26 +756,32 @@ exports.resetPassword = async (req, res) => {
       });
     }
 
+    // Hash the incoming token to compare with stored hash
+    const hashedToken = crypto
+      .createHash('sha256')
+      .update(token)
+      .digest('hex');
+
     // Find user based on reset token
     let user;
     if (userType === 'affiliate') {
       user = await Affiliate.findOne({
-        resetToken: token,
+        resetToken: hashedToken,
         resetTokenExpiry: { $gt: Date.now() }
       });
     } else if (userType === 'customer') {
       user = await Customer.findOne({
-        resetToken: token,
+        resetToken: hashedToken,
         resetTokenExpiry: { $gt: Date.now() }
       });
     } else if (userType === 'administrator') {
       user = await Administrator.findOne({
-        resetToken: token,
+        resetToken: hashedToken,
         resetTokenExpiry: { $gt: Date.now() }
       });
     } else if (userType === 'operator') {
       user = await Operator.findOne({
-        resetToken: token,
+        resetToken: hashedToken,
         resetTokenExpiry: { $gt: Date.now() }
       });
     } else {
@@ -2031,10 +2050,10 @@ exports.checkUsername = async (req, res) => {
 
     // Check across all user types - using exact match with case-insensitive
     const [affiliate, customer, administrator, operator] = await Promise.all([
-      Affiliate.findOne({ username: { $regex: `^${trimmedUsername}$`, $options: 'i' } }),
-      Customer.findOne({ username: { $regex: `^${trimmedUsername}$`, $options: 'i' } }),
-      Administrator.findOne({ username: { $regex: `^${trimmedUsername}$`, $options: 'i' } }),
-      Operator.findOne({ username: { $regex: `^${trimmedUsername}$`, $options: 'i' } })
+      Affiliate.findOne({ username: { $regex: `^${escapeRegex(trimmedUsername)}$`, $options: 'i' } }),
+      Customer.findOne({ username: { $regex: `^${escapeRegex(trimmedUsername)}$`, $options: 'i' } }),
+      Administrator.findOne({ username: { $regex: `^${escapeRegex(trimmedUsername)}$`, $options: 'i' } }),
+      Operator.findOne({ username: { $regex: `^${escapeRegex(trimmedUsername)}$`, $options: 'i' } })
     ]);
 
     console.log('Username check results:', {
