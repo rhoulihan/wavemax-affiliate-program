@@ -13,6 +13,12 @@ const emailService = require('../utils/emailService');
 const { logLoginAttempt, logAuditEvent, AuditEvents } = require('../utils/auditLogger');
 const { sanitizeInput } = require('../middleware/sanitization');
 
+// Wrapper for crypto.randomBytes to allow mocking in tests
+// This allows us to mock just this function without affecting the entire crypto module
+const cryptoWrapper = {
+  randomBytes: (size) => crypto.randomBytes(size)
+};
+
 /**
  * Generate JWT token
  */
@@ -34,7 +40,7 @@ const generateRefreshToken = async (userId, userType, ip, replaceToken = null) =
   expiryDate.setDate(expiryDate.getDate() + 30);
 
   // Generate a secure random token
-  const token = crypto.randomBytes(40).toString('hex');
+  const token = cryptoWrapper.randomBytes(40).toString('hex');
 
   // If replacing a token, update it with the replacement token
   if (replaceToken) {
@@ -684,7 +690,7 @@ exports.forgotPassword = async (req, res) => {
     }
 
     // Generate reset token
-    const resetToken = crypto.randomBytes(32).toString('hex');
+    const resetToken = cryptoWrapper.randomBytes(32).toString('hex');
     const resetTokenExpiry = Date.now() + 3600000; // 1 hour
 
     // Store token and expiry (in a real implementation, these would be fields on the user models)
@@ -1319,8 +1325,7 @@ exports.completeSocialRegistration = async (req, res) => {
     }
 
     // Generate a secure random password for backup login (not exposed to user)
-    const crypto = require('crypto');
-    const generatedPassword = crypto.randomBytes(32).toString('hex') + 'A1!'; // Ensures password requirements
+    const generatedPassword = cryptoWrapper.randomBytes(32).toString('hex') + 'A1!'; // Ensures password requirements
 
     // Check if email or username already exists (now using generatedUsername)
     const existingAffiliate = await Affiliate.findOne({
@@ -1868,8 +1873,7 @@ exports.completeSocialCustomerRegistration = async (req, res) => {
     }
 
     // Generate a secure random password for backup login (not exposed to user)
-    const crypto = require('crypto');
-    const generatedPassword = crypto.randomBytes(32).toString('hex') + 'A1!'; // Ensures password requirements
+    const generatedPassword = cryptoWrapper.randomBytes(32).toString('hex') + 'A1!'; // Ensures password requirements
 
     // Check if email already exists
     const existingCustomer = await Customer.findOne({
@@ -2109,5 +2113,8 @@ exports.checkEmail = async (req, res) => {
     });
   }
 };
+
+// Export cryptoWrapper for testing
+exports._cryptoWrapper = cryptoWrapper;
 
 module.exports = exports;

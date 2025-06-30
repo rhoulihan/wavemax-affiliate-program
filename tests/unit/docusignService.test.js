@@ -44,9 +44,10 @@ describe('DocuSign Service', () => {
     await DocuSignToken.deleteMany({});
     jest.clearAllMocks();
     
-    // Clean up PKCE directory
+    // Ensure PKCE directory exists and clean it up
     try {
       const pkceDir = path.join(__dirname, '../../temp/pkce');
+      await fs.mkdir(pkceDir, { recursive: true });
       const files = await fs.readdir(pkceDir);
       for (const file of files) {
         if (file.endsWith('.json')) {
@@ -54,7 +55,7 @@ describe('DocuSign Service', () => {
         }
       }
     } catch (err) {
-      // Directory might not exist yet
+      // Ignore errors
     }
   });
   
@@ -579,13 +580,14 @@ describe('DocuSign Service', () => {
 
   describe('hasValidToken', () => {
     it('should return true when a valid token exists', async () => {
-      // Mock a valid token in database
-      const mockToken = {
+      // Create a valid token in database
+      await DocuSignToken.create({
+        tokenId: 'default',
         accessToken: 'valid_access_token',
-        expiresAt: new Date(Date.now() + 3600000) // 1 hour from now
-      };
-      
-      jest.spyOn(DocuSignToken, 'findOne').mockResolvedValue(mockToken);
+        refreshToken: 'valid_refresh_token',
+        expiresAt: new Date(Date.now() + 3600000), // 1 hour from now
+        tokenType: 'Bearer'
+      });
       
       const result = await docusignService.hasValidToken();
       
@@ -593,22 +595,21 @@ describe('DocuSign Service', () => {
     });
 
     it('should return false when no valid token exists', async () => {
-      // Mock no token found
-      jest.spyOn(DocuSignToken, 'findOne').mockResolvedValue(null);
-      
+      // Ensure no token exists in database (already cleaned in beforeEach)
       const result = await docusignService.hasValidToken();
       
       expect(result).toBe(false);
     });
 
     it('should return false when token is expired', async () => {
-      // Mock an expired token
-      const mockToken = {
+      // Create an expired token
+      await DocuSignToken.create({
+        tokenId: 'default',
         accessToken: 'expired_token',
-        expiresAt: new Date(Date.now() - 3600000) // 1 hour ago
-      };
-      
-      jest.spyOn(DocuSignToken, 'findOne').mockResolvedValue(mockToken);
+        refreshToken: 'expired_refresh',
+        expiresAt: new Date(Date.now() - 3600000), // 1 hour ago
+        tokenType: 'Bearer'
+      });
       
       const result = await docusignService.hasValidToken();
       
@@ -618,12 +619,14 @@ describe('DocuSign Service', () => {
 
   describe('authenticate', () => {
     it('should return access token when authentication succeeds', async () => {
-      const mockToken = {
+      // Create a valid token
+      await DocuSignToken.create({
+        tokenId: 'default',
         accessToken: 'valid_access_token',
-        expiresAt: new Date(Date.now() + 3600000)
-      };
-      
-      jest.spyOn(DocuSignToken, 'findOne').mockResolvedValue(mockToken);
+        refreshToken: 'valid_refresh_token',
+        expiresAt: new Date(Date.now() + 3600000), // 1 hour from now
+        tokenType: 'Bearer'
+      });
       
       const result = await docusignService.authenticate();
       
@@ -631,8 +634,7 @@ describe('DocuSign Service', () => {
     });
 
     it('should throw error when authentication fails', async () => {
-      jest.spyOn(DocuSignToken, 'findOne').mockResolvedValue(null);
-      
+      // Ensure no token exists (already cleaned in beforeEach)
       await expect(docusignService.authenticate()).rejects.toThrow(
         'User authorization required. Please complete the OAuth flow.'
       );

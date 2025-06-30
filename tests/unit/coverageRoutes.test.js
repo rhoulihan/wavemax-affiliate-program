@@ -184,6 +184,30 @@ describe('Coverage Routes', () => {
       expect(response.headers['pragma']).toBe('no-cache');
       expect(response.headers['expires']).toBe('0');
     });
+
+    test('should set no-cache headers for HTML files', async () => {
+      process.env.NODE_ENV = 'development';
+
+      const response = await request(app)
+        .get('/coverage/action-plan.html')
+        .expect(200);
+
+      expect(response.headers['cache-control']).toBe('no-cache, no-store, must-revalidate');
+      expect(response.headers['pragma']).toBe('no-cache');
+      expect(response.headers['expires']).toBe('0');
+    });
+
+    test('should set no-cache headers for other HTML files', async () => {
+      process.env.NODE_ENV = 'development';
+
+      const response = await request(app)
+        .get('/coverage/critical-files.html')
+        .expect(200);
+
+      expect(response.headers['cache-control']).toBe('no-cache, no-store, must-revalidate');
+      expect(response.headers['pragma']).toBe('no-cache');
+      expect(response.headers['expires']).toBe('0');
+    });
   });
 
   describe('Environment Variable Handling', () => {
@@ -297,11 +321,34 @@ describe('Coverage Routes', () => {
     test('should handle specific route handlers', async () => {
       process.env.NODE_ENV = 'development';
 
-      // Test that the specific route handler is called (line 96)
+      // Mock express.static to not serve files, forcing route handler to be called
+      const mockStatic = jest.spyOn(express, 'static').mockImplementation(() => {
+        return (req, res, next) => {
+          // Skip static file serving for root path
+          if (req.path === '/') {
+            next();
+          } else {
+            // For other paths, serve normally
+            express.static.mockRestore();
+            const realStatic = express.static(path.join(__dirname, '../../public/coverage-analysis'), {
+              index: 'index.html',
+              setHeaders: (res, path) => {
+                res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+                res.setHeader('Pragma', 'no-cache');
+                res.setHeader('Expires', '0');
+              }
+            });
+            realStatic(req, res, next);
+          }
+        };
+      });
+
       const response = await request(app)
         .get('/coverage/')
-        .query({ _specificRoute: true }) // Force specific route handler
         .expect(200);
+
+      // Restore the mock
+      mockStatic.mockRestore();
     });
   });
 });

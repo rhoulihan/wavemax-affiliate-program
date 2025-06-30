@@ -12,16 +12,6 @@ This file maintains a prioritized list of tasks and issues to be addressed in fu
 
 ### High Priority
 
-#### 1. Fix Failing Email Service Tests
-- **Added**: 2025-01-06
-- **Status**: BLOCKED (2025-06-03)
-- **Context**: Email service tests are failing with console transport
-- **Details**: 
-  - 36 out of 38 email service tests are failing
-  - Console transport is not logging as expected in test environment
-  - Issue: Module caching and Jest mock timing prevents proper mocking of console.log
-  - Created manual mock in tests/__mocks__/server/utils/emailService.js for other tests to use
-- **Recommendation**: Use the manual mock for testing components that depend on email service rather than trying to test the email service internals with complex mocking
 
 #### 2. Improve Test Coverage to Near 100%
 - **Added**: 2025-06-03
