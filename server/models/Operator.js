@@ -96,6 +96,13 @@ const operatorSchema = new mongoose.Schema({
   lockUntil: Date,
   passwordResetToken: String,
   passwordResetExpires: Date,
+  passwordHistory: [{
+    hash: String,
+    changedAt: {
+      type: Date,
+      default: Date.now
+    }
+  }],
   createdAt: {
     type: Date,
     default: Date.now
@@ -152,8 +159,28 @@ operatorSchema.pre('save', function(next) {
   // Hash password if modified
   if (this.isModified('password')) {
     const salt = cryptoWrapper.randomBytes(16);
-    this.password = crypto.pbkdf2Sync(this.password, salt, 100000, 64, 'sha512')
+    const hashedPassword = crypto.pbkdf2Sync(this.password, salt, 100000, 64, 'sha512')
       .toString('hex') + ':' + salt.toString('hex');
+    
+    // Add current password to history before updating
+    if (!this.isNew && this.password) {
+      if (!this.passwordHistory) {
+        this.passwordHistory = [];
+      }
+      
+      // Store the old password hash
+      this.passwordHistory.push({
+        hash: this.password,
+        changedAt: new Date()
+      });
+      
+      // Keep only last 5 passwords
+      if (this.passwordHistory.length > 5) {
+        this.passwordHistory = this.passwordHistory.slice(-5);
+      }
+    }
+    
+    this.password = hashedPassword;
   }
 
   next();
@@ -165,6 +192,20 @@ operatorSchema.methods.verifyPassword = function(password) {
   const verifyHash = crypto.pbkdf2Sync(password, Buffer.from(salt, 'hex'), 100000, 64, 'sha512')
     .toString('hex');
   return hash === verifyHash;
+};
+
+// Method to check if password is in history
+operatorSchema.methods.isPasswordInHistory = function(password) {
+  if (!this.passwordHistory || this.passwordHistory.length === 0) {
+    return false;
+  }
+  
+  return this.passwordHistory.some(historyEntry => {
+    const [hash, salt] = historyEntry.hash.split(':');
+    const verifyHash = crypto.pbkdf2Sync(password, Buffer.from(salt, 'hex'), 100000, 64, 'sha512')
+      .toString('hex');
+    return hash === verifyHash;
+  });
 };
 
 // Method to handle failed login attempts

@@ -3,7 +3,8 @@
 const express = require('express');
 const router = express.Router();
 const authController = require('../controllers/authController');
-const { authLimiter, authenticate } = require('../middleware/auth');
+const { authenticate } = require('../middleware/auth');
+const { authLimiter, passwordResetLimiter, registrationLimiter } = require('../middleware/rateLimiting');
 const { body, validationResult } = require('express-validator');
 const { customPasswordValidator } = require('../utils/passwordValidator');
 
@@ -114,7 +115,7 @@ router.post('/operator/login',
  * @access  Public
  */
 router.post('/forgot-password',
-  authLimiter,
+  passwordResetLimiter,
   [
     body('email').trim().isEmail().withMessage('Valid email is required'),
     body('userType').isIn(['affiliate', 'customer', 'administrator', 'operator']).withMessage('Invalid user type')
@@ -129,7 +130,7 @@ router.post('/forgot-password',
  * @access  Public
  */
 router.post('/reset-password',
-  authLimiter,
+  passwordResetLimiter,
   [
     body('token').trim().notEmpty().withMessage('Reset token is required')
       .isLength({ min: 64, max: 64 }).withMessage('Invalid reset token'),
