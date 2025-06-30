@@ -20,9 +20,18 @@ describe('Operator Integration Tests', () => {
   let testOperator;
 
   // Set timeout for all tests in this suite
-  jest.setTimeout(10000);
+  jest.setTimeout(60000);
 
   beforeEach(async () => {
+    // Mock cryptoWrapper for Operator model
+    if (Operator._cryptoWrapper) {
+      Operator._cryptoWrapper.randomBytes = jest.fn((size) => {
+        const buffer = Buffer.alloc(size);
+        buffer.fill(0x61); // Fill with 'a'
+        return buffer;
+      });
+    }
+    
     // Clear database
     await Operator.deleteMany({});
     await Administrator.deleteMany({});

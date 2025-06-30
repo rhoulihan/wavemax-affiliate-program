@@ -5,6 +5,11 @@ const mongoose = require('mongoose');
 const crypto = require('crypto');
 const { encrypt, decrypt } = require('../utils/encryption');
 
+// Wrapper for crypto.randomBytes to allow mocking in tests
+const cryptoWrapper = {
+  randomBytes: (size) => crypto.randomBytes(size)
+};
+
 const operatorSchema = new mongoose.Schema({
   operatorId: {
     type: String,
@@ -141,12 +146,12 @@ operatorSchema.pre('save', function(next) {
   // Generate operator ID if new
   if (this.isNew && !this.operatorId) {
     this.operatorId = 'OPR' + Date.now().toString(36).toUpperCase() +
-                      crypto.randomBytes(3).toString('hex').toUpperCase();
+                      cryptoWrapper.randomBytes(3).toString('hex').toUpperCase();
   }
 
   // Hash password if modified
   if (this.isModified('password')) {
-    const salt = crypto.randomBytes(16);
+    const salt = cryptoWrapper.randomBytes(16);
     this.password = crypto.pbkdf2Sync(this.password, salt, 100000, 64, 'sha512')
       .toString('hex') + ':' + salt.toString('hex');
   }
@@ -195,7 +200,7 @@ operatorSchema.methods.resetLoginAttempts = function() {
 
 // Method to generate password reset token
 operatorSchema.methods.generatePasswordResetToken = function() {
-  const resetToken = crypto.randomBytes(32).toString('hex');
+  const resetToken = cryptoWrapper.randomBytes(32).toString('hex');
 
   this.passwordResetToken = crypto
     .createHash('sha256')
@@ -270,5 +275,8 @@ operatorSchema.index({ operatorId: 1, isActive: 1 });
 operatorSchema.index({ currentOrderCount: 1, isActive: 1 });
 
 const Operator = mongoose.model('Operator', operatorSchema);
+
+// Export cryptoWrapper for testing
+Operator._cryptoWrapper = cryptoWrapper;
 
 module.exports = Operator;

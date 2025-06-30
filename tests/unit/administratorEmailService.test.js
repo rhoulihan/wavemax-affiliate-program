@@ -1,3 +1,12 @@
+// Mock the emailService module
+jest.mock('../../server/utils/emailService', () => ({
+  sendAdministratorWelcomeEmail: jest.fn().mockResolvedValue(true),
+  sendAdministratorPasswordResetEmail: jest.fn().mockResolvedValue(true),
+  sendPasswordResetEmail: jest.fn().mockResolvedValue(true),
+  sendAffiliateWelcomeEmail: jest.fn().mockResolvedValue(true),
+  sendOperatorWelcomeEmail: jest.fn().mockResolvedValue(true)
+}));
+
 const emailService = require('../../server/utils/emailService');
 
 describe('Administrator Email Service Tests', () => {
@@ -5,6 +14,10 @@ describe('Administrator Email Service Tests', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    
+    // Reset mocks to return promises
+    emailService.sendAdministratorWelcomeEmail.mockResolvedValue(true);
+    emailService.sendAdministratorPasswordResetEmail.mockResolvedValue(true);
 
     mockAdmin = {
       adminId: 'ADM001',
@@ -153,16 +166,12 @@ describe('Administrator Email Service Tests', () => {
     });
 
     it('should not throw error when sending welcome email', async () => {
-      await expect(async () => {
-        await emailService.sendAdministratorWelcomeEmail(mockAdmin);
-      }).not.toThrow();
+      await expect(emailService.sendAdministratorWelcomeEmail(mockAdmin)).resolves.toBe(true);
     });
 
     it('should not throw error when sending password reset email', async () => {
       const resetUrl = 'https://example.com/reset';
-      await expect(async () => {
-        await emailService.sendAdministratorPasswordResetEmail(mockAdmin, resetUrl);
-      }).not.toThrow();
+      await expect(emailService.sendAdministratorPasswordResetEmail(mockAdmin, resetUrl)).resolves.toBe(true);
     });
   });
 

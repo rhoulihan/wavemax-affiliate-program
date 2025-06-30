@@ -79,7 +79,6 @@ router.get('/:orderId', authenticate, orderController.getOrderDetails);
  * @desc    Get bags for an order (for label printing)
  * @access  Private (operator, affiliate, or admin)
  */
-router.get('/:orderId/bags', authenticate, orderController.getOrderBags);
 
 /**
  * @route   PUT /api/orders/:orderId/status

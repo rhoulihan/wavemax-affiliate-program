@@ -179,7 +179,12 @@ jest.mock('../../server/models/Transaction', () => ({
 }));
 
 jest.mock('../../server/utils/auditLogger');
-jest.mock('../../server/utils/emailService');
+jest.mock('../../server/utils/emailService', () => ({
+  sendPasswordResetEmail: jest.fn(),
+  sendAffiliateWelcomeEmail: jest.fn(),
+  sendOperatorWelcomeEmail: jest.fn(),
+  sendAdministratorWelcomeEmail: jest.fn()
+}));
 jest.mock('../../server/utils/passwordValidator');
 jest.mock('../../server/utils/fieldFilter');
 jest.mock('../../server/utils/encryption', () => ({

@@ -8,9 +8,24 @@ const { promisify } = require('util');
 const readFile = promisify(fs.readFile);
 // Removed SES and Brevo dependencies - using SMTP only
 
-// Create email transport for Mailcow SMTP
+// Create email transport for Mailcow SMTP or console for testing
 const createTransport = () => {
-  // Always use SMTP transport for Mailcow
+  // Use console transport for testing
+  if (process.env.EMAIL_PROVIDER === 'console') {
+    return {
+      sendMail: async (mailOptions) => {
+        console.log('=== EMAIL CONSOLE LOG ===');
+        console.log('From:', mailOptions.from);
+        console.log('To:', mailOptions.to);
+        console.log('Subject:', mailOptions.subject);
+        console.log('HTML:', mailOptions.html);
+        console.log('=========================');
+        return { messageId: 'console-message-id' };
+      }
+    };
+  }
+  
+  // Use SMTP transport for Mailcow
   return nodemailer.createTransport({
     host: process.env.EMAIL_HOST || 'localhost',
     port: parseInt(process.env.EMAIL_PORT) || 587,

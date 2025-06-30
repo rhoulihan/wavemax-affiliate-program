@@ -1,0 +1,20 @@
+Testing files in tests/integration
+================================
+Testing tests/integration/adminCreation.test.js... FAILED
+  Reason: FAIL tests/integration/adminCreation.test.js (5.812 s)   ● Admin Creation Integration Tests › Email Integration › should call email service after admin creation   ● Admin Creation Integration Tests › Email Integration › should handle email service failures gracefully 
+Testing tests/integration/administrator.test.js... TIMEOUT (>30s)
+Testing tests/integration/affiliate.test.js... PASSED
+Testing tests/integration/affiliateCustomerFiltering.test.js... PASSED
+Testing tests/integration/auth.test.js... PASSED
+Testing tests/integration/customer.test.js... PASSED
+Testing tests/integration/docusignW9.test.js... PASSED
+Testing tests/integration/emailService.integration.test.js... FAILED
+  Reason: FAIL tests/integration/emailService.integration.test.js   ● Email Service Integration › Console Email Provider › should log affiliate welcome emails to console   ● Email Service Integration › Console Email Provider › should log customer welcome emails to console 
+Testing tests/integration/operator.test.js... TIMEOUT (>30s)
+Testing tests/integration/order.test.js... TIMEOUT (>30s)
+Testing tests/integration/passwordValidation.test.js... PASSED
+Testing tests/integration/payment.test.js... PASSED
+Testing tests/integration/quickbooks.test.js... TIMEOUT (>30s)
+Testing tests/integration/systemConfig.test.js... PASSED
+================================
+Test scan complete

@@ -201,6 +201,61 @@ describe('Social Auth Routes - Full Coverage', () => {
       expect(response.status).toBe(200);
       expect(response.body.isCustomer).toBe(true);
     });
+
+    it('should initiate Facebook OAuth for customers', async () => {
+      process.env.FACEBOOK_APP_ID = 'test-app-id';
+      process.env.FACEBOOK_APP_SECRET = 'test-app-secret';
+
+      const response = await request(app)
+        .get('/api/auth/customer/facebook?state=affiliateCode123');
+
+      expect(response.status).toBe(302);
+      expect(response.headers.location).toContain('https://facebook.com/oauth');
+      expect(response.headers.location).toContain('state=affiliateCode123');
+    });
+
+    it('should return 404 when Facebook OAuth is not configured for customers', async () => {
+      delete process.env.FACEBOOK_APP_ID;
+      delete process.env.FACEBOOK_APP_SECRET;
+
+      const response = await request(app)
+        .get('/api/auth/customer/facebook');
+
+      expect(response.status).toBe(404);
+      expect(response.body.message).toBe('Facebook OAuth is not configured');
+    });
+
+    it('should initiate LinkedIn OAuth for customers', async () => {
+      process.env.LINKEDIN_CLIENT_ID = 'test-client-id';
+      process.env.LINKEDIN_CLIENT_SECRET = 'test-client-secret';
+
+      const response = await request(app)
+        .get('/api/auth/customer/linkedin?state=test-state');
+
+      expect(response.status).toBe(302);
+      expect(response.headers.location).toContain('https://linkedin.com/oauth');
+      expect(response.headers.location).toContain('state=test-state');
+    });
+
+    it('should return 404 when LinkedIn OAuth is not configured for customers', async () => {
+      delete process.env.LINKEDIN_CLIENT_ID;
+      delete process.env.LINKEDIN_CLIENT_SECRET;
+
+      const response = await request(app)
+        .get('/api/auth/customer/linkedin');
+
+      expect(response.status).toBe(404);
+      expect(response.body.message).toBe('LinkedIn OAuth is not configured');
+    });
+
+    it('should handle customer LinkedIn OAuth callback', async () => {
+      const response = await request(app)
+        .get('/api/auth/customer/linkedin/callback');
+
+      expect(response.status).toBe(200);
+      expect(response.body.isCustomer).toBe(true);
+      expect(response.body.provider).toBe('linkedin');
+    });
   });
 
   describe('Social Registration Completion', () => {

@@ -1,12 +1,62 @@
 // Email Service Unit Tests
 // Testing email service mock functionality
 
+// Mock the email service
+jest.mock('../../server/utils/emailService', () => ({
+  sendAffiliateWelcomeEmail: jest.fn(),
+  sendAffiliateNewCustomerEmail: jest.fn(),
+  sendAffiliateNewOrderEmail: jest.fn(),
+  sendAffiliateCommissionEmail: jest.fn(),
+  sendAffiliateOrderCancellationEmail: jest.fn(),
+  sendAffiliatePasswordResetEmail: jest.fn(),
+  sendCustomerWelcomeEmail: jest.fn(),
+  sendCustomerOrderConfirmationEmail: jest.fn(),
+  sendOrderStatusUpdateEmail: jest.fn(),
+  sendOrderCancellationEmail: jest.fn(),
+  sendCustomerPasswordResetEmail: jest.fn(),
+  sendAdministratorWelcomeEmail: jest.fn(),
+  sendAdministratorPasswordResetEmail: jest.fn(),
+  sendOperatorWelcomeEmail: jest.fn(),
+  sendOperatorPinResetEmail: jest.fn(),
+  sendOperatorShiftReminderEmail: jest.fn(),
+  sendOperatorPasswordResetEmail: jest.fn(),
+  sendServiceDownAlert: jest.fn(),
+  sendOrderReadyNotification: jest.fn(),
+  sendOrderPickedUpNotification: jest.fn(),
+  sendEmail: jest.fn(),
+  sendPasswordResetEmail: jest.fn()
+}));
+
 const emailService = require('../../server/utils/emailService');
 
 describe('Email Service Mock', () => {
   beforeEach(() => {
     // Clear all mocks before each test
     jest.clearAllMocks();
+    
+    // Re-mock with resolved values
+    emailService.sendAffiliateWelcomeEmail.mockResolvedValue({ MessageId: 'test-message-id' });
+    emailService.sendAffiliateNewCustomerEmail.mockResolvedValue({ MessageId: 'test-message-id' });
+    emailService.sendAffiliateNewOrderEmail.mockResolvedValue({ MessageId: 'test-message-id' });
+    emailService.sendAffiliateCommissionEmail.mockResolvedValue({ MessageId: 'test-message-id' });
+    emailService.sendAffiliateOrderCancellationEmail.mockResolvedValue({ MessageId: 'test-message-id' });
+    emailService.sendAffiliatePasswordResetEmail.mockResolvedValue({ MessageId: 'test-message-id' });
+    emailService.sendCustomerWelcomeEmail.mockResolvedValue({ MessageId: 'test-message-id' });
+    emailService.sendCustomerOrderConfirmationEmail.mockResolvedValue({ MessageId: 'test-message-id' });
+    emailService.sendOrderStatusUpdateEmail.mockResolvedValue({ MessageId: 'test-message-id' });
+    emailService.sendOrderCancellationEmail.mockResolvedValue({ MessageId: 'test-message-id' });
+    emailService.sendCustomerPasswordResetEmail.mockResolvedValue({ MessageId: 'test-message-id' });
+    emailService.sendAdministratorWelcomeEmail.mockResolvedValue({ MessageId: 'test-message-id' });
+    emailService.sendAdministratorPasswordResetEmail.mockResolvedValue({ MessageId: 'test-message-id' });
+    emailService.sendOperatorWelcomeEmail.mockResolvedValue({ MessageId: 'test-message-id' });
+    emailService.sendOperatorPinResetEmail.mockResolvedValue({ MessageId: 'test-message-id' });
+    emailService.sendOperatorShiftReminderEmail.mockResolvedValue({ MessageId: 'test-message-id' });
+    emailService.sendOperatorPasswordResetEmail.mockResolvedValue({ MessageId: 'test-message-id' });
+    emailService.sendServiceDownAlert.mockResolvedValue({ MessageId: 'test-message-id' });
+    emailService.sendOrderReadyNotification.mockResolvedValue({ MessageId: 'test-message-id' });
+    emailService.sendOrderPickedUpNotification.mockResolvedValue({ MessageId: 'test-message-id' });
+    emailService.sendEmail.mockResolvedValue({ MessageId: 'test-message-id' });
+    emailService.sendPasswordResetEmail.mockResolvedValue({ MessageId: 'test-message-id' });
   });
 
   describe('All Email Functions', () => {
@@ -93,7 +143,9 @@ describe('Email Service Mock', () => {
       await expect(emailService.sendAffiliateWelcomeEmail({ email: 'test@example.com' }))
         .rejects.toThrow('Email service error');
         
-      // Verify the mock is restored
+      // After the rejection, the next call should work normally
+      // Re-set the mock to return success
+      emailService.sendAffiliateWelcomeEmail.mockResolvedValue({ MessageId: 'test-message-id' });
       expect(await emailService.sendAffiliateWelcomeEmail({})).toEqual({ MessageId: 'test-message-id' });
     });
   });

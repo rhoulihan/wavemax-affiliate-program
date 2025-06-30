@@ -1,6 +1,50 @@
 // Email Service Integration Tests
 // These tests verify the email service functionality without conflicting with global mocks
 
+// Mock fs module before any imports
+jest.mock('fs', () => {
+  const actualFs = jest.requireActual('fs');
+  return {
+    ...actualFs,
+    readFile: jest.fn((path, encoding, callback) => {
+      // Mock template reading
+      if (typeof encoding === 'function') {
+        callback = encoding;
+      }
+      callback(null, `
+        <!DOCTYPE html>
+        <html>
+        <head><title>Test Email</title></head>
+        <body>
+          <h1>Test Email Template</h1>
+          <p>[EMAIL_CONTENT]</p>
+          <p>Reset Link: [RESET_LINK]</p>
+          <p>User: [USER_NAME]</p>
+          <p>Email: [USER_EMAIL]</p>
+        </body>
+        </html>
+      `);
+    }),
+    promises: {
+      ...actualFs.promises,
+      readFile: jest.fn().mockResolvedValue(`
+        <!DOCTYPE html>
+        <html>
+        <head><title>Test Email</title></head>
+        <body>
+          <h1>Test Email Template</h1>
+          <p>[EMAIL_CONTENT]</p>
+          <p>Reset Link: [RESET_LINK]</p>
+          <p>User: [USER_NAME]</p>
+          <p>Email: [USER_EMAIL]</p>
+        </body>
+        </html>
+      `),
+      access: jest.fn().mockResolvedValue(true)
+    }
+  };
+});
+
 const fs = require('fs').promises;
 const path = require('path');
 
@@ -9,19 +53,17 @@ describe('Email Service Integration', () => {
   const originalEnv = process.env;
 
   beforeAll(() => {
-    // Reset modules and mocks
-    jest.resetModules();
-    jest.clearAllMocks();
-    
-    // Unmock the email service
+    // Unmock the email service to use real implementation
     jest.unmock('../../server/utils/emailService');
   });
 
   beforeEach(() => {
-    // Set up test environment
-    process.env = { ...originalEnv };
-    process.env.NODE_ENV = 'test';
-    process.env.EMAIL_PROVIDER = 'console'; // Use console provider for tests
+    // Clear module cache before each test
+    jest.resetModules();
+    
+    // Set up test environment - these are already set in setup.js
+    // but we ensure they're correct for our tests
+    process.env.EMAIL_PROVIDER = 'console';
     process.env.EMAIL_FROM = 'test@wavemax.promo';
     process.env.BASE_URL = 'https://wavemax.promo';
   });
@@ -95,13 +137,17 @@ describe('Email Service Integration', () => {
         commissionPercentage: 10
       };
 
-      await emailService.sendAffiliateWelcomeEmail(affiliate);
-
+      const result = await emailService.sendAffiliateWelcomeEmail(affiliate);
+      
+      // Console transport logs the email content
       expect(consoleSpy).toHaveBeenCalledWith('=== EMAIL CONSOLE LOG ===');
       expect(consoleSpy).toHaveBeenCalledWith('To:', 'test@example.com');
-      // Subject is logged as a separate call
+      expect(consoleSpy).toHaveBeenCalledWith('From:', '"WaveMAX Laundry" <test@wavemax.promo>');
+      
+      // Check for subject
       const calls = consoleSpy.mock.calls.map(call => call.join(' '));
       expect(calls.some(call => call.includes('Subject:'))).toBe(true);
+      expect(calls.some(call => call.includes('Welcome to WaveMAX Laundry Affiliate Program'))).toBe(true);
     });
 
     it('should log customer welcome emails to console', async () => {
@@ -118,10 +164,14 @@ describe('Email Service Integration', () => {
         businessName: 'Test Business'
       };
 
-      await emailService.sendCustomerWelcomeEmail(customer, affiliate);
-
+      const result = await emailService.sendCustomerWelcomeEmail(customer, affiliate);
+      
       expect(consoleSpy).toHaveBeenCalledWith('=== EMAIL CONSOLE LOG ===');
       expect(consoleSpy).toHaveBeenCalledWith('To:', 'customer@example.com');
+      expect(consoleSpy).toHaveBeenCalledWith('From:', '"WaveMAX Laundry" <test@wavemax.promo>');
+      
+      // Also logs success message
+      expect(consoleSpy).toHaveBeenCalledWith('Customer welcome email sent successfully to:', 'customer@example.com');
     });
 
     it('should log password reset emails to console', async () => {
@@ -133,21 +183,23 @@ describe('Email Service Integration', () => {
       
       const resetUrl = 'https://example.com/reset/reset-token-123';
 
-      await emailService.sendAffiliatePasswordResetEmail(affiliate, resetUrl);
-
+      const result = await emailService.sendAffiliatePasswordResetEmail(affiliate, resetUrl);
+      
       expect(consoleSpy).toHaveBeenCalledWith('=== EMAIL CONSOLE LOG ===');
       expect(consoleSpy).toHaveBeenCalledWith('To:', 'user@example.com');
-      // Subject is logged as a separate call
+      expect(consoleSpy).toHaveBeenCalledWith('From:', '"WaveMAX Laundry" <test@wavemax.promo>');
+      
       const calls = consoleSpy.mock.calls.map(call => call.join(' '));
-      expect(calls.some(call => call.includes('Subject:'))).toBe(true);
+      expect(calls.some(call => call.includes('Password Reset'))).toBe(true);
     });
   });
 
   describe('Email Template Verification', () => {
     it('should verify email templates directory exists', async () => {
+      const actualFs = jest.requireActual('fs').promises;
       const templateDir = path.join(__dirname, '../../server/templates/emails');
       
-      const dirExists = await fs.access(templateDir)
+      const dirExists = await actualFs.access(templateDir)
         .then(() => true)
         .catch(() => false);
       
@@ -155,6 +207,7 @@ describe('Email Service Integration', () => {
     });
 
     it('should verify essential email templates exist', async () => {
+      const actualFs = jest.requireActual('fs').promises;
       const templateDir = path.join(__dirname, '../../server/templates/emails');
       const essentialTemplates = [
         'affiliate-welcome.html',
@@ -165,7 +218,7 @@ describe('Email Service Integration', () => {
 
       for (const template of essentialTemplates) {
         const templatePath = path.join(templateDir, template);
-        const exists = await fs.access(templatePath)
+        const exists = await actualFs.access(templatePath)
           .then(() => true)
           .catch(() => false);
         
@@ -247,7 +300,9 @@ describe('Email Service Integration', () => {
       // Console provider will still "send" but to invalid address
       await emailService.sendCustomerWelcomeEmail(invalidCustomer, affiliate);
       
+      expect(consoleSpy).toHaveBeenCalledWith('=== EMAIL CONSOLE LOG ===');
       expect(consoleSpy).toHaveBeenCalledWith('To:', 'not-an-email');
+      expect(consoleSpy).toHaveBeenCalledWith('Customer welcome email sent successfully to:', 'not-an-email');
       
       consoleSpy.mockRestore();
     });
@@ -284,11 +339,16 @@ describe('Email Service Integration', () => {
       
       // Count how many times we logged email headers
       const emailLogCalls = consoleSpy.mock.calls.filter(
-        call => call[0] && call[0].includes('EMAIL')
+        call => call[0] && call[0] === '=== EMAIL CONSOLE LOG ==='
       );
       
-      // Should have logged something for each email
-      expect(emailLogCalls.length).toBeGreaterThan(0);
+      // Should have logged 3 emails (one for each recipient)
+      expect(emailLogCalls.length).toBe(3);
+      
+      // Verify each recipient was sent an email
+      expect(consoleSpy).toHaveBeenCalledWith('Customer welcome email sent successfully to:', 'user1@example.com');
+      expect(consoleSpy).toHaveBeenCalledWith('Customer welcome email sent successfully to:', 'user2@example.com');
+      expect(consoleSpy).toHaveBeenCalledWith('Customer welcome email sent successfully to:', 'user3@example.com');
       
       consoleSpy.mockRestore();
     });

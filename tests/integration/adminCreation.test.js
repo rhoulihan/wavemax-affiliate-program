@@ -3,6 +3,14 @@ const Administrator = require('../../server/models/Administrator');
 const emailService = require('../../server/utils/emailService');
 const encryptionUtil = require('../../server/utils/encryption');
 
+// Mock emailService
+jest.mock('../../server/utils/emailService', () => ({
+  sendAdministratorWelcomeEmail: jest.fn().mockResolvedValue(true),
+  sendPasswordResetEmail: jest.fn().mockResolvedValue(true),
+  sendAffiliateWelcomeEmail: jest.fn().mockResolvedValue(true),
+  sendOperatorWelcomeEmail: jest.fn().mockResolvedValue(true)
+}));
+
 jest.mock('../../server/utils/auditLogger', () => ({
   log: jest.fn().mockResolvedValue(true),
   logAuditEvent: jest.fn(),
