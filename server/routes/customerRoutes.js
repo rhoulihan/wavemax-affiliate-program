@@ -88,18 +88,8 @@ router.put('/:customerId/password', authenticate, [
 ], customerController.updateCustomerPassword);
 
 
-
-/**
- * @route   PUT /api/customers/:customerId/payment
- * @desc    Update customer payment information
- * @access  Private (self or admin)
- */
-router.put('/:customerId/payment', authenticate, [
-  body('cardholderName').notEmpty().withMessage('Cardholder name is required'),
-  body('cardNumber').notEmpty().withMessage('Card number is required'),
-  body('expiryDate').notEmpty().withMessage('Expiry date is required'),
-  body('billingZip').notEmpty().withMessage('Billing ZIP code is required')
-], customerController.updatePaymentInfo);
+// Payment information is now handled entirely by Paygistix
+// No payment update endpoint needed
 
 /**
  * @route   DELETE /api/customers/:customerId/delete-all-data
