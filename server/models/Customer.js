@@ -2,7 +2,6 @@
 
 const mongoose = require('mongoose');
 const { v4: uuidv4 } = require('uuid');
-const encryptionUtil = require('../utils/encryption');
 
 // Customer Schema
 const customerSchema = new mongoose.Schema({
@@ -68,20 +67,8 @@ const customerSchema = new mongoose.Schema({
     enum: ['traditional', 'google', 'facebook', 'linkedin', 'social'],
     default: 'traditional'
   },
-  // Encrypted payment fields
-  cardholderName: {
-    iv: String,
-    encryptedData: String,
-    authTag: String
-  },
-  lastFourDigits: String, // Only store last 4 digits of card
-  expiryDate: {
-    iv: String,
-    encryptedData: String,
-    authTag: String
-  },
-  billingZip: String,
-  savePaymentInfo: { type: Boolean, default: false },
+  // Payment is now handled entirely by Paygistix
+  // No payment information is stored in our database
   // Bag information
   numberOfBags: { type: Number, default: 1 },
   bagCredit: { type: Number, default: 0 }, // Credit to be applied on first order
@@ -97,18 +84,7 @@ const customerSchema = new mongoose.Schema({
   }
 }, { timestamps: true });
 
-// Middleware for encrypting sensitive payment data before saving
-customerSchema.pre('save', function(next) {
-  if (this.isModified('cardholderName') && this.cardholderName && typeof this.cardholderName === 'string') {
-    this.cardholderName = encryptionUtil.encrypt(this.cardholderName);
-  }
-
-  if (this.isModified('expiryDate') && this.expiryDate && typeof this.expiryDate === 'string') {
-    this.expiryDate = encryptionUtil.encrypt(this.expiryDate);
-  }
-
-  next();
-});
+// No longer need encryption middleware as payment data is not stored
 
 // Create model
 const Customer = mongoose.model('Customer', customerSchema);
