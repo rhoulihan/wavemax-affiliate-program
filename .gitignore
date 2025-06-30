@@ -163,6 +163,8 @@ dist
 .yarn/install-state.gz
 .pnp.*
 .env.backup
+.env.backup*
+backup/
 
 # Project-specific temporary files
 *.out

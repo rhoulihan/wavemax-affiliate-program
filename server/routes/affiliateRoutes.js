@@ -7,13 +7,14 @@ const { authenticate, authorize } = require('../middleware/auth');
 const { body } = require('express-validator');
 const paginationMiddleware = require('../utils/paginationMiddleware');
 const { customPasswordValidator } = require('../utils/passwordValidator');
+const { registrationLimiter } = require('../middleware/rateLimiting');
 
 /**
  * @route   POST /api/affiliates/register
  * @desc    Register a new affiliate
  * @access  Public
  */
-router.post('/register', [
+router.post('/register', registrationLimiter, [
   body('firstName').notEmpty().withMessage('First name is required'),
   body('lastName').notEmpty().withMessage('Last name is required'),
   body('email').isEmail().withMessage('Valid email is required'),

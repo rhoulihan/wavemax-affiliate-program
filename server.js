@@ -9,7 +9,7 @@ const cors = require('cors');
 const path = require('path');
 const helmet = require('helmet');
 const morgan = require('morgan');
-const rateLimit = require('express-rate-limit');
+// Rate limiting is now handled by centralized middleware
 const compression = require('compression');
 
 // Import middleware
@@ -122,13 +122,36 @@ if (process.env.NODE_ENV === 'production') {
   });
 }
 
+// Import CSP nonce middleware
+const { cspNonce } = require('./server/middleware/cspNonce');
+
+// Apply CSP nonce middleware before helmet
+app.use(cspNonce);
+
 // Security headers with iframe embedding support
 app.use(helmet({
   contentSecurityPolicy: {
     directives: {
       defaultSrc: ['\'self\''],
-      scriptSrc: ['\'self\'', 'https://cdnjs.cloudflare.com', 'https://cdn.jsdelivr.net', 'https://safepay.paymentlogistics.net', '\'unsafe-inline\''], // Added unsafe-inline for embed pages
-      styleSrc: ['\'self\'', 'https://cdnjs.cloudflare.com', 'https://cdn.jsdelivr.net', 'https://fonts.googleapis.com', '\'unsafe-inline\''], // unsafe-inline needed for Tailwind
+      scriptSrc: [
+        '\'self\'',
+        'https://cdnjs.cloudflare.com',
+        'https://cdn.jsdelivr.net',
+        'https://safepay.paymentlogistics.net',
+        // For backward compatibility during transition, keep unsafe-inline temporarily
+        // Remove after updating all inline scripts to use nonces
+        '\'unsafe-inline\'',
+        (req, res) => `'nonce-${res.locals.cspNonce}'`
+      ],
+      styleSrc: [
+        '\'self\'',
+        'https://cdnjs.cloudflare.com',
+        'https://cdn.jsdelivr.net',
+        'https://fonts.googleapis.com',
+        // Keep unsafe-inline for Tailwind CSS compatibility
+        '\'unsafe-inline\'',
+        (req, res) => `'nonce-${res.locals.styleNonce}'`
+      ],
       imgSrc: ['\'self\'', 'data:', 'https://www.wavemax.promo', 'https://*.tile.openstreetmap.org', 'https://tile.openstreetmap.org', 'https://cdnjs.cloudflare.com', 'https://flagcdn.com'],
       connectSrc: ['\'self\'', 'https://wavemax.promo', 'https://router.project-osrm.org', 'https://graphhopper.com', 'https://api.openrouteservice.org', 'https://valhalla1.openstreetmap.de', 'https://nominatim.openstreetmap.org'],
       fontSrc: ['\'self\'', 'https://cdnjs.cloudflare.com', 'https://cdn.jsdelivr.net', 'https://fonts.gstatic.com'],
@@ -138,7 +161,13 @@ app.use(helmet({
       // Allow form submissions to Paygistix
       formAction: ['\'self\'', 'https://safepay.paymentlogistics.net'],
       // Allow embedding on WaveMAX Laundry domains
-      frameAncestors: ['\'self\'', 'https://www.wavemaxlaundry.com', 'https://wavemaxlaundry.com']
+      frameAncestors: ['\'self\'', 'https://www.wavemaxlaundry.com', 'https://wavemaxlaundry.com'],
+      // Additional security directives
+      baseUri: ['\'self\''],
+      childSrc: ['\'none\''],
+      workerSrc: ['\'self\''],
+      manifestSrc: ['\'self\''],
+      upgradeInsecureRequests: process.env.NODE_ENV === 'production' ? [] : null
     }
   },
   hsts: {
@@ -150,8 +179,31 @@ app.use(helmet({
   noSniff: true,
   referrerPolicy: { policy: 'same-origin' },
   // Remove frameguard to use CSP frame-ancestors instead
-  frameguard: false
+  frameguard: false,
+  // Additional security headers
+  permittedCrossDomainPolicies: false,
+  hidePoweredBy: true,
+  ieNoOpen: true,
+  dnsPrefetchControl: { allow: false }
 }));
+
+// Add custom security headers not covered by helmet
+app.use((req, res, next) => {
+  // Permissions Policy (previously Feature Policy)
+  res.setHeader('Permissions-Policy', 
+    'geolocation=(), microphone=(), camera=(), payment=(), usb=(), magnetometer=(), accelerometer=(), gyroscope=()'
+  );
+  
+  // X-Permitted-Cross-Domain-Policies
+  res.setHeader('X-Permitted-Cross-Domain-Policies', 'none');
+  
+  // Clear-Site-Data header for logout endpoints
+  if (req.path.includes('/logout')) {
+    res.setHeader('Clear-Site-Data', '"cache", "cookies", "storage"');
+  }
+  
+  next();
+});
 
 // CORS setup
 const corsOptions = {
@@ -204,16 +256,12 @@ app.use(sanitizeRequest); // Sanitize all inputs for XSS prevention
 app.use(compression());
 
 // Rate limiting for API endpoints
-if (process.env.NODE_ENV !== 'test' && process.env.RELAX_RATE_LIMITING !== 'true') {
-  const apiLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 100, // Limit each IP to 100 requests per windowMs
-    message: 'Too many requests from this IP, please try again later',
-    standardHeaders: true,
-    legacyHeaders: false
-  });
-  app.use('/api/', apiLimiter);
-}
+// Import centralized rate limiting configuration
+const { apiLimiter } = require('./server/middleware/rateLimiting');
+
+// Apply general API rate limiting to all /api routes
+// The middleware itself handles test environment and relaxed mode
+app.use('/api/', apiLimiter);
 
 // Setup session middleware - add this after other middleware like helmet, cors, etc.
 const session = require('express-session');

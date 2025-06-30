@@ -7,13 +7,14 @@ const { authenticate, authorize } = require('../middleware/auth');
 const { checkRole } = require('../middleware/rbac');
 const { body } = require('express-validator');
 const { customPasswordValidator } = require('../utils/passwordValidator');
+const { registrationLimiter } = require('../middleware/rateLimiting');
 
 /**
  * @route   POST /api/customers/register
  * @desc    Register a new customer
  * @access  Public
  */
-router.post('/register', [
+router.post('/register', registrationLimiter, [
   body('affiliateId').notEmpty().withMessage('Affiliate ID is required'),
   body('firstName').notEmpty().withMessage('First name is required'),
   body('lastName').notEmpty().withMessage('Last name is required'),
