@@ -122,11 +122,6 @@ if (process.env.NODE_ENV === 'production') {
   });
 }
 
-// Import CSP nonce middleware
-const { cspNonce } = require('./server/middleware/cspNonce');
-
-// Apply CSP nonce middleware before helmet
-app.use(cspNonce);
 
 // Security headers with iframe embedding support
 app.use(helmet({
@@ -138,19 +133,14 @@ app.use(helmet({
         'https://cdnjs.cloudflare.com',
         'https://cdn.jsdelivr.net',
         'https://safepay.paymentlogistics.net',
-        // For backward compatibility during transition, keep unsafe-inline temporarily
-        // Remove after updating all inline scripts to use nonces
-        '\'unsafe-inline\'',
-        (req, res) => `'nonce-${res.locals.cspNonce}'`
+        '\'unsafe-inline\''
       ],
       styleSrc: [
         '\'self\'',
         'https://cdnjs.cloudflare.com',
         'https://cdn.jsdelivr.net',
         'https://fonts.googleapis.com',
-        // Keep unsafe-inline for Tailwind CSS compatibility
-        '\'unsafe-inline\'',
-        (req, res) => `'nonce-${res.locals.styleNonce}'`
+        '\'unsafe-inline\''
       ],
       imgSrc: ['\'self\'', 'data:', 'https://www.wavemax.promo', 'https://*.tile.openstreetmap.org', 'https://tile.openstreetmap.org', 'https://cdnjs.cloudflare.com', 'https://flagcdn.com'],
       connectSrc: ['\'self\'', 'https://wavemax.promo', 'https://router.project-osrm.org', 'https://graphhopper.com', 'https://api.openrouteservice.org', 'https://valhalla1.openstreetmap.de', 'https://nominatim.openstreetmap.org'],
@@ -337,6 +327,7 @@ app.use((req, res, next) => {
 // Initialize Passport for social media authentication
 app.use(passport.initialize());
 app.use(passport.session());
+
 
 // Serve static files in all environments
 app.use(express.static(path.join(__dirname, 'public')));
