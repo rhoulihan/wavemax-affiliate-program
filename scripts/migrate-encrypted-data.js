@@ -58,8 +58,11 @@ class MigrationEncryption {
         return encryptedData;
       }
 
-      const { iv, authTag, encrypted } = encryptedData;
-      if (!iv || !authTag || !encrypted) {
+      // Handle both old and new field names
+      const { iv, authTag, encrypted, encryptedData: encData } = encryptedData;
+      const cipherText = encrypted || encData;
+      
+      if (!iv || !authTag || !cipherText) {
         throw new Error('Invalid encrypted data format');
       }
 
@@ -70,7 +73,7 @@ class MigrationEncryption {
       );
       decipher.setAuthTag(Buffer.from(authTag, 'hex'));
 
-      let decrypted = decipher.update(encrypted, 'hex', 'utf8');
+      let decrypted = decipher.update(cipherText, 'hex', 'utf8');
       decrypted += decipher.final('utf8');
 
       return decrypted;
@@ -96,7 +99,7 @@ class MigrationEncryption {
       return {
         iv: iv.toString('hex'),
         authTag: authTag.toString('hex'),
-        encrypted: encrypted
+        encryptedData: encrypted  // Use the same field name as the main encryption util
       };
     } catch (error) {
       throw new Error(`Encryption failed: ${error.message}`);
