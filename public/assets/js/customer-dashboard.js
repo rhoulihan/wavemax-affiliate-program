@@ -470,6 +470,9 @@ async function saveProfile() {
 
 // Handle logout
 function handleLogout() {
+  console.log('Customer logout initiated');
+  
+  // Clear local storage
   localStorage.removeItem('customerToken');
   localStorage.removeItem('currentCustomer');
   localStorage.removeItem('currentRoute');
@@ -478,14 +481,27 @@ function handleLogout() {
   if (window.SessionManager) {
     window.SessionManager.clearAuth('customer');
   }
-
-  // Use embed navigation
+  
+  // Send logout message to parent if in iframe
   if (window.parent !== window) {
     window.parent.postMessage({
+      type: 'logout',
+      userType: 'customer'
+    }, '*');
+  }
+
+  // Use embed navigation - check for navigateTo function first
+  if (window.navigateTo && typeof window.navigateTo === 'function') {
+    // We're in embed-app-v2.html context
+    window.navigateTo('/customer-login');
+  } else if (window.parent !== window) {
+    // We're in an iframe but not embed-app-v2
+    window.parent.postMessage({
       type: 'navigate',
-      data: { page: '/customer-login' }
+      route: '/customer-login'
     }, '*');
   } else {
+    // Direct navigation
     window.location.href = '/embed-app-v2.html?route=/customer-login';
   }
 }
