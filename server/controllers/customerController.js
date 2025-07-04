@@ -417,9 +417,9 @@ exports.getCustomerDashboardStats = async (req, res) => {
     // Get all orders for statistics
     const allOrders = await Order.find({ customerId }).sort({ createdAt: -1 });
 
-    // Get active orders
+    // Get active orders (anything not complete or cancelled)
     const activeOrders = allOrders.filter(order =>
-      ['scheduled', 'picked_up', 'processing', 'ready_for_delivery'].includes(order.status)
+      ['pending', 'processing', 'processed'].includes(order.status)
     );
 
     // Get completed orders
