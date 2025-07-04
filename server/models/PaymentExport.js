@@ -116,7 +116,7 @@ const paymentExportSchema = new mongoose.Schema({
   },
   // Notes and error tracking
   notes: String,
-  errors: [{
+  exportErrors: [{
     affiliateId: String,
     error: String,
     timestamp: Date

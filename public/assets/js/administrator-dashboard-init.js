@@ -44,7 +44,7 @@
         data: { page: '/administrator-login' }
       }, '*');
     } else {
-      window.location.href = '/embed-app.html?route=/administrator-login';
+      window.location.href = '/embed-app-v2.html?route=/administrator-login';
     }
     return;
   }
@@ -63,6 +63,7 @@
       // Show the logout modal
       const logoutModal = document.getElementById('logoutModal');
       if (logoutModal) {
+        logoutModal.classList.remove('hidden');
         logoutModal.style.display = 'flex';
       }
     });
@@ -73,6 +74,7 @@
     const logoutModal = document.getElementById('logoutModal');
     if (logoutModal) {
       logoutModal.style.display = 'none';
+      logoutModal.classList.add('hidden');
     }
   };
 
@@ -117,7 +119,7 @@
         data: { page: '/administrator-login' }
       }, '*');
     } else {
-      window.location.href = '/embed-app.html?route=/administrator-login';
+      window.location.href = '/embed-app-v2.html?route=/administrator-login';
     }
   };
 
@@ -278,7 +280,7 @@
         renderRecentActivity(dashboardData.dashboard.recentActivity || []);
       } else {
         console.error('Dashboard data not loaded:', dashboardData.message);
-        document.getElementById('dashboardStats').innerHTML = `<p style="padding: 20px; text-align: center; color: #666;">${t('administrator.dashboard.errors.dashboardLoadFailed', 'Failed to load dashboard data')}</p>`;
+        document.getElementById('dashboardStats').innerHTML = `<p class="p-20 text-center text-muted">${t('administrator.dashboard.errors.dashboardLoadFailed', 'Failed to load dashboard data')}</p>`;
       }
       
       // Load analytics data with default period
@@ -287,7 +289,7 @@
       
     } catch (error) {
       console.error('Error loading dashboard:', error);
-      document.getElementById('dashboardStats').innerHTML = `<p style="padding: 20px; text-align: center; color: #666;">${t('administrator.dashboard.errors.dashboardLoadFailed', 'Error loading dashboard')}</p>`;
+      document.getElementById('dashboardStats').innerHTML = `<p class="p-20 text-center text-muted">${t('administrator.dashboard.errors.dashboardLoadFailed', 'Error loading dashboard')}</p>`;
     }
   }
 
@@ -296,7 +298,7 @@
     const dashboardElement = document.getElementById('dashboardStats');
 
     if (!data) {
-      dashboardElement.innerHTML = `<p style="padding: 20px; text-align: center; color: #666;">${t('common.messages.noData', 'No dashboard data available')}</p>`;
+      dashboardElement.innerHTML = `<p class="p-20 text-center text-muted">${t('common.messages.noData', 'No dashboard data available')}</p>`;
       return;
     }
 
@@ -344,7 +346,7 @@
   // Render recent activity
   function renderRecentActivity(activities) {
     if (!activities || activities.length === 0) {
-      document.getElementById('recentActivity').innerHTML = `<p style="padding: 20px; text-align: center; color: #666;">${t('administrator.dashboard.recentActivity.noActivity', 'No recent activity')}</p>`;
+      document.getElementById('recentActivity').innerHTML = `<p class="p-20 text-center text-muted">${t('administrator.dashboard.recentActivity.noActivity', 'No recent activity')}</p>`;
       return;
     }
 
@@ -450,7 +452,7 @@
       }
     } catch (error) {
       console.error('Error loading analytics for dashboard:', error);
-      document.getElementById('kpiOverview').innerHTML = `<p style="padding: 20px; text-align: center; color: #666;">${t('administrator.dashboard.errors.analyticsLoadFailed', 'Error loading analytics data')}</p>`;
+      document.getElementById('kpiOverview').innerHTML = `<p class="p-20 text-center text-muted">${t('administrator.dashboard.errors.analyticsLoadFailed', 'Error loading analytics data')}</p>`;
     }
   }
   
@@ -501,7 +503,7 @@
     const analyticsContainer = document.getElementById('orderAnalytics');
     
     if (!data || !data.analytics || !data.analytics.ordersByStatus) {
-      analyticsContainer.innerHTML = `<p style="padding: 20px; text-align: center; color: #666;">${t('common.messages.noData', 'No analytics data available')}</p>`;
+      analyticsContainer.innerHTML = `<p class="p-20 text-center text-muted">${t('common.messages.noData', 'No analytics data available')}</p>`;
       return;
     }
     
@@ -555,7 +557,7 @@
         data = JSON.parse(text);
       } catch (e) {
         console.error('Failed to parse response as JSON:', e);
-        document.getElementById('operatorsList').innerHTML = '<p style="padding: 20px; text-align: center; color: #666;">Error: Invalid response format</p>';
+        document.getElementById('operatorsList').innerHTML = '<p class="p-20 text-center text-muted">Error: Invalid response format</p>';
         return;
       }
 
@@ -564,11 +566,11 @@
       } else {
         console.error('Operators load failed:', data);
         const errorMsg = data.message || data.error || 'Failed to load operators';
-        document.getElementById('operatorsList').innerHTML = `<p style="padding: 20px; text-align: center; color: #666;">${t('administrator.dashboard.errors.operatorsLoadFailed', errorMsg)}</p>`;
+        document.getElementById('operatorsList').innerHTML = `<p class="p-20 text-center text-muted">${t('administrator.dashboard.errors.operatorsLoadFailed', errorMsg)}</p>`;
       }
     } catch (error) {
       console.error('Error loading operators:', error);
-      document.getElementById('operatorsList').innerHTML = `<p style="padding: 20px; text-align: center; color: #666;">${t('administrator.dashboard.errors.operatorsLoadFailed', 'Error loading operators')}</p>`;
+      document.getElementById('operatorsList').innerHTML = `<p class="p-20 text-center text-muted">${t('administrator.dashboard.errors.operatorsLoadFailed', 'Error loading operators')}</p>`;
     }
   }
 
@@ -577,7 +579,7 @@
     const t = window.i18n ? window.i18n.t.bind(window.i18n) : (key) => key;
     
     if (!operators || operators.length === 0) {
-      document.getElementById('operatorsList').innerHTML = `<p style="padding: 20px; text-align: center; color: #666;">${t('administrator.dashboard.operators.noOperators', 'No operators found')}</p>`;
+      document.getElementById('operatorsList').innerHTML = `<p class="p-20 text-center text-muted">${t('administrator.dashboard.operators.noOperators', 'No operators found')}</p>`;
       return;
     }
     const tableHtml = `
@@ -642,11 +644,11 @@
         }
       } else {
         console.error('Customers load failed:', data);
-        document.getElementById('customersList').innerHTML = `<p style="padding: 20px; text-align: center; color: #666;">${t('administrator.dashboard.errors.customersLoadFailed', 'Failed to load customers')}</p>`;
+        document.getElementById('customersList').innerHTML = `<p class="p-20 text-center text-muted">${t('administrator.dashboard.errors.customersLoadFailed', 'Failed to load customers')}</p>`;
       }
     } catch (error) {
       console.error('Error loading customers:', error);
-      document.getElementById('customersList').innerHTML = `<p style="padding: 20px; text-align: center; color: #666;">${t('administrator.dashboard.errors.customersLoadFailed', 'Error loading customers')}</p>`;
+      document.getElementById('customersList').innerHTML = `<p class="p-20 text-center text-muted">${t('administrator.dashboard.errors.customersLoadFailed', 'Error loading customers')}</p>`;
     }
     
     // Setup event handlers for customers tab
@@ -656,7 +658,7 @@
   // Render customers list
   function renderCustomersList(customers) {
     if (!customers || customers.length === 0) {
-      document.getElementById('customersList').innerHTML = `<p style="padding: 20px; text-align: center; color: #666;">${t('administrator.dashboard.customers.noCustomers', 'No customers found')}</p>`;
+      document.getElementById('customersList').innerHTML = `<p class="p-20 text-center text-muted">${t('administrator.dashboard.customers.noCustomers', 'No customers found')}</p>`;
       return;
     }
     
@@ -664,7 +666,7 @@
       <table>
         <thead>
           <tr>
-            <th style="width: 50px;">
+            <th class="w-50px">
               <input type="checkbox" id="selectAllCustomers">
             </th>
             <th>${t('administrator.dashboard.customers.name', 'Name')}</th>
@@ -696,20 +698,20 @@
                 </td>
                 <td>
                   <div>${customer.firstName} ${customer.lastName}</div>
-                  ${customer.businessName ? `<div style="font-size: 0.875rem; color: #666;">${customer.businessName}</div>` : ''}
-                  <div style="font-size: 0.875rem; color: #999;">${customer.customerId}</div>
+                  ${customer.businessName ? `<div class="text-sm text-muted">${customer.businessName}</div>` : ''}
+                  <div class="text-sm text-light">${customer.customerId}</div>
                 </td>
                 <td>
                   <div>${customer.email}</div>
-                  <div style="font-size: 0.875rem; color: #666;">${customer.phone}</div>
+                  <div class="text-sm text-muted">${customer.phone}</div>
                 </td>
                 <td>
                   <div>${customer.address}</div>
-                  <div style="font-size: 0.875rem; color: #666;">${customer.city}, ${customer.state} ${customer.zipCode}</div>
+                  <div class="text-sm text-muted">${customer.city}, ${customer.state} ${customer.zipCode}</div>
                 </td>
                 <td>
                   <div>${customer.orderCount || 0}</div>
-                  <div style="font-size: 0.875rem; color: #666;">${t('administrator.dashboard.customers.joined', 'Joined')}: ${new Date(customer.createdAt).toLocaleDateString()}</div>
+                  <div class="text-sm text-muted">${t('administrator.dashboard.customers.joined', 'Joined')}: ${new Date(customer.createdAt).toLocaleDateString()}</div>
                 </td>
                 <td>${statusBadge}</td>
                 <td>
@@ -947,14 +949,33 @@
     const pdfBlob = pdf.output('blob');
     const pdfUrl = URL.createObjectURL(pdfBlob);
     
-    // Open PDF in new window
-    const printWindow = window.open(pdfUrl, '_blank');
+    // Create a temporary anchor element to force download/open in full window
+    const link = document.createElement('a');
+    link.href = pdfUrl;
+    link.target = '_blank';
+    link.download = filename;
     
-    // Clean up the URL immediately after opening
-    // The browser will have already loaded the PDF data
+    // Check if we're in an iframe - if so, notify parent to open in new window
+    if (window.parent !== window) {
+      // Send message to parent to open PDF
+      window.parent.postMessage({
+        type: 'open-pdf',
+        url: pdfUrl,
+        filename: filename
+      }, '*');
+      
+      // Also try to open directly
+      link.click();
+    } else {
+      // Not in iframe, open directly
+      link.click();
+    }
+    
+    // Clean up
     setTimeout(() => {
       URL.revokeObjectURL(pdfUrl);
-    }, 100); // Very short delay to ensure window has opened
+      link.remove();
+    }, 1000); // Slightly longer delay to ensure download starts
     
     console.log(`Generated PDF with ${customers.length} customer cards`);
   }
@@ -1471,7 +1492,7 @@
       } else {
         console.error('Affiliates API error:', data);
         document.getElementById('affiliatesList').innerHTML = `
-          <p style="padding: 20px; text-align: center; color: #dc3545;">
+          <p class="p-20 text-center text-danger">
             ${data.message || t('administrator.dashboard.affiliates.loadError', 'Error loading affiliates')}
           </p>
         `;
@@ -1479,7 +1500,7 @@
     } catch (error) {
       console.error('Error loading affiliates:', error);
       document.getElementById('affiliatesList').innerHTML = `
-        <p style="padding: 20px; text-align: center; color: #dc3545;">
+        <p class="p-20 text-center text-danger">
           ${t('administrator.dashboard.affiliates.loadError', 'Error loading affiliates')}
         </p>
       `;
@@ -1490,7 +1511,7 @@
   function renderAffiliatesList(affiliates) {
     if (!affiliates || affiliates.length === 0) {
       const noDataText = window.i18n ? window.i18n.t('administrator.dashboard.affiliates.noData') : 'No affiliate data available';
-      document.getElementById('affiliatesList').innerHTML = `<p style="padding: 20px; text-align: center; color: #666;">${noDataText}</p>`;
+      document.getElementById('affiliatesList').innerHTML = `<p class="p-20 text-center text-muted">${noDataText}</p>`;
       return;
     }
 
@@ -1605,13 +1626,13 @@
         renderExportHistory();
       } else {
         document.getElementById('exportHistoryList').innerHTML = `
-                    <p style="padding: 20px; text-align: center; color: #666;">${t('administrator.dashboard.errors.exportHistoryLoadFailed', 'Failed to load export history')}</p>
+                    <p class="p-20 text-center text-muted">${t('administrator.dashboard.errors.exportHistoryLoadFailed', 'Failed to load export history')}</p>
                 `;
       }
     } catch (error) {
       console.error('Error loading export history:', error);
       document.getElementById('exportHistoryList').innerHTML = `
-                <p style="padding: 20px; text-align: center; color: #666;">${t('administrator.dashboard.errors.exportHistoryLoadFailed', 'Error loading export history')}</p>
+                <p class="p-20 text-center text-muted">${t('administrator.dashboard.errors.exportHistoryLoadFailed', 'Error loading export history')}</p>
             `;
     }
   }
@@ -1620,7 +1641,7 @@
   function renderExportHistory() {
     if (exportHistory.length === 0) {
       document.getElementById('exportHistoryList').innerHTML = `
-                <p style="padding: 20px; text-align: center; color: #666;">${t('administrator.dashboard.quickbooks.noExports', 'No exports found')}</p>
+                <p class="p-20 text-center text-muted">${t('administrator.dashboard.quickbooks.noExports', 'No exports found')}</p>
             `;
       return;
     }
@@ -1686,7 +1707,11 @@
     if (openPaymentSummaryBtn && !openPaymentSummaryBtn.hasAttribute('data-initialized')) {
       openPaymentSummaryBtn.setAttribute('data-initialized', 'true');
       openPaymentSummaryBtn.addEventListener('click', () => {
-        document.getElementById('paymentSummaryModal').style.display = 'flex';
+        const paymentModal = document.getElementById('paymentSummaryModal');
+        if (paymentModal) {
+          paymentModal.classList.remove('hidden');
+          paymentModal.style.display = 'flex';
+        }
       });
     }
 
@@ -1695,7 +1720,11 @@
     if (openCommissionDetailBtn && !openCommissionDetailBtn.hasAttribute('data-initialized')) {
       openCommissionDetailBtn.setAttribute('data-initialized', 'true');
       openCommissionDetailBtn.addEventListener('click', () => {
-        document.getElementById('commissionDetailModal').style.display = 'flex';
+        const commissionModal = document.getElementById('commissionDetailModal');
+        if (commissionModal) {
+          commissionModal.classList.remove('hidden');
+          commissionModal.style.display = 'flex';
+        }
       });
     }
 
@@ -1878,10 +1907,10 @@
     const resultsDiv = document.getElementById('affiliateSearchResults');
 
     if (affiliateSearchResults.length === 0) {
-      resultsDiv.innerHTML = `<div style="padding: 10px; color: #666;">${t('administrator.dashboard.quickbooks.noAffiliatesFound', 'No affiliates found')}</div>`;
+      resultsDiv.innerHTML = `<div class="p-10 text-muted">${t('administrator.dashboard.quickbooks.noAffiliatesFound', 'No affiliates found')}</div>`;
     } else {
       resultsDiv.innerHTML = affiliateSearchResults.map(affiliate => `
-                <div style="padding: 10px; cursor: pointer; border-bottom: 1px solid #eee;" 
+                <div class="p-10 clickable border-bottom" 
                      data-affiliate-id="${affiliate.affiliateId}" data-affiliate-name="${affiliate.firstName} ${affiliate.lastName}" class="select-affiliate-link affiliate-search-item">
                     <strong>${affiliate.firstName} ${affiliate.lastName}</strong><br>
                     <small>${affiliate.email} | ID: ${affiliate.affiliateId}</small>
@@ -1903,12 +1932,20 @@
 
   // Modal close functions
   window.closePaymentSummaryModal = function() {
-    document.getElementById('paymentSummaryModal').style.display = 'none';
+    const paymentModal = document.getElementById('paymentSummaryModal');
+    if (paymentModal) {
+      paymentModal.style.display = 'none';
+      paymentModal.classList.add('hidden');
+    }
     document.getElementById('paymentSummaryForm').reset();
   };
 
   window.closeCommissionDetailModal = function() {
-    document.getElementById('commissionDetailModal').style.display = 'none';
+    const commissionModal = document.getElementById('commissionDetailModal');
+    if (commissionModal) {
+      commissionModal.style.display = 'none';
+      commissionModal.classList.add('hidden');
+    }
     document.getElementById('commissionDetailForm').reset();
     document.getElementById('detailAffiliateId').value = '';
     document.getElementById('selectedAffiliate').style.display = 'none';
@@ -1969,7 +2006,7 @@
       } else {
         console.error('Config API error:', data);
         document.getElementById('systemConfig').innerHTML = `
-          <p style="padding: 20px; text-align: center; color: #dc3545;">
+          <p class="p-20 text-center text-danger">
             ${data.message || t('administrator.dashboard.config.loadError', 'Error loading configuration')}
           </p>
         `;
@@ -1977,7 +2014,7 @@
     } catch (error) {
       console.error('Error loading system config:', error);
       document.getElementById('systemConfig').innerHTML = `
-        <p style="padding: 20px; text-align: center; color: #dc3545;">
+        <p class="p-20 text-center text-danger">
           ${t('administrator.dashboard.config.loadError', 'Error loading configuration')}
         </p>
       `;
@@ -2002,7 +2039,7 @@
         renderEnvironmentVariables(data.variables || data, data.sensitiveValues || {}, data.isSuperAdmin || false);
       } else {
         container.innerHTML = `
-          <p style="padding: 20px; text-align: center; color: #dc3545;">
+          <p class="p-20 text-center text-danger">
             ${data.message || t('administrator.dashboard.config.envLoadError', 'Error loading environment variables')}
           </p>
         `;
@@ -2010,7 +2047,7 @@
     } catch (error) {
       console.error('Error loading environment variables:', error);
       container.innerHTML = `
-        <p style="padding: 20px; text-align: center; color: #dc3545;">
+        <p class="p-20 text-center text-danger">
           ${t('administrator.dashboard.config.envLoadError', 'Error loading environment variables')}
         </p>
       `;
@@ -2023,7 +2060,7 @@
     
     if (!variables || Object.keys(variables).length === 0) {
       container.innerHTML = `
-        <p style="padding: 20px; text-align: center; color: #666;">
+        <p class="p-20 text-center text-muted">
           ${t('administrator.dashboard.config.noEnvVars', 'No environment variables found')}
         </p>
       `;
@@ -2071,12 +2108,12 @@
       }
     });
 
-    let html = '<div style="padding: 20px;">';
+    let html = '<div class="p-20">';
     
     if (isSuperAdmin) {
       html += `
-        <div style="margin-bottom: 20px; padding: 15px; background: #fff3cd; border: 1px solid #ffeeba; border-radius: 4px;">
-          <p style="margin: 0; color: #856404;">
+        <div class="alert alert-warning mb-20">
+          <p class="m-0 text-warning-dark">
             <strong>Super Admin Mode:</strong> You can view sensitive values by clicking the eye icon next to masked values.
           </p>
         </div>
@@ -2089,11 +2126,11 @@
       html += `
         <div class="form-section">
           <h3 class="section-title">${category}</h3>
-          <table style="width: 100%; border-collapse: collapse;">
+          <table class="w-100 table-collapsed">
             <thead>
-              <tr style="background: #f8f9fa;">
-                <th style="padding: 10px; text-align: left; border-bottom: 2px solid #dee2e6;">Variable</th>
-                <th style="padding: 10px; text-align: left; border-bottom: 2px solid #dee2e6;">Value</th>
+              <tr class="bg-light">
+                <th class="p-10 text-left border-bottom-2">Variable</th>
+                <th class="p-10 text-left border-bottom-2">Value</th>
               </tr>
             </thead>
             <tbody>
@@ -2113,16 +2150,16 @@
         
         html += `
           <tr>
-            <td style="padding: 8px; border-bottom: 1px solid #dee2e6; font-family: monospace; font-size: 13px;">${key}</td>
-            <td style="padding: 8px; border-bottom: 1px solid #dee2e6; font-family: monospace; font-size: 13px;">
-              <div style="display: flex; align-items: center; gap: 10px;">
-                <span id="env-value-${key}" style="color: ${value ? '#333' : '#999'};">${displayValue}</span>
+            <td class="p-8 border-bottom font-mono text-sm">${key}</td>
+            <td class="p-8 border-bottom font-mono text-sm">
+              <div class="d-flex align-center gap-10">
+                <span id="env-value-${key}" class="${value ? 'text-dark' : 'text-muted'}">${displayValue}</span>
                 ${hasSensitiveValue ? `
                   <button 
                     type="button" 
                     class="btn btn-sm" 
                     onclick="toggleEnvValue('${key}')"
-                    style="padding: 2px 8px; font-size: 12px; background: #6c757d; color: white; border: none; border-radius: 3px; cursor: pointer;"
+                    class="btn btn-sm btn-secondary"
                     title="Toggle visibility"
                   >
                     <span id="env-toggle-icon-${key}">👁️</span>
@@ -2177,7 +2214,7 @@
     // Check if configs is valid
     if (!configs || !Array.isArray(configs)) {
       document.getElementById('systemConfig').innerHTML = `
-        <p style="padding: 20px; text-align: center; color: #666;">
+        <p class="p-20 text-center text-muted">
           ${t('administrator.dashboard.config.noConfigData', 'No configuration data available')}
         </p>
       `;
@@ -2190,12 +2227,12 @@
       return acc;
     }, {});
 
-    let configHtml = '<form id="configForm" style="padding: 20px;">';
+    let configHtml = '<form id="configForm" class="p-20">';
 
     for (const [category, items] of Object.entries(groupedConfigs)) {
       configHtml += `
         <div class="form-section">
-          <h3 class="section-title" style="text-transform: capitalize;">${category}</h3>
+          <h3 class="section-title text-capitalize">${category}</h3>
           <div class="form-row">
       `;
 
@@ -2223,7 +2260,7 @@
         } else if (config.dataType === 'number') {
           configHtml += `<input type="number" id="config_${config.key}" name="${config.key}" value="${config.value}" data-type="${config.dataType}">`;
         } else if (config.dataType === 'object' || config.dataType === 'array') {
-          configHtml += `<textarea id="config_${config.key}" name="${config.key}" data-type="${config.dataType}" rows="3" style="font-family: monospace; font-size: 12px;">${JSON.stringify(config.value, null, 2)}</textarea>`;
+          configHtml += `<textarea id="config_${config.key}" name="${config.key}" data-type="${config.dataType}" rows="3" class="font-mono text-xs">${JSON.stringify(config.value, null, 2)}</textarea>`;
         } else {
           configHtml += `<input type="text" id="config_${config.key}" name="${config.key}" value="${config.value}" data-type="${config.dataType}">`;
         }
@@ -2246,14 +2283,14 @@
     
     // Add DocuSign Authorization section
     configHtml += `
-      <div class="docusign-auth-section" style="margin-top: 40px; padding: 20px; border: 1px solid #ddd; border-radius: 8px; background-color: #f8f9fa;">
-        <h3 style="margin: 0 0 15px;">${t('administrator.dashboard.config.docusignTitle', 'DocuSign Integration')}</h3>
-        <p style="margin-bottom: 15px;">${t('administrator.dashboard.config.docusignDesc', 'Authorize DocuSign to enable W9 form sending to affiliates.')}</p>
-        <div id="docusignAuthStatus" style="margin-bottom: 15px;">
-          <span class="spinner" style="display: inline-block; margin-right: 10px;"></span>
+      <div class="docusign-auth-section mt-40 p-20 border rounded bg-light">
+        <h3 class="m-0 mb-15">${t('administrator.dashboard.config.docusignTitle', 'DocuSign Integration')}</h3>
+        <p class="mb-15">${t('administrator.dashboard.config.docusignDesc', 'Authorize DocuSign to enable W9 form sending to affiliates.')}</p>
+        <div id="docusignAuthStatus" class="mb-15">
+          <span class="spinner d-inline-block mr-10"></span>
           ${t('administrator.dashboard.config.checkingAuth', 'Checking authorization status...')}
         </div>
-        <button id="authorizeDocuSignBtn" class="btn btn-primary" style="display: none;">
+        <button id="authorizeDocuSignBtn" class="btn btn-primary d-none">
           ${t('administrator.dashboard.config.authorizeDocuSign', 'Authorize DocuSign')}
         </button>
       </div>
@@ -2276,13 +2313,13 @@
       
       if (data.authorized) {
         statusDiv.innerHTML = `
-          <span style="color: #28a745;">✓</span> 
+          <span class="text-success">✓</span> 
           ${t('administrator.dashboard.config.docusignAuthorized', 'DocuSign is authorized and ready to use.')}
         `;
         authBtn.style.display = 'none';
       } else {
         statusDiv.innerHTML = `
-          <span style="color: #dc3545;">✗</span> 
+          <span class="text-danger">✗</span> 
           ${t('administrator.dashboard.config.docusignNotAuthorized', 'DocuSign is not authorized. Click the button below to authorize.')}
         `;
         authBtn.style.display = 'inline-block';
@@ -2298,7 +2335,7 @@
       console.error('Error checking DocuSign auth:', error);
       const statusDiv = document.getElementById('docusignAuthStatus');
       statusDiv.innerHTML = `
-        <span style="color: #dc3545;">✗</span> 
+        <span class="text-danger">✗</span> 
         ${t('administrator.dashboard.config.docusignCheckError', 'Error checking authorization status.')}
       `;
     }
@@ -2671,14 +2708,7 @@
     }
   });
   
-  // Add hover effect for affiliate search items via CSS class
-  const style = document.createElement('style');
-  style.textContent = `
-    .affiliate-search-item:hover {
-      background-color: #f8f9fa !important;
-    }
-  `;
-  document.head.appendChild(style);
+  // Hover effect for affiliate search items is now handled in CSS file
 
   // Load initial data
   removeLoadingSpinners();
@@ -2734,6 +2764,121 @@
     }
   });
   
+  // Modal functions (moved from inline event handlers)
+  window.closePaymentSummaryModal = function() {
+    const modal = document.getElementById('paymentSummaryModal');
+    if (modal) {
+      modal.style.display = 'none';
+      modal.classList.add('hidden');
+    }
+  };
+
+  window.closeCommissionDetailModal = function() {
+    const modal = document.getElementById('commissionDetailModal');
+    if (modal) {
+      modal.style.display = 'none';
+      modal.classList.add('hidden');
+    }
+  };
+
+  window.closeLogoutModal = function() {
+    const modal = document.getElementById('logoutModal');
+    if (modal) {
+      modal.style.display = 'none';
+      modal.classList.add('hidden');
+    }
+  };
+
+  window.confirmLogout = function() {
+    // Clear admin session
+    localStorage.removeItem('adminToken');
+    localStorage.removeItem('adminRefreshToken');
+    localStorage.removeItem('adminData');
+    
+    // Clear session if SessionManager is available
+    if (window.SessionManager) {
+      window.SessionManager.logout('administrator');
+    }
+    
+    // Redirect to login
+    if (window.parent !== window) {
+      window.parent.postMessage({
+        type: 'navigate',
+        data: { page: '/administrator-login' }
+      }, '*');
+    } else {
+      window.location.href = '/embed-app-v2.html?route=/administrator-login';
+    }
+  };
+
+  // Add event listeners for modal buttons
+  document.addEventListener('DOMContentLoaded', function() {
+    // Payment Summary Modal
+    const closePaymentSummaryBtn = document.getElementById('closePaymentSummaryModal');
+    if (closePaymentSummaryBtn) {
+      closePaymentSummaryBtn.addEventListener('click', window.closePaymentSummaryModal);
+    }
+    
+    const cancelPaymentSummaryBtn = document.getElementById('cancelPaymentSummaryModal');
+    if (cancelPaymentSummaryBtn) {
+      cancelPaymentSummaryBtn.addEventListener('click', window.closePaymentSummaryModal);
+    }
+
+    // Commission Detail Modal
+    const closeCommissionDetailBtn = document.getElementById('closeCommissionDetailModal');
+    if (closeCommissionDetailBtn) {
+      closeCommissionDetailBtn.addEventListener('click', window.closeCommissionDetailModal);
+    }
+    
+    const cancelCommissionDetailBtn = document.getElementById('cancelCommissionDetailModal');
+    if (cancelCommissionDetailBtn) {
+      cancelCommissionDetailBtn.addEventListener('click', window.closeCommissionDetailModal);
+    }
+
+    // Logout Modal
+    const closeLogoutBtn = document.getElementById('closeLogoutModal');
+    if (closeLogoutBtn) {
+      closeLogoutBtn.addEventListener('click', window.closeLogoutModal);
+    }
+    
+    const cancelLogoutBtn = document.getElementById('cancelLogoutModal');
+    if (cancelLogoutBtn) {
+      cancelLogoutBtn.addEventListener('click', window.closeLogoutModal);
+    }
+    
+    const confirmLogoutBtn = document.getElementById('confirmLogoutBtn');
+    if (confirmLogoutBtn) {
+      confirmLogoutBtn.addEventListener('click', window.confirmLogout);
+    }
+
+    // Click outside modal to close
+    const modals = ['paymentSummaryModal', 'commissionDetailModal', 'logoutModal'];
+    modals.forEach(modalId => {
+      const modal = document.getElementById(modalId);
+      if (modal) {
+        modal.addEventListener('click', function(e) {
+          if (e.target === modal) {
+            modal.style.display = 'none';
+            modal.classList.add('hidden');
+          }
+        });
+      }
+    });
+  });
+
+  // Initialize i18n and language switcher (moved from inline script)
+  document.addEventListener('DOMContentLoaded', async function() {
+    await window.i18n.init({ debugMode: false });
+    
+    // Only create language switcher if container exists
+    if (document.getElementById('language-switcher-container')) {
+      window.LanguageSwitcher.createSwitcher('language-switcher-container', {
+        style: 'dropdown',
+        showLabel: false
+      });
+    }
+  });
+
   // Initialize the dashboard by loading the default tab
   // Check URL for tab parameter first, then localStorage, then default
   const urlParams = new URLSearchParams(window.location.search);

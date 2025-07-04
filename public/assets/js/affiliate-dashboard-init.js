@@ -117,7 +117,7 @@ function initializeAffiliateDashboard() {
         data: { page: '/affiliate-login' }
       }, '*');
     } else {
-      window.location.href = '/embed-app.html?route=/affiliate-login';
+      window.location.href = '/embed-app-v2.html?route=/affiliate-login';
     }
     return;
   }
@@ -148,7 +148,7 @@ function initializeAffiliateDashboard() {
   const urlParams = new URLSearchParams(window.location.search);
   let filterCustomerId = urlParams.get('customer');
 
-  // Also check if embed-app.html has parsed parameters globally
+  // Also check if embed-app-v2.html has parsed parameters globally
   if (!filterCustomerId && window.location.search.includes('customer=')) {
     const searchParams = window.location.search;
     const customerMatch = searchParams.match(/customer=([^&]+)/);
@@ -282,10 +282,10 @@ function initializeAffiliateDashboard() {
         // Fallback direct navigation after a short delay
         setTimeout(() => {
           console.log('Fallback: Direct navigation to login');
-          window.location.href = '/embed-app.html?route=/affiliate-login';
+          window.location.href = '/embed-app-v2.html?route=/affiliate-login';
         }, 500);
       } else {
-        window.location.href = '/embed-app.html?route=/affiliate-login';
+        window.location.href = '/embed-app-v2.html?route=/affiliate-login';
       }
     });
   } else {
@@ -1456,7 +1456,7 @@ async function deleteAllData(affiliateId) {
           data: { url: '/affiliate-login' }
         }, '*');
       } else {
-        window.location.href = '/embed-app.html?route=/affiliate-login';
+        window.location.href = '/embed-app-v2.html?route=/affiliate-login';
       }
     } else {
       alert(data.message || 'Failed to delete data');

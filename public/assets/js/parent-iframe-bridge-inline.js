@@ -8,7 +8,7 @@
 // First, handle the iframe setup (like their current script)
 (function() {
     const urlParams = new URLSearchParams(window.location.search);
-    let iframeSrc = 'https://wavemax.promo/embed-app.html';
+    let iframeSrc = 'https://wavemax.promo/embed-app-v2.html';
     if (urlParams.toString()) {
         iframeSrc += '?' + urlParams.toString();
     }

@@ -181,6 +181,16 @@ router.get('/oauth-session/:sessionId',
 );
 
 /**
+ * @route   GET /api/auth/test-oauth-callback
+ * @desc    Test OAuth callback
+ * @access  Public
+ */
+router.get('/test-oauth-callback', async (req, res) => {
+  console.log('[Test] OAuth callback test route hit');
+  res.send('OAuth callback test successful');
+});
+
+/**
  * @route   POST /api/auth/check-username
  * @desc    Check if username is available
  * @access  Public

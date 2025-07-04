@@ -3,775 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csp-nonce" content="{{nonce}}">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'nonce-{{nonce}}' https://cdn.jsdelivr.net; style-src 'self' 'nonce-{{nonce}}' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self'; frame-ancestors 'self'; base-uri 'self'; form-action 'self';">
     <title data-i18n="administrator.dashboard.title">Administrator Dashboard - WaveMAX</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background: #f5f7fa;
-            color: #333;
-            line-height: 1.6;
-        }
-
-        .header {
-            background: white;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
-
-        .header-content {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 15px 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .logo h1 {
-            color: #4A90E2;
-            font-size: 28px;
-        }
-
-        .user-info {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-        }
-
-        .user-name {
-            font-weight: 500;
-        }
-
-        .btn-logout {
-            padding: 8px 16px;
-            background: #dc3545;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 14px;
-        }
-
-        .btn-logout:hover {
-            background: #c82333;
-        }
-
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-
-        .nav-tabs {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 30px;
-            border-bottom: 2px solid #e9ecef;
-            overflow-x: auto;
-        }
-
-        .nav-tab {
-            padding: 12px 24px;
-            background: none;
-            border: none;
-            border-bottom: 3px solid transparent;
-            cursor: pointer;
-            font-size: 16px;
-            font-weight: 500;
-            color: #666;
-            white-space: nowrap;
-            transition: all 0.2s;
-        }
-
-        .nav-tab:hover {
-            color: #4A90E2;
-        }
-
-        .nav-tab.active {
-            color: #4A90E2;
-            border-bottom-color: #4A90E2;
-        }
-
-        .tab-content {
-            display: none;
-        }
-
-        .tab-content.active {
-            display: block;
-        }
-
-        /* Sub-tabs styling */
-        .sub-nav-tabs {
-            display: flex;
-            gap: 5px;
-            margin-bottom: 20px;
-            border-bottom: 1px solid #e9ecef;
-            padding-bottom: 0;
-        }
-
-        .sub-nav-tab {
-            padding: 10px 20px;
-            background: none;
-            border: none;
-            border-bottom: 2px solid transparent;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 500;
-            color: #666;
-            white-space: nowrap;
-            transition: all 0.2s;
-        }
-
-        .sub-nav-tab:hover {
-            color: #4A90E2;
-            background: rgba(74, 144, 226, 0.05);
-        }
-
-        .sub-nav-tab.active {
-            color: #4A90E2;
-            border-bottom-color: #4A90E2;
-            background: rgba(74, 144, 226, 0.1);
-        }
-
-        .sub-tab-content {
-            display: none;
-        }
-
-        .sub-tab-content.active {
-            display: block;
-        }
-
-        /* Dashboard Grid */
-        .dashboard-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-
-        .stat-card {
-            background: white;
-            border-radius: 12px;
-            padding: 24px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-        }
-
-        .stat-card h3 {
-            font-size: 14px;
-            color: #666;
-            margin-bottom: 8px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .stat-value {
-            font-size: 32px;
-            font-weight: 700;
-            color: #333;
-            margin-bottom: 8px;
-        }
-
-        .stat-change {
-            font-size: 14px;
-            color: #28a745;
-        }
-
-        .stat-change.negative {
-            color: #dc3545;
-        }
-
-        /* Dashboard Grid */
-        .dashboard-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-
-        /* Tables */
-        .card {
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-            margin-bottom: 20px;
-        }
-
-        .card-header {
-            padding: 20px;
-            border-bottom: 1px solid #e9ecef;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .card-title {
-            font-size: 20px;
-            font-weight: 600;
-        }
-
-        .btn {
-            padding: 10px 20px;
-            background: #4A90E2;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 500;
-        }
-
-        .btn:hover {
-            background: #357ABD;
-        }
-
-        .btn-secondary {
-            background: #6c757d;
-        }
-
-        .btn-secondary:hover {
-            background: #5a6268;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        th, td {
-            padding: 12px 20px;
-            text-align: left;
-            border-bottom: 1px solid #e9ecef;
-        }
-
-        th {
-            font-weight: 600;
-            color: #666;
-            background: #f8f9fa;
-        }
-
-        tbody tr:hover {
-            background: #f8f9fa;
-        }
-
-        .status-badge {
-            display: inline-block;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 500;
-        }
-
-        .status-badge.active {
-            background: #d4edda;
-            color: #155724;
-        }
-
-        .status-badge.inactive {
-            background: #f8d7da;
-            color: #721c24;
-        }
-
-        .status-badge.working {
-            background: #cce5ff;
-            color: #004085;
-        }
-
-        /* Forms */
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 500;
-        }
-
-        input, select, textarea {
-            width: 100%;
-            padding: 10px 12px;
-            border: 1px solid #ddd;
-            border-radius: 6px;
-            font-size: 14px;
-        }
-
-        textarea {
-            resize: vertical;
-            min-height: 80px;
-        }
-
-        input:focus, select:focus, textarea:focus {
-            outline: none;
-            border-color: #4A90E2;
-            box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
-        }
-
-        .form-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-        }
-        
-        /* Enhanced form layout for operator modal */
-        .form-section {
-            margin-bottom: 25px;
-            padding: 20px;
-            background: #f9fafb;
-            border-radius: 8px;
-            border: 1px solid #e5e7eb;
-        }
-        
-        .section-title {
-            margin: 0 0 15px 0;
-            font-size: 16px;
-            font-weight: 600;
-            color: #1f2937;
-        }
-        
-        .form-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 20px;
-        }
-        
-        .form-group.full-width {
-            grid-column: span 2;
-        }
-        
-        .form-actions {
-            display: flex;
-            gap: 12px;
-            margin-top: 30px;
-            padding-top: 20px;
-            border-top: 1px solid #e5e7eb;
-            justify-content: flex-end;
-        }
-        
-        .btn-primary {
-            background-color: #3b82f6;
-            color: white;
-            font-weight: 500;
-        }
-        
-        .btn-primary:hover {
-            background-color: #2563eb;
-        }
-        
-        @media (max-width: 768px) {
-            .form-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .form-group.full-width {
-                grid-column: span 1;
-            }
-            
-            .form-row {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        /* Modal */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.5);
-            z-index: 1000;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .modal.active {
-            display: flex;
-        }
-
-        .modal-content {
-            background: white;
-            border-radius: 12px;
-            padding: 30px;
-            max-width: 800px;
-            width: 90%;
-            max-height: 90vh;
-            overflow-y: auto;
-        }
-
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-
-        .modal-title {
-            font-size: 24px;
-            font-weight: 600;
-        }
-
-        .modal-close {
-            background: none;
-            border: none;
-            font-size: 24px;
-            cursor: pointer;
-            color: #666;
-        }
-
-        .modal-close:hover {
-            color: #333;
-        }
-
-        /* Loading */
-        .loading {
-            text-align: center;
-            padding: 40px;
-            color: #666;
-        }
-
-        .spinner {
-            display: inline-block;
-            width: 40px;
-            height: 40px;
-            border: 4px solid rgba(0,0,0,0.1);
-            border-left-color: #4A90E2;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        /* Chart containers */
-        .chart-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-            margin-bottom: 20px;
-        }
-
-        .chart-container {
-            position: relative;
-            height: 300px;
-        }
-
-        /* Responsive */
-        @media (max-width: 768px) {
-            .header-content {
-                flex-direction: column;
-                gap: 15px;
-            }
-
-            .nav-tabs {
-                overflow-x: scroll;
-                -webkit-overflow-scrolling: touch;
-            }
-
-            .form-row {
-                grid-template-columns: 1fr;
-            }
-
-            .dashboard-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .chart-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-    
-        /* Language switcher positioning */
-        #language-switcher-container {
-            position: fixed;
-            top: 10px;
-            right: 10px;
-            z-index: 1000;
-        }
-
-        /* Date range toggle */
-        .date-range-toggle {
-            display: flex;
-            gap: 8px;
-            background: #f8f9fa;
-            padding: 4px;
-            border-radius: 6px;
-        }
-
-        .toggle-btn {
-            padding: 6px 12px;
-            border: none;
-            background: transparent;
-            color: #666;
-            font-size: 12px;
-            font-weight: 500;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: all 0.2s;
-            white-space: nowrap;
-        }
-
-        .toggle-btn:hover {
-            background: #e9ecef;
-            color: #333;
-        }
-
-        .toggle-btn.active {
-            background: #4A90E2;
-            color: white;
-        }
-
-        .toggle-btn.active:hover {
-            background: #357ABD;
-        }
-
-        /* Modal styles */
-        .modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-        }
-
-        .modal-content {
-            background: white;
-            border-radius: 8px;
-            max-height: 90vh;
-            overflow-y: auto;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-        }
-
-        .modal-header {
-            padding: 20px;
-            border-bottom: 1px solid #e9ecef;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .modal-header h3 {
-            margin: 0;
-            font-size: 1.25rem;
-        }
-
-        .modal-close {
-            background: none;
-            border: none;
-            font-size: 1.5rem;
-            cursor: pointer;
-            color: #999;
-        }
-
-        .modal-close:hover {
-            color: #333;
-        }
-
-        .modal-body {
-            padding: 20px;
-        }
-
-
-        .status-badge {
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            text-transform: uppercase;
-        }
-
-        .status-pending {
-            background: #fff3cd;
-            color: #856404;
-        }
-
-        .status-verified {
-            background: #d4edda;
-            color: #155724;
-        }
-
-        .status-rejected {
-            background: #f8d7da;
-            color: #721c24;
-        }
-
-        /* Customer List Styles - Now using table structure */
-        #customersList table {
-            margin-top: 0;
-        }
-        
-        #customersList th:first-child,
-        #customersList td:first-child {
-            text-align: center;
-            width: 50px;
-        }
-
-        /* Print Styles */
-        @media print {
-            body * {
-                visibility: hidden;
-            }
-            
-            .print-container, .print-container * {
-                visibility: visible;
-            }
-            
-            .print-container {
-                position: absolute;
-                left: 0;
-                top: 0;
-            }
-        }
-
-        .customer-card {
-            width: 4in;
-            height: 6in;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            padding: 24px;
-            margin: 10px;
-            background: white;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            page-break-inside: avoid;
-            display: inline-block;
-            position: relative;
-            box-sizing: border-box;
-        }
-
-        .customer-card .card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 10px;
-            padding: 0;
-            border: none;
-            box-shadow: none;
-        }
-
-        .customer-card .card-logo {
-            font-size: 1.5rem;
-            font-weight: bold;
-            color: #4A90E2;
-            margin-bottom: 10px;
-        }
-
-        .customer-card .card-info {
-            flex: 1;
-        }
-
-        .customer-card .customer-name {
-            font-size: 1.5rem;
-            font-weight: 600;
-            margin-bottom: 10px;
-            margin-top: 20px;
-        }
-
-        .customer-card .customer-address {
-            font-size: 1rem;
-            line-height: 1.5;
-            color: #666;
-        }
-
-        .customer-card .customer-id-section {
-            position: absolute;
-            bottom: 30px;
-            left: 30px;
-            font-size: 1rem;
-            color: #666;
-            font-weight: 500;
-        }
-
-        .customer-card .qr-code {
-            position: absolute;
-            bottom: 24px;
-            right: 24px;
-            width: 100px;
-            height: 100px;
-            background: white;
-            border: 2px solid #ddd;
-            padding: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        .customer-card .qr-code canvas {
-            max-width: 100%;
-            max-height: 100%;
-        }
-        
-        .customer-card .qr-code img {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-        }
-
-        .print-container {
-            display: none;
-        }
-
-        @media print {
-            @page {
-                size: 4in 6in;
-                margin: 0;
-            }
-            
-            /* Hide everything except print container */
-            body * {
-                visibility: hidden;
-            }
-            
-            .print-container,
-            .print-container * {
-                visibility: visible;
-            }
-            
-            .print-container {
-                display: block !important;
-                position: absolute;
-                top: 0;
-                left: 0;
-                width: 4in;
-            }
-            
-            .customer-card {
-                width: 4in !important;
-                height: 6in !important;
-                margin: 0 !important;
-                padding: 0.375in !important;
-                page-break-after: always;
-                page-break-inside: avoid;
-                box-shadow: none !important;
-                border: none !important;
-                display: block !important;
-                visibility: visible !important;
-                box-sizing: border-box !important;
-            }
-            
-            .customer-card:last-child {
-                page-break-after: auto;
-            }
-        }
-        
-        /* Utility classes */
-        .hidden {
-            display: none !important;
-        }
-    </style>
+    <link rel="stylesheet" href="/assets/css/language-switcher.css">
+    <link rel="stylesheet" href="/assets/css/administrator-dashboard.css">
 </head>
 <body>
     <header class="header">
@@ -808,9 +44,9 @@
             <!-- Overview Sub-tab -->
             <div class="sub-tab-content active" id="overview-subtab">
                 <!-- Date Range Filter for KPIs -->
-                <div class="card" style="margin-bottom: 20px;">
-                    <div class="card-header" style="padding: 15px 20px;">
-                        <h2 class="card-title" style="margin: 0;" data-i18n="administrator.dashboard.analytics.dateRange">Date Range</h2>
+                <div class="card margin-bottom-20">
+                    <div class="card-header padding-15-20">
+                        <h2 class="card-title margin-0" data-i18n="administrator.dashboard.analytics.dateRange">Date Range</h2>
                         <div class="date-range-toggle">
                             <button class="toggle-btn" data-range="today" data-i18n="administrator.dashboard.analytics.today">Today</button>
                             <button class="toggle-btn" data-range="week" data-i18n="administrator.dashboard.analytics.last7Days">Last 7 Days</button>
@@ -839,14 +75,14 @@
             <!-- Charts Sub-tab -->
             <div class="sub-tab-content" id="charts-subtab">
                 <!-- Charts Row 1 -->
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+                <div class="chart-grid-layout">
                     <!-- Revenue Chart -->
                     <div class="card">
                         <div class="card-header">
                             <h2 class="card-title" data-i18n="administrator.dashboard.analytics.revenueChart">Revenue Over Time</h2>
                         </div>
-                        <div style="padding: 20px;">
-                            <canvas id="revenueChart" style="max-height: 300px;"></canvas>
+                        <div class="padding-20">
+                            <canvas id="revenueChart" class="max-height-300"></canvas>
                         </div>
                     </div>
 
@@ -855,21 +91,21 @@
                         <div class="card-header">
                             <h2 class="card-title" data-i18n="administrator.dashboard.analytics.processingTimeChart">Processing Time Distribution</h2>
                         </div>
-                        <div style="padding: 20px;">
-                            <canvas id="processingTimeChart" style="max-height: 300px;"></canvas>
+                        <div class="padding-20">
+                            <canvas id="processingTimeChart" class="max-height-300"></canvas>
                         </div>
                     </div>
                 </div>
 
                 <!-- Charts Row 2 -->
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+                <div class="chart-grid-layout">
                     <!-- Order Status Chart -->
                     <div class="card">
                         <div class="card-header">
                             <h2 class="card-title" data-i18n="administrator.dashboard.analytics.orderStatusChart">Order Status Distribution</h2>
                         </div>
-                        <div style="padding: 20px;">
-                            <canvas id="orderStatusChart" style="max-height: 300px;"></canvas>
+                        <div class="padding-20">
+                            <canvas id="orderStatusChart" class="max-height-300"></canvas>
                         </div>
                     </div>
 
@@ -878,8 +114,8 @@
                         <div class="card-header">
                             <h2 class="card-title" data-i18n="administrator.dashboard.analytics.dailyOrdersChart">Daily Orders Trend</h2>
                         </div>
-                        <div style="padding: 20px;">
-                            <canvas id="dailyOrdersChart" style="max-height: 300px;"></canvas>
+                        <div class="padding-20">
+                            <canvas id="dailyOrdersChart" class="max-height-300"></canvas>
                         </div>
                     </div>
                 </div>
@@ -932,14 +168,14 @@
             <div class="card">
                 <div class="card-header">
                     <h2 class="card-title" data-i18n="administrator.dashboard.customers.title">Customer Management</h2>
-                    <div style="display: flex; gap: 10px;">
-                        <button class="btn" id="printSelectedCardsBtn" style="display: none;" data-i18n="administrator.dashboard.customers.printSelected">Print Selected Cards</button>
+                    <div class="flex-center gap-10">
+                        <button class="btn hidden" id="printSelectedCardsBtn" data-i18n="administrator.dashboard.customers.printSelected">Print Selected Cards</button>
                         <button class="btn btn-secondary" id="refreshCustomersBtn" data-i18n="common.buttons.refresh">Refresh</button>
                     </div>
                 </div>
                 
                 <!-- Search and Filter Section -->
-                <div style="padding: 20px; border-bottom: 1px solid #e9ecef;">
+                <div class="padding-20 border-bottom-e9ecef">
                     <div class="form-row">
                         <div class="form-group">
                             <label for="customerSearchInput" data-i18n="administrator.dashboard.customers.search">Search Customers</label>
@@ -964,7 +200,7 @@
                         </div>
                         <div class="form-group">
                             <label>&nbsp;</label>
-                            <div style="display: flex; gap: 10px;">
+                            <div class="flex-center gap-10">
                                 <button class="btn btn-primary" id="applyCustomerFiltersBtn" data-i18n="common.buttons.applyFilters">Apply Filters</button>
                                 <button class="btn btn-secondary" id="clearCustomerFiltersBtn" data-i18n="common.buttons.clearFilters">Clear Filters</button>
                             </div>
@@ -1008,35 +244,35 @@
                 </div>
                 
                 <!-- Export Options -->
-                <div style="padding: 20px;">
+                <div class="padding-20">
                     <div class="dashboard-grid">
                         <!-- Vendor Export Card -->
                         <div class="stat-card">
                             <h3 data-i18n="administrator.dashboard.quickbooks.vendorExport">Vendor Export</h3>
-                            <p style="color: #666; margin-bottom: 15px;" data-i18n="administrator.dashboard.quickbooks.vendorExportDesc">Export all affiliates with verified W-9s as QuickBooks vendors</p>
+                            <p class="color-666 margin-bottom-15" data-i18n="administrator.dashboard.quickbooks.vendorExportDesc">Export all affiliates with verified W-9s as QuickBooks vendors</p>
                             <button class="btn btn-primary" id="exportVendorsBtn" data-i18n="administrator.dashboard.quickbooks.exportVendors">Export Vendors</button>
                         </div>
                         
                         <!-- Payment Summary Card -->
                         <div class="stat-card">
                             <h3 data-i18n="administrator.dashboard.quickbooks.paymentSummary">Payment Summary</h3>
-                            <p style="color: #666; margin-bottom: 15px;" data-i18n="administrator.dashboard.quickbooks.paymentSummaryDesc">Export commission payments for a date range</p>
+                            <p class="color-666 margin-bottom-15" data-i18n="administrator.dashboard.quickbooks.paymentSummaryDesc">Export commission payments for a date range</p>
                             <button class="btn btn-primary" id="openPaymentSummaryBtn" data-i18n="administrator.dashboard.quickbooks.selectDateRange">Select Date Range</button>
                         </div>
                         
                         <!-- Commission Detail Card -->
                         <div class="stat-card">
                             <h3 data-i18n="administrator.dashboard.quickbooks.commissionDetail">Commission Detail</h3>
-                            <p style="color: #666; margin-bottom: 15px;" data-i18n="administrator.dashboard.quickbooks.commissionDetailDesc">Export detailed commission report for a specific affiliate</p>
+                            <p class="color-666 margin-bottom-15" data-i18n="administrator.dashboard.quickbooks.commissionDetailDesc">Export detailed commission report for a specific affiliate</p>
                             <button class="btn btn-primary" id="openCommissionDetailBtn" data-i18n="administrator.dashboard.quickbooks.selectAffiliate">Select Affiliate</button>
                         </div>
                     </div>
                 </div>
                 
                 <!-- Export History -->
-                <div class="card" style="margin-top: 20px;">
+                <div class="card margin-top-20">
                     <div class="card-header">
-                        <h3 style="margin: 0; font-size: 18px;" data-i18n="administrator.dashboard.quickbooks.exportHistory">Export History</h3>
+                        <h3 class="margin-0 font-size-18" data-i18n="administrator.dashboard.quickbooks.exportHistory">Export History</h3>
                         <button class="btn btn-secondary btn-sm" id="refreshExportHistoryBtn" data-i18n="common.buttons.refresh">Refresh</button>
                     </div>
                     <div id="exportHistoryList">
@@ -1091,11 +327,11 @@
     </div>
 
     <!-- Payment Summary Export Modal -->
-    <div id="paymentSummaryModal" class="modal" style="display: none;">
-        <div class="modal-content" style="max-width: 500px;">
+    <div id="paymentSummaryModal" class="modal hidden">
+        <div class="modal-content max-width-500">
             <div class="modal-header">
                 <h3 data-i18n="administrator.dashboard.quickbooks.paymentSummaryTitle">Export Payment Summary</h3>
-                <button class="modal-close" onclick="closePaymentSummaryModal()">&times;</button>
+                <button class="modal-close" id="closePaymentSummaryModal">&times;</button>
             </div>
             <div class="modal-body">
                 <form id="paymentSummaryForm">
@@ -1117,8 +353,8 @@
                         </select>
                     </div>
                     
-                    <div class="form-actions" style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px;">
-                        <button type="button" class="btn btn-secondary" onclick="closePaymentSummaryModal()" data-i18n="common.buttons.cancel">Cancel</button>
+                    <div class="form-actions flex-center gap-10 justify-content-flex-end margin-top-20">
+                        <button type="button" class="btn btn-secondary" id="cancelPaymentSummaryModal" data-i18n="common.buttons.cancel">Cancel</button>
                         <button type="submit" class="btn btn-primary" data-i18n="administrator.dashboard.quickbooks.export">Export</button>
                     </div>
                 </form>
@@ -1127,20 +363,20 @@
     </div>
 
     <!-- Commission Detail Export Modal -->
-    <div id="commissionDetailModal" class="modal" style="display: none;">
-        <div class="modal-content" style="max-width: 600px;">
+    <div id="commissionDetailModal" class="modal hidden">
+        <div class="modal-content max-width-600">
             <div class="modal-header">
                 <h3 data-i18n="administrator.dashboard.quickbooks.commissionDetailTitle">Export Commission Detail</h3>
-                <button class="modal-close" onclick="closeCommissionDetailModal()">&times;</button>
+                <button class="modal-close" id="closeCommissionDetailModal">&times;</button>
             </div>
             <div class="modal-body">
                 <form id="commissionDetailForm">
                     <div class="form-group">
                         <label for="detailAffiliateSearch" data-i18n="administrator.dashboard.quickbooks.searchAffiliate">Search Affiliate</label>
                         <input type="text" id="detailAffiliateSearch" class="form-control" placeholder="Type to search..." data-i18n-placeholder="administrator.dashboard.quickbooks.searchAffiliatePlaceholder">
-                        <div id="affiliateSearchResults" style="max-height: 200px; overflow-y: auto; border: 1px solid #ddd; margin-top: 5px; display: none;"></div>
+                        <div id="affiliateSearchResults" class="affiliate-search-results"></div>
                         <input type="hidden" id="detailAffiliateId" required>
-                        <div id="selectedAffiliate" style="margin-top: 10px; padding: 10px; background: #f8f9fa; border-radius: 4px; display: none;">
+                        <div id="selectedAffiliate" class="selected-affiliate">
                             <strong data-i18n="administrator.dashboard.quickbooks.selected">Selected:</strong> <span id="selectedAffiliateName"></span>
                         </div>
                     </div>
@@ -1163,8 +399,8 @@
                         </select>
                     </div>
                     
-                    <div class="form-actions" style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px;">
-                        <button type="button" class="btn btn-secondary" onclick="closeCommissionDetailModal()" data-i18n="common.buttons.cancel">Cancel</button>
+                    <div class="form-actions flex-center gap-10 justify-content-flex-end margin-top-20">
+                        <button type="button" class="btn btn-secondary" id="cancelCommissionDetailModal" data-i18n="common.buttons.cancel">Cancel</button>
                         <button type="submit" class="btn btn-primary" data-i18n="administrator.dashboard.quickbooks.export">Export</button>
                     </div>
                 </form>
@@ -1173,19 +409,19 @@
     </div>
 
     <!-- Logout Confirmation Modal -->
-    <div class="modal" id="logoutModal" style="display: none;">
-        <div class="modal-content" style="max-width: 400px;">
+    <div class="modal hidden" id="logoutModal">
+        <div class="modal-content max-width-400">
             <div class="modal-header">
                 <h3 data-i18n="administrator.dashboard.logout.title">Confirm Logout</h3>
-                <button class="modal-close" onclick="closeLogoutModal()">&times;</button>
+                <button class="modal-close" id="closeLogoutModal">&times;</button>
             </div>
-            <div class="modal-body" style="padding: 30px;">
-                <p style="text-align: center; font-size: 16px; margin-bottom: 30px;" data-i18n="administrator.dashboard.logout.message">
+            <div class="modal-body padding-30">
+                <p class="text-center font-size-16 margin-bottom-30" data-i18n="administrator.dashboard.logout.message">
                     Are you sure you want to logout?
                 </p>
-                <div class="form-actions" style="justify-content: center;">
-                    <button type="button" class="btn btn-secondary" onclick="closeLogoutModal()" data-i18n="common.buttons.cancel">Cancel</button>
-                    <button type="button" class="btn btn-primary" onclick="confirmLogout()" style="background: #dc3545; border-color: #dc3545;" data-i18n="common.buttons.logout">Logout</button>
+                <div class="form-actions justify-content-center">
+                    <button type="button" class="btn btn-secondary" id="cancelLogoutModal" data-i18n="common.buttons.cancel">Cancel</button>
+                    <button type="button" class="btn btn-primary logout-button-danger" id="confirmLogoutBtn" data-i18n="common.buttons.logout">Logout</button>
                 </div>
             </div>
         </div>
@@ -1219,7 +455,7 @@
                 </div>
                 
                 <!-- Password Validator Component Container (only shown for new operators) -->
-                <div id="operatorPasswordContainer" class="form-section" style="display: none;">
+                <div id="operatorPasswordContainer" class="form-section operator-password-section">
                     <h4 class="section-title" data-i18n="administrator.dashboard.operators.accountCredentials">Account Credentials</h4>
                     <div id="operatorPasswordValidator"></div>
                 </div>
@@ -1255,26 +491,17 @@
     <div class="print-container" id="printContainer"></div>
 
     <!-- Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js" nonce="{{nonce}}"></script>
     
     <!-- QR Code Library -->
-    <script src="/assets/js/qrcode.min.js"></script>
+    <script src="/assets/js/qrcode.min.js" nonce="{{nonce}}"></script>
     
-    <script src="/assets/js/i18n.js"></script>
-    <script src="/assets/js/language-switcher.js"></script>
-    <script src="/assets/js/csrf-utils.js"></script>
-    <script src="/assets/js/password-validator-component.js"></script>
-    <script src="/assets/js/administrator-dashboard-init.js?v=20250623"></script>
-    <script>
-        // Initialize i18n
-        document.addEventListener('DOMContentLoaded', async function() {
-            await window.i18n.init({ debugMode: false });
-            window.LanguageSwitcher.createSwitcher('language-switcher-container', {
-                style: 'dropdown',
-                showLabel: false
-            });
-        });
-    </script>
+    <script src="/assets/js/i18n.js" nonce="{{nonce}}"></script>
+    <script src="/assets/js/language-switcher.js" nonce="{{nonce}}"></script>
+    <script src="/assets/js/csrf-utils.js" nonce="{{nonce}}"></script>
+    <script src="/assets/js/password-validator-component.js" nonce="{{nonce}}"></script>
+    <script src="/assets/js/administrator-dashboard-init.js?v=20250623" nonce="{{nonce}}"></script>
+    <script src="/assets/js/administrator-dashboard-i18n.js" nonce="{{nonce}}"></script>
 
 </body>
 </html>

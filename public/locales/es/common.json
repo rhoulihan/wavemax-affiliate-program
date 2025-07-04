@@ -740,8 +740,10 @@
       "orderManagement": "Gestión de Pedidos",
       "reports": "Reportes",
       "settings": "Configuración del Sistema",
-      "logout": "Cerrar Sesión",
-      "confirmLogout": "¿Estás seguro de que deseas cerrar sesión?",
+      "logout": {
+        "title": "Confirmar Cierre de Sesión",
+        "message": "¿Está seguro de que desea cerrar sesión?"
+      },
       "tabs": {
         "dashboard": "Panel",
         "operators": "Operadores",

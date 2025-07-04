@@ -10,7 +10,7 @@ The service area component has been successfully integrated into both the affili
   - Replaced the old service area section with a container for the new component
   - Added service-area-component.js script reference
   
-- **Modified**: `/public/embed-app.html`
+- **Modified**: `/public/embed-app-v2.html`
   - Added service-area-component.js to the affiliate-register route scripts
 
 - **Modified**: `/public/assets/js/affiliate-register-init.js`
@@ -84,7 +84,7 @@ window.settingsServiceArea = window.ServiceAreaComponent.init('settingsServiceAr
 ## Files Modified
 1. `/public/affiliate-register-embed.html`
 2. `/public/affiliate-dashboard-embed.html`
-3. `/public/embed-app.html`
+3. `/public/embed-app-v2.html`
 4. `/public/assets/js/affiliate-register-init.js`
 5. `/public/assets/js/affiliate-dashboard-init.js`
 6. `/public/assets/js/service-area-component.js` (created)

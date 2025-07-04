@@ -52,7 +52,12 @@ const CSRF_CONFIG = {
 
     // DocuSign webhook endpoints (external callbacks)
     '/api/v1/w9/docusign-webhook',
-    '/api/auth/docusign/callback'
+    '/api/auth/docusign/callback',
+    
+    // Test endpoints (development only)
+    '/api/v1/test/customer',
+    '/api/v1/test/order',
+    '/api/v1/test/cleanup'
   ],
 
   // Authentication endpoints - will add rate limiting instead of CSRF

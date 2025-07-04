@@ -50,8 +50,8 @@
         ${config.showMap ? `
           <div class="grid md:grid-cols-2 gap-6">
             <!-- Left side: Map -->
-            <div class="flex flex-col" style="min-height: 400px;">
-              <div id="${containerId}-map" class="rounded-lg border border-gray-300 flex-grow" style="height: 100%; min-height: 400px;"></div>
+            <div class="flex flex-col service-area-container">
+              <div id="${containerId}-map" class="rounded-lg border border-gray-300 flex-grow service-area-map"></div>
             </div>
             
             <!-- Right side: Controls and instructions -->

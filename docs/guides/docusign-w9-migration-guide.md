@@ -95,7 +95,7 @@ Add to `affiliate-dashboard-embed.html`:
 ```
 
 ### 2. Update Page Scripts Configuration
-In `embed-app.html`, add the DocuSign script to the affiliate dashboard:
+In `embed-app-v2.html`, add the DocuSign script to the affiliate dashboard:
 ```javascript
 const pageScripts = {
   '/affiliate-dashboard': [

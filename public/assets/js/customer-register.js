@@ -22,10 +22,10 @@
     const affiliateData = result.affiliateData;
     const affiliateName = `${affiliateData.firstName} ${affiliateData.lastName}`;
 
-    // Create modal HTML - positioned at top of viewport for iframe visibility
+    // Create modal HTML - using CSS classes instead of inline styles
     const modalHTML = `
-      <div id="accountConflictModal" class="fixed inset-0 bg-black bg-opacity-50 z-50" style="z-index: 9999; position: fixed; top: 0; left: 0; width: 100%; height: 100vh; display: flex; align-items: flex-start; justify-content: center; padding-top: 20px;">
-        <div class="bg-white rounded-lg p-6 max-w-md mx-4 shadow-xl" style="margin-top: 0; position: relative;">
+      <div id="accountConflictModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 account-conflict-modal-overlay">
+        <div class="bg-white rounded-lg p-6 max-w-md mx-4 shadow-xl account-conflict-modal-content">
           <div class="text-center mb-6">
             <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-orange-100 mb-4">
               <svg class="h-6 w-6 text-orange-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -69,7 +69,7 @@
           data: { url: '/affiliate-login' }
         }, '*');
       } else {
-        window.location.href = '/embed-app.html?route=/affiliate-login';
+        window.location.href = '/embed-app-v2.html?route=/affiliate-login';
       }
     });
 
@@ -112,9 +112,9 @@
     }
 
     // Extract affiliate ID from URL query parameter
-    // When loaded via embed-app.html, we need to check the actual page URL, not the base URL
+    // When loaded via embed-app-v2.html, we need to check the actual page URL, not the base URL
     let urlParams = new URLSearchParams(window.location.search);
-    let affiliateId = urlParams.get('affid') || urlParams.get('affiliate') || sessionStorage.getItem('affiliateId');
+    let affiliateId = urlParams.get('affiliateId') || urlParams.get('affid') || urlParams.get('affiliate') || sessionStorage.getItem('affiliateId');
 
     console.log('Window location search:', window.location.search);
     console.log('Initial affiliate ID search:', affiliateId);
@@ -124,7 +124,7 @@
       // Try to get parent URL parameters
         const parentUrl = new URL(window.parent.location.href);
         const parentParams = new URLSearchParams(parentUrl.search);
-        affiliateId = parentParams.get('affid') || parentParams.get('affiliate');
+        affiliateId = parentParams.get('affiliateId') || parentParams.get('affid') || parentParams.get('affiliate');
         console.log('Checking parent URL for affiliate ID:', affiliateId);
       } catch (e) {
         console.log('Cannot access parent URL (cross-origin), checking embed-app URL');
@@ -132,7 +132,7 @@
         if (document.referrer) {
           const referrerUrl = new URL(document.referrer);
           const referrerParams = new URLSearchParams(referrerUrl.search);
-          affiliateId = referrerParams.get('affid') || referrerParams.get('affiliate');
+          affiliateId = referrerParams.get('affiliateId') || referrerParams.get('affid') || referrerParams.get('affiliate');
           console.log('Found affiliate ID in referrer:', affiliateId);
         }
       }
@@ -231,13 +231,13 @@
           } else {
             console.error('Invalid affiliate data:', data);
             modalAlert('Invalid affiliate ID. Please use a valid registration link.', 'Invalid Affiliate');
-            window.location.href = '/embed-app.html?login=customer';
+            // Don't redirect - let the user stay on the registration page
           }
         })
         .catch(error => {
           console.error('Error fetching affiliate info:', error);
           modalAlert('Unable to load affiliate information. Please try again.', 'Loading Error');
-          window.location.href = '/embed-app.html?login=customer';
+          // Don't redirect - let the user stay on the registration page
         });
 
       // Fetch WDF rate from system configuration
@@ -265,7 +265,7 @@
     } else {
     // Redirect if no affiliate ID is provided
       modalAlert('No affiliate ID provided. Please use a valid registration link.', 'Missing Affiliate ID');
-      window.location.href = '/embed-app.html?login=customer';
+      window.location.href = '/embed-app-v2.html?login=customer';
     }
 
 
@@ -503,19 +503,13 @@
       // Fallback: show a basic loading indicator
         console.warn('SwirlSpinnerUtils not available, using fallback');
         const spinnerHTML = `
-        <div id="addressValidationSpinner" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); display: flex; align-items: center; justify-content: center; z-index: 10000;">
-          <div style="background: white; padding: 40px; border-radius: 8px; text-align: center; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
-            <div style="display: inline-block; width: 50px; height: 50px; border: 3px solid #f3f3f3; border-top: 3px solid #1e3a8a; border-radius: 50%; animation: spin 1s linear infinite;"></div>
-            <h3 style="margin-top: 20px; color: #1e3a8a;">Validating Address</h3>
-            <p style="color: #6b7280; margin-top: 10px;">Checking if your address is within our service area...</p>
+        <div id="addressValidationSpinner" class="address-validation-overlay">
+          <div class="address-validation-content">
+            <div class="address-validation-spinner"></div>
+            <h3 class="address-validation-title">Validating Address</h3>
+            <p class="address-validation-message">Checking if your address is within our service area...</p>
           </div>
         </div>
-        <style>
-          @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-          }
-        </style>
       `;
         document.body.insertAdjacentHTML('beforeend', spinnerHTML);
       }
@@ -1027,7 +1021,7 @@
                         data: { url: `/customer-dashboard?token=${data.result.token}&refreshToken=${data.result.refreshToken}` }
                       }, '*');
                     } else {
-                      window.location.href = `/embed-app.html?route=/customer-dashboard&token=${data.result.token}&refreshToken=${data.result.refreshToken}`;
+                      window.location.href = `/embed-app-v2.html?route=/customer-dashboard&token=${data.result.token}&refreshToken=${data.result.refreshToken}`;
                     }
                   } else if (data.result.type === 'social-auth-account-conflict') {
                     console.log('Processing customer social-auth-account-conflict from database');

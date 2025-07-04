@@ -35,10 +35,28 @@ router.get('/google', (req, res, next) => {
  * @desc    Handle Google OAuth callback
  * @access  Public
  */
-router.get('/google/callback',
-  passport.authenticate('google', { session: false }),
-  authController.handleSocialCallback
-);
+router.get('/google/callback', (req, res, next) => {
+  passport.authenticate('google', { session: false }, (err, user, info) => {
+    console.log('[OAuth] Google callback:', { 
+      error: err ? err.message : null, 
+      user: user ? 'exists' : 'null',
+      userObject: user,
+      isExistingAffiliate: user?.isExistingAffiliate,
+      info: info 
+    });
+    
+    // Handle errors
+    if (err) {
+      console.error('[OAuth] Google authentication error:', err);
+      req.user = null;
+    } else {
+      req.user = user;
+    }
+    
+    // Always proceed to handleSocialCallback, even if authentication failed
+    authController.handleSocialCallback(req, res);
+  })(req, res, next);
+});
 
 /**
  * @route   GET /api/auth/facebook
@@ -64,10 +82,15 @@ router.get('/facebook', (req, res, next) => {
  * @desc    Handle Facebook OAuth callback
  * @access  Public
  */
-router.get('/facebook/callback',
-  passport.authenticate('facebook', { session: false }),
-  authController.handleSocialCallback
-);
+router.get('/facebook/callback', (req, res, next) => {
+  passport.authenticate('facebook', { session: false }, (err, user, info) => {
+    // Add user to request regardless of authentication result
+    req.user = user;
+    
+    // Always proceed to handleSocialCallback, even if authentication failed
+    authController.handleSocialCallback(req, res);
+  })(req, res, next);
+});
 
 /**
  * @route   GET /api/auth/linkedin
@@ -93,10 +116,15 @@ router.get('/linkedin', (req, res, next) => {
  * @desc    Handle LinkedIn OAuth callback
  * @access  Public
  */
-router.get('/linkedin/callback',
-  passport.authenticate('linkedin', { session: false }),
-  authController.handleSocialCallback
-);
+router.get('/linkedin/callback', (req, res, next) => {
+  passport.authenticate('linkedin', { session: false }, (err, user, info) => {
+    // Add user to request regardless of authentication result
+    req.user = user;
+    
+    // Always proceed to handleSocialCallback, even if authentication failed
+    authController.handleSocialCallback(req, res);
+  })(req, res, next);
+});
 
 /**
  * @route   POST /api/auth/social/register

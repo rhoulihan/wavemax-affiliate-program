@@ -1,0 +1,14 @@
+/* Terms and Conditions Page Specific Styles */
+.liability-section {
+    background-color: #fef2f2;
+    border-left: 4px solid #dc2626;
+    padding: 1.5rem;
+    margin: 1.5rem 0;
+}
+
+.important-notice {
+    background-color: #fef3c7;
+    border-left: 4px solid #f59e0b;
+    padding: 1rem;
+    margin: 1.5rem 0;
+}

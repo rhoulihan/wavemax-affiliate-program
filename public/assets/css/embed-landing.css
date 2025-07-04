@@ -1,0 +1,293 @@
+/* Embed Landing Page Styles */
+
+/* Custom styles for embedding */
+.wavemax-affiliate-container {
+    font-family: 'Open Sans', sans-serif;
+    background-color: #f8f9fa;
+    min-height: 600px;
+    padding: 0 0 40px 0;
+}
+
+.wavemax-affiliate-header {
+    background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+    color: white;
+    padding: 60px 0;
+    text-align: center;
+    margin-bottom: 40px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    position: relative;
+}
+
+.header-actions {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    display: flex;
+    gap: 10px;
+}
+
+.header-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    text-decoration: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
+}
+
+.header-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    text-decoration: none;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.header-btn i {
+    font-size: 1rem;
+}
+
+.header-btn-primary {
+    background: rgba(255, 255, 255, 0.9);
+    color: #1e3a8a;
+}
+
+.header-btn-primary:hover {
+    background: white;
+    color: #1e3a8a;
+}
+
+.wavemax-affiliate-header h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 20px;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.wavemax-affiliate-header p {
+    font-size: 1.2rem;
+    opacity: 0.9;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.feature-card {
+    background: white;
+    border-radius: 12px;
+    padding: 30px;
+    height: 100%;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border: 1px solid #e5e7eb;
+}
+
+.feature-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+}
+
+.feature-icon {
+    width: 80px;
+    height: 80px;
+    background: linear-gradient(135deg, #3b82f6 0%, #1e3a8a 100%);
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+    font-size: 2rem;
+    color: white;
+    box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+}
+
+.cta-section {
+    background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+    padding: 60px 0;
+    margin-top: 60px;
+    border-radius: 20px;
+}
+
+.btn-primary-custom {
+    background: linear-gradient(135deg, #3b82f6 0%, #1e3a8a 100%);
+    border: none;
+    padding: 12px 30px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+}
+
+.btn-primary-custom:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+    background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+}
+
+.btn-secondary-custom {
+    background: white;
+    color: #1e3a8a;
+    border: 2px solid #3b82f6;
+    padding: 12px 30px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.btn-secondary-custom:hover {
+    background: #3b82f6;
+    color: white;
+    transform: translateY(-2px);
+}
+
+.stats-box {
+    background: white;
+    border-radius: 12px;
+    padding: 25px;
+    text-align: center;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+    border: 1px solid #e5e7eb;
+}
+
+.stats-number {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #1e3a8a;
+    margin-bottom: 10px;
+}
+
+.testimonial-card {
+    background: white;
+    border-radius: 12px;
+    padding: 30px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+    border: 1px solid #e5e7eb;
+    margin-bottom: 20px;
+}
+
+.testimonial-stars {
+    color: #fbbf24;
+    margin-bottom: 15px;
+}
+
+@media (max-width: 768px) {
+    .wavemax-affiliate-header h1 {
+        font-size: 2rem;
+    }
+    
+    .feature-card {
+        margin-bottom: 20px;
+    }
+    
+    .header-actions {
+        position: static;
+        justify-content: center;
+        margin-bottom: 20px;
+    }
+    
+    .header-btn {
+        width: 36px;
+        height: 36px;
+        font-size: 0.9rem;
+    }
+}
+
+/* Revenue Calculator Styles */
+.revenue-calculator-card {
+    background: white;
+    border-radius: 16px;
+    padding: 40px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    border: 1px solid #e5e7eb;
+    position: relative;
+    overflow: hidden;
+}
+
+.revenue-calculator-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #3b82f6 0%, #1e3a8a 100%);
+}
+
+.calculator-inputs, .calculator-results {
+    padding: 20px;
+}
+
+.calculator-results {
+    background: #f8f9fa;
+    border-radius: 12px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.earnings-display h3 {
+    font-weight: 700;
+}
+
+.earnings-breakdown {
+    background: white;
+    padding: 15px;
+    border-radius: 8px;
+    margin-top: 15px;
+    font-size: 0.9rem;
+}
+
+.earnings-breakdown > div {
+    padding: 5px 0;
+}
+
+@media (max-width: 768px) {
+    .revenue-calculator-card {
+        padding: 25px 15px;
+    }
+    
+    .calculator-inputs, .calculator-results {
+        padding: 15px;
+    }
+}
+
+/* Language switcher positioning */
+#language-switcher-container {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    z-index: 1000;
+}
+
+/* How it works numbered icons */
+.feature-icon-small {
+    width: 60px;
+    height: 60px;
+    font-size: 1.5rem;
+}
+
+/* CTA large icon */
+.feature-icon-large {
+    width: 120px;
+    height: 120px;
+    font-size: 3rem;
+}
+
+/* Footer styles */
+.footer-section {
+    background-color: #f8f9fa;
+    border-top: 1px solid #e5e7eb;
+}
+</content>
+</invoke>

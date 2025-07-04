@@ -192,7 +192,7 @@
 
                     const affiliateId = data.result.affiliate.affiliateId;
                     console.log('Redirecting to affiliate dashboard after social login, affiliateId:', affiliateId);
-                    window.location.href = `/embed-app.html?route=/affiliate-dashboard&id=${affiliateId}`;
+                    window.location.href = `/embed-app-v2.html?route=/affiliate-dashboard&id=${affiliateId}`;
 
                   } else if (data.result.type === 'social-auth-success') {
                     console.log('Affiliate does not exist, redirecting to registration');
@@ -202,7 +202,7 @@
                     } else {
                       alert('Account not found. You will be redirected to registration to create a new affiliate account.');
                     }
-                    window.location.href = `/embed-app.html?route=/affiliate-register&socialToken=${data.result.socialToken}&provider=${data.result.provider}`;
+                    window.location.href = `/embed-app-v2.html?route=/affiliate-register&socialToken=${data.result.socialToken}&provider=${data.result.provider}`;
 
                   } else if (data.result.type === 'social-auth-account-conflict') {
                     console.log('Processing social-auth-account-conflict from database');
@@ -215,7 +215,7 @@
 
                       if (confirm(confirmMessage)) {
                       // Redirect to customer login
-                        window.location.href = '/embed-app.html?route=/customer-login';
+                        window.location.href = '/embed-app-v2.html?route=/customer-login';
                       }
                     } else {
                       if (window.ModalSystem) {
@@ -382,7 +382,7 @@
             const urlParams = new URLSearchParams(window.location.search);
             const customerParam = urlParams.get('customer');
 
-            let redirectUrl = `/embed-app.html?route=/affiliate-dashboard&id=${data.affiliate.affiliateId}`;
+            let redirectUrl = `/embed-app-v2.html?route=/affiliate-dashboard&id=${data.affiliate.affiliateId}`;
 
             // Add customer parameter if it exists
             if (customerParam) {

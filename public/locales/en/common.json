@@ -785,8 +785,10 @@
       "orderManagement": "Order Management",
       "reports": "Reports",
       "settings": "System Settings",
-      "logout": "Logout",
-      "confirmLogout": "Are you sure you want to logout?",
+      "logout": {
+        "title": "Confirm Logout",
+        "message": "Are you sure you want to logout?"
+      },
       "tabs": {
         "dashboard": "Dashboard",
         "operators": "Operators",

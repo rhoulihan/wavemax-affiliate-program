@@ -71,16 +71,16 @@ async function handleRegistrationPayment(req, res) {
       // In a real implementation, you'd retrieve this from a secure session store
       // For now, we'll redirect to success page with transaction info
 
-      res.redirect(`/embed-app.html?route=/customer-success&transactionId=${transactionId}&paymentStatus=success`);
+      res.redirect(`/embed-app-v2.html?route=/customer-success&transactionId=${transactionId}&paymentStatus=success`);
 
     } else {
       // Payment failed
-      res.redirect(`/embed-app.html?route=/customer-register&error=payment_failed&message=${encodeURIComponent(responseMessage || 'Payment failed')}`);
+      res.redirect(`/embed-app-v2.html?route=/customer-register&error=payment_failed&message=${encodeURIComponent(responseMessage || 'Payment failed')}`);
     }
 
   } catch (error) {
     console.error('Registration payment callback error:', error);
-    res.redirect('/embed-app.html?route=/customer-register&error=processing_error');
+    res.redirect('/embed-app-v2.html?route=/customer-register&error=processing_error');
   }
 }
 

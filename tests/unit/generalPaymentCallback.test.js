@@ -49,7 +49,7 @@ describe('General Payment Callback Routes', () => {
           });
 
         expect(res.status).toBe(302);
-        expect(res.header.location).toBe('/embed-app.html?route=/customer-success&transactionId=TX123&paymentStatus=success');
+        expect(res.header.location).toBe('/embed-app-v2.html?route=/customer-success&transactionId=TX123&paymentStatus=success');
       });
 
       it('should redirect to success page on success status', async () => {
@@ -62,7 +62,7 @@ describe('General Payment Callback Routes', () => {
           });
 
         expect(res.status).toBe(302);
-        expect(res.header.location).toBe('/embed-app.html?route=/customer-success&transactionId=TX124&paymentStatus=success');
+        expect(res.header.location).toBe('/embed-app-v2.html?route=/customer-success&transactionId=TX124&paymentStatus=success');
       });
 
       it('should redirect to register page with error on failed registration payment', async () => {
@@ -76,7 +76,7 @@ describe('General Payment Callback Routes', () => {
           });
 
         expect(res.status).toBe(302);
-        expect(res.header.location).toBe('/embed-app.html?route=/customer-register&error=payment_failed&message=Insufficient%20funds');
+        expect(res.header.location).toBe('/embed-app-v2.html?route=/customer-register&error=payment_failed&message=Insufficient%20funds');
       });
 
       it('should handle missing response message on failure', async () => {
@@ -88,7 +88,7 @@ describe('General Payment Callback Routes', () => {
           });
 
         expect(res.status).toBe(302);
-        expect(res.header.location).toBe('/embed-app.html?route=/customer-register&error=payment_failed&message=Payment%20failed');
+        expect(res.header.location).toBe('/embed-app-v2.html?route=/customer-register&error=payment_failed&message=Payment%20failed');
       });
 
       it('should handle registration payment callback errors', async () => {

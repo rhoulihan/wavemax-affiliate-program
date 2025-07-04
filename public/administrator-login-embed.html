@@ -3,9 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csp-nonce" content="{{CSP_NONCE}}">
     <title data-i18n="administrator.login.title">Administrator Login - WaveMAX</title>
+    <script nonce="{{CSP_NONCE}}">
+        window.CSP_NONCE = document.querySelector('meta[name="csp-nonce"]')?.getAttribute('content') || '';
+    </script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
-    <style>
+    <link rel="stylesheet" href="/assets/css/language-switcher.css">
+    <style nonce="{{CSP_NONCE}}">
         * {
             margin: 0;
             padding: 0;
@@ -242,6 +247,9 @@
     </style>
 </head>
 <body>
+    <!-- Language Switcher Container -->
+    <div id="language-switcher-container"></div>
+    
     <div class="container">
         <div class="login-card">
             <div class="logo">
@@ -302,22 +310,6 @@
     <script src="/assets/js/language-switcher.js"></script>
     <script src="/assets/js/csrf-utils.js"></script>
     <script src="/assets/js/administrator-login-init.js"></script>
-    <script>
-        // Initialize i18n
-        document.addEventListener('DOMContentLoaded', async function() {
-            await window.i18n.init({ debugMode: false });
-            window.LanguageSwitcher.createSwitcher('language-switcher-container', {
-                style: 'dropdown',
-                showLabel: false
-            });
-            
-            // Ensure the toggle password button has correct initial text
-            const toggleBtn = document.getElementById('togglePassword');
-            if (toggleBtn && window.i18n) {
-                toggleBtn.textContent = window.i18n.t('administrator.login.showPassword');
-            }
-        });
-    </script>
 
 </body>
 </html>

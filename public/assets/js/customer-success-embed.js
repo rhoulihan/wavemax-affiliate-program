@@ -31,7 +31,7 @@
       }
 
       // Navigate to the new route
-      window.location.href = `/embed-app.html?${newParams.toString()}`;
+      window.location.href = `/embed-app-v2.html?${newParams.toString()}`;
     } else {
       // For direct access, just navigate
       window.location.href = `/${page}.html`;

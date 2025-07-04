@@ -949,14 +949,28 @@ exports.logout = async (req, res) => {
  * Handle social media OAuth callback
  */
 exports.handleSocialCallback = async (req, res) => {
+  console.log('[OAuth] handleSocialCallback called with:', {
+    user: req.user ? 'exists' : 'null',
+    query: req.query,
+    headers: req.headers,
+    state: req.query.state,
+    stateStartsWithCustomer: req.query.state && req.query.state.startsWith('customer')
+  });
   try {
     const user = req.user;
 
     // Check if this is a customer OAuth request (state starts with 'customer_')
     const isCustomerRequest = req.query.state && req.query.state.startsWith('customer');
 
+    console.log('[OAuth] Customer request check:', { 
+      state: req.query.state, 
+      isCustomerRequest,
+      willDelegate: isCustomerRequest 
+    });
+
     if (isCustomerRequest) {
       // This is a customer OAuth request, delegate to customer handler
+      console.log('[OAuth] Delegating to handleCustomerSocialCallback');
       return exports.handleCustomerSocialCallback(req, res);
     }
 
@@ -996,29 +1010,9 @@ exports.handleSocialCallback = async (req, res) => {
           }
         }
 
-        return res.send(`
-          <script>
-            try {
-              // Try multiple approaches to communicate with parent
-              const message = ${JSON.stringify(message)};
-              
-              if (window.opener && !window.opener.closed) {
-                window.opener.postMessage(message, '*');
-              } else if (window.parent && window.parent !== window) {
-                window.parent.postMessage(message, '*');
-              } else {
-                // Store in localStorage as fallback
-                localStorage.setItem('socialAuthResult', JSON.stringify(message));
-              }
-              
-              // Close popup after a short delay
-              setTimeout(() => window.close(), 500);
-            } catch (e) {
-              console.error('Error in popup communication:', e);
-              window.close();
-            }
-          </script>
-        `);
+        // Redirect to OAuth success page with message as parameter
+        const messageParam = encodeURIComponent(JSON.stringify(message));
+        return res.redirect(`/oauth-success.html?message=${messageParam}`);
       }
 
       return res.redirect('/affiliate-register-embed.html?error=social_auth_failed');
@@ -1083,29 +1077,9 @@ exports.handleSocialCallback = async (req, res) => {
           }
         }
 
-        return res.send(`
-          <script>
-            try {
-              // Try multiple approaches to communicate with parent
-              const message = ${JSON.stringify(message)};
-              
-              if (window.opener && !window.opener.closed) {
-                window.opener.postMessage(message, '*');
-              } else if (window.parent && window.parent !== window) {
-                window.parent.postMessage(message, '*');
-              } else {
-                // Store in localStorage as fallback
-                localStorage.setItem('socialAuthResult', JSON.stringify(message));
-              }
-              
-              // Close popup after a short delay
-              setTimeout(() => window.close(), 500);
-            } catch (e) {
-              console.error('Error in popup communication:', e);
-              window.close();
-            }
-          </script>
-        `);
+        // Redirect to OAuth success page with message as parameter
+        const messageParam = encodeURIComponent(JSON.stringify(message));
+        return res.redirect(`/oauth-success.html?message=${messageParam}`);
       }
 
       // Redirect to dashboard with tokens
@@ -1137,26 +1111,9 @@ exports.handleSocialCallback = async (req, res) => {
           }
         }
 
-        return res.send(`
-          <script>
-            try {
-              const message = ${JSON.stringify(message)};
-              
-              if (window.opener && !window.opener.closed) {
-                window.opener.postMessage(message, '*');
-              } else if (window.parent && window.parent !== window) {
-                window.parent.postMessage(message, '*');
-              } else {
-                localStorage.setItem('socialAuthResult', JSON.stringify(message));
-              }
-              
-              setTimeout(() => window.close(), 500);
-            } catch (e) {
-              console.error('Error in popup communication:', e);
-              window.close();
-            }
-          </script>
-        `);
+        // Redirect to OAuth success page with message as parameter
+        const messageParam = encodeURIComponent(JSON.stringify(message));
+        return res.redirect(`/oauth-success.html?message=${messageParam}`);
       }
 
       return res.redirect('/affiliate-register-embed.html?error=account_exists_as_customer');
@@ -1192,39 +1149,116 @@ exports.handleSocialCallback = async (req, res) => {
       }
 
       return res.send(`
-        <script>
-          console.log('Popup script executing for social-auth-success');
-          try {
-            // Try multiple approaches to communicate with parent
-            const message = ${JSON.stringify(message)};
-            
-            console.log('Attempting to send message:', message);
-            console.log('window.opener:', window.opener);
-            console.log('window.parent:', window.parent);
-            
-            if (window.opener && !window.opener.closed) {
-              console.log('Using window.opener.postMessage');
-              window.opener.postMessage(message, '*');
-            } else if (window.parent && window.parent !== window) {
-              console.log('Using window.parent.postMessage');
-              window.parent.postMessage(message, '*');
-            } else {
-              console.log('Using localStorage fallback');
-              // Store in localStorage as fallback
-              localStorage.setItem('socialAuthResult', JSON.stringify(message));
-              console.log('Stored in localStorage:', localStorage.getItem('socialAuthResult'));
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>Authentication Complete</title>
+          <style>
+            body {
+              font-family: Arial, sans-serif;
+              display: flex;
+              justify-content: center;
+              align-items: center;
+              height: 100vh;
+              margin: 0;
+              background-color: #f0f0f0;
             }
-            
-            // Close popup after a short delay
-            setTimeout(() => {
-              console.log('Closing popup');
+            .message {
+              text-align: center;
+              padding: 2rem;
+              background: white;
+              border-radius: 8px;
+              box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            }
+            .success {
+              color: #22c55e;
+              font-size: 3rem;
+              margin-bottom: 1rem;
+            }
+          </style>
+        </head>
+        <body>
+          <div class="message">
+            <div class="success">✓</div>
+            <h2>Authentication Successful!</h2>
+            <p>This window should close automatically.<br>If not, you can close it manually.</p>
+            <p style="margin-top: 1rem; font-size: 0.875rem; color: #666;">
+              <button onclick="window.close()" style="padding: 0.5rem 1rem; background: #3b82f6; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                Close Window
+              </button>
+            </p>
+          </div>
+          <script>
+            console.log('Popup script executing for social-auth-success');
+            try {
+              // Try multiple approaches to communicate with parent
+              const message = ${JSON.stringify(message)};
+              
+              console.log('Attempting to send message:', message);
+              console.log('window.opener:', window.opener);
+              console.log('window.parent:', window.parent);
+              
+              if (window.opener && !window.opener.closed) {
+                console.log('Using window.opener.postMessage');
+                window.opener.postMessage(message, '*');
+              } else if (window.parent && window.parent !== window) {
+                console.log('Using window.parent.postMessage');
+                window.parent.postMessage(message, '*');
+              } else {
+                console.log('Using localStorage fallback');
+                // Store in localStorage as fallback
+                localStorage.setItem('socialAuthResult', JSON.stringify(message));
+                console.log('Stored in localStorage:', localStorage.getItem('socialAuthResult'));
+              }
+              
+              // Try multiple methods to close the window
+              console.log('Attempting to close window...');
+              
+              // Method 1: Direct close
               window.close();
-            }, 500);
-          } catch (e) {
-            console.error('Error in popup communication:', e);
-            window.close();
-          }
-        </script>
+              
+              // Method 2: Blur and close
+              window.blur();
+              window.close();
+              
+              // Method 3: Clear opener and close
+              if (window.opener) {
+                window.opener = null;
+                window.close();
+              }
+              
+              // Method 4: Self-navigation and close
+              window.open('', '_self', '');
+              window.close();
+              
+              // Method 5: Force close with about:blank
+              window.open('about:blank', '_self');
+              window.close();
+              
+              // Method 6: Multiple timeout attempts
+              setTimeout(() => {
+                console.log('First timeout close attempt');
+                window.close();
+              }, 100);
+              
+              setTimeout(() => {
+                console.log('Second timeout close attempt');
+                window.opener = null;
+                window.close();
+              }, 300);
+              
+              setTimeout(() => {
+                console.log('Final timeout close attempt');
+                window.open('', '_self').close();
+              }, 500);
+              
+            } catch (e) {
+              console.error('Error in popup communication:', e);
+              window.close();
+            }
+          </script>
+        </body>
+        </html>
       `);
     }
 
@@ -1260,8 +1294,24 @@ exports.handleSocialCallback = async (req, res) => {
               localStorage.setItem('socialAuthResult', JSON.stringify(message));
             }
             
-            // Close popup after a short delay
-            setTimeout(() => window.close(), 500);
+            // Try multiple methods to close the window
+            window.close();
+            window.blur();
+            window.close();
+            if (window.opener) {
+              window.opener = null;
+              window.close();
+            }
+            window.open('', '_self', '');
+            window.close();
+            setTimeout(() => window.close(), 100);
+            setTimeout(() => {
+              window.opener = null;
+              window.close();
+            }, 300);
+            setTimeout(() => {
+              window.open('', '_self').close();
+            }, 500);
           } catch (e) {
             console.error('Error in popup communication:', e);
             window.close();
@@ -1474,6 +1524,7 @@ exports.completeSocialRegistration = async (req, res) => {
  * Poll for OAuth session result
  */
 exports.pollOAuthSession = async (req, res) => {
+  console.log('[OAuth] pollOAuthSession called for sessionId:', req.params.sessionId);
   try {
     const { sessionId } = req.params;
 
@@ -1522,6 +1573,25 @@ exports.pollOAuthSession = async (req, res) => {
  * Handle social media OAuth callback for customers
  */
 exports.handleCustomerSocialCallback = async (req, res) => {
+  console.log('[handleCustomerSocialCallback] Called with:', {
+    user: req.user ? 'exists' : 'null',
+    userType: req.user?.isExistingAffiliate ? 'existing-affiliate' : req.user?.isNewUser ? 'new-user' : 'existing-customer',
+    query: req.query,
+    url: req.url,
+    originalUrl: req.originalUrl
+  });
+
+  // Debug mode - return JSON instead of redirecting
+  if (req.query.debug === 'true') {
+    return res.json({
+      debug: true,
+      user: req.user,
+      isExistingAffiliate: req.user?.isExistingAffiliate,
+      query: req.query,
+      headers: req.headers
+    });
+  }
+
   try {
     const user = req.user;
 
@@ -1529,10 +1599,11 @@ exports.handleCustomerSocialCallback = async (req, res) => {
     // State format: 'customer_oauth_1234...' or 'customer' or 'oauth_1234...'
     let sessionId = null;
     if (req.query.state) {
-      if (req.query.state.startsWith('customer_oauth_')) {
-        sessionId = req.query.state.replace('customer_', '');
-      } else if (req.query.state.startsWith('oauth_')) {
-        sessionId = req.query.state;
+      // Handle different state formats
+      if (req.query.state.includes('oauth_')) {
+        // Extract the oauth_xxx part regardless of prefix
+        const match = req.query.state.match(/(oauth_[a-zA-Z0-9_]+)/);
+        sessionId = match ? match[1] : null;
       }
     }
 
@@ -1543,6 +1614,7 @@ exports.handleCustomerSocialCallback = async (req, res) => {
     });
 
     if (!user) {
+      console.log('[handleCustomerSocialCallback] User is null, handling error case');
       // Check if this is a popup request (for embedded contexts)
       const isPopup = req.query.popup === 'true' ||
                      sessionId !== null ||
@@ -1566,29 +1638,85 @@ exports.handleCustomerSocialCallback = async (req, res) => {
           }
         }
 
-        return res.send(`
-          <script>
-            try {
-              const message = ${JSON.stringify(message)};
-              
-              if (window.opener && !window.opener.closed) {
-                window.opener.postMessage(message, '*');
-              } else if (window.parent && window.parent !== window) {
-                window.parent.postMessage(message, '*');
-              } else {
-                localStorage.setItem('socialAuthResult', JSON.stringify(message));
-              }
-              
-              setTimeout(() => window.close(), 500);
-            } catch (e) {
-              console.error('Error in popup communication:', e);
-              window.close();
-            }
-          </script>
-        `);
+        // Redirect to OAuth success page with message as parameter
+        const messageParam = encodeURIComponent(JSON.stringify(message));
+        return res.redirect(`/oauth-success.html?message=${messageParam}`);
       }
 
-      return res.redirect('/customer-register-embed.html?error=social_auth_failed');
+      // Always handle OAuth errors as popup to prevent redirect issues
+      return res.send(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>Authentication Failed</title>
+          <style>
+            body { 
+              font-family: Arial, sans-serif; 
+              text-align: center; 
+              padding: 50px;
+              background-color: #f5f5f5;
+            }
+            .error { 
+              color: #dc3545; 
+              font-size: 24px; 
+              margin-bottom: 20px;
+            }
+            .message {
+              color: #666;
+              margin-bottom: 30px;
+            }
+            button { 
+              padding: 10px 20px; 
+              font-size: 16px; 
+              cursor: pointer;
+              background-color: #007bff;
+              color: white;
+              border: none;
+              border-radius: 5px;
+            }
+            button:hover {
+              background-color: #0056b3;
+            }
+          </style>
+        </head>
+        <body>
+          <div class="error">✗ Authentication Failed</div>
+          <p class="message">Social authentication failed. Please try again or use a different login method.</p>
+          <button onclick="window.close()">Close Window</button>
+          <script>
+            try {
+              const message = {
+                type: 'social-auth-error',
+                message: 'Social authentication failed'
+              };
+              
+              // Send error message to parent
+              if (window.opener && !window.opener.closed) {
+                window.opener.postMessage(message, '*');
+              }
+              
+              if (window.parent && window.parent !== window) {
+                window.parent.postMessage(message, '*');
+              }
+              
+              // Also store in localStorage as fallback
+              localStorage.setItem('socialAuthResult', JSON.stringify(message));
+              
+              // Close window after delay
+              setTimeout(() => {
+                window.close();
+                if (!window.closed) {
+                  window.open('', '_self', '');
+                  window.close();
+                }
+              }, 5000);
+            } catch (e) {
+              console.error('Error in popup communication:', e);
+            }
+          </script>
+        </body>
+        </html>
+      `);
     }
 
     // Check if this is a popup request (for embedded contexts)
@@ -1624,59 +1752,117 @@ exports.handleCustomerSocialCallback = async (req, res) => {
       // Log successful login
       logLoginAttempt(true, 'customer', user.username, req, 'Social login successful');
 
-      if (isPopup) {
-        const message = {
-          type: 'social-auth-login',
-          token: token,
-          refreshToken: refreshToken,
-          customer: {
-            customerId: user.customerId,
-            id: user._id,
-            firstName: user.firstName,
-            lastName: user.lastName,
-            email: user.email,
-            affiliateId: user.affiliateId
-          }
-        };
-
-        // Store in database if sessionId is provided
-        if (sessionId) {
-          try {
-            const OAuthSession = require('../models/OAuthSession');
-            await OAuthSession.createSession(sessionId, message);
-          } catch (dbError) {
-            console.error('Error storing Customer OAuth session:', dbError);
-          }
+      // Always handle OAuth callbacks as popups to ensure proper closing
+      const message = {
+        type: 'social-auth-login',
+        token: token,
+        refreshToken: refreshToken,
+        customer: {
+          customerId: user.customerId,
+          id: user._id,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          email: user.email,
+          affiliateId: user.affiliateId
         }
+      };
 
-        return res.send(`
+      // Store in database if sessionId is provided
+      if (sessionId) {
+        try {
+          const OAuthSession = require('../models/OAuthSession');
+          await OAuthSession.createSession(sessionId, message);
+        } catch (dbError) {
+          console.error('Error storing Customer OAuth session:', dbError);
+        }
+      }
+
+      // Always send HTML response that closes the window
+      return res.send(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>Login Successful</title>
+          <style>
+            body { 
+              font-family: Arial, sans-serif; 
+              text-align: center; 
+              padding: 50px;
+              background-color: #f5f5f5;
+            }
+            .success { 
+              color: #28a745; 
+              font-size: 24px; 
+              margin-bottom: 20px;
+            }
+            .message {
+              color: #666;
+              margin-bottom: 30px;
+            }
+            button { 
+              padding: 10px 20px; 
+              font-size: 16px; 
+              cursor: pointer;
+              background-color: #007bff;
+              color: white;
+              border: none;
+              border-radius: 5px;
+            }
+            button:hover {
+              background-color: #0056b3;
+            }
+          </style>
+        </head>
+        <body>
+          <div class="success">✓ Login Successful!</div>
+          <p class="message">You have been successfully logged in. This window will close automatically...</p>
+          <button onclick="window.close()">Close Window</button>
           <script>
             try {
               const message = ${JSON.stringify(message)};
               
+              // Try multiple methods to communicate with parent
               if (window.opener && !window.opener.closed) {
                 window.opener.postMessage(message, '*');
-              } else if (window.parent && window.parent !== window) {
-                window.parent.postMessage(message, '*');
-              } else {
-                localStorage.setItem('socialAuthResult', JSON.stringify(message));
               }
               
-              setTimeout(() => window.close(), 500);
+              if (window.parent && window.parent !== window) {
+                window.parent.postMessage(message, '*');
+              }
+              
+              // Also store in localStorage as fallback
+              localStorage.setItem('socialAuthResult', JSON.stringify(message));
+              
+              // Try multiple methods to close the window
+              setTimeout(() => {
+                window.close();
+                // If still open, try other methods
+                if (!window.closed) {
+                  window.blur();
+                  window.close();
+                  // Last resort
+                  window.open('', '_self', '');
+                  window.close();
+                }
+              }, 1500);
             } catch (e) {
               console.error('Error in popup communication:', e);
-              window.close();
+              document.body.innerHTML = '<p>Login successful! Please close this window.</p><button onclick="window.close()">Close Window</button>';
             }
           </script>
-        `);
-      }
-
-      // Redirect to customer dashboard with tokens
-      return res.redirect(`/customer-dashboard-embed.html?token=${token}&refreshToken=${refreshToken}`);
+        </body>
+        </html>
+      `);
     }
 
     // Handle case where social account already exists as an affiliate
-    if (user.isExistingAffiliate) {
+    console.log('[handleCustomerSocialCallback] Checking for existing affiliate:', {
+      isExistingAffiliate: user?.isExistingAffiliate,
+      userObject: user
+    });
+    
+    if (user && user.isExistingAffiliate) {
+      console.log('[handleCustomerSocialCallback] User is an existing affiliate, showing conflict message');
       const message = {
         type: 'social-auth-account-conflict',
         message: 'This social media account is already associated with an affiliate account. Would you like to login as an affiliate instead?',
@@ -1690,40 +1876,118 @@ exports.handleCustomerSocialCallback = async (req, res) => {
         }
       };
 
-      if (isPopup) {
-        // Store in database if sessionId is provided
-        if (sessionId) {
-          try {
-            const OAuthSession = require('../models/OAuthSession');
-            await OAuthSession.createSession(sessionId, message);
-          } catch (dbError) {
-            console.error('Error storing Customer OAuth session:', dbError);
-          }
+      // Store in database if sessionId is provided
+      if (sessionId) {
+        try {
+          const OAuthSession = require('../models/OAuthSession');
+          await OAuthSession.createSession(sessionId, message);
+        } catch (dbError) {
+          console.error('Error storing Customer OAuth session:', dbError);
         }
+      }
 
-        return res.send(`
-          <script>
+      // Always handle as popup to avoid redirect issues
+      const nonce = res.locals.cspNonce || '';
+      console.log('[handleCustomerSocialCallback] Using nonce for affiliate conflict:', nonce);
+      
+      // Set proper headers to avoid CSP issues
+      res.setHeader('Content-Type', 'text/html; charset=utf-8');
+      
+      return res.send(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>Account Type Conflict</title>
+          <style${nonce ? ` nonce="${nonce}"` : ''}>
+            body { 
+              font-family: Arial, sans-serif; 
+              text-align: center; 
+              padding: 50px;
+              background-color: #f5f5f5;
+            }
+            .warning { 
+              color: #ff9800; 
+              font-size: 24px; 
+              margin-bottom: 20px;
+            }
+            .message {
+              color: #666;
+              margin-bottom: 30px;
+              max-width: 500px;
+              margin-left: auto;
+              margin-right: auto;
+            }
+            button { 
+              padding: 10px 20px; 
+              font-size: 16px; 
+              cursor: pointer;
+              background-color: #007bff;
+              color: white;
+              border: none;
+              border-radius: 5px;
+              margin: 5px;
+            }
+            button:hover {
+              background-color: #0056b3;
+            }
+            .affiliate-info {
+              background-color: white;
+              padding: 20px;
+              border-radius: 10px;
+              box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+              margin: 20px auto;
+              max-width: 400px;
+            }
+          </style>
+        </head>
+        <body>
+          <div class="warning">⚠ Account Type Mismatch</div>
+          <div class="message">
+            <p>This ${message.provider} account is already registered as an affiliate account.</p>
+            <div class="affiliate-info">
+              <strong>Affiliate Account:</strong><br>
+              ${message.affiliateData.businessName || message.affiliateData.firstName + ' ' + message.affiliateData.lastName}<br>
+              ${message.affiliateData.email}
+            </div>
+            <p>You cannot use an affiliate account to log in as a customer. Please use a different social media account or create a new customer account.</p>
+          </div>
+          <button id="closeBtn">Close Window</button>
+          <script${nonce ? ` nonce="${nonce}"` : ''}>
             try {
               const message = ${JSON.stringify(message)};
               
+              // Add click handler for close button
+              document.getElementById('closeBtn').addEventListener('click', function() {
+                window.close();
+              });
+              
+              // Send message to parent window
               if (window.opener && !window.opener.closed) {
                 window.opener.postMessage(message, '*');
-              } else if (window.parent && window.parent !== window) {
-                window.parent.postMessage(message, '*');
-              } else {
-                localStorage.setItem('socialAuthResult', JSON.stringify(message));
               }
               
-              setTimeout(() => window.close(), 500);
+              if (window.parent && window.parent !== window) {
+                window.parent.postMessage(message, '*');
+              }
+              
+              // Also store in localStorage as fallback
+              localStorage.setItem('socialAuthResult', JSON.stringify(message));
+              
+              // Close window after delay
+              setTimeout(() => {
+                window.close();
+                if (!window.closed) {
+                  window.open('', '_self', '');
+                  window.close();
+                }
+              }, 10000); // Longer delay to allow user to read message
             } catch (e) {
               console.error('Error in popup communication:', e);
-              window.close();
             }
           </script>
-        `);
-      }
-
-      return res.redirect('/customer-register-embed.html?error=account_exists_as_affiliate');
+        </body>
+        </html>
+      `);
     }
 
     // For new customers, create a temporary social token and redirect to complete registration

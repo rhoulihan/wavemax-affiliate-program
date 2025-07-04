@@ -36,8 +36,12 @@
       window.paymentConfig = paymentConfig;
 
       // Initialize the Paygistix payment form with config
-      paymentForm = new PaygistixPaymentForm('paymentFormContainer', {
+      paymentForm = new window.PaygistixPaymentForm({
+        container: document.getElementById('paymentFormContainer'),
         paymentConfig: paymentConfig,
+        payContext: 'REGISTRATION',
+        affiliateId: document.getElementById('affiliateId')?.value,
+        affiliateSettings: window.affiliateData || null, // Pass affiliate data from customer-register.js
         hideRegistrationFormRows: true, // Hide non-BF form rows in registration
         onSuccess: function() {
           console.log('Payment form initialized with config:', paymentConfig);
@@ -88,8 +92,8 @@
     if (paymentForm && numberOfBags) {
       const quantity = parseInt(numberOfBags);
       console.log('Setting BF quantity to:', quantity);
-      // Use the updateBagQuantity method from PaygistixPaymentForm
-      paymentForm.updateBagQuantity(quantity);
+      // Use the updateQuantity method from PaygistixPaymentForm v2
+      paymentForm.updateQuantity('BF', quantity);
     } else {
       console.log('PaymentForm not ready or numberOfBags is empty', {
         paymentForm: !!paymentForm,
@@ -213,13 +217,13 @@
         console.log('Redirecting to customer success page in 1.5 seconds...');
         setTimeout(() => {
           console.log('Redirecting now...');
-          if (window.navigateTo) {
-            console.log('Using navigateTo function');
-            window.navigateTo('/customer-success');
-          } else {
-            console.log('Using direct navigation');
-            window.location.href = '/embed-app.html?route=/customer-success';
+          // For CSP v2, navigate directly to the success page with proper nonce injection
+          const currentParams = new URLSearchParams(window.location.search);
+          // Preserve affiliate ID in the URL
+          if (formData.affiliateId) {
+            currentParams.set('affiliateId', formData.affiliateId);
           }
+          window.location.href = '/customer-success-embed.html?' + currentParams.toString();
         }, 1500);
       } else {
         // Registration failed

@@ -864,7 +864,6 @@ exports.markOrderReady = async (req, res) => {
     }
 
     // Update order status
-    order.orderProcessingStatus = 'ready';
     order.processedAt = new Date();
     order.status = 'processed';
     order.bagsProcessed = order.numberOfBags; // All bags are processed
@@ -999,24 +998,47 @@ exports.getTodayStats = async (req, res) => {
     const operatorId = req.user.id;
     const today = new Date();
     today.setHours(0, 0, 0, 0);
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
 
-    // Get orders processed today
+    // Get orders that have been scanned/weighed today
+    // Include orders where:
+    // 1. Assigned to this operator OR
+    // 2. Have bags weighed today (updatedAt >= today and bagsWeighed > 0)
     const ordersProcessed = await Order.countDocuments({
-      assignedOperator: operatorId,
-      processingStarted: { $gte: today }
+      $or: [
+        {
+          assignedOperator: operatorId,
+          processingStarted: { $gte: today }
+        },
+        {
+          bagsWeighed: { $gt: 0 },
+          updatedAt: { $gte: today, $lt: tomorrow }
+        }
+      ]
     });
 
-    // Get total bags scanned today (sum of bagsWeighed from today's orders)
+    // Get total bags scanned today
+    // Include all orders with bags weighed today, regardless of operator assignment
     const todayOrders = await Order.find({
-      assignedOperator: operatorId,
-      processingStarted: { $gte: today }
+      $or: [
+        {
+          assignedOperator: operatorId,
+          processingStarted: { $gte: today }
+        },
+        {
+          bagsWeighed: { $gt: 0 },
+          updatedAt: { $gte: today, $lt: tomorrow }
+        }
+      ]
     });
     
     const bagsScanned = todayOrders.reduce((total, order) => total + (order.bagsWeighed || 0), 0);
 
-    // Get orders ready for pickup
+    // Get orders ready for pickup today (processed status means ready for pickup)
     const ordersReady = await Order.countDocuments({
-      orderProcessingStatus: 'ready'
+      status: 'processed',
+      updatedAt: { $gte: today }
     });
 
     res.json({

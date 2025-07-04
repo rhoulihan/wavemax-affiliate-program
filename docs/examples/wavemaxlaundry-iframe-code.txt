@@ -20,7 +20,7 @@ Replace the current iframe code on the WaveMAXLaundry.com website with this code
 (function() {
     // Build iframe URL from parent page parameters
     function buildIframeUrl() {
-        const baseUrl = 'https://wavemax.promo/embed-app.html';
+        const baseUrl = 'https://wavemax.promo/embed-app-v2.html';
         const params = new URLSearchParams(window.location.search);
         const iframeParams = new URLSearchParams();
         

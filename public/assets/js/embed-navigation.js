@@ -10,13 +10,15 @@
 
   // Navigation function for embedded context
   window.navigateToPage = function(route) {
-    // If in iframe, use postMessage to navigate
-    if (window.parent !== window) {
+    // Check if navigateTo function exists (from embed-app-v2.js)
+    if (window.navigateTo && typeof window.navigateTo === 'function') {
+      console.log('[Embed Navigation] Using navigateTo directly:', route);
+      window.navigateTo(route);
+    } else if (window.parent !== window) {
+      // If in iframe, use postMessage to navigate
       window.parent.postMessage({
         type: 'navigate',
-        data: {
-          url: route
-        }
+        route: route
       }, '*');
     } else {
       // If not in iframe, navigate directly

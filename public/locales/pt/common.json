@@ -740,8 +740,10 @@
       "orderManagement": "Gerenciamento de Pedidos",
       "reports": "Relatórios",
       "settings": "Configurações do Sistema",
-      "logout": "Sair",
-      "confirmLogout": "Tem certeza de que deseja sair?",
+      "logout": {
+        "title": "Confirmar Logout",
+        "message": "Tem certeza de que deseja sair?"
+      },
       "tabs": {
         "dashboard": "Painel",
         "operators": "Operadores",

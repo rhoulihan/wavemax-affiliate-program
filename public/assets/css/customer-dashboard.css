@@ -1,0 +1,77 @@
+/* Customer Dashboard Styles */
+body {
+    margin: 0;
+    padding: 0;
+    background: transparent;
+}
+
+.wavemax-blue {
+    background-color: #1e3a8a;
+}
+
+.wavemax-light-blue {
+    background-color: #3b82f6;
+}
+
+/* Minimal styling for iframe */
+.embed-container {
+    max-width: 100%;
+    margin: 0;
+    padding: 16px;
+}
+
+/* Language switcher positioning */
+#language-switcher-container {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    z-index: 1000;
+}
+
+/* Order status badges */
+.order-status {
+    padding: 0.125rem 0.625rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.status-scheduled {
+    background-color: #dbeafe;
+    color: #1e40af;
+}
+
+.status-picked_up {
+    background-color: #fef3c7;
+    color: #92400e;
+}
+
+.status-processing {
+    background-color: #ede9fe;
+    color: #5b21b6;
+}
+
+.status-ready_for_delivery {
+    background-color: #cffafe;
+    color: #0e7490;
+}
+
+.status-complete {
+    background-color: #d1fae5;
+    color: #065f46;
+}
+
+.status-cancelled {
+    background-color: #fee2e2;
+    color: #991b1b;
+}
+
+/* Hidden sections */
+.hidden-section {
+    display: none;
+}
+
+/* Delete data section - initially hidden */
+#deleteDataSection {
+    display: none;
+}
