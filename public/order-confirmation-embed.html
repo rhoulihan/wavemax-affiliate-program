@@ -3,35 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' https:; script-src 'self' https: 'nonce-{{CSP_NONCE}}'; style-src 'self' https: 'unsafe-inline'; img-src 'self' https: data:; font-src 'self' https: data:; connect-src 'self' https:; frame-src 'self' https:;">
     <title>WaveMAX Laundry - Order Confirmation</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-            background: transparent;
-        }
-        .wavemax-blue {
-            background-color: #1e3a8a;
-        }
-        .wavemax-light-blue {
-            background-color: #3b82f6;
-        }
-        /* Minimal styling for iframe */
-        .embed-container {
-            max-width: 100%;
-            margin: 0;
-            padding: 16px;
-        }
-    
-        /* Language switcher positioning */
-        #language-switcher-container {
-            position: fixed;
-            top: 10px;
-            right: 10px;
-            z-index: 1000;
-        }
-    </style>
+    <link rel="stylesheet" href="/assets/css/language-switcher.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/assets/css/order-confirmation.css">
 </head>
 <body class="bg-white font-sans">
     <!-- Language Switcher -->
@@ -144,7 +121,7 @@
                                     <span id="feeBreakdown"></span>
                                 </div>
                             </div>
-                            <div class="py-3" id="bagCreditSection" style="display: none;">
+                            <div class="py-3 hidden-section" id="bagCreditSection">
                                 <div class="flex justify-between text-green-600">
                                     <span data-i18n="orders.confirmation.bagCredit">Bag Credit (First Order):</span>
                                     <span id="bagCreditAmount">-$0.00</span>
@@ -182,6 +159,10 @@
         </div>
     </div>
 
+    <!-- Scripts -->
+    <script src="/assets/js/i18n.js"></script>
+    <script src="/assets/js/language-switcher.js"></script>
+    <script src="/assets/js/order-confirmation-init.js"></script>
 
 </body>
 </html>

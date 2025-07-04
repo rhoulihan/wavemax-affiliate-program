@@ -1,0 +1,105 @@
+/* Embed App V2 Styles - CSP Compliant */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: transparent;
+    min-height: 100vh;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+}
+
+#app-container {
+    width: 100%;
+    min-height: 600px;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+}
+
+/* Remove any Bootstrap container padding for affiliate landing */
+body[data-route="/affiliate-landing"] .container,
+body[data-route="/affiliate-landing"] .container-fluid {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    max-width: 100% !important;
+}
+
+/* Remove any top margins/padding from first child elements */
+#app-container > *:first-child {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+}
+
+/* Specifically target sections that might be loaded */
+#app-container > section:first-child,
+#app-container > .hero-section {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+}
+
+/* Override any inline styles that might be added */
+#app-container > style + * {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+}
+
+.loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 400px;
+    font-size: 1.2rem;
+    color: #666;
+}
+
+.error {
+    padding: 20px;
+    background: #fee;
+    border: 1px solid #fcc;
+    border-radius: 8px;
+    color: #c00;
+    margin: 20px;
+    text-align: center;
+}
+
+/* Mobile-specific styles */
+@media (max-width: 767px) {
+    body {
+        font-size: 16px; /* Prevent zoom on iOS */
+    }
+    
+    #app-container {
+        min-height: 100vh;
+        padding: 0;
+        margin: 0;
+    }
+    
+    /* Ensure full width on mobile */
+    #app-container > * {
+        max-width: 100vw;
+        overflow-x: hidden;
+    }
+}
+
+/* When chrome is hidden, take full viewport */
+body.chrome-hidden {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+body.chrome-hidden #app-container {
+    min-height: 100vh;
+    height: 100%;
+}

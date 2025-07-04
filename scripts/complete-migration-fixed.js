@@ -57,7 +57,7 @@ async function main() {
     console.log('   Email: demo.operator@wavemax.com');
     console.log('   Password: Demo1234!');
     console.log('\n3. Embedded Application:');
-    console.log('   URL: https://wavemax.promo/embed-app.html');
+    console.log('   URL: https://wavemax.promo/embed-app-v2.html');
     console.log('\n=== Important Notes ===');
     console.log('- Operators can only login during their shift hours (8:00 AM - 4:00 PM for demo)');
     console.log('- Administrators can create additional operators through the admin portal');

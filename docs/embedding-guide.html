@@ -261,7 +261,7 @@
 (function() {
     // Build iframe URL from parent page parameters
     function buildIframeUrl() {
-        const baseUrl = 'https://wavemax.promo/embed-app.html';
+        const baseUrl = 'https://wavemax.promo/embed-app-v2.html';
         const params = new URLSearchParams(window.location.search);
         const iframeParams = new URLSearchParams();
         
@@ -322,7 +322,7 @@
 (function() {
     // Pass URL parameters from parent page to iframe
     const urlParams = new URLSearchParams(window.location.search);
-    let iframeSrc = 'https://wavemax.promo/embed-app.html';
+    let iframeSrc = 'https://wavemax.promo/embed-app-v2.html';
     if (urlParams.toString()) {
         iframeSrc += '?' + urlParams.toString();
     }
@@ -410,9 +410,9 @@ https://wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program?login=cust
             <h3>Navigation Menu Links</h3>
             <pre><code>&lt;!-- Add to your website navigation --&gt;
 &lt;ul class="nav-menu"&gt;
-    &lt;li&gt;&lt;a href="https://wavemax.promo/embed-app.html?route=/affiliate-register" target="_blank"&gt;Become an Affiliate&lt;/a&gt;&lt;/li&gt;
-    &lt;li&gt;&lt;a href="https://wavemax.promo/embed-app.html?route=/affiliate-login" target="_blank"&gt;Affiliate Login&lt;/a&gt;&lt;/li&gt;
-    &lt;li&gt;&lt;a href="https://wavemax.promo/embed-app.html?route=/customer-login" target="_blank"&gt;Customer Portal&lt;/a&gt;&lt;/li&gt;
+    &lt;li&gt;&lt;a href="https://wavemax.promo/embed-app-v2.html?route=/affiliate-register" target="_blank"&gt;Become an Affiliate&lt;/a&gt;&lt;/li&gt;
+    &lt;li&gt;&lt;a href="https://wavemax.promo/embed-app-v2.html?route=/affiliate-login" target="_blank"&gt;Affiliate Login&lt;/a&gt;&lt;/li&gt;
+    &lt;li&gt;&lt;a href="https://wavemax.promo/embed-app-v2.html?route=/customer-login" target="_blank"&gt;Customer Portal&lt;/a&gt;&lt;/li&gt;
 &lt;/ul&gt;</code></pre>
 
             <h3>Call-to-Action Buttons</h3>
@@ -420,7 +420,7 @@ https://wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program?login=cust
 &lt;div class="affiliate-cta" style="text-align: center; padding: 40px 20px; background: #f8f9fa;"&gt;
     &lt;h2&gt;Join Our Affiliate Program&lt;/h2&gt;
     &lt;p&gt;Earn 10% recurring commission on every customer you refer!&lt;/p&gt;
-    &lt;a href="https://wavemax.promo/embed-app.html?route=/affiliate-register" 
+    &lt;a href="https://wavemax.promo/embed-app-v2.html?route=/affiliate-register" 
        target="_blank"
        style="display: inline-block; margin-top: 20px; padding: 15px 40px; 
               background: #3b82f6; color: white; text-decoration: none; 
@@ -439,7 +439,7 @@ https://wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program?login=cust
         &lt;h2&gt;Partner with WaveMAX&lt;/h2&gt;
         &lt;p&gt;Join our affiliate program and earn commission on every referral&lt;/p&gt;
         &lt;iframe 
-            src="https://wavemax.promo/embed-app.html?route=/landing" 
+            src="https://wavemax.promo/embed-app-v2.html?route=/landing" 
             width="100%" 
             height="600" 
             frameborder="0"
@@ -463,7 +463,7 @@ https://wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program?login=cust
     &lt;main&gt;
         &lt;iframe 
             id="wavemax-affiliate-app"
-            src="https://wavemax.promo/embed-app.html" 
+            src="https://wavemax.promo/embed-app-v2.html" 
             width="100%" 
             height="800" 
             frameborder="0" 
@@ -502,7 +502,7 @@ https://wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program?login=cust
 
             <h3>Lazy Loading (for below-fold embeds)</h3>
             <pre><code>&lt;iframe 
-    src="https://wavemax.promo/embed-app.html" 
+    src="https://wavemax.promo/embed-app-v2.html" 
     width="100%" 
     height="800" 
     frameborder="0"
@@ -656,7 +656,7 @@ const footer = document.querySelector('.your-custom-footer');</code></pre>
             <div class="demo-container">
                 <h4>Live Demo</h4>
                 <p>See the affiliate program in action:</p>
-                <a href="https://wavemax.promo/embed-app.html" target="_blank" 
+                <a href="https://wavemax.promo/embed-app-v2.html" target="_blank" 
                    style="display: inline-block; padding: 12px 30px; background: #3b82f6; 
                           color: white; text-decoration: none; border-radius: 6px;">
                     View Live Demo

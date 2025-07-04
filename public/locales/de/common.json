@@ -740,8 +740,10 @@
       "orderManagement": "Bestellverwaltung",
       "reports": "Berichte",
       "settings": "Systemeinstellungen",
-      "logout": "Abmelden",
-      "confirmLogout": "Sind Sie sicher, dass Sie sich abmelden möchten?",
+      "logout": {
+        "title": "Abmeldung bestätigen",
+        "message": "Sind Sie sicher, dass Sie sich abmelden möchten?"
+      },
       "tabs": {
         "dashboard": "Dashboard",
         "operators": "Operatoren",

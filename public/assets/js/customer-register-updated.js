@@ -141,7 +141,7 @@
           if (isEmbedded) {
             sendMessageToParent('registration-success', registrationData);
           } else {
-            window.location.href = '/embed-app.html?route=/customer-success';
+            window.location.href = '/embed-app-v2.html?route=/customer-success';
           }
         } else {
           modalAlert(data.message || 'Registration failed. Please try again.', 'Registration Error');

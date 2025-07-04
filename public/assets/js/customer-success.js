@@ -15,7 +15,7 @@ function initializeSuccessPage() {
 
     if (!customerId) {
       alert('No registration data found. Please register first.');
-      window.location.href = '/embed-app.html?login=customer';
+      window.location.href = '/embed-app-v2.html?login=customer';
       return;
     }
 
@@ -39,13 +39,13 @@ function initializeSuccessPage() {
         } else {
           console.error('Failed to load customer data:', data.message);
           alert('Unable to load customer information.');
-          window.location.href = '/embed-app.html?login=customer';
+          window.location.href = '/embed-app-v2.html?login=customer';
         }
       })
       .catch(error => {
         console.error('Error fetching customer data:', error);
         alert('An error occurred while loading customer information.');
-        window.location.href = '/embed-app.html?login=customer';
+        window.location.href = '/embed-app-v2.html?login=customer';
       });
   } else {
     // Use data from sessionStorage
@@ -122,7 +122,7 @@ function displayCustomerData(data) {
       e.preventDefault();
       // For embedded context, navigate within iframe
       if (window.parent !== window) {
-        window.location.href = '/embed-app.html?login=customer&pickup=true';
+        window.location.href = '/embed-app-v2.html?login=customer&pickup=true';
       } else {
         // For direct access, navigate to the parent site
         window.top.location.href = this.href;
@@ -136,7 +136,7 @@ function displayCustomerData(data) {
       e.preventDefault();
       // For embedded context, navigate within iframe
       if (window.parent !== window) {
-        window.location.href = '/embed-app.html?login=customer';
+        window.location.href = '/embed-app-v2.html?login=customer';
       } else {
         // For direct access, navigate to the parent site
         window.top.location.href = this.href;

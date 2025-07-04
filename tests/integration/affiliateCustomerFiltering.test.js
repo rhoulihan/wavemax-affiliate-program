@@ -211,7 +211,7 @@ describe('Affiliate Customer Filtering Integration Tests', () => {
       expect(customerParam).toBe(testCustomer.customerId);
 
       // After login, the redirect URL would be constructed
-      const redirectURL = `/embed-app.html?route=/affiliate-dashboard&id=${testAffiliate.affiliateId}&customer=${customerParam}`;
+      const redirectURL = `/embed-app-v2.html?route=/affiliate-dashboard&id=${testAffiliate.affiliateId}&customer=${customerParam}`;
 
       expect(redirectURL).toContain(testAffiliate.affiliateId);
       expect(redirectURL).toContain(testCustomer.customerId);

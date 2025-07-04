@@ -1,0 +1,981 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WaveMAX Affiliate Program</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Swirl Spinner CSS -->
+    <link rel="stylesheet" href="/assets/css/swirl-spinner.css">
+    
+    <!-- Mobile Utils -->
+    <script src="/assets/js/mobile-utils.js"></script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: transparent;
+            min-height: 100vh;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+        }
+        
+        #app-container {
+            width: 100%;
+            min-height: 600px;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+        }
+        
+        /* Remove any Bootstrap container padding for affiliate landing */
+        body[data-route="/affiliate-landing"] .container,
+        body[data-route="/affiliate-landing"] .container-fluid {
+            padding-left: 0 !important;
+            padding-right: 0 !important;
+            max-width: 100% !important;
+        }
+        
+        /* Remove any top margins/padding from first child elements */
+        #app-container > *:first-child {
+            margin-top: 0 !important;
+            padding-top: 0 !important;
+        }
+        
+        /* Specifically target sections that might be loaded */
+        #app-container > section:first-child,
+        #app-container > .hero-section {
+            margin-top: 0 !important;
+            padding-top: 0 !important;
+        }
+        
+        /* Override any inline styles that might be added */
+        #app-container > style + * {
+            margin-top: 0 !important;
+            padding-top: 0 !important;
+        }
+        
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 400px;
+            font-size: 1.2rem;
+            color: #666;
+        }
+        
+        
+        .error {
+            padding: 20px;
+            background: #fee;
+            border: 1px solid #fcc;
+            border-radius: 8px;
+            color: #c00;
+            margin: 20px;
+            text-align: center;
+        }
+        
+        /* Mobile-specific styles */
+        @media (max-width: 767px) {
+            body {
+                font-size: 16px; /* Prevent zoom on iOS */
+            }
+            
+            #app-container {
+                min-height: 100vh;
+                padding: 0;
+                margin: 0;
+            }
+            
+            /* Ensure full width on mobile */
+            #app-container > * {
+                max-width: 100vw;
+                overflow-x: hidden;
+            }
+        }
+        
+        /* When chrome is hidden, take full viewport */
+        body.chrome-hidden {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            overflow: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        body.chrome-hidden #app-container {
+            min-height: 100vh;
+            height: 100%;
+        }
+    </style>
+</head>
+<body>
+    <div id="app-container">
+        <div class="loading">
+            <i class="fas fa-spinner fa-spin me-2"></i>
+            Loading...
+        </div>
+    </div>
+
+    <!-- Session Manager -->
+    <script src="/assets/js/session-manager.js"></script>
+
+    <script>
+        // Single page embedded application
+        const BASE_URL = window.location.protocol + '//' + window.location.host;
+        
+        // Mobile and parent communication state
+        let viewportInfo = null;
+        let chromeHidden = false;
+        
+        // Helper function to check if any user is authenticated
+        function isAnyUserAuthenticated() {
+            // First check if SessionManager exists and has the method we need
+            if (!window.SessionManager || typeof window.SessionManager.isAuthenticated !== 'function') {
+                return false;
+            }
+            
+            // Check all possible user types
+            const userTypes = ['administrator', 'affiliate', 'customer', 'operator'];
+            return userTypes.some(type => window.SessionManager.isAuthenticated(type));
+        }
+        
+        // Helper function to check if a specific user type is authenticated
+        function isUserAuthenticated(userType) {
+            if (!window.SessionManager || typeof window.SessionManager.isAuthenticated !== 'function') {
+                return false;
+            }
+            return window.SessionManager.isAuthenticated(userType);
+        }
+        
+        // Helper function to get the currently authenticated user type
+        function getAuthenticatedUserType() {
+            if (!window.SessionManager || typeof window.SessionManager.isAuthenticated !== 'function') {
+                return null;
+            }
+            
+            const userTypes = ['administrator', 'affiliate', 'customer', 'operator'];
+            return userTypes.find(type => window.SessionManager.isAuthenticated(type)) || null;
+        }
+        
+        const EMBED_PAGES = {
+            '/': '/embed-landing.html',
+            '/landing': '/embed-landing.html',
+            '/affiliate-register': '/affiliate-register-embed.html',
+            '/affiliate-login': '/affiliate-login-embed.html',
+            '/affiliate-dashboard': '/affiliate-dashboard-embed.html',
+            '/affiliate-success': '/affiliate-success-embed.html',
+            '/affiliate-landing': '/affiliate-landing-embed.html',
+            '/customer-register': '/customer-register-embed.html',
+            '/customer-login': '/customer-login-embed.html',
+            '/customer-dashboard': '/customer-dashboard-embed.html',
+            '/customer-success': '/customer-success-embed.html',
+            '/schedule-pickup': '/schedule-pickup-embed.html',
+            '/order-confirmation': '/order-confirmation-embed.html',
+            '/administrator-login': '/administrator-login-embed.html',
+            '/administrator-dashboard': '/administrator-dashboard-embed.html',
+            '/operator-login': '/operator-login-embed.html',
+            '/operator-scan': '/operator-scan-embed.html',
+            '/terms-of-service': '/terms-and-conditions-embed.html',
+            '/terms-and-conditions': '/terms-and-conditions-embed.html',
+            '/privacy-policy': '/privacy-policy.html',
+            '/payment-success': '/payment-success-embed.html',
+            '/payment-error': '/payment-error-embed.html'
+        };
+        
+        let currentRoute = '/';
+        
+        // Get route from URL parameter
+        function getRouteFromUrl() {
+            const params = new URLSearchParams(window.location.search);
+            
+            // Check if only affid parameter is present (for affiliate customer registration)
+            const affid = params.get('affid') || params.get('affiliate');
+            const hasOnlyAffid = affid && params.size === 1 && !params.get('route') && !params.get('login');
+            
+            if (hasOnlyAffid) {
+                console.log('Only affid parameter found, routing to customer registration');
+                return '/customer-register';
+            }
+            
+            // Check for login parameter
+            const login = params.get('login');
+            if (login) {
+                // Special case: if login=customer with affid, redirect to registration
+                if (login === 'customer' && affid) {
+                    console.log('Customer login with affid, redirecting to registration');
+                    return '/customer-register';
+                }
+                
+                switch(login) {
+                    case 'admin':
+                        return '/administrator-login';
+                    case 'operator':
+                        return '/operator-login';
+                    case 'affiliate':
+                        return '/affiliate-login';
+                    case 'customer':
+                        return '/customer-login';
+                    default:
+                        console.log('Unknown login type:', login);
+                        return '/';
+                }
+            }
+            
+            let route = params.get('route');
+            
+            // If no route in URL, check localStorage for saved route ONLY if authenticated
+            if (!route) {
+                // Check if user is authenticated before using saved route
+                if (isAnyUserAuthenticated()) {
+                    route = localStorage.getItem('currentRoute') || '/';
+                    console.log('No route in URL, authenticated user, using saved route:', route);
+                } else {
+                    // No auth, clear saved route and use default
+                    localStorage.removeItem('currentRoute');
+                    route = '/';
+                    console.log('No route in URL, no auth, using default route');
+                }
+            }
+            
+            // If route is customer-login with affid, redirect to registration
+            if (route === '/customer-login' && affid) {
+                console.log('Customer login route with affid, redirecting to registration');
+                return '/customer-register';
+            }
+            
+            // Use SessionManager to validate route based on authentication
+            if (window.SessionManager) {
+                const originalRoute = route;
+                route = window.SessionManager.getAuthenticatedRoute(route);
+                if (originalRoute !== route) {
+                    console.log('SessionManager adjusted route from', originalRoute, 'to:', route);
+                }
+            }
+            
+            console.log('Final route:', route);
+            return route;
+        }
+        
+        // Clean up function to disconnect all observers
+        function cleanupCurrentPage() {
+            // Dispatch a custom event to notify scripts to clean up
+            window.dispatchEvent(new CustomEvent('page-cleanup'));
+            
+            // Remove all ResizeObservers by triggering cleanup in child scripts
+            if (window.ResizeObserver) {
+                // This will be caught by scripts that set up observers
+                window.dispatchEvent(new CustomEvent('disconnect-observers'));
+            }
+            
+            // Remove route-specific styles from previous page
+            document.querySelectorAll('style[data-route]').forEach(style => {
+                style.remove();
+            });
+        }
+        
+        // Load page content
+        async function loadPage(route) {
+            console.log('Loading page for route:', route);
+            console.log('Current window.location.search:', window.location.search);
+            
+            // Clean up current page before loading new one
+            cleanupCurrentPage();
+            
+            // Reset height tracking for new page
+            lastSentHeight = 0;
+            isUpdatingHeight = false;
+            
+            // Send a smaller height to trigger resize on new page
+            if (window.parent !== window) {
+                window.parent.postMessage({
+                    type: 'resize',
+                    data: { height: 600 } // Reset to minimum height
+                }, '*');
+            }
+            
+            const container = document.getElementById('app-container');
+            const pagePath = EMBED_PAGES[route] || EMBED_PAGES['/'];
+            console.log('Page path:', pagePath);
+            
+            try {
+                container.innerHTML = '<div class="loading"><i class="fas fa-spinner fa-spin me-2"></i>Loading...</div>';
+                
+                // Build URL with current query parameters - use fresh read of location
+                const currentParams = new URLSearchParams(window.location.search);
+                console.log('Current params for fetch:', Array.from(currentParams.entries()));
+                const fetchUrl = BASE_URL + pagePath + (currentParams.toString() ? '?' + currentParams.toString() : '');
+                console.log('Fetching URL:', fetchUrl);
+                
+                const response = await fetch(fetchUrl);
+                if (!response.ok) throw new Error('Failed to load page');
+                
+                let html = await response.text();
+                
+                // Extract head content for styles
+                const headMatch = html.match(/<head[^>]*>([\s\S]*)<\/head>/i);
+                const bodyMatch = html.match(/<body[^>]*>([\s\S]*)<\/body>/i);
+                
+                if (headMatch && bodyMatch) {
+                    // Extract styles and links from head
+                    const headContent = headMatch[1];
+                    // Use RegExp constructor to avoid nonce injection in the pattern
+                    const styleRegex = new RegExp('<style[^>]*>[\\s\\S]*?<\\/style>', 'gi');
+                    const styles = headContent.match(styleRegex) || [];
+                    const linkRegex = new RegExp('<link[^>]*rel=["\']stylesheet["\'][^>]*>', 'gi');
+                    const styleLinks = headContent.match(linkRegex) || [];
+                    
+                    // Get body content
+                    let bodyContent = bodyMatch[1];
+                    
+                    // Remove script tags to prevent duplicate execution
+                    const scriptRegex = new RegExp('<script\\b[^<]*(?:(?!<\\/script>)<[^<]*)*<\\/script>', 'gi');
+                    bodyContent = bodyContent.replace(scriptRegex, '');
+                    
+                    // Update relative URLs to absolute
+                    bodyContent = bodyContent.replace(/src=["'](?!http|\/\/)([^"']+)["']/g, `src="${BASE_URL}/$1"`);
+                    bodyContent = bodyContent.replace(/href=["'](?!http|\/\/|#)([^"']+)["']/g, `href="${BASE_URL}/$1"`);
+                    
+                    // Add external stylesheets to head if not already present
+                    styleLinks.forEach(link => {
+                        // Update relative paths in link tags
+                        const updatedLink = link.replace(/href=["'](?!http|\/\/)([^"']+)["']/g, `href="${BASE_URL}/$1"`);
+                        // Check if this stylesheet is already in the document
+                        const linkHref = updatedLink.match(/href=["']([^"']+)["']/);
+                        if (linkHref && !document.querySelector(`link[href="${linkHref[1]}"]`)) {
+                            const linkElement = document.createElement('div');
+                            linkElement.innerHTML = updatedLink;
+                            document.head.appendChild(linkElement.firstChild);
+                        }
+                    });
+                    
+                    // Add styles to document head instead of body
+                    styles.forEach(style => {
+                        const styleElement = document.createElement('style');
+                        // Extract just the style content, handling nonce attributes
+                        const styleContent = style.replace(/<style[^>]*>/gi, '').replace(/<\/style>/gi, '');
+                        styleElement.innerHTML = styleContent;
+                        styleElement.setAttribute('data-route', route);
+                        
+                        // Get nonce from the current script tag
+                        const currentScript = document.querySelector('script[nonce]');
+                        if (currentScript) {
+                            const nonce = currentScript.getAttribute('nonce');
+                            if (nonce) {
+                                styleElement.setAttribute('nonce', nonce);
+                            }
+                        }
+                        
+                        document.head.appendChild(styleElement);
+                    });
+                    
+                    // Only set body content
+                    html = bodyContent;
+                }
+                
+                container.innerHTML = html;
+                currentRoute = route;
+                
+                // Store the current route for persistence ONLY if authenticated
+                if (isAnyUserAuthenticated()) {
+                    localStorage.setItem('currentRoute', route);
+                } else {
+                    // Clear any saved route if not authenticated
+                    localStorage.removeItem('currentRoute');
+                }
+                
+                // Immediately translate any content that's already loaded
+                if (window.i18n && window.i18n.translatePage) {
+                    console.log('Translating page content after HTML load');
+                    window.i18n.translatePage();
+                }
+                
+                // Set data-route attribute on body for route-specific styling
+                document.body.setAttribute('data-route', route);
+                
+                // Initialize navigation for the loaded content
+                initializeNavigation();
+                
+                // Update parent URL if in iframe
+                if (window.parent !== window) {
+                    window.parent.postMessage({
+                        type: 'route-changed',
+                        data: { route: route }
+                    }, '*');
+                    
+                    // Hide chrome for mobile OR operator routes
+                    if ((viewportInfo && viewportInfo.isMobile) || route.startsWith('/operator-')) {
+                        console.log('[EMBED-APP] Hiding chrome for:', route.startsWith('/operator-') ? 'operator route' : 'mobile device');
+                        
+                        // For operator routes on desktop, we need to work around the parent's limitation
+                        if (route.startsWith('/operator-') && (!viewportInfo || !viewportInfo.isMobile)) {
+                            console.log('[EMBED-APP] Operator route on desktop - using mobile emulation workaround');
+                            
+                            // First, update our local viewport info to pretend we're mobile
+                            viewportInfo = {
+                                ...viewportInfo,
+                                isMobile: true,
+                                width: 375,
+                                height: 667
+                            };
+                            
+                            // Apply mobile classes
+                            if (window.MobileUtils) {
+                                window.MobileUtils.addBodyClasses();
+                            }
+                            
+                            // Then request chrome hide (which parent will accept because we're "mobile")
+                            requestChromeHide();
+                        } else {
+                            // Normal mobile or already handled
+                            requestChromeHide();
+                        }
+                    } else if (!route.startsWith('/operator-') && chromeHidden && viewportInfo && !viewportInfo.isMobile) {
+                        // Show chrome again if leaving operator routes on desktop
+                        console.log('[EMBED-APP] Showing chrome - left operator route on desktop');
+                        
+                        // Reset viewport info if we faked it
+                        if (viewportInfo.width === 375 && viewportInfo.height === 667) {
+                            viewportInfo = {
+                                ...viewportInfo,
+                                isMobile: false,
+                                width: window.innerWidth,
+                                height: window.innerHeight
+                            };
+                        }
+                        
+                        requestChromeShow();
+                    }
+                }
+                
+                // Scroll iframe content to top immediately
+                window.scrollTo(0, 0);
+                document.documentElement.scrollTop = 0;
+                document.body.scrollTop = 0;
+                
+                // Send height to parent after a short delay to ensure content is rendered
+                setTimeout(() => {
+                    sendHeight(true); // Force send on page load
+                    // Also scroll parent to top
+                    scrollParentToTop();
+                    
+                    // Ensure iframe is scrolled to top after content loads
+                    window.scrollTo(0, 0);
+                    document.documentElement.scrollTop = 0;
+                    document.body.scrollTop = 0;
+                }, 100);
+                
+                // Double-check height after a longer delay for complex content
+                setTimeout(() => {
+                    sendHeight(true); // Force another check
+                }, 500);
+                
+            } catch (error) {
+                console.error('Error loading page:', error);
+                container.innerHTML = '<div class="error">Failed to load content. Please try again.</div>';
+            }
+        }
+        
+        // Initialize navigation handlers
+        function initializeNavigation() {
+            // Handle data-navigate links
+            document.querySelectorAll('[data-navigate]').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const route = this.getAttribute('data-navigate');
+                    navigateTo(route);
+                });
+            });
+            
+            // Handle regular links that should navigate
+            document.querySelectorAll('a[href^="/"]').forEach(link => {
+                const href = link.getAttribute('href');
+                if (href && !link.hasAttribute('target')) {
+                    link.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        const route = href.replace('.html', '').replace('-embed', '');
+                        navigateTo(route);
+                    });
+                }
+            });
+            
+            // Load external navigation script if exists
+            const embedNavScript = document.createElement('script');
+            embedNavScript.src = BASE_URL + '/assets/js/embed-navigation.js';
+            embedNavScript.onload = function() {
+                console.log('Embed navigation script loaded');
+            };
+            document.body.appendChild(embedNavScript);
+            
+            // Load page-specific scripts
+            loadPageScripts();
+        }
+        
+        // Load page-specific scripts
+        function loadPageScripts() {
+            // Clean up old page-specific scripts
+            const oldScripts = document.querySelectorAll('script[data-page-script="true"]');
+            oldScripts.forEach(script => {
+                console.log('Removing script:', script.src);
+                script.remove();
+            });
+            
+            // Also clean up any lingering intervals from operator login
+            if (window.operatorClockInterval) {
+                clearInterval(window.operatorClockInterval);
+                window.operatorClockInterval = null;
+            }
+            
+            // Map of routes to their required scripts
+            const pageScripts = {
+                '/': ['/assets/js/i18n.js', '/assets/js/language-switcher.js', '/assets/js/revenue-calculator.js'], // Landing page
+                '/landing': ['/assets/js/i18n.js', '/assets/js/language-switcher.js', '/assets/js/revenue-calculator.js'], // Landing page alternate route
+                '/affiliate-register': ['/assets/js/i18n.js', '/assets/js/language-switcher.js', '/assets/js/modal-utils.js', '/assets/js/errorHandler.js', '/assets/js/csrf-utils.js', '/assets/js/swirl-spinner.js', '/assets/js/service-area-component.js', '/assets/js/form-validation.js', '/assets/js/pricing-preview-component.js', '/assets/js/affiliate-register-init.js'],
+                '/affiliate-login': ['/assets/js/i18n.js', '/assets/js/language-switcher.js', '/assets/js/modal-utils.js', '/assets/js/errorHandler.js', '/assets/js/csrf-utils.js', '/assets/js/swirl-spinner.js', '/assets/js/affiliate-login-init.js'],
+                '/affiliate-dashboard': ['/assets/js/i18n.js', '/assets/js/language-switcher.js', '/assets/js/modal-utils.js', '/assets/js/errorHandler.js', '/assets/js/csrf-utils.js', '/assets/js/service-area-component.js', '/assets/js/pricing-preview-component.js', '/assets/js/affiliate-dashboard-init.js'],
+                '/affiliate-success': ['/assets/js/i18n.js', '/assets/js/language-switcher.js', '/assets/js/affiliate-success-init.js'],
+                '/affiliate-landing': ['/assets/js/i18n.js', '/assets/js/language-switcher.js', '/assets/js/affiliate-landing-init.js'],
+                '/customer-register': ['/assets/js/i18n.js', '/assets/js/language-switcher.js', '/assets/js/embed-config.js', '/assets/js/modal-utils.js', '/assets/js/errorHandler.js', '/assets/js/csrf-utils.js', '/assets/js/swirl-spinner.js', '/assets/js/paygistix-payment-form.js', '/assets/js/customer-register.js', '/assets/js/customer-register-paygistix.js', '/assets/js/customer-register-navigation.js'],
+                '/customer-login': ['/assets/js/i18n.js', '/assets/js/language-switcher.js', '/assets/js/modal-utils.js', '/assets/js/errorHandler.js', '/assets/js/csrf-utils.js', '/assets/js/customer-login-embed.js'],
+                '/customer-dashboard': ['/assets/js/i18n.js', '/assets/js/language-switcher.js', '/assets/js/modal-utils.js', '/assets/js/errorHandler.js', '/assets/js/csrf-utils.js', '/assets/js/customer-dashboard.js'],
+                '/customer-success': ['/assets/js/i18n.js', '/assets/js/language-switcher.js', '/assets/js/customer-success-embed.js'],
+                '/schedule-pickup': ['/assets/js/i18n.js', '/assets/js/language-switcher.js', '/assets/js/embed-config.js', '/assets/js/modal-utils.js', '/assets/js/errorHandler.js', '/assets/js/csrf-utils.js', '/assets/js/swirl-spinner.js', '/assets/js/paygistix-payment-form.js', '/assets/js/schedule-pickup.js', '/assets/js/schedule-pickup-navigation.js'],
+                '/order-confirmation': ['/assets/js/i18n.js', '/assets/js/language-switcher.js', '/assets/js/order-confirmation-embed.js'],
+                '/administrator-login': ['/assets/js/i18n.js', '/assets/js/language-switcher.js', '/assets/js/modal-utils.js', '/assets/js/errorHandler.js', '/assets/js/csrf-utils.js', '/assets/js/administrator-login-init.js'],
+                '/administrator-dashboard': ['https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js', '/assets/js/i18n.js', '/assets/js/language-switcher.js', '/assets/js/modal-utils.js', '/assets/js/errorHandler.js', '/assets/js/csrf-utils.js', '/assets/js/password-validator-component.js', '/assets/js/qrcode.min.js', '/assets/js/jspdf.min.js', '/assets/js/administrator-dashboard-init.js', '/assets/js/admin-operator-fix.js'],
+                '/operator-login': ['/assets/js/i18n.js', '/assets/js/language-switcher.js', '/assets/js/modal-utils.js', '/assets/js/errorHandler.js', '/assets/js/csrf-utils.js', '/assets/js/operator-login-init.js'],
+                '/operator-scan': ['/assets/js/i18n.js', '/assets/js/language-switcher.js', '/assets/js/modal-utils.js', '/assets/js/errorHandler.js', '/assets/js/csrf-utils.js', '/assets/js/operator-scan-init.js'],
+                '/terms-of-service': ['/assets/js/terms-and-conditions.js'],
+                '/terms-and-conditions': ['/assets/js/terms-and-conditions.js'],
+                '/payment-success': ['/assets/js/payment-success.js'],
+                '/payment-error': ['/assets/js/payment-error.js']
+            };
+            
+            const scripts = pageScripts[currentRoute] || [];
+            
+            // Set embed config before loading scripts
+            window.EMBED_CONFIG = {
+                baseUrl: BASE_URL,
+                isEmbedded: true
+            };
+            
+            // Load scripts sequentially
+            let scriptIndex = 0;
+            function loadNextScript() {
+                if (scriptIndex < scripts.length) {
+                    const scriptPath = scripts[scriptIndex];
+                    
+                    // Check if utility scripts are already loaded
+                    const isUtilityScript = scriptPath.includes('csrf-utils.js') || scriptPath.includes('errorHandler.js') || scriptPath.includes('modal-utils.js');
+                    const scriptAlreadyLoaded = document.querySelector(`script[src*="${scriptPath}"]`);
+                    
+                    if (isUtilityScript && scriptAlreadyLoaded) {
+                        console.log('Script already loaded, skipping:', scriptPath);
+                        scriptIndex++;
+                        loadNextScript();
+                        return;
+                    }
+                    
+                    const script = document.createElement('script');
+                    // Check if it's an external URL
+                    if (scriptPath.startsWith('http://') || scriptPath.startsWith('https://')) {
+                        script.src = scriptPath;
+                    } else {
+                        script.src = BASE_URL + scriptPath + '?v=' + Date.now();
+                    }
+                    script.setAttribute('data-page-script', 'true');
+                    script.onload = function() {
+                        console.log('Loaded script:', scripts[scriptIndex]);
+                        scriptIndex++;
+                        loadNextScript();
+                    };
+                    script.onerror = function() {
+                        console.error('Failed to load script:', scripts[scriptIndex]);
+                        scriptIndex++;
+                        loadNextScript();
+                    };
+                    document.body.appendChild(script);
+                } else {
+                    // All scripts loaded, send height again
+                    setTimeout(() => {
+                        sendHeight(true); // Force send after scripts load
+                        
+                        // Trigger translation for dynamically loaded content
+                        if (window.i18n && window.i18n.translatePage) {
+                            console.log('Triggering i18n translation after scripts loaded');
+                            window.i18n.translatePage();
+                        }
+                    }, 200);
+                }
+            }
+            
+            loadNextScript();
+        }
+        
+        // Navigate to a route (expose globally for iframe content)
+        window.navigateTo = function navigateTo(route, params = {}, options = {}) {
+            console.log('Navigating to:', route, 'with params:', params);
+            
+            // Store the current route in localStorage for persistence ONLY if authenticated
+            if (isAnyUserAuthenticated()) {
+                localStorage.setItem('currentRoute', route);
+            } else {
+                // Clear any saved route if not authenticated
+                localStorage.removeItem('currentRoute');
+            }
+            
+            // Update URL parameter
+            const url = new URL(window.location);
+            
+            // Preserve important parameters like affid and affiliate
+            const currentParams = new URLSearchParams(window.location.search);
+            const affiliateId = currentParams.get('affid') || currentParams.get('affiliate');
+            
+            // Clear the search params and rebuild
+            url.searchParams.set('route', route);
+            
+            // Preserve affiliate ID if present
+            if (affiliateId && !params.affid && !params.affiliate) {
+                url.searchParams.set('affid', affiliateId);
+            }
+            
+            // Add any additional parameters
+            Object.keys(params).forEach(key => {
+                url.searchParams.set(key, params[key]);
+            });
+            
+            // Store state for history navigation
+            const state = {
+                route: route,
+                tab: params.tab || null,
+                timestamp: Date.now()
+            };
+            
+            // Use replaceState if specified (for tab changes within same route)
+            if (options.replaceState) {
+                window.history.replaceState(state, '', url);
+            } else {
+                window.history.pushState(state, '', url);
+            }
+            
+            // Load the new page
+            loadPage(route);
+        }
+        
+        // Use embed-navigation.js for height management
+        // This function will be called but delegate to embed-navigation
+        function sendHeight(force = false) {
+            // If embed-navigation is loaded, use its sendHeight function
+            if (window.embedNavigation && window.embedNavigation.sendHeight) {
+                window.embedNavigation.sendHeight(force);
+            }
+            // Otherwise do nothing - wait for embed-navigation to load
+        }
+        
+        // Scroll parent window to top
+        function scrollParentToTop() {
+            if (window.parent !== window) {
+                window.parent.postMessage({
+                    type: 'scroll-to-top',
+                    data: {}
+                }, '*');
+            }
+        }
+        
+        // Handle messages from embedded pages AND parent window
+        window.addEventListener('message', function(event) {
+            console.log('=== Message Received in embed-app.html ===');
+            console.log('Full event:', event);
+            console.log('Event data:', event.data);
+            console.log('Event data type:', typeof event.data);
+            
+            // Check if we have valid message data
+            if (!event.data || typeof event.data !== 'object') {
+                console.log('Invalid message data, ignoring');
+                return;
+            }
+            
+            // Extract type and data, checking for different possible structures
+            let messageType, messageData;
+            
+            // Check if it's our expected format
+            if (event.data.type && event.data.data) {
+                messageType = event.data.type;
+                messageData = event.data.data;
+            } else if (event.data.type) {
+                // Maybe data is not nested
+                messageType = event.data.type;
+                messageData = event.data;
+            }
+            
+            console.log('Extracted message type:', messageType);
+            console.log('Extracted message data:', messageData);
+            
+            // Handle different message types
+            switch(messageType) {
+                case 'navigate':
+                    console.log('Processing navigation message');
+                    console.log('Full messageData structure:', JSON.stringify(messageData, null, 2));
+                    
+                    // Handle navigation request
+                    if (messageData.url) {
+                        // Old format with just URL
+                        const route = messageData.url.startsWith('/') ? messageData.url : '/' + messageData.url;
+                        console.log('Navigating to route (old format):', route);
+                        navigateTo(route);
+                    } else if (messageData.page) {
+                        // New format with page and optional params
+                        const route = messageData.page.startsWith('/') ? messageData.page : '/' + messageData.page;
+                        console.log('Navigating to route (new format):', route, 'with params:', messageData.params);
+                        navigateTo(route, messageData.params || {});
+                    } else {
+                        console.log('No valid navigation target found in message data');
+                        console.log('Available keys in messageData:', Object.keys(messageData));
+                    }
+                    break;
+                    
+                case 'navigate-back':
+                    console.log('Processing navigate-back message');
+                    // Go back in browser history
+                    window.history.back();
+                    break;
+                    
+                case 'viewport-info':
+                    // Parent window sending viewport information
+                    console.log('[EMBED-APP] Received viewport info from parent:', messageData);
+                    console.log('[EMBED-APP] Current route:', currentRoute);
+                    console.log('[EMBED-APP] Is mobile?', messageData.isMobile);
+                    console.log('[EMBED-APP] Chrome hidden?', chromeHidden);
+                    viewportInfo = messageData;
+                    
+                    // Apply mobile classes
+                    if (window.MobileUtils) {
+                        console.log('[EMBED-APP] Applying mobile classes via MobileUtils');
+                        window.MobileUtils.addBodyClasses();
+                    } else {
+                        console.log('[EMBED-APP] MobileUtils not found');
+                    }
+                    
+                    // Auto-hide chrome on mobile for ALL routes
+                    console.log('[EMBED-APP] Mobile check:', {
+                        isMobile: messageData.isMobile,
+                        currentRoute: currentRoute,
+                        chromeHidden: chromeHidden
+                    });
+                    
+                    if (messageData.isMobile && !chromeHidden) {
+                        console.log('[EMBED-APP] Mobile detected, requesting chrome hide for ALL content');
+                        requestChromeHide();
+                    } else if (messageData.isMobile && chromeHidden) {
+                        console.log('[EMBED-APP] Mobile detected but chrome already hidden');
+                    } else if (!messageData.isMobile && chromeHidden) {
+                        // Only show chrome if NOT on operator route
+                        if (!currentRoute.startsWith('/operator-')) {
+                            console.log('[EMBED-APP] Desktop detected and not on operator route, showing chrome');
+                            requestChromeShow();
+                        } else {
+                            console.log('[EMBED-APP] Desktop detected but on operator route, keeping chrome hidden');
+                            // Re-request hide to ensure it stays hidden
+                            requestChromeHide();
+                        }
+                    } else {
+                        console.log('[EMBED-APP] Desktop mode, chrome visible');
+                        // If on operator route, hide chrome even in desktop mode
+                        if (currentRoute.startsWith('/operator-')) {
+                            console.log('[EMBED-APP] On operator route, hiding chrome');
+                            requestChromeHide();
+                        }
+                    }
+                    
+                    // Handle language if provided
+                    if (messageData.language && window.i18n && window.i18n.setLanguage) {
+                        console.log('[EMBED-APP] Setting language from parent:', messageData.language);
+                        window.i18n.setLanguage(messageData.language);
+                    }
+                    break;
+                    
+                case 'language-change':
+                    // Handle language change from parent
+                    if (messageData.language && window.i18n && window.i18n.setLanguage) {
+                        console.log('[EMBED-APP] Received language change from parent:', messageData.language);
+                        window.i18n.setLanguage(messageData.language);
+                    }
+                    break;
+                    
+                case 'chrome-hidden':
+                    // Parent notifying us that chrome visibility changed
+                    chromeHidden = messageData.hidden;
+                    document.body.classList.toggle('chrome-hidden', chromeHidden);
+                    
+                    // Recalculate height after chrome change
+                    setTimeout(() => sendHeight(true), 350);
+                    break;
+                    
+                case 'geocode-forward-response':
+                    // Response from parent for forward geocoding
+                    console.log('[EMBED-APP] Received geocode forward response:', messageData);
+                    if (window.handleGeocodeResponse) {
+                        window.handleGeocodeResponse(messageData);
+                    }
+                    break;
+                    
+                case 'geocode-reverse-response':
+                    // Response from parent for reverse geocoding
+                    console.log('[EMBED-APP] Received geocode reverse response:', messageData);
+                    if (window.handleReverseGeocodeResponse) {
+                        window.handleReverseGeocodeResponse(messageData);
+                    }
+                    break;
+                    
+                default:
+                    console.log('Unknown message type:', messageType);
+            }
+        });
+        
+        // Request parent to hide chrome (header/footer)
+        function requestChromeHide() {
+            console.log('[EMBED-APP] requestChromeHide called');
+            if (window.parent !== window) {
+                console.log('[EMBED-APP] Sending hide-chrome message to parent');
+                window.parent.postMessage({
+                    type: 'hide-chrome',
+                    data: {}
+                }, '*');
+            } else {
+                console.log('[EMBED-APP] Not in iframe, cannot hide chrome');
+            }
+        }
+        
+        // Request parent to show chrome (header/footer)
+        function requestChromeShow() {
+            console.log('[EMBED-APP] requestChromeShow called');
+            if (window.parent !== window) {
+                console.log('[EMBED-APP] Sending show-chrome message to parent');
+                window.parent.postMessage({
+                    type: 'show-chrome',
+                    data: {}
+                }, '*');
+            } else {
+                console.log('[EMBED-APP] Not in iframe, cannot show chrome');
+            }
+        }
+        
+        // Request geocoding from parent (forward geocoding - address to coordinates)
+        function requestGeocodeForward(query, requestId) {
+            console.log('[EMBED-APP] Requesting forward geocoding from parent:', query);
+            if (window.parent !== window) {
+                window.parent.postMessage({
+                    type: 'geocode-forward',
+                    data: {
+                        query: query,
+                        requestId: requestId
+                    }
+                }, '*');
+            } else {
+                console.log('[EMBED-APP] Not in iframe, cannot request geocoding');
+            }
+        }
+        
+        // Request reverse geocoding from parent (coordinates to address)
+        function requestGeocodeReverse(lat, lng, requestId) {
+            console.log('[EMBED-APP] Requesting reverse geocoding from parent:', lat, lng);
+            if (window.parent !== window) {
+                window.parent.postMessage({
+                    type: 'geocode-reverse',
+                    data: {
+                        lat: lat,
+                        lng: lng,
+                        requestId: requestId
+                    }
+                }, '*');
+            } else {
+                console.log('[EMBED-APP] Not in iframe, cannot request reverse geocoding');
+            }
+        }
+        
+        // Make geocoding functions available globally
+        window.requestGeocodeForward = requestGeocodeForward;
+        window.requestGeocodeReverse = requestGeocodeReverse;
+        
+        // Function to update URL with tab parameter (for dashboards to call)
+        window.updateTabInUrl = function(tab) {
+            const url = new URL(window.location);
+            const currentRoute = url.searchParams.get('route') || localStorage.getItem('currentRoute') || '/';
+            
+            // Update tab parameter
+            url.searchParams.set('tab', tab);
+            
+            // Update history state without reloading page
+            const state = {
+                route: currentRoute,
+                tab: tab,
+                timestamp: Date.now()
+            };
+            
+            window.history.pushState(state, '', url);
+        };
+        
+        // Handle browser back/forward
+        window.addEventListener('popstate', function(event) {
+            console.log('Popstate event:', event.state);
+            
+            const route = getRouteFromUrl();
+            loadPage(route);
+            
+            // If state contains tab information, notify the dashboard
+            if (event.state && event.state.tab) {
+                // Wait for page to load then switch to the tab
+                const restoreTab = () => {
+                    window.postMessage({
+                        type: 'restore-tab',
+                        tab: event.state.tab
+                    }, window.location.origin);
+                };
+                
+                // Try multiple times to ensure dashboard is ready
+                setTimeout(restoreTab, 200);
+                setTimeout(restoreTab, 500);
+            }
+        });
+        
+        // ResizeObserver removed - handled by embed-navigation.js
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            const initialRoute = getRouteFromUrl();
+            loadPage(initialRoute);
+            
+            // Check if we have tab state from history
+            if (window.history.state && window.history.state.tab) {
+                const restoreTab = () => {
+                    window.postMessage({
+                        type: 'restore-tab',
+                        tab: window.history.state.tab
+                    }, window.location.origin);
+                };
+                
+                // Try multiple times to ensure dashboard is ready
+                setTimeout(restoreTab, 200);
+                setTimeout(restoreTab, 500);
+            }
+            
+            // Height observation is handled by embed-navigation.js
+        });
+    </script>
+</body>
+</html>

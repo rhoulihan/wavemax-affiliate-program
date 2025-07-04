@@ -5,21 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Terms and Conditions - WaveMAX Laundry Affiliate Program</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="/assets/css/embed-styles.css">
-    <style>
-        .liability-section {
-            background-color: #fef2f2;
-            border-left: 4px solid #dc2626;
-            padding: 1.5rem;
-            margin: 1.5rem 0;
-        }
-        .important-notice {
-            background-color: #fef3c7;
-            border-left: 4px solid #f59e0b;
-            padding: 1rem;
-            margin: 1.5rem 0;
-        }
-    </style>
+    <link rel="stylesheet" href="/assets/css/wavemax-embed.css">
+    <link rel="stylesheet" href="/assets/css/terms-and-conditions.css">
 </head>
 <body class="bg-gray-50">
     <div class="min-h-screen p-4">
@@ -243,31 +230,13 @@
 
             <!-- Back button for embedded navigation -->
             <div class="mt-8 text-center">
-                <button onclick="history.back()" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                <button id="backButton" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
                     Back to Previous Page
                 </button>
             </div>
         </div>
     </div>
 
-    <script>
-        // Handle navigation within iframe
-        document.addEventListener('DOMContentLoaded', function() {
-            // Check if we're in an iframe
-            if (window.parent !== window) {
-                // Listen for navigation events
-                document.querySelectorAll('[data-navigate]').forEach(link => {
-                    link.addEventListener('click', function(e) {
-                        e.preventDefault();
-                        const route = this.getAttribute('data-navigate');
-                        window.parent.postMessage({
-                            type: 'navigate',
-                            data: { page: route }
-                        }, '*');
-                    });
-                });
-            }
-        });
-    </script>
+    <script src="/assets/js/terms-and-conditions.js"></script>
 </body>
 </html>

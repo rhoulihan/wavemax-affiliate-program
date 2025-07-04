@@ -119,11 +119,11 @@
               if (shouldRedirectToPickup) {
                 console.log('Redirecting to schedule pickup');
                 // Navigate to schedule pickup page
-                window.location.href = '/embed-app.html?route=/schedule-pickup';
+                window.location.href = '/embed-app-v2.html?route=/schedule-pickup';
               } else {
                 console.log('Redirecting to customer dashboard');
                 // Navigate to customer dashboard
-                window.location.href = '/embed-app.html?route=/customer-dashboard';
+                window.location.href = '/embed-app-v2.html?route=/customer-dashboard';
               }
             } else {
               throw new Error(data.message || 'Login failed');
@@ -270,10 +270,10 @@
                   // Navigate within the embed system
                   if (shouldRedirectToPickup) {
                     console.log('Redirecting to schedule pickup after social login');
-                    window.location.href = '/embed-app.html?route=/schedule-pickup';
+                    window.location.href = '/embed-app-v2.html?route=/schedule-pickup';
                   } else {
                     console.log('Redirecting to customer dashboard after social login');
-                    window.location.href = '/embed-app.html?route=/customer-dashboard';
+                    window.location.href = '/embed-app-v2.html?route=/customer-dashboard';
                   }
 
                 } else if (data.result.type === 'social-auth-success') {
@@ -298,7 +298,7 @@
 
                     if (confirm(confirmMessage)) {
                       // Redirect to affiliate login
-                      window.location.href = '/embed-app.html?route=/affiliate-login';
+                      window.location.href = '/embed-app-v2.html?route=/affiliate-login';
                     }
                   } else {
                     if (window.ModalSystem) {

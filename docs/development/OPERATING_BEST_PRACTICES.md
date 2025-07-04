@@ -61,13 +61,13 @@ This document contains important operational knowledge and workarounds discovere
    - Easier debugging and maintenance
    - Consistent with security best practices
 
-### Dynamic Page Loading in embed-app.html
+### Dynamic Page Loading in embed-app-v2.html
 1. **Issue**: Scripts in dynamically loaded pages are stripped out
-   - The embed-app.html router removes script tags when loading page content
+   - The embed-app-v2.html router removes script tags when loading page content
    - Scripts must be registered in the `pageScripts` mapping
    - Standard DOMContentLoaded events may not fire for dynamically loaded content
    
-2. **Solution**: Add page-specific scripts to embed-app.html
+2. **Solution**: Add page-specific scripts to embed-app-v2.html
    ```javascript
    const pageScripts = {
        '/': ['/assets/js/revenue-calculator.js'],
@@ -81,13 +81,13 @@ This document contains important operational knowledge and workarounds discovere
    - **Discovered**: 2025-01-09 - SwirlSpinner class not available in affiliate registration
    - **Discovered**: 2025-06-10 - FormValidation not available in affiliate registration
    - **Symptom**: JavaScript classes/functions undefined even though script tags exist in HTML
-   - **Root Cause**: The script was only included in the direct HTML file (affiliate-register-embed.html) but not in the pageScripts configuration in embed-app.html, which is what loads scripts when pages are loaded dynamically in the embedded iframe
+   - **Root Cause**: The script was only included in the direct HTML file (affiliate-register-embed.html) but not in the pageScripts configuration in embed-app-v2.html, which is what loads scripts when pages are loaded dynamically in the embedded iframe
    - **Solution**: Scripts must be added to BOTH locations:
      1. In the HTML file's script tags (for direct access)
-     2. In embed-app.html's `pageScripts` mapping (for embedded access)
+     2. In embed-app-v2.html's `pageScripts` mapping (for embedded access)
    - **Example**:
      ```javascript
-     // In embed-app.html
+     // In embed-app-v2.html
      const pageScripts = {
          '/affiliate-register': [
              '/assets/js/i18n.js',
@@ -103,7 +103,7 @@ This document contains important operational knowledge and workarounds discovere
      ```
    - **Best Practice**: When adding new JavaScript libraries or utilities:
      1. Add script tag to the HTML file
-     2. Add to pageScripts in embed-app.html in correct loading order
+     2. Add to pageScripts in embed-app-v2.html in correct loading order
      3. Test in both direct access AND embedded contexts
      4. Verify the script is available via console debugging (e.g., check `window.FormValidation`)
 

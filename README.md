@@ -28,6 +28,11 @@ The WaveMAX Affiliate Program enables individuals to register as affiliates, onb
 - **QuickBooks Integration**: Export vendors, payment summaries, and commission details for accounting
 - **Connectivity Monitoring**: Real-time monitoring of external service dependencies with alerting
 - **Service Health Dashboard**: Web-based dashboard showing system health and availability metrics
+- **Content Security Policy (CSP) v2 Compliance**: Complete CSP v2 migration for all embed pages with nonce-based security
+- **Language Switcher Controls**: Smart language selection with automatic hiding in embedded iframe contexts
+- **Direct Navigation Architecture**: Eliminated redirect chains to prevent session loss and improve performance
+- **Comprehensive CSS Migration**: All inline styles moved to external CSS files for CSP compliance
+- **Enhanced Embed Framework**: New embed-app-v2.html with improved iframe communication and height management
 
 ## Documentation
 
@@ -108,7 +113,7 @@ wavemax-affiliate-program/
 │   │       ├── operator-scan-init.js          # Operator QR scanner interface
 │   │       ├── order-confirmation.js          # Order confirmation
 │   │       └── schedule-pickup.js             # Pickup scheduling
-│   ├── embed-app.html                     # Main application (Single Entry Point)
+│   ├── embed-app-v2.html                     # Main application (Single Entry Point)
 │   ├── embed-landing.html                 # Full embeddable landing page
 │   ├── embed-integration-guide.md         # Integration documentation
 │   ├── iframe-parent-example.html         # Parent page implementation example
@@ -323,6 +328,29 @@ wavemax-affiliate-program/
 - Rate limiting on authentication endpoints
 - Comprehensive request validation
 
+## Content Security Policy (CSP) v2 Migration
+
+The application has undergone a comprehensive migration to Content Security Policy (CSP) v2 compliance for enhanced security:
+
+### Migration Overview
+- **Complete CSP v2 Compliance**: All 25+ embed pages now fully comply with strict CSP policies
+- **Inline Content Elimination**: Removed all inline styles, scripts, and event handlers
+- **External File Architecture**: Migrated to external CSS and JavaScript files with proper nonce handling
+- **Language Switcher Enhancement**: Smart language controls that automatically hide in embedded contexts
+
+### Key Improvements
+- **Session Preservation**: Eliminated redirect chains that were causing session loss
+- **Direct Navigation**: All internal navigation now uses embed-app-v2.html directly
+- **Enhanced Security**: Nonce-based CSP implementation prevents XSS attacks
+- **Performance Optimization**: Reduced payload sizes and improved loading times
+
+### Migration Status
+Track the complete migration progress in [`CSP-V2-MIGRATION-TRACKER.md`](CSP-V2-MIGRATION-TRACKER.md):
+- ✅ **25 pages migrated** to CSP v2 compliance
+- ✅ **5 unused pages quarantined** to prevent unnecessary work
+- ✅ **67 files updated** to eliminate redirect chains
+- ✅ **Language switcher controls** automatically hidden in embedded contexts
+
 ## Iframe Embedding
 
 The WaveMAX Affiliate Program is designed to be embedded as an iframe on external websites. The application includes proper URL parameter handling and cross-origin communication.
@@ -344,7 +372,7 @@ To embed the WaveMAX Affiliate Program on your website (e.g., wavemaxlaundry.com
 (function() {
     // Pass URL parameters from parent page to iframe
     const urlParams = new URLSearchParams(window.location.search);
-    let iframeSrc = 'https://wavemax.promo/embed-app.html';
+    let iframeSrc = 'https://wavemax.promo/embed-app-v2.html';
     if (urlParams.toString()) {
         iframeSrc += '?' + urlParams.toString();
     }
@@ -842,7 +870,7 @@ The system automatically creates default administrator and operator accounts on 
    - **Permissions**: All (super admin)
 
 2. **First Login Process**:
-   - Navigate to: `http://localhost:3000/embed-app.html?route=/administrator-login`
+   - Navigate to: `http://localhost:3000/embed-app-v2.html?route=/administrator-login`
    - Log in with the default credentials
    - You will be immediately prompted to change your password
    - Password requirements:
@@ -861,7 +889,7 @@ The system automatically creates default administrator and operator accounts on 
    - **Operator ID**: OP001
 
 2. **Operator Login**:
-   - Navigate to: `http://localhost:3000/embed-app.html?route=/operator-login`
+   - Navigate to: `http://localhost:3000/embed-app-v2.html?route=/operator-login`
    - Use the default credentials
    - Access the QR code scanning interface
 
@@ -1689,13 +1717,13 @@ For issues and questions:
 
 ## Embedding the Affiliate Program
 
-The WaveMAX Affiliate Program is designed for embedded deployment and runs entirely within iframes. The application uses a single-page architecture through `embed-app.html` for maximum compatibility with Content Security Policy (CSP) restrictions.
+The WaveMAX Affiliate Program is designed for embedded deployment and runs entirely within iframes. The application uses a single-page architecture through `embed-app-v2.html` for maximum compatibility with Content Security Policy (CSP) restrictions.
 
 ### Single Entry Point Architecture
 
 The entire application runs through one embedded entry point that handles all navigation internally:
 
-**Primary Embed Method** (`embed-app.html`):
+**Primary Embed Method** (`embed-app-v2.html`):
 - Single iframe containing the entire application
 - Route-based navigation within the iframe
 - CSP-compliant (works with `frame-src 'none'` policies)
@@ -1709,7 +1737,7 @@ Add this code where you want the affiliate program to appear:
 ```html
 <iframe 
     id="wavemax-affiliate-app"
-    src="https://wavemax.promo/embed-app.html" 
+    src="https://wavemax.promo/embed-app-v2.html" 
     width="100%" 
     height="800" 
     frameborder="0" 
@@ -1727,7 +1755,7 @@ For the main WaveMAX Laundry website, use this specific embed code:
 <div id="wavemax-affiliate-container" style="width: 100%; min-height: 600px;">
     <iframe 
         id="wavemax-affiliate-iframe"
-        src="https://wavemax.promo/embed-app.html" 
+        src="https://wavemax.promo/embed-app-v2.html" 
         width="100%" 
         height="800" 
         frameborder="0" 
@@ -1780,7 +1808,7 @@ Navigate directly to a specific section:
 
 ```html
 <iframe 
-    src="https://wavemax.promo/embed-app.html?route=/affiliate-register" 
+    src="https://wavemax.promo/embed-app-v2.html?route=/affiliate-register" 
     width="100%" 
     height="600" 
     frameborder="0" 
@@ -1798,7 +1826,7 @@ Link directly to specific pages within the application:
     <h2>Become a WaveMAX Affiliate</h2>
     <p>Earn 10% recurring commission on every customer you refer!</p>
     <div style="margin-top: 20px;">
-        <a href="https://wavemax.promo/embed-app.html?route=/affiliate-register" 
+        <a href="https://wavemax.promo/embed-app-v2.html?route=/affiliate-register" 
            target="_blank"
            style="display: inline-block; padding: 12px 30px; 
                   background: #3b82f6; color: white; 
@@ -1806,7 +1834,7 @@ Link directly to specific pages within the application:
                   font-weight: bold; margin: 0 10px;">
             Join Now
         </a>
-        <a href="https://wavemax.promo/embed-app.html?route=/affiliate-login" 
+        <a href="https://wavemax.promo/embed-app-v2.html?route=/affiliate-login" 
            target="_blank"
            style="display: inline-block; padding: 12px 30px; 
                   background: white; color: #3b82f6; 
@@ -1835,7 +1863,7 @@ function wavemax_affiliate_embed_shortcode($atts) {
     
     switch($atts['type']) {
         case 'app':
-            $url .= 'embed-app.html';
+            $url .= 'embed-app-v2.html';
             if ($atts['route'] !== '/') {
                 $url .= '?route=' . urlencode($atts['route']);
             }
@@ -1844,10 +1872,10 @@ function wavemax_affiliate_embed_shortcode($atts) {
             $url .= 'embed-landing.html';
             break;
         case 'register':
-            $url .= 'embed-app.html?route=/affiliate-register';
+            $url .= 'embed-app-v2.html?route=/affiliate-register';
             break;
         default:
-            $url .= 'embed-app.html';
+            $url .= 'embed-app-v2.html';
     }
     
     return '<iframe src="' . $url . '" 
@@ -1932,7 +1960,7 @@ Add this to your site's `<head>` for faster loading:
 - Verify the embed URL is correct
 
 **CSP frame-src errors?**
-- `embed-app.html` is designed for strict CSP environments
+- `embed-app-v2.html` is designed for strict CSP environments
 - Check console for "Refused to frame" errors  
 - Works with `frame-src 'none'` policies unlike nested iframe approaches
 
@@ -1959,11 +1987,11 @@ For embedding assistance:
 
 ## Full Application Embedding Architecture
 
-The WaveMAX Affiliate Program uses a unified embedded architecture through `embed-app.html` as the single entry point for all functionality.
+The WaveMAX Affiliate Program uses a unified embedded architecture through `embed-app-v2.html` as the single entry point for all functionality.
 
 ### Unified Embed Application
 
-The `embed-app.html` provides:
+The `embed-app-v2.html` provides:
 - Single iframe containing the entire application
 - Route-based navigation (no page reloads)
 - CSP-compliant operation with strict policies
@@ -1993,7 +2021,7 @@ All functionality is accessible through route parameters:
 #### URL Parameters
 ```html
 <!-- Direct navigation via URL -->
-<iframe src="https://wavemax.promo/embed-app.html?route=/affiliate-register"></iframe>
+<iframe src="https://wavemax.promo/embed-app-v2.html?route=/affiliate-register"></iframe>
 ```
 
 #### PostMessage API
@@ -2036,7 +2064,7 @@ Complete integration with auto-resizing and navigation handling:
         <h1>Our Affiliate Program</h1>
         <iframe 
             id="wavemax-app"
-            src="https://wavemax.promo/embed-app.html" 
+            src="https://wavemax.promo/embed-app-v2.html" 
             width="100%" 
             height="800" 
             frameborder="0"
@@ -2091,6 +2119,14 @@ The project includes several test pages for development and integration testing:
 - `/wavemax-development-prompt.html` - AI development framework documentation
 
 ## Recent Updates (January 2025)
+
+### Content Security Policy (CSP) v2 Migration (Latest)
+- **Complete CSP v2 Compliance**: Successfully migrated all 25+ embed pages to strict CSP policies
+- **Security Enhancement**: Eliminated all inline styles, scripts, and event handlers for XSS protection
+- **Session Preservation**: Removed redirect chains that were causing authentication session loss
+- **Language Switcher Intelligence**: Smart controls that auto-hide in embedded iframe contexts
+- **Performance Optimization**: Direct navigation architecture eliminates unnecessary redirects
+- **Code Organization**: Comprehensive migration to external CSS and JavaScript files with nonce-based security
 
 ### Operator QR Code Scanning Workflow
 - **Three-Stage Scanning Process**: Complete order tracking from receiving through delivery

@@ -3,71 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' https:; script-src 'self' https: 'nonce-{{CSP_NONCE}}'; style-src 'self' https: 'unsafe-inline'; img-src 'self' https: data:; font-src 'self' https: data:; connect-src 'self' https:; frame-src 'self' https:;">
     <title>WaveMAX Laundry - Schedule Pickup</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-            background: transparent;
-        }
-        .wavemax-blue {
-            background-color: #1e3a8a;
-        }
-        .wavemax-light-blue {
-            background-color: #3b82f6;
-        }
-        /* Minimal styling for iframe */
-        .embed-container {
-            max-width: 100%;
-            margin: 0;
-            padding: 16px;
-        }
-    
-        /* Language switcher positioning */
-        #language-switcher-container {
-            position: fixed;
-            top: 10px;
-            right: 10px;
-            z-index: 1000;
-        }
-        
-        /* Tooltip styling */
-        .tooltip-hover {
-            position: relative;
-        }
-        
-        .tooltip-hover:hover::after {
-            content: attr(data-tooltip);
-            position: absolute;
-            bottom: 100%;
-            left: 50%;
-            transform: translateX(-50%);
-            background-color: #374151;
-            color: white;
-            padding: 0.5rem 0.75rem;
-            border-radius: 0.375rem;
-            white-space: nowrap;
-            font-size: 0.875rem;
-            font-weight: normal;
-            margin-bottom: 0.25rem;
-            z-index: 10;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-        }
-        
-        .tooltip-hover:hover::before {
-            content: '';
-            position: absolute;
-            bottom: 100%;
-            left: 50%;
-            transform: translateX(-50%);
-            border-style: solid;
-            border-width: 6px 6px 0 6px;
-            border-color: #374151 transparent transparent transparent;
-            margin-bottom: -5px;
-            z-index: 10;
-        }
-    </style>
+    <link rel="stylesheet" href="/assets/css/language-switcher.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/assets/css/schedule-pickup.css">
 </head>
 <body class="bg-white font-sans">
     <!-- Pickup Scheduling Form -->
@@ -81,7 +22,7 @@
             <form id="pickupScheduleForm" class="p-6 space-y-6">
                 
                 <!-- Login Section (hidden - authentication handled by JS) -->
-                <div id="loginSection" style="display: none;">
+                <div id="loginSection" class="hidden-section">
                     <!-- Login form removed - authentication is required before accessing this page -->
                     <p>Redirecting to login...</p>
                 </div>
@@ -174,7 +115,7 @@
                 </div>
                 
                 <!-- Page 2: Summary and Payment Section -->
-                <div id="summaryPaymentSection" class="schedule-step" style="display: none;">
+                <div id="summaryPaymentSection" class="schedule-step hidden-section">
                     <!-- Service and Pricing Summary -->
                     <div class="border-t pt-6">
                         <h3 class="text-xl font-bold mb-4">Order Summary & Authorization</h3>
@@ -192,7 +133,7 @@
                                 <span class="font-bold">Estimated Weight:</span>
                                 <span id="estimatedWeightDisplay">0</span> lbs
                             </div>
-                            <div id="bagCreditSection" class="mb-2 text-green-600" style="display: none;">
+                            <div id="bagCreditSection" class="mb-2 text-green-600 hidden-section">
                                 <span class="font-bold">Bag Credit:</span>
                                 -<span id="bagCreditAmount">$0.00</span> (<span id="bagCreditWeight">0</span> lbs)
                             </div>
@@ -213,7 +154,7 @@
                 <!-- Navigation Section -->
                 <div id="navigationSection" class="border-t pt-6">
                     <div class="flex justify-between items-center">
-                        <button type="button" id="backButton" class="px-6 py-3 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition" style="display: none;">
+                        <button type="button" id="backButton" class="px-6 py-3 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition navigation-hidden">
                             <span>← Back</span>
                         </button>
                         <div class="flex-1"></div>
@@ -225,7 +166,7 @@
             </form>
             
             <!-- Payment Form Container (outside of order form to prevent nested form submission) -->
-            <div id="paymentFormContainer" style="display: none;">
+            <div id="paymentFormContainer" class="hidden-section">
                 <div id="paygistix-payment-container">
                     <!-- Paygistix payment form will be loaded here -->
                     <div class="text-center py-4">
@@ -247,24 +188,8 @@
     <script src="/assets/js/paygistix-payment-form.js"></script>
     <script src="/assets/js/schedule-pickup.js"></script>
     <script src="/assets/js/schedule-pickup-navigation.js"></script>
-    
-    <script>
-        // PostMessage communication with parent window
-        function sendMessageToParent(type, data) {
-            if (window.parent && window.parent !== window) {
-                window.parent.postMessage({
-                    type: type,
-                    source: 'wavemax-embed',
-                    data: data
-                }, '*');
-            }
-        }
-
-        // Navigate parent frame
-        function navigateParent(page) {
-            sendMessageToParent('navigate', { page: page });
-        }
-    </script>
+    <!-- Embed communication script -->
+    <script src="/assets/js/schedule-pickup-embed.js"></script>
 
 </body>
 </html>

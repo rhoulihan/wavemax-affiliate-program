@@ -3,43 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' https:; script-src 'self' https: 'nonce-{{CSP_NONCE}}'; style-src 'self' https: 'unsafe-inline'; img-src 'self' https: data:; font-src 'self' https: data:; connect-src 'self' https:; frame-src 'self' https:;">
     <title>WaveMAX Laundry - Affiliate Dashboard</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/assets/css/language-switcher.css">
     <!-- Leaflet CSS for map -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" crossorigin="anonymous" />
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-            background: transparent;
-        }
-        .wavemax-blue {
-            background-color: #1e3a8a;
-        }
-        .wavemax-light-blue {
-            background-color: #3b82f6;
-        }
-        .tab-content {
-            display: none;
-        }
-        .tab-content.active {
-            display: block;
-        }
-        /* Minimal styling for iframe */
-        .embed-container {
-            max-width: 100%;
-            margin: 0;
-            padding: 16px;
-        }
-    
-        /* Language switcher positioning */
-        #language-switcher-container {
-            position: fixed;
-            top: 10px;
-            right: 10px;
-            z-index: 1000;
-        }
-    </style>
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/assets/css/affiliate-dashboard.css">
 </head>
 <body class="bg-white font-sans">
     <!-- Language Switcher -->
@@ -55,7 +26,7 @@
                 </div>
                 <div class="mt-4 md:mt-0 flex items-center space-x-3">
                     <!-- Marketing Links Hover Button -->
-                    <div class="relative" style="display: inline-block;">
+                    <div class="relative marketing-links-container">
                         <button id="marketingLinksBtn" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition flex items-center">
                             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path>
@@ -64,7 +35,7 @@
                         </button>
                         
                         <!-- Marketing Links Modal (Hidden by default) -->
-                        <div id="marketingLinksModal" class="absolute top-full right-0 mt-2 w-96 bg-white rounded-lg shadow-xl border border-gray-200 p-6 z-50" style="display: none; min-width: 450px;">
+                        <div id="marketingLinksModal" class="absolute top-full right-0 mt-2 w-96 bg-white rounded-lg shadow-xl border border-gray-200 p-6 z-50 marketing-links-modal">
                             <h3 class="text-lg font-bold text-gray-800 mb-4" data-i18n="affiliate.dashboard.marketingLinks.title">Your Marketing Links</h3>
                             
                             <!-- Landing Page Link -->
@@ -413,7 +384,7 @@
                             </div>
                         </div>
                         
-                        <div id="formButtons" style="display: none;">
+                        <div id="formButtons" class="form-buttons-hidden">
                             <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition mr-2" data-i18n="affiliate.dashboard.settings.saveChanges">Save Changes</button>
                             <button type="button" id="cancelBtn" class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition" data-i18n="common.buttons.cancel">Cancel</button>
                         </div>
@@ -451,7 +422,7 @@
                     </div>
                     
                     <!-- Delete Data Section (Development Only) -->
-                    <div id="deleteDataSection" class="mt-8 pt-6 border-t" style="display: none;">
+                    <div id="deleteDataSection" class="mt-8 pt-6 border-t delete-data-section">
                         <h3 class="text-lg font-bold mb-4 text-red-600">Danger Zone - Development Only</h3>
                         <div class="bg-red-50 border border-red-300 rounded-lg p-4">
                             <p class="text-red-800 mb-4">
@@ -474,7 +445,7 @@
         </div>
     </div>
 
-        <!-- i18n Scripts -->
+    <!-- i18n Scripts -->
     <script src="/assets/js/i18n.js"></script>
     <script src="/assets/js/language-switcher.js"></script>
     <!-- Leaflet JS for map -->
@@ -484,124 +455,10 @@
     <script src="/assets/js/affiliate-dashboard-init.js"></script>
     <!-- CSRF Utils -->
     <script src="/assets/js/csrf-utils.js"></script>
-    <script>
-        // PostMessage communication with parent window
-        function sendMessageToParent(type, data) {
-            if (window.parent && window.parent !== window) {
-                window.parent.postMessage({
-                    type: type,
-                    source: 'wavemax-embed',
-                    data: data
-                }, '*');
-            }
-        }
-
-        // Navigate parent frame
-        function navigateParent(page) {
-            sendMessageToParent('navigate', { page: page });
-        }
-
-        // Handle logout
-        function handleLogout() {
-            localStorage.removeItem('affiliateToken');
-            localStorage.removeItem('currentAffiliate');
-            sendMessageToParent('logout', { userType: 'affiliate' });
-            navigateParent('affiliate-login');
-        }
-
-
-        // Override link behaviors for embedded version
-        document.addEventListener('DOMContentLoaded', function() {
-            // Tab switching
-            const tabButtons = document.querySelectorAll('.tab-btn');
-            const tabContents = document.querySelectorAll('.tab-content');
-            
-            tabButtons.forEach(button => {
-                button.addEventListener('click', function() {
-                    const targetTab = this.dataset.tab;
-                    
-                    // Update button states
-                    tabButtons.forEach(btn => {
-                        btn.classList.remove('border-blue-600', 'text-blue-600');
-                        btn.classList.add('border-transparent');
-                    });
-                    this.classList.remove('border-transparent');
-                    this.classList.add('border-blue-600', 'text-blue-600');
-                    
-                    // Show/hide tab content
-                    tabContents.forEach(content => {
-                        content.classList.remove('active');
-                    });
-                    document.getElementById(`${targetTab}-tab`).classList.add('active');
-                    
-                    // Notify parent of tab change
-                    sendMessageToParent('tab-change', { tab: targetTab });
-                });
-            });
-
-            // Notify parent that iframe is loaded
-            sendMessageToParent('iframe-loaded', { page: 'affiliate-dashboard' });
-            
-            // Check if this is an OAuth account and hide change password section if so
-            // This check will also happen in loadAffiliateData, but we do it here for immediate effect
-            const currentAffiliate = localStorage.getItem('currentAffiliate');
-            if (currentAffiliate) {
-                try {
-                    const affiliateData = JSON.parse(currentAffiliate);
-                    console.log('Initial OAuth check - registrationMethod:', affiliateData.registrationMethod);
-                    if (affiliateData.registrationMethod && affiliateData.registrationMethod !== 'traditional') {
-                        // This is an OAuth account, hide the change password section
-                        const changePasswordSection = document.getElementById('changePasswordSection');
-                        if (changePasswordSection) {
-                            changePasswordSection.style.display = 'none';
-                            console.log('Hiding change password section for OAuth account:', affiliateData.registrationMethod);
-                        }
-                    }
-                } catch (error) {
-                    console.error('Error parsing affiliate data:', error);
-                }
-            }
-            
-            // Also add a global function to check OAuth status that can be called anytime
-            window.checkOAuthStatus = function() {
-                const storedData = localStorage.getItem('currentAffiliate');
-                if (storedData) {
-                    try {
-                        const affiliate = JSON.parse(storedData);
-                        console.log('OAuth Status Check:', {
-                            hasRegistrationMethod: !!affiliate.registrationMethod,
-                            registrationMethod: affiliate.registrationMethod,
-                            isOAuth: affiliate.registrationMethod && affiliate.registrationMethod !== 'traditional'
-                        });
-                        return affiliate.registrationMethod && affiliate.registrationMethod !== 'traditional';
-                    } catch (e) {
-                        console.error('Error checking OAuth status:', e);
-                    }
-                }
-                return false;
-            };
-        });
-
-        // Override API calls to use full URLs
-        if (window.loadDashboardData) {
-            const originalLoadData = window.loadDashboardData;
-            window.loadDashboardData = function() {
-                // Update API base URL
-                window.API_BASE_URL = 'https://wavemax.promo/api/v1';
-                originalLoadData();
-            };
-        }
-    </script>
-    <script>
-        // Initialize i18n
-        document.addEventListener('DOMContentLoaded', async function() {
-            await window.i18n.init({ debugMode: false });
-            window.LanguageSwitcher.createSwitcher('language-switcher-container', {
-                style: 'dropdown',
-                showLabel: false
-            });
-        });
-    </script>
+    <!-- Embed communication script -->
+    <script src="/assets/js/affiliate-dashboard-embed.js"></script>
+    <!-- i18n initialization -->
+    <script src="/assets/js/affiliate-dashboard-i18n.js"></script>
 
     <!-- W9 Notification Modal -->
     <div id="w9NotificationModal" class="fixed inset-0 z-50 hidden">

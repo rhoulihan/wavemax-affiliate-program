@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Operator Scan Test Utility</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/assets/css/test-operator-scan.css">
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="text-center mb-4">Operator Scan Test Utility</h1>
+        
+        <div class="test-info">
+            <h5>Test Customer Information:</h5>
+            <p class="mb-1"><strong>Name:</strong> <span id="customerName">Loading...</span></p>
+            <p class="mb-1"><strong>Email:</strong> <span id="customerEmail">Loading...</span></p>
+            <p class="mb-1"><strong>Customer ID:</strong> <span id="customerId">Loading...</span></p>
+            <p class="mb-1"><strong>QR Code:</strong> <span id="customerQR">Loading...</span></p>
+        </div>
+
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <button class="btn btn-primary w-100 mb-3" id="recreateOrderBtn">
+                    <i class="fas fa-sync"></i> Recreate Test Order
+                </button>
+                <div id="orderStatus" class="alert alert-info d-none"></div>
+            </div>
+            <div class="col-md-6">
+                <button class="btn btn-success w-100 mb-3" id="printCardBtn">
+                    <i class="fas fa-print"></i> Print Customer Card
+                </button>
+            </div>
+        </div>
+
+        <div class="customer-card" id="customerCard">
+            <h3>WaveMAX Customer Card</h3>
+            <hr>
+            <div id="qrcode"></div>
+            <p class="mb-1"><strong id="cardName">Loading...</strong></p>
+            <p class="mb-0"><small id="cardId">Loading...</small></p>
+        </div>
+
+        <div class="mt-4">
+            <h5>Test Operator Scan Page:</h5>
+            <p>Once you have the QR code, test the operator scan page:</p>
+            <a href="/embed-app-v2.html?route=/operator-scan" class="btn btn-secondary" target="_blank">
+                Open Operator Scan (Legacy)
+            </a>
+            <a href="/embed-app-v2.html?route=/operator-scan" class="btn btn-secondary" target="_blank">
+                Open Operator Scan (CSP v2)
+            </a>
+        </div>
+    </div>
+
+    <script src="/assets/js/csrf-utils.js"></script>
+    <script src="/assets/js/test-operator-scan.js"></script>
+</body>
+</html>

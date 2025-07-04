@@ -1,0 +1,135 @@
+/* Language Switcher Styles */
+.language-switcher {
+    position: relative;
+    display: inline-block;
+    font-family: inherit;
+}
+
+.language-switcher-toggle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.2s;
+}
+
+.language-switcher-toggle:hover {
+    background: #f5f5f5;
+    border-color: #bbb;
+}
+
+.language-flag {
+    font-size: 20px;
+    line-height: 1;
+}
+
+.dropdown-arrow {
+    font-size: 10px;
+    margin-left: 4px;
+    transition: transform 0.2s;
+}
+
+.language-switcher-toggle[aria-expanded="true"] .dropdown-arrow {
+    transform: rotate(180deg);
+}
+
+.language-dropdown-menu {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    margin-top: 4px;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    display: none;
+    min-width: 150px;
+    z-index: 1000;
+}
+
+.language-dropdown-menu.show {
+    display: block;
+}
+
+.language-option {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    color: #333;
+    text-decoration: none;
+    transition: background 0.2s;
+}
+
+.language-option:hover {
+    background: #f5f5f5;
+}
+
+.language-option.active {
+    background: #e3f2fd;
+    color: #1976d2;
+}
+
+.language-option:first-child {
+    border-radius: 7px 7px 0 0;
+}
+
+.language-option:last-child {
+    border-radius: 0 0 7px 7px;
+}
+
+/* Flag style */
+.language-switcher.flags {
+    display: flex;
+    gap: 8px;
+}
+
+.language-flag-button {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 6px 12px;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.language-flag-button:hover {
+    background: #f5f5f5;
+    border-color: #bbb;
+}
+
+.language-flag-button.active {
+    background: #1976d2;
+    color: white;
+    border-color: #1976d2;
+}
+
+/* Hide language switcher in embedded iframe contexts */
+.is-embedded #language-switcher-container,
+.is-embedded .language-switcher-container,
+.is-embedded .language-switcher,
+body.is-embedded #language-switcher-container,
+body.is-embedded .language-switcher-container,
+body.is-embedded .language-switcher {
+    display: none !important;
+    visibility: hidden !important;
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+    .language-name {
+        display: none;
+    }
+    
+    .language-option .language-name {
+        display: inline;
+    }
+}

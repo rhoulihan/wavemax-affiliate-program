@@ -179,7 +179,7 @@
                   console.log('Test mode is enabled, using test payment flow');
 
                   // Use the payment form's test mode handler
-                  if (window.paymentForm && window.paymentForm.processPaymentTestMode) {
+                  if (window.paymentForm && typeof window.paymentForm.processPaymentTestMode === 'function') {
                     // Gather customer data from the form
                     const customerData = {
                       firstName: document.getElementById('firstName').value,
@@ -204,6 +204,15 @@
                     window.paymentForm.processPaymentTestMode(customerData);
                   } else {
                     console.error('Payment form not properly initialized for test mode');
+                    console.error('window.paymentForm:', window.paymentForm);
+                    console.error('processPaymentTestMode exists:', window.paymentForm ? typeof window.paymentForm.processPaymentTestMode : 'no paymentForm');
+                    
+                    // Check if using v1 instead of v2
+                    if (window.PaygistixPaymentForm && !window.PaygistixPaymentForm.prototype.processPaymentTestMode) {
+                      console.error('PaygistixPaymentForm v1 detected - processPaymentTestMode not available');
+                      console.error('Please ensure paygistix-payment-form-v2.js is loaded');
+                    }
+                    
                     if (window.modalAlert) {
                       window.modalAlert('Payment system not ready. Please refresh the page and try again.', 'Error');
                     }

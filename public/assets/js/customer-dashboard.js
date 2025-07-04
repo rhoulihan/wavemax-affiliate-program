@@ -31,7 +31,7 @@ async function initializeDashboard() {
         data: { page: '/customer-login' }
       }, '*');
     } else {
-      window.location.href = '/embed-app.html?route=/customer-login';
+      window.location.href = '/embed-app-v2.html?route=/customer-login';
     }
     return;
   }
@@ -50,7 +50,7 @@ async function initializeDashboard() {
       schedulePickupBtn.href = '#';
       schedulePickupBtn.addEventListener('click', function(e) {
         e.preventDefault();
-        window.location.href = '/embed-app.html?route=/schedule-pickup';
+        window.location.href = '/embed-app-v2.html?route=/schedule-pickup';
       });
     }
 
@@ -87,7 +87,7 @@ async function initializeDashboard() {
   } catch (error) {
     console.error('Error initializing dashboard:', error);
     alert('Error loading dashboard. Please login again.');
-    window.location.href = '/embed-app.html?route=/customer-login';
+    window.location.href = '/embed-app-v2.html?route=/customer-login';
   }
 }
 
@@ -279,7 +279,7 @@ async function loadProfile(editMode = false) {
                     <p class="font-semibold">Not provided</p>
                 </div>
             `}
-            <div id="deleteDataSection" class="mt-8 pt-6 border-t" style="display: none;">
+            <div id="deleteDataSection" class="mt-8 pt-6 border-t">
                 <h3 class="text-lg font-bold mb-4 text-red-600">Danger Zone - Development Only</h3>
                 <div class="bg-red-50 border border-red-300 rounded-lg p-4">
                     <p class="text-red-800 mb-4">
@@ -486,7 +486,7 @@ function handleLogout() {
       data: { page: '/customer-login' }
     }, '*');
   } else {
-    window.location.href = '/embed-app.html?route=/customer-login';
+    window.location.href = '/embed-app-v2.html?route=/customer-login';
   }
 }
 

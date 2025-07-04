@@ -3,31 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' https:; script-src 'self' https: 'nonce-{{CSP_NONCE}}'; style-src 'self' https: 'unsafe-inline'; img-src 'self' https: data:; font-src 'self' https: data:; connect-src 'self' https:; frame-src 'self' https:;">
     <title>Customer Dashboard - WaveMAX Laundry</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-            background: transparent;
-        }
-        .wavemax-blue { background-color: #1e3a8a; }
-        .wavemax-light-blue { background-color: #3b82f6; }
-        /* Minimal styling for iframe */
-        .embed-container {
-            max-width: 100%;
-            margin: 0;
-            padding: 16px;
-        }
-    
-        /* Language switcher positioning */
-        #language-switcher-container {
-            position: fixed;
-            top: 10px;
-            right: 10px;
-            z-index: 1000;
-        }
-    </style>
+    <link rel="stylesheet" href="/assets/css/customer-dashboard.css">
 </head>
 <body class="bg-white">
     <!-- Main Content -->

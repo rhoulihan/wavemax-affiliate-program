@@ -143,7 +143,7 @@
 
           // Redirect to dashboard
           setTimeout(() => {
-            window.location.href = '/embed-app.html?route=/administrator-dashboard';
+            window.location.href = '/embed-app-v2.html?route=/administrator-dashboard';
           }, 1000);
         }
       } else {
@@ -522,4 +522,23 @@
 
   // Focus on email field
   document.getElementById('email').focus();
+
+  // Initialize i18n and language switcher
+  document.addEventListener('DOMContentLoaded', async function() {
+    await window.i18n.init({ debugMode: false });
+    
+    // Only create language switcher if container exists
+    if (document.getElementById('language-switcher-container')) {
+      window.LanguageSwitcher.createSwitcher('language-switcher-container', {
+        style: 'dropdown',
+        showLabel: false
+      });
+    }
+    
+    // Ensure the toggle password button has correct initial text
+    const toggleBtn = document.getElementById('togglePassword');
+    if (toggleBtn && window.i18n) {
+      toggleBtn.textContent = window.i18n.t('administrator.login.showPassword');
+    }
+  });
 })();

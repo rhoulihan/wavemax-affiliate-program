@@ -61,13 +61,22 @@
 
         // Show submit button or complete payment button
         setTimeout(function() {
+          console.log('[Schedule Navigation] Setting up payment button for Summary step');
+          
           // Check if payment form is visible
           const paymentContainer = document.getElementById('paymentFormContainer');
           const navigationSection = document.getElementById('navigationSection');
+          
+          console.log('[Schedule Navigation] Payment container found:', !!paymentContainer);
+          console.log('[Schedule Navigation] Navigation section found:', !!navigationSection);
+          console.log('[Schedule Navigation] Payment container display:', paymentContainer ? paymentContainer.style.display : 'N/A');
 
-          if (!paymentContainer || paymentContainer.style.display === 'none') {
+          // Always create the Complete Payment button on the summary page
+          if (navigationSection) {
             // Create "Continue to Payment" button if it doesn't exist
             let continueButton = document.getElementById('continueToPaymentBtn');
+            console.log('[Schedule Navigation] Existing button found:', !!continueButton);
+            
             if (!continueButton) {
               continueButton = document.createElement('button');
               continueButton.id = 'continueToPaymentBtn';
@@ -77,13 +86,17 @@
 
               continueButton.addEventListener('click', function(e) {
                 e.preventDefault();
+                console.log('[Schedule Navigation] Complete Payment clicked');
                 // Process payment
                 showPaymentForm();
               });
 
               const buttonsContainer = navigationSection.querySelector('.flex.justify-between');
+              console.log('[Schedule Navigation] Buttons container found:', !!buttonsContainer);
+              
               if (buttonsContainer) {
                 buttonsContainer.appendChild(continueButton);
+                console.log('[Schedule Navigation] Complete Payment button appended');
               }
             }
           }
@@ -196,35 +209,11 @@
     if (paymentContainer) {
       paymentContainer.style.display = 'none';
 
-      // Update delivery fee quantities if payment form is ready
-      if (window.paymentForm && window.paymentForm.updateDeliveryFeeQuantities) {
-        if (window.deliveryFeeBreakdown) {
-          window.paymentForm.updateDeliveryFeeQuantities(window.deliveryFeeBreakdown);
-        }
-      }
-
-      // Update WDF quantity based on estimated weight minus bag credit
-      if (window.paymentForm && window.paymentForm.updateWDFQuantity) {
-        const estimatedWeightInput = document.getElementById('estimatedWeight');
-        const bagCreditWeightElement = document.getElementById('bagCreditWeight');
-
-        if (estimatedWeightInput) {
-          const estimatedWeight = parseFloat(estimatedWeightInput.value) || 0;
-          let bagCreditWeight = 0;
-
-          if (bagCreditWeightElement) {
-            bagCreditWeight = parseFloat(bagCreditWeightElement.textContent) || 0;
-          }
-
-          const wdfQuantity = estimatedWeight - bagCreditWeight;
-          console.log('Calculating WDF quantity:', {
-            estimatedWeight,
-            bagCreditWeight,
-            wdfQuantity
-          });
-
-          window.paymentForm.updateWDFQuantity(wdfQuantity);
-        }
+      // Trigger a recalculation to update payment form quantities
+      const calculateEstimateFunc = window.calculateEstimate;
+      if (typeof calculateEstimateFunc === 'function') {
+        console.log('Triggering estimate calculation to update payment form');
+        calculateEstimateFunc();
       }
     }
 
