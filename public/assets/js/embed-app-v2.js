@@ -73,6 +73,25 @@ function getRouteFromUrl() {
     
     let route = params.get('route');
     
+    // Handle legacy login parameter for backward compatibility with emails
+    if (!route && params.get('login')) {
+        const loginType = params.get('login');
+        if (loginType === 'customer') {
+            // Check if pickup parameter is also present
+            if (params.get('pickup') === 'true') {
+                route = '/schedule-pickup';
+                console.log('Mapped login=customer&pickup=true to /schedule-pickup');
+            } else {
+                route = '/customer-login';
+            }
+        } else if (loginType === 'affiliate') {
+            route = '/affiliate-login';
+        } else if (loginType === 'administrator') {
+            route = '/administrator-login';
+        }
+        console.log('Mapped login parameter to route:', loginType, '->', route);
+    }
+    
     // If no route in URL, check localStorage for saved route ONLY if authenticated
     if (!route) {
         // Check if user is authenticated before using saved route
