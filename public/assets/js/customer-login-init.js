@@ -78,19 +78,12 @@
 
         // Navigation functions
         function navigateToForgotPassword() {
-            if (isEmbedded || window.parent !== window) {
-                // In iframe - use parent navigation
-                if (window.parent.navigateTo && typeof window.parent.navigateTo === 'function') {
-                    window.parent.navigateTo('/forgot-password');
-                } else if (window.navigateParent && typeof window.navigateParent === 'function') {
-                    window.navigateParent('forgot-password');
-                } else {
-                    // Fallback for embed-app-v2.html
-                    window.location.href = '/embed-app-v2.html?route=/forgot-password';
-                }
+            // We're in embed-app-v2.html context, so use the local navigateTo function
+            if (window.navigateTo && typeof window.navigateTo === 'function') {
+                window.navigateTo('/forgot-password');
             } else {
-                // Direct navigation
-                window.location.href = '/forgot-password-embed.html?type=customer';
+                // Fallback
+                window.location.href = '/embed-app-v2.html?route=/forgot-password';
             }
         }
 
@@ -99,12 +92,10 @@
             const urlParams = new URLSearchParams(window.location.search);
             const redirectRoute = urlParams.get('redirect');
             
-            if (isEmbedded || window.parent !== window) {
-                // In iframe - use parent navigation
-                if (window.parent.navigateTo && typeof window.parent.navigateTo === 'function') {
-                    // Use redirect route if provided, otherwise go to dashboard
-                    const targetRoute = redirectRoute || `/customer-dashboard?id=${customerId}`;
-                    window.parent.navigateTo(targetRoute);
+            // We're in embed-app-v2.html context, so use the local navigateTo function
+            if (window.navigateTo && typeof window.navigateTo === 'function') {
+                const targetRoute = redirectRoute || `/customer-dashboard?id=${customerId}`;
+                window.navigateTo(targetRoute);
                 } else {
                     // Fallback for embed-app-v2.html
                     const targetRoute = redirectRoute || '/customer-dashboard';
