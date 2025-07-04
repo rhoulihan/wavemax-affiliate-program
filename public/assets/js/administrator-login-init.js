@@ -88,7 +88,7 @@
     submitText.innerHTML = '<span class="loading"></span>';
 
     try {
-      const response = await csrfFetch(`${BASE_URL}/api/v1/auth/administrator/login`, {
+      const response = await csrfFetch(`${BASE_URL}/api/auth/administrator/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
