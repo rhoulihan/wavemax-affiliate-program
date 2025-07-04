@@ -3,50 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OAuth Success</title>
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'nonce-{CSP_NONCE}'; style-src 'self' 'nonce-{CSP_NONCE}'; img-src 'self' data: https:; font-src 'self' https:; connect-src 'self' https:; frame-ancestors *;">
+    <title>Authentication Complete</title>
+    <link rel="stylesheet" href="/assets/css/oauth-success.css">
 </head>
 <body>
-    <script>
-        // This page is served for OAuth success callbacks
-        // It will close the popup window after communicating with the parent
-        
-        // Get the message from URL parameters
-        const params = new URLSearchParams(window.location.search);
-        const messageStr = params.get('message');
-        
-        if (messageStr) {
-            try {
-                const message = JSON.parse(decodeURIComponent(messageStr));
-                console.log('OAuth Success - Message:', message);
-                
-                // Try multiple approaches to communicate with parent
-                if (window.opener && !window.opener.closed) {
-                    window.opener.postMessage(message, '*');
-                } else if (window.parent && window.parent !== window) {
-                    window.parent.postMessage(message, '*');
-                } else {
-                    // Store in localStorage as fallback
-                    localStorage.setItem('socialAuthResult', JSON.stringify(message));
-                }
-                
-                // Always try to close the window
-                setTimeout(() => {
-                    try {
-                        window.close();
-                    } catch (e) {
-                        console.log('Could not close window:', e);
-                        // Show message to user
-                        document.body.innerHTML = '<div style="text-align: center; padding: 20px; font-family: sans-serif;"><h3>Login Successful!</h3><p>You can close this window.</p></div>';
-                    }
-                }, 500);
-            } catch (e) {
-                console.error('Error processing OAuth message:', e);
-                document.body.innerHTML = '<div style="text-align: center; padding: 20px; font-family: sans-serif;"><h3>Error</h3><p>There was an error processing your login. Please try again.</p></div>';
-            }
-        } else {
-            console.error('No message found in URL');
-            document.body.innerHTML = '<div style="text-align: center; padding: 20px; font-family: sans-serif;"><h3>Error</h3><p>No login data received. Please try again.</p></div>';
-        }
-    </script>
+    <div id="message-container">
+        <div class="spinner"></div>
+        <h3>Processing...</h3>
+        <p>Please wait while we complete your login.</p>
+    </div>
+
+    <script src="/assets/js/oauth-success.js"></script>
 </body>
 </html>
