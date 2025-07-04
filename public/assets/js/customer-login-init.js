@@ -96,18 +96,10 @@
             if (window.navigateTo && typeof window.navigateTo === 'function') {
                 const targetRoute = redirectRoute || `/customer-dashboard?id=${customerId}`;
                 window.navigateTo(targetRoute);
-                } else {
-                    // Fallback for embed-app-v2.html
-                    const targetRoute = redirectRoute || '/customer-dashboard';
-                    window.location.href = `/embed-app-v2.html?route=${targetRoute}&id=${customerId}`;
-                }
             } else {
-                // Direct navigation
-                if (redirectRoute) {
-                    window.location.href = `/embed-app-v2.html?route=${redirectRoute}`;
-                } else {
-                    window.location.href = `/customer-dashboard-embed.html?id=${customerId}`;
-                }
+                // Fallback for embed-app-v2.html
+                const targetRoute = redirectRoute || '/customer-dashboard';
+                window.location.href = `/embed-app-v2.html?route=${targetRoute}&id=${customerId}`;
             }
         }
 
