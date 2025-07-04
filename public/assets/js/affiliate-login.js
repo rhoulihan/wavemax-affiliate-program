@@ -218,6 +218,12 @@ console.log('🚀 Affiliate login script loaded!');
                                     // Store token and affiliate data
                                     localStorage.setItem('affiliateToken', data.result.token);
                                     
+                                    // Store affiliate data if available
+                                    if (data.result.affiliate) {
+                                        localStorage.setItem('currentAffiliate', JSON.stringify(data.result.affiliate));
+                                        console.log('Stored affiliate data:', data.result.affiliate.affiliateId);
+                                    }
+                                    
                                     // Notify parent of successful login
                                     sendMessageToParent('login-success', {
                                         userType: 'affiliate',
