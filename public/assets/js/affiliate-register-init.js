@@ -6,6 +6,9 @@
   console.log('[affiliate-register-init] SwirlSpinner available?', !!window.SwirlSpinner);
   console.log('[affiliate-register-init] Document readyState:', document.readyState);
 
+  // Global spinner reference to ensure it can be hidden
+  let globalSectionSpinner = null;
+  
   // Helper function to get translated spinner messages
   function getSpinnerMessage(key, params = {}) {
     // Default messages
@@ -43,6 +46,8 @@
 
   function initializeAffiliateRegistration() {
     console.log('[Init] Starting affiliate registration initialization');
+    console.log('[Init] Document readyState:', document.readyState);
+    console.log('[Init] Google button exists?', !!document.getElementById('googleRegister'));
 
     // Initialize form validation first
     if (window.FormValidation) {
@@ -80,8 +85,8 @@
 
       // Create modal HTML - positioned at top of viewport for iframe visibility
       const modalHTML = `
-      <div id="existingAffiliateModal" class="fixed inset-0 bg-black bg-opacity-50 z-50" style="z-index: 9999; position: fixed; top: 0; left: 0; width: 100%; height: 100vh; display: flex; align-items: flex-start; justify-content: center; padding-top: 20px;">
-        <div class="bg-white rounded-lg p-6 max-w-md mx-4 shadow-xl" style="margin-top: 0; position: relative;">
+      <div id="existingAffiliateModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 existing-affiliate-modal-overlay">
+        <div class="bg-white rounded-lg p-6 max-w-md mx-4 shadow-xl existing-affiliate-modal-content">
           <div class="text-center mb-6">
             <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-blue-100 mb-4">
               <svg class="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -90,7 +95,10 @@
             </div>
             <h3 class="text-lg font-medium text-gray-900 mb-2">Account Already Exists</h3>
             <p class="text-sm text-gray-500 mb-4">
-              Welcome back, <strong>${affiliateName}</strong>! This Google account is already associated with affiliate ID <strong>${affiliate.affiliateId}</strong>.
+              Welcome back, <strong>${affiliateName}</strong>! An affiliate account already exists with the email <strong>${affiliate.email}</strong> (ID: <strong>${affiliate.affiliateId}</strong>).
+            </p>
+            <p class="text-xs text-gray-400 mt-2">
+              To prevent duplicate accounts, each email address can only be associated with one affiliate account.
             </p>
           </div>
           
@@ -136,7 +144,7 @@
         console.log('Redirecting to affiliate dashboard, affiliateId:', affiliateId);
 
         // Always use direct window.location.href redirect like other successful logins
-        window.location.href = `/embed-app.html?route=/affiliate-dashboard&id=${affiliateId}`;
+        window.location.href = `/embed-app-v2.html?route=/affiliate-dashboard&id=${affiliateId}`;
 
         // Close modal
         document.getElementById('existingAffiliateModal').remove();
@@ -175,16 +183,16 @@
         paypalEmailInput.required = false;
 
         // Hide all containers first
-        bankInfoContainer.style.display = 'none';
-        paypalInfoContainer.style.display = 'none';
+        bankInfoContainer.classList.add('hidden');
+        paypalInfoContainer.classList.add('hidden');
 
         // Show relevant container based on selection
         if (this.value === 'directDeposit') {
-          bankInfoContainer.style.display = 'block';
+          bankInfoContainer.classList.remove('hidden');
           accountNumberInput.required = true;
           routingNumberInput.required = true;
         } else if (this.value === 'paypal') {
-          paypalInfoContainer.style.display = 'block';
+          paypalInfoContainer.classList.remove('hidden');
           paypalEmailInput.required = true;
         }
       });
@@ -293,9 +301,19 @@
       return missingFields;
     }
 
+    // Track if OAuth is in progress to prevent multiple simultaneous attempts
+    let oauthInProgress = false;
+    
     function handleSocialAuth(provider) {
     // No validation required before OAuth - the point is to authenticate first and auto-populate the form
       console.log(`🚀 Starting ${provider} OAuth authentication...`);
+      
+      // Prevent multiple OAuth processes
+      if (oauthInProgress) {
+        console.log('[OAuth] OAuth already in progress, ignoring duplicate request');
+        return;
+      }
+      oauthInProgress = true;
 
       // Show large spinner centered on the entire form
       const formContainer = document.getElementById('affiliateRegistrationForm');
@@ -309,15 +327,29 @@
 
       // Create function to hide spinner
       const hideSpinner = function() {
+        console.log('[OAuth] hideSpinner called, checking spinners...');
         if (sectionSpinner) {
-          console.log('[OAuth] Hiding spinner');
+          console.log('[OAuth] Hiding local spinner');
           sectionSpinner.hide();
           sectionSpinner = null;
-          
-          // Restore original form position if it was changed
-          if (formContainer && originalFormPosition !== null) {
-            formContainer.style.position = originalFormPosition;
-          }
+        }
+        if (globalSectionSpinner) {
+          console.log('[OAuth] Hiding global spinner');
+          globalSectionSpinner.hide();
+          globalSectionSpinner = null;
+        }
+        
+        // Fallback: manually remove any spinner overlays from DOM
+        const overlays = document.querySelectorAll('.swirl-spinner-overlay');
+        console.log('[OAuth] Found', overlays.length, 'spinner overlays in DOM');
+        overlays.forEach(overlay => {
+          console.log('[OAuth] Manually removing spinner overlay');
+          overlay.remove();
+        });
+        
+        // Restore original form position if it was changed
+        if (formContainer && originalFormPosition !== null) {
+          formContainer.style.position = originalFormPosition;
         }
       };
 
@@ -348,11 +380,23 @@
               overlay: true,
               message: connectingMessage
             }).show();
-            console.log('[OAuth] SwirlSpinner created successfully');
+            globalSectionSpinner = sectionSpinner; // Store global reference
+            console.log('[OAuth] SwirlSpinner created successfully and stored globally');
+            console.log('[OAuth] Spinner instance:', sectionSpinner);
+            console.log('[OAuth] Spinner isVisible:', sectionSpinner && sectionSpinner.isVisible ? sectionSpinner.isVisible() : 'N/A');
 
-            // Check if spinner element was actually added
-            const spinnerElements = formContainer.querySelectorAll('.swirl-spinner-overlay');
-            console.log('[OAuth] Spinner overlay elements found:', spinnerElements.length);
+            // Check if spinner element was actually added - look in both form and document
+            const spinnerElements = document.querySelectorAll('.swirl-spinner-overlay');
+            console.log('[OAuth] Spinner overlay elements found in document:', spinnerElements.length);
+            spinnerElements.forEach((el, index) => {
+              const computed = window.getComputedStyle(el);
+              console.log(`[OAuth] Spinner ${index} styles:`, {
+                display: computed.display,
+                visibility: computed.visibility,
+                zIndex: computed.zIndex,
+                position: computed.position
+              });
+            });
           } catch (error) {
             console.error('[OAuth] Error creating SwirlSpinner:', error);
           }
@@ -361,8 +405,19 @@
         }
       }
 
-      // For embedded context, use popup window to avoid iframe restrictions
-      if (isEmbedded || window.self !== window.top) {
+      // For embedded context or iframe, always use popup window to avoid iframe restrictions
+      // Check if we're in iframe or if embed config says we're embedded
+      const inIframe = window.self !== window.top;
+      const shouldUsePopup = isEmbedded || inIframe || window.location.pathname.includes('embed');
+      
+      console.log('[OAuth] Context check:', {
+        isEmbedded,
+        inIframe,
+        pathname: window.location.pathname,
+        shouldUsePopup
+      });
+      
+      if (shouldUsePopup) {
       // Generate unique session ID for database polling
         const sessionId = 'oauth_' + Date.now() + '_' + Math.random().toString(36).substring(2);
         console.log('Generated OAuth session ID:', sessionId);
@@ -387,6 +442,7 @@
           window.ErrorHandler.showError('Popup was blocked. Please allow popups for this site and try again.');
           // Hide spinner
           hideSpinner();
+          oauthInProgress = false;
           return;
         }
 
@@ -431,9 +487,36 @@
                 console.log('📨 OAuth result received from database:', data.result);
                 authResultReceived = true;
                 clearInterval(pollForResult);
+                console.log('[OAuth] Polling interval cleared');
 
                 if (popup && !popup.closed) {
-                  popup.close();
+                  console.log('[OAuth] Attempting to close popup window');
+                  console.log('[OAuth] Popup state:', {
+                    closed: popup.closed,
+                    location: typeof popup.location,
+                    document: typeof popup.document
+                  });
+                  try {
+                    // Focus on the main window first
+                    window.focus();
+                    
+                    // Try to close the popup
+                    popup.close();
+                    console.log('[OAuth] Popup close command executed');
+                    
+                    // Check if it actually closed after a short delay
+                    setTimeout(() => {
+                      if (popup && !popup.closed) {
+                        console.warn('[OAuth] Popup did not close, it may have been closed by the user or browser restrictions apply');
+                      } else {
+                        console.log('[OAuth] Popup successfully closed');
+                      }
+                    }, 500);
+                  } catch (e) {
+                    console.error('[OAuth] Error closing popup:', e);
+                  }
+                } else {
+                  console.log('[OAuth] Popup already closed or null');
                 }
 
                 // Handle the result
@@ -446,28 +529,41 @@
                     });
                     showSocialRegistrationCompletion(data.result.socialToken, data.result.provider);
                     // Hide spinner
+                    console.log('[OAuth] About to hide spinner, sectionSpinner exists?', !!sectionSpinner);
+                    console.log('[OAuth] globalSectionSpinner exists?', !!globalSectionSpinner);
+                    console.log('[OAuth] Spinner elements in DOM:', document.querySelectorAll('.swirl-spinner-overlay').length);
                     hideSpinner();
+                    oauthInProgress = false;
+                    // Double-check spinner was hidden
+                    setTimeout(() => {
+                      console.log('[OAuth] After hideSpinner - Spinner elements in DOM:', document.querySelectorAll('.swirl-spinner-overlay').length);
+                    }, 100);
                   } else if (data.result.type === 'social-auth-login') {
                     console.log('Processing social-auth-login from database');
+                    console.log('User attempted to register but account already exists:', data.result.affiliate);
                     // Show modal dialog asking user what they want to do
                     showExistingAffiliateModal(data.result);
                     // Hide spinner
                     hideSpinner();
+                    oauthInProgress = false;
                   } else if (data.result.type === 'social-auth-error') {
                     console.log('Processing social-auth-error from database');
                     window.ErrorHandler.showError(data.result.message || 'Social authentication failed');
                     // Hide spinner
                     hideSpinner();
+                    oauthInProgress = false;
                   } else {
                     console.log('Unknown result type:', data.result.type);
                     // Hide spinner
                     hideSpinner();
+                    oauthInProgress = false;
                   }
                 } catch (resultError) {
                   console.error('Error processing OAuth result:', resultError);
                   window.ErrorHandler.showError('Error processing authentication result');
                   // Hide spinner
                   hideSpinner();
+                  oauthInProgress = false;
                 }
                 return;
               }
@@ -482,7 +578,7 @@
               }
               window.ErrorHandler.showError('Authentication timed out. Please try again.');
               // Hide spinner
-              if (buttonSpinner) buttonSpinner.hide();
+              hideSpinner();
               return;
             }
 
@@ -518,23 +614,40 @@
 
     // Attach OAuth handlers immediately - spinner will use fallback if needed
     console.log('[Init] Attaching OAuth handlers (will use fallback spinner if needed)');
+    console.log('[Init] Google button element:', googleRegister);
 
     if (googleRegister) {
-      googleRegister.addEventListener('click', function() {
-        handleSocialAuth('google');
-      });
+      // Check if handler already attached to prevent duplicates
+      if (!googleRegister.dataset.initialized) {
+        console.log('[Init] Adding click handler to Google button');
+        googleRegister.addEventListener('click', function() {
+          console.log('[OAuth] Google button clicked!');
+          handleSocialAuth('google');
+        });
+        googleRegister.dataset.initialized = 'true';
+      } else {
+        console.log('[Init] Google button already has handler, skipping');
+      }
+    } else {
+      console.error('[Init] Google register button not found!')
     }
 
     if (facebookRegister) {
-      facebookRegister.addEventListener('click', function() {
-        handleSocialAuth('facebook');
-      });
+      if (!facebookRegister.dataset.initialized) {
+        facebookRegister.addEventListener('click', function() {
+          handleSocialAuth('facebook');
+        });
+        facebookRegister.dataset.initialized = 'true';
+      }
     }
 
     if (linkedinRegister) {
-      linkedinRegister.addEventListener('click', function() {
-        handleSocialAuth('linkedin');
-      });
+      if (!linkedinRegister.dataset.initialized) {
+        linkedinRegister.addEventListener('click', function() {
+          handleSocialAuth('linkedin');
+        });
+        linkedinRegister.dataset.initialized = 'true';
+      }
     }
 
     // Handle social registration completion
@@ -597,7 +710,7 @@
       // Hide account setup section immediately for OAuth users
       const accountSetupSection = document.getElementById('accountSetupSection');
       if (accountSetupSection) {
-        accountSetupSection.style.display = 'none';
+        accountSetupSection.classList.add('hidden');
         console.log('✅ Hidden account setup section for OAuth user');
       }
 
@@ -644,7 +757,7 @@
           const firstNameField = document.getElementById('firstName');
           if (firstNameField && !firstNameField.value) {
             firstNameField.value = payload.firstName;
-            firstNameField.style.backgroundColor = '#f0fdf4'; // Light green to indicate auto-filled
+            firstNameField.classList.add('auto-filled'); // Light green to indicate auto-filled
             console.log('✅ Pre-filled firstName:', payload.firstName);
           }
         }
@@ -831,10 +944,20 @@
       const existingHandlers = form.onsubmit;
       console.log('[Form Init] Existing onsubmit handler:', existingHandlers);
 
+      // Flag to prevent duplicate submissions
+      let isSubmitting = false;
+      
       form.addEventListener('submit', async function(e) {
         console.log('[Form Submit] Form submission triggered');
         e.preventDefault();
         e.stopPropagation();
+        
+        // Prevent duplicate submissions
+        if (isSubmitting) {
+          console.warn('[Form Submit] Already submitting, ignoring duplicate submission');
+          return;
+        }
+        isSubmitting = true;
 
         // Show spinner on entire page container
         const processingMessage = getSpinnerMessage('spinner.processingRegistration');
@@ -1082,46 +1205,42 @@
             formSpinner.updateMessage(successMessage);
           }
 
-          // Handle redirect
+          // Handle redirect immediately
           console.log('=== NAVIGATION DEBUG ===');
           console.log('window.location:', window.location.href);
           console.log('Attempting navigation to affiliate success page');
           
-          // Update spinner message while redirecting
-          if (formSpinner && formSpinner.updateMessage) {
-            formSpinner.updateMessage(getSpinnerMessage('common.messages.registrationSuccess') + ' ' + getSpinnerMessage('common.messages.redirecting'));
-          }
-          
           // Navigate to success page
-          // Since we're in a nested iframe (wavemaxlaundry.com > embed-app.html > affiliate-register)
+          // Since we're in a nested iframe (wavemaxlaundry.com > embed-app-v2.html > affiliate-register)
           // We need to navigate within our own frame context
           console.log('Current URL:', window.location.href);
           
-          // Check if we're in embed-app.html iframe
-          if (window.location.href.includes('embed-app.html')) {
-            // We're already in embed-app.html, just change the route parameter
+          // Check if we're in embed-app-v2.html iframe
+          if (window.location.href.includes('embed-app-v2.html')) {
+            // We're already in embed-app-v2.html, just change the route parameter
             const url = new URL(window.location.href);
             url.searchParams.set('route', '/affiliate-success');
             console.log('Navigating to:', url.href);
             window.location.href = url.href;
           } else if (window.parent !== window) {
-            // We're in an iframe but not embed-app.html
+            // We're in an iframe but not embed-app-v2.html
             // Try to use the navigateTo function if available
             if (window.parent.navigateTo && typeof window.parent.navigateTo === 'function') {
               console.log('Using parent navigateTo function');
               window.parent.navigateTo('/affiliate-success');
             } else {
-              // Fallback: navigate to embed-app.html with success route
+              // Fallback: navigate to embed-app-v2.html with success route
               console.log('Using fallback navigation');
-              window.location.href = '/embed-app.html?route=/affiliate-success';
+              window.location.href = '/embed-app-v2.html?route=/affiliate-success';
             }
           } else {
             // Not in iframe at all
             console.log('Not in iframe, using direct navigation');
-            window.location.href = '/embed-app.html?route=/affiliate-success';
+            window.location.href = '/embed-app-v2.html?route=/affiliate-success';
           }
         } catch (error) {
           console.error('Registration error:', error);
+          isSubmitting = false; // Reset flag on error
           
           // Show user-friendly error message
           let errorMessage = 'An error occurred during registration. Please try again.';
@@ -1152,6 +1271,7 @@
 
           // Hide spinner
           if (formSpinner) formSpinner.hide();
+          isSubmitting = false; // Reset flag after hiding spinner
         }
       });
 
@@ -1899,22 +2019,24 @@
           sectionsToHide.forEach(sectionId => {
             const section = document.getElementById(sectionId);
             if (section) {
-              section.style.display = 'none';
+              section.classList.add('form-section-hidden');
+              section.classList.remove('form-section-visible');
             }
           });
           
           // Hide this back button
-          backButton.style.display = 'none';
+          backButton.classList.add('hidden');
           
           // Show service area section and its navigation again
           const serviceAreaSection = document.getElementById('serviceAreaSection');
           const serviceAreaNav = document.getElementById('serviceAreaNavigation');
           
           if (serviceAreaSection) {
-            serviceAreaSection.style.display = '';
+            serviceAreaSection.classList.remove('form-section-hidden');
+            serviceAreaSection.classList.add('form-section-visible');
           }
           if (serviceAreaNav) {
-            serviceAreaNav.style.display = 'flex';
+            serviceAreaNav.classList.remove('hidden');
           }
           
           // Scroll to service area
@@ -1939,10 +2061,11 @@
           const serviceAreaSection = document.getElementById('serviceAreaSection');
           const serviceAreaNav = document.getElementById('serviceAreaNavigation');
           if (serviceAreaSection) {
-            serviceAreaSection.style.display = 'none';
+            serviceAreaSection.classList.add('form-section-hidden');
+            serviceAreaSection.classList.remove('form-section-visible');
           }
           if (serviceAreaNav) {
-            serviceAreaNav.style.display = 'none';
+            serviceAreaNav.classList.add('hidden');
           }
           
           // Show the first sections again (OAuth, personal info, business info)
@@ -2005,10 +2128,11 @@
           const serviceAreaSection = document.getElementById('serviceAreaSection');
           const serviceAreaNav = document.getElementById('serviceAreaNavigation');
           if (serviceAreaSection) {
-            serviceAreaSection.style.display = 'none';
+            serviceAreaSection.classList.add('form-section-hidden');
+            serviceAreaSection.classList.remove('form-section-visible');
           }
           if (serviceAreaNav) {
-            serviceAreaNav.style.display = 'none';
+            serviceAreaNav.classList.add('hidden');
           }
           
           // Show all remaining sections
@@ -2270,13 +2394,13 @@
         });
 
         const modalHTML = `
-        <div id="addressSelectionModal" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0, 0, 0, 0.5); z-index: 9999; overflow-y: auto;">
-          <div style="display: flex; align-items: flex-start; justify-content: center; min-height: 100%; padding-top: 2rem; padding-left: 1rem; padding-right: 1rem;">
-            <div class="bg-white rounded-lg w-full" style="max-width: 32rem; max-height: 90vh; overflow: hidden; margin-top: 0;">
+        <div id="addressSelectionModal" class="address-modal-overlay">
+          <div class="address-modal-container">
+            <div class="bg-white rounded-lg w-full address-modal-content">
               <div class="p-6">
                 <h3 class="text-lg font-semibold mb-4" data-i18n="${results.length > 1 ? 'affiliate.register.selectServiceLocation' : 'affiliate.register.confirmServiceLocation'}">${modalTitle}</h3>
                 <p class="text-sm text-gray-600 mb-4" data-i18n="${results.length > 1 ? 'affiliate.register.selectCorrectLocation' : 'affiliate.register.confirmCorrectAddress'}">${modalDesc}</p>
-                <div class="space-y-2 overflow-y-auto" style="max-height: 50vh;">
+                <div class="space-y-2 overflow-y-auto address-modal-list">
                   ${results.map((result, index) => {
     // Get the form address to compare
     const formAddress = document.getElementById('address')?.value?.trim() || '';
@@ -2351,6 +2475,26 @@
         const modal = document.getElementById('addressSelectionModal');
         if (modal) {
           modal.scrollTop = 0;
+          
+          // Move modal to document.body if it's not already a direct child
+          if (modal.parentElement !== document.body) {
+            document.body.appendChild(modal);
+          }
+          
+          // Add a class to body to prevent scrolling
+          document.body.classList.add('modal-open');
+          
+          // Force a reflow to ensure styles are applied
+          modal.offsetHeight;
+          
+          // Debug: Check computed styles
+          const computedStyle = window.getComputedStyle(modal);
+          console.log('[Modal Debug] Position:', computedStyle.position);
+          console.log('[Modal Debug] Z-index:', computedStyle.zIndex);
+          console.log('[Modal Debug] Display:', computedStyle.display);
+          console.log('[Modal Debug] Top:', computedStyle.top);
+          console.log('[Modal Debug] Left:', computedStyle.left);
+          
           // Also try to scroll the window to top if in iframe
           try {
             window.scrollTo(0, 0);
@@ -2485,16 +2629,16 @@
           const serviceAreaSection = document.getElementById('serviceAreaSection');
           console.log('[Service Area] Found service area section:', !!serviceAreaSection);
           if (serviceAreaSection) {
-            console.log('[Service Area] Current display:', serviceAreaSection.style.display);
+            console.log('[Service Area] Current visibility state - has hidden class:', serviceAreaSection.classList.contains('form-section-hidden'));
             console.log('[Service Area] Current classes:', serviceAreaSection.className);
             serviceAreaSection.classList.remove('form-section-hidden');
-            serviceAreaSection.style.display = '';
-            console.log('[Service Area] After update - display:', serviceAreaSection.style.display);
+            serviceAreaSection.classList.add('form-section-visible');
+            console.log('[Service Area] After update - classes:', serviceAreaSection.className);
             
             // Show the service area navigation buttons
             const serviceAreaNav = document.getElementById('serviceAreaNavigation');
             if (serviceAreaNav) {
-              serviceAreaNav.style.display = 'flex';
+              serviceAreaNav.classList.remove('hidden');
             }
 
             // Force reflow by accessing offsetHeight
@@ -2566,6 +2710,7 @@
           try {
             const modal = document.getElementById('addressSelectionModal');
             if (modal) {
+              document.body.classList.remove('modal-open');
               modal.remove();
               console.log('[Address Selection] Modal removed successfully');
             } else {
@@ -2599,6 +2744,7 @@
 
         // Cancel button
         document.getElementById('cancelAddressSelection').addEventListener('click', function() {
+          document.body.classList.remove('modal-open');
           document.getElementById('addressSelectionModal').remove();
         });
 
@@ -2672,9 +2818,20 @@
       setupLanguagePreferenceTracking();
     });
   } else {
-  // DOM is already loaded
+    // DOM is already loaded
     initializeAffiliateRegistration();
     setupLanguagePreferenceTracking();
+    
+    // Also try after a delay for dynamically loaded content
+    setTimeout(() => {
+      console.log('[Init] Re-checking OAuth buttons after delay...');
+      const googleBtn = document.getElementById('googleRegister');
+      if (googleBtn && !googleBtn.hasAttribute('data-initialized')) {
+        console.log('[Init] Re-initializing OAuth handlers...');
+        initializeAffiliateRegistration();
+        googleBtn.setAttribute('data-initialized', 'true');
+      }
+    }, 500);
   }
 
 })(); // End IIFE

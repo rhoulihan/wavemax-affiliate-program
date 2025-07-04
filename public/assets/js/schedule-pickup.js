@@ -48,7 +48,7 @@
     if (!token || !customerStr) {
     // Not logged in, redirect to login page with pickup flag
       console.log('User not authenticated, redirecting to login');
-      window.location.href = '/embed-app.html?login=customer&pickup=true';
+      window.location.href = '/embed-app-v2.html?login=customer&pickup=true';
       return;
     }
 
@@ -104,7 +104,7 @@
     } catch (error) {
       console.error('Error initializing schedule pickup:', error);
       // If there's an error, redirect to login
-      window.location.href = '/embed-app.html?login=customer&pickup=true';
+      window.location.href = '/embed-app-v2.html?login=customer&pickup=true';
     }
   }
 
@@ -176,7 +176,7 @@
                   </ul>
                 </div>
                 <div class="mt-6">
-                  <a href="/embed-app.html?route=/customer-dashboard" class="btn btn-primary">
+                  <a href="/embed-app-v2.html?route=/customer-dashboard" class="btn btn-primary">
                     View Order Status
                   </a>
                 </div>
@@ -503,7 +503,7 @@
     } catch (error) {
       console.error('Error loading customer data:', error);
       modalAlert('Error loading customer information. Please try logging in again.', 'Loading Error');
-      window.location.href = '/embed-app.html?login=customer&pickup=true';
+      window.location.href = '/embed-app-v2.html?login=customer&pickup=true';
     }
   }
 
@@ -728,7 +728,7 @@
         localStorage.setItem('wavemax_orders', JSON.stringify(storedOrders));
 
         // Redirect to order confirmation page
-        window.location.href = '/embed-app.html?route=/order-confirmation&id=' + data.orderId;
+        window.location.href = '/embed-app-v2.html?route=/order-confirmation&id=' + data.orderId;
       } else {
         console.error('Order submission failed:', data);
         modalAlert(data.message || 'Failed to schedule pickup. Please try again.', 'Scheduling Failed');
@@ -919,32 +919,59 @@
       estimatedTotalElement.textContent = `$${estimatedTotal.toFixed(2)}`;
     }
 
-    // Update WDF quantity in payment form if visible
-    if (window.paymentForm && window.paymentForm.updateWDFQuantity) {
-      const paymentContainer = document.getElementById('paymentFormContainer');
-      if (paymentContainer && paymentContainer.style.display !== 'none') {
+    // Update payment form quantities
+    if (window.paymentForm && window.paymentForm.updateQuantity) {
+      console.log('Updating payment form quantities');
+      
       // Calculate WDF quantity: estimated weight minus bag credit weight
-        let wdfQuantity = weight;
-
-        if (customerBagCredit > 0 && wdfRate > 0) {
-          const bagCreditWeight = customerBagCredit / wdfRate;
-          wdfQuantity = Math.max(0, weight - bagCreditWeight);
+      let wdfQuantity = weight;
+      
+      if (customerBagCredit > 0 && wdfRate > 0) {
+        const bagCreditWeight = customerBagCredit / wdfRate;
+        wdfQuantity = Math.max(0, weight - bagCreditWeight);
+      }
+      
+      console.log('Updating WDF quantity:', wdfQuantity);
+      window.paymentForm.updateQuantity('WDF', wdfQuantity);
+      
+      // Update delivery fee quantities based on the breakdown
+      if (deliveryFeeBreakdown) {
+        console.log('Updating delivery fees:', deliveryFeeBreakdown);
+        
+        // Update minimum delivery fee
+        if (deliveryFeeBreakdown.minimumFeeApplied && deliveryFeeBreakdown.minimumFee > 0) {
+          window.paymentForm.updateQuantity('MDF', 1);
+        } else {
+          window.paymentForm.updateQuantity('MDF', 0);
         }
-
-        console.log('Updating WDF quantity in payment form:', {
-          weight,
-          customerBagCredit,
-          wdfRate,
-          wdfQuantity
-        });
-
-        window.paymentForm.updateWDFQuantity(wdfQuantity);
+        
+        // Update per bag fee
+        if (deliveryFeeBreakdown.numberOfBags > 0 && deliveryFeeBreakdown.perBagFee > 0) {
+          window.paymentForm.updateQuantity('PBF', deliveryFeeBreakdown.numberOfBags);
+        } else {
+          window.paymentForm.updateQuantity('PBF', 0);
+        }
+      }
+      
+      // Update bag credit if applicable
+      if (customerBagCredit > 0) {
+        const bagCreditWeight = customerBagCredit / wdfRate;
+        console.log('Updating bag credit weight:', bagCreditWeight);
+        window.paymentForm.updateQuantity('BF', bagCreditWeight);
+      } else {
+        window.paymentForm.updateQuantity('BF', 0);
       }
     }
   }
 
   // Submit pickup order after successful payment
   async function submitPickupOrder(paymentDetails) {
+    // Prevent duplicate order submissions
+    if (window.isSubmittingOrder) {
+      console.log('Order submission already in progress, ignoring duplicate call');
+      return;
+    }
+    
     const pickupData = window.pendingPickupData;
     if (!pickupData) {
       console.error('No pending pickup data found');
@@ -953,6 +980,10 @@
 
     console.log('=== PAYMENT SUCCESS - CREATING ORDER ===');
     console.log('Payment details received:', paymentDetails);
+    
+    // Set flags to indicate we're processing
+    window.isProcessingPayment = true;
+    window.isSubmittingOrder = true;
 
     // If we have payment details with a payment token but no transaction ID,
     // wait a moment and fetch the updated payment status
@@ -1039,25 +1070,7 @@
           spinner.hide();
         }
 
-        // Store order data for confirmation page
-        const orderData = {
-          orderId: data.orderId,
-          customerId: pickupData.customerId,
-          affiliateId: pickupData.affiliateId,
-          pickupDate: pickupData.pickupDate,
-          pickupTime: pickupData.pickupTime,
-          estimatedSize: pickupData.estimatedSize,
-          specialPickupInstructions: pickupData.specialPickupInstructions || '',
-          estimatedTotal: data.estimatedTotal,
-          deliveryFee: deliveryFeeAmount || 25.00,
-          deliveryFeeBreakdown: deliveryFeeBreakdown,
-          createdAt: new Date().toISOString()
-        };
-
-        // Store in localStorage for the confirmation page
-        const storedOrders = JSON.parse(localStorage.getItem('wavemax_orders') || '{}');
-        storedOrders[data.orderId] = orderData;
-        localStorage.setItem('wavemax_orders', JSON.stringify(storedOrders));
+        // Order created successfully - the confirmation page will fetch details from API
 
         // Show success message
         if (window.modalAlert) {
@@ -1066,7 +1079,7 @@
 
         // Redirect to order confirmation page after a short delay
         setTimeout(() => {
-          window.location.href = '/embed-app.html?route=/order-confirmation&id=' + data.orderId;
+          window.location.href = '/embed-app-v2.html?route=/order-confirmation&orderId=' + data.orderId;
         }, 1500);
       } else {
       // Hide spinner on error
@@ -1075,7 +1088,8 @@
         }
 
         console.error('Order submission failed:', data);
-        if (window.modalAlert) {
+        // Only show error modal if we're not still processing payment
+        if (window.modalAlert && !window.isProcessingPayment) {
           window.modalAlert(data.message || 'Failed to schedule pickup. Please try again.', 'Scheduling Failed');
         }
       }
@@ -1086,11 +1100,19 @@
       }
 
       console.error('Order submission error:', error);
-      if (window.modalAlert) {
+      // Only show error modal if we're not still processing payment
+      if (window.modalAlert && !window.isProcessingPayment) {
         window.modalAlert('An error occurred while scheduling your pickup. Please try again.', 'Scheduling Error');
       }
+    } finally {
+      // Clear the processing flags
+      window.isProcessingPayment = false;
+      window.isSubmittingOrder = false;
     }
   }
+
+  // Make calculateEstimate globally available
+  window.calculateEstimate = calculateEstimate;
 
   // Initialize payment form
   async function initializePaymentForm() {
@@ -1126,10 +1148,12 @@
       console.log('Initializing PaygistixPaymentForm with config:', paymentConfig);
       console.log('Affiliate settings from customer:', affiliateSettings);
       
-      const paymentForm = new PaygistixPaymentForm('paygistix-payment-container', {
+      const paymentForm = new PaygistixPaymentForm({
+        container: document.getElementById('paygistix-payment-container'),
         paymentConfig: paymentConfig,
         hideRegistrationFormRows: false, // Show all form rows for orders
         affiliateSettings: affiliateSettings, // Pass affiliate settings directly
+        payContext: 'ORDER',
         onSuccess: function() {
           console.log('Payment form initialized successfully');
           console.log('Payment form object:', window.paymentForm);

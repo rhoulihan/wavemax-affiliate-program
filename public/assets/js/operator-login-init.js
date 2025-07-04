@@ -66,11 +66,11 @@
           window.operatorClockInterval = null;
         }
         
-        // Use navigateTo if available (when in embed-app.html)
+        // Use navigateTo if available (when in embed-app-v2.html)
         if (window.navigateTo) {
           window.navigateTo('/operator-scan');
         } else {
-          window.location.href = '/embed-app.html?route=/operator-scan';
+          window.location.href = '/embed-app-v2.html?route=/operator-scan';
         }
       }
     } catch (error) {
@@ -165,11 +165,11 @@
             clearInterval(clockInterval);
           }
           
-          // Use navigateTo if available (when in embed-app.html)
+          // Use navigateTo if available (when in embed-app-v2.html)
           if (window.navigateTo) {
             window.navigateTo('/operator-scan');
           } else {
-            window.location.href = '/embed-app.html?route=/operator-scan';
+            window.location.href = '/embed-app-v2.html?route=/operator-scan';
           }
         }, 1000);
       } else {
@@ -229,11 +229,11 @@
               : (currentTime >= shiftStart || currentTime <= shiftEnd);
 
             if (isWithinShift) {
-              // Use navigateTo if available (when in embed-app.html)
+              // Use navigateTo if available (when in embed-app-v2.html)
               if (window.navigateTo) {
                 window.navigateTo('/operator-scan');
               } else {
-                window.location.href = '/embed-app.html?route=/operator-scan';
+                window.location.href = '/embed-app-v2.html?route=/operator-scan';
               }
             } else {
               // Clear tokens if outside shift

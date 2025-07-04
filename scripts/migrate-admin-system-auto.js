@@ -208,7 +208,7 @@ async function main() {
     console.log('   Email: operator@example.com');
     console.log('   Password: Operator123!');
     console.log('\n3. Embedded Application:');
-    console.log('   URL: https://wavemax.promo/embed-app.html');
+    console.log('   URL: https://wavemax.promo/embed-app-v2.html');
 
   } catch (error) {
     console.error('\n✗ Migration failed:', error.message);

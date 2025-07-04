@@ -3,22 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csp-nonce" content="">
     <title>WaveMAX Laundry - Affiliate Registration</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/assets/css/language-switcher.css">
     <!-- Leaflet CSS from CDN -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" crossorigin="anonymous" />
+    <link rel="stylesheet" href="/assets/css/affiliate-register.css">
+    <link rel="stylesheet" href="/assets/css/swirl-spinner.css">
     <style>
         /* Minimal container styling for iframe embedding */
         body {
             margin: 0;
             padding: 0;
             background-color: transparent;
+            position: static !important;
+            transform: none !important;
         }
         
         .embed-container {
             max-width: 100%;
             margin: 0;
             padding: 20px;
+            position: static !important;
+            transform: none !important;
+            z-index: auto !important;
         }
         
         
@@ -127,12 +136,82 @@
         .validation-suggestion:hover {
             color: #1d4ed8;
         }
+        
+        /* Swirl Spinner overlay styles for embedded context */
+        .swirl-spinner-overlay {
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            right: 0 !important;
+            bottom: 0 !important;
+            background-color: rgba(255, 255, 255, 0.9) !important;
+            z-index: 9999 !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+        }
+        
+        .swirl-spinner-wrapper {
+            text-align: center;
+        }
+        
+        .swirl-spinner-message {
+            margin-top: 1rem;
+            font-size: 1.1rem;
+            color: #333;
+        }
+        
+        /* Modal styles moved to affiliate-register.css for better specificity */
+        
+        /* Existing affiliate modal styles */
+        .existing-affiliate-modal-overlay {
+            z-index: 9999;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+            padding-top: 20px;
+        }
+        
+        .existing-affiliate-modal-content {
+            margin-top: 0;
+            position: relative;
+        }
+        
+        /* Utility classes for dynamic show/hide */
+        .hidden {
+            display: none !important;
+        }
+        
+        .block {
+            display: block !important;
+        }
+        
+        /* Auto-filled field indicator */
+        .auto-filled {
+            background-color: #f0fdf4 !important;
+        }
+        
+        /* Form section visibility */
+        .form-section-hidden {
+            display: none;
+        }
+        
+        .form-section-visible {
+            display: block;
+        }
+        
+        /* Additional modal styles moved to affiliate-register.css */
     </style>
 </head>
 <body class="font-sans">
     <!-- Registration Form - No navigation or footer for embedded version -->
     <div class="embed-container">
-        <div class="bg-white rounded-lg shadow-md overflow-hidden" style="margin-top: 40px;">
+        <div class="bg-white rounded-lg shadow-md overflow-hidden registration-form-container">
             <div class="wavemax-blue text-white p-6">
                 <h2 class="text-2xl font-bold" data-i18n="affiliate.register.title">Affiliate Registration</h2>
                 <p class="mt-2" data-i18n="affiliate.register.subtitle">Fill out the form below to register as a WaveMAX Laundry affiliate partner.</p>
@@ -145,7 +224,7 @@
                 <input type="hidden" id="languagePreference" name="languagePreference" value="en">
                 
                 <!-- Social Registration (Top of Form) -->
-                <div id="socialAuthSection" style="position: relative;">
+                <div id="socialAuthSection">
                     <h3 class="text-xl font-bold mb-4" data-i18n="affiliate.register.quickRegistration">Quick Registration with Social Media</h3>
                     <div class="bg-gradient-to-r from-blue-50 to-indigo-50 p-6 rounded-lg border border-blue-200">
                         <p class="text-gray-700 mb-4 text-center" data-i18n="affiliate.register.socialSignupText">Sign up quickly using your social media account - we'll automatically fill in your information!</p>
@@ -318,7 +397,7 @@
                 </div>
                 
                 <!-- Service Area Section (Initially Hidden) -->
-                <div id="serviceAreaSection" class="form-section-hidden" style="display: none;">
+                <div id="serviceAreaSection" class="form-section-hidden">
                     <div class="md:col-span-2">
                         <label class="block text-gray-700 mb-4 text-lg font-semibold" data-i18n="affiliate.register.serviceArea">Service Area *</label>
                         
@@ -327,10 +406,9 @@
                             <!-- Component will be initialized here -->
                         </div>
                     </div>
-                    </div>
                     
                     <!-- Navigation Buttons for Service Area -->
-                    <div id="serviceAreaNavigation" class="mt-6 flex justify-between" style="display: none;">
+                    <div id="serviceAreaNavigation" class="mt-6 flex justify-between hidden">
                         <button type="button" id="serviceAreaBackButton" class="bg-gray-200 text-gray-700 font-bold py-3 px-6 rounded-lg hover:bg-gray-300 transition flex items-center">
                             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
@@ -347,7 +425,7 @@
                 </div>
                 
                 <!-- Service Information (Initially Hidden) -->
-                <div id="serviceInfoSection" class="form-section-hidden" style="display: none;">
+                <div id="serviceInfoSection" class="form-section-hidden">
                     <h3 class="text-xl font-bold mb-4" data-i18n="affiliate.register.serviceInfo">Service Information</h3>
                     <div class="grid md:grid-cols-2 gap-4">
                         
@@ -406,7 +484,7 @@
                 
                 
                 <!-- Payment Information (Initially Hidden) -->
-                <div id="paymentInfoSection" class="form-section-hidden" style="display: none;">
+                <div id="paymentInfoSection" class="form-section-hidden">
                     <h3 class="text-xl font-bold mb-4" data-i18n="affiliate.register.paymentInfo">Payment Information</h3>
                     <div class="grid md:grid-cols-2 gap-4">
                         <div class="md:col-span-2">
@@ -419,7 +497,7 @@
                             </select>
                         </div>
                         
-                        <div class="md:col-span-2" id="bankInfoContainer" style="display: none;">
+                        <div class="md:col-span-2 hidden" id="bankInfoContainer">
                             <label for="accountNumber" class="block text-gray-700 mb-2" data-i18n="affiliate.register.accountNumber">Account Number *</label>
                             <input type="text" id="accountNumber" name="accountNumber" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
                             
@@ -427,7 +505,7 @@
                             <input type="text" id="routingNumber" name="routingNumber" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
                         </div>
                         
-                        <div class="md:col-span-2" id="paypalInfoContainer" style="display: none;">
+                        <div class="md:col-span-2 hidden" id="paypalInfoContainer">
                             <label for="paypalEmail" class="block text-gray-700 mb-2" data-i18n="affiliate.register.paypalEmail">PayPal Email *</label>
                             <input type="email" id="paypalEmail" name="paypalEmail" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
                         </div>
@@ -435,7 +513,7 @@
                 </div>
 
                 <!-- Terms and Conditions (Always visible) (Initially Hidden) -->
-                <div id="termsSection" class="form-section-hidden" style="display: none;">
+                <div id="termsSection" class="form-section-hidden">
                     <div class="bg-gray-50 p-4 rounded-lg">
                         <div class="flex items-start">
                             <input type="checkbox" id="termsAgreement" name="termsAgreement" required class="mt-1 mr-2">
@@ -448,12 +526,12 @@
                 </div>
                 
                 <!-- Submit Button (Initially Hidden) -->
-                <div id="submitSection" class="form-section-hidden" style="display: none;">
+                <div id="submitSection" class="form-section-hidden">
                     <div class="mt-6 space-y-3">
                         <button type="submit" id="registerSubmitButton" class="w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-blue-700 transition" data-i18n="affiliate.register.submitButton">Register as an Affiliate</button>
                         
                         <!-- Back Button -->
-                        <button type="button" id="backButton" class="w-full bg-gray-200 text-gray-700 font-bold py-3 px-4 rounded-lg hover:bg-gray-300 transition flex items-center justify-center" style="display: none;">
+                        <button type="button" id="backButton" class="w-full bg-gray-200 text-gray-700 font-bold py-3 px-4 rounded-lg hover:bg-gray-300 transition flex items-center justify-center hidden">
                             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
                             </svg>

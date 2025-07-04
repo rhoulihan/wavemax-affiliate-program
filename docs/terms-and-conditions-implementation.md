@@ -39,7 +39,7 @@ If WaveMAX is found liable for laundry damage:
 
 ### Modified Files:
 1. `/server.js` - Updated routes to serve new terms
-2. `/public/embed-app.html` - Updated route mapping
+2. `/public/embed-app-v2.html` - Updated route mapping
 
 ### Backup:
 - `/public/terms-of-service-old.html` - Original terms backed up

@@ -3,419 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csp-nonce" content="">
     <title>Operator Scanner - WaveMAX</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background: #f0f4f8;
-            color: #2c3e50;
-            line-height: 1.6;
-            overflow-x: hidden;
-        }
-
-        .header {
-            background: #1e3a8a;
-            color: white;
-            padding: 15px 20px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .header h1 {
-            font-size: 24px;
-            font-weight: 700;
-        }
-
-        .operator-info {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-        }
-
-        .operator-name {
-            font-weight: 500;
-        }
-
-        .btn-logout {
-            padding: 8px 16px;
-            background: rgba(255,255,255,0.2);
-            color: white;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 14px;
-            transition: all 0.3s;
-        }
-
-        .btn-logout:hover {
-            background: rgba(255,255,255,0.3);
-        }
-
-        .main-container {
-            max-width: 800px;
-            margin: 40px auto;
-            padding: 0 20px;
-        }
-
-        .scan-prompt {
-            background: white;
-            border-radius: 16px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-            padding: 60px 40px;
-            text-align: center;
-            margin-bottom: 30px;
-        }
-
-        .scan-icon {
-            font-size: 80px;
-            color: #3b82f6;
-            margin-bottom: 20px;
-        }
-
-        .scan-prompt h2 {
-            font-size: 32px;
-            color: #2c3e50;
-            margin-bottom: 10px;
-        }
-
-        .scan-prompt p {
-            font-size: 18px;
-            color: #7f8c8d;
-        }
-
-        #scanInput {
-            position: absolute;
-            left: -9999px;
-            opacity: 0;
-        }
-
-        .scan-types {
-            display: flex;
-            justify-content: center;
-            gap: 40px;
-            margin: 30px 0;
-        }
-
-        .scan-type {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 15px 20px;
-            background: #f8f9fa;
-            border-radius: 8px;
-            font-size: 14px;
-            color: #666;
-        }
-
-        .scan-type-icon {
-            font-size: 24px;
-        }
-
-        .manual-input {
-            margin-top: 20px;
-            padding-top: 20px;
-            border-top: 1px solid #ecf0f1;
-        }
-
-        .manual-input-btn {
-            padding: 12px 24px;
-            background: #3498db;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 16px;
-            transition: all 0.3s;
-        }
-
-        .manual-input-btn:hover {
-            background: #2980b9;
-        }
-
-        /* Order Details Modal */
-        .modal, .weight-input-modal-active {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0,0,0,0.5);
-            z-index: 10000;
-            animation: fadeIn 0.3s;
-        }
-        
-        /* Force visibility for weight input modal */
-        .weight-input-modal-active[data-force-visible="true"] {
-            display: block !important;
-        }
-
-        .modal-content {
-            background: white;
-            max-width: 600px;
-            margin: 50px auto;
-            border-radius: 16px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            max-height: 90vh;
-            overflow-y: auto;
-            animation: slideUp 0.3s;
-        }
-
-        .modal-header {
-            background: #1e3a8a;
-            color: white;
-            padding: 20px;
-            border-radius: 16px 16px 0 0;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .modal-header h3 {
-            font-size: 24px;
-            font-weight: 600;
-        }
-
-        .close-btn {
-            background: none;
-            border: none;
-            color: white;
-            font-size: 28px;
-            cursor: pointer;
-            line-height: 1;
-        }
-
-        .modal-body {
-            padding: 30px;
-        }
-
-        .order-info {
-            margin-bottom: 30px;
-        }
-
-        .order-info h4 {
-            color: #2c3e50;
-            margin-bottom: 15px;
-            font-size: 20px;
-        }
-
-        .info-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-
-        .info-item {
-            padding: 12px;
-            background: #f8f9fa;
-            border-radius: 8px;
-        }
-
-        .info-label {
-            font-size: 12px;
-            color: #7f8c8d;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .info-value {
-            font-size: 16px;
-            color: #2c3e50;
-            font-weight: 500;
-            margin-top: 4px;
-        }
-
-        .weight-input-section {
-            background: #ecf0f1;
-            padding: 20px;
-            border-radius: 12px;
-            margin-bottom: 20px;
-        }
-
-        .weight-input-section h5 {
-            margin-bottom: 15px;
-            color: #2c3e50;
-        }
-
-        .bag-weight-input {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 10px;
-        }
-
-        .bag-weight-input label {
-            flex: 0 0 80px;
-            font-weight: 500;
-        }
-
-        .bag-weight-input input {
-            flex: 1;
-            padding: 10px;
-            border: 2px solid #bdc3c7;
-            border-radius: 6px;
-            font-size: 16px;
-        }
-
-        .bag-weight-input input:focus {
-            outline: none;
-            border-color: #3b82f6;
-        }
-
-        .action-buttons {
-            display: flex;
-            gap: 15px;
-            justify-content: flex-end;
-            margin-top: 30px;
-        }
-
-        .btn {
-            padding: 12px 24px;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .btn-primary {
-            background: #3b82f6;
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background: #2563eb;
-        }
-
-        .btn-secondary {
-            background: #95a5a6;
-            color: white;
-        }
-
-        .btn-secondary:hover {
-            background: #7f8c8d;
-        }
-
-        /* Confirmation Modal */
-        .confirmation-modal {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
-            padding: 20px;
-            max-width: 400px;
-            display: none;
-            animation: slideInRight 0.3s;
-        }
-
-        .confirmation-modal.success {
-            border-left: 5px solid #3b82f6;
-        }
-
-        .confirmation-modal.info {
-            border-left: 5px solid #1e3a8a;
-        }
-        
-        .confirmation-modal.error {
-            border-left: 5px solid #ef4444;
-        }
-
-        .confirmation-content {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .confirmation-icon {
-            font-size: 40px;
-        }
-
-        .confirmation-text h4 {
-            margin-bottom: 5px;
-            color: #2c3e50;
-        }
-
-        .confirmation-text p {
-            color: #7f8c8d;
-            font-size: 14px;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        @keyframes slideUp {
-            from { transform: translateY(30px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
-        }
-
-        @keyframes slideInRight {
-            from { transform: translateX(100px); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
-        }
-
-        /* Responsive */
-        @media (max-width: 600px) {
-            .modal-content {
-                margin: 20px;
-            }
-            
-            .info-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .scan-prompt {
-                padding: 40px 20px;
-            }
-            
-            .scan-prompt h2 {
-                font-size: 24px;
-            }
-        }
-
-        /* Stats Summary */
-        .stats-summary {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-
-        .stat-card {
-            background: white;
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-            text-align: center;
-        }
-
-        .stat-value {
-            font-size: 36px;
-            font-weight: 700;
-            color: #3b82f6;
-            margin-bottom: 5px;
-        }
-
-        .stat-label {
-            color: #7f8c8d;
-            font-size: 14px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-    </style>
+    <link rel="icon" href="data:,">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/assets/css/wavemax-embed.css">
+    <link rel="stylesheet" href="/assets/css/operator-scan.css">
+    <link rel="stylesheet" href="/assets/css/operator-scan-embed.css">
+    <link rel="stylesheet" href="/assets/css/language-switcher.css">
+    <link rel="stylesheet" href="/assets/css/modal-utils.css">
 </head>
 <body>
     <div class="header">
@@ -452,22 +48,31 @@
             <!-- Hidden input for scanner -->
             <input type="text" id="scanInput" autocomplete="off">
             
-            <div class="scan-types" style="text-align: left; max-width: 400px; margin: 30px auto;">
-                <div class="scan-type" style="margin-bottom: 15px;">
-                    <span class="scan-type-icon">1️⃣</span>
-                    <span><strong>Receive:</strong> Scan to weigh bags</span>
+            <div class="scan-types">
+                <div class="scan-type">
+                    <div class="scan-type-icon">1️⃣</div>
+                    <div class="scan-type-text">
+                        <strong>Receive:</strong><br>
+                        Scan to weigh bags
+                    </div>
                 </div>
-                <div class="scan-type" style="margin-bottom: 15px;">
-                    <span class="scan-type-icon">2️⃣</span>
-                    <span><strong>Notify:</strong> Scan when WDF is done</span>
+                <div class="scan-type">
+                    <div class="scan-type-icon">2️⃣</div>
+                    <div class="scan-type-text">
+                        <strong>Notify:</strong><br>
+                        Scan when WDF is done
+                    </div>
                 </div>
-                <div class="scan-type" style="margin-bottom: 15px;">
-                    <span class="scan-type-icon">3️⃣</span>
-                    <span><strong>Pickup:</strong> Scan as bags leave</span>
+                <div class="scan-type">
+                    <div class="scan-type-icon">3️⃣</div>
+                    <div class="scan-type-text">
+                        <strong>Pickup:</strong><br>
+                        Scan as bags leave
+                    </div>
                 </div>
             </div>
             
-            <p style="margin-top: 20px; color: #7f8c8d; font-size: 12px;">
+            <p class="scan-qr-note">
                 All bags have the same QR code (Customer ID)
             </p>
             
@@ -508,11 +113,5 @@
     <script src="/assets/js/errorHandler.js"></script>
     <script src="/assets/js/csrf-utils.js"></script>
     <script src="/assets/js/operator-scan-init.js"></script>
-    <script>
-    // Additional initialization for event handlers that couldn't be set inline
-    document.addEventListener('DOMContentLoaded', function() {
-        // All event handlers are now properly set up in operator-scan-init.js
-    });
-    </script>
 </body>
 </html>

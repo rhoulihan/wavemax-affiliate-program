@@ -1,0 +1,46 @@
+/* Affiliate Success Page Styles */
+body {
+    margin: 0;
+    padding: 0;
+    background: transparent;
+}
+
+.wavemax-blue {
+    background-color: #1e3a8a;
+}
+
+.wavemax-light-blue {
+    background-color: #3b82f6;
+}
+
+/* Minimal styling for iframe */
+.embed-container {
+    max-width: 100%;
+    margin: 0;
+    padding: 16px;
+}
+
+.success-icon {
+    width: 100px;
+    height: 100px;
+    background-color: #10b981;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+}
+
+.success-icon svg {
+    width: 60px;
+    height: 60px;
+    color: white;
+}
+
+/* Language switcher positioning */
+#language-switcher-container {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    z-index: 1000;
+}

@@ -1,0 +1,397 @@
+/* Customer Registration Page Styles */
+
+/* Base styles from inline */
+body {
+    margin: 0;
+    padding: 0;
+    background: transparent;
+}
+
+.wavemax-blue {
+    background-color: #1e3a8a;
+}
+
+.wavemax-light-blue {
+    background-color: #3b82f6;
+}
+
+/* Minimal styling for iframe */
+.embed-container {
+    max-width: 100%;
+    margin: 0;
+    padding: 40px 16px 16px 16px; /* Added top padding */
+}
+
+/* Language switcher positioning */
+#language-switcher-container {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    z-index: 1000;
+}
+
+/* Ensure Tailwind border classes are available */
+.border-red-500 {
+    border-color: #ef4444 !important;
+    border-width: 1px;
+}
+
+.border-green-500 {
+    border-color: #10b981 !important;
+    border-width: 1px;
+}
+
+/* Smooth transitions for visibility changes */
+#bagFeeSummary {
+    transition: visibility 0.3s, height 0.3s;
+    overflow: hidden;
+}
+
+/* Prevent layout shifts during password validation */
+#passwordStrength {
+    min-height: 1.5rem;
+}
+
+/* Stabilize password requirements height */
+#passwordRequirements {
+    min-height: 180px;
+}
+
+/* Container margins */
+.registration-container {
+    margin-top: 40px;
+}
+
+/* Section visibility - hidden by default */
+.registration-section {
+    display: none;
+}
+
+.registration-section.active {
+    display: block;
+}
+
+/* Back button visibility */
+.back-button-hidden {
+    display: none;
+}
+
+/* Payment form container */
+.payment-form-hidden {
+    display: none;
+}
+
+/* Bag fee summary */
+.bag-fee-hidden {
+    display: none;
+}
+
+/* Social registration styles */
+.social-auth-section {
+    background: linear-gradient(to right, rgb(239 246 255), rgb(238 242 255));
+    padding: 1.5rem;
+    border-radius: 0.5rem;
+    border: 1px solid rgb(191 219 254);
+}
+
+.social-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.75rem 1rem;
+    border: 2px solid rgb(209 213 219);
+    border-radius: 0.5rem;
+    background-color: white;
+    transition: all 0.2s;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    cursor: pointer;
+    width: 100%;
+}
+
+.social-button:hover {
+    background-color: rgb(249 250 251);
+    border-color: rgb(96 165 250);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.social-button svg {
+    width: 1.25rem;
+    height: 1.25rem;
+    margin-right: 0.5rem;
+}
+
+/* Form section styling */
+.form-section {
+    background-color: #f9fafb;
+    padding: 0.75rem;
+    border-radius: 0.5rem;
+}
+
+/* Password requirements */
+.password-requirements {
+    background-color: #f3f4f6;
+    padding: 0.75rem;
+    border-radius: 0.5rem;
+    font-size: 0.75rem;
+    color: #4b5563;
+}
+
+.password-requirement {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.25rem;
+}
+
+.password-requirement-icon {
+    width: 1rem;
+    height: 1rem;
+    margin-right: 0.5rem;
+    display: inline-block;
+}
+
+.password-requirement.met .password-requirement-icon {
+    color: #10b981;
+}
+
+.password-requirement.unmet .password-requirement-icon {
+    color: #6b7280;
+}
+
+/* Alert styles */
+.alert-info {
+    background-color: #fef3c7;
+    border: 1px solid #fcd34d;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.alert-info strong {
+    font-weight: 600;
+}
+
+/* Service summary */
+.service-summary {
+    background-color: #f3f4f6;
+    padding: 1rem;
+    border-radius: 0.5rem;
+}
+
+.service-summary-row {
+    margin-bottom: 0.5rem;
+}
+
+.service-summary-label {
+    font-weight: 600;
+}
+
+/* Agreement checkbox */
+.agreement-section {
+    background-color: #f3f4f6;
+    padding: 1rem;
+    border-radius: 0.5rem;
+}
+
+.agreement-checkbox {
+    display: flex;
+    align-items: flex-start;
+}
+
+.agreement-checkbox input[type="checkbox"] {
+    margin-top: 0.25rem;
+    margin-right: 0.5rem;
+}
+
+/* Navigation buttons */
+.navigation-section {
+    border-top: 1px solid #e5e7eb;
+    padding-top: 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.nav-button {
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.5rem;
+    font-weight: 500;
+    transition: all 0.2s;
+    cursor: pointer;
+    border: none;
+}
+
+.nav-button-back {
+    background-color: #6b7280;
+    color: white;
+}
+
+.nav-button-back:hover {
+    background-color: #4b5563;
+}
+
+.nav-button-next {
+    background-color: #2563eb;
+    color: white;
+}
+
+.nav-button-next:hover {
+    background-color: #1d4ed8;
+}
+
+.nav-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Loading spinner */
+.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .social-button span {
+        font-size: 0.875rem;
+    }
+    
+    .nav-button {
+        padding: 0.5rem 1rem;
+        font-size: 0.875rem;
+    }
+}
+
+/* Validation feedback */
+.field-valid {
+    border-color: #10b981 !important;
+}
+
+.field-invalid {
+    border-color: #ef4444 !important;
+}
+
+.field-error {
+    color: #ef4444;
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+}
+
+/* Progress indicator */
+.progress-indicator {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 2rem;
+}
+
+.progress-step {
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+    background-color: #e5e7eb;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 0.5rem;
+    font-size: 0.875rem;
+    color: #6b7280;
+    position: relative;
+}
+
+.progress-step.active {
+    background-color: #2563eb;
+    color: white;
+}
+
+.progress-step.completed {
+    background-color: #10b981;
+    color: white;
+}
+
+.progress-step:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    left: 100%;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 1rem;
+    height: 2px;
+    background-color: #e5e7eb;
+}
+
+.progress-step.completed:not(:last-child)::after {
+    background-color: #10b981;
+}
+
+/* Account Conflict Modal Styles */
+.account-conflict-modal-overlay {
+    z-index: 9999;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding-top: 20px;
+}
+
+.account-conflict-modal-content {
+    margin-top: 0;
+    position: relative;
+}
+
+/* Address Validation Spinner Styles */
+.address-validation-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+}
+
+.address-validation-content {
+    background: white;
+    padding: 40px;
+    border-radius: 8px;
+    text-align: center;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.address-validation-spinner {
+    display: inline-block;
+    width: 50px;
+    height: 50px;
+    border: 3px solid #f3f3f3;
+    border-top: 3px solid #1e3a8a;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+.address-validation-title {
+    margin-top: 20px;
+    color: #1e3a8a;
+}
+
+.address-validation-message {
+    color: #6b7280;
+    margin-top: 10px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}

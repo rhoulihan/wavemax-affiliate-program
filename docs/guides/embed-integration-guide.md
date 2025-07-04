@@ -6,7 +6,7 @@ This guide explains how to integrate WaveMAX embedded pages into your website us
 
 ## Available Embedded Pages
 
-1. **embed-app.html** - Main application (single entry point for all pages)
+1. **embed-app-v2.html** - Main application (single entry point for all pages)
 2. **affiliate-landing-embed.html** - Affiliate landing page with service information
 3. **affiliate-login-embed.html** - Affiliate partner login
 4. **customer-register-embed.html** - Customer registration form

@@ -178,7 +178,7 @@ Here's a complete example of a parent page:
     <div class="iframe-wrapper">
         <iframe 
             id="wavemax-affiliate-iframe"
-            src="https://affiliate.wavemax.promo/embed-app.html"
+            src="https://affiliate.wavemax.promo/embed-app-v2.html"
             width="100%"
             height="800">
         </iframe>

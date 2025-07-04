@@ -106,24 +106,24 @@ describe('Affiliate Login Initialization', () => {
       const affiliateId = 'AFF123456';
       const customerParam = 'CUST789012';
 
-      let redirectUrl = `/embed-app.html?route=/affiliate-dashboard&id=${affiliateId}`;
+      let redirectUrl = `/embed-app-v2.html?route=/affiliate-dashboard&id=${affiliateId}`;
       if (customerParam) {
         redirectUrl += `&customer=${customerParam}`;
       }
 
-      expect(redirectUrl).toBe('/embed-app.html?route=/affiliate-dashboard&id=AFF123456&customer=CUST789012');
+      expect(redirectUrl).toBe('/embed-app-v2.html?route=/affiliate-dashboard&id=AFF123456&customer=CUST789012');
     });
 
     test('should construct redirect URL correctly without customer parameter', () => {
       const affiliateId = 'AFF123456';
       const customerParam = null;
 
-      let redirectUrl = `/embed-app.html?route=/affiliate-dashboard&id=${affiliateId}`;
+      let redirectUrl = `/embed-app-v2.html?route=/affiliate-dashboard&id=${affiliateId}`;
       if (customerParam) {
         redirectUrl += `&customer=${customerParam}`;
       }
 
-      expect(redirectUrl).toBe('/embed-app.html?route=/affiliate-dashboard&id=AFF123456');
+      expect(redirectUrl).toBe('/embed-app-v2.html?route=/affiliate-dashboard&id=AFF123456');
     });
   });
 
@@ -175,7 +175,7 @@ describe('Affiliate Login Initialization', () => {
 
       // After successful login
       const affiliateId = 'AFF123456';
-      let redirectUrl = `/embed-app.html?route=/affiliate-dashboard&id=${affiliateId}`;
+      let redirectUrl = `/embed-app-v2.html?route=/affiliate-dashboard&id=${affiliateId}`;
 
       if (customerParam) {
         redirectUrl += `&customer=${customerParam}`;

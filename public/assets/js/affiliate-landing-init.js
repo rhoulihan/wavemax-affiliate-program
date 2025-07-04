@@ -1,6 +1,14 @@
 (function() {
   'use strict';
 
+  // Set viewport meta for mobile
+  if (!document.querySelector('meta[name="viewport"]')) {
+    const viewport = document.createElement('meta');
+    viewport.name = 'viewport';
+    viewport.content = 'width=device-width, initial-scale=1.0, maximum-scale=5.0';
+    document.head.appendChild(viewport);
+  }
+
   // Function to get URL parameters
   function getUrlParameter(name) {
     const urlParams = new URLSearchParams(window.location.search);
@@ -156,14 +164,14 @@
 
     registerLinks.forEach(link => {
       if (link) {
-        link.href = `${baseUrl}/embed-app.html?route=/customer-register&affid=${affiliateCode}`;
+        link.href = `${baseUrl}/embed-app-v2.html?route=/customer-register&affid=${affiliateCode}`;
       }
     });
 
     // Update login link
     const loginLink = document.getElementById('loginLink');
     if (loginLink) {
-      loginLink.href = `${baseUrl}/embed-app.html?route=/customer-login&affid=${affiliateCode}`;
+      loginLink.href = `${baseUrl}/embed-app-v2.html?route=/customer-login&affid=${affiliateCode}`;
     }
 
     // Add affiliate code to internal links for tracking (excluding navigation links)
@@ -182,12 +190,52 @@
   // Track if already initialized
   let initialized = false;
 
+  // Function to update affiliate name in i18n parameters
+  function updateAffiliateNameParameters() {
+    const affiliateName = document.getElementById('affiliateName')?.textContent || 'your local partner';
+    
+    // Update all elements with affiliate name parameters
+    document.querySelectorAll('[data-i18n-param-affiliateName]').forEach(el => {
+      el.setAttribute('data-i18n-param-affiliateName', affiliateName);
+    });
+    
+    // Re-translate the page
+    if (window.i18n && window.i18n.translatePage) {
+      window.i18n.translatePage();
+    }
+  }
+
   // Initialize when DOM is ready
-  function tryInitialize() {
+  async function tryInitialize() {
     console.log('tryInitialize called, initialized:', initialized, 'affiliateName element:', document.getElementById('affiliateName'));
     if (!initialized && document.getElementById('affiliateName')) {
       initialized = true;
+      
+      // Initialize i18n first
+      if (window.i18n) {
+        await window.i18n.init({
+          debugMode: false
+        });
+        
+        // Create language switcher
+        if (window.LanguageSwitcher) {
+          window.LanguageSwitcher.createSwitcher('language-switcher-container', {
+            style: 'dropdown',
+            showLabel: true
+          });
+        }
+        
+        // Update affiliate name parameters when language changes
+        window.addEventListener('languageChanged', function() {
+          updateAffiliateNameParameters();
+        });
+      }
+      
+      // Then initialize the landing page
       initializeLandingPage();
+      
+      // Update affiliate name parameters after a delay
+      setTimeout(updateAffiliateNameParameters, 1000);
     }
   }
 
@@ -203,7 +251,7 @@
     tryInitialize();
   }
 
-  // For dynamic loading in embed-app.html
+  // For dynamic loading in embed-app-v2.html
   console.log('Starting interval check for affiliateName element');
   const checkInterval = setInterval(function() {
     if (document.getElementById('affiliateName')) {

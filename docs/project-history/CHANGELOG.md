@@ -148,7 +148,7 @@ All notable changes to the WaveMAX Laundry Affiliate Program will be documented 
 - Diagnostic test files for payment window detection
   - public/test-payment-form.html
   - public/assets/js/test-payment-form.js
-- Duplicate window resize event handlers in embed-app.html
+- Duplicate window resize event handlers in embed-app-v2.html
 - embedAppHasResizeObserver flag (no longer needed)
 - Internationalization (i18n) support for multi-language deployment
   - Support for English, Spanish, Portuguese, and German languages
@@ -482,7 +482,7 @@ All notable changes to the WaveMAX Laundry Affiliate Program will be documented 
 ### Changed
 #### Embedded-Only Deployment
 - Simplified Architecture to embedded-only
-- Single Entry Point through embed-app.html
+- Single Entry Point through embed-app-v2.html
 - Consistent CSP Compliance
 - Reduced Codebase
 - Unified User Experience

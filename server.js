@@ -122,44 +122,14 @@ if (process.env.NODE_ENV === 'production') {
   });
 }
 
+// CSP Nonce Middleware - must come before helmet
+const cspNonceMiddleware = require('./server/middleware/cspNonce');
+app.use(cspNonceMiddleware);
 
 // Security headers with iframe embedding support
 app.use(helmet({
-  contentSecurityPolicy: {
-    directives: {
-      defaultSrc: ['\'self\''],
-      scriptSrc: [
-        '\'self\'',
-        'https://cdnjs.cloudflare.com',
-        'https://cdn.jsdelivr.net',
-        'https://safepay.paymentlogistics.net',
-        '\'unsafe-inline\''
-      ],
-      styleSrc: [
-        '\'self\'',
-        'https://cdnjs.cloudflare.com',
-        'https://cdn.jsdelivr.net',
-        'https://fonts.googleapis.com',
-        '\'unsafe-inline\''
-      ],
-      imgSrc: ['\'self\'', 'data:', 'https://www.wavemax.promo', 'https://*.tile.openstreetmap.org', 'https://tile.openstreetmap.org', 'https://cdnjs.cloudflare.com', 'https://flagcdn.com'],
-      connectSrc: ['\'self\'', 'https://wavemax.promo', 'https://router.project-osrm.org', 'https://graphhopper.com', 'https://api.openrouteservice.org', 'https://valhalla1.openstreetmap.de', 'https://nominatim.openstreetmap.org'],
-      fontSrc: ['\'self\'', 'https://cdnjs.cloudflare.com', 'https://cdn.jsdelivr.net', 'https://fonts.gstatic.com'],
-      objectSrc: ['\'none\''],
-      mediaSrc: ['\'self\''],
-      frameSrc: process.env.ENABLE_IFRAME_DEMO === 'true' ? ['\'self\''] : ['\'none\''],
-      // Allow form submissions to Paygistix
-      formAction: ['\'self\'', 'https://safepay.paymentlogistics.net'],
-      // Allow embedding on WaveMAX Laundry domains
-      frameAncestors: ['\'self\'', 'https://www.wavemaxlaundry.com', 'https://wavemaxlaundry.com'],
-      // Additional security directives
-      baseUri: ['\'self\''],
-      childSrc: ['\'none\''],
-      workerSrc: ['\'self\''],
-      manifestSrc: ['\'self\''],
-      upgradeInsecureRequests: process.env.NODE_ENV === 'production' ? [] : null
-    }
-  },
+  // Disable helmet's CSP - we'll implement it manually to support nonces
+  contentSecurityPolicy: false,
   hsts: {
     maxAge: 31536000,
     includeSubDomains: true,
@@ -192,6 +162,88 @@ app.use((req, res, next) => {
     res.setHeader('Clear-Site-Data', '"cache", "cookies", "storage"');
   }
   
+  next();
+});
+
+// Manual CSP implementation with nonce support
+app.use((req, res, next) => {
+  const nonce = res.locals.cspNonce;
+  
+  // Check if this is a migrated page that should use strict CSP
+  const strictCSPPages = [
+    '/terms-and-conditions-embed.html',
+    '/privacy-policy.html',
+    '/payment-success-embed.html',
+    '/payment-error-embed.html',
+    '/operator-scan-embed.html',
+    '/affiliate-success-embed.html',
+    '/affiliate-landing-embed.html',
+    '/embed-landing.html',
+    '/franchisee-landing.html',
+    '/embed-app-v2.html'
+  ];
+  
+  const useStrictCSP = strictCSPPages.includes(req.path);
+  
+  // All embed pages now use nonces since embed-app.html was converted to CSP-compliant redirect to embed-app-v2.html
+  const skipNonce = false;
+  
+  // Build CSP directives
+  const directives = {
+    'default-src': ["'self'"],
+    'script-src': [
+      "'self'",
+      'https://cdnjs.cloudflare.com',
+      'https://cdn.jsdelivr.net',
+      'https://safepay.paymentlogistics.net',
+      'https://code.jquery.com'
+    ],
+    'style-src': [
+      "'self'",
+      'https://cdnjs.cloudflare.com',
+      'https://cdn.jsdelivr.net',
+      'https://fonts.googleapis.com'
+    ],
+    'img-src': ["'self'", 'data:', 'https://www.wavemax.promo', 'https://*.tile.openstreetmap.org', 'https://tile.openstreetmap.org', 'https://cdnjs.cloudflare.com', 'https://flagcdn.com'],
+    'connect-src': ["'self'", 'https://wavemax.promo', 'https://router.project-osrm.org', 'https://graphhopper.com', 'https://api.openrouteservice.org', 'https://valhalla1.openstreetmap.de', 'https://nominatim.openstreetmap.org'],
+    'font-src': ["'self'", 'https://cdnjs.cloudflare.com', 'https://cdn.jsdelivr.net', 'https://fonts.gstatic.com'],
+    'object-src': ["'none'"],
+    'media-src': ["'self'"],
+    'frame-src': process.env.ENABLE_IFRAME_DEMO === 'true' ? ["'self'"] : ["'none'"],
+    'form-action': ["'self'", 'https://safepay.paymentlogistics.net'],
+    'frame-ancestors': ["'self'", 'https://www.wavemaxlaundry.com', 'https://wavemaxlaundry.com'],
+    'base-uri': ["'self'"],
+    'child-src': ["'none'"],
+    'worker-src': ["'self'"],
+    'manifest-src': ["'self'"]
+  };
+  
+  // Add nonces only if not skipping
+  if (!skipNonce && nonce) {
+    directives['script-src'].push(`'nonce-${nonce}'`);
+    directives['style-src'].push(`'nonce-${nonce}'`);
+  }
+  
+  // Add unsafe-inline for non-migrated pages
+  if (!useStrictCSP) {
+    directives['script-src'].push("'unsafe-inline'");
+    directives['style-src'].push("'unsafe-inline'");
+  }
+  
+  // Add upgrade-insecure-requests in production
+  if (process.env.NODE_ENV === 'production') {
+    directives['upgrade-insecure-requests'] = [];
+  }
+  
+  // Build CSP header string
+  const cspHeader = Object.entries(directives)
+    .map(([key, values]) => {
+      if (values.length === 0) return key;
+      return `${key} ${values.join(' ')}`;
+    })
+    .join('; ');
+  
+  res.setHeader('Content-Security-Policy', cspHeader);
   next();
 });
 
@@ -328,6 +380,9 @@ app.use((req, res, next) => {
 app.use(passport.initialize());
 app.use(passport.session());
 
+// Mount embed routes with CSP nonce support BEFORE static file serving
+const embedRoutes = require('./server/routes/embedRoutes');
+app.use('/', embedRoutes);
 
 // Serve static files in all environments
 app.use(express.static(path.join(__dirname, 'public')));
@@ -419,6 +474,12 @@ apiV1Router.use('/operators', operatorRoutes);
 apiV1Router.use('/w9', w9Routes);  // W-9 document management
 apiV1Router.use('/system/config', systemConfigRoutes);
 apiV1Router.use('/payments', paymentRoutes);
+
+// Test routes (development only)
+if (process.env.NODE_ENV !== 'production' || process.env.ENABLE_TEST_ROUTES === 'true') {
+  const testRoutes = require('./server/routes/testRoutes');
+  apiV1Router.use('/test', testRoutes);
+}
 apiV1Router.use('/quickbooks', quickbooksRoutes);  // QuickBooks export functionality
 
 // Paygistix callback route (directly under /api/v1 for the callback)

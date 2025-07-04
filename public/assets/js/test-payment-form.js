@@ -103,7 +103,11 @@
       params.append('AuthCode', authCode);
     }
 
-    // Don't add payment token to URL - the handler will find it by callback path
+    // Add payment token to custom1 parameter (as expected by payment callback handler)
+    if (paymentToken) {
+      params.append('custom1', paymentToken);
+      params.append('paymentToken', paymentToken);
+    }
 
     // Parse the callback URL to check if it's already a full URL
     let fullCallbackUrl;
@@ -134,11 +138,26 @@
     // For ALL test payments (registration or regular), redirect to callback URL
     // This simulates what Paygistix does - it redirects to the callback URL
     // The callback handler will find the pending token and update its status
-    setTimeout(() => {
-      if (confirm('Redirect to callback URL?')) {
-        window.location.href = url;
+    
+    // Send message to parent window before redirecting
+    if (window.opener) {
+      try {
+        window.opener.postMessage({
+          type: 'test-payment-initiated',
+          paymentToken: paymentToken,
+          result: result,
+          url: url
+        }, '*');
+      } catch (e) {
+        console.log('Could not send message to opener:', e);
       }
-    }, 1000);
+    }
+    
+    // Auto-redirect after a short delay
+    setTimeout(() => {
+      console.log('Redirecting to callback URL:', url);
+      window.location.href = url;
+    }, 500);
   };
 
   // Simulate in new window
@@ -271,9 +290,23 @@
       }
     }
 
-    // For non-registration test payments, check for callback URL from URL params
+    // Get parameters from URL (from v2 implementation)
     const urlParams = new URLSearchParams(window.location.search);
-    const callbackUrlParam = urlParams.get('callbackUrl');
+    const paymentToken = urlParams.get('paymentToken');
+    const amount = urlParams.get('amount');
+    const returnUrl = urlParams.get('returnUrl');
+    const context = urlParams.get('context');
+    
+    // Set values from URL parameters
+    if (paymentToken) {
+      document.getElementById('paymentToken').value = paymentToken;
+    }
+    if (amount) {
+      document.getElementById('amount').value = amount;
+    }
+    
+    // Handle callback URL from either old format or new returnUrl
+    const callbackUrlParam = urlParams.get('callbackUrl') || returnUrl;
     if (callbackUrlParam && !customerDataStr) {
       // Decode the URL parameter
       const decodedCallbackUrl = decodeURIComponent(callbackUrlParam);

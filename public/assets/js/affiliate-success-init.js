@@ -176,11 +176,11 @@ function initializeAffiliateSuccess() {
               setTimeout(() => {
                 if (window.location.href.includes('affiliate-success')) {
                   console.log('Fallback: Direct navigation to login');
-                  window.location.href = '/embed-app.html?route=/affiliate-login&login=affiliate';
+                  window.location.href = '/embed-app-v2.html?route=/affiliate-login&login=affiliate';
                 }
               }, 1000);
             } else {
-              window.location.href = '/embed-app.html?route=/affiliate-login&login=affiliate';
+              window.location.href = '/embed-app-v2.html?route=/affiliate-login&login=affiliate';
             }
             return false;
           };

@@ -11,6 +11,14 @@
          * Create language switcher HTML
          */
     createSwitcher(containerId, options = {}) {
+      // Check if we're in embedded context and should skip creation
+      if (document.body.classList.contains('is-embedded') || 
+          (window.parent && window.parent !== window) ||
+          (window.EMBED_CONFIG && window.EMBED_CONFIG.isEmbedded)) {
+        console.log('LanguageSwitcher: Skipping creation in embedded context');
+        return;
+      }
+      
       const container = document.getElementById(containerId);
       if (!container) {
         console.error(`Container with id '${containerId}' not found`);
@@ -176,137 +184,8 @@
          * Add default styles
          */
     addDefaultStyles() {
-      if (document.getElementById('language-switcher-styles')) return;
-
-      const styles = `
-                <style id="language-switcher-styles">
-                    .language-switcher {
-                        position: relative;
-                        display: inline-block;
-                        font-family: inherit;
-                    }
-
-                    .language-switcher-toggle {
-                        display: flex;
-                        align-items: center;
-                        gap: 8px;
-                        padding: 8px 16px;
-                        background: white;
-                        border: 1px solid #ddd;
-                        border-radius: 8px;
-                        cursor: pointer;
-                        font-size: 14px;
-                        transition: all 0.2s;
-                    }
-
-                    .language-switcher-toggle:hover {
-                        background: #f5f5f5;
-                        border-color: #bbb;
-                    }
-
-                    .language-flag {
-                        font-size: 20px;
-                        line-height: 1;
-                    }
-
-                    .dropdown-arrow {
-                        font-size: 10px;
-                        margin-left: 4px;
-                        transition: transform 0.2s;
-                    }
-
-                    .language-switcher-toggle[aria-expanded="true"] .dropdown-arrow {
-                        transform: rotate(180deg);
-                    }
-
-                    .language-dropdown-menu {
-                        position: absolute;
-                        top: 100%;
-                        right: 0;
-                        margin-top: 4px;
-                        background: white;
-                        border: 1px solid #ddd;
-                        border-radius: 8px;
-                        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-                        display: none;
-                        min-width: 150px;
-                        z-index: 1000;
-                    }
-
-                    .language-dropdown-menu.show {
-                        display: block;
-                    }
-
-                    .language-option {
-                        display: flex;
-                        align-items: center;
-                        gap: 8px;
-                        padding: 10px 16px;
-                        color: #333;
-                        text-decoration: none;
-                        transition: background 0.2s;
-                    }
-
-                    .language-option:hover {
-                        background: #f5f5f5;
-                    }
-
-                    .language-option.active {
-                        background: #e3f2fd;
-                        color: #1976d2;
-                    }
-
-                    .language-option:first-child {
-                        border-radius: 7px 7px 0 0;
-                    }
-
-                    .language-option:last-child {
-                        border-radius: 0 0 7px 7px;
-                    }
-
-                    /* Flag style */
-                    .language-switcher.flags {
-                        display: flex;
-                        gap: 8px;
-                    }
-
-                    .language-flag-button {
-                        display: flex;
-                        align-items: center;
-                        gap: 4px;
-                        padding: 6px 12px;
-                        background: white;
-                        border: 1px solid #ddd;
-                        border-radius: 6px;
-                        cursor: pointer;
-                        transition: all 0.2s;
-                    }
-
-                    .language-flag-button:hover {
-                        background: #f5f5f5;
-                        border-color: #bbb;
-                    }
-
-                    .language-flag-button.active {
-                        background: #1976d2;
-                        color: white;
-                        border-color: #1976d2;
-                    }
-
-                    /* Mobile responsive */
-                    @media (max-width: 768px) {
-                        .language-name {
-                            display: none;
-                        }
-                        
-                        .language-option .language-name {
-                            display: inline;
-                        }
-                    }
-                </style>
-            `;
-
-      document.head.insertAdjacentHTML('beforeend', styles);
+      // Styles are now in external CSS file /assets/css/language-switcher.css
+      // This function is kept for backward compatibility but no longer injects styles
     }
   };
 
@@ -316,6 +195,39 @@
   } else {
     LanguageSwitcher.addDefaultStyles();
   }
+
+  // Detect if we're in an iframe and add is-embedded class
+  function detectEmbeddedContext() {
+    try {
+      // Check if we're in an iframe
+      if (window.parent && window.parent !== window) {
+        document.body.classList.add('is-embedded');
+        console.log('LanguageSwitcher: Added is-embedded class (iframe detected)');
+      }
+      
+      // Also check if embed config indicates we're embedded
+      if (window.EMBED_CONFIG && window.EMBED_CONFIG.isEmbedded) {
+        document.body.classList.add('is-embedded');
+        console.log('LanguageSwitcher: Added is-embedded class (embed config)');
+      }
+    } catch (e) {
+      // If we can't access parent due to cross-origin, we're likely embedded
+      document.body.classList.add('is-embedded');
+      console.log('LanguageSwitcher: Added is-embedded class (cross-origin exception)');
+    }
+  }
+
+  // Run iframe detection immediately (multiple times to ensure it works)
+  detectEmbeddedContext();
+  
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', detectEmbeddedContext);
+  } else {
+    detectEmbeddedContext();
+  }
+  
+  // Also run after a short delay to catch late-loading scenarios
+  setTimeout(detectEmbeddedContext, 100);
 
   // Expose to global scope
   window.LanguageSwitcher = LanguageSwitcher;

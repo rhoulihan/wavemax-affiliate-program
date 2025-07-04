@@ -5,61 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>WaveMAX Laundry - Customer Registration</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-            background: transparent;
-        }
-        .wavemax-blue {
-            background-color: #1e3a8a;
-        }
-        .wavemax-light-blue {
-            background-color: #3b82f6;
-        }
-        /* Minimal styling for iframe */
-        .embed-container {
-            max-width: 100%;
-            margin: 0;
-            padding: 40px 16px 16px 16px; /* Added top padding */
-        }
-    
-        /* Language switcher positioning */
-        #language-switcher-container {
-            position: fixed;
-            top: 10px;
-            right: 10px;
-            z-index: 1000;
-        }
-        
-        /* Payment form will be hidden via JavaScript on the last step */
-        
-        /* Ensure Tailwind border classes are available */
-        .border-red-500 {
-            border-color: #ef4444 !important;
-            border-width: 1px;
-        }
-        .border-green-500 {
-            border-color: #10b981 !important;
-            border-width: 1px;
-        }
-        
-        /* Smooth transitions for visibility changes */
-        #bagFeeSummary {
-            transition: visibility 0.3s, height 0.3s;
-            overflow: hidden;
-        }
-        
-        /* Prevent layout shifts during password validation */
-        #passwordStrength {
-            min-height: 1.5rem;
-        }
-        
-        /* Stabilize password requirements height */
-        #passwordRequirements {
-            min-height: 180px;
-        }
-    </style>
+    <link rel="stylesheet" href="/assets/css/language-switcher.css">
+    <link href="/assets/css/customer-register.css" rel="stylesheet">
+    <link href="/assets/css/modal-utils.css" rel="stylesheet">
+    <link href="/assets/css/paygistix-payment-form.css" rel="stylesheet">
+    <!-- jQuery required for Paygistix payment form -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
 </head>
 <body class="bg-white font-sans">
     <!-- Language Switcher -->
@@ -67,7 +18,7 @@
     
     <!-- Registration Form -->
     <div class="embed-container">
-        <div class="max-w-3xl mx-auto bg-white rounded-lg shadow-md overflow-hidden" style="margin-top: 40px;">
+        <div class="max-w-3xl mx-auto bg-white rounded-lg shadow-md overflow-hidden registration-container">
             <div class="wavemax-blue text-white p-6">
                 <h2 class="text-2xl font-bold" data-i18n="customer.register.title">Customer Registration</h2>
                 <p class="mt-2" id="affiliateIntro" data-i18n="customer.register.subtitle">Sign up for premium laundry pickup and delivery service.</p>
@@ -186,7 +137,7 @@
                 </div>
                 
                 <!-- Personal Information -->
-                <div id="personalInfoSection" style="display: none;">
+                <div id="personalInfoSection" class="registration-section">
                     <h3 class="text-xl font-bold mb-4" data-i18n="customer.register.personalInfo">Personal Information</h3>
                     <div class="grid md:grid-cols-2 gap-4">
                         <div>
@@ -212,7 +163,7 @@
                 </div>
                 
                 <!-- Address Information -->
-                <div id="addressInfoSection" style="display: none;">
+                <div id="addressInfoSection" class="registration-section">
                     <h3 class="text-xl font-bold mb-4" data-i18n="customer.register.addressInfo">Address Information</h3>
                     <div class="grid md:grid-cols-2 gap-4">
                         <div class="md:col-span-2">
@@ -238,7 +189,7 @@
                 </div>
                 
                 <!-- Laundry Bags -->
-                <div id="laundryBagsSection" style="display: none;">
+                <div id="laundryBagsSection" class="registration-section">
                     <h3 class="text-xl font-bold mb-4" data-i18n="customer.register.laundryBags">Laundry Bags</h3>
                     <div class="bg-yellow-50 border border-yellow-200 p-4 rounded-lg mb-4">
                         <p class="text-sm text-gray-700 mb-2">
@@ -270,7 +221,7 @@
                 </div>
                 
                 <!-- Service Preferences -->
-                <div id="servicePreferencesSection" style="display: none;">
+                <div id="servicePreferencesSection" class="registration-section">
                     <h3 class="text-xl font-bold mb-4" data-i18n="customer.register.servicePreferences">Service Preferences</h3>
                     <div class="grid md:grid-cols-2 gap-4">
                         <div class="md:col-span-2">
@@ -290,7 +241,7 @@
                 <input type="hidden" id="AFFILIATEID" value="" />
                 
                 <!-- Service and Pricing Summary -->
-                <div id="serviceSummarySection" class="border-t pt-6" style="display: none;">
+                <div id="serviceSummarySection" class="border-t pt-6 registration-section">
                     <h3 class="text-xl font-bold mb-4" data-i18n="customer.register.serviceSummary">Service Summary</h3>
                     <div class="bg-gray-50 p-4 rounded-lg">
                         <div class="mb-2">
@@ -302,7 +253,7 @@
                             <span class="font-bold" data-i18n="customer.register.wdfServiceLabel">Wash, Dry, Fold Service:</span>
                             <span id="wdfRateDisplay">Loading...</span>
                         </div>
-                        <div class="mt-2" id="bagFeeSummary" style="display: none;">
+                        <div class="mt-2 bag-fee-hidden" id="bagFeeSummary">
                             <span class="font-bold" data-i18n="customer.register.laundryBagsLabel">Laundry Bags:</span>
                             <span id="bagFeeSummaryAmount">$0.00</span> <span data-i18n="customer.register.creditedOnFirstOrder">(credited on first order)</span>
                         </div>
@@ -311,7 +262,7 @@
                 </div>
                 
                 <!-- Service Agreement -->
-                <div id="serviceAgreementSection" style="display: none;">
+                <div id="serviceAgreementSection" class="registration-section">
                     <h3 class="text-xl font-bold mb-4" data-i18n="customer.register.serviceAgreement">Service Agreement</h3>
                     <div class="bg-gray-50 p-4 rounded-lg">
                         <div class="flex items-start">
@@ -324,7 +275,7 @@
                 <!-- Navigation Section -->
                 <div id="navigationSection" class="border-t pt-6">
                     <div class="flex justify-between items-center">
-                        <button type="button" id="backButton" class="px-6 py-3 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition" style="display: none;">
+                        <button type="button" id="backButton" class="px-6 py-3 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition back-button-hidden">
                             <span data-i18n="customer.register.back">← Back</span>
                         </button>
                         <div class="flex-1"></div>
@@ -338,7 +289,7 @@
             </form>
             
             <!-- Payment Form Container (outside of customer form to prevent nested form submission) -->
-            <div id="paymentFormContainer" class="mt-6" style="display: none;">
+            <div id="paymentFormContainer" class="mt-6 payment-form-hidden">
                 <!-- Paygistix payment form will be loaded here -->
                 <div class="text-center py-4">
                     <span class="text-gray-600" data-i18n="customer.register.loadingPayment">Loading payment form...</span>
@@ -358,25 +309,13 @@
     <script src="/assets/js/modal-utils.js"></script>
     <script src="/assets/js/errorHandler.js"></script>
     <script src="/assets/js/csrf-utils.js"></script>
-    <script src="/assets/js/swirl-spinner.js" onerror="console.error('[Script Load Error] Failed to load swirl-spinner.js')"></script>
+    <script src="/assets/js/swirl-spinner.js"></script>
     <script src="/assets/js/paygistix-payment-form.js"></script>
     <script src="/assets/js/customer-register.js"></script>
     <script src="/assets/js/customer-register-paygistix.js"></script>
     <!-- Load navigation last to ensure DOM is ready -->
     <script src="/assets/js/customer-register-navigation.js"></script>
-    
-    <!-- Debug script loading -->
-    <script>
-        console.log('[Page Load Debug] Scripts loaded');
-        console.log('[Page Load Debug] window.SwirlSpinner:', !!window.SwirlSpinner);
-        console.log('[Page Load Debug] window.SwirlSpinnerUtils:', !!window.SwirlSpinnerUtils);
-        
-        // Check if swirl-spinner.js loaded properly
-        setTimeout(() => {
-            console.log('[After 500ms] window.SwirlSpinner:', !!window.SwirlSpinner);
-            console.log('[After 500ms] window.SwirlSpinnerUtils:', !!window.SwirlSpinnerUtils);
-        }, 500);
-    </script>
+    <script src="/assets/js/customer-register-debug.js"></script>
 
 </body>
 </html>
