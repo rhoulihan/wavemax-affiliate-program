@@ -242,8 +242,11 @@ async function loadPage(route) {
     }
     
     const container = document.getElementById('app-container');
-    const pagePath = EMBED_PAGES[route] || EMBED_PAGES['/'];
-    console.log('Page path:', pagePath);
+    
+    // Extract base route without query parameters for page mapping
+    const baseRoute = route.split('?')[0];
+    const pagePath = EMBED_PAGES[baseRoute] || EMBED_PAGES['/'];
+    console.log('Base route:', baseRoute, 'Page path:', pagePath);
     
     try {
         container.innerHTML = '<div class="loading"><i class="fas fa-spinner fa-spin me-2"></i>Loading...</div>';
@@ -542,8 +545,9 @@ function initializePageScripts(route) {
         '/affiliate-landing': ['/assets/js/i18n.js', '/assets/js/language-switcher.js', '/assets/js/affiliate-landing-init.js']
     };
     
-    // Load scripts for the current route
-    const scripts = pageScripts[route] || [];
+    // Load scripts for the current route (use base route without query params)
+    const baseRoute = route.split('?')[0];
+    const scripts = pageScripts[baseRoute] || [];
     if (scripts.length > 0) {
         loadPageScripts(scripts);
     }
@@ -784,8 +788,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // Get initial route
     const route = getRouteFromUrl();
     
-    // Check if this route is supported in V2
-    if (!EMBED_PAGES[route]) {
+    // Check if this route is supported in V2 (check base route without query params)
+    const baseRoute = route.split('?')[0];
+    if (!EMBED_PAGES[baseRoute]) {
         // Route not migrated yet, show message
         const container = document.getElementById('app-container');
         container.innerHTML = `

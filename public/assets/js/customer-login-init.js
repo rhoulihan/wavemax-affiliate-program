@@ -87,19 +87,19 @@
             }
         }
 
-        function navigateToDashboard(customerId) {
+        function navigateToDashboard() {
             // Check for redirect parameter
             const urlParams = new URLSearchParams(window.location.search);
             const redirectRoute = urlParams.get('redirect');
             
             // We're in embed-app-v2.html context, so use the local navigateTo function
             if (window.navigateTo && typeof window.navigateTo === 'function') {
-                const targetRoute = redirectRoute || `/customer-dashboard?id=${customerId}`;
+                const targetRoute = redirectRoute || '/customer-dashboard';
                 window.navigateTo(targetRoute);
             } else {
                 // Fallback for embed-app-v2.html
                 const targetRoute = redirectRoute || '/customer-dashboard';
-                window.location.href = `/embed-app-v2.html?route=${targetRoute}&id=${customerId}`;
+                window.location.href = `/embed-app-v2.html?route=${targetRoute}`;
             }
         }
 
@@ -166,7 +166,7 @@
 
                     // Navigate to dashboard
                     setTimeout(() => {
-                        navigateToDashboard(data.customer.customerId);
+                        navigateToDashboard();
                     }, 500);
                 } else {
                     // Show error message
@@ -293,7 +293,7 @@
                                     }
                                     showAlert('Login successful!', 'success');
                                     setTimeout(() => {
-                                        navigateToDashboard(data.result.customer.customerId);
+                                        navigateToDashboard();
                                     }, 500);
                                 } else if (data.result.type === 'social-auth-success') {
                                     // New customer needs to complete registration
