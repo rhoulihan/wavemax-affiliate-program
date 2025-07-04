@@ -1148,7 +1148,12 @@ exports.handleSocialCallback = async (req, res) => {
         }
       }
 
-      return res.send(`
+      // Redirect to OAuth success page with message as parameter (consistent with other cases)
+      const messageParam = encodeURIComponent(JSON.stringify(message));
+      return res.redirect(`/oauth-success.html?message=${messageParam}`);
+
+      // OLD CODE - replaced with redirect above for consistency
+      /*return res.send(`
         <!DOCTYPE html>
         <html>
         <head>
@@ -1259,7 +1264,7 @@ exports.handleSocialCallback = async (req, res) => {
           </script>
         </body>
         </html>
-      `);
+      `);*/
     }
 
     // Redirect to registration page with social data
