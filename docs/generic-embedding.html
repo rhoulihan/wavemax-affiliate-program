@@ -540,10 +540,17 @@ document.getElementById('switchToLogin').onclick = () => {
 
 &lt;div class="wavemax-wrapper loading" id="wavemax-wrapper"&gt;
     &lt;iframe 
-        src="https://wavemax.promo/embed-app-v2.html"
-        onload="document.getElementById('wavemax-wrapper').classList.remove('loading')"&gt;
+        id="wavemax-iframe"
+        src="https://wavemax.promo/embed-app-v2.html"&gt;
     &lt;/iframe&gt;
-&lt;/div&gt;</code></pre>
+&lt;/div&gt;
+
+&lt;script&gt;
+// Remove loading class when iframe loads
+document.getElementById('wavemax-iframe').addEventListener('load', function() {
+    document.getElementById('wavemax-wrapper').classList.remove('loading');
+});
+&lt;/script&gt;</code></pre>
 
             <h3>Custom Theme Parameters</h3>
             <pre><code>// Pass custom theme via URL parameters
@@ -699,12 +706,11 @@ window.addEventListener('message', function(event) {
                 <h3>Lazy Loading</h3>
                 <pre><code>&lt;!-- Lazy load iframe when visible --&gt;
 &lt;div class="wavemax-placeholder" data-src="https://wavemax.promo/embed-app-v2.html"&gt;
-    &lt;button onclick="loadWaveMax(this)"&gt;Load WaveMAX&lt;/button&gt;
+    &lt;button id="load-wavemax-btn"&gt;Load WaveMAX&lt;/button&gt;
 &lt;/div&gt;
 
 &lt;script&gt;
-function loadWaveMax(button) {
-    const container = button.parentElement;
+function loadWaveMax(container) {
     const src = container.dataset.src;
     
     const iframe = document.createElement('iframe');
@@ -717,11 +723,16 @@ function loadWaveMax(button) {
     container.appendChild(iframe);
 }
 
+// Add event listener to button
+document.getElementById('load-wavemax-btn').addEventListener('click', function() {
+    loadWaveMax(this.parentElement);
+});
+
 // Or use Intersection Observer for auto-load
 const observer = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
         if (entry.isIntersecting) {
-            loadWaveMax(entry.target.querySelector('button'));
+            loadWaveMax(entry.target);
             observer.unobserve(entry.target);
         }
     });

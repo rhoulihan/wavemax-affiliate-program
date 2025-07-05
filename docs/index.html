@@ -158,6 +158,18 @@
             margin: 20px 0;
             text-align: center;
         }
+        
+        .version-info a {
+            color: #856404;
+        }
+        
+        .doc-card.recent-updates {
+            border: 2px solid #28a745;
+        }
+        
+        .doc-card.test-coverage {
+            border: 2px solid #4ade80;
+        }
     </style>
 </head>
 <body>
@@ -170,11 +182,11 @@
 
     <div class="container">
         <div class="version-info">
-            <strong>Version 1.8.1</strong> | Last Updated: June 27, 2025 | <a href="changelog.html" style="color: #856404;">View Recent Changes</a>
+            <strong>Version 1.8.1</strong> | Last Updated: June 27, 2025 | <a href="changelog.html">View Recent Changes</a>
         </div>
 
         <div class="search-box">
-            <input type="text" id="searchInput" placeholder="Search documentation..." onkeyup="searchDocs()">
+            <input type="text" id="searchInput" placeholder="Search documentation...">
         </div>
 
         <div class="quick-start">
@@ -202,7 +214,7 @@
                 </ul>
             </a>
 
-            <a href="changelog.html#v1.8.0" class="doc-card" style="border: 2px solid #28a745;">
+            <a href="changelog.html#v1.8.0" class="doc-card recent-updates">
                 <h2><span class="icon">✨</span> Recent Updates (v1.8.0)</h2>
                 <p>Latest improvements to payment processing and workflow enhancements.</p>
                 <ul>
@@ -418,7 +430,7 @@
                 </ul>
             </a>
 
-            <a href="/coverage-analysis/test-results-summary.html" class="doc-card" style="border: 2px solid #4ade80;">
+            <a href="/coverage-analysis/test-results-summary.html" class="doc-card test-coverage">
                 <h2><span class="icon">✅</span> Test Coverage Report</h2>
                 <p>Comprehensive test coverage analysis and metrics for the codebase.</p>
                 <ul>
@@ -492,6 +504,14 @@
                 }
             }
         }
+        
+        // Add event listener when DOM is loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.getElementById('searchInput');
+            if (searchInput) {
+                searchInput.addEventListener('keyup', searchDocs);
+            }
+        });
     </script>
 </body>
 </html>
