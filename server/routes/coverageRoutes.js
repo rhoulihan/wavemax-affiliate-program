@@ -4,6 +4,7 @@
 const express = require('express');
 const router = express.Router();
 const path = require('path');
+const { serveHTMLWithNonce } = require('../utils/cspHelper');
 
 // Middleware to prevent access from embedded contexts
 const preventEmbeddedAccess = (req, res, next) => {
@@ -80,9 +81,25 @@ const accessControl = (req, res, next) => {
 router.use(preventEmbeddedAccess);
 router.use(accessControl);
 
-// Serve the coverage analysis directory
+// Debug middleware
+router.use((req, res, next) => {
+  console.log(`[Coverage Route] ${req.method} ${req.path}`);
+  next();
+});
+
+// Handle specific page routes BEFORE static middleware
+router.get('/', serveHTMLWithNonce('coverage-analysis/index.html'));
+
+router.get('/critical-files', serveHTMLWithNonce('coverage-analysis/critical-files.html'));
+
+router.get('/test-templates', serveHTMLWithNonce('coverage-analysis/test-templates.html'));
+
+router.get('/action-plan', serveHTMLWithNonce('coverage-analysis/action-plan.html'));
+
+router.get('/test-results-summary.html', serveHTMLWithNonce('coverage-analysis/test-results-summary.html'));
+
+// Serve other static files (CSS, JS, images, etc.) from coverage analysis directory
 router.use('/', express.static(path.join(__dirname, '../../public/coverage-analysis'), {
-  index: 'index.html',
   setHeaders: (res, path) => {
     // Prevent caching for fresh reports
     res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
@@ -90,23 +107,6 @@ router.use('/', express.static(path.join(__dirname, '../../public/coverage-analy
     res.setHeader('Expires', '0');
   }
 }));
-
-// Handle specific page routes
-router.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, '../../public/coverage-analysis/index.html'));
-});
-
-router.get('/critical-files', (req, res) => {
-  res.sendFile(path.join(__dirname, '../../public/coverage-analysis/critical-files.html'));
-});
-
-router.get('/test-templates', (req, res) => {
-  res.sendFile(path.join(__dirname, '../../public/coverage-analysis/test-templates.html'));
-});
-
-router.get('/action-plan', (req, res) => {
-  res.sendFile(path.join(__dirname, '../../public/coverage-analysis/action-plan.html'));
-});
 
 // Catch-all for 404s within coverage routes
 router.use((req, res) => {
