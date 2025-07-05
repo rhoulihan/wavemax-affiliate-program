@@ -585,8 +585,10 @@ exports.addCustomerNote = async (req, res) => {
 // Scan customer card
 exports.scanCustomer = async (req, res) => {
   try {
-    const { customerId } = req.body;
+    const { customerId, bagId } = req.body;
     const operatorId = req.user.id;
+
+    console.log('scanCustomer called with:', { customerId, bagId });
 
     // Find customer
     const customer = await Customer.findOne({ customerId });
@@ -657,9 +659,15 @@ exports.scanCustomer = async (req, res) => {
         bagsPickedUp: currentOrder.bagsPickedUp,
         estimatedWeight: currentOrder.estimatedWeight,
         actualWeight: currentOrder.actualWeight,
-        status: currentOrder.status
+        status: currentOrder.status,
+        bags: currentOrder.bags || [] // Include bags array
       }
     };
+    
+    // If bagId was provided, include it in response
+    if (bagId) {
+      response.scannedBagId = bagId;
+    }
 
     await logAuditEvent(AuditEvents.SENSITIVE_DATA_ACCESS, {
       operatorId,
@@ -683,14 +691,55 @@ exports.scanCustomer = async (req, res) => {
   }
 };
 
-// Scan bag for processing (bags have customer ID as QR code)
+// Scan bag for processing (new format: customerId#bagId)
 exports.scanBag = async (req, res) => {
   try {
-    const { bagId } = req.body;
+    const { qrCode } = req.body;
     
-    // Check if this is a process_complete scan (when action is already determined)
-    // Since bags have customer ID as QR code, redirect to scanCustomer
-    return exports.scanCustomer(req, res);
+    // Parse QR code format: customerId#bagId
+    if (!qrCode || !qrCode.includes('#')) {
+      // Legacy format - just customer ID
+      req.body.customerId = qrCode || req.body.bagId;
+      return exports.scanCustomer(req, res);
+    }
+    
+    const [customerId, bagId] = qrCode.split('#');
+    
+    // Find customer
+    const customer = await Customer.findOne({ customerId });
+    if (!customer) {
+      return res.status(404).json({
+        success: false,
+        error: 'Customer not found',
+        message: 'Invalid customer ID'
+      });
+    }
+    
+    // Find current active order for this customer
+    const currentOrder = await Order.findOne({
+      customerId: customer.customerId,
+      status: { $in: ['pending', 'processing', 'processed'] }
+    })
+    .sort({ createdAt: -1 })
+    .populate('customer', 'firstName lastName phone email address');
+    
+    if (!currentOrder) {
+      return res.status(404).json({
+        success: false,
+        error: 'No active order',
+        message: 'No active order found for this customer'
+      });
+    }
+    
+    // Return order info with bag data
+    return res.json({
+      success: true,
+      order: currentOrder,
+      customer: currentOrder.customer,
+      bagId: bagId,
+      action: 'show_order'
+    });
+    
   } catch (error) {
     logger.error('Error scanning bag:', error);
     res.status(500).json({ 
@@ -762,6 +811,99 @@ exports.receiveOrder = async (req, res) => {
     res.status(500).json({ 
       success: false,
       error: 'Failed to receive order' 
+    });
+  }
+};
+
+// New endpoint for weighing bags with bag tracking
+exports.weighBags = async (req, res) => {
+  try {
+    const { bags, orderId } = req.body;
+    const operatorId = req.user.id;
+
+    const order = await Order.findOne({ orderId });
+    if (!order) {
+      return res.status(404).json({ 
+        success: false,
+        error: 'Order not found' 
+      });
+    }
+
+    // Validate that we're not adding duplicate bags
+    const existingBagIds = new Set(order.bags.map(b => b.bagId));
+    const newBagIds = new Set(bags.map(b => b.bagId));
+    
+    // Check for duplicates
+    for (const bagId of newBagIds) {
+      if (existingBagIds.has(bagId)) {
+        return res.status(400).json({
+          success: false,
+          error: 'Duplicate bag',
+          message: `Bag ${bagId} has already been added to this order`
+        });
+      }
+    }
+
+    // Calculate total weight
+    const totalWeight = bags.reduce((sum, bag) => sum + bag.weight, 0);
+    
+    // Update order with actual weight and bag tracking
+    order.actualWeight = (order.actualWeight || 0) + totalWeight;
+    order.status = 'processing';
+    order.assignedOperator = operatorId;
+    
+    if (!order.processingStartedAt) {
+      order.processingStartedAt = new Date();
+    }
+    
+    // Add bags to the order
+    let bagNumber = order.bags.length + 1;
+    for (const bag of bags) {
+      order.bags.push({
+        bagId: bag.bagId,
+        bagNumber: bagNumber++,
+        status: 'processing',
+        weight: bag.weight,
+        scannedAt: {
+          processing: new Date()
+        },
+        scannedBy: {
+          processing: operatorId
+        }
+      });
+    }
+    
+    // Update bag counts
+    order.bagsWeighed = order.bags.length;
+    
+    await order.save();
+
+    await logAuditEvent(AuditEvents.ORDER_STATUS_CHANGED, {
+      operatorId,
+      orderId,
+      action: 'bags_weighed',
+      totalWeight: order.actualWeight,
+      numberOfBags: order.bags.length,
+      newBags: bags.length
+    }, req);
+
+    // Return updated order with bag progress
+    res.json({
+      success: true,
+      order: order,
+      orderProgress: {
+        totalBags: order.bags.length,
+        bagsWeighed: order.bags.length,
+        bagsProcessed: order.bags.filter(b => b.status === 'processed').length,
+        bagsCompleted: order.bags.filter(b => b.status === 'completed').length
+      },
+      message: 'Bags weighed successfully'
+    });
+  } catch (error) {
+    logger.error('Error weighing bags:', error);
+    res.status(500).json({ 
+      success: false,
+      error: 'Failed to weigh bags' 
     });
   }
 };
@@ -848,7 +990,178 @@ exports.markBagProcessed = async (req, res) => {
   }
 };
 
-// Mark order as ready for pickup (deprecated - use markBagProcessed instead)
+// New endpoint for scanning processed bags
+exports.scanProcessed = async (req, res) => {
+  try {
+    const { qrCode } = req.body;
+    const operatorId = req.user.id;
+    
+    console.log('scanProcessed called with:', { qrCode, operatorId });
+    
+    // Parse QR code format: customerId#bagId
+    if (!qrCode || !qrCode.includes('#')) {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid QR code format',
+        message: 'Expected format: customerId#bagId'
+      });
+    }
+    
+    const [customerId, bagId] = qrCode.split('#');
+    
+    // Find order containing this bag
+    const order = await Order.findOne({
+      customerId: customerId,
+      'bags.bagId': bagId,
+      status: { $in: ['processing', 'processed'] }
+    });
+    
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        error: 'Bag not found',
+        message: 'This bag is not associated with any active order'
+      });
+    }
+    
+    // Fetch customer data separately since Order doesn't have a customer reference
+    const customer = await Customer.findOne({ customerId: order.customerId });
+    if (customer) {
+      order.customer = customer; // Attach customer to order for email sending
+    }
+    
+    // Find the specific bag
+    const bag = order.bags.find(b => b.bagId === bagId);
+    
+    // Check bag status
+    if (bag.status === 'processed') {
+      // Check if all bags are processed
+      const allBagsProcessed = order.bags.every(b => b.status === 'processed' || b.status === 'completed');
+      
+      if (allBagsProcessed) {
+        // Show pickup modal
+        return res.json({
+          success: true,
+          action: 'show_pickup_modal',
+          order: order,
+          allBagsProcessed: true,
+          message: 'All bags processed - ready for pickup'
+        });
+      } else {
+        // Show warning - bag already processed
+        const remainingBags = order.bags.filter(b => b.status === 'processing').length;
+        return res.json({
+          success: false,
+          warning: 'duplicate_scan',
+          message: `This bag has already been processed. ${remainingBags} bags still need processing.`,
+          bag: {
+            bagId: bag.bagId,
+            bagNumber: bag.bagNumber,
+            status: bag.status,
+            processedAt: bag.scannedAt.processed
+          },
+          remainingCount: remainingBags
+        });
+      }
+    }
+    
+    // Update bag to processed
+    bag.status = 'processed';
+    bag.scannedAt.processed = new Date();
+    bag.scannedBy.processed = operatorId;
+    
+    // Update order counts
+    order.bagsProcessed = order.bags.filter(b => b.status === 'processed' || b.status === 'completed').length;
+    
+    // Check if all bags are now processed
+    const allBagsProcessed = order.bags.every(b => b.status === 'processed' || b.status === 'completed');
+    
+    if (allBagsProcessed) {
+      // All bags processed, update order status
+      order.processedAt = new Date();
+      order.status = 'processed';
+      
+      // Send notifications
+      const emailService = require('../utils/emailService');
+      
+      // Notify customer
+      if (order.customer && order.customer.email) {
+        await emailService.sendOrderStatusUpdateEmail(
+          order.customer,
+          order,
+          'ready'
+        );
+      }
+      
+      // Notify affiliate
+      if (order.affiliateId) {
+        const Affiliate = require('../models/Affiliate');
+        const affiliate = await Affiliate.findOne({ affiliateId: order.affiliateId });
+        
+        if (affiliate && affiliate.email) {
+          await emailService.sendAffiliateCommissionEmail(
+            affiliate,
+            order,
+            order.customer
+          );
+        }
+      }
+    }
+    
+    await order.save();
+    
+    await logAuditEvent(AuditEvents.ORDER_STATUS_CHANGED, {
+      operatorId,
+      orderId: order.orderId,
+      action: 'bag_processed',
+      bagId: bagId,
+      bagNumber: bag.bagNumber,
+      bagsProcessed: order.bagsProcessed,
+      totalBags: order.bags.length,
+      allBagsProcessed: allBagsProcessed
+    }, req);
+    
+    // Return appropriate response
+    if (allBagsProcessed) {
+      return res.json({
+        success: true,
+        action: 'show_pickup_modal',
+        order: order,
+        allBagsProcessed: true,
+        message: 'All bags processed - ready for pickup'
+      });
+    } else {
+      return res.json({
+        success: true,
+        order: order,
+        bag: {
+          bagId: bag.bagId,
+          bagNumber: bag.bagNumber,
+          status: bag.status,
+          weight: bag.weight
+        },
+        orderProgress: {
+          totalBags: order.bags.length,
+          bagsWeighed: order.bags.length,
+          bagsProcessed: order.bagsProcessed,
+          bagsCompleted: order.bags.filter(b => b.status === 'completed').length
+        },
+        message: `Bag ${bag.bagNumber} marked as processed`
+      });
+    }
+    
+  } catch (error) {
+    console.error('Error in scanProcessed:', error);
+    logger.error('Error scanning processed bag:', error);
+    res.status(500).json({ 
+      success: false,
+      error: 'Failed to scan processed bag',
+      message: error.message 
+    });
+  }
+};
+
+// Mark order as ready for pickup (deprecated - use scanProcessed instead)
 exports.markOrderReady = async (req, res) => {
   try {
     const { orderId } = req.params;
@@ -922,7 +1235,127 @@ exports.markOrderReady = async (req, res) => {
   }
 };
 
-// Confirm pickup by affiliate
+// New endpoint for completing pickup with bag verification
+exports.completePickup = async (req, res) => {
+  try {
+    const { bagIds, orderId } = req.body;
+    const operatorId = req.user.id;
+    
+    console.log('completePickup called with:', { bagIds, orderId, operatorId });
+
+    const order = await Order.findOne({ orderId });
+
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        error: 'Order not found'
+      });
+    }
+
+    // Verify all bags are accounted for
+    if (bagIds.length !== order.bags.length) {
+      return res.status(400).json({
+        success: false,
+        error: 'Bag count mismatch',
+        message: `Expected ${order.bags.length} bags but received ${bagIds.length}`
+      });
+    }
+
+    // Verify all bag IDs match
+    const orderBagIds = new Set(order.bags.map(b => b.bagId));
+    const scannedBagIds = new Set(bagIds);
+    
+    for (const bagId of scannedBagIds) {
+      if (!orderBagIds.has(bagId)) {
+        return res.status(400).json({
+          success: false,
+          error: 'Invalid bag',
+          message: `Bag ${bagId} does not belong to this order`
+        });
+      }
+    }
+
+    // Update all bags to completed
+    const now = new Date();
+    console.log('Updating bags to completed. Current bag statuses:', order.bags.map(b => ({ bagId: b.bagId, status: b.status })));
+    
+    for (const bag of order.bags) {
+      bag.status = 'completed';
+      bag.scannedAt.completed = now;
+      bag.scannedBy.completed = operatorId;
+    }
+
+    // Update order to completed
+    order.status = 'complete';
+    order.completedAt = now;
+    order.bagsPickedUp = order.bags.length;
+    
+    console.log('Before save - Order status:', order.status);
+    console.log('Before save - Bag statuses:', order.bags.map(b => ({ bagId: b.bagId, status: b.status })));
+
+    try {
+      await order.save();
+      
+      console.log('After save - Order status:', order.status);
+      console.log('After save - Bag statuses:', order.bags.map(b => ({ bagId: b.bagId, status: b.status })));
+    } catch (saveError) {
+      console.error('Error saving order:', saveError);
+      return res.status(500).json({
+        success: false,
+        error: 'Failed to save order',
+        message: saveError.message
+      });
+    }
+
+    // Send customer notification
+    try {
+      const emailService = require('../utils/emailService');
+      const Customer = require('../models/Customer');
+      const customer = await Customer.findOne({ customerId: order.customerId });
+      
+      if (customer && customer.email) {
+        await emailService.sendOrderPickedUpNotification(
+          customer.email,
+          {
+            customerName: `${customer.firstName} ${customer.lastName}`,
+            orderId: order.orderId,
+            numberOfBags: order.bags.length,
+            totalWeight: order.actualWeight
+          }
+        );
+      }
+    } catch (emailError) {
+      console.error('Error sending email notification:', emailError);
+      // Don't fail the whole operation if email fails
+    }
+
+    await logAuditEvent(AuditEvents.ORDER_STATUS_CHANGED, {
+      operatorId,
+      orderId,
+      action: 'order_picked_up',
+      numberOfBags: order.bags.length,
+      newStatus: 'complete'
+    }, req);
+
+    res.json({
+      success: true,
+      message: 'Order completed successfully',
+      orderComplete: true,
+      order: order
+    });
+  } catch (error) {
+    console.error('Error in completePickup:', error);
+    console.error('Error stack:', error.stack);
+    logger.error('Error completing pickup:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to complete pickup',
+      message: error.message
+    });
+  }
+};
+
+// Confirm pickup by affiliate (legacy)
 exports.confirmPickup = async (req, res) => {
   try {
     const { orderId, numberOfBags } = req.body;

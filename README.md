@@ -11,6 +11,7 @@ The WaveMAX Affiliate Program enables individuals to register as affiliates, onb
 - **Affiliate Registration & Management**: Complete onboarding and management system for affiliates
 - **Customer Registration**: Allow affiliates to register customers using unique affiliate links
 - **Order Management**: Schedule pickups, track order status, and manage deliveries
+- **Individual Bag Tracking**: Unique QR codes for each bag with real-time status tracking through weighing, processing, and pickup
 - **Flexible Delivery Pricing**: Dynamic delivery fee structure with minimum + per-bag pricing
 - **Secure Payments**: Encrypted payment processing with PCI-compliant storage
 - **Dashboard Analytics**: Comprehensive metrics for both affiliates and customers with visual charts
@@ -81,10 +82,10 @@ The system implements a comprehensive role-based access control (RBAC) system wi
    - Perform quality checks
    - Update order status
    - Manage shift schedules
-   - Three-stage QR code scanning workflow:
-     - **Receive**: Scan customer QR to weigh incoming bags
-     - **Notify**: Scan when WDF (Wash/Dry/Fold) is done to notify affiliate
-     - **Pickup**: Scan as bags leave during affiliate pickup
+   - Three-stage QR code scanning workflow with individual bag tracking:
+     - **Weighing**: Scan bag QR code (customerId#bagId) to weigh incoming bags
+     - **Processing**: Scan bag after WDF (Wash/Dry/Fold) completion to update status
+     - **Pickup**: Scan bag during affiliate pickup to confirm delivery
    - Automatic session renewal for operators at store locations
 
 ## Project Structure
@@ -430,41 +431,52 @@ If URL parameters are not being passed to the iframe:
 ## Operator Workflow & QR Code Scanning
 
 ### Overview
-The WaveMAX Affiliate Program includes a comprehensive operator workflow for processing laundry orders using QR code scanning. Operators use handheld QR code scanners (keyboard-based) to track bags through the entire laundry process.
+The WaveMAX Affiliate Program includes a comprehensive operator workflow for processing laundry orders using QR code scanning. Operators use handheld QR code scanners (keyboard-based) to track individual bags through the entire laundry process with the new bag tracking system.
+
+### Bag Tracking System
+The system now tracks individual bags with unique IDs throughout the entire workflow:
+- Each bag has a unique QR code in the format: `customerId#bagId`
+- Individual bag status tracking through three stages: weighing, processing, and pickup
+- Real-time visibility of each bag's location and status
+- Automatic order status updates based on bag progression
 
 ### Workflow Stages
 
-1. **Receiving & Weighing** (First Scan)
-   - Operator scans customer card (QR code = Customer ID)
-   - System prompts for bag weights
-   - Order status changes to "processing"
-   - All bags for a customer use the SAME QR code
+1. **Weighing Stage** (First Scan)
+   - Operator scans individual bag QR code (format: `customerId#bagId`)
+   - System prompts for bag weight entry
+   - Bag status changes to "weighed"
+   - Order automatically moves to "processing" when first bag is weighed
 
-2. **After WDF Processing** (Second Scan)
-   - Operator scans customer card after wash/dry/fold completion
-   - Marks bags as processed
-   - When all bags are processed, affiliate is notified for pickup
-   - Order status changes to "ready"
+2. **Processing Stage** (Second Scan - After WDF)
+   - Operator scans bag after wash/dry/fold completion
+   - Bag status changes to "processed"
+   - System tracks which bags are ready for pickup
+   - When all bags are processed, affiliate is notified
+   - Order status changes to "ready" when all bags are processed
 
-3. **Affiliate Pickup** (Third Scan)
-   - Operator scans during bag handoff to affiliate
+3. **Pickup Stage** (Third Scan)
+   - Operator scans bag during handoff to affiliate
+   - Bag status changes to "picked_up"
    - Auto-dismiss confirmation after 5 seconds
    - When all bags are picked up, customer is notified
-   - Order status changes to "complete"
+   - Order status changes to "complete" when all bags are collected
 
 ### Operator Features
 - **Simple Interface**: Single "Scan to Process Order" screen
 - **QR Scanner Support**: Works with keyboard-input scanners (e.g., Amazon ASIN B0DNDNYJ53)
 - **Manual Entry Option**: Fallback for damaged QR codes
-- **Real-time Stats**: Track orders processed, bags scanned, and orders ready
+- **Real-time Stats**: Track orders processed, individual bags scanned, and orders ready
+- **Bag-Level Tracking**: See status of each individual bag
 - **Automatic Notifications**: Email alerts sent at appropriate workflow stages
-- **No Manual Confirmation**: Scanning automatically progresses orders
+- **No Manual Confirmation**: Scanning automatically progresses bags and orders
 
 ### Technical Implementation
-- Customer cards contain only the customer ID (e.g., "CUST123456")
-- All bags for one customer share the same QR code
-- Bag counts tracked at order level, not individual bags
-- Automatic workflow progression based on scan counts
+- Bag QR codes contain both customer ID and unique bag ID (e.g., "CUST123456#BAG001")
+- Individual bag tracking with status: pending → weighed → processed → picked_up
+- Bag-level data includes weight, status, timestamps, and operator actions
+- Order status automatically updates based on aggregate bag statuses
+- Complete audit trail for each bag's journey through the system
 
 ## W-9 Tax Compliance & QuickBooks Integration
 
@@ -2128,11 +2140,19 @@ The project includes several test pages for development and integration testing:
 - **Performance Optimization**: Direct navigation architecture eliminates unnecessary redirects
 - **Code Organization**: Comprehensive migration to external CSS and JavaScript files with nonce-based security
 
+### Enhanced Bag Tracking System (NEW)
+- **Individual Bag Tracking**: Each bag now has a unique QR code with format `customerId#bagId`
+- **Three-Stage Workflow**: Comprehensive tracking through weighing, processing (after WDF), and pickup stages
+- **Real-time Bag Status**: Track individual bag location and status throughout the facility
+- **Automatic Order Updates**: Order status automatically progresses based on aggregate bag statuses
+- **Enhanced Visibility**: Operators can see exactly which bags are at each stage of processing
+- **Complete Audit Trail**: Full history of each bag's journey with timestamps and operator actions
+
 ### Operator QR Code Scanning Workflow
 - **Three-Stage Scanning Process**: Complete order tracking from receiving through delivery
-- **Customer Card Scanning**: All bags for a customer use the same QR code (Customer ID)
-- **Automatic Workflow Progression**: No manual confirmation needed - scanning advances order status
-- **Real-time Statistics**: Dashboard showing orders processed, bags scanned, and orders ready
+- **Individual Bag Scanning**: Each bag has unique QR code combining customer ID and bag ID
+- **Automatic Workflow Progression**: No manual confirmation needed - scanning advances bag and order status
+- **Real-time Statistics**: Dashboard showing orders processed, individual bags scanned, and orders ready
 - **Email Notifications**: Automatic alerts to affiliates when orders are ready, customers when orders are picked up
 - **Simple Interface**: Single "Scan to Process Order" screen optimized for handheld scanners
 
