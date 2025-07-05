@@ -48,6 +48,11 @@ describe('Auth Controller', () => {
 
     // Default mocks
     crypto.randomBytes.mockReturnValue({ toString: jest.fn().mockReturnValue('mock-token') });
+    crypto.createHash = jest.fn().mockReturnValue({
+      update: jest.fn().mockReturnValue({
+        digest: jest.fn().mockReturnValue('hashed-token')
+      })
+    });
     jwt.sign.mockReturnValue('mock-jwt-token');
     jwt.verify.mockReturnValue({ id: 'user123', role: 'affiliate' });
 
@@ -266,7 +271,7 @@ describe('Auth Controller', () => {
 
       expect(Customer.findOne).toHaveBeenCalledWith({
         $or: [
-          { username: { $regex: new RegExp('^jane@example.com$', 'i') } },
+          { username: { $regex: new RegExp('^jane@example\\.com$', 'i') } },
           { email: 'jane@example.com' }
         ]
       });
@@ -643,6 +648,7 @@ describe('Auth Controller', () => {
 
       Affiliate.findOne.mockResolvedValue(mockAffiliate);
       emailService.sendAffiliatePasswordResetEmail = jest.fn().mockResolvedValue(true);
+      emailService.sendPasswordResetEmail = jest.fn().mockResolvedValue(true);
 
       await authController.forgotPassword(req, res);
 
@@ -680,7 +686,7 @@ describe('Auth Controller', () => {
 
       const mockAffiliate = {
         _id: 'aff123',
-        resetToken: 'valid-token',
+        resetToken: 'hashed-token',
         resetTokenExpiry: Date.now() + 3600000,
         save: jest.fn().mockResolvedValue(true)
       };
@@ -694,7 +700,7 @@ describe('Auth Controller', () => {
       await authController.resetPassword(req, res);
 
       expect(Affiliate.findOne).toHaveBeenCalledWith({
-        resetToken: 'valid-token',
+        resetToken: 'hashed-token',
         resetTokenExpiry: { $gt: expect.any(Number) }
       });
       expect(mockAffiliate.passwordSalt).toBe('new-salt');

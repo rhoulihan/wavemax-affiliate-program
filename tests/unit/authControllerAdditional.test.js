@@ -49,7 +49,8 @@ describe('Auth Controller - Additional Coverage', () => {
       status: jest.fn().mockReturnThis(),
       json: jest.fn(),
       redirect: jest.fn(),
-      cookie: jest.fn()
+      cookie: jest.fn(),
+      send: jest.fn()
     };
     jest.clearAllMocks();
     
@@ -396,10 +397,7 @@ describe('Auth Controller - Additional Coverage', () => {
     });
 
     it('should handle customer social auth callback', async () => {
-      req.query.state = JSON.stringify({ 
-        userType: 'customer', 
-        affiliateCode: 'AFF001' 
-      });
+      req.query.state = 'customer_oauth_test-session-id';
       
       // Set req.user with enriched customer data (as done by passport strategy)
       req.user = {
@@ -413,7 +411,7 @@ describe('Auth Controller - Additional Coverage', () => {
         affiliateId: 'AFF001',
         isNewUser: false, // Existing user
         provider: 'google',
-        id: 'google123',
+        socialId: 'google123',
         displayName: 'Jane Doe'
       };
       
@@ -421,42 +419,43 @@ describe('Auth Controller - Additional Coverage', () => {
 
       await authController.handleCustomerSocialCallback(req, res);
 
-      // It redirects to the embed page with token and refreshToken
-      expect(res.redirect).toHaveBeenCalledWith(
-        expect.stringMatching(/^\/customer-dashboard-embed\.html\?token=mock-token&refreshToken=[a-f0-9]{80}$/)
+      // For existing customers, it sends HTML response with postMessage
+      expect(res.send).toHaveBeenCalledWith(
+        expect.stringContaining('social-auth-login')
+      );
+      expect(res.send).toHaveBeenCalledWith(
+        expect.stringContaining('mock-token')
       );
     });
 
     it('should handle new customer registration', async () => {
-      req.query.state = JSON.stringify({ 
-        userType: 'customer', 
-        affiliateCode: 'AFF001' 
-      });
+      req.query.state = 'customer_oauth_test-session-id';
       
-      // Set req.user with raw social profile (not enriched with customer data)
+      // Set req.user with new customer data (isNewUser flag is important)
       req.user = {
         provider: 'google',
-        id: 'google123',
-        displayName: 'Jane Doe',
-        emails: [{ value: 'jane@example.com' }],
-        // No _id or customerId - this is a new user
+        socialId: 'google123',
+        email: 'jane@example.com',
+        firstName: 'Jane',
+        lastName: 'Doe',
+        isNewUser: true, // This indicates a new user
+        displayName: 'Jane Doe'
       };
       
-      // Mock session creation
-      const mockSessionId = Buffer.alloc(16);
-      mockSessionId.fill(0x61);
-      authController._cryptoWrapper.randomBytes.mockReturnValue(mockSessionId);
+      // Mock JWT sign for social token
+      jwt.sign.mockReturnValue('social-token-123');
       
-      OAuthSession.create.mockResolvedValue({
-        sessionId: mockSessionId.toString('hex'),
-        save: jest.fn()
-      });
+      // Mock session creation
+      OAuthSession.createSession = jest.fn().mockResolvedValue({});
 
       await authController.handleCustomerSocialCallback(req, res);
 
-      // For new customers, it creates a JWT token and redirects to registration page
-      expect(res.redirect).toHaveBeenCalledWith(
-        expect.stringContaining('/customer-register-embed.html?socialToken=')
+      // For new customers, it sends HTML with social-auth-success message
+      expect(res.send).toHaveBeenCalledWith(
+        expect.stringContaining('social-auth-success')
+      );
+      expect(res.send).toHaveBeenCalledWith(
+        expect.stringContaining('social-token-123')
       );
     });
   });

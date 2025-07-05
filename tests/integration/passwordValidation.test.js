@@ -564,17 +564,16 @@ describe('Password Validation Integration Tests', () => {
       });
       await affiliate.save();
 
-      // Request password reset
-      const resetRequestResponse = await agent
-        .post('/api/v1/auth/forgot-password')
-        .set('x-csrf-token', csrfToken)
-        .send({ email: 'resettest@example.com', userType: 'affiliate' });
-
-      expect(resetRequestResponse.status).toBe(200);
-
-      // Extract reset token (in real implementation, this would come from email)
-      const updatedAffiliate = await Affiliate.findOne({ email: 'resettest@example.com' });
-      const resetToken = updatedAffiliate.resetToken;
+      // Generate a reset token manually for testing
+      const crypto = require('crypto');
+      // Generate a 64-character hex token to match the validation requirement
+      const plainResetToken = crypto.randomBytes(32).toString('hex'); // 32 bytes = 64 hex chars
+      const hashedResetToken = crypto.createHash('sha256').update(plainResetToken).digest('hex');
+      
+      // Set the reset token directly in the database
+      affiliate.resetToken = hashedResetToken;
+      affiliate.resetTokenExpiry = new Date(Date.now() + 3600000); // 1 hour from now
+      await affiliate.save();
 
       // Try to reset with weak password
       const weakPassword = 'weak123';
@@ -582,7 +581,7 @@ describe('Password Validation Integration Tests', () => {
         .post('/api/v1/auth/reset-password')
         .set('x-csrf-token', csrfToken)
         .send({
-          token: resetToken,
+          token: plainResetToken,  // Use the plain token, not the hashed one
           userType: 'affiliate',
           password: weakPassword
         });
@@ -628,17 +627,16 @@ describe('Password Validation Integration Tests', () => {
       });
       await affiliate.save();
 
-      // Request password reset
-      const resetRequestResponse = await agent
-        .post('/api/v1/auth/forgot-password')
-        .set('x-csrf-token', csrfToken)
-        .send({ email: 'resettest2@example.com', userType: 'affiliate' });
-
-      expect(resetRequestResponse.status).toBe(200);
-
-      // Extract reset token
-      const updatedAffiliate = await Affiliate.findOne({ email: 'resettest2@example.com' });
-      const resetToken = updatedAffiliate.resetToken;
+      // Generate a reset token manually for testing
+      const crypto = require('crypto');
+      // Generate a 64-character hex token to match the validation requirement
+      const plainResetToken = crypto.randomBytes(32).toString('hex'); // 32 bytes = 64 hex chars
+      const hashedResetToken = crypto.createHash('sha256').update(plainResetToken).digest('hex');
+      
+      // Set the reset token directly in the database
+      affiliate.resetToken = hashedResetToken;
+      affiliate.resetTokenExpiry = new Date(Date.now() + 3600000); // 1 hour from now
+      await affiliate.save();
 
       // Reset with strong password
       const strongPassword = 'NewSecurePassw0rd!';
@@ -646,10 +644,15 @@ describe('Password Validation Integration Tests', () => {
         .post('/api/v1/auth/reset-password')
         .set('x-csrf-token', csrfToken)
         .send({
-          token: resetToken,
+          token: plainResetToken,  // Use the plain token, not the hashed one
           userType: 'affiliate',
           password: strongPassword
         });
+
+      // Log the response for debugging
+      if (resetResponse.status !== 200) {
+        console.log('Reset password failed:', resetResponse.status, resetResponse.body);
+      }
 
       expect(resetResponse.status).toBe(200);
       expect(resetResponse.body.success).toBe(true);
