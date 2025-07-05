@@ -188,7 +188,10 @@ app.use((req, res, next) => {
                              req.path.endsWith('.html') && 
                              !req.path.includes('/examples/');
   
-  const useStrictCSP = strictCSPPages.includes(req.path) || isDocumentationPage;
+  // Apply strict CSP to coverage analysis pages
+  const isCoveragePage = req.path.startsWith('/coverage');
+  
+  const useStrictCSP = strictCSPPages.includes(req.path) || isDocumentationPage || isCoveragePage;
   
   // All embed pages now use nonces since embed-app.html was converted to CSP-compliant redirect to embed-app-v2.html
   const skipNonce = false;
@@ -389,6 +392,9 @@ app.use(passport.session());
 const embedRoutes = require('./server/routes/embedRoutes');
 app.use('/', embedRoutes);
 
+// Mount coverage analysis reports BEFORE static files so they can handle CSP nonce injection
+app.use('/coverage-analysis', coverageRoutes);
+
 // Serve static files in all environments
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -398,9 +404,7 @@ if (process.env.SHOW_DOCS === 'true') {
   app.use('/docs', docsRoutes);
 }
 
-// Mount coverage analysis reports (separate from embedded app)
-// This is mounted before CSRF to avoid CSRF token requirements
-app.use('/coverage', coverageRoutes);
+// Coverage routes are mounted earlier, before static files
 
 // Mount filmwalk routes
 app.use('/filmwalk', routingRoutes);

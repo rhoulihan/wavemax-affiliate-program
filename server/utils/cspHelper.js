@@ -67,6 +67,7 @@ const serveHTMLWithNonce = (htmlPath) => {
   return async (req, res) => {
     try {
       const fullPath = path.join(__dirname, '../../public', htmlPath);
+      console.log(`[CSP] Serving HTML with nonce: ${htmlPath}, nonce: ${res.locals.cspNonce}`);
       const html = await readHTMLWithNonce(fullPath, res.locals.cspNonce);
       res.type('html').send(html);
     } catch (error) {
