@@ -126,6 +126,78 @@
             text-align: center;
             font-size: 1.2em;
         }
+        
+        /* New CSS classes for inline styles */
+        .achievement-card {
+            background: #e8f8f5;
+            border: 2px solid #30cfd0;
+        }
+        
+        .highlight-text {
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+        
+        .codebase-stats-container {
+            background: #f0f8ff;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 1px solid #1e3a8a;
+        }
+        
+        .codebase-stats-header {
+            margin-top: 0;
+            color: #1e3a8a;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        
+        .center-text {
+            text-align: center;
+        }
+        
+        .large-stat {
+            font-size: 2em;
+            font-weight: bold;
+            color: #1e3a8a;
+        }
+        
+        .gray-text {
+            color: #666;
+        }
+        
+        .green-stat {
+            color: #22c55e;
+        }
+        
+        .formula-container {
+            text-align: center;
+            margin-bottom: 20px;
+            padding: 10px;
+            background: #f9f9f9;
+            border-radius: 8px;
+        }
+        
+        .formula-text {
+            margin: 5px 0;
+            font-size: 1.1em;
+        }
+        
+        .formula-result {
+            margin: 5px 0;
+            font-size: 1.2em;
+            color: #1e3a8a;
+        }
+        
+        .health-card {
+            background: #d4edda;
+            border: 2px solid #28a745;
+        }
     </style>
 </head>
 <body>
@@ -136,10 +208,10 @@
         ✅ <strong>ALL TESTS PASSING!</strong> 104 test suites, 2,048 tests passed (4 skipped)
     </div>
     
-    <div class="metric-card" style="background: #e8f8f5; border: 2px solid #30cfd0;">
+    <div class="metric-card achievement-card">
         <h2>🎉 Excellent Test Coverage Achievement - 91.37% Coverage!</h2>
         <p><strong>MILESTONE REACHED:</strong> The project has achieved 91.37% test coverage, exceeding the 90% goal!</p>
-        <p><strong>Codebase Size:</strong> <span style="font-size: 1.2em; font-weight: bold;">5,081 lines of executable code</span> analyzed across all project files</p>
+        <p><strong>Codebase Size:</strong> <span class="highlight-text">5,081 lines of executable code</span> analyzed across all project files</p>
         <p><strong>Coverage Details:</strong> 4,643 lines covered by tests | 438 lines not covered</p>
         <p><strong>Current Status:</strong> 104 test suites passed, 0 failed. 2,048 tests passing (4 skipped), 0 failing.</p>
         <p><strong>Key Achievements:</strong></p>
@@ -156,24 +228,24 @@
     
     <div class="metric-card">
         <h2>Overall Test Coverage</h2>
-        <div style="background: #f0f8ff; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #1e3a8a;">
-            <h3 style="margin-top: 0; color: #1e3a8a;">📊 Codebase Statistics</h3>
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
-                <div style="text-align: center;">
-                    <div style="font-size: 2em; font-weight: bold; color: #1e3a8a;">5,194</div>
-                    <div style="color: #666;">Total Statements</div>
+        <div class="codebase-stats-container">
+            <h3 class="codebase-stats-header">📊 Codebase Statistics</h3>
+            <div class="stats-grid">
+                <div class="center-text">
+                    <div class="large-stat">5,194</div>
+                    <div class="gray-text">Total Statements</div>
                 </div>
-                <div style="text-align: center;">
-                    <div style="font-size: 2em; font-weight: bold; color: #1e3a8a;">2,931</div>
-                    <div style="color: #666;">Total Branches</div>
+                <div class="center-text">
+                    <div class="large-stat">2,931</div>
+                    <div class="gray-text">Total Branches</div>
                 </div>
-                <div style="text-align: center;">
-                    <div style="font-size: 2em; font-weight: bold; color: #1e3a8a;">565</div>
-                    <div style="color: #666;">Total Functions</div>
+                <div class="center-text">
+                    <div class="large-stat">565</div>
+                    <div class="gray-text">Total Functions</div>
                 </div>
-                <div style="text-align: center;">
-                    <div style="font-size: 2em; font-weight: bold; color: #1e3a8a;">5,081</div>
-                    <div style="color: #666;">Total Lines</div>
+                <div class="center-text">
+                    <div class="large-stat">5,081</div>
+                    <div class="gray-text">Total Lines</div>
                 </div>
             </div>
         </div>
@@ -187,7 +259,7 @@
                 <div class="stat-label">Branches</div>
             </div>
             <div class="stat-box">
-                <div class="stat-value" style="color: #22c55e;">97.7%</div>
+                <div class="stat-value green-stat">97.7%</div>
                 <div class="stat-label">Functions</div>
             </div>
             <div class="stat-box">
@@ -199,9 +271,9 @@
 
     <div class="metric-card">
         <h2>Test Suite Summary</h2>
-        <div style="text-align: center; margin-bottom: 20px; padding: 10px; background: #f9f9f9; border-radius: 8px;">
-            <p style="margin: 5px 0; font-size: 1.1em;"><strong>Test Coverage Formula:</strong> Lines Covered ÷ Total Lines = Coverage %</p>
-            <p style="margin: 5px 0; font-size: 1.2em; color: #1e3a8a;"><strong>4,643 ÷ 5,081 = 91.37%</strong></p>
+        <div class="formula-container">
+            <p class="formula-text"><strong>Test Coverage Formula:</strong> Lines Covered ÷ Total Lines = Coverage %</p>
+            <p class="formula-result"><strong>4,643 ÷ 5,081 = 91.37%</strong></p>
         </div>
         <div class="test-stats">
             <div class="stat-item">
@@ -209,7 +281,7 @@
                 <div>Total Test Suites</div>
             </div>
             <div class="stat-item">
-                <div class="stat-number" style="color: #22c55e;">104</div>
+                <div class="stat-number green-stat">104</div>
                 <div>Passed</div>
             </div>
             <div class="stat-item">
@@ -311,7 +383,7 @@
         </ul>
     </div>
 
-    <div class="metric-card" style="background: #d4edda; border: 2px solid #28a745;">
+    <div class="metric-card health-card">
         <h2>✅ Test Suite Health: Perfect!</h2>
         <p><strong>ALL TESTS PASSING!</strong> The test suite is in perfect health with:</p>
         <ul>
