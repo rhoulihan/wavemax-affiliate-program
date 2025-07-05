@@ -1,6 +1,16 @@
 // Test Operator Scan JavaScript
 let testCustomer = null;
 let testOrder = null;
+let testBags = [];
+
+// Generate UUID v4
+function generateUUID() {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+        const r = Math.random() * 16 | 0;
+        const v = c === 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+    });
+}
 
 async function loadTestData() {
     try {
@@ -14,7 +24,7 @@ async function loadTestData() {
             await createTestCustomer();
         }
 
-        // Get or create test order
+        // Get or create test order with bags
         await recreateTestOrder();
     } catch (error) {
         console.error('Error loading test data:', error);
@@ -68,18 +78,37 @@ async function displayCustomerInfo() {
     document.getElementById('customerName').textContent = `${testCustomer.firstName} ${testCustomer.lastName}`;
     document.getElementById('customerEmail').textContent = testCustomer.email;
     document.getElementById('customerId').textContent = testCustomer.customerId || testCustomer._id;
-    document.getElementById('customerQR').textContent = testCustomer.customerId || testCustomer._id;
 
-    // Update card
-    document.getElementById('cardName').textContent = `${testCustomer.firstName} ${testCustomer.lastName}`;
-    document.getElementById('cardId').textContent = `ID: ${testCustomer.customerId || testCustomer._id}`;
+    // Update order info
+    if (testOrder) {
+        document.getElementById('orderId').textContent = testOrder.orderId || testOrder._id;
+        document.getElementById('bagCount').textContent = testBags.length;
+    }
 
-    // Generate QR code with customer ID (not the old qrCode field)
-    await generateQRCode(testCustomer.customerId || testCustomer._id);
+    // Update bag cards
+    for (let i = 0; i < testBags.length; i++) {
+        const bagNum = i + 1;
+        const bag = testBags[i];
+        
+        // Update card info
+        const cardName = document.getElementById(`cardName${bagNum}`);
+        const cardId = document.getElementById(`cardId${bagNum}`);
+        const bagIdElement = document.getElementById(`bagId${bagNum}`);
+        
+        if (cardName) cardName.textContent = `${testCustomer.firstName} ${testCustomer.lastName}`;
+        if (cardId) cardId.textContent = `Customer: ${testCustomer.customerId || testCustomer._id}`;
+        if (bagIdElement) bagIdElement.textContent = `Bag ID: ${bag.bagId}`;
+        
+        // Generate QR code with new format: customerId#bagId
+        const qrData = `${testCustomer.customerId || testCustomer._id}#${bag.bagId}`;
+        await generateQRCode(qrData, `qrcode${bagNum}`);
+    }
 }
 
-async function generateQRCode(data) {
-    const qrcodeDiv = document.getElementById('qrcode');
+async function generateQRCode(data, elementId = 'qrcode') {
+    const qrcodeDiv = document.getElementById(elementId);
+    if (!qrcodeDiv) return;
+    
     qrcodeDiv.innerHTML = ''; // Clear existing QR code
     
     try {
@@ -107,7 +136,7 @@ async function generateQRCode(data) {
 
 async function recreateTestOrder() {
     try {
-        showStatus('Creating test order...', 'info');
+        showStatus('Creating test order with 2 bags...', 'info');
         
         const headers = {
             'Content-Type': 'application/json'
@@ -118,12 +147,19 @@ async function recreateTestOrder() {
             headers['X-CSRF-Token'] = window.csrfUtils.getToken();
         }
 
+        // Generate two bag IDs
+        testBags = [
+            { bagId: generateUUID(), bagNumber: 1 },
+            { bagId: generateUUID(), bagNumber: 2 }
+        ];
+
         const response = await fetch('/api/v1/test/order', {
             method: 'POST',
             headers: headers,
             body: JSON.stringify({
                 customerId: testCustomer?._id,
-                recreate: true // This will delete existing test orders first
+                recreate: true, // This will delete existing test orders first
+                numberOfBags: 2
             })
         });
 
@@ -133,7 +169,11 @@ async function recreateTestOrder() {
         }
 
         testOrder = await response.json();
-        showStatus(`Test order created successfully! Order ID: ${testOrder._id}`, 'success');
+        
+        // Display the order and bag information
+        await displayCustomerInfo();
+        
+        showStatus(`Test order created successfully! Order ID: ${testOrder.orderId || testOrder._id} with ${testBags.length} bags`, 'success');
     } catch (error) {
         console.error('Error creating test order:', error);
         showStatus('Error creating test order: ' + error.message, 'danger');
@@ -147,9 +187,9 @@ function showStatus(message, type = 'info') {
     statusDiv.classList.remove('d-none');
 }
 
-async function printCustomerCard() {
-    if (!testCustomer) {
-        showStatus('No customer data available', 'warning');
+async function printAllBagCards() {
+    if (!testCustomer || testBags.length === 0) {
+        showStatus('No customer or bag data available', 'warning');
         return;
     }
 
@@ -168,80 +208,101 @@ async function printCustomerCard() {
         format: [4, 6]
     });
     
-    // Set margins and positions
-    const margin = 0.375;
-    const pageWidth = 4;
-    const pageHeight = 6;
-    const contentWidth = pageWidth - (margin * 2);
+    let isFirstCard = true;
     
-    // Add WaveMAX Laundry logo/title
-    pdf.setFontSize(18);
-    pdf.setFont(undefined, 'bold');
-    pdf.setTextColor(74, 144, 226); // #4A90E2
-    pdf.text('WaveMAX Laundry', margin, margin + 0.3);
-    
-    // Add customer name
-    pdf.setFontSize(16);
-    pdf.setFont(undefined, 'bold');
-    pdf.setTextColor(0, 0, 0);
-    pdf.text(`${testCustomer.firstName} ${testCustomer.lastName}`, margin, margin + 0.7);
-    
-    // Add customer address
-    pdf.setFontSize(11);
-    pdf.setFont(undefined, 'normal');
-    const addressLines = [
-        testCustomer.address,
-        testCustomer.phone,
-        testCustomer.email || ''
-    ].filter(line => line);
-    
-    let yPosition = margin + 1;
-    addressLines.forEach(line => {
-        pdf.text(line, margin, yPosition);
-        yPosition += 0.2;
-    });
-    
-    // Generate QR code data - just the customer ID for operator scanning
-    const qrData = testCustomer.customerId || testCustomer._id;
-    
-    // Create QR code
-    try {
-        const qrImageUrl = await QRCode.toDataURL(qrData, {
-            width: 150,
-            margin: 1,
-            errorCorrectionLevel: 'M',
-            color: {
-                dark: '#000000',
-                light: '#FFFFFF'
-            }
+    // Generate a card for each bag
+    for (let i = 0; i < testBags.length; i++) {
+        const bag = testBags[i];
+        
+        // Add new page for each card except the first
+        if (!isFirstCard) {
+            pdf.addPage();
+        }
+        isFirstCard = false;
+        
+        // Set margins and positions
+        const margin = 0.375;
+        const pageWidth = 4;
+        const pageHeight = 6;
+        
+        // Add WaveMAX Laundry logo/title
+        pdf.setFontSize(18);
+        pdf.setFont(undefined, 'bold');
+        pdf.setTextColor(74, 144, 226); // #4A90E2
+        pdf.text('WaveMAX Laundry', margin, margin + 0.3);
+        
+        // Add bag number
+        pdf.setFontSize(14);
+        pdf.setTextColor(0, 0, 0);
+        pdf.text(`Bag ${bag.bagNumber}`, margin, margin + 0.6);
+        
+        // Add customer name
+        pdf.setFontSize(16);
+        pdf.setFont(undefined, 'bold');
+        pdf.text(`${testCustomer.firstName} ${testCustomer.lastName}`, margin, margin + 1);
+        
+        // Add customer info
+        pdf.setFontSize(11);
+        pdf.setFont(undefined, 'normal');
+        const infoLines = [
+            testCustomer.phone,
+            testCustomer.email || '',
+            `Customer ID: ${testCustomer.customerId || testCustomer._id}`,
+            `Bag ID: ${bag.bagId}`
+        ].filter(line => line);
+        
+        let yPosition = margin + 1.3;
+        infoLines.forEach(line => {
+            pdf.text(line, margin, yPosition);
+            yPosition += 0.2;
         });
         
-        // Add QR code to PDF (bottom right)
-        const qrSize = 1.25;
-        const qrX = pageWidth - margin - qrSize;
-        const qrY = pageHeight - margin - qrSize;
-        pdf.addImage(qrImageUrl, 'PNG', qrX, qrY, qrSize, qrSize);
-    } catch (err) {
-        console.error('QR Code generation failed:', err);
+        // Generate QR code data with new format
+        const qrData = `${testCustomer.customerId || testCustomer._id}#${bag.bagId}`;
+        
+        // Create QR code
+        try {
+            const qrImageUrl = await QRCode.toDataURL(qrData, {
+                width: 150,
+                margin: 1,
+                errorCorrectionLevel: 'M',
+                color: {
+                    dark: '#000000',
+                    light: '#FFFFFF'
+                }
+            });
+            
+            // Add QR code to PDF (bottom center)
+            const qrSize = 1.5;
+            const qrX = (pageWidth - qrSize) / 2;
+            const qrY = pageHeight - margin - qrSize - 0.5;
+            pdf.addImage(qrImageUrl, 'PNG', qrX, qrY, qrSize, qrSize);
+            
+            // Add QR data text below QR code
+            pdf.setFontSize(8);
+            pdf.text(qrData, pageWidth / 2, qrY + qrSize + 0.1, { align: 'center' });
+        } catch (err) {
+            console.error('QR Code generation failed:', err);
+        }
     }
     
     // Generate filename with timestamp
     const timestamp = new Date().toISOString().slice(0, 10);
-    const filename = `customer-card-${testCustomer.customerId || testCustomer._id}-${timestamp}.pdf`;
+    const filename = `bag-cards-${testCustomer.customerId || testCustomer._id}-${timestamp}.pdf`;
     
     // Save the PDF and open in new window for printing
     const pdfBlob = pdf.output('blob');
     const pdfUrl = URL.createObjectURL(pdfBlob);
     
     // Open PDF in new window
-    const printWindow = window.open(pdfUrl, '_blank');
+    window.open(pdfUrl, '_blank');
     
     // Clean up the URL after a short delay
     setTimeout(() => {
         URL.revokeObjectURL(pdfUrl);
     }, 100);
     
-    console.log(`Generated PDF customer card`);
+    console.log(`Generated PDF with ${testBags.length} bag cards`);
 }
 
 // Initialize on load
@@ -253,7 +314,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     
     // Set up button event handlers
     document.getElementById('recreateOrderBtn').addEventListener('click', recreateTestOrder);
-    document.getElementById('printCardBtn').addEventListener('click', printCustomerCard);
+    document.getElementById('printAllCardsBtn').addEventListener('click', printAllBagCards);
     
     // Load initial data
     loadTestData();

@@ -18,43 +18,71 @@
             <p class="mb-1"><strong>Name:</strong> <span id="customerName">Loading...</span></p>
             <p class="mb-1"><strong>Email:</strong> <span id="customerEmail">Loading...</span></p>
             <p class="mb-1"><strong>Customer ID:</strong> <span id="customerId">Loading...</span></p>
-            <p class="mb-1"><strong>QR Code:</strong> <span id="customerQR">Loading...</span></p>
+            <p class="mb-1"><strong>Order ID:</strong> <span id="orderId">No order created</span></p>
+            <p class="mb-1"><strong>Bags:</strong> <span id="bagCount">0</span></p>
         </div>
 
         <div class="row mb-4">
             <div class="col-md-6">
                 <button class="btn btn-primary w-100 mb-3" id="recreateOrderBtn">
-                    <i class="fas fa-sync"></i> Recreate Test Order
+                    <i class="fas fa-sync"></i> Create Test Order with 2 Bags
                 </button>
                 <div id="orderStatus" class="alert alert-info d-none"></div>
             </div>
             <div class="col-md-6">
-                <button class="btn btn-success w-100 mb-3" id="printCardBtn">
-                    <i class="fas fa-print"></i> Print Customer Card
+                <button class="btn btn-success w-100 mb-3" id="printAllCardsBtn">
+                    <i class="fas fa-print"></i> Print All Bag Cards
                 </button>
             </div>
         </div>
 
-        <div class="customer-card" id="customerCard">
-            <h3>WaveMAX Customer Card</h3>
-            <hr>
-            <div id="qrcode"></div>
-            <p class="mb-1"><strong id="cardName">Loading...</strong></p>
-            <p class="mb-0"><small id="cardId">Loading...</small></p>
+        <!-- Tabs for bag cards -->
+        <ul class="nav nav-tabs" id="bagTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="bag1-tab" data-bs-toggle="tab" data-bs-target="#bag1" type="button" role="tab">
+                    Bag 1
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="bag2-tab" data-bs-toggle="tab" data-bs-target="#bag2" type="button" role="tab">
+                    Bag 2
+                </button>
+            </li>
+        </ul>
+
+        <div class="tab-content" id="bagTabContent">
+            <div class="tab-pane fade show active" id="bag1" role="tabpanel">
+                <div class="customer-card">
+                    <h3>WaveMAX Bag Card - Bag 1</h3>
+                    <hr>
+                    <div id="qrcode1" class="qrcode-container"></div>
+                    <p class="mb-1"><strong id="cardName1">Loading...</strong></p>
+                    <p class="mb-0"><small id="cardId1">Loading...</small></p>
+                    <p class="mb-0"><small id="bagId1">Loading...</small></p>
+                </div>
+            </div>
+            <div class="tab-pane fade" id="bag2" role="tabpanel">
+                <div class="customer-card">
+                    <h3>WaveMAX Bag Card - Bag 2</h3>
+                    <hr>
+                    <div id="qrcode2" class="qrcode-container"></div>
+                    <p class="mb-1"><strong id="cardName2">Loading...</strong></p>
+                    <p class="mb-0"><small id="cardId2">Loading...</small></p>
+                    <p class="mb-0"><small id="bagId2">Loading...</small></p>
+                </div>
+            </div>
         </div>
 
         <div class="mt-4">
             <h5>Test Operator Scan Page:</h5>
-            <p>Once you have the QR code, test the operator scan page:</p>
+            <p>Once you have created the order and bags, test the operator scan page:</p>
             <a href="/embed-app-v2.html?route=/operator-scan" class="btn btn-secondary" target="_blank">
-                Open Operator Scan (Legacy)
-            </a>
-            <a href="/embed-app-v2.html?route=/operator-scan" class="btn btn-secondary" target="_blank">
-                Open Operator Scan (CSP v2)
+                Open Operator Scan Page
             </a>
         </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="/assets/js/csrf-utils.js"></script>
     <script src="/assets/js/test-operator-scan.js"></script>
 </body>

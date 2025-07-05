@@ -23,7 +23,7 @@ This document tracks the progress of migrating all HTML pages to Content Securit
 | `customer-login-embed.html` | ✅ Completed | - | Migrated with OAuth support, fixed affiliate conflict handling |
 | `customer-register-embed.html` | ✅ Completed | - | Migrated with payment form and OAuth support, fixed Paygistix window monitoring |
 | `administrator-login-embed.html` | ✅ Completed | - | Migrated, moved inline script to init file |
-| `operator-login-embed.html` | 🚫 Not Needed | 1 inline script, 1 onclick | Operators auto-login by IP, page not used |
+| `operator-login-embed.html` | ✅ Migrated | None | Moved inline styles and scripts to external files |
 | `forgot-password-embed.html` | ✅ Completed | - | New CSP-compliant page |
 | `reset-password-embed.html` | ✅ Completed | - | New CSP-compliant page |
 

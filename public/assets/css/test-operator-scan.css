@@ -12,8 +12,10 @@
     margin-bottom: 10px;
 }
 
-#qrcode {
+.qrcode-container {
     margin: 20px auto;
+    display: flex;
+    justify-content: center;
 }
 
 .test-info {
@@ -21,6 +23,17 @@
     padding: 15px;
     border-radius: 5px;
     margin-bottom: 20px;
+}
+
+.nav-tabs {
+    margin-bottom: 20px;
+}
+
+.tab-content {
+    background: white;
+    border: 1px solid #dee2e6;
+    border-top: none;
+    padding: 20px;
 }
 
 @media print {

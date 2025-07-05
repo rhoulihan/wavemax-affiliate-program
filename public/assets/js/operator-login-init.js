@@ -267,4 +267,20 @@
 
   // Auto-focus on email field
   document.getElementById('email').focus();
+
+  // Initialize i18n
+  async function initializeI18n() {
+    await window.i18n.init({ debugMode: false });
+    window.LanguageSwitcher.createSwitcher('language-switcher-container', {
+      style: 'dropdown',
+      showLabel: false
+    });
+  }
+
+  // Initialize i18n when DOM is ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initializeI18n);
+  } else {
+    initializeI18n();
+  }
 })();

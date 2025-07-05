@@ -49,6 +49,10 @@ router.post('/customer', async (req, res) => {
         let testAffiliate = await require('../models/Affiliate').findOne({ email: 'test.affiliate@wavemax.test' });
         if (!testAffiliate) {
             const Affiliate = require('../models/Affiliate');
+            
+            // Hash password for affiliate
+            const { salt: affSalt, hash: affHash } = encryptionUtil.hashPassword('TestPassword123!');
+            
             testAffiliate = new Affiliate({
                 firstName: 'Test',
                 lastName: 'Affiliate',
@@ -66,11 +70,12 @@ router.post('/customer', async (req, res) => {
                 perBagDeliveryFee: 5,
                 serviceLatitude: 30.2672,
                 serviceLongitude: -97.7431,
-                registrationMethod: 'traditional', // Explicitly set to traditional to work with password
+                registrationMethod: 'traditional',
                 paymentMethod: 'directDeposit',
                 accountNumber: '123456789',
                 routingNumber: '987654321',
-                password: 'TestPassword123!' // This will be hashed by the pre-save middleware
+                passwordSalt: affSalt,
+                passwordHash: affHash
             });
             
             await testAffiliate.save();

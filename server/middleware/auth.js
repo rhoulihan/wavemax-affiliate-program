@@ -39,15 +39,65 @@ exports.authenticate = async (req, res, next) => {
       });
     }
 
-    // Verify the token
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    
-    // Get client IP
+    // Get client IP first
     const clientIP = req.headers['x-forwarded-for'] || 
                     req.headers['x-real-ip'] || 
                     req.connection.remoteAddress ||
                     req.socket.remoteAddress ||
                     req.ip;
+    
+    // Try to decode token without verification first to check if it's from store IP
+    let decoded;
+    try {
+      // First decode without verification to check role and handle store IPs
+      const decodedUnverified = jwt.decode(token);
+      
+      if (decodedUnverified && decodedUnverified.role === 'operator' && storeIPConfig.isWhitelisted(clientIP)) {
+        // For operators from store IPs, check if token is expired
+        const tokenExp = decodedUnverified.exp * 1000; // Convert to milliseconds
+        const now = Date.now();
+        
+        if (now >= tokenExp) {
+          // Token is expired, but it's from a store IP - renew it
+          console.log(`Expired token from store IP ${clientIP}, renewing for operator ${decodedUnverified.operatorId}`);
+          
+          // Generate new token with ALL required fields from the original token
+          const newTokenData = {
+            id: decodedUnverified.id,
+            role: decodedUnverified.role,
+            operatorId: decodedUnverified.operatorId,
+            email: decodedUnverified.email,
+            name: decodedUnverified.name,
+            permissions: decodedUnverified.permissions
+          };
+          
+          // Set expiration to max session duration for store IPs
+          const newToken = jwt.sign(
+            newTokenData,
+            process.env.JWT_SECRET,
+            { expiresIn: '24h' } // 24 hours for store operators
+          );
+          
+          // Add new token to response header
+          res.setHeader('X-Renewed-Token', newToken);
+          res.setHeader('X-Token-Renewed', 'true');
+          res.setHeader('X-Token-Was-Expired', 'true');
+          
+          // Use the renewed token data as decoded
+          decoded = jwt.verify(newToken, process.env.JWT_SECRET);
+        } else {
+          // Token not expired, verify normally
+          decoded = jwt.verify(token, process.env.JWT_SECRET);
+        }
+      } else {
+        // Not a store operator, verify normally
+        decoded = jwt.verify(token, process.env.JWT_SECRET);
+      }
+    } catch (verifyError) {
+      // If decoding or initial check fails, try normal verification
+      // This will throw the appropriate error
+      decoded = jwt.verify(token, process.env.JWT_SECRET);
+    }
     
     // Check if this is an operator from a store IP
     const isStoreIP = storeIPConfig.isWhitelisted(clientIP);
@@ -61,11 +111,13 @@ exports.authenticate = async (req, res, next) => {
       
       // If token expires within threshold, renew it
       if (timeUntilExpiry < storeIPConfig.sessionRenewal.renewThreshold) {
-        // Generate new token with extended expiration
+        // Generate new token with ALL required fields from the original token
         const newTokenData = {
           id: decoded.id,
           role: decoded.role,
           operatorId: decoded.operatorId,
+          email: decoded.email,
+          name: decoded.name,
           permissions: decoded.permissions
         };
         

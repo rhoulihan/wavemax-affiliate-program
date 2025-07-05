@@ -34,22 +34,59 @@
     let bagsScanned = null;
     let ordersReady = null;
 
+    // Helper function to update stats display
+    function updateStatsDisplay(data) {
+        console.log('Stats data received:', data);
+        console.log('Raw stats values:', {
+            ordersProcessed: data.ordersProcessed,
+            bagsScanned: data.bagsScanned,
+            ordersReady: data.ordersReady,
+            fullData: JSON.stringify(data)
+        });
+        
+        // Update DOM elements
+        if (ordersToday) {
+            ordersToday.textContent = data.ordersProcessed || 0;
+            console.log('Set ordersToday to:', data.ordersProcessed || 0);
+        }
+        if (bagsScanned) {
+            bagsScanned.textContent = data.bagsScanned || 0;
+            console.log('Set bagsScanned to:', data.bagsScanned || 0);
+        }
+        if (ordersReady) {
+            ordersReady.textContent = data.ordersReady || 0;
+            console.log('Set ordersReady to:', data.ordersReady || 0);
+        }
+        
+        console.log('Stats updated in DOM:', {
+            ordersProcessed: data.ordersProcessed || 0,
+            bagsScanned: data.bagsScanned || 0,
+            ordersReady: data.ordersReady || 0
+        });
+    }
+
     // Initialize
     async function init() {
         // Check authentication
         const token = localStorage.getItem('operatorToken');
+        console.log('Operator scan init - Token status:', token ? 'Present' : 'Missing');
+        
         if (!token) {
+            console.log('No token found, redirecting to login...');
             window.location.href = '/operator-login-embed.html';
             return;
         }
         
         // Verify token is still valid by making a test request
+        console.log('Verifying token validity...');
         try {
             const testResponse = await fetch(`${BASE_URL}/api/v1/operators/stats/today`, {
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }
             });
+            
+            console.log('Token validation response:', testResponse.status);
             
             if (testResponse.status === 401) {
                 console.error('Operator token is invalid or expired');
@@ -75,6 +112,12 @@
             console.log('Disabling ModalSystem to prevent interference');
             window.ModalSystem.closeActiveModal = function() {};
             window.ModalSystem.showModal = function() {};
+        }
+        
+        // Remove modal class from orderModal to prevent modal-utils from controlling it
+        if (orderModal) {
+            orderModal.classList.remove('modal');
+            orderModal.classList.add('operator-modal');
         }
         
         // Override ErrorHandler to redirect on auth errors
@@ -164,6 +207,7 @@
         console.log('=== LOADING STATS ===');
         console.log('Current operator data:', operatorData);
         console.log('Operator ID:', operatorData?.id || 'No ID');
+        console.log('Stats call timestamp:', new Date().toISOString());
         
         try {
             const token = localStorage.getItem('operatorToken');
@@ -191,52 +235,64 @@
             });
             console.log('Stats response status:', response.status);
             
-            // Check for renewed token in response headers
+            // Always check for renewed token in response headers, even on non-ok responses
             const renewedToken = response.headers.get('X-Renewed-Token');
             const tokenRenewed = response.headers.get('X-Token-Renewed');
+            const wasExpired = response.headers.get('X-Token-Was-Expired');
             
             if (tokenRenewed === 'true' && renewedToken) {
                 // Update stored token with renewed one
                 console.log('Token renewed by server, updating local storage');
+                console.log('Old token:', token.substring(0, 50) + '...');
+                console.log('New token:', renewedToken.substring(0, 50) + '...');
+                console.log('Was expired:', wasExpired);
+                
+                // Decode tokens to compare
+                try {
+                    const oldPayload = JSON.parse(atob(token.split('.')[1]));
+                    const newPayload = JSON.parse(atob(renewedToken.split('.')[1]));
+                    console.log('Old token payload:', oldPayload);
+                    console.log('New token payload:', newPayload);
+                } catch (e) {
+                    console.error('Error decoding tokens:', e);
+                }
+                
                 localStorage.setItem('operatorToken', renewedToken);
+                
+                // If token was expired and renewed, retry the request with new token
+                if (wasExpired === 'true') {
+                    console.log('Token was expired and renewed, retrying request...');
+                    const retryResponse = await csrfFetch(`${BASE_URL}/api/v1/operators/stats/today`, {
+                        headers: {
+                            'Authorization': `Bearer ${renewedToken}`
+                        }
+                    });
+                    
+                    if (retryResponse.ok) {
+                        const data = await retryResponse.json();
+                        updateStatsDisplay(data);
+                        return;
+                    }
+                }
             }
 
             if (response.ok) {
                 const data = await response.json();
-                console.log('Stats data received:', data);
-                console.log('Raw stats values:', {
-                    ordersProcessed: data.ordersProcessed,
-                    bagsScanned: data.bagsScanned,
-                    ordersReady: data.ordersReady,
-                    fullData: JSON.stringify(data)
-                });
-                
-                // Update DOM elements
-                if (ordersToday) {
-                    ordersToday.textContent = data.ordersProcessed || 0;
-                    console.log('Set ordersToday to:', data.ordersProcessed || 0);
-                }
-                if (bagsScanned) {
-                    bagsScanned.textContent = data.bagsScanned || 0;
-                    console.log('Set bagsScanned to:', data.bagsScanned || 0);
-                }
-                if (ordersReady) {
-                    ordersReady.textContent = data.ordersReady || 0;
-                    console.log('Set ordersReady to:', data.ordersReady || 0);
-                }
-                
-                console.log('Stats updated in DOM:', {
-                    ordersProcessed: data.ordersProcessed || 0,
-                    bagsScanned: data.bagsScanned || 0,
-                    ordersReady: data.ordersReady || 0
-                });
+                updateStatsDisplay(data);
             } else if (response.status === 401) {
                 // Unauthorized - token might be expired
+                console.error('Stats call got 401 error at:', new Date().toISOString());
+                console.error('Current token:', localStorage.getItem('operatorToken')?.substring(0, 20) + '...');
                 console.error('Operator token expired or invalid');
+                
+                // Add a delay to prevent rapid refresh loops
                 clearInterval(statsInterval);
                 localStorage.removeItem('operatorToken');
                 localStorage.removeItem('operatorData');
-                window.location.href = '/operator-login-embed.html';
+                
+                setTimeout(function() {
+                    window.location.href = '/operator-login-embed.html';
+                }, 1000);
             }
         } catch (error) {
             console.error('Error loading stats:', error);
@@ -247,36 +303,68 @@
         }
     }
 
+    // Scanner blur handler
+    function handleScannerBlur() {
+        // Only refocus if no modal is open and not focusing on an input
+        setTimeout(function() {
+            const activeElement = document.activeElement;
+            const isInputFocused = activeElement && 
+                (activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA') &&
+                activeElement.id !== 'scanInput';
+            
+            // Check if weight input section is visible
+            const weightInputSection = document.querySelector('.weight-input-section');
+            const weightInputsVisible = weightInputSection && weightInputSection.offsetParent !== null;
+            
+            // Check if pickup modal is active (we want to keep scanning during pickup)
+            const isPickupModalActive = orderModal.classList.contains('active') && 
+                currentOrder && currentOrder.scannedBagsForPickup;
+            
+            // Refocus scanner if:
+            // 1. No modal is active, OR
+            // 2. Pickup modal is active (we want to keep scanning)
+            // AND no other input is focused AND weight inputs are not visible
+            if ((!orderModal.classList.contains('active') || isPickupModalActive) && 
+                !isInputFocused && !weightInputsVisible) {
+                focusScanner();
+            }
+        }, 100);
+    }
+
+    // Document click handler
+    function handleDocumentClick(e) {
+        // Check if weight input section is visible
+        const weightInputSection = document.querySelector('.weight-input-section');
+        const weightInputsVisible = weightInputSection && weightInputSection.offsetParent !== null;
+        
+        // Don't refocus scanner if weight inputs are visible
+        if (weightInputsVisible) {
+            return;
+        }
+        
+        if (!e.target.closest('.modal') && !e.target.closest('button')) {
+            focusScanner();
+        }
+    }
+
+    // Keyboard shortcut handler
+    function handleKeyDown(e) {
+        if (e.key === 'Escape') {
+            closeModal();
+        }
+    }
+
     // Set up event listeners
     function setupEventListeners() {
         // Scanner input handling
         scanInput.addEventListener('input', handleScanInput);
-        scanInput.addEventListener('blur', () => {
-            // Only refocus if no modal is open and not focusing on an input
-            setTimeout(() => {
-                const activeElement = document.activeElement;
-                const isInputFocused = activeElement && 
-                    (activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA');
-                
-                if (!orderModal.classList.contains('active') && !isInputFocused) {
-                    focusScanner();
-                }
-            }, 100);
-        });
+        scanInput.addEventListener('blur', handleScannerBlur);
 
         // Keep focus on scanner input
-        document.addEventListener('click', (e) => {
-            if (!e.target.closest('.modal') && !e.target.closest('button')) {
-                focusScanner();
-            }
-        });
+        document.addEventListener('click', handleDocumentClick);
 
         // Keyboard shortcuts
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') {
-                closeModal();
-            }
-        });
+        document.addEventListener('keydown', handleKeyDown);
 
         // Logout button
         const logoutBtn = document.getElementById('logoutBtn');
@@ -312,6 +400,8 @@
         console.log('=== SCAN INPUT DETECTED ===');
         console.log('Input value:', value);
         console.log('Buffer before:', scanBuffer);
+        console.log('Modal active:', orderModal.classList.contains('active'));
+        console.log('Current order:', currentOrder ? currentOrder.orderId : 'none');
         
         // Clear any existing timeout
         if (scanTimeout) {
@@ -325,7 +415,7 @@
         console.log('Buffer after:', scanBuffer);
 
         // Process after a short delay (scanner sends data quickly)
-        scanTimeout = setTimeout(() => {
+        scanTimeout = setTimeout(function() {
             if (scanBuffer.length > 0) {
                 console.log('Processing buffered scan:', scanBuffer);
                 processScan(scanBuffer.trim());
@@ -358,6 +448,19 @@
             console.log('Processing scan with token:', token ? 'Present' : 'Missing');
             console.log('CSRF token status:', CsrfUtils.getToken() ? 'Present' : 'Missing');
             
+            // Parse the scan data - format is customerId#bagId
+            let customerId = scanData;
+            let bagId = null;
+            
+            if (scanData.includes('#')) {
+                const parts = scanData.split('#');
+                customerId = parts[0];
+                bagId = parts[1];
+                console.log('Parsed scan data - Customer ID:', customerId, 'Bag ID:', bagId);
+            } else {
+                console.log('No bag ID in scan data, using full string as customer ID');
+            }
+            
             // Use scan-customer endpoint - bags have customer IDs on them
             const response = await csrfFetch(`${BASE_URL}/api/v1/operators/scan-customer`, {
                 method: 'POST',
@@ -366,7 +469,8 @@
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({ 
-                    customerId: scanData
+                    customerId: customerId,
+                    bagId: bagId
                 })
             });
             
@@ -403,6 +507,13 @@
             
             if (data.success) {
                 console.log('Scan successful, calling handleScanResponse');
+                console.log('Data from server:', JSON.stringify(data));
+                // Pass the customerId and bagId along with the response
+                data.scannedCustomerId = customerId;
+                if (bagId && !data.scannedBagId) {
+                    // Ensure bagId is passed if it was in the scan
+                    data.scannedBagId = bagId;
+                }
                 handleScanResponse(data);
             } else {
                 console.log('Scan failed:', data.message);
@@ -418,11 +529,13 @@
 
     // Handle scan response based on order status
     function handleScanResponse(data) {
-        const { order, action } = data;
+        const { order, action, scannedBagId, scannedCustomerId } = data;
         
         console.log('=== HANDLE SCAN RESPONSE ===');
         console.log('Action received:', action);
         console.log('Order data:', order);
+        console.log('Scanned bag ID:', scannedBagId);
+        console.log('Scanned customer ID:', scannedCustomerId);
         console.log('Order status:', order?.status);
         console.log('Bags weighed:', order?.bagsWeighed);
         console.log('Bags processed:', order?.bagsProcessed);
@@ -434,20 +547,91 @@
         switch (action) {
             case 'weight_input':
                 console.log('=> Handling weight_input action');
-                // First scan - need weight input
-                showWeightInputModal(order);
+                // Check if modal is already open and we're scanning additional bags
+                if (orderModal.classList.contains('active') && 
+                    currentOrder && 
+                    currentOrder.orderId === order.orderId && 
+                    currentOrder.scannedBagsForWeighing) {
+                    console.log('Modal already open, adding bag to existing scan session');
+                    // Add the new bag to the existing set
+                    if (scannedBagId && !currentOrder.scannedBagsForWeighing.has(scannedBagId)) {
+                        currentOrder.scannedBagsForWeighing.add(scannedBagId);
+                        // Update the modal with the new scan
+                        showWeightInputModal(currentOrder, null); // Don't pass bagId again, it's already in the set
+                    } else {
+                        console.log('Bag already scanned or no bag ID');
+                        showConfirmation('Bag already scanned', '⚠️', 'warning');
+                        setTimeout(hideConfirmation, 2000);
+                    }
+                } else {
+                    // First scan - need weight input
+                    // Check if we already have scanned bags for this order
+                    if (currentOrder && currentOrder.orderId === order.orderId && currentOrder.scannedBagsForWeighing) {
+                        // Preserve existing scanned bags
+                        order.scannedBagsForWeighing = currentOrder.scannedBagsForWeighing;
+                    }
+                    // Store the customer ID from the scan
+                    order.customerId = scannedCustomerId;
+                    showWeightInputModal(order, scannedBagId);
+                }
                 break;
 
             case 'process_complete':
                 console.log('=> Handling process_complete action');
                 // Second scan - mark bag as processed after WDF
-                handleProcessComplete(order);
+                order.customerId = scannedCustomerId;
+                handleProcessComplete(order, scannedBagId);
                 break;
 
             case 'pickup_scan':
                 console.log('=> Handling pickup_scan action');
+                console.log('Order ID:', order.orderId);
+                console.log('Scanned bag ID:', scannedBagId);
+                console.log('Modal active?', orderModal.classList.contains('active'));
+                console.log('Current order exists?', !!currentOrder);
+                console.log('Current order ID:', currentOrder ? currentOrder.orderId : 'none');
+                console.log('Current order scannedBagsForPickup:', currentOrder && currentOrder.scannedBagsForPickup ? Array.from(currentOrder.scannedBagsForPickup) : 'none');
+                
                 // Third scan - scanning for pickup by affiliate
-                handlePickupScan(order);
+                order.customerId = scannedCustomerId;
+                
+                // Check if pickup modal is already open and we're scanning additional bags
+                if (orderModal.classList.contains('active') && 
+                    currentOrder && 
+                    currentOrder.orderId === order.orderId) {
+                    console.log('Pickup modal already open, adding bag to existing scan session');
+                    
+                    // Preserve the existing scanned bags tracking
+                    if (currentOrder.scannedBagsForPickup) {
+                        order.scannedBagsForPickup = currentOrder.scannedBagsForPickup;
+                        console.log('Preserved existing tracking:', Array.from(order.scannedBagsForPickup));
+                    } else {
+                        order.scannedBagsForPickup = new Set();
+                        console.log('Created new tracking set');
+                    }
+                    
+                    // Add the new bag to the existing set
+                    if (scannedBagId && !order.scannedBagsForPickup.has(scannedBagId)) {
+                        console.log('Adding new bag to tracking:', scannedBagId);
+                        order.scannedBagsForPickup.add(scannedBagId);
+                        currentOrder = order; // Update currentOrder with the preserved tracking
+                        // Update the modal with the new scan
+                        showPickupModal(order);
+                    } else if (scannedBagId && order.scannedBagsForPickup.has(scannedBagId)) {
+                        console.log('Bag already scanned:', scannedBagId);
+                        // Add a small delay to ensure the previous confirmation is hidden
+                        setTimeout(() => {
+                            showConfirmation('Bag already scanned', '⚠️', 'warning');
+                            setTimeout(hideConfirmation, 2000);
+                        }, 100);
+                    } else {
+                        console.log('No bag ID provided');
+                    }
+                } else {
+                    console.log('First scan or different order - showing new pickup modal');
+                    // First scan - show pickup modal
+                    handlePickupScan(order, scannedBagId);
+                }
                 break;
 
             default:
@@ -459,16 +643,28 @@
     }
 
     // Show weight input modal
-    function showWeightInputModal(order) {
+    function showWeightInputModal(order, scannedBagId) {
         console.log('showWeightInputModal called');
         console.log('orderModal element:', orderModal);
-        console.log('orderModal active before:', orderModal?.classList.contains('active'));
+        console.log('Scanned bag ID:', scannedBagId);
         
-        currentOrder = order;
-        modalTitle.textContent = 'Enter Bag Weights';
+        // Initialize or preserve scanned bags tracking
+        if (!currentOrder || currentOrder.orderId !== order.orderId) {
+            currentOrder = order;
+            currentOrder.scannedBagsForWeighing = new Set();
+        }
+        
+        // Add the scanned bag ID to the set
+        if (scannedBagId) {
+            currentOrder.scannedBagsForWeighing.add(scannedBagId);
+        }
+        
+        modalTitle.textContent = 'Scan All Bags First';
 
         // Calculate how many bags still need weights
         const bagsToWeigh = order.numberOfBags - (order.bagsWeighed || 0);
+        const scannedCount = currentOrder.scannedBagsForWeighing.size;
+        const allBagsScanned = scannedCount >= bagsToWeigh;
 
         let html = `
             <div class="order-info">
@@ -488,193 +684,180 @@
                     </div>
                     <div class="info-item">
                         <div class="info-label">Bags Weighed</div>
-                        <div class="info-value">${order.bagsWeighed || 0}</div>
+                        <div class="info-value" id="bagsWeighedValue">${order.bagsWeighed || 0}</div>
                     </div>
                 </div>
             </div>
 
-            <div class="weight-input-section">
-                <h5>Enter weight for ${bagsToWeigh} bag${bagsToWeigh > 1 ? 's' : ''}:</h5>
+            <div class="scan-progress-section">
+                <h5>Scan all bags before entering weights</h5>
+                <div class="scan-progress">
+                    <p class="text-info"><strong>Bags scanned: ${scannedCount} of ${bagsToWeigh}</strong></p>
+                    <div class="progress mb-3">
+                        <div class="progress-bar" role="progressbar" 
+                             id="scanProgressBar"
+                             aria-valuenow="${scannedCount}" 
+                             aria-valuemin="0" 
+                             aria-valuemax="${bagsToWeigh}">
+                        </div>
+                    </div>
+                    ${!allBagsScanned ? 
+                        '<p class="text-warning">Please scan all bags to continue.</p>' : 
+                        '<p class="text-success"><strong>All bags scanned! Now enter weights.</strong></p>'}
+                </div>
+            </div>
         `;
 
-        // Create weight inputs for remaining bags
-        const startBag = (order.bagsWeighed || 0) + 1;
-        for (let i = startBag; i <= order.numberOfBags; i++) {
-            html += `
-                <div class="bag-weight-input">
-                    <label>Bag ${i}:</label>
-                    <input type="number" 
-                           id="bagWeight${i}" 
-                           step="0.1" 
-                           min="0.1" 
-                           placeholder="Weight in lbs">
-                </div>
-            `;
+        // Only show weight inputs if all bags are scanned
+        if (allBagsScanned) {
+            modalTitle.textContent = 'Enter Bag Weights';
+            html += '<div class="weight-input-section">';
+            
+            // Create weight inputs for each scanned bag
+            const scannedBagIds = Array.from(currentOrder.scannedBagsForWeighing);
+            scannedBagIds.forEach((bagId, index) => {
+                const bagNumber = (order.bagsWeighed || 0) + index + 1;
+                // Replace hyphens with underscores for valid HTML IDs
+                const sanitizedBagId = bagId.replace(/-/g, '_');
+                html += `
+                    <div class="bag-weight-input">
+                        <label>Bag ${bagNumber} (${bagId.substring(0, 8)}...):</label>
+                        <input type="number" 
+                               id="bagWeight_${sanitizedBagId}" 
+                               class="weight-input"
+                               data-bag-id="${bagId}"
+                               data-bag-number="${bagNumber}"
+                               step="0.1" 
+                               min="0.1" 
+                               placeholder="Weight in lbs">
+                    </div>
+                `;
+            });
+            
+            html += '</div>';
         }
 
         html += `
-            </div>
             <div class="action-buttons">
                 <button class="btn btn-secondary" id="cancelWeightModalBtn">Cancel</button>
-                <button class="btn btn-primary" id="submitWeightsBtn">Mark as In Progress</button>
+                <button class="btn btn-primary" 
+                        id="submitWeightsBtn"
+                        ${!allBagsScanned ? 'disabled' : ''}>
+                    Mark as In Progress
+                </button>
             </div>
         `;
 
         modalBody.innerHTML = html;
         
-        // Use multiple strategies to ensure modal stays visible
+        // Show modal using CSS classes only
         console.log('Setting modal to visible');
-        
-        // Strategy 1: Set display immediately
         orderModal.classList.add('active');
-        orderModal.setAttribute('data-force-visible', 'true');
         
-        // Temporarily remove the 'modal' class to avoid being targeted by modal-utils.js
-        orderModal.classList.remove('modal');
-        orderModal.classList.add('weight-input-modal-active');
-        
-        // Strategy 2: Use requestAnimationFrame to show after next paint
-        requestAnimationFrame(() => {
-            orderModal.classList.add('active');
-            console.log('Modal display set in requestAnimationFrame');
-        });
-        
-        // Strategy 3: Use multiple setTimeout calls
-        [0, 10, 50, 100, 200, 500].forEach(delay => {
-            setTimeout(() => {
-                if (orderModal.getAttribute('data-force-visible') === 'true') {
-                    orderModal.classList.add('active');
-                    console.log(`Modal display reinforced at ${delay}ms`);
-                }
-            }, delay);
-        });
-        
-        // Prevent click events OUTSIDE the modal from propagating
-        const preventClickPropagation = (e) => {
-            // Only prevent if click is outside the modal
-            if (orderModal.getAttribute('data-force-visible') === 'true' && 
-                !orderModal.contains(e.target)) {
-                console.log('Preventing outside click event from closing modal');
-                e.stopPropagation();
-                e.stopImmediatePropagation();
-                e.preventDefault();
-            }
-            // Allow clicks inside the modal to work normally
-        };
-        
-        // Add capture phase listener to intercept ALL clicks
-        document.addEventListener('click', preventClickPropagation, true);
-        orderModal._clickInterceptor = preventClickPropagation;
-        
-        // CSP-compliant: Ensure modal stays visible using classes
-        // The 'active' class will keep the modal visible
-        
-        // Prevent modal from being removed from DOM
-        const originalRemove = orderModal.remove;
-        orderModal.remove = function() {
-            if (orderModal.getAttribute('data-force-visible') === 'true') {
-                console.log('Blocked attempt to remove modal from DOM');
-                return;
-            }
-            originalRemove.call(this);
-        };
-        orderModal._originalRemove = originalRemove;
-        
-        // Also override parentNode.removeChild
-        if (orderModal.parentNode) {
-            const originalRemoveChild = orderModal.parentNode.removeChild;
-            orderModal.parentNode.removeChild = function(child) {
-                if (child === orderModal && orderModal.getAttribute('data-force-visible') === 'true') {
-                    console.log('Blocked attempt to remove modal via removeChild');
-                    return child;
-                }
-                return originalRemoveChild.call(this, child);
-            };
-            orderModal._originalRemoveChild = originalRemoveChild;
+        // Keep scanner focused if not all bags are scanned
+        if (!allBagsScanned) {
+            setTimeout(function() {
+                focusScanner();
+            }, 100);
         }
         
-        // Prevent ESC key from closing modal
-        const preventEscKey = (e) => {
-            if (e.key === 'Escape' && orderModal.getAttribute('data-force-visible') === 'true') {
-                console.log('Preventing ESC key from closing modal');
-                e.stopPropagation();
-                e.stopImmediatePropagation();
-                e.preventDefault();
-            }
-        };
-        document.addEventListener('keydown', preventEscKey, true);
-        orderModal._escInterceptor = preventEscKey;
-        
-        // Add event listeners to weight inputs for updates on blur only
-        setTimeout(() => {
-            const updateBagsWeighedCount = () => {
-                // Start with already weighed bags
-                let baseWeighedCount = order.bagsWeighed || 0;
-                let newWeighedCount = 0;
-                
-                // Count how many new bags have weights entered
-                for (let i = startBag; i <= order.numberOfBags; i++) {
-                    const input = document.getElementById(`bagWeight${i}`);
-                    if (input && input.value && parseFloat(input.value) > 0) {
-                        newWeighedCount++;
-                    }
-                }
-                
-                // Total is base + new
-                const totalWeighed = baseWeighedCount + newWeighedCount;
-                
-                // Update the display
-                const bagsWeighedDisplay = document.querySelector('.info-item:nth-child(4) .info-value');
-                if (bagsWeighedDisplay) {
-                    bagsWeighedDisplay.textContent = totalWeighed;
-                }
-            };
-            
-            // Add blur listeners to all weight fields (only update when focus leaves)
-            for (let i = startBag; i <= order.numberOfBags; i++) {
-                const input = document.getElementById(`bagWeight${i}`);
-                if (input) {
-                    // Only update count when focus leaves the field (blur event)
-                    input.addEventListener('blur', (e) => {
-                        // Only update if there's a valid value
-                        if (e.target.value && parseFloat(e.target.value) > 0) {
-                            updateBagsWeighedCount();
-                        }
-                    });
-                    
-                    // Also ensure focus works properly
-                    input.addEventListener('click', (e) => {
-                        e.stopPropagation();
-                        e.target.focus();
-                    });
-                }
-            }
-            
+        // Simple event listener setup without arrow functions
+        setTimeout(function() {
             // Add event listeners to buttons
             const cancelBtn = document.getElementById('cancelWeightModalBtn');
             const submitBtn = document.getElementById('submitWeightsBtn');
+            const progressBar = document.getElementById('scanProgressBar');
             
             if (cancelBtn) {
-                cancelBtn.addEventListener('click', closeModal);
+                cancelBtn.addEventListener('click', function() {
+                    // Clear the scanned bags when canceling
+                    if (currentOrder && currentOrder.scannedBagsForWeighing) {
+                        currentOrder.scannedBagsForWeighing.clear();
+                    }
+                    closeModal();
+                });
             }
             
             if (submitBtn) {
                 submitBtn.addEventListener('click', submitWeights);
+                // Enable/disable button based on whether all bags are scanned
+                submitBtn.disabled = !allBagsScanned;
+                
+                // If all bags are scanned, also check for weight inputs
+                if (allBagsScanned) {
+                    // Add input listeners to all weight inputs
+                    const weightInputs = document.querySelectorAll('.weight-input');
+                    
+                    function checkAllWeights() {
+                        let allValid = true;
+                        weightInputs.forEach(function(input) {
+                            const value = parseFloat(input.value);
+                            if (!value || value <= 0) {
+                                allValid = false;
+                            }
+                        });
+                        submitBtn.disabled = !allValid;
+                    }
+                    
+                    // Add listeners to each weight input
+                    weightInputs.forEach(function(input) {
+                        input.addEventListener('input', checkAllWeights);
+                        input.addEventListener('change', checkAllWeights);
+                    });
+                    
+                    // Initial check
+                    checkAllWeights();
+                }
             }
             
-            // Focus on first input
-            const firstInput = document.getElementById(`bagWeight${startBag}`);
-            if (firstInput) {
-                firstInput.focus();
+            // Set progress bar width
+            if (progressBar) {
+                const percentage = (scannedCount / bagsToWeigh) * 100;
+                progressBar.style.width = percentage + '%';
+                progressBar.textContent = Math.round(percentage) + '%';
             }
-        }, 300);
+            
+            // Focus on first input if all bags are scanned
+            if (allBagsScanned) {
+                const scannedBagIds = Array.from(currentOrder.scannedBagsForWeighing);
+                if (scannedBagIds.length > 0) {
+                    const sanitizedBagId = scannedBagIds[0].replace(/-/g, '_');
+                    const firstInput = document.getElementById(`bagWeight_${sanitizedBagId}`);
+                    if (firstInput) {
+                        firstInput.focus();
+                    }
+                }
+            }
+        }, 100);
     }
 
     // Handle process complete scan (after WDF)
-    function handleProcessComplete(order) {
+    function handleProcessComplete(order, scannedBagId) {
         console.log('=== HANDLE PROCESS COMPLETE ===');
         console.log('Order:', order);
+        console.log('Scanned bag ID:', scannedBagId);
+        console.log('Order bags:', order.bags);
+        
+        // Check if this specific bag has already been processed
+        if (order.bags && scannedBagId) {
+            const scannedBag = order.bags.find(b => b.bagId === scannedBagId);
+            if (scannedBag && scannedBag.status === 'processed') {
+                console.log('Bag already processed:', scannedBagId);
+                // Check if all bags are processed
+                const allBagsProcessed = order.bags.every(b => b.status === 'processed' || b.status === 'completed');
+                if (allBagsProcessed) {
+                    showConfirmation('All bags already processed - ready for pickup', '✅', 'success');
+                } else {
+                    const remainingBags = order.bags.filter(b => b.status === 'processing').length;
+                    showConfirmation(`This bag has already been processed. ${remainingBags} bags still need processing.`, '⚠️', 'info');
+                }
+                setTimeout(hideConfirmation, 3000);
+                return;
+            }
+        }
+        
         currentOrder = order;
+        currentOrder.scannedBagId = scannedBagId; // Store for later use
         
         // Show confirmation modal for bag processing
         console.log('Calling showBagProcessingModal');
@@ -686,13 +869,24 @@
         console.log('=== SHOW BAG PROCESSING MODAL ===');
         const processedBags = order.bagsProcessed || 0;
         const totalBags = order.numberOfBags || 1;
+        const scannedBagId = order.scannedBagId;
         
         console.log('Processed bags:', processedBags);
         console.log('Total bags:', totalBags);
+        console.log('Scanned bag ID:', scannedBagId);
         console.log('Modal elements check:');
         console.log('- orderModal:', orderModal ? 'Found' : 'Missing');
         console.log('- modalTitle:', modalTitle ? 'Found' : 'Missing');
         console.log('- modalBody:', modalBody ? 'Found' : 'Missing');
+        
+        // Find the bag number for the scanned bag
+        let bagNumber = 'Unknown';
+        if (order.bags && scannedBagId) {
+            const scannedBag = order.bags.find(b => b.bagId === scannedBagId);
+            if (scannedBag) {
+                bagNumber = scannedBag.bagNumber;
+            }
+        }
         
         modalTitle.textContent = 'Confirm Bag Processing';
         modalBody.innerHTML = `
@@ -704,7 +898,7 @@
             </div>
             <div class="process-confirm-section">
                 <h5>Confirm this bag has been processed (WDF complete)?</h5>
-                <p class="text-muted">Scanning bag ${processedBags + 1} of ${totalBags}</p>
+                <p class="text-muted">Bag ${bagNumber} (${scannedBagId || 'Unknown ID'})</p>
                 ${processedBags + 1 === totalBags ? 
                     '<p class="text-success"><strong>This is the last bag! Customer will be notified when confirmed.</strong></p>' : 
                     ''}
@@ -774,6 +968,7 @@
     async function markBagProcessed(order) {
         console.log('=== MARK BAG PROCESSED ===');
         console.log('Order to process:', order);
+        console.log('Scanned bag ID:', order.scannedBagId);
         
         if (!order) {
             console.error('No order provided to markBagProcessed');
@@ -786,12 +981,27 @@
             console.log('Processing bag with operator:', operatorData);
             console.log('Order being processed:', order.orderId);
             
-            const response = await csrfFetch(`${BASE_URL}/api/v1/operators/orders/${order.orderId}/process-bag`, {
+            // Need to get the customer ID - it might be in the order
+            let qrCode;
+            if (order.customerId && order.scannedBagId) {
+                qrCode = `${order.customerId}#${order.scannedBagId}`;
+            } else {
+                // If we don't have customerId, we can't proceed
+                showError('Customer ID not found in order');
+                return;
+            }
+            
+            console.log('Sending QR code:', qrCode);
+            
+            const response = await csrfFetch(`${BASE_URL}/api/v1/operators/scan-processed`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json'
-                }
+                },
+                body: JSON.stringify({
+                    qrCode: qrCode
+                })
             });
             
             // Check for token renewal
@@ -800,31 +1010,55 @@
             const data = await response.json();
             console.log('Process bag response:', data);
 
-            if (response.ok && data.success) {
-                if (data.orderReady) {
-                    console.log('All bags processed - order ready for pickup');
+            if (response.ok) {
+                if (data.warning === 'duplicate_scan') {
+                    // Handle duplicate scan - show warning but not as error
+                    console.log('Duplicate scan detected:', data.message);
                     showConfirmation(
-                        `All ${data.totalBags} bags processed! Affiliate notified for pickup.`,
-                        '✅',
-                        'success'
+                        data.message,
+                        '⚠️',
+                        'info'
                     );
-                } else {
-                    console.log(`Bag processed: ${data.bagsProcessed}/${data.totalBags}`);
-                    showConfirmation(
-                        `Bag ${data.bagsProcessed} of ${data.totalBags} processed`,
-                        '✓',
-                        'success'
-                    );
-                }
-                await loadStats();
-                
-                // Also refresh stats after a short delay to ensure backend has updated
-                setTimeout(async () => {
-                    console.log('Refreshing stats after delay...');
+                    setTimeout(hideConfirmation, 3000);
+                } else if (data.success) {
+                    if (data.allBagsProcessed) {
+                        console.log('All bags processed - order ready for pickup');
+                        showConfirmation(
+                            data.message || 'All bags processed - ready for pickup',
+                            '✅',
+                            'success'
+                        );
+                        // Don't automatically show pickup modal - wait for actual pickup scan
+                        setTimeout(hideConfirmation, 3000);
+                    } else if (data.bag && data.orderProgress) {
+                        console.log(`Bag processed:`, data.bag);
+                        showConfirmation(
+                            `${data.orderProgress.bagsProcessed} of ${data.orderProgress.totalBags} bags processed`,
+                            '✓',
+                            'success'
+                        );
+                    } else {
+                        // Fallback message
+                        showConfirmation(
+                            data.message || 'Bag processed',
+                            '✓',
+                            'success'
+                        );
+                    }
                     await loadStats();
-                }, 1000);
-                
-                setTimeout(hideConfirmation, 3000);
+                    
+                    // Also refresh stats after a short delay to ensure backend has updated
+                    setTimeout(async () => {
+                        console.log('Refreshing stats after delay...');
+                        await loadStats();
+                    }, 1000);
+                    
+                    // Hide confirmation after 3 seconds
+                    setTimeout(hideConfirmation, 3000);
+                } else {
+                    console.error('Failed to process bag:', data.message);
+                    showError(data.message || 'Failed to mark bag as processed');
+                }
             } else {
                 console.error('Failed to process bag:', data.message);
                 showError(data.message || 'Failed to mark bag as processed');
@@ -861,8 +1095,8 @@
                         <div class="info-value">${order.numberOfBags}</div>
                     </div>
                 </div>
-                <div style="margin-top: 20px; padding: 15px; background: #e8f8f5; border-radius: 8px;">
-                    <p style="color: #27ae60; font-weight: 500;">
+                <div class="success-message">
+                    <p>
                         ✓ All ${order.numberOfBags} bags have been processed and are ready for pickup
                     </p>
                 </div>
@@ -892,8 +1126,9 @@
     }
 
     // Handle pickup scan (auto-dismiss)
-    function handlePickupScan(order) {
+    function handlePickupScan(order, scannedBagId) {
         console.log('=== HANDLE PICKUP SCAN ===');
+        console.log('Scanned bag ID:', scannedBagId);
         
         // Check if we're already tracking this order
         if (currentOrder && currentOrder.orderId === order.orderId && currentOrder.scannedBagsForPickup) {
@@ -904,6 +1139,7 @@
         
         // Track current order for pickup
         currentOrder = order;
+        currentOrder.scannedBagId = scannedBagId; // Store for later use
 
         // Initialize scanned bags tracking if not exists
         if (!currentOrder.scannedBagsForPickup) {
@@ -911,10 +1147,12 @@
             console.log('Initialized scannedBagsForPickup Set');
         }
         
-        // Add this scan to the set (using timestamp to track unique scans)
-        const scanId = Date.now();
-        currentOrder.scannedBagsForPickup.add(scanId);
-        console.log(`Added scan ${scanId} to set. Total scans: ${currentOrder.scannedBagsForPickup.size}`);
+        // Add this bag ID to the set if provided
+        if (scannedBagId) {
+            currentOrder.scannedBagsForPickup.add(scannedBagId);
+            console.log('Added bag to pickup set:', scannedBagId);
+        }
+        console.log(`Total scanned bags: ${currentOrder.scannedBagsForPickup.size}`);
         console.log('Scanned bag IDs:', Array.from(currentOrder.scannedBagsForPickup));
         
         // Show pickup modal
@@ -990,12 +1228,16 @@
             
             // Set progress bar width
             if (progressBar) {
-                const percentage = Math.round((scannedCount / remainingBags) * 100);
-                // CSP-compliant: use class instead of style
-                const roundedPercentage = Math.min(100, Math.max(0, Math.round(percentage / 10) * 10));
-                progressBar.className = `progress-bar progress-bar-striped progress-bar-animated progress-${roundedPercentage}`;
-                console.log(`Progress: ${scannedCount}/${remainingBags} bags = ${percentage}% (rounded to ${roundedPercentage}%)`);
-                console.log('Progress bar classes:', progressBar.className);
+                const percentage = remainingBags > 0 ? Math.round((scannedCount / remainingBags) * 100) : 0;
+                progressBar.style.width = percentage + '%';
+                progressBar.textContent = percentage + '%';
+                console.log(`Progress: ${scannedCount}/${remainingBags} bags = ${percentage}%`);
+            }
+            
+            // Keep scanner focused for additional bag scans
+            if (!allBagsScanned) {
+                focusScanner();
+                console.log('Focused scanner for additional bag scans');
             }
         }, 50);
     }
@@ -1005,8 +1247,13 @@
         console.log('=== CONFIRM ALL BAGS PICKUP ===');
         const bagsToPickup = currentOrder.numberOfBags - (currentOrder.bagsPickedUp || 0);
         console.log(`Confirming pickup of ${bagsToPickup} bags`);
+        
+        // Save the order data before closing modal since closeModal sets currentOrder to null
+        const orderToConfirm = currentOrder;
         closeModal();
-        confirmPickup(bagsToPickup);
+        
+        // Pass the saved order data to confirmPickup
+        confirmPickup(bagsToPickup, orderToConfirm);
     }
 
     // Cancel pickup and clear scanned bags
@@ -1018,41 +1265,51 @@
     }
 
     // Submit weights
-    const submitWeights = async function() {
-        const weights = [];
-        let totalWeight = 0;
-
-        // Only get weights for bags that haven't been weighed yet
-        const startBag = (currentOrder.bagsWeighed || 0) + 1;
-        for (let i = startBag; i <= currentOrder.numberOfBags; i++) {
-            const weightInput = document.getElementById(`bagWeight${i}`);
-            if (!weightInput) continue;
+    const submitWeights = async function(e) {
+        if (e && e.preventDefault) {
+            e.preventDefault();
+        }
+        
+        const bagWeights = [];
+        
+        // Get the scanned bag IDs
+        const scannedBagIds = Array.from(currentOrder.scannedBagsForWeighing);
+        
+        // Collect weights for each scanned bag
+        for (let i = 0; i < scannedBagIds.length; i++) {
+            const bagId = scannedBagIds[i];
+            // Replace hyphens with underscores to match the input ID
+            const sanitizedBagId = bagId.replace(/-/g, '_');
+            const weightInput = document.getElementById(`bagWeight_${sanitizedBagId}`);
+            
+            if (!weightInput) {
+                showError(`Weight input not found for bag ${i + 1}`);
+                return;
+            }
             
             const weight = parseFloat(weightInput.value);
             if (!weight || weight <= 0) {
-                showError(`Please enter weight for Bag ${i}`);
+                showError(`Please enter weight for Bag ${i + 1}`);
                 return;
             }
-            weights.push({ bagNumber: i, weight });
-            totalWeight += weight;
-        }
-
-        // Add to any existing weight
-        if (currentOrder.actualWeight) {
-            totalWeight += currentOrder.actualWeight;
+            
+            bagWeights.push({ 
+                bagId: bagId,
+                weight: weight
+            });
         }
 
         try {
             const token = localStorage.getItem('operatorToken');
-            const response = await csrfFetch(`${BASE_URL}/api/v1/operators/orders/${currentOrder.orderId}/receive`, {
+            const response = await csrfFetch(`${BASE_URL}/api/v1/operators/orders/weigh-bags`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({ 
-                    bagWeights: weights,
-                    totalWeight: totalWeight
+                    orderId: currentOrder.orderId,
+                    bags: bagWeights
                 })
             });
             
@@ -1062,8 +1319,12 @@
             const data = await response.json();
 
             if (response.ok && data.success) {
+                // Clear the scanned bags set
+                if (currentOrder && currentOrder.scannedBagsForWeighing) {
+                    currentOrder.scannedBagsForWeighing.clear();
+                }
                 closeModal();
-                showConfirmation('Order marked as in progress', '✓', 'success');
+                showConfirmation(`${bagWeights.length} bag${bagWeights.length > 1 ? 's' : ''} marked as processing`, '⚖️', 'success');
                 setTimeout(hideConfirmation, 3000);
                 await loadStats();
                 
@@ -1109,21 +1370,42 @@
     };
 
     // Confirm pickup
-    async function confirmPickup(numberOfBags = 1) {
-        if (!currentOrder) return;
+    async function confirmPickup(numberOfBags = 1, order = null) {
+        console.log('=== CONFIRM PICKUP CALLED ===');
+        console.log('Number of bags:', numberOfBags);
+        console.log('Order:', order || currentOrder);
+        
+        // Use passed order or fall back to currentOrder
+        const orderToProcess = order || currentOrder;
+        
+        if (!orderToProcess) {
+            console.error('No order to process!');
+            return;
+        }
 
         try {
             const token = localStorage.getItem('operatorToken');
             
-            const response = await csrfFetch(`${BASE_URL}/api/v1/operators/confirm-pickup`, {
+            // Get the scanned bag IDs
+            const scannedBagIds = orderToProcess.scannedBagsForPickup ? 
+                Array.from(orderToProcess.scannedBagsForPickup) : [];
+            
+            console.log('Confirming pickup with bag IDs:', scannedBagIds);
+            console.log('Order ID:', orderToProcess.orderId);
+            console.log('Request body:', JSON.stringify({ 
+                orderId: orderToProcess.orderId,
+                bagIds: scannedBagIds
+            }));
+            
+            const response = await csrfFetch(`${BASE_URL}/api/v1/operators/complete-pickup`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({ 
-                    orderId: currentOrder.orderId,
-                    numberOfBags: numberOfBags 
+                    orderId: orderToProcess.orderId,
+                    bagIds: scannedBagIds
                 })
             });
             
@@ -1131,21 +1413,28 @@
             checkAndUpdateToken(response);
 
             const data = await response.json();
+            console.log('Complete pickup response:', data);
+            console.log('Response status:', response.status);
             
-            if (response.ok) {
+            if (response.ok && data.success) {
                 await loadStats();
                 
-                // Check if order is complete
-                if (data.orderComplete) {
-                    showConfirmation(`Order ${currentOrder.orderId} complete! Customer notified.`, '✅', 'success');
-                    setTimeout(hideConfirmation, 3000);
+                // Show success message
+                showConfirmation(`Order ${orderToProcess.orderId} complete! Customer notified.`, '✅', 'success');
+                setTimeout(hideConfirmation, 3000);
+                
+                // Clear the scanned bags tracking
+                if (orderToProcess && orderToProcess.scannedBagsForPickup) {
+                    orderToProcess.scannedBagsForPickup.clear();
                 }
+            } else {
+                console.error('Complete pickup failed:', data);
+                showError(data.message || 'Failed to complete pickup');
             }
         } catch (error) {
             console.error('Pickup confirmation error:', error);
+            showError('Network error. Please try again.');
         }
-
-        hideConfirmation();
     }
 
     // Show confirmation message
@@ -1193,10 +1482,12 @@
     }
 
     // Close modal
-    const closeModal = function() {
+    const closeModal = function(e) {
+        if (e && e.preventDefault) {
+            e.preventDefault();
+        }
         console.log('=== CLOSE MODAL ===');
         console.log('Modal state before close:', {
-            display: orderModal.style.display,
             classes: orderModal.className,
             forceVisible: orderModal.getAttribute('data-force-visible')
         });
@@ -1204,8 +1495,7 @@
         // Remove the force-visible attribute
         orderModal.removeAttribute('data-force-visible');
         
-        // Restore the modal class and remove active
-        orderModal.classList.add('modal');
+        // Remove active class
         orderModal.classList.remove('weight-input-modal-active', 'active');
         
         // Remove click interceptor
@@ -1279,17 +1569,16 @@
 
     // Initialize on DOM ready (only once)
     let initialized = false;
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', () => {
-            if (!initialized) {
-                initialized = true;
-                init();
-            }
-        });
-    } else {
+    function handleDOMReady() {
         if (!initialized) {
             initialized = true;
             init();
         }
+    }
+    
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', handleDOMReady);
+    } else {
+        handleDOMReady();
     }
 })();
