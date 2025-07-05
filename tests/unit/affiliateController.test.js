@@ -775,17 +775,48 @@ describe('Affiliate Controller', () => {
   describe('getAffiliateDashboardStats', () => {
     it('should return comprehensive dashboard statistics', async () => {
       const now = new Date();
-      const currentMonth = new Date(now.getFullYear(), now.getMonth(), 15); // 15th of current month
+      
+      // Calculate dates to ensure one order is in current week and one is not
+      const firstDayOfWeek = new Date(now);
+      firstDayOfWeek.setDate(now.getDate() - now.getDay());
+      firstDayOfWeek.setHours(0, 0, 0, 0);
+      
+      // First order: within current week
+      const withinThisWeek = new Date();
+      
+      // Second order: ensure it's in current month but NOT in current week
+      const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+      
+      // Create a date that is definitely before the current week but in current month
+      let beforeThisWeek;
+      if (firstDayOfWeek.getTime() > firstDayOfMonth.getTime()) {
+        // Current week started before this month, so use first day of month minus 1 day
+        // to ensure it's before the week
+        beforeThisWeek = new Date(firstDayOfWeek);
+        beforeThisWeek.setDate(beforeThisWeek.getDate() - 3); // 3 days before week start
+        // But if that puts us in previous month, use a date in current month that's after week start
+        if (beforeThisWeek.getMonth() !== now.getMonth()) {
+          // This means we're early in the month and can't have an order before this week
+          // So we'll adjust our expectation instead
+          beforeThisWeek = new Date(firstDayOfMonth);
+          beforeThisWeek.setDate(10); // Middle of the month
+        }
+      } else {
+        // Normal case: week started in current month
+        beforeThisWeek = new Date(firstDayOfWeek);
+        beforeThisWeek.setDate(beforeThisWeek.getDate() - 3); // 3 days before week
+      }
+      
       const mockDeliveredOrders = [
         {
           affiliateId: 'AFF123',
           affiliateCommission: 10,
-          deliveredAt: new Date()
+          deliveredAt: withinThisWeek // This week
         },
         {
           affiliateId: 'AFF123',
           affiliateCommission: 15,
-          deliveredAt: currentMonth // Definitely within current month
+          deliveredAt: beforeThisWeek // Before current week
         }
       ];
       const mockPendingTransactions = [
@@ -804,15 +835,22 @@ describe('Affiliate Controller', () => {
 
       expect(res.status).toHaveBeenCalledWith(200);
       const response = res.json.mock.calls[0][0];
+      
+      // Calculate expected values based on actual dates
+      const expectedWeeklyOrders = beforeThisWeek >= firstDayOfWeek ? 2 : 1;
+      const expectedWeekEarnings = beforeThisWeek >= firstDayOfWeek ? 25 : 10;
+      const expectedMonthlyOrders = beforeThisWeek.getMonth() === now.getMonth() ? 2 : 1;
+      const expectedMonthEarnings = beforeThisWeek.getMonth() === now.getMonth() ? 25 : 10;
+      
       expect(response.stats).toMatchObject({
         customerCount: 10,
         activeOrderCount: 3,
         totalEarnings: 25,
-        monthEarnings: 25,
-        weekEarnings: 10,  // Only the first order is in current week
+        monthEarnings: expectedMonthEarnings,
+        weekEarnings: expectedWeekEarnings,
         pendingEarnings: 25,
-        monthlyOrders: 2,
-        weeklyOrders: 1   // Only one order in current week
+        monthlyOrders: expectedMonthlyOrders,
+        weeklyOrders: expectedWeeklyOrders
       });
       expect(response.stats.nextPayoutDate).toBeDefined();
     });

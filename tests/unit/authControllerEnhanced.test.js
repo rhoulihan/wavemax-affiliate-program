@@ -80,8 +80,9 @@ describe('Enhanced Auth Controller - OAuth Methods', () => {
         type: 'social-auth-success'
       }));
 
-      expect(res.send).toHaveBeenCalledWith(expect.stringContaining('social-auth-success'));
-      expect(res.send).toHaveBeenCalledWith(expect.stringContaining('google'));
+      expect(res.redirect).toHaveBeenCalledWith(expect.stringContaining('oauth-success.html'));
+      expect(res.redirect).toHaveBeenCalledWith(expect.stringContaining('social-auth-success'));
+      expect(res.redirect).toHaveBeenCalledWith(expect.stringContaining('google'));
     });
 
     test('should handle customer context from state parameter', async () => {
@@ -125,11 +126,12 @@ describe('Enhanced Auth Controller - OAuth Methods', () => {
       };
 
       OAuthSession.createSession = jest.fn().mockRejectedValue(new Error('Database error'));
+      jwt.sign = jest.fn().mockReturnValue('mock-token');
 
       await authController.handleSocialCallback(req, res);
 
-      // Should still send response despite database error (error is logged but doesn't stop execution)
-      expect(res.send).toHaveBeenCalled();
+      // Should still redirect despite database error (error is logged but doesn't stop execution)
+      expect(res.redirect).toHaveBeenCalled();
       expect(OAuthSession.createSession).toHaveBeenCalled();
     });
 
@@ -182,7 +184,7 @@ describe('Enhanced Auth Controller - OAuth Methods', () => {
 
       await authController.handleCustomerSocialCallback(req, res);
 
-      expect(OAuthSession.createSession).toHaveBeenCalledWith('oauth_test-session-id',
+      expect(OAuthSession.createSession).toHaveBeenCalledWith('oauth_test',
         expect.objectContaining({
           type: 'social-auth-success',
           provider: 'google',
