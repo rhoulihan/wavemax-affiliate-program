@@ -183,7 +183,12 @@ app.use((req, res, next) => {
     '/embed-app-v2.html'
   ];
   
-  const useStrictCSP = strictCSPPages.includes(req.path);
+  // Apply strict CSP to documentation pages as well (but not examples)
+  const isDocumentationPage = req.path.startsWith('/docs/') && 
+                             req.path.endsWith('.html') && 
+                             !req.path.includes('/examples/');
+  
+  const useStrictCSP = strictCSPPages.includes(req.path) || isDocumentationPage;
   
   // All embed pages now use nonces since embed-app.html was converted to CSP-compliant redirect to embed-app-v2.html
   const skipNonce = false;
@@ -389,12 +394,8 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // Serve documentation if enabled
 if (process.env.SHOW_DOCS === 'true') {
-  app.use('/docs', express.static(path.join(__dirname, 'docs')));
-
-  // Redirect /docs to /docs/index.html
-  app.get('/docs', (req, res) => {
-    res.redirect('/docs/index.html');
-  });
+  const docsRoutes = require('./server/routes/docsRoutes');
+  app.use('/docs', docsRoutes);
 }
 
 // Mount coverage analysis reports (separate from embedded app)
