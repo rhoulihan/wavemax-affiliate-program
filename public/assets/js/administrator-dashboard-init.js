@@ -6,6 +6,15 @@
     return window.i18n && window.i18n.t ? window.i18n.t(key) : fallback;
   }
 
+  // Generate UUID v4
+  function generateUUID() {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+      const r = Math.random() * 16 | 0;
+      const v = c === 'x' ? r : (r & 0x3 | 0x8);
+      return v.toString(16);
+    });
+  }
+
 
   // Load CSRF utilities
   if (!window.CsrfUtils) {
@@ -915,9 +924,10 @@
         yPosition += 0.2;
       });
       
-      // Generate QR code data - just the customer ID for operator scanning
-      // When scanned by operator, this will lookup the customer's current order
-      const qrData = customer.id;
+      // Generate QR code data with customer ID and unique bag ID
+      // Format: {customerId}#{bagId}
+      const bagId = generateUUID();
+      const qrData = `${customer.id}#${bagId}`;
       
       // Create QR code
       try {

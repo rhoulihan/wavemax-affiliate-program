@@ -74,9 +74,12 @@ router.post('/customers/:customerId/notes', operatorController.addCustomerNote);
 router.post('/scan-customer', operatorController.scanCustomer);
 router.post('/scan-bag', operatorController.scanBag);
 router.post('/orders/:orderId/receive', operatorController.receiveOrder);
-router.post('/orders/:orderId/process-bag', operatorController.markBagProcessed);
+router.post('/orders/weigh-bags', operatorController.weighBags); // New bag tracking endpoint
+router.post('/scan-processed', operatorController.scanProcessed); // New endpoint for scanning processed bags
+router.post('/complete-pickup', operatorController.completePickup); // New endpoint for completing pickup with bag verification
+router.post('/orders/:orderId/process-bag', operatorController.markBagProcessed); // Legacy endpoint
 router.post('/orders/:orderId/ready', operatorController.markOrderReady); // Deprecated
-router.post('/confirm-pickup', operatorController.confirmPickup);
+router.post('/confirm-pickup', operatorController.confirmPickup); // Legacy endpoint
 router.get('/stats/today', operatorController.getTodayStats);
 
 module.exports = router;

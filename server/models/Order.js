@@ -39,11 +39,42 @@ const orderSchema = new mongoose.Schema({
   bagsWeighed: { type: Number, default: 0 },
   bagsProcessed: { type: Number, default: 0 }, // Bags scanned after WDF process
   bagsPickedUp: { type: Number, default: 0 },
-  // Individual bag weights
+  // Individual bag weights (legacy - kept for backward compatibility)
   bagWeights: [{
     bagNumber: Number,
     weight: Number,
     receivedAt: Date
+  }],
+  // New bag tracking system
+  bags: [{
+    bagId: {
+      type: String,
+      required: true,
+      index: true
+    },
+    bagNumber: {
+      type: Number,
+      required: true
+    },
+    status: {
+      type: String,
+      enum: ['processing', 'processed', 'completed'],
+      default: 'processing'
+    },
+    weight: {
+      type: Number,
+      default: 0
+    },
+    scannedAt: {
+      processing: Date,
+      processed: Date,
+      completed: Date
+    },
+    scannedBy: {
+      processing: { type: mongoose.Schema.Types.ObjectId, ref: 'Operator' },
+      processed: { type: mongoose.Schema.Types.ObjectId, ref: 'Operator' },
+      completed: { type: mongoose.Schema.Types.ObjectId, ref: 'Operator' }
+    }
   }],
   // Payment information
   baseRate: { type: Number }, // Per pound WDF rate - fetched from SystemConfig
