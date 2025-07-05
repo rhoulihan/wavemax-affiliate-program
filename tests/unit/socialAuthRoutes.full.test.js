@@ -10,6 +10,7 @@ describe('Social Auth Routes - Full Coverage', () => {
   beforeEach(() => {
     // Reset modules before each test
     jest.resetModules();
+    jest.clearAllMocks();
     
     // Reset environment variables
     process.env = { ...originalEnv };
@@ -17,8 +18,15 @@ describe('Social Auth Routes - Full Coverage', () => {
     // Mock auth controller with all required methods
     const mockAuthController = {
       // OAuth callback handlers
-      handleSocialCallback: jest.fn((req, res) => res.json({ success: true, provider: req.user.provider })),
-      handleCustomerSocialCallback: jest.fn((req, res) => res.json({ success: true, provider: req.user.provider, isCustomer: true })),
+      handleSocialCallback: jest.fn((req, res) => {
+        // Check if req.user was set by passport
+        const provider = req.user ? req.user.provider : 'google';
+        res.json({ success: true, provider: provider });
+      }),
+      handleCustomerSocialCallback: jest.fn((req, res) => {
+        const provider = req.user ? req.user.provider : 'google';
+        res.json({ success: true, provider: provider, isCustomer: true });
+      }),
       completeSocialRegistration: jest.fn((req, res) => res.status(201).json({ success: true, message: 'Registration completed' })),
       completeSocialCustomerRegistration: jest.fn((req, res) => res.status(201).json({ success: true, message: 'Customer registered' })),
       
@@ -42,12 +50,16 @@ describe('Social Auth Routes - Full Coverage', () => {
     jest.doMock('../../server/controllers/authController', () => mockAuthController);
     
     jest.doMock('../../server/config/passport-config', () => ({
-      authenticate: jest.fn((strategy, options) => {
+      authenticate: jest.fn((strategy, options, callback) => {
         return (req, res, next) => {
           // Simulate passport authentication behavior
           if (strategy === 'google' || strategy === 'facebook' || strategy === 'linkedin') {
-            if (options && options.session === false) {
-              // This is a callback route
+            if (options && options.session === false && callback) {
+              // This is a callback route with custom callback
+              const user = { id: '12345', email: 'test@example.com', provider: strategy };
+              callback(null, user, null);
+            } else if (options && options.session === false) {
+              // This is a callback route without custom callback
               req.user = { id: '12345', email: 'test@example.com', provider: strategy };
               next();
             } else {
@@ -68,9 +80,10 @@ describe('Social Auth Routes - Full Coverage', () => {
     app = express();
     app.use(express.json());
     
-    // Now require the routes after mocks are set up
+    // Now require the routes after mocks are set up - force reload
+    delete require.cache[require.resolve('../../server/routes/socialAuthRoutes')];
     socialAuthRoutes = require('../../server/routes/socialAuthRoutes');
-    app.use('/api/auth', socialAuthRoutes);
+    app.use('/api/v1/auth', socialAuthRoutes);
   });
 
   afterEach(() => {
@@ -81,12 +94,13 @@ describe('Social Auth Routes - Full Coverage', () => {
   });
 
   describe('Google OAuth Routes', () => {
+
     it('should initiate Google OAuth when configured', async () => {
       process.env.GOOGLE_CLIENT_ID = 'test-client-id';
       process.env.GOOGLE_CLIENT_SECRET = 'test-client-secret';
 
       const response = await request(app)
-        .get('/api/auth/google');
+        .get('/api/v1/auth/google');
 
       expect(response.status).toBe(302);
       expect(response.headers.location).toContain('https://google.com/oauth');
@@ -98,7 +112,7 @@ describe('Social Auth Routes - Full Coverage', () => {
       delete process.env.GOOGLE_CLIENT_SECRET;
 
       const response = await request(app)
-        .get('/api/auth/google');
+        .get('/api/v1/auth/google');
 
       expect(response.status).toBe(404);
       expect(response.body).toEqual({
@@ -108,8 +122,11 @@ describe('Social Auth Routes - Full Coverage', () => {
     });
 
     it('should handle Google OAuth callback', async () => {
+      process.env.GOOGLE_CLIENT_ID = 'test-client-id';
+      process.env.GOOGLE_CLIENT_SECRET = 'test-client-secret';
+      
       const response = await request(app)
-        .get('/api/auth/google/callback');
+        .get('/api/v1/auth/google/callback?code=test-code&state=test-state');
 
       expect(response.status).toBe(200);
       expect(response.body).toEqual({ 
@@ -123,7 +140,7 @@ describe('Social Auth Routes - Full Coverage', () => {
       process.env.GOOGLE_CLIENT_SECRET = 'test-client-secret';
 
       const response = await request(app)
-        .get('/api/auth/google?state=test-state-123');
+        .get('/api/v1/auth/google?state=test-state-123');
 
       expect(response.status).toBe(302);
       expect(response.headers.location).toContain('state=test-state-123');
@@ -136,7 +153,7 @@ describe('Social Auth Routes - Full Coverage', () => {
       process.env.FACEBOOK_APP_SECRET = 'test-app-secret';
 
       const response = await request(app)
-        .get('/api/auth/facebook');
+        .get('/api/v1/auth/facebook');
 
       expect(response.status).toBe(302);
       expect(response.headers.location).toContain('https://facebook.com/oauth');
@@ -148,7 +165,7 @@ describe('Social Auth Routes - Full Coverage', () => {
       delete process.env.FACEBOOK_APP_SECRET;
 
       const response = await request(app)
-        .get('/api/auth/facebook');
+        .get('/api/v1/auth/facebook');
 
       expect(response.status).toBe(404);
       expect(response.body).toEqual({
@@ -164,7 +181,7 @@ describe('Social Auth Routes - Full Coverage', () => {
       process.env.LINKEDIN_CLIENT_SECRET = 'test-client-secret';
 
       const response = await request(app)
-        .get('/api/auth/linkedin');
+        .get('/api/v1/auth/linkedin');
 
       expect(response.status).toBe(302);
       expect(response.headers.location).toContain('https://linkedin.com/oauth');
@@ -177,7 +194,7 @@ describe('Social Auth Routes - Full Coverage', () => {
       process.env.GOOGLE_CLIENT_SECRET = 'test-client-secret';
 
       const response = await request(app)
-        .get('/api/auth/customer/google');
+        .get('/api/v1/auth/customer/google');
 
       expect(response.status).toBe(302);
       expect(response.headers.location).toContain('https://google.com/oauth');
@@ -186,7 +203,7 @@ describe('Social Auth Routes - Full Coverage', () => {
 
     it('should redirect customer Google OAuth callback', async () => {
       const response = await request(app)
-        .get('/api/auth/customer/google/callback?code=test-code&state=test-state');
+        .get('/api/v1/auth/customer/google/callback?code=test-code&state=test-state');
 
       expect(response.status).toBe(302);
       expect(response.headers.location).toContain('/api/v1/auth/google/callback');
@@ -196,7 +213,7 @@ describe('Social Auth Routes - Full Coverage', () => {
     
     it('should handle customer Facebook OAuth callback', async () => {
       const response = await request(app)
-        .get('/api/auth/customer/facebook/callback');
+        .get('/api/v1/auth/customer/facebook/callback');
 
       expect(response.status).toBe(200);
       expect(response.body.isCustomer).toBe(true);
@@ -207,7 +224,7 @@ describe('Social Auth Routes - Full Coverage', () => {
       process.env.FACEBOOK_APP_SECRET = 'test-app-secret';
 
       const response = await request(app)
-        .get('/api/auth/customer/facebook?state=affiliateCode123');
+        .get('/api/v1/auth/customer/facebook?state=affiliateCode123');
 
       expect(response.status).toBe(302);
       expect(response.headers.location).toContain('https://facebook.com/oauth');
@@ -219,7 +236,7 @@ describe('Social Auth Routes - Full Coverage', () => {
       delete process.env.FACEBOOK_APP_SECRET;
 
       const response = await request(app)
-        .get('/api/auth/customer/facebook');
+        .get('/api/v1/auth/customer/facebook');
 
       expect(response.status).toBe(404);
       expect(response.body.message).toBe('Facebook OAuth is not configured');
@@ -230,7 +247,7 @@ describe('Social Auth Routes - Full Coverage', () => {
       process.env.LINKEDIN_CLIENT_SECRET = 'test-client-secret';
 
       const response = await request(app)
-        .get('/api/auth/customer/linkedin?state=test-state');
+        .get('/api/v1/auth/customer/linkedin?state=test-state');
 
       expect(response.status).toBe(302);
       expect(response.headers.location).toContain('https://linkedin.com/oauth');
@@ -242,7 +259,7 @@ describe('Social Auth Routes - Full Coverage', () => {
       delete process.env.LINKEDIN_CLIENT_SECRET;
 
       const response = await request(app)
-        .get('/api/auth/customer/linkedin');
+        .get('/api/v1/auth/customer/linkedin');
 
       expect(response.status).toBe(404);
       expect(response.body.message).toBe('LinkedIn OAuth is not configured');
@@ -250,7 +267,7 @@ describe('Social Auth Routes - Full Coverage', () => {
 
     it('should handle customer LinkedIn OAuth callback', async () => {
       const response = await request(app)
-        .get('/api/auth/customer/linkedin/callback');
+        .get('/api/v1/auth/customer/linkedin/callback');
 
       expect(response.status).toBe(200);
       expect(response.body.isCustomer).toBe(true);
@@ -263,7 +280,7 @@ describe('Social Auth Routes - Full Coverage', () => {
       const authController = require('../../server/controllers/authController');
       
       const response = await request(app)
-        .post('/api/auth/social/register')
+        .post('/api/v1/auth/social/register')
         .send({
           password: 'TestPassword123!',
           businessName: 'Test Business',

@@ -508,14 +508,16 @@ describe('Customer Controller', () => {
           status: 'complete',
           actualTotal: 50,
           createdAt: new Date('2024-01-01'),
-          deliveredAt: new Date('2024-01-02')
+          deliveryDate: new Date('2024-01-02'),
+          deliveredAt: new Date('2024-01-02')  // Keep this for lastOrderDate calculation
         },
         {
           orderId: 'ORD002',
           customerId: 'CUST123',
           status: 'complete',
           estimatedTotal: 75,
-          createdAt: new Date('2024-01-10')
+          createdAt: new Date('2024-01-10'),
+          updatedAt: new Date('2024-01-10')  // Add updatedAt for lastOrderDate calculation
         },
         {
           orderId: 'ORD003',
@@ -551,8 +553,10 @@ describe('Customer Controller', () => {
       Affiliate.findOne.mockResolvedValue(mockAffiliate);
       
       // Mock Order.find for all orders
+      // Sort mockOrders by createdAt descending for the main query
+      const sortedOrders = [...mockOrders].sort((a, b) => b.createdAt - a.createdAt);
       const orderFindMock = {
-        sort: jest.fn().mockResolvedValue(mockOrders)
+        sort: jest.fn().mockResolvedValue(sortedOrders)
       };
       Order.find.mockImplementation((query) => {
         if (query.status === 'scheduled') {
@@ -574,23 +578,58 @@ describe('Customer Controller', () => {
           statistics: {
             totalOrders: 4,
             completedOrders: 2,
-            activeOrders: 2,
+            activeOrders: 1, // Only 'processing' order is active ('scheduled' is not)
             totalSpent: 125,
             averageOrderValue: 62.5,
-            lastOrderDate: expect.any(Date)
+            lastOrderDate: new Date('2024-01-10')  // From ORD002's updatedAt (most recent completed order)
           },
-          recentOrders: expect.arrayContaining([
-            expect.objectContaining({ orderId: 'ORD001' }),
-            expect.objectContaining({ orderId: 'ORD002' }),
-            expect.objectContaining({ orderId: 'ORD003' }),
-            expect.objectContaining({ orderId: 'ORD004' })
-          ]),
-          upcomingPickups: expect.arrayContaining([
-            expect.objectContaining({
+          recentOrders: [
+            {
               orderId: 'ORD004',
-              pickupTime: '10:00 AM'
-            })
-          ]),
+              status: 'scheduled',
+              pickupDate: new Date('2024-02-01'),
+              deliveryDate: undefined,
+              estimatedTotal: 80,
+              actualTotal: undefined,
+              createdAt: new Date('2024-01-20')
+            },
+            {
+              orderId: 'ORD003',
+              status: 'processing',
+              pickupDate: undefined,
+              deliveryDate: undefined,
+              estimatedTotal: 60,
+              actualTotal: undefined,
+              createdAt: new Date('2024-01-15')
+            },
+            {
+              orderId: 'ORD002',
+              status: 'complete',
+              pickupDate: undefined,
+              deliveryDate: undefined,
+              estimatedTotal: 75,
+              actualTotal: undefined,
+              createdAt: new Date('2024-01-10')
+            },
+            {
+              orderId: 'ORD001',
+              status: 'complete',
+              pickupDate: undefined,
+              deliveryDate: new Date('2024-01-02'),
+              estimatedTotal: undefined,
+              actualTotal: 50,
+              createdAt: new Date('2024-01-01')
+            }
+          ],
+          upcomingPickups: [
+            {
+              orderId: 'ORD004',
+              pickupDate: new Date('2024-02-01'),
+              pickupTime: '10:00 AM',
+              estimatedSize: 'Large',
+              estimatedTotal: 80
+            }
+          ],
           affiliate: {
             affiliateId: 'AFF123',
             firstName: 'John',

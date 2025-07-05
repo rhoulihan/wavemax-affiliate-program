@@ -1313,8 +1313,8 @@ describe('Operator Controller', () => {
       ];
 
       Order.countDocuments.mockImplementation((query) => {
-        if (query.orderProcessingStatus === 'ready') {
-          return Promise.resolve(5);
+        if (query.status === 'processed') {
+          return Promise.resolve(5); // Orders ready
         }
         return Promise.resolve(3); // Orders processed today
       });
@@ -1323,9 +1323,20 @@ describe('Operator Controller', () => {
 
       await operatorController.getTodayStats(req, res);
 
+      const tomorrow = new Date(today);
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      
       expect(Order.countDocuments).toHaveBeenCalledWith({
-        assignedOperator: 'op123',
-        processingStarted: { $gte: today }
+        $or: [
+          {
+            assignedOperator: 'op123',
+            processingStarted: { $gte: today }
+          },
+          {
+            bagsWeighed: { $gt: 0 },
+            updatedAt: { $gte: today, $lt: tomorrow }
+          }
+        ]
       });
       
       expect(res.json).toHaveBeenCalledWith({
@@ -1694,9 +1705,11 @@ describe('Operator Controller', () => {
 
       await operatorController.markOrderReady(req, res);
 
-      expect(mockOrder.orderProcessingStatus).toBe('ready');
+      // Note: markOrderReady is deprecated and doesn't update orderProcessingStatus
+      expect(mockOrder.orderProcessingStatus).toBe('quality_check'); // Unchanged
       expect(mockOrder.status).toBe('processed');
       expect(mockOrder.bagsProcessed).toBe(2);
+      expect(mockOrder.processedAt).toBeDefined();
       expect(res.json).toHaveBeenCalledWith({
         success: true,
         message: 'Order marked as ready for pickup',
