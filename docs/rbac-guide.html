@@ -222,6 +222,22 @@
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
         
+        .hierarchy-box.admin {
+            border-color: #dc3545;
+        }
+        
+        .hierarchy-box.operator {
+            border-color: #fd7e14;
+        }
+        
+        .hierarchy-box.affiliate {
+            border-color: #3b82f6;
+        }
+        
+        .hierarchy-box.customer {
+            border-color: #28a745;
+        }
+        
         .nav-buttons {
             display: flex;
             justify-content: space-between;
@@ -266,23 +282,23 @@
             <div class="hierarchy-diagram">
                 <h3>Role Hierarchy</h3>
                 <div class="hierarchy-level">
-                    <div class="hierarchy-box" style="border-color: #dc3545;">
+                    <div class="hierarchy-box admin">
                         <strong>Administrator</strong><br>
                         Full System Access
                     </div>
                 </div>
                 <div class="hierarchy-level">
-                    <div class="hierarchy-box" style="border-color: #fd7e14;">
+                    <div class="hierarchy-box operator">
                         <strong>Operator</strong><br>
                         Order Management
                     </div>
                 </div>
                 <div class="hierarchy-level">
-                    <div class="hierarchy-box" style="border-color: #3b82f6;">
+                    <div class="hierarchy-box affiliate">
                         <strong>Affiliate</strong><br>
                         Customer & Commission Management
                     </div>
-                    <div class="hierarchy-box" style="border-color: #28a745;">
+                    <div class="hierarchy-box customer">
                         <strong>Customer</strong><br>
                         Order Placement & Tracking
                     </div>
