@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OAuth Configuration Guide - WaveMAX Affiliate Program</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f5f5f5;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #1e3a8a, #3b82f6);
+            color: white;
+            padding: 40px 0;
+            margin-bottom: 40px;
+        }
+        
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        .toc {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        
+        .toc h2 {
+            color: #1e3a8a;
+            margin-bottom: 20px;
+        }
+        
+        .toc ul {
+            list-style: none;
+        }
+        
+        .toc li {
+            margin-bottom: 10px;
+        }
+        
+        .toc a {
+            color: #3b82f6;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            padding: 5px 0;
+        }
+        
+        .toc a:hover {
+            text-decoration: underline;
+        }
+        
+        .provider-icon {
+            width: 20px;
+            height: 20px;
+            margin-right: 10px;
+        }
+        
+        .provider-section {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        
+        .provider-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+        
+        .provider-header img {
+            width: 48px;
+            height: 48px;
+            margin-right: 20px;
+        }
+        
+        .provider-header h2 {
+            color: #1e3a8a;
+            font-size: 2em;
+        }
+        
+        .status-badge {
+            margin-left: auto;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: 500;
+        }
+        
+        .status-active {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .status-planned {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .steps {
+            margin-top: 20px;
+        }
+        
+        .step {
+            margin-bottom: 25px;
+            padding-left: 40px;
+            position: relative;
+        }
+        
+        .step-number {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 30px;
+            height: 30px;
+            background: #3b82f6;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+        
+        .step h4 {
+            color: #1e3a8a;
+            margin-bottom: 10px;
+        }
+        
+        .code-block {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 4px;
+            padding: 15px;
+            margin: 10px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            overflow-x: auto;
+        }
+        
+        .env-vars {
+            background: #f0f8ff;
+            border: 1px solid #b8daff;
+            border-radius: 4px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        
+        .env-vars h5 {
+            color: #004085;
+            margin-bottom: 10px;
+        }
+        
+        .warning {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 4px;
+            padding: 15px;
+            margin: 15px 0;
+            display: flex;
+            align-items: start;
+        }
+        
+        .warning-icon {
+            color: #856404;
+            margin-right: 10px;
+            font-size: 1.2em;
+        }
+        
+        .info {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+            border-radius: 4px;
+            padding: 15px;
+            margin: 15px 0;
+            display: flex;
+            align-items: start;
+        }
+        
+        .info-icon {
+            color: #0c5460;
+            margin-right: 10px;
+            font-size: 1.2em;
+        }
+        
+        .urls-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+        
+        .urls-table th,
+        .urls-table td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .urls-table th {
+            background: #f8f9fa;
+            font-weight: 600;
+        }
+        
+        .urls-table code {
+            background: #e9ecef;
+            padding: 2px 5px;
+            border-radius: 3px;
+            font-size: 0.9em;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 40px 0;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <h1>OAuth Configuration Guide</h1>
+            <p>Complete setup instructions for all supported OAuth providers in the WaveMAX Affiliate Program</p>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- Table of Contents -->
+        <div class="toc">
+            <h2>Table of Contents</h2>
+            <ul>
+                <li>
+                    <a href="#google">
+                        <svg class="provider-icon" viewBox="0 0 24 24">
+                            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                        </svg>
+                        Google OAuth Setup
+                    </a>
+                </li>
+                <li>
+                    <a href="#facebook">
+                        <svg class="provider-icon" viewBox="0 0 24 24">
+                            <path fill="#1877F2" d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                        </svg>
+                        Facebook OAuth Setup
+                    </a>
+                </li>
+                <li>
+                    <a href="#linkedin">
+                        <svg class="provider-icon" viewBox="0 0 24 24">
+                            <path fill="#0A66C2" d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+                        </svg>
+                        LinkedIn OAuth Setup
+                    </a>
+                </li>
+                <li>
+                    <a href="#twitter">
+                        <svg class="provider-icon" viewBox="0 0 24 24">
+                            <path fill="#000000" d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                        </svg>
+                        Twitter/X OAuth Setup (Planned)
+                    </a>
+                </li>
+                <li>
+                    <a href="#instagram">
+                        <svg class="provider-icon" viewBox="0 0 24 24">
+                            <defs>
+                                <linearGradient id="instagram-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" stop-color="#833AB4"/>
+                                    <stop offset="50%" stop-color="#E1306C"/>
+                                    <stop offset="100%" stop-color="#F77737"/>
+                                </linearGradient>
+                            </defs>
+                            <path fill="url(#instagram-gradient)" d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zM5.838 12a6.162 6.162 0 1112.324 0 6.162 6.162 0 01-12.324 0zM12 16a4 4 0 110-8 4 4 0 010 8zm4.965-10.405a1.44 1.44 0 112.881.001 1.44 1.44 0 01-2.881-.001z"/>
+                        </svg>
+                        Instagram OAuth Setup (Planned)
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Google OAuth -->
+        <div id="google" class="provider-section">
+            <div class="provider-header">
+                <svg width="48" height="48" viewBox="0 0 24 24">
+                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                </svg>
+                <h2>Google OAuth Configuration</h2>
+                <span class="status-badge status-active">Active</span>
+            </div>
+
+            <div class="steps">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <h4>Create a Google Cloud Project</h4>
+                    <p>Visit the <a href="https://console.cloud.google.com" target="_blank">Google Cloud Console</a> and create a new project or select an existing one.</p>
+                </div>
+
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <h4>Enable Google+ API</h4>
+                    <p>Navigate to "APIs & Services" → "Library" and search for "Google+ API". Click on it and press "Enable".</p>
+                </div>
+
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <h4>Create OAuth 2.0 Credentials</h4>
+                    <p>Go to "APIs & Services" → "Credentials" → "Create Credentials" → "OAuth client ID"</p>
+                    <ul>
+                        <li>Application type: Web application</li>
+                        <li>Name: WaveMAX Affiliate Program</li>
+                        <li>Authorized JavaScript origins:
+                            <div class="code-block">
+                                https://wavemax.promo
+                                https://www.wavemax.promo
+                            </div>
+                        </li>
+                        <li>Authorized redirect URIs:
+                            <div class="code-block">
+                                https://wavemax.promo/api/v1/auth/google/callback
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="step">
+                    <div class="step-number">4</div>
+                    <h4>Configure OAuth Consent Screen</h4>
+                    <p>Set up your OAuth consent screen with the following:</p>
+                    <ul>
+                        <li>App name: WaveMAX Affiliate Program</li>
+                        <li>User support email: support@wavemax.promo</li>
+                        <li>App logo: Upload WaveMAX logo</li>
+                        <li>Application home page: https://wavemax.promo</li>
+                        <li>Privacy policy: https://wavemax.promo/privacy-policy</li>
+                        <li>Terms of service: https://wavemax.promo/terms-and-conditions</li>
+                    </ul>
+                </div>
+
+                <div class="step">
+                    <div class="step-number">5</div>
+                    <h4>Add Environment Variables</h4>
+                    <div class="env-vars">
+                        <h5>Required Environment Variables:</h5>
+                        <div class="code-block">
+GOOGLE_CLIENT_ID=your_google_client_id_here
+GOOGLE_CLIENT_SECRET=your_google_client_secret_here
+                        </div>
+                    </div>
+                </div>
+
+                <div class="info">
+                    <span class="info-icon">ℹ️</span>
+                    <div>
+                        <strong>Scopes:</strong> The application requests <code>profile</code> and <code>email</code> scopes to get user's basic information.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Facebook OAuth -->
+        <div id="facebook" class="provider-section">
+            <div class="provider-header">
+                <svg width="48" height="48" viewBox="0 0 24 24">
+                    <path fill="#1877F2" d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                </svg>
+                <h2>Facebook OAuth Configuration</h2>
+                <span class="status-badge status-active">Active</span>
+            </div>
+
+            <div class="steps">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <h4>Create a Facebook App</h4>
+                    <p>Visit <a href="https://developers.facebook.com/apps" target="_blank">Facebook Developers</a> and click "Create App".</p>
+                    <ul>
+                        <li>Select "Consumer" as the app type</li>
+                        <li>App name: WaveMAX Affiliate Program</li>
+                        <li>App contact email: support@wavemax.promo</li>
+                    </ul>
+                </div>
+
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <h4>Add Facebook Login Product</h4>
+                    <p>In your app dashboard, click "Add Product" and set up "Facebook Login".</p>
+                </div>
+
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <h4>Configure OAuth Settings</h4>
+                    <p>Go to Facebook Login → Settings:</p>
+                    <ul>
+                        <li>Client OAuth Login: Yes</li>
+                        <li>Web OAuth Login: Yes</li>
+                        <li>Valid OAuth Redirect URIs:
+                            <div class="code-block">
+                                https://wavemax.promo/api/v1/auth/facebook/callback
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="step">
+                    <div class="step-number">4</div>
+                    <h4>Configure App Domains</h4>
+                    <p>In Settings → Basic, add your app domains:</p>
+                    <div class="code-block">
+                        wavemax.promo
+                    </div>
+                </div>
+
+                <div class="step">
+                    <div class="step-number">5</div>
+                    <h4>Add Environment Variables</h4>
+                    <div class="env-vars">
+                        <h5>Required Environment Variables:</h5>
+                        <div class="code-block">
+FACEBOOK_APP_ID=your_facebook_app_id_here
+FACEBOOK_APP_SECRET=your_facebook_app_secret_here
+                        </div>
+                    </div>
+                </div>
+
+                <div class="warning">
+                    <span class="warning-icon">⚠️</span>
+                    <div>
+                        <strong>App Review:</strong> For production use, you'll need to submit your app for Facebook review to access email permissions beyond test users.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- LinkedIn OAuth -->
+        <div id="linkedin" class="provider-section">
+            <div class="provider-header">
+                <svg width="48" height="48" viewBox="0 0 24 24">
+                    <path fill="#0A66C2" d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+                </svg>
+                <h2>LinkedIn OAuth Configuration</h2>
+                <span class="status-badge status-active">Active</span>
+            </div>
+
+            <div class="steps">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <h4>Create a LinkedIn App</h4>
+                    <p>Visit the <a href="https://www.linkedin.com/developers/apps" target="_blank">LinkedIn Developers</a> portal and create a new app.</p>
+                    <ul>
+                        <li>App name: WaveMAX Affiliate Program</li>
+                        <li>Company: WaveMAX Laundry</li>
+                        <li>Privacy policy URL: https://wavemax.promo/privacy-policy</li>
+                        <li>App logo: Upload WaveMAX logo</li>
+                    </ul>
+                </div>
+
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <h4>Request API Products</h4>
+                    <p>In the Products tab, request access to:</p>
+                    <ul>
+                        <li>Sign In with LinkedIn</li>
+                        <li>Share on LinkedIn (optional)</li>
+                    </ul>
+                </div>
+
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <h4>Configure OAuth 2.0 Settings</h4>
+                    <p>In the Auth tab, set up:</p>
+                    <ul>
+                        <li>Authorized redirect URLs:
+                            <div class="code-block">
+                                https://wavemax.promo/api/v1/auth/linkedin/callback
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="step">
+                    <div class="step-number">4</div>
+                    <h4>Add Environment Variables</h4>
+                    <div class="env-vars">
+                        <h5>Required Environment Variables:</h5>
+                        <div class="code-block">
+LINKEDIN_CLIENT_ID=your_linkedin_client_id_here
+LINKEDIN_CLIENT_SECRET=your_linkedin_client_secret_here
+                        </div>
+                    </div>
+                </div>
+
+                <div class="info">
+                    <span class="info-icon">ℹ️</span>
+                    <div>
+                        <strong>Scopes:</strong> The application requests <code>r_emailaddress</code> and <code>r_liteprofile</code> for basic profile information.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Twitter/X OAuth (Planned) -->
+        <div id="twitter" class="provider-section">
+            <div class="provider-header">
+                <svg width="48" height="48" viewBox="0 0 24 24">
+                    <path fill="#000000" d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                </svg>
+                <h2>Twitter/X OAuth Configuration</h2>
+                <span class="status-badge status-planned">Planned</span>
+            </div>
+
+            <div class="steps">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <h4>Create a Twitter/X App</h4>
+                    <p>Visit the <a href="https://developer.twitter.com/en/portal/dashboard" target="_blank">Twitter Developer Portal</a> and create a new app.</p>
+                    <ul>
+                        <li>App name: WaveMAX Affiliate Program</li>
+                        <li>App description: Affiliate program for WaveMAX Laundry</li>
+                    </ul>
+                </div>
+
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <h4>Configure OAuth 2.0</h4>
+                    <p>In your app settings, configure OAuth 2.0:</p>
+                    <ul>
+                        <li>Type of App: Web App</li>
+                        <li>Callback URI:
+                            <div class="code-block">
+                                https://wavemax.promo/api/v1/auth/twitter/callback
+                            </div>
+                        </li>
+                        <li>Website URL: https://wavemax.promo</li>
+                    </ul>
+                </div>
+
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <h4>Request Elevated Access</h4>
+                    <p>To access email addresses, you need Elevated access. Apply through the developer portal.</p>
+                </div>
+
+                <div class="step">
+                    <div class="step-number">4</div>
+                    <h4>Environment Variables (When Implemented)</h4>
+                    <div class="env-vars">
+                        <h5>Required Environment Variables:</h5>
+                        <div class="code-block">
+TWITTER_CLIENT_ID=your_twitter_client_id_here
+TWITTER_CLIENT_SECRET=your_twitter_client_secret_here
+                        </div>
+                    </div>
+                </div>
+
+                <div class="warning">
+                    <span class="warning-icon">⚠️</span>
+                    <div>
+                        <strong>Note:</strong> Twitter/X OAuth 2.0 requires PKCE (Proof Key for Code Exchange) for enhanced security. Implementation planned for future release.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Instagram OAuth (Planned) -->
+        <div id="instagram" class="provider-section">
+            <div class="provider-header">
+                <svg width="48" height="48" viewBox="0 0 24 24">
+                    <defs>
+                        <linearGradient id="instagram-gradient-large" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="#833AB4"/>
+                            <stop offset="50%" stop-color="#E1306C"/>
+                            <stop offset="100%" stop-color="#F77737"/>
+                        </linearGradient>
+                    </defs>
+                    <path fill="url(#instagram-gradient-large)" d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zM5.838 12a6.162 6.162 0 1112.324 0 6.162 6.162 0 01-12.324 0zM12 16a4 4 0 110-8 4 4 0 010 8zm4.965-10.405a1.44 1.44 0 112.881.001 1.44 1.44 0 01-2.881-.001z"/>
+                </svg>
+                <h2>Instagram OAuth Configuration</h2>
+                <span class="status-badge status-planned">Planned</span>
+            </div>
+
+            <div class="steps">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <h4>Create a Facebook App</h4>
+                    <p>Instagram OAuth uses Facebook's infrastructure. Create an app at <a href="https://developers.facebook.com" target="_blank">Facebook Developers</a>.</p>
+                </div>
+
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <h4>Add Instagram Basic Display</h4>
+                    <p>In your Facebook app, add the "Instagram Basic Display" product:</p>
+                    <ul>
+                        <li>Go to Products → Add Product</li>
+                        <li>Select "Instagram Basic Display"</li>
+                        <li>Click "Set Up"</li>
+                    </ul>
+                </div>
+
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <h4>Configure Instagram App</h4>
+                    <p>Create an Instagram app within your Facebook app:</p>
+                    <ul>
+                        <li>Display Name: WaveMAX Affiliate Program</li>
+                        <li>Valid OAuth Redirect URIs:
+                            <div class="code-block">
+                                https://wavemax.promo/api/v1/auth/instagram/callback
+                            </div>
+                        </li>
+                        <li>Deauthorize Callback URL: https://wavemax.promo/api/v1/auth/instagram/deauth</li>
+                    </ul>
+                </div>
+
+                <div class="step">
+                    <div class="step-number">4</div>
+                    <h4>Add Test Users</h4>
+                    <p>Add Instagram test users for development:</p>
+                    <ul>
+                        <li>Go to Roles → Instagram Testers</li>
+                        <li>Add Instagram accounts for testing</li>
+                        <li>Accept invitations from Instagram accounts</li>
+                    </ul>
+                </div>
+
+                <div class="step">
+                    <div class="step-number">5</div>
+                    <h4>Environment Variables (When Implemented)</h4>
+                    <div class="env-vars">
+                        <h5>Required Environment Variables:</h5>
+                        <div class="code-block">
+INSTAGRAM_CLIENT_ID=your_instagram_client_id_here
+INSTAGRAM_CLIENT_SECRET=your_instagram_client_secret_here
+                        </div>
+                    </div>
+                </div>
+
+                <div class="warning">
+                    <span class="warning-icon">⚠️</span>
+                    <div>
+                        <strong>Limitations:</strong> Instagram Basic Display API doesn't provide email addresses. You'll need to request email separately or link with Facebook login.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Common Configuration -->
+        <div class="provider-section">
+            <h2>Common Configuration Settings</h2>
+
+            <h3>Callback URLs Reference</h3>
+            <table class="urls-table">
+                <thead>
+                    <tr>
+                        <th>Provider</th>
+                        <th>Callback URL</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Google</td>
+                        <td><code>https://wavemax.promo/api/v1/auth/google/callback</code></td>
+                        <td>✅ Active</td>
+                    </tr>
+                    <tr>
+                        <td>Facebook</td>
+                        <td><code>https://wavemax.promo/api/v1/auth/facebook/callback</code></td>
+                        <td>✅ Active</td>
+                    </tr>
+                    <tr>
+                        <td>LinkedIn</td>
+                        <td><code>https://wavemax.promo/api/v1/auth/linkedin/callback</code></td>
+                        <td>✅ Active</td>
+                    </tr>
+                    <tr>
+                        <td>Twitter/X</td>
+                        <td><code>https://wavemax.promo/api/v1/auth/twitter/callback</code></td>
+                        <td>🔄 Planned</td>
+                    </tr>
+                    <tr>
+                        <td>Instagram</td>
+                        <td><code>https://wavemax.promo/api/v1/auth/instagram/callback</code></td>
+                        <td>🔄 Planned</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>Environment Variables Template</h3>
+            <div class="code-block">
+# OAuth Configuration
+OAUTH_CALLBACK_URI=https://wavemax.promo
+
+# Google OAuth
+GOOGLE_CLIENT_ID=your_google_client_id
+GOOGLE_CLIENT_SECRET=your_google_client_secret
+
+# Facebook OAuth
+FACEBOOK_APP_ID=your_facebook_app_id
+FACEBOOK_APP_SECRET=your_facebook_app_secret
+
+# LinkedIn OAuth
+LINKEDIN_CLIENT_ID=your_linkedin_client_id
+LINKEDIN_CLIENT_SECRET=your_linkedin_client_secret
+
+# Twitter/X OAuth (Future)
+# TWITTER_CLIENT_ID=your_twitter_client_id
+# TWITTER_CLIENT_SECRET=your_twitter_client_secret
+
+# Instagram OAuth (Future)
+# INSTAGRAM_CLIENT_ID=your_instagram_client_id
+# INSTAGRAM_CLIENT_SECRET=your_instagram_client_secret
+            </div>
+
+            <h3>Testing OAuth Locally</h3>
+            <div class="info">
+                <span class="info-icon">ℹ️</span>
+                <div>
+                    <p>For local development, update your callback URIs to use <code>http://localhost:3000</code> and add this to your providers' authorized redirect URIs.</p>
+                </div>
+            </div>
+
+            <h3>Security Best Practices</h3>
+            <ul>
+                <li>Always use HTTPS in production</li>
+                <li>Store OAuth credentials in environment variables, never in code</li>
+                <li>Implement state parameter validation to prevent CSRF attacks</li>
+                <li>Regularly rotate client secrets</li>
+                <li>Monitor OAuth usage for suspicious activity</li>
+                <li>Implement proper session management after OAuth login</li>
+            </ul>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2025 WaveMAX Laundry. OAuth Configuration Guide v1.0</p>
+    </footer>
+</body>
+</html>

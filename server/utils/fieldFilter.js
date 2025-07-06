@@ -51,34 +51,40 @@ const fieldDefinitions = {
       'city', 'state', 'zipCode', 'serviceFrequency',
       'specialInstructions', 'affiliateSpecialInstructions', 'lastFourDigits',
       'savePaymentInfo', 'isActive', 'registrationDate', 'lastLogin',
-      'numberOfBags', 'bagCredit', 'bagCreditApplied'],
+      'numberOfBags', 'bagCredit', 'bagCreditApplied', 
+      'wdfCredit', 'wdfCreditUpdatedAt', 'wdfCreditFromOrderId'],
     affiliate: ['customerId', 'firstName', 'lastName', 'email', 'phone', 'address',
       'city', 'state', 'zipCode', 'serviceFrequency', 'specialInstructions', 'affiliateSpecialInstructions', 'isActive', 'registrationDate',
-      'numberOfBags', 'bagCredit', 'bagCreditApplied'],
+      'numberOfBags', 'bagCredit', 'bagCreditApplied',
+      'wdfCredit', 'wdfCreditUpdatedAt', 'wdfCreditFromOrderId'],
     admin: ['_id', 'customerId', 'affiliateId', 'firstName', 'lastName', 'email',
       'phone', 'address', 'city', 'state', 'zipCode', 'serviceFrequency',
       'specialInstructions', 'affiliateSpecialInstructions',
       'username', 'lastFourDigits', 'billingZip', 'savePaymentInfo', 'isActive',
-      'registrationDate', 'lastLogin', 'numberOfBags', 'bagCredit', 'bagCreditApplied']
+      'registrationDate', 'lastLogin', 'numberOfBags', 'bagCredit', 'bagCreditApplied',
+      'wdfCredit', 'wdfCreditUpdatedAt', 'wdfCreditFromOrderId']
   },
 
   // Order fields visible to different roles
   order: {
     customer: ['orderId', 'pickupDate', 'pickupTime',
       'status', 'estimatedSize', 'actualWeight', 'estimatedTotal', 'actualTotal',
-      'deliveryFee', 'paymentStatus', 'createdAt'],
+      'deliveryFee', 'paymentStatus', 'createdAt', 
+      'wdfCreditApplied', 'wdfCreditGenerated', 'weightDifference'],
     affiliate: ['orderId', 'customerId', 'pickupDate', 'pickupTime',
       'status', 'estimatedSize', 'actualWeight', 'baseRate',
       'deliveryFee', 'estimatedTotal', 'actualTotal', 'affiliateCommission',
       'paymentStatus', 'specialPickupInstructions',
       'washInstructions', 'createdAt', 'pickedUpAt',
-      'processedAt', 'readyForDeliveryAt', 'deliveredAt'],
+      'processedAt', 'readyForDeliveryAt', 'deliveredAt',
+      'wdfCreditApplied', 'wdfCreditGenerated', 'weightDifference'],
     admin: ['_id', 'orderId', 'customerId', 'affiliateId', 'pickupDate', 'pickupTime',
       'status', 'estimatedSize', 'actualWeight',
       'baseRate', 'deliveryFee', 'estimatedTotal', 'actualTotal', 'affiliateCommission',
       'paymentStatus', 'specialPickupInstructions',
       'washInstructions', 'createdAt', 'pickedUpAt',
-      'processedAt', 'readyForDeliveryAt', 'deliveredAt', 'cancelledAt']
+      'processedAt', 'readyForDeliveryAt', 'deliveredAt', 'cancelledAt',
+      'wdfCreditApplied', 'wdfCreditGenerated', 'weightDifference']
   },
 
 

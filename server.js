@@ -26,6 +26,7 @@ const administratorRoutes = require('./server/routes/administratorRoutes');
 const operatorRoutes = require('./server/routes/operatorRoutes');
 const w9Routes = require('./server/routes/w9Routes');
 const coverageRoutes = require('./server/routes/coverageRoutes');
+const monitoringRoutes = require('./server/routes/monitoringRoutes');
 const systemConfigRoutes = require('./server/routes/systemConfigRoutes');
 const routingRoutes = require('./server/routes/routingRoutes');
 const paymentRoutes = require('./server/routes/paymentRoutes');
@@ -394,6 +395,15 @@ app.use('/', embedRoutes);
 
 // Mount coverage analysis reports BEFORE static files so they can handle CSP nonce injection
 app.use('/coverage-analysis', coverageRoutes);
+
+// Mount monitoring dashboard BEFORE static files for CSP nonce injection
+app.use('/monitoring', monitoringRoutes);
+
+// Handle direct monitoring-dashboard.html path
+app.get('/monitoring-dashboard.html', (req, res) => {
+  res.redirect('/monitoring/');
+});
+
 
 // Serve static files in all environments
 app.use(express.static(path.join(__dirname, 'public')));

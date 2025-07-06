@@ -181,6 +181,13 @@ exports.createOrder = async (req, res) => {
     const bagCount = parseInt(numberOfBags) || 1; // Default to 1 bag if not specified
     const feeCalculation = await calculateDeliveryFee(bagCount, affiliate);
 
+    // Check if customer has WDF credit to apply
+    let wdfCreditToApply = 0;
+    if (customer.wdfCredit && customer.wdfCredit !== 0) {
+      wdfCreditToApply = customer.wdfCredit;
+      console.log(`Applying WDF credit of $${wdfCreditToApply} to order for customer ${customerId}`);
+    }
+
     // Create new order
     const newOrder = new Order({
       customerId,
@@ -197,10 +204,19 @@ exports.createOrder = async (req, res) => {
         totalFee: feeCalculation.totalFee,
         minimumApplied: feeCalculation.minimumApplied
       },
+      wdfCreditApplied: wdfCreditToApply, // Store the credit applied to this order
       status: 'pending'
     });
 
     await newOrder.save();
+
+    // Reset customer's WDF credit after applying it to the order
+    if (wdfCreditToApply !== 0) {
+      customer.wdfCredit = 0;
+      customer.wdfCreditUpdatedAt = new Date();
+      await customer.save();
+      console.log(`Reset WDF credit for customer ${customerId} after applying to order ${newOrder.orderId}`);
+    }
 
     // Update customer isActive to true on first order
     if (!customer.isActive) {
@@ -222,6 +238,7 @@ exports.createOrder = async (req, res) => {
       success: true,
       orderId: newOrder.orderId,
       estimatedTotal: newOrder.estimatedTotal,
+      wdfCreditApplied: newOrder.wdfCreditApplied,
       message: 'Pickup scheduled successfully!'
     });
   } catch (error) {
@@ -283,7 +300,8 @@ exports.getOrderDetails = async (req, res) => {
           email: customer.email,
           address: `${customer.address}, ${customer.city}, ${customer.state} ${customer.zipCode}`,
           bagCredit: customer.bagCredit,
-          bagCreditApplied: customer.bagCreditApplied
+          bagCreditApplied: customer.bagCreditApplied,
+          wdfCredit: customer.wdfCredit
         } : null,
         affiliateId: order.affiliateId,
         affiliate: affiliate ? {
@@ -306,6 +324,9 @@ exports.getOrderDetails = async (req, res) => {
         washInstructions: order.washInstructions,
         estimatedTotal: order.estimatedTotal,
         actualTotal: order.actualTotal,
+        wdfCreditApplied: order.wdfCreditApplied,
+        wdfCreditGenerated: order.wdfCreditGenerated,
+        weightDifference: order.weightDifference,
         affiliateCommission: order.affiliateCommission,
         paymentStatus: order.paymentStatus,
         createdAt: order.createdAt,

@@ -876,6 +876,25 @@ exports.weighBags = async (req, res) => {
     // Update bag counts
     order.bagsWeighed = order.bags.length;
     
+    // Calculate weight difference and WDF credit if all bags are weighed
+    if (order.bagsWeighed === order.numberOfBags) {
+      // Calculate weight difference
+      order.weightDifference = order.actualWeight - order.estimatedWeight;
+      
+      // Calculate WDF credit (weight difference × base rate)
+      const baseRate = order.baseRate || 1.25;
+      order.wdfCreditGenerated = parseFloat((order.weightDifference * baseRate).toFixed(2));
+      
+      // Update customer's WDF credit
+      const customer = await Customer.findOne({ customerId: order.customerId });
+      if (customer) {
+        customer.wdfCredit = parseFloat((order.wdfCreditGenerated).toFixed(2));
+        customer.wdfCreditUpdatedAt = new Date();
+        customer.wdfCreditFromOrderId = order.orderId;
+        await customer.save();
+      }
+    }
+    
     await order.save();
 
     await logAuditEvent(AuditEvents.ORDER_STATUS_CHANGED, {

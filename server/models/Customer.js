@@ -73,6 +73,10 @@ const customerSchema = new mongoose.Schema({
   numberOfBags: { type: Number, default: 1 },
   bagCredit: { type: Number, default: 0 }, // Credit to be applied on first order
   bagCreditApplied: { type: Boolean, default: false }, // Track if credit has been used
+  // WDF Credit tracking
+  wdfCredit: { type: Number, default: 0 }, // Positive = credit, Negative = debit
+  wdfCreditUpdatedAt: Date, // When the credit was last updated
+  wdfCreditFromOrderId: String, // Reference to the order that generated this credit
   isActive: { type: Boolean, default: true },
   registrationDate: { type: Date, default: Date.now },
   lastLogin: Date,
