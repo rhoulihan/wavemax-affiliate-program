@@ -493,6 +493,11 @@ exports.getCustomerDashboardStats = async (req, res) => {
           amount: customer.bagCredit || 0,
           applied: customer.bagCreditApplied || false,
           numberOfBags: customer.numberOfBags || 0
+        },
+        wdfCredit: {
+          amount: customer.wdfCredit || 0,
+          updatedAt: customer.wdfCreditUpdatedAt,
+          fromOrderId: customer.wdfCreditFromOrderId
         }
       }
     });
