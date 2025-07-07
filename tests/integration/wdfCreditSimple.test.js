@@ -11,16 +11,12 @@ describe('WDF Credit Integration Test', () => {
   let server;
 
   beforeAll(async () => {
-    // Start server if not already running
-    const PORT = process.env.PORT || 3001;
-    server = app.listen(PORT);
+    // Don't start server - use the app directly for supertest
+    // which will handle the server lifecycle
   });
 
   afterAll(async () => {
-    if (server) {
-      await new Promise((resolve) => server.close(resolve));
-    }
-    await mongoose.connection.close();
+    // No server to close since we're using supertest with app directly
   });
 
   describe('WDF Credit API Endpoints', () => {
@@ -49,7 +45,7 @@ describe('WDF Credit Integration Test', () => {
         username: 'apiaffiliate',
         passwordSalt: 'salt',
         passwordHash: 'hash',
-        paymentMethod: 'card',
+        paymentMethod: 'directDeposit',
         serviceLatitude: 40.7128,
         serviceLongitude: -74.0060
       });

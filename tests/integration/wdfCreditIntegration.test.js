@@ -43,8 +43,15 @@ describe('WDF Credit System Integration Tests', () => {
       city: 'Test City',
       state: 'TS',
       zipCode: '12345',
+      username: 'testaffiliate',
       passwordSalt: 'salt',
-      passwordHash: 'hash'
+      passwordHash: 'hash',
+      paymentMethod: 'directDeposit',
+      serviceLatitude: 40.7128,
+      serviceLongitude: -74.0060,
+      minimumDeliveryFee: 25,
+      perBagDeliveryFee: 5,
+      serviceRadius: 5
     });
 
     // Create test customer
