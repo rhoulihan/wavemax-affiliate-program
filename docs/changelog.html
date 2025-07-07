@@ -243,6 +243,7 @@
             <div class="version-nav">
                 <h3>Quick Navigation</h3>
                 <ul>
+                    <li><a href="#v1.10.0">v1.10.0 - WDF Credit System & Operator Enhancements</a></li>
                     <li><a href="#v1.9.0">v1.9.0 - Session Persistence & Browser Navigation</a></li>
                     <li><a href="#v1.8.1">v1.8.1 - Test Coverage Achievement & Backup System</a></li>
                     <li><a href="#v1.8.0">v1.8.0 - Payment Processing Refactoring & Enhanced Workflows</a></li>
@@ -256,6 +257,71 @@
                     <li><a href="#v1.2.0">v1.2.0 - Documentation System</a></li>
                     <li><a href="#v1.1.0">v1.1.0 - CSRF Protection</a></li>
                     <li><a href="#v1.0.0">v1.0.0 - Initial Release</a></li>
+                </ul>
+            </div>
+
+            <div id="v1.10.0" class="release">
+                <h2>Version 1.10.0</h2>
+                <div class="release-date">Released on July 7, 2025</div>
+                
+                <h3>💰 WDF Credit System</h3>
+                <ul>
+                    <li><span class="tag new">NEW</span> <strong>Automatic Weight-Based Credits:</strong> Credit/debit system for weight differences
+                        <ul>
+                            <li>Credits generated when actual weight exceeds estimated weight</li>
+                            <li>Debits applied when actual weight is less than estimated</li>
+                            <li>Credits automatically applied to customer's next order</li>
+                            <li>Credit tracking fields added to Customer and Order models</li>
+                            <li>Full test coverage for credit calculation and application</li>
+                        </ul>
+                    </li>
+                </ul>
+
+                <h3>🖥️ Operator Experience Improvements</h3>
+                <ul>
+                    <li><span class="tag new">NEW</span> <strong>Auto-Login for Store IPs:</strong> Direct operator access from store locations
+                        <ul>
+                            <li>IP-based authentication for store workstations</li>
+                            <li>Dedicated operator-login-store.html page</li>
+                            <li>Bypass manual login for known store IPs</li>
+                            <li>Full CSP v2 compliance</li>
+                        </ul>
+                    </li>
+                    <li><span class="tag improved">IMPROVED</span> <strong>Operator Scan Interface:</strong> Streamlined scanning workflow
+                        <ul>
+                            <li>Removed manual ID input elements</li>
+                            <li>Changed parcel icon to laundry basket emoji 🧺</li>
+                            <li>Cleaner, more focused scanning interface</li>
+                        </ul>
+                    </li>
+                    <li><span class="tag new">NEW</span> <strong>Android Kiosk Mode:</strong> Full-screen scanning for tablets
+                        <ul>
+                            <li>Automatic fullscreen on Android devices</li>
+                            <li>Fully Kiosk Browser integration (PLUS license)</li>
+                            <li>Logout button closes kiosk browser</li>
+                            <li>PWA manifest for installable web app</li>
+                            <li>Service worker for offline capability</li>
+                        </ul>
+                    </li>
+                </ul>
+
+                <h3>🔐 OAuth Provider Updates</h3>
+                <ul>
+                    <li><span class="tag new">NEW</span> <strong>Twitter/X OAuth:</strong> Added Twitter/X as authentication provider</li>
+                    <li><span class="tag new">NEW</span> <strong>Instagram OAuth:</strong> Added Instagram as authentication provider</li>
+                </ul>
+
+                <h3>🎯 UI/UX Enhancements</h3>
+                <ul>
+                    <li><span class="tag improved">IMPROVED</span> Updated affiliate landing page operator login to direct URL</li>
+                    <li><span class="tag improved">IMPROVED</span> Enhanced operator scan page for better kiosk deployment</li>
+                </ul>
+
+                <h3>🐛 Bug Fixes</h3>
+                <ul>
+                    <li><span class="tag fixed">FIXED</span> Operator auto-login not working through iframe</li>
+                    <li><span class="tag fixed">FIXED</span> CSP violations in operator login pages</li>
+                    <li><span class="tag fixed">FIXED</span> Android kiosk mode affecting entire site</li>
                 </ul>
             </div>
 
