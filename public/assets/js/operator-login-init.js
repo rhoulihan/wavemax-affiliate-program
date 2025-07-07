@@ -43,6 +43,9 @@
   // Check for auto-login on page load
   async function checkAutoLogin() {
     try {
+      console.log('Checking auto-login from:', window.location.href);
+      console.log('Base URL:', BASE_URL);
+      
       const response = await fetch(`${BASE_URL}/api/v1/auth/operator/login`, {
         method: 'GET',
         headers: {
@@ -52,8 +55,10 @@
       });
 
       const result = await response.json();
+      console.log('Auto-login response:', response.status, result);
       
       if (response.ok && result.success) {
+        console.log('Auto-login successful!');
         // Store tokens
         localStorage.setItem('operatorToken', result.token);
         localStorage.setItem('operatorRefreshToken', result.refreshToken);
@@ -72,9 +77,11 @@
         } else {
           window.location.href = '/embed-app-v2.html?route=/operator-scan';
         }
+      } else {
+        console.log('Auto-login failed:', result.message);
       }
     } catch (error) {
-      console.log('Auto-login not available:', error.message);
+      console.log('Auto-login error:', error.message);
     }
   }
 
