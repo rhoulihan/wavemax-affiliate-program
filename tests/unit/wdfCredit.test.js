@@ -1,8 +1,11 @@
 const mongoose = require('mongoose');
+const httpMocks = require('node-mocks-http');
 const Order = require('../../server/models/Order');
 const Customer = require('../../server/models/Customer');
 const Operator = require('../../server/models/Operator');
 const SystemConfig = require('../../server/models/SystemConfig');
+const { weighBags } = require('../../server/controllers/operatorController');
+const { createOrder } = require('../../server/controllers/orderController');
 
 describe('WDF Credit System', () => {
   let testCustomer;
@@ -47,6 +50,9 @@ describe('WDF Credit System', () => {
       firstName: 'Test',
       lastName: 'Operator',
       email: 'operator@test.com',
+      username: 'testoperator',
+      password: 'hashedpassword',
+      createdBy: new mongoose.Types.ObjectId(),
       passwordSalt: 'salt',
       passwordHash: 'hash'
     });
