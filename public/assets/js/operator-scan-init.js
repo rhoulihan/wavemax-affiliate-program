@@ -65,6 +65,53 @@
         });
     }
 
+    // Detect Android OS
+    function isAndroid() {
+        const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+        return /android/i.test(userAgent);
+    }
+
+    // Enter fullscreen mode
+    function enterFullscreen() {
+        const elem = document.documentElement;
+        if (elem.requestFullscreen) {
+            elem.requestFullscreen();
+        } else if (elem.webkitRequestFullscreen) { // Safari
+            elem.webkitRequestFullscreen();
+        } else if (elem.msRequestFullscreen) { // IE11
+            elem.msRequestFullscreen();
+        } else if (elem.mozRequestFullScreen) { // Firefox
+            elem.mozRequestFullScreen();
+        }
+    }
+
+    // Show fullscreen prompt
+    function showFullscreenPrompt() {
+        // Create prompt element
+        const prompt = document.createElement('div');
+        prompt.className = 'fullscreen-prompt';
+        prompt.innerHTML = `
+            <div class="fullscreen-prompt-content">
+                <h3>Setup Kiosk Mode</h3>
+                <p>For kiosk mode without browser controls:</p>
+                <ol>
+                    <li>Install a kiosk browser app (e.g., "Fully Kiosk Browser")</li>
+                    <li>Or use Samsung's "Internet Browser" with immersive mode</li>
+                    <li>Or add to home screen and use a launcher that hides status bar</li>
+                </ol>
+                <button class="btn btn-primary" onclick="this.parentElement.parentElement.remove()">Got it</button>
+            </div>
+        `;
+        document.body.appendChild(prompt);
+        
+        // Auto-hide after 10 seconds
+        setTimeout(() => {
+            if (prompt.parentNode) {
+                prompt.remove();
+            }
+        }, 10000);
+    }
+
     // Initialize
     async function init() {
         // Check authentication
@@ -75,6 +122,125 @@
             console.log('No token found, redirecting to login...');
             window.location.href = '/operator-login-embed.html';
             return;
+        }
+
+        // Register service worker for PWA functionality
+        if ('serviceWorker' in navigator && window.location.pathname.includes('operator-scan')) {
+            navigator.serviceWorker.register('/sw-operator.js')
+                .then(reg => console.log('Service Worker registered'))
+                .catch(err => console.log('Service Worker registration failed:', err));
+        }
+
+        // Check if running in Fully Kiosk Browser
+        const isFullyKiosk = typeof fully !== 'undefined';
+        
+        // Enter fullscreen mode on Android for operator-scan page only
+        if (isAndroid() && window.location.pathname.includes('operator-scan')) {
+            console.log('Android detected on operator-scan page, setting up fullscreen mode');
+            
+            // Add class for styling
+            document.body.classList.add('android-kiosk');
+            document.documentElement.classList.add('android-kiosk');
+            
+            // If in Fully Kiosk Browser, use PLUS features
+            if (isFullyKiosk) {
+                console.log('Fully Kiosk Browser detected - initializing PLUS features');
+                
+                // Screen settings (PLUS features)
+                if (fully.setScreenBrightness) {
+                    console.log('Setting screen brightness to maximum');
+                    fully.setScreenBrightness(255);
+                }
+                
+                if (fully.setScreenOn) {
+                    console.log('Keeping screen on');
+                    fully.setScreenOn(true);
+                }
+                
+                // Hide system UI for true fullscreen (PLUS)
+                if (fully.hideSystemUI) {
+                    console.log('Hiding system UI');
+                    fully.hideSystemUI();
+                }
+                
+                // Hide navigation bar (PLUS)
+                if (fully.hideNavigationBar) {
+                    console.log('Hiding navigation bar');
+                    fully.hideNavigationBar();
+                }
+                
+                // Keyboard control (PLUS)
+                if (fully.hideKeyboard) {
+                    console.log('Hiding keyboard');
+                    fully.hideKeyboard();
+                }
+                
+                if (fully.setKeyboardVisibility) {
+                    console.log('Disabling keyboard auto-show');
+                    fully.setKeyboardVisibility(false);
+                }
+                
+                // Lock kiosk mode to prevent exit without code (PLUS)
+                if (fully.lockKiosk) {
+                    console.log('Locking kiosk mode');
+                    // Don't lock if you want logout button to work
+                    // fully.lockKiosk();
+                }
+                
+                // Set volume to reasonable level (PLUS)
+                if (fully.setAudioVolume) {
+                    console.log('Setting audio volume');
+                    fully.setAudioVolume(0.7, 3); // 70% media volume
+                }
+            }
+            
+            // Hide address bar by scrolling
+            window.scrollTo(0, 1);
+            
+            // Function to request fullscreen with all vendor prefixes
+            const requestFullscreen = () => {
+                const elem = document.documentElement;
+                if (elem.requestFullscreen) {
+                    elem.requestFullscreen().catch(err => {
+                        console.log('Fullscreen error:', err);
+                    });
+                } else if (elem.webkitRequestFullscreen) {
+                    elem.webkitRequestFullscreen();
+                } else if (elem.mozRequestFullScreen) {
+                    elem.mozRequestFullScreen();
+                } else if (elem.msRequestFullscreen) {
+                    elem.msRequestFullscreen();
+                }
+                
+                // For Samsung Internet browser
+                if (window.AndroidFullScreen) {
+                    window.AndroidFullScreen.immersiveMode();
+                }
+            };
+            
+            // Try on first user interaction (required by browsers)
+            const enableFullscreen = () => {
+                requestFullscreen();
+                // Remove listeners after first attempt
+                document.removeEventListener('click', enableFullscreen);
+                document.removeEventListener('touchstart', enableFullscreen);
+            };
+            
+            document.addEventListener('click', enableFullscreen);
+            document.addEventListener('touchstart', enableFullscreen);
+            
+            // Show fullscreen prompt if not in standalone mode and not in Fully Kiosk
+            if (!isFullyKiosk && 
+                !window.matchMedia('(display-mode: standalone)').matches && 
+                !window.matchMedia('(display-mode: fullscreen)').matches) {
+                // Create a prompt to guide user to add to home screen
+                setTimeout(() => {
+                    if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+                        console.log('Not in fullscreen, showing prompt');
+                        showFullscreenPrompt();
+                    }
+                }, 2000);
+            }
         }
         
         // Verify token is still valid by making a test request
@@ -200,6 +366,30 @@
 
         // Update stats every 30 seconds
         statsInterval = setInterval(loadStats, 30000);
+        
+        // Global keyboard hiding for Fully Kiosk
+        if (typeof fully !== 'undefined' && fully.hideKeyboard) {
+            console.log('Setting up Fully Kiosk keyboard handlers');
+            
+            // Hide keyboard on any focus event
+            document.addEventListener('focusin', function(e) {
+                if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+                    setTimeout(() => {
+                        fully.hideKeyboard();
+                    }, 100);
+                }
+            });
+            
+            // Also hide on window resize (keyboard appearing often triggers resize)
+            window.addEventListener('resize', function() {
+                fully.hideKeyboard();
+            });
+            
+            // Periodic keyboard hide to ensure it stays hidden
+            setInterval(() => {
+                fully.hideKeyboard();
+            }, 5000);
+        }
     }
 
     // Load operator stats
@@ -374,12 +564,6 @@
             });
         }
         
-        // Manual input button
-        const manualInputBtn = document.getElementById('manualInputBtn');
-        if (manualInputBtn) {
-            manualInputBtn.addEventListener('click', showManualInput);
-        }
-        
         // Modal close button
         const modalCloseBtn = document.getElementById('modalCloseBtn');
         if (modalCloseBtn) {
@@ -389,8 +573,22 @@
 
     // Focus scanner input
     function focusScanner() {
+        // Remove readonly temporarily to allow scanner input
+        scanInput.removeAttribute('readonly');
         scanInput.focus();
         scanInput.select();
+        
+        // In Fully Kiosk, ensure keyboard stays hidden
+        if (typeof fully !== 'undefined' && fully.hideKeyboard) {
+            setTimeout(() => {
+                fully.hideKeyboard();
+            }, 50);
+        }
+        
+        // Re-add readonly after a brief delay
+        setTimeout(() => {
+            scanInput.setAttribute('readonly', 'readonly');
+        }, 100);
     }
 
     // Handle scanner input
@@ -1536,16 +1734,11 @@
         console.log('=== END CLOSE MODAL ===');
     };
 
-    // Show manual input
-    const showManualInput = function() {
-        const id = prompt('Enter Customer ID (e.g., CUST123456) or Bag ID:');
-        if (id && id.trim()) {
-            processScan(id.trim());
-        }
-    };
 
     // Logout
     const logout = function() {
+        console.log('Logout function called');
+        
         localStorage.removeItem('operatorToken');
         localStorage.removeItem('operatorRefreshToken');
         localStorage.removeItem('operatorData');
@@ -1555,8 +1748,70 @@
             window.SessionManager.clearAuth('operator');
         }
         
-        // Redirect to the parent page URL
-        window.top.location.href = 'https://www.wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program';
+        // Exit fullscreen if in fullscreen mode
+        if (document.fullscreenElement || document.webkitFullscreenElement) {
+            if (document.exitFullscreen) {
+                document.exitFullscreen();
+            } else if (document.webkitExitFullscreen) {
+                document.webkitExitFullscreen();
+            }
+        }
+        
+        // Check if running in Fully Kiosk Browser
+        console.log('Checking for Fully Kiosk Browser...');
+        console.log('typeof fully:', typeof fully);
+        
+        if (typeof fully !== 'undefined') {
+            console.log('Fully Kiosk Browser detected');
+            console.log('fully.exit available:', typeof fully.exit);
+            
+            // With PLUS license, we can use the exit function
+            if (fully.exit && typeof fully.exit === 'function') {
+                console.log('Calling fully.exit() - PLUS license feature');
+                fully.exit();
+                return;
+            }
+            
+            // Fallback if exit is not available
+            console.log('fully.exit not available - check PLUS license and settings');
+            
+            // Try other PLUS methods
+            if (fully.stopKiosk && typeof fully.stopKiosk === 'function') {
+                console.log('Calling fully.stopKiosk()');
+                fully.stopKiosk();
+                return;
+            }
+            
+            // Final fallback - clear screen and show message
+            document.body.innerHTML = `
+                <div style="display: flex; justify-content: center; align-items: center; height: 100vh; background: #1e3a8a; color: white; font-family: Arial;">
+                    <div style="text-align: center;">
+                        <h1 style="font-size: 48px; margin-bottom: 20px;">Logged Out</h1>
+                        <p style="font-size: 24px;">Exit function not available. Check Fully Kiosk settings.</p>
+                    </div>
+                </div>
+            `;
+            return;
+        }
+        
+        // Try other kiosk browser methods
+        if (window.AndroidFullScreen && window.AndroidFullScreen.closeApp) {
+            console.log('AndroidFullScreen API detected, closing app');
+            window.AndroidFullScreen.closeApp();
+            return;
+        }
+        
+        // Try standard window.close()
+        console.log('Trying window.close()');
+        window.close();
+        
+        // If window.close() doesn't work, redirect as fallback
+        setTimeout(function() {
+            if (!window.closed) {
+                console.log('Window still open, redirecting...');
+                window.location.href = 'https://www.wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program';
+            }
+        }, 100);
     };
 
     // Expose functions to global scope for onclick handlers
@@ -1566,6 +1821,7 @@
     window.confirmAllBagsPickup = confirmAllBagsPickup;
     window.cancelPickup = cancelPickup;
     window.submitWeights = submitWeights;
+    window.logout = logout; // Expose logout function
 
     // Initialize on DOM ready (only once)
     let initialized = false;

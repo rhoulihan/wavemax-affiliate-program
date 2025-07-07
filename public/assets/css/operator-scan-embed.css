@@ -89,6 +89,15 @@ body {
     position: absolute;
     left: -9999px;
     opacity: 0;
+    width: 1px;
+    height: 1px;
+    border: none;
+    padding: 0;
+    margin: 0;
+    /* Prevent mobile keyboard from showing */
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+    user-select: none;
 }
 
 .scan-types {
@@ -487,4 +496,107 @@ body {
     font-size: 14px;
     text-transform: uppercase;
     letter-spacing: 0.5px;
+}
+
+/* Android Kiosk Mode Styles */
+html.android-kiosk,
+body.android-kiosk {
+    /* Hide scrollbars */
+    overflow: hidden !important;
+    /* Prevent pull-to-refresh */
+    overscroll-behavior: none;
+    overscroll-behavior-y: none;
+    /* Prevent text selection */
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+    /* Use full viewport */
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100vw;
+    height: 100vh;
+    margin: 0;
+    padding: 0;
+    /* Prevent bounce scrolling */
+    -webkit-overflow-scrolling: touch;
+    touch-action: none;
+}
+
+/* Force full height on all containers */
+body.android-kiosk .main-container {
+    height: calc(100vh - 80px); /* Account for header */
+    overflow: hidden;
+}
+
+/* Fullscreen prompt */
+.fullscreen-prompt {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 99999;
+    animation: fadeIn 0.3s;
+}
+
+.fullscreen-prompt-content {
+    background: white;
+    padding: 30px;
+    border-radius: 12px;
+    max-width: 400px;
+    text-align: center;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+}
+
+.fullscreen-prompt-content h3 {
+    color: #1e3a8a;
+    margin-bottom: 15px;
+}
+
+.fullscreen-prompt-content p {
+    margin-bottom: 20px;
+    color: #666;
+}
+
+.fullscreen-prompt-content ol {
+    text-align: left;
+    margin-bottom: 25px;
+    padding-left: 20px;
+}
+
+.fullscreen-prompt-content li {
+    margin-bottom: 10px;
+    color: #333;
+}
+
+/* Hide certain elements in fullscreen/standalone mode */
+@media all and (display-mode: fullscreen), (display-mode: standalone) {
+    body.android-kiosk {
+        padding-top: env(safe-area-inset-top);
+        padding-bottom: env(safe-area-inset-bottom);
+    }
+    
+    /* Ensure header is visible in fullscreen */
+    .header {
+        position: sticky;
+        top: 0;
+        z-index: 100;
+    }
+}
+
+/* Additional styles for Galaxy Fold and other Samsung devices */
+body.android-kiosk::-webkit-scrollbar {
+    display: none;
+}
+
+body.android-kiosk {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
 }

@@ -34,6 +34,9 @@ The WaveMAX Affiliate Program enables individuals to register as affiliates, onb
 - **Direct Navigation Architecture**: Eliminated redirect chains to prevent session loss and improve performance
 - **Comprehensive CSS Migration**: All inline styles moved to external CSS files for CSP compliance
 - **Enhanced Embed Framework**: New embed-app-v2.html with improved iframe communication and height management
+- **WDF Credit System**: Automatic weight difference tracking with credit/debit applied to next order
+- **Operator Auto-Login**: IP-based authentication for store locations with dedicated kiosk page
+- **Android Kiosk Mode**: Full-screen operator scanning with Fully Kiosk Browser integration
 
 ## Documentation
 
@@ -76,6 +79,8 @@ The system implements a comprehensive role-based access control (RBAC) system wi
    - Operator lifecycle management
    - Analytics and reporting
    - Affiliate management
+   - W-9 verification and approval
+   - QuickBooks export management
 
 4. **Operators**: Laundry facility staff
    - Process orders at workstations
@@ -87,6 +92,8 @@ The system implements a comprehensive role-based access control (RBAC) system wi
      - **Processing**: Scan bag after WDF (Wash/Dry/Fold) completion to update status
      - **Pickup**: Scan bag during affiliate pickup to confirm delivery
    - Automatic session renewal for operators at store locations
+   - IP-based auto-login for store workstations
+   - Android kiosk mode support with Fully Kiosk Browser
 
 ## Project Structure
 
@@ -1011,6 +1018,8 @@ The WaveMAX Affiliate Program supports social media login for affiliates through
 1. **Google OAuth 2.0** - Most trusted and widely used
 2. **Facebook Login** - High user adoption for business accounts  
 3. **LinkedIn OAuth** - Professional network, ideal for affiliate businesses
+4. **Twitter/X OAuth** - Wide reach for social media marketing affiliates
+5. **Instagram Basic Display** - Visual platform for lifestyle-oriented affiliates
 
 ## Internationalization (i18n)
 
@@ -1282,9 +1291,13 @@ Add these variables to your `.env` file:
 | `FACEBOOK_APP_ID` | Facebook App ID | Optional |
 | `FACEBOOK_APP_SECRET` | Facebook App Secret | Optional |
 | `LINKEDIN_CLIENT_ID` | LinkedIn OAuth Client ID | Optional |
+| `LINKEDIN_CLIENT_SECRET` | LinkedIn OAuth Client Secret | Optional |
+| `TWITTER_CONSUMER_KEY` | Twitter/X API Consumer Key | Optional |
+| `TWITTER_CONSUMER_SECRET` | Twitter/X API Consumer Secret | Optional |
+| `INSTAGRAM_CLIENT_ID` | Instagram Basic Display API Client ID | Optional |
+| `INSTAGRAM_CLIENT_SECRET` | Instagram Basic Display API Client Secret | Optional |
 | `OAUTH_CALLBACK_URI` | Domain for OAuth callbacks (e.g., https://wavemax.promo) | Optional |
 | `RELAX_RATE_LIMITING` | Set to 'true' to disable rate limiting (development only) | Optional |
-| `LINKEDIN_CLIENT_SECRET` | LinkedIn OAuth Client Secret | Optional |
 
 **Note:** OAuth providers are optional. If environment variables are not provided, the application will run with traditional username/password authentication only.
 
