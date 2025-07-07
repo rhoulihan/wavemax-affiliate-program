@@ -366,15 +366,28 @@ exports.administratorLogin = async (req, res) => {
  */
 exports.operatorAutoLogin = async (req, res) => {
   try {
-    // Get client IP address
-    const clientIp = req.ip || req.connection.remoteAddress || req.socket.remoteAddress || req.headers['x-forwarded-for'];
+    // Get client IP address - handle proxy headers
+    let clientIp;
+    const forwardedFor = req.headers['x-forwarded-for'];
+    
+    if (forwardedFor) {
+      // Take the first IP if there are multiple (client, proxy1, proxy2, ...)
+      clientIp = forwardedFor.split(',')[0].trim();
+    } else {
+      clientIp = req.ip || req.connection.remoteAddress || req.socket.remoteAddress;
+    }
+    
     const cleanIp = clientIp.replace(/^::ffff:/, ''); // Remove IPv6 prefix if present
     
     console.log('Auto-login attempt from IP:', cleanIp);
     
-    // Check if request is from store IP
-    const storeIp = process.env.STORE_IP_ADDRESS;
-    if (!storeIp || cleanIp !== storeIp) {
+    // Check if request is from store IP using storeIPs configuration
+    const storeIPs = require('../config/storeIPs');
+    console.log('Whitelisted IPs:', storeIPs.whitelistedIPs);
+    console.log('Whitelisted Ranges:', storeIPs.whitelistedRanges);
+    
+    if (!storeIPs.isWhitelisted(cleanIp)) {
+      console.log('Auto-login denied - IP not whitelisted:', cleanIp);
       return res.status(403).json({
         success: false,
         message: 'Auto-login not allowed from this location'
