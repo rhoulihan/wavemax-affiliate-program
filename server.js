@@ -181,7 +181,8 @@ app.use((req, res, next) => {
     '/affiliate-landing-embed.html',
     '/embed-landing.html',
     '/franchisee-landing.html',
-    '/embed-app-v2.html'
+    '/embed-app-v2.html',
+    '/operator-login-store.html'
   ];
   
   // Apply strict CSP to documentation pages as well (but not examples)
