@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Operator Login - WaveMAX</title>
+    <script>
+        // This page is meant to be accessed directly from the store IP
+        // It will attempt auto-login and redirect
+        (async function() {
+            try {
+                const response = await fetch('/api/v1/auth/operator/login', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    credentials: 'include'
+                });
+
+                const result = await response.json();
+                
+                if (response.ok && result.success) {
+                    // Store tokens
+                    localStorage.setItem('operatorToken', result.token);
+                    localStorage.setItem('operatorRefreshToken', result.refreshToken);
+                    localStorage.setItem('operatorData', JSON.stringify(result.operator));
+                    
+                    // Redirect to operator scan page
+                    window.location.href = '/embed-app-v2.html?route=/operator-scan';
+                } else {
+                    // Auto-login failed, redirect to manual login
+                    window.location.href = '/embed-app-v2.html?route=/operator-login';
+                }
+            } catch (error) {
+                console.error('Auto-login error:', error);
+                // Redirect to manual login on error
+                window.location.href = '/embed-app-v2.html?route=/operator-login';
+            }
+        })();
+    </script>
+</head>
+<body>
+    <div style="display: flex; justify-content: center; align-items: center; height: 100vh; font-family: Arial, sans-serif;">
+        <div style="text-align: center;">
+            <h2>Checking credentials...</h2>
+            <p>Please wait while we log you in.</p>
+        </div>
+    </div>
+</body>
+</html>
