@@ -490,7 +490,10 @@ describe('Customer Controller', () => {
         affiliateId: 'AFF123',
         bagCredit: 20.00,
         bagCreditApplied: true,
-        numberOfBags: 2
+        numberOfBags: 2,
+        wdfCredit: 0,
+        wdfCreditUpdatedAt: null,
+        wdfCreditFromOrderId: null
       };
 
       const mockAffiliate = {
@@ -641,6 +644,11 @@ describe('Customer Controller', () => {
             amount: 20.00,
             applied: true,
             numberOfBags: 2
+          },
+          wdfCredit: {
+            amount: 0,
+            updatedAt: null,
+            fromOrderId: null
           }
         }
       });
