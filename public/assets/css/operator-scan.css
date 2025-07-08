@@ -87,8 +87,14 @@ body {
 
 #scanInput {
     position: absolute;
-    left: -9999px;
-    opacity: 0;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 1px;
+    height: 1px;
+    opacity: 0.01;
+    pointer-events: none;
+    z-index: -1;
 }
 
 .scan-types {
