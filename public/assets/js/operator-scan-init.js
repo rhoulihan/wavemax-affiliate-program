@@ -546,9 +546,29 @@
 
     // Set up event listeners
     function setupEventListeners() {
+        console.log('Setting up event listeners...');
+        console.log('scanInput element:', scanInput);
+        
         // Scanner input handling
         scanInput.addEventListener('input', handleScanInput);
         scanInput.addEventListener('blur', handleScannerBlur);
+        
+        // Add keypress listener for debugging
+        scanInput.addEventListener('keypress', function(e) {
+            console.log('Keypress detected:', e.key, 'KeyCode:', e.keyCode);
+        });
+        
+        // Add paste listener for barcode scanners that paste
+        scanInput.addEventListener('paste', function(e) {
+            console.log('Paste event detected');
+            e.preventDefault();
+            const pastedData = e.clipboardData.getData('text');
+            console.log('Pasted data:', pastedData);
+            if (pastedData) {
+                scanInput.value = pastedData;
+                handleScanInput({ target: scanInput });
+            }
+        });
 
         // Keep focus on scanner input
         document.addEventListener('click', handleDocumentClick);
@@ -573,7 +593,8 @@
 
     // Focus scanner input
     function focusScanner() {
-        // Remove readonly temporarily to allow scanner input
+        console.log('Focusing scanner input...');
+        // Remove readonly to allow scanner input
         scanInput.removeAttribute('readonly');
         scanInput.focus();
         scanInput.select();
@@ -585,10 +606,8 @@
             }, 50);
         }
         
-        // Re-add readonly after a brief delay
-        setTimeout(() => {
-            scanInput.setAttribute('readonly', 'readonly');
-        }, 100);
+        // Don't re-add readonly - let the scanner work
+        // The blur handler will manage refocusing as needed
     }
 
     // Handle scanner input

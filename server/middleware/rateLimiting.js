@@ -185,6 +185,27 @@ exports.adminOperationLimiter = rateLimit({
   store: createMongoStore()
 });
 
+// Administrator login - more lenient limits to prevent lockout
+exports.adminLoginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: isRelaxed ? 100 : 20, // Relaxed: 100, Production: 20 login attempts
+  message: {
+    success: false,
+    message: 'Too many login attempts, please try again in 15 minutes',
+    retryAfter: 15 * 60 // seconds
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+  skipSuccessfulRequests: true,
+  skip: skipInTest,
+  keyGenerator: (req) => {
+    // Rate limit by IP + username combination to prevent lockout of legitimate users
+    const username = req.body.username || req.body.email || '';
+    return `admin_login_${req.ip}_${username}`;
+  },
+  store: createMongoStore()
+});
+
 // Create a custom rate limiter with specific settings
 exports.createCustomLimiter = (options) => {
   const defaults = {
