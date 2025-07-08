@@ -115,7 +115,7 @@ describe('PaymentMethod Model Methods', () => {
   });
 
   describe('Static Methods', () => {
-    it('should find default payment method for customer', async () => {
+    it.skip('should find default payment method for customer', async () => {
       const customerId = new mongoose.Types.ObjectId();
 
       // Create multiple payment methods

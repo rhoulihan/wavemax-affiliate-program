@@ -4,7 +4,7 @@ const express = require('express');
 const router = express.Router();
 const authController = require('../controllers/authController');
 const { authenticate } = require('../middleware/auth');
-const { authLimiter, passwordResetLimiter, registrationLimiter } = require('../middleware/rateLimiting');
+const { authLimiter, passwordResetLimiter, registrationLimiter, adminLoginLimiter } = require('../middleware/rateLimiting');
 const { body, validationResult } = require('express-validator');
 const { customPasswordValidator } = require('../utils/passwordValidator');
 
@@ -78,7 +78,7 @@ router.post('/customer/login',
  * @access  Public
  */
 router.post('/administrator/login',
-  authLimiter,
+  adminLoginLimiter,
   [
     body('email').trim().isEmail().withMessage('Valid email is required'),
     body('password').notEmpty().withMessage('Password is required')
