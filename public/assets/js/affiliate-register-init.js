@@ -201,7 +201,6 @@
     // Social registration button handlers
     const googleRegister = document.getElementById('googleRegister');
     const facebookRegister = document.getElementById('facebookRegister');
-    const linkedinRegister = document.getElementById('linkedinRegister');
 
     // Shared validation function for both OAuth and form submission
     function validateFormFields(isSocialRegistration = false) {
@@ -638,15 +637,6 @@
           handleSocialAuth('facebook');
         });
         facebookRegister.dataset.initialized = 'true';
-      }
-    }
-
-    if (linkedinRegister) {
-      if (!linkedinRegister.dataset.initialized) {
-        linkedinRegister.addEventListener('click', function() {
-          handleSocialAuth('linkedin');
-        });
-        linkedinRegister.dataset.initialized = 'true';
       }
     }
 
