@@ -296,12 +296,10 @@
     console.log('🔍 Setting up OAuth button handlers...');
     const googleLogin = document.getElementById('googleLogin');
     const facebookLogin = document.getElementById('facebookLogin');
-    const linkedinLogin = document.getElementById('linkedinLogin');
 
     console.log('🔍 Found buttons:', {
       googleLogin: !!googleLogin,
-      facebookLogin: !!facebookLogin,
-      linkedinLogin: !!linkedinLogin
+      facebookLogin: !!facebookLogin
     });
 
     if (googleLogin) {
@@ -317,12 +315,6 @@
     if (facebookLogin) {
       facebookLogin.addEventListener('click', function() {
         handleAffiliateLogin('facebook');
-      });
-    }
-
-    if (linkedinLogin) {
-      linkedinLogin.addEventListener('click', function() {
-        handleAffiliateLogin('linkedin');
       });
     }
 
