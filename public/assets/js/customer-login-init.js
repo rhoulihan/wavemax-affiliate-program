@@ -42,7 +42,6 @@
         // Social login buttons
         const googleLoginBtn = document.getElementById('googleLogin');
         const facebookLoginBtn = document.getElementById('facebookLogin');
-        const linkedinLoginBtn = document.getElementById('linkedinLogin');
 
         // Alert container (create if doesn't exist)
         let alertContainer = document.getElementById('alertContainer');
@@ -340,9 +339,6 @@
         }
         if (facebookLoginBtn) {
             facebookLoginBtn.addEventListener('click', () => handleSocialLogin('facebook'));
-        }
-        if (linkedinLoginBtn) {
-            linkedinLoginBtn.addEventListener('click', () => handleSocialLogin('linkedin'));
         }
 
         // Handle enter key in form fields

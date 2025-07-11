@@ -1012,15 +1012,12 @@ The system is currently configured to use a self-hosted Mailcow email server:
 
 ## Social Media Authentication Configuration
 
-The WaveMAX Affiliate Program supports social media login for affiliates through Google, Facebook, and LinkedIn OAuth 2.0 integration. This provides a seamless registration and login experience while maintaining security.
+The WaveMAX Affiliate Program supports social media login for affiliates through Google and Facebook OAuth 2.0 integration. This provides a seamless registration and login experience while maintaining security.
 
 ### Supported OAuth Providers
 
 1. **Google OAuth 2.0** - Most trusted and widely used
-2. **Facebook Login** - High user adoption for business accounts  
-3. **LinkedIn OAuth** - Professional network, ideal for affiliate businesses
-4. **Twitter/X OAuth** - Wide reach for social media marketing affiliates
-5. **Instagram Basic Display** - Visual platform for lifestyle-oriented affiliates
+2. **Facebook Login** - High user adoption for business accounts
 
 ## Internationalization (i18n)
 
@@ -1261,26 +1258,6 @@ For production use with external users:
    FACEBOOK_APP_SECRET=your_facebook_app_secret
    ```
 
-#### LinkedIn OAuth Setup
-
-1. **Create a LinkedIn App:**
-   - Go to [LinkedIn Developer Portal](https://www.linkedin.com/developers/)
-   - Create a new app
-   - Select your organization or create a new one
-
-2. **Configure OAuth Settings:**
-   - Go to Auth tab
-   - Add Authorized redirect URLs:
-     - `https://yourdomain.com/api/auth/linkedin/callback`
-     - `http://localhost:3000/api/auth/linkedin/callback`
-   - Request access to `r_liteprofile` and `r_emailaddress` scopes
-
-3. **Add to environment variables:**
-   ```bash
-   LINKEDIN_CLIENT_ID=your_linkedin_client_id
-   LINKEDIN_CLIENT_SECRET=your_linkedin_client_secret
-   ```
-
 ### OAuth Environment Variables
 
 Add these variables to your `.env` file:
@@ -1291,8 +1268,6 @@ Add these variables to your `.env` file:
 | `GOOGLE_CLIENT_SECRET` | Google OAuth 2.0 Client Secret | Optional |
 | `FACEBOOK_APP_ID` | Facebook App ID | Optional |
 | `FACEBOOK_APP_SECRET` | Facebook App Secret | Optional |
-| `LINKEDIN_CLIENT_ID` | LinkedIn OAuth Client ID | Optional |
-| `LINKEDIN_CLIENT_SECRET` | LinkedIn OAuth Client Secret | Optional |
 | `TWITTER_CONSUMER_KEY` | Twitter/X API Consumer Key | Optional |
 | `TWITTER_CONSUMER_SECRET` | Twitter/X API Consumer Secret | Optional |
 | `INSTAGRAM_CLIENT_ID` | Instagram Basic Display API Client ID | Optional |
@@ -1309,13 +1284,11 @@ The OAuth integration provides the following endpoints:
 ```bash
 # Initiate OAuth flow
 GET /api/auth/google
-GET /api/auth/facebook  
-GET /api/auth/linkedin
+GET /api/auth/facebook
 
 # OAuth callback handling
 GET /api/auth/google/callback
 GET /api/auth/facebook/callback
-GET /api/auth/linkedin/callback
 
 # Complete social registration for affiliates
 POST /api/v1/auth/social/register
@@ -1327,14 +1300,14 @@ Body: { socialToken: 'string', affiliateId: 'string', phone: 'string', address: 
 
 # Social login for existing users
 POST /api/v1/auth/social/callback
-Body: { provider: 'google|facebook|linkedin', socialId: 'string' }
+Body: { provider: 'google|facebook', socialId: 'string' }
 
 # Poll OAuth session results
 GET /api/v1/auth/oauth-session/:sessionId
 
 # Link OAuth account to existing user
 POST /api/v1/auth/social/link
-Body: { provider: 'google|facebook|linkedin', socialToken: 'string' }
+Body: { provider: 'google|facebook', socialToken: 'string' }
 ```
 
 ### OAuth Frontend Integration

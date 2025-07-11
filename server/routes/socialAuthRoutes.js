@@ -99,39 +99,40 @@ router.get('/facebook/callback', (req, res, next) => {
   })(req, res, next);
 });
 
-/**
- * @route   GET /api/auth/linkedin
- * @desc    Start LinkedIn OAuth authentication
- * @access  Public
- */
-router.get('/linkedin', (req, res, next) => {
-  // Check if LinkedIn OAuth is configured
-  if (!process.env.LINKEDIN_CLIENT_ID || !process.env.LINKEDIN_CLIENT_SECRET) {
-    return res.status(404).json({
-      success: false,
-      message: 'LinkedIn OAuth is not configured'
-    });
-  }
+// LinkedIn OAuth routes removed - launching with Google and Facebook only
+// /**
+//  * @route   GET /api/auth/linkedin
+//  * @desc    Start LinkedIn OAuth authentication
+//  * @access  Public
+//  */
+// router.get('/linkedin', (req, res, next) => {
+//   // Check if LinkedIn OAuth is configured
+//   if (!process.env.LINKEDIN_CLIENT_ID || !process.env.LINKEDIN_CLIENT_SECRET) {
+//     return res.status(404).json({
+//       success: false,
+//       message: 'LinkedIn OAuth is not configured'
+//     });
+//   }
 
-  passport.authenticate('linkedin', {
-    scope: ['r_emailaddress', 'r_liteprofile']
-  })(req, res, next);
-});
+//   passport.authenticate('linkedin', {
+//     scope: ['r_emailaddress', 'r_liteprofile']
+//   })(req, res, next);
+// });
 
-/**
- * @route   GET /api/auth/linkedin/callback
- * @desc    Handle LinkedIn OAuth callback
- * @access  Public
- */
-router.get('/linkedin/callback', (req, res, next) => {
-  passport.authenticate('linkedin', { session: false }, (err, user, info) => {
-    // Add user to request regardless of authentication result
-    req.user = user;
-    
-    // Always proceed to handleSocialCallback, even if authentication failed
-    authController.handleSocialCallback(req, res);
-  })(req, res, next);
-});
+// /**
+//  * @route   GET /api/auth/linkedin/callback
+//  * @desc    Handle LinkedIn OAuth callback
+//  * @access  Public
+//  */
+// router.get('/linkedin/callback', (req, res, next) => {
+//   passport.authenticate('linkedin', { session: false }, (err, user, info) => {
+//     // Add user to request regardless of authentication result
+//     req.user = user;
+//     
+//     // Always proceed to handleSocialCallback, even if authentication failed
+//     authController.handleSocialCallback(req, res);
+//   })(req, res, next);
+// });
 
 /**
  * @route   POST /api/auth/social/register
@@ -227,37 +228,38 @@ router.get('/customer/facebook/callback',
   authController.handleCustomerSocialCallback
 );
 
-/**
- * @route   GET /api/auth/customer/linkedin
- * @desc    Start LinkedIn OAuth authentication for customers
- * @access  Public
- */
-router.get('/customer/linkedin', (req, res, next) => {
-  // Check if LinkedIn OAuth is configured
-  if (!process.env.LINKEDIN_CLIENT_ID || !process.env.LINKEDIN_CLIENT_SECRET) {
-    return res.status(404).json({
-      success: false,
-      message: 'LinkedIn OAuth is not configured'
-    });
-  }
+// LinkedIn OAuth routes removed - launching with Google and Facebook only
+// /**
+//  * @route   GET /api/auth/customer/linkedin
+//  * @desc    Start LinkedIn OAuth authentication for customers
+//  * @access  Public
+//  */
+// router.get('/customer/linkedin', (req, res, next) => {
+//   // Check if LinkedIn OAuth is configured
+//   if (!process.env.LINKEDIN_CLIENT_ID || !process.env.LINKEDIN_CLIENT_SECRET) {
+//     return res.status(404).json({
+//       success: false,
+//       message: 'LinkedIn OAuth is not configured'
+//     });
+//   }
 
-  const state = req.query.state || '';
+//   const state = req.query.state || '';
 
-  passport.authenticate('linkedin', {
-    scope: ['r_emailaddress', 'r_liteprofile'],
-    state: state
-  })(req, res, next);
-});
+//   passport.authenticate('linkedin', {
+//     scope: ['r_emailaddress', 'r_liteprofile'],
+//     state: state
+//   })(req, res, next);
+// });
 
-/**
- * @route   GET /api/auth/customer/linkedin/callback
- * @desc    Handle LinkedIn OAuth callback for customers
- * @access  Public
- */
-router.get('/customer/linkedin/callback',
-  passport.authenticate('linkedin', { session: false }),
-  authController.handleCustomerSocialCallback
-);
+// /**
+//  * @route   GET /api/auth/customer/linkedin/callback
+//  * @desc    Handle LinkedIn OAuth callback for customers
+//  * @access  Public
+//  */
+// router.get('/customer/linkedin/callback',
+//   passport.authenticate('linkedin', { session: false }),
+//   authController.handleCustomerSocialCallback
+// );
 
 /**
  * @route   POST /api/auth/customer/social/register

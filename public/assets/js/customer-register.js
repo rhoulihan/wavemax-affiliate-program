@@ -976,7 +976,6 @@
     // Social registration button handlers
     const googleRegister = document.getElementById('googleRegister');
     const facebookRegister = document.getElementById('facebookRegister');
-    const linkedinRegister = document.getElementById('linkedinRegister');
 
     // Shared validation function for both OAuth and form submission
     function validateFormFields(isSocialRegistration = false) {
@@ -1170,12 +1169,6 @@
     if (facebookRegister) {
       facebookRegister.addEventListener('click', function() {
         handleSocialAuth('facebook');
-      });
-    }
-
-    if (linkedinRegister) {
-      linkedinRegister.addEventListener('click', function() {
-        handleSocialAuth('linkedin');
       });
     }
 
