@@ -1263,5 +1263,41 @@
     "processingRegistration": "Processing your registration...",
     "loading": "Loading...",
     "pleaseWait": "Please wait..."
+  },
+  "deletionStatus": {
+    "title": "Data Deletion Status - WaveMAX",
+    "header": "Data Deletion Status",
+    "description": "Check the status of your Facebook data deletion request",
+    "loading": "Loading status...",
+    "confirmationCode": "Confirmation Code",
+    "status": "Status",
+    "requestedAt": "Requested At",
+    "completedAt": "Completed At",
+    "contact": "For questions about your data deletion request, please contact support.",
+    "error": {
+      "title": "Error",
+      "message": "An error occurred while loading the deletion status",
+      "noCode": "No confirmation code provided",
+      "loadFailed": "Failed to load deletion status",
+      "notFound": "Deletion request not found"
+    },
+    "status": {
+      "pending": "Pending Processing",
+      "processing": "Currently Processing",
+      "completed": "Completed Successfully",
+      "failed": "Failed"
+    },
+    "success": {
+      "title": "Deletion Completed",
+      "dataTypes": "Data types deleted:"
+    },
+    "failed": {
+      "title": "Deletion Failed",
+      "contact": "Please contact support for assistance."
+    },
+    "processing": {
+      "message": "Your data deletion request is being processed. Please check back later for updates.",
+      "delayed": "Note: This request has been pending for over 24 hours. If you have concerns, please contact support."
+    }
   }
 }

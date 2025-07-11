@@ -1022,7 +1022,10 @@ exports.searchOrders = async (req, res) => {
           actualWeight: order.actualWeight,
           estimatedTotal: order.estimatedTotal,
           actualTotal: order.actualTotal,
-          createdAt: order.createdAt
+          createdAt: order.createdAt,
+          wdfCreditApplied: order.wdfCreditApplied,
+          wdfCreditGenerated: order.wdfCreditGenerated,
+          weightDifference: order.weightDifference
         };
       }),
       totalResults,

@@ -1205,5 +1205,41 @@
     "processingRegistration": "Processando seu registro...",
     "loading": "Carregando...",
     "pleaseWait": "Por favor, aguarde..."
+  },
+  "deletionStatus": {
+    "title": "Status de Exclusão de Dados - WaveMAX",
+    "header": "Status de Exclusão de Dados",
+    "description": "Verifique o status da sua solicitação de exclusão de dados do Facebook",
+    "loading": "Carregando status...",
+    "confirmationCode": "Código de Confirmação",
+    "status": "Status",
+    "requestedAt": "Solicitado em",
+    "completedAt": "Concluído em",
+    "contact": "Para perguntas sobre sua solicitação de exclusão de dados, entre em contato com o suporte.",
+    "error": {
+      "title": "Erro",
+      "message": "Ocorreu um erro ao carregar o status de exclusão",
+      "noCode": "Nenhum código de confirmação fornecido",
+      "loadFailed": "Falha ao carregar o status de exclusão",
+      "notFound": "Solicitação de exclusão não encontrada"
+    },
+    "status": {
+      "pending": "Processamento Pendente",
+      "processing": "Processando Atualmente",
+      "completed": "Concluído com Sucesso",
+      "failed": "Falhou"
+    },
+    "success": {
+      "title": "Exclusão Concluída",
+      "dataTypes": "Tipos de dados excluídos:"
+    },
+    "failed": {
+      "title": "Exclusão Falhou",
+      "contact": "Entre em contato com o suporte para assistência."
+    },
+    "processing": {
+      "message": "Sua solicitação de exclusão de dados está sendo processada. Verifique novamente mais tarde para atualizações.",
+      "delayed": "Nota: Esta solicitação está pendente há mais de 24 horas. Se você tiver preocupações, entre em contato com o suporte."
+    }
   }
 }

@@ -9,19 +9,8 @@
 
   console.log('Test payment form loaded');
 
-  // Send heartbeat to parent window every second
-  const heartbeatInterval = setInterval(() => {
-    try {
-      // Send heartbeat to all origins since we're in cross-origin context
-      window.opener?.postMessage({ type: 'test-payment-heartbeat' }, '*');
-    } catch (e) {
-      console.log('Failed to send heartbeat:', e);
-    }
-  }, 1000);
-
   // Clean up on window unload
   window.addEventListener('beforeunload', () => {
-    clearInterval(heartbeatInterval);
     try {
       window.opener?.postMessage({ type: 'test-payment-closing' }, '*');
     } catch (e) {

@@ -10,6 +10,30 @@ const { customPasswordValidator } = require('../utils/passwordValidator');
 const { registrationLimiter } = require('../middleware/rateLimiting');
 
 /**
+ * @route   GET /api/customers/check-rate-limit
+ * @desc    Check if registration rate limit would be exceeded
+ * @access  Public
+ */
+router.get('/check-rate-limit', (req, res, next) => {
+  // Apply the registration rate limiter to check
+  registrationLimiter(req, res, (err) => {
+    if (err) {
+      // Rate limit would be exceeded
+      return res.status(429).json({
+        success: false,
+        message: 'Too many registration attempts from this IP, please try again later',
+        retryAfter: err.retryAfter || 3600
+      });
+    }
+    // Rate limit check passed
+    res.json({
+      success: true,
+      message: 'Rate limit check passed'
+    });
+  });
+});
+
+/**
  * @route   POST /api/customers/register
  * @desc    Register a new customer
  * @access  Public

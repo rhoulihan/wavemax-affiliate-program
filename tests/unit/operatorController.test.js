@@ -983,7 +983,8 @@ describe('Operator Controller', () => {
         bagsWeighed: 0,
         bagsProcessed: 0,
         bagsPickedUp: 0,
-        actualWeight: undefined
+        actualWeight: undefined,
+        bags: []
       };
 
       req.body = { customerId: 'CUST123' };
@@ -1010,7 +1011,8 @@ describe('Operator Controller', () => {
           bagsPickedUp: 0,
           estimatedWeight: 30,
           actualWeight: undefined,
-          status: 'pending'
+          status: 'pending',
+          bags: []
         }
       });
     });

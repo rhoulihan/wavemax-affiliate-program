@@ -566,6 +566,9 @@ class PaygistixPaymentForm {
                     form.target = 'paygistixPayment';
                     form.submit();
                     
+                    // Track when window was opened
+                    this.paymentWindowOpenedAt = Date.now();
+                    
                     // Start polling for payment status
                     this.startPaymentStatusPolling(paymentToken, paymentWindow, paymentSpinner);
                     
@@ -607,6 +610,9 @@ class PaygistixPaymentForm {
                         submessage: 'Please complete your payment in the popup window...'
                     });
                 }
+                
+                // Track when window was opened
+                this.paymentWindowOpenedAt = Date.now();
                 
                 // Monitor window
                 this.monitorPaymentWindow(paymentWindow, paymentSpinner);
@@ -951,6 +957,9 @@ class PaygistixPaymentForm {
                 // Handle success through callback handler or polling
                 console.log('Payment window opened successfully');
                 
+                // Track when window was opened
+                this.paymentWindowOpenedAt = Date.now();
+                
                 // Start polling for payment status
                 this.startPaymentStatusPolling(paymentToken, paymentWindow, paymentSpinner);
                 
@@ -969,6 +978,7 @@ class PaygistixPaymentForm {
         let pollCount = 0;
         const maxPollAttempts = 90; // 3 minutes (90 * 2 seconds)
         let paymentCompleted = false;
+        let windowNavigated = false;
         
         console.log('Starting payment status polling for token:', paymentToken);
         
@@ -977,15 +987,25 @@ class PaygistixPaymentForm {
             console.log('Received postMessage:', event.data);
             
             // Handle different message types
-            if (event.data.type === 'test-payment-initiated') {
+            if (event.data.type === 'test-payment-closing') {
+                console.log('Payment window is closing');
+                windowNavigated = true;
+            } else if (event.data.type === 'test-payment-initiated') {
                 console.log('Test payment initiated with token:', event.data.paymentToken);
+                windowNavigated = true;
+            } else if (event.data.type === 'paygistix-callback-starting') {
+                console.log('Payment callback starting');
+                windowNavigated = true;
             } else if (event.data.type === 'paygistix-payment-callback') {
                 console.log('Payment callback received:', event.data);
                 
                 // Process the callback
                 paymentCompleted = true;
+            windowDetector.markCompleted();
                 clearInterval(self.pollingInterval);
                 window.removeEventListener('message', messageHandler);
+                window.removeEventListener('focus', focusHandler);
+                document.removeEventListener('visibilitychange', visibilityHandler);
                 
                 // Close payment window if still open
                 if (paymentWindow && !paymentWindow.closed) {
@@ -1026,38 +1046,109 @@ class PaygistixPaymentForm {
         
         window.addEventListener('message', messageHandler);
         
-        // Monitor window separately
+        // Handle window closure - this is called when we detect the payment window was closed
+        const handleWindowClosed = () => {
+            if (paymentCompleted) return;
+            
+            console.log('Payment window appears to be closed - stopping polling');
+            paymentCompleted = true;
+            
+            // Stop all intervals and listeners
+            clearInterval(windowCheckInterval);
+            clearInterval(self.pollingInterval);
+            window.removeEventListener('message', messageHandler);
+            if (typeof focusHandler !== 'undefined') {
+                window.removeEventListener('focus', focusHandler);
+            }
+            if (typeof visibilityHandler !== 'undefined') {
+                document.removeEventListener('visibilitychange', visibilityHandler);
+            }
+            
+            if (paymentSpinner && typeof paymentSpinner.hide === 'function') {
+                paymentSpinner.hide();
+            }
+            
+            self.isProcessingPayment = false;
+            
+            // Optional: Cancel the payment token
+            if (paymentToken) {
+                const fetchFunction = window.CsrfUtils?.csrfFetch || fetch;
+                fetchFunction(`/api/v1/payments/cancel-token/${paymentToken}`, {
+                    method: 'POST',
+                    credentials: 'include'
+                }).catch(err => console.log('Failed to cancel token:', err));
+            }
+            
+            console.log('Payment cancelled - window was closed');
+            
+            if (self.onPaymentFailure) {
+                self.onPaymentFailure('Payment cancelled by user');
+            } else if (window.modalAlert) {
+                window.modalAlert('Payment cancelled by user', 'Payment Cancelled');
+            }
+        };
+        
+        // Create shared window detection function
+        const windowDetector = this.createWindowDetector(paymentWindow, handleWindowClosed);
+        
+        // For production Paygistix form, we cannot reliably detect window closure
+        // We must rely on:
+        // 1. The postMessage callback when payment completes
+        // 2. The payment status polling to detect completion
+        // 3. Manual user action if they close the window without completing
+        
+        // For user experience, we'll show a message after focus returns
+        const focusHandler = () => {
+            if (!paymentCompleted && windowNavigated) {
+                console.log('Main window regained focus - user may have closed payment window');
+                
+                // Show a non-blocking message to the user
+                if (!self.focusMessageShown) {
+                    self.focusMessageShown = true;
+                    
+                    // Create a subtle notification
+                    const notification = document.createElement('div');
+                    notification.className = 'payment-window-notification';
+                    notification.innerHTML = `
+                        <div class="payment-notification-title">Payment window closed?</div>
+                        <div class="payment-notification-text">If you closed the payment window, <a href="#" class="payment-notification-link">click here</a> to cancel.</div>
+                    `;
+                    
+                    const link = notification.querySelector('a');
+                    link.onclick = (e) => {
+                        e.preventDefault();
+                        console.log('User confirmed payment window was closed');
+                        document.body.removeChild(notification);
+                        handleWindowClosed();
+                    };
+                    
+                    document.body.appendChild(notification);
+                    
+                    // Auto-remove after 10 seconds if not clicked
+                    setTimeout(() => {
+                        if (notification.parentNode) {
+                            document.body.removeChild(notification);
+                        }
+                    }, 10000);
+                }
+            }
+        };
+        window.addEventListener('focus', focusHandler);
+        
+        
+        // Track window navigation state
         const windowCheckInterval = setInterval(() => {
-            if (paymentWindow && paymentWindow.closed && !paymentCompleted) {
-                console.log('Payment window closed by user - stopping immediately');
-                paymentCompleted = true; // Mark as completed to prevent further processing
+            if (paymentCompleted) {
                 clearInterval(windowCheckInterval);
-                clearInterval(self.pollingInterval);
-                window.removeEventListener('message', messageHandler);
-                
-                if (paymentSpinner && typeof paymentSpinner.hide === 'function') {
-                    paymentSpinner.hide();
-                }
-                
-                self.isProcessingPayment = false;
-                
-                // Optional: Cancel the payment token
-                if (paymentToken) {
-                    // Use CSRF-aware fetch if available
-                    const fetchFunction = window.CsrfUtils?.csrfFetch || fetch;
-                    fetchFunction(`/api/v1/payments/cancel-token/${paymentToken}`, {
-                        method: 'POST',
-                        credentials: 'include'
-                    }).catch(err => console.log('Failed to cancel token:', err));
-                }
-                
-                console.log('Payment process cancelled due to window closure');
-                
-                // Show cancellation modal (same as original implementation)
-                if (self.onPaymentFailure) {
-                    self.onPaymentFailure('Payment cancelled by user');
-                } else if (window.modalAlert) {
-                    window.modalAlert('Payment cancelled by user', 'Payment Cancelled');
+                return;
+            }
+            
+            // Don't check immediately - give window time to navigate
+            if (!windowNavigated) {
+                // Check if enough time has passed for navigation (3 seconds)
+                if (Date.now() - self.paymentWindowOpenedAt > 3000) {
+                    windowNavigated = true;
+                    console.log('Payment window considered navigated after 3 seconds');
                 }
             }
         }, 1000);
@@ -1104,6 +1195,7 @@ class PaygistixPaymentForm {
                 
                 if (status === 'success' || status === 'completed') {
                     paymentCompleted = true;
+            windowDetector.markCompleted();
                     clearInterval(self.pollingInterval);
                     clearInterval(windowCheckInterval);
                     window.removeEventListener('message', messageHandler);
@@ -1137,6 +1229,7 @@ class PaygistixPaymentForm {
                     }
                 } else if (status === 'failed' || status === 'error') {
                     paymentCompleted = true;
+            windowDetector.markCompleted();
                     clearInterval(self.pollingInterval);
                     clearInterval(windowCheckInterval);
                     window.removeEventListener('message', messageHandler);
@@ -1163,30 +1256,136 @@ class PaygistixPaymentForm {
         }, 2000); // Poll every 2 seconds
     }
     
-    monitorPaymentWindow(paymentWindow, paymentSpinner) {
-        // Monitor the payment window
-        const checkInterval = setInterval(() => {
-            if (paymentWindow.closed) {
-                console.log('Payment window closed');
-                clearInterval(checkInterval);
-                
-                // Hide spinner
-                if (paymentSpinner && typeof paymentSpinner.hide === 'function') {
-                    paymentSpinner.hide();
-                }
-                
-                // Window closed without completing payment
-                console.log('Payment window closed without completion');
+    createWindowDetector(paymentWindow, onWindowClosed) {
+        let paymentCompleted = false;
+        let lastWindowCheck = Date.now();
+        
+        const checkWindowStatus = () => {
+            if (paymentCompleted) return;
+            
+            // Simple approach: just check window.closed
+            // Even though it might give false positives initially, after 3 seconds it should be reliable
+            const timeSinceLastCheck = Date.now() - lastWindowCheck;
+            const timeSinceOpen = Date.now() - (this.paymentWindowOpenedAt || Date.now());
+            
+            // Only check after window has had time to navigate (3 seconds)
+            if (timeSinceOpen < 3000) {
+                return;
             }
+            
+            try {
+                // For test form windows (same origin), window.closed should work
+                if (paymentWindow.closed) {
+                    console.log('Payment window detected as closed');
+                    onWindowClosed();
+                    return;
+                }
+            } catch (e) {
+                // If we can't access window.closed, it might be cross-origin
+                console.log('Cannot access window.closed - assuming cross-origin');
+            }
+            
+            // For cross-origin windows, we need to rely on the user closing and returning focus
+            // The focus/visibility handlers will detect when user returns to main window
+            lastWindowCheck = Date.now();
+        };
+        
+        return {
+            check: checkWindowStatus,
+            markCompleted: () => { paymentCompleted = true; }
+        };
+    }
+    
+    monitorPaymentWindow(paymentWindow, paymentSpinner) {
+        const self = this;
+        let windowNavigated = false;
+        let paymentCompleted = false;
+        
+        // Handle window closure
+        const handleWindowClosed = () => {
+            if (paymentCompleted) return;
+            
+            console.log('Payment window closed by user');
+            paymentCompleted = true;
+            windowDetector.markCompleted();
+            
+            clearInterval(checkInterval);
+            window.removeEventListener('message', messageHandler);
+            if (this.paymentConfig.testModeEnabled) {
+                window.removeEventListener('focus', focusHandler);
+                document.removeEventListener('visibilitychange', visibilityHandler);
+            }
+            
+            if (paymentSpinner && typeof paymentSpinner.hide === 'function') {
+                paymentSpinner.hide();
+            }
+            
+            // Call the failure callback
+            if (this.onPaymentFailure) {
+                this.onPaymentFailure('Payment cancelled by user');
+            } else if (window.modalAlert) {
+                window.modalAlert('Payment cancelled by user', 'Payment Cancelled');
+            }
+        };
+        
+        // Create window detector
+        const windowDetector = this.createWindowDetector(paymentWindow, handleWindowClosed);
+        
+        // Track when main window regains focus
+        const focusHandler = () => {
+            if (!paymentCompleted && windowNavigated) {
+                console.log('Main window regained focus, checking payment window...');
+                setTimeout(() => {
+                    windowDetector.check();
+                }, 100);
+            }
+        };
+        window.addEventListener('focus', focusHandler);
+        
+        // Also track visibility changes
+        const visibilityHandler = () => {
+            if (!document.hidden && !paymentCompleted && windowNavigated) {
+                console.log('Page became visible, checking payment window...');
+                setTimeout(() => {
+                    windowDetector.check();
+                }, 100);
+            }
+        };
+        document.addEventListener('visibilitychange', visibilityHandler);
+        
+        // Monitor the payment window using shared detection logic
+        const checkInterval = setInterval(() => {
+            if (paymentCompleted) {
+                clearInterval(checkInterval);
+                return;
+            }
+            
+            // Don't check immediately - give window time to navigate (3 seconds)
+            if (!windowNavigated) {
+                if (Date.now() - self.paymentWindowOpenedAt > 3000) {
+                    windowNavigated = true;
+                    console.log('Payment window considered navigated after 3 seconds');
+                }
+                return;
+            }
+            
+            // Use shared window detection logic
+            windowDetector.check();
         }, 1000);
         
         // Listen for postMessage from payment callback
         const messageHandler = (event) => {
             console.log('Received postMessage:', event.data);
             
-            if (event.data.type === 'paygistix-payment-callback') {
+            if (event.data.type === 'paygistix-callback-starting') {
+                windowNavigated = true;
+            } else if (event.data.type === 'paygistix-payment-callback') {
+                paymentCompleted = true;
+            windowDetector.markCompleted();
                 clearInterval(checkInterval);
                 window.removeEventListener('message', messageHandler);
+                window.removeEventListener('focus', focusHandler);
+                document.removeEventListener('visibilitychange', visibilityHandler);
                 
                 // Close payment window if still open
                 if (paymentWindow && !paymentWindow.closed) {

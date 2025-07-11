@@ -12,6 +12,16 @@ This file maintains a prioritized list of tasks and issues to be addressed in fu
 
 ### High Priority
 
+#### 1. Remove PaymentMethod Model and References
+- **Added**: 2025-07-08
+- **Status**: Pending
+- **Context**: Payment methods are no longer being stored for customers
+- **Details**:
+  - Remove PaymentMethod model (server/models/PaymentMethod.js)
+  - Remove PaymentMethod test files (tests/unit/paymentMethod.test.js, tests/unit/paymentMethodModel.test.js)
+  - Search and remove all PaymentMethod references throughout the codebase
+  - Update any controllers, routes, or other models that reference PaymentMethod
+  - Note: The failing test "should find default payment method for customer" has been skipped for now
 
 #### 2. Improve Test Coverage to Near 100%
 - **Added**: 2025-06-03
