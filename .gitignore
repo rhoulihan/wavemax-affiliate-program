@@ -20,8 +20,12 @@ test_*.txt
 *_test_results.*
 admin_test_results.*
 test-coverage-results.txt
+test-coverage*.txt
 test-output.log
 unit-test-results.txt
+test-results-all.txt
+failing-tests*.txt
+failing-test-files.txt
 
 # Coverage output files
 /tmp/coverage*.txt
