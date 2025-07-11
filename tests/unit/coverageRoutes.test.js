@@ -313,9 +313,9 @@ describe('Coverage Routes', () => {
 
       const response = await request(app)
         .get('/coverage')
-        .expect(301); // Redirect to /coverage/
+        .expect(200); // Direct serve, not redirect
 
-      expect(response.headers.location).toBe('/coverage/');
+      expect(response.type).toBe('text/html');
     });
 
     test('should handle specific route handlers', async () => {

@@ -37,6 +37,7 @@ The WaveMAX Affiliate Program enables individuals to register as affiliates, onb
 - **WDF Credit System**: Automatic weight difference tracking with credit/debit applied to next order
 - **Operator Auto-Login**: IP-based authentication for store locations with dedicated kiosk page
 - **Android Kiosk Mode**: Full-screen operator scanning with Fully Kiosk Browser integration
+- **Facebook Data Deletion**: GDPR-compliant data deletion callback for Facebook OAuth users
 
 ## Documentation
 
@@ -1469,6 +1470,56 @@ formAction: [
 For detailed documentation:
 - [Paygistix Integration Guide](docs/implementation/PAYGISTIX_INTEGRATION_GUIDE.md)
 - [Callback Pool System Guide](docs/implementation/PAYGISTIX_FORM_POOL_GUIDE.md)
+
+## Facebook Data Deletion
+
+### Overview
+
+The application implements Facebook's required data deletion callback to comply with Facebook Platform Policy and GDPR requirements. When users request data deletion through Facebook settings, Facebook sends a signed request to our callback endpoint, which processes the deletion request automatically.
+
+### Implementation Details
+
+#### Data Deletion Callback Endpoint
+- **URL**: `POST /api/v1/auth/facebook/deletion-callback`
+- **Purpose**: Receives signed requests from Facebook when users request data deletion
+- **Response**: Returns JSON with status URL and confirmation code
+
+#### Status Check Page
+- **URL**: `GET /deletion-status?code=CONFIRMATION_CODE`
+- **Purpose**: Allows users to check the status of their deletion request
+- **Features**: Multi-language support, real-time status updates
+
+#### Data Deletion Process
+1. Facebook sends signed request with user ID
+2. System verifies the request signature using app secret
+3. Creates deletion request record with unique confirmation code
+4. Finds and deletes Facebook data from affiliated accounts:
+   - Clears Facebook ID, email, name, and access token
+   - Updates registration method if it was 'facebook'
+   - Maintains account but removes Facebook-specific data
+5. Returns status URL for user to check deletion progress
+
+### Configuration
+
+Add the deletion callback URL to your Facebook App settings:
+1. Go to Facebook App Dashboard
+2. Navigate to Settings > Advanced
+3. Add Data Deletion Request Callback URL: `https://yourdomain.com/api/v1/auth/facebook/deletion-callback`
+
+### Security Features
+- Validates signed requests using HMAC-SHA256
+- Tracks all deletion requests for audit purposes
+- Provides confirmation codes for status verification
+- Implements rate limiting on callback endpoint
+
+### Testing
+```bash
+# Run Facebook utils tests
+npm test tests/unit/facebookUtils.test.js
+
+# Run integration tests
+npm test tests/integration/facebookDataDeletion.test.js
+```
 
 ## Testing
 

@@ -749,40 +749,102 @@
 
       // Auto-populate form fields from social token (decode JWT payload)
       try {
-        const payload = JSON.parse(atob(socialToken.split('.')[1]));
+        // Validate social token format
+        if (!socialToken || typeof socialToken !== 'string') {
+          console.error('❌ Invalid social token:', socialToken);
+          return;
+        }
+        
+        const parts = socialToken.split('.');
+        if (parts.length !== 3) {
+          console.error('❌ Invalid JWT format. Expected 3 parts, got:', parts.length);
+          console.log('Token:', socialToken);
+          return;
+        }
+        
+        // Try to decode the payload
+        let payload;
+        try {
+          // Ensure proper padding for base64 decode
+          const base64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+          const padded = base64.padEnd(base64.length + (4 - base64.length % 4) % 4, '=');
+          payload = JSON.parse(atob(padded));
+        } catch (decodeError) {
+          console.error('❌ Failed to decode token payload:', decodeError);
+          console.log('Token part:', parts[1]);
+          throw decodeError;
+        }
+        
         console.log('🔓 Decoded social token payload:', payload);
+        console.log('🔍 Available form fields:', {
+          firstName: !!document.getElementById('firstName'),
+          lastName: !!document.getElementById('lastName'),
+          email: !!document.getElementById('email')
+        });
 
         // Auto-fill personal information
-        if (payload.firstName) {
+        if (payload.firstName || payload.displayName) {
           const firstNameField = document.getElementById('firstName');
-          if (firstNameField && !firstNameField.value) {
-            firstNameField.value = payload.firstName;
-            firstNameField.classList.add('auto-filled'); // Light green to indicate auto-filled
-            console.log('✅ Pre-filled firstName:', payload.firstName);
+          console.log('🔍 First name field:', firstNameField);
+          if (firstNameField) {
+            // Use firstName if available, otherwise try to extract from displayName
+            let firstName = payload.firstName;
+            if (!firstName && payload.displayName) {
+              firstName = payload.displayName.split(' ')[0];
+            }
+            
+            if (firstName && !firstNameField.value) {
+              firstNameField.value = firstName;
+              firstNameField.style.backgroundColor = '#f0fdf4'; // Light green to indicate auto-filled
+              console.log('✅ Pre-filled firstName:', firstName);
+            }
           }
         }
 
-        if (payload.lastName) {
+        if (payload.lastName || payload.displayName) {
           const lastNameField = document.getElementById('lastName');
-          if (lastNameField && !lastNameField.value) {
-            lastNameField.value = payload.lastName;
-            lastNameField.style.backgroundColor = '#f0fdf4'; // Light green to indicate auto-filled
-            console.log('✅ Pre-filled lastName:', payload.lastName);
+          console.log('🔍 Last name field:', lastNameField);
+          if (lastNameField) {
+            // Use lastName if available, otherwise try to extract from displayName
+            let lastName = payload.lastName;
+            if (!lastName && payload.displayName) {
+              const nameParts = payload.displayName.split(' ');
+              if (nameParts.length > 1) {
+                lastName = nameParts.slice(1).join(' ');
+              }
+            }
+            
+            if (lastName && !lastNameField.value) {
+              lastNameField.value = lastName;
+              lastNameField.style.backgroundColor = '#f0fdf4'; // Light green to indicate auto-filled
+              console.log('✅ Pre-filled lastName:', lastName);
+            }
           }
         }
 
         if (payload.email) {
           const emailField = document.getElementById('email');
+          console.log('🔍 Email field:', emailField);
           if (emailField && !emailField.value) {
             emailField.value = payload.email;
             emailField.readOnly = true; // Make it read-only since it comes from OAuth
             emailField.style.backgroundColor = '#f0fdf4'; // Light green to indicate auto-filled
             console.log('✅ Pre-filled email:', payload.email);
           }
+        } else {
+          console.warn('⚠️ No email in social token payload');
         }
 
+        // Log any fields that couldn't be populated
+        console.log('📊 Form population summary:', {
+          firstNamePopulated: !!document.getElementById('firstName')?.value,
+          lastNamePopulated: !!document.getElementById('lastName')?.value,
+          emailPopulated: !!document.getElementById('email')?.value
+        });
+
       } catch (e) {
-        console.log('Could not decode social token for pre-filling:', e);
+        console.error('❌ Error decoding social token for pre-filling:', e);
+        console.log('🔍 Social token:', socialToken);
       }
 
       // Ensure form submit handler is attached after OAuth
@@ -1224,14 +1286,31 @@
             window.location.href = url.href;
           } else if (window.parent !== window) {
             // We're in an iframe but not embed-app-v2.html
-            // Try to use the navigateTo function if available
-            if (window.parent.navigateTo && typeof window.parent.navigateTo === 'function') {
-              console.log('Using parent navigateTo function');
-              window.parent.navigateTo('/affiliate-success');
-            } else {
-              // Fallback: navigate to embed-app-v2.html with success route
-              console.log('Using fallback navigation');
-              window.location.href = '/embed-app-v2.html?route=/affiliate-success';
+            // Use postMessage to communicate with parent safely
+            console.log('Using postMessage for cross-origin navigation');
+            try {
+              // First try to check if navigateTo exists without accessing it
+              // This will throw if cross-origin
+              const hasNavigateTo = window.parent.navigateTo !== undefined;
+              if (hasNavigateTo && typeof window.parent.navigateTo === 'function') {
+                console.log('Using parent navigateTo function');
+                window.parent.navigateTo('/affiliate-success');
+              } else {
+                throw new Error('navigateTo not available');
+              }
+            } catch (e) {
+              // Cross-origin or navigateTo not available, use postMessage
+              console.log('Cross-origin detected or navigateTo not available, using postMessage');
+              window.parent.postMessage({
+                type: 'navigate',
+                route: '/affiliate-success'
+              }, '*');
+              
+              // Also do a fallback navigation after a short delay
+              setTimeout(() => {
+                console.log('Fallback navigation to success page');
+                window.location.href = '/embed-app-v2.html?route=/affiliate-success';
+              }, 500);
             }
           } else {
             // Not in iframe at all

@@ -1270,5 +1270,41 @@
     "processingRegistration": "Ihre Registrierung wird bearbeitet...",
     "loading": "Wird geladen...",
     "pleaseWait": "Bitte warten..."
+  },
+  "deletionStatus": {
+    "title": "Datenlöschungsstatus - WaveMAX",
+    "header": "Datenlöschungsstatus",
+    "description": "Überprüfen Sie den Status Ihrer Facebook-Datenlöschungsanfrage",
+    "loading": "Status wird geladen...",
+    "confirmationCode": "Bestätigungscode",
+    "status": "Status",
+    "requestedAt": "Angefordert am",
+    "completedAt": "Abgeschlossen am",
+    "contact": "Bei Fragen zu Ihrer Datenlöschungsanfrage wenden Sie sich bitte an den Support.",
+    "error": {
+      "title": "Fehler",
+      "message": "Beim Laden des Löschungsstatus ist ein Fehler aufgetreten",
+      "noCode": "Kein Bestätigungscode angegeben",
+      "loadFailed": "Löschungsstatus konnte nicht geladen werden",
+      "notFound": "Löschungsanfrage nicht gefunden"
+    },
+    "status": {
+      "pending": "Verarbeitung ausstehend",
+      "processing": "Wird derzeit verarbeitet",
+      "completed": "Erfolgreich abgeschlossen",
+      "failed": "Fehlgeschlagen"
+    },
+    "success": {
+      "title": "Löschung abgeschlossen",
+      "dataTypes": "Gelöschte Datentypen:"
+    },
+    "failed": {
+      "title": "Löschung fehlgeschlagen",
+      "contact": "Bitte wenden Sie sich an den Support für Unterstützung."
+    },
+    "processing": {
+      "message": "Ihre Datenlöschungsanfrage wird bearbeitet. Bitte prüfen Sie später auf Updates.",
+      "delayed": "Hinweis: Diese Anfrage ist seit über 24 Stunden ausstehend. Bei Bedenken wenden Sie sich bitte an den Support."
+    }
   }
 }

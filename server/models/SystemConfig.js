@@ -252,6 +252,26 @@ systemConfigSchema.statics.initializeDefaults = async function() {
       validation: { min: 0.00, max: 50.00 },
       isPublic: true
     },
+    {
+      key: 'delivery_minimum_fee',
+      value: 10.00,
+      defaultValue: 10.00,
+      description: 'Minimum delivery fee',
+      category: 'payment',
+      dataType: 'number',
+      validation: { min: 0.00, max: 100.00 },
+      isPublic: true
+    },
+    {
+      key: 'delivery_per_bag_fee',
+      value: 2.00,
+      defaultValue: 2.00,
+      description: 'Delivery fee per bag',
+      category: 'payment',
+      dataType: 'number',
+      validation: { min: 0.00, max: 50.00 },
+      isPublic: true
+    },
 
     // System settings
     {

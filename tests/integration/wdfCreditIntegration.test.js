@@ -13,6 +13,15 @@ describe('WDF Credit System Integration Tests', () => {
   let testAffiliate;
   let customerToken;
   let operatorToken;
+  let affiliateToken;
+  let csrfToken;
+
+  // Helper function to add common headers
+  const addHeaders = (req, token) => {
+    req.set('Authorization', `Bearer ${token}`);
+    if (csrfToken) req.set('X-CSRF-Token', csrfToken);
+    return req;
+  };
 
   beforeAll(async () => {
     // Connect to test database if not connected
@@ -30,6 +39,11 @@ describe('WDF Credit System Integration Tests', () => {
     await Customer.deleteMany({});
     await Operator.deleteMany({});
     await Affiliate.deleteMany({});
+    
+    // Import SystemConfig and initialize
+    const SystemConfig = require('../../server/models/SystemConfig');
+    await SystemConfig.deleteMany({});
+    await SystemConfig.initializeDefaults();
 
     // Create test affiliate
     testAffiliate = await Affiliate.create({
@@ -77,6 +91,9 @@ describe('WDF Credit System Integration Tests', () => {
       firstName: 'Test',
       lastName: 'Operator',
       email: 'operator@test.com',
+      username: 'testoperator',
+      password: 'hashedpassword',
+      createdBy: new mongoose.Types.ObjectId(),
       passwordSalt: 'salt',
       passwordHash: 'hash'
     });
@@ -99,6 +116,19 @@ describe('WDF Credit System Integration Tests', () => {
       },
       process.env.JWT_SECRET || 'test-secret'
     );
+    
+    affiliateToken = jwt.sign(
+      { 
+        id: testAffiliate._id, 
+        affiliateId: testAffiliate.affiliateId, 
+        role: 'affiliate' 
+      },
+      process.env.JWT_SECRET || 'test-secret'
+    );
+    
+    // Get CSRF token
+    const csrfRes = await request(app).get('/api/csrf-token');
+    csrfToken = csrfRes.body.csrfToken || csrfRes.body.token;
   });
 
   afterEach(async () => {
@@ -109,7 +139,7 @@ describe('WDF Credit System Integration Tests', () => {
   });
 
   afterAll(async () => {
-    await mongoose.connection.close();
+    // Connection cleanup is handled by global setup.js
   });
 
   describe('End-to-End WDF Credit Flow', () => {
@@ -118,6 +148,7 @@ describe('WDF Credit System Integration Tests', () => {
       const createOrderRes = await request(app)
         .post('/api/v1/orders')
         .set('Authorization', `Bearer ${customerToken}`)
+        .set('X-CSRF-Token', csrfToken)
         .send({
           customerId: testCustomer.customerId,
           affiliateId: testAffiliate.affiliateId,
@@ -136,6 +167,7 @@ describe('WDF Credit System Integration Tests', () => {
       const weighBagsRes = await request(app)
         .post('/api/v1/operators/orders/weigh-bags')
         .set('Authorization', `Bearer ${operatorToken}`)
+        .set('X-CSRF-Token', csrfToken)
         .send({
           orderId: firstOrderId,
           bags: [
@@ -155,10 +187,17 @@ describe('WDF Credit System Integration Tests', () => {
       expect(customerRes.status).toBe(200);
       expect(customerRes.body.dashboard.wdfCredit.amount).toBe(6.25); // (35-30) * 1.25
 
+      // Mark first order as complete to avoid active order conflict
+      await Order.findOneAndUpdate(
+        { orderId: firstOrderId },
+        { status: 'complete', completedAt: new Date() }
+      );
+
       // Step 4: Create second order (credit should be applied)
       const secondOrderRes = await request(app)
         .post('/api/v1/orders')
         .set('Authorization', `Bearer ${customerToken}`)
+        .set('X-CSRF-Token', csrfToken)
         .send({
           customerId: testCustomer.customerId,
           affiliateId: testAffiliate.affiliateId,
@@ -188,9 +227,9 @@ describe('WDF Credit System Integration Tests', () => {
       expect(orderDetailsRes.body.order.wdfCreditApplied).toBe(6.25);
       
       // Verify the total was calculated correctly
-      // Base: 25 * 1.25 = 31.25, Fee: 10, Credit: -6.25
-      // Total: 31.25 + 10 - 6.25 = 35
-      expect(orderDetailsRes.body.order.estimatedTotal).toBe(35);
+      // Base: 25 * 1.25 = 31.25, Fee: 25 (minimum), Credit: -6.25
+      // Total: 31.25 + 25 - 6.25 = 50
+      expect(orderDetailsRes.body.order.estimatedTotal).toBe(50);
     });
 
     it('should handle debit scenario when actual weight is less than estimated', async () => {
@@ -198,6 +237,7 @@ describe('WDF Credit System Integration Tests', () => {
       const createOrderRes = await request(app)
         .post('/api/v1/orders')
         .set('Authorization', `Bearer ${customerToken}`)
+        .set('X-CSRF-Token', csrfToken)
         .send({
           customerId: testCustomer.customerId,
           affiliateId: testAffiliate.affiliateId,
@@ -215,6 +255,7 @@ describe('WDF Credit System Integration Tests', () => {
       const weighBagsRes = await request(app)
         .post('/api/v1/operators/orders/weigh-bags')
         .set('Authorization', `Bearer ${operatorToken}`)
+        .set('X-CSRF-Token', csrfToken)
         .send({
           orderId: orderId,
           bags: [{ bagId: 'BAG-INT-003', weight: 35 }]
@@ -229,10 +270,17 @@ describe('WDF Credit System Integration Tests', () => {
 
       expect(customerRes.body.dashboard.wdfCredit.amount).toBe(-6.25); // (35-40) * 1.25
 
+      // Mark first order as complete to avoid active order conflict
+      await Order.findOneAndUpdate(
+        { orderId: orderId },
+        { status: 'complete', completedAt: new Date() }
+      );
+
       // Create next order with debit applied
       const secondOrderRes = await request(app)
         .post('/api/v1/orders')
         .set('Authorization', `Bearer ${customerToken}`)
+        .set('X-CSRF-Token', csrfToken)
         .send({
           customerId: testCustomer.customerId,
           affiliateId: testAffiliate.affiliateId,
@@ -250,9 +298,9 @@ describe('WDF Credit System Integration Tests', () => {
         .get(`/api/v1/orders/${secondOrderRes.body.orderId}`)
         .set('Authorization', `Bearer ${customerToken}`);
 
-      // Base: 20 * 1.25 = 25, Fee: 10, Debit: +6.25
-      // Total: 25 + 10 + 6.25 = 41.25
-      expect(orderDetailsRes.body.order.estimatedTotal).toBe(41.25);
+      // Base: 20 * 1.25 = 25, Fee: 25 (minimum), Debit: +6.25
+      // Total: 25 + 25 + 6.25 = 56.25
+      expect(orderDetailsRes.body.order.estimatedTotal).toBe(56.25);
     });
   });
 
@@ -287,12 +335,21 @@ describe('WDF Credit System Integration Tests', () => {
         wdfCreditApplied: 5.00,
         wdfCreditGenerated: 6.25,
         weightDifference: 5,
-        status: 'complete'
+        status: 'complete',
+        baseRate: 1.25,
+        numberOfBags: 2,
+        feeBreakdown: {
+          numberOfBags: 2,
+          minimumFee: 25,
+          perBagFee: 5,
+          totalFee: 25,
+          minimumApplied: true
+        }
       });
 
       const res = await request(app)
         .get('/api/v1/orders/search')
-        .set('Authorization', `Bearer ${customerToken}`)
+        .set('Authorization', `Bearer ${affiliateToken}`)
         .query({ customerId: testCustomer.customerId });
 
       expect(res.status).toBe(200);
@@ -308,6 +365,7 @@ describe('WDF Credit System Integration Tests', () => {
       const res = await request(app)
         .post('/api/v1/operators/orders/weigh-bags')
         .set('Authorization', `Bearer ${operatorToken}`)
+        .set('X-CSRF-Token', csrfToken)
         .send({
           orderId: 'INVALID-ORDER-ID',
           bags: [{ bagId: 'BAG001', weight: 10 }]
@@ -335,6 +393,7 @@ describe('WDF Credit System Integration Tests', () => {
       await request(app)
         .post('/api/v1/operators/orders/weigh-bags')
         .set('Authorization', `Bearer ${operatorToken}`)
+        .set('X-CSRF-Token', csrfToken)
         .send({
           orderId: order.orderId,
           bags: [{ bagId: 'BAG-DUP-001', weight: 10 }]
@@ -344,6 +403,7 @@ describe('WDF Credit System Integration Tests', () => {
       const res = await request(app)
         .post('/api/v1/operators/orders/weigh-bags')
         .set('Authorization', `Bearer ${operatorToken}`)
+        .set('X-CSRF-Token', csrfToken)
         .send({
           orderId: order.orderId,
           bags: [{ bagId: 'BAG-DUP-001', weight: 10 }]

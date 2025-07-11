@@ -72,9 +72,16 @@ router.get('/facebook', (req, res, next) => {
     });
   }
 
-  passport.authenticate('facebook', {
+  const options = {
     scope: ['email']
-  })(req, res, next);
+  };
+  
+  // Pass state parameter if provided
+  if (req.query.state) {
+    options.state = req.query.state;
+  }
+
+  passport.authenticate('facebook', options)(req, res, next);
 });
 
 /**
@@ -200,10 +207,13 @@ router.get('/customer/facebook', (req, res, next) => {
   }
 
   const state = req.query.state || '';
+  
+  // Add customer context to state parameter
+  const customerState = state ? `customer_${state}` : 'customer';
 
   passport.authenticate('facebook', {
     scope: ['email'],
-    state: state
+    state: customerState
   })(req, res, next);
 });
 

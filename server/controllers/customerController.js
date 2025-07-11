@@ -496,8 +496,8 @@ exports.getCustomerDashboardStats = async (req, res) => {
         },
         wdfCredit: {
           amount: customer.wdfCredit || 0,
-          updatedAt: customer.wdfCreditUpdatedAt,
-          fromOrderId: customer.wdfCreditFromOrderId
+          updatedAt: customer.wdfCreditUpdatedAt || null,
+          fromOrderId: customer.wdfCreditFromOrderId || null
         }
       }
     });

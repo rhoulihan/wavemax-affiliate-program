@@ -19,6 +19,7 @@ const { conditionalCsrf, csrfTokenEndpoint } = require('./server/config/csrf-con
 // Import routes
 const authRoutes = require('./server/routes/authRoutes');
 const socialAuthRoutes = require('./server/routes/socialAuthRoutes');
+const facebookDataRoutes = require('./server/routes/facebookDataRoutes');
 const affiliateRoutes = require('./server/routes/affiliateRoutes');
 const customerRoutes = require('./server/routes/customerRoutes');
 const orderRoutes = require('./server/routes/orderRoutes');
@@ -182,7 +183,15 @@ app.use((req, res, next) => {
     '/embed-landing.html',
     '/franchisee-landing.html',
     '/embed-app-v2.html',
-    '/operator-login-store.html'
+    '/operator-login-store.html',
+    '/affiliate-register-embed.html',
+    '/affiliate-login-embed.html',
+    '/affiliate-dashboard-embed.html',
+    '/customer-register-embed.html',
+    '/customer-login-embed.html',
+    '/customer-dashboard-embed.html',
+    '/forgot-password-embed.html',
+    '/reset-password-embed.html'
   ];
   
   // Apply strict CSP to documentation pages as well (but not examples)
@@ -482,6 +491,7 @@ apiV1Router.get('/environment', (req, res) => {
 // Mount v1 routes
 apiV1Router.use('/auth', authRoutes);
 apiV1Router.use('/auth', socialAuthRoutes);  // Social auth routes
+apiV1Router.use('/auth/facebook', facebookDataRoutes);  // Facebook data deletion routes
 apiV1Router.use('/affiliates', affiliateRoutes);
 apiV1Router.use('/customers', customerRoutes);
 apiV1Router.use('/orders', orderRoutes);
