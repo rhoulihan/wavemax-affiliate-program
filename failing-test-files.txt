@@ -1,2 +1,0 @@
-FAIL tests/integration/wdfCreditIntegration.test.js (13.846 s)
-FAIL tests/unit/wdfCredit.test.js (22.035 s)
