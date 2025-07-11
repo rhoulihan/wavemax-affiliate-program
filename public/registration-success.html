@@ -5,22 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Payment Successful - WaveMAX Laundry</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
-    <style>
-        @keyframes checkmark {
-            0% {
-                stroke-dashoffset: 100;
-            }
-            100% {
-                stroke-dashoffset: 0;
-            }
-        }
-        .checkmark-animation {
-            stroke-dasharray: 100;
-            stroke-dashoffset: 100;
-            animation: checkmark 0.5s ease-in-out forwards;
-            animation-delay: 0.3s;
-        }
-    </style>
+    <link href="/assets/css/registration-success.css" rel="stylesheet">
 </head>
 <body class="bg-gray-100 min-h-screen flex items-center justify-center">
     <div class="bg-white p-8 rounded-lg shadow-xl max-w-md w-full text-center transform transition-all">
@@ -52,64 +37,6 @@
         <p class="text-xs text-gray-500 mt-4">This window will close automatically in <span id="countdown">30</span> seconds</p>
     </div>
 
-    <script>
-        // Debug logging
-        console.log('Registration success page loaded');
-        console.log('Current URL:', window.location.href);
-        console.log('URL search params:', window.location.search);
-        
-        // Get transaction ID from URL parameters
-        const urlParams = new URLSearchParams(window.location.search);
-        console.log('All URL parameters:');
-        for (const [key, value] of urlParams) {
-            console.log(`  ${key}: ${value}`);
-        }
-        
-        const transactionId = urlParams.get('PNRef') || urlParams.get('transactionId') || urlParams.get('token') || '-';
-        console.log('Transaction ID found:', transactionId);
-        document.getElementById('transactionId').textContent = transactionId;
-        
-        // Countdown timer
-        let countdown = 30;
-        const countdownElement = document.getElementById('countdown');
-        const countdownInterval = setInterval(() => {
-            countdown--;
-            countdownElement.textContent = countdown;
-            if (countdown <= 0) {
-                clearInterval(countdownInterval);
-                window.close();
-            }
-        }, 1000);
-        
-        // Handle OK button click
-        document.getElementById('okButton').addEventListener('click', function() {
-            // Clear the countdown
-            clearInterval(countdownInterval);
-            
-            // Try to close the window
-            window.close();
-            
-            // If window doesn't close (might be blocked), update UI
-            setTimeout(() => {
-                if (!window.closed) {
-                    document.getElementById('okButton').textContent = 'You can now close this window';
-                    document.getElementById('okButton').disabled = true;
-                    document.getElementById('okButton').classList.add('opacity-50', 'cursor-not-allowed');
-                    document.getElementById('okButton').classList.remove('hover:bg-green-700', 'hover:shadow-lg', 'transform', 'hover:-translate-y-0.5');
-                    
-                    // Hide countdown
-                    const countdownP = document.querySelector('.text-xs.text-gray-500.mt-4');
-                    if (countdownP) {
-                        countdownP.style.display = 'none';
-                    }
-                }
-            }, 100);
-        });
-        
-        // Auto-close after 30 seconds (backup to countdown)
-        setTimeout(() => {
-            window.close();
-        }, 30000);
-    </script>
+    <script src="/assets/js/registration-success.js"></script>
 </body>
 </html>

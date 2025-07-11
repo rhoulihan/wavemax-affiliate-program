@@ -59,28 +59,65 @@ beforeAll(async () => {
 
 // Clean up after tests
 afterAll(async () => {
-  // Clean all collections instead of dropping database (permission issue)
-  if (mongoose.connection.db) {
-    const collections = mongoose.connection.collections;
-    for (const key in collections) {
-      await collections[key].deleteMany({});
+  try {
+    // Only clean collections if connection is still active
+    if (mongoose.connection.readyState === 1 && mongoose.connection.db) {
+      const collections = mongoose.connection.collections;
+      for (const key in collections) {
+        try {
+          await collections[key].deleteMany({});
+        } catch (error) {
+          // Ignore errors if collection doesn't exist or connection is closing
+          if (!error.message.includes('Client must be connected')) {
+            console.error(`Error cleaning collection ${key}:`, error.message);
+          }
+        }
+      }
+    }
+    
+    // Only disconnect if still connected
+    if (mongoose.connection.readyState !== 0) {
+      await mongoose.disconnect();
+    }
+  } catch (error) {
+    // Ignore connection errors during teardown
+    if (!error.message.includes('Client must be connected')) {
+      console.error('Error during test teardown:', error);
     }
   }
-  await mongoose.disconnect();
 });
 
 // Reset database between tests
 afterEach(async () => {
-  const collections = mongoose.connection.collections;
-  for (const key in collections) {
-    await collections[key].deleteMany({});
-  }
-  // Also clear any indexes that might have been created
-  for (const key in collections) {
-    try {
-      await collections[key].dropIndexes();
-    } catch (error) {
-      // Ignore errors from dropping indexes on _id field
+  try {
+    // Only clean if connection is active
+    if (mongoose.connection.readyState === 1 && mongoose.connection.db) {
+      const collections = mongoose.connection.collections;
+      for (const key in collections) {
+        try {
+          await collections[key].deleteMany({});
+        } catch (error) {
+          // Ignore errors if collection doesn't exist or connection is closing
+          if (!error.message.includes('Client must be connected') && 
+              !error.message.includes('ns not found')) {
+            console.error(`Error cleaning collection ${key} in afterEach:`, error.message);
+          }
+        }
+      }
+      
+      // Also clear any indexes that might have been created
+      for (const key in collections) {
+        try {
+          await collections[key].dropIndexes();
+        } catch (error) {
+          // Ignore errors from dropping indexes on _id field or connection issues
+        }
+      }
+    }
+  } catch (error) {
+    // Ignore connection errors during cleanup
+    if (!error.message.includes('Client must be connected')) {
+      console.error('Error in afterEach cleanup:', error);
     }
   }
 });

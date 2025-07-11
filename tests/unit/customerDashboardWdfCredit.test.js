@@ -71,7 +71,7 @@ describe('Customer Dashboard WDF Credit Display', () => {
   });
 
   afterAll(async () => {
-    await mongoose.connection.close();
+    // Connection cleanup is handled by global setup.js
   });
 
   describe('Dashboard Stats with WDF Credit', () => {

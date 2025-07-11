@@ -265,9 +265,11 @@
                 <div id="serviceAgreementSection" class="registration-section">
                     <h3 class="text-xl font-bold mb-4" data-i18n="customer.register.serviceAgreement">Service Agreement</h3>
                     <div class="bg-gray-50 p-4 rounded-lg">
-                        <div class="flex items-start">
-                            <input type="checkbox" id="termsAgreement" name="termsAgreement" required class="mt-1 mr-2">
-                            <label for="termsAgreement" class="text-gray-700"><span data-i18n="customer.register.termsAgree">I agree to the</span> <a href="#" data-navigate="/terms-of-service" class="text-blue-600 hover:underline">Terms of Service</a> and <a href="#" data-navigate="/privacy-policy" class="text-blue-600 hover:underline">Privacy Policy</a> *</label>
+                        <div class="flex items-start space-x-2">
+                            <input type="checkbox" id="termsAgreement" name="termsAgreement" required class="mt-1 h-4 w-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500">
+                            <label for="termsAgreement" class="text-sm text-gray-700 flex-1">
+                                <span data-i18n="customer.register.termsAgree">I agree to the</span> <a href="#" data-navigate="/terms-of-service" class="text-blue-600 hover:underline">Terms of Service</a> and <a href="#" data-navigate="/privacy-policy" class="text-blue-600 hover:underline">Privacy Policy</a> *
+                            </label>
                         </div>
                     </div>
                 </div>

@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-i18n="deletionStatus.title">Data Deletion Status - WaveMAX</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/assets/css/shared-styles.css">
+    <style>
+        .container {
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .status-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .status-header h1 {
+            color: #1976d2;
+            margin-bottom: 10px;
+        }
+
+        .status-card {
+            background-color: #f5f5f5;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .status-icon {
+            font-size: 48px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .status-icon.pending {
+            color: #ff9800;
+        }
+
+        .status-icon.processing {
+            color: #2196f3;
+        }
+
+        .status-icon.completed {
+            color: #4caf50;
+        }
+
+        .status-icon.failed {
+            color: #f44336;
+        }
+
+        .status-details {
+            margin-top: 20px;
+        }
+
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .detail-row:last-child {
+            border-bottom: none;
+        }
+
+        .detail-label {
+            font-weight: 600;
+            color: #666;
+        }
+
+        .detail-value {
+            color: #333;
+        }
+
+        .error-message {
+            background-color: #ffebee;
+            color: #c62828;
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 20px;
+        }
+
+        .success-message {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 20px;
+        }
+
+        .info-message {
+            background-color: #e3f2fd;
+            color: #1565c0;
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 20px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #1976d2;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .language-selector {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+        }
+
+        .contact-info {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #e0e0e0;
+        }
+    </style>
+</head>
+<body>
+    <!-- Language Selector -->
+    <div class="language-selector">
+        <select id="languageSelect" class="form-control">
+            <option value="en">English</option>
+            <option value="es">Español</option>
+            <option value="pt">Português</option>
+            <option value="de">Deutsch</option>
+        </select>
+    </div>
+
+    <div class="container">
+        <div class="status-header">
+            <h1 data-i18n="deletionStatus.header">Data Deletion Status</h1>
+            <p data-i18n="deletionStatus.description">Check the status of your Facebook data deletion request</p>
+        </div>
+
+        <div id="loadingSection" class="loading" style="display: none;">
+            <div class="spinner"></div>
+            <p data-i18n="deletionStatus.loading">Loading status...</p>
+        </div>
+
+        <div id="errorSection" style="display: none;">
+            <div class="error-message">
+                <h3 data-i18n="deletionStatus.error.title">Error</h3>
+                <p id="errorMessage" data-i18n="deletionStatus.error.message"></p>
+            </div>
+        </div>
+
+        <div id="statusSection" style="display: none;">
+            <div class="status-card">
+                <div id="statusIcon" class="status-icon">
+                    <i class="fas fa-clock"></i>
+                </div>
+                
+                <h2 id="statusTitle" style="text-align: center; margin-bottom: 20px;"></h2>
+                
+                <div class="status-details">
+                    <div class="detail-row">
+                        <span class="detail-label" data-i18n="deletionStatus.confirmationCode">Confirmation Code:</span>
+                        <span id="confirmationCode" class="detail-value"></span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label" data-i18n="deletionStatus.status">Status:</span>
+                        <span id="status" class="detail-value"></span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label" data-i18n="deletionStatus.requestedAt">Requested At:</span>
+                        <span id="requestedAt" class="detail-value"></span>
+                    </div>
+                    <div id="completedRow" class="detail-row" style="display: none;">
+                        <span class="detail-label" data-i18n="deletionStatus.completedAt">Completed At:</span>
+                        <span id="completedAt" class="detail-value"></span>
+                    </div>
+                </div>
+
+                <div id="statusMessage"></div>
+            </div>
+        </div>
+
+        <div class="contact-info">
+            <p data-i18n="deletionStatus.contact">
+                For questions about your data deletion request, please contact support.
+            </p>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer style="text-align: center; padding: 20px; color: #666;">
+        <p>&copy; 2025 CRHS Enterprises, LLC. All rights reserved.</p>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/i18next/21.8.14/i18next.min.js"></script>
+    <script src="/assets/js/i18n.js"></script>
+    <script src="/assets/js/language-switcher.js"></script>
+    <script src="/assets/js/deletion-status.js"></script>
+</body>
+</html>

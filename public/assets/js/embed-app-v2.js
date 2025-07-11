@@ -155,21 +155,45 @@ function cleanupCurrentPage() {
     clearTimeout(heightUpdateTimeout);
 }
 
+// Function to process HTML and remove inline styles for CSP compliance
+function processHtmlForCSP(html) {
+    // For now, just return the HTML as-is
+    // In the future, we could parse and move inline styles to a style element with nonce
+    return html;
+}
+
 // Height tracking variables
 let lastSentHeight = 0;
 let heightUpdateTimeout = null;
 let isUpdatingHeight = false;
 let heightUpdateCount = 0;
-const MAX_HEIGHT_UPDATES = 5; // Prevent infinite loops
+let heightUpdateResetTimeout = null;
+const MAX_HEIGHT_UPDATES = 10; // Increased limit
+const HEIGHT_UPDATE_RESET_DELAY = 5000; // Reset counter after 5 seconds of stability
 
 // Update iframe height
 function updateHeight() {
     if (isUpdatingHeight) return;
     
+    // Check if there are active animations (spinners, etc)
+    const hasActiveSpinner = document.querySelector('.swirl-spinner-overlay:not(.hidden)');
+    if (hasActiveSpinner) {
+        // Skip height updates while spinner is active to prevent flickering
+        return;
+    }
+    
     // Prevent infinite loops
     heightUpdateCount++;
     if (heightUpdateCount > MAX_HEIGHT_UPDATES) {
         console.warn('Height update limit reached, preventing infinite loop');
+        // Schedule a reset of the counter after some time
+        if (!heightUpdateResetTimeout) {
+            heightUpdateResetTimeout = setTimeout(() => {
+                heightUpdateCount = 0;
+                heightUpdateResetTimeout = null;
+                console.log('Height update counter reset');
+            }, HEIGHT_UPDATE_RESET_DELAY);
+        }
         return;
     }
     
@@ -201,6 +225,13 @@ function updateHeight() {
             // Reset flag after a delay
             setTimeout(() => {
                 isUpdatingHeight = false;
+                // Reset counter after successful update
+                if (heightUpdateCount > 5) {
+                    setTimeout(() => {
+                        heightUpdateCount = 0;
+                        console.log('Height update counter reset after successful update');
+                    }, 2000);
+                }
                 // Reset counter after successful update
                 heightUpdateCount = 0;
             }, 200);
@@ -422,7 +453,6 @@ async function loadPage(route) {
                 
                 if (nonce) {
                     styleElement.setAttribute('nonce', nonce);
-                    console.log('Setting nonce on style element:', nonce);
                 } else {
                     console.warn('No nonce found - CSP might block this style');
                 }
@@ -436,7 +466,9 @@ async function loadPage(route) {
             html = bodyContent;
         }
         
-        container.innerHTML = html;
+        // Process HTML to handle inline styles with CSP
+        const processedHtml = processHtmlForCSP(html);
+        container.innerHTML = processedHtml;
         currentRoute = route;
         
         // Store the current route for persistence ONLY if authenticated
@@ -654,8 +686,21 @@ function setupHeightObserver() {
     
     // Debounced update function to prevent excessive calls
     let observerTimeout = null;
-    const debouncedUpdate = () => {
+    let lastObservedHeight = 0;
+    
+    const debouncedUpdate = (entries) => {
         clearTimeout(observerTimeout);
+        
+        // Check if the height actually changed significantly
+        if (entries && entries[0]) {
+            const newHeight = entries[0].contentRect.height;
+            // Only trigger update if height changed by more than 10px
+            if (Math.abs(newHeight - lastObservedHeight) < 10) {
+                return;
+            }
+            lastObservedHeight = newHeight;
+        }
+        
         observerTimeout = setTimeout(updateHeight, 300);
     };
     

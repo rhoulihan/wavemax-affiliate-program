@@ -200,8 +200,32 @@
                       languagePreference: document.getElementById('languagePreference')?.value || 'en'
                     };
 
-                    // Process payment in test mode
-                    window.paymentForm.processPaymentTestMode(customerData);
+                    // Check rate limit before processing payment
+                    console.log('Checking rate limit before payment...');
+                    const csrfFetch = window.CsrfUtils?.csrfFetch || fetch;
+                    
+                    csrfFetch('/api/v1/customers/check-rate-limit', {
+                        method: 'GET',
+                        credentials: 'include'
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            console.log('Rate limit check passed, proceeding with payment');
+                            // Process payment in test mode
+                            window.paymentForm.processPaymentTestMode(customerData);
+                        } else {
+                            console.error('Rate limit exceeded:', data.message);
+                            if (window.modalAlert) {
+                                window.modalAlert(data.message, 'Registration Limit Exceeded');
+                            }
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error checking rate limit:', error);
+                        // Proceed with payment anyway if rate limit check fails
+                        window.paymentForm.processPaymentTestMode(customerData);
+                    });
                   } else {
                     console.error('Payment form not properly initialized for test mode');
                     console.error('window.paymentForm:', window.paymentForm);

@@ -90,6 +90,90 @@
     });
   }
 
+  // Generic function to show account conflict modal for any provider
+  function showAccountConflictModal(conflictData) {
+    console.log('Showing account conflict modal:', conflictData);
+    
+    const accountType = conflictData.accountType || 'affiliate';
+    const provider = conflictData.provider || 'social media';
+    const accountData = conflictData.affiliateData || conflictData.customerData || {};
+    const accountName = accountData.businessName || `${accountData.firstName} ${accountData.lastName}`.trim() || 'Unknown';
+    const accountId = accountData.affiliateId || accountData.customerId || '';
+    
+    // Check if we're in an embedded context
+    const isEmbedded = window.parent !== window;
+    
+    // Create modal HTML
+    const modalHTML = `
+      <div id="accountConflictModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 account-conflict-modal-overlay">
+        <div class="bg-white rounded-lg p-6 max-w-md mx-4 shadow-xl account-conflict-modal-content">
+          <div class="text-center mb-6">
+            <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-orange-100 mb-4">
+              <svg class="h-6 w-6 text-orange-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+            </div>
+            <h3 class="text-lg font-medium text-gray-900 mb-2">Account Conflict</h3>
+            <p class="text-sm text-gray-500 mb-4">
+              This ${provider} account is already associated with an ${accountType} account${accountName ? ' for' : ''} <strong>${accountName}</strong>${accountId ? ` (ID: <strong>${accountId}</strong>)` : ''}.
+            </p>
+            <p class="text-sm text-gray-500 mb-6">
+              Would you like to login as an ${accountType} instead, or use a different account for customer registration?
+            </p>
+          </div>
+          
+          <div class="flex flex-col space-y-3">
+            <button id="loginAsOtherType" class="w-full bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+              Login as ${accountType.charAt(0).toUpperCase() + accountType.slice(1)}
+            </button>
+            <button id="chooseAnotherAccount" class="w-full bg-gray-200 text-gray-800 px-4 py-2 rounded-md text-sm font-medium hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2">
+              Use Different Account
+            </button>
+          </div>
+        </div>
+      </div>
+    `;
+    
+    // Add modal to DOM
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+    
+    // Add event listeners
+    document.getElementById('loginAsOtherType').addEventListener('click', function() {
+      console.log(`User chose to login as ${accountType}`);
+      // Close modal
+      document.getElementById('accountConflictModal').remove();
+      
+      // Navigate to appropriate login page
+      const loginRoute = accountType === 'affiliate' ? '/affiliate-login' : '/customer-login';
+      if (isEmbedded) {
+        window.parent.postMessage({
+          type: 'navigate',
+          data: { url: loginRoute }
+        }, '*');
+      } else {
+        window.location.href = `/embed-app-v2.html?route=${loginRoute}`;
+      }
+    });
+    
+    document.getElementById('chooseAnotherAccount').addEventListener('click', function() {
+      console.log('User chose to use different account');
+      // Close modal and let user try another method
+      document.getElementById('accountConflictModal').remove();
+      
+      // Show a message about using a different account
+      if (window.modalAlert) {
+        window.modalAlert(`Please try logging in with a different ${provider} account or use the email/password registration method.`, 'Account Already Exists');
+      }
+    });
+    
+    // Close modal when clicking outside
+    document.getElementById('accountConflictModal').addEventListener('click', function(e) {
+      if (e.target === this) {
+        this.remove();
+      }
+    });
+  }
+
   // Function to initialize the registration form
   function initializeRegistrationForm() {
     console.log('Initializing registration form');

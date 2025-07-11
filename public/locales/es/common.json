@@ -1256,5 +1256,41 @@
     "processingRegistration": "Procesando tu registro...",
     "loading": "Cargando...",
     "pleaseWait": "Por favor espera..."
+  },
+  "deletionStatus": {
+    "title": "Estado de Eliminación de Datos - WaveMAX",
+    "header": "Estado de Eliminación de Datos",
+    "description": "Verifica el estado de tu solicitud de eliminación de datos de Facebook",
+    "loading": "Cargando estado...",
+    "confirmationCode": "Código de Confirmación",
+    "status": "Estado",
+    "requestedAt": "Solicitado el",
+    "completedAt": "Completado el",
+    "contact": "Para preguntas sobre tu solicitud de eliminación de datos, por favor contacta soporte.",
+    "error": {
+      "title": "Error",
+      "message": "Ocurrió un error al cargar el estado de eliminación",
+      "noCode": "No se proporcionó código de confirmación",
+      "loadFailed": "Error al cargar el estado de eliminación",
+      "notFound": "Solicitud de eliminación no encontrada"
+    },
+    "status": {
+      "pending": "Procesamiento Pendiente",
+      "processing": "Procesando Actualmente",
+      "completed": "Completado Exitosamente",
+      "failed": "Falló"
+    },
+    "success": {
+      "title": "Eliminación Completada",
+      "dataTypes": "Tipos de datos eliminados:"
+    },
+    "failed": {
+      "title": "Eliminación Fallida",
+      "contact": "Por favor contacta soporte para asistencia."
+    },
+    "processing": {
+      "message": "Tu solicitud de eliminación de datos está siendo procesada. Por favor revisa más tarde para actualizaciones.",
+      "delayed": "Nota: Esta solicitud ha estado pendiente por más de 24 horas. Si tienes preocupaciones, por favor contacta soporte."
+    }
   }
 }

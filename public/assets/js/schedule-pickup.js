@@ -46,9 +46,14 @@
     });
 
     if (!token || !customerStr) {
-    // Not logged in, redirect to login page with pickup flag
+    // Not logged in, redirect to login page
       console.log('User not authenticated, redirecting to login');
-      window.location.href = '/embed-app-v2.html?login=customer&pickup=true';
+      // Use navigateTo if in iframe, otherwise redirect
+      if (window.parent !== window && window.navigateTo) {
+        window.navigateTo('/customer-login');
+      } else {
+        window.location.href = '/embed-app-v2.html?route=/customer-login';
+      }
       return;
     }
 
@@ -104,7 +109,11 @@
     } catch (error) {
       console.error('Error initializing schedule pickup:', error);
       // If there's an error, redirect to login
-      window.location.href = '/embed-app-v2.html?login=customer&pickup=true';
+      if (window.parent !== window && window.navigateTo) {
+        window.navigateTo('/customer-login');
+      } else {
+        window.location.href = '/embed-app-v2.html?route=/customer-login';
+      }
     }
   }
 
@@ -503,7 +512,11 @@
     } catch (error) {
       console.error('Error loading customer data:', error);
       modalAlert('Error loading customer information. Please try logging in again.', 'Loading Error');
-      window.location.href = '/embed-app-v2.html?login=customer&pickup=true';
+      if (window.parent !== window && window.navigateTo) {
+        window.navigateTo('/customer-login');
+      } else {
+        window.location.href = '/embed-app-v2.html?route=/customer-login';
+      }
     }
   }
 

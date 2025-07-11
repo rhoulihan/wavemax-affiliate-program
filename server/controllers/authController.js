@@ -1136,9 +1136,10 @@ exports.handleSocialCallback = async (req, res) => {
     const socialToken = jwt.sign({
       provider: user.provider,
       socialId: user.socialId,
-      email: user.email,
-      firstName: user.firstName,
-      lastName: user.lastName,
+      email: user.email || '',
+      firstName: user.firstName || '',
+      lastName: user.lastName || '',
+      displayName: user.displayName || '',
       accessToken: user.accessToken,
       refreshToken: user.refreshToken,
       profileData: user.profileData
@@ -2006,6 +2007,11 @@ exports.handleCustomerSocialCallback = async (req, res) => {
         </body>
         </html>
       `);
+    }
+
+    // If we handled an existing affiliate conflict above, don't continue
+    if (user && user.isExistingAffiliate) {
+      return;
     }
 
     // For new customers, create a temporary social token and redirect to complete registration
