@@ -104,11 +104,7 @@
         setTimeout(() => sendViewportInfo(), 1000);
         setTimeout(() => sendViewportInfo(), 2000);
         
-        // Set up periodic check to ensure page chrome stays hidden
-        setInterval(() => {
-            hidePageHeader();
-            hideAllPageChrome();
-        }, 1000);
+        // Removed periodic chrome hiding - let iframe control when to hide chrome
         
         // Set up a global mutation observer to catch any DOM changes
         setupGlobalObserver();
@@ -148,9 +144,8 @@
             });
             
             if (needsHiding) {
-                console.log('[Parent-Iframe Bridge] Global observer detected changes, re-hiding chrome');
-                hidePageHeader();
-                hideAllPageChrome();
+                console.log('[Parent-Iframe Bridge] Global observer detected changes, but not auto-hiding chrome');
+                // Removed automatic chrome hiding - let iframe control when to hide chrome
             }
         });
         
