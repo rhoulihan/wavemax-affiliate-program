@@ -302,30 +302,8 @@
                 opacity: 0 !important;
             }
             
-            /* Specific page header hiding */
-            section.page-header.page-header-modern.bg-color-light-scale-1.page-header-sm {
-                display: none !important;
-                visibility: hidden !important;
-                opacity: 0 !important;
-                height: 0 !important;
-                overflow: hidden !important;
-            }
-            
-            /* Hide all common header/footer elements when iframe is present */
-            body:has(#wavemax-iframe) header,
-            body:has(#wavemax-iframe) nav,
-            body:has(#wavemax-iframe) footer,
-            body:has(#wavemax-iframe) .header,
-            body:has(#wavemax-iframe) .navbar,
-            body:has(#wavemax-iframe) .topbar,
-            body:has(#wavemax-iframe) .middlebar,
-            body:has(#wavemax-iframe) .page-header,
-            body:has(#wavemax-iframe) .site-header,
-            body:has(#wavemax-iframe) .site-footer {
-                display: none !important;
-                visibility: hidden !important;
-                opacity: 0 !important;
-            }
+            /* Removed automatic hiding of page headers and chrome elements */
+            /* Chrome hiding should only happen via explicit hide-chrome message */
             /* Target the iframe */
             #wavemax-iframe {
                 width: 100% !important;
