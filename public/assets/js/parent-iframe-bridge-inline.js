@@ -76,12 +76,6 @@
         
         console.log('[Parent-Iframe Bridge] Found iframe:', iframe.id, iframe.src);
         
-        // Always hide the page header element immediately
-        hidePageHeader();
-        
-        // Also hide all page chrome for embed pages
-        hideAllPageChrome();
-        
         // Remove padding and borders from iframe container for all embedded content
         removeContainerPaddingAndBorders();
 
