@@ -499,9 +499,9 @@
                 console.log('[Parent-Iframe Bridge] Hide chrome requested. isMobile:', isMobile, 'isTablet:', isTablet);
                 // Only hide chrome when requested by iframe if it's for operator routes
                 const currentRoute = window.currentEmbedRoute;
-                const isOperatorRoute = currentRoute && currentRoute.includes('/operator');
+                const isOperatorRouteForHide = currentRoute && currentRoute.includes('/operator');
                 
-                if (isOperatorRoute) {
+                if (isOperatorRouteForHide) {
                     console.log('[Parent-Iframe Bridge] Hiding chrome for operator route');
                     hideChrome();
                 } else {
@@ -544,9 +544,9 @@
                 window.currentEmbedRoute = route;
                 
                 // Only hide chrome on route changes for operator pages
-                const isOperatorRoute = route && route.includes('/operator');
+                const isOperatorRouteForChange = route && route.includes('/operator');
                 
-                if (isOperatorRoute) {
+                if (isOperatorRouteForChange) {
                     console.log('[Parent-Iframe Bridge] Route changed to operator page, ensuring chrome stays hidden');
                     hideChrome();
                 } else {
