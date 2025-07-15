@@ -270,7 +270,8 @@ class PaygistixPaymentForm {
             { code: 'MDF35', description: 'Minimum Delivery Fee', price: '35.00', hide: true },
             { code: 'MDF40', description: 'Minimum Delivery Fee', price: '40.00', hide: true },
             { code: 'MDF45', description: 'Minimum Delivery Fee', price: '45.00', hide: true },
-            { code: 'MDF50', description: 'Minimum Delivery Fee', price: '50.00', hide: true }
+            { code: 'MDF50', description: 'Minimum Delivery Fee', price: '50.00', hide: true },
+            { code: 'AO', description: 'Add-On Items', price: '0.10', hide: false }
         ];
         
         // Add all rows
