@@ -419,6 +419,20 @@ class PaygistixPaymentForm {
                                 <input type="text" class="pxQty" name="pxQty16" id="pxQty16" value="0"  maxlength="3"/>
                             </td>
                         </tr>
+                        <tr>
+                            <td class="pxCode">
+                                AO<input type="hidden" name="pxCode17" value="AO" />
+                            </td>
+                            <td class="pxDescription">
+                                Add-On Items<input type="hidden" name="pxDescription17" value="Add-On Items" />
+                            </td>
+                            <td class="pxPrice">
+                                $0.10<input type="hidden" name="pxPrice17" id="pxPrice17" value="0.10" />
+                            </td>
+                            <td>
+                                <input type="text" class="pxQty" name="pxQty17" id="pxQty17" value="0" maxlength="3"/>
+                            </td>
+                        </tr>
                     </tbody>
                     <tfoot>
                         <tr>
