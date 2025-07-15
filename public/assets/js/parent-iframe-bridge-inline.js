@@ -90,17 +90,10 @@
         window.addEventListener('resize', debounce(detectViewport, 250));
         window.addEventListener('orientationchange', detectViewport);
         
-        // Only hide chrome on init for operator pages
-        const isOperatorPage = window.location.pathname.includes('/operator') || 
-                              window.location.search.includes('operator') ||
-                              window.location.search.includes('route=/operator');
-        
-        if (isOperatorPage) {
-            console.log('[Parent-Iframe Bridge] Operator page detected, hiding chrome');
-            hideChrome();
-        } else {
-            console.log('[Parent-Iframe Bridge] Non-operator page detected, keeping chrome visible');
-        }
+        // Don't hide chrome on init - let the iframe decide when to hide it
+        // Chrome will only be hidden when explicitly requested by the iframe
+        // after operator authentication
+        console.log('[Parent-Iframe Bridge] Initialized, chrome visible by default');
 
         // Set up message listener
         window.addEventListener('message', handleMessage);
@@ -427,17 +420,9 @@
             sendViewportInfo();
         }
         
-        // Only hide chrome on viewport change for operator pages
-        const isOperatorPage = window.location.pathname.includes('/operator') || 
-                              window.location.search.includes('operator') ||
-                              window.location.search.includes('route=/operator');
-        
-        if (isOperatorPage) {
-            console.log('[Parent-Iframe Bridge] Viewport changed on operator page, ensuring chrome stays hidden');
-            hideChrome();
-        } else {
-            console.log('[Parent-Iframe Bridge] Viewport changed on non-operator page, keeping chrome visible');
-        }
+        // Don't automatically hide chrome on viewport changes
+        // Let the iframe decide if chrome should be hidden based on operator auth status
+        console.log('[Parent-Iframe Bridge] Viewport changed, current chrome state:', chromeHidden ? 'hidden' : 'visible');
     }
 
     function sendViewportInfo() {
@@ -497,30 +482,16 @@
         switch (event.data.type) {
             case 'hide-chrome':
                 console.log('[Parent-Iframe Bridge] Hide chrome requested. isMobile:', isMobile, 'isTablet:', isTablet);
-                // Only hide chrome when requested by iframe if it's for operator routes
-                const currentRoute = window.currentEmbedRoute;
-                const isOperatorRouteForHide = currentRoute && currentRoute.includes('/operator');
-                
-                if (isOperatorRouteForHide) {
-                    console.log('[Parent-Iframe Bridge] Hiding chrome for operator route');
-                    hideChrome();
-                } else {
-                    console.log('[Parent-Iframe Bridge] Ignoring hide chrome request for non-operator route');
-                }
+                // Hide chrome when explicitly requested by iframe (e.g., after operator login)
+                console.log('[Parent-Iframe Bridge] Hiding chrome as requested by iframe');
+                hideChrome();
                 break;
                 
             case 'show-chrome':
                 console.log('[Parent-Iframe Bridge] Show chrome requested');
-                // Only show chrome if we're not on an operator route
-                const currentRouteForShow = window.currentEmbedRoute;
-                const isOperatorRouteForShow = currentRouteForShow && currentRouteForShow.includes('/operator');
-                
-                if (!isOperatorRouteForShow) {
-                    console.log('[Parent-Iframe Bridge] Showing chrome for non-operator route');
-                    showChrome();
-                } else {
-                    console.log('[Parent-Iframe Bridge] Keeping chrome hidden for operator route');
-                }
+                // Show chrome when explicitly requested by iframe (e.g., after operator logout)
+                console.log('[Parent-Iframe Bridge] Showing chrome as requested by iframe');
+                showChrome();
                 break;
                 
             case 'resize':
@@ -543,15 +514,9 @@
                 // Store current route for future reference
                 window.currentEmbedRoute = route;
                 
-                // Only hide chrome on route changes for operator pages
-                const isOperatorRouteForChange = route && route.includes('/operator');
-                
-                if (isOperatorRouteForChange) {
-                    console.log('[Parent-Iframe Bridge] Route changed to operator page, ensuring chrome stays hidden');
-                    hideChrome();
-                } else {
-                    console.log('[Parent-Iframe Bridge] Route changed to non-operator page, keeping chrome visible');
-                }
+                // Don't automatically hide chrome on route changes
+                // Let the iframe decide if chrome should be hidden based on operator auth status
+                console.log('[Parent-Iframe Bridge] Route changed, current chrome state:', chromeHidden ? 'hidden' : 'visible');
                 break;
                 
             // GEOCODING CASES
