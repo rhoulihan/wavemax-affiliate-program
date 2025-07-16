@@ -7,6 +7,7 @@ const Transaction = require('../models/Transaction');
 const encryptionUtil = require('../utils/encryption');
 const emailService = require('../utils/emailService');
 const { validationResult } = require('express-validator');
+const { escapeRegex } = require('../utils/securityUtils');
 
 /**
  * Register a new affiliate
@@ -418,12 +419,13 @@ exports.getAffiliateCustomers = async (req, res) => {
 
     // Add search if provided
     if (search) {
+      const escapedSearch = escapeRegex(search);
       query.$or = [
-        { firstName: { $regex: search, $options: 'i' } },
-        { lastName: { $regex: search, $options: 'i' } },
-        { email: { $regex: search, $options: 'i' } },
-        { phone: { $regex: search, $options: 'i' } },
-        { customerId: { $regex: search, $options: 'i' } }
+        { firstName: { $regex: escapedSearch, $options: 'i' } },
+        { lastName: { $regex: escapedSearch, $options: 'i' } },
+        { email: { $regex: escapedSearch, $options: 'i' } },
+        { phone: { $regex: escapedSearch, $options: 'i' } },
+        { customerId: { $regex: escapedSearch, $options: 'i' } }
       ];
     }
 
@@ -575,9 +577,10 @@ exports.getAffiliateOrders = async (req, res) => {
 
     // Add search if provided
     if (search) {
+      const escapedSearch = escapeRegex(search);
       query.$or = [
-        { orderId: { $regex: search, $options: 'i' } },
-        { customerId: { $regex: search, $options: 'i' } }
+        { orderId: { $regex: escapedSearch, $options: 'i' } },
+        { customerId: { $regex: escapedSearch, $options: 'i' } }
       ];
     }
 

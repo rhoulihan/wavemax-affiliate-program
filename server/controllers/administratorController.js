@@ -13,6 +13,7 @@ const emailService = require('../utils/emailService');
 const { logAuditEvent, AuditEvents } = require('../utils/auditLogger');
 const { validatePasswordStrength } = require('../utils/passwordValidator');
 const { validationResult } = require('express-validator');
+const { escapeRegex } = require('../utils/securityUtils');
 const crypto = require('crypto');
 const mongoose = require('mongoose');
 const encryptionUtil = require('../utils/encryption');
@@ -1695,12 +1696,13 @@ exports.getAffiliatesList = async (req, res) => {
     const query = {};
     
     if (search) {
+      const escapedSearch = escapeRegex(search);
       query.$or = [
-        { businessName: { $regex: search, $options: 'i' } },
-        { firstName: { $regex: search, $options: 'i' } },
-        { lastName: { $regex: search, $options: 'i' } },
-        { email: { $regex: search, $options: 'i' } },
-        { affiliateId: { $regex: search, $options: 'i' } }
+        { businessName: { $regex: escapedSearch, $options: 'i' } },
+        { firstName: { $regex: escapedSearch, $options: 'i' } },
+        { lastName: { $regex: escapedSearch, $options: 'i' } },
+        { email: { $regex: escapedSearch, $options: 'i' } },
+        { affiliateId: { $regex: escapedSearch, $options: 'i' } }
       ];
     }
     
@@ -2446,6 +2448,66 @@ exports.getEnvironmentVariables = async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Failed to fetch environment variables'
+    });
+  }
+};
+
+/**
+ * Reset rate limits for specified criteria
+ */
+exports.resetRateLimits = async (req, res) => {
+  try {
+    const { type, ip } = req.body;
+    const db = mongoose.connection.db;
+    
+    if (!db) {
+      console.error('Database connection not available');
+      return res.status(500).json({
+        success: false,
+        message: 'Database connection not available'
+      });
+    }
+
+    // Build the filter based on provided criteria
+    let filter = {};
+    
+    if (ip) {
+      // Escape special regex characters in IP
+      const escapedIp = ip.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      filter.key = new RegExp(escapedIp);
+    } else if (type) {
+      // Filter by type of rate limit
+      filter.key = new RegExp(`^${type}:`);
+    }
+
+    // Access the rate_limits collection directly
+    const collection = db.collection('rate_limits');
+    const result = await collection.deleteMany(filter);
+
+    // Log the action for audit
+    await logAuditEvent(
+      AuditEvents.ADMIN_RESET_RATE_LIMITS,
+      req.user,
+      { 
+        type,
+        ip,
+        deletedCount: result.deletedCount
+      },
+      req
+    );
+
+    res.json({
+      success: true,
+      message: `Reset ${result.deletedCount} rate limit entries`,
+      deletedCount: result.deletedCount
+    });
+
+  } catch (error) {
+    console.error('Error resetting rate limits:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to reset rate limits',
+      error: error.message
     });
   }
 };

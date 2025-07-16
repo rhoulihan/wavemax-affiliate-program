@@ -8,6 +8,7 @@ const LinkedInStrategy = require('passport-linkedin-oauth2').Strategy;
 const Affiliate = require('../models/Affiliate');
 const Customer = require('../models/Customer');
 const { logAuditEvent, AuditEvents } = require('../utils/auditLogger');
+const { encryptField, decryptField } = require('../utils/encryption');
 
 /**
  * Configure Google OAuth Strategy
@@ -37,9 +38,9 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
         let customer = await Customer.findOne({ 'socialAccounts.google.id': profile.id });
 
         if (customer) {
-        // Update last login and social account info
-          customer.socialAccounts.google.accessToken = accessToken;
-          customer.socialAccounts.google.refreshToken = refreshToken;
+        // Update last login and social account info with encrypted tokens
+          customer.socialAccounts.google.accessToken = encryptField(accessToken);
+          customer.socialAccounts.google.refreshToken = encryptField(refreshToken);
           customer.lastLogin = new Date();
           await customer.save();
 
@@ -51,11 +52,11 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
         customer = await Customer.findOne({ email: profile.emails[0].value });
 
         if (customer) {
-        // Link Google account to existing customer
+        // Link Google account to existing customer with encrypted tokens
           customer.socialAccounts.google = {
             id: profile.id,
-            accessToken,
-            refreshToken,
+            accessToken: encryptField(accessToken),
+            refreshToken: encryptField(refreshToken),
             email: profile.emails[0].value,
             name: profile.displayName,
             linkedAt: new Date()
@@ -119,8 +120,8 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
           await Affiliate.findByIdAndUpdate(
             affiliate._id,
             {
-              'socialAccounts.google.accessToken': accessToken,
-              'socialAccounts.google.refreshToken': refreshToken,
+              'socialAccounts.google.accessToken': encryptField(accessToken),
+              'socialAccounts.google.refreshToken': encryptField(refreshToken),
               'lastLogin': new Date()
             },
             { runValidators: false }
@@ -143,8 +144,8 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
             {
               'socialAccounts.google': {
                 id: profile.id,
-                accessToken,
-                refreshToken,
+                accessToken: encryptField(accessToken),
+                refreshToken: encryptField(refreshToken),
                 email: profile.emails[0].value,
                 name: profile.displayName,
                 linkedAt: new Date()
@@ -369,7 +370,7 @@ if (process.env.FACEBOOK_APP_ID && process.env.FACEBOOK_APP_SECRET) {
         await Affiliate.findByIdAndUpdate(
           affiliate._id,
           {
-            'socialAccounts.facebook.accessToken': accessToken,
+            'socialAccounts.facebook.accessToken': encryptField(accessToken),
             'lastLogin': new Date()
           },
           { runValidators: false }
@@ -392,7 +393,7 @@ if (process.env.FACEBOOK_APP_ID && process.env.FACEBOOK_APP_SECRET) {
             {
               'socialAccounts.facebook': {
                 id: profile.id,
-                accessToken,
+                accessToken: encryptField(accessToken),
                 email,
                 name: profile.displayName,
                 linkedAt: new Date()
