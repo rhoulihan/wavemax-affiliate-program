@@ -183,6 +183,21 @@
 
       if (result.success) {
         console.log('=== REGISTRATION SUCCESSFUL ===', result);
+        
+        // If token is provided, log the customer in automatically
+        if (result.token) {
+          console.log('Auto-login: Token received, logging in customer');
+          localStorage.setItem('customerToken', result.token);
+          
+          // Store full customer data in localStorage
+          const customerData = {
+            ...result.customerData,
+            customerId: result.customerId,
+            token: result.token
+          };
+          localStorage.setItem('currentCustomer', JSON.stringify(customerData));
+        }
+        
         // Store registration data for success page
         const successData = {
           customerId: result.customerId || result.customerData?.customerId,
@@ -191,7 +206,8 @@
           lastName: formData.lastName,
           email: formData.email,
           affiliateId: formData.affiliateId,
-          numberOfBags: formData.numberOfBags,
+          numberOfBags: formData.numberOfBags || result.customerData?.numberOfBags,
+          bagCredit: result.customerData?.bagCredit,
           transactionId: paymentDetails?.transactionId || null,
           // Include affiliate info if available
           affiliateInfo: window.affiliateData ? {
