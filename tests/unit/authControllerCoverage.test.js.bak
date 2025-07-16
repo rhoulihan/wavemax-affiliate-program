@@ -1,0 +1,703 @@
+const authController = require('../../server/controllers/authController');
+const Affiliate = require('../../server/models/Affiliate');
+const Customer = require('../../server/models/Customer');
+const Administrator = require('../../server/models/Administrator');
+const Operator = require('../../server/models/Operator');
+const RefreshToken = require('../../server/models/RefreshToken');
+const TokenBlacklist = require('../../server/models/TokenBlacklist');
+const OAuthSession = require('../../server/models/OAuthSession');
+const encryptionUtil = require('../../server/utils/encryption');
+const emailService = require('../../server/utils/emailService');
+const { logLoginAttempt, logAuditEvent } = require('../../server/utils/auditLogger');
+const jwt = require('jsonwebtoken');
+const crypto = require('crypto');
+
+// Mock dependencies
+jest.mock('../../server/models/Affiliate');
+jest.mock('../../server/models/Customer');
+jest.mock('../../server/models/Administrator');
+jest.mock('../../server/models/Operator');
+jest.mock('../../server/models/RefreshToken');
+jest.mock('../../server/models/TokenBlacklist');
+jest.mock('../../server/models/OAuthSession');
+jest.mock('../../server/utils/encryption');
+jest.mock('../../server/utils/emailService');
+jest.mock('../../server/utils/auditLogger');
+jest.mock('jsonwebtoken');
+jest.mock('crypto');
+
+describe('Auth Controller - Additional Coverage Tests', () => {
+  let req, res;
+
+  beforeEach(() => {
+    // Mock OAuthSession.createSession to prevent database calls
+    OAuthSession.createSession = jest.fn().mockResolvedValue(true);
+    
+    // Mock RefreshToken operations
+    RefreshToken.findOneAndUpdate = jest.fn().mockResolvedValue(null);
+    RefreshToken.create = jest.fn().mockResolvedValue({ 
+      token: 'mock-refresh-token',
+      save: jest.fn().mockResolvedValue(true)
+    });
+    RefreshToken.prototype.save = jest.fn().mockResolvedValue(true);
+    
+    // Mock RefreshToken constructor
+    RefreshToken.mockImplementation(() => ({
+      token: 'mock-refresh-token',
+      save: jest.fn().mockResolvedValue({ token: 'mock-refresh-token' })
+    }));
+    
+    req = {
+      body: {},
+      query: {},
+      headers: {},
+      ip: '127.0.0.1',
+      session: {},
+      user: null,
+      get: jest.fn().mockReturnValue('User-Agent'),
+      cspNonce: 'test-nonce'
+    };
+    res = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+      cookie: jest.fn().mockReturnThis(),
+      clearCookie: jest.fn().mockReturnThis(),
+      redirect: jest.fn(),
+      send: jest.fn(),
+      setHeader: jest.fn(),
+      locals: {
+        cspNonce: 'test-nonce'
+      }
+    };
+
+    // Default mocks
+    crypto.randomBytes.mockReturnValue({ toString: jest.fn().mockReturnValue('mock-token') });
+    crypto.createHash = jest.fn().mockReturnValue({
+      update: jest.fn().mockReturnValue({
+        digest: jest.fn().mockReturnValue('hashed-token')
+      })
+    });
+    jwt.sign.mockReturnValue('mock-jwt-token');
+    jwt.verify.mockReturnValue({ id: 'user123', role: 'affiliate' });
+
+    // Mock encryption utilities
+    encryptionUtil.hashData = jest.fn().mockReturnValue('hashed-token');
+    encryptionUtil.hashPassword = jest.fn().mockReturnValue({ salt: 'salt', hash: 'hash' });
+    encryptionUtil.verifyPassword = jest.fn().mockReturnValue(true);
+    
+    // Mock audit logger functions
+    logLoginAttempt.mockImplementation(() => {});
+    logAuditEvent.mockImplementation(() => {});
+
+    jest.clearAllMocks();
+  });
+
+  afterEach(() => {
+    // Clear all mocks after each test
+    jest.clearAllMocks();
+  });
+
+  describe('administratorLogin - Password Validation', () => {
+    it('should handle incorrect password for administrator', async () => {
+      const mockAdmin = {
+        _id: 'admin123',
+        email: 'admin@example.com',
+        passwordHash: 'hash',
+        passwordSalt: 'salt',
+        incLoginAttempts: jest.fn()
+      };
+
+      req.body = {
+        email: 'admin@example.com',
+        password: 'wrongpassword'
+      };
+
+      Administrator.findOne.mockResolvedValue(mockAdmin);
+      encryptionUtil.verifyPassword.mockReturnValue(false);
+
+      await authController.administratorLogin(req, res);
+
+      expect(mockAdmin.incLoginAttempts).toHaveBeenCalled();
+      expect(logLoginAttempt).toHaveBeenCalledWith(
+        false,
+        'administrator',
+        'admin@example.com',
+        req,
+        'Invalid password'
+      );
+      expect(res.status).toHaveBeenCalledWith(401);
+      expect(res.json).toHaveBeenCalledWith({
+        success: false,
+        message: 'Invalid email or password'
+      });
+    });
+  });
+
+  describe('operatorLogin - Account Status', () => {
+    it.skip('should reject locked operator account', async () => {
+      // Skipped: operatorLogin now uses environment variables instead of database
+      const mockOperator = {
+        _id: 'op123',
+        username: 'operator1',
+        passwordHash: 'hash',
+        passwordSalt: 'salt',
+        isActive: true,
+        isLocked: true
+      };
+
+      req.body = {
+        username: 'operator1',
+        password: 'password123'
+      };
+
+      Operator.findOne.mockResolvedValue(mockOperator);
+
+      await authController.operatorLogin(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(403);
+      expect(res.json).toHaveBeenCalledWith({
+        success: false,
+        message: 'Account is locked'
+      });
+    });
+
+    it.skip('should handle error saving operator after login', async () => {
+      // Skipped: operatorLogin now uses environment variables instead of database
+      const mockOperator = {
+        _id: 'op123',
+        operatorId: 'OP001',
+        username: 'operator1',
+        passwordHash: 'hash',
+        passwordSalt: 'salt',
+        isActive: true,
+        isLocked: false,
+        resetLoginAttempts: jest.fn(),
+        save: jest.fn().mockRejectedValue(new Error('Save error'))
+      };
+
+      req.body = {
+        username: 'operator1',
+        password: 'password123'
+      };
+
+      Operator.findOne.mockResolvedValue(mockOperator);
+      encryptionUtil.verifyPassword.mockReturnValue(true);
+
+      await authController.operatorLogin(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(500);
+      expect(res.json).toHaveBeenCalledWith({
+        success: false,
+        message: 'An error occurred during login'
+      });
+    });
+  });
+
+  describe('resetPassword - Additional User Types', () => {
+    it('should reset password for administrator', async () => {
+      req.body = {
+        token: 'valid-token',
+        password: 'NewPass123!',
+        userType: 'administrator'
+      };
+
+      const mockAdmin = {
+        _id: 'admin123',
+        resetToken: 'hashed-token',
+        resetTokenExpiry: Date.now() + 3600000,
+        save: jest.fn().mockResolvedValue(true)
+      };
+
+      Administrator.findOne.mockResolvedValue(mockAdmin);
+
+      await authController.resetPassword(req, res);
+
+      expect(Administrator.findOne).toHaveBeenCalledWith({
+        resetToken: 'hashed-token',
+        resetTokenExpiry: { $gt: expect.any(Number) }
+      });
+      // Administrators use bcrypt, password is set directly and hashed by pre-save hook
+      expect(mockAdmin.password).toBe('NewPass123!');
+      expect(mockAdmin.resetToken).toBeUndefined();
+      expect(mockAdmin.resetTokenExpiry).toBeUndefined();
+      expect(res.json).toHaveBeenCalledWith({
+        success: true,
+        message: 'Password has been reset successfully'
+      });
+    });
+
+    it('should reset password for operator', async () => {
+      req.body = {
+        token: 'valid-token',
+        password: 'NewPass123!',
+        userType: 'operator'
+      };
+
+      const mockOperator = {
+        _id: 'op123',
+        resetToken: 'hashed-token',
+        resetTokenExpiry: Date.now() + 3600000,
+        save: jest.fn().mockResolvedValue(true)
+      };
+
+      Operator.findOne.mockResolvedValue(mockOperator);
+
+      await authController.resetPassword(req, res);
+
+      // Operators cannot reset passwords - they should get an error
+      expect(res.status).toHaveBeenCalledWith(400);
+      expect(res.json).toHaveBeenCalledWith({
+        success: false,
+        message: 'Operators cannot reset passwords. Please contact your supervisor to reset your PIN.'
+      });
+    });
+
+    it('should reject invalid user type', async () => {
+      req.body = {
+        token: 'valid-token',
+        password: 'NewPass123!',
+        userType: 'invalid'
+      };
+
+      await authController.resetPassword(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(400);
+      expect(res.json).toHaveBeenCalledWith({
+        success: false,
+        message: 'Invalid user type'
+      });
+    });
+  });
+
+  describe('forgotPassword - Additional User Types', () => {
+    it('should handle forgot password for operator', async () => {
+      const mockOperator = {
+        _id: 'op123',
+        email: 'operator@example.com',
+        firstName: 'Op',
+        resetToken: undefined,
+        resetTokenExpiry: undefined,
+        save: jest.fn().mockResolvedValue(true)
+      };
+
+      req.body = {
+        email: 'operator@example.com',
+        userType: 'operator'
+      };
+
+      Operator.findOne.mockResolvedValue(mockOperator);
+      emailService.sendPasswordResetEmail.mockResolvedValue(true);
+
+      await authController.forgotPassword(req, res);
+
+      expect(mockOperator.resetToken).toBe('hashed-token');
+      expect(mockOperator.resetTokenExpiry).toBeDefined();
+      expect(emailService.sendPasswordResetEmail).toHaveBeenCalledWith(
+        'operator@example.com',
+        'Op',
+        'mock-token',
+        'operator',
+        undefined
+      );
+      expect(res.json).toHaveBeenCalledWith({
+        success: true,
+        message: 'If the email exists, a password reset link has been sent'
+      });
+    });
+
+    it('should handle forgot password for administrator', async () => {
+      const mockAdmin = {
+        _id: 'admin123',
+        email: 'admin@example.com',
+        firstName: 'Admin',
+        resetToken: undefined,
+        resetTokenExpiry: undefined,
+        save: jest.fn().mockResolvedValue(true)
+      };
+
+      req.body = {
+        email: 'admin@example.com',
+        userType: 'administrator'
+      };
+
+      Administrator.findOne.mockResolvedValue(mockAdmin);
+      emailService.sendPasswordResetEmail.mockResolvedValue(true);
+
+      await authController.forgotPassword(req, res);
+
+      expect(mockAdmin.resetToken).toBe('hashed-token');
+      expect(emailService.sendPasswordResetEmail).toHaveBeenCalledWith(
+        'admin@example.com',
+        'Admin',
+        'mock-token',
+        'administrator',
+        undefined
+      );
+    });
+  });
+
+  describe('socialRegisterSuccess - Error Cases', () => {
+    it('should handle database error when creating OAuth session', async () => {
+      req.user = {
+        provider: 'facebook',
+        socialId: 'fb123',
+        email: 'test@example.com',
+        isExistingCustomer: true,
+        customer: {
+          firstName: 'Test',
+          lastName: 'User',
+          email: 'test@example.com'
+        }
+      };
+      req.query = {
+        popup: 'true',
+        sessionId: 'session123'
+      };
+
+      OAuthSession.createSession = jest.fn().mockRejectedValue(new Error('DB error'));
+
+      await authController.socialRegisterSuccess(req, res);
+
+      // Should still redirect even if session storage fails
+      expect(res.redirect).toHaveBeenCalledWith(expect.stringContaining('/oauth-success.html?message='));
+    });
+  });
+
+  describe('socialLoginSuccess - Additional Scenarios', () => {
+    it('should handle social login for existing customer', async () => {
+      const mockCustomer = {
+        _id: 'cust123',
+        customerId: 'CUST001',
+        email: 'customer@example.com',
+        firstName: 'Customer',
+        lastName: 'User',
+        save: jest.fn()
+      };
+
+      req.user = {
+        provider: 'google',
+        socialId: 'google123',
+        email: 'customer@example.com',
+        isExistingCustomer: true,
+        customer: mockCustomer
+      };
+      req.query = {};
+
+      jwt.sign.mockReturnValue('customer-jwt-token');
+      RefreshToken.prototype.save = jest.fn();
+
+      await authController.socialLoginSuccess(req, res);
+
+      expect(res.redirect).toHaveBeenCalledWith(
+        expect.stringContaining('/login?token=customer-jwt-token')
+      );
+    });
+
+    it('should handle social login without affiliate data', async () => {
+      req.user = {
+        provider: 'google',
+        socialId: 'google123',
+        email: 'test@example.com',
+        isExistingAffiliate: true,
+        affiliate: null
+      };
+      req.query = {};
+
+      await authController.socialLoginSuccess(req, res);
+
+      expect(res.redirect).toHaveBeenCalledWith('/login?error=auth_failed');
+    });
+
+    it('should handle popup mode with session storage error', async () => {
+      const mockAffiliate = {
+        _id: 'aff123',
+        affiliateId: 'AFF001',
+        email: 'affiliate@example.com',
+        save: jest.fn()
+      };
+
+      req.user = {
+        provider: 'google',
+        socialId: 'google123',
+        isExistingAffiliate: true,
+        affiliate: mockAffiliate
+      };
+      req.query = {
+        popup: 'true',
+        sessionId: 'session123'
+      };
+
+      jwt.sign.mockReturnValue('token');
+      RefreshToken.prototype.save = jest.fn();
+      OAuthSession.createSession = jest.fn().mockRejectedValue(new Error('DB error'));
+
+      await authController.socialLoginSuccess(req, res);
+
+      // Should still redirect even if session storage fails
+      expect(res.redirect).toHaveBeenCalledWith('/oauth-success.html');
+    });
+  });
+
+  describe('getLinkedInStrategyCallback', () => {
+    it('should handle LinkedIn profile data', async () => {
+      const callback = authController.getLinkedInStrategyCallback();
+      const profile = {
+        id: 'linkedin123',
+        emails: [{ value: 'test@example.com' }],
+        name: {
+          givenName: 'Test',
+          familyName: 'User'
+        },
+        photos: [{ value: 'https://example.com/photo.jpg' }]
+      };
+
+      const done = jest.fn();
+      await callback(null, null, profile, done);
+
+      expect(done).toHaveBeenCalledWith(null, {
+        provider: 'linkedin',
+        socialId: 'linkedin123',
+        email: 'test@example.com',
+        firstName: 'Test',
+        lastName: 'User',
+        profilePicture: 'https://example.com/photo.jpg'
+      });
+    });
+
+    it('should handle missing email in LinkedIn profile', async () => {
+      const callback = authController.getLinkedInStrategyCallback();
+      const profile = {
+        id: 'linkedin123',
+        emails: [],
+        name: {
+          givenName: 'Test',
+          familyName: 'User'
+        }
+      };
+
+      const done = jest.fn();
+      await callback(null, null, profile, done);
+
+      expect(done).toHaveBeenCalledWith(null, {
+        provider: 'linkedin',
+        socialId: 'linkedin123',
+        email: '',
+        firstName: 'Test',
+        lastName: 'User',
+        profilePicture: ''
+      });
+    });
+  });
+
+  describe('getFacebookStrategyCallback', () => {
+    it('should handle Facebook profile data', async () => {
+      const callback = authController.getFacebookStrategyCallback();
+      const profile = {
+        id: 'facebook123',
+        emails: [{ value: 'test@example.com' }],
+        name: {
+          givenName: 'Test',
+          familyName: 'User'
+        },
+        photos: [{ value: 'https://graph.facebook.com/123/picture' }]
+      };
+
+      const done = jest.fn();
+      await callback(null, null, profile, done);
+
+      expect(done).toHaveBeenCalledWith(null, {
+        provider: 'facebook',
+        socialId: 'facebook123',
+        email: 'test@example.com',
+        firstName: 'Test',
+        lastName: 'User',
+        profilePicture: 'https://graph.facebook.com/123/picture'
+      });
+    });
+  });
+
+  describe('verifyResetToken - Additional User Types', () => {
+    it('should verify reset token for administrator', async () => {
+      req.body = {
+        token: 'valid-token',
+        userType: 'administrator'
+      };
+
+      const mockAdmin = {
+        _id: 'admin123',
+        resetToken: 'hashed-token',
+        resetTokenExpiry: Date.now() + 3600000
+      };
+
+      Administrator.findOne.mockResolvedValue(mockAdmin);
+
+      await authController.verifyResetToken(req, res);
+
+      expect(res.json).toHaveBeenCalledWith({
+        success: true,
+        valid: true
+      });
+    });
+
+    it('should verify reset token for operator', async () => {
+      req.body = {
+        token: 'valid-token',
+        userType: 'operator'
+      };
+
+      const mockOperator = {
+        _id: 'op123',
+        resetToken: 'hashed-token',
+        resetTokenExpiry: Date.now() + 3600000
+      };
+
+      Operator.findOne.mockResolvedValue(mockOperator);
+
+      await authController.verifyResetToken(req, res);
+
+      expect(res.json).toHaveBeenCalledWith({
+        success: true,
+        valid: true
+      });
+    });
+  });
+
+  describe('logout - With Refresh Token', () => {
+    it('should delete refresh tokens on logout', async () => {
+      req.body = { refreshToken: 'refresh-token' };
+      req.headers['authorization'] = 'Bearer access-token';
+
+      RefreshToken.deleteMany.mockResolvedValue({ deletedCount: 1 });
+      TokenBlacklist.prototype.save = jest.fn();
+
+      await authController.logout(req, res);
+
+      expect(RefreshToken.deleteMany).toHaveBeenCalledWith({ token: 'refresh-token' });
+      expect(res.clearCookie).toHaveBeenCalledWith('refreshToken');
+      expect(res.json).toHaveBeenCalledWith({
+        success: true,
+        message: 'Logged out successfully'
+      });
+    });
+  });
+
+  describe('handleCustomerSocialCallback - Additional Scenarios', () => {
+    beforeEach(() => {
+      // Use fake timers for these tests to handle setTimeout in HTML responses
+      jest.useFakeTimers();
+    });
+
+    afterEach(() => {
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
+    });
+
+    it('should handle existing affiliate trying to register as customer', async () => {
+      req.user = {
+        provider: 'google',
+        socialId: 'google123',
+        email: 'affiliate@example.com',
+        isExistingAffiliate: true,
+        affiliate: {
+          _id: 'aff123',
+          affiliateId: 'AFF001',
+          email: 'affiliate@example.com'
+        }
+      };
+      req.query = {
+        state: 'customer_oauth_test-session-id'
+      };
+
+      await authController.handleCustomerSocialCallback(req, res);
+
+      expect(res.send).toHaveBeenCalledWith(
+        expect.stringContaining('social-auth-account-conflict')
+      );
+    });
+
+    it('should handle customer without affiliate', async () => {
+      req.user = {
+        _id: 'cust123',
+        customerId: 'CUST001',
+        email: 'customer@example.com',
+        firstName: 'Customer',
+        lastName: 'User',
+        isNewUser: false,
+        provider: 'google',
+        socialId: 'google123'
+      };
+      req.query = {
+        state: 'customer_oauth_test-session-id'
+      };
+
+      jwt.sign.mockReturnValue('token');
+      RefreshToken.prototype.save = jest.fn();
+
+      await authController.handleCustomerSocialCallback(req, res);
+
+      expect(res.send).toHaveBeenCalledWith(
+        expect.stringContaining('social-auth-login')
+      );
+    });
+  });
+
+  describe('completeSocialCustomerRegistration - Additional Validation', () => {
+    it('should handle missing required fields', async () => {
+      const socialData = {
+        provider: 'google',
+        socialId: 'google123',
+        email: 'test@example.com',
+        firstName: 'Test',
+        lastName: 'User'
+      };
+
+      jwt.verify.mockReturnValue(socialData);
+
+      req.body = {
+        socialToken: 'valid-token',
+        // Missing required fields like phone, address, etc.
+      };
+
+      await authController.completeSocialCustomerRegistration(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(400);
+      expect(res.json).toHaveBeenCalledWith({
+        success: false,
+        message: expect.any(String)
+      });
+    });
+
+    it('should handle duplicate customer email', async () => {
+      const socialData = {
+        provider: 'google',
+        socialId: 'google123',
+        email: 'existing@example.com',
+        firstName: 'Test',
+        lastName: 'User'
+      };
+
+      jwt.verify.mockReturnValue(socialData);
+
+      req.body = {
+        socialToken: 'valid-token',
+        phone: '1234567890',
+        address: '123 Main St',
+        city: 'City',
+        state: 'CA',
+        zipCode: '12345',
+        affiliateCode: 'AFF001'
+      };
+
+      Affiliate.findOne.mockResolvedValue({ _id: 'aff123' });
+      Customer.findOne.mockResolvedValue({ email: 'existing@example.com' });
+
+      await authController.completeSocialCustomerRegistration(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(409);
+      expect(res.json).toHaveBeenCalledWith({
+        success: false,
+        message: 'Email already exists'
+      });
+    });
+  });
+});

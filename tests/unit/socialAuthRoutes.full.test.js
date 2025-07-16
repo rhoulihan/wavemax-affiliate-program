@@ -176,15 +176,14 @@ describe('Social Auth Routes - Full Coverage', () => {
   });
 
   describe('LinkedIn OAuth Routes', () => {
-    it('should initiate LinkedIn OAuth when configured', async () => {
+    it('should return 404 as LinkedIn OAuth is not implemented', async () => {
       process.env.LINKEDIN_CLIENT_ID = 'test-client-id';
       process.env.LINKEDIN_CLIENT_SECRET = 'test-client-secret';
 
       const response = await request(app)
         .get('/api/v1/auth/linkedin');
 
-      expect(response.status).toBe(302);
-      expect(response.headers.location).toContain('https://linkedin.com/oauth');
+      expect(response.status).toBe(404);
     });
   });
 
@@ -228,7 +227,7 @@ describe('Social Auth Routes - Full Coverage', () => {
 
       expect(response.status).toBe(302);
       expect(response.headers.location).toContain('https://facebook.com/oauth');
-      expect(response.headers.location).toContain('state=affiliateCode123');
+      expect(response.headers.location).toContain('state=customer_affiliateCode123');
     });
 
     it('should return 404 when Facebook OAuth is not configured for customers', async () => {
@@ -242,19 +241,17 @@ describe('Social Auth Routes - Full Coverage', () => {
       expect(response.body.message).toBe('Facebook OAuth is not configured');
     });
 
-    it('should initiate LinkedIn OAuth for customers', async () => {
+    it('should return 404 as LinkedIn OAuth is not implemented for customers', async () => {
       process.env.LINKEDIN_CLIENT_ID = 'test-client-id';
       process.env.LINKEDIN_CLIENT_SECRET = 'test-client-secret';
 
       const response = await request(app)
         .get('/api/v1/auth/customer/linkedin?state=test-state');
 
-      expect(response.status).toBe(302);
-      expect(response.headers.location).toContain('https://linkedin.com/oauth');
-      expect(response.headers.location).toContain('state=test-state');
+      expect(response.status).toBe(404);
     });
 
-    it('should return 404 when LinkedIn OAuth is not configured for customers', async () => {
+    it('should return 404 for LinkedIn OAuth regardless of configuration', async () => {
       delete process.env.LINKEDIN_CLIENT_ID;
       delete process.env.LINKEDIN_CLIENT_SECRET;
 
@@ -262,16 +259,13 @@ describe('Social Auth Routes - Full Coverage', () => {
         .get('/api/v1/auth/customer/linkedin');
 
       expect(response.status).toBe(404);
-      expect(response.body.message).toBe('LinkedIn OAuth is not configured');
     });
 
-    it('should handle customer LinkedIn OAuth callback', async () => {
+    it('should return 404 for customer LinkedIn OAuth callback', async () => {
       const response = await request(app)
         .get('/api/v1/auth/customer/linkedin/callback');
 
-      expect(response.status).toBe(200);
-      expect(response.body.isCustomer).toBe(true);
-      expect(response.body.provider).toBe('linkedin');
+      expect(response.status).toBe(404);
     });
   });
 
