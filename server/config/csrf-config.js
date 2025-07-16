@@ -60,7 +60,16 @@ const CSRF_CONFIG = {
     // Test endpoints (development only)
     '/api/v1/test/customer',
     '/api/v1/test/order',
-    '/api/v1/test/cleanup'
+    '/api/v1/test/cleanup',
+    
+    // Service area endpoints (public for registration forms)
+    '/api/v1/service-area/config',
+    '/api/v1/service-area/autocomplete',
+    '/api/v1/service-area/validate',
+    '/api/v1/service-area/cities',
+    '/api/v1/service-area/zip-codes',
+    '/api/v1/service-area/city/:zipCode',
+    '/api/v1/service-area/zip-codes/:city'
   ],
 
   // Authentication endpoints - will add rate limiting instead of CSRF

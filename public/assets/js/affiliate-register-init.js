@@ -1053,6 +1053,7 @@
             );
             // Hide spinner on validation error
             if (formSpinner) formSpinner.hide();
+            isSubmitting = false; // Reset flag
             return;
           }
 
@@ -1063,6 +1064,7 @@
             window.ErrorHandler.showError('Please select a payment method');
             // Hide spinner
             if (formSpinner) formSpinner.hide();
+            isSubmitting = false; // Reset flag
             return;
           }
 
@@ -1075,6 +1077,7 @@
               window.ErrorHandler.showError('Passwords do not match!');
               // Hide spinner
               if (formSpinner) formSpinner.hide();
+              isSubmitting = false; // Reset flag
               return;
             }
           }
@@ -2246,584 +2249,199 @@
 
       // Monitor address fields and geocode when complete
       function validateAndSetAddress() {
-        const address = document.getElementById('address')?.value?.trim();
-        const city = document.getElementById('city')?.value?.trim();
-        const state = document.getElementById('state')?.value?.trim();
-        const zipCode = document.getElementById('zipCode')?.value?.trim();
-
-        console.log('[Service Area Map] Validating address:', { address, city, state, zipCode });
-
-        // Validate required fields
-        if (!address || !city || !state) {
-          alert('Please fill in all required address fields (Address, City, State) before validating.');
-          return;
-        }
-
-        // Service area component will be initialized after address validation
-        console.log('[Service Area Map] Validating address for service area component');
-
-        // Show loading state on button with swirl spinner
-        const validateButton = document.getElementById('validateAddress');
-        const originalText = validateButton.innerHTML;
-
-        // Show spinner over the entire form while validating
-        const form = document.getElementById('affiliateRegistrationForm');
-        let formSpinner = null;
-        if (window.SwirlSpinner && form) {
-        // Get translated message
-          const validatingMessage = getSpinnerMessage('spinner.validatingAddress');
-
-          formSpinner = new window.SwirlSpinner({
-            container: form,
-            size: 'large',
-            overlay: true,
-            message: validatingMessage
-          }).show();
-        }
-
-        // Also update button text
-        validateButton.innerHTML = 'Validating...';
-        validateButton.disabled = true;
-
-        // Always search for the address
-        if (true) {
-        // Build search queries prioritizing street address + zip code for accuracy
-        // This approach works better for business locations by avoiding city/neighborhood ambiguity
-          const searchQueries = [];
-
-          // FIRST PRIORITY: Street address + zip code only (most accurate for business locations)
-          if (address && zipCode) {
-            searchQueries.push({
-              query: `${address}, ${zipCode}, USA`,
-              description: `${address}, ${zipCode}`
-            });
-          }
-
-          // SECOND: Full address with zip
-          if (address && zipCode) {
-            searchQueries.push({
-              query: `${address}, ${city}, ${state} ${zipCode}, USA`,
-              description: `${address}, ${city}, ${state} ${zipCode}`
-            });
-          }
-
-          // THIRD: Full address without zip
-          if (address) {
-            searchQueries.push({
-              query: `${address}, ${city}, ${state}, USA`,
-              description: `${address}, ${city}, ${state}`
-            });
-          }
-
-          // LAST: Just city and state (fallback)
-          searchQueries.push({
-            query: `${city}, ${state}, USA`,
-            description: `${city}, ${state} (City Center)`
+        console.log('[Service Area Map] Using new address validation component');
+        
+        // Use the new address validation component
+        if (window.affiliateAddressValidator) {
+          window.affiliateAddressValidator.validateAddress();
+        } else if (window.AddressValidationComponent) {
+          // Create validator if it doesn't exist
+          const validator = new window.AddressValidationComponent({
+            addressField: 'address',
+            cityField: 'city',
+            stateField: 'state',
+            zipField: 'zipCode',
+            validateButton: 'validateAddress',
+            onSuccess: handleAddressValidationSuccess,
+            onError: handleAddressValidationError
           });
-
-          console.log('[Service Area Map] Will try multiple search queries:', searchQueries);
-
-          // Try geocoding with fallback
-          geocodeWithFallback(searchQueries, 0, originalText, formSpinner);
-
+          window.affiliateAddressValidator = validator;
+          validator.validateAddress();
+        } else {
+          console.error('[Service Area Map] Address validation component not available');
+          alert('Address validation is temporarily unavailable. Please try again.');
         }
       }
 
-      // Function to try multiple geocoding queries with fallback
-      function geocodeWithFallback(searchQueries, queryIndex, originalButtonText, formSpinner) {
-        if (queryIndex >= searchQueries.length) {
-          console.log('[Service Area Map] All geocoding queries failed');
-          // Reset button state and hide spinner
-          const validateButton = document.getElementById('validateAddress');
-          if (formSpinner) {
-            formSpinner.hide();
-          }
-          if (validateButton && originalButtonText) {
-            validateButton.innerHTML = originalButtonText;
-            validateButton.disabled = false;
-          }
-          alert('Unable to find the address. Please check your address and try again.');
-          return;
-        }
-
-        const currentQuery = searchQueries[queryIndex];
-        console.log(`[Service Area Map] Trying geocoding query ${queryIndex + 1}/${searchQueries.length}:`, currentQuery.query);
-
-        // Get radius slider value
+      // Handle successful address validation from the new component
+      function handleAddressValidationSuccess(data) {
+        console.log('[Service Area Map] Address validation successful:', data);
+        
+        // Update service location fields
+        const latField = document.getElementById('serviceLatitude');
+        const lonField = document.getElementById('serviceLongitude');
+        
+        if (latField) latField.value = data.latitude;
+        if (lonField) lonField.value = data.longitude;
+        
+        // Get radius value
         const radiusSlider = document.getElementById('radiusSlider');
         const radiusValue = radiusSlider ? parseInt(radiusSlider.value) : 5;
-
-        if (window.parent !== window) {
-        // Use bridge method when in iframe
-          const requestId = 'form_address_' + Date.now() + '_' + queryIndex;
-
-          // Request from parent
-          window.parent.postMessage({
-            type: 'geocode-forward',
-            data: {
-              query: currentQuery.query,
-              requestId: requestId
-            }
-          }, '*');
-
-          // Set up one-time handler for this specific request
-          const handleResponse = function(event) {
-            if (event.data && event.data.type === 'geocode-forward-response' &&
-              event.data.data && event.data.data.requestId === requestId) {
-              console.log('[Service Area Map] Received geocoding response:', event.data.data);
-
-              if (event.data.data.results && event.data.data.results.length > 0) {
-              // Always show address confirmation modal
-                showAddressConfirmationModal(event.data.data.results, radiusValue, originalButtonText, formSpinner);
-              } else {
-              // No results, try next query
-                console.log('[Service Area Map] No results for query, trying next...');
-                geocodeWithFallback(searchQueries, queryIndex + 1, originalButtonText, formSpinner);
-              }
-
-              // Remove this handler
-              window.removeEventListener('message', handleResponse);
-            }
-          };
-
-          window.addEventListener('message', handleResponse);
-        } else {
-        // Direct Nominatim call when not in iframe
-          const AUSTIN_BOUNDS = {
-            minLat: 29.5451,
-            maxLat: 30.9889,
-            minLon: -98.6687,
-            maxLon: -96.8175
-          };
-
-          fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(currentQuery.query)}&limit=5&accept-language=en&viewbox=${AUSTIN_BOUNDS.minLon},${AUSTIN_BOUNDS.minLat},${AUSTIN_BOUNDS.maxLon},${AUSTIN_BOUNDS.maxLat}&bounded=0&countrycodes=us`)
-            .then(response => response.json())
-            .then(results => {
-              console.log('[Service Area Map] Nominatim results:', results);
-              if (results.length > 0) {
-              // Always show address confirmation modal
-                showAddressConfirmationModal(results, radiusValue, originalButtonText, formSpinner);
-              } else {
-              // No results, try next query
-                console.log('[Service Area Map] No results for query, trying next...');
-                geocodeWithFallback(searchQueries, queryIndex + 1, originalButtonText, formSpinner);
-              }
-            })
-            .catch(error => {
-              console.error('Geocoding error:', error);
-              // Try next query on error
-              geocodeWithFallback(searchQueries, queryIndex + 1, originalButtonText, formSpinner);
-            });
+        
+        // Store the validated address components
+        const formAddress = document.getElementById('address')?.value?.trim() || '';
+        const formCity = document.getElementById('city')?.value?.trim() || '';
+        const formState = document.getElementById('state')?.value?.trim() || '';
+        const formZip = document.getElementById('zipCode')?.value?.trim() || '';
+        
+        window.validatedAddress = {
+          address: formAddress,
+          city: formCity,
+          state: formState,
+          zipCode: formZip
+        };
+        
+        // Store service area data
+        window.selectedServiceAreaData = {
+          latitude: data.latitude,
+          longitude: data.longitude,
+          radius: radiusValue,
+          address: data.formattedAddress
+        };
+        
+        window.confirmedServiceAddress = data.formattedAddress;
+        window.addressValidated = true;
+        
+        // Update UI elements
+        const centerLocationElement = document.getElementById('centerLocation');
+        if (centerLocationElement) {
+          centerLocationElement.textContent = data.formattedAddress;
         }
-      }
-
-      // Function to show address confirmation modal
-      function showAddressConfirmationModal(results, radiusValue, originalButtonText, formSpinner) {
-        console.log('[Service Area Map] Showing address confirmation modal with results:', results);
-
-        // Reset button state and hide spinner
-        const validateButton = document.getElementById('validateAddress');
-        if (formSpinner) {
-          formSpinner.hide();
+        
+        const centerCoordinatesElement = document.getElementById('centerCoordinates');
+        if (centerCoordinatesElement) {
+          centerCoordinatesElement.textContent = `${data.latitude.toFixed(6)}, ${data.longitude.toFixed(6)}`;
         }
-        if (validateButton && originalButtonText) {
-          validateButton.innerHTML = originalButtonText;
-          validateButton.disabled = false;
+        
+        // Show service area info
+        const serviceAreaInfo = document.getElementById('serviceAreaInfo');
+        if (serviceAreaInfo) {
+          serviceAreaInfo.classList.remove('hidden');
         }
-
-        // Remove any existing modal
-        const existingModal = document.getElementById('addressSelectionModal');
-        if (existingModal) {
-          existingModal.remove();
+        
+        // Update coverage area
+        const coverageAreaElement = document.getElementById('coverageArea');
+        if (coverageAreaElement) {
+          coverageAreaElement.textContent = `${radiusValue} mile radius`;
         }
-
-        // Create modal HTML with proper i18n support
-        const i18n = window.i18next;
-        const isI18nReady = i18n && (i18n.isInitialized || i18n.isInitialized === undefined);
-
-        console.log('[Service Area Map] i18next status:', {
-          i18n: !!i18n,
-          isInitialized: i18n ? i18n.isInitialized : 'no i18n',
-          isI18nReady,
-          language: i18n ? i18n.language : 'no i18n'
-        });
-
-        const modalTitle = results.length > 1
-          ? (isI18nReady ? i18n.t('affiliate.register.selectServiceLocation') : 'Select Your Service Location')
-          : (isI18nReady ? i18n.t('affiliate.register.confirmServiceLocation') : 'Confirm Your Service Location');
-        const modalDesc = results.length > 1
-          ? (isI18nReady ? i18n.t('affiliate.register.selectCorrectLocation') : 'We found multiple possible locations. Please select the correct one:')
-          : (isI18nReady ? i18n.t('affiliate.register.confirmCorrectAddress') : 'Please confirm this is the correct address for your service area:');
-
-        console.log('[Service Area Map] Modal translations:', {
-          modalTitle,
-          modalDesc,
-          cancelButton: isI18nReady ? i18n.t('common.buttons.cancel') : 'Cancel',
-          confirmButton: isI18nReady ? i18n.t('common.buttons.confirm') : 'Confirm'
-        });
-
-        const modalHTML = `
-        <div id="addressSelectionModal" class="address-modal-overlay">
-          <div class="address-modal-container">
-            <div class="bg-white rounded-lg w-full address-modal-content">
-              <div class="p-6">
-                <h3 class="text-lg font-semibold mb-4" data-i18n="${results.length > 1 ? 'affiliate.register.selectServiceLocation' : 'affiliate.register.confirmServiceLocation'}">${modalTitle}</h3>
-                <p class="text-sm text-gray-600 mb-4" data-i18n="${results.length > 1 ? 'affiliate.register.selectCorrectLocation' : 'affiliate.register.confirmCorrectAddress'}">${modalDesc}</p>
-                <div class="space-y-2 overflow-y-auto address-modal-list">
-                  ${results.map((result, index) => {
-    // Get the form address to compare
-    const formAddress = document.getElementById('address')?.value?.trim() || '';
-    const formCity = document.getElementById('city')?.value?.trim() || '';
-    const formState = document.getElementById('state')?.value?.trim() || '';
-    const formZip = document.getElementById('zipCode')?.value?.trim() || '';
-
-    // Parse the display name
-    const parts = result.display_name.split(',').map(p => p.trim());
-    let displayAddress = '';
-
-    // Try to extract the street address from the result
-    if (parts.length > 0) {
-      // If the first part looks like a street address (starts with number)
-      if (/^\d+/.test(parts[0])) {
-        displayAddress = parts[0];
-      } else if (formAddress) {
-        // Use the form address if we don't have a street address in results
-        displayAddress = formAddress;
-      } else {
-        // Fall back to first part of result
-        displayAddress = parts[0];
-      }
-    }
-
-    // Build full address display with proper formatting
-    // Format: "streetNumber streetName, city, state zipcode"
-    let fullDisplay = displayAddress;
-    if (formCity || (parts.length > 1 && parts[1])) {
-      fullDisplay += ', ' + (formCity || parts[1]);
-    }
-    if (formState || (parts.length > 2 && parts[2])) {
-      fullDisplay += ', ' + (formState || parts[2]);
-      if (formZip) {
-        fullDisplay += ' ' + formZip;
-      }
-    }
-
-    return `
-                      <button class="address-option w-full text-left p-4 border-2 border-gray-200 rounded-lg hover:bg-blue-50 hover:border-blue-400 transition-all duration-200 shadow-sm hover:shadow-md" 
-                              data-lat="${result.lat}" 
-                              data-lon="${result.lon}"
-                              data-index="${index}">
-                        <div class="font-semibold text-gray-800 text-base">${fullDisplay}</div>
-                        <div class="text-xs text-gray-500 mt-2">${result.display_name}</div>
-                      </button>
-                    `;
-  }).join('')}
-                </div>
-                <div class="mt-4 flex justify-end space-x-2">
-                  <button id="cancelAddressSelection" class="px-4 py-2 text-gray-600 hover:text-gray-800 border border-gray-300 rounded-lg" data-i18n="common.buttons.cancel">${isI18nReady ? i18n.t('common.buttons.cancel') : 'Cancel'}</button>
-                  ${results.length === 1 ? `<button class="confirm-single-address px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700" data-lat="${results[0].lat}" data-lon="${results[0].lon}" data-i18n="common.buttons.confirm">${isI18nReady ? i18n.t('common.buttons.confirm') : 'Confirm'}</button>` : ''}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      `;
-
-        // Add modal to page
-        document.body.insertAdjacentHTML('beforeend', modalHTML);
-
-        // Apply translations after modal is added to DOM
-        if (window.i18n && window.i18n.updateContent) {
-        // Use a slight delay to ensure DOM is ready
-          setTimeout(() => {
-            window.i18n.updateContent();
-          }, 100);
+        
+        // Hide other sections
+        const businessInfoSection = document.querySelector('#businessInfoSection');
+        if (businessInfoSection) {
+          businessInfoSection.style.display = 'none';
+          const requiredFields = businessInfoSection.querySelectorAll('input[required]');
+          requiredFields.forEach(field => {
+            field.removeAttribute('required');
+          });
         }
-
-        // Ensure modal is visible by scrolling to top
-        const modal = document.getElementById('addressSelectionModal');
-        if (modal) {
-          modal.scrollTop = 0;
+        
+        const socialAuthSection = document.getElementById('socialAuthSection');
+        if (socialAuthSection) {
+          socialAuthSection.style.display = 'none';
+        }
+        
+        const personalInfoSection = document.getElementById('personalInfoSection');
+        if (personalInfoSection) {
+          personalInfoSection.style.display = 'none';
+          const requiredFields = personalInfoSection.querySelectorAll('input[required]');
+          requiredFields.forEach(field => {
+            field.removeAttribute('required');
+          });
+        }
+        
+        if (window.isOAuthUser) {
+          const accountSetup = document.getElementById('accountSetupSection');
+          if (accountSetup) {
+            accountSetup.style.display = 'none';
+          }
+        }
+        
+        const oldBackButton = document.getElementById('backButton');
+        if (oldBackButton) {
+          oldBackButton.style.display = 'none';
+        }
+        
+        // Show service area section
+        const serviceAreaSection = document.getElementById('serviceAreaSection');
+        if (serviceAreaSection) {
+          serviceAreaSection.classList.remove('form-section-hidden');
+          serviceAreaSection.classList.add('form-section-visible');
           
-          // Move modal to document.body if it's not already a direct child
-          if (modal.parentElement !== document.body) {
-            document.body.appendChild(modal);
+          const serviceAreaNav = document.getElementById('serviceAreaNavigation');
+          if (serviceAreaNav) {
+            serviceAreaNav.classList.remove('hidden');
           }
           
-          // Add a class to body to prevent scrolling
-          document.body.classList.add('modal-open');
+          // Initialize service area component
+          if (window.ServiceAreaComponent && window.selectedServiceAreaData) {
+            const data = window.selectedServiceAreaData;
+            setTimeout(() => {
+              window.registrationServiceArea = window.ServiceAreaComponent.init('registrationServiceAreaComponent', {
+                latitude: data.latitude,
+                longitude: data.longitude,
+                radius: data.radius,
+                address: data.address,
+                editable: true,
+                showMap: true,
+                showControls: true,
+                showInfo: true,
+                registrationAddress: data.address,
+                registrationLat: data.latitude,
+                registrationLng: data.longitude,
+                onUpdate: function(serviceData) {
+                  const latField = document.getElementById('registrationServiceAreaComponent-latitude');
+                  const lngField = document.getElementById('registrationServiceAreaComponent-longitude');
+                  const radiusField = document.getElementById('registrationServiceAreaComponent-radius');
+                  if (latField) latField.value = serviceData.latitude;
+                  if (lngField) lngField.value = serviceData.longitude;
+                  if (radiusField) radiusField.value = serviceData.radius;
+                }
+              });
+              
+              // Update hidden fields with initial values
+              const latField = document.getElementById('registrationServiceAreaComponent-latitude');
+              const lngField = document.getElementById('registrationServiceAreaComponent-longitude');
+              const radiusField = document.getElementById('registrationServiceAreaComponent-radius');
+              if (latField) latField.value = data.latitude;
+              if (lngField) lngField.value = data.longitude;
+              if (radiusField) radiusField.value = data.radius;
+            }, 100);
+          }
           
-          // Force a reflow to ensure styles are applied
-          modal.offsetHeight;
-          
-          // Debug: Check computed styles
-          const computedStyle = window.getComputedStyle(modal);
-          console.log('[Modal Debug] Position:', computedStyle.position);
-          console.log('[Modal Debug] Z-index:', computedStyle.zIndex);
-          console.log('[Modal Debug] Display:', computedStyle.display);
-          console.log('[Modal Debug] Top:', computedStyle.top);
-          console.log('[Modal Debug] Left:', computedStyle.left);
-          
-          // Also try to scroll the window to top if in iframe
-          try {
-            window.scrollTo(0, 0);
-            if (window.parent && window.parent !== window) {
-              window.parent.postMessage({ type: 'scroll-to-top' }, '*');
-            }
-          } catch (e) {
-          // Ignore cross-origin errors
-          }
-        }
-
-        // Add event listeners
-        const selectAddress = function(lat, lon, addressText) {
-          console.log('[Service Area Map] Address confirmed:', lat, lon, addressText);
-
-          // Get the actual form address for display
-          const formAddress = document.getElementById('address')?.value?.trim() || '';
-          const formCity = document.getElementById('city')?.value?.trim() || '';
-          const formState = document.getElementById('state')?.value?.trim() || '';
-          const formZip = document.getElementById('zipCode')?.value?.trim() || '';
-
-          // Build full address display with proper formatting
-          // Format: "streetNumber streetName, city, state zipcode"
-          let fullAddress = formAddress;
-          if (formCity) {
-            fullAddress += ', ' + formCity;
-          }
-          if (formState) {
-            fullAddress += ', ' + formState;
-            if (formZip) {
-              fullAddress += ' ' + formZip;
-            }
-          }
-
-          // Store the address for service area display
-          window.confirmedServiceAddress = fullAddress || addressText || 'Location set';
-
-          // Store the validated address components globally so they're not lost when section is hidden
-          window.validatedAddress = {
-            address: formAddress,
-            city: formCity,
-            state: formState,
-            zipCode: formZip
-          };
-
-          // Update service area info with address
-          const centerLocationElement = document.getElementById('centerLocation');
-          if (centerLocationElement) {
-            centerLocationElement.textContent = window.confirmedServiceAddress;
-          }
-
-          // Update coordinates display
-          const centerCoordinatesElement = document.getElementById('centerCoordinates');
-          if (centerCoordinatesElement) {
-            centerCoordinatesElement.textContent = `${lat.toFixed(6)}, ${lon.toFixed(6)}`;
-          }
-
-          // Show service area info
-          const serviceAreaInfo = document.getElementById('serviceAreaInfo');
-          if (serviceAreaInfo) {
-            serviceAreaInfo.classList.remove('hidden');
-          }
-
-          // Update coverage area
-          const coverageAreaElement = document.getElementById('coverageArea');
-          if (coverageAreaElement) {
-            coverageAreaElement.textContent = `${radiusValue} mile radius`;
-          }
-
-          // Store the selected coordinates and radius for component initialization
-          window.selectedServiceAreaData = {
-            latitude: lat,
-            longitude: lon,
-            radius: radiusValue,
-            address: window.confirmedServiceAddress || fullAddress || addressText
-          };
-          console.log('[Service Area Map] Stored service area data for component initialization:', window.selectedServiceAreaData);
-
-          // Mark address as validated
-          window.addressValidated = true;
-
-          // Hide business info section, OAuth section, and personal info section after address validation
-          const businessInfoSection = document.querySelector('#businessInfoSection');
-          if (businessInfoSection) {
-            businessInfoSection.style.display = 'none';
-
-            // Remove required attribute from fields in hidden section to allow form submission
-            const requiredFields = businessInfoSection.querySelectorAll('input[required]');
-            requiredFields.forEach(field => {
-              field.removeAttribute('required');
-              console.log('[Address Validation] Removed required attribute from:', field.id);
-            });
-          }
-
-          // Hide OAuth section after successful address validation
-          const socialAuthSection = document.getElementById('socialAuthSection');
-          if (socialAuthSection) {
-            socialAuthSection.style.display = 'none';
-          }
-
-          // Hide personal information section after successful address validation
-          const personalInfoSection = document.getElementById('personalInfoSection');
-          if (personalInfoSection) {
-            personalInfoSection.style.display = 'none';
-            
-            // Remove required attribute from fields in hidden section to allow form submission
-            const requiredFields = personalInfoSection.querySelectorAll('input[required]');
-            requiredFields.forEach(field => {
-              field.removeAttribute('required');
-              console.log('[Address Validation] Removed required attribute from personal info field:', field.id);
-            });
-          }
-
-          // IMPORTANT: Only show the service area section, keep all other sections hidden
-          // Don't show any other hidden sections yet - they'll be shown when Next is clicked
-
-          // If OAuth user, hide account setup section again
-          if (window.isOAuthUser) {
-            const accountSetup = document.getElementById('accountSetupSection');
-            if (accountSetup) {
-              accountSetup.style.display = 'none';
-            }
-          }
-
-          // Hide the old back button (we'll use the new navigation buttons)
-          const oldBackButton = document.getElementById('backButton');
-          if (oldBackButton) {
-            oldBackButton.style.display = 'none';
-          }
-
-          // NOW show the service area section after address has been confirmed
-          const serviceAreaSection = document.getElementById('serviceAreaSection');
-          console.log('[Service Area] Found service area section:', !!serviceAreaSection);
-          if (serviceAreaSection) {
-            console.log('[Service Area] Current visibility state - has hidden class:', serviceAreaSection.classList.contains('form-section-hidden'));
-            console.log('[Service Area] Current classes:', serviceAreaSection.className);
-            serviceAreaSection.classList.remove('form-section-hidden');
-            serviceAreaSection.classList.add('form-section-visible');
-            console.log('[Service Area] After update - classes:', serviceAreaSection.className);
-            
-            // Show the service area navigation buttons
-            const serviceAreaNav = document.getElementById('serviceAreaNavigation');
-            if (serviceAreaNav) {
-              serviceAreaNav.classList.remove('hidden');
-            }
-
-            // Force reflow by accessing offsetHeight
-            serviceAreaSection.offsetHeight;
-
-            // Initialize the service area component with stored data
-            console.log('[Service Area Map] Service area section shown, initializing component');
-            if (window.ServiceAreaComponent && window.selectedServiceAreaData) {
-              const data = window.selectedServiceAreaData;
-              // Small delay to ensure container is fully rendered
-              setTimeout(() => {
-                window.registrationServiceArea = window.ServiceAreaComponent.init('registrationServiceAreaComponent', {
-                  latitude: data.latitude,
-                  longitude: data.longitude,
-                  radius: data.radius,
-                  address: data.address,
-                  editable: true,
-                  showMap: true,
-                  showControls: true,
-                  showInfo: true,
-                  // Store registration address for "Use Registration Address" button
-                  registrationAddress: data.address,
-                  registrationLat: data.latitude,
-                  registrationLng: data.longitude,
-                  onUpdate: function(serviceData) {
-                    // Update hidden fields - component creates fields with containerId prefix
-                    const latField = document.getElementById('registrationServiceAreaComponent-latitude');
-                    const lngField = document.getElementById('registrationServiceAreaComponent-longitude');
-                    const radiusField = document.getElementById('registrationServiceAreaComponent-radius');
-
-                    if (latField) latField.value = serviceData.latitude;
-                    if (lngField) lngField.value = serviceData.longitude;
-                    if (radiusField) radiusField.value = serviceData.radius;
-                    console.log('Service area updated:', serviceData);
-                  }
-                });
-
-                // Also update the hidden fields immediately with initial values
-                const latField = document.getElementById('registrationServiceAreaComponent-latitude');
-                const lngField = document.getElementById('registrationServiceAreaComponent-longitude');
-                const radiusField = document.getElementById('registrationServiceAreaComponent-radius');
-
-                if (latField) latField.value = data.latitude;
-                if (lngField) lngField.value = data.longitude;
-                if (radiusField) radiusField.value = data.radius;
-              }, 100); // Small delay to ensure DOM is ready
-            } else {
-              console.error('ServiceAreaComponent or selectedServiceAreaData not available');
-            }
-          }
-
           // Scroll to service area section
           setTimeout(() => {
-            const serviceAreaSection = document.getElementById('serviceAreaSection');
-            if (serviceAreaSection) {
-              serviceAreaSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }
-            
-            // Trigger height recalculation after hiding sections and showing service area
+            serviceAreaSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
             window.dispatchEvent(new Event('section-toggled'));
-            
-            // Also try manual height update if available
             if (window.embedNavigation && window.embedNavigation.sendHeight) {
               window.embedNavigation.sendHeight(true);
             }
           }, 100);
-
-          // Remove modal
-          try {
-            const modal = document.getElementById('addressSelectionModal');
-            if (modal) {
-              document.body.classList.remove('modal-open');
-              modal.remove();
-              console.log('[Address Selection] Modal removed successfully');
-            } else {
-              console.error('[Address Selection] Modal not found to remove');
-            }
-          } catch (error) {
-            console.error('[Address Selection] Error removing modal:', error);
-          }
-        };
-
-        // Add click handlers for address options
-        document.querySelectorAll('.address-option').forEach(button => {
-          button.addEventListener('click', function() {
-            const lat = parseFloat(this.dataset.lat);
-            const lon = parseFloat(this.dataset.lon);
-            const addressText = this.querySelector('.font-semibold').textContent;
-            selectAddress(lat, lon, addressText);
-          });
-        });
-
-        // Add handler for single address confirm button
-        const confirmButton = document.querySelector('.confirm-single-address');
-        if (confirmButton) {
-          confirmButton.addEventListener('click', function() {
-            const lat = parseFloat(this.dataset.lat);
-            const lon = parseFloat(this.dataset.lon);
-            const addressText = document.querySelector('.address-option .font-semibold')?.textContent || '';
-            selectAddress(lat, lon, addressText);
-          });
         }
-
-        // Cancel button
-        document.getElementById('cancelAddressSelection').addEventListener('click', function() {
-          document.body.classList.remove('modal-open');
-          document.getElementById('addressSelectionModal').remove();
-        });
-
-        // Close on backdrop click
-        document.getElementById('addressSelectionModal').addEventListener('click', function(e) {
-          if (e.target === this) {
-            this.remove();
-          }
-        });
       }
+      
+      // Handle address validation errors from the new component
+      function handleAddressValidationError(message) {
+        console.error('[Service Area Map] Address validation error:', message);
+        
+        // Hide service area section if shown
+        const serviceAreaSection = document.getElementById('serviceAreaSection');
+        if (serviceAreaSection) {
+          serviceAreaSection.classList.add('form-section-hidden');
+        }
+      }
+
+      // DEPRECATED - Old address confirmation modal has been removed
+      // The new address validation component handles all validation with strict requirements
 
       // Make validation function globally accessible
       window.validateAndSetAddress = validateAndSetAddress;

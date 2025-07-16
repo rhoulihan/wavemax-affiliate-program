@@ -10,6 +10,8 @@ The WaveMAX Affiliate Program enables individuals to register as affiliates, onb
 
 - **Affiliate Registration & Management**: Complete onboarding and management system for affiliates
 - **Customer Registration**: Allow affiliates to register customers using unique affiliate links
+- **Location-Based Service Areas**: Configurable service radius restrictions (default: 50-mile radius from Austin, TX)
+- **Strict Address Validation**: Unified address validation component ensures valid street addresses with ZIP code verification
 - **Order Management**: Schedule pickups, track order status, and manage deliveries
 - **Individual Bag Tracking**: Unique QR codes for each bag with real-time status tracking through weighing, processing, and pickup
 - **Flexible Delivery Pricing**: Dynamic delivery fee structure with minimum + per-bag pricing
@@ -957,6 +959,10 @@ docker-compose exec app node scripts/setup-database.js
 | `LOG_DIR` | Directory for log files | No |
 | `ENABLE_DELETE_DATA_FEATURE` | Enable delete all data feature (true/false) | No |
 | `SHOW_DOCS` | Enable documentation at /docs (true/false) | No |
+| `SERVICE_STATE` | State for service area restrictions (e.g., TX) | Yes |
+| `SERVICE_CITY` | City center for service radius (e.g., Austin) | Yes |
+| `SERVICE_RADIUS_MILES` | Service area radius in miles (e.g., 50) | Yes |
+| `ENABLE_TEST_PAYMENT_FORM` | Enable test payment form (set to false in production) | No |
 
 #### Paygistix Hosted Form Configuration
 
@@ -1492,6 +1498,62 @@ npm test tests/unit/facebookUtils.test.js
 
 # Run integration tests
 npm test tests/integration/facebookDataDeletion.test.js
+```
+
+## Deployment
+
+### Production Deployment Checklist
+
+1. **Environment Variables**
+   ```bash
+   NODE_ENV=production
+   ENABLE_TEST_PAYMENT_FORM=false
+   ENABLE_DELETE_DATA_FEATURE=false
+   SHOW_DOCS=false
+   RELAX_RATE_LIMITING=false
+   
+   # Service Area Configuration (required)
+   SERVICE_STATE=TX
+   SERVICE_CITY=Austin
+   SERVICE_RADIUS_MILES=50
+   ```
+
+2. **Security Configuration**
+   - Generate new encryption keys for production
+   - Set secure session secrets
+   - Configure CSRF protection
+   - Enable HTTPS only cookies
+
+3. **Database**
+   - Use production MongoDB URI
+   - Ensure proper indexes are created
+   - Set up regular backups
+
+4. **Payment Processing**
+   - Verify Paygistix production credentials
+   - Disable test payment endpoints
+   - Test payment flow with real cards
+
+5. **Service Area Validation**
+   - Verify SERVICE_* variables are set correctly
+   - Test address validation within service radius
+   - Confirm OpenStreetMap API access
+
+### Deployment Commands
+
+```bash
+# Install dependencies
+npm install --production
+
+# Build assets
+npm run build
+
+# Start with PM2
+pm2 start ecosystem.config.js --env production
+
+# Save PM2 configuration
+pm2 save
+pm2 startup
 ```
 
 ## Testing

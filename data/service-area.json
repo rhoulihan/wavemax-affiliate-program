@@ -1,0 +1,638 @@
+{
+  "state": "TX",
+  "centerCity": "Austin",
+  "centerLat": 30.2672,
+  "centerLon": -97.7431,
+  "radiusMiles": 50,
+  "locations": [
+    {
+      "zip": "78701",
+      "city": "Austin",
+      "lat": 30.2711,
+      "lon": -97.7437,
+      "distance": 0.3
+    },
+    {
+      "zip": "78702",
+      "city": "Austin",
+      "lat": 30.2605,
+      "lon": -97.7139,
+      "distance": 1.8
+    },
+    {
+      "zip": "78703",
+      "city": "Austin",
+      "lat": 30.2935,
+      "lon": -97.7691,
+      "distance": 2.4
+    },
+    {
+      "zip": "78704",
+      "city": "Austin",
+      "lat": 30.2425,
+      "lon": -97.7703,
+      "distance": 2.4
+    },
+    {
+      "zip": "78705",
+      "city": "Austin",
+      "lat": 30.2901,
+      "lon": -97.7425,
+      "distance": 1.6
+    },
+    {
+      "zip": "78712",
+      "city": "Austin",
+      "lat": 30.2847,
+      "lon": -97.7403,
+      "distance": 1.2
+    },
+    {
+      "zip": "78717",
+      "city": "Austin",
+      "lat": 30.4881,
+      "lon": -97.7661,
+      "distance": 15.3
+    },
+    {
+      "zip": "78721",
+      "city": "Austin",
+      "lat": 30.2703,
+      "lon": -97.6889,
+      "distance": 3.2
+    },
+    {
+      "zip": "78722",
+      "city": "Austin",
+      "lat": 30.2894,
+      "lon": -97.7169,
+      "distance": 2.2
+    },
+    {
+      "zip": "78723",
+      "city": "Austin",
+      "lat": 30.3069,
+      "lon": -97.6825,
+      "distance": 4.5
+    },
+    {
+      "zip": "78724",
+      "city": "Austin",
+      "lat": 30.2968,
+      "lon": -97.6542,
+      "distance": 5.7
+    },
+    {
+      "zip": "78725",
+      "city": "Austin",
+      "lat": 30.2353,
+      "lon": -97.6675,
+      "distance": 5
+    },
+    {
+      "zip": "78726",
+      "city": "Austin",
+      "lat": 30.4352,
+      "lon": -97.8331,
+      "distance": 12.8
+    },
+    {
+      "zip": "78727",
+      "city": "Austin",
+      "lat": 30.4201,
+      "lon": -97.71,
+      "distance": 10.7
+    },
+    {
+      "zip": "78728",
+      "city": "Austin",
+      "lat": 30.4375,
+      "lon": -97.6781,
+      "distance": 12.4
+    },
+    {
+      "zip": "78729",
+      "city": "Austin",
+      "lat": 30.4478,
+      "lon": -97.7692,
+      "distance": 12.6
+    },
+    {
+      "zip": "78730",
+      "city": "Austin",
+      "lat": 30.3625,
+      "lon": -97.8217,
+      "distance": 8.1
+    },
+    {
+      "zip": "78731",
+      "city": "Austin",
+      "lat": 30.3458,
+      "lon": -97.7717,
+      "distance": 5.7
+    },
+    {
+      "zip": "78732",
+      "city": "Austin",
+      "lat": 30.3792,
+      "lon": -97.8967,
+      "distance": 12
+    },
+    {
+      "zip": "78733",
+      "city": "Austin",
+      "lat": 30.3175,
+      "lon": -97.8667,
+      "distance": 8.2
+    },
+    {
+      "zip": "78734",
+      "city": "Austin",
+      "lat": 30.3775,
+      "lon": -97.9467,
+      "distance": 14.3
+    },
+    {
+      "zip": "78735",
+      "city": "Austin",
+      "lat": 30.2542,
+      "lon": -97.8367,
+      "distance": 5.7
+    },
+    {
+      "zip": "78736",
+      "city": "Austin",
+      "lat": 30.2175,
+      "lon": -97.9067,
+      "distance": 10.4
+    },
+    {
+      "zip": "78737",
+      "city": "Austin",
+      "lat": 30.1975,
+      "lon": -97.9567,
+      "distance": 13.6
+    },
+    {
+      "zip": "78738",
+      "city": "Austin",
+      "lat": 30.3175,
+      "lon": -97.9867,
+      "distance": 14.9
+    },
+    {
+      "zip": "78739",
+      "city": "Austin",
+      "lat": 30.1875,
+      "lon": -97.8767,
+      "distance": 9.7
+    },
+    {
+      "zip": "78741",
+      "city": "Austin",
+      "lat": 30.2301,
+      "lon": -97.7225,
+      "distance": 2.8
+    },
+    {
+      "zip": "78742",
+      "city": "Austin",
+      "lat": 30.2301,
+      "lon": -97.6969,
+      "distance": 3.8
+    },
+    {
+      "zip": "78744",
+      "city": "Austin",
+      "lat": 30.1847,
+      "lon": -97.7428,
+      "distance": 5.7
+    },
+    {
+      "zip": "78745",
+      "city": "Austin",
+      "lat": 30.2069,
+      "lon": -97.7953,
+      "distance": 5.2
+    },
+    {
+      "zip": "78746",
+      "city": "Austin",
+      "lat": 30.2658,
+      "lon": -97.8081,
+      "distance": 3.9
+    },
+    {
+      "zip": "78747",
+      "city": "Austin",
+      "lat": 30.1319,
+      "lon": -97.7589,
+      "distance": 9.4
+    },
+    {
+      "zip": "78748",
+      "city": "Austin",
+      "lat": 30.1689,
+      "lon": -97.8231,
+      "distance": 8.3
+    },
+    {
+      "zip": "78749",
+      "city": "Austin",
+      "lat": 30.2169,
+      "lon": -97.8431,
+      "distance": 6.9
+    },
+    {
+      "zip": "78750",
+      "city": "Austin",
+      "lat": 30.4469,
+      "lon": -97.8031,
+      "distance": 12.9
+    },
+    {
+      "zip": "78751",
+      "city": "Austin",
+      "lat": 30.3103,
+      "lon": -97.7261,
+      "distance": 3.1
+    },
+    {
+      "zip": "78752",
+      "city": "Austin",
+      "lat": 30.3336,
+      "lon": -97.7092,
+      "distance": 5
+    },
+    {
+      "zip": "78753",
+      "city": "Austin",
+      "lat": 30.3736,
+      "lon": -97.6742,
+      "distance": 8.4
+    },
+    {
+      "zip": "78754",
+      "city": "Austin",
+      "lat": 30.3536,
+      "lon": -97.6542,
+      "distance": 8
+    },
+    {
+      "zip": "78756",
+      "city": "Austin",
+      "lat": 30.3169,
+      "lon": -97.7425,
+      "distance": 3.4
+    },
+    {
+      "zip": "78757",
+      "city": "Austin",
+      "lat": 30.3503,
+      "lon": -97.7256,
+      "distance": 5.8
+    },
+    {
+      "zip": "78758",
+      "city": "Austin",
+      "lat": 30.3836,
+      "lon": -97.7086,
+      "distance": 8.3
+    },
+    {
+      "zip": "78759",
+      "city": "Austin",
+      "lat": 30.4203,
+      "lon": -97.7417,
+      "distance": 10.6
+    },
+    {
+      "zip": "78602",
+      "city": "Bastrop",
+      "lat": 30.1105,
+      "lon": -97.3153,
+      "distance": 27.8
+    },
+    {
+      "zip": "78738",
+      "city": "Bee Cave",
+      "lat": 30.3175,
+      "lon": -97.9867,
+      "distance": 14.9
+    },
+    {
+      "zip": "78610",
+      "city": "Buda",
+      "lat": 30.0853,
+      "lon": -97.8403,
+      "distance": 13.8
+    },
+    {
+      "zip": "78613",
+      "city": "Cedar Park",
+      "lat": 30.5053,
+      "lon": -97.8203,
+      "distance": 17.1
+    },
+    {
+      "zip": "78619",
+      "city": "Dripping Springs",
+      "lat": 30.1903,
+      "lon": -98.0867,
+      "distance": 21.2
+    },
+    {
+      "zip": "78620",
+      "city": "Dripping Springs",
+      "lat": 30.1903,
+      "lon": -98.0867,
+      "distance": 21.2
+    },
+    {
+      "zip": "78621",
+      "city": "Elgin",
+      "lat": 30.3494,
+      "lon": -97.37,
+      "distance": 23
+    },
+    {
+      "zip": "78626",
+      "city": "Georgetown",
+      "lat": 30.6333,
+      "lon": -97.6778,
+      "distance": 25.6
+    },
+    {
+      "zip": "78627",
+      "city": "Georgetown",
+      "lat": 30.6633,
+      "lon": -97.6778,
+      "distance": 27.6
+    },
+    {
+      "zip": "78628",
+      "city": "Georgetown",
+      "lat": 30.6833,
+      "lon": -97.6778,
+      "distance": 29
+    },
+    {
+      "zip": "78634",
+      "city": "Hutto",
+      "lat": 30.5428,
+      "lon": -97.5467,
+      "distance": 22.4
+    },
+    {
+      "zip": "78640",
+      "city": "Kyle",
+      "lat": 29.9892,
+      "lon": -97.8775,
+      "distance": 20.8
+    },
+    {
+      "zip": "78645",
+      "city": "Lago Vista",
+      "lat": 30.4603,
+      "lon": -97.9889,
+      "distance": 19.8
+    },
+    {
+      "zip": "78734",
+      "city": "Lakeway",
+      "lat": 30.3775,
+      "lon": -97.9467,
+      "distance": 14.3
+    },
+    {
+      "zip": "78641",
+      "city": "Leander",
+      "lat": 30.5788,
+      "lon": -97.8531,
+      "distance": 22.5
+    },
+    {
+      "zip": "78644",
+      "city": "Lockhart",
+      "lat": 29.885,
+      "lon": -97.67,
+      "distance": 26.8
+    },
+    {
+      "zip": "78653",
+      "city": "Manor",
+      "lat": 30.3408,
+      "lon": -97.5569,
+      "distance": 12.2
+    },
+    {
+      "zip": "78660",
+      "city": "Pflugerville",
+      "lat": 30.4383,
+      "lon": -97.62,
+      "distance": 13.9
+    },
+    {
+      "zip": "78664",
+      "city": "Round Rock",
+      "lat": 30.5083,
+      "lon": -97.6789,
+      "distance": 17.1
+    },
+    {
+      "zip": "78665",
+      "city": "Round Rock",
+      "lat": 30.5483,
+      "lon": -97.6589,
+      "distance": 20.1
+    },
+    {
+      "zip": "78681",
+      "city": "Round Rock",
+      "lat": 30.5083,
+      "lon": -97.7089,
+      "distance": 16.8
+    },
+    {
+      "zip": "78666",
+      "city": "San Marcos",
+      "lat": 29.8833,
+      "lon": -97.9414,
+      "distance": 29.1
+    },
+    {
+      "zip": "78667",
+      "city": "San Marcos",
+      "lat": 29.8833,
+      "lon": -97.9414,
+      "distance": 29.1
+    },
+    {
+      "zip": "78669",
+      "city": "Spicewood",
+      "lat": 30.4761,
+      "lon": -98.1561,
+      "distance": 28.5
+    },
+    {
+      "zip": "76574",
+      "city": "Taylor",
+      "lat": 30.5708,
+      "lon": -97.4094,
+      "distance": 28.9
+    },
+    {
+      "zip": "78676",
+      "city": "Wimberley",
+      "lat": 29.9975,
+      "lon": -98.0986,
+      "distance": 28.3
+    }
+  ],
+  "summary": {
+    "totalZipCodes": 69,
+    "totalCities": 21,
+    "cities": [
+      "Austin",
+      "Bastrop",
+      "Bee Cave",
+      "Buda",
+      "Cedar Park",
+      "Dripping Springs",
+      "Elgin",
+      "Georgetown",
+      "Hutto",
+      "Kyle",
+      "Lago Vista",
+      "Lakeway",
+      "Leander",
+      "Lockhart",
+      "Manor",
+      "Pflugerville",
+      "Round Rock",
+      "San Marcos",
+      "Spicewood",
+      "Taylor",
+      "Wimberley"
+    ],
+    "cityZipCounts": {
+      "Austin": 43,
+      "Bastrop": 1,
+      "Bee Cave": 1,
+      "Buda": 1,
+      "Cedar Park": 1,
+      "Dripping Springs": 2,
+      "Elgin": 1,
+      "Georgetown": 3,
+      "Hutto": 1,
+      "Kyle": 1,
+      "Lago Vista": 1,
+      "Lakeway": 1,
+      "Leander": 1,
+      "Lockhart": 1,
+      "Manor": 1,
+      "Pflugerville": 1,
+      "Round Rock": 3,
+      "San Marcos": 2,
+      "Spicewood": 1,
+      "Taylor": 1,
+      "Wimberley": 1
+    }
+  },
+  "autocomplete": {
+    "cities": [
+      "Austin",
+      "Bastrop",
+      "Bee Cave",
+      "Buda",
+      "Cedar Park",
+      "Dripping Springs",
+      "Elgin",
+      "Georgetown",
+      "Hutto",
+      "Kyle",
+      "Lago Vista",
+      "Lakeway",
+      "Leander",
+      "Lockhart",
+      "Manor",
+      "Pflugerville",
+      "Round Rock",
+      "San Marcos",
+      "Spicewood",
+      "Taylor",
+      "Wimberley"
+    ],
+    "zipCodes": [
+      "76574",
+      "78602",
+      "78610",
+      "78613",
+      "78619",
+      "78620",
+      "78621",
+      "78626",
+      "78627",
+      "78628",
+      "78634",
+      "78640",
+      "78641",
+      "78644",
+      "78645",
+      "78653",
+      "78660",
+      "78664",
+      "78665",
+      "78666",
+      "78667",
+      "78669",
+      "78676",
+      "78681",
+      "78701",
+      "78702",
+      "78703",
+      "78704",
+      "78705",
+      "78712",
+      "78717",
+      "78721",
+      "78722",
+      "78723",
+      "78724",
+      "78725",
+      "78726",
+      "78727",
+      "78728",
+      "78729",
+      "78730",
+      "78731",
+      "78732",
+      "78733",
+      "78734",
+      "78734",
+      "78735",
+      "78736",
+      "78737",
+      "78738",
+      "78738",
+      "78739",
+      "78741",
+      "78742",
+      "78744",
+      "78745",
+      "78746",
+      "78747",
+      "78748",
+      "78749",
+      "78750",
+      "78751",
+      "78752",
+      "78753",
+      "78754",
+      "78756",
+      "78757",
+      "78758",
+      "78759"
+    ]
+  }
+}

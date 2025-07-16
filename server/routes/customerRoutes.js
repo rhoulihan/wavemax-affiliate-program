@@ -8,6 +8,7 @@ const { checkRole } = require('../middleware/rbac');
 const { body } = require('express-validator');
 const { customPasswordValidator } = require('../utils/passwordValidator');
 const { registrationLimiter } = require('../middleware/rateLimiting');
+const { registrationAddressValidation, profileAddressValidation, handleValidationErrors } = require('../middleware/locationValidation');
 
 /**
  * @route   GET /api/customers/check-rate-limit
@@ -44,13 +45,10 @@ router.post('/register', registrationLimiter, [
   body('lastName').notEmpty().withMessage('Last name is required'),
   body('email').isEmail().withMessage('Valid email is required'),
   body('phone').notEmpty().withMessage('Phone number is required'),
-  body('address').notEmpty().withMessage('Address is required'),
-  body('city').notEmpty().withMessage('City is required'),
-  body('state').notEmpty().withMessage('State is required'),
-  body('zipCode').notEmpty().withMessage('ZIP code is required'),
+  ...registrationAddressValidation,
   body('username').notEmpty().withMessage('Username is required'),
   body('password').custom(customPasswordValidator())
-], customerController.registerCustomer);
+], handleValidationErrors, customerController.registerCustomer);
 
 
 /**
@@ -85,7 +83,12 @@ router.get('/:customerId', authenticate, customerController.getCustomerProfile);
  * @desc    Update customer profile
  * @access  Private (self, affiliated affiliate, or admin)
  */
-router.put('/:customerId/profile', authenticate, customerController.updateCustomerProfile);
+router.put('/:customerId/profile', 
+  authenticate, 
+  profileAddressValidation,
+  handleValidationErrors,
+  customerController.updateCustomerProfile
+);
 
 /**
  * @route   GET /api/customers/:customerId/orders

@@ -1,5 +1,34 @@
 # Recent Major Updates
 
+## Location-Based Service Area Restrictions (January 2025)
+- **Service Area Configuration**: Implemented configurable service radius restrictions
+  - Default configuration: 50-mile radius from Austin, TX
+  - Environment variables: `SERVICE_STATE`, `SERVICE_CITY`, `SERVICE_RADIUS_MILES`
+  - Applies to both affiliate and customer registrations
+  
+- **Unified Address Validation**: 
+  - Created centralized address validation service and frontend component
+  - Strict validation requires complete street address with house number
+  - ZIP code verification with tolerance for nearby ZIP codes
+  - Integration with OpenStreetMap Nominatim for geocoding
+  
+- **Address Validation Features**:
+  - Real-time address format validation
+  - Visual feedback with success/error messages
+  - Swirl spinner integration during validation
+  - Autocomplete for Texas cities and ZIP codes
+  - Prevents registration outside service area
+  
+- **User Experience Improvements**:
+  - Pre-populated state field based on SERVICE_STATE
+  - Only street address cleared on validation failure (city/state/zip preserved)
+  - Clear error messages with distance information for out-of-area addresses
+  - Consistent validation across all registration forms and dashboards
+
+- **Production Configuration**:
+  - Set `ENABLE_TEST_PAYMENT_FORM=false` for production environment
+  - Disabled test payment endpoints for security
+
 ## Order Status Simplification & Operator Workflow Updates (December 2024)
 - **Simplified Order Status**: Removed `orderProcessingStatus` field and consolidated to single `status` field
   - New status flow: `pending` → `processing` → `processed` → `complete` → `cancelled`
