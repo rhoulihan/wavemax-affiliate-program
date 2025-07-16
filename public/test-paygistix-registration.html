@@ -50,7 +50,7 @@
 
     <!-- Load scripts -->
     <script src="/assets/js/csrf-utils.js"></script>
-    <script src="/assets/js/paygistix-payment-form.js"></script>
+    <script src="/assets/js/paygistix-payment-form-v2.js"></script>
     <script>
         let paymentForm = null;
         const consoleOutput = document.getElementById('console-output');
@@ -96,12 +96,15 @@
                 console.log('Initializing Paygistix payment form...');
                 
                 // Initialize the Paygistix payment form
-                paymentForm = new PaygistixPaymentForm('paymentFormContainer', {
-                    merchantId: paymentConfig.merchantId,
-                    formId: paymentConfig.formId,
-                    hash: paymentConfig.formHash,
-                    formActionUrl: paymentConfig.formActionUrl,
-                    returnURL: `${paymentConfig.returnUrl}?type=registration`,
+                paymentForm = new PaygistixPaymentForm({
+                    container: document.getElementById('paymentFormContainer'),
+                    paymentConfig: {
+                        merchantId: paymentConfig.merchantId,
+                        formId: paymentConfig.formId,
+                        formHash: paymentConfig.formHash,
+                        formActionUrl: paymentConfig.formActionUrl,
+                        returnUrl: `${paymentConfig.returnUrl}?type=registration`
+                    },
                     onSuccess: function() {
                         console.log('Payment form initialized successfully');
                         console.log('Context:', document.getElementById('PAYCONTEXT').value);

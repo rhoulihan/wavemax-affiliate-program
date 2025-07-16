@@ -87,7 +87,7 @@
         </div>
     </div>
     
-    <script src="assets/js/paygistix-payment-form.js"></script>
+    <script src="assets/js/paygistix-payment-form-v2.js"></script>
     <script>
         // Get customer details from URL or session
         const urlParams = new URLSearchParams(window.location.search);
@@ -109,13 +109,16 @@
                 const paymentConfig = configData.config;
                 
                 // Initialize the payment form
-                const paymentForm = new PaygistixPaymentForm('paymentFormContainer', {
-                    customerId: customerId,
-                    merchantId: paymentConfig.merchantId,
-                    formId: paymentConfig.formId,
-                    hash: paymentConfig.formHash,
-                    formActionUrl: paymentConfig.formActionUrl,
-                    returnURL: `${paymentConfig.returnUrl}?customerId=${customerId}&type=registration`,
+                const paymentForm = new PaygistixPaymentForm({
+                    container: document.getElementById('paymentFormContainer'),
+                    paymentConfig: {
+                        customerId: customerId,
+                        merchantId: paymentConfig.merchantId,
+                        formId: paymentConfig.formId,
+                        formHash: paymentConfig.formHash,
+                        formActionUrl: paymentConfig.formActionUrl,
+                        returnUrl: `${paymentConfig.returnUrl}?customerId=${customerId}&type=registration`
+                    },
                     onSuccess: function() {
                         console.log('Payment form initialized');
                     },

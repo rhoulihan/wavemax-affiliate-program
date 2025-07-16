@@ -54,6 +54,9 @@ const CSRF_CONFIG = {
     '/api/v1/w9/docusign-webhook',
     '/api/auth/docusign/callback',
     
+    // Facebook data deletion webhook (external callback)
+    '/api/v1/auth/facebook/deletion-callback',
+    
     // Test endpoints (development only)
     '/api/v1/test/customer',
     '/api/v1/test/order',

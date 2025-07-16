@@ -2093,6 +2093,11 @@ const formatTimeSlot = (timeSlot) => {
  * Format size for display in emails
  */
 const formatSize = (size) => {
+  // Return non-string values as-is
+  if (typeof size !== 'string') {
+    return size;
+  }
+  
   switch (size) {
   case 'small':
     return 'Small (10-15 lbs)';
@@ -2255,5 +2260,8 @@ exports.sendOrderPickedUpNotification = async (customerEmail, data) => {
 
 // Export the sendEmail function for direct use
 exports.sendEmail = sendEmail;
+
+// Export helper functions
+exports.formatSize = formatSize;
 
 module.exports = exports;

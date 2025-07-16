@@ -1,0 +1,26 @@
+
+> wavemax-affiliate-program@1.0.0 test:coverage
+> jest --coverage --runInBand --forceExit
+
+  console.log
+    Connected to test database: mongodb+srv://***:***@cluster0.yiy75zr.mongodb.net/wavemax_test?retryWrites=true&w=majority
+
+      at Object.log (tests/setup.js:41:15)
+
+PASS tests/unit/logger.test.js
+  Logger Utility
+    ✓ should export logger methods (77 ms)
+    ✓ should be a winston logger instance (21 ms)
+
+  console.log
+    Connected to test database: mongodb+srv://***:***@cluster0.yiy75zr.mongodb.net/wavemax_test?retryWrites=true&w=majority
+
+      at Object.log (tests/setup.js:41:15)
+
+PASS tests/unit/routingRoutes.test.js
+  Routing Routes
+    GET /
+      ✓ should serve filmwalk index.html (20 ms)
+      ✓ should handle root path without trailing slash (4 ms)
+      ✓ should return 404 for non-existent paths (4 ms)
+

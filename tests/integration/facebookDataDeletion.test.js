@@ -78,9 +78,20 @@ describe('Facebook Data Deletion Integration Tests', () => {
     it('should delete data for existing affiliate', async () => {
       // Create test affiliate with Facebook data
       const affiliate = await Affiliate.create({
-        name: 'Test Affiliate',
+        firstName: 'Test',
+        lastName: 'Affiliate',
         email: 'test@example.com',
-        password: 'hashedpassword',
+        phone: '123-456-7890',
+        address: '123 Test St',
+        city: 'Test City',
+        state: 'TS',
+        zipCode: '12345',
+        serviceLatitude: 40.7128,
+        serviceLongitude: -74.0060,
+        username: 'testaffiliate456',
+        passwordHash: 'hashedpassword',
+        passwordSalt: 'salt',
+        paymentMethod: 'directDeposit',
         socialAccounts: {
           facebook: {
             id: 'test-fb-456',
@@ -110,7 +121,7 @@ describe('Facebook Data Deletion Integration Tests', () => {
       expect(updatedAffiliate.socialAccounts.facebook.id).toBeNull();
       expect(updatedAffiliate.socialAccounts.facebook.email).toBeNull();
       expect(updatedAffiliate.socialAccounts.facebook.accessToken).toBeNull();
-      expect(updatedAffiliate.registrationMethod).toBe('standard');
+      expect(updatedAffiliate.registrationMethod).toBe('traditional');
 
       // Verify deletion request shows completed
       const deletionRequest = await DataDeletionRequest.findOne({
@@ -125,9 +136,20 @@ describe('Facebook Data Deletion Integration Tests', () => {
       // Create test users
       const [affiliate, customer] = await Promise.all([
         Affiliate.create({
-          name: 'Test Affiliate',
+          firstName: 'Test',
+          lastName: 'Both',
           email: 'affiliate@example.com',
-          password: 'hashedpassword',
+          phone: '123-456-7890',
+          address: '123 Test St',
+          city: 'Test City',
+          state: 'TS',
+          zipCode: '12345',
+          serviceLatitude: 40.7128,
+          serviceLongitude: -74.0060,
+          username: 'testboth789',
+          passwordHash: 'hashedpassword',
+          passwordSalt: 'salt',
+          paymentMethod: 'directDeposit',
           socialAccounts: {
             facebook: {
               id: 'test-fb-789',
@@ -136,9 +158,18 @@ describe('Facebook Data Deletion Integration Tests', () => {
           }
         }),
         Customer.create({
-          name: 'Test Customer',
+          firstName: 'Test',
+          lastName: 'Customer',
           email: 'customer@example.com',
           phone: '+1234567890',
+          address: '456 Customer Ave',
+          city: 'Customer City',
+          state: 'CS',
+          zipCode: '54321',
+          username: 'testcustomer789',
+          passwordHash: 'hashedpassword',
+          passwordSalt: 'salt',
+          affiliateId: 'AFF-test-affiliate',
           socialAccounts: {
             facebook: {
               id: 'test-fb-789',
@@ -208,7 +239,8 @@ describe('Facebook Data Deletion Integration Tests', () => {
         .send({})
         .expect(400);
 
-      expect(response.body.error).toBe('Missing signed_request parameter');
+      expect(response.body.errors).toBeDefined();
+      expect(response.body.errors[0].msg).toBe('signed_request is required');
     });
 
     it('should handle malformed signed request', async () => {
@@ -250,7 +282,7 @@ describe('Facebook Data Deletion Integration Tests', () => {
 
     it('should return 404 for non-existent code', async () => {
       const response = await request(server)
-        .get('/api/v1/auth/facebook/deletion-status/NONEXISTENT')
+        .get('/api/v1/auth/facebook/deletion-status/NOTEXIST99')
         .expect(404);
 
       expect(response.body.error).toBe('Deletion request not found');

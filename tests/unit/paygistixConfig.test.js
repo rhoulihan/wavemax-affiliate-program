@@ -205,6 +205,7 @@ describe('Paygistix Config', () => {
       process.env.PAYGISTIX_FORM_HASH = 'test-hash';
       process.env.PAYGISTIX_ENVIRONMENT = 'sandbox';
       process.env.ENABLE_TEST_PAYMENT_FORM = 'true';
+      delete process.env.PAYGISTIX_RETURN_URL; // Ensure default is used
       
       jest.resetModules();
       const PaygistixConfig = require('../../server/config/paygistix.config');
