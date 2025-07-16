@@ -83,6 +83,34 @@
       //   pickupDetailsSection.style.display = 'block';
       // }
 
+      // If customer doesn't have bagCredit info (coming from registration), fetch full customer data
+      if (customer && !customer.hasOwnProperty('bagCredit')) {
+        console.log('Customer data missing bagCredit, fetching full customer data...');
+        try {
+          const baseUrl = window.EMBED_CONFIG?.baseUrl || 'https://wavemax.promo';
+          const response = await fetch(`${baseUrl}/api/v1/customers/${customer.customerId}`, {
+            method: 'GET',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            },
+            credentials: 'include'
+          });
+
+          if (response.ok) {
+            const data = await response.json();
+            if (data.success && data.customer) {
+              // Update localStorage with full customer data
+              customer = data.customer;
+              localStorage.setItem('currentCustomer', JSON.stringify(customer));
+              console.log('Updated customer data with bagCredit:', customer.bagCredit);
+            }
+          }
+        } catch (error) {
+          console.error('Error fetching full customer data:', error);
+        }
+      }
+
       // Load customer data into the form
       await loadCustomerIntoForm(customer, token);
 
