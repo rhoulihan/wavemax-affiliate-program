@@ -113,11 +113,27 @@ if (process.env.NODE_ENV !== 'test') {
 }
 
 // Middleware
-// HTTPS redirect in production
+// HTTPS redirect in production with host validation
 if (process.env.NODE_ENV === 'production') {
+  // Define allowed hosts
+  const allowedHosts = [
+    'wavemax.promo',
+    'www.wavemax.promo',
+    'affiliate.wavemax.promo',
+    'localhost:3000' // For development if needed
+  ];
+  
   app.use((req, res, next) => {
     if (req.header('x-forwarded-proto') !== 'https') {
-      res.redirect(`https://${req.header('host')}${req.url}`);
+      const host = req.header('host');
+      
+      // Validate host header against whitelist
+      if (host && allowedHosts.includes(host.toLowerCase())) {
+        res.redirect(`https://${host}${req.url}`);
+      } else {
+        // Use default domain if host is invalid
+        res.redirect(`https://wavemax.promo${req.url}`);
+      }
     } else {
       next();
     }
