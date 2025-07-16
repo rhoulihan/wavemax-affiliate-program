@@ -7,6 +7,7 @@ const encryptionUtil = require('../../server/utils/encryption');
 const emailService = require('../../server/utils/emailService');
 const { getFilteredData } = require('../../server/utils/fieldFilter');
 const { validationResult } = require('express-validator');
+const jwt = require('jsonwebtoken');
 
 // Mock dependencies
 jest.mock('../../server/models/Customer');
@@ -22,6 +23,7 @@ jest.mock('../../server/utils/encryption', () => ({
 }));
 jest.mock('../../server/utils/emailService');
 jest.mock('../../server/utils/fieldFilter');
+jest.mock('jsonwebtoken');
 
 describe('Customer Controller', () => {
   let req, res;
@@ -53,7 +55,9 @@ describe('Customer Controller', () => {
         affiliateId: 'AFF123',
         firstName: 'John',
         lastName: 'Doe',
-        deliveryFee: 5.99
+        deliveryFee: 5.99,
+        minimumDeliveryFee: 10.00,
+        perBagDeliveryFee: 2.50
       };
 
       req.body = {
@@ -78,6 +82,8 @@ describe('Customer Controller', () => {
         lastName: 'Smith',
         email: 'jane@example.com',
         affiliateId: 'AFF123',
+        numberOfBags: 2,
+        bagCredit: 20.00,
         save: jest.fn().mockResolvedValue(true)
       };
 
@@ -98,6 +104,9 @@ describe('Customer Controller', () => {
 
       emailService.sendCustomerWelcomeEmail.mockResolvedValue();
       emailService.sendAffiliateNewCustomerEmail.mockResolvedValue();
+      
+      // Mock JWT sign
+      jwt.sign.mockReturnValue('mock-jwt-token');
 
       await customerController.registerCustomer(req, res);
 
@@ -109,14 +118,17 @@ describe('Customer Controller', () => {
       expect(res.json).toHaveBeenCalledWith({
         success: true,
         customerId: 'CUST123456',
+        token: expect.any(String),
         customerData: expect.objectContaining({
           firstName: 'Jane',
           lastName: 'Smith',
           email: 'jane@example.com',
           affiliateId: 'AFF123',
           affiliateName: 'John Doe',
-          minimumDeliveryFee: undefined,
-          perBagDeliveryFee: undefined
+          minimumDeliveryFee: 10.00,
+          perBagDeliveryFee: 2.50,
+          numberOfBags: 2,
+          bagCredit: 20.00
         }),
         message: 'Customer registered successfully!'
       });
