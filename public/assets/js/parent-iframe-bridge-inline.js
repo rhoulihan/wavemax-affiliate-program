@@ -78,6 +78,9 @@
         
         // Remove padding and borders from iframe container for all embedded content
         removeContainerPaddingAndBorders();
+        
+        // Always hide the page header element on the parent page
+        hidePageHeader();
 
         // Set up viewport detection
         detectViewport();
@@ -146,6 +149,13 @@
             if (needsHiding) {
                 console.log('[Parent-Iframe Bridge] Global observer detected changes, but not auto-hiding chrome');
                 // Removed automatic chrome hiding - let iframe control when to hide chrome
+            }
+            
+            // Always check for and hide the specific page header
+            const pageHeader = document.querySelector('section.page-header.page-header-modern.bg-color-light-scale-1.page-header-sm');
+            if (pageHeader && pageHeader.style.display !== 'none') {
+                console.log('[Parent-Iframe Bridge] Global observer found page header shown, hiding it');
+                hidePageHeader();
             }
         });
         
@@ -300,6 +310,19 @@
                 display: none !important;
                 visibility: hidden !important;
                 opacity: 0 !important;
+            }
+            
+            /* Always hide the specific WaveMAX Austin Affiliate Program page header */
+            section.page-header.page-header-modern.bg-color-light-scale-1.page-header-sm {
+                display: none !important;
+                visibility: hidden !important;
+                opacity: 0 !important;
+                position: absolute !important;
+                left: -9999px !important;
+                top: -9999px !important;
+                width: 0 !important;
+                height: 0 !important;
+                overflow: hidden !important;
             }
             
             /* Removed automatic hiding of page headers and chrome elements */
