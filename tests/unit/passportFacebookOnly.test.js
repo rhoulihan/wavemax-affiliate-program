@@ -98,7 +98,7 @@ describe('Facebook OAuth Passport Configuration - Isolated', () => {
 
     // Verify the callback function exists and is callable
     expect(typeof facebookCallback).toBe('function');
-    expect(facebookCallback.length).toBe(4); // accessToken, refreshToken, profile, done
+    expect(facebookCallback.length).toBe(5); // req, accessToken, refreshToken, profile, done (passReqToCallback: true)
   });
 
   test('should configure Facebook strategy with profile fields', () => {

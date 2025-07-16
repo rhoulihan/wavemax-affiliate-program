@@ -21,18 +21,31 @@ function parseSignedRequest(signedRequest, appSecret) {
 
   const [encodedSig, encodedPayload] = parts;
 
-  // Decode signature and payload
-  const sig = base64UrlDecode(encodedSig);
+  // Decode payload
   const payload = base64UrlDecode(encodedPayload);
 
-  // Verify signature
-  const expectedSig = crypto
-    .createHmac('sha256', appSecret)
-    .update(encodedPayload)
-    .digest();
+  try {
+    // Decode signature as raw bytes
+    const sigBuffer = Buffer.from(encodedSig.replace(/-/g, '+').replace(/_/g, '/'), 'base64');
 
-  if (!crypto.timingSafeEqual(Buffer.from(sig, 'base64'), expectedSig)) {
-    logger.error('Invalid signed request signature');
+    // Verify signature
+    const expectedSig = crypto
+      .createHmac('sha256', appSecret)
+      .update(encodedPayload)
+      .digest();
+
+    // Check if buffers have same length before comparing
+    if (sigBuffer.length !== expectedSig.length) {
+      logger.error('Invalid signed request signature length');
+      return null;
+    }
+
+    if (!crypto.timingSafeEqual(sigBuffer, expectedSig)) {
+      logger.error('Invalid signed request signature');
+      return null;
+    }
+  } catch (error) {
+    logger.error('Error verifying signature:', error);
     return null;
   }
 
@@ -112,7 +125,7 @@ async function deleteFacebookData(user) {
 
     // Update registration method if it was Facebook
     if (user.registrationMethod === 'facebook') {
-      user.registrationMethod = 'standard';
+      user.registrationMethod = 'traditional';
       deletedData.push('registration_method');
     }
 

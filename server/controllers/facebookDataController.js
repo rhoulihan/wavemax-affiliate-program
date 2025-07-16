@@ -56,13 +56,16 @@ exports.handleDeletionCallback = async (req, res) => {
     // Find users associated with this Facebook ID
     const { affiliate, customer } = await findUsersByFacebookId(facebookUserId);
     
-    let userType = 'none';
+    let userType;
     if (affiliate && customer) {
       userType = 'both';
     } else if (affiliate) {
       userType = 'affiliate';
     } else if (customer) {
       userType = 'customer';
+    } else {
+      // No users found - still need to create a deletion request for tracking
+      userType = 'affiliate'; // Default to affiliate for "no user found" cases
     }
 
     // Create deletion request record
