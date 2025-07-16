@@ -40,6 +40,17 @@
 
   // Make navigateParent available globally for onclick handlers
   window.navigateParent = navigateParent;
+  
+  // Add click handler for schedule pickup button
+  function setupEventHandlers() {
+    const schedulePickupBtn = document.getElementById('schedulePickupBtn');
+    if (schedulePickupBtn) {
+      schedulePickupBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        navigateParent('schedule-pickup');
+      });
+    }
+  }
 
   function loadAffiliateInfo(affiliateId) {
     console.log('Loading affiliate info for ID:', affiliateId);
@@ -210,11 +221,13 @@
     document.addEventListener('DOMContentLoaded', function() {
       loadCustomerInformation();
       initializeI18n();
+      setupEventHandlers();
     });
   } else {
     // DOM is already loaded
     loadCustomerInformation();
     initializeI18n();
+    setupEventHandlers();
   }
 
 })();
