@@ -8,6 +8,7 @@ const SystemConfig = require('../models/SystemConfig');
 const encryptionUtil = require('../utils/encryption');
 const emailService = require('../utils/emailService');
 const jwt = require('jsonwebtoken');
+const { escapeRegex } = require('../utils/securityUtils');
 
 // ============================================================================
 // Helper Functions
@@ -976,11 +977,12 @@ exports.searchOrders = async (req, res) => {
     let orders;
     if (search) {
       // First find customers matching the search term
+      const escapedSearch = escapeRegex(search);
       const customers = await Customer.find({
         $or: [
-          { firstName: { $regex: search, $options: 'i' } },
-          { lastName: { $regex: search, $options: 'i' } },
-          { email: { $regex: search, $options: 'i' } }
+          { firstName: { $regex: escapedSearch, $options: 'i' } },
+          { lastName: { $regex: escapedSearch, $options: 'i' } },
+          { email: { $regex: escapedSearch, $options: 'i' } }
         ]
       }).select('customerId');
 

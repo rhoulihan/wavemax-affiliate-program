@@ -145,4 +145,36 @@ exports.generateBarcode = () => {
   return `${prefix}${randomPart}`;
 };
 
+/**
+ * Encrypt a field value for storage
+ * @param {string} value - Value to encrypt
+ * @returns {string} JSON stringified encrypted object or null
+ */
+exports.encryptField = (value) => {
+  if (!value) return null;
+  try {
+    const encrypted = exports.encrypt(value);
+    return JSON.stringify(encrypted);
+  } catch (error) {
+    console.error('Field encryption error:', error);
+    return null;
+  }
+};
+
+/**
+ * Decrypt a field value from storage
+ * @param {string} encryptedValue - JSON stringified encrypted object
+ * @returns {string} Decrypted value or null
+ */
+exports.decryptField = (encryptedValue) => {
+  if (!encryptedValue) return null;
+  try {
+    const encrypted = JSON.parse(encryptedValue);
+    return exports.decrypt(encrypted);
+  } catch (error) {
+    console.error('Field decryption error:', error);
+    return null;
+  }
+};
+
 module.exports = exports;
