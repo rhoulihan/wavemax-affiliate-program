@@ -415,7 +415,8 @@ describe('Auth Middleware', () => {
       expect(res.status).not.toHaveBeenCalled();
     });
 
-    it('should handle operator token renewal from store IP', async () => {
+    it('should NOT renew operator tokens from store IP (security fix)', async () => {
+      // This test verifies that the store IP token renewal bypass has been removed
       const storeIPConfig = require('../../server/config/storeIPs');
       storeIPConfig.isWhitelisted.mockReturnValue(true);
       
@@ -429,14 +430,14 @@ describe('Auth Middleware', () => {
         permissions: ['view_orders']
       };
       jwt.verify.mockReturnValue(decodedToken);
-      jwt.sign.mockReturnValue('newtoken');
       TokenBlacklist.isBlacklisted.mockResolvedValue(false);
 
       await authenticate(req, res, next);
 
-      expect(jwt.sign).toHaveBeenCalled();
-      expect(res.setHeader).toHaveBeenCalledWith('X-Renewed-Token', 'newtoken');
-      expect(res.setHeader).toHaveBeenCalledWith('X-Token-Renewed', 'true');
+      // Verify that no token renewal happens anymore (security fix)
+      expect(jwt.sign).not.toHaveBeenCalled();
+      expect(res.setHeader).not.toHaveBeenCalledWith('X-Renewed-Token', expect.any(String));
+      expect(res.setHeader).not.toHaveBeenCalledWith('X-Token-Renewed', 'true');
       expect(next).toHaveBeenCalled();
     });
 
