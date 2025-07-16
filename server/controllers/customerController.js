@@ -136,9 +136,26 @@ exports.registerCustomer = async (req, res) => {
       // Continue with registration process even if email fails
     }
 
+    // Generate authentication token for automatic login
+    const token = jwt.sign(
+      {
+        id: newCustomer._id,
+        customerId: newCustomer.customerId,
+        affiliateId: newCustomer.affiliateId,
+        role: 'customer'
+      },
+      process.env.JWT_SECRET,
+      {
+        expiresIn: '1h',
+        issuer: 'wavemax-api',
+        audience: 'wavemax-client'
+      }
+    );
+
     res.status(201).json({
       success: true,
       customerId: newCustomer.customerId,
+      token: token, // Include token for automatic login
       customerData: {
         firstName: newCustomer.firstName,
         lastName: newCustomer.lastName,
@@ -146,7 +163,9 @@ exports.registerCustomer = async (req, res) => {
         affiliateId: newCustomer.affiliateId,
         affiliateName: affiliate.businessName || `${affiliate.firstName} ${affiliate.lastName}`,
         minimumDeliveryFee: affiliate.minimumDeliveryFee,
-        perBagDeliveryFee: affiliate.perBagDeliveryFee
+        perBagDeliveryFee: affiliate.perBagDeliveryFee,
+        numberOfBags: newCustomer.numberOfBags,
+        bagCredit: newCustomer.bagCredit
       },
       message: 'Customer registered successfully!'
     });
