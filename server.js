@@ -32,6 +32,7 @@ const systemConfigRoutes = require('./server/routes/systemConfigRoutes');
 const routingRoutes = require('./server/routes/routingRoutes');
 const paymentRoutes = require('./server/routes/paymentRoutes');
 const quickbooksRoutes = require('./server/routes/quickbooksRoutes');
+const serviceAreaRoutes = require('./server/routes/serviceAreaRoutes');
 const affiliateController = require('./server/controllers/affiliateController');
 const customerController = require('./server/controllers/customerController');
 
@@ -515,6 +516,7 @@ apiV1Router.use('/administrators', administratorRoutes);
 apiV1Router.use('/operators', operatorRoutes);
 apiV1Router.use('/w9', w9Routes);  // W-9 document management
 apiV1Router.use('/system/config', systemConfigRoutes);
+apiV1Router.use('/service-area', serviceAreaRoutes);  // Service area and location validation
 apiV1Router.use('/payments', paymentRoutes);
 
 // Test routes (development only)

@@ -378,6 +378,12 @@ async function loadProfile(editMode = false) {
 
     contentArea.innerHTML = editHtml;
 
+    // Initialize service area autocomplete if available
+    if (window.ServiceAreaAutocomplete) {
+      // Re-initialize for the dynamically created fields
+      window.ServiceAreaAutocomplete.init();
+    }
+
     // Add event listeners for save and cancel buttons
     document.getElementById('saveProfileBtn').addEventListener('click', function() {
       saveProfile();

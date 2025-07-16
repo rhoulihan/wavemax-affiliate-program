@@ -29,6 +29,8 @@
   // Register link functionality removed - customers must use affiliate-specific registration links
 
   // Setup form submission
+  let isSubmitting = false; // Prevent duplicate submissions
+  
   function setupFormSubmission() {
     console.log('Setting up form submission');
     const form = document.getElementById('customerLoginForm');
@@ -39,11 +41,25 @@
       form.addEventListener('submit', function(e) {
         e.preventDefault();
         console.log('Form submitted');
+        
+        // Prevent duplicate submissions
+        if (isSubmitting) {
+          console.log('Form submission already in progress, ignoring duplicate submit');
+          return;
+        }
 
         const emailOrUsername = document.getElementById('emailOrUsername').value;
         const password = document.getElementById('password').value;
+        const submitButton = form.querySelector('button[type="submit"]');
 
         console.log('Submitting login with email/username:', emailOrUsername);
+        
+        // Disable the submit button and set submitting flag
+        isSubmitting = true;
+        if (submitButton) {
+          submitButton.disabled = true;
+          submitButton.textContent = 'Logging in...';
+        }
 
         // Send login status to parent
         sendMessageToParent('form-submit', { form: 'customer-login' });
@@ -98,39 +114,53 @@
 
               console.log('Login successful, navigating to dashboard');
 
-              // Check URL params for pickup flag
+              // Check URL params for redirect destination
               const urlParams = new URLSearchParams(window.location.search);
+              const redirectParam = urlParams.get('redirect');
               const pickupParam = urlParams.get('pickup');
               const pickupFromSession = sessionStorage.getItem('redirectToPickup');
+              const redirectFromSession = sessionStorage.getItem('redirectTo');
 
               console.log('Current URL:', window.location.href);
               console.log('URL search params:', window.location.search);
+              console.log('Redirect parameter from URL:', redirectParam);
               console.log('Pickup parameter from URL:', pickupParam);
-              console.log('Pickup parameter from session:', pickupFromSession);
+              console.log('Redirect from session:', redirectFromSession);
 
-              const shouldRedirectToPickup = pickupParam === 'true' || pickupFromSession === 'true';
+              // Determine where to redirect
+              let redirectTo = '/customer-dashboard'; // default
+              
+              if (redirectParam === 'schedule-pickup' || pickupParam === 'true' || 
+                  pickupFromSession === 'true' || redirectFromSession === 'schedule-pickup') {
+                redirectTo = '/schedule-pickup';
+              }
 
-              // Clear the session flag after reading
+              // Clear the session flags after reading
               if (pickupFromSession) {
                 sessionStorage.removeItem('redirectToPickup');
               }
+              if (redirectFromSession) {
+                sessionStorage.removeItem('redirectTo');
+              }
 
               // Navigate within the embed system
-              if (shouldRedirectToPickup) {
-                console.log('Redirecting to schedule pickup');
-                // Navigate to schedule pickup page
-                window.location.href = '/embed-app-v2.html?route=/schedule-pickup';
-              } else {
-                console.log('Redirecting to customer dashboard');
-                // Navigate to customer dashboard
-                window.location.href = '/embed-app-v2.html?route=/customer-dashboard';
-              }
+              console.log('Redirecting to:', redirectTo);
+              window.location.href = `/embed-app-v2.html?route=${redirectTo}`;
             } else {
               throw new Error(data.message || 'Login failed');
             }
           })
           .catch(error => {
             console.error('Login error:', error);
+            
+            // Re-enable form submission
+            isSubmitting = false;
+            const submitButton = form.querySelector('button[type="submit"]');
+            if (submitButton) {
+              submitButton.disabled = false;
+              submitButton.textContent = 'Sign In';
+            }
+            
             sendMessageToParent('login-error', {
               error: error.message
             });
@@ -256,25 +286,39 @@
                     token: data.result.token
                   });
 
-                  // Check for pickup redirect
+                  // Check for redirect destination
                   const urlParams = new URLSearchParams(window.location.search);
+                  const redirectParam = urlParams.get('redirect');
                   const pickupParam = urlParams.get('pickup');
                   const pickupFromSession = sessionStorage.getItem('redirectToPickup');
-                  const shouldRedirectToPickup = pickupParam === 'true' || pickupFromSession === 'true';
+                  const redirectFromSession = sessionStorage.getItem('redirectTo');
 
-                  // Clear the session flag after reading
+                  console.log('OAuth redirect parameters:', {
+                    redirectParam,
+                    pickupParam,
+                    pickupFromSession,
+                    redirectFromSession
+                  });
+
+                  // Determine where to redirect
+                  let redirectTo = '/customer-dashboard'; // default
+                  
+                  if (redirectParam === 'schedule-pickup' || pickupParam === 'true' || 
+                      pickupFromSession === 'true' || redirectFromSession === 'schedule-pickup') {
+                    redirectTo = '/schedule-pickup';
+                  }
+
+                  // Clear the session flags after reading
                   if (pickupFromSession) {
                     sessionStorage.removeItem('redirectToPickup');
                   }
+                  if (redirectFromSession) {
+                    sessionStorage.removeItem('redirectTo');
+                  }
 
                   // Navigate within the embed system
-                  if (shouldRedirectToPickup) {
-                    console.log('Redirecting to schedule pickup after social login');
-                    window.location.href = '/embed-app-v2.html?route=/schedule-pickup';
-                  } else {
-                    console.log('Redirecting to customer dashboard after social login');
-                    window.location.href = '/embed-app-v2.html?route=/customer-dashboard';
-                  }
+                  console.log('Redirecting to:', redirectTo);
+                  window.location.href = `/embed-app-v2.html?route=${redirectTo}`;
 
                 } else if (data.result.type === 'social-auth-success') {
                   console.log('Customer does not exist, redirecting to registration');
@@ -407,7 +451,14 @@
     const urlParams = new URLSearchParams(window.location.search);
     console.log('All URL parameters:', Array.from(urlParams.entries()));
 
-    // Store pickup flag if present
+    // Store redirect parameter if present
+    const redirectParam = urlParams.get('redirect');
+    if (redirectParam) {
+      sessionStorage.setItem('redirectTo', redirectParam);
+      console.log('Stored redirect parameter in session:', redirectParam);
+    }
+    
+    // Store pickup flag if present (legacy support)
     const pickupFlag = urlParams.get('pickup');
     if (pickupFlag === 'true') {
       sessionStorage.setItem('redirectToPickup', 'true');
