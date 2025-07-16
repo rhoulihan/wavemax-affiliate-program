@@ -178,7 +178,7 @@ describe('Facebook Utils', () => {
         linkedAt: null
       });
       
-      expect(mockUser.registrationMethod).toBe('standard');
+      expect(mockUser.registrationMethod).toBe('traditional');
       expect(mockUser.save).toHaveBeenCalled();
     });
 
