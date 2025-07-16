@@ -1,6 +1,12 @@
 // tests/unit/passportConfigFixed.test.js
 // Tests for passport OAuth strategies configuration
 
+// Mock the encryption utilities to return plain values for testing
+jest.mock('../../server/utils/encryption', () => ({
+  encryptField: jest.fn((value) => value), // Return plain value for testing
+  decryptField: jest.fn((value) => value)  // Return plain value for testing
+}));
+
 describe('Passport Configuration Tests', () => {
   let originalEnv;
   let passport;
@@ -142,7 +148,8 @@ describe('Passport Configuration Tests', () => {
         clientID: 'test-facebook-app-id',
         clientSecret: 'test-facebook-app-secret',
         callbackURL: 'https://wavemax.promo/api/v1/auth/facebook/callback',
-        profileFields: ['id', 'emails', 'name', 'picture.type(large)']
+        profileFields: ['id', 'emails', 'name', 'picture.type(large)'],
+        passReqToCallback: true
       });
     });
 
@@ -440,7 +447,9 @@ describe('Passport Configuration Tests', () => {
       Affiliate.findById.mockResolvedValue(mockAffiliate);
 
       const done = jest.fn();
+      const req = { query: { state: 'affiliate' } };
       await facebookVerify(
+        req,
         'access-token',
         'refresh-token',
         { id: 'fb123', emails: [{ value: 'test@example.com' }], name: {}, _json: {} },
@@ -454,7 +463,9 @@ describe('Passport Configuration Tests', () => {
       Affiliate.findOne.mockResolvedValue(null);
 
       const done = jest.fn();
+      const req = { query: { state: 'affiliate' } };
       await facebookVerify(
+        req,
         'access-token',
         'refresh-token',
         {
@@ -500,7 +511,9 @@ describe('Passport Configuration Tests', () => {
       Affiliate.findById.mockResolvedValue(updatedAffiliate);
 
       const done = jest.fn();
+      const req = { query: { state: 'affiliate' } };
       await facebookVerify(
+        req,
         'access-token',
         null, // No refresh token for Facebook
         {
@@ -532,7 +545,9 @@ describe('Passport Configuration Tests', () => {
       Affiliate.findOne.mockRejectedValue(new Error('Database error'));
 
       const done = jest.fn();
+      const req = { query: { state: 'affiliate' } };
       await facebookVerify(
+        req,
         'access-token',
         'refresh-token',
         { id: 'fb123', emails: [{ value: 'test@example.com' }], name: {}, _json: {} },
