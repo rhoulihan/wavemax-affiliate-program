@@ -945,34 +945,21 @@
       }
       
       console.log('Updating WDF quantity:', wdfQuantity);
-      window.paymentForm.updateQuantity('WDF', wdfQuantity);
+      window.paymentForm.updateWDFQuantity(wdfQuantity);
       
       // Update delivery fee quantities based on the breakdown
       if (deliveryFeeBreakdown) {
         console.log('Updating delivery fees:', deliveryFeeBreakdown);
-        
-        // Update minimum delivery fee
-        if (deliveryFeeBreakdown.minimumFeeApplied && deliveryFeeBreakdown.minimumFee > 0) {
-          window.paymentForm.updateQuantity('MDF', 1);
-        } else {
-          window.paymentForm.updateQuantity('MDF', 0);
-        }
-        
-        // Update per bag fee
-        if (deliveryFeeBreakdown.numberOfBags > 0 && deliveryFeeBreakdown.perBagFee > 0) {
-          window.paymentForm.updateQuantity('PBF', deliveryFeeBreakdown.numberOfBags);
-        } else {
-          window.paymentForm.updateQuantity('PBF', 0);
-        }
+        window.paymentForm.updateDeliveryFeeQuantities(deliveryFeeBreakdown);
       }
       
       // Update bag credit if applicable
       if (customerBagCredit > 0) {
         const bagCreditWeight = customerBagCredit / wdfRate;
         console.log('Updating bag credit weight:', bagCreditWeight);
-        window.paymentForm.updateQuantity('BF', bagCreditWeight);
+        window.paymentForm.updateBagQuantity(bagCreditWeight);
       } else {
-        window.paymentForm.updateQuantity('BF', 0);
+        window.paymentForm.updateBagQuantity(0);
       }
     }
   }
@@ -1161,8 +1148,7 @@
       console.log('Initializing PaygistixPaymentForm with config:', paymentConfig);
       console.log('Affiliate settings from customer:', affiliateSettings);
       
-      const paymentForm = new PaygistixPaymentForm({
-        container: document.getElementById('paygistix-payment-container'),
+      const paymentForm = new PaygistixPaymentForm('paygistix-payment-container', {
         paymentConfig: paymentConfig,
         hideRegistrationFormRows: false, // Show all form rows for orders
         affiliateSettings: affiliateSettings, // Pass affiliate settings directly
