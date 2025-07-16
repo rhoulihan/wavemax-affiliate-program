@@ -599,87 +599,55 @@
       }
 
       try {
-      // Try multiple geocoding strategies for better results
-        let geocodeData = null;
-
-        // Strategy 1: Try with full address
-        let geocodeUrl = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(fullAddress)}&countrycodes=us&limit=1`;
-        let response = await fetch(geocodeUrl, {
-          headers: {
-            'User-Agent': 'WaveMAX Laundry Application'
+        // Use the unified address validation service to validate address
+        const baseUrl = window.EMBED_CONFIG?.baseUrl || '';
+        let csrfToken = window.csrfToken;
+        if (!csrfToken) {
+          const csrfMeta = document.querySelector('meta[name="csrf-token"]');
+          if (csrfMeta) {
+            csrfToken = csrfMeta.getAttribute('content');
           }
+        }
+        
+        const response = await fetch(`${baseUrl}/api/v1/service-area/validate`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-Token': csrfToken || ''
+          },
+          credentials: 'include',
+          body: JSON.stringify({ address, city, state, zipCode })
         });
 
-        if (response.ok) {
-          const data = await response.json();
-          if (data && data.length > 0) {
-            geocodeData = data;
-          }
-        }
+        const result = await response.json();
 
-        // Strategy 2: If no results, try with just ZIP code (more reliable)
-        if (!geocodeData) {
-          console.log('Trying geocoding with ZIP code:', zipCode);
-          geocodeUrl = `https://nominatim.openstreetmap.org/search?format=json&postalcode=${zipCode}&country=United States&limit=1`;
-          response = await fetch(geocodeUrl, {
-            headers: {
-              'User-Agent': 'WaveMAX Laundry Application'
-            }
-          });
-
-          if (response.ok) {
-            const data = await response.json();
-            if (data && data.length > 0) {
-              geocodeData = data;
-            }
-          }
-        }
-
-        // Strategy 3: Try with city and state
-        if (!geocodeData) {
-          console.log('Trying geocoding with city and state:', `${city}, ${state}`);
-          geocodeUrl = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(`${city}, ${state}`)}&countrycodes=us&limit=1`;
-          response = await fetch(geocodeUrl, {
-            headers: {
-              'User-Agent': 'WaveMAX Laundry Application'
-            }
-          });
-
-          if (response.ok) {
-            const data = await response.json();
-            if (data && data.length > 0) {
-              geocodeData = data;
-            }
-          }
-        }
-
-        if (!geocodeData || geocodeData.length === 0) {
-          console.error('No geocoding results found after trying multiple strategies');
-          // For now, allow to proceed if we can't geocode
-          console.log('Allowing registration to proceed despite geocoding failure');
+        if (!result.success || !result.coordinates) {
+          console.error('Address validation failed:', result.message);
+          // Hide spinner
           if (addressValidationSpinner) {
             addressValidationSpinner.hide();
             addressValidationSpinner = null;
           } else {
-          // Remove fallback spinner
             const fallbackSpinner = document.getElementById('addressValidationSpinner');
             if (fallbackSpinner) {
               fallbackSpinner.remove();
             }
           }
-
-          // Swirl spinner handles re-enabling
-
-          return true;
+          
+          // Show error message
+          const message = result.message || 'Unable to verify this address. Please check that the street address and zip code are correct.';
+          alert(message);
+          
+          return false;
         }
 
-        const customerLat = parseFloat(geocodeData[0].lat);
-        const customerLon = parseFloat(geocodeData[0].lon);
+        const customerLat = result.coordinates.latitude;
+        const customerLon = result.coordinates.longitude;
 
         console.log('Geocoding successful:', {
           lat: customerLat,
           lon: customerLon,
-          display_name: geocodeData[0].display_name
+          formattedAddress: result.formattedAddress
         });
 
         // Calculate distance using Haversine formula
@@ -713,11 +681,9 @@
             'Outside Service Area'
           );
 
-          // Clear address fields
+          // Clear only the street address field - keep city, state, and zip
+          // so the user can try a different address in the same area
           document.getElementById('address').value = '';
-          document.getElementById('city').value = '';
-          document.getElementById('state').value = '';
-          document.getElementById('zipCode').value = '';
 
           return false;
         }

@@ -4,6 +4,44 @@ All notable changes to the WaveMAX Laundry Affiliate Program will be documented 
 
 ## [Unreleased]
 
+## [1.1.0] - 2025-01-16
+
+### Added
+- Location-based service area restrictions
+  - Configurable service radius (default: 50 miles from Austin, TX)
+  - Environment variables: `SERVICE_STATE`, `SERVICE_CITY`, `SERVICE_RADIUS_MILES`
+  - Applies to both affiliate and customer registrations
+  - Prevents registrations outside defined service area
+- Unified address validation system
+  - Centralized `addressValidationService.js` for backend validation
+  - Reusable `address-validation-component.js` for frontend
+  - Integration with OpenStreetMap Nominatim for geocoding
+  - Strict validation requiring complete street addresses
+- Service area API endpoints
+  - `/api/v1/service-area/config` - Get service area configuration
+  - `/api/v1/service-area/validate` - Validate addresses
+  - `/api/v1/service-area/cities` - List cities in service area
+  - `/api/v1/service-area/zip-codes` - List ZIP codes in service area
+- City and ZIP code autocomplete for Texas locations
+- Comprehensive documentation for service area validation
+
+### Changed
+- Address validation now requires house number and complete street address
+- ZIP code validation includes tolerance for nearby ZIP codes (same 3-digit prefix)
+- State field pre-populated based on `SERVICE_STATE` configuration
+- Only street address field cleared on validation failure (city/state/zip preserved)
+- `ENABLE_TEST_PAYMENT_FORM` set to `false` for production security
+
+### Fixed
+- Address validation for edge cases like ZIP code boundaries
+- Customer registration now properly uses unified validation API
+- Form submission state management to prevent stuck "submitting" state
+- Swirl spinner display during address validation
+
+### Removed
+- Deprecated old geocoding logic that tried multiple address combinations
+- Removed fallback geocoding strategies in favor of strict validation
+
 ## [1.0.1] - 2024-12-24
 
 ### Added

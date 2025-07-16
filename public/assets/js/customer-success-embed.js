@@ -41,13 +41,13 @@
   // Make navigateParent available globally for onclick handlers
   window.navigateParent = navigateParent;
   
-  // Add click handler for schedule pickup button
+  // Add click handler for dashboard button
   function setupEventHandlers() {
-    const schedulePickupBtn = document.getElementById('schedulePickupBtn');
-    if (schedulePickupBtn) {
-      schedulePickupBtn.addEventListener('click', function(e) {
+    const customerDashboardBtn = document.getElementById('customerDashboardBtn');
+    if (customerDashboardBtn) {
+      customerDashboardBtn.addEventListener('click', function(e) {
         e.preventDefault();
-        navigateParent('schedule-pickup');
+        navigateParent('customer-login');
       });
     }
   }

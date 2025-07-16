@@ -374,6 +374,27 @@ This document provides comprehensive information about all environment variables
 - **Description**: AWS region where your S3 bucket is located
 - **Example**: `AWS_REGION=us-east-2`
 
+## Service Area Configuration
+
+### SERVICE_STATE
+- **Type**: String
+- **Required**: Yes
+- **Description**: The state where service is available (used for address validation and restrictions)
+- **Example**: `SERVICE_STATE=TX`
+
+### SERVICE_CITY
+- **Type**: String
+- **Required**: Yes
+- **Description**: The city that serves as the center point for the service radius
+- **Example**: `SERVICE_CITY=Austin`
+
+### SERVICE_RADIUS_MILES
+- **Type**: Number
+- **Required**: Yes
+- **Description**: The maximum service radius in miles from the city center
+- **Example**: `SERVICE_RADIUS_MILES=50`
+- **Note**: All affiliate and customer addresses must be within this radius to register
+
 ## Social Login Configuration
 
 ### Google OAuth

@@ -8,6 +8,7 @@ const { body } = require('express-validator');
 const paginationMiddleware = require('../utils/paginationMiddleware');
 const { customPasswordValidator } = require('../utils/passwordValidator');
 const { registrationLimiter } = require('../middleware/rateLimiting');
+const { registrationAddressValidation, profileAddressValidation, handleValidationErrors } = require('../middleware/locationValidation');
 
 /**
  * @route   POST /api/affiliates/register
@@ -19,10 +20,7 @@ router.post('/register', registrationLimiter, [
   body('lastName').notEmpty().withMessage('Last name is required'),
   body('email').isEmail().withMessage('Valid email is required'),
   body('phone').notEmpty().withMessage('Phone number is required'),
-  body('address').notEmpty().withMessage('Address is required'),
-  body('city').notEmpty().withMessage('City is required'),
-  body('state').notEmpty().withMessage('State is required'),
-  body('zipCode').notEmpty().withMessage('ZIP code is required'),
+  ...registrationAddressValidation,
   body('serviceLatitude').notEmpty().isNumeric().withMessage('Service latitude is required'),
   body('serviceLongitude').notEmpty().isNumeric().withMessage('Service longitude is required'),
   body('serviceRadius').notEmpty().isNumeric().isInt({ min: 1, max: 50 }).withMessage('Service radius must be between 1 and 50 miles'),
@@ -31,7 +29,7 @@ router.post('/register', registrationLimiter, [
   body('username').notEmpty().withMessage('Username is required'),
   body('password').custom(customPasswordValidator()),
   body('paymentMethod').isIn(['directDeposit', 'check', 'paypal']).withMessage('Invalid payment method')
-], affiliateController.registerAffiliate);
+], handleValidationErrors, affiliateController.registerAffiliate);
 
 /**
  * @route   GET /api/affiliates/public/:affiliateCode
@@ -59,7 +57,12 @@ router.get('/:affiliateId', authenticate, affiliateController.getAffiliateProfil
  * @desc    Update affiliate profile
  * @access  Private (self or admin)
  */
-router.put('/:affiliateId', authenticate, affiliateController.updateAffiliateProfile);
+router.put('/:affiliateId', 
+  authenticate,
+  profileAddressValidation,
+  handleValidationErrors,
+  affiliateController.updateAffiliateProfile
+);
 
 /**
  * @route   GET /api/affiliates/:affiliateId/earnings
