@@ -151,7 +151,7 @@ exports.sendAffiliateWelcomeEmail = async (affiliate) => {
   try {
     const language = affiliate.languagePreference || 'en';
     const template = await loadTemplate('affiliate-welcome', language);
-    const registrationUrl = `https://www.wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program?affid=${affiliate.affiliateId}`;
+    const registrationUrl = `https://wavemax.promo/embed-app-v2.html?route=/customer-login&affid=${affiliate.affiliateId}`;
     const landingPageUrl = `https://www.wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program?route=/affiliate-landing&code=${affiliate.affiliateId}`;
 
     // Get translations for the email content

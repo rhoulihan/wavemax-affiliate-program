@@ -593,8 +593,8 @@ async function loadAffiliateData(affiliateId) {
         }
       }
 
-      // Generate and display registration link with wavemaxlaundry.com format
-      const registrationLink = `https://www.wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program?affid=${affiliateId}`;
+      // Generate and display registration link with wavemax.promo format
+      const registrationLink = `https://wavemax.promo/embed-app-v2.html?route=/customer-login&affid=${affiliateId}`;
       const linkElement = document.getElementById('registrationLink');
       if (linkElement) linkElement.value = registrationLink;
 
@@ -1195,8 +1195,8 @@ async function loadSettingsData(affiliateId) {
           updateFeeCalculatorPreview();
         }
 
-        // Generate and display registration link with wavemaxlaundry.com format
-        const registrationLink = `https://www.wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program?affid=${affiliateId}`;
+        // Generate and display registration link with wavemax.promo format
+        const registrationLink = `https://wavemax.promo/embed-app-v2.html?route=/customer-login&affid=${affiliateId}`;
         if (registrationLinkField) registrationLinkField.value = registrationLink;
 
         // Load W-9 status
