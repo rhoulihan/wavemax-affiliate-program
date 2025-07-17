@@ -76,6 +76,13 @@ const orderSchema = new mongoose.Schema({
       completed: { type: mongoose.Schema.Types.ObjectId, ref: 'Operator' }
     }
   }],
+  // Add-on services
+  addOns: {
+    premiumDetergent: { type: Boolean, default: false },
+    fabricSoftener: { type: Boolean, default: false },
+    stainRemover: { type: Boolean, default: false }
+  },
+  addOnTotal: { type: Number, default: 0 }, // Calculated cost of add-ons
   // Payment information
   baseRate: { type: Number }, // Per pound WDF rate - fetched from SystemConfig
   // Fee breakdown structure
@@ -146,10 +153,18 @@ orderSchema.pre('save', async function(next) {
     }
   }
 
-  if (this.isNew || this.isModified('estimatedWeight') || this.isModified('baseRate') || this.isModified('feeBreakdown') || this.isModified('wdfCreditApplied')) {
+  // Calculate add-on total if add-ons are selected
+  if (this.isNew || this.isModified('addOns') || this.isModified('estimatedWeight') || this.isModified('actualWeight')) {
+    const weight = this.actualWeight || this.estimatedWeight;
+    const selectedAddOns = Object.values(this.addOns || {}).filter(selected => selected === true).length;
+    this.addOnTotal = parseFloat((selectedAddOns * weight * 0.10).toFixed(2));
+  }
+
+  if (this.isNew || this.isModified('estimatedWeight') || this.isModified('baseRate') || this.isModified('feeBreakdown') || this.isModified('wdfCreditApplied') || this.isModified('addOns')) {
     // Calculate estimated total using the provided estimated weight
     const totalFee = this.feeBreakdown?.totalFee || 0;
-    const subtotal = this.estimatedWeight * this.baseRate + totalFee;
+    const wdfTotal = this.estimatedWeight * this.baseRate;
+    const subtotal = wdfTotal + totalFee + (this.addOnTotal || 0);
     // Apply WDF credit (subtract if positive credit, add if negative/debit)
     this.estimatedTotal = parseFloat((subtotal - (this.wdfCreditApplied || 0)).toFixed(2));
   }
@@ -157,11 +172,13 @@ orderSchema.pre('save', async function(next) {
   // Calculate actual total if actual weight is available
   if (this.isModified('actualWeight') && this.actualWeight) {
     const totalFee = this.feeBreakdown?.totalFee || 0;
-    const subtotal = this.actualWeight * this.baseRate + totalFee;
+    const wdfTotal = this.actualWeight * this.baseRate;
+    const subtotal = wdfTotal + totalFee + (this.addOnTotal || 0);
     // Apply WDF credit (subtract if positive credit, add if negative/debit)
     this.actualTotal = parseFloat((subtotal - (this.wdfCreditApplied || 0)).toFixed(2));
     // Calculate affiliate commission (10% of WDF + full delivery fee)
     // Commission = (WDF amount × 10%) + delivery fee
+    // NOTE: Add-ons are NOT included in commission calculation
     const wdfAmount = this.actualWeight * this.baseRate;
     const wdfCommission = wdfAmount * 0.1;
     this.affiliateCommission = parseFloat((wdfCommission + totalFee).toFixed(2));
