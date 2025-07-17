@@ -44,9 +44,9 @@
             <thead>
               <tr class="border-b border-gray-200">
                 <th class="text-left py-2 text-gray-600" data-i18n="affiliate.register.bags">Bags</th>
-                <th class="text-right py-2 text-gray-600" data-i18n="affiliate.register.deliveryFee">Delivery</th>
-                <th class="text-right py-2 text-gray-600" data-i18n="affiliate.register.yourCommission">Your Commission</th>
-                <th class="text-right py-2 text-gray-600" data-i18n="affiliate.register.total">Total Earnings</th>
+                <th class="text-right py-2 text-gray-600"><span data-i18n="affiliate.register.deliveryFee">Delivery</span><sup>1</sup></th>
+                <th class="text-right py-2 text-gray-600"><span data-i18n="affiliate.register.yourCommission">Your Commission</span><sup>2</sup></th>
+                <th class="text-right py-2 text-gray-600"><span data-i18n="affiliate.register.total">Total Earnings</span><sup>3</sup></th>
               </tr>
             </thead>
             <tbody>
@@ -80,9 +80,10 @@
         
         ${config.showNotes ? `
         <div class="text-xs text-gray-500 space-y-1">
-          <p data-i18n="affiliate.register.deliveryNote">* Delivery: 100% of delivery fees go to you</p>
-          <p data-i18n="affiliate.register.commissionNote">* Commission: 10% of WDF service (30 lbs × $1.25/lb per bag)</p>
-          <p data-i18n="affiliate.register.totalNote">* Total Earnings: Delivery fee + Commission</p>
+          <p data-i18n="affiliate.register.paymentNote">You will be paid the minimum delivery fee or the per bag fees, whichever is greater.</p>
+          <p data-i18n="affiliate.register.deliveryNote">1. Delivery: 100% of delivery fees go to you</p>
+          <p data-i18n="affiliate.register.commissionNote">2. Commission: 10% of WDF service (30 lbs × $1.25/lb per bag)</p>
+          <p data-i18n="affiliate.register.totalNote">3. Total Earnings: Delivery fee + Commission</p>
         </div>
         ` : ''}
       </div>
