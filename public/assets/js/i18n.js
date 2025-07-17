@@ -88,7 +88,9 @@
       }
 
       try {
-        const url = `${this.config.translationsPath}/${lang}/common.json`;
+        // Add cache-busting parameter to force reload
+        const timestamp = new Date().getTime();
+        const url = `${this.config.translationsPath}/${lang}/common.json?v=${timestamp}`;
         const response = await fetch(url);
         if (!response.ok) {
           throw new Error(`Failed to load translations for ${lang}: ${response.status} ${response.statusText}`);

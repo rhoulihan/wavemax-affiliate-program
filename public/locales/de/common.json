@@ -1110,6 +1110,12 @@
       "pickupAddress": "Abholadresse",
       "deliveryAddress": "Lieferadresse",
       "sameAsPickup": "Gleich wie Abholadresse",
+      "addOnItems": "Zusatzleistungen",
+      "addOnDescription": "Verbessern Sie Ihren Wäscheservice mit Premium-Zusätzen ($0,10/lb pro Stück):",
+      "premiumDetergent": "Premium-Waschmittel",
+      "fabricSoftener": "Weichspüler",
+      "stainRemover": "Fleckenentferner",
+      "addOnsLabel": "Zusätze:",
       "specialInstructions": "Besondere Anweisungen (Optional)",
       "estimatedBags": "Geschätzte Anzahl Taschen",
       "confirmPickup": "Abholung bestätigen"

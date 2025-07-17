@@ -19,6 +19,13 @@
   };
   let customerBagCredit = 0; // Store customer's bag credit
   let bagCreditApplied = false; // Track if credit has been applied
+  
+  // State variables for add-ons
+  let selectedAddOns = {
+    premiumDetergent: false,
+    fabricSoftener: false,
+    stainRemover: false
+  };
 
   // Function to initialize the page
   async function initializeSchedulePickup() {
@@ -606,14 +613,10 @@
     pickupDateInput.value = formatDate(today);
   }
 
-  // Function to setup form submission - NOW HANDLED BY NAVIGATION
+  // Function to setup form submission
   function setupFormSubmission(token) {
-  // Form submission is now handled by schedule-pickup-navigation.js
-    return;
-
-  /* OLD FORM SUBMISSION CODE - KEPT FOR REFERENCE
-  const form = document.getElementById('pickupScheduleForm');
-  if (!form) return;
+    const form = document.getElementById('pickupScheduleForm');
+    if (!form) return;
 
   // Get customer data for delivery fee
   const customerStr = localStorage.getItem('currentCustomer');
@@ -621,6 +624,7 @@
 
   form.addEventListener('submit', async function(e) {
     e.preventDefault();
+    console.log('=== FORM SUBMIT HANDLER TRIGGERED ===');
 
     // Validate form
     if (!form.checkValidity()) {
@@ -643,8 +647,16 @@
       }
     });
 
+    // Add add-on selections to pickup data
+    pickupData.addOns = {
+      premiumDetergent: selectedAddOns.premiumDetergent,
+      fabricSoftener: selectedAddOns.fabricSoftener,
+      stainRemover: selectedAddOns.stainRemover
+    };
+    
     // Store the pickup data for when payment is complete
     window.pendingPickupData = pickupData;
+    console.log('=== PENDING PICKUP DATA SET ===', window.pendingPickupData);
 
     // Show payment form
     const paymentContainer = document.getElementById('paymentFormContainer');
@@ -751,7 +763,6 @@
       modalAlert('An error occurred while scheduling your pickup. Please try again.', 'Scheduling Error');
     }
   });
-  */
   }
 
   // Initialize payment field formatting
@@ -820,7 +831,7 @@
       perBagFee,
       calculatedFee,
       totalFee,
-      minimumApplied: totalFee === minimumFee
+      minimumFeeApplied: totalFee === minimumFee
     };
   }
 
@@ -851,7 +862,7 @@
 
     // Show breakdown
     if (deliveryFeeBreakdownElement) {
-      if (deliveryFeeBreakdown.minimumApplied) {
+      if (deliveryFeeBreakdown.minimumFeeApplied) {
         deliveryFeeBreakdownElement.textContent = '(Minimum fee applied)';
       } else {
         deliveryFeeBreakdownElement.textContent = `(${numberOfBags} bags × $${deliveryFeeBreakdown.perBagFee.toFixed(2)}/bag = $${deliveryFeeBreakdown.calculatedFee.toFixed(2)})`;
@@ -896,9 +907,48 @@
       estimatedWeightInput.addEventListener('input', calculateEstimate);
       estimatedWeightInput.addEventListener('change', calculateEstimate);
     }
+    
+    // Setup add-on checkbox listeners
+    const addOnCheckboxes = document.querySelectorAll('#premiumDetergent, #fabricSoftener, #stainRemover');
+    addOnCheckboxes.forEach(checkbox => {
+      checkbox.addEventListener('change', function() {
+        selectedAddOns[this.value] = this.checked;
+        console.log('Add-on changed:', this.value, this.checked);
+        calculateEstimate();
+      });
+    });
 
     // Initial calculation
     updateDeliveryFeeDisplay();
+  }
+
+  // Calculate add-on costs
+  function calculateAddOnCost(weight) {
+    const selectedCount = Object.values(selectedAddOns).filter(selected => selected).length;
+    return selectedCount * weight * 0.10;
+  }
+
+  // Update add-on display
+  function updateAddOnDisplay(weight) {
+    const addOnsCost = calculateAddOnCost(weight);
+    const addOnsSection = document.getElementById('addOnsSection');
+    const addOnsCostElement = document.getElementById('addOnsCost');
+    const addOnsDetailElement = document.getElementById('addOnsDetail');
+    
+    if (addOnsCost > 0) {
+      addOnsSection.classList.remove('hidden-section');
+      addOnsCostElement.textContent = `$${addOnsCost.toFixed(2)}`;
+      
+      // Show which add-ons are selected
+      const selectedNames = [];
+      if (selectedAddOns.premiumDetergent) selectedNames.push('Premium Detergent');
+      if (selectedAddOns.fabricSoftener) selectedNames.push('Fabric Softener');
+      if (selectedAddOns.stainRemover) selectedNames.push('Stain Remover');
+      
+      addOnsDetailElement.textContent = `(${selectedNames.join(', ')})`;
+    } else {
+      addOnsSection.classList.add('hidden-section');
+    }
   }
 
   // Calculate estimate and authorization amount
@@ -919,12 +969,16 @@
 
     // Calculate costs
     const laundryTotal = weight * wdfRate;
-    let estimatedTotal = laundryTotal + (deliveryFeeBreakdown ? deliveryFeeBreakdown.totalFee : 0);
+    const addOnsCost = calculateAddOnCost(weight);
+    let estimatedTotal = laundryTotal + (deliveryFeeBreakdown ? deliveryFeeBreakdown.totalFee : 0) + addOnsCost;
 
     // Apply bag credit if available
     if (customerBagCredit > 0) {
       estimatedTotal = Math.max(0, estimatedTotal - customerBagCredit);
     }
+
+    // Update add-on display
+    updateAddOnDisplay(weight);
 
     // Update displays
     const estimatedTotalElement = document.getElementById('estimatedTotal');
@@ -951,29 +1005,57 @@
       if (deliveryFeeBreakdown) {
         console.log('Updating delivery fees:', deliveryFeeBreakdown);
         
-        // Update minimum delivery fee
-        if (deliveryFeeBreakdown.minimumFeeApplied && deliveryFeeBreakdown.minimumFee > 0) {
-          window.paymentForm.updateQuantity('MDF', 1);
-        } else {
-          window.paymentForm.updateQuantity('MDF', 0);
-        }
+        // First, clear all delivery fee quantities
+        const mdfCodes = ['MDF10', 'MDF15', 'MDF20', 'MDF25', 'MDF30', 'MDF35', 'MDF40', 'MDF45', 'MDF50'];
+        const pbfCodes = ['PBF5', 'PBF10', 'PBF15', 'PBF20', 'PBF25'];
         
-        // Update per bag fee
-        if (deliveryFeeBreakdown.numberOfBags > 0 && deliveryFeeBreakdown.perBagFee > 0) {
-          window.paymentForm.updateQuantity('PBF', deliveryFeeBreakdown.numberOfBags);
+        mdfCodes.forEach(code => window.paymentForm.updateQuantity(code, 0));
+        pbfCodes.forEach(code => window.paymentForm.updateQuantity(code, 0));
+        
+        // Apply either minimum fee OR per-bag fee, not both
+        if (deliveryFeeBreakdown.minimumFeeApplied) {
+          // Minimum fee applies - set MDF and clear PBF
+          const mdfCode = `MDF${Math.round(deliveryFeeBreakdown.minimumFee)}`;
+          if (mdfCodes.includes(mdfCode)) {
+            window.paymentForm.updateQuantity(mdfCode, 1);
+          } else {
+            // Find closest available MDF variant
+            const closestMDF = mdfCodes.reduce((prev, curr) => {
+              const prevDiff = Math.abs(parseInt(prev.substring(3)) - deliveryFeeBreakdown.minimumFee);
+              const currDiff = Math.abs(parseInt(curr.substring(3)) - deliveryFeeBreakdown.minimumFee);
+              return currDiff < prevDiff ? curr : prev;
+            });
+            window.paymentForm.updateQuantity(closestMDF, 1);
+          }
+          // Ensure all PBF are cleared when minimum fee applies
+          pbfCodes.forEach(code => window.paymentForm.updateQuantity(code, 0));
         } else {
-          window.paymentForm.updateQuantity('PBF', 0);
+          // Per-bag fee applies - set PBF and clear MDF
+          mdfCodes.forEach(code => window.paymentForm.updateQuantity(code, 0));
+          
+          const pbfCode = `PBF${Math.round(deliveryFeeBreakdown.perBagFee)}`;
+          if (pbfCodes.includes(pbfCode)) {
+            window.paymentForm.updateQuantity(pbfCode, deliveryFeeBreakdown.numberOfBags);
+          } else {
+            // Find closest available PBF variant
+            const closestPBF = pbfCodes.reduce((prev, curr) => {
+              const prevDiff = Math.abs(parseInt(prev.substring(3)) - deliveryFeeBreakdown.perBagFee);
+              const currDiff = Math.abs(parseInt(curr.substring(3)) - deliveryFeeBreakdown.perBagFee);
+              return currDiff < prevDiff ? curr : prev;
+            });
+            window.paymentForm.updateQuantity(closestPBF, deliveryFeeBreakdown.numberOfBags);
+          }
         }
       }
       
-      // Update bag credit if applicable
-      if (customerBagCredit > 0) {
-        const bagCreditWeight = customerBagCredit / wdfRate;
-        console.log('Updating bag credit weight:', bagCreditWeight);
-        window.paymentForm.updateQuantity('BF', bagCreditWeight);
-      } else {
-        window.paymentForm.updateQuantity('BF', 0);
-      }
+      // BF line item is for bag fees, not credits - set to 0
+      window.paymentForm.updateQuantity('BF', 0);
+      
+      // Update add-ons quantity
+      const selectedAddOnsCount = Object.values(selectedAddOns).filter(selected => selected).length;
+      const addOnQuantity = selectedAddOnsCount * weight;
+      console.log('Updating add-on quantity:', addOnQuantity);
+      window.paymentForm.updateQuantity('AO', addOnQuantity);
     }
   }
 

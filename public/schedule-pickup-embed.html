@@ -116,6 +116,28 @@
                 
                 <!-- Page 2: Summary and Payment Section -->
                 <div id="summaryPaymentSection" class="schedule-step hidden-section">
+                    <!-- Add-on Items Section -->
+                    <div class="border-t pt-6">
+                        <h3 class="text-xl font-bold mb-4" data-i18n="orders.schedule.addOnItems">Add-on Items</h3>
+                        <div class="bg-gray-50 p-4 rounded-lg mb-6">
+                            <p class="text-sm text-gray-600 mb-4" data-i18n="orders.schedule.addOnDescription">Enhance your laundry service with premium add-ons ($0.10/lb each):</p>
+                            <div class="space-y-3">
+                                <label class="flex items-center cursor-pointer">
+                                    <input type="checkbox" id="premiumDetergent" value="premiumDetergent" class="mr-3 w-4 h-4 text-blue-600 rounded focus:ring-blue-500">
+                                    <span class="text-base" data-i18n="orders.schedule.premiumDetergent">Premium Detergent</span>
+                                </label>
+                                <label class="flex items-center cursor-pointer">
+                                    <input type="checkbox" id="fabricSoftener" value="fabricSoftener" class="mr-3 w-4 h-4 text-blue-600 rounded focus:ring-blue-500">
+                                    <span class="text-base" data-i18n="orders.schedule.fabricSoftener">Fabric Softener</span>
+                                </label>
+                                <label class="flex items-center cursor-pointer">
+                                    <input type="checkbox" id="stainRemover" value="stainRemover" class="mr-3 w-4 h-4 text-blue-600 rounded focus:ring-blue-500">
+                                    <span class="text-base" data-i18n="orders.schedule.stainRemover">Stain Remover</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    
                     <!-- Service and Pricing Summary -->
                     <div class="border-t pt-6">
                         <h3 class="text-xl font-bold mb-4">Order Summary & Authorization</h3>
@@ -132,6 +154,11 @@
                             <div class="mb-3">
                                 <span class="font-bold">Estimated Weight:</span>
                                 <span id="estimatedWeightDisplay">0</span> lbs
+                            </div>
+                            <div id="addOnsSection" class="mb-2 hidden-section">
+                                <span class="font-bold" data-i18n="orders.schedule.addOnsLabel">Add-ons:</span>
+                                <span id="addOnsCost">$0.00</span>
+                                <span id="addOnsDetail" class="text-sm text-gray-600"></span>
                             </div>
                             <div id="bagCreditSection" class="mb-2 text-green-600 hidden-section">
                                 <span class="font-bold">Bag Credit:</span>

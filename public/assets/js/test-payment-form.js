@@ -18,6 +18,118 @@
     }
   });
 
+  // Display order summary from items data
+  function displayOrderSummaryFromItems(items) {
+    try {
+      let summaryHTML = '<table class="order-summary-table">';
+      summaryHTML += '<thead><tr>';
+      summaryHTML += '<th class="text-left">Item</th>';
+      summaryHTML += '<th class="text-right">Qty</th>';
+      summaryHTML += '<th class="text-right">Price</th>';
+      summaryHTML += '<th class="text-right">Total</th>';
+      summaryHTML += '</tr></thead>';
+      summaryHTML += '<tbody>';
+      
+      let grandTotal = 0;
+      let hasDeliveryFee = false;
+      
+      items.forEach(item => {
+        const qty = item.quantity || 0;
+        const price = item.price / 100; // Convert from cents
+        const lineTotal = qty * price;
+        grandTotal += lineTotal;
+        
+        // Check if this is a delivery fee item
+        if (item.code && (item.code.startsWith('MDF') || item.code.startsWith('PBF'))) {
+          hasDeliveryFee = true;
+        }
+        
+        summaryHTML += '<tr>';
+        summaryHTML += `<td class="item-desc">${item.description}</td>`;
+        summaryHTML += `<td class="text-right item-qty">${qty}</td>`;
+        summaryHTML += `<td class="text-right item-price">$${price.toFixed(2)}</td>`;
+        summaryHTML += `<td class="text-right item-total">$${lineTotal.toFixed(2)}</td>`;
+        summaryHTML += '</tr>';
+      });
+      
+      summaryHTML += '</tbody>';
+      summaryHTML += '<tfoot>';
+      summaryHTML += '<tr>';
+      summaryHTML += '<td colspan="3" class="text-right">Total:</td>';
+      summaryHTML += `<td class="text-right grand-total">$${grandTotal.toFixed(2)}</td>`;
+      summaryHTML += '</tr>';
+      summaryHTML += '</tfoot>';
+      summaryHTML += '</table>';
+      
+      document.getElementById('orderSummaryContent').innerHTML = summaryHTML;
+      document.getElementById('orderSummaryCard').style.display = 'block';
+      
+    } catch (e) {
+      console.log('Could not display order summary from items:', e);
+    }
+  }
+
+  // Display order summary from payment form
+  function displayOrderSummary() {
+    try {
+      if (!window.opener || !window.opener.document) return;
+      
+      const paymentForm = window.opener.document.querySelector('form#paygistixPaymentForm');
+      if (!paymentForm) return;
+      
+      let summaryHTML = '<table class="order-summary-table">';
+      summaryHTML += '<thead><tr>';
+      summaryHTML += '<th class="text-left">Item</th>';
+      summaryHTML += '<th class="text-right">Qty</th>';
+      summaryHTML += '<th class="text-right">Price</th>';
+      summaryHTML += '<th class="text-right">Total</th>';
+      summaryHTML += '</tr></thead>';
+      summaryHTML += '<tbody>';
+      
+      let grandTotal = 0;
+      const rows = paymentForm.querySelectorAll('tbody tr');
+      
+      rows.forEach((row, index) => {
+        const qtyInput = row.querySelector('input.pxQty');
+        const codeInput = row.querySelector(`input[name="pxCode${index + 1}"]`);
+        const descInput = row.querySelector(`input[name="pxDescription${index + 1}"]`);
+        const priceInput = row.querySelector(`input[name="pxPrice${index + 1}"]`);
+        
+        if (qtyInput && codeInput && descInput && priceInput) {
+          const qty = parseInt(qtyInput.value) || 0;
+          const price = parseFloat(priceInput.value) || 0;
+          
+          if (qty > 0) {
+            const lineTotal = qty * price;
+            grandTotal += lineTotal;
+            
+            summaryHTML += '<tr>';
+            summaryHTML += `<td class="item-desc">${descInput.value}</td>`;
+            summaryHTML += `<td class="text-right item-qty">${qty}</td>`;
+            summaryHTML += `<td class="text-right item-price">$${price.toFixed(2)}</td>`;
+            summaryHTML += `<td class="text-right item-total">$${lineTotal.toFixed(2)}</td>`;
+            summaryHTML += '</tr>';
+          }
+        }
+      });
+      
+      summaryHTML += '</tbody>';
+      summaryHTML += '<tfoot>';
+      summaryHTML += '<tr>';
+      summaryHTML += '<td colspan="3" class="text-right">Total:</td>';
+      summaryHTML += `<td class="text-right grand-total">$${grandTotal.toFixed(2)}</td>`;
+      summaryHTML += '</tr>';
+      summaryHTML += '</tfoot>';
+      summaryHTML += '</table>';
+      
+      document.getElementById('orderSummaryContent').innerHTML = summaryHTML;
+      document.getElementById('orderSummaryCard').style.display = 'block';
+      
+    } catch (e) {
+      console.log('Could not display order summary:', e);
+    }
+  }
+
   // Generate random payment data
   window.generateRandomData = function() {
     // Generate random card last 4
@@ -285,13 +397,44 @@
     const amount = urlParams.get('amount');
     const returnUrl = urlParams.get('returnUrl');
     const context = urlParams.get('context');
+    const itemsJson = urlParams.get('items');
     
     // Set values from URL parameters
     if (paymentToken) {
       document.getElementById('paymentToken').value = paymentToken;
     }
-    if (amount) {
-      document.getElementById('amount').value = amount;
+    
+    // Display items if provided
+    if (itemsJson) {
+      try {
+        const items = JSON.parse(decodeURIComponent(itemsJson));
+        displayOrderSummaryFromItems(items);
+      } catch (e) {
+        console.log('Could not parse items:', e);
+      }
+    }
+    
+    // Try to get the actual total and line items from the opener's payment form
+    let calculatedAmount = amount;
+    if (window.opener && window.opener.paymentForm && typeof window.opener.paymentForm.getTotal === 'function') {
+      try {
+        const formTotal = window.opener.paymentForm.getTotal();
+        if (formTotal > 0) {
+          calculatedAmount = formTotal.toFixed(2);
+          console.log('Using total from payment form:', calculatedAmount);
+        }
+        
+        // Also try to get line items for display if not already displayed
+        if (!itemsJson) {
+          displayOrderSummary();
+        }
+      } catch (e) {
+        console.log('Could not access opener payment form:', e);
+      }
+    }
+    
+    if (calculatedAmount) {
+      document.getElementById('amount').value = calculatedAmount;
     }
     
     // Handle callback URL from either old format or new returnUrl
