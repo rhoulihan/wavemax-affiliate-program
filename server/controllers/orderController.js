@@ -120,7 +120,8 @@ exports.createOrder = async (req, res) => {
       pickupTime,
       specialPickupInstructions,
       estimatedWeight,
-      numberOfBags
+      numberOfBags,
+      addOns
     } = req.body;
 
     // Verify customer exists
@@ -206,6 +207,11 @@ exports.createOrder = async (req, res) => {
         minimumApplied: feeCalculation.minimumApplied
       },
       wdfCreditApplied: wdfCreditToApply, // Store the credit applied to this order
+      addOns: addOns || {
+        premiumDetergent: false,
+        fabricSoftener: false,
+        stainRemover: false
+      },
       status: 'pending'
     });
 
@@ -314,17 +320,22 @@ exports.getOrderDetails = async (req, res) => {
         pickupTime: order.pickupTime,
         specialPickupInstructions: order.specialPickupInstructions,
         estimatedWeight: order.estimatedWeight,
+        numberOfBags: order.numberOfBags,
         serviceNotes: order.serviceNotes,
         deliveryDate: order.deliveryDate,
         deliveryTime: order.deliveryTime,
         specialDeliveryInstructions: order.specialDeliveryInstructions,
         status: order.status,
         baseRate: order.baseRate,
+        deliveryFee: order.feeBreakdown?.totalFee || 0,
         feeBreakdown: order.feeBreakdown,
+        bagCreditApplied: order.wdfCreditApplied || 0,
         actualWeight: order.actualWeight,
         washInstructions: order.washInstructions,
         estimatedTotal: order.estimatedTotal,
         actualTotal: order.actualTotal,
+        addOns: order.addOns,
+        addOnTotal: order.addOnTotal,
         wdfCreditApplied: order.wdfCreditApplied,
         wdfCreditGenerated: order.wdfCreditGenerated,
         weightDifference: order.weightDifference,

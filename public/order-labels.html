@@ -267,6 +267,13 @@
                     <p><strong>Customer:</strong> ${order.customerName}</p>
                     <p><strong>Pickup Date:</strong> ${new Date(order.pickupDate).toLocaleDateString()}</p>
                     <p><strong>Affiliate:</strong> ${order.affiliateName}</p>
+                    ${order.addOns && (order.addOns.premiumDetergent || order.addOns.fabricSoftener || order.addOns.stainRemover) ? `
+                        <p><strong>Add-ons:</strong> ${[
+                            order.addOns.premiumDetergent && 'Premium Detergent',
+                            order.addOns.fabricSoftener && 'Fabric Softener',
+                            order.addOns.stainRemover && 'Stain Remover'
+                        ].filter(Boolean).join(', ')}</p>
+                    ` : ''}
                 </div>
                 <div class="bag-number">BAG ${bag.bagNumber} of ${order.numberOfBags}</div>
                 <div class="qr-code" id="qr-${bag.bagId}"></div>

@@ -206,3 +206,77 @@ select.warning { color: #ea580c; }
     margin-top: 0.5rem;
     font-weight: 600;
 }
+
+/* Order summary table */
+.order-summary-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #f9fafb;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.order-summary-table thead tr {
+    background: #e5e7eb;
+}
+
+.order-summary-table th {
+    padding: 12px 16px;
+    font-weight: 600;
+    color: #374151;
+}
+
+.order-summary-table th.text-left {
+    text-align: left;
+}
+
+.order-summary-table th.text-right {
+    text-align: right;
+}
+
+.order-summary-table tbody tr {
+    background: white;
+}
+
+.order-summary-table tbody td {
+    padding: 12px 16px;
+    border-top: 1px solid #e5e7eb;
+}
+
+.order-summary-table tbody td.text-right {
+    text-align: right;
+}
+
+.order-summary-table tbody td.item-desc {
+    color: #111827;
+}
+
+.order-summary-table tbody td.item-qty,
+.order-summary-table tbody td.item-price {
+    color: #6b7280;
+}
+
+.order-summary-table tbody td.item-total {
+    color: #111827;
+    font-weight: 500;
+}
+
+.order-summary-table tfoot tr {
+    background: #f3f4f6;
+}
+
+.order-summary-table tfoot td {
+    padding: 12px 16px;
+    font-weight: 600;
+    color: #111827;
+    border-top: 2px solid #d1d5db;
+}
+
+.order-summary-table tfoot td.text-right {
+    text-align: right;
+}
+
+.order-summary-table tfoot td.grand-total {
+    font-size: 1.1em;
+}

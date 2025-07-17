@@ -1045,6 +1045,12 @@
       "pickupAddress": "Endereço de Coleta",
       "deliveryAddress": "Endereço de Entrega",
       "sameAsPickup": "Mesmo endereço de coleta",
+      "addOnItems": "Itens Adicionais",
+      "addOnDescription": "Aprimore seu serviço de lavanderia com complementos premium ($0,10/lb cada):",
+      "premiumDetergent": "Detergente Premium",
+      "fabricSoftener": "Amaciante de Tecidos",
+      "stainRemover": "Removedor de Manchas",
+      "addOnsLabel": "Complementos:",
       "specialInstructions": "Instruções Especiais (Opcional)",
       "estimatedBags": "Número Estimado de Sacolas",
       "confirmPickup": "Confirmar Coleta"

@@ -183,31 +183,22 @@
   }
 
   function showPaymentForm() {
+    // The main schedule-pickup.js will handle the form submission and data collection
+    // This function now just triggers the submit event on the form
     const form = document.getElementById('pickupScheduleForm');
     if (!form) return;
 
-    // Store form data for later submission
-    const formData = new FormData(form);
-    const pickupData = {};
-
-    formData.forEach((value, key) => {
-      if (key !== '_csrf') {
-        // Convert date fields to ISO8601 format
-        if (key === 'pickupDate' && value) {
-          pickupData[key] = new Date(value + 'T12:00:00').toISOString();
-        } else {
-          pickupData[key] = value;
-        }
-      }
+    // Trigger the form's submit event which will be handled by schedule-pickup.js
+    const submitEvent = new Event('submit', {
+      bubbles: true,
+      cancelable: true
     });
+    form.dispatchEvent(submitEvent);
 
-    // Store the pickup data for when payment is complete
-    window.pendingPickupData = pickupData;
-
-    // Keep payment form hidden
+    // Don't hide the payment form - let schedule-pickup.js handle the display
     const paymentContainer = document.getElementById('paymentFormContainer');
     if (paymentContainer) {
-      paymentContainer.style.display = 'none';
+      // paymentContainer.style.display = 'none'; // Removed - let main script handle this
 
       // Trigger a recalculation to update payment form quantities
       const calculateEstimateFunc = window.calculateEstimate;
@@ -323,14 +314,7 @@
 
     // Remove the old form submission handler FIRST
     const form = document.getElementById('pickupScheduleForm');
-    if (form) {
-      // Add submit handler that prevents default
-      form.addEventListener('submit', function(e) {
-        e.preventDefault();
-        console.log('Form submission prevented');
-        // Do nothing - navigation is handled by buttons
-      });
-    }
+    // Form submission is now handled by schedule-pickup.js
 
     // Now attach button handlers
     const advanceButton = document.getElementById('advanceButton');

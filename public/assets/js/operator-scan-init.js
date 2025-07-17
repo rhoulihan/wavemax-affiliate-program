@@ -904,6 +904,15 @@
                         <div class="info-value" id="bagsWeighedValue">${order.bagsWeighed || 0}</div>
                     </div>
                 </div>
+                ${order.addOns && (order.addOns.premiumDetergent || order.addOns.fabricSoftener || order.addOns.stainRemover) ? `
+                    <div class="add-ons-info mt-2">
+                        <strong>Add-ons:</strong> ${[
+                            order.addOns.premiumDetergent && 'Premium Detergent',
+                            order.addOns.fabricSoftener && 'Fabric Softener',
+                            order.addOns.stainRemover && 'Stain Remover'
+                        ].filter(Boolean).join(', ')}
+                    </div>
+                ` : ''}
             </div>
 
             <div class="scan-progress-section">
@@ -1112,6 +1121,13 @@
                 <p><strong>Order ID:</strong> ${order.orderId}</p>
                 <p><strong>Order Type:</strong> ${order.orderType || 'WDF'}</p>
                 <p><strong>Bags Processed:</strong> ${processedBags} of ${totalBags}</p>
+                ${order.addOns && (order.addOns.premiumDetergent || order.addOns.fabricSoftener || order.addOns.stainRemover) ? `
+                    <p><strong>Add-ons:</strong> ${[
+                        order.addOns.premiumDetergent && 'Premium Detergent',
+                        order.addOns.fabricSoftener && 'Fabric Softener',
+                        order.addOns.stainRemover && 'Stain Remover'
+                    ].filter(Boolean).join(', ')}</p>
+                ` : ''}
             </div>
             <div class="process-confirm-section">
                 <h5>Confirm this bag has been processed (WDF complete)?</h5>
@@ -1394,6 +1410,13 @@
                 <p><strong>Customer:</strong> ${order.customerName}</p>
                 <p><strong>Order ID:</strong> ${order.orderId}</p>
                 <p><strong>Total Bags:</strong> ${totalBags}</p>
+                ${order.addOns && (order.addOns.premiumDetergent || order.addOns.fabricSoftener || order.addOns.stainRemover) ? `
+                    <p><strong>Add-ons:</strong> ${[
+                        order.addOns.premiumDetergent && 'Premium Detergent',
+                        order.addOns.fabricSoftener && 'Fabric Softener',
+                        order.addOns.stainRemover && 'Stain Remover'
+                    ].filter(Boolean).join(', ')}</p>
+                ` : ''}
             </div>
             <div class="pickup-scan-section">
                 <h5>Scan all bags before confirming pickup</h5>

@@ -667,6 +667,29 @@ class PaygistixPaymentForm {
         });
     }
     
+    // Get the current total from all line items
+    getTotal() {
+        const form = this.container.querySelector('form#paygistixPaymentForm');
+        if (!form) return 0;
+        
+        let totalAmount = 0;
+        
+        // Get all quantity inputs
+        const qtyInputs = form.querySelectorAll('input.pxQty');
+        qtyInputs.forEach((qtyInput, index) => {
+            const qty = parseInt(qtyInput.value) || 0;
+            if (qty > 0) {
+                const priceInput = form.querySelector(`input[name="pxPrice${index + 1}"]`);
+                if (priceInput) {
+                    const price = parseFloat(priceInput.value) || 0;
+                    totalAmount += qty * price;
+                }
+            }
+        });
+        
+        return totalAmount;
+    }
+    
     hideAllRows() {
         const rows = this.container.querySelectorAll('tbody tr');
         rows.forEach(row => {
@@ -702,28 +725,31 @@ class PaygistixPaymentForm {
                 throw new Error('Payment form not found');
             }
             
-            // Collect all line items from the form
+            // Collect all line items from the form that have quantity > 0
             const items = [];
             let totalAmount = 0;
             
-            // Get all quantity inputs
-            const qtyInputs = form.querySelectorAll('input.pxQty');
-            qtyInputs.forEach((qtyInput, index) => {
-                const qty = parseInt(qtyInput.value) || 0;
-                if (qty > 0) {
-                    const codeInput = form.querySelector(`input[name="pxCode${index + 1}"]`);
-                    const descInput = form.querySelector(`input[name="pxDescription${index + 1}"]`);
-                    const priceInput = form.querySelector(`input[name="pxPrice${index + 1}"]`);
+            // Get all rows to collect line items
+            const rows = form.querySelectorAll('tbody tr');
+            rows.forEach((row, index) => {
+                const qtyInput = row.querySelector('input.pxQty');
+                const codeInput = row.querySelector(`input[name="pxCode${index + 1}"]`);
+                const descInput = row.querySelector(`input[name="pxDescription${index + 1}"]`);
+                const priceInput = row.querySelector(`input[name="pxPrice${index + 1}"]`);
+                
+                if (qtyInput && codeInput && descInput && priceInput) {
+                    const qty = parseInt(qtyInput.value) || 0;
+                    const price = parseFloat(priceInput.value) || 0;
                     
-                    if (codeInput && descInput && priceInput) {
-                        const price = parseFloat(priceInput.value) || 0;
+                    // Only include items with quantity > 0
+                    if (qty > 0) {
                         const lineTotal = qty * price;
                         totalAmount += lineTotal;
                         
                         items.push({
                             code: codeInput.value,
                             description: descInput.value,
-                            price: price * 100, // Convert to cents like original
+                            price: price * 100, // Convert to cents
                             quantity: qty,
                             total: lineTotal
                         });
@@ -892,12 +918,13 @@ class PaygistixPaymentForm {
                 paygistixForm.style.display = 'none';
                 
                 if (isTestMode) {
-                    // For test mode, only add essential fields
+                    // For test mode, add essential fields plus items data
                     const testFields = [
                         { name: 'paymentToken', value: paymentToken },
                         { name: 'amount', value: (this.testPaymentData?.totalAmount || 0).toFixed(2) },
                         { name: 'returnUrl', value: this.paymentConfig.returnUrl },
-                        { name: 'context', value: this.payContext }
+                        { name: 'context', value: this.payContext },
+                        { name: 'items', value: JSON.stringify(this.testPaymentData?.items || []) }
                     ];
                     
                     testFields.forEach(field => {

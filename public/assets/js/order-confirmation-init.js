@@ -169,8 +169,8 @@
             
             // Affiliate info
             if (orderData.affiliate) {
-                document.getElementById('affiliateName').textContent = orderData.affiliate.businessName || 
-                    `${orderData.affiliate.firstName} ${orderData.affiliate.lastName}`;
+                // The API returns a combined 'name' field, not separate firstName/lastName
+                document.getElementById('affiliateName').textContent = orderData.affiliate.name || 'Not available';
                 document.getElementById('affiliateContact').textContent = orderData.affiliate.phone || 
                     orderData.affiliate.email || 'Contact info not available';
             }
@@ -214,10 +214,6 @@
                 feeBreakdownEl.textContent = feeBreakdownText;
             }
             
-            // Estimated total
-            const estimatedTotal = orderData.estimatedTotal || 0;
-            document.getElementById('estimatedTotal').textContent = `$${estimatedTotal.toFixed(2)}`;
-            
             // Check for bag credit - might be in customer data
             let bagCreditAmount = orderData.bagCreditApplied;
             
@@ -229,6 +225,42 @@
                 // Show bag credit if customer has it and it's applicable to this order
                 if (orderData.customer.bagCredit > 0) {
                     bagCreditAmount = orderData.customer.bagCredit;
+                }
+            }
+            
+            // Display add-ons if any were selected
+            if (orderData.addOns && (orderData.addOns.premiumDetergent || orderData.addOns.fabricSoftener || orderData.addOns.stainRemover)) {
+                const addOnsSection = document.getElementById('addOnsSection');
+                if (addOnsSection) {
+                    addOnsSection.classList.remove('hidden-section');
+                    
+                    // Calculate add-on total and build detail text
+                    const selectedAddOns = [];
+                    if (orderData.addOns.premiumDetergent) selectedAddOns.push('Premium Detergent');
+                    if (orderData.addOns.fabricSoftener) selectedAddOns.push('Fabric Softener');
+                    if (orderData.addOns.stainRemover) selectedAddOns.push('Stain Remover');
+                    
+                    // Calculate add-on total if not provided
+                    let addOnTotal = orderData.addOnTotal;
+                    if (addOnTotal === undefined || addOnTotal === null) {
+                        const weight = orderData.estimatedWeight || 0;
+                        const pricePerPound = 0.10;
+                        addOnTotal = selectedAddOns.length * weight * pricePerPound;
+                    }
+                    
+                    // Store calculated total for later use if it wasn't in the order data
+                    if (!orderData.addOnTotal) {
+                        orderData.addOnTotal = addOnTotal;
+                    }
+                    
+                    document.getElementById('addOnsTotal').textContent = `$${addOnTotal.toFixed(2)}`;
+                    
+                    // Show details
+                    const addOnsDetail = document.getElementById('addOnsDetail');
+                    if (addOnsDetail) {
+                        const weight = orderData.estimatedWeight || 0;
+                        addOnsDetail.textContent = `${selectedAddOns.join(', ')} (${selectedAddOns.length} × ${weight} lbs × $0.10/lb)`;
+                    }
                 }
             }
             
@@ -249,6 +281,33 @@
                     }
                 }
             }
+            
+            // Calculate and display estimated total
+            let calculatedTotal = 0;
+            
+            // Base WDF service cost
+            const wdfCost = (orderData.estimatedWeight || 0) * wdfRate;
+            calculatedTotal += wdfCost;
+            
+            // Add delivery fee
+            calculatedTotal += deliveryFee;
+            
+            // Add add-on costs
+            if (orderData.addOnTotal && orderData.addOnTotal > 0) {
+                calculatedTotal += orderData.addOnTotal;
+            }
+            
+            // Subtract bag credit if applied
+            if (bagCreditAmount && bagCreditAmount > 0) {
+                calculatedTotal -= bagCreditAmount;
+            }
+            
+            // Ensure total doesn't go negative
+            calculatedTotal = Math.max(0, calculatedTotal);
+            
+            // Use order's estimated total if available and reasonable, otherwise use calculated
+            const estimatedTotal = (orderData.estimatedTotal > 0) ? orderData.estimatedTotal : calculatedTotal;
+            document.getElementById('estimatedTotal').textContent = `$${estimatedTotal.toFixed(2)}`;
         } catch (error) {
             console.error('Error loading order details:', error);
             
