@@ -187,6 +187,13 @@ exports.createOrder = async (req, res) => {
     const bagCount = parseInt(numberOfBags) || 1; // Default to 1 bag if not specified
     const feeCalculation = await calculateDeliveryFee(bagCount, affiliate);
 
+    // Check if customer has bag credit to apply (only on first order)
+    let bagCreditToApply = 0;
+    if (!customer.bagCreditApplied && customer.bagCredit && customer.bagCredit > 0) {
+      bagCreditToApply = customer.bagCredit;
+      console.log(`Applying bag credit of $${bagCreditToApply} to first order for customer ${customerId}`);
+    }
+
     // Check if customer has WDF credit to apply
     let wdfCreditToApply = 0;
     if (customer.wdfCredit && customer.wdfCredit !== 0) {
@@ -195,7 +202,7 @@ exports.createOrder = async (req, res) => {
     }
 
     // Create new order
-    const newOrder = new Order({
+    const orderData = {
       customerId,
       affiliateId,
       pickupDate,
@@ -210,6 +217,7 @@ exports.createOrder = async (req, res) => {
         totalFee: feeCalculation.totalFee,
         minimumApplied: feeCalculation.minimumApplied
       },
+      bagCreditApplied: bagCreditToApply, // Store the bag credit applied to this order
       wdfCreditApplied: wdfCreditToApply, // Store the credit applied to this order
       addOns: addOns || {
         premiumDetergent: false,
@@ -217,12 +225,28 @@ exports.createOrder = async (req, res) => {
         stainRemover: false
       },
       status: 'pending'
-    });
+    };
 
+    console.log('Creating order with data:', JSON.stringify(orderData, null, 2));
+    const newOrder = new Order(orderData);
+    console.log('Order instance before save:', JSON.stringify(newOrder.toObject(), null, 2));
+    
     await newOrder.save();
+    
+    // Re-fetch the order to ensure we have the latest data
+    const savedOrder = await Order.findById(newOrder._id);
+    console.log('Order fetched after save:', JSON.stringify(savedOrder.toObject(), null, 2));
 
     console.log('Order saved with addOns:', newOrder.addOns);
     console.log('Full order object:', JSON.stringify(newOrder.toObject(), null, 2));
+
+    // Reset customer's bag credit after applying it to the first order
+    if (bagCreditToApply > 0) {
+      customer.bagCredit = 0;
+      customer.bagCreditApplied = true;
+      await customer.save();
+      console.log(`Reset bag credit for customer ${customerId} after applying $${bagCreditToApply} to first order ${newOrder.orderId}`);
+    }
 
     // Reset customer's WDF credit after applying it to the order
     if (wdfCreditToApply !== 0) {
@@ -252,7 +276,10 @@ exports.createOrder = async (req, res) => {
       success: true,
       orderId: newOrder.orderId,
       estimatedTotal: newOrder.estimatedTotal,
+      bagCreditApplied: newOrder.bagCreditApplied,
       wdfCreditApplied: newOrder.wdfCreditApplied,
+      addOns: savedOrder ? savedOrder.addOns : newOrder.addOns,
+      addOnTotal: savedOrder ? savedOrder.addOnTotal : newOrder.addOnTotal,
       message: 'Pickup scheduled successfully!'
     });
   } catch (error) {
