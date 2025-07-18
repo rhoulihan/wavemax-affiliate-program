@@ -111,7 +111,7 @@ exports.createOrder = async (req, res) => {
       });
     }
 
-    console.log('Creating order with data:', req.body);
+    console.log('Creating order with data:', JSON.stringify(req.body, null, 2));
 
     const {
       customerId,
@@ -123,6 +123,10 @@ exports.createOrder = async (req, res) => {
       numberOfBags,
       addOns
     } = req.body;
+
+    console.log('AddOns received:', addOns);
+    console.log('AddOns type:', typeof addOns);
+    console.log('AddOns stringified:', JSON.stringify(addOns));
 
     // Verify customer exists
     console.log('Looking for customer with ID:', customerId);
@@ -216,6 +220,9 @@ exports.createOrder = async (req, res) => {
     });
 
     await newOrder.save();
+
+    console.log('Order saved with addOns:', newOrder.addOns);
+    console.log('Full order object:', JSON.stringify(newOrder.toObject(), null, 2));
 
     // Reset customer's WDF credit after applying it to the order
     if (wdfCreditToApply !== 0) {
