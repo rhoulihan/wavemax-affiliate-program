@@ -657,6 +657,8 @@
     // Store the pickup data for when payment is complete
     window.pendingPickupData = pickupData;
     console.log('=== PENDING PICKUP DATA SET ===', window.pendingPickupData);
+    console.log('AddOns in pendingPickupData:', window.pendingPickupData.addOns);
+    console.log('selectedAddOns at form submit:', selectedAddOns);
 
     // Show payment form
     const paymentContainer = document.getElementById('paymentFormContainer');
@@ -1119,6 +1121,12 @@
       }
 
       console.log('Submitting pickup order:', JSON.stringify(pickupData, null, 2));
+      console.log('=== ADDON DEBUG ===');
+      console.log('AddOns in pickupData:', pickupData.addOns);
+      console.log('window.pendingPickupData.addOns:', window.pendingPickupData?.addOns);
+      console.log('selectedAddOns state:', selectedAddOns);
+      console.log('=== END ADDON DEBUG ===');
+      
       // Get auth token
       const token = localStorage.getItem('customerToken');
       if (!token) {
