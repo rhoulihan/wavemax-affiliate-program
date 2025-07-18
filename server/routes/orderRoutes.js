@@ -24,7 +24,11 @@ router.post('/', [
   body('pickupDate').isISO8601().withMessage('Valid pickup date is required'),
   body('pickupTime').isIn(['morning', 'afternoon', 'evening']).withMessage('Invalid pickup time'),
   body('numberOfBags').isInt({ min: 1 }).withMessage('Number of bags must be at least 1'),
-  body('estimatedWeight').isFloat({ min: 0.1 }).withMessage('Estimated weight must be a positive number')
+  body('estimatedWeight').isFloat({ min: 0.1 }).withMessage('Estimated weight must be a positive number'),
+  body('addOns').optional().isObject().withMessage('Add-ons must be an object'),
+  body('addOns.premiumDetergent').optional().isBoolean().withMessage('Premium detergent must be a boolean'),
+  body('addOns.fabricSoftener').optional().isBoolean().withMessage('Fabric softener must be a boolean'),
+  body('addOns.stainRemover').optional().isBoolean().withMessage('Stain remover must be a boolean')
 ], authenticate, orderController.createOrder);
 
 /**

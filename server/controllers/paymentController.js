@@ -22,6 +22,9 @@ class PaymentController {
       // Get payment configuration
       // Note: For hosted form approach, the hash is required in the client form
       const config = paygistixConfig.getClientConfig();
+      
+      // Add test payment form status
+      config.testPaymentFormEnabled = process.env.ENABLE_TEST_PAYMENT_FORM === 'true';
 
       // Log config access for monitoring
       logger.info('Payment config accessed', {

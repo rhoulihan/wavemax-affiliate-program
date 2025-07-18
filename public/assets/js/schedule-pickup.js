@@ -19,6 +19,7 @@
   };
   let customerBagCredit = 0; // Store customer's bag credit
   let bagCreditApplied = false; // Track if credit has been applied
+  let customerWdfCredit = 0; // Store customer's WDF credit
   
   // State variables for add-ons
   let selectedAddOns = {
@@ -444,6 +445,16 @@
               calculateEstimate();
             }
           }
+          
+          // Check for WDF credit
+          if (fullCustomer.wdfCredit && fullCustomer.wdfCredit !== 0) {
+            customerWdfCredit = parseFloat(fullCustomer.wdfCredit);
+            console.log('Customer has WDF credit:', customerWdfCredit);
+            
+            // WDF credit will be applied by reducing the WDF quantity in calculateEstimate
+            // Recalculate totals with credit
+            calculateEstimate();
+          }
 
           // Set delivery fee if available and not already set
           const deliveryFeeField = document.getElementById('deliveryFee');
@@ -654,28 +665,28 @@
       stainRemover: selectedAddOns.stainRemover
     };
     
+    // Add WDF credit if available
+    if (customerWdfCredit > 0) {
+      pickupData.wdfCreditToApply = customerWdfCredit;
+    }
+    
     // Store the pickup data for when payment is complete
     window.pendingPickupData = pickupData;
     console.log('=== PENDING PICKUP DATA SET ===', window.pendingPickupData);
     console.log('AddOns in pendingPickupData:', window.pendingPickupData.addOns);
     console.log('selectedAddOns at form submit:', selectedAddOns);
 
-    // Show payment form
-    const paymentContainer = document.getElementById('paymentFormContainer');
-    if (paymentContainer) {
-      paymentContainer.style.display = 'block';
-      // Scroll to payment form
-      paymentContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
-
-      // If payment form is available, update delivery fee quantities
-      if (window.paymentForm && window.paymentForm.updateDeliveryFeeQuantities) {
-        // Update delivery fee quantities based on current breakdown
-        if (deliveryFeeBreakdown) {
-          window.paymentForm.updateDeliveryFeeQuantities(deliveryFeeBreakdown);
-        }
-        console.log('Payment form ready for submission');
+    // Update payment form quantities before navigation script handles payment
+    if (window.paymentForm && window.paymentForm.updateDeliveryFeeQuantities) {
+      // Update delivery fee quantities based on current breakdown
+      if (deliveryFeeBreakdown) {
+        window.paymentForm.updateDeliveryFeeQuantities(deliveryFeeBreakdown);
       }
+      console.log('Payment form quantities updated');
     }
+    
+    // The navigation script (schedule-pickup-navigation.js) will handle the actual payment triggering
+    // via the showPaymentForm() function when the user clicks "Complete Payment"
 
     // Change the submit button text to indicate waiting for payment
     const submitButton = form.querySelector('button[type="submit"]');
@@ -992,12 +1003,20 @@
     if (window.paymentForm && window.paymentForm.updateQuantity) {
       console.log('Updating payment form quantities');
       
-      // Calculate WDF quantity: estimated weight minus bag credit weight
+      // Calculate WDF quantity: estimated weight minus bag credit weight minus WDF credit weight
       let wdfQuantity = weight;
       
+      // Apply bag credit by reducing weight
       if (customerBagCredit > 0 && wdfRate > 0) {
         const bagCreditWeight = customerBagCredit / wdfRate;
         wdfQuantity = Math.max(0, weight - bagCreditWeight);
+      }
+      
+      // Apply WDF credit by further reducing weight
+      if (customerWdfCredit > 0 && wdfRate > 0) {
+        const wdfCreditWeight = customerWdfCredit / wdfRate;
+        wdfQuantity = Math.max(0, wdfQuantity - wdfCreditWeight);
+        console.log('Applying WDF credit:', customerWdfCredit, 'reducing weight by:', wdfCreditWeight);
       }
       
       console.log('Updating WDF quantity:', wdfQuantity);
@@ -1279,8 +1298,28 @@
         },
         onPaymentFailure: function(error) {
           console.error('Payment failed:', error);
-          if (window.modalAlert) {
-            window.modalAlert(error || 'Payment failed. Please try again.', 'Payment Error');
+          
+          // Re-enable the submit button
+          const submitButton = document.querySelector('#pickupScheduleForm button[type="submit"]');
+          if (submitButton) {
+            submitButton.textContent = 'Confirm and Pay';
+            submitButton.disabled = false;
+            submitButton.classList.remove('opacity-50', 'cursor-not-allowed');
+          }
+          
+          // Also re-enable the Complete Payment button if it exists
+          const completePaymentBtn = document.getElementById('continueToPaymentBtn');
+          if (completePaymentBtn) {
+            completePaymentBtn.textContent = 'Complete Payment';
+            completePaymentBtn.disabled = false;
+            completePaymentBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+          }
+          
+          // Only show modal if it's not a user cancellation
+          if (error !== 'Payment cancelled by user') {
+            if (window.modalAlert) {
+              window.modalAlert(error || 'Payment failed. Please try again.', 'Payment Error');
+            }
           }
         }
       });

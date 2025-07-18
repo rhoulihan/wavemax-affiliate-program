@@ -286,7 +286,30 @@
             let calculatedTotal = 0;
             
             // Base WDF service cost
-            const wdfCost = (orderData.estimatedWeight || 0) * wdfRate;
+            let wdfWeight = orderData.estimatedWeight || 0;
+            let wdfCreditApplied = orderData.wdfCreditApplied || 0;
+            
+            // If WDF credit was applied, show the reduced weight
+            if (wdfCreditApplied > 0) {
+                const wdfCreditWeight = wdfCreditApplied / wdfRate;
+                wdfWeight = Math.max(0, wdfWeight - wdfCreditWeight);
+                
+                // Update the WDF service display to show credit applied
+                const wdfServiceDisplay = document.getElementById('wdfRateDisplay');
+                if (wdfServiceDisplay) {
+                    wdfServiceDisplay.textContent = `${wdfWeight.toFixed(1)} lbs × $${wdfRate.toFixed(2)}/lb`;
+                    // Add a note about credit applied
+                    const wdfParent = wdfServiceDisplay.parentElement;
+                    if (wdfParent && !wdfParent.querySelector('.wdf-credit-note')) {
+                        const creditNote = document.createElement('div');
+                        creditNote.className = 'text-sm text-gray-600 mt-1 wdf-credit-note';
+                        creditNote.textContent = `(WDF Credit of $${wdfCreditApplied.toFixed(2)} applied)`;
+                        wdfParent.appendChild(creditNote);
+                    }
+                }
+            }
+            
+            const wdfCost = wdfWeight * wdfRate;
             calculatedTotal += wdfCost;
             
             // Add delivery fee

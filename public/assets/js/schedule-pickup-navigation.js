@@ -220,48 +220,28 @@
       setTimeout(function() {
         console.log('Checking payment config for test mode:', window.paymentConfig);
         
-        // Check if test mode is enabled
-        if (window.paymentConfig && window.paymentConfig.testModeEnabled) {
-          console.log('Test mode is enabled, using test payment flow for order');
+        // Check if test payment form is enabled
+        if (window.paymentConfig && window.paymentConfig.testPaymentFormEnabled) {
+          console.log('Test payment form is enabled, opening test form in popup');
           
-          // Use the payment form's test mode handler
-          if (window.paymentForm && window.paymentForm.processPaymentTestMode) {
-            console.log('Using processPaymentTestMode for order');
-            
-            // Get customer data from localStorage
-            const customerStr = localStorage.getItem('currentCustomer');
-            const customer = customerStr ? JSON.parse(customerStr) : {};
-            
-            // Calculate total from payment form
-            const totalElement = document.getElementById('pxTotal');
-            let totalAmount = 0;
-            if (totalElement) {
-              const totalText = totalElement.textContent.replace(/[^0-9.]/g, '');
-              totalAmount = parseFloat(totalText);
+          // Open test payment form in popup
+          const testFormUrl = '/test-payment';
+          const width = 800;
+          const height = 600;
+          const left = (window.screen.width - width) / 2;
+          const top = (window.screen.height - height) / 2;
+          
+          const testWindow = window.open(testFormUrl, 'testPayment', 
+            `width=${width},height=${height},left=${left},top=${top},resizable=yes,scrollbars=yes`);
+          
+          if (!testWindow) {
+            if (window.modalAlert) {
+              window.modalAlert('Please allow pop-ups for this site to complete payment.', 'Pop-up Blocked');
             }
-            
-            // For the test mode to work, we need to pass numberOfBags
-            // Calculate it from the total and bag price ($10)
-            const bagPrice = 10.00;
-            const numberOfBags = Math.ceil(totalAmount / bagPrice) || 1;
-            
-            const customerData = {
-              firstName: customer.firstName || 'Order',
-              lastName: customer.lastName || 'Customer', 
-              email: customer.email || 'order@test.com',
-              numberOfBags: numberOfBags // This is what the test mode expects
-            };
-            
-            console.log('Customer data for test payment:', customerData);
-            window.paymentForm.processPaymentTestMode(customerData);
-          } else {
-            console.error('Payment form not properly initialized for test mode');
+            // Re-enable the button
             continueButton.textContent = 'Complete Payment';
             continueButton.disabled = false;
             continueButton.classList.remove('opacity-50', 'cursor-not-allowed');
-            if (window.modalAlert) {
-              window.modalAlert('Payment system not ready. Please refresh the page and try again.', 'Error');
-            }
           }
         } else {
           console.log('Production mode, looking for payment form submit button');
@@ -300,8 +280,23 @@
               }
             }, 1000);
           } else {
-            console.log('Submit button found, clicking it directly');
-            submitButton.click();
+            console.log('Submit button found, triggering form submission');
+            
+            // Instead of clicking the button, trigger the form submission directly
+            const paygistixForm = document.getElementById('paygistixPaymentForm');
+            if (paygistixForm) {
+              console.log('Triggering form submit event');
+              // Create and dispatch a submit event
+              const submitEvent = new Event('submit', {
+                bubbles: true,
+                cancelable: true
+              });
+              paygistixForm.dispatchEvent(submitEvent);
+            } else {
+              // Fallback to clicking the button
+              console.log('Form not found, falling back to button click');
+              submitButton.click();
+            }
           }
         }
       }, 500);
