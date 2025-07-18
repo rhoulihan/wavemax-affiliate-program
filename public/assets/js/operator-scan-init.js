@@ -864,6 +864,7 @@
         console.log('showWeightInputModal called');
         console.log('orderModal element:', orderModal);
         console.log('Scanned bag ID:', scannedBagId);
+        console.log('Order addOns:', order.addOns);
         
         // Initialize or preserve scanned bags tracking
         if (!currentOrder || currentOrder.orderId !== order.orderId) {
@@ -882,6 +883,9 @@
         const bagsToWeigh = order.numberOfBags - (order.bagsWeighed || 0);
         const scannedCount = currentOrder.scannedBagsForWeighing.size;
         const allBagsScanned = scannedCount >= bagsToWeigh;
+
+        // Check if order has add-ons
+        const hasAddOns = order.addOns && (order.addOns.premiumDetergent || order.addOns.fabricSoftener || order.addOns.stainRemover);
 
         let html = `
             <div class="order-info">
@@ -904,13 +908,16 @@
                         <div class="info-value" id="bagsWeighedValue">${order.bagsWeighed || 0}</div>
                     </div>
                 </div>
-                ${order.addOns && (order.addOns.premiumDetergent || order.addOns.fabricSoftener || order.addOns.stainRemover) ? `
-                    <div class="add-ons-info mt-2">
-                        <strong>Add-ons:</strong> ${[
-                            order.addOns.premiumDetergent && 'Premium Detergent',
-                            order.addOns.fabricSoftener && 'Fabric Softener',
-                            order.addOns.stainRemover && 'Stain Remover'
-                        ].filter(Boolean).join(', ')}
+                ${hasAddOns ? `
+                    <div class="add-ons-alert" style="background-color: #fff3cd; border: 2px solid #856404; border-radius: 4px; padding: 12px; margin-top: 12px;">
+                        <h5 style="color: #856404; margin: 0 0 8px 0;">⚠️ Add-ons Required</h5>
+                        <div style="color: #721c24; font-weight: bold;">
+                            ${[
+                                order.addOns.premiumDetergent && '✓ Premium Detergent',
+                                order.addOns.fabricSoftener && '✓ Fabric Softener',
+                                order.addOns.stainRemover && '✓ Stain Remover'
+                            ].filter(Boolean).join('<br>')}
+                        </div>
                     </div>
                 ` : ''}
             </div>
@@ -961,6 +968,18 @@
             });
             
             html += '</div>';
+            
+            // Add add-on confirmation checkbox if order has add-ons
+            if (hasAddOns) {
+                html += `
+                    <div class="add-ons-confirmation" style="background-color: #f8f9fa; border: 1px solid #dee2e6; border-radius: 4px; padding: 12px; margin-top: 12px;">
+                        <label style="display: flex; align-items: center; margin: 0; cursor: pointer;">
+                            <input type="checkbox" id="addOnsConfirmed" style="margin-right: 8px; width: 18px; height: 18px;">
+                            <span style="font-weight: bold;">I confirm all add-ons have been applied to this order</span>
+                        </label>
+                    </div>
+                `;
+            }
         }
 
         html += `
@@ -1013,6 +1032,7 @@
                 if (allBagsScanned) {
                     // Add input listeners to all weight inputs
                     const weightInputs = document.querySelectorAll('.weight-input');
+                    const addOnsCheckbox = document.getElementById('addOnsConfirmed');
                     
                     function checkAllWeights() {
                         let allValid = true;
@@ -1022,6 +1042,12 @@
                                 allValid = false;
                             }
                         });
+                        
+                        // Also check add-ons confirmation if required
+                        if (hasAddOns && addOnsCheckbox && !addOnsCheckbox.checked) {
+                            allValid = false;
+                        }
+                        
                         submitBtn.disabled = !allValid;
                     }
                     
@@ -1030,6 +1056,11 @@
                         input.addEventListener('input', checkAllWeights);
                         input.addEventListener('change', checkAllWeights);
                     });
+                    
+                    // Add listener to add-ons checkbox if it exists
+                    if (addOnsCheckbox) {
+                        addOnsCheckbox.addEventListener('change', checkAllWeights);
+                    }
                     
                     // Initial check
                     checkAllWeights();
@@ -1115,20 +1146,29 @@
         }
         
         modalTitle.textContent = 'Confirm Bag Processing';
+        
+        // Check if order has add-ons
+        const hasAddOns = order.addOns && (order.addOns.premiumDetergent || order.addOns.fabricSoftener || order.addOns.stainRemover);
+        
         modalBody.innerHTML = `
             <div class="order-info">
                 <p><strong>Customer:</strong> ${order.customerName}</p>
                 <p><strong>Order ID:</strong> ${order.orderId}</p>
                 <p><strong>Order Type:</strong> ${order.orderType || 'WDF'}</p>
                 <p><strong>Bags Processed:</strong> ${processedBags} of ${totalBags}</p>
-                ${order.addOns && (order.addOns.premiumDetergent || order.addOns.fabricSoftener || order.addOns.stainRemover) ? `
-                    <p><strong>Add-ons:</strong> ${[
-                        order.addOns.premiumDetergent && 'Premium Detergent',
-                        order.addOns.fabricSoftener && 'Fabric Softener',
-                        order.addOns.stainRemover && 'Stain Remover'
-                    ].filter(Boolean).join(', ')}</p>
-                ` : ''}
             </div>
+            ${hasAddOns ? `
+                <div class="add-ons-reminder" style="background-color: #d4edda; border: 2px solid #155724; border-radius: 4px; padding: 12px; margin: 12px 0;">
+                    <h5 style="color: #155724; margin: 0 0 8px 0;">✅ Add-ons Applied</h5>
+                    <div style="color: #155724; font-weight: bold;">
+                        ${[
+                            order.addOns.premiumDetergent && '✓ Premium Detergent',
+                            order.addOns.fabricSoftener && '✓ Fabric Softener',
+                            order.addOns.stainRemover && '✓ Stain Remover'
+                        ].filter(Boolean).join('<br>')}
+                    </div>
+                </div>
+            ` : ''}
             <div class="process-confirm-section">
                 <h5>Confirm this bag has been processed (WDF complete)?</h5>
                 <p class="text-muted">Bag ${bagNumber} (${scannedBagId || 'Unknown ID'})</p>
@@ -1405,19 +1445,28 @@
         console.log('All bags scanned?', allBagsScanned);
         
         modalTitle.textContent = 'Order Pickup';
+        
+        // Check if order has add-ons
+        const hasAddOns = order.addOns && (order.addOns.premiumDetergent || order.addOns.fabricSoftener || order.addOns.stainRemover);
+        
         modalBody.innerHTML = `
             <div class="order-info">
                 <p><strong>Customer:</strong> ${order.customerName}</p>
                 <p><strong>Order ID:</strong> ${order.orderId}</p>
                 <p><strong>Total Bags:</strong> ${totalBags}</p>
-                ${order.addOns && (order.addOns.premiumDetergent || order.addOns.fabricSoftener || order.addOns.stainRemover) ? `
-                    <p><strong>Add-ons:</strong> ${[
-                        order.addOns.premiumDetergent && 'Premium Detergent',
-                        order.addOns.fabricSoftener && 'Fabric Softener',
-                        order.addOns.stainRemover && 'Stain Remover'
-                    ].filter(Boolean).join(', ')}</p>
-                ` : ''}
             </div>
+            ${hasAddOns ? `
+                <div class="add-ons-complete" style="background-color: #cce5ff; border: 2px solid #004085; border-radius: 4px; padding: 12px; margin: 12px 0;">
+                    <h5 style="color: #004085; margin: 0 0 8px 0;">ℹ️ Add-ons Included</h5>
+                    <div style="color: #004085; font-weight: bold;">
+                        ${[
+                            order.addOns.premiumDetergent && '✓ Premium Detergent',
+                            order.addOns.fabricSoftener && '✓ Fabric Softener',
+                            order.addOns.stainRemover && '✓ Stain Remover'
+                        ].filter(Boolean).join('<br>')}
+                    </div>
+                </div>
+            ` : ''}
             <div class="pickup-scan-section">
                 <h5>Scan all bags before confirming pickup</h5>
                 <div class="scan-progress">

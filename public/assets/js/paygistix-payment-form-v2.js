@@ -471,7 +471,10 @@ class PaygistixPaymentForm {
         
         form.addEventListener('submit', (e) => {
             e.preventDefault(); // Prevent default form submission
-            console.log('Payment form submitted - opening in popup');
+            console.log('Payment form submit event triggered');
+            console.log('Form context:', this.payContext);
+            console.log('Event type:', e.type);
+            console.log('Event target:', e.target);
             
             // Update return URL with context information
             const returnUrlField = form.querySelector('#returnUrlField');
@@ -583,12 +586,14 @@ class PaygistixPaymentForm {
                     }
                 });
             } else {
-                // For non-registration payments, just open window and submit
+                // For non-registration payments (ORDER context), just open window and submit
+                console.log('ORDER context - opening payment window');
                 const width = 800;
                 const height = 600;
                 const left = (window.screen.width - width) / 2;
                 const top = (window.screen.height - height) / 2;
                 
+                console.log('Opening popup window for Paygistix payment');
                 const paymentWindow = window.open('about:blank', 'paygistixPayment', 
                     `width=${width},height=${height},left=${left},top=${top},resizable=yes,scrollbars=yes`);
                 

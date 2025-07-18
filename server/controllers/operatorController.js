@@ -660,7 +660,9 @@ exports.scanCustomer = async (req, res) => {
         estimatedWeight: currentOrder.estimatedWeight,
         actualWeight: currentOrder.actualWeight,
         status: currentOrder.status,
-        bags: currentOrder.bags || [] // Include bags array
+        bags: currentOrder.bags || [], // Include bags array
+        addOns: currentOrder.addOns, // Include addOns
+        addOnTotal: currentOrder.addOnTotal // Include addOn total
       }
     };
     
