@@ -147,22 +147,19 @@ describe('Affiliate Model - Additional Coverage', () => {
         zipCode: '12345',
         serviceLatitude: 30.0,
         serviceLongitude: -97.0,
-        paymentMethod: 'directDeposit',
-        accountNumber: '1234567890',
-        routingNumber: '123456789',
+        paymentMethod: 'paypal',
         paypalEmail: 'paypal@example.com',
+        venmoHandle: '@testuser-venmo',
         passwordHash: 'hash',
         passwordSalt: 'salt'
       });
       
       await affiliate.save();
       
-      expect(encryptionUtil.encrypt).toHaveBeenCalledWith('1234567890');
-      expect(encryptionUtil.encrypt).toHaveBeenCalledWith('123456789');
       expect(encryptionUtil.encrypt).toHaveBeenCalledWith('paypal@example.com');
-      expect(affiliate.accountNumber).toBe('encrypted_1234567890');
-      expect(affiliate.routingNumber).toBe('encrypted_123456789');
+      expect(encryptionUtil.encrypt).toHaveBeenCalledWith('@testuser-venmo');
       expect(affiliate.paypalEmail).toBe('encrypted_paypal@example.com');
+      expect(affiliate.venmoHandle).toBe('encrypted_@testuser-venmo');
     });
 
     it('should not encrypt non-string values', async () => {
@@ -181,9 +178,8 @@ describe('Affiliate Model - Additional Coverage', () => {
         paymentMethod: 'check',
         passwordHash: 'hash',
         passwordSalt: 'salt',
-        accountNumber: null,
-        routingNumber: undefined,
-        paypalEmail: 123 // number instead of string
+        paypalEmail: 123, // number instead of string
+        venmoHandle: null
       });
       
       // Clear previous calls
@@ -211,9 +207,8 @@ describe('Affiliate Model - Additional Coverage', () => {
         paymentMethod: 'check',
         passwordHash: 'hash',
         passwordSalt: 'salt',
-        accountNumber: 'encrypted_existing',
-        routingNumber: 'encrypted_existing',
-        paypalEmail: 'encrypted_existing'
+        paypalEmail: 'encrypted_existing',
+        venmoHandle: 'encrypted_existing'
       });
       
       await affiliate.save();

@@ -152,6 +152,35 @@ describe('Model Tests', () => {
       // PayPal email should be saved (encryption is mocked in tests)
       expect(saved.paypalEmail).toBeDefined();
     });
+
+    it('should save affiliate with venmo payment method', async () => {
+      const affiliate = new Affiliate({
+        firstName: 'Test',
+        lastName: 'User',
+        email: 'test@example.com',
+        username: 'testuser',
+        passwordHash: 'hash',
+        passwordSalt: 'salt',
+        phone: '555-123-4567',
+        address: '123 Main St',
+        city: 'Austin',
+        state: 'TX',
+        zipCode: '78701',
+        serviceArea: 'Downtown',
+        minimumDeliveryFee: 25,
+        perBagDeliveryFee: 5,
+        serviceLatitude: 30.2672,
+        serviceLongitude: -97.7431,
+        serviceRadius: 10,
+        paymentMethod: 'venmo',
+        venmoHandle: '@testuser-venmo'
+      });
+
+      const saved = await affiliate.save();
+      expect(saved.paymentMethod).toBe('venmo');
+      // Venmo handle should be saved (encryption is mocked in tests)
+      expect(saved.venmoHandle).toBeDefined();
+    });
   });
 
   describe('Customer Model', () => {

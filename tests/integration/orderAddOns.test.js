@@ -54,7 +54,7 @@ describe('Order API - Add-on Functionality Integration Tests', () => {
       serviceLongitude: -97.7431,
       minimumDeliveryFee: 15,
       perBagDeliveryFee: 5,
-      paymentMethod: 'directDeposit',
+      paymentMethod: 'check',
       isActive: true
     });
 

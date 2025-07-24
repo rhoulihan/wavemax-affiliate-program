@@ -169,32 +169,30 @@
 
     // Show/hide payment method fields based on selection
     const paymentMethodSelect = document.getElementById('paymentMethod');
-    const bankInfoContainer = document.getElementById('bankInfoContainer');
     const paypalInfoContainer = document.getElementById('paypalInfoContainer');
-    const accountNumberInput = document.getElementById('accountNumber');
-    const routingNumberInput = document.getElementById('routingNumber');
+    const venmoInfoContainer = document.getElementById('venmoInfoContainer');
     const paypalEmailInput = document.getElementById('paypalEmail');
+    const venmoHandleInput = document.getElementById('venmoHandle');
 
     if (paymentMethodSelect) {
       paymentMethodSelect.addEventListener('change', function() {
       // Reset required fields
-        accountNumberInput.required = false;
-        routingNumberInput.required = false;
         paypalEmailInput.required = false;
+        venmoHandleInput.required = false;
 
         // Hide all containers first
-        bankInfoContainer.classList.add('hidden');
         paypalInfoContainer.classList.add('hidden');
+        venmoInfoContainer.classList.add('hidden');
 
         // Show relevant container based on selection
-        if (this.value === 'directDeposit') {
-          bankInfoContainer.classList.remove('hidden');
-          accountNumberInput.required = true;
-          routingNumberInput.required = true;
-        } else if (this.value === 'paypal') {
+        if (this.value === 'paypal') {
           paypalInfoContainer.classList.remove('hidden');
           paypalEmailInput.required = true;
+        } else if (this.value === 'venmo') {
+          venmoInfoContainer.classList.remove('hidden');
+          venmoHandleInput.required = true;
         }
+        // Check payment method doesn't require additional fields
       });
     }
 
@@ -280,14 +278,12 @@
 
       // Check payment method specific fields
       const paymentMethod = document.getElementById('paymentMethod')?.value;
-      if (paymentMethod === 'directDeposit') {
-        const accountNumber = document.getElementById('accountNumber');
-        const routingNumber = document.getElementById('routingNumber');
-        if (!accountNumber?.value.trim()) missingFields.push('Account Number');
-        if (!routingNumber?.value.trim()) missingFields.push('Routing Number');
-      } else if (paymentMethod === 'paypal') {
+      if (paymentMethod === 'paypal') {
         const paypalEmail = document.getElementById('paypalEmail');
         if (!paypalEmail?.value.trim()) missingFields.push('PayPal Email');
+      } else if (paymentMethod === 'venmo') {
+        const venmoHandle = document.getElementById('venmoHandle');
+        if (!venmoHandle?.value.trim()) missingFields.push('Venmo Handle');
       }
 
       // If we have field validation errors, add them to missing fields
@@ -1159,17 +1155,18 @@
             }
           }
 
-          if (affiliateData.paymentMethod === 'directDeposit') {
-            if (!affiliateData.accountNumber) {
-              const accountNumberEl = document.getElementById('accountNumber');
-              if (accountNumberEl) {
-                affiliateData.accountNumber = accountNumberEl.value;
+          if (affiliateData.paymentMethod === 'paypal') {
+            if (!affiliateData.paypalEmail) {
+              const paypalEmailEl = document.getElementById('paypalEmail');
+              if (paypalEmailEl) {
+                affiliateData.paypalEmail = paypalEmailEl.value;
               }
             }
-            if (!affiliateData.routingNumber) {
-              const routingNumberEl = document.getElementById('routingNumber');
-              if (routingNumberEl) {
-                affiliateData.routingNumber = routingNumberEl.value;
+          } else if (affiliateData.paymentMethod === 'venmo') {
+            if (!affiliateData.venmoHandle) {
+              const venmoHandleEl = document.getElementById('venmoHandle');
+              if (venmoHandleEl) {
+                affiliateData.venmoHandle = venmoHandleEl.value;
               }
             }
           }

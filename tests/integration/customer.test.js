@@ -48,7 +48,7 @@ describe('Customer Integration Tests', () => {
       username: 'johndoe',
       passwordHash: hash,
       passwordSalt: salt,
-      paymentMethod: 'directDeposit'
+      paymentMethod: 'check'
     });
     await testAffiliate.save();
 

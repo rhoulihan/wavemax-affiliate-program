@@ -41,9 +41,8 @@ exports.registerAffiliate = async (req, res) => {
       username,
       password,
       paymentMethod,
-      accountNumber,
-      routingNumber,
       paypalEmail,
+      venmoHandle,
       languagePreference
     } = req.body;
 
@@ -86,11 +85,11 @@ exports.registerAffiliate = async (req, res) => {
     });
 
     // Add payment information if provided
-    if (paymentMethod === 'directDeposit' && accountNumber && routingNumber) {
-      newAffiliate.accountNumber = accountNumber;
-      newAffiliate.routingNumber = routingNumber;
-    } else if (paymentMethod === 'paypal' && paypalEmail) {
+    if (paymentMethod === 'paypal' && paypalEmail) {
       newAffiliate.paypalEmail = paypalEmail;
+      // The encryption middleware will handle this automatically
+    } else if (paymentMethod === 'venmo' && venmoHandle) {
+      newAffiliate.venmoHandle = venmoHandle;
       // The encryption middleware will handle this automatically
     }
 
@@ -239,16 +238,13 @@ exports.updateAffiliateProfile = async (req, res) => {
     if (updates.paymentMethod) {
       affiliate.paymentMethod = updates.paymentMethod;
 
-      if (updates.paymentMethod === 'directDeposit') {
-        if (updates.accountNumber) {
-          affiliate.accountNumber = updates.accountNumber;
-        }
-        if (updates.routingNumber) {
-          affiliate.routingNumber = updates.routingNumber;
-        }
-      } else if (updates.paymentMethod === 'paypal') {
+      if (updates.paymentMethod === 'paypal') {
         if (updates.paypalEmail) {
           affiliate.paypalEmail = updates.paypalEmail;
+        }
+      } else if (updates.paymentMethod === 'venmo') {
+        if (updates.venmoHandle) {
+          affiliate.venmoHandle = updates.venmoHandle;
         }
       }
     }

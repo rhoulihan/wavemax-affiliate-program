@@ -142,7 +142,7 @@ describe('QuickBooks Export Integration Tests', () => {
         city: 'Houston',
         state: 'TX',
         zipCode: '77001',
-        paymentMethod: 'directDeposit',
+        paymentMethod: 'check',
         serviceArea: 'Houston Area',
         serviceLatitude: 29.7604,
         serviceLongitude: -95.3698,

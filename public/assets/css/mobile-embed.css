@@ -1,0 +1,201 @@
+/**
+ * Mobile Embed Styles
+ * Styles for when the WaveMAX app is embedded in an iframe on mobile devices
+ */
+
+/* When parent chrome is hidden */
+body.parent-chrome-hidden {
+  /* Remove any extra padding/margins that might be inherited */
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* Mobile view adjustments */
+body.is-mobile-view {
+  /* Ensure full width usage on mobile */
+  width: 100vw !important;
+  overflow-x: hidden;
+}
+
+body.is-mobile-view .container,
+body.is-mobile-view .container-fluid {
+  padding-left: 15px;
+  padding-right: 15px;
+  max-width: 100%;
+}
+
+/* Small screen adjustments (mobile + tablet) */
+body.is-small-screen {
+  /* Adjust font sizes for better mobile readability */
+  font-size: 16px; /* Prevents zoom on iOS */
+}
+
+body.is-small-screen .btn {
+  /* Make buttons more touch-friendly */
+  min-height: 44px;
+  padding: 12px 20px;
+}
+
+body.is-small-screen input,
+body.is-small-screen select,
+body.is-small-screen textarea {
+  /* Improve form element touch targets */
+  min-height: 44px;
+  font-size: 16px; /* Prevents zoom on iOS */
+}
+
+/* Hide desktop-only elements on mobile */
+body.is-mobile-view .desktop-only,
+body.is-small-screen .desktop-only {
+  display: none !important;
+}
+
+/* Show mobile-only elements */
+body.is-mobile-view .mobile-only {
+  display: block !important;
+}
+
+/* Tablet-specific adjustments */
+body.is-tablet-view {
+  /* Tablet-specific styles */
+}
+
+body.is-tablet-view .container {
+  max-width: 100%;
+  padding-left: 20px;
+  padding-right: 20px;
+}
+
+/* Responsive tables on mobile */
+body.is-mobile-view table {
+  display: block;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Stack form elements on mobile */
+body.is-mobile-view .form-row,
+body.is-mobile-view .row {
+  margin-left: 0;
+  margin-right: 0;
+}
+
+body.is-mobile-view .col,
+body.is-mobile-view [class*="col-"] {
+  padding-left: 0;
+  padding-right: 0;
+  margin-bottom: 15px;
+}
+
+/* Mobile navigation adjustments */
+body.is-mobile-view .navbar {
+  padding: 10px 15px;
+}
+
+body.is-mobile-view .navbar-brand {
+  font-size: 1.1rem;
+}
+
+/* Modal adjustments for mobile */
+body.is-mobile-view .modal-dialog {
+  margin: 0;
+  max-width: 100%;
+  height: 100%;
+}
+
+body.is-mobile-view .modal-content {
+  height: 100%;
+  border-radius: 0;
+}
+
+/* Card adjustments for mobile */
+body.is-mobile-view .card {
+  border-radius: 0;
+  margin-bottom: 1rem;
+}
+
+/* Service area map adjustments */
+body.is-mobile-view #map,
+body.is-mobile-view .leaflet-container {
+  height: 300px !important; /* Reduce height on mobile */
+}
+
+/* Pricing preview adjustments */
+body.is-mobile-view .pricing-preview {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+body.is-mobile-view .pricing-preview table {
+  min-width: 300px;
+}
+
+/* Loading spinner adjustments */
+body.is-mobile-view .loading {
+  padding: 20px;
+  font-size: 1rem;
+}
+
+/* Alert adjustments */
+body.is-mobile-view .alert {
+  margin: 10px;
+  border-radius: 4px;
+}
+
+/* Dashboard card adjustments */
+body.is-mobile-view .dashboard-card {
+  margin-bottom: 15px;
+}
+
+body.is-mobile-view .stat-value {
+  font-size: 1.5rem;
+}
+
+/* Responsive utilities */
+@media (max-width: 576px) {
+  body.is-mobile-view h1 { font-size: 1.75rem; }
+  body.is-mobile-view h2 { font-size: 1.5rem; }
+  body.is-mobile-view h3 { font-size: 1.25rem; }
+  body.is-mobile-view h4 { font-size: 1.1rem; }
+  body.is-mobile-view h5 { font-size: 1rem; }
+  body.is-mobile-view h6 { font-size: 0.9rem; }
+}
+
+/* Prevent horizontal scroll */
+body.is-mobile-view,
+body.is-mobile-view #app-container {
+  overflow-x: hidden !important;
+  max-width: 100vw !important;
+}
+
+/* Fix for iOS viewport issues */
+body.is-mobile-view {
+  -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Ensure inputs don't zoom on focus (iOS) */
+body.is-mobile-view input[type="text"],
+body.is-mobile-view input[type="email"],
+body.is-mobile-view input[type="number"],
+body.is-mobile-view input[type="tel"],
+body.is-mobile-view input[type="password"],
+body.is-mobile-view textarea,
+body.is-mobile-view select {
+  font-size: 16px !important;
+}
+
+/* Touch-friendly spacing */
+body.is-mobile-view a,
+body.is-mobile-view button {
+  min-height: 44px;
+  min-width: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Fix for sticky elements on mobile */
+body.is-mobile-view .sticky-top {
+  position: relative !important;
+}

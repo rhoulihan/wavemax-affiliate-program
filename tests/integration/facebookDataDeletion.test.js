@@ -91,7 +91,7 @@ describe('Facebook Data Deletion Integration Tests', () => {
         username: 'testaffiliate456',
         passwordHash: 'hashedpassword',
         passwordSalt: 'salt',
-        paymentMethod: 'directDeposit',
+        paymentMethod: 'check',
         socialAccounts: {
           facebook: {
             id: 'test-fb-456',
@@ -149,7 +149,7 @@ describe('Facebook Data Deletion Integration Tests', () => {
           username: 'testboth789',
           passwordHash: 'hashedpassword',
           passwordSalt: 'salt',
-          paymentMethod: 'directDeposit',
+          paymentMethod: 'check',
           socialAccounts: {
             facebook: {
               id: 'test-fb-789',

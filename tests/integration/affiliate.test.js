@@ -38,7 +38,7 @@ describe('Affiliate API', () => {
       username: 'testaffiliate',
       passwordSalt: 'testsalt',
       passwordHash: 'testhash',
-      paymentMethod: 'directDeposit'
+      paymentMethod: 'check'
     });
 
     await testAffiliate.save();
@@ -76,7 +76,7 @@ describe('Affiliate API', () => {
         perBagDeliveryFee: 5,
         username: 'newaffiliate',
         password: getStrongPassword('affiliate', 1),
-        paymentMethod: 'directDeposit'
+        paymentMethod: 'check'
       });
 
     expect(res.statusCode).toEqual(201);
