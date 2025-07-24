@@ -2,12 +2,14 @@ const orderController = require('../../server/controllers/orderController');
 const Order = require('../../server/models/Order');
 const Customer = require('../../server/models/Customer');
 const Affiliate = require('../../server/models/Affiliate');
+const SystemConfig = require('../../server/models/SystemConfig');
 const emailService = require('../../server/utils/emailService');
 
 // Mock dependencies
 jest.mock('../../server/models/Order');
 jest.mock('../../server/models/Customer');
 jest.mock('../../server/models/Affiliate');
+jest.mock('../../server/models/SystemConfig');
 jest.mock('../../server/utils/emailService');
 
 describe('Order Controller', () => {
@@ -24,6 +26,17 @@ describe('Order Controller', () => {
       json: jest.fn()
     };
     jest.clearAllMocks();
+    
+    // Mock SystemConfig
+    SystemConfig.getValue = jest.fn().mockImplementation((key, defaultValue) => {
+      const values = {
+        'delivery_minimum_fee': 10.00,
+        'delivery_per_bag_fee': 2.00,
+        'wdf_base_rate_per_pound': 1.25,
+        'wdf_add_on_per_pound': 0.10
+      };
+      return Promise.resolve(values[key] || defaultValue);
+    });
   });
 
   describe('createOrder', () => {
@@ -37,12 +50,26 @@ describe('Order Controller', () => {
 
       const mockAffiliate = {
         affiliateId: 'AFF123',
-        deliveryFee: 5.99
+        deliveryFee: 5.99,
+        perBagFee: 2.00,
+        firstName: 'Test',
+        lastName: 'Affiliate'
       };
 
       const mockOrder = {
         orderId: 'ORD123456',
         estimatedTotal: 49.46,
+        _id: 'mockOrderId',
+        bagCreditApplied: 0,
+        wdfCreditApplied: 0,
+        addOns: undefined,
+        addOnTotal: undefined,
+        toObject: jest.fn().mockReturnValue({
+          orderId: 'ORD123456',
+          estimatedTotal: 49.46,
+          bagCreditApplied: 0,
+          wdfCreditApplied: 0
+        }),
         save: jest.fn()
       };
       mockOrder.save.mockResolvedValue(mockOrder);
@@ -65,6 +92,7 @@ describe('Order Controller', () => {
         Object.assign(this, mockOrder);
         return Promise.resolve(this);
       });
+      Order.findById = jest.fn().mockResolvedValue(mockOrder);
       emailService.sendCustomerOrderConfirmationEmail.mockResolvedValue();
       emailService.sendAffiliateNewOrderEmail.mockResolvedValue();
 
@@ -77,16 +105,37 @@ describe('Order Controller', () => {
         success: true,
         orderId: 'ORD123456',
         estimatedTotal: 49.46,
+        bagCreditApplied: 0,
+        wdfCreditApplied: 0,
+        addOns: undefined,
+        addOnTotal: undefined,
         message: 'Pickup scheduled successfully!'
       });
     });
 
     it('should handle email sending failures gracefully', async () => {
       const mockCustomer = { customerId: 'CUST123', save: jest.fn().mockResolvedValue(true) };
-      const mockAffiliate = { affiliateId: 'AFF123', deliveryFee: 5.99 };
+      const mockAffiliate = {
+        affiliateId: 'AFF123',
+        deliveryFee: 5.99,
+        perBagFee: 2.00,
+        firstName: 'Test',
+        lastName: 'Affiliate'
+      };
       const mockOrder = {
         orderId: 'ORD123456',
         estimatedTotal: 49.46,
+        _id: 'mockOrderId',
+        bagCreditApplied: 0,
+        wdfCreditApplied: 0,
+        addOns: undefined,
+        addOnTotal: undefined,
+        toObject: jest.fn().mockReturnValue({
+          orderId: 'ORD123456',
+          estimatedTotal: 49.46,
+          bagCreditApplied: 0,
+          wdfCreditApplied: 0
+        }),
         save: jest.fn()
       };
       mockOrder.save.mockResolvedValue(mockOrder);
@@ -106,6 +155,7 @@ describe('Order Controller', () => {
         Object.assign(this, mockOrder);
         return Promise.resolve(this);
       });
+      Order.findById = jest.fn().mockResolvedValue(mockOrder);
       emailService.sendCustomerOrderConfirmationEmail.mockRejectedValue(new Error('Email failed'));
       emailService.sendAffiliateNewOrderEmail.mockRejectedValue(new Error('Email failed'));
 
@@ -116,6 +166,10 @@ describe('Order Controller', () => {
         success: true,
         orderId: 'ORD123456',
         estimatedTotal: 49.46,
+        bagCreditApplied: 0,
+        wdfCreditApplied: 0,
+        addOns: undefined,
+        addOnTotal: undefined,
         message: 'Pickup scheduled successfully!'
       });
     });
