@@ -5,42 +5,65 @@ const Order = require('../../server/models/Order');
 const Affiliate = require('../../server/models/Affiliate');
 const SystemConfig = require('../../server/models/SystemConfig');
 const { createTestAffiliate, createTestCustomer, cleanupTestData } = require('../testUtils');
+const { getCsrfToken, createAgent } = require('../helpers/csrfHelper');
 
 describe('Bag Credit Functionality', () => {
   let testAffiliate;
   let testCustomer;
   let authToken;
+  let agent;
+  let csrfToken;
 
-  beforeAll(async () => {
+  beforeEach(async () => {
+    // Create agent for session handling
+    agent = createAgent(app);
+    
     // Setup test data
     testAffiliate = await createTestAffiliate();
     testCustomer = await createTestCustomer(testAffiliate.affiliateId);
     
-    // Set customer's bag credit
-    testCustomer.bagCredit = 25; // $25 bag credit
-    testCustomer.bagCreditApplied = false;
-    await testCustomer.save();
+    // Customer is created with default values (no bag credit)
+
+    // Get CSRF token
+    csrfToken = await getCsrfToken(app, agent);
 
     // Login to get auth token
-    const loginRes = await request(app)
-      .post('/api/auth/login')
+    const loginRes = await agent
+      .post('/api/v1/auth/customer/login')
+      .set('x-csrf-token', csrfToken)
       .send({
         username: testCustomer.username,
         password: 'password123'
       });
+    
+    // Check if login was successful
+    if (loginRes.status !== 200) {
+      console.error('Login failed:', loginRes.body);
+      console.error('Customer username:', testCustomer.username);
+    }
+    
+    expect(loginRes.status).toBe(200);
+    expect(loginRes.body.token).toBeDefined();
     authToken = loginRes.body.token;
 
-    // Ensure system config values exist
+    // Ensure system config values exist - initialize defaults first
+    await SystemConfig.initializeDefaults();
+    
+    // Then set specific values if needed
     await SystemConfig.setValue('wdf_base_rate_per_pound', 1.25);
-    await SystemConfig.setValue('affiliate_default_min_delivery_fee', 5.00);
-    await SystemConfig.setValue('affiliate_default_per_bag_fee', 2.00);
+    await SystemConfig.setValue('delivery_minimum_fee', 5.00);
+    await SystemConfig.setValue('delivery_per_bag_fee', 2.00);
   });
 
-  afterAll(async () => {
+  afterEach(async () => {
     await cleanupTestData();
   });
 
   test('Should apply bag credit to first order', async () => {
+    // Set customer's bag credit for this test
+    testCustomer.bagCredit = 25; // $25 bag credit
+    testCustomer.bagCreditApplied = false;
+    await testCustomer.save();
     const orderData = {
       customerId: testCustomer.customerId,
       affiliateId: testAffiliate.affiliateId,
@@ -55,9 +78,10 @@ describe('Bag Credit Functionality', () => {
       }
     };
 
-    const res = await request(app)
-      .post('/api/orders')
+    const res = await agent
+      .post('/api/v1/orders')
       .set('Authorization', `Bearer ${authToken}`)
+      .set('x-csrf-token', csrfToken)
       .send(orderData);
 
     expect(res.status).toBe(201);
@@ -83,6 +107,10 @@ describe('Bag Credit Functionality', () => {
   });
 
   test('Should not apply bag credit to second order', async () => {
+    // Ensure customer has no bag credit for this test
+    expect(testCustomer.bagCredit).toBe(0);
+    expect(testCustomer.bagCreditApplied).toBe(false);
+    
     // Create another order
     const orderData = {
       customerId: testCustomer.customerId,
@@ -93,9 +121,10 @@ describe('Bag Credit Functionality', () => {
       numberOfBags: 1
     };
 
-    const res = await request(app)
-      .post('/api/orders')
+    const res = await agent
+      .post('/api/v1/orders')
       .set('Authorization', `Bearer ${authToken}`)
+      .set('x-csrf-token', csrfToken)
       .send(orderData);
 
     expect(res.status).toBe(201);
