@@ -71,8 +71,36 @@
           if (viewportData.isTablet) {
             document.body.classList.add('is-tablet-view');
           }
+          
+          // Request chrome hiding on mobile/tablet
+          if (window.parent !== window) {
+            window.parent.postMessage({
+              type: 'manage-chrome',
+              data: {
+                hideChrome: true,
+                isMobile: viewportData.isMobile,
+                isTablet: viewportData.isTablet,
+                width: viewportData.width,
+                height: viewportData.height
+              }
+            }, '*');
+          }
         } else {
           document.body.classList.remove('is-mobile-view', 'is-tablet-view');
+          
+          // Request chrome showing on desktop
+          if (window.parent !== window) {
+            window.parent.postMessage({
+              type: 'manage-chrome',
+              data: {
+                hideChrome: false,
+                isMobile: false,
+                isTablet: false,
+                width: viewportData.width,
+                height: viewportData.height
+              }
+            }, '*');
+          }
         }
       }
       break;
@@ -99,60 +127,12 @@
     }
   }
 
-  // Mobile detection and parent chrome management
-  function detectMobileAndManageChrome() {
-    const isMobile = window.innerWidth <= 768;
-    const isTablet = window.innerWidth > 768 && window.innerWidth <= 1024;
-    const isSmallScreen = window.innerWidth <= 1024;
-    
-    // If we're in an iframe, send message to parent to hide/show chrome
-    if (window.parent !== window) {
-      window.parent.postMessage({
-        type: 'manage-chrome',
-        data: {
-          hideChrome: isSmallScreen,
-          isMobile: isMobile,
-          isTablet: isTablet,
-          width: window.innerWidth,
-          height: window.innerHeight
-        }
-      }, '*');
-      
-      // Also update local classes
-      if (isSmallScreen) {
-        document.body.classList.add('parent-chrome-hidden');
-      } else {
-        document.body.classList.remove('parent-chrome-hidden');
-      }
-    }
-    
-    // Update viewport classes
-    document.body.classList.toggle('is-mobile-view', isMobile);
-    document.body.classList.toggle('is-tablet-view', isTablet);
-    document.body.classList.toggle('is-small-screen', isSmallScreen);
-  }
-
   // Initialize when DOM is ready
   function init() {
     console.log('Embed navigation initialized');
 
     // Set up message listener for parent communication
     window.addEventListener('message', handleParentMessage);
-    
-    // Initial mobile detection and chrome management
-    detectMobileAndManageChrome();
-    
-    // Watch for window resize to handle orientation changes
-    let resizeTimeout;
-    window.addEventListener('resize', function() {
-      clearTimeout(resizeTimeout);
-      resizeTimeout = setTimeout(detectMobileAndManageChrome, 250);
-    });
-    
-    // Also listen for orientation change
-    window.addEventListener('orientationchange', function() {
-      setTimeout(detectMobileAndManageChrome, 100);
-    });
 
     // Handle all navigation links with data-navigate attribute
     document.addEventListener('click', function(e) {
