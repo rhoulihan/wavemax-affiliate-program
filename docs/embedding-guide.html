@@ -325,7 +325,10 @@
         }
     });
 })();
-&lt;/script&gt;</code></pre>
+&lt;/script&gt;
+
+&lt;!-- Optional: Include parent-iframe bridge for mobile chrome hiding --&gt;
+&lt;script src="https://wavemax.promo/assets/js/parent-iframe-bridge.js"&gt;&lt;/script&gt;</code></pre>
 
             <h2>Simple Alternative (Recommended)</h2>
             
@@ -398,6 +401,21 @@
                     <p>Professional swirl spinner and smart address validation</p>
                 </div>
             </div>
+            
+            <h2>Mobile Chrome Hiding (Optional)</h2>
+            
+            <p>For the best mobile experience, include the parent-iframe bridge script to automatically hide your site's header and footer on mobile devices:</p>
+            
+            <pre><code>&lt;!-- Add this line after your iframe implementation --&gt;
+&lt;script src="https://wavemax.promo/assets/js/parent-iframe-bridge.js"&gt;&lt;/script&gt;</code></pre>
+            
+            <p>This feature:</p>
+            <ul>
+                <li>Automatically detects mobile devices (≤1024px width)</li>
+                <li>Hides parent page headers, footers, and navigation on mobile</li>
+                <li>Shows them again on desktop screens</li>
+                <li>Provides a full-screen experience for mobile users</li>
+            </ul>
 
             <h2>URL Parameters</h2>
             
