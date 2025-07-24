@@ -55,9 +55,8 @@ describe('Affiliate Controller', () => {
         deliveryFee: '5.99',
         username: 'johndoe',
         password: 'password123',
-        paymentMethod: 'directDeposit',
-        accountNumber: '123456789',
-        routingNumber: '987654321'
+        paymentMethod: 'venmo',
+        venmoHandle: '@johndoe'
       };
 
       validationResult.mockReturnValue({
@@ -388,18 +387,16 @@ describe('Affiliate Controller', () => {
       req.params.affiliateId = 'AFF123';
       req.user = { role: 'admin' };
       req.body = {
-        paymentMethod: 'directDeposit',
-        accountNumber: '123456789',
-        routingNumber: '987654321'
+        paymentMethod: 'venmo',
+        venmoHandle: '@aff123-venmo'
       };
 
       Affiliate.findOne.mockResolvedValue(mockAffiliate);
 
       await affiliateController.updateAffiliateProfile(req, res);
 
-      expect(mockAffiliate.paymentMethod).toBe('directDeposit');
-      expect(mockAffiliate.accountNumber).toBe('123456789');
-      expect(mockAffiliate.routingNumber).toBe('987654321');
+      expect(mockAffiliate.paymentMethod).toBe('venmo');
+      expect(mockAffiliate.venmoHandle).toBe('@aff123-venmo');
       expect(mockAffiliate.save).toHaveBeenCalled();
     });
   });

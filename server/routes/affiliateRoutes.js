@@ -28,7 +28,7 @@ router.post('/register', registrationLimiter, [
   body('perBagDeliveryFee').optional().isNumeric().withMessage('Per-bag delivery fee must be a number'),
   body('username').notEmpty().withMessage('Username is required'),
   body('password').custom(customPasswordValidator()),
-  body('paymentMethod').isIn(['directDeposit', 'check', 'paypal']).withMessage('Invalid payment method')
+  body('paymentMethod').isIn(['check', 'paypal', 'venmo']).withMessage('Invalid payment method')
 ], handleValidationErrors, affiliateController.registerAffiliate);
 
 /**

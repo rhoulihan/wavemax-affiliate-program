@@ -34,7 +34,7 @@ describe('Affiliate Customer Filtering Integration Tests', () => {
       username: 'john@testaffiliate.com',
       passwordSalt: salt,
       passwordHash: hash,
-      paymentMethod: 'directDeposit',
+      paymentMethod: 'check',
       isActive: true
     });
     await testAffiliate.save();
