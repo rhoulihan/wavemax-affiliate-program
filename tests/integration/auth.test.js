@@ -51,7 +51,7 @@ describe('Authentication Integration Tests', () => {
         username: 'johndoe',
         passwordHash: hash,
         passwordSalt: salt,
-        paymentMethod: 'directDeposit'
+        paymentMethod: 'check'
       });
       await affiliate.save();
 
@@ -97,7 +97,7 @@ describe('Authentication Integration Tests', () => {
         serviceRadius: 10,
         minimumDeliveryFee: 25,
         perBagDeliveryFee: 5,
-        paymentMethod: 'directDeposit'
+        paymentMethod: 'check'
       });
       await affiliate.save();
 
@@ -153,7 +153,7 @@ describe('Authentication Integration Tests', () => {
         username: 'johndoe',
         passwordHash: 'hash',
         passwordSalt: 'salt',
-        paymentMethod: 'directDeposit'
+        paymentMethod: 'check'
       });
       await affiliate.save();
 
@@ -222,7 +222,7 @@ describe('Authentication Integration Tests', () => {
         username: 'johndoe',
         passwordHash: 'hash',
         passwordSalt: 'salt',
-        paymentMethod: 'directDeposit'
+        paymentMethod: 'check'
       });
       await affiliate.save();
 
@@ -291,7 +291,7 @@ describe('Authentication Integration Tests', () => {
         username: 'johndoe',
         passwordHash: 'hash',
         passwordSalt: 'salt',
-        paymentMethod: 'directDeposit'
+        paymentMethod: 'check'
       });
       await affiliate.save();
 
@@ -360,7 +360,7 @@ describe('Authentication Integration Tests', () => {
         username: 'johndoe',
         passwordHash: 'hash',
         passwordSalt: 'salt',
-        paymentMethod: 'directDeposit'
+        paymentMethod: 'check'
       });
       await affiliate.save();
 
@@ -443,7 +443,7 @@ describe('Authentication Integration Tests', () => {
         username: 'johndoe',
         passwordHash: hash,
         passwordSalt: salt,
-        paymentMethod: 'directDeposit'
+        paymentMethod: 'check'
       });
       await affiliate.save();
 
@@ -518,7 +518,7 @@ describe('Authentication Integration Tests', () => {
         username: 'johndoe',
         passwordHash: hash,
         passwordSalt: salt,
-        paymentMethod: 'directDeposit'
+        paymentMethod: 'check'
       });
       await affiliate.save();
 
@@ -582,7 +582,7 @@ describe('Authentication Integration Tests', () => {
         username: 'johndoe',
         passwordHash: hash,
         passwordSalt: salt,
-        paymentMethod: 'directDeposit'
+        paymentMethod: 'check'
       });
       await affiliate.save();
 
@@ -633,7 +633,7 @@ describe('Authentication Integration Tests', () => {
         username: 'johndoe',
         passwordHash: hash,
         passwordSalt: salt,
-        paymentMethod: 'directDeposit'
+        paymentMethod: 'check'
       });
       await affiliate.save();
 
@@ -710,7 +710,7 @@ describe('Authentication Integration Tests', () => {
         serviceRadius: 10,
         minimumDeliveryFee: 25,
         perBagDeliveryFee: 5,
-        paymentMethod: 'directDeposit'
+        paymentMethod: 'check'
       });
       await affiliate.save();
 
@@ -790,7 +790,7 @@ describe('Authentication Integration Tests', () => {
         username: 'johndoe',
         passwordHash: hash,
         passwordSalt: salt,
-        paymentMethod: 'directDeposit'
+        paymentMethod: 'check'
       });
       await affiliate.save();
 
@@ -868,7 +868,7 @@ describe('Authentication Integration Tests', () => {
         username: 'johndoe999',
         passwordHash: hash,
         passwordSalt: salt,
-        paymentMethod: 'directDeposit'
+        paymentMethod: 'check'
       });
       await affiliate.save();
 

@@ -65,7 +65,7 @@ describe('Social Auth Routes - Simple Tests', () => {
         errors.push({ msg: 'Service radius must be between 1 and 50 miles', param: 'serviceRadius' });
       }
 
-      if (req.body.paymentMethod && !['directDeposit', 'check', 'paypal'].includes(req.body.paymentMethod)) {
+      if (req.body.paymentMethod && !['check', 'paypal', 'venmo'].includes(req.body.paymentMethod)) {
         errors.push({ msg: 'Invalid payment method', param: 'paymentMethod' });
       }
 
@@ -345,6 +345,31 @@ describe('Social Auth Routes - Simple Tests', () => {
       expect(response.status).toBe(400);
       expect(response.body.errors).toBeDefined();
       expect(response.body.errors.some(err => err.msg === 'Invalid payment method')).toBe(true);
+    });
+
+    it('should accept valid payment methods including venmo', async () => {
+      const validPaymentMethods = ['check', 'paypal', 'venmo'];
+      
+      for (const paymentMethod of validPaymentMethods) {
+        const response = await request(app)
+          .post('/api/auth/social/register')
+          .send({
+            socialToken: 'valid-token',
+            phone: '123-456-7890',
+            address: '123 Main St',
+            city: 'Austin',
+            state: 'TX',
+            zipCode: '78701',
+            serviceLatitude: 30.2672,
+            serviceLongitude: -97.7431,
+            serviceRadius: 10,
+            paymentMethod: paymentMethod,
+            venmoHandle: paymentMethod === 'venmo' ? '@testuser' : undefined
+          });
+
+        expect(response.status).toBe(200);
+        expect(response.body.success).toBe(true);
+      }
     });
   });
 

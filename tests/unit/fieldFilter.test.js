@@ -191,8 +191,8 @@ describe('Field Filter Utility', () => {
       phone: '123-456-7890',
       businessName: 'Johns Laundry',
       deliveryFee: 5.99,
-      accountNumber: '123456789',
-      routingNumber: '987654321'
+      paymentMethod: 'venmo',
+      venmoHandle: '@johndoe'
     };
 
     it('should filter data based on admin role', () => {
@@ -211,7 +211,7 @@ describe('Field Filter Utility', () => {
       expect(result.businessName).toBe('Johns Laundry');
       expect(result.email).toBeUndefined();
       expect(result.phone).toBeUndefined();
-      expect(result.accountNumber).toBeUndefined();
+      expect(result.venmoHandle).toBeUndefined();
     });
 
     it('should handle self context for customers', () => {

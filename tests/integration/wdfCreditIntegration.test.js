@@ -60,7 +60,7 @@ describe('WDF Credit System Integration Tests', () => {
       username: 'testaffiliate',
       passwordSalt: 'salt',
       passwordHash: 'hash',
-      paymentMethod: 'directDeposit',
+      paymentMethod: 'check',
       serviceLatitude: 40.7128,
       serviceLongitude: -74.0060,
       minimumDeliveryFee: 25,

@@ -83,7 +83,7 @@ const affiliateSchema = new mongoose.Schema({
     required: function() {
       return this.registrationMethod === 'traditional' || !this.registrationMethod;
     },
-    enum: ['directDeposit', 'check', 'paypal'],
+    enum: ['check', 'paypal', 'venmo'],
     default: function() {
       if (this.registrationMethod && this.registrationMethod !== 'traditional') {
         return 'check'; // Default for social registrations
@@ -91,15 +91,11 @@ const affiliateSchema = new mongoose.Schema({
       return undefined;
     }
   },
-  accountNumber: {
-    type: mongoose.Schema.Types.Mixed,
-    default: undefined
-  },
-  routingNumber: {
-    type: mongoose.Schema.Types.Mixed,
-    default: undefined
-  },
   paypalEmail: {
+    type: mongoose.Schema.Types.Mixed,
+    default: undefined
+  },
+  venmoHandle: {
     type: mongoose.Schema.Types.Mixed,
     default: undefined
   },
@@ -209,16 +205,12 @@ affiliateSchema.pre('save', function(next) {
 
 // Middleware for encrypting sensitive payment data before saving
 affiliateSchema.pre('save', function(next) {
-  if (this.isModified('accountNumber') && this.accountNumber && typeof this.accountNumber === 'string') {
-    this.accountNumber = encryptionUtil.encrypt(this.accountNumber);
-  }
-
-  if (this.isModified('routingNumber') && this.routingNumber && typeof this.routingNumber === 'string') {
-    this.routingNumber = encryptionUtil.encrypt(this.routingNumber);
-  }
-
   if (this.isModified('paypalEmail') && this.paypalEmail && typeof this.paypalEmail === 'string') {
     this.paypalEmail = encryptionUtil.encrypt(this.paypalEmail);
+  }
+
+  if (this.isModified('venmoHandle') && this.venmoHandle && typeof this.venmoHandle === 'string') {
+    this.venmoHandle = encryptionUtil.encrypt(this.venmoHandle);
   }
 
   next();

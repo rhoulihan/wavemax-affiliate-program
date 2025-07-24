@@ -34,7 +34,7 @@ describe('Affiliate Model Methods', () => {
         zipCode: '12345',
         username: 'johndoe',
         password: 'StrongPassword123!',
-        paymentMethod: 'directDeposit'
+        paymentMethod: 'check'
       }));
 
       expect(affiliate.name).toBe('John Doe');
@@ -63,7 +63,7 @@ describe('Affiliate Model Methods', () => {
         zipCode: '12345',
         username: 'johndoe',
         password: 'StrongPassword123!',
-        paymentMethod: 'directDeposit',
+        paymentMethod: 'check',
         isActive: true,
         w9Information: {
           status: 'verified'
@@ -105,7 +105,7 @@ describe('Affiliate Model Methods', () => {
         zipCode: '12345',
         username: 'johndoe',
         password: 'StrongPassword123!',
-        paymentMethod: 'directDeposit',
+        paymentMethod: 'check',
         w9Information: {
           status: 'not_submitted'
         }
