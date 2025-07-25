@@ -509,6 +509,21 @@
                 console.log('[Parent-Iframe Bridge] Route changed, current chrome state:', chromeHidden ? 'hidden' : 'visible');
                 break;
                 
+            case 'manage-chrome':
+                console.log('[Parent-Iframe Bridge] Manage chrome requested:', event.data.data);
+                if (event.data.data && event.data.data.hideChrome) {
+                    // Hide chrome when requested by iframe on mobile/tablet
+                    if (event.data.data.isMobile || event.data.data.isTablet) {
+                        console.log('[Parent-Iframe Bridge] Hiding chrome for mobile/tablet view');
+                        hideChrome();
+                    }
+                } else {
+                    // Show chrome when requested
+                    console.log('[Parent-Iframe Bridge] Showing chrome');
+                    showChrome();
+                }
+                break;
+                
             // GEOCODING CASES
             case 'geocode-forward':
                 console.log('[Parent-Iframe Bridge] Forward geocoding requested:', event.data.data);

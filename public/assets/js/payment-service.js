@@ -1,6 +1,6 @@
 /**
  * WaveMAX Payment Service
- * Handles all payment-related API calls with CSRF protection
+ * Handles payment processing API calls with CSRF protection
  */
 
 (function(window) {
@@ -11,11 +11,9 @@
     config: {
       apiBase: '/api',
       endpoints: {
-        paymentMethods: '/payment-methods',
         processPayment: '/payments',
         paymentIntent: '/payment-intent',
-        paymentHistory: '/payment-history',
-        validateCard: '/validate-card'
+        paymentHistory: '/payment-history'
       }
     },
 
@@ -37,187 +35,6 @@
             options.headers['Authorization'] = `Bearer ${token}`;
           }
           return window.CsrfUtils ? window.CsrfUtils.csrfFetch(url, options) : fetch(url, options);
-        };
-      }
-    },
-
-    /**
-         * Get all payment methods for the current user
-         */
-    async getPaymentMethods() {
-      try {
-        const response = await this.authenticatedFetch(
-          `${this.config.apiBase}${this.config.endpoints.paymentMethods}`,
-          {
-            method: 'GET',
-            headers: {
-              'Content-Type': 'application/json'
-            }
-          }
-        );
-
-        const data = await response.json();
-
-        if (!response.ok) {
-          throw new Error(data.error || 'Failed to fetch payment methods');
-        }
-
-        return {
-          success: true,
-          methods: data.methods || []
-        };
-      } catch (error) {
-        console.error('Error fetching payment methods:', error);
-        return {
-          success: false,
-          error: error.message,
-          methods: []
-        };
-      }
-    },
-
-    /**
-         * Add a new payment method
-         */
-    async addPaymentMethod(methodData) {
-      try {
-        // Validate required fields
-        if (!methodData.type) {
-          throw new Error('Payment method type is required');
-        }
-
-        // Prepare the data based on method type
-        const paymentMethodData = this.prepareMethodData(methodData);
-
-        const response = await this.authenticatedFetch(
-          `${this.config.apiBase}${this.config.endpoints.paymentMethods}`,
-          {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(paymentMethodData)
-          }
-        );
-
-        const data = await response.json();
-
-        if (!response.ok) {
-          throw new Error(data.error || 'Failed to add payment method');
-        }
-
-        return {
-          success: true,
-          method: data.method
-        };
-      } catch (error) {
-        console.error('Error adding payment method:', error);
-        return {
-          success: false,
-          error: error.message
-        };
-      }
-    },
-
-    /**
-         * Update a payment method
-         */
-    async updatePaymentMethod(methodId, updates) {
-      try {
-        const response = await this.authenticatedFetch(
-          `${this.config.apiBase}${this.config.endpoints.paymentMethods}/${methodId}`,
-          {
-            method: 'PUT',
-            headers: {
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(updates)
-          }
-        );
-
-        const data = await response.json();
-
-        if (!response.ok) {
-          throw new Error(data.error || 'Failed to update payment method');
-        }
-
-        return {
-          success: true,
-          method: data.method
-        };
-      } catch (error) {
-        console.error('Error updating payment method:', error);
-        return {
-          success: false,
-          error: error.message
-        };
-      }
-    },
-
-    /**
-         * Delete a payment method
-         */
-    async deletePaymentMethod(methodId) {
-      try {
-        const response = await this.authenticatedFetch(
-          `${this.config.apiBase}${this.config.endpoints.paymentMethods}/${methodId}`,
-          {
-            method: 'DELETE',
-            headers: {
-              'Content-Type': 'application/json'
-            }
-          }
-        );
-
-        const data = await response.json();
-
-        if (!response.ok) {
-          throw new Error(data.error || 'Failed to delete payment method');
-        }
-
-        return {
-          success: true,
-          message: data.message
-        };
-      } catch (error) {
-        console.error('Error deleting payment method:', error);
-        return {
-          success: false,
-          error: error.message
-        };
-      }
-    },
-
-    /**
-         * Set a payment method as default
-         */
-    async setDefaultMethod(methodId) {
-      try {
-        const response = await this.authenticatedFetch(
-          `${this.config.apiBase}${this.config.endpoints.paymentMethods}/${methodId}/default`,
-          {
-            method: 'PUT',
-            headers: {
-              'Content-Type': 'application/json'
-            }
-          }
-        );
-
-        const data = await response.json();
-
-        if (!response.ok) {
-          throw new Error(data.error || 'Failed to set default payment method');
-        }
-
-        return {
-          success: true,
-          message: data.message
-        };
-      } catch (error) {
-        console.error('Error setting default payment method:', error);
-        return {
-          success: false,
-          error: error.message
         };
       }
     },
@@ -268,8 +85,8 @@
     async processPayment(paymentData) {
       try {
         // Validate required fields
-        if (!paymentData.amount || !paymentData.paymentMethodId) {
-          throw new Error('Amount and payment method are required');
+        if (!paymentData.amount) {
+          throw new Error('Amount is required');
         }
 
         // Create payment intent first if using a payment gateway
@@ -360,94 +177,6 @@
           error: error.message,
           payments: []
         };
-      }
-    },
-
-    /**
-         * Validate card details (for real-time validation)
-         */
-    async validateCard(cardNumber) {
-      try {
-        // Only send first 6 and last 4 digits for BIN checking
-        const sanitizedNumber = cardNumber.replace(/\s/g, '');
-        const validationData = {
-          bin: sanitizedNumber.slice(0, 6),
-          last4: sanitizedNumber.slice(-4)
-        };
-
-        const response = await this.authenticatedFetch(
-          `${this.config.apiBase}${this.config.endpoints.validateCard}`,
-          {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(validationData)
-          }
-        );
-
-        const data = await response.json();
-
-        if (!response.ok) {
-          throw new Error(data.error || 'Card validation failed');
-        }
-
-        return {
-          success: true,
-          valid: data.valid,
-          cardBrand: data.cardBrand,
-          cardType: data.cardType
-        };
-      } catch (error) {
-        console.error('Error validating card:', error);
-        return {
-          success: false,
-          error: error.message,
-          valid: false
-        };
-      }
-    },
-
-    /**
-         * Prepare method data based on type
-         */
-    prepareMethodData(methodData) {
-      const baseData = {
-        type: methodData.type,
-        nickname: methodData.nickname || '',
-        isDefault: methodData.isDefault || false
-      };
-
-      switch (methodData.type) {
-      case 'card':
-        return {
-          ...baseData,
-          // In production, you'd tokenize the card details first
-          cardToken: methodData.cardToken || 'test_token',
-          last4: methodData.last4 || '4242',
-          brand: methodData.brand || 'Visa',
-          expiryMonth: methodData.expiryMonth,
-          expiryYear: methodData.expiryYear
-        };
-
-      case 'bank':
-        return {
-          ...baseData,
-          // In production, you'd use Plaid or similar for bank accounts
-          accountToken: methodData.accountToken || 'test_bank_token',
-          last4: methodData.last4 || '6789',
-          bankName: methodData.bankName || 'Test Bank'
-        };
-
-      case 'paypal':
-        return {
-          ...baseData,
-          paypalEmail: methodData.email,
-          paypalId: methodData.paypalId
-        };
-
-      default:
-        return baseData;
       }
     },
 
