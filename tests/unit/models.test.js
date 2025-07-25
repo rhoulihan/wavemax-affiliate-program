@@ -27,7 +27,7 @@ describe('Model Tests', () => {
         username: 'johndoe',
         passwordHash: 'hashedpassword',
         passwordSalt: 'salt',
-        paymentMethod: 'directDeposit'
+        paymentMethod: 'check'
       };
 
       const affiliate = new Affiliate(affiliateData);
@@ -37,7 +37,7 @@ describe('Model Tests', () => {
       expect(saved.affiliateId).toMatch(/^AFF-[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/); // UUID format
       expect(saved.email).toBe('john@example.com');
       expect(saved.isActive).toBe(true); // Default value
-      expect(saved.paymentMethod).toBe('directDeposit');
+      expect(saved.paymentMethod).toBe('check');
     });
 
     it('should require required fields', async () => {
@@ -82,7 +82,7 @@ describe('Model Tests', () => {
         serviceLatitude: 30.2672,
         serviceLongitude: -97.7431,
         serviceRadius: 10,
-        paymentMethod: 'directDeposit'
+        paymentMethod: 'check'
       };
 
       await new Affiliate(affiliateData).save();
@@ -330,7 +330,7 @@ describe('Model Tests', () => {
         amount: 25.50,
         description: 'Commission for order ORD123456',
         orders: ['ORD123456'],
-        payoutMethod: 'directDeposit'
+        payoutMethod: 'check'
       });
 
       const saved = await transaction.save();
@@ -367,7 +367,7 @@ describe('Model Tests', () => {
         type: 'commission',
         amount: 25.50,
         description: 'Test transaction',
-        payoutMethod: 'directDeposit',
+        payoutMethod: 'check',
         status: 'invalid'
       });
 
