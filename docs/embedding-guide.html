@@ -327,8 +327,7 @@
 })();
 &lt;/script&gt;
 
-&lt;!-- Optional: Include parent-iframe bridge for mobile chrome hiding --&gt;
-&lt;script src="https://wavemax.promo/assets/js/parent-iframe-bridge.js"&gt;&lt;/script&gt;</code></pre>
+&lt;!-- Note: For full mobile chrome hiding support, use parent-iframe-bridge-inline.js --&gt;</code></pre>
 
             <h2>Simple Alternative (Recommended)</h2>
             
@@ -402,19 +401,24 @@
                 </div>
             </div>
             
-            <h2>Mobile Chrome Hiding (Optional)</h2>
+            <h2>Mobile Chrome Hiding</h2>
             
-            <p>For the best mobile experience, include the parent-iframe bridge script to automatically hide your site's header and footer on mobile devices:</p>
+            <p>For the best mobile experience, the WaveMAX application can automatically hide your site's header and footer on mobile devices. This feature is built into the <code>parent-iframe-bridge-inline.js</code> script.</p>
             
-            <pre><code>&lt;!-- Add this line after your iframe implementation --&gt;
-&lt;script src="https://wavemax.promo/assets/js/parent-iframe-bridge.js"&gt;&lt;/script&gt;</code></pre>
+            <p>To enable mobile chrome hiding:</p>
+            <ol>
+                <li>Use the complete parent-iframe-bridge-inline.js script (available in the documentation)</li>
+                <li>The script will automatically detect mobile devices (≤1024px width)</li>
+                <li>Headers, footers, and navigation will be hidden on mobile/tablet</li>
+                <li>They will automatically show again on desktop screens</li>
+            </ol>
             
-            <p>This feature:</p>
+            <p>The mobile chrome hiding feature:</p>
             <ul>
-                <li>Automatically detects mobile devices (≤1024px width)</li>
-                <li>Hides parent page headers, footers, and navigation on mobile</li>
-                <li>Shows them again on desktop screens</li>
                 <li>Provides a full-screen experience for mobile users</li>
+                <li>Works with the existing message handling</li>
+                <li>Includes smooth transitions</li>
+                <li>Preserves your site's chrome on desktop</li>
             </ul>
 
             <h2>URL Parameters</h2>

@@ -33,11 +33,6 @@ const PaymentSchema = new mongoose.Schema({
     required: true,
     index: true
   },
-  paymentMethodId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'PaymentMethod',
-    required: true
-  },
   paygistixId: {
     type: String,
     required: true,
