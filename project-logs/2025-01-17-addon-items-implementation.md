@@ -1,6 +1,6 @@
 # Add-on Items Feature Implementation
 **Date**: 2025-01-17
-**Status**: IN PROGRESS
+**Status**: COMPLETED
 **Feature**: Add premium service add-ons to schedule pickup form
 
 ## Overview
@@ -35,17 +35,17 @@ Implementing three add-on service options (Premium Detergent, Fabric Softener, S
 - [x] Add event listeners for add-on checkboxes
 - [x] Update add-on display with selected items
 
-### 4. API Updates ❌
+### 4. API Updates ✅
 **File**: `/server/controllers/orderController.js`
-- [ ] Update createOrder to accept addOns object
-- [ ] Validate add-on selections
-- [ ] Calculate and store addOnTotal
+- [x] Update createOrder to accept addOns object
+- [x] Validate add-on selections
+- [x] Calculate and store addOnTotal
 
-### 5. WDF Credit Calculation ❌
+### 5. WDF Credit Calculation ✅
 **File**: `/server/models/Order.js`
-- [ ] Update estimatedTotal calculation to include addOnTotal
-- [ ] Update actualTotal calculation to include addOnTotal
-- [ ] Ensure commission calculation excludes add-ons
+- [x] Update estimatedTotal calculation to include addOnTotal
+- [x] Update actualTotal calculation to include addOnTotal
+- [x] Ensure commission calculation excludes add-ons
 
 ### 6. Operator Interface Updates ✅
 **Files**: Updated

@@ -8,7 +8,6 @@ describe('Payment Model Unit Tests', () => {
     mockPayment = new Payment({
       orderId: new mongoose.Types.ObjectId(),
       customerId: new mongoose.Types.ObjectId(),
-      paymentMethodId: new mongoose.Types.ObjectId(),
       paygistixId: 'PAY-' + Date.now(),
       transactionId: 'TXN-123456',
       amount: 100.00,
@@ -40,13 +39,6 @@ describe('Payment Model Unit Tests', () => {
       expect(error.errors.customerId).toBeDefined();
     });
 
-    it('should require paymentMethodId', () => {
-      mockPayment.paymentMethodId = undefined;
-      const error = mockPayment.validateSync();
-      expect(error).toBeDefined();
-      expect(error.errors.paymentMethodId).toBeDefined();
-    });
-
     it('should require paygistixId', () => {
       mockPayment.paygistixId = undefined;
       const error = mockPayment.validateSync();
@@ -72,7 +64,6 @@ describe('Payment Model Unit Tests', () => {
       const payment = new Payment({
         orderId: new mongoose.Types.ObjectId(),
         customerId: new mongoose.Types.ObjectId(),
-        paymentMethodId: new mongoose.Types.ObjectId(),
         paygistixId: 'PAY-TEST',
         amount: 50.00
       });
@@ -121,7 +112,6 @@ describe('Payment Model Unit Tests', () => {
       const payment = new Payment({
         orderId: new mongoose.Types.ObjectId(),
         customerId: new mongoose.Types.ObjectId(),
-        paymentMethodId: new mongoose.Types.ObjectId(),
         paygistixId: 'PAY-TEST',
         amount: 50.00
       });
