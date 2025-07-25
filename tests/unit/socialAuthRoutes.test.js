@@ -367,7 +367,7 @@ describe('Social Auth Routes - Simple Tests', () => {
             venmoHandle: paymentMethod === 'venmo' ? '@testuser' : undefined
           });
 
-        expect(response.status).toBe(200);
+        expect(response.status).toBe(201);
         expect(response.body.success).toBe(true);
       }
     });

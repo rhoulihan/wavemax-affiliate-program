@@ -38,7 +38,7 @@ describe('Customer Dashboard WDF Credit Display', () => {
       passwordSalt: 'salt',
       passwordHash: 'hash',
       username: 'dashaffiliate',
-      paymentMethod: 'directDeposit',
+      paymentMethod: 'check',
       serviceLatitude: 40.7128,
       serviceLongitude: -74.0060
     });

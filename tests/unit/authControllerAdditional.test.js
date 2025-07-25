@@ -490,7 +490,7 @@ describe('Auth Controller - Additional Coverage', () => {
         zipCode: '12345',
         username: 'johndoe',
         password: 'securepass123',
-        paymentMethod: 'bank',
+        paymentMethod: 'check',
         accountNumber: '1234567890',
         routingNumber: '123456789',
         languagePreference: 'en'
@@ -566,7 +566,7 @@ describe('Auth Controller - Additional Coverage', () => {
         city: 'City',
         state: 'CA',
         zipCode: '12345',
-        paymentMethod: 'bank',
+        paymentMethod: 'check',
         accountNumber: '1234',
         routingNumber: '123456789'
       };

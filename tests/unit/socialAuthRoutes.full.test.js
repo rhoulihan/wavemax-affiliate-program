@@ -285,7 +285,7 @@ describe('Social Auth Routes - Full Coverage', () => {
           serviceRadius: 10,
           minimumDeliveryFee: 25,
           perBagDeliveryFee: 5,
-          paymentMethod: 'stripe'
+          paymentMethod: 'paypal'
         });
 
       expect(response.status).toBe(201);

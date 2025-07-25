@@ -71,9 +71,7 @@ router.post('/customer', async (req, res) => {
                 serviceLatitude: 30.2672,
                 serviceLongitude: -97.7431,
                 registrationMethod: 'traditional',
-                paymentMethod: 'directDeposit',
-                accountNumber: '123456789',
-                routingNumber: '987654321',
+                paymentMethod: 'check',
                 passwordSalt: affSalt,
                 passwordHash: affHash
             });

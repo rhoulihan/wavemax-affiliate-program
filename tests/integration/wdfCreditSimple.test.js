@@ -45,7 +45,7 @@ describe('WDF Credit Integration Test', () => {
         username: 'apiaffiliate',
         passwordSalt: 'salt',
         passwordHash: 'hash',
-        paymentMethod: 'directDeposit',
+        paymentMethod: 'check',
         serviceLatitude: 40.7128,
         serviceLongitude: -74.0060
       });

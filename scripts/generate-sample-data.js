@@ -141,7 +141,7 @@ async function generateAffiliates() {
     
     const longitude = -97.7431 + (Math.random() - 0.5) * 0.2; // Austin longitude +/- variance
     const latitude = 30.2672 + (Math.random() - 0.5) * 0.2;   // Austin latitude +/- variance
-    const paymentMethod = getRandomElement(['directDeposit', 'check', 'paypal']);
+    const paymentMethod = getRandomElement(['check', 'paypal', 'venmo']);
     
     // Hash the password
     const { salt, hash } = hashPassword(DEFAULT_PASSWORD);
@@ -173,11 +173,10 @@ async function generateAffiliates() {
     };
     
     // Add payment-specific fields based on payment method
-    if (paymentMethod === 'directDeposit') {
-      affiliateData.accountNumber = faker.finance.accountNumber();
-      affiliateData.routingNumber = faker.finance.routingNumber();
-    } else if (paymentMethod === 'paypal') {
+    if (paymentMethod === 'paypal') {
       affiliateData.paypalEmail = `${firstName.toLowerCase()}.${lastName.toLowerCase()}@paypal.com`;
+    } else if (paymentMethod === 'venmo') {
+      affiliateData.venmoHandle = `@${firstName.toLowerCase()}-${lastName.toLowerCase()}`;
     }
     
     const affiliate = new Affiliate(affiliateData);

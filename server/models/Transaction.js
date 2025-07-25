@@ -25,7 +25,7 @@ const transactionSchema = new mongoose.Schema({
   },
   payoutMethod: {
     type: String,
-    enum: ['directDeposit', 'check', 'paypal'],
+    enum: ['check', 'paypal', 'venmo'],
     required: true
   },
   payoutReference: String, // Reference number for the payout
