@@ -266,7 +266,7 @@ describe('Affiliate API', () => {
         amount: 10.43,
         description: 'Commission for order ORD001',
         status: 'pending',
-        payoutMethod: 'directDeposit'
+        payoutMethod: 'check'
       },
       {
         transactionId: 'TXN002',
@@ -275,7 +275,7 @@ describe('Affiliate API', () => {
         amount: -100.00,
         description: 'Weekly payout',
         status: 'completed',
-        payoutMethod: 'directDeposit',
+        payoutMethod: 'check',
         payoutReference: 'REF123'
       }
     ]);
