@@ -142,6 +142,220 @@ The project maintains a `docs/development/BACKLOG.md` file for tracking pending 
 4. **Collaborative decision-making**: Complex choices should involve discussion
 5. **Continuous improvement**: Learn from each session to work better together
 
+## WaveMAX Application Architecture & Implementation Guide
+
+### 1. **Core Architecture Overview**
+
+**Tech Stack:**
+- Backend: Node.js (v16+) with Express.js
+- Database: MongoDB with Mongoose ODM
+- Authentication: JWT tokens + Passport.js (Google, Facebook, LinkedIn OAuth)
+- Testing: Jest with Supertest
+- Process Management: PM2
+- Payment Processing: Paygistix (hosted form solution)
+- Email: Nodemailer with multiple provider support
+- Security: Helmet, CSRF protection, rate limiting, input sanitization
+
+**Key Architectural Patterns:**
+- RESTful API design with JWT authentication
+- Role-Based Access Control (RBAC) with hierarchical permissions
+- Embedded iframe architecture for white-label deployments
+- Single-page application router (embed-app-v2.html) for CSP compliance
+- Dynamic configuration via SystemConfig model
+- Encrypted sensitive data storage (payment info, OAuth tokens)
+
+### 2. **Database Schema & Business Logic**
+
+**Core Models:**
+- **Affiliate**: Service providers with geo-based service areas, commission tracking, W-9 tax compliance
+- **Customer**: End users linked to affiliates, WDF credit system, bag credit tracking
+- **Order**: Multi-stage workflow (pending → processing → processed → complete), bag tracking system
+- **Administrator**: System managers with role-based permissions
+- **Operator**: Store workers with PIN-based authentication for scanning operations
+- **SystemConfig**: Dynamic configuration storage (rates, fees, limits)
+
+**Key Business Rules:**
+- Affiliates earn commissions on customer orders (configurable via SystemConfig)
+- Delivery fees: minimum fee + per-bag charges (configurable per affiliate)
+- WDF Credit: Generated from weight differences, applied to future orders
+- Bag tracking: Individual QR codes for multi-stage scanning workflow
+- Payment: Handled entirely by Paygistix, no card data stored locally
+
+### 3. **API Structure & Authentication**
+
+**Authentication Flow:**
+1. Traditional: username/password → JWT token
+2. OAuth: Social provider → profile creation/linking → JWT token
+3. Store Operators: PIN-based auth with IP whitelisting support
+
+**Route Organization:**
+```
+/api/auth/* - Authentication endpoints
+/api/affiliates/* - Affiliate management
+/api/customers/* - Customer operations
+/api/orders/* - Order processing
+/api/administrators/* - Admin functions
+/api/operators/* - Operator management
+/api/system-config/* - Dynamic configuration
+/api/payments/* - Payment processing
+/api/w9/* - Tax document management
+```
+
+**RBAC Hierarchy:**
+- admin → administrator → operator → affiliate → customer
+- Middleware: `checkRole(['admin', 'administrator'])` for route protection
+
+### 4. **Frontend Architecture**
+
+**Embedding System:**
+- Main router: `embed-app-v2.html` - CSP-compliant single-page app
+- Dynamic page loading with script injection management
+- Parent-iframe communication via postMessage for mobile chrome hiding
+- Route mapping in `EMBED_PAGES` configuration
+
+**CSP Compliance:**
+- All JavaScript in external files (no inline scripts)
+- Nonce-based CSP for dynamic content
+- Scripts registered in `pageScripts` mapping for dynamic loading
+- Strict CSP applied to all embed pages
+
+**Mobile Support:**
+- Automatic chrome hiding on mobile devices
+- Viewport management via parent-iframe bridge
+- Touch-optimized UI components
+
+### 5. **Security Implementation**
+
+**Multi-Layer Security:**
+1. **Authentication**: JWT with blacklist support, token expiry
+2. **Authorization**: RBAC with resource ownership checks
+3. **Input Validation**: express-validator + Joi schemas
+4. **Sanitization**: MongoDB injection prevention, XSS protection
+5. **Rate Limiting**: Route-specific limits (auth, API endpoints)
+6. **CSRF Protection**: Token-based with conditional application
+7. **Encryption**: AES-256-GCM for sensitive data (payment info, SSNs)
+
+**Security Headers:**
+- Helmet.js configuration
+- Custom CSP with frame-ancestors for embedding
+- HSTS, X-Frame-Options, Permissions-Policy
+
+### 6. **Testing Patterns**
+
+**Test Organization:**
+- Unit tests: `/tests/unit/*` - Model methods, utilities, controllers
+- Integration tests: `/tests/integration/*` - Full API endpoint testing
+- Test helpers: CSRF token management, auth helpers, test data factories
+
+**Key Testing Patterns:**
+```javascript
+// CSRF-aware request pattern
+const csrfToken = await getCsrfToken(agent);
+const response = await agent
+  .post('/api/endpoint')
+  .set('x-csrf-token', csrfToken)
+  .send(data);
+
+// Auth testing pattern
+const token = createTestToken(userId, 'affiliate');
+await agent.get('/api/protected')
+  .set('Authorization', `Bearer ${token}`);
+```
+
+### 7. **Configuration & Integration Points**
+
+**SystemConfig Usage:**
+```javascript
+// Always fetch dynamic values
+const wdfRate = await SystemConfig.getValue('wdf_base_rate_per_pound', 1.25);
+const maxBags = await SystemConfig.getValue('max_bags_per_order', 10);
+```
+
+**External Integrations:**
+1. **Paygistix**: Hosted payment forms with callback handling
+2. **OAuth Providers**: Google, Facebook, LinkedIn for social auth
+3. **DocuSign**: W-9 tax form collection and verification
+4. **QuickBooks**: Financial data export (planned)
+5. **Email Services**: SMTP, SendGrid, Mailcow support
+
+### 8. **Common Implementation Patterns**
+
+**Error Handling:**
+```javascript
+try {
+  // Operation
+} catch (error) {
+  logger.error('Operation failed:', { 
+    error: error.message, 
+    userId: req.user?.id,
+    context: additionalData 
+  });
+  return res.status(500).json({ 
+    success: false, 
+    message: 'User-friendly error message' 
+  });
+}
+```
+
+**Response Format:**
+```javascript
+// Success
+res.json({ 
+  success: true, 
+  data: result,
+  message: 'Operation completed successfully' 
+});
+
+// Error
+res.status(400).json({ 
+  success: false, 
+  message: 'Validation error',
+  errors: validationErrors 
+});
+```
+
+**Mongoose Middleware Patterns:**
+- Pre-save: Password hashing, data encryption, validation
+- Virtual fields: Computed properties (fullName, commissions)
+- Careful with `isNew` checks for conditional validation
+
+### 9. **Deployment & Operations**
+
+**PM2 Management:**
+- Config: `ecosystem.config.js`
+- Commands: `pm2 restart wavemax`, `pm2 logs wavemax`
+- Log locations: `/root/.pm2/logs/`
+
+**Environment Variables:**
+- Required: MONGODB_URI, JWT_SECRET, ENCRYPTION_KEY
+- OAuth: Provider-specific client IDs and secrets
+- Paygistix: MERCHANT_ID, FORM_ID, FORM_HASH
+- Email: Provider configuration
+
+### 10. **Critical Implementation Notes**
+
+**Always Remember:**
+1. Use SystemConfig for ALL configurable values (rates, fees, limits)
+2. Test in both direct access AND embedded contexts
+3. Add scripts to pageScripts mapping in embed-app-v2.html
+4. Maintain translations for all 4 languages (en, es, pt, de)
+5. Use external JavaScript files only (CSP compliance)
+6. Follow existing patterns in neighboring code
+7. Run tests before committing changes
+8. Check for regression in related functionality
+9. Validate all user inputs thoroughly
+10. Log security-relevant events to audit log
+
+**Common Pitfalls to Avoid:**
+1. Hardcoding business values instead of using SystemConfig
+2. Adding inline JavaScript (blocked by CSP)
+3. Forgetting to update pageScripts mapping for embedded pages
+4. Not testing OAuth flows with real providers
+5. Storing sensitive data without encryption
+6. Missing CSRF tokens in state-changing requests
+7. Not handling floating-point precision in financial calculations
+8. Forgetting to initialize SystemConfig in tests
+
 ---
 
 **Ready to debug, build, and improve the WaveMAX codebase together! What are we working on today?**

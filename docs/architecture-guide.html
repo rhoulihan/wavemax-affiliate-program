@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WaveMAX Architecture & Implementation Guide</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            background-color: #f8f9fa;
+        }
+        .content {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            padding: 30px;
+            margin: 20px 0;
+        }
+        h1 {
+            color: #2c3e50;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 15px;
+            margin-bottom: 30px;
+        }
+        h2 {
+            color: #34495e;
+            margin-top: 40px;
+            margin-bottom: 20px;
+        }
+        h3 {
+            color: #7f8c8d;
+            margin-top: 25px;
+            margin-bottom: 15px;
+        }
+        .navbar {
+            background-color: #2c3e50;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .navbar-brand, .navbar-nav .nav-link {
+            color: white !important;
+        }
+        .navbar-nav .nav-link:hover {
+            color: #3498db !important;
+        }
+        pre {
+            background-color: #f4f4f4;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 15px;
+            overflow-x: auto;
+        }
+        code {
+            background-color: #f4f4f4;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-size: 90%;
+        }
+        .toc {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+        .toc h3 {
+            margin-top: 0;
+            color: #2c3e50;
+        }
+        .toc ul {
+            list-style-type: none;
+            padding-left: 0;
+        }
+        .toc ul li {
+            margin-bottom: 8px;
+        }
+        .toc ul li a {
+            color: #3498db;
+            text-decoration: none;
+        }
+        .toc ul li a:hover {
+            text-decoration: underline;
+        }
+        .alert-info {
+            background-color: #e3f2fd;
+            border-color: #2196f3;
+            color: #1565c0;
+        }
+        .alert-warning {
+            background-color: #fff3cd;
+            border-color: #ffc107;
+            color: #856404;
+        }
+        .tech-stack {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .tech-item {
+            background-color: #f8f9fa;
+            padding: 10px 15px;
+            border-radius: 5px;
+            border-left: 4px solid #3498db;
+        }
+        .business-rule {
+            background-color: #e8f5e9;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+            border-left: 4px solid #4caf50;
+        }
+        .pattern-example {
+            background-color: #f5f5f5;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 20px;
+            margin: 15px 0;
+        }
+        .security-layer {
+            background-color: #ffebee;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+            border-left: 4px solid #f44336;
+        }
+        .integration-point {
+            background-color: #f3e5f5;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+            border-left: 4px solid #9c27b0;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/docs/index.html">
+                <i class="fas fa-book me-2"></i>WaveMAX Documentation
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/docs/index.html">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/docs/api-reference.html">API Reference</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/docs/security-guide.html">Security</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/docs/architecture-guide.html">Architecture</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <div class="content">
+            <h1><i class="fas fa-sitemap me-3"></i>WaveMAX Architecture & Implementation Guide</h1>
+
+            <!-- Table of Contents -->
+            <div class="toc">
+                <h3><i class="fas fa-list me-2"></i>Table of Contents</h3>
+                <ul>
+                    <li><a href="#core-architecture">1. Core Architecture Overview</a></li>
+                    <li><a href="#database-schema">2. Database Schema & Business Logic</a></li>
+                    <li><a href="#api-structure">3. API Structure & Authentication</a></li>
+                    <li><a href="#frontend-architecture">4. Frontend Architecture</a></li>
+                    <li><a href="#security-implementation">5. Security Implementation</a></li>
+                    <li><a href="#testing-patterns">6. Testing Patterns</a></li>
+                    <li><a href="#configuration">7. Configuration & Integration Points</a></li>
+                    <li><a href="#implementation-patterns">8. Common Implementation Patterns</a></li>
+                    <li><a href="#deployment">9. Deployment & Operations</a></li>
+                    <li><a href="#critical-notes">10. Critical Implementation Notes</a></li>
+                </ul>
+            </div>
+
+            <div class="alert alert-info mb-4">
+                <i class="fas fa-info-circle me-2"></i>
+                This guide provides a comprehensive overview of the WaveMAX application architecture, patterns, and best practices for developers working on the codebase.
+            </div>
+
+            <!-- 1. Core Architecture Overview -->
+            <h2 id="core-architecture"><i class="fas fa-cube me-2"></i>1. Core Architecture Overview</h2>
+            
+            <h3>Tech Stack</h3>
+            <div class="tech-stack">
+                <div class="tech-item"><strong>Backend:</strong> Node.js (v16+) with Express.js</div>
+                <div class="tech-item"><strong>Database:</strong> MongoDB with Mongoose ODM</div>
+                <div class="tech-item"><strong>Authentication:</strong> JWT tokens + Passport.js (Google, Facebook, LinkedIn OAuth)</div>
+                <div class="tech-item"><strong>Testing:</strong> Jest with Supertest</div>
+                <div class="tech-item"><strong>Process Management:</strong> PM2</div>
+                <div class="tech-item"><strong>Payment Processing:</strong> Paygistix (hosted form solution)</div>
+                <div class="tech-item"><strong>Email:</strong> Nodemailer with multiple provider support</div>
+                <div class="tech-item"><strong>Security:</strong> Helmet, CSRF protection, rate limiting, input sanitization</div>
+            </div>
+
+            <h3>Key Architectural Patterns</h3>
+            <ul>
+                <li>RESTful API design with JWT authentication</li>
+                <li>Role-Based Access Control (RBAC) with hierarchical permissions</li>
+                <li>Embedded iframe architecture for white-label deployments</li>
+                <li>Single-page application router (embed-app-v2.html) for CSP compliance</li>
+                <li>Dynamic configuration via SystemConfig model</li>
+                <li>Encrypted sensitive data storage (payment info, OAuth tokens)</li>
+            </ul>
+
+            <!-- 2. Database Schema & Business Logic -->
+            <h2 id="database-schema"><i class="fas fa-database me-2"></i>2. Database Schema & Business Logic</h2>
+            
+            <h3>Core Models</h3>
+            <div class="business-rule">
+                <h4>Affiliate</h4>
+                <p>Service providers with geo-based service areas, commission tracking, W-9 tax compliance</p>
+                <ul>
+                    <li>Unique ID format: <code>AFF-{uuid}</code></li>
+                    <li>Service area defined by lat/lng coordinates + radius</li>
+                    <li>Payment methods: check, PayPal, Venmo</li>
+                    <li>Social OAuth support for registration</li>
+                </ul>
+            </div>
+
+            <div class="business-rule">
+                <h4>Customer</h4>
+                <p>End users linked to affiliates, WDF credit system, bag credit tracking</p>
+                <ul>
+                    <li>Unique ID format: <code>CUST-{uuid}</code></li>
+                    <li>Linked to single affiliate</li>
+                    <li>WDF credit balance tracking</li>
+                    <li>No payment data stored (handled by Paygistix)</li>
+                </ul>
+            </div>
+
+            <div class="business-rule">
+                <h4>Order</h4>
+                <p>Multi-stage workflow (pending → processing → processed → complete), bag tracking system</p>
+                <ul>
+                    <li>Unique ID format: <code>ORD{6-digit-random}</code></li>
+                    <li>Individual bag tracking with QR codes</li>
+                    <li>Weight-based pricing with dynamic rates</li>
+                    <li>Add-on services support</li>
+                </ul>
+            </div>
+
+            <div class="business-rule">
+                <h4>Administrator</h4>
+                <p>System managers with role-based permissions</p>
+                <ul>
+                    <li>Unique ID format: <code>ADM-{type}-{3-digit}</code></li>
+                    <li>Hierarchical permissions system</li>
+                    <li>Audit logging for all actions</li>
+                </ul>
+            </div>
+
+            <div class="business-rule">
+                <h4>Operator</h4>
+                <p>Store workers with PIN-based authentication for scanning operations</p>
+                <ul>
+                    <li>Unique ID format: <code>OP-{storeId}-{3-digit}</code></li>
+                    <li>PIN authentication for mobile devices</li>
+                    <li>Store IP whitelisting support</li>
+                </ul>
+            </div>
+
+            <div class="business-rule">
+                <h4>SystemConfig</h4>
+                <p>Dynamic configuration storage (rates, fees, limits)</p>
+                <ul>
+                    <li>Key-value storage with type validation</li>
+                    <li>Category-based organization</li>
+                    <li>Default values with override capability</li>
+                </ul>
+            </div>
+
+            <h3>Key Business Rules</h3>
+            <ul>
+                <li>Affiliates earn commissions on customer orders (configurable via SystemConfig)</li>
+                <li>Delivery fees: minimum fee + per-bag charges (configurable per affiliate)</li>
+                <li>WDF Credit: Generated from weight differences, applied to future orders</li>
+                <li>Bag tracking: Individual QR codes for multi-stage scanning workflow</li>
+                <li>Payment: Handled entirely by Paygistix, no card data stored locally</li>
+            </ul>
+
+            <!-- 3. API Structure & Authentication -->
+            <h2 id="api-structure"><i class="fas fa-network-wired me-2"></i>3. API Structure & Authentication</h2>
+            
+            <h3>Authentication Flow</h3>
+            <ol>
+                <li><strong>Traditional:</strong> username/password → JWT token</li>
+                <li><strong>OAuth:</strong> Social provider → profile creation/linking → JWT token</li>
+                <li><strong>Store Operators:</strong> PIN-based auth with IP whitelisting support</li>
+            </ol>
+
+            <h3>Route Organization</h3>
+            <pre><code>/api/auth/*          - Authentication endpoints
+/api/affiliates/*    - Affiliate management
+/api/customers/*     - Customer operations
+/api/orders/*        - Order processing
+/api/administrators/* - Admin functions
+/api/operators/*     - Operator management
+/api/system-config/* - Dynamic configuration
+/api/payments/*      - Payment processing
+/api/w9/*           - Tax document management</code></pre>
+
+            <h3>RBAC Hierarchy</h3>
+            <p>The role hierarchy follows this pattern:</p>
+            <pre><code>admin → administrator → operator → affiliate → customer</code></pre>
+            <p>Middleware usage: <code>checkRole(['admin', 'administrator'])</code> for route protection</p>
+
+            <!-- 4. Frontend Architecture -->
+            <h2 id="frontend-architecture"><i class="fas fa-window-restore me-2"></i>4. Frontend Architecture</h2>
+            
+            <h3>Embedding System</h3>
+            <ul>
+                <li><strong>Main router:</strong> <code>embed-app-v2.html</code> - CSP-compliant single-page app</li>
+                <li>Dynamic page loading with script injection management</li>
+                <li>Parent-iframe communication via postMessage for mobile chrome hiding</li>
+                <li>Route mapping in <code>EMBED_PAGES</code> configuration</li>
+            </ul>
+
+            <h3>CSP Compliance</h3>
+            <div class="alert alert-warning">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                <strong>Important:</strong> All JavaScript must be in external files. No inline scripts are allowed due to CSP restrictions.
+            </div>
+            <ul>
+                <li>All JavaScript in external files (no inline scripts)</li>
+                <li>Nonce-based CSP for dynamic content</li>
+                <li>Scripts registered in <code>pageScripts</code> mapping for dynamic loading</li>
+                <li>Strict CSP applied to all embed pages</li>
+            </ul>
+
+            <h3>Mobile Support</h3>
+            <ul>
+                <li>Automatic chrome hiding on mobile devices</li>
+                <li>Viewport management via parent-iframe bridge</li>
+                <li>Touch-optimized UI components</li>
+            </ul>
+
+            <!-- 5. Security Implementation -->
+            <h2 id="security-implementation"><i class="fas fa-shield-alt me-2"></i>5. Security Implementation</h2>
+            
+            <h3>Multi-Layer Security</h3>
+            <div class="security-layer">
+                <h4>1. Authentication</h4>
+                <p>JWT with blacklist support, token expiry</p>
+            </div>
+            <div class="security-layer">
+                <h4>2. Authorization</h4>
+                <p>RBAC with resource ownership checks</p>
+            </div>
+            <div class="security-layer">
+                <h4>3. Input Validation</h4>
+                <p>express-validator + Joi schemas</p>
+            </div>
+            <div class="security-layer">
+                <h4>4. Sanitization</h4>
+                <p>MongoDB injection prevention, XSS protection</p>
+            </div>
+            <div class="security-layer">
+                <h4>5. Rate Limiting</h4>
+                <p>Route-specific limits (auth, API endpoints)</p>
+            </div>
+            <div class="security-layer">
+                <h4>6. CSRF Protection</h4>
+                <p>Token-based with conditional application</p>
+            </div>
+            <div class="security-layer">
+                <h4>7. Encryption</h4>
+                <p>AES-256-GCM for sensitive data (payment info, SSNs)</p>
+            </div>
+
+            <h3>Security Headers</h3>
+            <ul>
+                <li>Helmet.js configuration</li>
+                <li>Custom CSP with frame-ancestors for embedding</li>
+                <li>HSTS, X-Frame-Options, Permissions-Policy</li>
+            </ul>
+
+            <!-- 6. Testing Patterns -->
+            <h2 id="testing-patterns"><i class="fas fa-vial me-2"></i>6. Testing Patterns</h2>
+            
+            <h3>Test Organization</h3>
+            <ul>
+                <li><strong>Unit tests:</strong> <code>/tests/unit/*</code> - Model methods, utilities, controllers</li>
+                <li><strong>Integration tests:</strong> <code>/tests/integration/*</code> - Full API endpoint testing</li>
+                <li><strong>Test helpers:</strong> CSRF token management, auth helpers, test data factories</li>
+            </ul>
+
+            <h3>Key Testing Patterns</h3>
+            <div class="pattern-example">
+                <h4>CSRF-aware request pattern</h4>
+                <pre><code>const csrfToken = await getCsrfToken(agent);
+const response = await agent
+  .post('/api/endpoint')
+  .set('x-csrf-token', csrfToken)
+  .send(data);</code></pre>
+            </div>
+
+            <div class="pattern-example">
+                <h4>Auth testing pattern</h4>
+                <pre><code>const token = createTestToken(userId, 'affiliate');
+await agent.get('/api/protected')
+  .set('Authorization', `Bearer ${token}`);</code></pre>
+            </div>
+
+            <!-- 7. Configuration & Integration Points -->
+            <h2 id="configuration"><i class="fas fa-cogs me-2"></i>7. Configuration & Integration Points</h2>
+            
+            <h3>SystemConfig Usage</h3>
+            <div class="pattern-example">
+                <pre><code>// Always fetch dynamic values
+const wdfRate = await SystemConfig.getValue('wdf_base_rate_per_pound', 1.25);
+const maxBags = await SystemConfig.getValue('max_bags_per_order', 10);</code></pre>
+            </div>
+
+            <h3>External Integrations</h3>
+            <div class="integration-point">
+                <h4>1. Paygistix</h4>
+                <p>Hosted payment forms with callback handling</p>
+            </div>
+            <div class="integration-point">
+                <h4>2. OAuth Providers</h4>
+                <p>Google, Facebook, LinkedIn for social auth</p>
+            </div>
+            <div class="integration-point">
+                <h4>3. DocuSign</h4>
+                <p>W-9 tax form collection and verification</p>
+            </div>
+            <div class="integration-point">
+                <h4>4. QuickBooks</h4>
+                <p>Financial data export (planned)</p>
+            </div>
+            <div class="integration-point">
+                <h4>5. Email Services</h4>
+                <p>SMTP, SendGrid, Mailcow support</p>
+            </div>
+
+            <!-- 8. Common Implementation Patterns -->
+            <h2 id="implementation-patterns"><i class="fas fa-code me-2"></i>8. Common Implementation Patterns</h2>
+            
+            <h3>Error Handling</h3>
+            <div class="pattern-example">
+                <pre><code>try {
+  // Operation
+} catch (error) {
+  logger.error('Operation failed:', { 
+    error: error.message, 
+    userId: req.user?.id,
+    context: additionalData 
+  });
+  return res.status(500).json({ 
+    success: false, 
+    message: 'User-friendly error message' 
+  });
+}</code></pre>
+            </div>
+
+            <h3>Response Format</h3>
+            <div class="pattern-example">
+                <h4>Success Response</h4>
+                <pre><code>res.json({ 
+  success: true, 
+  data: result,
+  message: 'Operation completed successfully' 
+});</code></pre>
+            </div>
+
+            <div class="pattern-example">
+                <h4>Error Response</h4>
+                <pre><code>res.status(400).json({ 
+  success: false, 
+  message: 'Validation error',
+  errors: validationErrors 
+});</code></pre>
+            </div>
+
+            <h3>Mongoose Middleware Patterns</h3>
+            <ul>
+                <li><strong>Pre-save:</strong> Password hashing, data encryption, validation</li>
+                <li><strong>Virtual fields:</strong> Computed properties (fullName, commissions)</li>
+                <li><strong>Careful with <code>isNew</code> checks:</strong> for conditional validation</li>
+            </ul>
+
+            <!-- 9. Deployment & Operations -->
+            <h2 id="deployment"><i class="fas fa-server me-2"></i>9. Deployment & Operations</h2>
+            
+            <h3>PM2 Management</h3>
+            <ul>
+                <li><strong>Config:</strong> <code>ecosystem.config.js</code></li>
+                <li><strong>Commands:</strong> <code>pm2 restart wavemax</code>, <code>pm2 logs wavemax</code></li>
+                <li><strong>Log locations:</strong> <code>/root/.pm2/logs/</code></li>
+            </ul>
+
+            <h3>Environment Variables</h3>
+            <ul>
+                <li><strong>Required:</strong> MONGODB_URI, JWT_SECRET, ENCRYPTION_KEY</li>
+                <li><strong>OAuth:</strong> Provider-specific client IDs and secrets</li>
+                <li><strong>Paygistix:</strong> MERCHANT_ID, FORM_ID, FORM_HASH</li>
+                <li><strong>Email:</strong> Provider configuration</li>
+            </ul>
+
+            <!-- 10. Critical Implementation Notes -->
+            <h2 id="critical-notes"><i class="fas fa-exclamation-circle me-2"></i>10. Critical Implementation Notes</h2>
+            
+            <h3>Always Remember</h3>
+            <ol>
+                <li>Use SystemConfig for ALL configurable values (rates, fees, limits)</li>
+                <li>Test in both direct access AND embedded contexts</li>
+                <li>Add scripts to pageScripts mapping in embed-app-v2.html</li>
+                <li>Maintain translations for all 4 languages (en, es, pt, de)</li>
+                <li>Use external JavaScript files only (CSP compliance)</li>
+                <li>Follow existing patterns in neighboring code</li>
+                <li>Run tests before committing changes</li>
+                <li>Check for regression in related functionality</li>
+                <li>Validate all user inputs thoroughly</li>
+                <li>Log security-relevant events to audit log</li>
+            </ol>
+
+            <h3>Common Pitfalls to Avoid</h3>
+            <div class="alert alert-danger">
+                <h4><i class="fas fa-times-circle me-2"></i>Don't Make These Mistakes:</h4>
+                <ol>
+                    <li>Hardcoding business values instead of using SystemConfig</li>
+                    <li>Adding inline JavaScript (blocked by CSP)</li>
+                    <li>Forgetting to update pageScripts mapping for embedded pages</li>
+                    <li>Not testing OAuth flows with real providers</li>
+                    <li>Storing sensitive data without encryption</li>
+                    <li>Missing CSRF tokens in state-changing requests</li>
+                    <li>Not handling floating-point precision in financial calculations</li>
+                    <li>Forgetting to initialize SystemConfig in tests</li>
+                </ol>
+            </div>
+
+            <div class="mt-5 pt-5 border-top">
+                <p class="text-muted">
+                    <i class="fas fa-info-circle me-2"></i>
+                    This guide is part of the WaveMAX documentation suite. For more information, see the 
+                    <a href="/docs/index.html">main documentation index</a>.
+                </p>
+                <p class="text-muted">
+                    Last updated: January 2025
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
