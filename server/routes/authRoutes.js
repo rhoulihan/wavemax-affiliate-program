@@ -96,14 +96,15 @@ router.get('/operator/login', authController.operatorAutoLogin);
 
 /**
  * @route   POST /api/auth/operator/login
- * @desc    Login operator
+ * @desc    Login operator with PIN code
  * @access  Public
  */
 router.post('/operator/login',
   authLimiter,
   [
-    body('email').trim().isEmail().withMessage('Valid email is required'),
-    body('password').notEmpty().withMessage('Password is required')
+    body('pinCode').trim().notEmpty().withMessage('PIN code is required')
+      .isNumeric().withMessage('PIN code must be numeric')
+      .isLength({ min: 4, max: 6 }).withMessage('PIN code must be 4-6 digits')
   ],
   validate,
   authController.operatorLogin
