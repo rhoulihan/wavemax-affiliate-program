@@ -51,8 +51,15 @@ exports.registerCustomer = async (req, res) => {
       billingZip,
       savePaymentInfo,
       numberOfBags,
-      languagePreference
+      languagePreference,
+      paymentConfirmed,
+      socialToken
     } = req.body;
+
+    // Log if this is a post-payment registration
+    if (paymentConfirmed) {
+      console.log(`Post-payment registration for email: ${email}, affiliate: ${affiliateId}`);
+    }
 
     // Verify affiliate exists
     const affiliate = await Affiliate.findOne({ affiliateId });
@@ -76,8 +83,23 @@ exports.registerCustomer = async (req, res) => {
       });
     }
 
-    // Hash password
-    const { salt, hash } = encryptionUtil.hashPassword(password);
+    // For OAuth registrations, generate a username from email if not provided
+    let finalUsername = username;
+    let passwordSalt = null;
+    let passwordHash = null;
+    
+    if (socialToken) {
+      // OAuth registration - generate username from email if not provided
+      if (!username) {
+        finalUsername = email.split('@')[0] + '_' + Date.now().toString(36);
+      }
+      console.log(`OAuth registration for email: ${email}, generated username: ${finalUsername}`);
+    } else {
+      // Traditional registration - hash password
+      const { salt, hash } = encryptionUtil.hashPassword(password);
+      passwordSalt = salt;
+      passwordHash = hash;
+    }
 
     // Get bag fee from system config
     const bagFee = await SystemConfig.getValue('laundry_bag_fee', 10.00);
@@ -85,7 +107,7 @@ exports.registerCustomer = async (req, res) => {
     const totalBagCredit = bagFee * bagCount;
 
     // Create new customer with bag information
-    console.log('Creating new customer with email:', email, 'username:', username);
+    console.log('Creating new customer with email:', email, 'username:', finalUsername);
     const newCustomer = new Customer({
       affiliateId,
       firstName,
@@ -98,9 +120,10 @@ exports.registerCustomer = async (req, res) => {
       zipCode,
       specialInstructions,
       affiliateSpecialInstructions,
-      username,
-      passwordSalt: salt,
-      passwordHash: hash,
+      username: finalUsername,
+      passwordSalt,
+      passwordHash,
+      registrationMethod: socialToken ? 'social' : 'traditional',
       cardholderName: savePaymentInfo ? cardholderName : null,
       // Only store last 4 digits of card
       lastFourDigits: cardNumber && savePaymentInfo ? cardNumber.slice(-4) : null,

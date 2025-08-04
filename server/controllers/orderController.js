@@ -348,7 +348,9 @@ exports.getOrderDetails = async (req, res) => {
         affiliate: affiliate ? {
           name: `${affiliate.firstName} ${affiliate.lastName}`,
           phone: affiliate.phone,
-          email: affiliate.email
+          email: affiliate.email,
+          minimumDeliveryFee: affiliate.minimumDeliveryFee,
+          perBagDeliveryFee: affiliate.perBagDeliveryFee
         } : null,
         pickupDate: order.pickupDate,
         pickupTime: order.pickupTime,
@@ -363,7 +365,7 @@ exports.getOrderDetails = async (req, res) => {
         baseRate: order.baseRate,
         deliveryFee: order.feeBreakdown?.totalFee || 0,
         feeBreakdown: order.feeBreakdown,
-        bagCreditApplied: order.wdfCreditApplied || 0,
+        bagCreditApplied: order.bagCreditApplied || 0,
         actualWeight: order.actualWeight,
         washInstructions: order.washInstructions,
         estimatedTotal: order.estimatedTotal,

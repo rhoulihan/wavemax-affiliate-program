@@ -475,6 +475,15 @@ class PaygistixPaymentForm {
             console.log('Form context:', this.payContext);
             console.log('Event type:', e.type);
             console.log('Event target:', e.target);
+            console.log('Test mode enabled:', this.paymentConfig.testPaymentFormEnabled);
+            
+            // Check if test mode is enabled
+            if (this.paymentConfig.testPaymentFormEnabled) {
+                console.log('Test mode detected, processing test payment');
+                const customerData = this.getCustomerDataFromForm();
+                this.processPaymentTestMode(customerData);
+                return;
+            }
             
             // Update return URL with context information
             const returnUrlField = form.querySelector('#returnUrlField');
@@ -723,6 +732,15 @@ class PaygistixPaymentForm {
         
         this.isProcessingPayment = true;
         
+        // Show spinner immediately
+        let paymentSpinner = null;
+        if (window.SwirlSpinnerUtils && typeof window.SwirlSpinnerUtils.showGlobal === 'function') {
+            paymentSpinner = window.SwirlSpinnerUtils.showGlobal({
+                message: 'Preparing Payment',
+                submessage: 'Please wait...'
+            });
+        }
+        
         try {
             // Get the form
             const form = this.container.querySelector('form#paygistixPaymentForm');
@@ -827,12 +845,22 @@ class PaygistixPaymentForm {
                 items: items
             };
             
-            // Show payment processing modal
-            this.showPaymentProcessingModal(paymentToken);
+            // Update spinner message before opening window
+            if (paymentSpinner && paymentSpinner.updateMessage) {
+                paymentSpinner.updateMessage('Opening Payment Window', 'Please complete your payment in the popup window...');
+            }
+            
+            // Show payment processing modal (pass the existing spinner)
+            this.showPaymentProcessingModal(paymentToken, paymentSpinner);
             
         } catch (error) {
             console.error('Error processing payment:', error);
             this.isProcessingPayment = false;
+            
+            // Hide spinner on error
+            if (paymentSpinner && typeof paymentSpinner.hide === 'function') {
+                paymentSpinner.hide();
+            }
             
             if (error.message.includes('pop-up') || error.message.includes('blocked')) {
                 if (window.modalAlert) {
@@ -895,10 +923,10 @@ class PaygistixPaymentForm {
         }
     }
     
-    showPaymentProcessingModal(paymentToken) {
-        // Show spinner using SwirlSpinner
-        let paymentSpinner = null;
-        if (window.SwirlSpinnerUtils && typeof window.SwirlSpinnerUtils.showGlobal === 'function') {
+    showPaymentProcessingModal(paymentToken, existingSpinner = null) {
+        // Use existing spinner or create new one
+        let paymentSpinner = existingSpinner;
+        if (!paymentSpinner && window.SwirlSpinnerUtils && typeof window.SwirlSpinnerUtils.showGlobal === 'function') {
             paymentSpinner = window.SwirlSpinnerUtils.showGlobal({
                 message: 'Opening Payment Window',
                 submessage: 'Please complete your payment in the new window...'
@@ -911,7 +939,7 @@ class PaygistixPaymentForm {
                 const self = this;
                 
                 // Determine form action URL and method based on test mode
-                const isTestMode = this.paymentConfig.testModeEnabled;
+                const isTestMode = this.paymentConfig.testPaymentFormEnabled;
                 const formActionUrl = isTestMode ? 
                     '/test-payment-form.html' : 
                     this.paymentConfig.formActionUrl;
