@@ -132,6 +132,12 @@
           submessage: 'Please wait while we set up your account'
         }) : null;
 
+      // Check if this is an OAuth registration (socialToken exists in form)
+      const socialTokenInput = document.querySelector('input[name="socialToken"]');
+      const isOAuthRegistration = !!socialTokenInput?.value;
+      
+      console.log('OAuth registration detected:', isOAuthRegistration);
+
       // Gather all form data with null safety
       const formData = {
         // Personal Information
@@ -150,9 +156,12 @@
         numberOfBags: parseInt(document.getElementById('numberOfBags')?.value || '0'),
         specialInstructions: document.getElementById('specialInstructions')?.value || '',
 
-        // Account Setup
-        username: document.getElementById('username')?.value || '',
-        password: document.getElementById('password')?.value || '',
+        // Account Setup - only include if NOT OAuth registration
+        username: isOAuthRegistration ? undefined : document.getElementById('username')?.value || '',
+        password: isOAuthRegistration ? undefined : document.getElementById('password')?.value || '',
+
+        // OAuth token if present
+        socialToken: socialTokenInput?.value || undefined,
 
         // Affiliate Info - check both possible field names
         affiliateId: document.getElementById('AFFILIATEID')?.value || document.getElementById('affiliateId')?.value || '',

@@ -10,6 +10,18 @@ const { customPasswordValidator } = require('../utils/passwordValidator');
 const { registrationLimiter } = require('../middleware/rateLimiting');
 const { registrationAddressValidation, profileAddressValidation, handleValidationErrors } = require('../middleware/locationValidation');
 
+// Conditional rate limiter that skips rate limiting for post-payment registrations
+const conditionalRegistrationLimiter = (req, res, next) => {
+  // Skip rate limiting if this is a post-payment registration
+  if (req.body.paymentConfirmed === true) {
+    console.log('Skipping rate limit for post-payment registration');
+    return next();
+  }
+  
+  // Otherwise apply the normal rate limiter
+  return registrationLimiter(req, res, next);
+};
+
 /**
  * @route   GET /api/customers/check-rate-limit
  * @desc    Check if registration rate limit would be exceeded
@@ -39,15 +51,27 @@ router.get('/check-rate-limit', (req, res, next) => {
  * @desc    Register a new customer
  * @access  Public
  */
-router.post('/register', registrationLimiter, [
+router.post('/register', conditionalRegistrationLimiter, [
   body('affiliateId').notEmpty().withMessage('Affiliate ID is required'),
   body('firstName').notEmpty().withMessage('First name is required'),
   body('lastName').notEmpty().withMessage('Last name is required'),
   body('email').isEmail().withMessage('Valid email is required'),
   body('phone').notEmpty().withMessage('Phone number is required'),
   ...registrationAddressValidation,
-  body('username').notEmpty().withMessage('Username is required'),
-  body('password').custom(customPasswordValidator())
+  // Only require username/password if NOT using OAuth (no socialToken)
+  body('username').custom((value, { req }) => {
+    if (!req.body.socialToken && !value) {
+      throw new Error('Username is required');
+    }
+    return true;
+  }),
+  body('password').custom((value, { req }) => {
+    if (!req.body.socialToken) {
+      // Apply password validation only for non-OAuth registrations
+      return customPasswordValidator()(value, { req });
+    }
+    return true;
+  })
 ], handleValidationErrors, customerController.registerCustomer);
 
 

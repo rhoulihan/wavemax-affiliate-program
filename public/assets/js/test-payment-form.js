@@ -62,7 +62,7 @@
       summaryHTML += '</table>';
       
       document.getElementById('orderSummaryContent').innerHTML = summaryHTML;
-      document.getElementById('orderSummaryCard').style.display = 'block';
+      document.getElementById('orderSummaryCard').classList.remove('hidden');
       
     } catch (e) {
       console.log('Could not display order summary from items:', e);
@@ -123,7 +123,7 @@
       summaryHTML += '</table>';
       
       document.getElementById('orderSummaryContent').innerHTML = summaryHTML;
-      document.getElementById('orderSummaryCard').style.display = 'block';
+      document.getElementById('orderSummaryCard').classList.remove('hidden');
       
     } catch (e) {
       console.log('Could not display order summary:', e);
@@ -208,6 +208,13 @@
     if (paymentToken) {
       params.append('custom1', paymentToken);
       params.append('paymentToken', paymentToken);
+    }
+    
+    // Add context if provided from URL
+    const urlSearchParams = new URLSearchParams(window.location.search);
+    const context = urlSearchParams.get('context');
+    if (context) {
+      params.append('context', context);
     }
 
     // Parse the callback URL to check if it's already a full URL
@@ -402,6 +409,10 @@
     // Set values from URL parameters
     if (paymentToken) {
       document.getElementById('paymentToken').value = paymentToken;
+    }
+    
+    if (amount) {
+      document.getElementById('amount').value = amount;
     }
     
     // Display items if provided
