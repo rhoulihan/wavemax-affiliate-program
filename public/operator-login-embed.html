@@ -3,6 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <title data-i18n="operator.login.title">Operator Login - WaveMAX</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
     <link rel="stylesheet" href="/assets/css/language-switcher.css">
@@ -18,29 +21,20 @@
             </div>
             <div class="error-message" id="errorMessage"></div>
 
-            <form id="loginForm" method="POST" action="#">
+            <form id="loginForm">
                 <div class="form-group">
-                    <label for="email" data-i18n="operator.login.email">Email Address</label>
-                    <input 
-                        type="email" 
-                        id="email" 
-                        name="email" 
-                        required 
-                        placeholder="operator@wavemax.com"
-                        autocomplete="username"
-                    >
-                </div>
-
-                <div class="form-group">
-                    <label for="password" data-i18n="operator.login.password">Password</label>
+                    <label for="pinCode" data-i18n="operator.login.pinCode">Enter PIN Code</label>
                     <input 
                         type="password" 
-                        id="password" 
-                        name="password" 
+                        id="pinCode" 
+                        name="pinCode" 
+                        class="pin-input"
                         required 
-                        data-i18n-placeholder="operator.login.password"
-                        placeholder="Enter your password"
-                        autocomplete="current-password"
+                        pattern="[0-9]{4,6}"
+                        maxlength="6"
+                        placeholder="Enter 4-6 digit PIN"
+                        data-i18n-placeholder="operator.login.pinPlaceholder"
+                        autocomplete="off"
                     >
                 </div>
 

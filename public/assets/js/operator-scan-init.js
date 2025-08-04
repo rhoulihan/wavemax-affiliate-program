@@ -120,7 +120,65 @@
         
         if (!token) {
             console.log('No token found, redirecting to login...');
-            window.location.href = '/operator-login-embed.html';
+            // Use navigateTo if available (when in embed-app-v2.html)
+            if (window.navigateTo) {
+                window.navigateTo('/operator-login');
+            } else {
+                window.location.href = '/embed-app-v2.html?route=/operator-login';
+            }
+            return;
+        }
+
+        // Verify the token is still valid
+        try {
+            console.log('Verifying operator token...');
+            const response = await fetch(`${BASE_URL}/api/v1/auth/verify`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            if (!response.ok) {
+                console.log('Token validation failed, redirecting to login...');
+                localStorage.removeItem('operatorToken');
+                localStorage.removeItem('operatorRefreshToken');
+                localStorage.removeItem('operatorData');
+                
+                if (window.navigateTo) {
+                    window.navigateTo('/operator-login');
+                } else {
+                    window.location.href = '/embed-app-v2.html?route=/operator-login';
+                }
+                return;
+            }
+
+            const data = await response.json();
+            if (!data.success) {
+                console.log('Token invalid, redirecting to login...');
+                localStorage.removeItem('operatorToken');
+                localStorage.removeItem('operatorRefreshToken');
+                localStorage.removeItem('operatorData');
+                
+                if (window.navigateTo) {
+                    window.navigateTo('/operator-login');
+                } else {
+                    window.location.href = '/embed-app-v2.html?route=/operator-login';
+                }
+                return;
+            }
+
+            console.log('Token validated successfully');
+        } catch (error) {
+            console.error('Error validating token:', error);
+            localStorage.removeItem('operatorToken');
+            localStorage.removeItem('operatorRefreshToken');
+            localStorage.removeItem('operatorData');
+            
+            if (window.navigateTo) {
+                window.navigateTo('/operator-login');
+            } else {
+                window.location.href = '/embed-app-v2.html?route=/operator-login';
+            }
             return;
         }
 

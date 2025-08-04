@@ -680,10 +680,20 @@
   },
   "operator": {
     "login": {
-      "title": "Portal de Operador",
-      "subtitle": "Ingresa tu PIN de 4 dígitos para acceder al sistema",
-      "pinPlaceholder": "Ingresa PIN de 4 dígitos",
-      "invalidPin": "PIN inválido. Por favor intenta nuevamente."
+      "title": "Portal de Operador - WaveMAX",
+      "subtitle": "Portal del Operador",
+      "pinCode": "Ingrese el Código PIN",
+      "pinPlaceholder": "Ingrese PIN de 4-6 dígitos",
+      "clockIn": "Registrar Entrada",
+      "clockingIn": "Registrando entrada...",
+      "needHelp": "¿Necesita ayuda? Contacte a su supervisor",
+      "shiftNoticeTitle": "Aviso de Turno:",
+      "shiftNoticeText": "Solo puede registrar entrada durante sus horas de turno programadas. Toda actividad es monitoreada.",
+      "invalidPin": "PIN inválido. Por favor intente nuevamente.",
+      "accountLocked": "Cuenta bloqueada. Por favor intente más tarde.",
+      "accountInactive": "Cuenta inactiva. Contacte a su supervisor.",
+      "outsideShiftHours": "Inicio de sesión solo permitido durante horas de turno",
+      "shiftEnded": "Su turno ha terminado. Por favor inicie sesión durante sus horas de turno."
     }
   },
   "administrator": {

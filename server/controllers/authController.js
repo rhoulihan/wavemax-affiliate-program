@@ -468,52 +468,59 @@ exports.operatorAutoLogin = async (req, res) => {
 
 exports.operatorLogin = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { pinCode } = req.body;
 
-    // Find operator by email with password
-    const operator = await Operator.findByEmailWithPassword(email);
-
-    if (!operator) {
-      logLoginAttempt(false, 'operator', email, req, 'User not found');
-      return res.status(401).json({
+    // Validate PIN code is provided
+    if (!pinCode) {
+      return res.status(400).json({
         success: false,
-        message: 'Invalid email or password'
+        message: 'PIN code is required'
       });
     }
 
-    // Check if account is locked
-    if (operator.isLocked) {
-      logLoginAttempt(false, 'operator', email, req, 'Account locked');
-      return res.status(403).json({
+    // Check if PIN matches the configured operator PIN
+    const configuredPin = process.env.OPERATOR_PIN;
+    if (!configuredPin) {
+      console.error('OPERATOR_PIN not configured in environment');
+      return res.status(500).json({
         success: false,
-        message: 'Account is locked due to multiple failed login attempts. Please try again later.'
+        message: 'System configuration error'
+      });
+    }
+
+    // Verify PIN code
+    if (pinCode !== configuredPin) {
+      logLoginAttempt(false, 'operator', 'PIN', req, 'Invalid PIN');
+      return res.status(401).json({
+        success: false,
+        message: 'Invalid PIN code'
+      });
+    }
+
+    // Find default operator for PIN-based login
+    const defaultOperatorId = process.env.DEFAULT_OPERATOR_ID || 'OP001';
+    const operator = await Operator.findOne({ operatorId: defaultOperatorId });
+
+    if (!operator) {
+      console.error('Default operator not found:', defaultOperatorId);
+      return res.status(404).json({
+        success: false,
+        message: 'Default operator not configured'
       });
     }
 
     // Check if account is active
     if (!operator.isActive) {
-      logLoginAttempt(false, 'operator', email, req, 'Account inactive');
+      logLoginAttempt(false, 'operator', defaultOperatorId, req, 'Account inactive');
       return res.status(403).json({
         success: false,
-        message: 'Account is inactive. Please contact your supervisor.'
-      });
-    }
-
-    // Verify password
-    const isPasswordValid = operator.verifyPassword(password);
-
-    if (!isPasswordValid) {
-      await operator.incLoginAttempts();
-      logLoginAttempt(false, 'operator', email, req, 'Invalid password');
-      return res.status(401).json({
-        success: false,
-        message: 'Invalid email or password'
+        message: 'Operator account is inactive. Please contact your supervisor.'
       });
     }
 
     // Check shift hours
     if (!operator.isOnShift) {
-      logLoginAttempt(false, 'operator', email, req, 'Outside shift hours');
+      logLoginAttempt(false, 'operator', defaultOperatorId, req, 'Outside shift hours');
       return res.status(403).json({
         success: false,
         message: 'Login not allowed outside of shift hours',
@@ -539,19 +546,20 @@ exports.operatorLogin = async (req, res) => {
     );
 
     // Log successful login
-    logLoginAttempt(true, 'operator', email, req);
+    logLoginAttempt(true, 'operator', operator.operatorId, req);
     logAuditEvent(AuditEvents.AUTH_LOGIN, {
       userType: 'operator',
       userId: operator._id,
       operatorId: operator.operatorId,
-      shift: `${operator.shiftStart} - ${operator.shiftEnd}`
+      shift: `${operator.shiftStart} - ${operator.shiftEnd}`,
+      loginMethod: 'PIN'
     }, req);
 
     res.status(200).json({
       success: true,
       token,
       refreshToken,
-      user: {
+      operator: {
         id: operator._id,
         operatorId: operator.operatorId,
         firstName: operator.firstName,
