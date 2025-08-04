@@ -1,12 +1,6 @@
 (function() {
   'use strict';
 
-  // Only run this script on the operator login page
-  if (!document.getElementById('loginForm') || !document.getElementById('clock')) {
-    console.log('Not on operator login page, skipping initialization');
-    return;
-  }
-
   // Note: Login endpoints currently don't require CSRF tokens
   // But we'll prepare for future implementation
   const csrfFetch = window.CsrfUtils && window.CsrfUtils.csrfFetch ? window.CsrfUtils.csrfFetch : fetch;
@@ -16,6 +10,9 @@
     baseUrl: 'https://wavemax.promo'
   };
   const BASE_URL = config.baseUrl;
+
+  // Track clock interval for cleanup (store on window for external cleanup)
+  window.operatorClockInterval = null;
 
   // Clock display
   function updateClock() {
@@ -31,71 +28,11 @@
     clockElement.textContent = timeString;
   }
 
-  // Track clock interval for cleanup (store on window for external cleanup)
-  window.operatorClockInterval = null;
-  
-  // Only start clock if we're on the login page
-  if (document.getElementById('clock')) {
-    updateClock();
-    window.operatorClockInterval = setInterval(updateClock, 1000);
-  }
-
-  // Check for auto-login on page load
-  async function checkAutoLogin() {
-    try {
-      console.log('Checking auto-login from:', window.location.href);
-      console.log('Base URL:', BASE_URL);
-      
-      const response = await fetch(`${BASE_URL}/api/v1/auth/operator/login`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        credentials: 'include'
-      });
-
-      const result = await response.json();
-      console.log('Auto-login response:', response.status, result);
-      
-      if (response.ok && result.success) {
-        console.log('Auto-login successful!');
-        // Store tokens
-        localStorage.setItem('operatorToken', result.token);
-        localStorage.setItem('operatorRefreshToken', result.refreshToken);
-        localStorage.setItem('operatorData', JSON.stringify(result.operator));
-        
-        // Redirect to operator scan page
-        // Clear clock interval before navigation
-        if (window.operatorClockInterval) {
-          clearInterval(window.operatorClockInterval);
-          window.operatorClockInterval = null;
-        }
-        
-        // Use navigateTo if available (when in embed-app-v2.html)
-        if (window.navigateTo) {
-          window.navigateTo('/operator-scan');
-        } else {
-          window.location.href = '/embed-app-v2.html?route=/operator-scan';
-        }
-      } else {
-        console.log('Auto-login failed:', result.message);
-      }
-    } catch (error) {
-      console.log('Auto-login error:', error.message);
-    }
-  }
-
-  // Check for auto-login when page loads
-  checkAutoLogin();
-
-  // DOM elements
-  const loginForm = document.getElementById('loginForm');
-  const errorMessage = document.getElementById('errorMessage');
-  const submitBtn = document.getElementById('submitBtn');
-  const submitText = document.getElementById('submitText');
-
   // Show error message
   function showError(message) {
+    const errorMessage = document.getElementById('errorMessage');
+    if (!errorMessage) return;
+    
     errorMessage.textContent = message;
     errorMessage.style.display = 'block';
 
@@ -104,17 +41,28 @@
     }, 5000);
   }
 
-  // Handle login form submission
-  if (loginForm) {
-    loginForm.addEventListener('submit', async function(e) {
-      e.preventDefault();
+  // Removed auto-login functionality - PIN is always required on login page
 
-    const email = document.getElementById('email').value.trim();
-    const password = document.getElementById('password').value;
+  // Handle login form submission
+  async function handleFormSubmit(e) {
+    e.preventDefault();
+    console.log('Form submit handler called');
+
+    const submitBtn = document.getElementById('submitBtn');
+    const submitText = document.getElementById('submitText');
+    const pinCode = document.getElementById('pinCode').value.trim();
 
     // Basic validation
-    if (!email || !password) {
-      showError('Please enter both email and password');
+    if (!pinCode) {
+      showError('Please enter your PIN code');
+      return;
+    }
+
+    // Validate PIN format (4-6 digits)
+    if (!/^\d{4,6}$/.test(pinCode)) {
+      showError('PIN must be 4-6 digits');
+      document.getElementById('pinCode').value = '';
+      document.getElementById('pinCode').focus();
       return;
     }
 
@@ -129,7 +77,7 @@
           'Content-Type': 'application/json'
         },
         credentials: 'include',
-        body: JSON.stringify({ email, password })
+        body: JSON.stringify({ pinCode })
       });
 
       const data = await response.json();
@@ -150,7 +98,10 @@
         }
 
         // Show success message
-        errorMessage.style.display = 'none';
+        const errorMessage = document.getElementById('errorMessage');
+        if (errorMessage) {
+          errorMessage.style.display = 'none';
+        }
         submitText.textContent = 'CLOCKED IN!';
         submitBtn.style.background = '#27ae60';
 
@@ -168,8 +119,9 @@
         // Redirect to scanner interface
         setTimeout(() => {
           // Clear clock interval before navigation
-          if (clockInterval) {
-            clearInterval(clockInterval);
+          if (window.operatorClockInterval) {
+            clearInterval(window.operatorClockInterval);
+            window.operatorClockInterval = null;
           }
           
           // Use navigateTo if available (when in embed-app-v2.html)
@@ -188,12 +140,12 @@
         } else if (response.status === 403 && data.message.includes('shift hours')) {
           showError(`Login only allowed during shift hours: ${data.shiftHours}`);
         } else {
-          showError(data.message || 'Invalid email or password');
+          showError(data.message || 'Invalid PIN code');
         }
 
-        // Clear password on error
-        document.getElementById('password').value = '';
-        document.getElementById('password').focus();
+        // Clear PIN on error
+        document.getElementById('pinCode').value = '';
+        document.getElementById('pinCode').focus();
       }
     } catch (error) {
       console.error('Login error:', error);
@@ -203,91 +155,92 @@
       submitBtn.disabled = false;
       submitText.textContent = 'CLOCK IN';
       if (submitBtn.style.background !== '#27ae60') {
-        submitBtn.style.background = '#2ecc71';
+        submitBtn.style.background = '#3b82f6';
       }
     }
-  });
   }
 
-  // Check if already logged in
-  const existingToken = localStorage.getItem('operatorToken');
-  if (existingToken) {
-    // Verify token is still valid
-    fetch(`${BASE_URL}/api/v1/auth/verify`, {
-      headers: {
-        'Authorization': `Bearer ${existingToken}`
-      }
-    })
-      .then(response => {
-        if (response.ok) {
-          // Check if within shift hours
-          const operatorData = JSON.parse(localStorage.getItem('operatorData') || '{}');
-          const now = new Date();
-          const currentTime = now.getHours() * 60 + now.getMinutes();
-
-          if (operatorData.shiftStart && operatorData.shiftEnd) {
-            const shiftStart = parseInt(operatorData.shiftStart.split(':')[0]) * 60 +
-                                     parseInt(operatorData.shiftStart.split(':')[1]);
-            const shiftEnd = parseInt(operatorData.shiftEnd.split(':')[0]) * 60 +
-                                   parseInt(operatorData.shiftEnd.split(':')[1]);
-
-            const isWithinShift = (shiftEnd > shiftStart)
-              ? (currentTime >= shiftStart && currentTime <= shiftEnd)
-              : (currentTime >= shiftStart || currentTime <= shiftEnd);
-
-            if (isWithinShift) {
-              // Use navigateTo if available (when in embed-app-v2.html)
-              if (window.navigateTo) {
-                window.navigateTo('/operator-scan');
-              } else {
-                window.location.href = '/embed-app-v2.html?route=/operator-scan';
-              }
-            } else {
-              // Clear tokens if outside shift
-              localStorage.removeItem('operatorToken');
-              localStorage.removeItem('operatorRefreshToken');
-              localStorage.removeItem('operatorData');
-              showError('Your shift has ended. Please login again during your shift hours.');
-            }
-          }
-        } else {
-          // Clear invalid token
-          localStorage.removeItem('operatorToken');
-          localStorage.removeItem('operatorRefreshToken');
-          localStorage.removeItem('operatorData');
-        }
-      })
-      .catch(() => {
-        // Network error, let user try to login
-      });
-  }
-
-  // Listen for messages from parent window
-  window.addEventListener('message', function(event) {
-    if (event.data.type === 'logout') {
-      localStorage.removeItem('operatorToken');
-      localStorage.removeItem('operatorRefreshToken');
-      localStorage.removeItem('operatorData');
-      showError('You have been logged out.');
+  // Initialize operator login
+  function initOperatorLogin() {
+    console.log('Initializing operator login page...');
+    
+    // ALWAYS clear operator session when loading the login page
+    // This ensures PIN is always required
+    console.log('Clearing operator session to force PIN entry');
+    localStorage.removeItem('operatorToken');
+    localStorage.removeItem('operatorRefreshToken');
+    localStorage.removeItem('operatorData');
+    sessionStorage.removeItem('operatorToken');
+    sessionStorage.removeItem('operatorRefreshToken');
+    sessionStorage.removeItem('operatorData');
+    
+    // Clear any cookies that might exist
+    document.cookie = 'operatorToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+    document.cookie = 'operatorRefreshToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+    
+    // Only run this script on the operator login page
+    const loginForm = document.getElementById('loginForm');
+    if (!loginForm) {
+      console.log('Login form not found, skipping operator login initialization');
+      return;
     }
-  });
 
-  // Auto-focus on email field
-  document.getElementById('email').focus();
+    // Attach form submission handler
+    console.log('Attaching form submit handler');
+    loginForm.addEventListener('submit', handleFormSubmit);
 
-  // Initialize i18n
-  async function initializeI18n() {
-    await window.i18n.init({ debugMode: false });
-    window.LanguageSwitcher.createSwitcher('language-switcher-container', {
-      style: 'dropdown',
-      showLabel: false
+    // Start clock if element exists
+    const clockElement = document.getElementById('clock');
+    if (clockElement) {
+      updateClock();
+      window.operatorClockInterval = setInterval(updateClock, 1000);
+    }
+
+    // NO AUTO-LOGIN - Always require PIN entry on this page
+    // Token validation will happen on the scan page instead
+
+    // Auto-focus on PIN field
+    const pinField = document.getElementById('pinCode');
+    if (pinField) {
+      pinField.focus();
+    }
+
+    // Listen for messages from parent window
+    window.addEventListener('message', function(event) {
+      if (event.data.type === 'logout') {
+        localStorage.removeItem('operatorToken');
+        localStorage.removeItem('operatorRefreshToken');
+        localStorage.removeItem('operatorData');
+        showError('You have been logged out.');
+      }
     });
   }
 
-  // Initialize i18n when DOM is ready
+  // Initialize i18n
+  async function initializeI18n() {
+    if (window.i18n && window.i18n.init) {
+      await window.i18n.init({ debugMode: false });
+    }
+    if (window.LanguageSwitcher && window.LanguageSwitcher.createSwitcher) {
+      window.LanguageSwitcher.createSwitcher('language-switcher-container', {
+        style: 'dropdown',
+        showLabel: false
+      });
+    }
+  }
+
+  // Initialize when DOM is ready
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initializeI18n);
+    console.log('DOM loading, waiting for DOMContentLoaded');
+    document.addEventListener('DOMContentLoaded', function() {
+      console.log('DOM loaded, initializing operator login');
+      initOperatorLogin();
+      initializeI18n();
+    });
   } else {
+    console.log('DOM already loaded, initializing operator login');
+    initOperatorLogin();
     initializeI18n();
   }
+
 })();

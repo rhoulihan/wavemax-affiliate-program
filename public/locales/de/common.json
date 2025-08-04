@@ -680,10 +680,20 @@
   },
   "operator": {
     "login": {
-      "title": "Operator-Portal",
-      "subtitle": "Geben Sie Ihre 4-stellige PIN ein, um auf das System zuzugreifen",
-      "pinPlaceholder": "4-stellige PIN eingeben",
-      "invalidPin": "Ungültige PIN. Bitte versuchen Sie es erneut."
+      "title": "Operator-Portal - WaveMAX",
+      "subtitle": "Operator-Portal",
+      "pinCode": "PIN-Code eingeben",
+      "pinPlaceholder": "4-6 stellige PIN eingeben",
+      "clockIn": "Einstempeln",
+      "clockingIn": "Einstempeln...",
+      "needHelp": "Benötigen Sie Hilfe? Kontaktieren Sie Ihren Vorgesetzten",
+      "shiftNoticeTitle": "Schichthinweis:",
+      "shiftNoticeText": "Sie können sich nur während Ihrer geplanten Schichtzeiten anmelden. Alle Aktivitäten werden überwacht.",
+      "invalidPin": "Ungültige PIN. Bitte versuchen Sie es erneut.",
+      "accountLocked": "Konto gesperrt. Bitte versuchen Sie es später erneut.",
+      "accountInactive": "Konto inaktiv. Kontaktieren Sie Ihren Vorgesetzten.",
+      "outsideShiftHours": "Anmeldung nur während der Schichtzeiten erlaubt",
+      "shiftEnded": "Ihre Schicht ist beendet. Bitte melden Sie sich während Ihrer Schichtzeiten an."
     }
   },
   "administrator": {

@@ -150,6 +150,14 @@ input:focus {
     color: #333;
 }
 
+/* PIN code input styling */
+.pin-input {
+    text-align: center;
+    font-size: 16px;
+    letter-spacing: 4px;
+    font-family: monospace;
+}
+
 /* Language switcher for operator login */
 #language-switcher-container {
     position: absolute;
