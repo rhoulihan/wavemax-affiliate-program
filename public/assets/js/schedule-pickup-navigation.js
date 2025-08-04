@@ -222,21 +222,28 @@
         
         // Check if test payment form is enabled
         if (window.paymentConfig && window.paymentConfig.testPaymentFormEnabled) {
-          console.log('Test payment form is enabled, opening test form in popup');
+          console.log('Test payment form is enabled, processing test payment');
           
-          // Open test payment form in popup
-          const testFormUrl = '/test-payment';
-          const width = 800;
-          const height = 600;
-          const left = (window.screen.width - width) / 2;
-          const top = (window.screen.height - height) / 2;
-          
-          const testWindow = window.open(testFormUrl, 'testPayment', 
-            `width=${width},height=${height},left=${left},top=${top},resizable=yes,scrollbars=yes`);
-          
-          if (!testWindow) {
+          // Check if payment form is initialized
+          if (window.paymentForm && typeof window.paymentForm.processPaymentTestMode === 'function') {
+            console.log('Processing payment in test mode');
+            // Get customer data for payment (same as production mode)
+            const customerStr = localStorage.getItem('currentCustomer');
+            const customer = customerStr ? JSON.parse(customerStr) : {};
+            const customerData = {
+              firstName: customer.firstName || 'Order',
+              lastName: customer.lastName || 'Customer',
+              email: customer.email || 'order@test.com'
+            };
+            // Process payment in test mode (this opens the test payment form window)
+            window.paymentForm.processPaymentTestMode(customerData);
+          } else {
+            console.error('Payment form not properly initialized for test mode');
+            console.error('window.paymentForm:', window.paymentForm);
+            console.error('processPaymentTestMode exists:', window.paymentForm ? typeof window.paymentForm.processPaymentTestMode : 'no paymentForm');
+            
             if (window.modalAlert) {
-              window.modalAlert('Please allow pop-ups for this site to complete payment.', 'Pop-up Blocked');
+              window.modalAlert('Payment system not ready. Please refresh the page and try again.', 'Error');
             }
             // Re-enable the button
             continueButton.textContent = 'Complete Payment';

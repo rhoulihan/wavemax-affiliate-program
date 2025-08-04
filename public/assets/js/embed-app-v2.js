@@ -471,10 +471,23 @@ async function loadPage(route) {
         container.innerHTML = processedHtml;
         currentRoute = route;
         
-        // Store the current route for persistence ONLY if authenticated
-        if (isAnyUserAuthenticated()) {
-            localStorage.setItem('currentRoute', route);
-        } else {
+        // Only store the base route path without query parameters
+        const baseRoute = route.split('?')[0];
+        
+        // Don't persist certain pages that require specific parameters or are entry points
+        const excludedRoutes = [
+            '/affiliate-landing',  // Requires specific affiliate code
+            '/customer-login',     // Entry point that may have affiliate ID
+            '/customer-register',  // Entry point that may have affiliate ID
+            '/affiliate-login',    // Entry point
+            '/affiliate-register', // Entry point
+            '/administrator-login' // Entry point
+        ];
+        
+        // Store the current route for persistence ONLY if authenticated AND not an excluded route
+        if (isAnyUserAuthenticated() && !excludedRoutes.includes(baseRoute)) {
+            localStorage.setItem('currentRoute', baseRoute);
+        } else if (!isAnyUserAuthenticated()) {
             // Clear any saved route if not authenticated
             localStorage.removeItem('currentRoute');
         }
