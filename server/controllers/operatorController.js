@@ -1568,9 +1568,44 @@ exports.printNewCustomerLabels = async (req, res) => {
       }
     }
     
-    // Update customers to mark labels as generated
+    // Don't update customers yet - wait for print confirmation
+    // Return the label data and customer IDs for later confirmation
     const customerIds = customers.map(c => c._id);
-    await Customer.updateMany(
+    
+    res.json({
+      success: true,
+      message: `Generated ${totalLabels} labels for ${customers.length} customers`,
+      customersProcessed: customers.length,
+      labelsGenerated: totalLabels,
+      labelData: labelData,
+      customerIds: customerIds // Send IDs for confirmation endpoint
+    });
+    
+  } catch (error) {
+    logger.error('Print new customer labels error:', error);
+    res.status(500).json({ 
+      success: false,
+      message: 'Error printing customer labels' 
+    });
+  }
+};// Confirm that labels were printed successfully
+exports.confirmLabelsPrinted = async (req, res) => {
+  const Customer = require('../models/Customer');
+  const logger = require('../utils/logger');
+  
+  try {
+    const { customerIds } = req.body;
+    const operatorId = req.user.id;
+    
+    if (!customerIds || !Array.isArray(customerIds) || customerIds.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'No customer IDs provided'
+      });
+    }
+    
+    // Update customers to mark labels as generated
+    const result = await Customer.updateMany(
       { _id: { $in: customerIds } },
       {
         $set: {
@@ -1581,22 +1616,20 @@ exports.printNewCustomerLabels = async (req, res) => {
       }
     );
     
-    // Log the print job
-    logger.info(`Operator ${operatorId} printed ${totalLabels} labels for ${customers.length} customers`);
+    // Log the successful print
+    logger.info(`Operator ${operatorId} confirmed printing labels for ${result.modifiedCount} customers`);
     
     res.json({
       success: true,
-      message: `Generated ${totalLabels} labels for ${customers.length} customers`,
-      customersProcessed: customers.length,
-      labelsGenerated: totalLabels,
-      labelData: labelData // Send label data to frontend for printing
+      message: `Labels marked as printed for ${result.modifiedCount} customers`,
+      customersUpdated: result.modifiedCount
     });
     
   } catch (error) {
-    logger.error('Print new customer labels error:', error);
-    res.status(500).json({ 
+    logger.error('Confirm labels printed error:', error);
+    res.status(500).json({
       success: false,
-      message: 'Error printing customer labels' 
+      message: 'Error confirming label printing'
     });
   }
 };
