@@ -1510,8 +1510,8 @@ exports.getTodayStats = async (req, res) => {
 exports.getNewCustomersCount = async (req, res) => {
   try {
     const count = await Customer.countDocuments({
-      bagLabelsGenerated: false,
-      isActive: true
+      bagLabelsGenerated: false
+      // Removed isActive check - customers may need labels printed before activation
     });
     
     res.json({ 
@@ -1534,8 +1534,8 @@ exports.printNewCustomerLabels = async (req, res) => {
     
     // Get all customers without bag labels
     const customers = await Customer.find({
-      bagLabelsGenerated: false,
-      isActive: true
+      bagLabelsGenerated: false
+      // Removed isActive check - customers may need labels printed before activation
     }).select('customerId firstName lastName numberOfBags affiliateId');
     
     if (customers.length === 0) {
