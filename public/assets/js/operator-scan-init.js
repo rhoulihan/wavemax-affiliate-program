@@ -43,8 +43,8 @@
         const actionBar = document.querySelector('.action-bar');
         if (actionBar) {
             if (show) {
-                actionBar.style.display = 'flex';
-                actionBar.style.opacity = '1';
+                // Only show if there are customers needing labels
+                checkNewCustomers(); // This will handle showing/hiding based on count
             } else {
                 actionBar.style.display = 'none';
                 actionBar.style.opacity = '0';
@@ -145,12 +145,24 @@
                 if (data.count > 0) {
                     newCustomerBadge.textContent = data.count;
                     newCustomerBadge.classList.remove('hidden');
+                    // Show the button when there are customers needing labels
+                    if (printLabelsBtn) {
+                        printLabelsBtn.style.display = 'flex';
+                    }
                 } else {
                     newCustomerBadge.classList.add('hidden');
+                    // Hide the button when there are no customers needing labels
+                    if (printLabelsBtn) {
+                        printLabelsBtn.style.display = 'none';
+                    }
                 }
             }
         } catch (error) {
             console.error('Error checking new customers:', error);
+            // Hide button on error
+            if (printLabelsBtn) {
+                printLabelsBtn.style.display = 'none';
+            }
         }
     }
     
@@ -176,6 +188,16 @@
                 const data = await response.json();
                 
                 if (data.labelsGenerated > 0) {
+                    // Check if print utilities are loaded
+                    if (!window.LabelPrintUtils || !window.LabelPrintUtils.generateAndPrintBagLabels) {
+                        showConfirmation(
+                            'error',
+                            'Print System Not Ready',
+                            'The label printing system is not fully loaded. Please refresh the page and try again.'
+                        );
+                        return;
+                    }
+                    
                     // Check if on Android and offer printing options
                     const isAndroid = /android/i.test(navigator.userAgent);
                     
