@@ -27,11 +27,30 @@
     const confirmIcon = document.getElementById('confirmIcon');
     const confirmTitle = document.getElementById('confirmTitle');
     const confirmMessage = document.getElementById('confirmMessage');
+    const printLabelsBtn = document.getElementById('printLabelsBtn');
+    const newCustomerBadge = document.getElementById('newCustomerBadge');
 
     // Stats elements - will be populated in init
     let ordersToday = null;
     let bagsScanned = null;
     let ordersReady = null;
+    
+    // Check interval for new customers
+    let newCustomerCheckInterval = null;
+    
+    // Helper function to manage action bar visibility
+    function toggleActionBar(show) {
+        const actionBar = document.querySelector('.action-bar');
+        if (actionBar) {
+            if (show) {
+                actionBar.style.display = 'flex';
+                actionBar.style.opacity = '1';
+            } else {
+                actionBar.style.display = 'none';
+                actionBar.style.opacity = '0';
+            }
+        }
+    }
 
     // Helper function to update stats display
     function updateStatsDisplay(data) {
@@ -109,6 +128,142 @@
                 prompt.remove();
             }
         }, 10000);
+    }
+
+    // Check for new customers without bag labels
+    async function checkNewCustomers() {
+        try {
+            const token = localStorage.getItem('operatorToken');
+            const response = await csrfFetch(`${BASE_URL}/api/operators/new-customers/count`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            
+            if (response.ok) {
+                const data = await response.json();
+                if (data.count > 0) {
+                    newCustomerBadge.textContent = data.count;
+                    newCustomerBadge.classList.remove('hidden');
+                } else {
+                    newCustomerBadge.classList.add('hidden');
+                }
+            }
+        } catch (error) {
+            console.error('Error checking new customers:', error);
+        }
+    }
+    
+    // Print labels for new customers
+    async function printNewCustomerLabels() {
+        try {
+            // Show loading state
+            printLabelsBtn.disabled = true;
+            const btnIcon = printLabelsBtn.querySelector('.btn-icon');
+            const originalEmoji = btnIcon.textContent;
+            btnIcon.textContent = '⏳';
+            
+            const token = localStorage.getItem('operatorToken');
+            const response = await csrfFetch(`${BASE_URL}/api/operators/print-new-customer-labels`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+            
+            if (response.ok) {
+                const data = await response.json();
+                
+                if (data.labelsGenerated > 0) {
+                    // Check if on Android and offer printing options
+                    const isAndroid = /android/i.test(navigator.userAgent);
+                    
+                    if (isAndroid && window.ThermalPrintUtils && window.ThermalPrintUtils.isWebUSBAvailable()) {
+                        // Offer choice of printing methods
+                        const printMethod = confirm(
+                            'Select printing method:\n\n' +
+                            'OK = Direct USB printing (experimental)\n' +
+                            'Cancel = Download PDF for HP Print Service Plugin'
+                        );
+                        
+                        try {
+                            if (printMethod) {
+                                // Try direct USB printing
+                                await window.ThermalPrintUtils.printViaWebUSB(data.labelData);
+                                showConfirmation(
+                                    'success',
+                                    'Labels Sent',
+                                    `Sent ${data.labelsGenerated} labels to thermal printer`
+                                );
+                            } else {
+                                // Generate PDF for HP Print Service Plugin
+                                await window.LabelPrintUtils.generateAndPrintBagLabels(data.labelData);
+                                showConfirmation(
+                                    'success',
+                                    'Labels Downloaded',
+                                    `Downloaded ${data.labelsGenerated} labels. Open with HP Print Service Plugin.`
+                                );
+                            }
+                        } catch (printError) {
+                            console.error('Print error:', printError);
+                            // Fallback to PDF download
+                            await window.LabelPrintUtils.generateAndPrintBagLabels(data.labelData);
+                            showConfirmation(
+                                'warning',
+                                'Using PDF Method',
+                                'Direct printing failed. PDF downloaded instead.'
+                            );
+                        }
+                    } else {
+                        // Standard PDF printing
+                        try {
+                            await window.LabelPrintUtils.generateAndPrintBagLabels(data.labelData);
+                            showConfirmation(
+                                'success',
+                                'Labels Printed',
+                                `Successfully printed ${data.labelsGenerated} labels for ${data.customersProcessed} customers`
+                            );
+                        } catch (printError) {
+                            console.error('Print error:', printError);
+                            showConfirmation(
+                                'error',
+                                'Print Error',
+                                'Failed to print labels. Please check your printer and try again.'
+                            );
+                        }
+                    }
+                } else {
+                    showConfirmation(
+                        'info',
+                        'No New Customers',
+                        'There are no new customers requiring bag labels.'
+                    );
+                }
+                
+                // Refresh the count
+                checkNewCustomers();
+            } else {
+                const errorData = await response.json();
+                showConfirmation(
+                    'error',
+                    'Error',
+                    errorData.message || 'Failed to generate labels'
+                );
+            }
+        } catch (error) {
+            console.error('Error printing labels:', error);
+            showConfirmation(
+                'error',
+                'Error',
+                'An error occurred while printing labels'
+            );
+        } finally {
+            // Reset button state
+            printLabelsBtn.disabled = false;
+            const btnIcon = printLabelsBtn.querySelector('.btn-icon');
+            btnIcon.textContent = '🏷️';
+        }
     }
 
     // Initialize
@@ -637,6 +792,15 @@
         if (modalCloseBtn) {
             modalCloseBtn.addEventListener('click', closeModal);
         }
+        
+        // Print labels button
+        if (printLabelsBtn) {
+            printLabelsBtn.addEventListener('click', printNewCustomerLabels);
+        }
+        
+        // Check for new customers immediately and every 30 seconds
+        checkNewCustomers();
+        newCustomerCheckInterval = setInterval(checkNewCustomers, 30000);
     }
 
     // Focus scanner input
@@ -1046,6 +1210,7 @@
         // Show modal using CSS classes only
         console.log('Setting modal to visible');
         orderModal.classList.add('active');
+        toggleActionBar(false); // Hide action bar when modal opens
         
         // Keep scanner focused if not all bags are scanned
         if (!allBagsScanned) {
@@ -1233,6 +1398,7 @@
         // Remove modal class that might hide it and add active class
         orderModal.classList.remove('modal');
         orderModal.classList.add('modal', 'active');
+        toggleActionBar(false); // Hide action bar when modal opens
         
         // Apply important to override any CSS
         // CSP-compliant: active class handles display
@@ -1242,6 +1408,7 @@
             if (!orderModal.classList.contains('active')) {
                 console.log('Modal was hidden, forcing it back to visible');
                 orderModal.classList.add('active');
+                toggleActionBar(false); // Hide action bar when modal opens
                 // CSP-compliant: active class handles display
             }
             
@@ -1430,6 +1597,7 @@
 
         modalBody.innerHTML = html;
         orderModal.classList.add('active');
+        toggleActionBar(false); // Hide action bar when modal opens
         
         // Add event listeners to buttons
         setTimeout(() => {
@@ -1544,6 +1712,7 @@
         
         // Show modal with active class
         orderModal.classList.add('modal', 'active');
+        toggleActionBar(false); // Hide action bar when modal opens
         // CSP-compliant: active class handles display
         
         // Add event listeners to buttons and set progress bar width
@@ -1864,6 +2033,7 @@
         // Now we can safely hide the modal
         orderModal.classList.remove('active');
         currentOrder = null;
+        toggleActionBar(true); // Show action bar when modal closes
         focusScanner();
         
         console.log('Modal state after close:', {

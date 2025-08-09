@@ -72,6 +72,78 @@ body {
     width: 100%;
 }
 
+/* Action Bar */
+.action-bar {
+    position: fixed;
+    right: 20px;
+    top: 60px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    z-index: 50;
+}
+
+.action-btn {
+    background: white;
+    border: 2px solid #3b82f6;
+    border-radius: 50%;
+    padding: 15px;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    width: 60px;
+    height: 60px;
+    font-size: 24px;
+    font-weight: 500;
+    color: #2c3e50;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.action-btn:hover {
+    background: #3b82f6;
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.btn-icon {
+    font-size: 20px;
+}
+
+.btn-text {
+    flex: 1;
+    text-align: left;
+}
+
+.badge {
+    background: #ef4444;
+    color: white;
+    border-radius: 10px;
+    padding: 2px 6px;
+    font-size: 11px;
+    font-weight: bold;
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    min-width: 18px;
+    text-align: center;
+    line-height: 1;
+}
+
+.badge.hidden {
+    display: none;
+}
+
+/* Adjust main container for action bar */
+@media (min-width: 1024px) {
+    .main-container {
+        margin-right: 280px;
+    }
+}
+
 .scan-prompt {
     background: white;
     border-radius: 16px;
