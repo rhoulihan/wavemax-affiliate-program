@@ -82,4 +82,8 @@ router.post('/orders/:orderId/ready', operatorController.markOrderReady); // Dep
 router.post('/confirm-pickup', operatorController.confirmPickup); // Legacy endpoint
 router.get('/stats/today', operatorController.getTodayStats);
 
+// Label Printing Routes
+router.get('/new-customers/count', operatorController.getNewCustomersCount);
+router.post('/print-new-customer-labels', operatorController.printNewCustomerLabels);
+
 module.exports = router;

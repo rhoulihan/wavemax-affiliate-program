@@ -1505,3 +1505,98 @@ exports.getTodayStats = async (req, res) => {
     res.status(500).json({ error: 'Failed to fetch stats' });
   }
 };
+
+// Get count of new customers without bag labels
+exports.getNewCustomersCount = async (req, res) => {
+  try {
+    const count = await Customer.countDocuments({
+      bagLabelsGenerated: false,
+      isActive: true
+    });
+    
+    res.json({ 
+      success: true,
+      count 
+    });
+  } catch (error) {
+    console.error('Get new customers count error:', error);
+    res.status(500).json({ 
+      success: false,
+      message: 'Error fetching new customers count' 
+    });
+  }
+};
+
+// Print bag labels for new customers
+exports.printNewCustomerLabels = async (req, res) => {
+  try {
+    const operatorId = req.user.id;
+    
+    // Get all customers without bag labels
+    const customers = await Customer.find({
+      bagLabelsGenerated: false,
+      isActive: true
+    }).select('customerId firstName lastName numberOfBags affiliateId');
+    
+    if (customers.length === 0) {
+      return res.json({
+        success: true,
+        message: 'No new customers found',
+        customersProcessed: 0,
+        labelsGenerated: 0
+      });
+    }
+    
+    // Generate label data for each customer
+    const labelData = [];
+    let totalLabels = 0;
+    
+    for (const customer of customers) {
+      const bagCount = customer.numberOfBags || 1;
+      
+      // Generate label for each bag
+      for (let bagNumber = 1; bagNumber <= bagCount; bagNumber++) {
+        labelData.push({
+          customerId: customer.customerId,
+          customerName: `${customer.firstName} ${customer.lastName}`,
+          bagNumber: bagNumber,
+          totalBags: bagCount,
+          qrCode: `BAG-${customer.customerId}-${bagNumber}`,
+          affiliateId: customer.affiliateId
+        });
+        totalLabels++;
+      }
+    }
+    
+    // Update customers to mark labels as generated
+    const customerIds = customers.map(c => c._id);
+    await Customer.updateMany(
+      { _id: { $in: customerIds } },
+      {
+        $set: {
+          bagLabelsGenerated: true,
+          bagLabelsGeneratedAt: new Date(),
+          bagLabelsGeneratedBy: operatorId
+        }
+      }
+    );
+    
+    // Log the print job
+    logger.info(`Operator ${operatorId} printed ${totalLabels} labels for ${customers.length} customers`);
+    
+    res.json({
+      success: true,
+      message: `Generated ${totalLabels} labels for ${customers.length} customers`,
+      customersProcessed: customers.length,
+      labelsGenerated: totalLabels,
+      labelData: labelData // Send label data to frontend for printing
+    });
+    
+  } catch (error) {
+    logger.error('Print new customer labels error:', error);
+    res.status(500).json({ 
+      success: false,
+      message: 'Error printing customer labels' 
+    });
+  }
+};
