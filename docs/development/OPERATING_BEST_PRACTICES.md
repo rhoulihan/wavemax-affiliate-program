@@ -216,6 +216,16 @@ When the command "run coverage test" is issued, the system performs the followin
 
 ## Session Management
 
+### Session Startup Requirements
+1. **Always review init.prompt** which includes:
+   - AI Assistant Persona and expertise areas
+   - Project context and problem-solving processes
+   - **Critical: Architecture & Implementation Guide (Section 10)**
+   - Session startup and completion checklists
+2. **Review OPERATING_BEST_PRACTICES.md** for known issues and workarounds
+3. **Check git status** for uncommitted changes
+4. **Review recent project logs** for in-progress tasks
+
 ### Project Logs
 - Always update status in project logs when switching between tasks
 - Use clear status indicators: IN PROGRESS, TESTING, COMPLETED, BLOCKED
