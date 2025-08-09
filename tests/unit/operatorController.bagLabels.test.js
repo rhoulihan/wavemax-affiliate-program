@@ -42,8 +42,7 @@ describe('Operator Controller - Bag Label Printing', () => {
       await operatorController.getNewCustomersCount(req, res);
 
       expect(Customer.countDocuments).toHaveBeenCalledWith({
-        bagLabelsGenerated: false,
-        isActive: true
+        bagLabelsGenerated: false
       });
       expect(res.json).toHaveBeenCalledWith({
         success: true,
@@ -105,8 +104,7 @@ describe('Operator Controller - Bag Label Printing', () => {
       await operatorController.printNewCustomerLabels(req, res);
 
       expect(Customer.find).toHaveBeenCalledWith({
-        bagLabelsGenerated: false,
-        isActive: true
+        bagLabelsGenerated: false
       });
 
       expect(Customer.updateMany).toHaveBeenCalledWith(
