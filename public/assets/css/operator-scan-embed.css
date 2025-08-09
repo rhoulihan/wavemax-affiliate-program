@@ -5,12 +5,19 @@
     box-sizing: border-box;
 }
 
+html {
+    height: 100%;
+    overflow: hidden;
+}
+
 body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
     background: #f0f4f8;
     color: #2c3e50;
     line-height: 1.6;
     overflow-x: hidden;
+    height: 100%;
+    margin: 0;
 }
 
 .header {
@@ -55,8 +62,14 @@ body {
 
 .main-container {
     max-width: 800px;
-    margin: 40px auto;
-    padding: 0 20px;
+    margin: 0 auto;
+    padding: 20px !important;
+}
+
+/* Top spacer to ensure padding */
+.top-spacer {
+    height: 40px;
+    width: 100%;
 }
 
 .scan-prompt {
@@ -527,8 +540,10 @@ body.android-kiosk {
 
 /* Force full height on all containers */
 body.android-kiosk .main-container {
-    height: calc(100vh - 80px); /* Account for header */
+    height: 100vh; /* Full height without header */
     overflow: hidden;
+    padding-top: 40px !important; /* Ensure padding is maintained */
+    box-sizing: border-box; /* Include padding in height calculation */
 }
 
 /* Fullscreen prompt */

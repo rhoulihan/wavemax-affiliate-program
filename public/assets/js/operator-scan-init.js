@@ -19,7 +19,6 @@
     let statsInterval = null;
 
     // DOM elements
-    const operatorName = document.getElementById('operatorName');
     const scanInput = document.getElementById('scanInput');
     const orderModal = document.getElementById('orderModal');
     const modalBody = document.getElementById('modalBody');
@@ -395,7 +394,6 @@
         
         // Get operator data
         operatorData = JSON.parse(localStorage.getItem('operatorData') || '{}');
-        operatorName.textContent = operatorData.name || 'Operator';
         
         console.log('Operator data:', operatorData);
         console.log('Token present:', !!token);
@@ -633,14 +631,6 @@
 
         // Keyboard shortcuts
         document.addEventListener('keydown', handleKeyDown);
-
-        // Logout button
-        const logoutBtn = document.getElementById('logoutBtn');
-        if (logoutBtn) {
-            logoutBtn.addEventListener('click', function() {
-                logout();
-            });
-        }
         
         // Modal close button
         const modalCloseBtn = document.getElementById('modalCloseBtn');
