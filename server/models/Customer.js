@@ -85,7 +85,14 @@ const customerSchema = new mongoose.Schema({
     type: String,
     enum: ['en', 'es', 'pt', 'de'],
     default: 'en'
-  }
+  },
+  // Bag label tracking
+  bagLabelsGenerated: {
+    type: Boolean,
+    default: false
+  },
+  bagLabelsGeneratedAt: Date,
+  bagLabelsGeneratedBy: String // operatorId who printed
 }, { timestamps: true });
 
 // No longer need encryption middleware as payment data is not stored
