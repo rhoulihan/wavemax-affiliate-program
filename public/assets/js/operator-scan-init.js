@@ -130,6 +130,32 @@
         }, 10000);
     }
 
+    // Confirm that labels were printed successfully
+    async function confirmLabelsPrinted(customerIds) {
+        try {
+            const token = localStorage.getItem('operatorToken');
+            const response = await csrfFetch(`${BASE_URL}/api/operators/confirm-labels-printed`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ customerIds })
+            });
+            
+            if (!response.ok) {
+                throw new Error('Failed to confirm label printing');
+            }
+            
+            const data = await response.json();
+            console.log('Labels confirmed:', data);
+            return data;
+        } catch (error) {
+            console.error('Error confirming labels:', error);
+            throw error;
+        }
+    }
+    
     // Check for new customers without bag labels
     async function checkNewCustomers() {
         try {
@@ -188,6 +214,9 @@
                 const data = await response.json();
                 
                 if (data.labelsGenerated > 0) {
+                    // Store customer IDs for confirmation
+                    const customerIds = data.customerIds;
+                    
                     // Check if print utilities are loaded
                     if (!window.LabelPrintUtils || !window.LabelPrintUtils.generateAndPrintBagLabels) {
                         showConfirmation(
@@ -213,6 +242,7 @@
                             if (printMethod) {
                                 // Try direct USB printing
                                 await window.ThermalPrintUtils.printViaWebUSB(data.labelData);
+                                await confirmLabelsPrinted(customerIds);
                                 showConfirmation(
                                     'success',
                                     'Labels Sent',
@@ -221,26 +251,60 @@
                             } else {
                                 // Generate PDF for HP Print Service Plugin
                                 await window.LabelPrintUtils.generateAndPrintBagLabels(data.labelData);
+                                // Don't confirm here - user needs to manually print from PDF
                                 showConfirmation(
-                                    'success',
+                                    'info',
                                     'Labels Downloaded',
-                                    `Downloaded ${data.labelsGenerated} labels. Open with HP Print Service Plugin.`
+                                    `Downloaded ${data.labelsGenerated} labels. Please print using HP Print Service Plugin, then tap "Confirm Printed".`
                                 );
+                                
+                                // Show a confirm button
+                                setTimeout(() => {
+                                    if (confirm('Have you successfully printed the labels?')) {
+                                        confirmLabelsPrinted(customerIds).then(() => {
+                                            showConfirmation('success', 'Confirmed', 'Labels marked as printed');
+                                            checkNewCustomers();
+                                        }).catch(err => {
+                                            showConfirmation('error', 'Error', 'Failed to confirm printing');
+                                        });
+                                    }
+                                }, 2000);
                             }
                         } catch (printError) {
                             console.error('Print error:', printError);
                             // Fallback to PDF download
-                            await window.LabelPrintUtils.generateAndPrintBagLabels(data.labelData);
-                            showConfirmation(
-                                'warning',
-                                'Using PDF Method',
-                                'Direct printing failed. PDF downloaded instead.'
-                            );
+                            try {
+                                await window.LabelPrintUtils.generateAndPrintBagLabels(data.labelData);
+                                showConfirmation(
+                                    'warning',
+                                    'Using PDF Method',
+                                    'Direct printing failed. PDF downloaded instead. Please print and confirm.'
+                                );
+                                
+                                // Show a confirm button for fallback
+                                setTimeout(() => {
+                                    if (confirm('Have you successfully printed the labels?')) {
+                                        confirmLabelsPrinted(customerIds).then(() => {
+                                            showConfirmation('success', 'Confirmed', 'Labels marked as printed');
+                                            checkNewCustomers();
+                                        }).catch(err => {
+                                            showConfirmation('error', 'Error', 'Failed to confirm printing');
+                                        });
+                                    }
+                                }, 2000);
+                            } catch (fallbackError) {
+                                console.error('Fallback print error:', fallbackError);
+                                showConfirmation('error', 'Print Failed', 'Unable to generate labels. Please try again.');
+                            }
                         }
                     } else {
                         // Standard PDF printing
                         try {
                             await window.LabelPrintUtils.generateAndPrintBagLabels(data.labelData);
+                            
+                            // Only confirm if printing was successful
+                            await confirmLabelsPrinted(customerIds);
+                            
                             showConfirmation(
                                 'success',
                                 'Labels Printed',
@@ -253,6 +317,8 @@
                                 'Print Error',
                                 'Failed to print labels. Please check your printer and try again.'
                             );
+                            // Don't confirm if printing failed
+                            return;
                         }
                     }
                 } else {
