@@ -90,7 +90,7 @@ body {
     padding: 15px;
     cursor: pointer;
     transition: all 0.3s;
-    display: flex;
+    display: none; /* Hidden by default until we check for customers */
     align-items: center;
     justify-content: center;
     position: relative;
