@@ -58,27 +58,37 @@
         const bagText = `Bag ${label.bagNumber} of ${label.totalBags}`;
         pdf.text(bagText, pageWidth / 2, margin + 1.2, { align: 'center' });
         
-        // Generate QR code
-        const qrCanvas = document.createElement('canvas');
-        const qrSize = 200;
-        qrCanvas.width = qrSize;
-        qrCanvas.height = qrSize;
-        
-        new QRCode(qrCanvas, {
-          text: label.qrCode,
-          width: qrSize,
-          height: qrSize,
-          correctLevel: QRCode.CorrectLevel.H
-        });
-        
-        // Wait for QR code to render
-        await new Promise(resolve => setTimeout(resolve, 100));
+        // Generate QR code using the same method as admin dashboard
+        let qrImageUrl;
+        try {
+          qrImageUrl = await QRCode.toDataURL(label.qrCode, {
+            width: 200,
+            margin: 1,
+            errorCorrectionLevel: 'H',
+            color: {
+              dark: '#000000',
+              light: '#FFFFFF'
+            }
+          });
+        } catch (qrError) {
+          console.error('QR Code generation error:', qrError);
+          // Create a fallback placeholder if QR code fails
+          const canvas = document.createElement('canvas');
+          canvas.width = 200;
+          canvas.height = 200;
+          const ctx = canvas.getContext('2d');
+          ctx.fillStyle = '#000';
+          ctx.font = '20px Arial';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText(label.qrCode, 100, 100);
+          qrImageUrl = canvas.toDataURL('image/png');
+        }
         
         // Add QR code to PDF (centered)
-        const qrImage = qrCanvas.toDataURL('image/png');
         const qrSizeInInches = 2;
         const qrX = (pageWidth - qrSizeInInches) / 2;
-        pdf.addImage(qrImage, 'PNG', qrX, 2, qrSizeInInches, qrSizeInInches);
+        pdf.addImage(qrImageUrl, 'PNG', qrX, 2, qrSizeInInches, qrSizeInInches);
         
         // Add customer ID below QR code
         pdf.setFontSize(12);
@@ -175,27 +185,37 @@
         const customerName = `${customer.firstName} ${customer.lastName}`;
         pdf.text(customerName, pageWidth / 2, margin + 1, { align: 'center' });
         
-        // Generate QR code
-        const qrCanvas = document.createElement('canvas');
-        const qrSize = 256;
-        qrCanvas.width = qrSize;
-        qrCanvas.height = qrSize;
-        
-        new QRCode(qrCanvas, {
-          text: customer.customerId,
-          width: qrSize,
-          height: qrSize,
-          correctLevel: QRCode.CorrectLevel.H
-        });
-        
-        // Wait for QR code to render
-        await new Promise(resolve => setTimeout(resolve, 100));
+        // Generate QR code using the same method as admin dashboard
+        let qrImageUrl;
+        try {
+          qrImageUrl = await QRCode.toDataURL(customer.customerId, {
+            width: 256,
+            margin: 1,
+            errorCorrectionLevel: 'H',
+            color: {
+              dark: '#000000',
+              light: '#FFFFFF'
+            }
+          });
+        } catch (qrError) {
+          console.error('QR Code generation error:', qrError);
+          // Create a fallback placeholder if QR code fails
+          const canvas = document.createElement('canvas');
+          canvas.width = 256;
+          canvas.height = 256;
+          const ctx = canvas.getContext('2d');
+          ctx.fillStyle = '#000';
+          ctx.font = '20px Arial';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText(customer.customerId, 128, 128);
+          qrImageUrl = canvas.toDataURL('image/png');
+        }
         
         // Add QR code to PDF (centered)
-        const qrImage = qrCanvas.toDataURL('image/png');
         const qrSizeInInches = 2.5;
         const qrX = (pageWidth - qrSizeInInches) / 2;
-        pdf.addImage(qrImage, 'PNG', qrX, 1.75, qrSizeInInches, qrSizeInInches);
+        pdf.addImage(qrImageUrl, 'PNG', qrX, 1.75, qrSizeInInches, qrSizeInInches);
         
         // Add customer ID
         pdf.setFontSize(14);
