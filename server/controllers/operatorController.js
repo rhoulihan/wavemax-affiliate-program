@@ -1536,7 +1536,7 @@ exports.printNewCustomerLabels = async (req, res) => {
     const customers = await Customer.find({
       bagLabelsGenerated: false
       // Removed isActive check - customers may need labels printed before activation
-    }).select('customerId firstName lastName numberOfBags affiliateId');
+    }).select('customerId firstName lastName phone email numberOfBags affiliateId');
     
     if (customers.length === 0) {
       return res.json({
@@ -1559,9 +1559,11 @@ exports.printNewCustomerLabels = async (req, res) => {
         labelData.push({
           customerId: customer.customerId,
           customerName: `${customer.firstName} ${customer.lastName}`,
+          phone: customer.phone || '',
+          email: customer.email || '',
           bagNumber: bagNumber,
           totalBags: bagCount,
-          qrCode: `BAG-${customer.customerId}-${bagNumber}`,
+          qrCode: `${customer.customerId}-${bagNumber}`,
           affiliateId: customer.affiliateId
         });
         totalLabels++;

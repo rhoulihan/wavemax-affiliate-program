@@ -302,14 +302,14 @@
                         try {
                             await window.LabelPrintUtils.generateAndPrintBagLabels(data.labelData);
                             
-                            // Only confirm if printing was successful
+                            // Confirm labels were printed (updates database)
                             await confirmLabelsPrinted(customerIds);
                             
-                            showConfirmation(
-                                'success',
-                                'Labels Printed',
-                                `Successfully printed ${data.labelsGenerated} labels for ${data.customersProcessed} customers`
-                            );
+                            // Hide the print button instead of showing dialog
+                            printLabelsBtn.style.display = 'none';
+                            
+                            // Update the count
+                            checkNewCustomers();
                         } catch (printError) {
                             console.error('Print error:', printError);
                             showConfirmation(

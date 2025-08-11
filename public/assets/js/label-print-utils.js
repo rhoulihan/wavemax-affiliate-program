@@ -52,11 +52,19 @@
         pdf.setFont('helvetica', 'normal');
         pdf.text(label.customerName, pageWidth / 2, margin + 0.7, { align: 'center' });
         
-        // Add bag info
-        pdf.setFontSize(24);
-        pdf.setFont('helvetica', 'bold');
-        const bagText = `Bag ${label.bagNumber} of ${label.totalBags}`;
-        pdf.text(bagText, pageWidth / 2, margin + 1.2, { align: 'center' });
+        // Add phone and email if available
+        pdf.setFontSize(11);
+        let yPos = margin + 1.1;
+        
+        if (label.phone) {
+          pdf.text(label.phone, pageWidth / 2, yPos, { align: 'center' });
+          yPos += 0.2;
+        }
+        
+        if (label.email) {
+          pdf.text(label.email, pageWidth / 2, yPos, { align: 'center' });
+          yPos += 0.2;
+        }
         
         // Generate QR code using the same method as admin dashboard
         let qrImageUrl;
@@ -88,16 +96,16 @@
         // Add QR code to PDF (centered)
         const qrSizeInInches = 2;
         const qrX = (pageWidth - qrSizeInInches) / 2;
-        pdf.addImage(qrImageUrl, 'PNG', qrX, 2, qrSizeInInches, qrSizeInInches);
+        pdf.addImage(qrImageUrl, 'PNG', qrX, 2.3, qrSizeInInches, qrSizeInInches);
         
         // Add customer ID below QR code
         pdf.setFontSize(12);
         pdf.setFont('helvetica', 'normal');
-        pdf.text(`ID: ${label.customerId}`, pageWidth / 2, 4.5, { align: 'center' });
+        pdf.text(`ID: ${label.customerId}`, pageWidth / 2, 4.7, { align: 'center' });
         
         // Add instructions
         pdf.setFontSize(10);
-        pdf.text('Scan this code to process this bag', pageWidth / 2, 5, { align: 'center' });
+        pdf.text('Scan this code to process this bag', pageWidth / 2, 5.2, { align: 'center' });
         
         // Add footer with date
         pdf.setFontSize(8);
@@ -105,38 +113,32 @@
         pdf.text(`Printed: ${printDate}`, pageWidth / 2, pageHeight - margin, { align: 'center' });
       }
       
-      // For Android/mobile devices, offer download option
+      // Add auto-print JavaScript to the PDF
+      // This will trigger print dialog when PDF is opened
+      pdf.autoPrint();
+      
+      // Download the PDF with auto-print enabled
+      const pdfBlob = pdf.output('blob');
+      const fileName = `bag-labels-${new Date().getTime()}.pdf`;
+      
+      // Create download link
+      const downloadLink = document.createElement('a');
+      downloadLink.href = URL.createObjectURL(pdfBlob);
+      downloadLink.download = fileName;
+      downloadLink.style.display = 'none';
+      document.body.appendChild(downloadLink);
+      downloadLink.click();
+      document.body.removeChild(downloadLink);
+      
+      // Show instructions based on device
       const isAndroid = /android/i.test(navigator.userAgent);
       const isMobile = /mobile|tablet/i.test(navigator.userAgent);
       
       if (isAndroid || isMobile) {
-        // On mobile devices, download the PDF for printing via appropriate app
-        const pdfBlob = pdf.output('blob');
-        const fileName = `bag-labels-${new Date().getTime()}.pdf`;
-        
-        // Create download link
-        const downloadLink = document.createElement('a');
-        downloadLink.href = URL.createObjectURL(pdfBlob);
-        downloadLink.download = fileName;
-        downloadLink.style.display = 'none';
-        document.body.appendChild(downloadLink);
-        downloadLink.click();
-        document.body.removeChild(downloadLink);
-        
-        // Show instructions
         alert('Label PDF downloaded. Please open with a PDF viewer that supports printing to your thermal printer.');
       } else {
-        // Desktop browser - open print dialog
-        const pdfBlob = pdf.output('blob');
-        const pdfUrl = URL.createObjectURL(pdfBlob);
-        const printWindow = window.open(pdfUrl);
-        
-        // Auto-print when loaded
-        if (printWindow) {
-          printWindow.onload = function() {
-            printWindow.print();
-          };
-        }
+        // Desktop - inform that PDF will auto-print when opened
+        console.log('Label PDF downloaded with auto-print enabled. The print dialog will appear when you open the PDF.');
       }
       
       return true;
@@ -257,38 +259,32 @@
         pdf.text(`Member since: ${regDate}`, pageWidth / 2, pageHeight - margin, { align: 'center' });
       }
       
-      // For Android/mobile devices, offer download option
+      // Add auto-print JavaScript to the PDF
+      // This will trigger print dialog when PDF is opened
+      pdf.autoPrint();
+      
+      // Download the PDF with auto-print enabled
+      const pdfBlob = pdf.output('blob');
+      const fileName = `bag-labels-${new Date().getTime()}.pdf`;
+      
+      // Create download link
+      const downloadLink = document.createElement('a');
+      downloadLink.href = URL.createObjectURL(pdfBlob);
+      downloadLink.download = fileName;
+      downloadLink.style.display = 'none';
+      document.body.appendChild(downloadLink);
+      downloadLink.click();
+      document.body.removeChild(downloadLink);
+      
+      // Show instructions based on device
       const isAndroid = /android/i.test(navigator.userAgent);
       const isMobile = /mobile|tablet/i.test(navigator.userAgent);
       
       if (isAndroid || isMobile) {
-        // On mobile devices, download the PDF for printing via appropriate app
-        const pdfBlob = pdf.output('blob');
-        const fileName = `bag-labels-${new Date().getTime()}.pdf`;
-        
-        // Create download link
-        const downloadLink = document.createElement('a');
-        downloadLink.href = URL.createObjectURL(pdfBlob);
-        downloadLink.download = fileName;
-        downloadLink.style.display = 'none';
-        document.body.appendChild(downloadLink);
-        downloadLink.click();
-        document.body.removeChild(downloadLink);
-        
-        // Show instructions
         alert('Label PDF downloaded. Please open with a PDF viewer that supports printing to your thermal printer.');
       } else {
-        // Desktop browser - open print dialog
-        const pdfBlob = pdf.output('blob');
-        const pdfUrl = URL.createObjectURL(pdfBlob);
-        const printWindow = window.open(pdfUrl);
-        
-        // Auto-print when loaded
-        if (printWindow) {
-          printWindow.onload = function() {
-            printWindow.print();
-          };
-        }
+        // Desktop - inform that PDF will auto-print when opened
+        console.log('Label PDF downloaded with auto-print enabled. The print dialog will appear when you open the PDF.');
       }
       
       return true;
