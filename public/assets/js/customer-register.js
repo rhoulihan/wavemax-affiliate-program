@@ -864,6 +864,8 @@
 
     // Handle bag selection
     let bagFee = 10.00; // Default bag fee, will be updated from server
+    let freeFirstBagEnabled = false; // Will be updated from server
+    window.freeFirstBagEnabled = false; // Make it globally accessible
     const numberOfBagsSelect = document.getElementById('numberOfBags');
     const totalBagFeeDisplay = document.getElementById('totalBagFee');
     const bagFeeSummary = document.getElementById('bagFeeSummary');
@@ -877,7 +879,7 @@
       bagFeeSummary.style.overflow = 'hidden';
     }
 
-    // Fetch bag fee from system configuration
+    // Fetch bag fee and free first bag policy from system configuration
     const baseUrl = window.EMBED_CONFIG?.baseUrl || 'https://wavemax.promo';
     fetch(`${baseUrl}/api/v1/system/config/public`)
       .then(response => response.json())
@@ -890,11 +892,39 @@
           if (bagFeeDisplay) {
             bagFeeDisplay.textContent = `$${bagFee.toFixed(2)}`;
           }
-          // Update select options
+          // Update select options (will be updated again when free bag policy is loaded)
           for (let i = 1; i <= 5; i++) {
             const option = numberOfBagsSelect.querySelector(`option[value="${i}"]`);
             if (option) {
               option.textContent = `${i} bag${i > 1 ? 's' : ''} - $${(i * bagFee).toFixed(2)}`;
+            }
+          }
+        }
+        
+        // Check for free first bag policy
+        const freeFirstBagConfig = configs.find(c => c.key === 'free_first_bag_enabled');
+        if (freeFirstBagConfig && freeFirstBagConfig.currentValue) {
+          freeFirstBagEnabled = freeFirstBagConfig.currentValue === true || freeFirstBagConfig.currentValue === 'true';
+          window.freeFirstBagEnabled = freeFirstBagEnabled; // Update global variable
+          
+          // Update select options with free first bag pricing
+          if (freeFirstBagEnabled) {
+            for (let i = 1; i <= 5; i++) {
+              const option = numberOfBagsSelect.querySelector(`option[value="${i}"]`);
+              if (option) {
+                const cost = Math.max(0, (i - 1) * bagFee);
+                if (i === 1) {
+                  option.textContent = `1 bag - FREE`;
+                } else {
+                  option.textContent = `${i} bags - $${cost.toFixed(2)} (1 free + ${i - 1} paid)`;
+                }
+              }
+            }
+            
+            // Add a notice about free first bag
+            const bagFeeDisplay = document.getElementById('bagFeeDisplay');
+            if (bagFeeDisplay) {
+              bagFeeDisplay.innerHTML = `<span style="color: #28a745;">First bag FREE!</span> Additional bags: $${bagFee.toFixed(2)} each`;
             }
           }
         }
@@ -921,10 +951,18 @@
 
     numberOfBagsSelect.addEventListener('change', function() {
       const numberOfBags = parseInt(this.value) || 0;
-      const total = numberOfBags * bagFee;
+      let total = 0;
+      
+      if (freeFirstBagEnabled) {
+        // First bag is free, charge for additional bags only
+        total = Math.max(0, (numberOfBags - 1) * bagFee);
+      } else {
+        // Traditional pricing - all bags are paid
+        total = numberOfBags * bagFee;
+      }
 
-      totalBagFeeDisplay.textContent = `$${total.toFixed(2)}`;
-      bagFeeSummaryAmount.textContent = `$${total.toFixed(2)}`;
+      totalBagFeeDisplay.textContent = total === 0 ? 'FREE' : `$${total.toFixed(2)}`;
+      bagFeeSummaryAmount.textContent = total === 0 ? 'FREE' : `$${total.toFixed(2)}`;
 
       // Use visibility instead of display to prevent layout reflows
       if (numberOfBags > 0) {

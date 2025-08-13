@@ -143,6 +143,13 @@
       },
       isLastStep: true,
       onShow: function() {
+        // Check if payment should be skipped (free first bag with only 1 bag selected)
+        const numberOfBags = parseInt(document.getElementById('numberOfBags')?.value || 0);
+        const freeFirstBagEnabled = window.freeFirstBagEnabled || false;
+        const shouldSkipPayment = freeFirstBagEnabled && numberOfBags === 1;
+        
+        console.log('Payment step - bags:', numberOfBags, 'freeFirstBag:', freeFirstBagEnabled, 'skipPayment:', shouldSkipPayment);
+        
         // Trigger payment form visibility event
         if (window.PaygistixRegistration && window.PaygistixRegistration.updateBagQuantity) {
           window.PaygistixRegistration.updateBagQuantity();
@@ -155,9 +162,25 @@
           const navigationSection = document.getElementById('navigationSection');
           const advanceButton = document.getElementById('advanceButton');
 
-          if (submitBtn && paymentContainer && navigationSection) {
-            // Hide the entire payment container
-            paymentContainer.style.display = 'none';
+          if (paymentContainer && navigationSection) {
+            // Hide payment container if payment should be skipped or in normal flow
+            if (shouldSkipPayment) {
+              paymentContainer.style.display = 'none';
+              
+              // Show a message that registration is free
+              const freeMessage = document.createElement('div');
+              freeMessage.className = 'p-4 bg-green-50 border border-green-200 rounded-lg text-green-800 mb-4';
+              freeMessage.innerHTML = '<strong>Free Registration!</strong> Your first bag is free. Click "Complete Registration" to finish.';
+              
+              const summarySection = document.getElementById('serviceSummarySection');
+              if (summarySection && !document.querySelector('.free-registration-message')) {
+                freeMessage.classList.add('free-registration-message');
+                summarySection.appendChild(freeMessage);
+              }
+            } else if (submitBtn) {
+              // Normal payment flow - hide container as before
+              paymentContainer.style.display = 'none';
+            }
 
             // Check if payment button already exists in navigation
             let payButton = document.getElementById('completePayButton');
@@ -167,38 +190,104 @@
               payButton.id = 'completePayButton';
               payButton.type = 'button';
               payButton.className = 'px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition';
-              payButton.innerHTML = '<span data-i18n="customer.register.completeAndPay">Complete and Pay</span>';
+              
+              // Change button text based on whether payment is needed
+              if (shouldSkipPayment) {
+                payButton.innerHTML = '<span data-i18n="customer.register.completeRegistration">Complete Registration</span>';
+              } else {
+                payButton.innerHTML = '<span data-i18n="customer.register.completeAndPay">Complete and Pay</span>';
+              }
 
               // Add click handler to trigger the original submit button
               payButton.addEventListener('click', async function(e) {
                 e.preventDefault();
-                console.log('Complete and Pay clicked');
+                console.log('Complete button clicked, shouldSkipPayment:', shouldSkipPayment);
 
+                // Gather customer data from the form
+                const customerData = {
+                  firstName: document.getElementById('firstName').value,
+                  lastName: document.getElementById('lastName').value,
+                  email: document.getElementById('email').value,
+                  phone: document.getElementById('phone').value,
+                  address: document.getElementById('address').value,
+                  city: document.getElementById('city').value,
+                  state: document.getElementById('state').value,
+                  zipCode: document.getElementById('zipCode').value,
+                  affiliateId: document.getElementById('affiliateId').value,
+                  numberOfBags: document.getElementById('numberOfBags').value,
+                  username: document.getElementById('username')?.value || '',
+                  password: document.getElementById('password')?.value || '',
+                  socialToken: document.querySelector('input[name="socialToken"]')?.value || '',
+                  specialInstructions: document.getElementById('specialInstructions')?.value || '',
+                  affiliateSpecialInstructions: document.getElementById('affiliateSpecialInstructions')?.value || '',
+                  languagePreference: document.getElementById('languagePreference')?.value || 'en'
+                };
+
+                // If payment should be skipped (free first bag with 1 bag), register directly
+                if (shouldSkipPayment) {
+                  console.log('Skipping payment - free first bag registration');
+                  
+                  // Show loading spinner
+                  if (window.SwirlSpinner) {
+                    window.SwirlSpinner.show('Processing free registration...');
+                  }
+                  
+                  try {
+                    // Register customer without payment
+                    const csrfFetch = window.CsrfUtils?.csrfFetch || fetch;
+                    const response = await csrfFetch('/api/v1/customers/register', {
+                      method: 'POST',
+                      headers: {
+                        'Content-Type': 'application/json'
+                      },
+                      credentials: 'include',
+                      body: JSON.stringify({
+                        ...customerData,
+                        paymentConfirmed: false // No payment needed
+                      })
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                      console.log('Free registration successful');
+                      
+                      // Store token for auto-login
+                      if (data.token) {
+                        localStorage.setItem('customerAuthToken', data.token);
+                      }
+                      
+                      // Redirect to success page
+                      const successUrl = `/customer-registration-complete.html?customerId=${data.customerId}`;
+                      window.location.href = successUrl;
+                    } else {
+                      console.error('Registration failed:', data);
+                      if (window.SwirlSpinner) {
+                        window.SwirlSpinner.hide();
+                      }
+                      if (window.modalAlert) {
+                        window.modalAlert(data.message || 'Registration failed. Please try again.', 'Registration Error');
+                      }
+                    }
+                  } catch (error) {
+                    console.error('Registration error:', error);
+                    if (window.SwirlSpinner) {
+                      window.SwirlSpinner.hide();
+                    }
+                    if (window.modalAlert) {
+                      window.modalAlert('An error occurred during registration. Please try again.', 'Error');
+                    }
+                  }
+                  return;
+                }
+
+                // Normal payment flow continues below
                 // Check if test mode is enabled
                 if (window.paymentConfig && window.paymentConfig.testModeEnabled) {
                   console.log('Test mode is enabled, using test payment flow');
 
                   // Use the payment form's test mode handler
                   if (window.paymentForm && typeof window.paymentForm.processPaymentTestMode === 'function') {
-                    // Gather customer data from the form
-                    const customerData = {
-                      firstName: document.getElementById('firstName').value,
-                      lastName: document.getElementById('lastName').value,
-                      email: document.getElementById('email').value,
-                      phone: document.getElementById('phone').value,
-                      address: document.getElementById('address').value,
-                      city: document.getElementById('city').value,
-                      state: document.getElementById('state').value,
-                      zipCode: document.getElementById('zipCode').value,
-                      affiliateId: document.getElementById('affiliateId').value,
-                      numberOfBags: document.getElementById('numberOfBags').value,
-                      username: document.getElementById('username')?.value || '',
-                      password: document.getElementById('password')?.value || '',
-                      socialToken: document.querySelector('input[name="socialToken"]')?.value || '',
-                      specialInstructions: document.getElementById('specialInstructions')?.value || '',
-                      affiliateSpecialInstructions: document.getElementById('affiliateSpecialInstructions')?.value || '',
-                      languagePreference: document.getElementById('languagePreference')?.value || 'en'
-                    };
 
                     // Check rate limit before processing payment
                     console.log('Checking rate limit before payment...');
