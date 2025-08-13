@@ -344,6 +344,8 @@ exports.sendAffiliateNewCustomerEmail = async (affiliate, customer, bagInfo = {}
     const template = await loadTemplate('affiliate-new-customer', language);
 
     const numberOfBags = bagInfo.numberOfBags || 1;
+    const totalCredit = bagInfo.totalCredit || 0;
+    const isFreeRegistration = numberOfBags === 1 && totalCredit === 0;
 
     // Get translations for the email content
     const translations = {
@@ -354,7 +356,9 @@ exports.sendAffiliateNewCustomerEmail = async (affiliate, customer, bagInfo = {}
         NEW_CUSTOMER_MESSAGE: 'Great news! A new customer has just registered through your affiliate link.',
         ACTION_REQUIRED_LABEL: 'Action Required',
         ACTION_REQUIRED_MESSAGE: `Please deliver ${numberOfBags} laundry bag(s) to your new customer within 48 hours.`,
-        BAG_FEE_NOTE: 'Note: The customer has been charged for their bags. This fee will be credited on their first order.',
+        BAG_FEE_NOTE: isFreeRegistration ? 
+          'Note: This customer received their first bag FREE as part of our promotional offer.' :
+          'Note: The customer has been charged for their bags. This fee will be credited on their first order.',
         CUSTOMER_INFO_TITLE: 'Customer Information',
         CUSTOMER_ID_LABEL: 'Customer ID',
         NAME_LABEL: 'Name',
@@ -377,7 +381,9 @@ exports.sendAffiliateNewCustomerEmail = async (affiliate, customer, bagInfo = {}
         NEW_CUSTOMER_MESSAGE: '¡Excelentes noticias! Un nuevo cliente acaba de registrarse a través de su enlace de afiliado.',
         ACTION_REQUIRED_LABEL: 'Acción Requerida',
         ACTION_REQUIRED_MESSAGE: `Por favor entregue ${numberOfBags} bolsa(s) de lavandería a su nuevo cliente dentro de 48 horas.`,
-        BAG_FEE_NOTE: 'Nota: Al cliente se le ha cobrado por sus bolsas. Esta tarifa se acreditará en su primer pedido.',
+        BAG_FEE_NOTE: isFreeRegistration ?
+          'Nota: Este cliente recibió su primera bolsa GRATIS como parte de nuestra oferta promocional.' :
+          'Nota: Al cliente se le ha cobrado por sus bolsas. Esta tarifa se acreditará en su primer pedido.',
         CUSTOMER_INFO_TITLE: 'Información del Cliente',
         CUSTOMER_ID_LABEL: 'ID del Cliente',
         NAME_LABEL: 'Nombre',
@@ -400,7 +406,9 @@ exports.sendAffiliateNewCustomerEmail = async (affiliate, customer, bagInfo = {}
         NEW_CUSTOMER_MESSAGE: 'Ótimas notícias! Um novo cliente acabou de se registrar através do seu link de afiliado.',
         ACTION_REQUIRED_LABEL: 'Ação Necessária',
         ACTION_REQUIRED_MESSAGE: `Por favor, entregue ${numberOfBags} sacola(s) de lavanderia ao seu novo cliente dentro de 48 horas.`,
-        BAG_FEE_NOTE: 'Nota: O cliente foi cobrado pelas sacolas. Esta taxa será creditada no primeiro pedido.',
+        BAG_FEE_NOTE: isFreeRegistration ?
+          'Nota: Este cliente recebeu sua primeira sacola GRÁTIS como parte de nossa oferta promocional.' :
+          'Nota: O cliente foi cobrado pelas sacolas. Esta taxa será creditada no primeiro pedido.',
         CUSTOMER_INFO_TITLE: 'Informações do Cliente',
         CUSTOMER_ID_LABEL: 'ID do Cliente',
         NAME_LABEL: 'Nome',
@@ -423,7 +431,9 @@ exports.sendAffiliateNewCustomerEmail = async (affiliate, customer, bagInfo = {}
         NEW_CUSTOMER_MESSAGE: 'Großartige Neuigkeiten! Ein neuer Kunde hat sich gerade über Ihren Affiliate-Link registriert.',
         ACTION_REQUIRED_LABEL: 'Aktion erforderlich',
         ACTION_REQUIRED_MESSAGE: `Bitte liefern Sie ${numberOfBags} Wäschesack/-säcke innerhalb von 48 Stunden an Ihren neuen Kunden.`,
-        BAG_FEE_NOTE: 'Hinweis: Dem Kunden wurden die Säcke berechnet. Diese Gebühr wird bei der ersten Bestellung gutgeschrieben.',
+        BAG_FEE_NOTE: isFreeRegistration ?
+          'Hinweis: Dieser Kunde hat seinen ersten Sack KOSTENLOS als Teil unseres Werbeangebots erhalten.' :
+          'Hinweis: Dem Kunden wurden die Säcke berechnet. Diese Gebühr wird bei der ersten Bestellung gutgeschrieben.',
         CUSTOMER_INFO_TITLE: 'Kundeninformationen',
         CUSTOMER_ID_LABEL: 'Kunden-ID',
         NAME_LABEL: 'Name',
@@ -898,6 +908,9 @@ exports.sendCustomerWelcomeEmail = async (customer, affiliate, bagInfo = {}) => 
     const numberOfBags = bagInfo.numberOfBags || 1;
     const bagFee = bagInfo.bagFee || 10.00;
     const totalCredit = bagInfo.totalCredit || (numberOfBags * bagFee);
+    
+    // Check if this was a free registration (single bag with no credit)
+    const isFreeRegistration = numberOfBags === 1 && totalCredit === 0;
 
     // Get translations for the email content
     const translations = {
@@ -909,14 +922,18 @@ exports.sendCustomerWelcomeEmail = async (customer, affiliate, bagInfo = {}) => 
         YOUR_INFO_TITLE: 'Your Account Information',
         CUSTOMER_ID_LABEL: 'Customer ID',
         SERVICE_PROVIDER_LABEL: 'Your Service Provider',
-        BAG_INFO_TITLE: 'Your Laundry Bag Credit',
-        BAG_INFO_MESSAGE: 'We\'ve credited your account with prepaid laundry bags. These bags will be delivered to you by your service provider.',
+        BAG_INFO_TITLE: isFreeRegistration ? 'Your FREE Laundry Bag' : 'Your Laundry Bag Credit',
+        BAG_INFO_MESSAGE: isFreeRegistration ? 
+          'Great news! Your first laundry bag is FREE! It will be delivered to you by your service provider.' :
+          'We\'ve credited your account with prepaid laundry bags. These bags will be delivered to you by your service provider.',
         BAG_CREDIT_TITLE: 'Account Credit Details',
-        BAGS_PURCHASED_LABEL: 'Bags Purchased',
+        BAGS_PURCHASED_LABEL: isFreeRegistration ? 'Bags Received' : 'Bags Purchased',
         COST_PER_BAG_LABEL: 'Cost per Bag',
         TOTAL_CREDIT_LABEL: 'Total Account Credit',
         NOTE_LABEL: 'Note',
-        CREDIT_NOTE_MESSAGE: 'This credit will be automatically applied to your first orders. Each bag holds approximately 20-25 lbs of laundry.',
+        CREDIT_NOTE_MESSAGE: isFreeRegistration ? 
+          'Your first bag was FREE! Each bag holds approximately 20-25 lbs of laundry.' :
+          'This credit will be automatically applied to your first orders. Each bag holds approximately 20-25 lbs of laundry.',
         HOW_IT_WORKS_TITLE: 'How It Works',
         STEP_1_TITLE: 'Schedule a Pickup',
         STEP_1_DESC: 'Login to your dashboard and schedule a convenient pickup time.',
@@ -949,14 +966,18 @@ exports.sendCustomerWelcomeEmail = async (customer, affiliate, bagInfo = {}) => 
         YOUR_INFO_TITLE: 'Información de Su Cuenta',
         CUSTOMER_ID_LABEL: 'ID de Cliente',
         SERVICE_PROVIDER_LABEL: 'Su Proveedor de Servicio',
-        BAG_INFO_TITLE: 'Su Crédito de Bolsas de Lavandería',
-        BAG_INFO_MESSAGE: 'Hemos acreditado su cuenta con bolsas de lavandería prepagadas. Estas bolsas serán entregadas por su proveedor de servicio.',
+        BAG_INFO_TITLE: isFreeRegistration ? 'Su Bolsa de Lavandería GRATIS' : 'Su Crédito de Bolsas de Lavandería',
+        BAG_INFO_MESSAGE: isFreeRegistration ?
+          '¡Excelentes noticias! ¡Su primera bolsa de lavandería es GRATIS! Será entregada por su proveedor de servicio.' :
+          'Hemos acreditado su cuenta con bolsas de lavandería prepagadas. Estas bolsas serán entregadas por su proveedor de servicio.',
         BAG_CREDIT_TITLE: 'Detalles del Crédito de Cuenta',
-        BAGS_PURCHASED_LABEL: 'Bolsas Compradas',
+        BAGS_PURCHASED_LABEL: isFreeRegistration ? 'Bolsas Recibidas' : 'Bolsas Compradas',
         COST_PER_BAG_LABEL: 'Costo por Bolsa',
         TOTAL_CREDIT_LABEL: 'Crédito Total de Cuenta',
         NOTE_LABEL: 'Nota',
-        CREDIT_NOTE_MESSAGE: 'Este crédito se aplicará automáticamente a sus primeros pedidos. Cada bolsa contiene aproximadamente 20-25 libras de ropa.',
+        CREDIT_NOTE_MESSAGE: isFreeRegistration ?
+          '¡Su primera bolsa fue GRATIS! Cada bolsa contiene aproximadamente 20-25 libras de ropa.' :
+          'Este crédito se aplicará automáticamente a sus primeros pedidos. Cada bolsa contiene aproximadamente 20-25 libras de ropa.',
         HOW_IT_WORKS_TITLE: 'Cómo Funciona',
         STEP_1_TITLE: 'Programe una Recogida',
         STEP_1_DESC: 'Inicie sesión en su panel y programe un horario conveniente de recogida.',
@@ -989,14 +1010,18 @@ exports.sendCustomerWelcomeEmail = async (customer, affiliate, bagInfo = {}) => 
         YOUR_INFO_TITLE: 'Informações da Sua Conta',
         CUSTOMER_ID_LABEL: 'ID do Cliente',
         SERVICE_PROVIDER_LABEL: 'Seu Provedor de Serviço',
-        BAG_INFO_TITLE: 'Seu Crédito de Sacolas de Lavanderia',
-        BAG_INFO_MESSAGE: 'Creditamos sua conta com sacolas de lavanderia pré-pagas. Estas sacolas serão entregues pelo seu provedor de serviço.',
+        BAG_INFO_TITLE: isFreeRegistration ? 'Sua Sacola de Lavanderia GRÁTIS' : 'Seu Crédito de Sacolas de Lavanderia',
+        BAG_INFO_MESSAGE: isFreeRegistration ?
+          'Ótimas notícias! Sua primeira sacola de lavanderia é GRÁTIS! Ela será entregue pelo seu provedor de serviço.' :
+          'Creditamos sua conta com sacolas de lavanderia pré-pagas. Estas sacolas serão entregues pelo seu provedor de serviço.',
         BAG_CREDIT_TITLE: 'Detalhes do Crédito da Conta',
-        BAGS_PURCHASED_LABEL: 'Sacolas Compradas',
+        BAGS_PURCHASED_LABEL: isFreeRegistration ? 'Sacolas Recebidas' : 'Sacolas Compradas',
         COST_PER_BAG_LABEL: 'Custo por Sacola',
         TOTAL_CREDIT_LABEL: 'Crédito Total da Conta',
         NOTE_LABEL: 'Nota',
-        CREDIT_NOTE_MESSAGE: 'Este crédito será aplicado automaticamente aos seus primeiros pedidos. Cada sacola comporta aproximadamente 20-25 libras de roupa.',
+        CREDIT_NOTE_MESSAGE: isFreeRegistration ?
+          'Sua primeira sacola foi GRÁTIS! Cada sacola comporta aproximadamente 20-25 libras de roupa.' :
+          'Este crédito será aplicado automaticamente aos seus primeiros pedidos. Cada sacola comporta aproximadamente 20-25 libras de roupa.',
         HOW_IT_WORKS_TITLE: 'Como Funciona',
         STEP_1_TITLE: 'Agende uma Coleta',
         STEP_1_DESC: 'Faça login no seu painel e agende um horário conveniente para coleta.',
@@ -1029,14 +1054,18 @@ exports.sendCustomerWelcomeEmail = async (customer, affiliate, bagInfo = {}) => 
         YOUR_INFO_TITLE: 'Ihre Kontoinformationen',
         CUSTOMER_ID_LABEL: 'Kunden-ID',
         SERVICE_PROVIDER_LABEL: 'Ihr Dienstleister',
-        BAG_INFO_TITLE: 'Ihr Wäschesack-Guthaben',
-        BAG_INFO_MESSAGE: 'Wir haben Ihrem Konto vorausbezahlte Wäschesäcke gutgeschrieben. Diese Säcke werden von Ihrem Dienstleister geliefert.',
+        BAG_INFO_TITLE: isFreeRegistration ? 'Ihr KOSTENLOSER Wäschesack' : 'Ihr Wäschesack-Guthaben',
+        BAG_INFO_MESSAGE: isFreeRegistration ?
+          'Großartige Neuigkeiten! Ihr erster Wäschesack ist KOSTENLOS! Er wird von Ihrem Dienstleister geliefert.' :
+          'Wir haben Ihrem Konto vorausbezahlte Wäschesäcke gutgeschrieben. Diese Säcke werden von Ihrem Dienstleister geliefert.',
         BAG_CREDIT_TITLE: 'Kontoguthaben Details',
-        BAGS_PURCHASED_LABEL: 'Gekaufte Säcke',
+        BAGS_PURCHASED_LABEL: isFreeRegistration ? 'Erhaltene Säcke' : 'Gekaufte Säcke',
         COST_PER_BAG_LABEL: 'Kosten pro Sack',
         TOTAL_CREDIT_LABEL: 'Gesamtguthaben',
         NOTE_LABEL: 'Hinweis',
-        CREDIT_NOTE_MESSAGE: 'Dieses Guthaben wird automatisch auf Ihre ersten Bestellungen angewendet. Jeder Sack fasst etwa 20-25 Pfund Wäsche.',
+        CREDIT_NOTE_MESSAGE: isFreeRegistration ?
+          'Ihr erster Sack war KOSTENLOS! Jeder Sack fasst etwa 20-25 Pfund Wäsche.' :
+          'Dieses Guthaben wird automatisch auf Ihre ersten Bestellungen angewendet. Jeder Sack fasst etwa 20-25 Pfund Wäsche.',
         HOW_IT_WORKS_TITLE: 'So funktioniert es',
         STEP_1_TITLE: 'Abholung planen',
         STEP_1_DESC: 'Melden Sie sich in Ihrem Dashboard an und planen Sie eine passende Abholzeit.',
