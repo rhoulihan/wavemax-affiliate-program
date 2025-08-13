@@ -169,6 +169,10 @@
                 <div class="card-header">
                     <h2 class="card-title" data-i18n="administrator.dashboard.customers.title">Customer Management</h2>
                     <div class="flex-center gap-10">
+                        <button class="btn btn-warning" id="printNewCustomerLabelsBtn" style="display: none;">
+                            <span>🏷️ Print New Customer Labels</span>
+                            <span class="badge" id="newCustomerBadge" style="margin-left: 5px; background: red; color: white; padding: 2px 6px; border-radius: 10px; display: none;">0</span>
+                        </button>
                         <button class="btn hidden" id="printSelectedCardsBtn" data-i18n="administrator.dashboard.customers.printSelected">Print Selected Cards</button>
                         <button class="btn btn-secondary" id="refreshCustomersBtn" data-i18n="common.buttons.refresh">Refresh</button>
                     </div>
@@ -495,6 +499,10 @@
     
     <!-- QR Code Library -->
     <script src="/assets/js/qrcode.min.js" nonce="{{nonce}}"></script>
+    
+    <!-- PDF Generation and Label Printing -->
+    <script src="/assets/js/jspdf.min.js" nonce="{{nonce}}"></script>
+    <script src="/assets/js/label-print-utils.js" nonce="{{nonce}}"></script>
     
     <script src="/assets/js/i18n.js" nonce="{{nonce}}"></script>
     <script src="/assets/js/language-switcher.js" nonce="{{nonce}}"></script>

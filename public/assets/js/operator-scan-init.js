@@ -27,7 +27,7 @@
     const confirmIcon = document.getElementById('confirmIcon');
     const confirmTitle = document.getElementById('confirmTitle');
     const confirmMessage = document.getElementById('confirmMessage');
-    const printLabelsBtn = document.getElementById('printLabelsBtn');
+    // const printLabelsBtn = document.getElementById('printLabelsBtn'); // Moved to admin dashboard
     const newCustomerBadge = document.getElementById('newCustomerBadge');
 
     // Stats elements - will be populated in init
@@ -44,7 +44,7 @@
         if (actionBar) {
             if (show) {
                 // Only show if there are customers needing labels
-                checkNewCustomers(); // This will handle showing/hiding based on count
+                // checkNewCustomers(); // Moved to admin dashboard
             } else {
                 actionBar.style.display = 'none';
                 actionBar.style.opacity = '0';
@@ -156,8 +156,8 @@
         }
     }
     
-    // Check for new customers without bag labels
-    async function checkNewCustomers() {
+    // Check for new customers without bag labels - MOVED TO ADMIN DASHBOARD
+    /* async function checkNewCustomers() {
         try {
             const token = localStorage.getItem('operatorToken');
             const response = await csrfFetch(`${BASE_URL}/api/operators/new-customers/count`, {
@@ -190,10 +190,10 @@
                 printLabelsBtn.style.display = 'none';
             }
         }
-    }
+    } */
     
-    // Print labels for new customers
-    async function printNewCustomerLabels() {
+    // Print labels for new customers - MOVED TO ADMIN DASHBOARD
+    /* async function printNewCustomerLabels() {
         try {
             // Show loading state
             printLabelsBtn.disabled = true;
@@ -352,7 +352,7 @@
             const btnIcon = printLabelsBtn.querySelector('.btn-icon');
             btnIcon.textContent = '🏷️';
         }
-    }
+    } */
 
     // Initialize
     async function init() {
@@ -881,14 +881,14 @@
             modalCloseBtn.addEventListener('click', closeModal);
         }
         
-        // Print labels button
-        if (printLabelsBtn) {
-            printLabelsBtn.addEventListener('click', printNewCustomerLabels);
-        }
+        // Print labels button - MOVED TO ADMIN DASHBOARD
+        // if (printLabelsBtn) {
+        //     printLabelsBtn.addEventListener('click', printNewCustomerLabels);
+        // }
         
-        // Check for new customers immediately and every 30 seconds
-        checkNewCustomers();
-        newCustomerCheckInterval = setInterval(checkNewCustomers, 30000);
+        // Check for new customers immediately and every 30 seconds - MOVED TO ADMIN DASHBOARD
+        // checkNewCustomers();
+        // newCustomerCheckInterval = setInterval(checkNewCustomers, 30000);
     }
 
     // Focus scanner input
