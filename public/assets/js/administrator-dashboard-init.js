@@ -702,7 +702,8 @@
                            name: `${customer.firstName} ${customer.lastName}`,
                            address: `${customer.address}, ${customer.city}, ${customer.state} ${customer.zipCode}`,
                            phone: customer.phone,
-                           email: customer.email
+                           email: customer.email,
+                           numberOfBags: customer.numberOfBags || 1
                          }).replace(/'/g, '&apos;')}'>
                 </td>
                 <td>
@@ -869,22 +870,24 @@
         return;
       }
       
-      // Generate a unique bag ID for this customer
-      const bagId = generateUUID();
+      // Generate labels for each bag the customer has
+      const numberOfBags = customerData.numberOfBags || 1;
+      const labelData = [];
       
-      // Prepare label data in the format expected by generateAndPrintBagLabels
-      const labelData = [{
-        customerName: customerData.name,
-        customerId: customerData.id,
-        phone: customerData.phone || '',
-        email: customerData.email || '',
-        qrCode: `${customerData.id}#${bagId}` // Format: customerId#bagId
-      }];
+      for (let bagNum = 1; bagNum <= numberOfBags; bagNum++) {
+        labelData.push({
+          customerName: customerData.name,
+          customerId: customerData.id,
+          phone: customerData.phone || '',
+          email: customerData.email || '',
+          qrCode: `${customerData.id}-${bagNum}` // Format: custId-bagNum
+        });
+      }
       
       // Generate and download PDF with auto-print
       await window.LabelPrintUtils.generateAndPrintBagLabels(labelData);
       
-      console.log(`Generated bag label for customer: ${customerData.name}`);
+      console.log(`Generated ${numberOfBags} bag label(s) for customer: ${customerData.name}`);
     } catch (error) {
       console.error('Error printing customer label:', error);
       alert('An error occurred while printing the label');
@@ -907,25 +910,30 @@
         return;
       }
       
-      // Prepare label data for all selected customers
+      // Prepare label data for all selected customers (all their bags)
       const labelData = [];
+      let totalBags = 0;
       selectedCheckboxes.forEach(checkbox => {
         const customerData = JSON.parse(checkbox.getAttribute('data-customer-data'));
-        const bagId = generateUUID();
-        labelData.push({
-          customerName: customerData.name,
-          customerId: customerData.id,
-          phone: customerData.phone || '',
-          email: customerData.email || '',
-          qrCode: `${customerData.id}#${bagId}` // Format: customerId#bagId
-        });
+        const numberOfBags = customerData.numberOfBags || 1;
+        totalBags += numberOfBags;
+        
+        for (let bagNum = 1; bagNum <= numberOfBags; bagNum++) {
+          labelData.push({
+            customerName: customerData.name,
+            customerId: customerData.id,
+            phone: customerData.phone || '',
+            email: customerData.email || '',
+            qrCode: `${customerData.id}-${bagNum}` // Format: custId-bagNum
+          });
+        }
       });
       
       // Generate and download PDF with auto-print
       await window.LabelPrintUtils.generateAndPrintBagLabels(labelData);
       
-      console.log(`Generated ${labelData.length} bag labels`);
-      alert(`Generated ${labelData.length} bag labels`);
+      console.log(`Generated ${totalBags} bag labels for ${selectedCheckboxes.length} customers`);
+      alert(`Generated ${totalBags} bag labels for ${selectedCheckboxes.length} customers`);
     } catch (error) {
       console.error('Error printing labels:', error);
       alert('An error occurred while printing labels');
