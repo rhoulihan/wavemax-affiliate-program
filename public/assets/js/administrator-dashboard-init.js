@@ -852,27 +852,83 @@
     }
   }
   
-  // Print single customer card
+  // Print single customer card (generates bag labels)
   window.printCustomerCard = async function(customerId) {
-    const checkbox = document.querySelector(`.customer-checkbox[data-customer-id="${customerId}"]`);
-    if (checkbox) {
+    try {
+      const checkbox = document.querySelector(`.customer-checkbox[data-customer-id="${customerId}"]`);
+      if (!checkbox) {
+        alert('Customer data not found');
+        return;
+      }
+      
       const customerData = JSON.parse(checkbox.getAttribute('data-customer-data'));
-      await generateAndPrintCards([customerData]);
+      
+      // Check if print utilities are loaded
+      if (!window.LabelPrintUtils || !window.LabelPrintUtils.generateAndPrintBagLabels) {
+        alert('Print system not ready. Please refresh the page and try again.');
+        return;
+      }
+      
+      // Generate a unique bag ID for this customer
+      const bagId = generateUUID();
+      
+      // Prepare label data in the format expected by generateAndPrintBagLabels
+      const labelData = [{
+        customerName: customerData.name,
+        customerId: customerData.id,
+        phone: customerData.phone || '',
+        email: customerData.email || '',
+        qrCode: `${customerData.id}#${bagId}` // Format: customerId#bagId
+      }];
+      
+      // Generate and download PDF with auto-print
+      await window.LabelPrintUtils.generateAndPrintBagLabels(labelData);
+      
+      console.log(`Generated bag label for customer: ${customerData.name}`);
+    } catch (error) {
+      console.error('Error printing customer label:', error);
+      alert('An error occurred while printing the label');
     }
   };
   
-  // Print selected customer cards
+  // Print selected customer cards (generates bag labels)
   async function printSelectedCustomerCards() {
-    const selectedCheckboxes = document.querySelectorAll('.customer-checkbox:checked');
-    const customers = [];
-    
-    selectedCheckboxes.forEach(checkbox => {
-      const customerData = JSON.parse(checkbox.getAttribute('data-customer-data'));
-      customers.push(customerData);
-    });
-    
-    if (customers.length > 0) {
-      await generateAndPrintCards(customers);
+    try {
+      const selectedCheckboxes = document.querySelectorAll('.customer-checkbox:checked');
+      
+      if (selectedCheckboxes.length === 0) {
+        alert('No customers selected');
+        return;
+      }
+      
+      // Check if print utilities are loaded
+      if (!window.LabelPrintUtils || !window.LabelPrintUtils.generateAndPrintBagLabels) {
+        alert('Print system not ready. Please refresh the page and try again.');
+        return;
+      }
+      
+      // Prepare label data for all selected customers
+      const labelData = [];
+      selectedCheckboxes.forEach(checkbox => {
+        const customerData = JSON.parse(checkbox.getAttribute('data-customer-data'));
+        const bagId = generateUUID();
+        labelData.push({
+          customerName: customerData.name,
+          customerId: customerData.id,
+          phone: customerData.phone || '',
+          email: customerData.email || '',
+          qrCode: `${customerData.id}#${bagId}` // Format: customerId#bagId
+        });
+      });
+      
+      // Generate and download PDF with auto-print
+      await window.LabelPrintUtils.generateAndPrintBagLabels(labelData);
+      
+      console.log(`Generated ${labelData.length} bag labels`);
+      alert(`Generated ${labelData.length} bag labels`);
+    } catch (error) {
+      console.error('Error printing labels:', error);
+      alert('An error occurred while printing labels');
     }
   }
   
