@@ -803,6 +803,17 @@
       printSelectedBtn.addEventListener('click', printSelectedCustomerCards);
     }
     
+    // Print new customer labels button
+    const printNewLabelsBtn = document.getElementById('printNewCustomerLabelsBtn');
+    if (printNewLabelsBtn && !printNewLabelsBtn.hasAttribute('data-initialized')) {
+      printNewLabelsBtn.setAttribute('data-initialized', 'true');
+      printNewLabelsBtn.addEventListener('click', printNewCustomerLabels);
+    }
+    
+    // Check for new customers on load and periodically
+    checkNewCustomers();
+    setInterval(checkNewCustomers, 30000); // Check every 30 seconds
+    
     // Select all checkbox
     setTimeout(() => {
       const selectAllCheckbox = document.getElementById('selectAllCustomers');
@@ -988,6 +999,125 @@
     }, 1000); // Slightly longer delay to ensure download starts
     
     console.log(`Generated PDF with ${customers.length} customer cards`);
+  }
+  
+  // Check for new customers without bag labels
+  async function checkNewCustomers() {
+    try {
+      const token = localStorage.getItem('adminToken');
+      const response = await csrfFetch(`${BASE_URL}/api/operators/new-customers/count`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        const printNewLabelsBtn = document.getElementById('printNewCustomerLabelsBtn');
+        const newCustomerBadge = document.getElementById('newCustomerBadge');
+        
+        if (data.count > 0) {
+          if (printNewLabelsBtn) {
+            printNewLabelsBtn.style.display = 'inline-flex';
+          }
+          if (newCustomerBadge) {
+            newCustomerBadge.textContent = data.count;
+            newCustomerBadge.style.display = 'inline-block';
+          }
+        } else {
+          if (printNewLabelsBtn) {
+            printNewLabelsBtn.style.display = 'none';
+          }
+          if (newCustomerBadge) {
+            newCustomerBadge.style.display = 'none';
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Error checking new customers:', error);
+    }
+  }
+  
+  // Print labels for new customers
+  async function printNewCustomerLabels() {
+    try {
+      const printNewLabelsBtn = document.getElementById('printNewCustomerLabelsBtn');
+      if (printNewLabelsBtn) {
+        printNewLabelsBtn.disabled = true;
+      }
+      
+      const token = localStorage.getItem('adminToken');
+      const response = await csrfFetch(`${BASE_URL}/api/operators/print-new-customer-labels`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        
+        if (data.labelsGenerated > 0) {
+          // Check if print utilities are loaded
+          if (!window.LabelPrintUtils || !window.LabelPrintUtils.generateAndPrintBagLabels) {
+            alert('Print system not ready. Please refresh the page and try again.');
+            return;
+          }
+          
+          // Generate and download PDF
+          await window.LabelPrintUtils.generateAndPrintBagLabels(data.labelData);
+          
+          // Confirm labels were printed
+          await confirmLabelsPrinted(data.customerIds);
+          
+          // Refresh the customer count
+          checkNewCustomers();
+          
+          // Show success message
+          showNotification('success', `Successfully generated ${data.labelsGenerated} labels`);
+        } else {
+          showNotification('info', 'No new customers requiring bag labels');
+        }
+      } else {
+        const errorData = await response.json();
+        showNotification('error', errorData.message || 'Failed to generate labels');
+      }
+    } catch (error) {
+      console.error('Error printing labels:', error);
+      showNotification('error', 'An error occurred while printing labels');
+    } finally {
+      const printNewLabelsBtn = document.getElementById('printNewCustomerLabelsBtn');
+      if (printNewLabelsBtn) {
+        printNewLabelsBtn.disabled = false;
+      }
+    }
+  }
+  
+  // Confirm that labels were printed successfully
+  async function confirmLabelsPrinted(customerIds) {
+    try {
+      const token = localStorage.getItem('adminToken');
+      const response = await csrfFetch(`${BASE_URL}/api/operators/confirm-labels-printed`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ customerIds })
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to confirm label printing');
+      }
+      
+      const data = await response.json();
+      console.log('Labels confirmed:', data);
+      return data;
+    } catch (error) {
+      console.error('Error confirming labels:', error);
+      throw error;
+    }
   }
   
   // Debounce helper
