@@ -2,6 +2,8 @@
 (function() {
   'use strict';
 
+  console.log('label-print-utils.js loading...');
+  
   // Export to window for global access
   window.LabelPrintUtils = {
     
@@ -290,4 +292,6 @@
       return true;
     }
   };
+  
+  console.log('label-print-utils.js loaded successfully, LabelPrintUtils available:', !!window.LabelPrintUtils);
 })();

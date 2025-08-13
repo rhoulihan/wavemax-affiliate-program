@@ -500,14 +500,17 @@
     <!-- QR Code Library -->
     <script src="/assets/js/qrcode.min.js" nonce="{{nonce}}"></script>
     
-    <!-- PDF Generation and Label Printing -->
+    <!-- PDF Generation Library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" nonce="{{nonce}}"></script>
-    <script src="/assets/js/label-print-utils.js" nonce="{{nonce}}"></script>
     
     <script src="/assets/js/i18n.js" nonce="{{nonce}}"></script>
     <script src="/assets/js/language-switcher.js" nonce="{{nonce}}"></script>
     <script src="/assets/js/csrf-utils.js" nonce="{{nonce}}"></script>
     <script src="/assets/js/password-validator-component.js" nonce="{{nonce}}"></script>
+    
+    <!-- Label Printing Utils - Must load after QRCode and jsPDF -->
+    <script src="/assets/js/label-print-utils.js" nonce="{{nonce}}"></script>
+    
     <script src="/assets/js/administrator-dashboard-init.js?v=20250623" nonce="{{nonce}}"></script>
     <script src="/assets/js/administrator-dashboard-i18n.js" nonce="{{nonce}}"></script>
 
