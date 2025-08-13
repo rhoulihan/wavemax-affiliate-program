@@ -1050,7 +1050,19 @@
         
         if (data.labelsGenerated > 0) {
           // Check if print utilities are loaded
+          console.log('Checking print utilities:', {
+            LabelPrintUtils: !!window.LabelPrintUtils,
+            generateAndPrintBagLabels: !!(window.LabelPrintUtils && window.LabelPrintUtils.generateAndPrintBagLabels),
+            jspdf: !!window.jspdf,
+            QRCode: !!window.QRCode
+          });
+          
           if (!window.LabelPrintUtils || !window.LabelPrintUtils.generateAndPrintBagLabels) {
+            console.error('Print system not ready:', {
+              LabelPrintUtils: window.LabelPrintUtils,
+              jspdf: window.jspdf,
+              QRCode: window.QRCode
+            });
             alert('Print system not ready. Please refresh the page and try again.');
             return;
           }
