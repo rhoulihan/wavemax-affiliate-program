@@ -1004,12 +1004,7 @@
   // Check for new customers without bag labels
   async function checkNewCustomers() {
     try {
-      const token = localStorage.getItem('adminToken');
-      const response = await csrfFetch(`${BASE_URL}/api/operators/new-customers/count`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
+      const response = await adminFetch('/api/operators/new-customers/count');
       
       if (response.ok) {
         const data = await response.json();
@@ -1046,13 +1041,8 @@
         printNewLabelsBtn.disabled = true;
       }
       
-      const token = localStorage.getItem('adminToken');
-      const response = await csrfFetch(`${BASE_URL}/api/operators/print-new-customer-labels`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
+      const response = await adminFetch('/api/operators/print-new-customer-labels', {
+        method: 'POST'
       });
       
       if (response.ok) {
@@ -1097,13 +1087,8 @@
   // Confirm that labels were printed successfully
   async function confirmLabelsPrinted(customerIds) {
     try {
-      const token = localStorage.getItem('adminToken');
-      const response = await csrfFetch(`${BASE_URL}/api/operators/confirm-labels-printed`, {
+      const response = await adminFetch('/api/operators/confirm-labels-printed', {
         method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
         body: JSON.stringify({ customerIds })
       });
       
