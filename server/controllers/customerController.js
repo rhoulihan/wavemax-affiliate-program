@@ -101,10 +101,21 @@ exports.registerCustomer = async (req, res) => {
       passwordHash = hash;
     }
 
-    // Get bag fee from system config
+    // Get bag fee from system config and check free first bag policy
     const bagFee = await SystemConfig.getValue('laundry_bag_fee', 10.00);
+    const freeFirstBagEnabled = await SystemConfig.getValue('free_first_bag_enabled', false);
     const bagCount = parseInt(numberOfBags) || 1;
-    const totalBagCredit = bagFee * bagCount;
+    
+    // Calculate bag credit based on free first bag policy
+    let totalBagCredit = 0;
+    if (freeFirstBagEnabled) {
+      // First bag is free, only charge for additional bags
+      totalBagCredit = Math.max(0, (bagCount - 1) * bagFee);
+      console.log(`Free first bag policy active. Bags: ${bagCount}, Credit: $${totalBagCredit}`);
+    } else {
+      // Traditional pricing - all bags are paid
+      totalBagCredit = bagFee * bagCount;
+    }
 
     // Create new customer with bag information
     console.log('Creating new customer with email:', email, 'username:', finalUsername);
@@ -188,7 +199,8 @@ exports.registerCustomer = async (req, res) => {
         minimumDeliveryFee: affiliate.minimumDeliveryFee,
         perBagDeliveryFee: affiliate.perBagDeliveryFee,
         numberOfBags: newCustomer.numberOfBags,
-        bagCredit: newCustomer.bagCredit
+        bagCredit: newCustomer.bagCredit,
+        paymentSkipped: freeFirstBagEnabled && bagCount === 1 // Indicate if payment was skipped
       },
       message: 'Customer registered successfully!'
     });
