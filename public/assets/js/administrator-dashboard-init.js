@@ -1077,17 +1077,17 @@
           checkNewCustomers();
           
           // Show success message
-          showNotification('success', `Successfully generated ${data.labelsGenerated} labels`);
+          alert(`Successfully generated ${data.labelsGenerated} labels`);
         } else {
-          showNotification('info', 'No new customers requiring bag labels');
+          alert('No new customers requiring bag labels');
         }
       } else {
         const errorData = await response.json();
-        showNotification('error', errorData.message || 'Failed to generate labels');
+        alert(errorData.message || 'Failed to generate labels');
       }
     } catch (error) {
       console.error('Error printing labels:', error);
-      showNotification('error', 'An error occurred while printing labels');
+      alert('An error occurred while printing labels');
     } finally {
       const printNewLabelsBtn = document.getElementById('printNewCustomerLabelsBtn');
       if (printNewLabelsBtn) {
