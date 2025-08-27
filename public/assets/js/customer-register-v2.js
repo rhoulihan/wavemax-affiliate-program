@@ -228,8 +228,20 @@
             const isOAuthUser = socialToken && socialToken.value;
             
             // Show loading spinner if available
-            if (window.SwirlSpinner) {
-                window.SwirlSpinner.show('Processing your registration...');
+            let registrationSpinner = null;
+            if (window.SwirlSpinnerUtils) {
+                registrationSpinner = window.SwirlSpinnerUtils.showOnForm(this, {
+                    message: 'Processing your registration...',
+                    submessage: 'Please wait while we create your account'
+                });
+            } else if (window.SwirlSpinner) {
+                registrationSpinner = new window.SwirlSpinner({
+                    container: this,
+                    size: 'large',
+                    overlay: true,
+                    message: 'Processing your registration...'
+                });
+                registrationSpinner.show();
             }
             
             const submitBtn = document.getElementById('submitBtn');
@@ -283,8 +295,8 @@
                     }
                 } else {
                     // Show error
-                    if (window.SwirlSpinner) {
-                        window.SwirlSpinner.hide();
+                    if (registrationSpinner) {
+                        registrationSpinner.hide();
                     }
                     if (window.ModalSystem) {
                         window.ModalSystem.error(result.message || 'Registration failed. Please try again.', 'Registration Error');
@@ -300,8 +312,8 @@
             } catch (error) {
                 console.error('[V2 Registration] Registration error:', error);
                 
-                if (window.SwirlSpinner) {
-                    window.SwirlSpinner.hide();
+                if (registrationSpinner) {
+                    registrationSpinner.hide();
                 }
                 if (window.ModalSystem) {
                     window.ModalSystem.error('An error occurred during registration. Please try again.', 'Registration Error');
