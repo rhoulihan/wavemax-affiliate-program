@@ -77,6 +77,14 @@ if (process.env.NODE_ENV !== 'test') {
         const SystemConfig = require('./server/models/SystemConfig');
         await SystemConfig.initializeDefaults();
         logger.info('System configuration defaults initialized');
+        
+        // Start payment verification job if V2 system is enabled
+        const paymentVersion = await SystemConfig.getValue('payment_version', 'v1');
+        if (paymentVersion === 'v2') {
+          const paymentVerificationJob = require('./server/jobs/paymentVerificationJob');
+          await paymentVerificationJob.start();
+          logger.info('Payment verification job started for V2 system');
+        }
       } catch (error) {
         logger.error('Error initializing system config:', { error: error.message });
       }
