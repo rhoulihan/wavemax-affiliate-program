@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WaveMAX Laundry - Payment Confirmation</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/assets/css/language-switcher.css">
+    <link href="/assets/css/modal-utils.css" rel="stylesheet">
+    <style>
+        .payment-method-card {
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .payment-method-card:hover {
+            border-color: #667eea;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+        }
+        .payment-method-card.selected {
+            border-color: #667eea;
+            background: linear-gradient(135deg, #f5f7ff 0%, #e9ecff 100%);
+        }
+        .payment-icon {
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .urgency-banner {
+            background: linear-gradient(135deg, #f56565 0%, #ed8936 100%);
+            color: white;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .urgency-banner.warning {
+            background: linear-gradient(135deg, #ed8936 0%, #f6ad55 100%);
+        }
+        .status-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+        .status-indicator.awaiting {
+            background: #fef2e8;
+            color: #d97706;
+        }
+        .blink {
+            animation: blink 1.5s linear infinite;
+        }
+        @keyframes blink {
+            0%, 50%, 100% { opacity: 1; }
+            25%, 75% { opacity: 0.3; }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 font-sans">
+    <!-- Language Switcher -->
+    <div id="language-switcher-container"></div>
+    
+    <!-- Main Container -->
+    <div class="min-h-screen flex items-center justify-center p-4">
+        <div class="max-w-2xl w-full bg-white rounded-lg shadow-xl overflow-hidden">
+            <!-- Header -->
+            <div class="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-6">
+                <h1 class="text-2xl font-bold" data-i18n="payment.confirmation.title">Payment Confirmation</h1>
+                <p class="mt-2 opacity-90" data-i18n="payment.confirmation.subtitle">Help us verify your payment</p>
+            </div>
+            
+            <!-- Content -->
+            <div class="p-6">
+                <!-- Urgency Banner (shown if payment is overdue) -->
+                <div id="urgencyBanner" class="urgency-banner hidden">
+                    <svg class="w-6 h-6 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9 7a1 1 0 012 0v4a1 1 0 11-2 0V7zm1 8a1.5 1.5 0 110-3 1.5 1.5 0 010 3z" clip-rule="evenodd"/>
+                    </svg>
+                    <div>
+                        <div class="font-bold" data-i18n="payment.confirmation.urgentTitle">Payment Required Soon</div>
+                        <div class="text-sm opacity-90" id="urgencyMessage"></div>
+                    </div>
+                </div>
+                
+                <!-- Order Information -->
+                <div class="bg-gray-50 p-4 rounded-lg mb-6">
+                    <div class="flex justify-between items-start mb-3">
+                        <div>
+                            <h3 class="font-bold text-lg" data-i18n="payment.confirmation.orderDetails">Order Details</h3>
+                            <p class="text-gray-600">Order #<span id="orderId"></span></p>
+                        </div>
+                        <div class="status-indicator awaiting">
+                            <div class="w-2 h-2 bg-orange-500 rounded-full blink"></div>
+                            <span data-i18n="payment.confirmation.awaitingPayment">Awaiting Payment</span>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4 text-sm">
+                        <div>
+                            <span class="text-gray-600" data-i18n="payment.confirmation.amount">Amount Due:</span>
+                            <span class="font-bold text-lg block">$<span id="paymentAmount">0.00</span></span>
+                        </div>
+                        <div>
+                            <span class="text-gray-600" data-i18n="payment.confirmation.requestedAt">Payment Requested:</span>
+                            <span class="block" id="requestedTime"></span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Confirmation Form -->
+                <form id="confirmationForm">
+                    <div class="mb-6">
+                        <h3 class="font-bold text-lg mb-4" data-i18n="payment.confirmation.haveYouPaid">Have you already sent payment?</h3>
+                        
+                        <!-- Payment Method Selection -->
+                        <div class="space-y-3">
+                            <div class="payment-method-card" onclick="selectPaymentMethod('venmo')">
+                                <input type="radio" name="paymentMethod" value="venmo" id="venmo" class="hidden">
+                                <div class="payment-icon">
+                                    <svg width="40" height="40" viewBox="0 0 24 24" fill="#3D95CE">
+                                        <path d="M9.093 11.65c.046-.318.143-.614.29-.885.148-.272.365-.507.653-.707.288-.2.647-.318 1.077-.353.318-.024.64.017.97.123.327.106.638.294.93.564l2.453-1.84c-.648-.618-1.36-1.03-2.135-1.236-.775-.206-1.555-.27-2.34-.194-1.06.106-1.96.412-2.7.918-.74.506-1.29 1.136-1.65 1.89-.357.752-.452 1.542-.285 2.365.118.577.318 1.11.6 1.6.283.49.635.917 1.06 1.282.423.366.917.648 1.482.848.565.2 1.18.288 1.846.265.977-.035 1.854-.277 2.635-.73.78-.452 1.388-1.023 1.824-1.71.435-.69.653-1.413.653-2.168v-.523h-4.6v2.117h2.23c-.036.423-.195.782-.477 1.077-.282.294-.635.47-1.06.523-.494.06-.928-.017-1.305-.23-.377-.21-.666-.51-.87-.893-.206-.382-.3-.81-.284-1.288zm13.834-4.906L21.618 5.4h-2.342l1.31 1.346zm-1.31 10.837l1.31 1.346h2.342l-1.308-1.346z"/>
+                                    </svg>
+                                </div>
+                                <div class="flex-1">
+                                    <div class="font-medium" data-i18n="payment.confirmation.venmo">I paid with Venmo</div>
+                                    <div class="text-sm text-gray-600">@wavemax</div>
+                                </div>
+                            </div>
+                            
+                            <div class="payment-method-card" onclick="selectPaymentMethod('paypal')">
+                                <input type="radio" name="paymentMethod" value="paypal" id="paypal" class="hidden">
+                                <div class="payment-icon">
+                                    <svg width="40" height="40" viewBox="0 0 24 24" fill="#0070BA">
+                                        <path d="M7.076 21.337H2.47a.64.64 0 0 1-.633-.74L4.944 3.72c.07-.37.4-.64.774-.64h7.14c2.126 0 3.716.816 4.483 2.3.32.62.47 1.34.43 2.15-.08 1.65-.86 3.06-2.14 3.87-.06.04-.12.07-.19.1.12.17.22.35.3.54.23.52.33 1.1.29 1.77-.08 1.4-.65 2.62-1.57 3.35-.8.64-1.84.98-3.01.98H9.77c-.28 0-.52.2-.58.47l-.72 3.67zM23.02 10.2c-.08 1.86-1.65 3.3-3.58 3.3h-.91l-.64 3.25c-.06.3-.33.52-.64.52h-2.27l2.73-13.85h4.58c1 0 1.77.36 2.22 1.03.34.5.5 1.14.47 1.9-.04.3-.1.6-.2.88-.05-.02-.1-.03-.15-.03zm-4.95 2.16h1.25c.56 0 1.02-.17 1.32-.5.3-.32.46-.77.5-1.34.03-.5-.08-.88-.33-1.14-.24-.26-.62-.4-1.12-.4h-1.13l-.5 2.54v.84z"/>
+                                    </svg>
+                                </div>
+                                <div class="flex-1">
+                                    <div class="font-medium" data-i18n="payment.confirmation.paypal">I paid with PayPal</div>
+                                    <div class="text-sm text-gray-600">paypal.me/wavemax</div>
+                                </div>
+                            </div>
+                            
+                            <div class="payment-method-card" onclick="selectPaymentMethod('cashapp')">
+                                <input type="radio" name="paymentMethod" value="cashapp" id="cashapp" class="hidden">
+                                <div class="payment-icon">
+                                    <svg width="40" height="40" viewBox="0 0 24 24" fill="#00D632">
+                                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1.19 14.56h-2.38c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5h1.25c.69 0 1.25-.56 1.25-1.25s-.56-1.25-1.25-1.25h-1.25v-1.5h1.25c1.52 0 2.75 1.23 2.75 2.75 0 .72-.28 1.38-.74 1.87.98.51 1.64 1.54 1.64 2.73 0 1.71-1.39 3.1-3.1 3.1h-.41v-1.45z"/>
+                                    </svg>
+                                </div>
+                                <div class="flex-1">
+                                    <div class="font-medium" data-i18n="payment.confirmation.cashapp">I paid with CashApp</div>
+                                    <div class="text-sm text-gray-600">$wavemax</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Additional Details -->
+                    <div class="mb-6">
+                        <label for="paymentDetails" class="block font-medium mb-2" data-i18n="payment.confirmation.additionalInfo">Additional Information (Optional)</label>
+                        <textarea id="paymentDetails" name="paymentDetails" rows="3" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                            placeholder="Transaction ID, time of payment, sender name, etc."></textarea>
+                        <p class="text-sm text-gray-600 mt-1" data-i18n="payment.confirmation.helpUsVerify">Any details that can help us verify your payment faster</p>
+                    </div>
+                    
+                    <!-- Buttons -->
+                    <div class="flex gap-4">
+                        <button type="submit" id="confirmBtn" class="flex-1 bg-green-600 text-white px-6 py-3 rounded-lg font-bold hover:bg-green-700 transition duration-300 disabled:bg-gray-400">
+                            <span data-i18n="payment.confirmation.confirmPayment">Yes, I've Sent Payment</span>
+                        </button>
+                        <button type="button" onclick="showPaymentLinks()" class="flex-1 bg-blue-600 text-white px-6 py-3 rounded-lg font-bold hover:bg-blue-700 transition duration-300">
+                            <span data-i18n="payment.confirmation.needToPay">I Need to Pay Now</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Payment Links Modal -->
+    <div id="paymentLinksModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
+            <h3 class="text-xl font-bold mb-4" data-i18n="payment.confirmation.payNow">Pay Now</h3>
+            <p class="text-gray-600 mb-4" data-i18n="payment.confirmation.chooseMethod">Choose your preferred payment method:</p>
+            
+            <div class="space-y-3" id="paymentLinksContainer">
+                <!-- Payment links will be inserted here -->
+            </div>
+            
+            <button onclick="closePaymentLinks()" class="mt-4 w-full px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition duration-300">
+                <span data-i18n="payment.confirmation.close">Close</span>
+            </button>
+        </div>
+    </div>
+    
+    <!-- Success Modal -->
+    <div id="successModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-lg shadow-xl max-w-md w-full p-8">
+            <div class="text-center">
+                <div class="text-5xl mb-4">✅</div>
+                <h3 class="text-2xl font-bold mb-2" data-i18n="payment.confirmation.thankYou">Thank You!</h3>
+                <p class="text-gray-700 mb-4" data-i18n="payment.confirmation.received">We've received your payment confirmation and are verifying it now.</p>
+                <p class="text-sm text-gray-600 mb-4" data-i18n="payment.confirmation.notifyYou">We'll notify you as soon as your payment is verified and your order is ready for pickup.</p>
+                <button onclick="window.close()" class="bg-blue-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-blue-700 transition duration-300">
+                    <span data-i18n="payment.confirmation.done">Done</span>
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Scripts -->
+    <script src="/assets/js/i18n.js"></script>
+    <script src="/assets/js/language-switcher.js"></script>
+    <script src="/assets/js/csrf-utils.js"></script>
+    
+    <script>
+        // Get order details from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const orderId = urlParams.get('orderId');
+        const token = urlParams.get('token');
+        let orderData = {};
+        
+        // Payment method selection
+        function selectPaymentMethod(method) {
+            document.querySelectorAll('.payment-method-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            document.querySelector(`#${method}`).checked = true;
+            document.querySelector(`#${method}`).closest('.payment-method-card').classList.add('selected');
+        }
+        
+        // Load order details
+        async function loadOrderDetails() {
+            if (!orderId) {
+                alert('Invalid order link');
+                return;
+            }
+            
+            // For now, we'll use mock data
+            // In production, this would fetch from the API
+            orderData = {
+                orderId: orderId,
+                amount: urlParams.get('amount') || '50.00',
+                requestedAt: new Date(Date.now() - 2 * 60 * 60 * 1000), // 2 hours ago
+                paymentLinks: {
+                    venmo: 'venmo://paycharge?txn=pay&recipients=@wavemax&amount=50&note=Order%20' + orderId,
+                    paypal: 'https://paypal.me/wavemax/50',
+                    cashapp: 'https://cash.app/$wavemax/50'
+                }
+            };
+            
+            // Display order details
+            document.getElementById('orderId').textContent = orderData.orderId;
+            document.getElementById('paymentAmount').textContent = orderData.amount;
+            document.getElementById('requestedTime').textContent = new Date(orderData.requestedAt).toLocaleString();
+            
+            // Show urgency banner if payment is overdue
+            const hoursElapsed = Math.floor((Date.now() - orderData.requestedAt) / (1000 * 60 * 60));
+            if (hoursElapsed >= 3) {
+                const banner = document.getElementById('urgencyBanner');
+                banner.classList.remove('hidden');
+                banner.classList.add('urgency-banner');
+                document.getElementById('urgencyMessage').textContent = `Payment has been pending for ${hoursElapsed} hours. Please confirm or contact support.`;
+            } else if (hoursElapsed >= 2) {
+                const banner = document.getElementById('urgencyBanner');
+                banner.classList.remove('hidden');
+                banner.classList.add('warning');
+                document.getElementById('urgencyMessage').textContent = `Payment requested ${hoursElapsed} hours ago.`;
+            }
+        }
+        
+        // Show payment links modal
+        function showPaymentLinks() {
+            const container = document.getElementById('paymentLinksContainer');
+            container.innerHTML = `
+                <a href="${orderData.paymentLinks.venmo}" class="block p-4 border rounded-lg hover:bg-gray-50 transition">
+                    <div class="flex items-center gap-3">
+                        <svg width="30" height="30" viewBox="0 0 24 24" fill="#3D95CE">
+                            <path d="M9.093 11.65c.046-.318.143-.614.29-.885.148-.272.365-.507.653-.707.288-.2.647-.318 1.077-.353.318-.024.64.017.97.123.327.106.638.294.93.564l2.453-1.84c-.648-.618-1.36-1.03-2.135-1.236-.775-.206-1.555-.27-2.34-.194-1.06.106-1.96.412-2.7.918-.74.506-1.29 1.136-1.65 1.89-.357.752-.452 1.542-.285 2.365.118.577.318 1.11.6 1.6.283.49.635.917 1.06 1.282.423.366.917.648 1.482.848.565.2 1.18.288 1.846.265.977-.035 1.854-.277 2.635-.73.78-.452 1.388-1.023 1.824-1.71.435-.69.653-1.413.653-2.168v-.523h-4.6v2.117h2.23c-.036.423-.195.782-.477 1.077-.282.294-.635.47-1.06.523-.494.06-.928-.017-1.305-.23-.377-.21-.666-.51-.87-.893-.206-.382-.3-.81-.284-1.288zm13.834-4.906L21.618 5.4h-2.342l1.31 1.346zm-1.31 10.837l1.31 1.346h2.342l-1.308-1.346z"/>
+                        </svg>
+                        <span class="font-medium">Pay with Venmo</span>
+                    </div>
+                </a>
+                <a href="${orderData.paymentLinks.paypal}" class="block p-4 border rounded-lg hover:bg-gray-50 transition">
+                    <div class="flex items-center gap-3">
+                        <svg width="30" height="30" viewBox="0 0 24 24" fill="#0070BA">
+                            <path d="M7.076 21.337H2.47a.64.64 0 0 1-.633-.74L4.944 3.72c.07-.37.4-.64.774-.64h7.14c2.126 0 3.716.816 4.483 2.3.32.62.47 1.34.43 2.15-.08 1.65-.86 3.06-2.14 3.87-.06.04-.12.07-.19.1.12.17.22.35.3.54.23.52.33 1.1.29 1.77-.08 1.4-.65 2.62-1.57 3.35-.8.64-1.84.98-3.01.98H9.77c-.28 0-.52.2-.58.47l-.72 3.67zM23.02 10.2c-.08 1.86-1.65 3.3-3.58 3.3h-.91l-.64 3.25c-.06.3-.33.52-.64.52h-2.27l2.73-13.85h4.58c1 0 1.77.36 2.22 1.03.34.5.5 1.14.47 1.9-.04.3-.1.6-.2.88-.05-.02-.1-.03-.15-.03zm-4.95 2.16h1.25c.56 0 1.02-.17 1.32-.5.3-.32.46-.77.5-1.34.03-.5-.08-.88-.33-1.14-.24-.26-.62-.4-1.12-.4h-1.13l-.5 2.54v.84z"/>
+                        </svg>
+                        <span class="font-medium">Pay with PayPal</span>
+                    </div>
+                </a>
+                <a href="${orderData.paymentLinks.cashapp}" class="block p-4 border rounded-lg hover:bg-gray-50 transition">
+                    <div class="flex items-center gap-3">
+                        <svg width="30" height="30" viewBox="0 0 24 24" fill="#00D632">
+                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1.19 14.56h-2.38c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5h1.25c.69 0 1.25-.56 1.25-1.25s-.56-1.25-1.25-1.25h-1.25v-1.5h1.25c1.52 0 2.75 1.23 2.75 2.75 0 .72-.28 1.38-.74 1.87.98.51 1.64 1.54 1.64 2.73 0 1.71-1.39 3.1-3.1 3.1h-.41v-1.45z"/>
+                        </svg>
+                        <span class="font-medium">Pay with CashApp</span>
+                    </div>
+                </a>
+            `;
+            document.getElementById('paymentLinksModal').classList.remove('hidden');
+        }
+        
+        function closePaymentLinks() {
+            document.getElementById('paymentLinksModal').classList.add('hidden');
+        }
+        
+        // Form submission
+        document.getElementById('confirmationForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked')?.value;
+            if (!paymentMethod) {
+                alert('Please select the payment method you used');
+                return;
+            }
+            
+            document.getElementById('confirmBtn').disabled = true;
+            
+            const data = {
+                orderId: orderId,
+                paymentMethod: paymentMethod,
+                paymentDetails: document.getElementById('paymentDetails').value
+            };
+            
+            try {
+                const response = await fetch('/api/orders/confirm-payment', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-Token': document.querySelector('[name="csrf-token"]')?.value || ''
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    document.getElementById('successModal').classList.remove('hidden');
+                } else {
+                    alert(result.message || 'Failed to confirm payment. Please try again.');
+                    document.getElementById('confirmBtn').disabled = false;
+                }
+            } catch (error) {
+                console.error('Confirmation error:', error);
+                alert('An error occurred. Please try again.');
+                document.getElementById('confirmBtn').disabled = false;
+            }
+        });
+        
+        // Load order details on page load
+        loadOrderDetails();
+    </script>
+</body>
+</html>

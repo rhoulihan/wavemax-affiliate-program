@@ -124,6 +124,9 @@
       }
     },
     "howItWorks": {
+        "step1": "Jetzt ohne Kreditkarte anmelden",
+        "socialSignupText": "Melden Sie sich schnell mit Ihrem Social-Media-Konto an",
+        "socialConnectedMessage": "Großartig! Wir haben Ihr soziales Konto verbunden. Füllen Sie einfach das untenstehende Formular aus, um die Registrierung abzuschließen - keine Zahlung erforderlich!",
       "title": "So funktioniert unser Service",
       "subtitle": "Einfacher Prozess",
       "steps": {
@@ -144,6 +147,8 @@
         }
       },
       "step1": {
+        "socialSignupText": "Melden Sie sich schnell mit Ihrem Social-Media-Konto an",
+        "socialConnectedMessage": "Großartig! Wir haben Ihr soziales Konto verbunden. Füllen Sie einfach das untenstehende Formular aus, um die Registrierung abzuschließen - keine Zahlung erforderlich!",
         "title": "Registrieren",
         "description": "Erstellen Sie Ihr Partnerkonto in wenigen Minuten"
       },
@@ -162,6 +167,8 @@
     },
     "process": {
       "step1": {
+        "socialSignupText": "Melden Sie sich schnell mit Ihrem Social-Media-Konto an",
+        "socialConnectedMessage": "Großartig! Wir haben Ihr soziales Konto verbunden. Füllen Sie einfach das untenstehende Formular aus, um die Registrierung abzuschließen - keine Zahlung erforderlich!",
         "title": "Abholung planen",
         "description": "Nutzen Sie unsere einfache App, um eine Abholzeit zu planen, die zu Ihrem Zeitplan passt"
       },
@@ -661,7 +668,33 @@
         "startingAt": "Ab ${{price}}",
         "feeStructure": "(Min: ${{minFee}}, dann ${{perBagFee}}/Tasche)",
         "wdfRate": "${{rate}}/lb (inkl. Servicegebühren)"
-      }
+      },
+      "v2": {
+        "subtitle": "Melden Sie sich für den Premium-Wäscheabhol- und Lieferservice an - zahlen Sie nach dem Wiegen Ihrer Wäsche!",
+        "freeBagsBanner": "Erhalten Sie Ihre ersten 1-2 Wäschesäcke KOSTENLOS - Keine Kreditkarte erforderlich!",
+        "selectBags": "Wählen Sie Ihre kostenlosen Wäschesäcke",
+        "selectBagsDescription": "Wählen Sie, wie viele Säcke Sie zum Start benötigen. Jeder Sack fasst 20-25 Pfund Wäsche.",
+        "oneBag": "1 Sack",
+        "oneBagDesc": "Perfekt für Einzelpersonen",
+        "twoBags": "2 Säcke",
+        "twoBagsDesc": "Ideal für Paare oder Familien",
+        "howItWorks": "So funktioniert unser V2-Zahlungssystem",
+        "step1": "Jetzt ohne Kreditkarte anmelden",
+        "socialSignupText": "Melden Sie sich schnell mit Ihrem Social-Media-Konto an",
+        "socialConnectedMessage": "Großartig! Wir haben Ihr soziales Konto verbunden. Füllen Sie einfach das untenstehende Formular aus, um die Registrierung abzuschließen - keine Zahlung erforderlich!",
+        "step2": "Erhalten Sie Ihre kostenlosen Wäschesäcke",
+        "step3": "Planen Sie Ihre erste Abholung",
+        "step4": "Wir wiegen Ihre Wäsche und senden Ihnen Zahlungslinks",
+        "step5": "Bezahlen Sie bequem über Venmo, PayPal oder CashApp",
+        "step6": "Erhalten Sie Ihre frische, saubere Wäsche!",
+        "submitButton": "Kostenlos anmelden - Keine Zahlung erforderlich",
+        "noCardRequired": "Keine Kreditkarte erforderlich • Zahlen Sie nach dem Wiegen Ihrer Wäsche"
+      },
+      "terms": "Mit der Registrierung stimmen Sie unseren",
+      "termsLink": "Nutzungsbedingungen",
+      "and": "und",
+      "privacyLink": "Datenschutzrichtlinien",
+      "processing": "Ihre Registrierung wird bearbeitet..."
     },
     "dashboard": {
       "title": "Kunden-Dashboard",
@@ -1155,7 +1188,6 @@
       "deliveryFee": "Abhol-/Liefergebühr:",
       "estimatedTotal": "Geschätzter Gesamtbetrag:",
       "nextSteps": "Nächste Schritte",
-      "step1": "Halten Sie Ihre Wäsche zur geplanten Zeit bereit",
       "step2": "Ihr Partner wird Sie benachrichtigen, wenn er unterwegs ist",
       "step3": "Wir wiegen Ihre Wäsche und teilen Ihnen die endgültigen Kosten mit",
       "step4": "Saubere Wäsche wird am geplanten Liefertermin geliefert",

@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WaveMAX Laundry - Schedule Pickup</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/assets/css/language-switcher.css">
+    <link href="/assets/css/schedule-pickup.css" rel="stylesheet">
+    <link href="/assets/css/modal-utils.css" rel="stylesheet">
+    <style>
+        .v2-info-banner {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        .payment-methods {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            padding: 20px;
+            background: #f7fafc;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        .payment-method {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+        }
+        .payment-icon {
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .process-timeline {
+            display: flex;
+            justify-content: space-between;
+            margin: 30px 0;
+            position: relative;
+        }
+        .process-timeline::before {
+            content: '';
+            position: absolute;
+            top: 20px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: #e2e8f0;
+            z-index: 0;
+        }
+        .process-step {
+            flex: 1;
+            text-align: center;
+            position: relative;
+            z-index: 1;
+        }
+        .process-step-icon {
+            width: 40px;
+            height: 40px;
+            background: white;
+            border: 2px solid #667eea;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 10px;
+            font-weight: bold;
+            color: #667eea;
+        }
+        .process-step.active .process-step-icon {
+            background: #667eea;
+            color: white;
+        }
+        .time-slot {
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .time-slot:hover {
+            border-color: #667eea;
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.2);
+        }
+        .time-slot.selected {
+            border-color: #667eea;
+            background: #f5f7ff;
+        }
+    </style>
+</head>
+<body class="bg-white font-sans">
+    <!-- Language Switcher -->
+    <div id="language-switcher-container"></div>
+    
+    <!-- Schedule Pickup Form -->
+    <div class="embed-container">
+        <div class="max-w-4xl mx-auto bg-white rounded-lg shadow-md overflow-hidden">
+            <div class="wavemax-blue text-white p-6">
+                <h2 class="text-2xl font-bold" data-i18n="schedule.title">Schedule Your Pickup</h2>
+                <p class="mt-2" data-i18n="schedule.v2.subtitle">Schedule your laundry pickup - pay after we weigh it!</p>
+            </div>
+            
+            <div class="p-6">
+                <!-- V2 Info Banner -->
+                <div class="v2-info-banner">
+                    <h3 class="font-bold text-lg mb-2" data-i18n="schedule.v2.noPrepaymentTitle">No Prepayment Required!</h3>
+                    <p data-i18n="schedule.v2.noPrepaymentDesc">Simply schedule your pickup now. We'll weigh your laundry and send you payment links via email. Pay conveniently through Venmo, PayPal, or CashApp.</p>
+                </div>
+                
+                <!-- Payment Methods Display -->
+                <div class="payment-methods">
+                    <div class="payment-method">
+                        <div class="payment-icon">
+                            <svg width="40" height="40" viewBox="0 0 24 24" fill="#3D95CE">
+                                <path d="M9.093 11.65c.046-.318.143-.614.29-.885.148-.272.365-.507.653-.707.288-.2.647-.318 1.077-.353.318-.024.64.017.97.123.327.106.638.294.93.564l2.453-1.84c-.648-.618-1.36-1.03-2.135-1.236-.775-.206-1.555-.27-2.34-.194-1.06.106-1.96.412-2.7.918-.74.506-1.29 1.136-1.65 1.89-.357.752-.452 1.542-.285 2.365.118.577.318 1.11.6 1.6.283.49.635.917 1.06 1.282.423.366.917.648 1.482.848.565.2 1.18.288 1.846.265.977-.035 1.854-.277 2.635-.73.78-.452 1.388-1.023 1.824-1.71.435-.69.653-1.413.653-2.168v-.523h-4.6v2.117h2.23c-.036.423-.195.782-.477 1.077-.282.294-.635.47-1.06.523-.494.06-.928-.017-1.305-.23-.377-.21-.666-.51-.87-.893-.206-.382-.3-.81-.284-1.288zm13.834-4.906L21.618 5.4h-2.342l1.31 1.346zm-1.31 10.837l1.31 1.346h2.342l-1.308-1.346z"/>
+                            </svg>
+                        </div>
+                        <span class="text-sm font-medium">Venmo</span>
+                    </div>
+                    <div class="payment-method">
+                        <div class="payment-icon">
+                            <svg width="40" height="40" viewBox="0 0 24 24" fill="#0070BA">
+                                <path d="M7.076 21.337H2.47a.64.64 0 0 1-.633-.74L4.944 3.72c.07-.37.4-.64.774-.64h7.14c2.126 0 3.716.816 4.483 2.3.32.62.47 1.34.43 2.15-.08 1.65-.86 3.06-2.14 3.87-.06.04-.12.07-.19.1.12.17.22.35.3.54.23.52.33 1.1.29 1.77-.08 1.4-.65 2.62-1.57 3.35-.8.64-1.84.98-3.01.98H9.77c-.28 0-.52.2-.58.47l-.72 3.67zM23.02 10.2c-.08 1.86-1.65 3.3-3.58 3.3h-.91l-.64 3.25c-.06.3-.33.52-.64.52h-2.27l2.73-13.85h4.58c1 0 1.77.36 2.22 1.03.34.5.5 1.14.47 1.9-.04.3-.1.6-.2.88-.05-.02-.1-.03-.15-.03zm-4.95 2.16h1.25c.56 0 1.02-.17 1.32-.5.3-.32.46-.77.5-1.34.03-.5-.08-.88-.33-1.14-.24-.26-.62-.4-1.12-.4h-1.13l-.5 2.54v.84z"/>
+                            </svg>
+                        </div>
+                        <span class="text-sm font-medium">PayPal</span>
+                    </div>
+                    <div class="payment-method">
+                        <div class="payment-icon">
+                            <svg width="40" height="40" viewBox="0 0 24 24" fill="#00D632">
+                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1.19 14.56h-2.38c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5h1.25c.69 0 1.25-.56 1.25-1.25s-.56-1.25-1.25-1.25h-1.25v-1.5h1.25c1.52 0 2.75 1.23 2.75 2.75 0 .72-.28 1.38-.74 1.87.98.51 1.64 1.54 1.64 2.73 0 1.71-1.39 3.1-3.1 3.1h-.41v-1.45z"/>
+                            </svg>
+                        </div>
+                        <span class="text-sm font-medium">CashApp</span>
+                    </div>
+                </div>
+                
+                <!-- Process Timeline -->
+                <div class="process-timeline">
+                    <div class="process-step active">
+                        <div class="process-step-icon">1</div>
+                        <div class="text-sm font-medium" data-i18n="schedule.v2.step1">Schedule</div>
+                    </div>
+                    <div class="process-step">
+                        <div class="process-step-icon">2</div>
+                        <div class="text-sm font-medium" data-i18n="schedule.v2.step2">Pickup</div>
+                    </div>
+                    <div class="process-step">
+                        <div class="process-step-icon">3</div>
+                        <div class="text-sm font-medium" data-i18n="schedule.v2.step3">Weigh</div>
+                    </div>
+                    <div class="process-step">
+                        <div class="process-step-icon">4</div>
+                        <div class="text-sm font-medium" data-i18n="schedule.v2.step4">Pay</div>
+                    </div>
+                    <div class="process-step">
+                        <div class="process-step-icon">5</div>
+                        <div class="text-sm font-medium" data-i18n="schedule.v2.step5">Deliver</div>
+                    </div>
+                </div>
+                
+                <form id="schedulePickupForm" class="space-y-6">
+                    <!-- Hidden fields -->
+                    <input type="hidden" id="customerId" name="customerId">
+                    <input type="hidden" id="affiliateId" name="affiliateId">
+                    
+                    <!-- Pickup Date -->
+                    <div>
+                        <label for="pickupDate" class="block text-gray-700 font-bold mb-2" data-i18n="schedule.pickupDate">Select Pickup Date *</label>
+                        <input type="date" id="pickupDate" name="pickupDate" required class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <p class="text-sm text-gray-600 mt-1" data-i18n="schedule.pickupDateHelp">Choose a date at least 24 hours from now</p>
+                    </div>
+                    
+                    <!-- Pickup Time -->
+                    <div>
+                        <label class="block text-gray-700 font-bold mb-2" data-i18n="schedule.pickupTime">Select Pickup Time *</label>
+                        <div class="grid md:grid-cols-3 gap-4">
+                            <div class="time-slot" onclick="selectTimeSlot(this, 'morning')">
+                                <input type="radio" id="morning" name="pickupTime" value="morning" required class="hidden">
+                                <div class="font-medium" data-i18n="schedule.morning">Morning</div>
+                                <div class="text-sm text-gray-600">8:00 AM - 12:00 PM</div>
+                            </div>
+                            <div class="time-slot" onclick="selectTimeSlot(this, 'afternoon')">
+                                <input type="radio" id="afternoon" name="pickupTime" value="afternoon" required class="hidden">
+                                <div class="font-medium" data-i18n="schedule.afternoon">Afternoon</div>
+                                <div class="text-sm text-gray-600">12:00 PM - 4:00 PM</div>
+                            </div>
+                            <div class="time-slot" onclick="selectTimeSlot(this, 'evening')">
+                                <input type="radio" id="evening" name="pickupTime" value="evening" required class="hidden">
+                                <div class="font-medium" data-i18n="schedule.evening">Evening</div>
+                                <div class="text-sm text-gray-600">4:00 PM - 8:00 PM</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Number of Bags -->
+                    <div>
+                        <label for="numberOfBags" class="block text-gray-700 font-bold mb-2" data-i18n="schedule.numberOfBags">Number of Bags *</label>
+                        <select id="numberOfBags" name="numberOfBags" required class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="1">1 Bag</option>
+                            <option value="2">2 Bags</option>
+                            <option value="3">3 Bags</option>
+                            <option value="4">4 Bags</option>
+                            <option value="5">5+ Bags</option>
+                        </select>
+                        <p class="text-sm text-gray-600 mt-1" data-i18n="schedule.v2.bagsNote">Don't worry if you're not sure - we'll count and weigh everything!</p>
+                    </div>
+                    
+                    <!-- Estimated Weight -->
+                    <div>
+                        <label for="estimatedWeight" class="block text-gray-700 font-bold mb-2" data-i18n="schedule.estimatedWeight">Estimated Weight (lbs)</label>
+                        <input type="number" id="estimatedWeight" name="estimatedWeight" placeholder="20" min="10" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <p class="text-sm text-gray-600 mt-1" data-i18n="schedule.v2.weightNote">Just an estimate - we'll get the exact weight when we pick up</p>
+                    </div>
+                    
+                    <!-- Special Instructions -->
+                    <div>
+                        <label for="specialInstructions" class="block text-gray-700 font-bold mb-2" data-i18n="schedule.specialInstructions">Special Pickup Instructions</label>
+                        <textarea id="specialInstructions" name="specialInstructions" rows="3" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="e.g., Ring doorbell, leave on porch, call when arriving..."></textarea>
+                    </div>
+                    
+                    <!-- Pricing Info -->
+                    <div class="bg-gray-50 p-6 rounded-lg">
+                        <h3 class="font-bold text-lg mb-3" data-i18n="schedule.v2.pricingTitle">Simple, Transparent Pricing</h3>
+                        <div class="space-y-2 text-sm">
+                            <div class="flex justify-between">
+                                <span data-i18n="schedule.v2.baseRate">Base Rate:</span>
+                                <span class="font-medium">$1.25/lb</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span data-i18n="schedule.v2.minimumCharge">Minimum Charge:</span>
+                                <span class="font-medium">$25.00</span>
+                            </div>
+                            <div class="border-t pt-2 mt-2">
+                                <p class="text-gray-600" data-i18n="schedule.v2.pricingNote">You'll receive payment links via email after we weigh your laundry. Pay conveniently through Venmo, PayPal, or CashApp.</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Submit Button -->
+                    <div class="text-center pt-4">
+                        <button type="submit" id="submitBtn" class="bg-blue-600 text-white px-8 py-3 rounded-lg font-bold hover:bg-blue-700 transition duration-300 w-full md:w-auto">
+                            <span data-i18n="schedule.v2.submitButton">Schedule Pickup - No Payment Required</span>
+                        </button>
+                        <p class="text-sm text-gray-600 mt-3" data-i18n="schedule.v2.payLaterNote">You'll pay after we weigh your laundry</p>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Loading Spinner -->
+    <div id="loadingSpinner" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+        <div class="bg-white p-8 rounded-lg shadow-xl">
+            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+            <p class="mt-4 text-gray-700" data-i18n="schedule.scheduling">Scheduling your pickup...</p>
+        </div>
+    </div>
+    
+    <!-- Success Modal -->
+    <div id="successModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+        <div class="bg-white p-8 rounded-lg shadow-xl max-w-md mx-auto">
+            <div class="text-center">
+                <div class="text-5xl mb-4">✅</div>
+                <h3 class="text-2xl font-bold mb-2" data-i18n="schedule.v2.successTitle">Pickup Scheduled!</h3>
+                <p class="text-gray-700 mb-4" data-i18n="schedule.v2.successMessage">Your laundry pickup has been scheduled. We'll send you payment links via email after we weigh your laundry.</p>
+                <div class="bg-blue-50 p-4 rounded-lg mb-4">
+                    <p class="text-sm text-gray-700" data-i18n="schedule.v2.whatNext">What happens next:</p>
+                    <ul class="text-left text-sm text-gray-600 mt-2 space-y-1">
+                        <li>• We'll pick up your laundry on the scheduled date</li>
+                        <li>• We'll weigh it and calculate the exact cost</li>
+                        <li>• You'll receive payment links via email</li>
+                        <li>• Pay using Venmo, PayPal, or CashApp</li>
+                        <li>• Receive your clean laundry!</li>
+                    </ul>
+                </div>
+                <button onclick="window.location.href='/customer-dashboard-embed.html'" class="bg-blue-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-blue-700 transition duration-300">
+                    <span data-i18n="schedule.v2.goToDashboard">Go to Dashboard</span>
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Scripts -->
+    <script src="/assets/js/i18n.js"></script>
+    <script src="/assets/js/language-switcher.js"></script>
+    <script src="/assets/js/csrf-utils.js"></script>
+    <script src="/assets/js/modal-utils.js"></script>
+    
+    <script>
+        // Time slot selection
+        function selectTimeSlot(element, value) {
+            document.querySelectorAll('.time-slot').forEach(slot => {
+                slot.classList.remove('selected');
+            });
+            element.classList.add('selected');
+            document.getElementById(value).checked = true;
+        }
+        
+        // Set minimum date to tomorrow
+        const tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        document.getElementById('pickupDate').min = tomorrow.toISOString().split('T')[0];
+        
+        // Get customer info from token
+        const urlParams = new URLSearchParams(window.location.search);
+        const token = urlParams.get('token');
+        
+        if (token) {
+            // Decode token to get customer info
+            try {
+                const payload = JSON.parse(atob(token.split('.')[1]));
+                document.getElementById('customerId').value = payload.customerId;
+                document.getElementById('affiliateId').value = payload.affiliateId;
+            } catch (e) {
+                console.error('Invalid token');
+            }
+        }
+        
+        // Form submission
+        document.getElementById('schedulePickupForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            document.getElementById('loadingSpinner').classList.remove('hidden');
+            document.getElementById('submitBtn').disabled = true;
+            
+            const formData = new FormData(this);
+            const data = {};
+            formData.forEach((value, key) => {
+                data[key] = value;
+            });
+            
+            // Set estimated weight based on bags if not provided
+            if (!data.estimatedWeight) {
+                data.estimatedWeight = parseInt(data.numberOfBags) * 20;
+            }
+            
+            try {
+                const response = await fetch('/api/orders', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + token,
+                        'X-CSRF-Token': document.querySelector('[name="csrf-token"]')?.value || ''
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    document.getElementById('loadingSpinner').classList.add('hidden');
+                    document.getElementById('successModal').classList.remove('hidden');
+                } else {
+                    alert(result.message || 'Failed to schedule pickup. Please try again.');
+                    document.getElementById('loadingSpinner').classList.add('hidden');
+                    document.getElementById('submitBtn').disabled = false;
+                }
+            } catch (error) {
+                console.error('Schedule error:', error);
+                alert('An error occurred. Please try again.');
+                document.getElementById('loadingSpinner').classList.add('hidden');
+                document.getElementById('submitBtn').disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>

@@ -413,8 +413,15 @@ exports.updateOrderStatus = async (req, res) => {
     const { orderId } = req.params;
     const { status, actualWeight } = req.body;
 
-    // Find order
-    const order = await Order.findOne({ orderId });
+    // Find order by orderId or _id
+    let order;
+    if (orderId.match(/^[0-9a-fA-F]{24}$/)) {
+      // MongoDB ObjectId format
+      order = await Order.findById(orderId);
+    } else {
+      // Order ID format (ORD123456)
+      order = await Order.findOne({ orderId });
+    }
 
     if (!order) {
       return res.status(404).json({
@@ -423,10 +430,12 @@ exports.updateOrderStatus = async (req, res) => {
       });
     }
 
-    // Check authorization (admin or associated affiliate)
+    // Check authorization (admin, operator, or associated affiliate)
     const isAuthorized =
       req.user.role === 'admin' ||
+      req.user.role === 'operator' ||
       (req.user.role === 'affiliate' && req.user.affiliateId === order.affiliateId);
+
 
     if (!isAuthorized) {
       return res.status(403).json({
@@ -462,10 +471,11 @@ exports.updateOrderStatus = async (req, res) => {
     if ((status === 'processing' || status === 'processed') && actualWeight) {
       order.actualWeight = parseFloat(actualWeight);
       
+      
       // Check if this is a V2 customer and generate payment request
       if (customer && customer.registrationVersion === 'v2' && order.v2PaymentStatus === 'pending') {
         // Calculate total with actual weight
-        const actualTotal = order.actualTotal || order.estimatedTotal;
+        const actualTotal = req.body.actualTotal || order.actualTotal || order.estimatedTotal;
         
         // Generate payment links
         const paymentLinkService = require('../services/paymentLinkService');
@@ -1221,6 +1231,150 @@ exports.getOrderStatistics = async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'An error occurred while retrieving statistics'
+    });
+  }
+};
+
+/**
+ * Customer payment confirmation - when they click "already paid?"
+ */
+exports.confirmPayment = async (req, res) => {
+  try {
+    const { orderId, paymentMethod, paymentDetails } = req.body;
+    
+    // Find order by short ID or full ID
+    let order;
+    if (orderId.length === 8) {
+      // Short order ID
+      const orders = await Order.find({ v2PaymentStatus: 'awaiting' });
+      for (const o of orders) {
+        const shortId = o._id.toString().slice(-8).toUpperCase();
+        if (shortId === orderId.toUpperCase()) {
+          order = o;
+          break;
+        }
+      }
+    } else {
+      // Full order ID
+      order = await Order.findById(orderId);
+    }
+    
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        message: 'Order not found'
+      });
+    }
+    
+    // Check if payment is already verified
+    if (order.v2PaymentStatus === 'verified') {
+      return res.json({
+        success: true,
+        message: 'Payment already verified',
+        alreadyVerified: true
+      });
+    }
+    
+    // Log customer confirmation
+    console.log(`Customer confirmed payment for order ${order._id}:`, {
+      paymentMethod,
+      paymentDetails
+    });
+    
+    // Update order with customer confirmation
+    order.v2PaymentStatus = 'confirming';
+    order.v2PaymentConfirmedAt = new Date();
+    order.v2PaymentNotes = `Customer confirmed payment via ${paymentMethod}. Details: ${paymentDetails || 'None provided'}. Awaiting manual verification.`;
+    order.v2PaymentMethod = paymentMethod || 'pending';
+    await order.save();
+    
+    // Immediately escalate to admin for manual verification
+    const paymentVerificationJob = require('../jobs/paymentVerificationJob');
+    await paymentVerificationJob.escalateToAdmin(order);
+    
+    // Also trigger an immediate payment check
+    const paymentEmailScanner = require('../services/paymentEmailScanner');
+    const verified = await paymentEmailScanner.checkOrderPayment(order._id);
+    
+    if (verified) {
+      return res.json({
+        success: true,
+        message: 'Payment has been verified!',
+        verified: true
+      });
+    }
+    
+    res.json({
+      success: true,
+      message: 'Thank you for confirming your payment. We are verifying it now and will update you shortly.',
+      escalated: true
+    });
+    
+  } catch (error) {
+    console.error('Payment confirmation error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'An error occurred while processing your payment confirmation'
+    });
+  }
+};
+
+/**
+ * Manual payment verification by admin
+ */
+exports.verifyPaymentManually = async (req, res) => {
+  try {
+    const { orderId } = req.params;
+    const { transactionId, notes } = req.body;
+    
+    // Admin only
+    if (req.user.role !== 'admin' && req.user.role !== 'administrator') {
+      return res.status(403).json({
+        success: false,
+        message: 'Unauthorized - admin access required'
+      });
+    }
+    
+    const order = await Order.findById(orderId);
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        message: 'Order not found'
+      });
+    }
+    
+    // Update payment status
+    order.v2PaymentStatus = 'verified';
+    order.v2PaymentVerifiedAt = new Date();
+    order.v2PaymentTransactionId = transactionId || `MANUAL-${Date.now()}`;
+    order.v2PaymentNotes = `Manually verified by admin${req.user.email ? ` (${req.user.email})` : ''}. ${notes || ''}`;
+    await order.save();
+    
+    // If order is ready, send pickup notification
+    if (order.status === 'processed') {
+      const customer = await Customer.findOne({ customerId: order.customerId });
+      const affiliate = await Affiliate.findOne({ affiliateId: order.affiliateId });
+      
+      // Send notifications
+      console.log(`Sending pickup notification after manual verification for order ${orderId}`);
+      // await emailService.sendPickupReadyNotification(order, customer, affiliate);
+    }
+    
+    res.json({
+      success: true,
+      message: 'Payment verified successfully',
+      order: {
+        orderId: order.orderId,
+        v2PaymentStatus: order.v2PaymentStatus,
+        v2PaymentVerifiedAt: order.v2PaymentVerifiedAt
+      }
+    });
+    
+  } catch (error) {
+    console.error('Manual payment verification error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'An error occurred while verifying payment'
     });
   }
 };

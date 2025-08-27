@@ -193,12 +193,16 @@ class PaymentVerificationJob {
   shouldSendReminder(order) {
     const attempts = order.v2PaymentCheckAttempts || 0;
     
-    // Send reminders at specific intervals
+    // Send reminders hourly after the first 30 minutes
     // First reminder after 30 minutes (6 attempts at 5-minute intervals)
-    // Then every hour (12 attempts)
-    const reminderIntervals = [6, 12, 24, 36];
+    // Then every hour (12 attempts each hour)
+    if (attempts >= 6) {
+      // After 30 minutes, send reminder every hour (every 12 attempts)
+      return (attempts - 6) % 12 === 0;
+    }
     
-    return reminderIntervals.includes(attempts);
+    // First reminder at 30 minutes
+    return attempts === 6;
   }
 
   /**
@@ -213,14 +217,19 @@ class PaymentVerificationJob {
         return;
       }
       
-      console.log(`Sending payment reminder to ${customer.email} for order ${order._id}`);
+      // Calculate time elapsed and urgency
+      const hoursElapsed = Math.floor((order.v2PaymentCheckAttempts || 0) * this.checkInterval / 60);
+      const hoursRemaining = Math.max(0, 4 - hoursElapsed);
+      const isUrgent = hoursRemaining <= 1;
+      
+      console.log(`Sending payment reminder to ${customer.email} for order ${order._id} (${hoursElapsed} hours elapsed, ${hoursRemaining} hours remaining)`);
       
       // Generate fresh payment links (in case they expired or were lost)
       const paymentLinkService = require('../services/paymentLinkService');
-      const { links, qrCodes } = await paymentLinkService.generatePaymentLinks(
+      const { links, qrCodes, shortOrderId } = await paymentLinkService.generatePaymentLinks(
         order._id,
         order.v2PaymentAmount || order.actualTotal || order.estimatedTotal,
-        customer.name
+        customer.name || `${customer.firstName} ${customer.lastName}`
       );
       
       // Update order with fresh links
@@ -228,8 +237,17 @@ class PaymentVerificationJob {
       order.v2PaymentQRCodes = qrCodes;
       await order.save();
       
-      // Send reminder email
-      await this.sendReminderEmail(order, customer);
+      // Generate "already paid?" confirmation link
+      const baseUrl = process.env.BASE_URL || 'https://wavemax.promo';
+      const confirmationLink = `${baseUrl}/payment-confirmation-embed.html?orderId=${shortOrderId}&token=${order._id}`;
+      
+      // Send reminder email with urgency and confirmation link
+      await this.sendReminderEmail(order, customer, {
+        hoursElapsed,
+        hoursRemaining,
+        isUrgent,
+        confirmationLink
+      });
       
     } catch (error) {
       console.error('Error sending payment reminder:', error);
@@ -239,14 +257,21 @@ class PaymentVerificationJob {
   /**
    * Send reminder email to customer
    */
-  async sendReminderEmail(order, customer) {
+  async sendReminderEmail(order, customer, reminderInfo) {
     try {
       // This will be implemented in emailService
-      // For now, log the action
+      // For now, log the action with details
       console.log(`Payment reminder email would be sent to ${customer.email}`);
+      console.log(`Reminder details:`, {
+        orderId: order._id,
+        hoursElapsed: reminderInfo.hoursElapsed,
+        hoursRemaining: reminderInfo.hoursRemaining,
+        isUrgent: reminderInfo.isUrgent,
+        confirmationLink: reminderInfo.confirmationLink
+      });
       
       // Placeholder for actual implementation
-      // await emailService.sendV2PaymentReminder(order, customer);
+      // await emailService.sendV2PaymentReminder(order, customer, reminderInfo);
     } catch (error) {
       console.error('Error sending reminder email:', error);
     }
@@ -280,11 +305,36 @@ class PaymentVerificationJob {
     try {
       console.log(`Escalating payment timeout for order ${order._id} to admin`);
       
+      // Get customer and affiliate information
+      const customer = order.customerId;
+      const affiliate = order.affiliateId;
+      
       // Get admin email from config or use default
       const adminEmail = await SystemConfig.getValue('admin_notification_email', 'admin@wavemax.promo');
       
+      // Calculate time since payment requested
+      const hoursSinceRequest = Math.round((Date.now() - order.v2PaymentRequestedAt.getTime()) / (1000 * 60 * 60));
+      
+      // Prepare escalation details
+      const escalationDetails = {
+        orderId: order.orderId,
+        orderMongoId: order._id,
+        customerName: customer ? `${customer.firstName} ${customer.lastName}` : 'Unknown',
+        customerEmail: customer?.email || 'Unknown',
+        customerPhone: customer?.phone || 'Unknown',
+        affiliateName: affiliate ? `${affiliate.firstName} ${affiliate.lastName}` : 'Unknown',
+        affiliateEmail: affiliate?.email || 'Unknown',
+        paymentAmount: order.v2PaymentAmount || order.actualTotal || 'Unknown',
+        hoursSinceRequest,
+        paymentRequestedAt: order.v2PaymentRequestedAt,
+        attemptsMade: order.v2PaymentCheckAttempts || 0
+      };
+      
+      // Log escalation details
+      console.log(`Admin escalation details:`, escalationDetails);
+      
       // Send escalation email
-      // await emailService.sendPaymentTimeoutEscalation(order, adminEmail);
+      // await emailService.sendPaymentTimeoutEscalation(order, adminEmail, escalationDetails);
       
       // Log for now
       console.log(`Admin escalation email would be sent to ${adminEmail} for order ${order._id}`);

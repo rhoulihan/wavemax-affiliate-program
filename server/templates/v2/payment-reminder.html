@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Reminder - WaveMAX Laundry</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .email-container {
+            background-color: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #f56565 0%, #ed8936 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        .header.urgent {
+            background: linear-gradient(135deg, #e53e3e 0%, #c53030 100%);
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 28px;
+        }
+        .content {
+            padding: 30px;
+        }
+        .urgency-banner {
+            background-color: #fef2e8;
+            border: 2px solid #fed7aa;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .urgency-banner.critical {
+            background-color: #fee2e2;
+            border-color: #fca5a5;
+            color: #991b1b;
+        }
+        .time-indicator {
+            font-size: 24px;
+            font-weight: bold;
+            color: #e53e3e;
+            text-align: center;
+            margin: 20px 0;
+        }
+        .order-info {
+            background-color: #f8f9fa;
+            border-left: 4px solid #ed8936;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        .amount-due {
+            font-size: 32px;
+            color: #2d3748;
+            font-weight: bold;
+            text-align: center;
+            margin: 20px 0;
+        }
+        .already-paid-section {
+            background: linear-gradient(135deg, #f0f4ff 0%, #e9ecff 100%);
+            border: 2px solid #667eea;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 30px 0;
+            text-align: center;
+        }
+        .already-paid-btn {
+            display: inline-block;
+            padding: 12px 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: bold;
+            font-size: 16px;
+            margin-top: 10px;
+        }
+        .payment-methods {
+            margin: 30px 0;
+        }
+        .payment-method {
+            display: block;
+            background-color: #ffffff;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 10px 0;
+            text-decoration: none;
+            color: #333;
+        }
+        .payment-method:hover {
+            border-color: #ed8936;
+            box-shadow: 0 4px 12px rgba(237, 137, 54, 0.2);
+        }
+        .btn {
+            display: inline-block;
+            padding: 12px 24px;
+            background-color: #ed8936;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: bold;
+            margin: 10px 5px;
+        }
+        .btn-venmo { background-color: #3D95CE; }
+        .btn-paypal { background-color: #0070BA; }
+        .btn-cashapp { background-color: #00D632; }
+        .footer {
+            background-color: #f8f9fa;
+            padding: 20px;
+            text-align: center;
+            color: #718096;
+            font-size: 14px;
+        }
+        .warning-icon {
+            font-size: 48px;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="email-container">
+        <div class="header {{#if isUrgent}}urgent{{/if}}">
+            <h1>Payment Reminder</h1>
+            <p>{{#if isUrgent}}Urgent: {{/if}}Your payment is still pending</p>
+        </div>
+        
+        <div class="content">
+            <p>Hi {{customerName}},</p>
+            
+            {{#if isUrgent}}
+            <div class="urgency-banner critical">
+                <div class="warning-icon">⚠️</div>
+                <strong>URGENT: Payment Required</strong><br>
+                Your payment has been pending for {{hoursElapsed}} hours.<br>
+                Please submit payment within the next {{hoursRemaining}} hour(s) to avoid delays.
+            </div>
+            {{else}}
+            <div class="urgency-banner">
+                <strong>Friendly Reminder</strong><br>
+                We're still waiting for your payment for order #{{shortOrderId}}.
+            </div>
+            {{/if}}
+            
+            <div class="time-indicator">
+                {{hoursElapsed}} hours since payment requested
+            </div>
+            
+            <div class="order-info">
+                <strong>Order Details:</strong><br>
+                Order ID: #{{orderId}}<br>
+                Weight: {{actualWeight}} lbs<br>
+                Status: Ready for payment<br>
+                Payment Requested: {{paymentRequestedTime}}<br>
+            </div>
+            
+            <div class="amount-due">
+                Amount Due: ${{amount}}
+            </div>
+            
+            <!-- Already Paid Section -->
+            <div class="already-paid-section">
+                <h3 style="margin-top: 0;">Already sent payment?</h3>
+                <p>If you've already paid through Venmo, PayPal, or CashApp, please let us know so we can verify it immediately.</p>
+                <a href="{{confirmationLink}}" class="already-paid-btn">I've Already Paid →</a>
+            </div>
+            
+            <p style="text-align: center; font-weight: bold; color: #e53e3e;">
+                If you haven't paid yet, please use one of these methods:
+            </p>
+            
+            <div class="payment-methods">
+                <a href="{{venmoLink}}" class="payment-method">
+                    <div style="text-align: center;">
+                        <span class="btn btn-venmo">Pay with Venmo</span>
+                        <p style="margin: 10px 0 0 0; color: #718096;">@wavemax</p>
+                    </div>
+                </a>
+                
+                <a href="{{paypalLink}}" class="payment-method">
+                    <div style="text-align: center;">
+                        <span class="btn btn-paypal">Pay with PayPal</span>
+                        <p style="margin: 10px 0 0 0; color: #718096;">paypal.me/wavemax</p>
+                    </div>
+                </a>
+                
+                <a href="{{cashappLink}}" class="payment-method">
+                    <div style="text-align: center;">
+                        <span class="btn btn-cashapp">Pay with CashApp</span>
+                        <p style="margin: 10px 0 0 0; color: #718096;">$wavemax</p>
+                    </div>
+                </a>
+            </div>
+            
+            <p style="background-color: #fef2e8; padding: 15px; border-radius: 6px;">
+                <strong>⏰ Time Remaining:</strong> {{hoursRemaining}} hour(s)<br>
+                {{#if isUrgent}}
+                <span style="color: #e53e3e;">Your order may be delayed if payment is not received soon.</span>
+                {{else}}
+                Please submit payment to ensure timely delivery of your clean laundry.
+                {{/if}}
+            </p>
+            
+            <p><strong>Remember:</strong> Include <strong>Order #{{shortOrderId}}</strong> in your payment note/memo.</p>
+            
+            <p>If you're having trouble with payment or have any questions, please contact us immediately.</p>
+            
+            <p>Thank you for your prompt attention to this matter.</p>
+        </div>
+        
+        <div class="footer">
+            <p>WaveMAX Laundry<br>
+            Premium Pickup & Delivery Service<br>
+            <a href="https://wavemax.promo" style="color: #667eea;">wavemax.promo</a></p>
+            <p style="font-size: 12px;">
+                This is reminder {{reminderNumber}} of {{maxReminders}}.<br>
+                Payment reminders are sent hourly until payment is received.
+            </p>
+        </div>
+    </div>
+</body>
+</html>

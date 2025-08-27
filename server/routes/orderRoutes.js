@@ -4,6 +4,7 @@ const express = require('express');
 const router = express.Router();
 const orderController = require('../controllers/orderController');
 const { authenticate, authorize } = require('../middleware/auth');
+const { checkRole } = require('../middleware/rbac');
 const { body } = require('express-validator');
 
 /**
@@ -106,5 +107,25 @@ router.post('/:orderId/cancel', authenticate, orderController.cancelOrder);
 router.put('/:orderId/payment-status', authenticate, [
   body('paymentStatus').isIn(['pending', 'paid', 'failed', 'refunded']).withMessage('Invalid payment status')
 ], orderController.updatePaymentStatus);
+
+/**
+ * @route   POST /api/orders/confirm-payment
+ * @desc    Customer confirms they have already paid
+ * @access  Public (with order validation)
+ */
+router.post('/confirm-payment', [
+  body('orderId').notEmpty().withMessage('Order ID is required'),
+  body('paymentMethod').optional().isIn(['venmo', 'paypal', 'cashapp']).withMessage('Invalid payment method')
+], orderController.confirmPayment);
+
+/**
+ * @route   PUT /api/orders/:orderId/verify-payment
+ * @desc    Manually verify payment (admin only)
+ * @access  Private (admin only)
+ */
+router.put('/:orderId/verify-payment', authenticate, checkRole(['admin', 'administrator']), [
+  body('transactionId').optional(),
+  body('notes').optional()
+], orderController.verifyPaymentManually);
 
 module.exports = router;

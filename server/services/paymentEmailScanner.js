@@ -4,7 +4,7 @@
  * Automatically verifies payments based on order ID in payment notes
  */
 
-const mailcowService = require('./mailcowService');
+const imapScanner = require('./imapEmailScanner');
 const Order = require('../models/Order');
 const Customer = require('../models/Customer');
 const emailService = require('../utils/emailService');
@@ -49,11 +49,19 @@ class PaymentEmailScanner {
    */
   async scanForPayments() {
     try {
+      // Connect to IMAP
+      const connected = await imapScanner.connect();
+      if (!connected) {
+        console.log('Could not connect to IMAP server');
+        return [];
+      }
+
       // Get unread payment emails
-      const emails = await mailcowService.getUnreadPaymentEmails();
+      const emails = await imapScanner.getUnreadEmails();
       
       if (!emails || emails.length === 0) {
         console.log('No new payment emails found');
+        imapScanner.disconnect();
         return [];
       }
 
@@ -71,16 +79,19 @@ class PaymentEmailScanner {
             
             if (verified) {
               verifiedPayments.push(payment);
-              // Mark email as processed
-              await mailcowService.markEmailAsProcessed(email.id || email.uid);
+              // Mark email as read
+              await imapScanner.markAsRead(email.uid);
+              // Move to processed folder if needed
+              // await imapScanner.moveToFolder(email.uid, 'Processed');
             }
           }
         } catch (error) {
-          console.error(`Error processing email ${email.id}:`, error);
+          console.error(`Error processing email ${email.uid}:`, error);
         }
       }
       
       console.log(`Verified ${verifiedPayments.length} payments`);
+      imapScanner.disconnect();
       return verifiedPayments;
     } catch (error) {
       console.error('Error scanning for payments:', error);
@@ -90,15 +101,16 @@ class PaymentEmailScanner {
 
   /**
    * Parse a payment email to extract payment details
-   * @param {Object} email - Email object from Mailcow
+   * @param {Object} email - Email object from IMAP
    * @returns {Object|null} Parsed payment details or null if not a payment email
    */
   async parsePaymentEmail(email) {
     try {
-      const { from, subject, body, text, html, date } = email;
+      const { from, fromAddress, subject, text, html, date } = email;
+      const body = text || html || '';
       
       // Determine provider based on sender domain
-      const provider = this.identifyProvider(from);
+      const provider = this.identifyProvider(fromAddress || from);
       
       if (!provider) {
         console.log(`Not a payment email from known provider: ${from}`);

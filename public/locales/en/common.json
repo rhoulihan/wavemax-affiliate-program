@@ -696,7 +696,33 @@
         "startingAt": "Starting at ${{price}}",
         "feeStructure": "(Min: ${{minFee}}, then ${{perBagFee}}/bag)",
         "wdfRate": "${{rate}}/lb (includes service fees)"
-      }
+      },
+      "v2": {
+        "subtitle": "Sign up for premium laundry pickup and delivery service - pay after we weigh your laundry!",
+        "freeBagsBanner": "Get Your First 1-2 Laundry Bags FREE - No Credit Card Required!",
+        "selectBags": "Select Your Free Laundry Bags",
+        "selectBagsDescription": "Choose how many bags you need to get started. Each bag holds 20-25 lbs of laundry.",
+        "oneBag": "1 Bag",
+        "oneBagDesc": "Perfect for individuals",
+        "twoBags": "2 Bags", 
+        "twoBagsDesc": "Great for couples or families",
+        "howItWorks": "How Our V2 Payment System Works",
+        "step1": "Sign up now with no credit card required",
+        "socialSignupText": "Sign up quickly using your social media account",
+        "socialConnectedMessage": "Great! We've connected your social account. Just complete the form below to finish registration - no payment required!",
+        "step2": "Receive your free laundry bags",
+        "step3": "Schedule your first pickup",
+        "step4": "We weigh your laundry and send you payment links",
+        "step5": "Pay conveniently via Venmo, PayPal, or CashApp",
+        "step6": "Receive your fresh, clean laundry!",
+        "submitButton": "Sign Up for Free - No Payment Required",
+        "noCardRequired": "No credit card needed • Pay after we weigh your laundry"
+      },
+      "terms": "By registering, you agree to our",
+      "termsLink": "Terms of Service",
+      "and": "and",
+      "privacyLink": "Privacy Policy",
+      "processing": "Processing your registration..."
     },
     "dashboard": {
       "title": "Customer Dashboard",

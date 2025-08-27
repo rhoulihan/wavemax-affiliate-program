@@ -328,7 +328,8 @@
                   } else {
                     alert('Account not found. You will be redirected to registration to create a new customer account.');
                   }
-                  window.location.href = `/customer-register-embed.html?socialToken=${data.result.socialToken}&provider=${data.result.provider}`;
+                  // Use embed-app-v2 routing which will determine V1 vs V2 based on payment version
+                  window.location.href = `/embed-app-v2.html?route=/customer-register&socialToken=${data.result.socialToken}&provider=${data.result.provider}`;
 
                 } else if (data.result.type === 'social-auth-account-conflict') {
                   console.log('Processing social-auth-account-conflict from database');

@@ -17,7 +17,8 @@ const v2PaymentConfigs = [
     dataType: 'string',
     category: 'payment',
     description: 'Payment system version toggle (v1: Paygistix, v2: Venmo/PayPal/CashApp)',
-    displayOrder: 1001
+    displayOrder: 1001,
+    isPublic: true
   },
   {
     key: 'payment_notification_email',
