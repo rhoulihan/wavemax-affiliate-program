@@ -249,22 +249,36 @@
                 submitBtn.disabled = true;
             }
             
-            // Collect form data
-            const formData = new FormData(this);
+            // Collect all form fields (including those in hidden sections)
             const data = {};
-            formData.forEach((value, key) => {
-                data[key] = value;
+            
+            // Get all input, select, and textarea elements in the form
+            const inputs = this.querySelectorAll('input, select, textarea');
+            inputs.forEach(input => {
+                if (input.name && input.type !== 'submit' && input.type !== 'button') {
+                    if (input.type === 'checkbox') {
+                        data[input.name] = input.checked;
+                    } else if (input.type === 'radio') {
+                        if (input.checked) {
+                            data[input.name] = input.value;
+                        }
+                    } else {
+                        data[input.name] = input.value;
+                    }
+                }
             });
             
             // Add V2 specific fields
             data.registrationVersion = 'v2';
             data.paymentVersion = 'v2';
-            data.initialBagsRequested = parseInt(data.numberOfBags || '2');
+            data.initialBagsRequested = parseInt(data.numberOfBags || '1');
             
             // Get CSRF token
             const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
             
             try {
+                console.log('[V2 Registration] Sending registration data:', data);
+                
                 const response = await fetch('/api/customers/register', {
                     method: 'POST',
                     headers: {
@@ -276,6 +290,7 @@
                 });
                 
                 const result = await response.json();
+                console.log('[V2 Registration] Server response:', result);
                 
                 if (result.success) {
                     // Store customer data
