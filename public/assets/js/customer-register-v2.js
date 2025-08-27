@@ -5,6 +5,7 @@
     // Base URL for API calls
     const baseUrl = window.location.origin;
     const isEmbedded = window.self !== window.top;
+    let affiliateData = null; // Store affiliate data for service area validation
 
     // Password validation function
     function validatePassword() {
@@ -332,6 +333,9 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
+                        // Store affiliate data for service area validation
+                        affiliateData = data;
+                        
                         const intro = document.getElementById('affiliateIntro');
                         if (intro && data.firstName && data.businessName) {
                             const affiliateName = data.businessName || `${data.firstName} ${data.lastName}`;
@@ -639,6 +643,137 @@
         }
     }
 
+    // Service area validation function
+    async function validateServiceArea() {
+        const address = document.getElementById('address')?.value?.trim();
+        const city = document.getElementById('city')?.value?.trim();
+        const state = document.getElementById('state')?.value?.trim();
+        const zipCode = document.getElementById('zipCode')?.value?.trim();
+
+        if (!address || !city || !state || !zipCode) {
+            return false; // Not all fields filled
+        }
+
+        if (!affiliateData || !affiliateData.serviceLatitude || !affiliateData.serviceLongitude || !affiliateData.serviceRadius) {
+            console.error('[V2 Registration] Missing affiliate service area data');
+            return true; // Allow to proceed if we can't validate
+        }
+
+        const fullAddress = `${address}, ${city}, ${state} ${zipCode}`;
+        console.log('[V2 Registration] Validating service area for address:', fullAddress);
+
+        // Show spinner
+        let spinner = null;
+        if (window.SwirlSpinnerUtils) {
+            const form = document.getElementById('customerRegistrationForm');
+            spinner = window.SwirlSpinnerUtils.showOnForm(form, {
+                message: 'Validating address...',
+                submessage: 'Checking if your address is within our service area'
+            });
+        }
+
+        try {
+            // Get CSRF token
+            let csrfToken = window.csrfToken;
+            if (!csrfToken) {
+                const csrfMeta = document.querySelector('meta[name="csrf-token"]');
+                if (csrfMeta) {
+                    csrfToken = csrfMeta.getAttribute('content');
+                }
+            }
+            
+            const response = await fetch(`${baseUrl}/api/v1/service-area/validate`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-Token': csrfToken || ''
+                },
+                credentials: 'include',
+                body: JSON.stringify({ address, city, state, zipCode })
+            });
+
+            const result = await response.json();
+
+            if (!result.success || !result.coordinates) {
+                console.error('[V2 Registration] Address validation failed:', result.message);
+                if (spinner) spinner.hide();
+                
+                // Show error message
+                const message = result.message || 'Unable to verify this address. Please check that the street address and zip code are correct.';
+                if (window.modalAlert) {
+                    window.modalAlert(message, 'Address Validation Error');
+                } else {
+                    alert(message);
+                }
+                return false;
+            }
+
+            const customerLat = result.coordinates.latitude;
+            const customerLon = result.coordinates.longitude;
+
+            console.log('[V2 Registration] Geocoding successful:', {
+                lat: customerLat,
+                lon: customerLon,
+                formattedAddress: result.formattedAddress
+            });
+
+            // Calculate distance using Haversine formula
+            const distance = calculateDistance(
+                affiliateData.serviceLatitude,
+                affiliateData.serviceLongitude,
+                customerLat,
+                customerLon
+            );
+
+            console.log('[V2 Registration] Distance from affiliate:', distance, 'miles');
+            console.log('[V2 Registration] Service radius:', affiliateData.serviceRadius, 'miles');
+
+            if (spinner) spinner.hide();
+
+            if (distance > affiliateData.serviceRadius) {
+                // Outside service area
+                if (window.modalAlert) {
+                    window.modalAlert(
+                        `Unfortunately, this address is outside the service area. The service area extends ${affiliateData.serviceRadius} miles from the affiliate location, and this address is ${distance.toFixed(1)} miles away.`,
+                        'Outside Service Area'
+                    );
+                } else {
+                    alert(`Unfortunately, this address is outside the service area. The service area extends ${affiliateData.serviceRadius} miles from the affiliate location, and this address is ${distance.toFixed(1)} miles away.`);
+                }
+
+                // Clear only the street address field
+                document.getElementById('address').value = '';
+                return false;
+            }
+
+            return true; // Address is valid and within service area
+
+        } catch (error) {
+            console.error('[V2 Registration] Error validating service area:', error);
+            if (spinner) spinner.hide();
+            
+            // Allow to proceed on error
+            return true;
+        }
+    }
+
+    // Calculate distance between two coordinates in miles
+    function calculateDistance(lat1, lon1, lat2, lon2) {
+        const R = 3959; // Radius of Earth in miles
+        const dLat = toRad(lat2 - lat1);
+        const dLon = toRad(lon2 - lon1);
+        const a =
+            Math.sin(dLat/2) * Math.sin(dLat/2) +
+            Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
+            Math.sin(dLon/2) * Math.sin(dLon/2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        return R * c;
+    }
+
+    function toRad(deg) {
+        return deg * (Math.PI/180);
+    }
+
     // Initialize when DOM is ready
     function init() {
         console.log('[V2 Registration] Initializing V2 customer registration form');
@@ -650,6 +785,9 @@
         setupPasswordValidation();
         loadAffiliateInfo();
         initLanguagePreference();
+        
+        // Make validateServiceArea available globally for navigation
+        window.validateServiceArea = validateServiceArea;
         
         // Note: Navigation is handled by customer-register-v2-navigation.js
         // i18n initialization and translation is handled by embed-app-v2.js

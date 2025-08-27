@@ -133,6 +133,14 @@
                     return false;
                 }
 
+                // Validate service area
+                if (window.validateServiceArea && typeof window.validateServiceArea === 'function') {
+                    const inServiceArea = await window.validateServiceArea();
+                    if (!inServiceArea) {
+                        return false; // validateServiceArea shows its own modal
+                    }
+                }
+
                 return true;
             },
             onShow: function() {
