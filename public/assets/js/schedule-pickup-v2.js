@@ -1,0 +1,173 @@
+// Schedule Pickup V2 - Post-Weigh Payment System
+(function() {
+    'use strict';
+
+    console.log('[Schedule V2] Initializing V2 schedule pickup form');
+
+    // Initialize form when DOM is ready
+    function init() {
+        // Get customer data from localStorage
+        const customerData = localStorage.getItem('currentCustomer');
+        const customerToken = localStorage.getItem('customerToken');
+        
+        if (customerData) {
+            const customer = JSON.parse(customerData);
+            console.log('[Schedule V2] Customer data loaded:', customer.firstName);
+            
+            // Show success message if coming from registration
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('registered') === 'true') {
+                showRegistrationSuccess(customer);
+            }
+        }
+        
+        // Setup form submission
+        const form = document.getElementById('schedulePickupForm');
+        if (form) {
+            form.addEventListener('submit', handleScheduleSubmit);
+        }
+        
+        // Setup date picker (minimum today)
+        const dateInput = document.getElementById('pickupDate');
+        if (dateInput) {
+            const today = new Date().toISOString().split('T')[0];
+            dateInput.min = today;
+            dateInput.value = today;
+        }
+        
+        // Setup bag count selector
+        const bagCountInput = document.getElementById('numberOfBags');
+        if (bagCountInput) {
+            // Set default from customer data if available
+            if (customerData) {
+                const customer = JSON.parse(customerData);
+                if (customer.initialBagsRequested) {
+                    bagCountInput.value = customer.initialBagsRequested;
+                }
+            }
+        }
+    }
+    
+    function showRegistrationSuccess(customer) {
+        const successModal = document.getElementById('registrationSuccessModal');
+        if (successModal) {
+            successModal.style.display = 'block';
+            
+            // Customize message with customer name
+            const messageEl = successModal.querySelector('.success-message');
+            if (messageEl && customer.firstName) {
+                messageEl.textContent = `Welcome ${customer.firstName}! Your registration is complete.`;
+            }
+            
+            // Auto-hide after 5 seconds
+            setTimeout(() => {
+                successModal.style.display = 'none';
+            }, 5000);
+        }
+    }
+    
+    async function handleScheduleSubmit(e) {
+        e.preventDefault();
+        
+        console.log('[Schedule V2] Submitting pickup schedule');
+        
+        // Show spinner
+        let spinner = null;
+        if (window.SwirlSpinnerUtils) {
+            spinner = window.SwirlSpinnerUtils.showOnForm(e.target, {
+                message: 'Scheduling your pickup...',
+                submessage: 'Please wait while we confirm your pickup time'
+            });
+        }
+        
+        // Collect form data
+        const formData = new FormData(e.target);
+        const data = {};
+        formData.forEach((value, key) => {
+            data[key] = value;
+        });
+        
+        // Add customer token
+        const customerToken = localStorage.getItem('customerToken');
+        
+        // Get CSRF token
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
+        
+        try {
+            const response = await fetch('/api/orders/schedule', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': customerToken ? `Bearer ${customerToken}` : '',
+                    'X-CSRF-Token': csrfToken
+                },
+                credentials: 'include',
+                body: JSON.stringify(data)
+            });
+            
+            const result = await response.json();
+            
+            if (spinner) spinner.hide();
+            
+            if (result.success) {
+                // Show success message
+                showScheduleSuccess(result.order);
+            } else {
+                // Show error
+                if (window.ModalSystem) {
+                    window.ModalSystem.error(result.message || 'Failed to schedule pickup', 'Scheduling Error');
+                } else {
+                    alert(result.message || 'Failed to schedule pickup');
+                }
+            }
+        } catch (error) {
+            console.error('[Schedule V2] Error scheduling pickup:', error);
+            if (spinner) spinner.hide();
+            
+            if (window.ModalSystem) {
+                window.ModalSystem.error('An error occurred while scheduling your pickup', 'Scheduling Error');
+            } else {
+                alert('An error occurred while scheduling your pickup');
+            }
+        }
+    }
+    
+    function showScheduleSuccess(order) {
+        const successSection = document.getElementById('scheduleSuccessSection');
+        const formSection = document.getElementById('scheduleFormSection');
+        
+        if (successSection && formSection) {
+            formSection.style.display = 'none';
+            successSection.style.display = 'block';
+            
+            // Update order details
+            if (order) {
+                const orderIdEl = document.getElementById('orderId');
+                const pickupDateEl = document.getElementById('confirmedPickupDate');
+                const pickupTimeEl = document.getElementById('confirmedPickupTime');
+                
+                if (orderIdEl) orderIdEl.textContent = order.orderNumber || order._id;
+                if (pickupDateEl) pickupDateEl.textContent = formatDate(order.pickupDate);
+                if (pickupTimeEl) pickupTimeEl.textContent = order.pickupTime || 'Morning (8 AM - 12 PM)';
+            }
+        }
+    }
+    
+    function formatDate(dateString) {
+        const date = new Date(dateString);
+        return date.toLocaleDateString('en-US', {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        });
+    }
+    
+    // Initialize when DOM is ready
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+    } else {
+        init();
+    }
+    
+})();
