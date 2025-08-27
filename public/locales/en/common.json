@@ -698,6 +698,7 @@
         "wdfRate": "${{rate}}/lb (includes service fees)"
       },
       "v2": {
+        "noPaymentRequired": "No Payment Required",
         "subtitle": "Sign up for premium laundry pickup and delivery service - pay after we weigh your laundry!",
         "freeBagsBanner": "Get Your First 1-2 Laundry Bags FREE - No Credit Card Required!",
         "selectBags": "Select Your Free Laundry Bags",

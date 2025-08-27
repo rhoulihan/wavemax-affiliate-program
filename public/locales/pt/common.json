@@ -670,6 +670,7 @@
         "wdfRate": "${{rate}}/lb (inclui taxas de serviço)"
       },
       "v2": {
+        "noPaymentRequired": "Pagamento Não Necessário",
         "subtitle": "Cadastre-se para o serviço premium de coleta e entrega de roupa - pague depois de pesarmos sua roupa!",
         "freeBagsBanner": "Ganhe suas primeiras 1-2 sacolas de lavanderia GRÁTIS - Não é necessário cartão de crédito!",
         "selectBags": "Selecione suas sacolas de lavanderia grátis",
