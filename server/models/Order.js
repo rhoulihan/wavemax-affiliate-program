@@ -135,6 +135,42 @@ const orderSchema = new mongoose.Schema({
   },
   qualityCheckNotes: String,
   processingTimeMinutes: Number, // Auto-calculated
+  
+  // V2 Payment System Fields
+  v2PaymentStatus: {
+    type: String,
+    enum: ['pending', 'awaiting', 'verified', 'failed'],
+    default: 'pending'
+  },
+  v2PaymentMethod: {
+    type: String,
+    enum: ['venmo', 'paypal', 'cashapp', 'multiple', 'pending'],
+    default: 'pending'
+  },
+  v2PaymentAmount: {
+    type: Number,
+    default: 0
+  },
+  v2PaymentRequestedAt: Date,
+  v2PaymentVerifiedAt: Date,
+  v2PaymentTransactionId: String,
+  v2PaymentLinks: {
+    venmo: String,
+    paypal: String,
+    cashapp: String
+  },
+  v2PaymentQRCodes: {
+    venmo: String, // Base64 encoded
+    paypal: String,
+    cashapp: String
+  },
+  v2PaymentCheckAttempts: {
+    type: Number,
+    default: 0
+  },
+  v2LastPaymentCheck: Date,
+  v2PaymentNotes: String, // For storing verification details
+  
   // Timestamps
   createdAt: { type: Date, default: Date.now }, // When order was created (pending state)
   processingStartedAt: Date, // When order was received and WDF started
