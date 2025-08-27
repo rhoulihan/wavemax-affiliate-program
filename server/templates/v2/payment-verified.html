@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Verified - WaveMAX Laundry</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .email-container {
+            background-color: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 28px;
+        }
+        .success-icon {
+            font-size: 64px;
+            margin: 20px 0;
+        }
+        .content {
+            padding: 30px;
+        }
+        .success-message {
+            background-color: #f0fdf4;
+            border: 2px solid #86efac;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .order-info {
+            background-color: #f8f9fa;
+            border-left: 4px solid #48bb78;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        .timeline {
+            margin: 30px 0;
+        }
+        .timeline-item {
+            display: flex;
+            align-items: center;
+            margin: 15px 0;
+        }
+        .timeline-icon {
+            width: 40px;
+            height: 40px;
+            background-color: #48bb78;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            font-size: 20px;
+        }
+        .timeline-icon.pending {
+            background-color: #e2e8f0;
+            color: #a0aec0;
+        }
+        .timeline-content {
+            flex: 1;
+        }
+        .timeline-title {
+            font-weight: bold;
+            color: #2d3748;
+        }
+        .timeline-description {
+            color: #718096;
+            font-size: 14px;
+        }
+        .payment-details {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .footer {
+            background-color: #f8f9fa;
+            padding: 20px;
+            text-align: center;
+            color: #718096;
+            font-size: 14px;
+        }
+        .btn {
+            display: inline-block;
+            padding: 12px 30px;
+            background-color: #48bb78;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="email-container">
+        <div class="header">
+            <div class="success-icon">✅</div>
+            <h1>Payment Verified!</h1>
+            <p>Thank you for your payment</p>
+        </div>
+        
+        <div class="content">
+            <p>Hi {{customerName}},</p>
+            
+            <div class="success-message">
+                <h2 style="margin-top: 0; color: #16a34a;">Payment Successfully Received</h2>
+                <p>We've received and verified your payment of <strong>${{amount}}</strong> for order #{{shortOrderId}}.</p>
+            </div>
+            
+            <div class="order-info">
+                <strong>Order Summary:</strong><br>
+                Order ID: #{{orderId}}<br>
+                Weight: {{actualWeight}} lbs<br>
+                Number of Bags: {{numberOfBags}}<br>
+                Payment Method: {{paymentMethod}}<br>
+                Transaction ID: {{transactionId}}<br>
+                Verified At: {{verifiedTime}}<br>
+            </div>
+            
+            <h3>What Happens Next?</h3>
+            
+            <div class="timeline">
+                <div class="timeline-item">
+                    <div class="timeline-icon">✓</div>
+                    <div class="timeline-content">
+                        <div class="timeline-title">Payment Verified</div>
+                        <div class="timeline-description">Your payment has been successfully processed</div>
+                    </div>
+                </div>
+                
+                <div class="timeline-item">
+                    <div class="timeline-icon {{#if isProcessing}}pending{{/if}}">{{#if isProcessing}}2{{else}}✓{{/if}}</div>
+                    <div class="timeline-content">
+                        <div class="timeline-title">Laundry Processing</div>
+                        <div class="timeline-description">
+                            {{#if isProcessing}}
+                            Your laundry is currently being washed and dried
+                            {{else}}
+                            Your laundry has been processed
+                            {{/if}}
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="timeline-item">
+                    <div class="timeline-icon pending">3</div>
+                    <div class="timeline-content">
+                        <div class="timeline-title">Ready for Delivery</div>
+                        <div class="timeline-description">We'll notify you when your laundry is ready for pickup/delivery</div>
+                    </div>
+                </div>
+                
+                <div class="timeline-item">
+                    <div class="timeline-icon pending">4</div>
+                    <div class="timeline-content">
+                        <div class="timeline-title">Delivery Complete</div>
+                        <div class="timeline-description">Your fresh, clean laundry will be delivered to you</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="payment-details">
+                <h4 style="margin-top: 0;">Payment Details for Your Records</h4>
+                <table style="width: 100%; border-collapse: collapse;">
+                    <tr>
+                        <td style="padding: 8px 0; color: #718096;">Subtotal:</td>
+                        <td style="padding: 8px 0; text-align: right;">${{subtotal}}</td>
+                    </tr>
+                    {{#if addOnsTotal}}
+                    <tr>
+                        <td style="padding: 8px 0; color: #718096;">Add-ons:</td>
+                        <td style="padding: 8px 0; text-align: right;">${{addOnsTotal}}</td>
+                    </tr>
+                    {{/if}}
+                    <tr style="border-top: 2px solid #e2e8f0;">
+                        <td style="padding: 8px 0; font-weight: bold;">Total Paid:</td>
+                        <td style="padding: 8px 0; text-align: right; font-weight: bold;">${{amount}}</td>
+                    </tr>
+                </table>
+            </div>
+            
+            <div style="text-align: center; margin: 30px 0;">
+                <a href="https://wavemax.promo/customer-dashboard-embed.html" class="btn">View Order Status</a>
+            </div>
+            
+            <p>Thank you for your business! We appreciate your trust in WaveMAX Laundry for your laundry needs.</p>
+            
+            <p>If you have any questions about your order, please don't hesitate to contact us.</p>
+        </div>
+        
+        <div class="footer">
+            <p>WaveMAX Laundry<br>
+            Premium Pickup & Delivery Service<br>
+            <a href="https://wavemax.promo" style="color: #48bb78;">wavemax.promo</a></p>
+            <p style="font-size: 12px;">This is an automated confirmation. Please do not reply to this email.</p>
+        </div>
+    </div>
+</body>
+</html>

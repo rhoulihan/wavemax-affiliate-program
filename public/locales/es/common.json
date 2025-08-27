@@ -661,7 +661,33 @@
         "startingAt": "Desde ${{price}}",
         "feeStructure": "(Mín: ${{minFee}}, luego ${{perBagFee}}/bolsa)",
         "wdfRate": "${{rate}}/lb (incluye tarifas de servicio)"
-      }
+      },
+      "v2": {
+        "subtitle": "¡Regístrate para el servicio premium de recogida y entrega de ropa - paga después de que pesemos tu ropa!",
+        "freeBagsBanner": "¡Obtén tus primeras 1-2 bolsas de lavandería GRATIS - No se requiere tarjeta de crédito!",
+        "selectBags": "Selecciona tus bolsas de lavandería gratis",
+        "selectBagsDescription": "Elige cuántas bolsas necesitas para empezar. Cada bolsa contiene 20-25 libras de ropa.",
+        "oneBag": "1 Bolsa",
+        "oneBagDesc": "Perfecto para individuos",
+        "twoBags": "2 Bolsas",
+        "twoBagsDesc": "Ideal para parejas o familias",
+        "howItWorks": "Cómo funciona nuestro sistema de pago V2",
+        "step1": "Regístrate ahora sin tarjeta de crédito",
+        "socialSignupText": "Regístrate rápidamente usando tu cuenta de redes sociales",
+        "socialConnectedMessage": "¡Excelente! Hemos conectado tu cuenta social. Solo completa el formulario a continuación para finalizar el registro - ¡no se requiere pago!",
+        "step2": "Recibe tus bolsas de lavandería gratis",
+        "step3": "Programa tu primera recogida",
+        "step4": "Pesamos tu ropa y te enviamos enlaces de pago",
+        "step5": "Paga cómodamente vía Venmo, PayPal o CashApp",
+        "step6": "¡Recibe tu ropa limpia y fresca!",
+        "submitButton": "Regístrate gratis - No se requiere pago",
+        "noCardRequired": "No se necesita tarjeta de crédito • Paga después de pesar tu ropa"
+      },
+      "terms": "Al registrarte, aceptas nuestros",
+      "termsLink": "Términos de servicio",
+      "and": "y",
+      "privacyLink": "Política de privacidad",
+      "processing": "Procesando tu registro..."
     },
     "dashboard": {
       "title": "Panel de Cliente",

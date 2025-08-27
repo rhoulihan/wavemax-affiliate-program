@@ -139,7 +139,7 @@ const orderSchema = new mongoose.Schema({
   // V2 Payment System Fields
   v2PaymentStatus: {
     type: String,
-    enum: ['pending', 'awaiting', 'verified', 'failed'],
+    enum: ['pending', 'awaiting', 'confirming', 'verified', 'failed'],
     default: 'pending'
   },
   v2PaymentMethod: {
@@ -152,6 +152,7 @@ const orderSchema = new mongoose.Schema({
     default: 0
   },
   v2PaymentRequestedAt: Date,
+  v2PaymentConfirmedAt: Date, // When customer clicked "already paid"
   v2PaymentVerifiedAt: Date,
   v2PaymentTransactionId: String,
   v2PaymentLinks: {
