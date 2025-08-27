@@ -92,7 +92,20 @@ const customerSchema = new mongoose.Schema({
     default: false
   },
   bagLabelsGeneratedAt: Date,
-  bagLabelsGeneratedBy: String // operatorId who printed
+  bagLabelsGeneratedBy: String, // operatorId who printed
+  
+  // V2 Payment System Fields
+  registrationVersion: {
+    type: String,
+    enum: ['v1', 'v2'],
+    default: 'v1'
+  },
+  initialBagsRequested: {
+    type: Number,
+    min: 1,
+    max: 2,
+    default: 1
+  }
 }, { timestamps: true });
 
 // No longer need encryption middleware as payment data is not stored
