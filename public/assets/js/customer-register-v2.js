@@ -265,7 +265,7 @@
             const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
             
             try {
-                const response = await fetch('/api/v1/customers/register', {
+                const response = await fetch('/api/customers/register', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
