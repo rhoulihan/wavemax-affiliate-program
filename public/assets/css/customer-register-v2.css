@@ -84,14 +84,26 @@
 
 /* Navigation section always visible */
 #navigationSection {
-    display: block !important;
+    display: flex !important;
 }
 
-/* Initial state - first step sections visible */
-#socialAuthSection {
+/* Initial state - first step sections are made active via JS */
+#socialAuthSection.active {
     display: block;
 }
 
-#accountSetupSection {
+#accountSetupSection.active {
+    display: block;
+}
+
+#personalInfoSection.active {
+    display: block;
+}
+
+#addressInfoSection.active {
+    display: block;
+}
+
+#serviceSummarySection.active {
     display: block;
 }
