@@ -101,20 +101,37 @@ exports.registerCustomer = async (req, res) => {
       passwordHash = hash;
     }
 
+    // Check payment version for V2 system
+    const paymentVersion = await SystemConfig.getValue('payment_version', 'v1');
+    const isV2Registration = paymentVersion === 'v2';
+    
     // Get bag fee from system config and check free first bag policy
     const bagFee = await SystemConfig.getValue('laundry_bag_fee', 10.00);
     const freeFirstBagEnabled = await SystemConfig.getValue('free_first_bag_enabled', false);
     const bagCount = parseInt(numberOfBags) || 1;
     
-    // Calculate bag credit based on free first bag policy
+    // V2 System: Get free initial bags for new customers
     let totalBagCredit = 0;
-    if (freeFirstBagEnabled) {
-      // First bag is free, only charge for additional bags
-      totalBagCredit = Math.max(0, (bagCount - 1) * bagFee);
-      console.log(`Free first bag policy active. Bags: ${bagCount}, Credit: $${totalBagCredit}`);
+    let registrationVersion = 'v1';
+    let initialBagsRequested = bagCount;
+    
+    if (isV2Registration) {
+      // V2 Registration: No payment, free bags
+      registrationVersion = 'v2';
+      const freeInitialBags = await SystemConfig.getValue('free_initial_bags', 2);
+      initialBagsRequested = Math.min(bagCount, freeInitialBags);
+      totalBagCredit = 0; // No credit needed, bags are free
+      console.log(`V2 registration: ${initialBagsRequested} free bags, no payment required`);
     } else {
-      // Traditional pricing - all bags are paid
-      totalBagCredit = bagFee * bagCount;
+      // V1 Registration: Calculate bag credit based on free first bag policy
+      if (freeFirstBagEnabled) {
+        // First bag is free, only charge for additional bags
+        totalBagCredit = Math.max(0, (bagCount - 1) * bagFee);
+        console.log(`Free first bag policy active. Bags: ${bagCount}, Credit: $${totalBagCredit}`);
+      } else {
+        // Traditional pricing - all bags are paid
+        totalBagCredit = bagFee * bagCount;
+      }
     }
 
     // Create new customer with bag information
@@ -146,6 +163,9 @@ exports.registerCustomer = async (req, res) => {
       bagCredit: totalBagCredit,
       bagCreditApplied: false,
       languagePreference: languagePreference || 'en',
+      // V2 Payment System fields
+      registrationVersion: registrationVersion,
+      initialBagsRequested: initialBagsRequested,
       // Set isActive to false for new customers (will be set to true on first order)
       isActive: false
     });

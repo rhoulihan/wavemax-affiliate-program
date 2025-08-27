@@ -201,6 +201,9 @@ exports.createOrder = async (req, res) => {
       console.log(`Applying WDF credit of $${wdfCreditToApply} to order for customer ${customerId}`);
     }
 
+    // Check if customer is V2 for payment status initialization
+    const isV2Customer = customer.registrationVersion === 'v2';
+    
     // Create new order
     const orderData = {
       customerId,
@@ -226,6 +229,14 @@ exports.createOrder = async (req, res) => {
       },
       status: 'pending'
     };
+    
+    // Add V2 payment fields if customer is V2
+    if (isV2Customer) {
+      orderData.v2PaymentStatus = 'pending';
+      orderData.v2PaymentMethod = 'pending';
+      orderData.v2PaymentAmount = 0; // Will be calculated after weighing
+      console.log(`V2 customer order - payment will be collected after weighing`);
+    }
 
     console.log('Creating order with data:', JSON.stringify(orderData, null, 2));
     const newOrder = new Order(orderData);
@@ -440,19 +451,50 @@ exports.updateOrderStatus = async (req, res) => {
       });
     }
 
+    // Find customer and affiliate first
+    const customer = await Customer.findOne({ customerId: order.customerId });
+    const affiliate = await Affiliate.findOne({ affiliateId: order.affiliateId });
+
     // Update order status
     order.status = status;
 
     // Update actual weight when transitioning to processing or processed
     if ((status === 'processing' || status === 'processed') && actualWeight) {
       order.actualWeight = parseFloat(actualWeight);
+      
+      // Check if this is a V2 customer and generate payment request
+      if (customer && customer.registrationVersion === 'v2' && order.v2PaymentStatus === 'pending') {
+        // Calculate total with actual weight
+        const actualTotal = order.actualTotal || order.estimatedTotal;
+        
+        // Generate payment links
+        const paymentLinkService = require('../services/paymentLinkService');
+        const { links, qrCodes, shortOrderId, amount } = await paymentLinkService.generatePaymentLinks(
+          order._id,
+          actualTotal,
+          customer.name || `${customer.firstName} ${customer.lastName}`
+        );
+        
+        // Update order with payment information
+        order.v2PaymentStatus = 'awaiting';
+        order.v2PaymentAmount = parseFloat(amount);
+        order.v2PaymentLinks = links;
+        order.v2PaymentQRCodes = qrCodes;
+        order.v2PaymentRequestedAt = new Date();
+        
+        console.log(`Generated V2 payment links for order ${order.orderId} - Amount: $${amount}`);
+        
+        // Send payment request email (will be implemented in emailService)
+        try {
+          // await emailService.sendV2PaymentRequest(order, customer);
+          console.log(`V2 payment request would be sent to ${customer.email} for order ${order.orderId}`);
+        } catch (emailError) {
+          console.error('Error sending payment request:', emailError);
+        }
+      }
     }
 
     await order.save();
-
-    // Find customer and affiliate
-    const customer = await Customer.findOne({ customerId: order.customerId });
-    const affiliate = await Affiliate.findOne({ affiliateId: order.affiliateId });
 
     // Send status update email to customer
     if (customer && ['scheduled', 'processing', 'processed', 'complete'].includes(status)) {

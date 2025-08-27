@@ -22,12 +22,12 @@ Replacing credit card payments (Paygistix) with Venmo, PayPal, and CashApp payme
 - [x] Create payment link generation service
 - [ ] Implement feature toggle logic
 
-### Phase 2: Email Integration 📧
+### Phase 2: Email Integration ✅
 - [x] Mailcow API integration service
 - [x] Email parser for Venmo notifications
 - [x] Email parser for PayPal notifications  
 - [x] Email parser for CashApp notifications
-- [ ] Payment verification cron job
+- [x] Payment verification cron job
 
 ### Phase 3: V2 Registration & Scheduling 📝
 - [ ] Create customer-register-v2-embed.html
@@ -90,6 +90,25 @@ Replacing credit card payments (Paygistix) with Venmo, PayPal, and CashApp payme
 - Create payment verification cron job
 - Implement feature toggle in controllers
 - Create V2 registration and scheduling forms
+
+### 2025-01-27 - Phase 3 Progress
+**Tasks Completed:**
+1. ✅ Created payment verification cron job with configurable intervals
+2. ✅ Integrated cron job into server startup
+3. ✅ Implemented feature toggle logic in customer controller
+4. ✅ Updated order controller for V2 payment flow
+5. ✅ Added automatic payment link generation after weighing
+
+**Controller Updates:**
+- Customer controller: Detects V2 mode and skips payment for registration
+- Order controller: Generates payment links when order is weighed
+- V2 customers get free initial bags (configurable)
+- Payment status tracking throughout order lifecycle
+
+**Next Steps:**
+- Create V2 registration and scheduling HTML forms
+- Implement payment request email templates
+- Test end-to-end flow
 
 ---
 
