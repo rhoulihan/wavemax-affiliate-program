@@ -663,6 +663,7 @@
         "wdfRate": "${{rate}}/lb (incluye tarifas de servicio)"
       },
       "v2": {
+        "noPaymentRequired": "Sin Pago Requerido",
         "subtitle": "¡Regístrate para el servicio premium de recogida y entrega de ropa - paga después de que pesemos tu ropa!",
         "freeBagsBanner": "¡Obtén tus primeras 1-2 bolsas de lavandería GRATIS - No se requiere tarjeta de crédito!",
         "selectBags": "Selecciona tus bolsas de lavandería gratis",

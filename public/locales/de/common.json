@@ -670,6 +670,7 @@
         "wdfRate": "${{rate}}/lb (inkl. Servicegebühren)"
       },
       "v2": {
+        "noPaymentRequired": "Keine Zahlung Erforderlich",
         "subtitle": "Melden Sie sich für den Premium-Wäscheabhol- und Lieferservice an - zahlen Sie nach dem Wiegen Ihrer Wäsche!",
         "freeBagsBanner": "Erhalten Sie Ihre ersten 1-2 Wäschesäcke KOSTENLOS - Keine Kreditkarte erforderlich!",
         "selectBags": "Wählen Sie Ihre kostenlosen Wäschesäcke",
