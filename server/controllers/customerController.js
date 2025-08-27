@@ -136,7 +136,7 @@ exports.registerCustomer = async (req, res) => {
 
     // Create new customer with bag information
     console.log('Creating new customer with email:', email, 'username:', finalUsername);
-    const newCustomer = new Customer({
+    const customerData = {
       affiliateId,
       firstName,
       lastName,
@@ -159,16 +159,22 @@ exports.registerCustomer = async (req, res) => {
       billingZip: savePaymentInfo ? billingZip : null,
       savePaymentInfo: !!savePaymentInfo,
       // Bag information
-      numberOfBags: bagCount,
+      numberOfBags: isV2Registration ? initialBagsRequested : bagCount,
       bagCredit: totalBagCredit,
       bagCreditApplied: false,
       languagePreference: languagePreference || 'en',
       // V2 Payment System fields
       registrationVersion: registrationVersion,
-      initialBagsRequested: initialBagsRequested,
       // Set isActive to false for new customers (will be set to true on first order)
       isActive: false
-    });
+    };
+    
+    // Only add initialBagsRequested for V2 customers
+    if (isV2Registration) {
+      customerData.initialBagsRequested = initialBagsRequested;
+    }
+    
+    const newCustomer = new Customer(customerData);
 
     console.log('Saving customer to database...');
     await newCustomer.save();

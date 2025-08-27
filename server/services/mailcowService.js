@@ -23,7 +23,8 @@ class MailcowService {
 
     try {
       // Get API configuration from SystemConfig
-      this.apiUrl = await SystemConfig.getValue('mailcow_api_url', 'https://mail.wavemax.promo/api/v1');
+      // Try direct connection to Mailcow container on port 8443 to bypass nginx proxy issues
+      this.apiUrl = await SystemConfig.getValue('mailcow_api_url', 'https://localhost:8443/api/v1');
       
       // Get encrypted API key
       const encryptedKey = await SystemConfig.getValue('mailcow_api_key', '');
@@ -43,7 +44,11 @@ class MailcowService {
           'X-API-Key': this.apiKey,
           'Content-Type': 'application/json'
         },
-        timeout: 30000 // 30 seconds
+        timeout: 30000, // 30 seconds
+        // Temporarily ignore SSL certificate issues for mail subdomain
+        httpsAgent: new (require('https').Agent)({
+          rejectUnauthorized: false
+        })
       });
       
       this.initialized = true;

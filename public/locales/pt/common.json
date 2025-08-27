@@ -124,6 +124,9 @@
       }
     },
     "howItWorks": {
+        "step1": "Cadastre-se agora sem cartão de crédito",
+        "socialSignupText": "Inscreva-se rapidamente usando sua conta de mídia social",
+        "socialConnectedMessage": "Ótimo! Conectamos sua conta social. Apenas complete o formulário abaixo para finalizar o registro - não é necessário pagamento!",
       "title": "Como Funciona Nosso Serviço",
       "subtitle": "Processo Simples",
       "steps": {
@@ -144,6 +147,8 @@
         }
       },
       "step1": {
+        "socialSignupText": "Inscreva-se rapidamente usando sua conta de mídia social",
+        "socialConnectedMessage": "Ótimo! Conectamos sua conta social. Apenas complete o formulário abaixo para finalizar o registro - não é necessário pagamento!",
         "title": "Cadastre-se",
         "description": "Crie sua conta de afiliado em minutos"
       },
@@ -162,6 +167,8 @@
     },
     "process": {
       "step1": {
+        "socialSignupText": "Inscreva-se rapidamente usando sua conta de mídia social",
+        "socialConnectedMessage": "Ótimo! Conectamos sua conta social. Apenas complete o formulário abaixo para finalizar o registro - não é necessário pagamento!",
         "title": "Agende a Coleta",
         "description": "Use nosso aplicativo fácil para agendar um horário de coleta que funcione com sua agenda"
       },
@@ -661,7 +668,33 @@
         "startingAt": "A partir de ${{price}}",
         "feeStructure": "(Mín: ${{minFee}}, depois ${{perBagFee}}/sacola)",
         "wdfRate": "${{rate}}/lb (inclui taxas de serviço)"
-      }
+      },
+      "v2": {
+        "subtitle": "Cadastre-se para o serviço premium de coleta e entrega de roupa - pague depois de pesarmos sua roupa!",
+        "freeBagsBanner": "Ganhe suas primeiras 1-2 sacolas de lavanderia GRÁTIS - Não é necessário cartão de crédito!",
+        "selectBags": "Selecione suas sacolas de lavanderia grátis",
+        "selectBagsDescription": "Escolha quantas sacolas você precisa para começar. Cada sacola comporta 20-25 libras de roupa.",
+        "oneBag": "1 Sacola",
+        "oneBagDesc": "Perfeito para indivíduos",
+        "twoBags": "2 Sacolas",
+        "twoBagsDesc": "Ótimo para casais ou famílias",
+        "howItWorks": "Como funciona nosso sistema de pagamento V2",
+        "step1": "Cadastre-se agora sem cartão de crédito",
+        "socialSignupText": "Inscreva-se rapidamente usando sua conta de mídia social",
+        "socialConnectedMessage": "Ótimo! Conectamos sua conta social. Apenas complete o formulário abaixo para finalizar o registro - não é necessário pagamento!",
+        "step2": "Receba suas sacolas de lavanderia grátis",
+        "step3": "Agende sua primeira coleta",
+        "step4": "Pesamos sua roupa e enviamos links de pagamento",
+        "step5": "Pague convenientemente via Venmo, PayPal ou CashApp",
+        "step6": "Receba sua roupa limpa e fresca!",
+        "submitButton": "Cadastre-se gratuitamente - Não é necessário pagamento",
+        "noCardRequired": "Não precisa de cartão de crédito • Pague depois de pesarmos sua roupa"
+      },
+      "terms": "Ao se cadastrar, você concorda com nossos",
+      "termsLink": "Termos de Serviço",
+      "and": "e",
+      "privacyLink": "Política de Privacidade",
+      "processing": "Processando seu cadastro..."
     },
     "dashboard": {
       "title": "Painel do Cliente",
@@ -1090,7 +1123,6 @@
       "deliveryFee": "Taxa de Coleta/Entrega:",
       "estimatedTotal": "Total Estimado:",
       "nextSteps": "Próximos Passos",
-      "step1": "Tenha sua lavanderia pronta para coleta no horário agendado",
       "step2": "Seu parceiro afiliado notificará quando estiver a caminho",
       "step3": "Pesaremos sua lavanderia e forneceremos o custo final",
       "step4": "A roupa limpa será entregue na data de entrega agendada",

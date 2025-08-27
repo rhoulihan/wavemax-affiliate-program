@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WaveMAX Laundry - Customer Registration</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/assets/css/language-switcher.css">
+    <link href="/assets/css/customer-register.css" rel="stylesheet">
+    <link href="/assets/css/customer-register-v2.css" rel="stylesheet">
+    <link href="/assets/css/modal-utils.css" rel="stylesheet">
+    <link href="/assets/css/swirl-spinner.css" rel="stylesheet">
+    <!-- Awesomplete for autocomplete -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/awesomplete/1.1.5/awesomplete.min.css">
+</head>
+<body class="bg-white font-sans">
+    <!-- Language Switcher -->
+    <div id="language-switcher-container"></div>
+    
+    <!-- Registration Form -->
+    <div class="embed-container">
+        <div class="max-w-3xl mx-auto bg-white rounded-lg shadow-md overflow-hidden registration-container">
+            <div class="wavemax-blue text-white p-6">
+                <h2 class="text-2xl font-bold">
+                    <span data-i18n="customer.register.title">Customer Registration</span>
+                    <span class="v2-badge">No Payment Required</span>
+                </h2>
+                <p class="mt-2" id="affiliateIntro" data-i18n="customer.register.v2.subtitle">Sign up for premium laundry pickup and delivery service - pay after we weigh your laundry!</p>
+            </div>
+            
+            <form id="customerRegistrationForm" method="POST" action="#" class="p-6 space-y-6">
+                <!-- Hidden fields -->
+                <input type="hidden" id="affiliateId" name="affiliateId">
+                <input type="hidden" id="languagePreference" name="languagePreference" value="en">
+                <input type="hidden" id="registrationVersion" name="registrationVersion" value="v2">
+                
+                <!-- Social Registration (Top of Form) -->
+                <div id="socialAuthSection">
+                    <div class="bg-gradient-to-r from-blue-50 to-indigo-50 p-6 rounded-lg border border-blue-200">
+                        <p class="text-gray-700 mb-4 text-center" data-i18n="customer.register.v2.socialSignupText">Sign up quickly using your social media account - no payment required to get started!</p>
+                        <div class="grid md:grid-cols-2 gap-3">
+                            <button type="button" id="googleRegister" class="flex items-center justify-center px-4 py-3 border-2 border-gray-300 rounded-lg bg-white hover:bg-gray-50 hover:border-blue-400 transition-all duration-200 shadow-sm hover:shadow-md">
+                                <svg class="w-5 h-5 mr-2" viewBox="0 0 24 24">
+                                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                                    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                                    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                                </svg>
+                                <span class="font-medium" data-i18n="customer.register.continueWithGoogle">Continue with Google</span>
+                            </button>
+                            
+                            <button type="button" id="facebookRegister" class="flex items-center justify-center px-4 py-3 border-2 border-gray-300 rounded-lg bg-white hover:bg-gray-50 hover:border-blue-400 transition-all duration-200 shadow-sm hover:shadow-md">
+                                <svg class="w-5 h-5 mr-2" fill="#1877F2" viewBox="0 0 24 24">
+                                    <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                                </svg>
+                                <span class="font-medium" data-i18n="customer.register.continueWithFacebook">Continue with Facebook</span>
+                            </button>
+                        </div>
+                        
+                        <div class="mt-6 text-center">
+                            <div class="relative">
+                                <div class="absolute inset-0 flex items-center">
+                                    <div class="w-full border-t border-gray-300"></div>
+                                </div>
+                                <div class="relative flex justify-center text-sm">
+                                    <span class="px-3 bg-gradient-to-r from-blue-50 to-indigo-50 text-gray-600" data-i18n="customer.register.orManually">Or fill out the form manually</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Account Information -->
+                <div>
+                    <h3 class="text-xl font-bold mb-4" data-i18n="customer.register.accountInfo">Account Information</h3>
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div>
+                            <label for="username" class="block text-gray-700 mb-2" data-i18n="customer.register.username">Username *</label>
+                            <input type="text" id="username" name="username" required class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <p class="text-xs text-gray-500 mt-1" data-i18n="customer.register.usernameHelp">Your unique login identifier</p>
+                        </div>
+                        
+                        <div>
+                            <label for="email" class="block text-gray-700 mb-2" data-i18n="customer.register.email">Email Address *</label>
+                            <input type="email" id="email" name="email" required class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        
+                        <div>
+                            <label for="password" class="block text-gray-700 mb-2" data-i18n="customer.register.password">Password *</label>
+                            <input type="password" id="password" name="password" required class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        
+                        <div>
+                            <label for="confirmPassword" class="block text-gray-700 mb-2" data-i18n="customer.register.confirmPassword">Confirm Password *</label>
+                            <input type="password" id="confirmPassword" name="confirmPassword" required class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Personal Information -->
+                <div>
+                    <h3 class="text-xl font-bold mb-4" data-i18n="customer.register.personalInfo">Personal Information</h3>
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div>
+                            <label for="firstName" class="block text-gray-700 mb-2" data-i18n="customer.register.firstName">First Name *</label>
+                            <input type="text" id="firstName" name="firstName" required class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        
+                        <div>
+                            <label for="lastName" class="block text-gray-700 mb-2" data-i18n="customer.register.lastName">Last Name *</label>
+                            <input type="text" id="lastName" name="lastName" required class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        
+                        <div>
+                            <label for="phone" class="block text-gray-700 mb-2" data-i18n="customer.register.phone">Phone Number *</label>
+                            <input type="tel" id="phone" name="phone" required class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        
+                        <div>
+                            <label for="address" class="block text-gray-700 mb-2" data-i18n="customer.register.address">Street Address *</label>
+                            <input type="text" id="address" name="address" required class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        
+                        <div>
+                            <label for="city" class="block text-gray-700 mb-2" data-i18n="customer.register.city">City *</label>
+                            <input type="text" id="city" name="city" required class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        
+                        <div>
+                            <label for="state" class="block text-gray-700 mb-2" data-i18n="customer.register.state">State *</label>
+                            <select id="state" name="state" required class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <option value="">Select State</option>
+                                <option value="TX">Texas</option>
+                                <!-- Add more states as needed -->
+                            </select>
+                        </div>
+                        
+                        <div>
+                            <label for="zipCode" class="block text-gray-700 mb-2" data-i18n="customer.register.zipCode">ZIP Code *</label>
+                            <input type="text" id="zipCode" name="zipCode" required pattern="[0-9]{5}" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Free Bag Selection -->
+                <div>
+                    <h3 class="text-xl font-bold mb-4" data-i18n="customer.register.v2.selectBags">Select Your Free Laundry Bags</h3>
+                    <p class="text-gray-600 mb-4" data-i18n="customer.register.v2.selectBagsDescription">Choose how many bags you need to get started. Each bag holds 20-25 lbs of laundry.</p>
+                    
+                    <div class="bag-selector">
+                        <div class="bag-option" data-bags="1">
+                            <div class="bag-icon">🛍️</div>
+                            <div class="bag-label" data-i18n="customer.register.v2.oneBag">1 Bag</div>
+                            <div class="bag-description" data-i18n="customer.register.v2.oneBagDesc">Perfect for individuals</div>
+                        </div>
+                        
+                        <div class="bag-option selected" data-bags="2">
+                            <div class="bag-icon">🛍️🛍️</div>
+                            <div class="bag-label" data-i18n="customer.register.v2.twoBags">2 Bags</div>
+                            <div class="bag-description" data-i18n="customer.register.v2.twoBagsDesc">Great for couples or families</div>
+                        </div>
+                    </div>
+                    
+                    <input type="hidden" id="numberOfBags" name="numberOfBags" value="2">
+                </div>
+                
+                <!-- How It Works -->
+                <div class="bg-blue-50 p-6 rounded-lg">
+                    <h3 class="text-lg font-bold mb-3" data-i18n="customer.register.v2.howItWorks">How Our V2 Payment System Works</h3>
+                    <div class="space-y-2 text-sm text-gray-700">
+                        <div class="flex items-start">
+                            <span class="text-blue-600 mr-2">✓</span>
+                            <span data-i18n="customer.register.v2.step1">Sign up now with no credit card required</span>
+                        </div>
+                        <div class="flex items-start">
+                            <span class="text-blue-600 mr-2">✓</span>
+                            <span data-i18n="customer.register.v2.step2">Receive your free laundry bags</span>
+                        </div>
+                        <div class="flex items-start">
+                            <span class="text-blue-600 mr-2">✓</span>
+                            <span data-i18n="customer.register.v2.step3">Schedule your first pickup</span>
+                        </div>
+                        <div class="flex items-start">
+                            <span class="text-blue-600 mr-2">✓</span>
+                            <span data-i18n="customer.register.v2.step4">We weigh your laundry and send you payment links</span>
+                        </div>
+                        <div class="flex items-start">
+                            <span class="text-blue-600 mr-2">✓</span>
+                            <span data-i18n="customer.register.v2.step5">Pay conveniently via Venmo, PayPal, or CashApp</span>
+                        </div>
+                        <div class="flex items-start">
+                            <span class="text-blue-600 mr-2">✓</span>
+                            <span data-i18n="customer.register.v2.step6">Receive your fresh, clean laundry!</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Submit Button -->
+                <div class="text-center pt-4">
+                    <button type="submit" id="submitBtn" class="bg-blue-600 text-white px-8 py-3 rounded-lg font-bold hover:bg-blue-700 transition duration-300 w-full md:w-auto">
+                        <span data-i18n="customer.register.v2.submitButton">Sign Up for Free - No Payment Required</span>
+                    </button>
+                    <p class="text-sm text-gray-600 mt-3" data-i18n="customer.register.v2.noCardRequired">No credit card needed • Pay after we weigh your laundry</p>
+                </div>
+                
+                <!-- Terms and Privacy -->
+                <div class="text-center text-xs text-gray-600">
+                    <span data-i18n="customer.register.terms">By registering, you agree to our</span>
+                    <a href="/terms-and-conditions.html" class="text-blue-600 hover:underline" data-i18n="customer.register.termsLink">Terms of Service</a>
+                    <span data-i18n="customer.register.and">and</span>
+                    <a href="/privacy-policy.html" class="text-blue-600 hover:underline" data-i18n="customer.register.privacyLink">Privacy Policy</a>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Loading Spinner -->
+    <div id="loadingSpinner" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+        <div class="bg-white p-8 rounded-lg shadow-xl">
+            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+            <p class="mt-4 text-gray-700" data-i18n="customer.register.processing">Processing your registration...</p>
+        </div>
+    </div>
+    
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/awesomplete/1.1.5/awesomplete.min.js"></script>
+    <script src="/assets/js/i18n.js"></script>
+    <script src="/assets/js/language-switcher.js"></script>
+    <script src="/assets/js/csrf-utils.js"></script>
+    <script src="/assets/js/modal-utils.js"></script>
+    <script src="/assets/js/swirl-spinner.js"></script>
+    <script src="/assets/js/customer-register-v2.js"></script>
+</body>
+</html>
