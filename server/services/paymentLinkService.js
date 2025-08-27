@@ -129,14 +129,66 @@ class PaymentLinkService {
   }
 
   /**
+   * Get translated payment text based on language
+   */
+  getPaymentTranslations(lang = 'en') {
+    const translations = {
+      en: {
+        totalDue: 'Total Due',
+        payWithVenmo: 'Pay with Venmo',
+        payWithPayPal: 'Pay with PayPal',
+        payWithCashApp: 'Pay with CashApp',
+        important: 'Important',
+        includeOrderNumber: 'Please include the order number in your payment note',
+        orScanToPay: 'Or Scan to Pay',
+        paymentNote: 'Payment Note'
+      },
+      es: {
+        totalDue: 'Total a Pagar',
+        payWithVenmo: 'Pagar con Venmo',
+        payWithPayPal: 'Pagar con PayPal',
+        payWithCashApp: 'Pagar con CashApp',
+        important: 'Importante',
+        includeOrderNumber: 'Por favor incluya el número de orden en la nota de pago',
+        orScanToPay: 'O Escanee para Pagar',
+        paymentNote: 'Nota de Pago'
+      },
+      pt: {
+        totalDue: 'Total a Pagar',
+        payWithVenmo: 'Pagar com Venmo',
+        payWithPayPal: 'Pagar com PayPal',
+        payWithCashApp: 'Pagar com CashApp',
+        important: 'Importante',
+        includeOrderNumber: 'Por favor, inclua o número do pedido na nota de pagamento',
+        orScanToPay: 'Ou Escaneie para Pagar',
+        paymentNote: 'Nota de Pagamento'
+      },
+      de: {
+        totalDue: 'Gesamtbetrag',
+        payWithVenmo: 'Mit Venmo bezahlen',
+        payWithPayPal: 'Mit PayPal bezahlen',
+        payWithCashApp: 'Mit CashApp bezahlen',
+        important: 'Wichtig',
+        includeOrderNumber: 'Bitte geben Sie die Bestellnummer in der Zahlungsnotiz an',
+        orScanToPay: 'Oder zum Bezahlen scannen',
+        paymentNote: 'Zahlungsnotiz'
+      }
+    };
+    
+    return translations[lang] || translations.en;
+  }
+
+  /**
    * Generate mobile-friendly payment buttons HTML
    * Used in email templates
    */
-  generatePaymentButtonsHTML(links, amount) {
+  generatePaymentButtonsHTML(links, amount, lang = 'en') {
+    const t = this.getPaymentTranslations(lang);
+    
     return `
       <div style="text-align: center; margin: 30px 0;">
         <p style="font-size: 24px; font-weight: bold; color: #333;">
-          Total Due: $${amount}
+          ${t.totalDue}: $${amount}
         </p>
         
         <div style="margin: 20px 0;">
@@ -145,7 +197,7 @@ class PaymentLinkService {
              style="display: inline-block; background-color: #3D95CE; color: white; 
                     padding: 15px 30px; text-decoration: none; border-radius: 5px; 
                     font-size: 16px; font-weight: bold; margin: 10px;">
-            Pay with Venmo
+            ${t.payWithVenmo}
           </a>
         </div>
         
@@ -155,7 +207,7 @@ class PaymentLinkService {
              style="display: inline-block; background-color: #0070BA; color: white; 
                     padding: 15px 30px; text-decoration: none; border-radius: 5px; 
                     font-size: 16px; font-weight: bold; margin: 10px;">
-            Pay with PayPal
+            ${t.payWithPayPal}
           </a>
         </div>
         
@@ -165,12 +217,12 @@ class PaymentLinkService {
              style="display: inline-block; background-color: #00D632; color: white; 
                     padding: 15px 30px; text-decoration: none; border-radius: 5px; 
                     font-size: 16px; font-weight: bold; margin: 10px;">
-            Pay with CashApp
+            ${t.payWithCashApp}
           </a>
         </div>
         
         <p style="color: #666; font-size: 14px; margin-top: 20px;">
-          <strong>Important:</strong> Please include the order number in your payment note
+          <strong>${t.important}:</strong> ${t.includeOrderNumber}
         </p>
       </div>
     `;
@@ -180,9 +232,11 @@ class PaymentLinkService {
    * Generate QR code images for email embedding
    * Returns HTML with embedded base64 images
    */
-  generateQRCodesHTML(qrCodes, note) {
+  generateQRCodesHTML(qrCodes, note, lang = 'en') {
+    const t = this.getPaymentTranslations(lang);
+    
     let html = '<div style="text-align: center; margin: 30px 0;">';
-    html += '<h3 style="color: #333;">Or Scan to Pay:</h3>';
+    html += `<h3 style="color: #333;">${t.orScanToPay}:</h3>`;
     html += '<div style="display: flex; justify-content: center; flex-wrap: wrap; gap: 20px;">';
     
     const providers = [
@@ -208,7 +262,7 @@ class PaymentLinkService {
     }
     
     html += '</div>';
-    html += `<p style="color: #666; font-size: 12px; margin-top: 15px;">Payment Note: ${note}</p>`;
+    html += `<p style="color: #666; font-size: 12px; margin-top: 15px;">${t.paymentNote}: ${note}</p>`;
     html += '</div>';
     
     return html;
