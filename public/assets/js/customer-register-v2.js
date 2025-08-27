@@ -1,10 +1,189 @@
-// Customer Registration V2 - CSP Compliant
+// Customer Registration V2 - CSP Compliant with Multi-Step Navigation
 (function() {
     'use strict';
 
     // Base URL for API calls
     const baseUrl = window.location.origin;
     const isEmbedded = window.self !== window.top;
+
+    // Password validation function
+    function validatePassword() {
+        const passwordField = document.getElementById('password');
+        const confirmPasswordField = document.getElementById('confirmPassword');
+        const password = passwordField?.value || '';
+        const confirmPassword = confirmPasswordField?.value || '';
+        const username = document.getElementById('username')?.value || '';
+        const email = document.getElementById('email')?.value || '';
+
+        // Check requirements
+        const requirements = {
+            length: password.length >= 8,
+            uppercase: /[A-Z]/.test(password),
+            lowercase: /[a-z]/.test(password),
+            number: /\d/.test(password),
+            special: /[!@#$%^&*()_+\-=\[\]{}|;:,.<>?]/.test(password),
+            match: password !== '' && password === confirmPassword
+        };
+
+        // Check if password contains username or email
+        const containsUsername = username && password.toLowerCase().includes(username.toLowerCase());
+        const containsEmailUser = email && password.toLowerCase().includes(email.split('@')[0].toLowerCase());
+
+        // Update requirement indicators
+        function updateReq(id, met) {
+            const element = document.getElementById(id);
+            if (!element) return;
+            
+            const indicator = element.querySelector('span:first-child');
+            if (indicator) {
+                indicator.textContent = met ? '✅' : '⚪';
+            }
+            
+            if (met) {
+                element.classList.add('text-green-600');
+                element.classList.remove('text-red-600', 'text-gray-600');
+            } else if (password.length > 0) {
+                element.classList.add('text-red-600');
+                element.classList.remove('text-green-600', 'text-gray-600');
+            } else {
+                element.classList.add('text-gray-600');
+                element.classList.remove('text-green-600', 'text-red-600');
+            }
+        }
+
+        updateReq('req-length', requirements.length);
+        updateReq('req-uppercase', requirements.uppercase);
+        updateReq('req-lowercase', requirements.lowercase);
+        updateReq('req-number', requirements.number);
+        updateReq('req-special', requirements.special);
+        updateReq('req-match', requirements.match);
+
+        // Check if all requirements are met
+        const allRequirementsMet = requirements.length && requirements.uppercase && requirements.lowercase &&
+                                 requirements.number && requirements.special && requirements.match &&
+                                 !containsUsername && !containsEmailUser;
+
+        // Update field borders based on password state
+        if (passwordField && confirmPasswordField) {
+            if (password.length > 0) {
+                if (allRequirementsMet) {
+                    passwordField.classList.remove('border-red-500');
+                    passwordField.classList.add('border-green-500');
+                    confirmPasswordField.classList.remove('border-red-500');
+                    confirmPasswordField.classList.add('border-green-500');
+                } else {
+                    passwordField.classList.remove('border-green-500');
+                    passwordField.classList.add('border-red-500');
+                    confirmPasswordField.classList.remove('border-green-500');
+                    confirmPasswordField.classList.add('border-red-500');
+                }
+            } else {
+                passwordField.classList.remove('border-green-500', 'border-red-500');
+                confirmPasswordField.classList.remove('border-green-500', 'border-red-500');
+            }
+        }
+
+        // Update strength indicator
+        const strengthElement = document.getElementById('passwordStrength');
+        if (strengthElement) {
+            if (password.length === 0) {
+                strengthElement.innerHTML = '';
+            } else if (allRequirementsMet) {
+                strengthElement.innerHTML = '<span class="text-green-600 font-medium">✅ Strong password</span>';
+            } else {
+                const missing = [];
+                if (!requirements.length) missing.push('8+ characters');
+                if (!requirements.uppercase) missing.push('uppercase letter');
+                if (!requirements.lowercase) missing.push('lowercase letter');
+                if (!requirements.number) missing.push('number');
+                if (!requirements.special) missing.push('special character');
+                if (!requirements.match) missing.push('passwords must match');
+                if (containsUsername || containsEmailUser) missing.push('cannot contain username/email');
+
+                strengthElement.innerHTML = `<span class="text-red-600">❌ Missing: ${missing.join(', ')}</span>`;
+            }
+        }
+
+        return allRequirementsMet;
+    }
+
+    // Validate username availability
+    async function validateUsername() {
+        const username = document.getElementById('username');
+        if (!username || !username.value) return;
+
+        const usernameHelp = username.nextElementSibling;
+        
+        try {
+            const response = await fetch(`${baseUrl}/api/v1/auth/check-username`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ username: username.value }),
+                credentials: 'include'
+            });
+
+            const result = await response.json();
+
+            if (result.available) {
+                username.classList.remove('border-red-500');
+                username.classList.add('border-green-500');
+                if (usernameHelp) {
+                    usernameHelp.textContent = '✅ Username is available';
+                    usernameHelp.classList.remove('text-gray-500', 'text-red-600');
+                    usernameHelp.classList.add('text-green-600');
+                }
+            } else {
+                username.classList.remove('border-green-500');
+                username.classList.add('border-red-500');
+                if (usernameHelp) {
+                    usernameHelp.textContent = '❌ Username is already taken';
+                    usernameHelp.classList.remove('text-gray-500', 'text-green-600');
+                    usernameHelp.classList.add('text-red-600');
+                }
+            }
+        } catch (error) {
+            console.error('[V2 Registration] Error checking username:', error);
+        }
+    }
+
+    // Validate email availability
+    async function validateEmail() {
+        const email = document.getElementById('email');
+        if (!email || !email.value) return;
+
+        try {
+            const response = await fetch(`${baseUrl}/api/v1/auth/check-email`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ email: email.value }),
+                credentials: 'include'
+            });
+
+            const result = await response.json();
+
+            if (result.available) {
+                email.classList.remove('border-red-500');
+                email.classList.add('border-green-500');
+            } else {
+                email.classList.remove('border-green-500');
+                email.classList.add('border-red-500');
+                // Create or update help text
+                let emailHelp = email.parentElement.querySelector('.text-xs.text-red-600');
+                if (!emailHelp) {
+                    emailHelp = document.createElement('p');
+                    emailHelp.className = 'text-xs text-red-600 mt-1';
+                    email.parentElement.appendChild(emailHelp);
+                }
+                emailHelp.textContent = '❌ This email is already registered';
+            }
+        } catch (error) {
+            console.error('[V2 Registration] Error checking email:', error);
+        }
+    }
 
     // Bag selection function
     function selectBags(num) {
@@ -36,7 +215,7 @@
     function setupFormSubmission() {
         const form = document.getElementById('customerRegistrationForm');
         if (!form) {
-            console.error('Registration form not found');
+            console.error('[V2 Registration] Registration form not found');
             return;
         }
 
@@ -47,31 +226,14 @@
             const socialToken = document.getElementById('socialToken');
             const isOAuthUser = socialToken && socialToken.value;
             
-            // Only validate passwords for non-OAuth users
-            if (!isOAuthUser) {
-                const password = document.getElementById('password').value;
-                const confirmPassword = document.getElementById('confirmPassword').value;
-                
-                if (password !== confirmPassword) {
-                    if (window.ModalSystem) {
-                        window.ModalSystem.error('Passwords do not match', 'Validation Error');
-                    } else {
-                        alert('Passwords do not match');
-                    }
-                    return;
-                }
-            }
-            
             // Show loading spinner if available
-            const loadingSpinner = document.getElementById('loadingSpinner');
-            if (loadingSpinner) {
-                loadingSpinner.classList.remove('hidden');
+            if (window.SwirlSpinner) {
+                window.SwirlSpinner.show('Processing your registration...');
             }
             
             const submitBtn = document.getElementById('submitBtn');
             if (submitBtn) {
                 submitBtn.disabled = true;
-                submitBtn.innerHTML = '<span data-i18n="customer.register.processing">Processing your registration...</span>';
             }
             
             // Collect form data
@@ -120,6 +282,9 @@
                     }
                 } else {
                     // Show error
+                    if (window.SwirlSpinner) {
+                        window.SwirlSpinner.hide();
+                    }
                     if (window.ModalSystem) {
                         window.ModalSystem.error(result.message || 'Registration failed. Please try again.', 'Registration Error');
                     } else {
@@ -127,17 +292,16 @@
                     }
                     
                     // Re-enable form
-                    if (loadingSpinner) {
-                        loadingSpinner.classList.add('hidden');
-                    }
                     if (submitBtn) {
                         submitBtn.disabled = false;
-                        submitBtn.innerHTML = '<span data-i18n="customer.register.v2.submitButton">Sign Up for Free - No Payment Required</span>';
                     }
                 }
             } catch (error) {
-                console.error('Registration error:', error);
+                console.error('[V2 Registration] Registration error:', error);
                 
+                if (window.SwirlSpinner) {
+                    window.SwirlSpinner.hide();
+                }
                 if (window.ModalSystem) {
                     window.ModalSystem.error('An error occurred during registration. Please try again.', 'Registration Error');
                 } else {
@@ -145,12 +309,8 @@
                 }
                 
                 // Re-enable form
-                if (loadingSpinner) {
-                    loadingSpinner.classList.add('hidden');
-                }
                 if (submitBtn) {
                     submitBtn.disabled = false;
-                    submitBtn.innerHTML = '<span data-i18n="customer.register.v2.submitButton">Sign Up for Free - No Payment Required</span>';
                 }
             }
         });
@@ -174,14 +334,13 @@
                     if (data.success) {
                         const intro = document.getElementById('affiliateIntro');
                         if (intro && data.firstName && data.businessName) {
-                            // Update the subtitle to mention the affiliate
                             const affiliateName = data.businessName || `${data.firstName} ${data.lastName}`;
                             intro.textContent = `Sign up through ${affiliateName} for premium laundry service - pay after we weigh your laundry!`;
                         }
                     }
                 })
                 .catch(error => {
-                    console.error('Error fetching affiliate info:', error);
+                    console.error('[V2 Registration] Error fetching affiliate info:', error);
                 });
         }
     }
@@ -193,28 +352,6 @@
         if (langField) {
             langField.value = savedLang;
         }
-    }
-    
-    // Listen for language changes from parent
-    function setupLanguageListener() {
-        window.addEventListener('message', function(event) {
-            if (event.data.type === 'language-change' && event.data.data?.language) {
-                const newLanguage = event.data.data.language;
-                console.log('[Customer-Register-V2] Language change received:', newLanguage);
-                
-                // Update language preference field
-                const langField = document.getElementById('languagePreference');
-                if (langField) {
-                    langField.value = newLanguage;
-                }
-                
-                // Store in localStorage
-                localStorage.setItem('selectedLanguage', newLanguage);
-                
-                // Note: The actual language change and translation is handled by embed-app-v2.js
-                // which is the parent script that manages i18n for embedded pages
-            }
-        });
     }
 
     // OAuth Social Auth Handling
@@ -239,16 +376,16 @@
     }
 
     function handleSocialAuth(provider) {
-        console.log(`[Customer-Register-V2] Starting ${provider} OAuth authentication...`);
+        console.log(`[V2 Registration] Starting ${provider} OAuth authentication...`);
 
         // Generate unique session ID for database polling
         const sessionId = 'oauth_v2_' + Date.now() + '_' + Math.random().toString(36).substring(2);
-        console.log('[Customer-Register-V2] Generated OAuth session ID:', sessionId);
+        console.log('[V2 Registration] Generated OAuth session ID:', sessionId);
 
         // Include affiliate ID in OAuth URL if present
         const affiliateId = document.getElementById('affiliateId')?.value || '';
         const oauthUrl = `${baseUrl}/api/v1/auth/customer/${provider}?popup=true&state=${sessionId}&affiliateId=${affiliateId}&version=v2&t=${Date.now()}`;
-        console.log('[Customer-Register-V2] Opening OAuth URL:', oauthUrl);
+        console.log('[V2 Registration] Opening OAuth URL:', oauthUrl);
 
         const popup = window.open(
             oauthUrl,
@@ -270,20 +407,20 @@
         const maxPolls = 120; // 6 minutes max (120 * 3 seconds)
         let authResultReceived = false;
 
-        console.log('[Customer-Register-V2] Starting database polling for OAuth result...');
+        console.log('[V2 Registration] Starting database polling for OAuth result...');
 
         const pollForResult = setInterval(async () => {
             pollCount++;
 
             // Check if popup is still open
             if (popup && popup.closed && !authResultReceived) {
-                console.log('[Customer-Register-V2] Popup was closed by user');
+                console.log('[V2 Registration] Popup was closed by user');
                 clearInterval(pollForResult);
                 return;
             }
 
             if (pollCount > maxPolls) {
-                console.log('[Customer-Register-V2] OAuth polling timeout');
+                console.log('[V2 Registration] OAuth polling timeout');
                 clearInterval(pollForResult);
                 if (window.ModalSystem) {
                     window.ModalSystem.error('Authentication timeout. Please try again.', 'Timeout');
@@ -307,7 +444,7 @@
                     if (result.completed) {
                         authResultReceived = true;
                         clearInterval(pollForResult);
-                        console.log('[Customer-Register-V2] OAuth result received:', result);
+                        console.log('[V2 Registration] OAuth result received:', result);
 
                         if (popup && !popup.closed) {
                             popup.close();
@@ -326,13 +463,13 @@
                     }
                 }
             } catch (error) {
-                console.error('[Customer-Register-V2] Error polling for OAuth result:', error);
+                console.error('[V2 Registration] Error polling for OAuth result:', error);
             }
         }, 3000); // Poll every 3 seconds
     }
 
     function handleOAuthSuccess(userData, provider) {
-        console.log('[Customer-Register-V2] OAuth successful, pre-filling form with user data');
+        console.log('[V2 Registration] OAuth successful, pre-filling form with user data');
 
         // Update social auth section to show connected status
         const socialAuthSection = document.getElementById('socialAuthSection');
@@ -383,11 +520,18 @@
         passwordFields.forEach(field => {
             const container = field.closest('div');
             if (container) {
-                container.style.display = 'none';
+                container.classList.add('hidden');
             }
             // Remove required attribute for OAuth
             field.removeAttribute('required');
         });
+
+        // Hide account setup section
+        const accountSetup = document.getElementById('accountSetupSection');
+        if (accountSetup) {
+            accountSetup.classList.remove('active');
+            accountSetup.classList.add('hidden');
+        }
 
         // Store OAuth token for registration
         if (userData.socialToken) {
@@ -411,12 +555,8 @@
             window.ModalSystem.success(`Successfully connected with ${provider}! Please complete the remaining fields.`, 'Connected');
         }
 
-        // Scroll to first empty required field
-        const firstEmptyField = document.querySelector('input[required]:not([value]):not([type="hidden"])');
-        if (firstEmptyField) {
-            firstEmptyField.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            firstEmptyField.focus();
-        }
+        // Dispatch OAuth success event for navigation
+        window.dispatchEvent(new CustomEvent('oauthSuccess'));
     }
 
     function checkOAuthCallback() {
@@ -452,25 +592,67 @@
                 }
             })
             .catch(error => {
-                console.error('[Customer-Register-V2] Error fetching OAuth user data:', error);
+                console.error('[V2 Registration] Error fetching OAuth user data:', error);
+            });
+        }
+    }
+
+    // Setup password validation handlers
+    function setupPasswordValidation() {
+        const passwordInput = document.getElementById('password');
+        const confirmPasswordInput = document.getElementById('confirmPassword');
+        const usernameInput = document.getElementById('username');
+        const emailInput = document.getElementById('email');
+
+        if (passwordInput) {
+            passwordInput.addEventListener('input', validatePassword);
+            passwordInput.addEventListener('focus', validatePassword);
+        }
+        if (confirmPasswordInput) {
+            confirmPasswordInput.addEventListener('input', validatePassword);
+        }
+        if (usernameInput) {
+            usernameInput.addEventListener('input', validatePassword);
+            usernameInput.addEventListener('blur', validateUsername);
+            // Reset on input change
+            usernameInput.addEventListener('input', function() {
+                const usernameHelp = this.nextElementSibling;
+                this.classList.remove('border-red-500', 'border-green-500');
+                if (usernameHelp) {
+                    usernameHelp.textContent = 'Your unique login identifier';
+                    usernameHelp.classList.remove('text-red-600', 'text-green-600');
+                    usernameHelp.classList.add('text-gray-500');
+                }
+            });
+        }
+        if (emailInput) {
+            emailInput.addEventListener('input', validatePassword);
+            emailInput.addEventListener('blur', validateEmail);
+            // Reset on input change
+            emailInput.addEventListener('input', function() {
+                const emailHelp = this.parentElement.querySelector('.text-xs.text-red-600');
+                if (emailHelp && emailHelp.textContent.includes('❌')) {
+                    this.classList.remove('border-red-500', 'border-green-500');
+                    emailHelp.remove();
+                }
             });
         }
     }
 
     // Initialize when DOM is ready
     function init() {
-        console.log('[Customer-Register-V2] Initializing V2 customer registration form');
+        console.log('[V2 Registration] Initializing V2 customer registration form');
         
         // Setup all handlers
         setupBagSelection();
         setupFormSubmission();
-        setupOAuthHandlers();  // Add OAuth handling
+        setupOAuthHandlers();
+        setupPasswordValidation();
         loadAffiliateInfo();
         initLanguagePreference();
-        setupLanguageListener();
         
-        // Note: i18n initialization and translation is handled by embed-app-v2.js
-        // We just need to ensure our elements are ready for translation
+        // Note: Navigation is handled by customer-register-v2-navigation.js
+        // i18n initialization and translation is handled by embed-app-v2.js
     }
 
     // Initialize when DOM is ready

@@ -55,3 +55,43 @@
     color: #718096;
     margin-top: 5px;
 }
+
+/* Visibility control classes to avoid inline styles (CSP compliance) */
+.hidden {
+    display: none !important;
+}
+
+.visible {
+    display: block !important;
+}
+
+.button-hidden {
+    display: none !important;
+}
+
+.button-visible {
+    display: inline-block !important;
+}
+
+/* Initial state for registration sections */
+.registration-section {
+    display: none;
+}
+
+.registration-section.active {
+    display: block;
+}
+
+/* Navigation section always visible */
+#navigationSection {
+    display: block !important;
+}
+
+/* Initial state - first step sections visible */
+#socialAuthSection {
+    display: block;
+}
+
+#accountSetupSection {
+    display: block;
+}
