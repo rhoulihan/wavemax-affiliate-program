@@ -3,6 +3,84 @@ const Order = require('../models/Order');
 const Customer = require('../models/Customer');
 const logger = require('../utils/logger');
 const { logAuditEvent, AuditEvents } = require('../utils/auditLogger');
+const emailService = require('../utils/emailService');
+const QRCode = require('qrcode');
+
+// Helper function to send payment reminder
+async function sendPaymentReminder(order) {
+  try {
+    // Get customer
+    const customer = await Customer.findOne({ customerId: order.customerId });
+    if (!customer) {
+      logger.error(`Customer not found for order ${order.orderId}`);
+      return;
+    }
+    
+    // Update reminder tracking
+    order.v2ReminderCount = (order.v2ReminderCount || 0) + 1;
+    order.v2LastReminderSentAt = new Date();
+    
+    // Add to reminders array
+    if (!order.v2PaymentReminders) {
+      order.v2PaymentReminders = [];
+    }
+    order.v2PaymentReminders.push({
+      sentAt: new Date(),
+      reminderNumber: order.v2ReminderCount,
+      method: 'email'
+    });
+    
+    // Send reminder email
+    await emailService.sendV2PaymentReminder({
+      customer,
+      order,
+      reminderNumber: order.v2ReminderCount,
+      paymentAmount: order.v2PaymentAmount,
+      paymentLinks: order.v2PaymentLinks,
+      qrCodes: order.v2PaymentQRCodes
+    });
+    
+    logger.info(`Payment reminder #${order.v2ReminderCount} sent for order ${order.orderId}`);
+    
+    await order.save();
+  } catch (error) {
+    logger.error(`Failed to send payment reminder for order ${order.orderId}:`, error);
+  }
+}
+
+// Helper function to generate payment URLs and QR codes
+async function generatePaymentURLs(order) {
+  const amount = order.v2PaymentAmount.toFixed(2);
+  const orderNote = `WaveMAX Order ${order.orderId}`;
+  
+  // Generate payment URLs for each service
+  const links = {
+    venmo: `venmo://paycharge?txn=pay&recipients=WaveMAXLaundry&amount=${amount}&note=${encodeURIComponent(orderNote)}`,
+    paypal: `https://www.paypal.me/WaveMAXLaundry/${amount}?locale.x=en_US&country.x=US`,
+    cashapp: `https://cash.app/$WaveMAXLaundry/${amount}?note=${encodeURIComponent(orderNote)}`
+  };
+  
+  // Generate QR codes for each payment URL
+  const qrCodes = {};
+  for (const [service, url] of Object.entries(links)) {
+    try {
+      // Generate QR code as base64 string
+      qrCodes[service] = await QRCode.toDataURL(url, {
+        width: 300,
+        margin: 1,
+        color: {
+          dark: '#000000',
+          light: '#FFFFFF'
+        }
+      });
+    } catch (error) {
+      logger.error(`Failed to generate QR code for ${service}:`, error);
+      qrCodes[service] = null;
+    }
+  }
+  
+  return { links, qrCodes };
+}
 
 // Get order queue
 exports.getOrderQueue = async (req, res) => {
@@ -878,22 +956,31 @@ exports.weighBags = async (req, res) => {
     // Update bag counts
     order.bagsWeighed = order.bags.length;
     
-    // Calculate weight difference and WDF credit if all bags are weighed
+    // V2 Payment Flow: Send payment request if all bags are weighed
     if (order.bagsWeighed === order.numberOfBags) {
-      // Calculate weight difference
+      // Calculate weight difference for reference
       order.weightDifference = order.actualWeight - order.estimatedWeight;
       
-      // Calculate WDF credit (weight difference × base rate)
-      const baseRate = order.baseRate || 1.25;
-      order.wdfCreditGenerated = parseFloat((order.weightDifference * baseRate).toFixed(2));
-      
-      // Update customer's WDF credit
+      // Get customer for payment request
       const customer = await Customer.findOne({ customerId: order.customerId });
       if (customer) {
-        customer.wdfCredit = parseFloat((order.wdfCreditGenerated).toFixed(2));
-        customer.wdfCreditUpdatedAt = new Date();
-        customer.wdfCreditFromOrderId = order.orderId;
-        await customer.save();
+        // Generate payment URLs and QR codes
+        const paymentURLs = await generatePaymentURLs(order);
+        order.v2PaymentLinks = paymentURLs.links;
+        order.v2PaymentQRCodes = paymentURLs.qrCodes;
+        order.v2PaymentStatus = 'awaiting';
+        order.v2PaymentRequestedAt = new Date();
+        
+        // Send payment request email
+        await emailService.sendV2PaymentRequest({
+          customer,
+          order,
+          paymentAmount: order.v2PaymentAmount,
+          paymentLinks: paymentURLs.links,
+          qrCodes: paymentURLs.qrCodes
+        });
+        
+        logger.info(`V2 Payment request sent for order ${order.orderId}, amount: $${order.v2PaymentAmount}`);
       }
     }
     
@@ -1102,30 +1189,38 @@ exports.scanProcessed = async (req, res) => {
       order.processedAt = new Date();
       order.status = 'processed';
       
-      // Send notifications
-      const emailService = require('../utils/emailService');
-      
-      // Notify customer
-      if (order.customer && order.customer.email) {
-        await emailService.sendOrderStatusUpdateEmail(
-          order.customer,
-          order,
-          'ready'
-        );
-      }
-      
-      // Notify affiliate
-      if (order.affiliateId) {
-        const Affiliate = require('../models/Affiliate');
-        const affiliate = await Affiliate.findOne({ affiliateId: order.affiliateId });
+      // V2 Payment Flow: Check payment status before sending notifications
+      if (order.v2PaymentStatus === 'verified' || order.v2PaymentStatus === 'paid') {
+        // Payment received - send ready for pickup notifications
+        const emailService = require('../utils/emailService');
         
-        if (affiliate && affiliate.email) {
-          await emailService.sendAffiliateCommissionEmail(
-            affiliate,
+        // Notify customer
+        if (order.customer && order.customer.email) {
+          await emailService.sendOrderStatusUpdateEmail(
+            order.customer,
             order,
-            order.customer
+            'ready'
           );
         }
+        
+        // Notify affiliate
+        if (order.affiliateId) {
+          const Affiliate = require('../models/Affiliate');
+          const affiliate = await Affiliate.findOne({ affiliateId: order.affiliateId });
+          
+          if (affiliate && affiliate.email) {
+            await emailService.sendAffiliateCommissionEmail(
+              affiliate,
+              order,
+              order.customer
+            );
+          }
+        }
+      } else {
+        // Payment not received - send payment reminder
+        await sendPaymentReminder(order);
+        
+        logger.info(`Order ${order.orderId} processed but awaiting payment. Reminder sent.`);
       }
     }
     
