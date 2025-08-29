@@ -172,6 +172,16 @@ const orderSchema = new mongoose.Schema({
   v2LastPaymentCheck: Date,
   v2PaymentNotes: String, // For storing verification details
   
+  // V2 Payment Reminder Tracking
+  v2PaymentReminders: [{
+    sentAt: { type: Date, required: true },
+    reminderNumber: { type: Number, required: true },
+    sentBy: { type: mongoose.Schema.Types.ObjectId, ref: 'Administrator' },
+    method: { type: String, enum: ['email', 'sms'], default: 'email' }
+  }],
+  v2LastReminderSentAt: Date,
+  v2ReminderCount: { type: Number, default: 0 },
+  
   // Timestamps
   createdAt: { type: Date, default: Date.now }, // When order was created (pending state)
   processingStartedAt: Date, // When order was received and WDF started
@@ -215,6 +225,10 @@ orderSchema.pre('save', async function(next) {
     const subtotal = wdfTotal + totalFee + (this.addOnTotal || 0);
     // Apply both bag credit and WDF credit (subtract if positive credit, add if negative/debit)
     this.actualTotal = parseFloat((subtotal - (this.bagCreditApplied || 0) - (this.wdfCreditApplied || 0)).toFixed(2));
+    
+    // For V2 orders, calculate payment amount without credits
+    this.v2PaymentAmount = parseFloat((wdfTotal + totalFee + (this.addOnTotal || 0)).toFixed(2));
+    
     // Calculate affiliate commission (10% of WDF + full delivery fee)
     // Commission = (WDF amount × 10%) + delivery fee
     // NOTE: Add-ons and credits are NOT included in commission calculation
