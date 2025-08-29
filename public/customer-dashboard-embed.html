@@ -7,10 +7,26 @@
     <title>Customer Dashboard - WaveMAX Laundry</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
     <link rel="stylesheet" href="/assets/css/customer-dashboard.css">
+    <link rel="stylesheet" href="/assets/css/swirl-spinner.css">
     <!-- Awesomplete for autocomplete -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/awesomplete/1.1.5/awesomplete.min.css">
 </head>
 <body class="bg-white">
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="fixed inset-0 bg-white bg-opacity-90 z-50 flex items-center justify-center">
+        <div class="text-center">
+            <div class="swirl-spinner-container">
+                <div class="swirl-spinner">
+                    <div class="swirl-spinner-circle"></div>
+                    <div class="swirl-spinner-circle swirl-spinner-circle-2"></div>
+                    <div class="swirl-spinner-circle swirl-spinner-circle-3"></div>
+                </div>
+            </div>
+            <p class="mt-4 text-lg text-gray-700" data-i18n="spinner.loadingDashboard">Loading your dashboard...</p>
+            <p class="text-sm text-gray-500 mt-2" data-i18n="spinner.fetchingInfo">Please wait while we fetch your information</p>
+        </div>
+    </div>
+    
     <!-- Main Content -->
     <div class="embed-container">
         <!-- Welcome Section -->
@@ -71,6 +87,7 @@
     </div>
 
     <!-- Scripts -->
+    <script src="/assets/js/i18n.js"></script>
     <script src="/assets/js/customer-dashboard.js"></script>
 </body>
 </html>

@@ -3,99 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="">
     <title>WaveMAX Laundry - Schedule Pickup</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
     <link rel="stylesheet" href="/assets/css/language-switcher.css">
-    <link href="/assets/css/schedule-pickup.css" rel="stylesheet">
+    <link href="/assets/css/schedule-pickup.css?v=20250828-addon-icons" rel="stylesheet">
+    <link href="/assets/css/schedule-pickup-v2.css?v=20250828-addon-icons" rel="stylesheet">
     <link href="/assets/css/modal-utils.css" rel="stylesheet">
-    <style>
-        .v2-info-banner {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-        }
-        .payment-methods {
-            display: flex;
-            justify-content: center;
-            gap: 30px;
-            padding: 20px;
-            background: #f7fafc;
-            border-radius: 10px;
-            margin: 20px 0;
-        }
-        .payment-method {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 5px;
-        }
-        .payment-icon {
-            width: 60px;
-            height: 60px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        .process-timeline {
-            display: flex;
-            justify-content: space-between;
-            margin: 30px 0;
-            position: relative;
-        }
-        .process-timeline::before {
-            content: '';
-            position: absolute;
-            top: 20px;
-            left: 0;
-            right: 0;
-            height: 2px;
-            background: #e2e8f0;
-            z-index: 0;
-        }
-        .process-step {
-            flex: 1;
-            text-align: center;
-            position: relative;
-            z-index: 1;
-        }
-        .process-step-icon {
-            width: 40px;
-            height: 40px;
-            background: white;
-            border: 2px solid #667eea;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 10px;
-            font-weight: bold;
-            color: #667eea;
-        }
-        .process-step.active .process-step-icon {
-            background: #667eea;
-            color: white;
-        }
-        .time-slot {
-            border: 2px solid #e2e8f0;
-            border-radius: 8px;
-            padding: 12px;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        .time-slot:hover {
-            border-color: #667eea;
-            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.2);
-        }
-        .time-slot.selected {
-            border-color: #667eea;
-            background: #f5f7ff;
-        }
-    </style>
 </head>
 <body class="bg-white font-sans">
     <!-- Language Switcher -->
@@ -105,15 +19,15 @@
     <div class="embed-container">
         <div class="max-w-4xl mx-auto bg-white rounded-lg shadow-md overflow-hidden">
             <div class="wavemax-blue text-white p-6">
-                <h2 class="text-2xl font-bold" data-i18n="schedule.title">Schedule Your Pickup</h2>
-                <p class="mt-2" data-i18n="schedule.v2.subtitle">Schedule your laundry pickup - pay after we weigh it!</p>
+                <h2 class="text-2xl font-bold" data-i18n="orders.schedule.title">Schedule Your Pickup</h2>
+                <p class="mt-2"><span data-i18n="orders.schedule.v2.subtitle">Schedule your free laundry pickup with</span> <span id="affiliateName"></span></p>
             </div>
             
             <div class="p-6">
                 <!-- V2 Info Banner -->
                 <div class="v2-info-banner">
-                    <h3 class="font-bold text-lg mb-2" data-i18n="schedule.v2.noPrepaymentTitle">No Prepayment Required!</h3>
-                    <p data-i18n="schedule.v2.noPrepaymentDesc">Simply schedule your pickup now. We'll weigh your laundry and send you payment links via email. Pay conveniently through Venmo, PayPal, or CashApp.</p>
+                    <h3 class="font-bold text-lg mb-2" data-i18n="orders.schedule.v2.noPrepaymentTitle">No Prepayment Required!</h3>
+                    <p data-i18n="orders.schedule.v2.noPrepaymentDesc">Pay after we weigh your laundry. We'll send you payment links via email for Venmo, PayPal, or CashApp.</p>
                 </div>
                 
                 <!-- Payment Methods Display -->
@@ -148,23 +62,23 @@
                 <div class="process-timeline">
                     <div class="process-step active">
                         <div class="process-step-icon">1</div>
-                        <div class="text-sm font-medium" data-i18n="schedule.v2.step1">Schedule</div>
+                        <div class="text-sm font-medium" data-i18n="orders.schedule.v2.step1">Schedule</div>
                     </div>
                     <div class="process-step">
                         <div class="process-step-icon">2</div>
-                        <div class="text-sm font-medium" data-i18n="schedule.v2.step2">Pickup</div>
+                        <div class="text-sm font-medium" data-i18n="orders.schedule.v2.step2">Pickup</div>
                     </div>
                     <div class="process-step">
                         <div class="process-step-icon">3</div>
-                        <div class="text-sm font-medium" data-i18n="schedule.v2.step3">Weigh</div>
+                        <div class="text-sm font-medium" data-i18n="orders.schedule.v2.step3">Weigh</div>
                     </div>
                     <div class="process-step">
                         <div class="process-step-icon">4</div>
-                        <div class="text-sm font-medium" data-i18n="schedule.v2.step4">Pay</div>
+                        <div class="text-sm font-medium" data-i18n="orders.schedule.v2.step4">Pay</div>
                     </div>
                     <div class="process-step">
                         <div class="process-step-icon">5</div>
-                        <div class="text-sm font-medium" data-i18n="schedule.v2.step5">Deliver</div>
+                        <div class="text-sm font-medium" data-i18n="orders.schedule.v2.step5">Deliver</div>
                     </div>
                 </div>
                 
@@ -175,28 +89,28 @@
                     
                     <!-- Pickup Date -->
                     <div>
-                        <label for="pickupDate" class="block text-gray-700 font-bold mb-2" data-i18n="schedule.pickupDate">Select Pickup Date *</label>
+                        <label for="pickupDate" class="block text-gray-700 font-bold mb-2" data-i18n="orders.schedule.pickupDate">Select Pickup Date *</label>
                         <input type="date" id="pickupDate" name="pickupDate" required class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        <p class="text-sm text-gray-600 mt-1" data-i18n="schedule.pickupDateHelp">Choose a date at least 24 hours from now</p>
+                        <p class="text-sm text-gray-600 mt-1" data-i18n="orders.schedule.pickupDateHelp">Choose a date at least 24 hours from now</p>
                     </div>
                     
                     <!-- Pickup Time -->
                     <div>
-                        <label class="block text-gray-700 font-bold mb-2" data-i18n="schedule.pickupTime">Select Pickup Time *</label>
+                        <label class="block text-gray-700 font-bold mb-2" data-i18n="orders.schedule.pickupTime">Select Pickup Time *</label>
                         <div class="grid md:grid-cols-3 gap-4">
-                            <div class="time-slot" onclick="selectTimeSlot(this, 'morning')">
+                            <div class="time-slot" data-time-value="morning">
                                 <input type="radio" id="morning" name="pickupTime" value="morning" required class="hidden">
-                                <div class="font-medium" data-i18n="schedule.morning">Morning</div>
+                                <div class="font-medium" data-i18n="orders.schedule.morning">Morning</div>
                                 <div class="text-sm text-gray-600">8:00 AM - 12:00 PM</div>
                             </div>
-                            <div class="time-slot" onclick="selectTimeSlot(this, 'afternoon')">
+                            <div class="time-slot" data-time-value="afternoon">
                                 <input type="radio" id="afternoon" name="pickupTime" value="afternoon" required class="hidden">
-                                <div class="font-medium" data-i18n="schedule.afternoon">Afternoon</div>
+                                <div class="font-medium" data-i18n="orders.schedule.afternoon">Afternoon</div>
                                 <div class="text-sm text-gray-600">12:00 PM - 4:00 PM</div>
                             </div>
-                            <div class="time-slot" onclick="selectTimeSlot(this, 'evening')">
+                            <div class="time-slot" data-time-value="evening">
                                 <input type="radio" id="evening" name="pickupTime" value="evening" required class="hidden">
-                                <div class="font-medium" data-i18n="schedule.evening">Evening</div>
+                                <div class="font-medium" data-i18n="orders.schedule.evening">Evening</div>
                                 <div class="text-sm text-gray-600">4:00 PM - 8:00 PM</div>
                             </div>
                         </div>
@@ -204,44 +118,75 @@
                     
                     <!-- Number of Bags -->
                     <div>
-                        <label for="numberOfBags" class="block text-gray-700 font-bold mb-2" data-i18n="schedule.numberOfBags">Number of Bags *</label>
+                        <label for="numberOfBags" class="block text-gray-700 font-bold mb-2" data-i18n="orders.schedule.numberOfBags">Number of Bags *</label>
                         <select id="numberOfBags" name="numberOfBags" required class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                            <option value="1">1 Bag</option>
-                            <option value="2">2 Bags</option>
-                            <option value="3">3 Bags</option>
-                            <option value="4">4 Bags</option>
-                            <option value="5">5+ Bags</option>
+                            <!-- Options will be populated based on customer's initial selection -->
                         </select>
-                        <p class="text-sm text-gray-600 mt-1" data-i18n="schedule.v2.bagsNote">Don't worry if you're not sure - we'll count and weigh everything!</p>
+                        <p class="text-sm text-gray-600 mt-1" data-i18n="orders.schedule.v2.bagsNote">Based on your initial bag request</p>
                     </div>
                     
-                    <!-- Estimated Weight -->
+                    <!-- Add-on Services -->
                     <div>
-                        <label for="estimatedWeight" class="block text-gray-700 font-bold mb-2" data-i18n="schedule.estimatedWeight">Estimated Weight (lbs)</label>
-                        <input type="number" id="estimatedWeight" name="estimatedWeight" placeholder="20" min="10" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        <p class="text-sm text-gray-600 mt-1" data-i18n="schedule.v2.weightNote">Just an estimate - we'll get the exact weight when we pick up</p>
+                        <label class="block text-gray-700 font-bold mb-2" data-i18n="orders.schedule.addOnItems">Add-on Services</label>
+                        <p class="text-xs text-gray-600 mb-3" data-i18n="orders.schedule.addOnDescription">Premium add-ons ($0.10/lb each)</p>
+                        <div class="flex gap-4 justify-center">
+                            <div class="addon-item" data-addon="premiumDetergent">
+                                <input type="checkbox" id="premiumDetergent" name="addOns" value="premiumDetergent" class="hidden addon-checkbox">
+                                <div class="addon-icon-wrapper">
+                                    <svg class="addon-icon" fill="currentColor" viewBox="0 0 20 20">
+                                        <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z"/>
+                                    </svg>
+                                </div>
+                                <span class="addon-label" data-i18n="orders.schedule.premiumDetergentCompact">Premium<br>Detergent</span>
+                            </div>
+                            <div class="addon-item" data-addon="fabricSoftener">
+                                <input type="checkbox" id="fabricSoftener" name="addOns" value="fabricSoftener" class="hidden addon-checkbox">
+                                <div class="addon-icon-wrapper">
+                                    <svg class="addon-icon" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M5 2a1 1 0 011 1v1h1a1 1 0 010 2H6v1a1 1 0 01-2 0V6H3a1 1 0 010-2h1V3a1 1 0 011-1zm0 10a1 1 0 011 1v1h1a1 1 0 110 2H6v1a1 1 0 11-2 0v-1H3a1 1 0 110-2h1v-1a1 1 0 011-1zM12 2a1 1 0 01.967.744L14.146 7.2 17.5 9.134a1 1 0 010 1.732l-3.354 1.935-1.18 4.455a1 1 0 01-1.933 0L9.854 12.8 6.5 10.866a1 1 0 010-1.732l3.354-1.935 1.18-4.455A1 1 0 0112 2z" clip-rule="evenodd"/>
+                                    </svg>
+                                </div>
+                                <span class="addon-label" data-i18n="orders.schedule.fabricSoftenerCompact">Fabric<br>Softener</span>
+                            </div>
+                            <div class="addon-item" data-addon="stainRemover">
+                                <input type="checkbox" id="stainRemover" name="addOns" value="stainRemover" class="hidden addon-checkbox">
+                                <div class="addon-icon-wrapper">
+                                    <svg class="addon-icon" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+                                    </svg>
+                                </div>
+                                <span class="addon-label" data-i18n="orders.schedule.stainRemoverCompact">Stain<br>Remover</span>
+                            </div>
+                        </div>
                     </div>
                     
                     <!-- Special Instructions -->
                     <div>
-                        <label for="specialInstructions" class="block text-gray-700 font-bold mb-2" data-i18n="schedule.specialInstructions">Special Pickup Instructions</label>
+                        <label for="specialInstructions" class="block text-gray-700 font-bold mb-2" data-i18n="orders.schedule.specialInstructions">Special Pickup Instructions</label>
                         <textarea id="specialInstructions" name="specialInstructions" rows="3" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="e.g., Ring doorbell, leave on porch, call when arriving..."></textarea>
                     </div>
                     
                     <!-- Pricing Info -->
                     <div class="bg-gray-50 p-6 rounded-lg">
-                        <h3 class="font-bold text-lg mb-3" data-i18n="schedule.v2.pricingTitle">Simple, Transparent Pricing</h3>
+                        <h3 class="font-bold text-lg mb-3" data-i18n="orders.schedule.v2.pricingTitle">Simple, Transparent Pricing</h3>
                         <div class="space-y-2 text-sm">
                             <div class="flex justify-between">
-                                <span data-i18n="schedule.v2.baseRate">Base Rate:</span>
-                                <span class="font-medium">$1.25/lb</span>
+                                <span data-i18n="orders.schedule.v2.baseRate">Wash Dry Fold:</span>
+                                <span class="font-medium" id="wdfRate">$1.25/lb</span>
+                            </div>
+                            <div class="justify-between hidden" id="addonsLineItem">
+                                <span>
+                                    <span data-i18n="orders.schedule.v2.addOns">Add-ons</span>
+                                    <span id="selectedAddonsText" class="text-xs text-gray-500"></span>
+                                </span>
+                                <span class="font-medium" id="addonsRate">+$0.00/lb</span>
                             </div>
                             <div class="flex justify-between">
-                                <span data-i18n="schedule.v2.minimumCharge">Minimum Charge:</span>
-                                <span class="font-medium">$25.00</span>
+                                <span data-i18n="orders.schedule.v2.minimumCharge">Minimum Charge:</span>
+                                <span class="font-medium" id="minimumCharge">$25.00</span>
                             </div>
                             <div class="border-t pt-2 mt-2">
-                                <p class="text-gray-600" data-i18n="schedule.v2.pricingNote">You'll receive payment links via email after we weigh your laundry. Pay conveniently through Venmo, PayPal, or CashApp.</p>
+                                <p class="text-gray-600" data-i18n="orders.schedule.v2.pricingNote">You'll receive payment links via email after we weigh your laundry. Pay conveniently through Venmo, PayPal, or CashApp.</p>
                             </div>
                         </div>
                     </div>
@@ -249,9 +194,9 @@
                     <!-- Submit Button -->
                     <div class="text-center pt-4">
                         <button type="submit" id="submitBtn" class="bg-blue-600 text-white px-8 py-3 rounded-lg font-bold hover:bg-blue-700 transition duration-300 w-full md:w-auto">
-                            <span data-i18n="schedule.v2.submitButton">Schedule Pickup - No Payment Required</span>
+                            <span data-i18n="orders.schedule.v2.submitButton">Schedule Pickup - No Payment Required</span>
                         </button>
-                        <p class="text-sm text-gray-600 mt-3" data-i18n="schedule.v2.payLaterNote">You'll pay after we weigh your laundry</p>
+                        <p class="text-sm text-gray-600 mt-3" data-i18n="orders.schedule.v2.payLaterNote">You'll pay after we weigh your laundry</p>
                     </div>
                 </form>
             </div>
@@ -262,7 +207,7 @@
     <div id="loadingSpinner" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
         <div class="bg-white p-8 rounded-lg shadow-xl">
             <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-            <p class="mt-4 text-gray-700" data-i18n="schedule.scheduling">Scheduling your pickup...</p>
+            <p class="mt-4 text-gray-700" data-i18n="orders.schedule.scheduling">Scheduling your pickup...</p>
         </div>
     </div>
     
@@ -271,10 +216,10 @@
         <div class="bg-white p-8 rounded-lg shadow-xl max-w-md mx-auto">
             <div class="text-center">
                 <div class="text-5xl mb-4">✅</div>
-                <h3 class="text-2xl font-bold mb-2" data-i18n="schedule.v2.successTitle">Pickup Scheduled!</h3>
-                <p class="text-gray-700 mb-4" data-i18n="schedule.v2.successMessage">Your laundry pickup has been scheduled. We'll send you payment links via email after we weigh your laundry.</p>
+                <h3 class="text-2xl font-bold mb-2" data-i18n="orders.schedule.v2.successTitle">Pickup Scheduled!</h3>
+                <p class="text-gray-700 mb-4" data-i18n="orders.schedule.v2.successMessage">Your laundry pickup has been scheduled. We'll send you payment links via email after we weigh your laundry.</p>
                 <div class="bg-blue-50 p-4 rounded-lg mb-4">
-                    <p class="text-sm text-gray-700" data-i18n="schedule.v2.whatNext">What happens next:</p>
+                    <p class="text-sm text-gray-700" data-i18n="orders.schedule.v2.whatNext">What happens next:</p>
                     <ul class="text-left text-sm text-gray-600 mt-2 space-y-1">
                         <li>• We'll pick up your laundry on the scheduled date</li>
                         <li>• We'll weigh it and calculate the exact cost</li>
@@ -283,8 +228,8 @@
                         <li>• Receive your clean laundry!</li>
                     </ul>
                 </div>
-                <button onclick="window.location.href='/customer-dashboard-embed.html'" class="bg-blue-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-blue-700 transition duration-300">
-                    <span data-i18n="schedule.v2.goToDashboard">Go to Dashboard</span>
+                <button id="dashboardButton" class="bg-blue-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-blue-700 transition duration-300">
+                    <span data-i18n="orders.schedule.v2.goToDashboard">Go to Dashboard</span>
                 </button>
             </div>
         </div>
@@ -295,83 +240,6 @@
     <script src="/assets/js/language-switcher.js"></script>
     <script src="/assets/js/csrf-utils.js"></script>
     <script src="/assets/js/modal-utils.js"></script>
-    
-    <script>
-        // Time slot selection
-        function selectTimeSlot(element, value) {
-            document.querySelectorAll('.time-slot').forEach(slot => {
-                slot.classList.remove('selected');
-            });
-            element.classList.add('selected');
-            document.getElementById(value).checked = true;
-        }
-        
-        // Set minimum date to tomorrow
-        const tomorrow = new Date();
-        tomorrow.setDate(tomorrow.getDate() + 1);
-        document.getElementById('pickupDate').min = tomorrow.toISOString().split('T')[0];
-        
-        // Get customer info from token
-        const urlParams = new URLSearchParams(window.location.search);
-        const token = urlParams.get('token');
-        
-        if (token) {
-            // Decode token to get customer info
-            try {
-                const payload = JSON.parse(atob(token.split('.')[1]));
-                document.getElementById('customerId').value = payload.customerId;
-                document.getElementById('affiliateId').value = payload.affiliateId;
-            } catch (e) {
-                console.error('Invalid token');
-            }
-        }
-        
-        // Form submission
-        document.getElementById('schedulePickupForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            
-            document.getElementById('loadingSpinner').classList.remove('hidden');
-            document.getElementById('submitBtn').disabled = true;
-            
-            const formData = new FormData(this);
-            const data = {};
-            formData.forEach((value, key) => {
-                data[key] = value;
-            });
-            
-            // Set estimated weight based on bags if not provided
-            if (!data.estimatedWeight) {
-                data.estimatedWeight = parseInt(data.numberOfBags) * 20;
-            }
-            
-            try {
-                const response = await fetch('/api/orders', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': 'Bearer ' + token,
-                        'X-CSRF-Token': document.querySelector('[name="csrf-token"]')?.value || ''
-                    },
-                    body: JSON.stringify(data)
-                });
-                
-                const result = await response.json();
-                
-                if (result.success) {
-                    document.getElementById('loadingSpinner').classList.add('hidden');
-                    document.getElementById('successModal').classList.remove('hidden');
-                } else {
-                    alert(result.message || 'Failed to schedule pickup. Please try again.');
-                    document.getElementById('loadingSpinner').classList.add('hidden');
-                    document.getElementById('submitBtn').disabled = false;
-                }
-            } catch (error) {
-                console.error('Schedule error:', error);
-                alert('An error occurred. Please try again.');
-                document.getElementById('loadingSpinner').classList.add('hidden');
-                document.getElementById('submitBtn').disabled = false;
-            }
-        });
-    </script>
+    <script src="/assets/js/schedule-pickup-v2-embed.js"></script>
 </body>
 </html>
