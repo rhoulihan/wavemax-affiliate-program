@@ -2294,7 +2294,7 @@ exports.sendOrderPickedUpNotification = async (customerEmail, data) => {
 /**
  * Send V2 payment request email after laundry is weighed
  */
-exports.sendV2PaymentRequest = async (order, customer, paymentData) => {
+exports.sendV2PaymentRequest = async ({ customer, order, paymentAmount, paymentLinks, qrCodes }) => {
   try {
     const language = customer.languagePreference || 'en';
     const template = await loadTemplate('v2/payment-request', language);
@@ -2310,17 +2310,17 @@ exports.sendV2PaymentRequest = async (order, customer, paymentData) => {
     const emailData = {
       customerName: customer.name || `${customer.firstName} ${customer.lastName}`,
       orderId: order.orderId,
-      shortOrderId: paymentData.shortOrderId,
-      amount: (paymentData.amount || order.v2PaymentAmount).toFixed(2),
+      shortOrderId: order.orderId.replace('ORD', ''),
+      amount: (paymentAmount || order.v2PaymentAmount).toFixed(2),
       actualWeight: order.actualWeight,
       numberOfBags: order.numberOfBags,
       pickupDate: new Date(order.pickupDate).toLocaleDateString(),
-      venmoLink: paymentData.links.venmo,
-      paypalLink: paymentData.links.paypal,
-      cashappLink: paymentData.links.cashapp,
-      venmoQR: paymentData.qrCodes.venmo,
-      paypalQR: paymentData.qrCodes.paypal,
-      cashappQR: paymentData.qrCodes.cashapp
+      venmoLink: paymentLinks.venmo,
+      paypalLink: paymentLinks.paypal,
+      cashappLink: paymentLinks.cashapp,
+      venmoQR: qrCodes.venmo,
+      paypalQR: qrCodes.paypal,
+      cashappQR: qrCodes.cashapp
     };
     
     // Replace both {{}} and [] style placeholders
@@ -2330,7 +2330,7 @@ exports.sendV2PaymentRequest = async (order, customer, paymentData) => {
       html = html.replace(regex, emailData[key]);
     });
     
-    const subject = `Payment Request - Order #${paymentData.shortOrderId} - $${emailData.amount}`;
+    const subject = `Payment Request - Order #${emailData.shortOrderId} - $${emailData.amount}`;
     
     await sendEmail(customer.email, subject, html);
     console.log(`V2 payment request sent to ${customer.email} for order ${order.orderId}`);
@@ -2344,7 +2344,7 @@ exports.sendV2PaymentRequest = async (order, customer, paymentData) => {
 /**
  * Send V2 payment reminder email
  */
-exports.sendV2PaymentReminder = async (order, customer, reminderData) => {
+exports.sendV2PaymentReminder = async ({ customer, order, reminderNumber, paymentAmount, paymentLinks, qrCodes }) => {
   try {
     const language = customer.languagePreference || 'en';
     
@@ -2355,19 +2355,19 @@ exports.sendV2PaymentReminder = async (order, customer, reminderData) => {
     const emailData = {
       customerName: customer.name || `${customer.firstName} ${customer.lastName}`,
       orderId: order.orderId,
-      shortOrderId: order._id.toString().slice(-8).toUpperCase(),
-      amount: (order.v2PaymentAmount || order.actualTotal).toFixed(2),
+      shortOrderId: order.orderId.replace('ORD', ''),
+      amount: (paymentAmount || order.v2PaymentAmount || order.actualTotal).toFixed(2),
       actualWeight: order.actualWeight,
-      hoursElapsed: reminderData.hoursElapsed,
-      hoursRemaining: reminderData.hoursRemaining,
-      isUrgent: reminderData.isUrgent,
+      reminderNumber: reminderNumber || 1,
       paymentRequestedTime: new Date(order.v2PaymentRequestedAt).toLocaleString(),
-      confirmationLink: reminderData.confirmationLink,
-      venmoLink: order.v2PaymentLinks?.venmo || '#',
-      paypalLink: order.v2PaymentLinks?.paypal || '#',
-      cashappLink: order.v2PaymentLinks?.cashapp || '#',
-      reminderNumber: Math.floor((order.v2PaymentCheckAttempts - 6) / 12) + 1,
-      maxReminders: 4
+      venmoLink: paymentLinks?.venmo || order.v2PaymentLinks?.venmo || '#',
+      paypalLink: paymentLinks?.paypal || order.v2PaymentLinks?.paypal || '#',
+      cashappLink: paymentLinks?.cashapp || order.v2PaymentLinks?.cashapp || '#',
+      venmoQR: qrCodes?.venmo || order.v2PaymentQRCodes?.venmo || '',
+      paypalQR: qrCodes?.paypal || order.v2PaymentQRCodes?.paypal || '',
+      cashappQR: qrCodes?.cashapp || order.v2PaymentQRCodes?.cashapp || '',
+      isUrgent: reminderNumber >= 2,
+      maxReminders: 3
     };
     
     // Handle conditional sections for urgency
