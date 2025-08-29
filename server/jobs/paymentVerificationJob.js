@@ -259,19 +259,36 @@ class PaymentVerificationJob {
    */
   async sendReminderEmail(order, customer, reminderInfo) {
     try {
-      // This will be implemented in emailService
-      // For now, log the action with details
-      console.log(`Payment reminder email would be sent to ${customer.email}`);
-      console.log(`Reminder details:`, {
-        orderId: order._id,
-        hoursElapsed: reminderInfo.hoursElapsed,
-        hoursRemaining: reminderInfo.hoursRemaining,
-        isUrgent: reminderInfo.isUrgent,
-        confirmationLink: reminderInfo.confirmationLink
+      // Calculate reminder number based on attempts
+      const reminderNumber = Math.floor((order.v2PaymentCheckAttempts - 6) / 12) + 1;
+      
+      // Update reminder tracking on order
+      order.v2ReminderCount = reminderNumber;
+      order.v2LastReminderSentAt = new Date();
+      
+      // Add to reminders array
+      if (!order.v2PaymentReminders) {
+        order.v2PaymentReminders = [];
+      }
+      order.v2PaymentReminders.push({
+        sentAt: new Date(),
+        reminderNumber: reminderNumber,
+        method: 'email'
       });
       
-      // Placeholder for actual implementation
-      // await emailService.sendV2PaymentReminder(order, customer, reminderInfo);
+      await order.save();
+      
+      // Send the reminder email
+      await emailService.sendV2PaymentReminder({
+        customer,
+        order,
+        reminderNumber,
+        paymentAmount: order.v2PaymentAmount,
+        paymentLinks: order.v2PaymentLinks,
+        qrCodes: order.v2PaymentQRCodes
+      });
+      
+      console.log(`Payment reminder #${reminderNumber} sent to ${customer.email} for order ${order.orderId}`);
     } catch (error) {
       console.error('Error sending reminder email:', error);
     }
@@ -283,16 +300,30 @@ class PaymentVerificationJob {
   async sendPickupNotification(order) {
     try {
       const affiliate = order.affiliateId;
+      const customer = order.customerId;
       
-      if (!affiliate) {
+      if (!affiliate || !affiliate.email) {
         console.error('Cannot send pickup notification - affiliate not found');
         return;
       }
       
-      console.log(`Sending pickup notification to affiliate ${affiliate.email} for order ${order._id}`);
+      console.log(`Sending pickup notification to affiliate ${affiliate.email} for order ${order.orderId}`);
       
-      // This will use existing emailService method
-      // await emailService.sendPickupReadyNotification(order);
+      // Send notification to affiliate that order is ready
+      await emailService.sendAffiliateCommissionEmail(
+        affiliate,
+        order,
+        customer
+      );
+      
+      // Also notify customer that order is ready
+      if (customer && customer.email) {
+        await emailService.sendOrderStatusUpdateEmail(
+          customer,
+          order,
+          'ready'
+        );
+      }
     } catch (error) {
       console.error('Error sending pickup notification:', error);
     }
