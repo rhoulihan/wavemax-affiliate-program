@@ -1,0 +1,9 @@
+{
+  "commands": [
+    {
+      "name": "init",
+      "description": "Initialize session with persona and review best practices",
+      "prompt": "please set your persona with init.prompt then review our best practices and let me know when you are ready to start working"
+    }
+  ]
+}

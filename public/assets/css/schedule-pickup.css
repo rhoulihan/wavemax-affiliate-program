@@ -28,6 +28,78 @@ body {
     z-index: 1000;
 }
 
+/* Add-on Items Styling */
+.addon-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    padding: 8px;
+    border-radius: 8px;
+    user-select: none;
+}
+
+.addon-icon-wrapper {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: white;
+    border: 2px solid #e5e7eb;
+    transition: all 0.3s ease;
+    margin-bottom: 4px;
+}
+
+.addon-icon {
+    width: 24px;
+    height: 24px;
+    color: #6b7280;
+    transition: all 0.3s ease;
+}
+
+.addon-label {
+    font-size: 11px;
+    text-align: center;
+    color: #6b7280;
+    line-height: 1.2;
+    transition: color 0.3s ease;
+}
+
+/* Selected state */
+.addon-item.selected .addon-icon-wrapper {
+    background: #3b82f6;
+    border-color: #3b82f6;
+    transform: scale(1.1);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.addon-item.selected .addon-icon {
+    color: white;
+}
+
+.addon-item.selected .addon-label {
+    color: #3b82f6;
+    font-weight: 600;
+}
+
+/* Hover state */
+.addon-item:hover .addon-icon-wrapper {
+    border-color: #3b82f6;
+    transform: scale(1.05);
+}
+
+.addon-item:hover .addon-label {
+    color: #4b5563;
+}
+
+/* Active/clicking state */
+.addon-item:active .addon-icon-wrapper {
+    transform: scale(0.95);
+}
+
 /* Tooltip styling */
 .tooltip-hover {
     position: relative;

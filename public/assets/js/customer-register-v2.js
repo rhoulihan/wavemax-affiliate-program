@@ -231,8 +231,8 @@
             let registrationSpinner = null;
             if (window.SwirlSpinnerUtils) {
                 registrationSpinner = window.SwirlSpinnerUtils.showOnForm(this, {
-                    message: 'Processing your registration...',
-                    submessage: 'Please wait while we create your account'
+                    message: window.i18n?.translate('spinner.processingRegistration') || 'Processing your registration...',
+                    submessage: window.i18n?.translate('spinner.creatingAccount') || 'Please wait while we create your account'
                 });
             } else if (window.SwirlSpinner) {
                 registrationSpinner = new window.SwirlSpinner({
@@ -297,17 +297,20 @@
                     if (result.token) {
                         localStorage.setItem('customerToken', result.token);
                     }
-                    if (result.customer) {
-                        localStorage.setItem('currentCustomer', JSON.stringify(result.customer));
+                    // Backend returns customerData, not customer
+                    if (result.customerData) {
+                        // Add the customerId to the customer data object
+                        const customerData = {
+                            ...result.customerData,
+                            customerId: result.customerId
+                        };
+                        localStorage.setItem('currentCustomer', JSON.stringify(customerData));
                     }
                     
-                    // Redirect to success page or schedule pickup
-                    const redirectUrl = '/embed-app-v2.html?route=/schedule-pickup';
-                    if (result.token) {
-                        window.location.href = redirectUrl + '&token=' + result.token;
-                    } else {
-                        window.location.href = redirectUrl;
-                    }
+                    // Redirect to customer login page
+                    const redirectUrl = '/embed-app-v2.html?route=/customer-login';
+                    // Add registered=true to show a success message
+                    window.location.href = redirectUrl + '&registered=true';
                 } else {
                     // Show error
                     if (registrationSpinner) {
@@ -694,8 +697,8 @@
         if (window.SwirlSpinnerUtils) {
             const form = document.getElementById('customerRegistrationForm');
             spinner = window.SwirlSpinnerUtils.showOnForm(form, {
-                message: 'Validating address...',
-                submessage: 'Checking if your address is within our service area'
+                message: window.i18n?.translate('spinner.validatingAddress') || 'Validating address...',
+                submessage: window.i18n?.translate('spinner.checkingServiceArea') || 'Checking if your address is within our service area'
             });
         }
 
