@@ -659,6 +659,9 @@ exports.customerLogin = async (req, res) => {
         state: customer.state,
         zipCode: customer.zipCode,
         affiliateId: customer.affiliateId,
+        numberOfBags: customer.numberOfBags || 1,
+        bagCredit: customer.bagCredit || 0,
+        wdfCredit: customer.wdfCredit || 0,
         affiliate: affiliate ? {
           affiliateId: affiliate.affiliateId,
           name: `${affiliate.firstName} ${affiliate.lastName}`,

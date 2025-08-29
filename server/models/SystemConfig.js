@@ -272,6 +272,18 @@ systemConfigSchema.statics.initializeDefaults = async function() {
       validation: { min: 0.00, max: 50.00 },
       isPublic: true
     },
+    {
+      key: 'payment_version',
+      value: 'v1',
+      defaultValue: 'v1',
+      description: 'Payment system version (v1 or v2)',
+      category: 'payment',
+      dataType: 'string',
+      validation: {
+        allowedValues: ['v1', 'v2']
+      },
+      isPublic: true
+    },
 
     // System settings
     {

@@ -5,7 +5,7 @@
     console.log('[Schedule V2] Initializing V2 schedule pickup form');
 
     // Initialize form when DOM is ready
-    function init() {
+    async function init() {
         // Get customer data from localStorage
         const customerData = localStorage.getItem('currentCustomer');
         const customerToken = localStorage.getItem('customerToken');
@@ -20,6 +20,9 @@
                 showRegistrationSuccess(customer);
             }
         }
+        
+        // Fetch and display pricing information
+        await loadPricingInfo();
         
         // Setup form submission
         const form = document.getElementById('schedulePickupForm');
@@ -45,6 +48,105 @@
                     bagCountInput.value = customer.initialBagsRequested;
                 }
             }
+        }
+        
+        // Setup add-on icon click listeners
+        const addonItems = document.querySelectorAll('.addon-item');
+        addonItems.forEach(item => {
+            item.addEventListener('click', function() {
+                const addonType = this.dataset.addon;
+                const checkbox = this.querySelector('.addon-checkbox');
+                
+                // Toggle the checkbox state
+                checkbox.checked = !checkbox.checked;
+                
+                // Toggle the selected class for visual feedback
+                this.classList.toggle('selected', checkbox.checked);
+                
+                console.log('[Schedule V2] Add-on toggled:', addonType, checkbox.checked);
+                
+                // Update pricing display
+                updateAddonsDisplay();
+            });
+            
+            // Set initial state based on checkbox
+            const checkbox = item.querySelector('.addon-checkbox');
+            if (checkbox && checkbox.checked) {
+                item.classList.add('selected');
+            }
+        });
+    }
+    
+    async function loadPricingInfo() {
+        try {
+            // Fetch WDF rate from system config
+            const wdfResponse = await fetch('/api/v1/system/config/public/wdf_base_rate_per_pound');
+            const wdfData = await wdfResponse.json();
+            const wdfRate = wdfData.currentValue || 1.25;
+            
+            // Update WDF rate display
+            const wdfRateElement = document.getElementById('wdfRate');
+            if (wdfRateElement) {
+                wdfRateElement.textContent = `$${wdfRate.toFixed(2)}/lb`;
+            }
+            
+            // Calculate and display minimum charge (assuming 20 lbs minimum)
+            const minimumWeight = 20;
+            const minimumCharge = wdfRate * minimumWeight;
+            const minimumChargeElement = document.getElementById('minimumCharge');
+            if (minimumChargeElement) {
+                minimumChargeElement.textContent = `$${minimumCharge.toFixed(2)}`;
+            }
+            
+            console.log('[Schedule V2] Pricing loaded - WDF: $' + wdfRate + '/lb, Min: $' + minimumCharge);
+        } catch (error) {
+            console.error('[Schedule V2] Error loading pricing:', error);
+            // Use defaults if fetch fails
+            document.getElementById('wdfRate').textContent = '$1.25/lb';
+            document.getElementById('minimumCharge').textContent = '$25.00';
+        }
+    }
+    
+    function updateAddonsDisplay() {
+        const selectedAddons = [];
+        const addonNames = {
+            'premiumDetergent': 'Premium Detergent',
+            'fabricSoftener': 'Fabric Softener',
+            'stainRemover': 'Stain Remover'
+        };
+        
+        // Check which add-ons are selected
+        document.querySelectorAll('.addon-checkbox:checked').forEach(checkbox => {
+            const addonKey = checkbox.value;
+            if (addonNames[addonKey]) {
+                selectedAddons.push(addonNames[addonKey]);
+            }
+        });
+        
+        const addonsLineItem = document.getElementById('addonsLineItem');
+        const addonsRate = document.getElementById('addonsRate');
+        const selectedAddonsText = document.getElementById('selectedAddonsText');
+        
+        if (selectedAddons.length > 0) {
+            // Show the add-ons line item
+            addonsLineItem.style.display = 'flex';
+            
+            // Calculate total add-on rate
+            const addonRatePerItem = 0.10;
+            const totalAddonRate = selectedAddons.length * addonRatePerItem;
+            addonsRate.textContent = `+$${totalAddonRate.toFixed(2)}/lb`;
+            
+            // Show selected add-ons (abbreviated if many)
+            if (selectedAddons.length === 1) {
+                selectedAddonsText.textContent = `(${selectedAddons[0]})`;
+            } else if (selectedAddons.length === 2) {
+                selectedAddonsText.textContent = `(${selectedAddons.join(', ')})`;
+            } else {
+                selectedAddonsText.textContent = `(${selectedAddons.length} selected)`;
+            }
+        } else {
+            // Hide the add-ons line item
+            addonsLineItem.style.display = 'none';
         }
     }
     
@@ -75,8 +177,8 @@
         let spinner = null;
         if (window.SwirlSpinnerUtils) {
             spinner = window.SwirlSpinnerUtils.showOnForm(e.target, {
-                message: 'Scheduling your pickup...',
-                submessage: 'Please wait while we confirm your pickup time'
+                message: window.i18n?.translate('spinner.schedulingPickup') || 'Scheduling your pickup...',
+                submessage: window.i18n?.translate('spinner.confirmingPickup') || 'Please wait while we confirm your pickup time'
             });
         }
         

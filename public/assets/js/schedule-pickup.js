@@ -355,6 +355,75 @@
         console.log('Set AFFILIATEID hidden field to:', customer.affiliateId);
       }
 
+      // Handle bags dropdown based on customer's bag count
+      const numberOfBagsSelect = document.getElementById('numberOfBags');
+      if (numberOfBagsSelect) {
+        const customerBags = parseInt(customer.numberOfBags) || 1;
+        console.log('Customer has bags:', customerBags);
+        
+        // Clear existing options
+        numberOfBagsSelect.innerHTML = '';
+        
+        if (customerBags === 1) {
+          // If customer has only 1 bag, set it and hide the dropdown
+          const option = document.createElement('option');
+          option.value = '1';
+          option.textContent = '1 bag';
+          option.selected = true;
+          numberOfBagsSelect.appendChild(option);
+          
+          // Hide the dropdown and show a readonly text instead
+          const parentDiv = numberOfBagsSelect.parentElement;
+          numberOfBagsSelect.style.display = 'none';
+          
+          // Create a display element for the single bag
+          const singleBagDisplay = document.createElement('div');
+          singleBagDisplay.className = 'w-full px-4 py-2 border rounded-lg bg-gray-100';
+          singleBagDisplay.textContent = '1 bag';
+          singleBagDisplay.id = 'singleBagDisplay';
+          
+          // Remove any existing display element
+          const existingDisplay = document.getElementById('singleBagDisplay');
+          if (existingDisplay) {
+            existingDisplay.remove();
+          }
+          
+          parentDiv.appendChild(singleBagDisplay);
+        } else {
+          // If customer has multiple bags, populate dropdown with options from 1 to customerBags
+          numberOfBagsSelect.style.display = 'block';
+          
+          // Remove any single bag display element if it exists
+          const existingDisplay = document.getElementById('singleBagDisplay');
+          if (existingDisplay) {
+            existingDisplay.remove();
+          }
+          
+          // Add placeholder option
+          const placeholderOption = document.createElement('option');
+          placeholderOption.value = '';
+          placeholderOption.textContent = 'Select number of bags';
+          numberOfBagsSelect.appendChild(placeholderOption);
+          
+          // Add options from 1 to customerBags
+          for (let i = 1; i <= customerBags; i++) {
+            const option = document.createElement('option');
+            option.value = i.toString();
+            option.textContent = i === 1 ? '1 bag' : `${i} bags`;
+            
+            // Select the maximum number of bags by default
+            if (i === customerBags) {
+              option.selected = true;
+            }
+            
+            numberOfBagsSelect.appendChild(option);
+          }
+        }
+        
+        // Trigger change event to update delivery fee calculation
+        numberOfBagsSelect.dispatchEvent(new Event('change'));
+      }
+
       console.log('Customer affiliateId:', customer.affiliateId);
       console.log('Customer data has affiliate info:', customer.affiliate);
 
@@ -921,14 +990,31 @@
       estimatedWeightInput.addEventListener('change', calculateEstimate);
     }
     
-    // Setup add-on checkbox listeners
-    const addOnCheckboxes = document.querySelectorAll('#premiumDetergent, #fabricSoftener, #stainRemover');
-    addOnCheckboxes.forEach(checkbox => {
-      checkbox.addEventListener('change', function() {
-        selectedAddOns[this.value] = this.checked;
-        console.log('Add-on changed:', this.value, this.checked);
+    // Setup add-on icon click listeners
+    const addonItems = document.querySelectorAll('.addon-item');
+    addonItems.forEach(item => {
+      item.addEventListener('click', function() {
+        const addonType = this.dataset.addon;
+        const checkbox = this.querySelector('.addon-checkbox');
+        
+        // Toggle the checkbox state
+        checkbox.checked = !checkbox.checked;
+        
+        // Toggle the selected class for visual feedback
+        this.classList.toggle('selected', checkbox.checked);
+        
+        // Update the selectedAddOns object
+        selectedAddOns[addonType] = checkbox.checked;
+        
+        console.log('Add-on toggled:', addonType, checkbox.checked);
         calculateEstimate();
       });
+      
+      // Set initial state based on checkbox
+      const checkbox = item.querySelector('.addon-checkbox');
+      if (checkbox && checkbox.checked) {
+        item.classList.add('selected');
+      }
     });
 
     // Initial calculation

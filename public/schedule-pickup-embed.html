@@ -7,8 +7,8 @@
     <title>WaveMAX Laundry - Schedule Pickup</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
     <link rel="stylesheet" href="/assets/css/language-switcher.css">
-    <!-- Custom CSS -->
-    <link rel="stylesheet" href="/assets/css/schedule-pickup.css">
+    <!-- Custom CSS with cache buster -->
+    <link rel="stylesheet" href="/assets/css/schedule-pickup.css?v=20250828-addon-icons-v2">
 </head>
 <body class="bg-white font-sans">
     <!-- Pickup Scheduling Form -->
@@ -117,23 +117,38 @@
                 <!-- Page 2: Summary and Payment Section -->
                 <div id="summaryPaymentSection" class="schedule-step hidden-section">
                     <!-- Add-on Items Section -->
-                    <div class="border-t pt-6">
-                        <h3 class="text-xl font-bold mb-4" data-i18n="orders.schedule.addOnItems">Add-on Items</h3>
-                        <div class="bg-gray-50 p-4 rounded-lg mb-6">
-                            <p class="text-sm text-gray-600 mb-4" data-i18n="orders.schedule.addOnDescription">Enhance your laundry service with premium add-ons ($0.10/lb each):</p>
-                            <div class="space-y-3">
-                                <label class="flex items-center cursor-pointer">
-                                    <input type="checkbox" id="premiumDetergent" value="premiumDetergent" class="mr-3 w-4 h-4 text-blue-600 rounded focus:ring-blue-500">
-                                    <span class="text-base" data-i18n="orders.schedule.premiumDetergent">Premium Detergent</span>
-                                </label>
-                                <label class="flex items-center cursor-pointer">
-                                    <input type="checkbox" id="fabricSoftener" value="fabricSoftener" class="mr-3 w-4 h-4 text-blue-600 rounded focus:ring-blue-500">
-                                    <span class="text-base" data-i18n="orders.schedule.fabricSoftener">Fabric Softener</span>
-                                </label>
-                                <label class="flex items-center cursor-pointer">
-                                    <input type="checkbox" id="stainRemover" value="stainRemover" class="mr-3 w-4 h-4 text-blue-600 rounded focus:ring-blue-500">
-                                    <span class="text-base" data-i18n="orders.schedule.stainRemover">Stain Remover</span>
-                                </label>
+                    <div class="border-t pt-4">
+                        <h3 class="text-lg font-bold mb-3" data-i18n="orders.schedule.addOnItems">Add-on Items</h3>
+                        <div class="bg-gray-50 p-3 rounded-lg mb-4">
+                            <p class="text-xs text-gray-600 mb-3" data-i18n="orders.schedule.addOnDescription">Premium add-ons ($0.10/lb each)</p>
+                            <div class="flex gap-4 justify-center">
+                                <div class="addon-item" data-addon="premiumDetergent">
+                                    <input type="checkbox" id="premiumDetergent" value="premiumDetergent" class="hidden addon-checkbox">
+                                    <div class="addon-icon-wrapper">
+                                        <svg class="addon-icon" fill="currentColor" viewBox="0 0 20 20">
+                                            <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z"/>
+                                        </svg>
+                                    </div>
+                                    <span class="addon-label" data-i18n="orders.schedule.premiumDetergentCompact">Premium<br>Detergent</span>
+                                </div>
+                                <div class="addon-item" data-addon="fabricSoftener">
+                                    <input type="checkbox" id="fabricSoftener" value="fabricSoftener" class="hidden addon-checkbox">
+                                    <div class="addon-icon-wrapper">
+                                        <svg class="addon-icon" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M5 2a1 1 0 011 1v1h1a1 1 0 010 2H6v1a1 1 0 01-2 0V6H3a1 1 0 010-2h1V3a1 1 0 011-1zm0 10a1 1 0 011 1v1h1a1 1 0 110 2H6v1a1 1 0 11-2 0v-1H3a1 1 0 110-2h1v-1a1 1 0 011-1zM12 2a1 1 0 01.967.744L14.146 7.2 17.5 9.134a1 1 0 010 1.732l-3.354 1.935-1.18 4.455a1 1 0 01-1.933 0L9.854 12.8 6.5 10.866a1 1 0 010-1.732l3.354-1.935 1.18-4.455A1 1 0 0112 2z" clip-rule="evenodd"/>
+                                        </svg>
+                                    </div>
+                                    <span class="addon-label" data-i18n="orders.schedule.fabricSoftenerCompact">Fabric<br>Softener</span>
+                                </div>
+                                <div class="addon-item" data-addon="stainRemover">
+                                    <input type="checkbox" id="stainRemover" value="stainRemover" class="hidden addon-checkbox">
+                                    <div class="addon-icon-wrapper">
+                                        <svg class="addon-icon" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+                                        </svg>
+                                    </div>
+                                    <span class="addon-label" data-i18n="orders.schedule.stainRemoverCompact">Stain<br>Remover</span>
+                                </div>
                             </div>
                         </div>
                     </div>

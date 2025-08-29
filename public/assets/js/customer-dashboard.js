@@ -1,15 +1,50 @@
-// Load CSRF utilities
-if (!window.CsrfUtils) {
-  console.error('CSRF utilities not loaded. Please include csrf-utils.js before this script.');
+(function() {
+  'use strict';
+  
+  // Check if already loaded
+  if (window.customerDashboardLoaded) {
+    console.log('Customer dashboard already loaded, skipping...');
+    return;
+  }
+  window.customerDashboardLoaded = true;
+
+  // Load CSRF utilities
+  if (!window.CsrfUtils) {
+    console.error('CSRF utilities not loaded. Please include csrf-utils.js before this script.');
+  }
+
+  // Global variables
+  let customerData = null;
+  let customerId = null;
+
+// Function to show loading overlay
+function showLoadingOverlay() {
+  const overlay = document.getElementById('loadingOverlay');
+  if (overlay) {
+    overlay.style.display = 'flex';
+  }
 }
 
-// Global variables
-let customerData = null;
-let customerId = null;
+// Function to hide loading overlay
+function hideLoadingOverlay() {
+  const overlay = document.getElementById('loadingOverlay');
+  if (overlay) {
+    // Fade out animation
+    overlay.style.opacity = '0';
+    overlay.style.transition = 'opacity 0.3s ease';
+    setTimeout(() => {
+      overlay.style.display = 'none';
+    }, 300);
+  }
+}
 
 // Function to initialize dashboard
 async function initializeDashboard() {
   console.log('Initializing customer dashboard');
+  
+  // Show loading overlay immediately
+  showLoadingOverlay();
+  
   // Check authentication
   const token = localStorage.getItem('customerToken');
   const customerStr = localStorage.getItem('currentCustomer');
@@ -24,6 +59,8 @@ async function initializeDashboard() {
 
   if (!token || !customerStr) {
     console.log('No authentication found, redirecting to login');
+    // Hide loading overlay before redirecting
+    hideLoadingOverlay();
     // Use embed navigation
     if (window.parent !== window) {
       window.parent.postMessage({
@@ -50,7 +87,23 @@ async function initializeDashboard() {
       schedulePickupBtn.href = '#';
       schedulePickupBtn.addEventListener('click', function(e) {
         e.preventDefault();
-        window.location.href = '/embed-app-v2.html?route=/schedule-pickup';
+        
+        // Use navigateTo if available (when in iframe), otherwise use window.location
+        if (window.navigateTo && typeof window.navigateTo === 'function') {
+          console.log('Navigating to schedule pickup using navigateTo');
+          window.navigateTo('/schedule-pickup');
+        } else if (window.parent !== window && window.parent.postMessage) {
+          // Try to communicate with parent frame
+          console.log('Posting navigation message to parent');
+          window.parent.postMessage({
+            type: 'navigate',
+            route: '/schedule-pickup'
+          }, '*');
+        } else {
+          // Fallback to direct navigation
+          console.log('Using direct navigation to schedule pickup');
+          window.location.href = '/embed-app-v2.html?route=/schedule-pickup';
+        }
       });
     }
 
@@ -83,9 +136,14 @@ async function initializeDashboard() {
 
     // Load dashboard data
     await loadDashboardData();
+    
+    // Hide loading overlay once everything is loaded
+    hideLoadingOverlay();
 
   } catch (error) {
     console.error('Error initializing dashboard:', error);
+    // Hide overlay even on error
+    hideLoadingOverlay();
     alert('Error loading dashboard. Please login again.');
     window.location.href = '/embed-app-v2.html?route=/customer-login';
   }
@@ -577,3 +635,16 @@ async function deleteAllData() {
     alert('An error occurred while deleting data');
   }
 }
+
+// Expose necessary functions to window
+window.initializeDashboard = initializeDashboard;
+window.handleLogout = handleLogout;
+
+// Auto-initialize when DOM is ready
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initializeDashboard);
+} else {
+  initializeDashboard();
+}
+
+})();
