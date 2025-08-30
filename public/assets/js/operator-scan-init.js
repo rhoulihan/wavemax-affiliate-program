@@ -1218,9 +1218,9 @@
                     </div>
                 </div>
                 ${hasAddOns ? `
-                    <div class="add-ons-alert" style="background-color: #fff3cd; border: 2px solid #856404; border-radius: 4px; padding: 12px; margin-top: 12px;">
-                        <h5 style="color: #856404; margin: 0 0 8px 0;">⚠️ Add-ons Required</h5>
-                        <div style="color: #721c24; font-weight: bold;">
+                    <div class="add-ons-alert">
+                        <h5>⚠️ Add-ons Required</h5>
+                        <div class="add-ons-list">
                             ${[
                                 order.addOns.premiumDetergent && '✓ Premium Detergent',
                                 order.addOns.fabricSoftener && '✓ Fabric Softener',
@@ -1281,10 +1281,10 @@
             // Add add-on confirmation checkbox if order has add-ons
             if (hasAddOns) {
                 html += `
-                    <div class="add-ons-confirmation" style="background-color: #f8f9fa; border: 1px solid #dee2e6; border-radius: 4px; padding: 12px; margin-top: 12px;">
-                        <label style="display: flex; align-items: center; margin: 0; cursor: pointer;">
-                            <input type="checkbox" id="addOnsConfirmed" style="margin-right: 8px; width: 18px; height: 18px;">
-                            <span style="font-weight: bold;">I confirm all add-ons have been applied to this order</span>
+                    <div class="add-ons-confirmation">
+                        <label>
+                            <input type="checkbox" id="addOnsConfirmed">
+                            <span class="confirmation-text">I confirm all add-ons have been applied to this order</span>
                         </label>
                     </div>
                 `;
@@ -1468,9 +1468,9 @@
                 <p><strong>Bags Processed:</strong> ${processedBags} of ${totalBags}</p>
             </div>
             ${hasAddOns ? `
-                <div class="add-ons-reminder" style="background-color: #d4edda; border: 2px solid #155724; border-radius: 4px; padding: 12px; margin: 12px 0;">
-                    <h5 style="color: #155724; margin: 0 0 8px 0;">✅ Add-ons Applied</h5>
-                    <div style="color: #155724; font-weight: bold;">
+                <div class="add-ons-reminder">
+                    <h5>✅ Add-ons Applied</h5>
+                    <div class="add-ons-list">
                         ${[
                             order.addOns.premiumDetergent && '✓ Premium Detergent',
                             order.addOns.fabricSoftener && '✓ Fabric Softener',
@@ -1769,9 +1769,9 @@
                 <p><strong>Total Bags:</strong> ${totalBags}</p>
             </div>
             ${hasAddOns ? `
-                <div class="add-ons-complete" style="background-color: #cce5ff; border: 2px solid #004085; border-radius: 4px; padding: 12px; margin: 12px 0;">
-                    <h5 style="color: #004085; margin: 0 0 8px 0;">ℹ️ Add-ons Included</h5>
-                    <div style="color: #004085; font-weight: bold;">
+                <div class="add-ons-complete">
+                    <h5>ℹ️ Add-ons Included</h5>
+                    <div class="add-ons-list">
                         ${[
                             order.addOns.premiumDetergent && '✓ Premium Detergent',
                             order.addOns.fabricSoftener && '✓ Fabric Softener',
@@ -2192,7 +2192,7 @@
             document.body.innerHTML = `
                 <div style="display: flex; justify-content: center; align-items: center; height: 100vh; background: #1e3a8a; color: white; font-family: Arial;">
                     <div style="text-align: center;">
-                        <h1 style="font-size: 48px; margin-bottom: 20px;">Logged Out</h1>
+                        <h1 class="logout-title">Logged Out</h1>
                         <p style="font-size: 24px;">Exit function not available. Check Fully Kiosk settings.</p>
                     </div>
                 </div>

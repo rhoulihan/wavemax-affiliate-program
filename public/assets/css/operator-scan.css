@@ -452,3 +452,101 @@ body {
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
+/* Add-ons Alert Styles - CSP compliant */
+.add-ons-alert {
+    background-color: #fff3cd;
+    border: 2px solid #856404;
+    border-radius: 4px;
+    padding: 12px;
+    margin-top: 12px;
+}
+
+.add-ons-alert h5 {
+    color: #856404;
+    margin: 0 0 8px 0;
+}
+
+/* Add-ons Confirmation Styles */
+.add-ons-confirmation {
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    padding: 12px;
+    margin-top: 12px;
+}
+
+.add-ons-confirmation label {
+    display: flex;
+    align-items: center;
+    margin: 0;
+    cursor: pointer;
+}
+
+.add-ons-confirmation input[type="checkbox"] {
+    margin-right: 8px;
+    width: 18px;
+    height: 18px;
+}
+
+/* Add-ons Reminder Styles */
+.add-ons-reminder {
+    background-color: #d4edda;
+    border: 2px solid #155724;
+    border-radius: 4px;
+    padding: 12px;
+    margin: 12px 0;
+}
+
+.add-ons-reminder h5 {
+    color: #155724;
+    margin: 0 0 8px 0;
+}
+
+/* Add-ons Complete Styles */
+.add-ons-complete {
+    background-color: #cce5ff;
+    border: 2px solid #004085;
+    border-radius: 4px;
+    padding: 12px;
+    margin: 12px 0;
+}
+
+.add-ons-complete h5 {
+    color: #004085;
+    margin: 0 0 8px 0;
+}
+
+/* Logout Message Styles */
+.logout-message h1 {
+    font-size: 48px;
+    margin-bottom: 20px;
+}
+
+
+/* Add-ons List Styles */
+.add-ons-list {
+    color: #721c24;
+    font-weight: bold;
+}
+
+.add-ons-reminder .add-ons-list {
+    color: #155724;
+    font-weight: bold;
+}
+
+.add-ons-complete .add-ons-list {
+    color: #004085;
+    font-weight: bold;
+}
+
+/* Confirmation Text */
+.confirmation-text {
+    font-weight: bold;
+}
+
+/* Logout Title */
+.logout-title {
+    font-size: 48px;
+    margin-bottom: 20px;
+}
+
