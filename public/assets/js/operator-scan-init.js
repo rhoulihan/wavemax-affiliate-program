@@ -965,15 +965,24 @@
             console.log('Processing scan with token:', token ? 'Present' : 'Missing');
             console.log('CSRF token status:', CsrfUtils.getToken() ? 'Present' : 'Missing');
             
-            // Parse the scan data - format is customerId#bagId
+            // Parse the scan data - supports multiple formats:
+            // Format 1: customerId#bagId (e.g., CUST-xxx#1)
+            // Format 2: customerId-bagNumber (e.g., CUST-xxx-1)
             let customerId = scanData;
             let bagId = null;
             
             if (scanData.includes('#')) {
+                // Format: CUST-xxx#1
                 const parts = scanData.split('#');
                 customerId = parts[0];
                 bagId = parts[1];
-                console.log('Parsed scan data - Customer ID:', customerId, 'Bag ID:', bagId);
+                console.log('Parsed scan data (# format) - Customer ID:', customerId, 'Bag ID:', bagId);
+            } else if (scanData.match(/^CUST-[a-f0-9-]+-\d+$/)) {
+                // Format: CUST-xxx-1 (customer ID with bag number at end)
+                const lastDashIndex = scanData.lastIndexOf('-');
+                customerId = scanData.substring(0, lastDashIndex);
+                bagId = scanData.substring(lastDashIndex + 1);
+                console.log('Parsed scan data (- format) - Customer ID:', customerId, 'Bag ID:', bagId);
             } else {
                 console.log('No bag ID in scan data, using full string as customer ID');
             }
