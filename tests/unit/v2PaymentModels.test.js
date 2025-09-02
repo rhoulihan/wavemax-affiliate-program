@@ -7,6 +7,10 @@ describe('V2 Payment System Model Updates', () => {
   
   // Helper function to create affiliate with required fields
   const createTestAffiliate = async (overrides = {}) => {
+    const crypto = require('crypto');
+    const salt = crypto.randomBytes(16).toString('hex');
+    const hash = crypto.pbkdf2Sync('testpass123', salt, 1000, 64, 'sha512').toString('hex');
+    
     const defaults = {
       firstName: 'Test',
       lastName: 'Affiliate',
@@ -19,10 +23,34 @@ describe('V2 Payment System Model Updates', () => {
       serviceLatitude: 30.123,
       serviceLongitude: -97.456,
       username: `affiliate${Date.now()}`,
-      password: 'testpass123',
+      passwordHash: hash,
+      passwordSalt: salt,
       paymentMethod: 'check'
     };
     return await Affiliate.create({ ...defaults, ...overrides });
+  };
+  
+  // Helper function to create customer with required fields
+  const createTestCustomer = async (affiliate, overrides = {}) => {
+    const crypto = require('crypto');
+    const salt = crypto.randomBytes(16).toString('hex');
+    const hash = crypto.pbkdf2Sync('password123', salt, 1000, 64, 'sha512').toString('hex');
+    
+    const defaults = {
+      firstName: 'Test',
+      lastName: 'Customer',
+      email: `customer${Date.now()}@test.com`,
+      phone: '555-5678',
+      address: '123 Main St',
+      city: 'Test City',
+      state: 'TX',
+      zipCode: '12345',
+      username: `testcustomer${Date.now()}`,
+      passwordHash: hash,
+      passwordSalt: salt,
+      affiliateId: affiliate._id
+    };
+    return await Customer.create({ ...defaults, ...overrides });
   };
   
   afterAll(async () => {
@@ -36,20 +64,7 @@ describe('V2 Payment System Model Updates', () => {
     it('should create customer with V1 registration by default', async () => {
       const affiliate = await createTestAffiliate();
 
-      const customer = await Customer.create({
-        name: 'Test Customer',
-        email: 'customer@test.com',
-        phoneNumber: '555-5678',
-        address: {
-          street: '123 Main St',
-          city: 'Test City',
-          state: 'TX',
-          zipCode: '12345'
-        },
-        username: 'testcustomer',
-        password: 'password123',
-        affiliateId: affiliate._id
-      });
+      const customer = await createTestCustomer(affiliate);
 
       expect(customer.registrationVersion).toBe('v1');
       expect(customer.initialBagsRequested).toBe(1);
@@ -58,19 +73,15 @@ describe('V2 Payment System Model Updates', () => {
     it('should create V2 customer with custom bag count', async () => {
       const affiliate = await createTestAffiliate();
 
-      const customer = await Customer.create({
-        name: 'V2 Customer',
+      const customer = await createTestCustomer(affiliate, {
+        firstName: 'V2',
+        lastName: 'Customer',
         email: 'v2customer@test.com',
-        phoneNumber: '555-6789',
-        address: {
-          street: '456 Oak St',
-          city: 'Test Town',
-          state: 'CA',
-          zipCode: '54321'
-        },
-        username: 'v2customer',
-        password: 'password123',
-        affiliateId: affiliate._id,
+        phone: '555-6789',
+        address: '456 Oak St',
+        city: 'Test Town',
+        state: 'CA',
+        zipCode: '54321',
         registrationVersion: 'v2',
         initialBagsRequested: 2
       });
@@ -82,18 +93,22 @@ describe('V2 Payment System Model Updates', () => {
     it('should validate registrationVersion enum values', async () => {
       const affiliate = await createTestAffiliate();
 
+      const crypto = require('crypto');
+      const salt = crypto.randomBytes(16).toString('hex');
+      const hash = crypto.pbkdf2Sync('password123', salt, 1000, 64, 'sha512').toString('hex');
+      
       const invalidCustomer = new Customer({
-        name: 'Invalid Customer',
+        firstName: 'Invalid',
+        lastName: 'Customer',
         email: 'invalid@test.com',
-        phoneNumber: '555-7890',
-        address: {
-          street: '789 Pine St',
-          city: 'Error City',
-          state: 'NY',
-          zipCode: '67890'
-        },
+        phone: '555-7890',
+        address: '789 Pine St',
+        city: 'Error City',
+        state: 'NY',
+        zipCode: '67890',
         username: 'invalidcustomer',
-        password: 'password123',
+        passwordHash: hash,
+        passwordSalt: salt,
         affiliateId: affiliate._id,
         registrationVersion: 'v3' // Invalid value
       });
@@ -152,19 +167,15 @@ describe('V2 Payment System Model Updates', () => {
     beforeEach(async () => {
       affiliate = await createTestAffiliate();
 
-      customer = await Customer.create({
-        name: 'Order Test Customer',
+      customer = await createTestCustomer(affiliate, {
+        firstName: 'Order',
+        lastName: 'TestCustomer',
         email: 'ordercustomer@test.com',
-        phoneNumber: '555-6666',
-        address: {
-          street: '999 Order St',
-          city: 'Order City',
-          state: 'OR',
-          zipCode: '99999'
-        },
-        username: `ordercustomer${Date.now()}`,
-        password: 'password123',
-        affiliateId: affiliate._id,
+        phone: '555-6666',
+        address: '999 Order St',
+        city: 'Order City',
+        state: 'OR',
+        zipCode: '99999',
         registrationVersion: 'v2'
       });
     });
@@ -174,7 +185,7 @@ describe('V2 Payment System Model Updates', () => {
         customerId: customer._id,
         affiliateId: affiliate._id,
         pickupDate: new Date(),
-        pickupTime: '10:00 AM - 12:00 PM',
+        pickupTime: 'morning',
         estimatedWeight: 20,
         numberOfBags: 2
       });
@@ -184,8 +195,8 @@ describe('V2 Payment System Model Updates', () => {
       expect(order.v2PaymentMethod).toBe('pending');
       expect(order.v2PaymentAmount).toBe(0);
       expect(order.v2PaymentCheckAttempts).toBe(0);
-      expect(order.v2PaymentLinks).toBeUndefined();
-      expect(order.v2PaymentQRCodes).toBeUndefined();
+      expect(order.v2PaymentLinks).toEqual({});
+      expect(order.v2PaymentQRCodes).toEqual({});
       expect(order.v2PaymentRequestedAt).toBeUndefined();
       expect(order.v2PaymentVerifiedAt).toBeUndefined();
     });
@@ -195,7 +206,7 @@ describe('V2 Payment System Model Updates', () => {
         customerId: customer._id,
         affiliateId: affiliate._id,
         pickupDate: new Date(),
-        pickupTime: '2:00 PM - 4:00 PM',
+        pickupTime: 'afternoon',
         estimatedWeight: 25,
         numberOfBags: 2,
         v2PaymentStatus: 'awaiting',
@@ -237,7 +248,7 @@ describe('V2 Payment System Model Updates', () => {
         customerId: customer._id,
         affiliateId: affiliate._id,
         pickupDate: new Date(),
-        pickupTime: '4:00 PM - 6:00 PM',
+        pickupTime: 'afternoon',
         estimatedWeight: 30,
         numberOfBags: 2,
         v2PaymentLinks: paymentLinks,
@@ -258,7 +269,7 @@ describe('V2 Payment System Model Updates', () => {
         customerId: customer._id,
         affiliateId: affiliate._id,
         pickupDate: new Date(),
-        pickupTime: '6:00 PM - 8:00 PM',
+        pickupTime: 'evening',
         estimatedWeight: 15,
         numberOfBags: 1,
         v2PaymentStatus: 'awaiting',
@@ -297,7 +308,7 @@ describe('V2 Payment System Model Updates', () => {
         customerId: customer._id,
         affiliateId: affiliate._id,
         pickupDate: new Date(),
-        pickupTime: '10:00 PM - 12:00 AM',
+        pickupTime: 'evening',
         estimatedWeight: 18,
         numberOfBags: 2,
         v2PaymentMethod: 'bitcoin' // Invalid enum value
@@ -311,7 +322,7 @@ describe('V2 Payment System Model Updates', () => {
         customerId: customer._id,
         affiliateId: affiliate._id,
         pickupDate: new Date(),
-        pickupTime: '12:00 AM - 2:00 AM',
+        pickupTime: 'morning',
         estimatedWeight: 22,
         numberOfBags: 2,
         v2PaymentNotes: 'Payment verified via email confirmation from Venmo'
@@ -325,19 +336,15 @@ describe('V2 Payment System Model Updates', () => {
     it('should not affect existing V1 customers', async () => {
       const affiliate = await createTestAffiliate();
 
-      const v1Customer = await Customer.create({
-        name: 'V1 Customer',
+      const v1Customer = await createTestCustomer(affiliate, {
+        firstName: 'V1',
+        lastName: 'Customer',
         email: 'v1customer@test.com',
-        phoneNumber: '555-8888',
-        address: {
-          street: '111 Legacy St',
-          city: 'Old City',
-          state: 'TX',
-          zipCode: '11111'
-        },
-        username: 'v1customer',
-        password: 'password123',
-        affiliateId: affiliate._id,
+        phone: '555-8888',
+        address: '111 Legacy St',
+        city: 'Old City',
+        state: 'TX',
+        zipCode: '11111',
         numberOfBags: 3,
         bagCredit: 50.00
       });
@@ -351,26 +358,22 @@ describe('V2 Payment System Model Updates', () => {
     it('should not affect existing V1 orders', async () => {
       const affiliate = await createTestAffiliate();
 
-      const customer = await Customer.create({
-        name: 'V1 Order Customer',
+      const customer = await createTestCustomer(affiliate, {
+        firstName: 'V1Order',
+        lastName: 'Customer',
         email: 'v1ordercustomer@test.com',
-        phoneNumber: '555-0000',
-        address: {
-          street: '222 Legacy Ave',
-          city: 'Old Town',
-          state: 'CA',
-          zipCode: '22222'
-        },
-        username: 'v1ordercustomer',
-        password: 'password123',
-        affiliateId: affiliate._id
+        phone: '555-0000',
+        address: '222 Legacy Ave',
+        city: 'Old Town',
+        state: 'CA',
+        zipCode: '22222'
       });
 
       const v1Order = await Order.create({
         customerId: customer._id,
         affiliateId: affiliate._id,
         pickupDate: new Date(),
-        pickupTime: '10:00 AM - 12:00 PM',
+        pickupTime: 'morning',
         estimatedWeight: 25,
         numberOfBags: 2,
         paymentStatus: 'completed',

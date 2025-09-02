@@ -565,53 +565,57 @@ describe('Auth Controller', () => {
 
   describe('operatorLogin', () => {
     test('should successfully login operator with PIN', async () => {
-      req.body = { email: 'operator@example.com', password: '1234' };
+      // Set up environment for PIN-based auth
+      process.env.OPERATOR_PIN = '1234';
+      process.env.DEFAULT_OPERATOR_ID = 'OP001';
+      
+      req.body = { pinCode: '1234' };
 
       const mockOperator = {
         _id: 'op123',
         operatorId: 'OP001',
         email: 'operator@example.com',
         firstName: 'John',
+        lastName: 'Doe',
         isActive: true,
         isOnShift: true,
-        verifyPassword: jest.fn().mockReturnValue(true),
+        shiftStart: '00:00',
+        shiftEnd: '23:59',
         resetLoginAttempts: jest.fn()
       };
 
-      Operator.findByEmailWithPassword = jest.fn().mockResolvedValue(mockOperator);
+      Operator.findOne = jest.fn().mockResolvedValue(mockOperator);
       RefreshToken.prototype.save = jest.fn().mockResolvedValue(true);
 
       await authController.operatorLogin(req, res);
 
-      expect(Operator.findByEmailWithPassword).toHaveBeenCalledWith('operator@example.com');
-      expect(mockOperator.verifyPassword).toHaveBeenCalledWith('1234');
+      expect(Operator.findOne).toHaveBeenCalledWith({ operatorId: 'OP001' });
+      expect(res.status).toHaveBeenCalledWith(200);
       expect(res.json).toHaveBeenCalledWith({
         success: true,
         token: 'mock-jwt-token',
         refreshToken: 'mock-token',
-        user: expect.objectContaining({
+        operator: expect.objectContaining({
           operatorId: 'OP001',
           firstName: 'John'
         })
       });
     });
 
-    test('should increment login attempts on failure', async () => {
-      req.body = { email: 'operator@example.com', password: 'wrong' };
-
-      const mockOperator = {
-        email: 'operator@example.com',
-        isActive: true,
-        verifyPassword: jest.fn().mockReturnValue(false),
-        incLoginAttempts: jest.fn()
-      };
-
-      Operator.findByEmailWithPassword = jest.fn().mockResolvedValue(mockOperator);
+    test('should fail with invalid PIN', async () => {
+      // Set up environment for PIN-based auth
+      process.env.OPERATOR_PIN = '1234';
+      process.env.DEFAULT_OPERATOR_ID = 'OP001';
+      
+      req.body = { pinCode: 'wrong' };
 
       await authController.operatorLogin(req, res);
 
-      expect(mockOperator.incLoginAttempts).toHaveBeenCalled();
       expect(res.status).toHaveBeenCalledWith(401);
+      expect(res.json).toHaveBeenCalledWith({
+        success: false,
+        message: 'Invalid PIN code'
+      });
     });
   });
 

@@ -66,7 +66,7 @@ describe('Test Routes', () => {
     it('should return existing test customer', async () => {
       const mockCustomer = {
         _id: 'customerId',
-        email: 'test.customer@wavemax.test',
+        email: 'spam-me@wavemax.promo',
         firstName: 'Test',
         lastName: 'Customer'
       };
@@ -78,7 +78,7 @@ describe('Test Routes', () => {
       
       expect(response.status).toBe(200);
       expect(response.body).toEqual(mockCustomer);
-      expect(Customer.findOne).toHaveBeenCalledWith({ email: 'test.customer@wavemax.test' });
+      expect(Customer.findOne).toHaveBeenCalledWith({ email: 'spam-me@wavemax.promo' });
     });
 
     it('should return 404 when test customer not found', async () => {
@@ -241,7 +241,7 @@ describe('Test Routes', () => {
         .send({});
       
       expect(response.status).toBe(200);
-      expect(Customer.findOne).toHaveBeenCalledWith({ email: 'test.customer@wavemax.test' });
+      expect(Customer.findOne).toHaveBeenCalledWith({ email: 'spam-me@wavemax.promo' });
       expect(mockOrder.save).toHaveBeenCalled();
     });
 
@@ -299,16 +299,20 @@ describe('Test Routes', () => {
 
   describe('DELETE /api/test/cleanup', () => {
     it('should delete all test data', async () => {
+      Customer.find.mockResolvedValue([]);
       Order.deleteMany.mockResolvedValue({ deletedCount: 5 });
       Customer.deleteMany.mockResolvedValue({ deletedCount: 1 });
+      Affiliate.deleteMany.mockResolvedValue({ deletedCount: 1 });
       
       const response = await request(app)
         .delete('/api/test/cleanup');
       
       expect(response.status).toBe(200);
       expect(response.body).toEqual({ message: 'Test data cleaned up successfully' });
-      expect(Order.deleteMany).toHaveBeenCalledWith({ orderNumber: { $regex: /^TEST-/ } });
-      expect(Customer.deleteMany).toHaveBeenCalledWith({ email: 'test.customer@wavemax.test' });
+      expect(Order.deleteMany).toHaveBeenCalledWith({ orderId: { $regex: /^TEST-/ } });
+      expect(Customer.deleteMany).toHaveBeenCalledWith({ 
+        email: { $in: ['spam-me@wavemax.promo', 'test.customer@wavemax.test', 'test.affiliate@wavemax.test'] } 
+      });
     });
 
     it('should handle database errors during cleanup', async () => {

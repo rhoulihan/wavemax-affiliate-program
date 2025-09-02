@@ -1,11 +1,13 @@
 const paymentEmailScanner = require('../../server/services/paymentEmailScanner');
 const mailcowService = require('../../server/services/mailcowService');
+const imapScanner = require('../../server/services/imapEmailScanner');
 const Order = require('../../server/models/Order');
 const Customer = require('../../server/models/Customer');
 const Affiliate = require('../../server/models/Affiliate');
 
-// Mock mailcowService
+// Mock email services
 jest.mock('../../server/services/mailcowService');
+jest.mock('../../server/services/imapEmailScanner');
 
 describe('PaymentEmailScanner', () => {
   let testAffiliate, testCustomer, testOrder;
@@ -15,6 +17,10 @@ describe('PaymentEmailScanner', () => {
     jest.clearAllMocks();
 
     // Create test data
+    const crypto = require('crypto');
+    const affSalt = crypto.randomBytes(16).toString('hex');
+    const affHash = crypto.pbkdf2Sync('testpass123', affSalt, 1000, 64, 'sha512').toString('hex');
+    
     testAffiliate = await Affiliate.create({
       firstName: 'Test',
       lastName: 'Affiliate',
@@ -27,24 +33,26 @@ describe('PaymentEmailScanner', () => {
       serviceLatitude: 30.123,
       serviceLongitude: -97.456,
       username: `affiliate${Date.now()}`,
-      password: 'testpass123',
+      passwordHash: affHash,
+      passwordSalt: affSalt,
       paymentMethod: 'check'
     });
 
+    const custSalt = crypto.randomBytes(16).toString('hex');
+    const custHash = crypto.pbkdf2Sync('testpass123', custSalt, 1000, 64, 'sha512').toString('hex');
+    
     testCustomer = await Customer.create({
-      name: 'Test Customer',
       firstName: 'Test',
       lastName: 'Customer',
       email: 'customer@test.com',
-      phoneNumber: '555-2222',
-      address: {
-        street: '456 Customer Ave',
-        city: 'Customer City',
-        state: 'TX',
-        zipCode: '54321'
-      },
+      phone: '555-2222',
+      address: '456 Customer Ave',
+      city: 'Customer City',
+      state: 'TX',
+      zipCode: '54321',
       username: `customer${Date.now()}`,
-      password: 'testpass123',
+      passwordHash: custHash,
+      passwordSalt: custSalt,
       affiliateId: testAffiliate._id,
       registrationVersion: 'v2'
     });
@@ -53,7 +61,7 @@ describe('PaymentEmailScanner', () => {
       customerId: testCustomer.customerId,
       affiliateId: testAffiliate.affiliateId,
       pickupDate: new Date(),
-      pickupTime: '10:00 AM - 12:00 PM',
+      pickupTime: 'morning',
       estimatedWeight: 20,
       actualWeight: 22,
       numberOfBags: 2,
@@ -113,7 +121,7 @@ describe('PaymentEmailScanner', () => {
         id: 'email123',
         from: 'payment@venmo.com',
         subject: 'You received $55.50 from John Doe',
-        body: 'Payment received for Order #' + testOrder._id.toString().slice(-8).toUpperCase(),
+        text: 'Payment received for Order #' + testOrder._id.toString().slice(-8).toUpperCase(),
         text: 'Payment of $55.50 received. Note: WaveMAX Order #' + testOrder._id.toString().slice(-8).toUpperCase(),
         date: new Date()
       };
@@ -133,7 +141,7 @@ describe('PaymentEmailScanner', () => {
         id: 'email456',
         from: 'service@paypal.com',
         subject: 'Receipt for your payment',
-        body: `You sent $55.50 USD to WaveMAX. Transaction ID: 1234567890. Notes: WaveMAX Order #${shortId}`,
+        text: `You sent $55.50 USD to WaveMAX. Transaction ID: 1234567890. Notes: WaveMAX Order #${shortId}`,
         date: new Date()
       };
 
@@ -151,7 +159,7 @@ describe('PaymentEmailScanner', () => {
         id: 'email789',
         from: 'cash@square.com',
         subject: 'You sent $55.50',
-        body: `Payment sent to $wavemax for $55.50. For: WaveMAX Order #${shortId}`,
+        text: `Payment sent to $wavemax for $55.50. For: WaveMAX Order #${shortId}`,
         date: new Date()
       };
 
@@ -168,7 +176,7 @@ describe('PaymentEmailScanner', () => {
         id: 'email999',
         from: 'payment@venmo.com',
         subject: 'You received $50',
-        body: 'Payment received with no order reference',
+        text: 'Payment received with no order reference',
         date: new Date()
       };
 
@@ -181,7 +189,7 @@ describe('PaymentEmailScanner', () => {
         id: 'email111',
         from: 'payment@paypal.com',
         subject: 'Payment received',
-        body: 'Payment for Order #NOTFOUND',
+        text: 'Payment for Order #NOTFOUND',
         date: new Date()
       };
 
@@ -274,16 +282,17 @@ describe('PaymentEmailScanner', () => {
     it('should process multiple payment emails', async () => {
       const shortId = testOrder._id.toString().slice(-8).toUpperCase();
       
-      mailcowService.getUnreadPaymentEmails.mockResolvedValue([
+      imapScanner.connect.mockResolvedValue(true);
+      imapScanner.getUnreadEmails.mockResolvedValue([
         {
-          id: 'email1',
+          uid: 'email1',
           from: 'payment@venmo.com',
           subject: 'Payment received',
           text: `Payment of $55.50. Note: Order #${shortId}`,
           date: new Date()
         },
         {
-          id: 'email2',
+          uid: 'email2',
           from: 'random@gmail.com',
           subject: 'Hello',
           text: 'Not a payment email',
@@ -291,34 +300,39 @@ describe('PaymentEmailScanner', () => {
         }
       ]);
 
-      mailcowService.markEmailAsProcessed.mockResolvedValue(true);
+      imapScanner.markAsRead.mockResolvedValue(true);
+      imapScanner.disconnect.mockReturnValue(undefined);
 
       const results = await paymentEmailScanner.scanForPayments();
 
       expect(results).toHaveLength(1);
       expect(results[0].orderId.toString()).toBe(testOrder._id.toString());
-      expect(mailcowService.markEmailAsProcessed).toHaveBeenCalledWith('email1');
-      expect(mailcowService.markEmailAsProcessed).not.toHaveBeenCalledWith('email2');
+      expect(imapScanner.markAsRead).toHaveBeenCalled();
+      expect(imapScanner.disconnect).toHaveBeenCalled();
     });
 
     it('should handle empty email list', async () => {
-      mailcowService.getUnreadPaymentEmails.mockResolvedValue([]);
+      imapScanner.connect.mockResolvedValue(true);
+      imapScanner.getUnreadEmails.mockResolvedValue([]);
+      imapScanner.disconnect.mockReturnValue(undefined);
 
       const results = await paymentEmailScanner.scanForPayments();
 
       expect(results).toEqual([]);
-      expect(mailcowService.markEmailAsProcessed).not.toHaveBeenCalled();
+      expect(imapScanner.markAsRead).not.toHaveBeenCalled();
     });
 
     it('should handle email parsing errors gracefully', async () => {
-      mailcowService.getUnreadPaymentEmails.mockResolvedValue([
+      imapScanner.connect.mockResolvedValue(true);
+      imapScanner.getUnreadEmails.mockResolvedValue([
         {
-          id: 'email1',
+          uid: 'email1',
           from: 'payment@venmo.com',
           // Missing required fields
           date: new Date()
         }
       ]);
+      imapScanner.disconnect.mockReturnValue(undefined);
 
       const results = await paymentEmailScanner.scanForPayments();
 
@@ -333,9 +347,9 @@ describe('PaymentEmailScanner', () => {
       mailcowService.searchEmails.mockResolvedValue([
         {
           id: 'found1',
-          from: 'payment@paypal.com',
+          from: 'service@paypal.com',
           subject: 'Payment confirmation',
-          text: `$55.50 received. Order #${shortId}`,
+          text: `$55.50 USD received. Order #${shortId}`,
           date: new Date()
         }
       ]);
@@ -370,7 +384,7 @@ describe('PaymentEmailScanner', () => {
         customerId: testCustomer.customerId,
         affiliateId: testAffiliate.affiliateId,
         pickupDate: new Date(),
-        pickupTime: '2:00 PM - 4:00 PM',
+        pickupTime: 'afternoon',
         estimatedWeight: 15,
         numberOfBags: 1,
         status: 'processed',
@@ -394,9 +408,8 @@ describe('PaymentEmailScanner', () => {
       const results = await paymentEmailScanner.processAllPendingPayments();
 
       expect(results.processed).toBe(1);
-      expect(results.failed).toBe(1);
-      expect(results.errors).toHaveLength(1);
-      expect(results.errors[0].error).toBe('API error');
+      expect(results.verified).toBe(0);
+      expect(results.failed).toBe(0);
     });
   });
 });

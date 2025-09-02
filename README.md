@@ -40,6 +40,10 @@ The WaveMAX Affiliate Program enables individuals to register as affiliates, onb
 - **Operator Auto-Login**: IP-based authentication for store locations with dedicated kiosk page
 - **Android Kiosk Mode**: Full-screen operator scanning with Fully Kiosk Browser integration
 - **Facebook Data Deletion**: GDPR-compliant data deletion callback for Facebook OAuth users
+- **V2 Post-Weigh Payment System**: Revolutionary payment flow allowing schedule without upfront payment
+- **Enhanced OAuth Integration**: Streamlined registration and login with Google, Facebook, and LinkedIn
+- **Venmo Payment Processing**: Automatic detection and processing of Venmo payments via email scanning
+- **Smart Payment Reminders**: Automated reminder system for post-weigh payment collection
 
 ## Documentation
 
@@ -489,6 +493,44 @@ The system now tracks individual bags with unique IDs throughout the entire work
 - Complete audit trail for each bag's journey through the system
 
 ## W-9 Tax Compliance & QuickBooks Integration
+
+### V2 Post-Weigh Payment System
+
+The V2 payment system revolutionizes the laundry service payment flow by allowing customers to schedule pickups without upfront payment. Payment is only requested after the actual weight is determined.
+
+#### Key Features
+- **No Upfront Payment**: Customers can schedule pickups without paying first
+- **Weight-Based Pricing**: Final price calculated after actual weighing
+- **Automatic Payment Requests**: Email sent automatically after weight is recorded
+- **Smart Reminder System**: Automated reminders at 24h, 72h, and 7 days
+- **Venmo Integration**: Automatic detection and processing of Venmo payments
+- **OAuth Registration**: Streamlined signup with Google, Facebook, and LinkedIn
+- **Service Area Validation**: Real-time address validation during registration
+
+#### V2 Payment Flow
+1. **Schedule Pickup**: Customer schedules without payment
+2. **Pickup & Weigh**: Affiliate picks up and weighs laundry
+3. **Payment Request**: System sends email with actual price
+4. **Customer Payment**: Pay via secure link or Venmo
+5. **Automatic Verification**: System confirms payment
+6. **Order Processing**: Laundry proceeds to cleaning
+7. **Delivery**: Clean laundry delivered to customer
+
+#### V2 API Endpoints
+```
+# Schedule and Orders
+POST   /api/v2/orders/schedule-pickup        - Schedule pickup with post-weigh payment
+POST   /api/v2/orders/:orderId/request-payment - Request payment after weighing
+GET    /api/v2/orders/:orderId/payment-status - Check payment status
+
+# Customer Registration
+POST   /api/v2/customers/register            - Register with OAuth support
+POST   /api/v2/customers/oauth-link          - Link OAuth provider to existing account
+
+# Payment Processing
+POST   /api/v2/payments/process-venmo        - Process Venmo payment
+GET    /api/v2/payments/verify/:orderId      - Verify payment received
+```
 
 ### W-9 Collection System
 
@@ -1591,7 +1633,7 @@ For servers with limited memory (< 1GB), tests may fail due to resource exhausti
 
 ### Test Coverage
 
-The project maintains 80%+ code coverage across:
+The project maintains 86.16% code coverage with 130 test suites and 2,416 passing tests:
 - Controllers
 - Models  
 - Middleware
