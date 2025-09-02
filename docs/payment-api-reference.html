@@ -817,6 +817,203 @@ curl -X POST https://api.wavemax.com/api/v1/payments/507f1f77bcf86cd799439011/re
                 </div>
             </div>
 
+            <!-- V2 Post-Weigh Payment System -->
+            <section id="v2-payment-system">
+                <h2>V2 Post-Weigh Payment System</h2>
+                <p>The V2 payment system introduces a revolutionary post-weigh payment flow that allows customers to schedule pickups without upfront payment. Payment is only requested after the actual weight of the laundry is determined.</p>
+                
+                <div class="endpoint">
+                    <div class="endpoint-header">
+                        <span class="method method-post">POST</span>
+                        <span class="endpoint-path">/api/v2/payments/request-post-weigh</span>
+                    </div>
+                    
+                    <h3>Request Payment After Weighing</h3>
+                    <p>Triggers payment request email to customer after actual weight is recorded.</p>
+                    
+                    <h4>Request Headers</h4>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Header</th>
+                                <th>Type</th>
+                                <th>Required</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>Authorization</code></td>
+                                <td>string</td>
+                                <td>Yes</td>
+                                <td>Bearer token for operator authentication</td>
+                            </tr>
+                            <tr>
+                                <td><code>X-CSRF-Token</code></td>
+                                <td>string</td>
+                                <td>Yes</td>
+                                <td>CSRF protection token</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    
+                    <h4>Request Body</h4>
+                    <pre>{
+    "orderId": "ORD-2025-0001",
+    "actualWeight": 22.5,
+    "wdfRate": 1.25,
+    "deliveryFee": 10.00,
+    "wdfCredit": 0,
+    "customerEmail": "customer@example.com",
+    "customerName": "John Doe",
+    "pickupAddress": "123 Main St, Austin, TX 78701"
+}</pre>
+                    
+                    <h4>Response</h4>
+                    <pre>{
+    "success": true,
+    "payment": {
+        "paymentId": "pay_v2_1234567890",
+        "orderId": "ORD-2025-0001",
+        "amount": 38.13,
+        "breakdown": {
+            "wdfCharge": 28.13,
+            "deliveryFee": 10.00,
+            "wdfCredit": 0,
+            "totalDue": 38.13
+        },
+        "paymentLink": "https://pay.wavemaxlaundry.com/v2/pay/ORD-2025-0001",
+        "requestedAt": "2025-09-02T14:30:00.000Z",
+        "expiresAt": "2025-09-09T14:30:00.000Z",
+        "status": "payment_requested"
+    },
+    "emailSent": true
+}</pre>
+                </div>
+                
+                <div class="endpoint">
+                    <div class="endpoint-header">
+                        <span class="method method-get">GET</span>
+                        <span class="endpoint-path">/api/v2/payments/status/:orderId</span>
+                    </div>
+                    
+                    <h3>Check V2 Payment Status</h3>
+                    <p>Retrieves the current payment status for a post-weigh payment order.</p>
+                    
+                    <h4>Response</h4>
+                    <pre>{
+    "success": true,
+    "paymentStatus": {
+        "orderId": "ORD-2025-0001",
+        "status": "payment_requested",
+        "amount": 38.13,
+        "requestedAt": "2025-09-02T14:30:00.000Z",
+        "paymentLink": "https://pay.wavemaxlaundry.com/v2/pay/ORD-2025-0001",
+        "remindersSent": [
+            {
+                "sentAt": "2025-09-03T14:30:00.000Z",
+                "type": "first_reminder"
+            },
+            {
+                "sentAt": "2025-09-05T14:30:00.000Z",
+                "type": "second_reminder"
+            }
+        ],
+        "paymentReceived": false
+    }
+}</pre>
+                </div>
+                
+                <div class="endpoint">
+                    <div class="endpoint-header">
+                        <span class="method method-post">POST</span>
+                        <span class="endpoint-path">/api/v2/payments/process-venmo</span>
+                    </div>
+                    
+                    <h3>Process Venmo Payment</h3>
+                    <p>Processes Venmo payments received via email scanning system.</p>
+                    
+                    <h4>Request Body</h4>
+                    <pre>{
+    "orderId": "ORD-2025-0001",
+    "transactionId": "venmo_3789456123",
+    "amount": 38.13,
+    "senderEmail": "customer@example.com",
+    "receivedAt": "2025-09-02T15:45:00.000Z",
+    "emailSubject": "You received $38.13 from John Doe"
+}</pre>
+                    
+                    <h4>Response</h4>
+                    <pre>{
+    "success": true,
+    "payment": {
+        "paymentId": "pay_v2_venmo_1234567890",
+        "orderId": "ORD-2025-0001",
+        "amount": 38.13,
+        "paymentMethod": "venmo",
+        "transactionId": "venmo_3789456123",
+        "status": "completed",
+        "processedAt": "2025-09-02T15:46:00.000Z"
+    },
+    "orderUpdated": true,
+    "newOrderStatus": "processing"
+}</pre>
+                </div>
+                
+                <h3>V2 Payment Flow Diagram</h3>
+                <div class="flow-diagram">
+                    <ol>
+                        <li><strong>Schedule Pickup:</strong> Customer schedules pickup without payment</li>
+                        <li><strong>Pickup & Weigh:</strong> Affiliate picks up and weighs laundry</li>
+                        <li><strong>Request Payment:</strong> System sends payment request email with actual price</li>
+                        <li><strong>Customer Payment:</strong> Customer pays via secure link or Venmo</li>
+                        <li><strong>Payment Verification:</strong> System verifies payment automatically</li>
+                        <li><strong>Order Processing:</strong> Order proceeds to processing status</li>
+                        <li><strong>Delivery:</strong> Cleaned laundry delivered to customer</li>
+                    </ol>
+                </div>
+                
+                <h3>V2 Payment Reminders</h3>
+                <p>The system automatically sends payment reminders if payment is not received:</p>
+                <ul>
+                    <li><strong>First Reminder:</strong> 24 hours after initial request</li>
+                    <li><strong>Second Reminder:</strong> 72 hours after initial request</li>
+                    <li><strong>Final Notice:</strong> 7 days after initial request (order may be cancelled)</li>
+                </ul>
+                
+                <h3>V2 Webhook Events</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Event Type</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>v2.payment.requested</code></td>
+                            <td>Payment request sent to customer</td>
+                        </tr>
+                        <tr>
+                            <td><code>v2.payment.reminder_sent</code></td>
+                            <td>Payment reminder sent</td>
+                        </tr>
+                        <tr>
+                            <td><code>v2.payment.completed</code></td>
+                            <td>Post-weigh payment received</td>
+                        </tr>
+                        <tr>
+                            <td><code>v2.payment.expired</code></td>
+                            <td>Payment link expired without payment</td>
+                        </tr>
+                        <tr>
+                            <td><code>v2.venmo.detected</code></td>
+                            <td>Venmo payment detected via email</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
             <!-- Webhook Events -->
             <section id="webhook-events">
                 <h2>Webhook Events</h2>

@@ -897,6 +897,145 @@ X-CSRF-Token: {csrf_token}</code></pre>
 }</code></pre>
             </div>
 
+            <h3>V2 Payment System Endpoints</h3>
+            
+            <div class="endpoint">
+                <h4>V2 Schedule Pickup (Post-Weigh Payment)</h4>
+                <span class="method post">POST</span> <code>/api/v2/orders/schedule-pickup</code>
+                
+                <h5>Headers:</h5>
+                <pre><code>Authorization: Bearer {jwt_token}
+X-CSRF-Token: {csrf_token}</code></pre>
+                
+                <h5>Request Body:</h5>
+                <pre><code>{
+    "customerId": "CUST123",
+    "pickupDate": "2025-09-05",
+    "pickupTime": "morning",
+    "deliveryDate": "2025-09-07",
+    "deliveryTime": "afternoon",
+    "estimatedWeight": 20,
+    "numberOfBags": 2,
+    "specialInstructions": "Call before pickup",
+    "paymentMethod": "post_weigh",  // New: "immediate" or "post_weigh"
+    "serviceType": "wash_dry_fold"
+}</code></pre>
+                
+                <h5>Response:</h5>
+                <pre><code>{
+    "success": true,
+    "order": {
+        "id": "507f1f77bcf86cd799439011",
+        "orderId": "ORD-2025-0001",
+        "status": "scheduled",  // No payment required upfront
+        "paymentStatus": "pending_weight",
+        "estimatedTotal": null,  // Will be calculated after weighing
+        "requiresPayment": false,
+        "createdAt": "2025-09-02T10:00:00.000Z"
+    },
+    "message": "Pickup scheduled successfully. Payment will be requested after weighing."
+}</code></pre>
+                
+                <h5>Post-Weigh Payment Flow:</h5>
+                <ol>
+                    <li>Customer schedules pickup without upfront payment</li>
+                    <li>Affiliate picks up laundry and weighs it</li>
+                    <li>Operator scans bags and enters actual weight</li>
+                    <li>System calculates final price based on actual weight</li>
+                    <li>Payment request email sent to customer automatically</li>
+                    <li>Customer completes payment via secure link</li>
+                    <li>Order proceeds to processing upon payment confirmation</li>
+                </ol>
+            </div>
+
+            <div class="endpoint">
+                <h4>V2 Request Payment After Weighing</h4>
+                <span class="method post">POST</span> <code>/api/v2/orders/:orderId/request-payment</code>
+                
+                <h5>Headers:</h5>
+                <pre><code>Authorization: Bearer {operator_token}
+X-CSRF-Token: {csrf_token}</code></pre>
+                
+                <h5>Request Body:</h5>
+                <pre><code>{
+    "actualWeight": 22.5,
+    "numberOfBags": 2,
+    "operatorNotes": "Extra items added by customer"
+}</code></pre>
+                
+                <h5>Response:</h5>
+                <pre><code>{
+    "success": true,
+    "order": {
+        "orderId": "ORD-2025-0001",
+        "actualWeight": 22.5,
+        "totalAmount": 38.13,  // Calculated based on actual weight
+        "wdfCharge": 28.13,    // $1.25/lb * 22.5
+        "deliveryFee": 10.00,
+        "paymentStatus": "payment_requested",
+        "paymentRequestSentAt": "2025-09-02T14:30:00.000Z"
+    },
+    "message": "Payment request sent to customer"
+}</code></pre>
+            </div>
+
+            <div class="endpoint">
+                <h4>V2 Customer Registration with OAuth</h4>
+                <span class="method post">POST</span> <code>/api/v2/customers/register</code>
+                
+                <h5>Request Body:</h5>
+                <pre><code>{
+    "firstName": "Jane",
+    "lastName": "Doe",
+    "email": "jane@example.com",
+    "phone": "+15125551234",
+    "password": "SecurePass123!",  // Optional if using OAuth
+    "address": {
+        "street": "123 Main St",
+        "city": "Austin",
+        "state": "TX",
+        "zipCode": "78701"
+    },
+    "affiliateId": "AFF123",
+    "languagePreference": "en",
+    "numberOfBags": 2,
+    "oauthProvider": "google",  // Optional: google, facebook, linkedin
+    "oauthId": "google_oauth_id_123"  // Optional: OAuth provider ID
+}</code></pre>
+                
+                <h5>Response:</h5>
+                <pre><code>{
+    "success": true,
+    "customer": {
+        "id": "CUST456",
+        "email": "jane@example.com",
+        "hasOAuthProvider": true,
+        "oauthProviders": ["google"],
+        "wdfCredit": 0,
+        "bagCredit": 0
+    },
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+}</code></pre>
+            </div>
+
+            <div class="endpoint">
+                <h4>V2 Get Payment Status</h4>
+                <span class="method get">GET</span> <code>/api/v2/orders/:orderId/payment-status</code>
+                
+                <h5>Response:</h5>
+                <pre><code>{
+    "success": true,
+    "paymentStatus": {
+        "status": "payment_requested",
+        "requestedAt": "2025-09-02T14:30:00.000Z",
+        "amount": 38.13,
+        "paymentLink": "https://pay.wavemaxlaundry.com/v2/pay/ORD-2025-0001",
+        "remindersSent": 1,
+        "lastReminderAt": "2025-09-03T14:30:00.000Z"
+    }
+}</code></pre>
+            </div>
+
             <h2 id="administrator-endpoints">Administrator Endpoints</h2>
 
             <div class="endpoint">

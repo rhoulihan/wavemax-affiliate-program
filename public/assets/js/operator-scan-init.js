@@ -1715,6 +1715,15 @@
     function handlePickupScan(order, scannedBagId) {
         console.log('=== HANDLE PICKUP SCAN ===');
         console.log('Scanned bag ID:', scannedBagId);
+        console.log('Order type:', order.orderType);
+        console.log('V2 Payment Status:', order.v2PaymentStatus);
+        
+        // Check if this is a V2 order that hasn't been paid
+        if (order.isV2Order && order.v2PaymentStatus !== 'verified' && order.v2PaymentStatus !== 'paid') {
+            console.log('V2 order not paid - showing payment required modal');
+            showPaymentRequiredModal(order);
+            return;
+        }
         
         // Check if we're already tracking this order
         if (currentOrder && currentOrder.orderId === order.orderId && currentOrder.scannedBagsForPickup) {
@@ -1745,6 +1754,73 @@
         showPickupModal(order);
     }
 
+    // Show payment required modal for V2 orders
+    function showPaymentRequiredModal(order) {
+        console.log('=== SHOW PAYMENT REQUIRED MODAL ===');
+        modalTitle.textContent = 'Payment Required';
+        
+        const amountDue = order.v2PaymentAmount || order.actualTotal || 0;
+        
+        modalBody.innerHTML = `
+            <div class="payment-required-container">
+                <div class="payment-warning-icon">⚠️</div>
+                <h3 class="payment-warning-title">Payment Not Received</h3>
+                
+                <div class="order-info">
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <div class="info-label">Customer</div>
+                            <div class="info-value">${order.customerName || 'N/A'}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Order ID</div>
+                            <div class="info-value">${order.orderId}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Amount Due</div>
+                            <div class="info-value payment-amount">$${amountDue.toFixed(2)}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Payment Status</div>
+                            <div class="info-value payment-status-pending">Pending</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="payment-required-message">
+                    <p><strong>This order cannot be released until payment is received.</strong></p>
+                    <p>Please verify that the customer has completed payment through one of the following methods:</p>
+                    <ul class="payment-methods-list">
+                        <li>✓ Venmo (@wavemaxatx)</li>
+                        <li>✓ PayPal (paypal.me/WaveMAXLaundry)</li>
+                        <li>✓ Cash App ($WaveMAXLaundry)</li>
+                    </ul>
+                    <p class="payment-note">The customer should include <strong>Order #${order.orderId.slice(-6)}</strong> in the payment memo.</p>
+                </div>
+                
+                <div class="action-buttons">
+                    <button class="btn btn-secondary" id="closePaymentModalBtn">Close</button>
+                </div>
+            </div>
+        `;
+        
+        orderModal.classList.add('active');
+        toggleActionBar(false);
+        
+        // Add event listener to close button
+        setTimeout(function() {
+            const closeBtn = document.getElementById('closePaymentModalBtn');
+            if (closeBtn) {
+                closeBtn.addEventListener('click', closeModal);
+            }
+        }, 50);
+        
+        // Auto-close after 10 seconds
+        setTimeout(function() {
+            closeModal();
+        }, 10000);
+    }
+    
     // Show pickup modal with bag scanning progress
     function showPickupModal(order) {
         console.log('=== SHOW PICKUP MODAL ===');
@@ -1873,6 +1949,16 @@
             e.preventDefault();
         }
         
+        // Get submit button and disable it
+        const submitBtn = document.getElementById('submitWeightsBtn');
+        const originalButtonText = submitBtn ? submitBtn.innerHTML : 'Mark as In Progress';
+        
+        // Show loading state
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<div class="swirl-spinner"></div> Processing...';
+        }
+        
         const bagWeights = [];
         
         // Get the scanned bag IDs
@@ -1887,12 +1973,22 @@
             
             if (!weightInput) {
                 showError(`Weight input not found for bag ${i + 1}`);
+                // Restore button state
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = originalButtonText;
+                }
                 return;
             }
             
             const weight = parseFloat(weightInput.value);
             if (!weight || weight <= 0) {
                 showError(`Please enter weight for Bag ${i + 1}`);
+                // Restore button state
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = originalButtonText;
+                }
                 return;
             }
             
@@ -1926,7 +2022,9 @@
                 if (currentOrder && currentOrder.scannedBagsForWeighing) {
                     currentOrder.scannedBagsForWeighing.clear();
                 }
+                // Close modal first
                 closeModal();
+                // Then show confirmation
                 showConfirmation(`${bagWeights.length} bag${bagWeights.length > 1 ? 's' : ''} marked as processing`, '⚖️', 'success');
                 setTimeout(hideConfirmation, 3000);
                 await loadStats();
@@ -1938,10 +2036,20 @@
                 }, 1000);
             } else {
                 showError(data.message || 'Failed to update order');
+                // Restore button state on error
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = originalButtonText;
+                }
             }
         } catch (error) {
             console.error('Submit error:', error);
             showError('Network error. Please try again.');
+            // Restore button state on error
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalButtonText;
+            }
         }
     };
 

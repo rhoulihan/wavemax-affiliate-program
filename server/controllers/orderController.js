@@ -1240,7 +1240,7 @@ exports.getOrderStatistics = async (req, res) => {
  */
 exports.confirmPayment = async (req, res) => {
   try {
-    const { orderId, paymentMethod, paymentDetails } = req.body;
+    const { orderId, paymentMethod, paymentDetails, amount } = req.body;
     
     // Find order by short ID or full ID
     let order;
@@ -1262,17 +1262,35 @@ exports.confirmPayment = async (req, res) => {
     if (!order) {
       return res.status(404).json({
         success: false,
-        message: 'Order not found'
+        message: 'Order not found',
+        error: 'Order not found'
       });
     }
     
-    // Check if payment is already verified
+    // Check if payment is already verified - return 409 for duplicate
     if (order.v2PaymentStatus === 'verified') {
-      return res.json({
-        success: true,
+      return res.status(409).json({
+        success: false,
         message: 'Payment already verified',
+        error: 'Payment already verified',
         alreadyVerified: true
       });
+    }
+    
+    // Validate payment amount if provided
+    if (amount !== undefined) {
+      const expectedAmount = order.v2PaymentAmount || order.actualTotal || order.estimatedTotal;
+      
+      // Check if amount is way off (more than 100% difference)
+      if (Math.abs(amount - expectedAmount) > expectedAmount) {
+        return res.status(400).json({
+          success: false,
+          message: 'Invalid payment amount',
+          error: 'Invalid payment amount provided',
+          expectedAmount,
+          providedAmount: amount
+        });
+      }
     }
     
     // Log customer confirmation

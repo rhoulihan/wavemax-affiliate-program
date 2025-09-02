@@ -14,21 +14,45 @@ function generateUUID() {
 
 async function loadTestData() {
     try {
-        // Get test customer
-        const customerRes = await fetch('/api/v1/test/customer');
-        if (customerRes.ok) {
-            testCustomer = await customerRes.json();
-            await displayCustomerInfo();
-        } else {
-            // Create test customer if doesn't exist
-            await createTestCustomer();
-        }
-
-        // Get or create test order with bags
-        await recreateTestOrder();
+        showStatus('Cleaning up old test data...', 'info');
+        
+        // First, clean up any existing test data
+        await cleanupTestData();
+        
+        // Then create fresh test customer and affiliate
+        await createTestCustomer();
+        
+        // Create default V2 order with 1 bag
+        await createV2TestOrder(1);
     } catch (error) {
         console.error('Error loading test data:', error);
         showStatus('Error loading test data: ' + error.message, 'danger');
+    }
+}
+
+async function cleanupTestData() {
+    try {
+        const headers = {
+            'Content-Type': 'application/json'
+        };
+        
+        // Add CSRF token if available
+        if (window.csrfUtils && window.csrfUtils.getToken) {
+            headers['X-CSRF-Token'] = window.csrfUtils.getToken();
+        }
+        
+        const response = await fetch('/api/v1/test/cleanup', {
+            method: 'DELETE',
+            headers: headers
+        });
+        
+        if (!response.ok) {
+            console.warn('Cleanup may have failed, continuing anyway');
+        }
+        
+        console.log('Test data cleaned up');
+    } catch (error) {
+        console.warn('Error during cleanup (continuing):', error);
     }
 }
 
@@ -49,7 +73,7 @@ async function createTestCustomer() {
             body: JSON.stringify({
                 firstName: 'Test',
                 lastName: 'Customer',
-                email: 'test.customer@wavemax.test',
+                email: 'spam-me@wavemax.promo',  // Use spam-me email
                 phone: '512-555-0100',
                 address: {
                     street: '123 Test Street',
@@ -97,10 +121,11 @@ async function displayCustomerInfo() {
         
         if (cardName) cardName.textContent = `${testCustomer.firstName} ${testCustomer.lastName}`;
         if (cardId) cardId.textContent = `Customer: ${testCustomer.customerId || testCustomer._id}`;
-        if (bagIdElement) bagIdElement.textContent = `Bag ID: ${bag.bagId}`;
+        if (bagIdElement) bagIdElement.textContent = `Bag ${bagNum} of ${testBags.length}`;
         
-        // Generate QR code with new format: customerId#bagId
-        const qrData = `${testCustomer.customerId || testCustomer._id}#${bag.bagId}`;
+        // Generate QR code with format: CUST-{customerId}-{bagNumber}
+        // This matches the admin dashboard format
+        const qrData = `${testCustomer.customerId || testCustomer._id}-${bagNum}`;
         await generateQRCode(qrData, `qrcode${bagNum}`);
     }
 }
@@ -134,9 +159,9 @@ async function generateQRCode(data, elementId = 'qrcode') {
     }
 }
 
-async function recreateTestOrder() {
+async function createV2TestOrder(numberOfBags = 1) {
     try {
-        showStatus('Creating test order with 2 bags...', 'info');
+        showStatus(`Creating V2 test order with ${numberOfBags} bag${numberOfBags > 1 ? 's' : ''}...`, 'info');
         
         const headers = {
             'Content-Type': 'application/json'
@@ -147,11 +172,11 @@ async function recreateTestOrder() {
             headers['X-CSRF-Token'] = window.csrfUtils.getToken();
         }
 
-        // Generate two bag IDs
-        testBags = [
-            { bagId: generateUUID(), bagNumber: 1 },
-            { bagId: generateUUID(), bagNumber: 2 }
-        ];
+        // Generate bag IDs based on number of bags
+        testBags = [];
+        for (let i = 0; i < numberOfBags; i++) {
+            testBags.push({ bagId: generateUUID(), bagNumber: i + 1 });
+        }
 
         const response = await fetch('/api/v1/test/order', {
             method: 'POST',
@@ -159,24 +184,41 @@ async function recreateTestOrder() {
             body: JSON.stringify({
                 customerId: testCustomer?._id,
                 recreate: true, // This will delete existing test orders first
-                numberOfBags: 2
+                numberOfBags: numberOfBags,
+                orderType: 'v2', // Specify V2 order type
+                isV2Order: true   // Mark as V2 order
             })
         });
 
         if (!response.ok) {
             const error = await response.json();
-            throw new Error(error.message || 'Failed to create test order');
+            throw new Error(error.message || 'Failed to create V2 test order');
         }
 
         testOrder = await response.json();
         
+        // Update tab visibility based on number of bags
+        const bag2Tab = document.getElementById('bag2-tab');
+        const bag2Pane = document.getElementById('bag2');
+        if (numberOfBags === 1) {
+            if (bag2Tab) bag2Tab.style.display = 'none';
+            if (bag2Pane) bag2Pane.classList.remove('show', 'active');
+            // Make sure bag1 is active
+            const bag1Tab = document.getElementById('bag1-tab');
+            const bag1Pane = document.getElementById('bag1');
+            if (bag1Tab) bag1Tab.classList.add('active');
+            if (bag1Pane) bag1Pane.classList.add('show', 'active');
+        } else {
+            if (bag2Tab) bag2Tab.style.display = 'block';
+        }
+        
         // Display the order and bag information
         await displayCustomerInfo();
         
-        showStatus(`Test order created successfully! Order ID: ${testOrder.orderId || testOrder._id} with ${testBags.length} bags`, 'success');
+        showStatus(`V2 test order created successfully! Order ID: ${testOrder.orderId || testOrder._id} with ${testBags.length} bag${testBags.length > 1 ? 's' : ''}`, 'success');
     } catch (error) {
-        console.error('Error creating test order:', error);
-        showStatus('Error creating test order: ' + error.message, 'danger');
+        console.error('Error creating V2 test order:', error);
+        showStatus('Error creating V2 test order: ' + error.message, 'danger');
     }
 }
 
@@ -248,7 +290,7 @@ async function printAllBagCards() {
             testCustomer.phone,
             testCustomer.email || '',
             `Customer ID: ${testCustomer.customerId || testCustomer._id}`,
-            `Bag ID: ${bag.bagId}`
+            `Bag ${bag.bagNumber} of ${testBags.length}`
         ].filter(line => line);
         
         let yPosition = margin + 1.3;
@@ -257,8 +299,9 @@ async function printAllBagCards() {
             yPosition += 0.2;
         });
         
-        // Generate QR code data with new format
-        const qrData = `${testCustomer.customerId || testCustomer._id}#${bag.bagId}`;
+        // Generate QR code data with format: CUST-{customerId}-{bagNumber}
+        // This matches the admin dashboard format
+        const qrData = `${testCustomer.customerId || testCustomer._id}-${bag.bagNumber}`;
         
         // Create QR code
         try {
@@ -313,7 +356,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
     
     // Set up button event handlers
-    document.getElementById('recreateOrderBtn').addEventListener('click', recreateTestOrder);
+    document.getElementById('createV2Order1BagBtn').addEventListener('click', () => createV2TestOrder(1));
+    document.getElementById('createV2Order2BagsBtn').addEventListener('click', () => createV2TestOrder(2));
     document.getElementById('printAllCardsBtn').addEventListener('click', printAllBagCards);
     
     // Load initial data

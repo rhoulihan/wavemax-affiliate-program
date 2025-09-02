@@ -2306,15 +2306,29 @@ exports.sendV2PaymentRequest = async ({ customer, order, paymentAmount, paymentL
       finalTemplate = await readFile(v2TemplatePath, 'utf8');
     }
     
+    // Calculate breakdown amounts
+    const wdfAmount = order.actualWeight * (order.baseRate || 1.25);
+    const addOnsAmount = order.addOnTotal || 0;
+    const deliveryFee = order.feeBreakdown?.totalFee || 0;
+    const totalAmount = paymentAmount || order.v2PaymentAmount || (wdfAmount + addOnsAmount + deliveryFee);
+    
     // Replace template variables (using {{}} syntax for V2 templates)
     const emailData = {
       customerName: customer.name || `${customer.firstName} ${customer.lastName}`,
       orderId: order.orderId,
       shortOrderId: order.orderId.replace('ORD', ''),
-      amount: (paymentAmount || order.v2PaymentAmount).toFixed(2),
+      amount: totalAmount.toFixed(2),
       actualWeight: order.actualWeight,
       numberOfBags: order.numberOfBags,
       pickupDate: new Date(order.pickupDate).toLocaleDateString(),
+      // Breakdown amounts
+      wdfAmount: wdfAmount.toFixed(2),
+      wdfRate: (order.baseRate || 1.25).toFixed(2),
+      addOnsAmount: addOnsAmount.toFixed(2),
+      deliveryFee: deliveryFee.toFixed(2),
+      hasAddOns: addOnsAmount > 0,
+      hasDeliveryFee: deliveryFee > 0,
+      // Payment links and QR codes
       venmoLink: paymentLinks.venmo,
       paypalLink: paymentLinks.paypal,
       cashappLink: paymentLinks.cashapp,
@@ -2323,8 +2337,24 @@ exports.sendV2PaymentRequest = async ({ customer, order, paymentAmount, paymentL
       cashappQR: qrCodes.cashapp
     };
     
-    // Replace both {{}} and [] style placeholders
+    // Handle conditional sections first
     let html = finalTemplate;
+    
+    // Remove or keep add-ons section based on hasAddOns
+    if (!emailData.hasAddOns) {
+      html = html.replace(/{{#if hasAddOns}}[\s\S]*?{{\/if}}/g, '');
+    } else {
+      html = html.replace(/{{#if hasAddOns}}/g, '').replace(/{{\/if}}/g, '');
+    }
+    
+    // Remove or keep delivery fee section based on hasDeliveryFee
+    if (!emailData.hasDeliveryFee) {
+      html = html.replace(/{{#if hasDeliveryFee}}[\s\S]*?{{\/if}}/g, '');
+    } else {
+      html = html.replace(/{{#if hasDeliveryFee}}/g, '').replace(/{{\/if}}/g, '');
+    }
+    
+    // Replace both {{}} and [] style placeholders
     Object.keys(emailData).forEach(key => {
       const regex = new RegExp(`{{${key}}}|\\[${key}\\]`, 'g');
       html = html.replace(regex, emailData[key]);
@@ -2352,12 +2382,26 @@ exports.sendV2PaymentReminder = async ({ customer, order, reminderNumber, paymen
     const v2TemplatePath = path.join(__dirname, '../templates/v2/payment-reminder.html');
     let template = await readFile(v2TemplatePath, 'utf8');
     
+    // Calculate breakdown amounts (same as payment request)
+    const wdfAmount = order.actualWeight * (order.baseRate || 1.25);
+    const addOnsAmount = order.addOnTotal || 0;
+    const deliveryFee = order.feeBreakdown?.totalFee || 0;
+    const totalAmount = paymentAmount || order.v2PaymentAmount || order.actualTotal || (wdfAmount + addOnsAmount + deliveryFee);
+    
     const emailData = {
       customerName: customer.name || `${customer.firstName} ${customer.lastName}`,
       orderId: order.orderId,
       shortOrderId: order.orderId.replace('ORD', ''),
-      amount: (paymentAmount || order.v2PaymentAmount || order.actualTotal).toFixed(2),
+      amount: totalAmount.toFixed(2),
       actualWeight: order.actualWeight,
+      // Breakdown amounts
+      wdfAmount: wdfAmount.toFixed(2),
+      wdfRate: (order.baseRate || 1.25).toFixed(2),
+      addOnsAmount: addOnsAmount.toFixed(2),
+      deliveryFee: deliveryFee.toFixed(2),
+      hasAddOns: addOnsAmount > 0,
+      hasDeliveryFee: deliveryFee > 0,
+      // Reminder specific
       reminderNumber: reminderNumber || 1,
       paymentRequestedTime: new Date(order.v2PaymentRequestedAt).toLocaleString(),
       venmoLink: paymentLinks?.venmo || order.v2PaymentLinks?.venmo || '#',
@@ -2379,8 +2423,24 @@ exports.sendV2PaymentReminder = async ({ customer, order, reminderNumber, paymen
       template = template.replace(/{{#if isUrgent}}(.*?){{else}}(.*?){{\/if}}/gs, '$2');
     }
     
-    // Replace template variables
+    // Handle conditional sections for add-ons and delivery fee (same as payment request)
     let html = template;
+    
+    // Remove or keep add-ons section based on hasAddOns
+    if (!emailData.hasAddOns) {
+      html = html.replace(/{{#if hasAddOns}}[\s\S]*?{{\/if}}/g, '');
+    } else {
+      html = html.replace(/{{#if hasAddOns}}/g, '').replace(/{{\/if}}/g, '');
+    }
+    
+    // Remove or keep delivery fee section based on hasDeliveryFee
+    if (!emailData.hasDeliveryFee) {
+      html = html.replace(/{{#if hasDeliveryFee}}[\s\S]*?{{\/if}}/g, '');
+    } else {
+      html = html.replace(/{{#if hasDeliveryFee}}/g, '').replace(/{{\/if}}/g, '');
+    }
+    
+    // Replace template variables
     Object.keys(emailData).forEach(key => {
       const regex = new RegExp(`{{${key}}}`, 'g');
       html = html.replace(regex, emailData[key]);
@@ -2579,6 +2639,64 @@ exports.sendV2PickupReadyNotification = async (order, customer, affiliate) => {
     return true;
   } catch (error) {
     console.error('Error sending V2 pickup ready notification:', error);
+    throw error;
+  }
+};
+
+/**
+ * Send notification to admin
+ * @param {Object} options - Email options
+ * @param {String} options.subject - Email subject
+ * @param {String} options.html - HTML content
+ * @param {String} options.priority - Email priority (high, normal, low)
+ * @returns {Promise<Boolean>}
+ */
+exports.sendAdminNotification = async function(options) {
+  try {
+    const { subject, html, priority = 'normal' } = options;
+    
+    // Get admin email from SystemConfig or use default
+    const SystemConfig = require('../models/SystemConfig');
+    let adminEmail = await SystemConfig.getValue('admin_notification_email', null);
+    
+    if (!adminEmail) {
+      // Fallback to environment variable or default
+      adminEmail = process.env.ADMIN_EMAIL || 'admin@wavemaxlaundry.com';
+    }
+    
+    // Add priority header if high priority
+    const headers = priority === 'high' ? {
+      'X-Priority': '1',
+      'Importance': 'high'
+    } : {};
+    
+    const fullHtml = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <style>
+            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+            h2 { color: #2c3e50; border-bottom: 2px solid #3498db; padding-bottom: 10px; }
+            h3 { color: #34495e; margin-top: 20px; }
+            ul { background: #f4f4f4; padding: 15px; border-radius: 5px; }
+            li { margin: 5px 0; }
+            .alert { background: #fff3cd; border: 1px solid #ffc107; padding: 15px; border-radius: 5px; margin: 20px 0; }
+            .error { background: #f8d7da; border: 1px solid #dc3545; }
+            hr { border: none; border-top: 1px solid #ddd; margin: 30px 0; }
+          </style>
+        </head>
+        <body>
+          ${html}
+        </body>
+      </html>
+    `;
+    
+    await sendEmail(adminEmail, subject, fullHtml, headers);
+    
+    console.log(`Admin notification sent: ${subject}`);
+    return true;
+  } catch (error) {
+    console.error('Error sending admin notification:', error);
     throw error;
   }
 };

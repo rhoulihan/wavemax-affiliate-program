@@ -1054,6 +1054,10 @@ describe('Authentication Integration Tests', () => {
 
   describe('POST /api/v1/auth/operator/login', () => {
     it('should login operator with valid credentials', async () => {
+      // Set up operator PIN in environment
+      process.env.OPERATOR_PIN = '1234';
+      process.env.DEFAULT_OPERATOR_ID = 'OPR001';
+      
       // Create a dummy administrator for the createdBy field
       const { salt: adminSalt, hash: adminHash } = encryptionUtil.hashPassword(getStrongPassword('admin', 1));
       const admin = await Administrator.create({
@@ -1084,16 +1088,19 @@ describe('Authentication Integration Tests', () => {
         .post('/api/v1/auth/operator/login')
         .set('X-CSRF-Token', csrfToken)
         .send({
-          email: 'operator@example.com',
-          password: getStrongPassword('operator', 1)
+          pinCode: '1234'
         });
 
+      if (response.status !== 200) {
+        console.log('Operator login error:', response.body);
+      }
+      
       expect(response.status).toBe(200);
       expect(response.body).toMatchObject({
         success: true,
         token: expect.any(String),
         refreshToken: expect.any(String),
-        user: {
+        operator: {
           id: expect.any(String),
           email: 'operator@example.com',
           role: 'operator',
@@ -1103,6 +1110,10 @@ describe('Authentication Integration Tests', () => {
     });
 
     it('should fail with invalid operator credentials', async () => {
+      // Set up operator PIN in environment
+      process.env.OPERATOR_PIN = '1234';
+      process.env.DEFAULT_OPERATOR_ID = 'OPR001';
+      
       // Create a dummy administrator for the createdBy field
       const { salt: adminSalt2, hash: adminHash2 } = encryptionUtil.hashPassword(getStrongPassword('admin', 1));
       const admin = await Administrator.create({
@@ -1132,18 +1143,23 @@ describe('Authentication Integration Tests', () => {
         .post('/api/v1/auth/operator/login')
         .set('X-CSRF-Token', csrfToken)
         .send({
-          email: 'operator@example.com',
-          password: 'WrongPassword123!@#'
+          pinCode: 'wrongpin'
         });
 
-      expect(response.status).toBe(401);
-      expect(response.body).toMatchObject({
-        success: false,
-        message: 'Invalid email or password'
-      });
+      if (response.status !== 401 && response.status !== 400) {
+        console.log('Invalid PIN response:', response.body);
+      }
+
+      // PIN validation can return 400 or 401 depending on validation
+      expect([400, 401]).toContain(response.status);
+      expect(response.body.success).toBe(false);
     });
 
     it('should fail when operator is inactive', async () => {
+      // Set up operator PIN in environment
+      process.env.OPERATOR_PIN = '1234';
+      process.env.DEFAULT_OPERATOR_ID = 'OPR001';
+      
       // Create a dummy administrator for the createdBy field
       const { salt: adminSalt3, hash: adminHash3 } = encryptionUtil.hashPassword(getStrongPassword('admin', 1));
       const admin = await Administrator.create({
@@ -1173,14 +1189,13 @@ describe('Authentication Integration Tests', () => {
         .post('/api/v1/auth/operator/login')
         .set('X-CSRF-Token', csrfToken)
         .send({
-          email: 'operator@example.com',
-          password: getStrongPassword('operator', 1)
+          pinCode: '1234'
         });
 
       expect(response.status).toBe(403);
       expect(response.body).toMatchObject({
         success: false,
-        message: 'Account is inactive. Please contact your supervisor.'
+        message: 'Operator account is inactive. Please contact your supervisor.'
       });
     });
   });

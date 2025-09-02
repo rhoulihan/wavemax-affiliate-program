@@ -243,6 +243,7 @@
             <div class="version-nav">
                 <h3>Quick Navigation</h3>
                 <ul>
+                    <li><a href="#v1.11.0">v1.11.0 - V2 Payment System & Post-Weigh Payment Flow</a></li>
                     <li><a href="#v1.10.0">v1.10.0 - WDF Credit System & Operator Enhancements</a></li>
                     <li><a href="#v1.9.0">v1.9.0 - Session Persistence & Browser Navigation</a></li>
                     <li><a href="#v1.8.1">v1.8.1 - Test Coverage Achievement & Backup System</a></li>
@@ -257,6 +258,101 @@
                     <li><a href="#v1.2.0">v1.2.0 - Documentation System</a></li>
                     <li><a href="#v1.1.0">v1.1.0 - CSRF Protection</a></li>
                     <li><a href="#v1.0.0">v1.0.0 - Initial Release</a></li>
+                </ul>
+            </div>
+
+            <div id="v1.11.0" class="release">
+                <h2>Version 1.11.0 <span class="tag new">Latest</span></h2>
+                <div class="release-date">Released on September 2, 2025</div>
+                
+                <h3>💳 V2 Payment System</h3>
+                <ul>
+                    <li><span class="tag new">NEW</span> <strong>Post-Weigh Payment Flow:</strong> Revolutionary payment workflow for laundry services
+                        <ul>
+                            <li>Customers can schedule pickups without upfront payment</li>
+                            <li>Payment requested only after actual weight is determined</li>
+                            <li>Automatic payment reminders via email</li>
+                            <li>Integration with payment verification job</li>
+                            <li>Support for both immediate and deferred payment options</li>
+                        </ul>
+                    </li>
+                    <li><span class="tag new">NEW</span> <strong>V2 Registration System:</strong> Enhanced customer onboarding
+                        <ul>
+                            <li>OAuth integration for Google, Facebook, LinkedIn authentication</li>
+                            <li>Service area validation during registration</li>
+                            <li>Dynamic bag selection with defaults</li>
+                            <li>Automatic language detection and translation</li>
+                            <li>CSP-compliant forms with external JavaScript</li>
+                        </ul>
+                    </li>
+                    <li><span class="tag new">NEW</span> <strong>V2 Schedule Pickup Form:</strong> Streamlined order creation
+                        <ul>
+                            <li>Post-weigh payment option selection</li>
+                            <li>Enhanced form validation and error handling</li>
+                            <li>Real-time address validation</li>
+                            <li>Multi-language support (EN, ES, PT, DE)</li>
+                        </ul>
+                    </li>
+                </ul>
+
+                <h3>📧 Enhanced Email System</h3>
+                <ul>
+                    <li><span class="tag improved">IMPROVED</span> <strong>Payment Email Scanner:</strong> Advanced email parsing capabilities
+                        <ul>
+                            <li>Support for Venmo payment parsing</li>
+                            <li>Enhanced transaction ID extraction</li>
+                            <li>Better handling of various email formats</li>
+                            <li>Improved error handling and logging</li>
+                        </ul>
+                    </li>
+                    <li><span class="tag new">NEW</span> <strong>V2 Payment Request Template:</strong> Professional payment request emails
+                        <ul>
+                            <li>Responsive HTML email template</li>
+                            <li>Clear payment instructions and CTAs</li>
+                            <li>Order details and pricing breakdown</li>
+                            <li>Support for WDF credits display</li>
+                        </ul>
+                    </li>
+                </ul>
+
+                <h3>🔄 Operator Scan Improvements</h3>
+                <ul>
+                    <li><span class="tag improved">IMPROVED</span> <strong>QR Code Format Support:</strong> Flexible QR code parsing
+                        <ul>
+                            <li>Support for both legacy and new QR code formats</li>
+                            <li>Automatic format detection and parsing</li>
+                            <li>Backward compatibility maintained</li>
+                        </ul>
+                    </li>
+                    <li><span class="tag improved">IMPROVED</span> <strong>V2 Payment Integration:</strong> Seamless post-weigh payment handling
+                        <ul>
+                            <li>Automatic payment request triggering</li>
+                            <li>Real-time order status updates</li>
+                            <li>Enhanced error messaging</li>
+                        </ul>
+                    </li>
+                </ul>
+
+                <h3>🐛 Bug Fixes</h3>
+                <ul>
+                    <li><span class="tag fixed">FIXED</span> CSP violations in operator scan pages</li>
+                    <li><span class="tag fixed">FIXED</span> Inline styles causing CSP errors in embedded forms</li>
+                    <li><span class="tag fixed">FIXED</span> Form validation issues in V2 registration</li>
+                    <li><span class="tag fixed">FIXED</span> SwirlSpinner class availability in embedded contexts</li>
+                    <li><span class="tag fixed">FIXED</span> Translation initialization in dynamic content</li>
+                </ul>
+
+                <h3>🧪 Test Coverage</h3>
+                <ul>
+                    <li><span class="tag improved">IMPROVED</span> <strong>86.16% Code Coverage:</strong> Comprehensive test updates
+                        <ul>
+                            <li>130 test suites passing (6 skipped)</li>
+                            <li>2,416 tests passing (67 skipped)</li>
+                            <li>Enhanced V2 payment flow tests</li>
+                            <li>Improved email parsing test coverage</li>
+                            <li>Updated integration tests for new features</li>
+                        </ul>
+                    </li>
                 </ul>
             </div>
 
@@ -369,7 +465,7 @@
             </div>
 
             <div id="v1.8.1" class="release">
-                <h2>Version 1.8.1 <span class="tag new">Latest</span></h2>
+                <h2>Version 1.8.1</h2>
                 <div class="release-date">Released on June 27, 2025</div>
                 
                 <h3>✅ Test Coverage Achievement</h3>

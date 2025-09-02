@@ -119,6 +119,7 @@ const orderSchema = new mongoose.Schema({
   refundReason: String,
   refundReference: String,
   refundedAt: Date,
+  isPaid: { type: Boolean, default: false },
   // Operator processing fields
   assignedOperator: {
     type: mongoose.Schema.Types.ObjectId,
@@ -171,6 +172,11 @@ const orderSchema = new mongoose.Schema({
   },
   v2LastPaymentCheck: Date,
   v2PaymentNotes: String, // For storing verification details
+  v2PaymentReminderCount: {
+    type: Number,
+    default: 0
+  },
+  v2PaymentLastReminderAt: Date,
   
   // V2 Payment Reminder Tracking
   v2PaymentReminders: [{
@@ -235,6 +241,16 @@ orderSchema.pre('save', async function(next) {
     const wdfAmount = this.actualWeight * this.baseRate;
     const wdfCommission = wdfAmount * 0.1;
     this.affiliateCommission = parseFloat((wdfCommission + totalFee).toFixed(2));
+  }
+
+  // Update isPaid when v2PaymentStatus changes to verified
+  if (this.isModified('v2PaymentStatus')) {
+    if (this.v2PaymentStatus === 'verified') {
+      this.isPaid = true;
+      if (!this.paymentDate) {
+        this.paymentDate = new Date();
+      }
+    }
   }
 
   // Update status timestamps

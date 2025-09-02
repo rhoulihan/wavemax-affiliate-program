@@ -2,25 +2,23 @@ const paymentLinkService = require('../../server/services/paymentLinkService');
 const SystemConfig = require('../../server/models/SystemConfig');
 
 describe('PaymentLinkService', () => {
-  beforeAll(async () => {
-    // Initialize SystemConfig with test values
-    // Use existing connection from setup.js
+  beforeEach(async () => {
+    // Reset initialization state and handles
+    paymentLinkService.initialized = false;
+    paymentLinkService.handles = {
+      venmo: null,
+      paypal: null,
+      cashapp: null
+    };
+    
+    // Initialize SystemConfig with test values for each test
+    // (afterEach in setup.js clears all collections)
     await SystemConfig.deleteMany({ key: { $in: ['venmo_handle', 'paypal_handle', 'cashapp_handle'] } });
     await SystemConfig.create([
       { key: 'venmo_handle', value: '@testvenmo', dataType: 'string', category: 'payment' },
       { key: 'paypal_handle', value: 'testpaypal', dataType: 'string', category: 'payment' },
       { key: 'cashapp_handle', value: '$testcash', dataType: 'string', category: 'payment' }
     ]);
-  });
-
-  afterAll(async () => {
-    // Clean up test data
-    await SystemConfig.deleteMany({ key: { $in: ['venmo_handle', 'paypal_handle', 'cashapp_handle'] } });
-  });
-
-  beforeEach(() => {
-    // Reset initialization state
-    paymentLinkService.initialized = false;
   });
 
   describe('generatePaymentLinks', () => {

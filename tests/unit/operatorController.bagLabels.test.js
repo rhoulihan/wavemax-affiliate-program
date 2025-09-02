@@ -107,22 +107,8 @@ describe('Operator Controller - Bag Label Printing', () => {
         bagLabelsGenerated: false
       });
 
-      expect(Customer.updateMany).toHaveBeenCalledWith(
-        { _id: { $in: ['cust1', 'cust2'] } },
-        {
-          $set: {
-            bagLabelsGenerated: true,
-            bagLabelsGeneratedAt: expect.any(Date),
-            bagLabelsGeneratedBy: 'op123' // Uses req.user.id
-          }
-        }
-      );
-
-      // Check logger.info was called
-      const logger = require('../../server/utils/logger');
-      expect(logger.info).toHaveBeenCalledWith(
-        'Operator op123 printed 5 labels for 2 customers'
-      );
+      // Check that updateMany is NOT called in the initial request
+      expect(Customer.updateMany).not.toHaveBeenCalled();
 
       expect(res.json).toHaveBeenCalledWith({
         success: true,
@@ -135,7 +121,7 @@ describe('Operator Controller - Bag Label Printing', () => {
             customerId: 'CUST001',
             bagNumber: 1,
             totalBags: 2,
-            qrCode: 'BAG-CUST001-1',
+            qrCode: 'CUST001-1',
             affiliateId: 'AFF001'
           }),
           expect.objectContaining({
@@ -143,7 +129,7 @@ describe('Operator Controller - Bag Label Printing', () => {
             customerId: 'CUST001',
             bagNumber: 2,
             totalBags: 2,
-            qrCode: 'BAG-CUST001-2',
+            qrCode: 'CUST001-2',
             affiliateId: 'AFF001'
           }),
           expect.objectContaining({
@@ -151,7 +137,7 @@ describe('Operator Controller - Bag Label Printing', () => {
             customerId: 'CUST002',
             bagNumber: 1,
             totalBags: 3,
-            qrCode: 'BAG-CUST002-1',
+            qrCode: 'CUST002-1',
             affiliateId: 'AFF002'
           }),
           expect.objectContaining({
@@ -159,7 +145,7 @@ describe('Operator Controller - Bag Label Printing', () => {
             customerId: 'CUST002',
             bagNumber: 2,
             totalBags: 3,
-            qrCode: 'BAG-CUST002-2',
+            qrCode: 'CUST002-2',
             affiliateId: 'AFF002'
           }),
           expect.objectContaining({
@@ -167,10 +153,11 @@ describe('Operator Controller - Bag Label Printing', () => {
             customerId: 'CUST002',
             bagNumber: 3,
             totalBags: 3,
-            qrCode: 'BAG-CUST002-3',
+            qrCode: 'CUST002-3',
             affiliateId: 'AFF002'
           })
-        ])
+        ]),
+        customerIds: ['cust1', 'cust2']
       });
     });
 
@@ -210,8 +197,8 @@ describe('Operator Controller - Bag Label Printing', () => {
 
       await operatorController.printNewCustomerLabels(req, res);
 
-      // Should still update the customer and generate 1 label (default)
-      expect(Customer.updateMany).toHaveBeenCalled();
+      // Should NOT update the customer immediately
+      expect(Customer.updateMany).not.toHaveBeenCalled();
       expect(res.json).toHaveBeenCalledWith({
         success: true,
         message: 'Generated 1 labels for 1 customers',
@@ -223,9 +210,10 @@ describe('Operator Controller - Bag Label Printing', () => {
             customerId: 'CUST001',
             bagNumber: 1,
             totalBags: 1, // Defaults to 1 when numberOfBags is 0
-            qrCode: 'BAG-CUST001-1'
+            qrCode: 'CUST001-1'
           })
-        ])
+        ]),
+        customerIds: ['cust1']
       });
     });
 
@@ -245,33 +233,7 @@ describe('Operator Controller - Bag Label Printing', () => {
       });
     });
 
-    it('should handle database error during update', async () => {
-      const mockCustomers = [
-        {
-          _id: 'cust1',
-          customerId: 'CUST001',
-          firstName: 'John',
-          lastName: 'Doe',
-          numberOfBags: 2,
-          affiliateId: 'AFF001'
-        }
-      ];
-
-      Customer.find.mockReturnValue({
-        select: jest.fn().mockResolvedValue(mockCustomers)
-      });
-      Customer.updateMany.mockRejectedValue(new Error('Update failed'));
-
-      await operatorController.printNewCustomerLabels(req, res);
-
-      const logger = require('../../server/utils/logger');
-      expect(logger.error).toHaveBeenCalledWith('Print new customer labels error:', expect.any(Error));
-      expect(res.status).toHaveBeenCalledWith(500);
-      expect(res.json).toHaveBeenCalledWith({
-        success: false,
-        message: 'Error printing customer labels'
-      });
-    });
+    // Database error during update test removed - update no longer happens in printNewCustomerLabels
 
     it('should handle customers with missing names', async () => {
       const mockCustomers = [
@@ -314,7 +276,8 @@ describe('Operator Controller - Bag Label Printing', () => {
             customerName: 'Jane ', // First name + space
             customerId: 'CUST002'
           })
-        ])
+        ]),
+        customerIds: ['cust1', 'cust2']
       });
     });
 
@@ -346,7 +309,7 @@ describe('Operator Controller - Bag Label Printing', () => {
           bagNumber: i + 1,
           totalBags: 5,
           customerId: 'CUST001',
-          qrCode: `BAG-CUST001-${i + 1}`
+          qrCode: `CUST001-${i + 1}`
         });
       }
     });
@@ -381,9 +344,10 @@ describe('Operator Controller - Bag Label Printing', () => {
             customerId: 'CUST001',
             bagNumber: 1,
             totalBags: 1, // Defaults to 1
-            qrCode: 'BAG-CUST001-1'
+            qrCode: 'CUST001-1'
           })
-        ])
+        ]),
+        customerIds: ['cust1']
       });
     });
   });

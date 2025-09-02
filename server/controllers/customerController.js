@@ -226,7 +226,9 @@ exports.registerCustomer = async (req, res) => {
         perBagDeliveryFee: affiliate.perBagDeliveryFee,
         numberOfBags: newCustomer.numberOfBags,
         bagCredit: newCustomer.bagCredit,
-        paymentSkipped: freeFirstBagEnabled && bagCount === 1 // Indicate if payment was skipped
+        paymentSkipped: freeFirstBagEnabled && bagCount === 1, // Indicate if payment was skipped
+        registrationVersion: newCustomer.registrationVersion,
+        initialBagsRequested: newCustomer.initialBagsRequested || initialBagsRequested
       },
       message: 'Customer registered successfully!'
     });
