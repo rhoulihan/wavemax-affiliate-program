@@ -550,3 +550,80 @@ body {
     margin-bottom: 20px;
 }
 
+/* Button Loading State */
+.btn .swirl-spinner {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    margin-right: 8px;
+    vertical-align: middle;
+}
+
+.btn:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+/* Payment Required Modal Styles */
+.payment-required-container {
+    text-align: center;
+    padding: 20px 0;
+}
+
+.payment-warning-icon {
+    font-size: 64px;
+    margin-bottom: 15px;
+}
+
+.payment-warning-title {
+    color: #dc3545;
+    font-size: 28px;
+    margin-bottom: 25px;
+    font-weight: 600;
+}
+
+.payment-amount {
+    color: #dc3545;
+    font-weight: bold;
+    font-size: 18px;
+}
+
+.payment-status-pending {
+    color: #ffc107;
+    font-weight: bold;
+}
+
+.payment-required-message {
+    background: #fff3cd;
+    border: 2px solid #ffc107;
+    border-radius: 8px;
+    padding: 20px;
+    margin: 20px 0;
+    text-align: left;
+}
+
+.payment-required-message p {
+    margin: 10px 0;
+    color: #856404;
+}
+
+.payment-methods-list {
+    list-style: none;
+    padding: 0;
+    margin: 15px 0;
+}
+
+.payment-methods-list li {
+    padding: 8px 0;
+    color: #856404;
+    font-weight: 500;
+}
+
+.payment-note {
+    background: #f8f9fa;
+    padding: 10px;
+    border-radius: 4px;
+    margin-top: 15px;
+    border-left: 4px solid #dc3545;
+}
+

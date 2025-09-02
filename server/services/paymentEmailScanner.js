@@ -5,6 +5,7 @@
  */
 
 const imapScanner = require('./imapEmailScanner');
+const mailcowService = require('./mailcowService');
 const Order = require('../models/Order');
 const Customer = require('../models/Customer');
 const emailService = require('../utils/emailService');
@@ -16,10 +17,13 @@ class PaymentEmailScanner {
       venmo: {
         domains: ['venmo.com', 'notifications.venmo.com'],
         patterns: {
-          amount: /\$?([\d,]+\.?\d*)/,
-          orderIdInNote: /Order\s*#?\s*([A-Z0-9]{8})/i,
-          sender: /from\s+([\w\s]+)/i,
-          transactionId: /Transaction\s*ID:?\s*([A-Z0-9-]+)/i
+          amount: /\$\s*(\d+)\s+(\d{2})/, // Venmo displays as "$ 2 35" for $2.35
+          amountFallback: /\$?([\d,]+\.?\d*)/, // Fallback pattern
+          orderIdInNote: /Order\s*(?:TEST-)?([\d]{8,})/i, // Handle TEST- prefix and get numeric part
+          orderIdFallback: /Order\s*#?\s*([A-Z0-9]{8})/i, // Fallback pattern
+          sender: /([A-Za-z\s]+)\s+paid\s+you/i, // "John Houlihan paid you"
+          senderFallback: /from\s+([\w\s]+)/i,
+          transactionId: /Transaction\s*ID:?\s*([\d]+)/i
         }
       },
       paypal: {
@@ -123,21 +127,46 @@ class PaymentEmailScanner {
       // Extract payment details using provider-specific patterns
       const patterns = this.providers[provider].patterns;
       
-      // Extract order ID from note/memo
-      const orderIdMatch = content.match(patterns.orderIdInNote);
+      // Extract order ID from note/memo - try primary pattern first, then fallback
+      let orderIdMatch = content.match(patterns.orderIdInNote);
+      if (!orderIdMatch && patterns.orderIdFallback) {
+        orderIdMatch = content.match(patterns.orderIdFallback);
+      }
+      
       if (!orderIdMatch) {
         console.log('No order ID found in payment note');
         return null;
       }
       
-      const shortOrderId = orderIdMatch[1].toUpperCase();
+      // Extract the numeric part of the order ID and get last 8 chars
+      const extractedId = orderIdMatch[1];
+      const shortOrderId = extractedId.slice(-8).toUpperCase();
       
-      // Extract amount
-      const amountMatch = content.match(patterns.amount);
-      const amount = amountMatch ? parseFloat(amountMatch[1].replace(',', '')) : null;
+      // Extract amount - handle Venmo's special format
+      let amount = null;
+      if (provider === 'venmo') {
+        // Try Venmo's separated dollar/cents format first
+        const venmoAmountMatch = content.match(patterns.amount);
+        if (venmoAmountMatch) {
+          const dollars = parseInt(venmoAmountMatch[1]);
+          const cents = parseInt(venmoAmountMatch[2]);
+          amount = dollars + (cents / 100);
+        } else if (patterns.amountFallback) {
+          // Fall back to standard format
+          const fallbackMatch = content.match(patterns.amountFallback);
+          amount = fallbackMatch ? parseFloat(fallbackMatch[1].replace(',', '')) : null;
+        }
+      } else {
+        // Standard amount extraction for other providers
+        const amountMatch = content.match(patterns.amount);
+        amount = amountMatch ? parseFloat(amountMatch[1].replace(',', '')) : null;
+      }
       
-      // Extract sender info
-      const senderMatch = content.match(patterns.sender);
+      // Extract sender info - try primary pattern first, then fallback
+      let senderMatch = content.match(patterns.sender);
+      if (!senderMatch && patterns.senderFallback) {
+        senderMatch = content.match(patterns.senderFallback);
+      }
       const sender = senderMatch ? senderMatch[1].trim() : 'Unknown';
       
       // Extract transaction ID if available
@@ -258,23 +287,43 @@ class PaymentEmailScanner {
         return true;
       }
       
-      // Verify amount (allow small variance for fees)
+      // Verify amount - payment must be >= order amount
       const expectedAmount = order.v2PaymentAmount || order.actualTotal || order.estimatedTotal;
-      const variance = Math.abs(payment.amount - expectedAmount);
+      const paymentDifference = payment.amount - expectedAmount;
       
-      if (variance > 1.00) {
-        console.warn(`Payment amount mismatch. Expected: $${expectedAmount}, Received: $${payment.amount}`);
-        // Still mark as verified but note the discrepancy
-        order.v2PaymentNotes = `Amount variance: Expected $${expectedAmount}, received $${payment.amount}`;
+      if (payment.amount < expectedAmount) {
+        // Payment is less than required - notify admin but don't verify
+        console.warn(`Payment insufficient. Expected: $${expectedAmount}, Received: $${payment.amount}`);
+        
+        // Notify admin about insufficient payment
+        try {
+          await this.notifyAdminPaymentIssue(order, payment, expectedAmount, 'underpayment');
+        } catch (error) {
+          console.error('Error notifying admin about underpayment:', error);
+        }
+        
+        return false; // Don't verify the payment
       }
       
+      // Payment is sufficient (exact or overpayment)
       // Update order with payment verification
       order.v2PaymentStatus = 'verified';
       order.v2PaymentVerifiedAt = new Date();
       order.v2PaymentTransactionId = payment.transactionId;
       order.v2PaymentMethod = payment.provider;
       
-      if (!order.v2PaymentNotes) {
+      if (paymentDifference > 0) {
+        // Customer overpaid - note this and notify admin
+        order.v2PaymentNotes = `Payment verified. Amount variance: Overpayment of $${paymentDifference.toFixed(2)} received`;
+        
+        // Notify admin about overpayment
+        try {
+          await this.notifyAdminPaymentIssue(order, payment, expectedAmount, 'overpayment');
+        } catch (error) {
+          console.error('Error notifying admin about overpayment:', error);
+        }
+      } else {
+        // Exact payment
         order.v2PaymentNotes = `Payment verified via email from ${payment.sender}`;
       }
       
@@ -416,6 +465,82 @@ class PaymentEmailScanner {
       return results;
     } catch (error) {
       console.error('Error processing pending payments:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Notify admin about payment issues (overpayment or underpayment)
+   * @param {Object} order - Order document
+   * @param {Object} payment - Payment details
+   * @param {Number} expectedAmount - Expected payment amount
+   * @param {String} issueType - 'overpayment' or 'underpayment'
+   */
+  async notifyAdminPaymentIssue(order, payment, expectedAmount, issueType) {
+    try {
+      // Get customer details
+      const customer = await Customer.findOne({ customerId: order.customerId });
+      if (!customer) {
+        console.error('Customer not found for payment issue notification');
+        return;
+      }
+
+      const paymentDifference = Math.abs(payment.amount - expectedAmount);
+      const subject = issueType === 'overpayment' 
+        ? `Overpayment Received - Order ${order._id.toString().slice(-8).toUpperCase()}`
+        : `Underpayment Received - Order ${order._id.toString().slice(-8).toUpperCase()}`;
+
+      const issueDescription = issueType === 'overpayment'
+        ? `Customer has overpaid by $${paymentDifference.toFixed(2)}`
+        : `Customer has underpaid by $${paymentDifference.toFixed(2)}`;
+
+      const actionRequired = issueType === 'overpayment'
+        ? 'Consider refunding the overpayment amount or applying it as credit to future orders.'
+        : 'Payment verification was blocked. Please follow up with the customer for the remaining amount.';
+
+      const emailContent = `
+        <h2>Payment ${issueType === 'overpayment' ? 'Overpayment' : 'Underpayment'} Alert</h2>
+        
+        <p>${issueDescription}</p>
+        
+        <h3>Order Details:</h3>
+        <ul>
+          <li><strong>Order ID:</strong> ${order._id}</li>
+          <li><strong>Short Order ID:</strong> ${order._id.toString().slice(-8).toUpperCase()}</li>
+          <li><strong>Customer:</strong> ${customer.firstName} ${customer.lastName}</li>
+          <li><strong>Customer Email:</strong> ${customer.email}</li>
+          <li><strong>Customer Phone:</strong> ${customer.phone}</li>
+        </ul>
+        
+        <h3>Payment Details:</h3>
+        <ul>
+          <li><strong>Expected Amount:</strong> $${expectedAmount.toFixed(2)}</li>
+          <li><strong>Received Amount:</strong> $${payment.amount.toFixed(2)}</li>
+          <li><strong>Difference:</strong> $${paymentDifference.toFixed(2)}</li>
+          <li><strong>Payment Method:</strong> ${payment.provider}</li>
+          <li><strong>Transaction ID:</strong> ${payment.transactionId}</li>
+          <li><strong>Sender:</strong> ${payment.sender}</li>
+        </ul>
+        
+        <h3>Action Required:</h3>
+        <p>${actionRequired}</p>
+        
+        <hr>
+        <p style="color: #666; font-size: 12px;">
+          This is an automated notification from the WaveMAX Payment Scanner system.
+        </p>
+      `;
+
+      // Send notification to admin
+      await emailService.sendAdminNotification({
+        subject: subject,
+        html: emailContent,
+        priority: issueType === 'underpayment' ? 'high' : 'normal'
+      });
+
+      console.log(`Admin notified about ${issueType} for order ${order._id}`);
+    } catch (error) {
+      console.error(`Error sending admin notification for ${issueType}:`, error);
       throw error;
     }
   }

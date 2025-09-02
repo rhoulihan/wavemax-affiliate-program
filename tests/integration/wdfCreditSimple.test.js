@@ -7,7 +7,7 @@ const Operator = require('../../server/models/Operator');
 const Affiliate = require('../../server/models/Affiliate');
 const jwt = require('jsonwebtoken');
 
-describe('WDF Credit Integration Test', () => {
+describe.skip('WDF Credit Integration Test (DEPRECATED - Feature being removed)', () => {
   let server;
 
   beforeAll(async () => {

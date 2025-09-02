@@ -54,16 +54,27 @@ async function generatePaymentURLs(order) {
   const orderNote = `WaveMAX Order ${order.orderId}`;
   
   // Generate payment URLs for each service
+  // Note: Custom payment links only work with Venmo business profiles
+  // Known issue: Venmo app adds business profile + username as two recipients when scanning QR
   const links = {
-    venmo: `venmo://paycharge?txn=pay&recipients=WaveMAXLaundry&amount=${amount}&note=${encodeURIComponent(orderNote)}`,
+    venmo: `https://venmo.com/wavemaxatx?txn=pay&amount=${amount}&note=${encodeURIComponent(orderNote)}`,
     paypal: `https://www.paypal.me/WaveMAXLaundry/${amount}?locale.x=en_US&country.x=US`,
     cashapp: `https://cash.app/$WaveMAXLaundry/${amount}?note=${encodeURIComponent(orderNote)}`
   };
   
-  // Generate QR codes for each payment URL
+  // Use the same URL for QR codes as the button
+  const qrUrls = {
+    venmo: links.venmo,
+    paypal: links.paypal,
+    cashapp: links.cashapp
+  };
+  
   const qrCodes = {};
-  for (const [service, url] of Object.entries(links)) {
+  for (const [service, url] of Object.entries(qrUrls)) {
     try {
+      // Log the URL being encoded in the QR code
+      console.log(`Generating ${service} QR code for URL:`, url);
+      
       // Generate QR code as base64 string
       qrCodes[service] = await QRCode.toDataURL(url, {
         width: 300,
@@ -956,6 +967,9 @@ exports.weighBags = async (req, res) => {
     // Update bag counts
     order.bagsWeighed = order.bags.length;
     
+    // Save order first to calculate v2PaymentAmount
+    await order.save();
+    
     // V2 Payment Flow: Send payment request if all bags are weighed
     if (order.bagsWeighed === order.numberOfBags) {
       // Calculate weight difference for reference
@@ -964,27 +978,33 @@ exports.weighBags = async (req, res) => {
       // Get customer for payment request
       const customer = await Customer.findOne({ customerId: order.customerId });
       if (customer) {
-        // Generate payment URLs and QR codes
-        const paymentURLs = await generatePaymentURLs(order);
+        // Use actualTotal if v2PaymentAmount is not set
+        const paymentAmount = order.v2PaymentAmount || order.actualTotal || 
+                            (order.actualWeight * (order.baseRate || 1.25) + (order.addOnTotal || 0));
+        
+        // Generate payment URLs and QR codes with correct amount
+        const paymentURLs = await generatePaymentURLs({...order.toObject(), v2PaymentAmount: paymentAmount});
         order.v2PaymentLinks = paymentURLs.links;
         order.v2PaymentQRCodes = paymentURLs.qrCodes;
         order.v2PaymentStatus = 'awaiting';
         order.v2PaymentRequestedAt = new Date();
+        order.v2PaymentAmount = paymentAmount; // Ensure it's set
+        
+        // Save again with payment info
+        await order.save();
         
         // Send payment request email
         await emailService.sendV2PaymentRequest({
           customer,
           order,
-          paymentAmount: order.v2PaymentAmount,
+          paymentAmount: paymentAmount,
           paymentLinks: paymentURLs.links,
           qrCodes: paymentURLs.qrCodes
         });
         
-        logger.info(`V2 Payment request sent for order ${order.orderId}, amount: $${order.v2PaymentAmount}`);
+        logger.info(`V2 Payment request sent for order ${order.orderId}, amount: $${paymentAmount}`);
       }
     }
-    
-    await order.save();
 
     await logAuditEvent(AuditEvents.ORDER_STATUS_CHANGED, {
       operatorId,

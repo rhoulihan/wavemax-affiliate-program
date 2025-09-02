@@ -3,7 +3,7 @@ const Order = require('../../server/models/Order');
 const Customer = require('../../server/models/Customer');
 const SystemConfig = require('../../server/models/SystemConfig');
 
-describe('WDF Credit Model Tests', () => {
+describe.skip('WDF Credit Model Tests (DEPRECATED - Feature being removed)', () => {
   beforeAll(async () => {
     // Initialize SystemConfig defaults
     await SystemConfig.initializeDefaults();

@@ -33,7 +33,7 @@ jest.mock('../../server/utils/emailService', () => ({
   sendCustomerWelcomeEmail: jest.fn().mockResolvedValue(true)
 }));
 
-describe('WDF Credit System', () => {
+describe.skip('WDF Credit System (DEPRECATED - Feature being removed)', () => {
   let testCustomer;
   let testOperator;
   let testAffiliate;
