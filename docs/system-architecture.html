@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>System Architecture | WaveMAX Documentation</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f5f5f5;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #2196f3 0%, #1976d2 100%);
+            color: white;
+            padding: 30px 0;
+            margin-bottom: 30px;
+        }
+        
+        header h1 {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+        
+        .breadcrumb {
+            background: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        
+        .breadcrumb a {
+            color: #2196f3;
+            text-decoration: none;
+        }
+        
+        .content-section {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        h2 {
+            color: #2c3e50;
+            margin: 30px 0 20px 0;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #ecf0f1;
+        }
+        
+        h3 {
+            color: #34495e;
+            margin: 20px 0 15px 0;
+        }
+        
+        pre {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            border-left: 4px solid #2196f3;
+            margin: 15px 0;
+        }
+        
+        code {
+            background: #f1f3f4;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', Courier, monospace;
+        }
+        
+        .architecture-layer {
+            background: #f8f9fa;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 5px;
+            border-left: 4px solid #2196f3;
+        }
+        
+        .architecture-layer h4 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+        
+        .component-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        .component-card {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 5px;
+            border: 1px solid #dee2e6;
+        }
+        
+        .component-card h4 {
+            color: #2196f3;
+            margin-bottom: 10px;
+        }
+        
+        .tech-badge {
+            display: inline-block;
+            background: #2196f3;
+            color: white;
+            padding: 3px 10px;
+            border-radius: 15px;
+            font-size: 0.85em;
+            margin: 5px 5px 5px 0;
+        }
+        
+        .diagram {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 5px;
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        ul {
+            margin-left: 20px;
+            margin-top: 10px;
+        }
+        
+        li {
+            margin-bottom: 5px;
+        }
+        
+        .security-note {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+        }
+        
+        .performance-note {
+            background: #d4edda;
+            border-left: 4px solid #28a745;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>System Architecture</h1>
+            <p>Complete technical architecture documentation for WaveMAX Affiliate Program</p>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="breadcrumb">
+            <a href="/docs/">Documentation</a> / System Architecture
+        </div>
+
+        <div class="content-section">
+            <h2>Overview</h2>
+            <p>The WaveMAX Affiliate Program is a comprehensive laundry service management platform built with modern web technologies. The system handles customer registration, order management, payment processing, bag tracking, and affiliate operations.</p>
+            
+            <div class="diagram">
+                <p><strong>High-Level Architecture</strong></p>
+                <pre>
+┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
+│   Web Client    │────▶│   Express.js    │────▶│    MongoDB      │
+│   (Browser)     │     │     Server      │     │    Database     │
+└─────────────────┘     └─────────────────┘     └─────────────────┘
+         │                       │                        │
+         │                       ├── Email Service ──────┤
+         │                       ├── Payment Scanner ────┤
+         │                       └── Background Jobs ────┘
+</pre>
+            </div>
+        </div>
+
+        <div class="content-section">
+            <h2>Technology Stack</h2>
+            
+            <div class="component-grid">
+                <div class="component-card">
+                    <h4>Frontend</h4>
+                    <p>Client-side technologies:</p>
+                    <div>
+                        <span class="tech-badge">HTML5</span>
+                        <span class="tech-badge">CSS3</span>
+                        <span class="tech-badge">JavaScript</span>
+                        <span class="tech-badge">jQuery</span>
+                        <span class="tech-badge">Bootstrap</span>
+                        <span class="tech-badge">QR Code Libraries</span>
+                    </div>
+                </div>
+                
+                <div class="component-card">
+                    <h4>Backend</h4>
+                    <p>Server-side technologies:</p>
+                    <div>
+                        <span class="tech-badge">Node.js</span>
+                        <span class="tech-badge">Express.js</span>
+                        <span class="tech-badge">MongoDB</span>
+                        <span class="tech-badge">Mongoose ODM</span>
+                        <span class="tech-badge">JWT</span>
+                        <span class="tech-badge">Bcrypt</span>
+                    </div>
+                </div>
+                
+                <div class="component-card">
+                    <h4>Infrastructure</h4>
+                    <p>Deployment and operations:</p>
+                    <div>
+                        <span class="tech-badge">PM2</span>
+                        <span class="tech-badge">Nginx</span>
+                        <span class="tech-badge">Linux (Ubuntu)</span>
+                        <span class="tech-badge">Git</span>
+                        <span class="tech-badge">Let's Encrypt</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="content-section">
+            <h2>Application Layers</h2>
+            
+            <div class="architecture-layer">
+                <h4>1. Presentation Layer</h4>
+                <p>Web-based user interfaces for different user roles:</p>
+                <ul>
+                    <li><strong>Customer Portal:</strong> Registration, order scheduling, payment management</li>
+                    <li><strong>Operator Interface:</strong> Bag scanning, weight recording, order processing</li>
+                    <li><strong>Admin Dashboard:</strong> System management, reporting, configuration</li>
+                    <li><strong>Affiliate Portal:</strong> Business management, order tracking</li>
+                </ul>
+            </div>
+            
+            <div class="architecture-layer">
+                <h4>2. API Layer</h4>
+                <p>RESTful API endpoints organized by domain:</p>
+                <ul>
+                    <li><code>/api/auth/*</code> - Authentication and authorization</li>
+                    <li><code>/api/customers/*</code> - Customer management</li>
+                    <li><code>/api/orders/*</code> - Order processing</li>
+                    <li><code>/api/operator/*</code> - Operator functions</li>
+                    <li><code>/api/admin/*</code> - Administrative operations</li>
+                    <li><code>/api/v2/*</code> - Version 2 payment endpoints</li>
+                    <li><code>/api/test/*</code> - Testing utilities (dev only)</li>
+                </ul>
+            </div>
+            
+            <div class="architecture-layer">
+                <h4>3. Business Logic Layer</h4>
+                <p>Core application services:</p>
+                <ul>
+                    <li><strong>Authentication Service:</strong> JWT-based auth with role management</li>
+                    <li><strong>Order Management:</strong> Complete order lifecycle handling</li>
+                    <li><strong>Payment Processing:</strong> V2 post-weigh payment system</li>
+                    <li><strong>Bag Tracking:</strong> QR code-based tracking system</li>
+                    <li><strong>Email Service:</strong> Transactional emails and notifications</li>
+                    <li><strong>Payment Scanner:</strong> IMAP-based payment verification</li>
+                </ul>
+            </div>
+            
+            <div class="architecture-layer">
+                <h4>4. Data Layer</h4>
+                <p>MongoDB collections and data models:</p>
+                <ul>
+                    <li><strong>Core Entities:</strong> Customers, Orders, Affiliates, Bags</li>
+                    <li><strong>Authentication:</strong> Users, Operators, Admins, Sessions</li>
+                    <li><strong>Configuration:</strong> SystemConfig, ServiceAreas, Rates</li>
+                    <li><strong>Tracking:</strong> AuditLogs, PaymentLogs, EmailLogs</li>
+                    <li><strong>Financial:</strong> Payments, WDFCredits, Transactions</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="content-section">
+            <h2>Core Components</h2>
+            
+            <h3>Authentication System</h3>
+            <p>Multi-role authentication with JWT tokens:</p>
+            <pre>
+// Authentication flow
+1. User submits credentials
+2. Server validates against database
+3. JWT token generated with role claims
+4. Token stored in secure cookie
+5. Subsequent requests validated via middleware</pre>
+            
+            <div class="security-note">
+                <strong>Security Features:</strong>
+                <ul>
+                    <li>Password hashing with bcrypt (10 rounds)</li>
+                    <li>JWT tokens with 24-hour expiration</li>
+                    <li>CSRF protection on all forms</li>
+                    <li>Rate limiting on auth endpoints</li>
+                    <li>Secure HTTP-only cookies</li>
+                </ul>
+            </div>
+            
+            <h3>Payment System (V2)</h3>
+            <p>Post-weigh payment processing with email verification:</p>
+            <pre>
+// V2 Payment Flow
+1. Customer schedules pickup (no upfront payment)
+2. Bags collected and weighed
+3. Payment request sent with actual amount
+4. Customer pays via Venmo/PayPal/CashApp
+5. Email scanner verifies payment
+6. Order marked as complete
+7. Affiliate notified for delivery</pre>
+            
+            <h3>Bag Tracking System</h3>
+            <p>QR code-based tracking through order lifecycle:</p>
+            <pre>
+// Bag Status Flow
+pending → collected → processing → processed → delivered → completed</pre>
+            
+            <div class="performance-note">
+                <strong>Performance Optimizations:</strong>
+                <ul>
+                    <li>Indexed MongoDB queries for fast lookups</li>
+                    <li>Caching of frequently accessed config</li>
+                    <li>Batch processing for email scanning</li>
+                    <li>Async/await for non-blocking operations</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="content-section">
+            <h2>Background Services</h2>
+            
+            <div class="component-grid">
+                <div class="component-card">
+                    <h4>Payment Verification Job</h4>
+                    <p>Automated email scanning for payment verification</p>
+                    <ul>
+                        <li>Runs every 60 seconds</li>
+                        <li>Scans IMAP inbox for payment emails</li>
+                        <li>Matches payments to orders</li>
+                        <li>Sends admin notifications for issues</li>
+                    </ul>
+                </div>
+                
+                <div class="component-card">
+                    <h4>Payment Reminder Service</h4>
+                    <p>Automated reminder system for pending payments</p>
+                    <ul>
+                        <li>2-hour initial reminder</li>
+                        <li>6-hour follow-up</li>
+                        <li>24-hour final notice</li>
+                        <li>Admin escalation after 24 hours</li>
+                    </ul>
+                </div>
+                
+                <div class="component-card">
+                    <h4>Session Cleanup</h4>
+                    <p>Database maintenance for expired sessions</p>
+                    <ul>
+                        <li>Runs daily at 2 AM</li>
+                        <li>Removes expired JWT sessions</li>
+                        <li>Cleans up orphaned records</li>
+                        <li>Maintains audit log retention</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="content-section">
+            <h2>External Integrations</h2>
+            
+            <h3>Email Services</h3>
+            <ul>
+                <li><strong>SMTP (Outbound):</strong> SendGrid/Mailgun for transactional emails</li>
+                <li><strong>IMAP (Inbound):</strong> Payment verification via email scanning</li>
+                <li><strong>Templates:</strong> HTML email templates with responsive design</li>
+            </ul>
+            
+            <h3>Payment Providers</h3>
+            <ul>
+                <li><strong>Venmo:</strong> Email notifications for payment tracking</li>
+                <li><strong>PayPal:</strong> Email confirmations for verification</li>
+                <li><strong>CashApp:</strong> Receipt parsing for payment matching</li>
+            </ul>
+            
+            <h3>DocuSign Integration</h3>
+            <ul>
+                <li>OAuth 2.0 authentication</li>
+                <li>Service agreement generation</li>
+                <li>Automated envelope creation</li>
+                <li>Signature status tracking</li>
+            </ul>
+        </div>
+
+        <div class="content-section">
+            <h2>Database Schema</h2>
+            
+            <h3>Key Collections</h3>
+            
+            <pre>
+// Orders Collection
+{
+  orderId: String (unique),
+  customerId: String,
+  affiliateId: String,
+  status: Enum,
+  pickupDate: Date,
+  actualWeight: Number,
+  actualTotal: Number,
+  v2PaymentStatus: Enum,
+  v2PaymentAmount: Number,
+  bags: [{
+    bagId: String,
+    status: String,
+    weight: Number,
+    scannedAt: Object
+  }],
+  timestamps: true
+}</pre>
+            
+            <pre>
+// Customers Collection
+{
+  customerId: String (unique),
+  affiliateId: String,
+  firstName: String,
+  lastName: String,
+  email: String,
+  phone: String,
+  address: Object,
+  wdfCredits: Number,
+  v2PaymentEnabled: Boolean,
+  timestamps: true
+}</pre>
+            
+            <pre>
+// SystemConfig Collection
+{
+  key: String (unique),
+  value: Mixed,
+  description: String,
+  category: String,
+  updatedBy: String,
+  timestamps: true
+}</pre>
+        </div>
+
+        <div class="content-section">
+            <h2>Security Architecture</h2>
+            
+            <h3>Authentication & Authorization</h3>
+            <ul>
+                <li>JWT-based stateless authentication</li>
+                <li>Role-based access control (RBAC)</li>
+                <li>Secure session management</li>
+                <li>CSRF token validation</li>
+            </ul>
+            
+            <h3>Data Protection</h3>
+            <ul>
+                <li>Bcrypt password hashing</li>
+                <li>HTTPS enforcement</li>
+                <li>Input validation and sanitization</li>
+                <li>SQL injection prevention via Mongoose</li>
+                <li>XSS protection headers</li>
+            </ul>
+            
+            <h3>Audit & Compliance</h3>
+            <ul>
+                <li>Comprehensive audit logging</li>
+                <li>IP address tracking</li>
+                <li>Failed login monitoring</li>
+                <li>Rate limiting on sensitive endpoints</li>
+            </ul>
+        </div>
+
+        <div class="content-section">
+            <h2>Deployment Architecture</h2>
+            
+            <h3>Server Configuration</h3>
+            <pre>
+# Production Setup
+- Ubuntu 20.04 LTS
+- Node.js 16.x or higher
+- MongoDB 5.0+
+- Nginx as reverse proxy
+- PM2 process manager
+- Let's Encrypt SSL certificates</pre>
+            
+            <h3>Process Management</h3>
+            <pre>
+# PM2 Ecosystem
+module.exports = {
+  apps: [{
+    name: 'wavemax-server',
+    script: './server.js',
+    instances: 2,
+    exec_mode: 'cluster',
+    env: {
+      NODE_ENV: 'production',
+      PORT: 3001
+    }
+  }]
+}</pre>
+            
+            <h3>Monitoring</h3>
+            <ul>
+                <li>PM2 process monitoring</li>
+                <li>Application logs in /root/.pm2/logs/</li>
+                <li>MongoDB performance monitoring</li>
+                <li>Nginx access and error logs</li>
+                <li>System resource monitoring</li>
+            </ul>
+        </div>
+
+        <div class="content-section">
+            <h2>Performance Considerations</h2>
+            
+            <h3>Database Optimization</h3>
+            <ul>
+                <li>Indexes on frequently queried fields</li>
+                <li>Compound indexes for complex queries</li>
+                <li>Connection pooling</li>
+                <li>Query result caching</li>
+            </ul>
+            
+            <h3>Application Performance</h3>
+            <ul>
+                <li>Async/await for non-blocking I/O</li>
+                <li>Batch processing for bulk operations</li>
+                <li>Lazy loading of heavy resources</li>
+                <li>Response compression</li>
+                <li>Static asset caching</li>
+            </ul>
+            
+            <h3>Scalability</h3>
+            <ul>
+                <li>Horizontal scaling with PM2 cluster mode</li>
+                <li>Database sharding capability</li>
+                <li>Stateless application design</li>
+                <li>Load balancing with Nginx</li>
+            </ul>
+        </div>
+
+        <div class="content-section">
+            <h2>Development Workflow</h2>
+            
+            <h3>Environment Setup</h3>
+            <pre>
+# Clone repository
+git clone [repository-url]
+
+# Install dependencies
+npm install
+
+# Configure environment
+cp .env.example .env
+# Edit .env with your configuration
+
+# Initialize database
+node scripts/init-mongo.js
+
+# Start development server
+npm run dev</pre>
+            
+            <h3>Testing Strategy</h3>
+            <ul>
+                <li><strong>Unit Tests:</strong> Jest for business logic</li>
+                <li><strong>Integration Tests:</strong> API endpoint testing</li>
+                <li><strong>Test Scripts:</strong> Manual testing utilities</li>
+                <li><strong>Coverage:</strong> Target 80% code coverage</li>
+            </ul>
+            
+            <h3>Deployment Process</h3>
+            <pre>
+# Production deployment
+git pull origin main
+npm install
+pm2 restart wavemax-server
+pm2 logs  # Monitor for issues</pre>
+        </div>
+
+        <div class="content-section">
+            <h2>Troubleshooting Guide</h2>
+            
+            <h3>Common Issues</h3>
+            
+            <h4>Payment Verification Not Working</h4>
+            <ul>
+                <li>Check IMAP configuration in SystemConfig</li>
+                <li>Verify email credentials are correct</li>
+                <li>Check payment scanner logs: <code>pm2 logs</code></li>
+                <li>Run test: <code>node scripts/test-payment-notifications.js</code></li>
+            </ul>
+            
+            <h4>Operator Scan Issues</h4>
+            <ul>
+                <li>Verify QR code format matches expected pattern</li>
+                <li>Check browser console for JavaScript errors</li>
+                <li>Ensure operator has proper permissions</li>
+                <li>Test with: <code>/test-operator-scan.html</code></li>
+            </ul>
+            
+            <h4>Email Delivery Problems</h4>
+            <ul>
+                <li>Check SMTP configuration</li>
+                <li>Verify SendGrid/Mailgun API keys</li>
+                <li>Review email logs in database</li>
+                <li>Test with: <code>node scripts/send-test-email.js</code></li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>

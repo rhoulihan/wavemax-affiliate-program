@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Operator Workflow & Scanning System | WaveMAX Documentation</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f5f5f5;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #4caf50 0%, #45a049 100%);
+            color: white;
+            padding: 30px 0;
+            margin-bottom: 30px;
+        }
+        
+        header h1 {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+        
+        .breadcrumb {
+            background: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        
+        .breadcrumb a {
+            color: #4caf50;
+            text-decoration: none;
+        }
+        
+        .content-section {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        h2 {
+            color: #2c3e50;
+            margin: 30px 0 20px 0;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #ecf0f1;
+        }
+        
+        h3 {
+            color: #34495e;
+            margin: 20px 0 15px 0;
+        }
+        
+        pre {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            border-left: 4px solid #4caf50;
+        }
+        
+        code {
+            background: #f1f3f4;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', Courier, monospace;
+        }
+        
+        .workflow-step {
+            background: #f8f9fa;
+            padding: 20px;
+            border-left: 4px solid #4caf50;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+        
+        .workflow-step h4 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+        
+        .scan-types {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        .scan-card {
+            background: #e8f5e9;
+            padding: 20px;
+            border-radius: 8px;
+            border: 2px solid #4caf50;
+        }
+        
+        .scan-card h4 {
+            color: #2e7d32;
+            margin-bottom: 10px;
+        }
+        
+        .alert {
+            padding: 15px 20px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        
+        .alert-info {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            color: #1565c0;
+        }
+        
+        .alert-warning {
+            background: #fff3e0;
+            border-left: 4px solid #ff9800;
+            color: #e65100;
+        }
+        
+        .alert-success {
+            background: #e8f5e9;
+            border-left: 4px solid #4caf50;
+            color: #2e7d32;
+        }
+        
+        .qr-format {
+            background: #263238;
+            color: #aed581;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: monospace;
+            margin: 10px 0;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ecf0f1;
+        }
+        
+        th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        .modal-screenshot {
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            margin: 20px 0;
+            padding: 10px;
+            background: #f8f9fa;
+        }
+        
+        ul {
+            margin-left: 20px;
+            margin-top: 10px;
+        }
+        
+        li {
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>Operator Workflow & Scanning System</h1>
+            <p>Complete guide to the operator scanning and bag processing workflow</p>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="breadcrumb">
+            <a href="index.html">Documentation</a> / <span>Operator Workflow</span>
+        </div>
+
+        <div class="content-section">
+            <h2>Overview</h2>
+            <p>The operator scanning system provides a streamlined workflow for processing laundry orders from receipt through delivery. The system uses QR code scanning to track bags, automate weight entry, and manage the entire laundry processing lifecycle.</p>
+            
+            <div class="alert alert-success">
+                <strong>Key Features:</strong> Auto bag registration, duplicate scan prevention, V2 payment integration, real-time status tracking, and automated notifications.
+            </div>
+        </div>
+
+        <div class="content-section">
+            <h2>Access & Authentication</h2>
+            
+            <h3>Operator Login</h3>
+            <p>Operators access the scanning system at: <code>https://wavemax.promo/operator-scan.html</code></p>
+            
+            <h4>Auto-Login for Store IPs</h4>
+            <p>Operators at configured store locations are automatically logged in:</p>
+            <ul>
+                <li>System detects store IP addresses</li>
+                <li>Automatically authenticates designated operator account</li>
+                <li>No manual login required for in-store terminals</li>
+                <li>Session persists for 24 hours</li>
+            </ul>
+
+            <h4>Manual Login</h4>
+            <pre><code>Username: operator_username
+Password: operator_password
+Store Code: STORE001 (if required)</code></pre>
+
+            <div class="alert alert-info">
+                <strong>Kiosk Mode:</strong> For dedicated scanning stations, use <code>?kiosk=true</code> to hide navigation elements.
+            </div>
+        </div>
+
+        <div class="content-section">
+            <h2>QR Code Formats</h2>
+            
+            <h3>Customer QR Codes</h3>
+            <p>Customer cards contain QR codes in these formats:</p>
+            
+            <div class="qr-format">
+                # Format 1: Customer only
+                CUST-{uuid}
+                Example: CUST-a1b2c3d4-e5f6-g7h8-i9j0-k1l2m3n4o5p6
+
+                # Format 2: Customer with bag number
+                CUST-{uuid}-{bagNumber}
+                Example: CUST-a1b2c3d4-e5f6-g7h8-i9j0-k1l2m3n4o5p6-1
+            </div>
+
+            <div class="alert alert-warning">
+                <strong>Case Handling:</strong> The system normalizes QR codes to handle both uppercase and lowercase formats automatically.
+            </div>
+        </div>
+
+        <div class="content-section">
+            <h2>Scanning Workflow</h2>
+            
+            <div class="workflow-step">
+                <h4>Step 1: Bag Receipt (Initial Scan)</h4>
+                <p><strong>When:</strong> Customer drops off laundry bags</p>
+                <p><strong>Action:</strong> Scan customer QR code for each bag</p>
+                <ul>
+                    <li>System auto-registers bag in order</li>
+                    <li>Prevents duplicate bag registration</li>
+                    <li>Shows progress: "X of Y bags scanned"</li>
+                    <li>When all bags scanned, weight entry modal appears</li>
+                </ul>
+                <div class="modal-screenshot">
+                    <strong>Modal Shows:</strong>
+                    <ul>
+                        <li>Customer name and order details</li>
+                        <li>Scan progress bar</li>
+                        <li>Weight input fields (when all bags scanned)</li>
+                        <li>Add-on alerts if applicable</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="workflow-step">
+                <h4>Step 2: Weight Entry</h4>
+                <p><strong>When:</strong> All bags have been scanned</p>
+                <p><strong>Action:</strong> Enter actual weight for each bag</p>
+                <ul>
+                    <li>Weight fields appear automatically</li>
+                    <li>Submit button enabled when all weights entered</li>
+                    <li>For V2 orders: Payment request sent automatically</li>
+                    <li>Order status changes to "processing"</li>
+                </ul>
+                
+                <div class="alert alert-info">
+                    <strong>V2 Payment Flow:</strong> After weighing, the system automatically sends a payment request to the customer with the actual total based on weight.
+                </div>
+            </div>
+
+            <div class="workflow-step">
+                <h4>Step 3: Post-WDF Scan</h4>
+                <p><strong>When:</strong> After wash, dry, and fold is complete</p>
+                <p><strong>Action:</strong> Scan each processed bag</p>
+                <ul>
+                    <li>Marks bag as "processed"</li>
+                    <li>When all bags processed:
+                        <ul>
+                            <li>Order status changes to "processed"</li>
+                            <li>If V2 payment verified: Sends pickup notification to affiliate</li>
+                            <li>If payment pending: Shows payment required message</li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="workflow-step">
+                <h4>Step 4: Pickup Scan</h4>
+                <p><strong>When:</strong> Affiliate arrives to collect order</p>
+                <p><strong>Action:</strong> Scan bags for pickup verification</p>
+                <ul>
+                    <li>Verifies all bags are accounted for</li>
+                    <li>Confirms payment is complete</li>
+                    <li>Updates order to "complete"</li>
+                    <li>Sends delivery notification to customer with affiliate info</li>
+                    <li>Sends commission notification to affiliate</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="content-section">
+            <h2>Scan Status Actions</h2>
+            
+            <div class="scan-types">
+                <div class="scan-card">
+                    <h4>🟢 scan_required</h4>
+                    <p>More bags need to be scanned before proceeding</p>
+                </div>
+                <div class="scan-card">
+                    <h4>⚖️ weight_input</h4>
+                    <p>All bags scanned, ready for weight entry</p>
+                </div>
+                <div class="scan-card">
+                    <h4>✅ process_complete</h4>
+                    <p>Bag ready to mark as processed after WDF</p>
+                </div>
+                <div class="scan-card">
+                    <h4>🚚 pickup_scan</h4>
+                    <p>Bag ready for pickup by affiliate</p>
+                </div>
+                <div class="scan-card">
+                    <h4>ℹ️ status_check</h4>
+                    <p>View current order status only</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="content-section">
+            <h2>Payment Integration</h2>
+            
+            <h3>V1 Orders (Prepaid)</h3>
+            <ul>
+                <li>Payment already collected during scheduling</li>
+                <li>No payment verification needed</li>
+                <li>Can proceed directly to pickup after processing</li>
+            </ul>
+
+            <h3>V2 Orders (Post-Weigh Payment)</h3>
+            <ul>
+                <li>Payment request sent after weight entry</li>
+                <li>System monitors for payment confirmation</li>
+                <li>Order blocked from pickup until payment verified</li>
+                <li>Real-time payment status shown in operator interface</li>
+            </ul>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Payment Status</th>
+                        <th>Icon</th>
+                        <th>Meaning</th>
+                        <th>Operator Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Pending</td>
+                        <td>⏳</td>
+                        <td>Payment not yet requested</td>
+                        <td>Complete weighing</td>
+                    </tr>
+                    <tr>
+                        <td>Awaiting</td>
+                        <td>💳</td>
+                        <td>Payment request sent</td>
+                        <td>Wait for customer payment</td>
+                    </tr>
+                    <tr>
+                        <td>Confirming</td>
+                        <td>🔄</td>
+                        <td>Customer indicated payment sent</td>
+                        <td>System verifying</td>
+                    </tr>
+                    <tr>
+                        <td>Verified</td>
+                        <td>✅</td>
+                        <td>Payment confirmed</td>
+                        <td>Proceed with pickup</td>
+                    </tr>
+                    <tr>
+                        <td>Failed</td>
+                        <td>❌</td>
+                        <td>Payment timeout or issue</td>
+                        <td>Contact admin</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="content-section">
+            <h2>Email Notifications</h2>
+            
+            <h3>Automated Emails by Stage</h3>
+            
+            <table>
+                <thead>
+                    <tr>
+                        <th>Stage</th>
+                        <th>Recipient</th>
+                        <th>Email Type</th>
+                        <th>Trigger</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>After Weighing</td>
+                        <td>Customer</td>
+                        <td>V2 Payment Request</td>
+                        <td>All bags weighed (V2 orders only)</td>
+                    </tr>
+                    <tr>
+                        <td>Payment Received</td>
+                        <td>Customer</td>
+                        <td>Payment Confirmation</td>
+                        <td>Payment verified</td>
+                    </tr>
+                    <tr>
+                        <td>After Processing</td>
+                        <td>Affiliate</td>
+                        <td>Ready for Pickup</td>
+                        <td>All bags processed + payment verified</td>
+                    </tr>
+                    <tr>
+                        <td>After Pickup</td>
+                        <td>Customer</td>
+                        <td>Delivery Notification</td>
+                        <td>Bags picked up by affiliate</td>
+                    </tr>
+                    <tr>
+                        <td>After Pickup</td>
+                        <td>Affiliate</td>
+                        <td>Commission Earned</td>
+                        <td>Order marked complete</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="alert alert-success">
+                <strong>Customer Delivery Email:</strong> Now includes affiliate name and business info: "{AffiliateN
+
+ame} is on the way with your freshly cleaned laundry!"
+            </div>
+        </div>
+
+        <div class="content-section">
+            <h2>Error Handling</h2>
+            
+            <h3>Common Scan Errors</h3>
+            
+            <h4>Customer Not Found</h4>
+            <ul>
+                <li>QR code may be damaged or invalid</li>
+                <li>Customer may not be in system</li>
+                <li>Check QR code format and try manual entry</li>
+            </ul>
+
+            <h4>No Active Order</h4>
+            <ul>
+                <li>Customer hasn't scheduled a pickup</li>
+                <li>Order may be complete or cancelled</li>
+                <li>Verify order status in admin panel</li>
+            </ul>
+
+            <h4>Duplicate Bag Scan</h4>
+            <ul>
+                <li>Bag already registered in order</li>
+                <li>System prevents double registration</li>
+                <li>Shows warning message, continue with next bag</li>
+            </ul>
+
+            <h4>Payment Not Verified</h4>
+            <ul>
+                <li>Customer hasn't paid yet</li>
+                <li>Payment still processing</li>
+                <li>Cannot proceed to pickup until resolved</li>
+            </ul>
+        </div>
+
+        <div class="content-section">
+            <h2>Keyboard Shortcuts</h2>
+            
+            <table>
+                <thead>
+                    <tr>
+                        <th>Key</th>
+                        <th>Action</th>
+                        <th>Context</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Enter</td>
+                        <td>Process scan buffer</td>
+                        <td>After scanning QR code</td>
+                    </tr>
+                    <tr>
+                        <td>Escape</td>
+                        <td>Close modal / Clear buffer</td>
+                        <td>Any modal or scan input</td>
+                    </tr>
+                    <tr>
+                        <td>Tab</td>
+                        <td>Next weight input field</td>
+                        <td>Weight entry modal</td>
+                    </tr>
+                    <tr>
+                        <td>Shift+Tab</td>
+                        <td>Previous weight input field</td>
+                        <td>Weight entry modal</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="content-section">
+            <h2>Statistics Dashboard</h2>
+            
+            <p>The operator interface displays real-time statistics:</p>
+            
+            <ul>
+                <li><strong>Orders Processed Today:</strong> Count of orders moved to processing status</li>
+                <li><strong>Bags Scanned Today:</strong> Total bags weighed</li>
+                <li><strong>Orders Ready:</strong> Orders awaiting pickup</li>
+            </ul>
+
+            <pre><code>// Stats refresh every 30 seconds
+setInterval(loadStats, 30000);
+
+// Manual refresh available
+document.getElementById('refreshStats').click();</code></pre>
+        </div>
+
+        <div class="content-section">
+            <h2>Testing Tools</h2>
+            
+            <h3>Test Operator Scan</h3>
+            <p>Access at: <code>https://wavemax.promo/test-operator-scan.html</code></p>
+            
+            <h4>Features:</h4>
+            <ul>
+                <li>Create test orders with configurable parameters</li>
+                <li>Generate test QR codes</li>
+                <li>Simulate payment scenarios</li>
+                <li>Test email notifications</li>
+                <li>Monitor payment detection</li>
+            </ul>
+
+            <h3>QR Code Generator</h3>
+            <pre><code>// Generate test QR code
+const customerId = 'CUST-test-uuid-here';
+const bagNumber = 1;
+const qrData = `${customerId}-${bagNumber}`;
+
+// Use any QR library
+QRCode.toDataURL(qrData, (err, url) => {
+  document.getElementById('qr').src = url;
+});</code></pre>
+        </div>
+
+        <div class="content-section">
+            <h2>Best Practices</h2>
+            
+            <h3>Scanning Tips</h3>
+            <ul>
+                <li>Ensure good lighting for QR code scanning</li>
+                <li>Hold scanner 6-8 inches from QR code</li>
+                <li>Keep QR codes clean and undamaged</li>
+                <li>Wait for beep confirmation before moving to next bag</li>
+            </ul>
+
+            <h3>Weight Entry</h3>
+            <ul>
+                <li>Double-check weights before submitting</li>
+                <li>Use decimal points for precise weights (e.g., 10.5)</li>
+                <li>Confirm add-ons are applied if shown</li>
+                <li>Note any special instructions in order</li>
+            </ul>
+
+            <h3>Order Management</h3>
+            <ul>
+                <li>Process bags in order received</li>
+                <li>Keep bags together by order</li>
+                <li>Verify payment before allowing pickup</li>
+                <li>Document any issues in order notes</li>
+            </ul>
+        </div>
+
+        <div class="content-section">
+            <h2>Troubleshooting</h2>
+            
+            <h4>Scanner Not Working</h4>
+            <ol>
+                <li>Check scanner is connected via USB</li>
+                <li>Verify scanner is in keyboard mode</li>
+                <li>Test with notepad to ensure output</li>
+                <li>Restart browser if needed</li>
+            </ol>
+
+            <h4>Modal Not Appearing</h4>
+            <ol>
+                <li>Ensure JavaScript is enabled</li>
+                <li>Check browser console for errors</li>
+                <li>Clear browser cache</li>
+                <li>Try different browser</li>
+            </ol>
+
+            <h4>Weight Not Saving</h4>
+            <ol>
+                <li>Verify all fields have values</li>
+                <li>Check network connection</li>
+                <li>Ensure operator has permissions</li>
+                <li>Review server logs for errors</li>
+            </ol>
+
+            <div class="alert alert-info">
+                <strong>Support:</strong> For technical issues, contact admin or check server logs: <code>pm2 logs wavemax</code>
+            </div>
+        </div>
+
+        <div class="content-section" style="margin-top: 40px; text-align: center; color: #666;">
+            <p>Last updated: January 2025 | Version 2.0</p>
+            <p><a href="index.html">← Back to Documentation</a></p>
+        </div>
+    </div>
+</body>
+</html>
