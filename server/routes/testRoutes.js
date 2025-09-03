@@ -139,7 +139,7 @@ router.post('/order', async (req, res) => {
         if (recreate) {
             await Order.deleteMany({ 
                 customerId: customer.customerId,
-                orderId: { $regex: /^TEST-/ }
+                isTestOrder: true
             });
         }
 
@@ -158,7 +158,7 @@ router.post('/order', async (req, res) => {
         
         // Create new test order with delivery fee and fabric softener add-on
         const orderData = {
-            orderId: `TEST-${Date.now()}`,
+            // orderId will be auto-generated as ORD-[UUID]
             customerId: customer.customerId,
             affiliateId: customer.affiliateId,
             pickupDate: new Date(Date.now() + 24 * 60 * 60 * 1000), // Tomorrow
@@ -166,6 +166,7 @@ router.post('/order', async (req, res) => {
             estimatedWeight: numberOfBags * 10, // Estimate 10 lbs per bag
             status: 'pending',
             specialPickupInstructions: 'Test order for operator scanning',
+            isTestOrder: true, // Mark as test order for cleanup
             numberOfBags: numberOfBags,
             baseRate: 1.25, // V2 rate per pound
             paymentMethod: 'card',
@@ -210,13 +211,63 @@ router.post('/order', async (req, res) => {
     }
 });
 
+// Get test order details
+router.get('/order/:orderId', async (req, res) => {
+    try {
+        const order = await Order.findOne({ 
+            $or: [
+                { _id: req.params.orderId },
+                { orderId: req.params.orderId }
+            ]
+        });
+        
+        if (!order) {
+            return res.status(404).json({ error: 'Order not found' });
+        }
+        
+        res.json(order);
+    } catch (error) {
+        console.error('Error fetching test order:', error);
+        res.status(500).json({ error: 'Failed to fetch test order' });
+    }
+});
+
+// Send test payment email
+router.post('/send-payment-email', async (req, res) => {
+    try {
+        const { to, subject, html, orderId } = req.body;
+        
+        if (!to || !subject || !html) {
+            return res.status(400).json({ error: 'Missing required fields: to, subject, html' });
+        }
+        
+        // Import email service
+        const emailService = require('../utils/emailService');
+        
+        // Send the email
+        await emailService.sendEmail(to, subject, html);
+        
+        // Log the test email for debugging
+        console.log(`Test payment email sent to ${to} for order ${orderId}`);
+        
+        res.json({ 
+            success: true, 
+            message: 'Test payment email sent successfully',
+            orderId 
+        });
+    } catch (error) {
+        console.error('Error sending test payment email:', error);
+        res.status(500).json({ error: 'Failed to send test payment email: ' + error.message });
+    }
+});
+
 // Delete all test data
 router.delete('/cleanup', async (req, res) => {
     try {
         const Affiliate = require('../models/Affiliate');
         
         // Delete test orders (using orderId pattern)
-        await Order.deleteMany({ orderId: { $regex: /^TEST-/ } });
+        await Order.deleteMany({ isTestOrder: true });
         
         // Find and delete test customers and affiliates with any test email
         const testEmails = ['spam-me@wavemax.promo', 'test.customer@wavemax.test', 'test.affiliate@wavemax.test'];

@@ -210,10 +210,11 @@ class PaymentVerificationJob {
    */
   async sendPaymentReminder(order) {
     try {
-      const customer = order.customerId;
+      // Fetch customer by customerId
+      const customer = await Customer.findOne({ customerId: order.customerId });
       
       if (!customer || !customer.email) {
-        console.error('Cannot send reminder - customer email not found');
+        console.error('Cannot send reminder - customer not found or email missing');
         return;
       }
       
@@ -299,11 +300,13 @@ class PaymentVerificationJob {
    */
   async sendPickupNotification(order) {
     try {
-      const affiliate = order.affiliateId;
-      const customer = order.customerId;
+      // Fetch affiliate and customer by their IDs
+      const Affiliate = require('../models/Affiliate');
+      const affiliate = await Affiliate.findOne({ affiliateId: order.affiliateId });
+      const customer = await Customer.findOne({ customerId: order.customerId });
       
       if (!affiliate || !affiliate.email) {
-        console.error('Cannot send pickup notification - affiliate not found');
+        console.error('Cannot send pickup notification - affiliate not found or email missing');
         return;
       }
       
@@ -337,8 +340,9 @@ class PaymentVerificationJob {
       console.log(`Escalating payment timeout for order ${order._id} to admin`);
       
       // Get customer and affiliate information
-      const customer = order.customerId;
-      const affiliate = order.affiliateId;
+      const Affiliate = require('../models/Affiliate');
+      const customer = await Customer.findOne({ customerId: order.customerId });
+      const affiliate = await Affiliate.findOne({ affiliateId: order.affiliateId });
       
       // Get admin email from config or use default
       const adminEmail = await SystemConfig.getValue('admin_notification_email', 'admin@wavemax.promo');

@@ -1,13 +1,14 @@
 // Order Model for WaveMAX Laundry Affiliate Program
 
 const mongoose = require('mongoose');
+const { v4: uuidv4 } = require('uuid');
 const SystemConfig = require('./SystemConfig');
 
 // Order Schema
 const orderSchema = new mongoose.Schema({
   orderId: {
     type: String,
-    default: () => 'ORD' + Math.floor(100000 + Math.random() * 900000),
+    default: () => 'ORD-' + uuidv4(),
     unique: true
   },
   customerId: { type: String, required: true, ref: 'Customer' },
@@ -187,6 +188,9 @@ const orderSchema = new mongoose.Schema({
   }],
   v2LastReminderSentAt: Date,
   v2ReminderCount: { type: Number, default: 0 },
+  
+  // Test order flag for cleanup
+  isTestOrder: { type: Boolean, default: false },
   
   // Timestamps
   createdAt: { type: Date, default: Date.now }, // When order was created (pending state)

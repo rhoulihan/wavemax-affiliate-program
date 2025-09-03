@@ -1071,35 +1071,21 @@
         hideConfirmation();
 
         switch (action) {
-            case 'weight_input':
-                console.log('=> Handling weight_input action');
-                // Check if modal is already open and we're scanning additional bags
-                if (orderModal.classList.contains('active') && 
-                    currentOrder && 
-                    currentOrder.orderId === order.orderId && 
-                    currentOrder.scannedBagsForWeighing) {
-                    console.log('Modal already open, adding bag to existing scan session');
-                    // Add the new bag to the existing set
-                    if (scannedBagId && !currentOrder.scannedBagsForWeighing.has(scannedBagId)) {
-                        currentOrder.scannedBagsForWeighing.add(scannedBagId);
-                        // Update the modal with the new scan
-                        showWeightInputModal(currentOrder, null); // Don't pass bagId again, it's already in the set
-                    } else {
-                        console.log('Bag already scanned or no bag ID');
-                        showConfirmation('Bag already scanned', '⚠️', 'warning');
-                        setTimeout(hideConfirmation, 2000);
-                    }
-                } else {
-                    // First scan - need weight input
-                    // Check if we already have scanned bags for this order
-                    if (currentOrder && currentOrder.orderId === order.orderId && currentOrder.scannedBagsForWeighing) {
-                        // Preserve existing scanned bags
-                        order.scannedBagsForWeighing = currentOrder.scannedBagsForWeighing;
-                    }
-                    // Store the customer ID from the scan
-                    order.customerId = scannedCustomerId;
-                    showWeightInputModal(order, scannedBagId);
+            case 'scan_required':
+                console.log('=> Handling scan_required action - more bags need to be scanned');
+                // Show modal with scan progress
+                showWeightInputModal(order, scannedBagId);
+                if (data.bagAlreadyExists) {
+                    showConfirmation('Bag already scanned', '⚠️', 'warning');
+                    setTimeout(hideConfirmation, 2000);
                 }
+                break;
+                
+            case 'weight_input':
+                console.log('=> Handling weight_input action - all bags scanned');
+                // All bags scanned, ready for weight input
+                order.customerId = scannedCustomerId;
+                showWeightInputModal(order, scannedBagId);
                 break;
 
             case 'process_complete':
@@ -1174,24 +1160,16 @@
         console.log('orderModal element:', orderModal);
         console.log('Scanned bag ID:', scannedBagId);
         console.log('Order addOns:', order.addOns);
+        console.log('Order bags scanned:', order.bagsScanned);
         
-        // Initialize or preserve scanned bags tracking
-        if (!currentOrder || currentOrder.orderId !== order.orderId) {
-            currentOrder = order;
-            currentOrder.scannedBagsForWeighing = new Set();
-        }
-        
-        // Add the scanned bag ID to the set
-        if (scannedBagId) {
-            currentOrder.scannedBagsForWeighing.add(scannedBagId);
-        }
+        // Update current order
+        currentOrder = order;
         
         modalTitle.textContent = 'Scan All Bags First';
 
-        // Calculate how many bags still need weights
-        const bagsToWeigh = order.numberOfBags - (order.bagsWeighed || 0);
-        const scannedCount = currentOrder.scannedBagsForWeighing.size;
-        const allBagsScanned = scannedCount >= bagsToWeigh;
+        // Use the bagsScanned count from the server
+        const scannedCount = order.bagsScanned || 0;
+        const allBagsScanned = scannedCount >= order.numberOfBags;
 
         // Check if order has add-ons
         const hasAddOns = order.addOns && (order.addOns.premiumDetergent || order.addOns.fabricSoftener || order.addOns.stainRemover);
@@ -1234,13 +1212,13 @@
             <div class="scan-progress-section">
                 <h5>Scan all bags before entering weights</h5>
                 <div class="scan-progress">
-                    <p class="text-info"><strong>Bags scanned: ${scannedCount} of ${bagsToWeigh}</strong></p>
+                    <p class="text-info"><strong>Bags scanned: ${scannedCount} of ${order.numberOfBags}</strong></p>
                     <div class="progress mb-3">
                         <div class="progress-bar" role="progressbar" 
                              id="scanProgressBar"
                              aria-valuenow="${scannedCount}" 
                              aria-valuemin="0" 
-                             aria-valuemax="${bagsToWeigh}">
+                             aria-valuemax="${order.numberOfBags}">
                         </div>
                     </div>
                     ${!allBagsScanned ? 
@@ -1255,19 +1233,19 @@
             modalTitle.textContent = 'Enter Bag Weights';
             html += '<div class="weight-input-section">';
             
-            // Create weight inputs for each scanned bag
-            const scannedBagIds = Array.from(currentOrder.scannedBagsForWeighing);
-            scannedBagIds.forEach((bagId, index) => {
-                const bagNumber = (order.bagsWeighed || 0) + index + 1;
+            // Create weight inputs for each bag in the order
+            const bags = order.bags || [];
+            bags.forEach((bag, index) => {
+                const bagNumber = bag.bagNumber || (index + 1);
                 // Replace hyphens with underscores for valid HTML IDs
-                const sanitizedBagId = bagId.replace(/-/g, '_');
+                const sanitizedBagId = bag.bagId.replace(/-/g, '_');
                 html += `
                     <div class="bag-weight-input">
-                        <label>Bag ${bagNumber} (${bagId.substring(0, 8)}...):</label>
+                        <label>Bag ${bagNumber} (${bag.bagId.substring(0, 8)}...):</label>
                         <input type="number" 
                                id="bagWeight_${sanitizedBagId}" 
                                class="weight-input"
-                               data-bag-id="${bagId}"
+                               data-bag-id="${bag.bagId}"
                                data-bag-number="${bagNumber}"
                                step="0.1" 
                                min="0.1" 
@@ -1323,12 +1301,15 @@
             const submitBtn = document.getElementById('submitWeightsBtn');
             const progressBar = document.getElementById('scanProgressBar');
             
+            // Update progress bar width
+            if (progressBar) {
+                const percentage = (scannedCount / order.numberOfBags) * 100;
+                progressBar.style.width = percentage + '%';
+                progressBar.textContent = Math.round(percentage) + '%';
+            }
+            
             if (cancelBtn) {
                 cancelBtn.addEventListener('click', function() {
-                    // Clear the scanned bags when canceling
-                    if (currentOrder && currentOrder.scannedBagsForWeighing) {
-                        currentOrder.scannedBagsForWeighing.clear();
-                    }
                     closeModal();
                 });
             }
@@ -1379,16 +1360,16 @@
             
             // Set progress bar width
             if (progressBar) {
-                const percentage = (scannedCount / bagsToWeigh) * 100;
+                const percentage = (scannedCount / order.numberOfBags) * 100;
                 progressBar.style.width = percentage + '%';
                 progressBar.textContent = Math.round(percentage) + '%';
             }
             
             // Focus on first input if all bags are scanned
             if (allBagsScanned) {
-                const scannedBagIds = Array.from(currentOrder.scannedBagsForWeighing);
-                if (scannedBagIds.length > 0) {
-                    const sanitizedBagId = scannedBagIds[0].replace(/-/g, '_');
+                const bags = order.bags || [];
+                if (bags.length > 0) {
+                    const sanitizedBagId = bags[0].bagId.replace(/-/g, '_');
                     const firstInput = document.getElementById(`bagWeight_${sanitizedBagId}`);
                     if (firstInput) {
                         firstInput.focus();
@@ -1961,18 +1942,19 @@
         
         const bagWeights = [];
         
-        // Get the scanned bag IDs
-        const scannedBagIds = Array.from(currentOrder.scannedBagsForWeighing);
+        // Get the bags from the order
+        const bags = currentOrder.bags || [];
         
-        // Collect weights for each scanned bag
-        for (let i = 0; i < scannedBagIds.length; i++) {
-            const bagId = scannedBagIds[i];
+        // Collect weights for each bag
+        for (let i = 0; i < bags.length; i++) {
+            const bag = bags[i];
+            const bagId = bag.bagId;
             // Replace hyphens with underscores to match the input ID
             const sanitizedBagId = bagId.replace(/-/g, '_');
             const weightInput = document.getElementById(`bagWeight_${sanitizedBagId}`);
             
             if (!weightInput) {
-                showError(`Weight input not found for bag ${i + 1}`);
+                showError(`Weight input not found for bag ${bag.bagNumber || (i + 1)}`);
                 // Restore button state
                 if (submitBtn) {
                     submitBtn.disabled = false;
@@ -2018,10 +2000,6 @@
             const data = await response.json();
 
             if (response.ok && data.success) {
-                // Clear the scanned bags set
-                if (currentOrder && currentOrder.scannedBagsForWeighing) {
-                    currentOrder.scannedBagsForWeighing.clear();
-                }
                 // Close modal first
                 closeModal();
                 // Then show confirmation
