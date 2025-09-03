@@ -17,20 +17,21 @@ class PaymentEmailScanner {
       venmo: {
         domains: ['venmo.com', 'notifications.venmo.com'],
         patterns: {
-          amount: /\$\s*(\d+)\s+(\d{2})/, // Venmo displays as "$ 2 35" for $2.35
+          amount: /\$\s*(\d+)\s*[\.\n\s]+(\d{2})/, // Venmo displays as "$ 2 . 35" or with newlines
           amountFallback: /\$?([\d,]+\.?\d*)/, // Fallback pattern
-          orderIdInNote: /Order\s*(?:TEST-)?([\d]{8,})/i, // Handle TEST- prefix and get numeric part
-          orderIdFallback: /Order\s*#?\s*([A-Z0-9]{8})/i, // Fallback pattern
+          orderIdInNote: /WaveMAX\s+Order\s+(ORD-[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12})/i, // Match "WaveMAX Order ORD-[UUID]"
+          orderIdFallback: /ORD-[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}/i, // Fallback pattern for UUID
           sender: /([A-Za-z\s]+)\s+paid\s+you/i, // "John Houlihan paid you"
-          senderFallback: /from\s+([\w\s]+)/i,
-          transactionId: /Transaction\s*ID:?\s*([\d]+)/i
+          senderFallback: /Subject:\s*([A-Za-z\s]+)\s+paid\s+you/i, // From subject line
+          transactionId: /Transaction\s*ID[\s\n]*(\d+)/i // May have newline after ID
         }
       },
       paypal: {
         domains: ['paypal.com', 'mail.paypal.com', 'service.paypal.com'],
         patterns: {
           amount: /\$?([\d,]+\.?\d*)\s*USD/i,
-          orderIdInNote: /Order\s*#?\s*([A-Z0-9]{8})/i,
+          orderIdInNote: /Order\s*:?\s*(ORD-[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12})/i,
+          orderIdFallback: /ORD-[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}/i,
           sender: /from\s+([\w\s@.]+)/i,
           transactionId: /Transaction\s*ID:?\s*([A-Z0-9]+)/i
         }
@@ -39,7 +40,8 @@ class PaymentEmailScanner {
         domains: ['cash.app', 'square.com', 'squareup.com'],
         patterns: {
           amount: /\$?([\d,]+\.?\d*)/,
-          orderIdInNote: /Order\s*#?\s*([A-Z0-9]{8})/i,
+          orderIdInNote: /Order\s*:?\s*(ORD-[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12})/i,
+          orderIdFallback: /ORD-[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}/i,
           sender: /from\s+\$?([\w]+)/i,
           transactionId: /Payment\s*ID:?\s*([A-Z0-9-]+)/i
         }
@@ -75,19 +77,26 @@ class PaymentEmailScanner {
       
       for (const email of emails) {
         try {
+          console.log(`Processing email: From: ${email.from}, Subject: ${email.subject}`);
           const payment = await this.parsePaymentEmail(email);
           
           if (payment) {
+            console.log(`Parsed payment: Order ${payment.orderNumber}, Amount: $${payment.amount}, Provider: ${payment.provider}`);
             // Verify and update order
             const verified = await this.verifyAndUpdateOrder(payment);
             
             if (verified) {
+              console.log(`Payment verified for order ${payment.orderNumber}`);
               verifiedPayments.push(payment);
               // Mark email as read
               await imapScanner.markAsRead(email.uid);
               // Move to processed folder if needed
               // await imapScanner.moveToFolder(email.uid, 'Processed');
+            } else {
+              console.log(`Payment could not be verified for order ${payment.orderNumber}`);
             }
+          } else {
+            console.log('Email was not parsed as a valid payment');
           }
         } catch (error) {
           console.error(`Error processing email ${email.uid}:`, error);
@@ -113,11 +122,34 @@ class PaymentEmailScanner {
       const { from, fromAddress, subject, text, html, date } = email;
       const body = text || html || '';
       
-      // Determine provider based on sender domain
-      const provider = this.identifyProvider(fromAddress || from);
+      // Check if this is a forwarded email
+      const isForwarded = subject && (
+        subject.toLowerCase().includes('fwd:') || 
+        subject.toLowerCase().includes('forwarded')
+      );
+      
+      // For forwarded emails, look for the provider in the subject or body
+      let provider = null;
+      
+      if (isForwarded) {
+        // Check subject for payment provider
+        const subjectLower = subject.toLowerCase();
+        const bodyLower = (text || html || '').toLowerCase();
+        
+        if (subjectLower.includes('venmo') || bodyLower.includes('venmo@venmo.com')) {
+          provider = 'venmo';
+        } else if (subjectLower.includes('paypal') || bodyLower.includes('@paypal.com')) {
+          provider = 'paypal';
+        } else if (subjectLower.includes('cash app') || bodyLower.includes('@cash.app')) {
+          provider = 'cashapp';
+        }
+      } else {
+        // For direct emails, check sender domain
+        provider = this.identifyProvider(fromAddress || from);
+      }
       
       if (!provider) {
-        console.log(`Not a payment email from known provider: ${from}`);
+        console.log(`Not a payment email from known provider: ${from} (subject: ${subject})`);
         return null;
       }
       
@@ -138,9 +170,8 @@ class PaymentEmailScanner {
         return null;
       }
       
-      // Extract the numeric part of the order ID and get last 8 chars
-      const extractedId = orderIdMatch[1];
-      const shortOrderId = extractedId.slice(-8).toUpperCase();
+      // Extract the full order ID (ORD-[UUID])
+      const orderId = orderIdMatch[1];
       
       // Extract amount - handle Venmo's special format
       let amount = null;
@@ -173,17 +204,17 @@ class PaymentEmailScanner {
       const transactionMatch = content.match(patterns.transactionId);
       const transactionId = transactionMatch ? transactionMatch[1] : `${provider}-${Date.now()}`;
       
-      // Find full order by short ID
-      const order = await this.findOrderByShortId(shortOrderId);
+      // Find order by full order ID
+      const order = await this.findOrderById(orderId);
       
       if (!order) {
-        console.log(`No matching order found for ID: ${shortOrderId}`);
+        console.log(`No matching order found for ID: ${orderId}`);
         return null;
       }
       
       return {
-        orderId: order._id,
-        shortOrderId,
+        orderId: order.orderId,  // Use the orderId field, not _id
+        orderNumber: orderId,
         provider,
         amount,
         sender,
@@ -239,30 +270,21 @@ class PaymentEmailScanner {
   }
 
   /**
-   * Find order by short ID (last 8 characters)
-   * @param {String} shortOrderId - Last 8 characters of order ID
+   * Find order by order ID
+   * @param {String} orderId - Full order ID (ORD-[UUID])
    * @returns {Object|null} Order document or null
    */
-  async findOrderByShortId(shortOrderId) {
+  async findOrderById(orderId) {
     try {
-      // Find orders with v2PaymentStatus = 'awaiting'
-      const orders = await Order.find({
+      // Find order with matching orderId and v2PaymentStatus = 'awaiting'
+      const order = await Order.findOne({
+        orderId: orderId,
         v2PaymentStatus: 'awaiting'
       });
       
-      // Match by last 8 characters
-      for (const order of orders) {
-        const orderIdStr = order._id.toString();
-        const orderShortId = orderIdStr.slice(-8).toUpperCase();
-        
-        if (orderShortId === shortOrderId) {
-          return order;
-        }
-      }
-      
-      return null;
+      return order;
     } catch (error) {
-      console.error('Error finding order by short ID:', error);
+      console.error('Error finding order by ID:', error);
       return null;
     }
   }
@@ -274,16 +296,25 @@ class PaymentEmailScanner {
    */
   async verifyAndUpdateOrder(payment) {
     try {
-      const order = await Order.findById(payment.orderId);
+      // Find order by orderId field (not _id)
+      const order = await Order.findOne({ orderId: payment.orderId });
       
       if (!order) {
         console.error('Order not found:', payment.orderId);
         return false;
       }
       
-      // Check if already verified
+      // Check if already verified - this would be a duplicate payment
       if (order.v2PaymentStatus === 'verified') {
-        console.log('Order already verified:', payment.orderId);
+        console.log('Order already verified - duplicate payment detected:', payment.orderId);
+        
+        // Notify admin about duplicate payment
+        try {
+          await this.notifyAdminPaymentIssue(order, payment, order.v2PaymentAmount || order.actualTotal, 'duplicate');
+        } catch (error) {
+          console.error('Error notifying admin about duplicate payment:', error);
+        }
+        
         return true;
       }
       
@@ -352,7 +383,7 @@ class PaymentEmailScanner {
    */
   async sendPaymentConfirmation(order) {
     try {
-      const customer = await Customer.findById(order.customerId);
+      const customer = await Customer.findOne({ customerId: order.customerId });
       
       if (!customer) {
         console.error('Customer not found for payment confirmation');
@@ -398,11 +429,8 @@ class PaymentEmailScanner {
         return order?.v2PaymentStatus === 'verified';
       }
       
-      // Get short order ID
-      const shortOrderId = orderId.toString().slice(-8).toUpperCase();
-      
-      // Search emails for this order ID
-      const emails = await mailcowService.searchEmails(`Order #${shortOrderId}`);
+      // Search emails for this order ID (using the full ORD-UUID format)
+      const emails = await mailcowService.searchEmails(order.orderId);
       
       for (const email of emails) {
         const payment = await this.parsePaymentEmail(email);
@@ -486,20 +514,28 @@ class PaymentEmailScanner {
       }
 
       const paymentDifference = Math.abs(payment.amount - expectedAmount);
-      const subject = issueType === 'overpayment' 
-        ? `Overpayment Received - Order ${order._id.toString().slice(-8).toUpperCase()}`
-        : `Underpayment Received - Order ${order._id.toString().slice(-8).toUpperCase()}`;
+      
+      let subject, issueDescription, actionRequired;
+      
+      if (issueType === 'duplicate') {
+        subject = `Duplicate Payment Received - Order ${order.orderId || order._id.toString().slice(-8).toUpperCase()}`;
+        issueDescription = `Customer has made a duplicate payment of $${payment.amount.toFixed(2)} for an already paid order`;
+        actionRequired = 'This order was already paid. Please refund this duplicate payment to the customer immediately.';
+      } else if (issueType === 'overpayment') {
+        subject = `Overpayment Received - Order ${order.orderId || order._id.toString().slice(-8).toUpperCase()}`;
+        issueDescription = `Customer has overpaid by $${paymentDifference.toFixed(2)}`;
+        actionRequired = 'Consider refunding the overpayment amount or applying it as credit to future orders.';
+      } else {
+        subject = `Underpayment Received - Order ${order.orderId || order._id.toString().slice(-8).toUpperCase()}`;
+        issueDescription = `Customer has underpaid by $${paymentDifference.toFixed(2)}`;
+        actionRequired = 'Payment verification was blocked. Please follow up with the customer for the remaining amount.';
+      }
 
-      const issueDescription = issueType === 'overpayment'
-        ? `Customer has overpaid by $${paymentDifference.toFixed(2)}`
-        : `Customer has underpaid by $${paymentDifference.toFixed(2)}`;
-
-      const actionRequired = issueType === 'overpayment'
-        ? 'Consider refunding the overpayment amount or applying it as credit to future orders.'
-        : 'Payment verification was blocked. Please follow up with the customer for the remaining amount.';
-
+      const alertTitle = issueType === 'duplicate' ? 'Duplicate Payment' : 
+                         issueType === 'overpayment' ? 'Overpayment' : 'Underpayment';
+      
       const emailContent = `
-        <h2>Payment ${issueType === 'overpayment' ? 'Overpayment' : 'Underpayment'} Alert</h2>
+        <h2>Payment ${alertTitle} Alert</h2>
         
         <p>${issueDescription}</p>
         

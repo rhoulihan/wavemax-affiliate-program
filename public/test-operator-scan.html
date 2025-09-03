@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Operator Scan Test Utility</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="/assets/css/test-operator-scan.css">
     <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -23,19 +24,24 @@
         </div>
 
         <div class="row mb-4">
-            <div class="col-md-4">
+            <div class="col-md-3">
                 <button class="btn btn-primary w-100 mb-2" id="createV2Order1BagBtn">
                     <i class="fas fa-plus"></i> Create V2 Order (1 Bag)
                 </button>
             </div>
-            <div class="col-md-4">
+            <div class="col-md-3">
                 <button class="btn btn-primary w-100 mb-2" id="createV2Order2BagsBtn">
                     <i class="fas fa-plus"></i> Create V2 Order (2 Bags)
                 </button>
             </div>
-            <div class="col-md-4">
+            <div class="col-md-3">
                 <button class="btn btn-success w-100 mb-2" id="printAllCardsBtn">
                     <i class="fas fa-print"></i> Print All Bag Cards
+                </button>
+            </div>
+            <div class="col-md-3">
+                <button class="btn btn-warning w-100 mb-2" id="testVenmoPaymentBtn" disabled>
+                    <i class="fas fa-dollar-sign"></i> Test Venmo Payment
                 </button>
             </div>
         </div>
@@ -91,8 +97,66 @@
         </div>
     </div>
 
+    <!-- Venmo Payment Test Modal -->
+    <div class="modal fade" id="venmoPaymentModal" tabindex="-1" aria-labelledby="venmoPaymentModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="venmoPaymentModalLabel">Test Venmo Payment Confirmation</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-info">
+                        <strong>Order Details:</strong><br>
+                        Order ID: <span id="modalOrderId"></span><br>
+                        Expected Amount: $<span id="modalExpectedAmount"></span><br>
+                        Status: <span id="modalOrderStatus"></span>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="paymentAmount" class="form-label">Payment Amount ($)</label>
+                        <input type="number" class="form-control" id="paymentAmount" step="0.01" min="0.01">
+                        <small class="form-text text-muted">Adjust to test underpayment or overpayment scenarios</small>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="senderName" class="form-label">Sender Name</label>
+                        <input type="text" class="form-control" id="senderName" value="John Smith">
+                    </div>
+                    
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" class="form-check-input" id="sendMultiplePayments">
+                        <label class="form-check-label" for="sendMultiplePayments">
+                            Send multiple payments (test duplicate detection)
+                        </label>
+                    </div>
+                    
+                    <div id="paymentProgress" class="d-none">
+                        <div class="alert alert-warning">
+                            <strong>Monitoring Order...</strong>
+                            <div class="spinner-border spinner-border-sm ms-2" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div id="paymentResults" class="d-none">
+                        <div class="alert alert-success">
+                            <strong>Payment Detection Results:</strong>
+                            <div id="paymentResultDetails"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" id="sendVenmoEmail">Send Test Payment Email</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="/assets/js/csrf-utils.js"></script>
-    <script src="/assets/js/test-operator-scan.js"></script>
+    <script src="/assets/js/test-operator-scan.js?v=20250902b"></script>
 </body>
 </html>
