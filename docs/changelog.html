@@ -243,6 +243,7 @@
             <div class="version-nav">
                 <h3>Quick Navigation</h3>
                 <ul>
+                    <li><a href="#v2.0.0">v2.0.0 - Complete V2 Payment System & Enhanced Workflow</a></li>
                     <li><a href="#v1.11.0">v1.11.0 - V2 Payment System & Post-Weigh Payment Flow</a></li>
                     <li><a href="#v1.10.0">v1.10.0 - WDF Credit System & Operator Enhancements</a></li>
                     <li><a href="#v1.9.0">v1.9.0 - Session Persistence & Browser Navigation</a></li>
@@ -261,8 +262,132 @@
                 </ul>
             </div>
 
+            <div id="v2.0.0" class="release">
+                <h2>Version 2.0.0 <span class="tag new">Latest</span></h2>
+                <div class="release-date">Released on September 3, 2025</div>
+                
+                <div class="breaking">
+                    <h4>⚠️ Breaking Changes</h4>
+                    <ul>
+                        <li>V2 payment system is now the default - customers pay after weighing, not upfront</li>
+                        <li>Updated API endpoints for V2 payment workflow</li>
+                        <li>New SystemConfig keys for payment configuration</li>
+                    </ul>
+                </div>
+                
+                <h3>🚀 Major Features</h3>
+                <ul>
+                    <li><span class="tag new">NEW</span> <strong>Complete V2 Payment System:</strong> Revolutionary post-weigh payment workflow
+                        <ul>
+                            <li>Customers schedule pickup without upfront payment</li>
+                            <li>Payment requested after actual weight determination</li>
+                            <li>Automated email payment verification scanner</li>
+                            <li>Support for Venmo, PayPal, and CashApp payments</li>
+                            <li>Intelligent payment matching with order IDs</li>
+                        </ul>
+                    </li>
+                    <li><span class="tag new">NEW</span> <strong>Automated Payment Reminders:</strong> Multi-stage reminder system
+                        <ul>
+                            <li>2-hour initial payment reminder</li>
+                            <li>6-hour follow-up reminder</li>
+                            <li>24-hour final notice before admin escalation</li>
+                            <li>Admin notifications for payment issues</li>
+                            <li>Automatic handling of underpayments and overpayments</li>
+                        </ul>
+                    </li>
+                    <li><span class="tag new">NEW</span> <strong>Enhanced Operator Workflow:</strong> Streamlined bag processing
+                        <ul>
+                            <li>QR code auto-bag registration system</li>
+                            <li>Automatic status transitions based on scan context</li>
+                            <li>Integrated weight recording with payment calculation</li>
+                            <li>Real-time payment verification status</li>
+                            <li>Affiliate pickup notifications when ready</li>
+                        </ul>
+                    </li>
+                </ul>
+
+                <h3>📱 Operator Improvements</h3>
+                <ul>
+                    <li><span class="tag improved">IMPROVED</span> <strong>Operator Scan System:</strong> Enhanced scanning capabilities
+                        <ul>
+                            <li>Support for multiple QR code formats</li>
+                            <li>CSP-compliant implementation without inline styles</li>
+                            <li>Keyboard shortcuts for common actions</li>
+                            <li>Visual feedback for scan results</li>
+                            <li>Error recovery and retry mechanisms</li>
+                        </ul>
+                    </li>
+                    <li><span class="tag new">NEW</span> <strong>Bag Status Management:</strong> Complete lifecycle tracking
+                        <ul>
+                            <li>Automatic progression: pending → collected → processing → processed</li>
+                            <li>Post-WDF processing status updates</li>
+                            <li>Real-time order completion detection</li>
+                            <li>Batch processing capabilities</li>
+                        </ul>
+                    </li>
+                </ul>
+
+                <h3>📧 Email System Enhancements</h3>
+                <ul>
+                    <li><span class="tag improved">IMPROVED</span> <strong>Payment Verification:</strong> Advanced email parsing
+                        <ul>
+                            <li>IMAP-based payment email scanning</li>
+                            <li>Venmo payment notification parsing</li>
+                            <li>PayPal transaction verification</li>
+                            <li>CashApp receipt processing</li>
+                            <li>Duplicate payment detection</li>
+                        </ul>
+                    </li>
+                    <li><span class="tag new">NEW</span> <strong>Admin Notifications:</strong> Comprehensive alerting
+                        <ul>
+                            <li>Underpayment alerts with customer details</li>
+                            <li>Overpayment notifications for refund processing</li>
+                            <li>Duplicate payment warnings</li>
+                            <li>24-hour non-payment escalation</li>
+                        </ul>
+                    </li>
+                </ul>
+
+                <h3>📚 Documentation</h3>
+                <ul>
+                    <li><span class="tag new">NEW</span> <strong>V2 Payment System Documentation:</strong> Complete workflow guide</li>
+                    <li><span class="tag new">NEW</span> <strong>Operator Workflow Documentation:</strong> Scanning and processing guide</li>
+                    <li><span class="tag new">NEW</span> <strong>System Architecture Documentation:</strong> Technical overview</li>
+                    <li><span class="tag new">NEW</span> <strong>API Reference V2:</strong> Updated with all V2 endpoints</li>
+                    <li><span class="tag improved">IMPROVED</span> <strong>Documentation Index:</strong> Reorganized with new sections</li>
+                </ul>
+
+                <h3>🐛 Bug Fixes</h3>
+                <ul>
+                    <li><span class="tag fixed">FIXED</span> CSP violations in operator scan pages</li>
+                    <li><span class="tag fixed">FIXED</span> QR code format parsing for different generators</li>
+                    <li><span class="tag fixed">FIXED</span> Payment verification job memory leaks</li>
+                    <li><span class="tag fixed">FIXED</span> Email template rendering issues</li>
+                    <li><span class="tag fixed">FIXED</span> Session persistence in V2 forms</li>
+                </ul>
+
+                <h3>🔧 Technical Improvements</h3>
+                <ul>
+                    <li><span class="tag improved">IMPROVED</span> Database indexes for payment queries</li>
+                    <li><span class="tag improved">IMPROVED</span> Background job error handling</li>
+                    <li><span class="tag improved">IMPROVED</span> Email queue processing efficiency</li>
+                    <li><span class="tag improved">IMPROVED</span> API response time optimization</li>
+                    <li><span class="tag new">NEW</span> Payment verification job monitoring</li>
+                </ul>
+
+                <div class="security">
+                    <strong>Security Updates:</strong>
+                    <ul>
+                        <li>Enhanced input validation for payment amounts</li>
+                        <li>Improved CSRF protection on payment forms</li>
+                        <li>Secure handling of payment confirmation emails</li>
+                        <li>Rate limiting on payment verification endpoints</li>
+                    </ul>
+                </div>
+            </div>
+
             <div id="v1.11.0" class="release">
-                <h2>Version 1.11.0 <span class="tag new">Latest</span></h2>
+                <h2>Version 1.11.0</h2>
                 <div class="release-date">Released on September 2, 2025</div>
                 
                 <h3>💳 V2 Payment System</h3>
