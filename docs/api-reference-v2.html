@@ -1,0 +1,1153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Reference V2 | WaveMAX Documentation</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f5f5f5;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #9c27b0 0%, #7b1fa2 100%);
+            color: white;
+            padding: 30px 0;
+            margin-bottom: 30px;
+        }
+        
+        header h1 {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+        
+        .breadcrumb {
+            background: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        
+        .breadcrumb a {
+            color: #9c27b0;
+            text-decoration: none;
+        }
+        
+        .content-section {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        h2 {
+            color: #2c3e50;
+            margin: 30px 0 20px 0;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #ecf0f1;
+        }
+        
+        h3 {
+            color: #34495e;
+            margin: 25px 0 15px 0;
+        }
+        
+        .endpoint {
+            background: #f8f9fa;
+            border-left: 4px solid #9c27b0;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+        
+        .method {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 3px;
+            font-weight: bold;
+            font-size: 0.9em;
+            margin-right: 10px;
+        }
+        
+        .method.get { background: #61affe; color: white; }
+        .method.post { background: #49cc90; color: white; }
+        .method.put { background: #fca130; color: white; }
+        .method.delete { background: #f93e3e; color: white; }
+        .method.patch { background: #50e3c2; color: white; }
+        
+        .endpoint-path {
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 1.1em;
+            color: #2c3e50;
+        }
+        
+        pre {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            margin: 15px 0;
+        }
+        
+        code {
+            background: #f1f3f4;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', Courier, monospace;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+        
+        th {
+            background: #f8f9fa;
+            padding: 12px;
+            text-align: left;
+            border-bottom: 2px solid #dee2e6;
+        }
+        
+        td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #dee2e6;
+        }
+        
+        .param-name {
+            font-family: 'Courier New', Courier, monospace;
+            color: #d73a49;
+        }
+        
+        .param-type {
+            color: #005cc5;
+            font-size: 0.9em;
+        }
+        
+        .required {
+            color: #dc3545;
+            font-weight: bold;
+        }
+        
+        .optional {
+            color: #6c757d;
+        }
+        
+        .response-example {
+            margin-top: 20px;
+        }
+        
+        .auth-note {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+        }
+        
+        .nav-sidebar {
+            position: sticky;
+            top: 20px;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        
+        .nav-sidebar h4 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+        
+        .nav-sidebar ul {
+            list-style: none;
+        }
+        
+        .nav-sidebar li {
+            margin-bottom: 5px;
+        }
+        
+        .nav-sidebar a {
+            color: #6c757d;
+            text-decoration: none;
+            display: block;
+            padding: 5px 10px;
+            border-radius: 3px;
+            transition: all 0.3s;
+        }
+        
+        .nav-sidebar a:hover {
+            background: #f8f9fa;
+            color: #9c27b0;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>API Reference V2</h1>
+            <p>Complete API documentation for WaveMAX Affiliate Program</p>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="breadcrumb">
+            <a href="/docs/">Documentation</a> / API Reference V2
+        </div>
+
+        <div class="content-section">
+            <h2>Overview</h2>
+            <p>The WaveMAX API provides programmatic access to all platform functionality. All endpoints return JSON responses and use standard HTTP response codes.</p>
+            
+            <h3>Base URL</h3>
+            <pre>https://wavemax.promo/api</pre>
+            
+            <h3>Authentication</h3>
+            <p>The API uses JWT tokens for authentication. Tokens are issued upon successful login and must be included in the Authorization header or as a secure cookie.</p>
+            
+            <div class="auth-note">
+                <strong>Authentication Required:</strong> Most endpoints require authentication. The required role is specified for each endpoint.
+            </div>
+        </div>
+
+        <div class="content-section">
+            <h2>Authentication Endpoints</h2>
+            
+            <div class="endpoint">
+                <span class="method post">POST</span>
+                <span class="endpoint-path">/api/auth/login</span>
+                <p>Authenticate user and receive JWT token</p>
+                
+                <h4>Request Body</h4>
+                <table>
+                    <tr>
+                        <th>Parameter</th>
+                        <th>Type</th>
+                        <th>Required</th>
+                        <th>Description</th>
+                    </tr>
+                    <tr>
+                        <td class="param-name">username</td>
+                        <td class="param-type">string</td>
+                        <td class="required">Required</td>
+                        <td>User's username or email</td>
+                    </tr>
+                    <tr>
+                        <td class="param-name">password</td>
+                        <td class="param-type">string</td>
+                        <td class="required">Required</td>
+                        <td>User's password</td>
+                    </tr>
+                    <tr>
+                        <td class="param-name">role</td>
+                        <td class="param-type">string</td>
+                        <td class="optional">Optional</td>
+                        <td>User role (customer, operator, admin)</td>
+                    </tr>
+                </table>
+                
+                <h4>Response</h4>
+                <pre>{
+  "success": true,
+  "token": "eyJhbGciOiJIUzI1NiIs...",
+  "user": {
+    "id": "USER123",
+    "username": "johndoe",
+    "role": "customer",
+    "firstName": "John",
+    "lastName": "Doe"
+  }
+}</pre>
+            </div>
+            
+            <div class="endpoint">
+                <span class="method post">POST</span>
+                <span class="endpoint-path">/api/auth/logout</span>
+                <p>Logout current user and invalidate token</p>
+                
+                <h4>Response</h4>
+                <pre>{
+  "success": true,
+  "message": "Logged out successfully"
+}</pre>
+            </div>
+            
+            <div class="endpoint">
+                <span class="method get">GET</span>
+                <span class="endpoint-path">/api/auth/verify</span>
+                <p>Verify current authentication status</p>
+                
+                <h4>Response</h4>
+                <pre>{
+  "authenticated": true,
+  "user": {
+    "id": "USER123",
+    "role": "customer"
+  }
+}</pre>
+            </div>
+        </div>
+
+        <div class="content-section">
+            <h2>Customer Endpoints</h2>
+            
+            <div class="endpoint">
+                <span class="method post">POST</span>
+                <span class="endpoint-path">/api/customers/register</span>
+                <p>Register a new customer account</p>
+                
+                <h4>Request Body</h4>
+                <table>
+                    <tr>
+                        <th>Parameter</th>
+                        <th>Type</th>
+                        <th>Required</th>
+                        <th>Description</th>
+                    </tr>
+                    <tr>
+                        <td class="param-name">firstName</td>
+                        <td class="param-type">string</td>
+                        <td class="required">Required</td>
+                        <td>Customer's first name</td>
+                    </tr>
+                    <tr>
+                        <td class="param-name">lastName</td>
+                        <td class="param-type">string</td>
+                        <td class="required">Required</td>
+                        <td>Customer's last name</td>
+                    </tr>
+                    <tr>
+                        <td class="param-name">email</td>
+                        <td class="param-type">string</td>
+                        <td class="required">Required</td>
+                        <td>Customer's email address</td>
+                    </tr>
+                    <tr>
+                        <td class="param-name">phone</td>
+                        <td class="param-type">string</td>
+                        <td class="required">Required</td>
+                        <td>Customer's phone number</td>
+                    </tr>
+                    <tr>
+                        <td class="param-name">password</td>
+                        <td class="param-type">string</td>
+                        <td class="required">Required</td>
+                        <td>Account password</td>
+                    </tr>
+                    <tr>
+                        <td class="param-name">address</td>
+                        <td class="param-type">string</td>
+                        <td class="required">Required</td>
+                        <td>Street address</td>
+                    </tr>
+                    <tr>
+                        <td class="param-name">city</td>
+                        <td class="param-type">string</td>
+                        <td class="required">Required</td>
+                        <td>City</td>
+                    </tr>
+                    <tr>
+                        <td class="param-name">state</td>
+                        <td class="param-type">string</td>
+                        <td class="required">Required</td>
+                        <td>State (2-letter code)</td>
+                    </tr>
+                    <tr>
+                        <td class="param-name">zipCode</td>
+                        <td class="param-type">string</td>
+                        <td class="required">Required</td>
+                        <td>ZIP code</td>
+                    </tr>
+                    <tr>
+                        <td class="param-name">affiliateId</td>
+                        <td class="param-type">string</td>
+                        <td class="optional">Optional</td>
+                        <td>Referring affiliate ID</td>
+                    </tr>
+                </table>
+                
+                <h4>Response</h4>
+                <pre>{
+  "success": true,
+  "customerId": "CUST-123456",
+  "message": "Registration successful"
+}</pre>
+            </div>
+            
+            <div class="endpoint">
+                <span class="method get">GET</span>
+                <span class="endpoint-path">/api/customers/profile</span>
+                <p>Get current customer's profile</p>
+                <p><strong>Authentication:</strong> Customer role required</p>
+                
+                <h4>Response</h4>
+                <pre>{
+  "customerId": "CUST-123456",
+  "firstName": "John",
+  "lastName": "Doe",
+  "email": "john.doe@example.com",
+  "phone": "555-1234",
+  "address": {
+    "street": "123 Main St",
+    "city": "Austin",
+    "state": "TX",
+    "zipCode": "78701"
+  },
+  "wdfCredits": 25.00,
+  "v2PaymentEnabled": true
+}</pre>
+            </div>
+            
+            <div class="endpoint">
+                <span class="method put">PUT</span>
+                <span class="endpoint-path">/api/customers/profile</span>
+                <p>Update customer profile</p>
+                <p><strong>Authentication:</strong> Customer role required</p>
+                
+                <h4>Request Body</h4>
+                <p>Any customer fields to update (firstName, lastName, email, phone, address, etc.)</p>
+                
+                <h4>Response</h4>
+                <pre>{
+  "success": true,
+  "message": "Profile updated successfully"
+}</pre>
+            </div>
+        </div>
+
+        <div class="content-section">
+            <h2>Order Endpoints</h2>
+            
+            <div class="endpoint">
+                <span class="method post">POST</span>
+                <span class="endpoint-path">/api/orders/schedule</span>
+                <p>Schedule a new pickup order</p>
+                <p><strong>Authentication:</strong> Customer role required</p>
+                
+                <h4>Request Body</h4>
+                <table>
+                    <tr>
+                        <th>Parameter</th>
+                        <th>Type</th>
+                        <th>Required</th>
+                        <th>Description</th>
+                    </tr>
+                    <tr>
+                        <td class="param-name">pickupDate</td>
+                        <td class="param-type">date</td>
+                        <td class="required">Required</td>
+                        <td>Scheduled pickup date</td>
+                    </tr>
+                    <tr>
+                        <td class="param-name">pickupTime</td>
+                        <td class="param-type">string</td>
+                        <td class="required">Required</td>
+                        <td>Time slot (morning, afternoon, evening)</td>
+                    </tr>
+                    <tr>
+                        <td class="param-name">estimatedWeight</td>
+                        <td class="param-type">number</td>
+                        <td class="required">Required</td>
+                        <td>Estimated weight in pounds</td>
+                    </tr>
+                    <tr>
+                        <td class="param-name">numberOfBags</td>
+                        <td class="param-type">number</td>
+                        <td class="required">Required</td>
+                        <td>Number of bags</td>
+                    </tr>
+                    <tr>
+                        <td class="param-name">specialInstructions</td>
+                        <td class="param-type">string</td>
+                        <td class="optional">Optional</td>
+                        <td>Special pickup instructions</td>
+                    </tr>
+                </table>
+                
+                <h4>Response</h4>
+                <pre>{
+  "success": true,
+  "orderId": "ORD-20240101-001",
+  "qrCodes": [
+    "ORD-20240101-001-BAG1",
+    "ORD-20240101-001-BAG2"
+  ],
+  "message": "Order scheduled successfully"
+}</pre>
+            </div>
+            
+            <div class="endpoint">
+                <span class="method get">GET</span>
+                <span class="endpoint-path">/api/orders/current</span>
+                <p>Get customer's active orders</p>
+                <p><strong>Authentication:</strong> Customer role required</p>
+                
+                <h4>Response</h4>
+                <pre>{
+  "orders": [
+    {
+      "orderId": "ORD-20240101-001",
+      "status": "processing",
+      "pickupDate": "2024-01-01",
+      "actualWeight": 15.5,
+      "actualTotal": 19.38,
+      "v2PaymentStatus": "pending",
+      "bags": [
+        {
+          "bagId": "ORD-20240101-001-BAG1",
+          "status": "processing",
+          "weight": 7.5
+        }
+      ]
+    }
+  ]
+}</pre>
+            </div>
+            
+            <div class="endpoint">
+                <span class="method get">GET</span>
+                <span class="endpoint-path">/api/orders/:orderId</span>
+                <p>Get specific order details</p>
+                <p><strong>Authentication:</strong> Required</p>
+                
+                <h4>Response</h4>
+                <pre>{
+  "orderId": "ORD-20240101-001",
+  "customerId": "CUST-123456",
+  "status": "processing",
+  "pickupDate": "2024-01-01",
+  "pickupTime": "morning",
+  "estimatedWeight": 15,
+  "actualWeight": 15.5,
+  "baseRate": 1.25,
+  "actualTotal": 19.38,
+  "v2PaymentStatus": "verified",
+  "v2PaymentAmount": 19.38,
+  "bags": [...],
+  "timestamps": {
+    "created": "2024-01-01T10:00:00Z",
+    "collected": "2024-01-01T11:00:00Z",
+    "processed": "2024-01-01T15:00:00Z"
+  }
+}</pre>
+            </div>
+        </div>
+
+        <div class="content-section">
+            <h2>V2 Payment Endpoints</h2>
+            
+            <div class="endpoint">
+                <span class="method post">POST</span>
+                <span class="endpoint-path">/api/v2/payment-request</span>
+                <p>Send payment request after weighing</p>
+                <p><strong>Authentication:</strong> Operator role required</p>
+                
+                <h4>Request Body</h4>
+                <table>
+                    <tr>
+                        <th>Parameter</th>
+                        <th>Type</th>
+                        <th>Required</th>
+                        <th>Description</th>
+                    </tr>
+                    <tr>
+                        <td class="param-name">orderId</td>
+                        <td class="param-type">string</td>
+                        <td class="required">Required</td>
+                        <td>Order ID</td>
+                    </tr>
+                    <tr>
+                        <td class="param-name">amount</td>
+                        <td class="param-type">number</td>
+                        <td class="required">Required</td>
+                        <td>Payment amount</td>
+                    </tr>
+                </table>
+                
+                <h4>Response</h4>
+                <pre>{
+  "success": true,
+  "paymentLink": "https://wavemax.promo/pay/ORD-20240101-001",
+  "message": "Payment request sent"
+}</pre>
+            </div>
+            
+            <div class="endpoint">
+                <span class="method get">GET</span>
+                <span class="endpoint-path">/api/v2/payment-status/:orderId</span>
+                <p>Check payment status for an order</p>
+                
+                <h4>Response</h4>
+                <pre>{
+  "orderId": "ORD-20240101-001",
+  "paymentStatus": "verified",
+  "paymentAmount": 19.38,
+  "paymentMethod": "venmo",
+  "verifiedAt": "2024-01-01T16:00:00Z"
+}</pre>
+            </div>
+            
+            <div class="endpoint">
+                <span class="method post">POST</span>
+                <span class="endpoint-path">/api/v2/verify-payment</span>
+                <p>Manually verify payment (admin only)</p>
+                <p><strong>Authentication:</strong> Admin role required</p>
+                
+                <h4>Request Body</h4>
+                <table>
+                    <tr>
+                        <th>Parameter</th>
+                        <th>Type</th>
+                        <th>Required</th>
+                        <th>Description</th>
+                    </tr>
+                    <tr>
+                        <td class="param-name">orderId</td>
+                        <td class="param-type">string</td>
+                        <td class="required">Required</td>
+                        <td>Order ID</td>
+                    </tr>
+                    <tr>
+                        <td class="param-name">amount</td>
+                        <td class="param-type">number</td>
+                        <td class="required">Required</td>
+                        <td>Verified amount</td>
+                    </tr>
+                    <tr>
+                        <td class="param-name">method</td>
+                        <td class="param-type">string</td>
+                        <td class="required">Required</td>
+                        <td>Payment method</td>
+                    </tr>
+                </table>
+                
+                <h4>Response</h4>
+                <pre>{
+  "success": true,
+  "message": "Payment verified successfully"
+}</pre>
+            </div>
+        </div>
+
+        <div class="content-section">
+            <h2>Operator Endpoints</h2>
+            
+            <div class="endpoint">
+                <span class="method post">POST</span>
+                <span class="endpoint-path">/api/operator/scan</span>
+                <p>Process bag scan with automatic actions</p>
+                <p><strong>Authentication:</strong> Operator role required</p>
+                
+                <h4>Request Body</h4>
+                <table>
+                    <tr>
+                        <th>Parameter</th>
+                        <th>Type</th>
+                        <th>Required</th>
+                        <th>Description</th>
+                    </tr>
+                    <tr>
+                        <td class="param-name">qrCode</td>
+                        <td class="param-type">string</td>
+                        <td class="required">Required</td>
+                        <td>QR code data</td>
+                    </tr>
+                    <tr>
+                        <td class="param-name">action</td>
+                        <td class="param-type">string</td>
+                        <td class="optional">Optional</td>
+                        <td>Override action (collect, process, deliver)</td>
+                    </tr>
+                </table>
+                
+                <h4>Response</h4>
+                <pre>{
+  "success": true,
+  "action": "process",
+  "orderId": "ORD-20240101-001",
+  "bagId": "ORD-20240101-001-BAG1",
+  "bagNumber": 1,
+  "requiresWeight": true,
+  "message": "Bag ready for processing"
+}</pre>
+            </div>
+            
+            <div class="endpoint">
+                <span class="method post">POST</span>
+                <span class="endpoint-path">/api/operator/weight</span>
+                <p>Record bag weight</p>
+                <p><strong>Authentication:</strong> Operator role required</p>
+                
+                <h4>Request Body</h4>
+                <table>
+                    <tr>
+                        <th>Parameter</th>
+                        <th>Type</th>
+                        <th>Required</th>
+                        <th>Description</th>
+                    </tr>
+                    <tr>
+                        <td class="param-name">orderId</td>
+                        <td class="param-type">string</td>
+                        <td class="required">Required</td>
+                        <td>Order ID</td>
+                    </tr>
+                    <tr>
+                        <td class="param-name">bagId</td>
+                        <td class="param-type">string</td>
+                        <td class="required">Required</td>
+                        <td>Bag ID</td>
+                    </tr>
+                    <tr>
+                        <td class="param-name">weight</td>
+                        <td class="param-type">number</td>
+                        <td class="required">Required</td>
+                        <td>Weight in pounds</td>
+                    </tr>
+                </table>
+                
+                <h4>Response</h4>
+                <pre>{
+  "success": true,
+  "totalWeight": 15.5,
+  "bagsWeighed": 2,
+  "totalBags": 2,
+  "allBagsWeighed": true,
+  "totalAmount": 19.38
+}</pre>
+            </div>
+            
+            <div class="endpoint">
+                <span class="method post">POST</span>
+                <span class="endpoint-path">/api/operator/mark-processed</span>
+                <p>Mark bag as processed (post-WDF)</p>
+                <p><strong>Authentication:</strong> Operator role required</p>
+                
+                <h4>Request Body</h4>
+                <table>
+                    <tr>
+                        <th>Parameter</th>
+                        <th>Type</th>
+                        <th>Required</th>
+                        <th>Description</th>
+                    </tr>
+                    <tr>
+                        <td class="param-name">bagId</td>
+                        <td class="param-type">string</td>
+                        <td class="required">Required</td>
+                        <td>Bag ID</td>
+                    </tr>
+                    <tr>
+                        <td class="param-name">orderId</td>
+                        <td class="param-type">string</td>
+                        <td class="required">Required</td>
+                        <td>Order ID</td>
+                    </tr>
+                </table>
+                
+                <h4>Response</h4>
+                <pre>{
+  "success": true,
+  "allBagsProcessed": true,
+  "readyForPickup": true,
+  "affiliateNotified": true
+}</pre>
+            </div>
+            
+            <div class="endpoint">
+                <span class="method get">GET</span>
+                <span class="endpoint-path">/api/operator/active-orders</span>
+                <p>Get orders being processed</p>
+                <p><strong>Authentication:</strong> Operator role required</p>
+                
+                <h4>Response</h4>
+                <pre>{
+  "orders": [
+    {
+      "orderId": "ORD-20240101-001",
+      "customerName": "John Doe",
+      "status": "processing",
+      "bags": [
+        {
+          "bagId": "ORD-20240101-001-BAG1",
+          "status": "processing",
+          "weight": 7.5
+        }
+      ],
+      "progress": {
+        "collected": 2,
+        "weighed": 2,
+        "processed": 1,
+        "total": 2
+      }
+    }
+  ]
+}</pre>
+            </div>
+        </div>
+
+        <div class="content-section">
+            <h2>Admin Endpoints</h2>
+            
+            <div class="endpoint">
+                <span class="method get">GET</span>
+                <span class="endpoint-path">/api/admin/dashboard</span>
+                <p>Get admin dashboard statistics</p>
+                <p><strong>Authentication:</strong> Admin role required</p>
+                
+                <h4>Response</h4>
+                <pre>{
+  "stats": {
+    "totalOrders": 1250,
+    "activeOrders": 15,
+    "totalCustomers": 450,
+    "totalRevenue": 25750.50,
+    "todayOrders": 8,
+    "pendingPayments": 3
+  },
+  "recentOrders": [...],
+  "paymentIssues": [...]
+}</pre>
+            </div>
+            
+            <div class="endpoint">
+                <span class="method get">GET</span>
+                <span class="endpoint-path">/api/admin/orders</span>
+                <p>Get all orders with filters</p>
+                <p><strong>Authentication:</strong> Admin role required</p>
+                
+                <h4>Query Parameters</h4>
+                <table>
+                    <tr>
+                        <th>Parameter</th>
+                        <th>Type</th>
+                        <th>Description</th>
+                    </tr>
+                    <tr>
+                        <td class="param-name">status</td>
+                        <td class="param-type">string</td>
+                        <td>Filter by status</td>
+                    </tr>
+                    <tr>
+                        <td class="param-name">startDate</td>
+                        <td class="param-type">date</td>
+                        <td>Start date range</td>
+                    </tr>
+                    <tr>
+                        <td class="param-name">endDate</td>
+                        <td class="param-type">date</td>
+                        <td>End date range</td>
+                    </tr>
+                    <tr>
+                        <td class="param-name">customerId</td>
+                        <td class="param-type">string</td>
+                        <td>Filter by customer</td>
+                    </tr>
+                    <tr>
+                        <td class="param-name">paymentStatus</td>
+                        <td class="param-type">string</td>
+                        <td>Filter by payment status</td>
+                    </tr>
+                </table>
+                
+                <h4>Response</h4>
+                <pre>{
+  "orders": [...],
+  "total": 1250,
+  "page": 1,
+  "limit": 50
+}</pre>
+            </div>
+            
+            <div class="endpoint">
+                <span class="method post">POST</span>
+                <span class="endpoint-path">/api/admin/operators</span>
+                <p>Create new operator account</p>
+                <p><strong>Authentication:</strong> Admin role required</p>
+                
+                <h4>Request Body</h4>
+                <table>
+                    <tr>
+                        <th>Parameter</th>
+                        <th>Type</th>
+                        <th>Required</th>
+                        <th>Description</th>
+                    </tr>
+                    <tr>
+                        <td class="param-name">username</td>
+                        <td class="param-type">string</td>
+                        <td class="required">Required</td>
+                        <td>Operator username</td>
+                    </tr>
+                    <tr>
+                        <td class="param-name">password</td>
+                        <td class="param-type">string</td>
+                        <td class="required">Required</td>
+                        <td>Initial password</td>
+                    </tr>
+                    <tr>
+                        <td class="param-name">name</td>
+                        <td class="param-type">string</td>
+                        <td class="required">Required</td>
+                        <td>Operator name</td>
+                    </tr>
+                    <tr>
+                        <td class="param-name">permissions</td>
+                        <td class="param-type">array</td>
+                        <td class="optional">Optional</td>
+                        <td>Specific permissions</td>
+                    </tr>
+                </table>
+                
+                <h4>Response</h4>
+                <pre>{
+  "success": true,
+  "operatorId": "OP-001",
+  "message": "Operator created successfully"
+}</pre>
+            </div>
+            
+            <div class="endpoint">
+                <span class="method get">GET</span>
+                <span class="endpoint-path">/api/admin/config</span>
+                <p>Get system configuration</p>
+                <p><strong>Authentication:</strong> Admin role required</p>
+                
+                <h4>Response</h4>
+                <pre>{
+  "config": {
+    "payment_version": "v2",
+    "payment_check_interval": 60000,
+    "base_rate": 1.25,
+    "minimum_weight": 10,
+    "email_settings": {...},
+    "payment_methods": ["venmo", "paypal", "cashapp"]
+  }
+}</pre>
+            </div>
+            
+            <div class="endpoint">
+                <span class="method put">PUT</span>
+                <span class="endpoint-path">/api/admin/config</span>
+                <p>Update system configuration</p>
+                <p><strong>Authentication:</strong> Admin role required</p>
+                
+                <h4>Request Body</h4>
+                <table>
+                    <tr>
+                        <th>Parameter</th>
+                        <th>Type</th>
+                        <th>Description</th>
+                    </tr>
+                    <tr>
+                        <td class="param-name">key</td>
+                        <td class="param-type">string</td>
+                        <td>Configuration key</td>
+                    </tr>
+                    <tr>
+                        <td class="param-name">value</td>
+                        <td class="param-type">any</td>
+                        <td>Configuration value</td>
+                    </tr>
+                </table>
+                
+                <h4>Response</h4>
+                <pre>{
+  "success": true,
+  "message": "Configuration updated"
+}</pre>
+            </div>
+        </div>
+
+        <div class="content-section">
+            <h2>Test Endpoints (Development Only)</h2>
+            
+            <div class="endpoint">
+                <span class="method post">POST</span>
+                <span class="endpoint-path">/api/test/simulate-payment</span>
+                <p>Simulate payment email for testing</p>
+                <p><strong>Environment:</strong> Development only</p>
+                
+                <h4>Request Body</h4>
+                <table>
+                    <tr>
+                        <th>Parameter</th>
+                        <th>Type</th>
+                        <th>Required</th>
+                        <th>Description</th>
+                    </tr>
+                    <tr>
+                        <td class="param-name">orderId</td>
+                        <td class="param-type">string</td>
+                        <td class="required">Required</td>
+                        <td>Order ID</td>
+                    </tr>
+                    <tr>
+                        <td class="param-name">amount</td>
+                        <td class="param-type">number</td>
+                        <td class="required">Required</td>
+                        <td>Payment amount</td>
+                    </tr>
+                    <tr>
+                        <td class="param-name">method</td>
+                        <td class="param-type">string</td>
+                        <td class="required">Required</td>
+                        <td>Payment method (venmo, paypal, cashapp)</td>
+                    </tr>
+                </table>
+                
+                <h4>Response</h4>
+                <pre>{
+  "success": true,
+  "message": "Payment simulation sent"
+}</pre>
+            </div>
+            
+            <div class="endpoint">
+                <span class="method post">POST</span>
+                <span class="endpoint-path">/api/test/reset-order</span>
+                <p>Reset order status for testing</p>
+                <p><strong>Environment:</strong> Development only</p>
+                
+                <h4>Request Body</h4>
+                <table>
+                    <tr>
+                        <th>Parameter</th>
+                        <th>Type</th>
+                        <th>Required</th>
+                        <th>Description</th>
+                    </tr>
+                    <tr>
+                        <td class="param-name">orderId</td>
+                        <td class="param-type">string</td>
+                        <td class="required">Required</td>
+                        <td>Order ID to reset</td>
+                    </tr>
+                </table>
+                
+                <h4>Response</h4>
+                <pre>{
+  "success": true,
+  "message": "Order reset to pending"
+}</pre>
+            </div>
+        </div>
+
+        <div class="content-section">
+            <h2>Response Codes</h2>
+            
+            <table>
+                <tr>
+                    <th>Code</th>
+                    <th>Description</th>
+                </tr>
+                <tr>
+                    <td>200</td>
+                    <td>Success - Request completed successfully</td>
+                </tr>
+                <tr>
+                    <td>201</td>
+                    <td>Created - Resource created successfully</td>
+                </tr>
+                <tr>
+                    <td>400</td>
+                    <td>Bad Request - Invalid parameters</td>
+                </tr>
+                <tr>
+                    <td>401</td>
+                    <td>Unauthorized - Authentication required</td>
+                </tr>
+                <tr>
+                    <td>403</td>
+                    <td>Forbidden - Insufficient permissions</td>
+                </tr>
+                <tr>
+                    <td>404</td>
+                    <td>Not Found - Resource not found</td>
+                </tr>
+                <tr>
+                    <td>409</td>
+                    <td>Conflict - Resource already exists</td>
+                </tr>
+                <tr>
+                    <td>422</td>
+                    <td>Unprocessable Entity - Validation failed</td>
+                </tr>
+                <tr>
+                    <td>429</td>
+                    <td>Too Many Requests - Rate limit exceeded</td>
+                </tr>
+                <tr>
+                    <td>500</td>
+                    <td>Internal Server Error</td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="content-section">
+            <h2>Error Response Format</h2>
+            
+            <p>All error responses follow a consistent format:</p>
+            
+            <pre>{
+  "success": false,
+  "error": {
+    "code": "VALIDATION_ERROR",
+    "message": "Invalid email address format",
+    "field": "email"
+  }
+}</pre>
+            
+            <h3>Common Error Codes</h3>
+            <ul>
+                <li><code>AUTH_REQUIRED</code> - Authentication required</li>
+                <li><code>INVALID_CREDENTIALS</code> - Invalid username or password</li>
+                <li><code>TOKEN_EXPIRED</code> - JWT token has expired</li>
+                <li><code>INSUFFICIENT_PERMISSIONS</code> - User lacks required role</li>
+                <li><code>VALIDATION_ERROR</code> - Input validation failed</li>
+                <li><code>RESOURCE_NOT_FOUND</code> - Requested resource not found</li>
+                <li><code>DUPLICATE_RESOURCE</code> - Resource already exists</li>
+                <li><code>PAYMENT_REQUIRED</code> - Payment verification needed</li>
+                <li><code>RATE_LIMIT_EXCEEDED</code> - Too many requests</li>
+            </ul>
+        </div>
+
+        <div class="content-section">
+            <h2>Rate Limiting</h2>
+            
+            <p>API endpoints implement rate limiting to prevent abuse:</p>
+            
+            <ul>
+                <li><strong>Authentication endpoints:</strong> 5 requests per minute</li>
+                <li><strong>Registration:</strong> 3 requests per hour</li>
+                <li><strong>General API:</strong> 100 requests per minute</li>
+                <li><strong>Admin endpoints:</strong> 200 requests per minute</li>
+            </ul>
+            
+            <p>Rate limit information is included in response headers:</p>
+            
+            <pre>X-RateLimit-Limit: 100
+X-RateLimit-Remaining: 95
+X-RateLimit-Reset: 1704139200</pre>
+        </div>
+    </div>
+</body>
+</html>
