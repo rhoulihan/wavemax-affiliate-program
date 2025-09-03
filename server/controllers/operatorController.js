@@ -674,18 +674,47 @@ exports.addCustomerNote = async (req, res) => {
 // Scan customer card
 exports.scanCustomer = async (req, res) => {
   try {
-    const { customerId, bagId } = req.body;
+    let { customerId, bagId } = req.body;
     const operatorId = req.user.id;
 
     console.log('scanCustomer called with:', { customerId, bagId });
 
-    // Find customer
-    const customer = await Customer.findOne({ customerId });
+    // Handle QR code format: cust-UUID-bagNumber or CUST-UUID-bagNumber
+    let cleanCustomerId = customerId;
+    let extractedBagNumber = null;
+    
+    // Check if the customerId has a bag number suffix (e.g., -1, -2, etc.)
+    const bagNumberMatch = customerId.match(/^(cust-[a-f0-9-]+)-(\d+)$/i);
+    if (bagNumberMatch) {
+      cleanCustomerId = bagNumberMatch[1];
+      extractedBagNumber = parseInt(bagNumberMatch[2]);
+      console.log(`Extracted customer ID: ${cleanCustomerId}, bag number: ${extractedBagNumber}`);
+    }
+    
+    // Normalize the customer ID format (handle case differences)
+    // Convert to uppercase CUST and lowercase UUID
+    cleanCustomerId = cleanCustomerId.replace(/^cust-/i, 'CUST-').toLowerCase();
+    cleanCustomerId = cleanCustomerId.replace(/^cust-/, 'CUST-'); // Ensure CUST is uppercase
+    
+    console.log(`Normalized customer ID: ${cleanCustomerId}`);
+
+    // Find customer (case-insensitive search as fallback)
+    let customer = await Customer.findOne({ customerId: cleanCustomerId });
+    
+    // If not found, try case-insensitive search
+    if (!customer) {
+      customer = await Customer.findOne({ 
+        customerId: { $regex: new RegExp('^' + cleanCustomerId.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '$', 'i') }
+      });
+    }
+    
     if (!customer) {
       return res.status(404).json({
         success: false,
         error: 'Customer not found',
-        message: 'Invalid customer ID'
+        message: 'Invalid customer ID',
+        searchedId: cleanCustomerId,
+        originalId: customerId
       });
     }
 
@@ -733,16 +762,72 @@ exports.scanCustomer = async (req, res) => {
       }
     }
 
+    // Handle bag registration if we have a bagId or extracted bag number
+    let bagRegistered = false;
+    let bagAlreadyExists = false;
+    
+    if (bagId || extractedBagNumber) {
+      // Generate bagId if we only have a bag number
+      if (!bagId && extractedBagNumber) {
+        bagId = `${currentOrder.orderId}-BAG${extractedBagNumber}`;
+      }
+      
+      // Initialize bags array if it doesn't exist
+      if (!currentOrder.bags) {
+        currentOrder.bags = [];
+      }
+      
+      // Check if this bag already exists in the order
+      const existingBag = currentOrder.bags.find(b => b.bagId === bagId);
+      
+      if (!existingBag) {
+        // Add the bag to the order
+        const newBag = {
+          bagId: bagId,
+          bagNumber: extractedBagNumber || currentOrder.bags.length + 1,
+          status: 'processing',
+          weight: 0,
+          scannedAt: {
+            processing: new Date()
+          },
+          scannedBy: {
+            processing: operatorId
+          }
+        };
+        
+        currentOrder.bags.push(newBag);
+        await currentOrder.save();
+        bagRegistered = true;
+        
+        console.log(`Bag ${bagId} registered for order ${currentOrder.orderId}. Total bags scanned: ${currentOrder.bags.length}/${currentOrder.numberOfBags}`);
+      } else {
+        bagAlreadyExists = true;
+        console.log(`Bag ${bagId} already exists in order ${currentOrder.orderId}`);
+      }
+    }
+    
+    // Update action based on current bag count
+    if (currentOrder.bags && currentOrder.bags.length === currentOrder.numberOfBags && currentOrder.bagsWeighed < currentOrder.numberOfBags) {
+      // All bags scanned, ready for weight input
+      action = 'weight_input';
+    } else if (currentOrder.bags && currentOrder.bags.length < currentOrder.numberOfBags) {
+      // Still need more bags to be scanned
+      action = 'scan_required';
+    }
+
     // Format response
     const response = {
       success: true,
       currentOrder: true,
       action,
+      bagRegistered: bagRegistered,
+      bagAlreadyExists: bagAlreadyExists,
       order: {
         orderId: currentOrder.orderId,
         customerName: `${customer.firstName} ${customer.lastName}`,
         affiliateName: affiliateName,
         numberOfBags: currentOrder.numberOfBags,
+        bagsScanned: currentOrder.bags ? currentOrder.bags.length : 0,
         bagsWeighed: currentOrder.bagsWeighed,
         bagsProcessed: currentOrder.bagsProcessed,
         bagsPickedUp: currentOrder.bagsPickedUp,
@@ -920,26 +1005,43 @@ exports.weighBags = async (req, res) => {
       });
     }
 
-    // Validate that we're not adding duplicate bags
-    const existingBagIds = new Set(order.bags.map(b => b.bagId));
-    const newBagIds = new Set(bags.map(b => b.bagId));
-    
-    // Check for duplicates
-    for (const bagId of newBagIds) {
-      if (existingBagIds.has(bagId)) {
-        return res.status(400).json({
-          success: false,
-          error: 'Duplicate bag',
-          message: `Bag ${bagId} has already been added to this order`
+    // Update weights for existing bags or add new ones
+    for (const bagData of bags) {
+      // Check if bag already exists in order
+      const existingBagIndex = order.bags.findIndex(b => b.bagId === bagData.bagId);
+      
+      if (existingBagIndex >= 0) {
+        // Update existing bag with weight
+        order.bags[existingBagIndex].weight = bagData.weight;
+        order.bags[existingBagIndex].status = 'processing';
+        if (!order.bags[existingBagIndex].scannedAt.processing) {
+          order.bags[existingBagIndex].scannedAt.processing = new Date();
+        }
+        if (!order.bags[existingBagIndex].scannedBy.processing) {
+          order.bags[existingBagIndex].scannedBy.processing = operatorId;
+        }
+      } else {
+        // Add new bag if it doesn't exist
+        order.bags.push({
+          bagId: bagData.bagId,
+          bagNumber: order.bags.length + 1,
+          status: 'processing',
+          weight: bagData.weight,
+          scannedAt: {
+            processing: new Date()
+          },
+          scannedBy: {
+            processing: operatorId
+          }
         });
       }
     }
-
-    // Calculate total weight
-    const totalWeight = bags.reduce((sum, bag) => sum + bag.weight, 0);
     
-    // Update order with actual weight and bag tracking
-    order.actualWeight = (order.actualWeight || 0) + totalWeight;
+    // Calculate total weight from all bags
+    const totalWeight = order.bags.reduce((sum, bag) => sum + (bag.weight || 0), 0);
+    
+    // Update order with actual weight
+    order.actualWeight = totalWeight;
     order.status = 'processing';
     order.assignedOperator = operatorId;
     
@@ -947,25 +1049,8 @@ exports.weighBags = async (req, res) => {
       order.processingStartedAt = new Date();
     }
     
-    // Add bags to the order
-    let bagNumber = order.bags.length + 1;
-    for (const bag of bags) {
-      order.bags.push({
-        bagId: bag.bagId,
-        bagNumber: bagNumber++,
-        status: 'processing',
-        weight: bag.weight,
-        scannedAt: {
-          processing: new Date()
-        },
-        scannedBy: {
-          processing: operatorId
-        }
-      });
-    }
-    
     // Update bag counts
-    order.bagsWeighed = order.bags.length;
+    order.bagsWeighed = order.bags.filter(b => b.weight > 0).length;
     
     // Save order first to calculate v2PaymentAmount
     await order.save();
@@ -1211,31 +1296,30 @@ exports.scanProcessed = async (req, res) => {
       
       // V2 Payment Flow: Check payment status before sending notifications
       if (order.v2PaymentStatus === 'verified' || order.v2PaymentStatus === 'paid') {
-        // Payment received - send ready for pickup notifications
+        // Payment received - send ready for pickup notification to affiliate ONLY
         const emailService = require('../utils/emailService');
         
-        // Notify customer
-        if (order.customer && order.customer.email) {
-          await emailService.sendOrderStatusUpdateEmail(
-            order.customer,
-            order,
-            'ready'
-          );
-        }
-        
-        // Notify affiliate
+        // Notify affiliate that order is ready for pickup (NOT commission email)
         if (order.affiliateId) {
           const Affiliate = require('../models/Affiliate');
           const affiliate = await Affiliate.findOne({ affiliateId: order.affiliateId });
           
           if (affiliate && affiliate.email) {
-            await emailService.sendAffiliateCommissionEmail(
-              affiliate,
-              order,
-              order.customer
-            );
+            // Send ready for pickup notification (not commission email)
+            await emailService.sendOrderReadyNotification(affiliate.email, {
+              orderId: order.orderId,
+              customerName: `${order.customer.firstName} ${order.customer.lastName}`,
+              customerPhone: order.customer.phone,
+              numberOfBags: order.numberOfBags,
+              totalWeight: order.actualWeight,
+              finalTotal: order.actualTotal || order.estimatedTotal,
+              address: `${order.customer.address.street}, ${order.customer.address.city}, ${order.customer.address.state} ${order.customer.address.zip}`
+            });
+            
+            logger.info(`Ready for pickup notification sent to affiliate ${affiliate.email} for order ${order.orderId}`);
           }
         }
+        // Do NOT notify customer yet - wait until affiliate picks up
       } else {
         // Payment not received - send payment reminder
         await sendPaymentReminder(order);
@@ -1443,12 +1527,21 @@ exports.completePickup = async (req, res) => {
       });
     }
 
-    // Send customer notification
+    // Send notifications for completed order
     try {
       const emailService = require('../utils/emailService');
       const Customer = require('../models/Customer');
+      const Affiliate = require('../models/Affiliate');
+      
       const customer = await Customer.findOne({ customerId: order.customerId });
       
+      // Get affiliate information first
+      let affiliate = null;
+      if (order.affiliateId) {
+        affiliate = await Affiliate.findOne({ affiliateId: order.affiliateId });
+      }
+      
+      // 1. Send delivery notification to customer with affiliate info
       if (customer && customer.email) {
         await emailService.sendOrderPickedUpNotification(
           customer.email,
@@ -1456,12 +1549,28 @@ exports.completePickup = async (req, res) => {
             customerName: `${customer.firstName} ${customer.lastName}`,
             orderId: order.orderId,
             numberOfBags: order.bags.length,
-            totalWeight: order.actualWeight
+            totalWeight: order.actualWeight,
+            affiliateName: affiliate ? (affiliate.contactPerson || affiliate.businessName) : 'Your laundry service provider',
+            businessName: affiliate ? affiliate.businessName : null
           }
         );
+        console.log(`Delivery notification sent to customer ${customer.email}`);
+      }
+      
+      // 2. Send commission earned notification to affiliate
+      if (order.affiliateId && affiliate) {
+        
+        if (affiliate && affiliate.email) {
+          await emailService.sendAffiliateCommissionEmail(
+            affiliate,
+            order,
+            customer
+          );
+          console.log(`Commission notification sent to affiliate ${affiliate.email}`);
+        }
       }
     } catch (emailError) {
-      console.error('Error sending email notification:', emailError);
+      console.error('Error sending email notifications:', emailError);
       // Don't fail the whole operation if email fails
     }
 
@@ -1516,17 +1625,28 @@ exports.confirmPickup = async (req, res) => {
       order.status = 'complete';
       order.completedAt = new Date();
 
-      // Notify customer
+      // Notify customer with affiliate info
       const emailService = require('../utils/emailService');
       if (order.customerId) {
         const customer = await Customer.findOne({ customerId: order.customerId });
+        
+        // Get affiliate information
+        let affiliate = null;
+        if (order.affiliateId) {
+          const Affiliate = require('../models/Affiliate');
+          affiliate = await Affiliate.findOne({ affiliateId: order.affiliateId });
+        }
+        
         if (customer && customer.email) {
           await emailService.sendOrderPickedUpNotification(
             customer.email,
             {
               customerName: `${customer.firstName} ${customer.lastName}`,
               orderId: order.orderId,
-              numberOfBags: order.numberOfBags
+              numberOfBags: order.numberOfBags,
+              totalWeight: order.actualWeight,
+              affiliateName: affiliate ? (affiliate.contactPerson || affiliate.businessName) : 'Your laundry service provider',
+              businessName: affiliate ? affiliate.businessName : null
             }
           );
         }

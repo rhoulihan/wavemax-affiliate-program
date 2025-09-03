@@ -109,6 +109,10 @@ class IMAPEmailScanner {
           
           console.log(`Found ${results.length} unread emails`);
           
+          // Track messages being processed
+          let messagesExpected = results.length;
+          let messagesProcessed = 0;
+          
           // Fetch the emails
           const fetch = this.imap.fetch(results, {
             bodies: '',
@@ -116,6 +120,7 @@ class IMAPEmailScanner {
           });
           
           fetch.on('message', (msg, seqno) => {
+            console.log(`Processing message ${seqno}`);
             let emailData = {
               seqno: seqno,
               uid: null,
@@ -124,12 +129,20 @@ class IMAPEmailScanner {
               html: ''
             };
             
+            let bodyParsed = false;
+            let messageEnded = false;
+            
             msg.on('body', (stream, info) => {
+              console.log(`Parsing body for message ${seqno}`);
               simpleParser(stream, (err, parsed) => {
                 if (err) {
                   console.error('Error parsing email:', err);
+                  bodyParsed = true;
+                  messagesProcessed++;
                   return;
                 }
+                
+                console.log(`Parsed email - Subject: ${parsed.subject}, From: ${parsed.from?.text}`);
                 
                 emailData.from = parsed.from?.text || '';
                 emailData.subject = parsed.subject || '';
@@ -142,16 +155,46 @@ class IMAPEmailScanner {
                 if (parsed.from && parsed.from.value && parsed.from.value[0]) {
                   emailData.fromAddress = parsed.from.value[0].address;
                 }
+                
+                bodyParsed = true;
+                
+                // If message has already ended, add to emails now
+                if (messageEnded) {
+                  emails.push(emailData);
+                  messagesProcessed++;
+                  console.log(`Added email ${seqno} to array (delayed). Total: ${emails.length}`);
+                  
+                  // Check if all messages are processed
+                  if (messagesProcessed === messagesExpected) {
+                    console.log(`All ${messagesExpected} messages processed. Resolving with ${emails.length} emails`);
+                    resolve(emails);
+                  }
+                }
               });
             });
             
             msg.once('attributes', (attrs) => {
               emailData.uid = attrs.uid;
               emailData.flags = attrs.flags;
+              console.log(`Got attributes for message ${seqno}: UID=${attrs.uid}`);
             });
             
             msg.once('end', () => {
-              emails.push(emailData);
+              console.log(`Message ${seqno} ended`);
+              messageEnded = true;
+              
+              // If body is already parsed, add to emails now
+              if (bodyParsed) {
+                emails.push(emailData);
+                messagesProcessed++;
+                console.log(`Added email ${seqno} to array. Total: ${emails.length}`);
+                
+                // Check if all messages are processed
+                if (messagesProcessed === messagesExpected) {
+                  console.log(`All ${messagesExpected} messages processed. Resolving with ${emails.length} emails`);
+                  resolve(emails);
+                }
+              }
             });
           });
           
@@ -161,8 +204,12 @@ class IMAPEmailScanner {
           });
           
           fetch.once('end', () => {
-            console.log(`Successfully fetched ${emails.length} emails`);
-            resolve(emails);
+            console.log(`Fetch ended. Waiting for ${messagesExpected} messages to be processed...`);
+            
+            // If no messages were expected, resolve immediately
+            if (messagesExpected === 0) {
+              resolve(emails);
+            }
           });
         });
       });

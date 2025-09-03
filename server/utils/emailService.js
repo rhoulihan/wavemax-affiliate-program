@@ -1307,14 +1307,16 @@ exports.sendOrderStatusUpdateEmail = async (customer, order, status) => {
           scheduled: 'Your order has been accepted by the affiliate',
           processing: 'Your laundry has been received and is being processed',
           processed: 'Your laundry is ready for pickup by the affiliate',
-          complete: 'Your laundry has been delivered'
+          complete: 'Your laundry has been delivered',
+          ready: 'Your laundry is ready and will be delivered soon'
         },
         STATUS_TITLES: {
           pending: 'Order Pending',
           scheduled: 'Order Scheduled',
           processing: 'Laundry Processing',
           processed: 'Ready for Pickup',
-          complete: 'Order Complete'
+          complete: 'Order Complete',
+          ready: 'Ready for Delivery'
         }
       },
       es: {
@@ -1427,7 +1429,7 @@ exports.sendOrderStatusUpdateEmail = async (customer, order, status) => {
       pt: 'Atualização do Pedido',
       de: 'Bestellaktualisierung'
     };
-    const subject = `${subjectPrefix[language] || subjectPrefix.en}: ${statusTitles[status]}`;
+    const subject = `${subjectPrefix[language] || subjectPrefix.en}: ${statusTitles[status] || status.charAt(0).toUpperCase() + status.slice(1)}`;
 
     await sendEmail(
       customer.email,
@@ -2249,27 +2251,30 @@ exports.sendOrderReadyNotification = async (affiliateEmail, data) => {
 
 // Send order picked up notification to customer
 exports.sendOrderPickedUpNotification = async (customerEmail, data) => {
-  const subject = `Your Laundry is On Its Way!`;
+  const subject = `Your Fresh Laundry is On Its Way - Order ${data.orderId}`;
   
   const html = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
       <div style="background-color: #3498db; color: white; padding: 20px; text-align: center;">
-        <h2 style="margin: 0;">Your Laundry is On Its Way!</h2>
+        <h2 style="margin: 0;">Your Fresh Laundry is On Its Way! 🚚</h2>
       </div>
       
       <div style="padding: 20px; background-color: #f8f9fa;">
         <p>Hello ${data.customerName},</p>
         
-        <p>Good news! Your clean laundry has been picked up from our facility and is on its way back to you.</p>
+        <p><strong>Great news!</strong> Your freshly cleaned laundry has been picked up from our facility and is now on its way to you.</p>
         
         <div style="background-color: white; padding: 20px; border-radius: 8px; margin: 20px 0;">
-          <h3 style="color: #2c3e50; margin-top: 0;">Order Information</h3>
+          <h3 style="color: #2c3e50; margin-top: 0;">Delivery Details</h3>
           <p><strong>Order ID:</strong> ${data.orderId}</p>
           <p><strong>Number of Bags:</strong> ${data.numberOfBags}</p>
+          ${data.totalWeight ? `<p><strong>Total Weight:</strong> ${data.totalWeight} lbs</p>` : ''}
+          <p><strong>Delivery Provider:</strong> ${data.affiliateName}</p>
+          ${data.businessName ? `<p><strong>Business:</strong> ${data.businessName}</p>` : ''}
         </div>
         
         <div style="background-color: #e8f5ff; border-left: 4px solid #3498db; padding: 15px; margin: 20px 0;">
-          <p style="margin: 0;">Your laundry service provider will deliver your clean clothes shortly. Please be available to receive your order.</p>
+          <p style="margin: 0;"><strong>${data.affiliateName}</strong> is on the way with your freshly cleaned laundry! Please be available to receive your order.</p>
         </div>
         
         <p>Thank you for choosing WaveMAX Laundry Services!</p>
