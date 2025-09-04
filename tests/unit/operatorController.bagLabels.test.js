@@ -2,6 +2,7 @@
 const operatorController = require('../../server/controllers/operatorController');
 const Customer = require('../../server/models/Customer');
 const { logAuditEvent } = require('../../server/utils/auditLogger');
+const { expectSuccessResponse, expectErrorResponse } = require('../helpers/responseHelpers');
 
 jest.mock('../../server/models/Customer');
 jest.mock('../../server/utils/auditLogger');
@@ -44,10 +45,9 @@ describe('Operator Controller - Bag Label Printing', () => {
       expect(Customer.countDocuments).toHaveBeenCalledWith({
         bagLabelsGenerated: false
       });
-      expect(res.json).toHaveBeenCalledWith({
-        success: true,
-        count: 5
-      });
+      expect(res.json).toHaveBeenCalledWith(
+        expectSuccessResponse({ count: 5 })
+      );
     });
 
     it('should return zero when no new customers', async () => {
@@ -55,10 +55,9 @@ describe('Operator Controller - Bag Label Printing', () => {
 
       await operatorController.getNewCustomersCount(req, res);
 
-      expect(res.json).toHaveBeenCalledWith({
-        success: true,
-        count: 0
-      });
+      expect(res.json).toHaveBeenCalledWith(
+        expectSuccessResponse({ count: 0 })
+      );
     });
 
     it('should handle database error', async () => {
@@ -68,10 +67,9 @@ describe('Operator Controller - Bag Label Printing', () => {
 
       // Note: The actual controller uses console.error, not logger.error
       expect(res.status).toHaveBeenCalledWith(500);
-      expect(res.json).toHaveBeenCalledWith({
-        success: false,
-        message: 'Error fetching new customers count'
-      });
+      expect(res.json).toHaveBeenCalledWith(
+        expectErrorResponse('Error fetching new customers count')
+      );
     });
   });
 
@@ -110,55 +108,55 @@ describe('Operator Controller - Bag Label Printing', () => {
       // Check that updateMany is NOT called in the initial request
       expect(Customer.updateMany).not.toHaveBeenCalled();
 
-      expect(res.json).toHaveBeenCalledWith({
-        success: true,
-        message: 'Generated 5 labels for 2 customers',
-        customersProcessed: 2,
-        labelsGenerated: 5,
-        labelData: expect.arrayContaining([
-          expect.objectContaining({
-            customerName: 'John Doe',
-            customerId: 'CUST001',
-            bagNumber: 1,
-            totalBags: 2,
-            qrCode: 'CUST001-1',
-            affiliateId: 'AFF001'
-          }),
-          expect.objectContaining({
-            customerName: 'John Doe',
-            customerId: 'CUST001',
-            bagNumber: 2,
-            totalBags: 2,
-            qrCode: 'CUST001-2',
-            affiliateId: 'AFF001'
-          }),
-          expect.objectContaining({
-            customerName: 'Jane Smith',
-            customerId: 'CUST002',
-            bagNumber: 1,
-            totalBags: 3,
-            qrCode: 'CUST002-1',
-            affiliateId: 'AFF002'
-          }),
-          expect.objectContaining({
-            customerName: 'Jane Smith',
-            customerId: 'CUST002',
-            bagNumber: 2,
-            totalBags: 3,
-            qrCode: 'CUST002-2',
-            affiliateId: 'AFF002'
-          }),
-          expect.objectContaining({
-            customerName: 'Jane Smith',
-            customerId: 'CUST002',
-            bagNumber: 3,
-            totalBags: 3,
-            qrCode: 'CUST002-3',
-            affiliateId: 'AFF002'
-          })
-        ]),
-        customerIds: ['cust1', 'cust2']
-      });
+      expect(res.json).toHaveBeenCalledWith(
+        expectSuccessResponse({
+          customersProcessed: 2,
+          labelsGenerated: 5,
+          labelData: expect.arrayContaining([
+            expect.objectContaining({
+              customerName: 'John Doe',
+              customerId: 'CUST001',
+              bagNumber: 1,
+              totalBags: 2,
+              qrCode: 'CUST001-1',
+              affiliateId: 'AFF001'
+            }),
+            expect.objectContaining({
+              customerName: 'John Doe',
+              customerId: 'CUST001',
+              bagNumber: 2,
+              totalBags: 2,
+              qrCode: 'CUST001-2',
+              affiliateId: 'AFF001'
+            }),
+            expect.objectContaining({
+              customerName: 'Jane Smith',
+              customerId: 'CUST002',
+              bagNumber: 1,
+              totalBags: 3,
+              qrCode: 'CUST002-1',
+              affiliateId: 'AFF002'
+            }),
+            expect.objectContaining({
+              customerName: 'Jane Smith',
+              customerId: 'CUST002',
+              bagNumber: 2,
+              totalBags: 3,
+              qrCode: 'CUST002-2',
+              affiliateId: 'AFF002'
+            }),
+            expect.objectContaining({
+              customerName: 'Jane Smith',
+              customerId: 'CUST002',
+              bagNumber: 3,
+              totalBags: 3,
+              qrCode: 'CUST002-3',
+              affiliateId: 'AFF002'
+            })
+          ]),
+          customerIds: ['cust1', 'cust2']
+        }, 'Generated 5 labels for 2 customers')
+      );
     });
 
     it('should handle no new customers', async () => {
@@ -170,12 +168,12 @@ describe('Operator Controller - Bag Label Printing', () => {
 
       expect(Customer.updateMany).not.toHaveBeenCalled();
       
-      expect(res.json).toHaveBeenCalledWith({
-        success: true,
-        message: 'No new customers found',
-        customersProcessed: 0,
-        labelsGenerated: 0
-      });
+      expect(res.json).toHaveBeenCalledWith(
+        expectSuccessResponse({
+          customersProcessed: 0,
+          labelsGenerated: 0
+        }, 'No new customers found')
+      );
     });
 
     it('should handle customer with zero bags', async () => {
@@ -199,22 +197,22 @@ describe('Operator Controller - Bag Label Printing', () => {
 
       // Should NOT update the customer immediately
       expect(Customer.updateMany).not.toHaveBeenCalled();
-      expect(res.json).toHaveBeenCalledWith({
-        success: true,
-        message: 'Generated 1 labels for 1 customers',
-        customersProcessed: 1,
-        labelsGenerated: 1,
-        labelData: expect.arrayContaining([
-          expect.objectContaining({
-            customerName: 'John Doe',
-            customerId: 'CUST001',
-            bagNumber: 1,
-            totalBags: 1, // Defaults to 1 when numberOfBags is 0
-            qrCode: 'CUST001-1'
-          })
-        ]),
-        customerIds: ['cust1']
-      });
+      expect(res.json).toHaveBeenCalledWith(
+        expectSuccessResponse({
+          customersProcessed: 1,
+          labelsGenerated: 1,
+          labelData: expect.arrayContaining([
+            expect.objectContaining({
+              customerName: 'John Doe',
+              customerId: 'CUST001',
+              bagNumber: 1,
+              totalBags: 1, // Defaults to 1 when numberOfBags is 0
+              qrCode: 'CUST001-1'
+            })
+          ]),
+          customerIds: ['cust1']
+        }, 'Generated 1 labels for 1 customers')
+      );
     });
 
     it('should handle database error during find', async () => {
@@ -227,10 +225,9 @@ describe('Operator Controller - Bag Label Printing', () => {
       const logger = require('../../server/utils/logger');
       expect(logger.error).toHaveBeenCalledWith('Print new customer labels error:', expect.any(Error));
       expect(res.status).toHaveBeenCalledWith(500);
-      expect(res.json).toHaveBeenCalledWith({
-        success: false,
-        message: 'Error printing customer labels'
-      });
+      expect(res.json).toHaveBeenCalledWith(
+        expectErrorResponse('Error printing customer labels')
+      );
     });
 
     // Database error during update test removed - update no longer happens in printNewCustomerLabels
@@ -262,23 +259,23 @@ describe('Operator Controller - Bag Label Printing', () => {
 
       await operatorController.printNewCustomerLabels(req, res);
 
-      expect(res.json).toHaveBeenCalledWith({
-        success: true,
-        message: 'Generated 2 labels for 2 customers',
-        customersProcessed: 2,
-        labelsGenerated: 2,
-        labelData: expect.arrayContaining([
-          expect.objectContaining({
-            customerName: ' Doe', // Space + last name
-            customerId: 'CUST001'
-          }),
-          expect.objectContaining({
-            customerName: 'Jane ', // First name + space
-            customerId: 'CUST002'
-          })
-        ]),
-        customerIds: ['cust1', 'cust2']
-      });
+      expect(res.json).toHaveBeenCalledWith(
+        expectSuccessResponse({
+          customersProcessed: 2,
+          labelsGenerated: 2,
+          labelData: expect.arrayContaining([
+            expect.objectContaining({
+              customerName: ' Doe', // Space + last name
+              customerId: 'CUST001'
+            }),
+            expect.objectContaining({
+              customerName: 'Jane ', // First name + space
+              customerId: 'CUST002'
+            })
+          ]),
+          customerIds: ['cust1', 'cust2']
+        }, 'Generated 2 labels for 2 customers')
+      );
     });
 
     it('should generate correct number of labels for each customer', async () => {
@@ -333,22 +330,22 @@ describe('Operator Controller - Bag Label Printing', () => {
 
       await operatorController.printNewCustomerLabels(req, res);
 
-      expect(res.json).toHaveBeenCalledWith({
-        success: true,
-        message: 'Generated 1 labels for 1 customers',
-        customersProcessed: 1,
-        labelsGenerated: 1,
-        labelData: expect.arrayContaining([
-          expect.objectContaining({
-            customerName: 'John Doe',
-            customerId: 'CUST001',
-            bagNumber: 1,
-            totalBags: 1, // Defaults to 1
-            qrCode: 'CUST001-1'
-          })
-        ]),
-        customerIds: ['cust1']
-      });
+      expect(res.json).toHaveBeenCalledWith(
+        expectSuccessResponse({
+          customersProcessed: 1,
+          labelsGenerated: 1,
+          labelData: expect.arrayContaining([
+            expect.objectContaining({
+              customerName: 'John Doe',
+              customerId: 'CUST001',
+              bagNumber: 1,
+              totalBags: 1, // Defaults to 1
+              qrCode: 'CUST001-1'
+            })
+          ]),
+          customerIds: ['cust1']
+        }, 'Generated 1 labels for 1 customers')
+      );
     });
   });
 

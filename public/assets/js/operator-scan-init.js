@@ -7,8 +7,7 @@
     };
     const BASE_URL = config.baseUrl;
     
-    // Use csrfFetch if available, otherwise fall back to regular fetch
-    const csrfFetch = window.CsrfUtils && window.CsrfUtils.csrfFetch ? window.CsrfUtils.csrfFetch : fetch;
+    // Use ApiClient for all API calls
 
     // State
     let currentOrder = null;
@@ -134,20 +133,16 @@
     async function confirmLabelsPrinted(customerIds) {
         try {
             const token = localStorage.getItem('operatorToken');
-            const response = await csrfFetch(`${BASE_URL}/api/operators/confirm-labels-printed`, {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ customerIds })
-            });
+            const data = await ApiClient.post('/api/operators/confirm-labels-printed', 
+                { customerIds },
+                { 
+                    showError: false,
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                }
+            );
             
-            if (!response.ok) {
-                throw new Error('Failed to confirm label printing');
-            }
-            
-            const data = await response.json();
             console.log('Labels confirmed:', data);
             return data;
         } catch (error) {
@@ -374,27 +369,13 @@
         // Verify the token is still valid
         try {
             console.log('Verifying operator token...');
-            const response = await fetch(`${BASE_URL}/api/v1/auth/verify`, {
+            const data = await ApiClient.get('/api/v1/auth/verify', {
+                showError: false,
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }
             });
 
-            if (!response.ok) {
-                console.log('Token validation failed, redirecting to login...');
-                localStorage.removeItem('operatorToken');
-                localStorage.removeItem('operatorRefreshToken');
-                localStorage.removeItem('operatorData');
-                
-                if (window.navigateTo) {
-                    window.navigateTo('/operator-login');
-                } else {
-                    window.location.href = '/embed-app-v2.html?route=/operator-login';
-                }
-                return;
-            }
-
-            const data = await response.json();
             if (!data.success) {
                 console.log('Token invalid, redirecting to login...');
                 localStorage.removeItem('operatorToken');
@@ -546,31 +527,29 @@
         // Verify token is still valid by making a test request
         console.log('Verifying token validity...');
         try {
-            const testResponse = await fetch(`${BASE_URL}/api/v1/operators/stats/today`, {
+            await ApiClient.get('/api/v1/operators/stats/today', {
+                showError: false,
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }
             });
             
-            console.log('Token validation response:', testResponse.status);
-            
-            if (testResponse.status === 401) {
+            console.log('Token validation successful');
+        } catch (error) {
+            if (error.status === 401) {
                 console.error('Operator token is invalid or expired');
                 localStorage.removeItem('operatorToken');
                 localStorage.removeItem('operatorData');
                 window.location.href = '/operator-login-embed.html';
                 return;
             }
-        } catch (error) {
             console.error('Error verifying operator token:', error);
         }
 
-        // Initialize CSRF token
-        try {
-            await CsrfUtils.fetchCsrfToken();
-            console.log('CSRF token initialized');
-        } catch (error) {
-            console.error('Failed to initialize CSRF token:', error);
+        // Initialize ApiClient CSRF token
+        if (window.ApiClient) {
+            ApiClient.initCSRF();
+            console.log('ApiClient CSRF token initialized');
         }
 
         // Disable ModalSystem if it exists to prevent interference
@@ -717,58 +696,17 @@
             console.log('Current date (ISO):', isoDate);
             console.log('With token:', token.substring(0, 20) + '...');
             
-            const response = await csrfFetch(`${BASE_URL}/api/v1/operators/stats/today`, {
+            const data = await ApiClient.get('/api/v1/operators/stats/today', {
+                showError: false,
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }
             });
-            console.log('Stats response status:', response.status);
+            console.log('Stats response received');
             
-            // Always check for renewed token in response headers, even on non-ok responses
-            const renewedToken = response.headers.get('X-Renewed-Token');
-            const tokenRenewed = response.headers.get('X-Token-Renewed');
-            const wasExpired = response.headers.get('X-Token-Was-Expired');
-            
-            if (tokenRenewed === 'true' && renewedToken) {
-                // Update stored token with renewed one
-                console.log('Token renewed by server, updating local storage');
-                console.log('Old token:', token.substring(0, 50) + '...');
-                console.log('New token:', renewedToken.substring(0, 50) + '...');
-                console.log('Was expired:', wasExpired);
-                
-                // Decode tokens to compare
-                try {
-                    const oldPayload = JSON.parse(atob(token.split('.')[1]));
-                    const newPayload = JSON.parse(atob(renewedToken.split('.')[1]));
-                    console.log('Old token payload:', oldPayload);
-                    console.log('New token payload:', newPayload);
-                } catch (e) {
-                    console.error('Error decoding tokens:', e);
-                }
-                
-                localStorage.setItem('operatorToken', renewedToken);
-                
-                // If token was expired and renewed, retry the request with new token
-                if (wasExpired === 'true') {
-                    console.log('Token was expired and renewed, retrying request...');
-                    const retryResponse = await csrfFetch(`${BASE_URL}/api/v1/operators/stats/today`, {
-                        headers: {
-                            'Authorization': `Bearer ${renewedToken}`
-                        }
-                    });
-                    
-                    if (retryResponse.ok) {
-                        const data = await retryResponse.json();
-                        updateStatsDisplay(data);
-                        return;
-                    }
-                }
-            }
-
-            if (response.ok) {
-                const data = await response.json();
-                updateStatsDisplay(data);
-            } else if (response.status === 401) {
+            updateStatsDisplay(data);
+        } catch (error) {
+            if (error.status === 401) {
                 // Unauthorized - token might be expired
                 console.error('Stats call got 401 error at:', new Date().toISOString());
                 console.error('Current token:', localStorage.getItem('operatorToken')?.substring(0, 20) + '...');
@@ -782,13 +720,13 @@
                 setTimeout(function() {
                     window.location.href = '/operator-login-embed.html';
                 }, 1000);
+            } else {
+                console.error('Error loading stats:', error);
+                console.error('Stats error details:', {
+                    message: error.message,
+                    stack: error.stack
+                });
             }
-        } catch (error) {
-            console.error('Error loading stats:', error);
-            console.error('Stats error details:', {
-                message: error.message,
-                stack: error.stack
-            });
         }
     }
 
@@ -941,16 +879,7 @@
         }, 100);
     }
 
-    // Helper function to check for renewed token
-    function checkAndUpdateToken(response) {
-        const renewedToken = response.headers.get('X-Renewed-Token');
-        const tokenRenewed = response.headers.get('X-Token-Renewed');
-        
-        if (tokenRenewed === 'true' && renewedToken) {
-            console.log('Token renewed by server, updating local storage');
-            localStorage.setItem('operatorToken', renewedToken);
-        }
-    }
+    // Token renewal is handled automatically by ApiClient
 
     // Process scanned code
     async function processScan(scanData) {
@@ -988,47 +917,18 @@
             }
             
             // Use scan-customer endpoint - bags have customer IDs on them
-            const response = await csrfFetch(`${BASE_URL}/api/v1/operators/scan-customer`, {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ 
+            const data = await ApiClient.post('/api/v1/operators/scan-customer', 
+                { 
                     customerId: customerId,
                     bagId: bagId
-                })
-            });
-            
-            // Check for token renewal
-            checkAndUpdateToken(response);
-
-            if (!response.ok) {
-                console.error('Scan failed:', response.status, response.statusText);
-                
-                // Handle 401 Unauthorized
-                if (response.status === 401) {
-                    console.error('Operator token expired or invalid');
-                    clearInterval(statsInterval);
-                    localStorage.removeItem('operatorToken');
-                    localStorage.removeItem('operatorData');
-                    window.location.href = '/operator-login-embed.html';
-                    return;
+                },
+                {
+                    showError: false,
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
                 }
-                
-                const responseText = await response.text();
-                console.error('Response body:', responseText);
-                
-                try {
-                    const data = JSON.parse(responseText);
-                    showError(data.message || data.error || 'Invalid scan');
-                } catch (e) {
-                    showError(`Error ${response.status}: ${response.statusText}`);
-                }
-                return;
-            }
-            
-            const data = await response.json();
+            );
             console.log('API Response:', data);
             
             if (data.success) {
@@ -1559,24 +1459,19 @@
             
             console.log('Sending QR code:', qrCode);
             
-            const response = await csrfFetch(`${BASE_URL}/api/v1/operators/scan-processed`, {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    qrCode: qrCode
-                })
-            });
+            const data = await ApiClient.post('/api/v1/operators/scan-processed',
+                { qrCode: qrCode },
+                {
+                    showError: false,
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                }
+            );
             
-            // Check for token renewal
-            checkAndUpdateToken(response);
-
-            const data = await response.json();
             console.log('Process bag response:', data);
 
-            if (response.ok) {
+            if (data) {
                 if (data.warning === 'duplicate_scan') {
                     // Handle duplicate scan - show warning but not as error
                     console.log('Duplicate scan detected:', data.message);
@@ -1982,24 +1877,22 @@
 
         try {
             const token = localStorage.getItem('operatorToken');
-            const response = await csrfFetch(`${BASE_URL}/api/v1/operators/orders/weigh-bags`, {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ 
+            const data = await ApiClient.post('/api/v1/operators/orders/weigh-bags',
+                { 
                     orderId: currentOrder.orderId,
                     bags: bagWeights
-                })
-            });
-            
-            // Check for token renewal
-            checkAndUpdateToken(response);
+                },
+                {
+                    showLoading: true,
+                    loadingMessage: 'Weighing bags...',
+                    showError: false,
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                }
+            );
 
-            const data = await response.json();
-
-            if (response.ok && data.success) {
+            if (data.success) {
                 // Close modal first
                 closeModal();
                 // Then show confirmation
@@ -2035,17 +1928,17 @@
     const confirmReady = async function() {
         try {
             const token = localStorage.getItem('operatorToken');
-            const response = await csrfFetch(`${BASE_URL}/api/v1/operators/orders/${currentOrder.orderId}/ready`, {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
+            const data = await ApiClient.post(`/api/v1/operators/orders/${currentOrder.orderId}/ready`,
+                {},
+                {
+                    showError: false,
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
                 }
-            });
+            );
 
-            const data = await response.json();
-
-            if (response.ok && data.success) {
+            if (data.success) {
                 closeModal();
                 showConfirmation('Order marked as ready for pickup', '✓', 'success');
                 await loadStats();
@@ -2086,26 +1979,24 @@
                 bagIds: scannedBagIds
             }));
             
-            const response = await csrfFetch(`${BASE_URL}/api/v1/operators/complete-pickup`, {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ 
+            const data = await ApiClient.post('/api/v1/operators/complete-pickup',
+                { 
                     orderId: orderToProcess.orderId,
                     bagIds: scannedBagIds
-                })
-            });
+                },
+                {
+                    showLoading: true,
+                    loadingMessage: 'Completing pickup...',
+                    showError: false,
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                }
+            );
             
-            // Check for token renewal
-            checkAndUpdateToken(response);
-
-            const data = await response.json();
             console.log('Complete pickup response:', data);
-            console.log('Response status:', response.status);
             
-            if (response.ok && data.success) {
+            if (data.success) {
                 await loadStats();
                 
                 // Show success message

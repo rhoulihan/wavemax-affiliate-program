@@ -11,6 +11,7 @@ const emailService = require('../../server/utils/emailService');
 const { logLoginAttempt, logAuditEvent } = require('../../server/utils/auditLogger');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
+const { expectSuccessResponse, expectErrorResponse } = require('../helpers/responseHelpers');
 
 // Mock dependencies
 jest.mock('../../server/models/Affiliate');
@@ -101,8 +102,7 @@ describe('Auth Controller', () => {
       expect(mockAffiliate.save).toHaveBeenCalled();
       expect(res.status).toHaveBeenCalledWith(200);
       expect(res.json).toHaveBeenCalledWith(
-        expect.objectContaining({
-          success: true,
+        expectSuccessResponse({
           token: 'mockToken',
           refreshToken: 'mock-token',
           affiliate: expect.objectContaining({
@@ -126,10 +126,9 @@ describe('Auth Controller', () => {
       await authController.affiliateLogin(req, res);
 
       expect(res.status).toHaveBeenCalledWith(401);
-      expect(res.json).toHaveBeenCalledWith({
-        success: false,
-        message: 'Invalid username or password'
-      });
+      expect(res.json).toHaveBeenCalledWith(
+        expectErrorResponse('Invalid username or password')
+      );
     });
 
     it('should return 401 for incorrect password', async () => {
@@ -150,10 +149,9 @@ describe('Auth Controller', () => {
       await authController.affiliateLogin(req, res);
 
       expect(res.status).toHaveBeenCalledWith(401);
-      expect(res.json).toHaveBeenCalledWith({
-        success: false,
-        message: 'Invalid username or password'
-      });
+      expect(res.json).toHaveBeenCalledWith(
+        expectErrorResponse('Invalid username or password')
+      );
     });
   });
 
@@ -204,8 +202,7 @@ describe('Auth Controller', () => {
       expect(mockCustomer.save).toHaveBeenCalled();
       expect(res.status).toHaveBeenCalledWith(200);
       expect(res.json).toHaveBeenCalledWith(
-        expect.objectContaining({
-          success: true,
+        expectSuccessResponse({
           token: 'mockToken',
           customer: expect.objectContaining({
             customerId: 'CUST123',
@@ -231,10 +228,9 @@ describe('Auth Controller', () => {
       await authController.customerLogin(req, res);
 
       expect(res.status).toHaveBeenCalledWith(401);
-      expect(res.json).toHaveBeenCalledWith({
-        success: false,
-        message: 'Invalid username/email or password'
-      });
+      expect(res.json).toHaveBeenCalledWith(
+        expectErrorResponse('Invalid username/email or password')
+      );
     });
 
     it('should login customer using emailOrUsername field', async () => {
@@ -277,8 +273,7 @@ describe('Auth Controller', () => {
       });
       expect(res.status).toHaveBeenCalledWith(200);
       expect(res.json).toHaveBeenCalledWith(
-        expect.objectContaining({
-          success: true,
+        expectSuccessResponse({
           token: 'mockToken'
         })
       );
@@ -335,10 +330,9 @@ describe('Auth Controller', () => {
       await authController.customerLogin(req, res);
 
       expect(res.status).toHaveBeenCalledWith(400);
-      expect(res.json).toHaveBeenCalledWith({
-        success: false,
-        message: 'Username or email is required'
-      });
+      expect(res.json).toHaveBeenCalledWith(
+        expectErrorResponse('Username or email is required')
+      );
     });
   });
 
@@ -353,15 +347,16 @@ describe('Auth Controller', () => {
       await authController.verifyToken(req, res);
 
       expect(res.status).toHaveBeenCalledWith(200);
-      expect(res.json).toHaveBeenCalledWith({
-        success: true,
-        requirePasswordChange: false,
-        user: {
-          id: 'user123',
-          role: 'affiliate',
-          affiliateId: 'AFF123'
-        }
-      });
+      expect(res.json).toHaveBeenCalledWith(
+        expectSuccessResponse({
+          requirePasswordChange: false,
+          user: {
+            id: 'user123',
+            role: 'affiliate',
+            affiliateId: 'AFF123'
+          }
+        })
+      );
     });
 
     it('should handle missing user data', async () => {
@@ -370,10 +365,9 @@ describe('Auth Controller', () => {
       await authController.verifyToken(req, res);
 
       expect(res.status).toHaveBeenCalledWith(500);
-      expect(res.json).toHaveBeenCalledWith({
-        success: false,
-        message: 'An error occurred during token verification'
-      });
+      expect(res.json).toHaveBeenCalledWith(
+        expectErrorResponse('An error occurred during token verification')
+      );
     });
 
     it('should return customer user data', async () => {
@@ -386,15 +380,16 @@ describe('Auth Controller', () => {
       await authController.verifyToken(req, res);
 
       expect(res.status).toHaveBeenCalledWith(200);
-      expect(res.json).toHaveBeenCalledWith({
-        success: true,
-        requirePasswordChange: false,
-        user: {
-          id: 'user456',
-          role: 'customer',
-          customerId: 'CUST456'
-        }
-      });
+      expect(res.json).toHaveBeenCalledWith(
+        expectSuccessResponse({
+          requirePasswordChange: false,
+          user: {
+            id: 'user456',
+            role: 'customer',
+            customerId: 'CUST456'
+          }
+        })
+      );
     });
   });
 
@@ -447,8 +442,7 @@ describe('Auth Controller', () => {
       );
       expect(res.status).toHaveBeenCalledWith(200);
       expect(res.json).toHaveBeenCalledWith(
-        expect.objectContaining({
-          success: true,
+        expectSuccessResponse({
           token: 'newMockToken',
           refreshToken: expect.any(String)
         })
@@ -465,10 +459,9 @@ describe('Auth Controller', () => {
       await authController.refreshToken(req, res);
 
       expect(res.status).toHaveBeenCalledWith(401);
-      expect(res.json).toHaveBeenCalledWith({
-        success: false,
-        message: 'Invalid or expired refresh token'
-      });
+      expect(res.json).toHaveBeenCalledWith(
+        expectErrorResponse('Invalid or expired refresh token')
+      );
     });
 
     it('should return error for expired refresh token', async () => {
@@ -482,10 +475,9 @@ describe('Auth Controller', () => {
       await authController.refreshToken(req, res);
 
       expect(res.status).toHaveBeenCalledWith(401);
-      expect(res.json).toHaveBeenCalledWith({
-        success: false,
-        message: 'Invalid or expired refresh token'
-      });
+      expect(res.json).toHaveBeenCalledWith(
+        expectErrorResponse('Invalid or expired refresh token')
+      );
     });
   });
 
@@ -511,14 +503,15 @@ describe('Auth Controller', () => {
       expect(Administrator.findOne).toHaveBeenCalledWith({ email: 'admin@example.com' });
       expect(mockAdmin.verifyPassword).toHaveBeenCalledWith('AdminPass123!');
       expect(mockAdmin.resetLoginAttempts).toHaveBeenCalled();
-      expect(res.json).toHaveBeenCalledWith({
-        success: true,
-        token: 'mock-jwt-token',
-        refreshToken: 'mock-token',
-        user: expect.objectContaining({
-          adminId: 'ADM001'
+      expect(res.json).toHaveBeenCalledWith(
+        expectSuccessResponse({
+          token: 'mock-jwt-token',
+          refreshToken: 'mock-token',
+          user: expect.objectContaining({
+            adminId: 'ADM001'
+          })
         })
-      });
+      );
     });
 
     test('should handle locked account', async () => {
@@ -536,10 +529,9 @@ describe('Auth Controller', () => {
       await authController.administratorLogin(req, res);
 
       expect(res.status).toHaveBeenCalledWith(403);
-      expect(res.json).toHaveBeenCalledWith({
-        success: false,
-        message: 'Account is locked due to multiple failed login attempts.'
-      });
+      expect(res.json).toHaveBeenCalledWith(
+        expectErrorResponse('Account is locked due to multiple failed login attempts.')
+      );
     });
 
     test('should handle inactive administrator', async () => {
@@ -556,10 +548,9 @@ describe('Auth Controller', () => {
       await authController.administratorLogin(req, res);
 
       expect(res.status).toHaveBeenCalledWith(401);
-      expect(res.json).toHaveBeenCalledWith({
-        success: false,
-        message: 'Account is deactivated. Please contact system administrator.'
-      });
+      expect(res.json).toHaveBeenCalledWith(
+        expectErrorResponse('Account is deactivated. Please contact system administrator.')
+      );
     });
   });
 
@@ -591,15 +582,16 @@ describe('Auth Controller', () => {
 
       expect(Operator.findOne).toHaveBeenCalledWith({ operatorId: 'OP001' });
       expect(res.status).toHaveBeenCalledWith(200);
-      expect(res.json).toHaveBeenCalledWith({
-        success: true,
-        token: 'mock-jwt-token',
-        refreshToken: 'mock-token',
-        operator: expect.objectContaining({
-          operatorId: 'OP001',
-          firstName: 'John'
+      expect(res.json).toHaveBeenCalledWith(
+        expectSuccessResponse({
+          token: 'mock-jwt-token',
+          refreshToken: 'mock-token',
+          operator: expect.objectContaining({
+            operatorId: 'OP001',
+            firstName: 'John'
+          })
         })
-      });
+      );
     });
 
     test('should fail with invalid PIN', async () => {
@@ -612,10 +604,9 @@ describe('Auth Controller', () => {
       await authController.operatorLogin(req, res);
 
       expect(res.status).toHaveBeenCalledWith(401);
-      expect(res.json).toHaveBeenCalledWith({
-        success: false,
-        message: 'Invalid PIN code'
-      });
+      expect(res.json).toHaveBeenCalledWith(
+        expectErrorResponse('Invalid PIN code')
+      );
     });
   });
 
@@ -633,10 +624,9 @@ describe('Auth Controller', () => {
 
       expect(TokenBlacklist.blacklistToken).toHaveBeenCalled();
       expect(RefreshToken.findOneAndDelete).toHaveBeenCalledWith({ token: 'refresh-token' });
-      expect(res.json).toHaveBeenCalledWith({
-        success: true,
-        message: 'Logged out successfully'
-      });
+      expect(res.json).toHaveBeenCalledWith(
+        expectSuccessResponse(null, 'Logged out successfully')
+      );
     });
   });
 
@@ -658,10 +648,9 @@ describe('Auth Controller', () => {
 
       expect(mockAffiliate.save).toHaveBeenCalled();
       expect(emailService.sendAffiliatePasswordResetEmail).toHaveBeenCalled();
-      expect(res.json).toHaveBeenCalledWith({
-        success: true,
-        message: 'Password reset email sent'
-      });
+      expect(res.json).toHaveBeenCalledWith(
+        expectSuccessResponse(null, 'Password reset email sent')
+      );
     });
 
     test('should handle non-existent email gracefully', async () => {
@@ -673,10 +662,9 @@ describe('Auth Controller', () => {
 
       // Should return 404 for non-existent email
       expect(res.status).toHaveBeenCalledWith(404);
-      expect(res.json).toHaveBeenCalledWith({
-        success: false,
-        message: 'No account found with that email address'
-      });
+      expect(res.json).toHaveBeenCalledWith(
+        expectErrorResponse('No account found with that email address')
+      );
     });
   });
 
@@ -711,10 +699,9 @@ describe('Auth Controller', () => {
       expect(mockAffiliate.passwordHash).toBe('new-hash');
       expect(mockAffiliate.resetToken).toBeUndefined();
       expect(mockAffiliate.resetTokenExpiry).toBeUndefined();
-      expect(res.json).toHaveBeenCalledWith({
-        success: true,
-        message: 'Password has been reset successfully'
-      });
+      expect(res.json).toHaveBeenCalledWith(
+        expectSuccessResponse(null, 'Password has been reset successfully')
+      );
     });
 
     test('should reject expired token', async () => {
@@ -729,10 +716,9 @@ describe('Auth Controller', () => {
       await authController.resetPassword(req, res);
 
       expect(res.status).toHaveBeenCalledWith(400);
-      expect(res.json).toHaveBeenCalledWith({
-        success: false,
-        message: 'Invalid or expired token'
-      });
+      expect(res.json).toHaveBeenCalledWith(
+        expectErrorResponse('Invalid or expired token')
+      );
     });
   });
 });

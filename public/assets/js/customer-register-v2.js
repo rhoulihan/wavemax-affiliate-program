@@ -116,16 +116,10 @@
         const usernameHelp = username.nextElementSibling;
         
         try {
-            const response = await fetch(`${baseUrl}/api/v1/auth/check-username`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ username: username.value }),
-                credentials: 'include'
-            });
-
-            const result = await response.json();
+            const result = await ApiClient.post('/api/v1/auth/check-username', 
+                { username: username.value },
+                { showError: false }
+            );
 
             if (result.available) {
                 username.classList.remove('border-red-500');
@@ -155,16 +149,10 @@
         if (!email || !email.value) return;
 
         try {
-            const response = await fetch(`${baseUrl}/api/v1/auth/check-email`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ email: email.value }),
-                credentials: 'include'
-            });
-
-            const result = await response.json();
+            const result = await ApiClient.post('/api/v1/auth/check-email',
+                { email: email.value },
+                { showError: false }
+            );
 
             if (result.available) {
                 email.classList.remove('border-red-500');
@@ -227,23 +215,6 @@
             const socialToken = document.getElementById('socialToken');
             const isOAuthUser = socialToken && socialToken.value;
             
-            // Show loading spinner if available
-            let registrationSpinner = null;
-            if (window.SwirlSpinnerUtils) {
-                registrationSpinner = window.SwirlSpinnerUtils.showOnForm(this, {
-                    message: window.i18n?.translate('spinner.processingRegistration') || 'Processing your registration...',
-                    submessage: window.i18n?.translate('spinner.creatingAccount') || 'Please wait while we create your account'
-                });
-            } else if (window.SwirlSpinner) {
-                registrationSpinner = new window.SwirlSpinner({
-                    container: this,
-                    size: 'large',
-                    overlay: true,
-                    message: 'Processing your registration...'
-                });
-                registrationSpinner.show();
-            }
-            
             const submitBtn = document.getElementById('submitBtn');
             if (submitBtn) {
                 submitBtn.disabled = true;
@@ -273,23 +244,15 @@
             data.paymentVersion = 'v2';
             data.initialBagsRequested = parseInt(data.numberOfBags || '1');
             
-            // Get CSRF token
-            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
-            
             try {
                 console.log('[V2 Registration] Sending registration data:', data);
                 
-                const response = await fetch('/api/customers/register', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-Token': csrfToken
-                    },
-                    credentials: 'include',
-                    body: JSON.stringify(data)
+                const result = await ApiClient.post('/api/customers/register', data, {
+                    showLoading: true,
+                    loadingMessage: window.i18n?.translate('spinner.processingRegistration') || 'Processing your registration...',
+                    showError: false
                 });
                 
-                const result = await response.json();
                 console.log('[V2 Registration] Server response:', result);
                 
                 if (result.success) {
@@ -313,9 +276,6 @@
                     window.location.href = redirectUrl + '&registered=true';
                 } else {
                     // Show error
-                    if (registrationSpinner) {
-                        registrationSpinner.hide();
-                    }
                     if (window.ModalSystem) {
                         window.ModalSystem.error(result.message || 'Registration failed. Please try again.', 'Registration Error');
                     } else {
@@ -330,9 +290,6 @@
             } catch (error) {
                 console.error('[V2 Registration] Registration error:', error);
                 
-                if (registrationSpinner) {
-                    registrationSpinner.hide();
-                }
                 if (window.ModalSystem) {
                     window.ModalSystem.error('An error occurred during registration. Please try again.', 'Registration Error');
                 } else {
@@ -359,8 +316,9 @@
             }
             
             // Fetch affiliate info to show their name
-            fetch(`/api/v1/affiliates/public/${affiliateId}`)
-                .then(response => response.json())
+            ApiClient.get(`/api/v1/affiliates/public/${affiliateId}`, {
+                showError: false
+            })
                 .then(data => {
                     if (data.success) {
                         // Store affiliate data for service area validation
@@ -468,31 +426,27 @@
             }
 
             try {
-                const response = await fetch(`${baseUrl}/api/v1/auth/oauth/result/${sessionId}`, {
-                    credentials: 'include'
+                const result = await ApiClient.get(`/api/v1/auth/oauth/result/${sessionId}`, {
+                    showError: false
                 });
+                
+                if (result.completed) {
+                    authResultReceived = true;
+                    clearInterval(pollForResult);
+                    console.log('[V2 Registration] OAuth result received:', result);
 
-                if (response.ok) {
-                    const result = await response.json();
-                    
-                    if (result.completed) {
-                        authResultReceived = true;
-                        clearInterval(pollForResult);
-                        console.log('[V2 Registration] OAuth result received:', result);
+                    if (popup && !popup.closed) {
+                        popup.close();
+                    }
 
-                        if (popup && !popup.closed) {
-                            popup.close();
-                        }
-
-                        if (result.success) {
-                            handleOAuthSuccess(result.data, provider);
+                    if (result.success) {
+                        handleOAuthSuccess(result.data, provider);
+                    } else {
+                        const errorMessage = result.message || 'Authentication failed. Please try again.';
+                        if (window.ModalSystem) {
+                            window.ModalSystem.error(errorMessage, 'Authentication Failed');
                         } else {
-                            const errorMessage = result.message || 'Authentication failed. Please try again.';
-                            if (window.ModalSystem) {
-                                window.ModalSystem.error(errorMessage, 'Authentication Failed');
-                            } else {
-                                alert(errorMessage);
-                            }
+                            alert(errorMessage);
                         }
                     }
                 }
@@ -611,15 +565,10 @@
 
         if (socialToken && provider) {
             // Fetch user data with the social token
-            fetch(`${baseUrl}/api/v1/auth/social/userdata`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ socialToken, provider }),
-                credentials: 'include'
-            })
-            .then(response => response.json())
+            ApiClient.post('/api/v1/auth/social/userdata', 
+                { socialToken, provider },
+                { showError: false }
+            )
             .then(data => {
                 if (data.success) {
                     handleOAuthSuccess(data.userData, provider);
@@ -692,41 +641,18 @@
         const fullAddress = `${address}, ${city}, ${state} ${zipCode}`;
         console.log('[V2 Registration] Validating service area for address:', fullAddress);
 
-        // Show spinner
-        let spinner = null;
-        if (window.SwirlSpinnerUtils) {
-            const form = document.getElementById('customerRegistrationForm');
-            spinner = window.SwirlSpinnerUtils.showOnForm(form, {
-                message: window.i18n?.translate('spinner.validatingAddress') || 'Validating address...',
-                submessage: window.i18n?.translate('spinner.checkingServiceArea') || 'Checking if your address is within our service area'
-            });
-        }
-
         try {
-            // Get CSRF token
-            let csrfToken = window.csrfToken;
-            if (!csrfToken) {
-                const csrfMeta = document.querySelector('meta[name="csrf-token"]');
-                if (csrfMeta) {
-                    csrfToken = csrfMeta.getAttribute('content');
+            const result = await ApiClient.post('/api/v1/service-area/validate',
+                { address, city, state, zipCode },
+                {
+                    showLoading: true,
+                    loadingMessage: window.i18n?.translate('spinner.validatingAddress') || 'Validating address...',
+                    showError: false
                 }
-            }
-            
-            const response = await fetch(`${baseUrl}/api/v1/service-area/validate`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-Token': csrfToken || ''
-                },
-                credentials: 'include',
-                body: JSON.stringify({ address, city, state, zipCode })
-            });
-
-            const result = await response.json();
+            );
 
             if (!result.success || !result.coordinates) {
                 console.error('[V2 Registration] Address validation failed:', result.message);
-                if (spinner) spinner.hide();
                 
                 // Show error message
                 const message = result.message || 'Unable to verify this address. Please check that the street address and zip code are correct.';
@@ -758,8 +684,6 @@
             console.log('[V2 Registration] Distance from affiliate:', distance, 'miles');
             console.log('[V2 Registration] Service radius:', affiliateData.serviceRadius, 'miles');
 
-            if (spinner) spinner.hide();
-
             if (distance > affiliateData.serviceRadius) {
                 // Outside service area
                 if (window.modalAlert) {
@@ -780,7 +704,6 @@
 
         } catch (error) {
             console.error('[V2 Registration] Error validating service area:', error);
-            if (spinner) spinner.hide();
             
             // Allow to proceed on error
             return true;
@@ -807,6 +730,11 @@
     // Initialize when DOM is ready
     function init() {
         console.log('[V2 Registration] Initializing V2 customer registration form');
+        
+        // Initialize ApiClient CSRF token
+        if (window.ApiClient) {
+            ApiClient.initCSRF();
+        }
         
         // Setup all handlers
         setupBagSelection();

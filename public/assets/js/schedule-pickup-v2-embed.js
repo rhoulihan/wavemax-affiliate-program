@@ -184,6 +184,11 @@
     async function init() {
         console.log('[Schedule V2 Embed] Initializing...');
         
+        // Initialize ApiClient CSRF token
+        if (window.ApiClient) {
+            ApiClient.initCSRF();
+        }
+        
         // Setup date picker with 24-hour minimum in CDT
         setupDatePicker();
         
@@ -497,44 +502,21 @@
         console.log('[Schedule V2 Embed] Submitting order data:', data);
         
         try {
-            // Get CSRF token if available
-            let csrfToken = '';
-            if (window.CsrfUtils && typeof window.CsrfUtils.ensureCsrfToken === 'function') {
-                try {
-                    csrfToken = await window.CsrfUtils.ensureCsrfToken();
-                    console.log('[Schedule V2 Embed] CSRF token obtained');
-                } catch (e) {
-                    console.error('[Schedule V2 Embed] Failed to get CSRF token:', e);
-                }
-            }
-            
-            const response = await fetch('/api/orders', {
-                method: 'POST',
+            const result = await ApiClient.post('/api/orders', data, {
+                showLoading: true,
+                loadingMessage: spinner ? undefined : 'Scheduling your pickup...',
                 headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': token ? 'Bearer ' + token : '',
-                    'X-CSRF-Token': csrfToken
-                },
-                credentials: 'include',  // Include cookies for session
-                body: JSON.stringify(data)
+                    'Authorization': token ? 'Bearer ' + token : ''
+                }
             });
             
-            let result;
-            try {
-                result = await response.json();
-            } catch (e) {
-                console.error('[Schedule V2 Embed] Failed to parse response JSON:', e);
-                result = { success: false, message: 'Server response was not valid JSON' };
-            }
-            
-            console.log('[Schedule V2 Embed] Response status:', response.status);
             console.log('[Schedule V2 Embed] Response data:', result);
             
             if (spinner) spinner.hide();
             if (loadingSpinner) loadingSpinner.classList.add('hidden');
             if (submitBtn) submitBtn.disabled = false;
             
-            if (response.ok && result.success) {
+            if (result.success) {
                 // Show success using the showScheduleSuccess function
                 showScheduleSuccess(result.order);
                 // Also show modal if it exists
@@ -571,27 +553,25 @@
     async function loadCustomerAndAffiliateInfo(token) {
         try {
             // Fetch customer info
-            const customerResponse = await fetch('/api/customers/me', {
+            const customerData = await ApiClient.get('/api/customers/me', {
+                showError: false,
                 headers: {
                     'Authorization': 'Bearer ' + token
                 }
             });
             
-            if (customerResponse.ok) {
-                const customerData = await customerResponse.json();
-                if (customerData.customer) {
-                    // Populate bag options based on customer's initial selection
-                    // Check for numberOfBags first, then initialBagsRequested, default to 1
-                    const bags = customerData.customer.numberOfBags || customerData.customer.initialBagsRequested || 1;
-                    window.populateBagOptions(bags);
-                    
-                    // Store customer data
-                    localStorage.setItem('currentCustomer', JSON.stringify(customerData.customer));
-                    
-                    // Load affiliate info if available
-                    if (customerData.customer.affiliateId) {
-                        await loadAffiliateInfo(customerData.customer.affiliateId);
-                    }
+            if (customerData.customer) {
+                // Populate bag options based on customer's initial selection
+                // Check for numberOfBags first, then initialBagsRequested, default to 1
+                const bags = customerData.customer.numberOfBags || customerData.customer.initialBagsRequested || 1;
+                window.populateBagOptions(bags);
+                
+                // Store customer data
+                localStorage.setItem('currentCustomer', JSON.stringify(customerData.customer));
+                
+                // Load affiliate info if available
+                if (customerData.customer.affiliateId) {
+                    await loadAffiliateInfo(customerData.customer.affiliateId);
                 }
             }
         } catch (error) {
@@ -608,25 +588,24 @@
                 console.warn('[Schedule V2 Embed] No affiliate ID provided');
                 return;
             }
-            const response = await fetch(`/api/affiliates/${affiliateId}/public`);
-            if (response.ok) {
-                const data = await response.json();
-                console.log('[Schedule V2 Embed] API response:', data);
-                if (data && data.affiliate) {
-                    // Update affiliate name in the subtitle
-                    const affiliateNameEl = document.getElementById('affiliateName');
-                    if (affiliateNameEl) {
-                        const name = data.affiliate.businessName || 
-                                    `${data.affiliate.firstName} ${data.affiliate.lastName}`;
-                        affiliateNameEl.textContent = name;
-                        console.log('[Schedule V2 Embed] Affiliate name set to:', name);
-                    }
+            
+            const data = await ApiClient.get(`/api/affiliates/${affiliateId}/public`, {
+                showError: false
+            });
+            
+            console.log('[Schedule V2 Embed] API response:', data);
+            if (data && data.affiliate) {
+                // Update affiliate name in the subtitle
+                const affiliateNameEl = document.getElementById('affiliateName');
+                if (affiliateNameEl) {
+                    const name = data.affiliate.businessName || 
+                                `${data.affiliate.firstName} ${data.affiliate.lastName}`;
+                    affiliateNameEl.textContent = name;
+                    console.log('[Schedule V2 Embed] Affiliate name set to:', name);
                 }
-            } else {
-                console.warn('[Schedule V2 Embed] Failed to load affiliate info, response:', response.status);
             }
         } catch (error) {
-            console.error('[Schedule V2 Embed] Error loading affiliate info:', error);
+            console.warn('[Schedule V2 Embed] Failed to load affiliate info:', error);
         }
     }
     
@@ -765,8 +744,9 @@
     async function loadPricingInfo() {
         try {
             // Fetch WDF rate from system config
-            const wdfResponse = await fetch('/api/v1/system/config/public/wdf_base_rate_per_pound');
-            const wdfData = await wdfResponse.json();
+            const wdfData = await ApiClient.get('/api/v1/system/config/public/wdf_base_rate_per_pound', {
+                showError: false
+            });
             const wdfRate = wdfData.currentValue || 1.25;
             
             // Update WDF rate display

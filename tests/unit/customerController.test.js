@@ -8,6 +8,7 @@ const emailService = require('../../server/utils/emailService');
 const { getFilteredData } = require('../../server/utils/fieldFilter');
 const { validationResult } = require('express-validator');
 const jwt = require('jsonwebtoken');
+const { expectSuccessResponse, expectErrorResponse } = require('../helpers/responseHelpers');
 
 // Mock dependencies
 jest.mock('../../server/models/Customer');
@@ -115,23 +116,26 @@ describe('Customer Controller', () => {
         $or: [{ email: 'jane@example.com' }, { username: 'janesmith' }]
       });
       expect(res.status).toHaveBeenCalledWith(201);
-      expect(res.json).toHaveBeenCalledWith({
-        success: true,
-        customerId: 'CUST123456',
-        token: expect.any(String),
-        customerData: expect.objectContaining({
-          firstName: 'Jane',
-          lastName: 'Smith',
-          email: 'jane@example.com',
-          affiliateId: 'AFF123',
-          affiliateName: 'John Doe',
-          minimumDeliveryFee: 10.00,
-          perBagDeliveryFee: 2.50,
-          numberOfBags: 2,
-          bagCredit: 20.00
-        }),
-        message: 'Customer registered successfully!'
-      });
+      expect(res.json).toHaveBeenCalledWith(
+        expectSuccessResponse(
+          {
+            customerId: 'CUST123456',
+            token: expect.any(String),
+            customerData: expect.objectContaining({
+              firstName: 'Jane',
+              lastName: 'Smith',
+              email: 'jane@example.com',
+              affiliateId: 'AFF123',
+              affiliateName: 'John Doe',
+              minimumDeliveryFee: 10.00,
+              perBagDeliveryFee: 2.50,
+              numberOfBags: 2,
+              bagCredit: 20.00
+            })
+          },
+          'Customer registered successfully!'
+        )
+      );
     });
 
     it('should return error for invalid affiliate', async () => {
@@ -144,10 +148,9 @@ describe('Customer Controller', () => {
       await customerController.registerCustomer(req, res);
 
       expect(res.status).toHaveBeenCalledWith(400);
-      expect(res.json).toHaveBeenCalledWith({
-        success: false,
-        message: 'Invalid affiliate ID'
-      });
+      expect(res.json).toHaveBeenCalledWith(
+        expectErrorResponse('Invalid affiliate ID')
+      );
     });
 
     it('should return error for duplicate email', async () => {
@@ -166,10 +169,9 @@ describe('Customer Controller', () => {
       await customerController.registerCustomer(req, res);
 
       expect(res.status).toHaveBeenCalledWith(400);
-      expect(res.json).toHaveBeenCalledWith({
-        success: false,
-        message: 'Email or username already in use'
-      });
+      expect(res.json).toHaveBeenCalledWith(
+        expectErrorResponse('Email or username already in use')
+      );
     });
   });
 
@@ -235,19 +237,20 @@ describe('Customer Controller', () => {
 
       expect(Customer.findOne).toHaveBeenCalledWith({ customerId: 'CUST123' });
       expect(res.status).toHaveBeenCalledWith(200);
-      expect(res.json).toHaveBeenCalledWith({
-        success: true,
-        customer: expect.objectContaining({
-          customerId: 'CUST123',
-          firstName: 'Jane',
-          lastName: 'Smith',
-          affiliate: expect.objectContaining({
-            affiliateId: 'AFF123',
-            name: 'John Doe',
-            deliveryFee: 5.99
+      expect(res.json).toHaveBeenCalledWith(
+        expectSuccessResponse({
+          customer: expect.objectContaining({
+            customerId: 'CUST123',
+            firstName: 'Jane',
+            lastName: 'Smith',
+            affiliate: expect.objectContaining({
+              affiliateId: 'AFF123',
+              name: 'John Doe',
+              deliveryFee: 5.99
+            })
           })
         })
-      });
+      );
     });
 
     it('should return 403 for unauthorized access', async () => {
@@ -259,10 +262,9 @@ describe('Customer Controller', () => {
       await customerController.getCustomerProfile(req, res);
 
       expect(res.status).toHaveBeenCalledWith(403);
-      expect(res.json).toHaveBeenCalledWith({
-        success: false,
-        message: 'Unauthorized'
-      });
+      expect(res.json).toHaveBeenCalledWith(
+        expectErrorResponse('Unauthorized')
+      );
     });
 
     it('should return 404 for non-existent customer', async () => {
@@ -274,10 +276,9 @@ describe('Customer Controller', () => {
       await customerController.getCustomerProfile(req, res);
 
       expect(res.status).toHaveBeenCalledWith(404);
-      expect(res.json).toHaveBeenCalledWith({
-        success: false,
-        message: 'Customer not found'
-      });
+      expect(res.json).toHaveBeenCalledWith(
+        expectErrorResponse('Customer not found')
+      );
     });
   });
 
@@ -311,10 +312,9 @@ describe('Customer Controller', () => {
       expect(mockCustomer.address).toBe('456 Oak Ave');
       expect(mockCustomer.save).toHaveBeenCalled();
       expect(res.status).toHaveBeenCalledWith(200);
-      expect(res.json).toHaveBeenCalledWith({
-        success: true,
-        message: 'Customer profile updated successfully!'
-      });
+      expect(res.json).toHaveBeenCalledWith(
+        expectSuccessResponse(null, 'Customer profile updated successfully!')
+      );
     });
 
     it('should prevent updating protected fields', async () => {
@@ -388,21 +388,22 @@ describe('Customer Controller', () => {
 
       expect(Order.find).toHaveBeenCalledWith({ customerId: 'CUST123' });
       expect(res.status).toHaveBeenCalledWith(200);
-      expect(res.json).toHaveBeenCalledWith({
-        success: true,
-        orders: expect.arrayContaining([
-          expect.objectContaining({ orderId: 'ORD001' }),
-          expect.objectContaining({ orderId: 'ORD002' })
-        ]),
-        pagination: {
-          total: 2,
-          page: 1,
-          currentPage: 1,
-          limit: 10,
-          perPage: 10,
-          pages: 1
-        }
-      });
+      expect(res.json).toHaveBeenCalledWith(
+        expectSuccessResponse({
+          orders: expect.arrayContaining([
+            expect.objectContaining({ orderId: 'ORD001' }),
+            expect.objectContaining({ orderId: 'ORD002' })
+          ]),
+          pagination: {
+            total: 2,
+            page: 1,
+            currentPage: 1,
+            limit: 10,
+            perPage: 10,
+            pages: 1
+          }
+        })
+      );
     });
   });
 
@@ -427,14 +428,14 @@ describe('Customer Controller', () => {
       expect(Customer.deleteOne).toHaveBeenCalledWith({ customerId: 'CUST123' });
 
       expect(res.status).toHaveBeenCalledWith(200);
-      expect(res.json).toHaveBeenCalledWith({
-        success: true,
-        message: 'All data has been deleted successfully',
-        deletedData: {
-          customer: 1,
-          orders: 3
-        }
-      });
+      expect(res.json).toHaveBeenCalledWith(
+        expectSuccessResponse({
+          deletedData: {
+            customer: 1,
+            orders: 3
+          }
+        }, 'All data has been deleted successfully')
+      );
     });
 
     it('should reject deletion in production environment', async () => {
@@ -443,10 +444,9 @@ describe('Customer Controller', () => {
       await customerController.deleteCustomerData(req, res);
 
       expect(res.status).toHaveBeenCalledWith(403);
-      expect(res.json).toHaveBeenCalledWith({
-        success: false,
-        message: 'This operation is not allowed'
-      });
+      expect(res.json).toHaveBeenCalledWith(
+        expectErrorResponse('This operation is not allowed')
+      );
     });
 
     it('should reject unauthorized deletion', async () => {
@@ -459,10 +459,9 @@ describe('Customer Controller', () => {
       await customerController.deleteCustomerData(req, res);
 
       expect(res.status).toHaveBeenCalledWith(403);
-      expect(res.json).toHaveBeenCalledWith({
-        success: false,
-        message: 'You can only delete your own data'
-      });
+      expect(res.json).toHaveBeenCalledWith(
+        expectErrorResponse('You can only delete your own data')
+      );
     });
 
     it('should handle deletion errors', async () => {
@@ -474,10 +473,9 @@ describe('Customer Controller', () => {
       await customerController.deleteCustomerData(req, res);
 
       expect(res.status).toHaveBeenCalledWith(500);
-      expect(res.json).toHaveBeenCalledWith({
-        success: false,
-        message: 'An error occurred while deleting data'
-      });
+      expect(res.json).toHaveBeenCalledWith(
+        expectErrorResponse('An error occurred while deleting data')
+      );
     });
 
     it('should return 404 for non-existent customer', async () => {
@@ -488,10 +486,9 @@ describe('Customer Controller', () => {
       await customerController.deleteCustomerData(req, res);
 
       expect(res.status).toHaveBeenCalledWith(404);
-      expect(res.json).toHaveBeenCalledWith({
-        success: false,
-        message: 'Customer not found'
-      });
+      expect(res.json).toHaveBeenCalledWith(
+        expectErrorResponse('Customer not found')
+      );
     });
   });
 
@@ -726,18 +723,19 @@ describe('Customer Controller', () => {
       await customerController.getCustomerDashboardStats(req, res);
 
       expect(res.status).toHaveBeenCalledWith(200);
-      expect(res.json).toHaveBeenCalledWith({
-        success: true,
-        dashboard: expect.objectContaining({
-          statistics: expect.objectContaining({
-            totalOrders: 0,
-            completedOrders: 0,
-            activeOrders: 0,
-            totalSpent: 0,
-            averageOrderValue: 0
+      expect(res.json).toHaveBeenCalledWith(
+        expectSuccessResponse({
+          dashboard: expect.objectContaining({
+            statistics: expect.objectContaining({
+              totalOrders: 0,
+              completedOrders: 0,
+              activeOrders: 0,
+              totalSpent: 0,
+              averageOrderValue: 0
+            })
           })
         })
-      });
+      );
     });
 
     it('should handle database errors gracefully', async () => {
@@ -749,10 +747,9 @@ describe('Customer Controller', () => {
       await customerController.getCustomerDashboardStats(req, res);
 
       expect(res.status).toHaveBeenCalledWith(500);
-      expect(res.json).toHaveBeenCalledWith({
-        success: false,
-        message: 'An error occurred while retrieving dashboard statistics'
-      });
+      expect(res.json).toHaveBeenCalledWith(
+        expectErrorResponse('An error occurred while retrieving dashboard statistics')
+      );
     });
   });
 
@@ -784,11 +781,11 @@ describe('Customer Controller', () => {
       expect(mockCustomer.save).toHaveBeenCalled();
 
       expect(res.status).toHaveBeenCalledWith(200);
-      expect(res.json).toHaveBeenCalledWith({
-        success: true,
-        message: 'Payment information updated successfully',
-        lastFourDigits: '1111'
-      });
+      expect(res.json).toHaveBeenCalledWith(
+        expectSuccessResponse({
+          lastFourDigits: '1111'
+        }, 'Payment information updated successfully')
+      );
     });
 
     it('should return 404 for non-existent customer', async () => {
@@ -800,10 +797,9 @@ describe('Customer Controller', () => {
       await customerController.updatePaymentInfo(req, res);
 
       expect(res.status).toHaveBeenCalledWith(404);
-      expect(res.json).toHaveBeenCalledWith({
-        success: false,
-        message: 'Customer not found'
-      });
+      expect(res.json).toHaveBeenCalledWith(
+        expectErrorResponse('Customer not found')
+      );
     });
 
     it('should return 403 for unauthorized access', async () => {
@@ -815,10 +811,9 @@ describe('Customer Controller', () => {
       await customerController.updatePaymentInfo(req, res);
 
       expect(res.status).toHaveBeenCalledWith(403);
-      expect(res.json).toHaveBeenCalledWith({
-        success: false,
-        message: 'Unauthorized'
-      });
+      expect(res.json).toHaveBeenCalledWith(
+        expectErrorResponse('Unauthorized')
+      );
     });
 
     it('should allow admin to update customer payment info', async () => {
@@ -853,10 +848,9 @@ describe('Customer Controller', () => {
       await customerController.updatePaymentInfo(req, res);
 
       expect(res.status).toHaveBeenCalledWith(500);
-      expect(res.json).toHaveBeenCalledWith({
-        success: false,
-        message: 'An error occurred while updating payment information'
-      });
+      expect(res.json).toHaveBeenCalledWith(
+        expectErrorResponse('An error occurred while updating payment information')
+      );
     });
   });
 
@@ -895,10 +889,9 @@ describe('Customer Controller', () => {
       expect(mockCustomer.save).toHaveBeenCalled();
 
       expect(res.status).toHaveBeenCalledWith(200);
-      expect(res.json).toHaveBeenCalledWith({
-        success: true,
-        message: 'Password updated successfully'
-      });
+      expect(res.json).toHaveBeenCalledWith(
+        expectSuccessResponse(null, 'Password updated successfully')
+      );
     });
 
     it('should reject incorrect current password', async () => {
@@ -921,10 +914,9 @@ describe('Customer Controller', () => {
       await customerController.updateCustomerPassword(req, res);
 
       expect(res.status).toHaveBeenCalledWith(401);
-      expect(res.json).toHaveBeenCalledWith({
-        success: false,
-        message: 'Current password is incorrect'
-      });
+      expect(res.json).toHaveBeenCalledWith(
+        expectErrorResponse('Current password is incorrect')
+      );
     });
 
     it('should validate new password length', async () => {
@@ -947,10 +939,9 @@ describe('Customer Controller', () => {
       await customerController.updateCustomerPassword(req, res);
 
       expect(res.status).toHaveBeenCalledWith(400);
-      expect(res.json).toHaveBeenCalledWith({
-        success: false,
-        message: 'New password must be at least 8 characters long'
-      });
+      expect(res.json).toHaveBeenCalledWith(
+        expectErrorResponse('New password must be at least 8 characters long')
+      );
     });
 
     it('should return 404 for non-existent customer', async () => {
@@ -962,10 +953,9 @@ describe('Customer Controller', () => {
       await customerController.updateCustomerPassword(req, res);
 
       expect(res.status).toHaveBeenCalledWith(404);
-      expect(res.json).toHaveBeenCalledWith({
-        success: false,
-        message: 'Customer not found'
-      });
+      expect(res.json).toHaveBeenCalledWith(
+        expectErrorResponse('Customer not found')
+      );
     });
 
     it('should return 403 for unauthorized access', async () => {
@@ -977,10 +967,9 @@ describe('Customer Controller', () => {
       await customerController.updateCustomerPassword(req, res);
 
       expect(res.status).toHaveBeenCalledWith(403);
-      expect(res.json).toHaveBeenCalledWith({
-        success: false,
-        message: 'Unauthorized'
-      });
+      expect(res.json).toHaveBeenCalledWith(
+        expectErrorResponse('Unauthorized')
+      );
     });
 
     it('should handle missing new password', async () => {
@@ -1003,10 +992,9 @@ describe('Customer Controller', () => {
       await customerController.updateCustomerPassword(req, res);
 
       expect(res.status).toHaveBeenCalledWith(400);
-      expect(res.json).toHaveBeenCalledWith({
-        success: false,
-        message: 'New password must be at least 8 characters long'
-      });
+      expect(res.json).toHaveBeenCalledWith(
+        expectErrorResponse('New password must be at least 8 characters long')
+      );
     });
 
     it('should handle database errors', async () => {
@@ -1018,10 +1006,9 @@ describe('Customer Controller', () => {
       await customerController.updateCustomerPassword(req, res);
 
       expect(res.status).toHaveBeenCalledWith(500);
-      expect(res.json).toHaveBeenCalledWith({
-        success: false,
-        message: 'An error occurred while updating password'
-      });
+      expect(res.json).toHaveBeenCalledWith(
+        expectErrorResponse('An error occurred while updating password')
+      );
     });
   });
 
@@ -1063,22 +1050,23 @@ describe('Customer Controller', () => {
       await customerController.getCustomersForAdmin(req, res);
 
       expect(res.status).toHaveBeenCalledWith(200);
-      expect(res.json).toHaveBeenCalledWith({
-        success: true,
-        customers: expect.arrayContaining([
-          expect.objectContaining({
-            customerId: 'CUST001',
-            orderCount: 5,
-            affiliate: expect.objectContaining({ affiliateId: 'AFF001' })
-          }),
-          expect.objectContaining({
-            customerId: 'CUST002',
-            orderCount: 0,
-            affiliate: expect.objectContaining({ affiliateId: 'AFF002' })
-          })
-        ]),
-        total: 2
-      });
+      expect(res.json).toHaveBeenCalledWith(
+        expectSuccessResponse({
+          customers: expect.arrayContaining([
+            expect.objectContaining({
+              customerId: 'CUST001',
+              orderCount: 5,
+              affiliate: expect.objectContaining({ affiliateId: 'AFF001' })
+            }),
+            expect.objectContaining({
+              customerId: 'CUST002',
+              orderCount: 0,
+              affiliate: expect.objectContaining({ affiliateId: 'AFF002' })
+            })
+          ]),
+          total: 2
+        })
+      );
     });
 
     it('should filter customers by search query', async () => {
@@ -1203,16 +1191,17 @@ describe('Customer Controller', () => {
 
       await customerController.getCustomersForAdmin(req, res);
 
-      expect(res.json).toHaveBeenCalledWith({
-        success: true,
-        customers: expect.arrayContaining([
-          expect.objectContaining({
-            customerId: 'CUST002',
-            orderCount: 0
-          })
-        ]),
-        total: 1
-      });
+      expect(res.json).toHaveBeenCalledWith(
+        expectSuccessResponse({
+          customers: expect.arrayContaining([
+            expect.objectContaining({
+              customerId: 'CUST002',
+              orderCount: 0
+            })
+          ]),
+          total: 1
+        })
+      );
     });
 
     it('should handle combined filters', async () => {
@@ -1251,10 +1240,9 @@ describe('Customer Controller', () => {
       await customerController.getCustomersForAdmin(req, res);
 
       expect(res.status).toHaveBeenCalledWith(500);
-      expect(res.json).toHaveBeenCalledWith({
-        success: false,
-        message: 'Failed to retrieve customers'
-      });
+      expect(res.json).toHaveBeenCalledWith(
+        expectErrorResponse('Failed to retrieve customers')
+      );
     });
 
     it('should ignore "all" filter values', async () => {
@@ -1294,13 +1282,14 @@ describe('Customer Controller', () => {
       await customerController.registerCustomer(req, res);
 
       expect(res.status).toHaveBeenCalledWith(400);
-      expect(res.json).toHaveBeenCalledWith({
-        success: false,
-        errors: [
-          { msg: 'Email is required', param: 'email' },
-          { msg: 'Password is too short', param: 'password' }
-        ]
-      });
+      expect(res.json).toHaveBeenCalledWith(
+        expectErrorResponse('Validation failed', {
+          errors: [
+            { msg: 'Email is required', param: 'email' },
+            { msg: 'Password is too short', param: 'password' }
+          ]
+        })
+      );
     });
   });
 
@@ -1337,10 +1326,9 @@ describe('Customer Controller', () => {
       await customerController.registerCustomer(req, res);
 
       expect(res.status).toHaveBeenCalledWith(500);
-      expect(res.json).toHaveBeenCalledWith({
-        success: false,
-        message: 'An error occurred during registration'
-      });
+      expect(res.json).toHaveBeenCalledWith(
+        expectErrorResponse('An error occurred during registration')
+      );
     });
 
     it('should handle missing payment info gracefully', async () => {
