@@ -9,11 +9,6 @@ const emailService = require('../utils/emailService');
 const { validationResult } = require('express-validator');
 const { escapeRegex } = require('../utils/securityUtils');
 
-// Utility modules for consistent error handling and responses
-const ControllerHelpers = require('../utils/controllerHelpers');
-const AuthorizationHelpers = require('../middleware/authorizationHelpers');
-const Formatters = require('../utils/formatters');
-
 /**
  * Register a new affiliate
  */
@@ -126,66 +121,78 @@ exports.registerAffiliate = async (req, res) => {
 /**
  * Get affiliate profile
  */
-exports.getAffiliateProfile = ControllerHelpers.asyncWrapper(async (req, res) => {
-  const { affiliateId } = req.params;
+exports.getAffiliateProfile = async (req, res) => {
+  try {
+    const { affiliateId } = req.params;
 
-  // Verify affiliate exists
-  const affiliate = await Affiliate.findOne({ affiliateId });
+    // Verify affiliate exists
+    const affiliate = await Affiliate.findOne({ affiliateId });
 
-  if (!affiliate) {
-    return ControllerHelpers.sendError(res, 'Affiliate not found', 404);
-  }
+    if (!affiliate) {
+      return res.status(404).json({
+        success: false,
+        message: 'Affiliate not found'
+      });
+    }
 
-  // Check authorization using AuthorizationHelpers
-  if (!AuthorizationHelpers.canAccessAffiliate(req.user, affiliateId)) {
-    return ControllerHelpers.sendError(res, 'Unauthorized', 403);
-  }
+    // Check authorization (admin or self)
+    if (req.user.role !== 'admin' && req.user.affiliateId !== affiliateId) {
+      return res.status(403).json({
+        success: false,
+        message: 'Unauthorized'
+      });
+    }
 
-  // Prepare response data with formatting
-  const responseData = {
-    affiliateId: affiliate.affiliateId,
-    firstName: affiliate.firstName,
-    lastName: affiliate.lastName,
-    name: Formatters.fullName(affiliate.firstName, affiliate.lastName),
-    email: affiliate.email,
-    phone: Formatters.phone(affiliate.phone),
-    businessName: affiliate.businessName,
-    address: Formatters.address({
+    // Prepare response data
+    const responseData = {
+      affiliateId: affiliate.affiliateId,
+      firstName: affiliate.firstName,
+      lastName: affiliate.lastName,
+      email: affiliate.email,
+      phone: affiliate.phone,
+      businessName: affiliate.businessName,
       address: affiliate.address,
       city: affiliate.city,
       state: affiliate.state,
-      zipCode: affiliate.zipCode
-    }),
-    city: affiliate.city,
-    state: affiliate.state,
-    zipCode: affiliate.zipCode,
-    serviceLatitude: affiliate.serviceLatitude,
-    serviceLongitude: affiliate.serviceLongitude,
-    serviceRadius: affiliate.serviceRadius,
-    minimumDeliveryFee: Formatters.currency(affiliate.minimumDeliveryFee),
-    perBagDeliveryFee: Formatters.currency(affiliate.perBagDeliveryFee),
-    paymentMethod: affiliate.paymentMethod,
-    registrationMethod: affiliate.registrationMethod,
-    isActive: affiliate.isActive,
-    dateRegistered: Formatters.datetime(affiliate.dateRegistered),
-    lastLogin: Formatters.datetime(affiliate.lastLogin)
-  };
+      zipCode: affiliate.zipCode,
+      serviceLatitude: affiliate.serviceLatitude,
+      serviceLongitude: affiliate.serviceLongitude,
+      serviceRadius: affiliate.serviceRadius,
+      minimumDeliveryFee: affiliate.minimumDeliveryFee,
+      perBagDeliveryFee: affiliate.perBagDeliveryFee,
+      paymentMethod: affiliate.paymentMethod,
+      registrationMethod: affiliate.registrationMethod,
+      isActive: affiliate.isActive,
+      dateRegistered: affiliate.dateRegistered,
+      lastLogin: affiliate.lastLogin
+    };
 
-  // Include payment info if available (decrypt if necessary)
-  if (affiliate.paymentMethod === 'paypal' && affiliate.paypalEmail) {
-    try {
-      // Decrypt PayPal email if it's encrypted
-      responseData.paypalEmail = typeof affiliate.paypalEmail === 'object'
-        ? encryptionUtil.decrypt(affiliate.paypalEmail)
-        : affiliate.paypalEmail;
-    } catch (error) {
-      console.error('Error decrypting PayPal email:', error);
-      // Don't include if decryption fails
+    // Include payment info if available (decrypt if necessary)
+    if (affiliate.paymentMethod === 'paypal' && affiliate.paypalEmail) {
+      try {
+        // Decrypt PayPal email if it's encrypted
+        responseData.paypalEmail = typeof affiliate.paypalEmail === 'object'
+          ? encryptionUtil.decrypt(affiliate.paypalEmail)
+          : affiliate.paypalEmail;
+      } catch (error) {
+        console.error('Error decrypting PayPal email:', error);
+        // Don't include if decryption fails
+      }
     }
-  }
 
-  ControllerHelpers.sendSuccess(res, { affiliate: responseData }, 'Affiliate profile retrieved successfully');
-});
+    // Return affiliate data
+    res.status(200).json({
+      success: true,
+      affiliate: responseData
+    });
+  } catch (error) {
+    console.error('Get affiliate profile error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'An error occurred while retrieving affiliate profile'
+    });
+  }
+};
 
 /**
  * Update affiliate profile
@@ -384,94 +391,122 @@ exports.getAffiliateEarnings = async (req, res) => {
 /**
  * Get affiliate customers
  */
-exports.getAffiliateCustomers = ControllerHelpers.asyncWrapper(async (req, res) => {
-  const { affiliateId } = req.params;
-  const { search, sort, customerId } = req.query;
-  
-  // Parse pagination parameters
-  const pagination = ControllerHelpers.parsePagination(req.query);
+exports.getAffiliateCustomers = async (req, res) => {
+  try {
+    const { affiliateId } = req.params;
+    const { search, sort, customerId } = req.query;
+    const { page, limit, skip } = req.pagination; // Use values from middleware
 
-  // Check authorization using AuthorizationHelpers
-  if (!AuthorizationHelpers.canAccessAffiliate(req.user, affiliateId)) {
-    return ControllerHelpers.sendError(res, 'Unauthorized', 403);
+    // Check authorization (admin or self)
+    if (req.user.role !== 'admin' && req.user.affiliateId !== affiliateId) {
+      return res.status(403).json({
+        success: false,
+        message: 'Unauthorized'
+      });
+    }
+
+    // Build query
+    const query = { affiliateId };
+
+    // Add customer ID filter if provided (for dashboard customer highlighting)
+    if (customerId) {
+      query.customerId = customerId;
+    }
+
+    // Add search if provided
+    if (search) {
+      const escapedSearch = escapeRegex(search);
+      query.$or = [
+        { firstName: { $regex: escapedSearch, $options: 'i' } },
+        { lastName: { $regex: escapedSearch, $options: 'i' } },
+        { email: { $regex: escapedSearch, $options: 'i' } },
+        { phone: { $regex: escapedSearch, $options: 'i' } },
+        { customerId: { $regex: escapedSearch, $options: 'i' } }
+      ];
+    }
+
+    // Build sort options
+    let sortOptions = {};
+
+    if (sort) {
+      switch (sort) {
+      case 'name_asc':
+        sortOptions = { firstName: 1, lastName: 1 };
+        break;
+      case 'name_desc':
+        sortOptions = { firstName: -1, lastName: -1 };
+        break;
+      case 'recent':
+        sortOptions = { registrationDate: -1 };
+        break;
+      default:
+        sortOptions = { registrationDate: -1 };
+      }
+    } else {
+      sortOptions = { registrationDate: -1 };
+    }
+
+    // Get total count for pagination
+    const totalCustomers = await Customer.countDocuments(query);
+
+    // Get paginated customers
+    const customers = await Customer.find(query)
+      .sort(sortOptions)
+      .skip(skip)
+      .limit(limit);
+
+    // Get order counts for each customer
+    const customerIds = customers.map(customer => customer.customerId);
+
+    const orderCounts = await Order.aggregate([
+      { $match: { customerId: { $in: customerIds } } },
+      { $group: { _id: '$customerId', count: { $sum: 1 } } }
+    ]);
+
+    // Map order counts to customer objects
+    const orderCountMap = {};
+    orderCounts.forEach(item => {
+      orderCountMap[item._id] = item.count;
+    });
+
+    // Prepare response data
+    const customersData = customers.map(customer => ({
+      customerId: customer.customerId,
+      firstName: customer.firstName,
+      lastName: customer.lastName,
+      email: customer.email,
+      phone: customer.phone,
+      address: customer.address,
+      city: customer.city,
+      state: customer.state,
+      zipCode: customer.zipCode,
+      registrationDate: customer.registrationDate,
+      lastLogin: customer.lastLogin,
+      serviceFrequency: customer.serviceFrequency,
+      orderCount: orderCountMap[customer.customerId] || 0
+    }));
+
+    res.status(200).json({
+      success: true,
+      customers: customersData,
+      totalItems: totalCustomers,
+      pagination: {
+        total: totalCustomers,
+        page,
+        limit,
+        pages: Math.ceil(totalCustomers / limit),
+        currentPage: page,
+        perPage: limit
+      }
+    });
+  } catch (error) {
+    console.error('Get affiliate customers error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'An error occurred while retrieving customers'
+    });
   }
-
-  // Build query
-  const query = { affiliateId };
-
-  // Add customer ID filter if provided (for dashboard customer highlighting)
-  if (customerId) {
-    query.customerId = customerId;
-  }
-
-  // Add search if provided
-  if (search) {
-    const escapedSearch = escapeRegex(search);
-    query.$or = [
-      { firstName: { $regex: escapedSearch, $options: 'i' } },
-      { lastName: { $regex: escapedSearch, $options: 'i' } },
-      { email: { $regex: escapedSearch, $options: 'i' } },
-      { phone: { $regex: escapedSearch, $options: 'i' } },
-      { customerId: { $regex: escapedSearch, $options: 'i' } }
-    ];
-  }
-
-  // Build sort options
-  const sortOptionsMap = {
-    'name_asc': { firstName: 1, lastName: 1 },
-    'name_desc': { firstName: -1, lastName: -1 },
-    'recent': { registrationDate: -1 },
-    default: { registrationDate: -1 }
-  };
-
-  const sortOptions = sortOptionsMap[sort] || sortOptionsMap.default;
-
-  // Get total count for pagination
-  const totalCustomers = await Customer.countDocuments(query);
-
-  // Get paginated customers
-  const customers = await Customer.find(query)
-    .sort(sortOptions)
-    .skip(pagination.skip)
-    .limit(pagination.limit);
-
-  // Get order counts for each customer
-  const customerIds = customers.map(customer => customer.customerId);
-
-  const orderCounts = await Order.aggregate([
-    { $match: { customerId: { $in: customerIds } } },
-    { $group: { _id: '$customerId', count: { $sum: 1 } } }
-  ]);
-
-  // Map order counts to customer objects
-  const orderCountMap = {};
-  orderCounts.forEach(item => {
-    orderCountMap[item._id] = item.count;
-  });
-
-  // Prepare response data with formatting
-  const customersData = customers.map(customer => ({
-    customerId: customer.customerId,
-    firstName: customer.firstName,
-    lastName: customer.lastName,
-    name: Formatters.fullName(customer.firstName, customer.lastName),
-    email: customer.email,
-    phone: Formatters.phone(customer.phone),
-    address: customer.address,
-    city: customer.city,
-    state: customer.state,
-    zipCode: customer.zipCode,
-    fullAddress: Formatters.address(customer),
-    registrationDate: Formatters.datetime(customer.registrationDate),
-    lastLogin: Formatters.datetime(customer.lastLogin),
-    serviceFrequency: customer.serviceFrequency,
-    orderCount: orderCountMap[customer.customerId] || 0
-  }));
-
-  const paginationMeta = ControllerHelpers.calculatePagination(totalCustomers, pagination.page, pagination.limit);
-
-  ControllerHelpers.sendPaginated(res, customersData, paginationMeta, 'customers');
-});
+};
 
 /**
  * Get affiliate orders
