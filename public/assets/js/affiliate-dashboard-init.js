@@ -1,48 +1,6 @@
-// Store CSRF token globally
-let csrfToken = null;
-
-// Helper function to fetch CSRF token if needed
-async function ensureCsrfToken() {
-  if (!csrfToken) {
-    const baseUrl = window.EMBED_CONFIG?.baseUrl || 'https://wavemax.promo';
-    console.log('Fetching CSRF token from:', `${baseUrl}/api/csrf-token`);
-    const response = await fetch(`${baseUrl}/api/csrf-token`, {
-      credentials: 'include'
-    });
-    const data = await response.json();
-    csrfToken = data.csrfToken;
-    console.log('CSRF token received:', csrfToken);
-  }
-  return csrfToken;
-}
-
-// Helper function to make authenticated API requests with CSRF token
-async function authenticatedFetch(url, options = {}) {
-  const baseUrl = window.EMBED_CONFIG?.baseUrl || 'https://wavemax.promo';
-  const fullUrl = url.startsWith('http') ? url : `${baseUrl}${url}`;
-
-  // Add authorization header
-  const token = localStorage.getItem('affiliateToken');
-  console.log('Auth token from localStorage:', token ? 'Token exists' : 'No token found');
-  const headers = {
-    'Authorization': `Bearer ${token}`,
-    ...options.headers
-  };
-
-  // Add CSRF token for non-GET requests
-  if (options.method && options.method !== 'GET') {
-    await ensureCsrfToken();
-    headers['x-csrf-token'] = csrfToken;
-    console.log('Request headers:', headers);
-  }
-
-  console.log('Making request to:', fullUrl, 'with method:', options.method || 'GET');
-
-  return fetch(fullUrl, {
-    ...options,
-    headers,
-    credentials: 'include'
-  });
+// Initialize ApiClient when dashboard is loaded
+if (window.ApiClient) {
+  ApiClient.initCSRF();
 }
 
 // Helper function to format address from Nominatim response
@@ -94,6 +52,11 @@ function formatDashboardAddress(displayName) {
 function initializeAffiliateDashboard() {
   const isEmbedded = window.EMBED_CONFIG?.isEmbedded || false;
   const baseUrl = window.EMBED_CONFIG?.baseUrl || 'https://wavemax.promo';
+
+  // Initialize ApiClient CSRF token
+  if (window.ApiClient) {
+    ApiClient.initCSRF();
+  }
 
   // Check authentication
   const token = localStorage.getItem('affiliateToken');
@@ -556,15 +519,15 @@ function initializePricingPreview(affiliateData) {
 // Copy the existing functions from affiliate-dashboard.js
 async function loadAffiliateData(affiliateId) {
   try {
-    const baseUrl = window.EMBED_CONFIG?.baseUrl || 'https://wavemax.promo';
-    const response = await fetch(`${baseUrl}/api/v1/affiliates/${affiliateId}`, {
+    const token = localStorage.getItem('affiliateToken');
+    const result = await ApiClient.get(`/api/v1/affiliates/${affiliateId}`, {
+      showError: false,
       headers: {
-        'Authorization': `Bearer ${localStorage.getItem('affiliateToken')}`
+        'Authorization': `Bearer ${token}`
       }
     });
 
-    if (response.ok) {
-      const result = await response.json();
+    if (result) {
       // Extract the actual affiliate data from the response
       const data = result.affiliate || result;
 
@@ -729,15 +692,15 @@ async function loadAffiliateData(affiliateId) {
 
 async function loadDashboardStats(affiliateId) {
   try {
-    const baseUrl = window.EMBED_CONFIG?.baseUrl || 'https://wavemax.promo';
-    const response = await fetch(`${baseUrl}/api/v1/affiliates/${affiliateId}/dashboard`, {
+    const token = localStorage.getItem('affiliateToken');
+    const data = await ApiClient.get(`/api/v1/affiliates/${affiliateId}/dashboard`, {
+      showError: false,
       headers: {
-        'Authorization': `Bearer ${localStorage.getItem('affiliateToken')}`
+        'Authorization': `Bearer ${token}`
       }
     });
 
-    if (response.ok) {
-      const data = await response.json();
+    if (data) {
       console.log('Dashboard stats response:', data);
 
       // Extract stats from response
@@ -763,15 +726,15 @@ async function loadDashboardStats(affiliateId) {
 
 async function loadPickupRequests(affiliateId) {
   try {
-    const baseUrl = window.EMBED_CONFIG?.baseUrl || 'https://wavemax.promo';
-    const response = await fetch(`${baseUrl}/api/v1/affiliates/${affiliateId}/orders`, {
+    const token = localStorage.getItem('affiliateToken');
+    const data = await ApiClient.get(`/api/v1/affiliates/${affiliateId}/orders`, {
+      showError: false,
       headers: {
-        'Authorization': `Bearer ${localStorage.getItem('affiliateToken')}`
+        'Authorization': `Bearer ${token}`
       }
     });
 
-    if (response.ok) {
-      const data = await response.json();
+    if (data) {
       console.log('Orders response:', data);
 
       // Extract orders array from response
@@ -830,15 +793,15 @@ async function loadCustomers(affiliateId) {
 
 async function loadCustomersWithHighlight(affiliateId, highlightCustomerId) {
   try {
-    const baseUrl = window.EMBED_CONFIG?.baseUrl || 'https://wavemax.promo';
-    const response = await fetch(`${baseUrl}/api/v1/affiliates/${affiliateId}/customers`, {
+    const token = localStorage.getItem('affiliateToken');
+    const data = await ApiClient.get(`/api/v1/affiliates/${affiliateId}/customers`, {
+      showError: false,
       headers: {
-        'Authorization': `Bearer ${localStorage.getItem('affiliateToken')}`
+        'Authorization': `Bearer ${token}`
       }
     });
 
-    if (response.ok) {
-      const data = await response.json();
+    if (data) {
       console.log('Customers response:', data);
 
       // Extract customers array from response
@@ -893,14 +856,15 @@ async function loadCustomersWithHighlight(affiliateId, highlightCustomerId) {
 
 async function loadInvoices(affiliateId) {
   try {
-    const response = await fetch(`/api/v1/affiliates/${affiliateId}/invoices`, {
+    const token = localStorage.getItem('affiliateToken');
+    const invoices = await ApiClient.get(`/api/v1/affiliates/${affiliateId}/invoices`, {
+      showError: false,
       headers: {
-        'Authorization': `Bearer ${localStorage.getItem('affiliateToken')}`
+        'Authorization': `Bearer ${token}`
       }
     });
 
-    if (response.ok) {
-      const invoices = await response.json();
+    if (invoices) {
       const tbody = document.querySelector('#invoicesTable tbody');
       tbody.innerHTML = '';
 
@@ -1095,15 +1059,15 @@ function showCopySuccess(button) {
 async function loadSettingsData(affiliateId) {
   try {
     console.log('Loading settings data for affiliate:', affiliateId);
-    const baseUrl = window.EMBED_CONFIG?.baseUrl || 'https://wavemax.promo';
-    const response = await fetch(`${baseUrl}/api/v1/affiliates/${affiliateId}`, {
+    const token = localStorage.getItem('affiliateToken');
+    const result = await ApiClient.get(`/api/v1/affiliates/${affiliateId}`, {
+      showError: false,
       headers: {
-        'Authorization': `Bearer ${localStorage.getItem('affiliateToken')}`
+        'Authorization': `Bearer ${token}`
       }
     });
 
-    if (response.ok) {
-      const result = await response.json();
+    if (result) {
       console.log('Affiliate data received:', result);
 
       // Extract the actual affiliate data from the response
@@ -1309,22 +1273,18 @@ async function saveSettings(affiliateId) {
       }
     }
 
-    const response = await authenticatedFetch(`/api/v1/affiliates/${affiliateId}`, {
-      method: 'PUT',
+    const token = localStorage.getItem('affiliateToken');
+    const result = await ApiClient.put(`/api/v1/affiliates/${affiliateId}`, data, {
+      showLoading: true,
+      loadingMessage: 'Updating settings...',
       headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(data)
+        'Authorization': `Bearer ${token}`
+      }
     });
 
-    if (response.ok) {
-      alert('Settings updated successfully!');
-      disableEditMode();
-      loadSettingsData(affiliateId); // Reload data
-    } else {
-      const error = await response.json();
-      alert('Error updating settings: ' + (error.message || 'Unknown error'));
-    }
+    alert('Settings updated successfully!');
+    disableEditMode();
+    loadSettingsData(affiliateId); // Reload data
   } catch (error) {
     console.error('Error saving settings:', error);
     alert('Error saving settings. Please try again.');
@@ -1358,33 +1318,29 @@ async function changePassword(affiliateId) {
   }
 
   try {
-    const response = await authenticatedFetch(`/api/v1/affiliates/${affiliateId}/change-password`, {
-      method: 'POST',
+    const token = localStorage.getItem('affiliateToken');
+    const result = await ApiClient.post(`/api/v1/affiliates/${affiliateId}/change-password`, {
+      currentPassword: currentPassword,
+      newPassword: newPassword
+    }, {
+      showLoading: true,
+      loadingMessage: 'Changing password...',
+      showError: false,
       headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        currentPassword: currentPassword,
-        newPassword: newPassword
-      })
+        'Authorization': `Bearer ${token}`
+      }
     });
 
-    if (response.ok) {
-      successDiv.textContent = 'Password changed successfully!';
-      successDiv.classList.remove('hidden');
+    successDiv.textContent = 'Password changed successfully!';
+    successDiv.classList.remove('hidden');
 
-      // Clear the form
-      document.getElementById('changePasswordForm').reset();
+    // Clear the form
+    document.getElementById('changePasswordForm').reset();
 
-      // Hide success message after 5 seconds
-      setTimeout(() => {
-        successDiv.classList.add('hidden');
-      }, 5000);
-    } else {
-      const error = await response.json();
-      errorDiv.textContent = error.message || 'Failed to change password';
-      errorDiv.classList.remove('hidden');
-    }
+    // Hide success message after 5 seconds
+    setTimeout(() => {
+      successDiv.classList.add('hidden');
+    }, 5000);
   } catch (error) {
     console.error('Error changing password:', error);
     errorDiv.textContent = 'Error changing password. Please try again.';
@@ -1398,8 +1354,7 @@ function checkAndShowDeleteSection() {
   const baseUrl = window.EMBED_CONFIG?.baseUrl || 'https://wavemax.promo';
   console.log('Fetching environment from:', `${baseUrl}/api/v1/environment`);
 
-  fetch(`${baseUrl}/api/v1/environment`)
-    .then(response => response.json())
+  ApiClient.get('/api/v1/environment', { showError: false })
     .then(data => {
       console.log('Environment data received:', data);
       if (data.enableDeleteDataFeature === true) {
@@ -1429,20 +1384,14 @@ async function deleteAllData(affiliateId) {
   }
 
   try {
-    // Get CSRF token first
-    await ensureCsrfToken();
-
-    const response = await authenticatedFetch(`/api/v1/affiliates/${affiliateId}/delete-all-data`, {
-      method: 'DELETE',
+    const token = localStorage.getItem('affiliateToken');
+    const data = await ApiClient.delete(`/api/v1/affiliates/${affiliateId}/delete-all-data`, {
+      showLoading: true,
+      loadingMessage: 'Deleting all data...',
       headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        _csrf: csrfToken  // Try sending in body as well
-      })
+        'Authorization': `Bearer ${token}`
+      }
     });
-
-    const data = await response.json();
 
     if (data.success) {
       alert('All data has been deleted successfully.');
@@ -1530,21 +1479,31 @@ async function getYearToDateRevenue(affiliateId) {
     const baseUrl = window.EMBED_CONFIG?.baseUrl || 'https://wavemax.promo';
     const currentYear = new Date().getFullYear();
     
-    // Fetch year-to-date stats
-    const response = await authenticatedFetch(`${baseUrl}/api/v1/affiliates/${affiliateId}/stats/ytd`);
+    const token = localStorage.getItem('affiliateToken');
     
-    if (!response.ok) {
+    try {
+      // Fetch year-to-date stats
+      const data = await ApiClient.get(`/api/v1/affiliates/${affiliateId}/stats/ytd`, {
+        showError: false,
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      return data.totalRevenue || data.totalEarnings || 0;
+    } catch (error) {
       // Fallback to dashboard stats if YTD endpoint doesn't exist
-      const dashboardResponse = await authenticatedFetch(`${baseUrl}/api/v1/affiliates/${affiliateId}/dashboard`);
-      if (dashboardResponse.ok) {
-        const data = await dashboardResponse.json();
+      try {
+        const data = await ApiClient.get(`/api/v1/affiliates/${affiliateId}/dashboard`, {
+          showError: false,
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
         return data.totalEarnings || 0;
+      } catch (dashboardError) {
+        return 0;
       }
-      return 0;
     }
-    
-    const data = await response.json();
-    return data.totalRevenue || data.totalEarnings || 0;
   } catch (error) {
     console.error('Error fetching year-to-date revenue:', error);
     return 0;
@@ -1614,15 +1573,17 @@ async function fetchAdminSupportEmail() {
   try {
     const baseUrl = window.EMBED_CONFIG?.baseUrl || 'https://wavemax.promo';
     // Try to get the primary administrator's email
-    const response = await authenticatedFetch(`${baseUrl}/api/v1/administrators`);
-    
-    if (response.ok) {
-      const data = await response.json();
-      // Get the first administrator's email (usually the primary admin)
-      if (data.administrators && data.administrators.length > 0) {
-        const adminEmail = data.administrators[0].email;
-        localStorage.setItem('adminSupportEmail', adminEmail);
+    const data = await ApiClient.get('/api/v1/administrators', {
+      showError: false,
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('affiliateToken')}`
       }
+    });
+    
+    // Get the first administrator's email (usually the primary admin)
+    if (data.administrators && data.administrators.length > 0) {
+      const adminEmail = data.administrators[0].email;
+      localStorage.setItem('adminSupportEmail', adminEmail);
     }
   } catch (error) {
     console.error('Error fetching admin support email:', error);
