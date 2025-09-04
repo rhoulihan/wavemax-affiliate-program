@@ -6,11 +6,6 @@ const { logAuditEvent, AuditEvents } = require('../utils/auditLogger');
 const emailService = require('../utils/emailService');
 const QRCode = require('qrcode');
 
-// Utility modules for consistent error handling and responses
-const ControllerHelpers = require('../utils/controllerHelpers');
-const AuthorizationHelpers = require('../middleware/authorizationHelpers');
-const Formatters = require('../utils/formatters');
-
 // Helper function to send payment reminder
 async function sendPaymentReminder(order) {
   try {
@@ -99,115 +94,108 @@ async function generatePaymentURLs(order) {
 }
 
 // Get order queue
-exports.getOrderQueue = ControllerHelpers.asyncWrapper(async (req, res) => {
-  const { status = 'pending', priority, dateFrom, dateTo } = req.query;
-  
-  // Parse pagination parameters
-  const pagination = ControllerHelpers.parsePagination(req.query, { limit: 20 });
+exports.getOrderQueue = async (req, res) => {
+  try {
+    const {
+      status = 'pending',
+      priority,
+      dateFrom,
+      dateTo,
+      page = 1,
+      limit = 20
+    } = req.query;
 
-  const query = { orderProcessingStatus: status };
+    const query = { orderProcessingStatus: status };
 
-  if (priority) {
-    query.priority = priority;
+    if (priority) {
+      query.priority = priority;
+    }
+
+    if (dateFrom || dateTo) {
+      query.scheduledPickup = {};
+      if (dateFrom) query.scheduledPickup.$gte = new Date(dateFrom);
+      if (dateTo) query.scheduledPickup.$lte = new Date(dateTo);
+    }
+
+    const skip = (page - 1) * limit;
+
+    const [orders, total] = await Promise.all([
+      Order.find(query)
+        .populate('customer', 'firstName lastName email phone')
+        .populate('assignedOperator', 'firstName lastName operatorId')
+        .sort({ priority: -1, scheduledPickup: 1 })
+        .skip(skip)
+        .limit(parseInt(limit)),
+      Order.countDocuments(query)
+    ]);
+
+    res.json({
+      orders,
+      pagination: {
+        total,
+        page: parseInt(page),
+        pages: Math.ceil(total / limit)
+      }
+    });
+  } catch (error) {
+    logger.error('Error fetching order queue:', error);
+    res.status(500).json({ error: 'Failed to fetch order queue' });
   }
-
-  if (dateFrom || dateTo) {
-    query.scheduledPickup = {};
-    if (dateFrom) query.scheduledPickup.$gte = new Date(dateFrom);
-    if (dateTo) query.scheduledPickup.$lte = new Date(dateTo);
-  }
-
-  const [orders, total] = await Promise.all([
-    Order.find(query)
-      .populate('customer', 'firstName lastName email phone')
-      .populate('assignedOperator', 'firstName lastName operatorId')
-      .sort({ priority: -1, scheduledPickup: 1 })
-      .skip(pagination.skip)
-      .limit(pagination.limit),
-    Order.countDocuments(query)
-  ]);
-
-  // Format the orders data
-  const formattedOrders = orders.map(order => ({
-    ...order.toObject(),
-    customer: order.customer ? {
-      ...order.customer.toObject(),
-      name: Formatters.fullName(order.customer.firstName, order.customer.lastName),
-      phone: Formatters.phone(order.customer.phone)
-    } : null,
-    scheduledPickup: Formatters.datetime(order.scheduledPickup),
-    estimatedWeight: Formatters.weight(order.estimatedWeight),
-    actualWeight: Formatters.weight(order.actualWeight)
-  }));
-
-  const paginationMeta = ControllerHelpers.calculatePagination(total, pagination.page, pagination.limit);
-
-  ControllerHelpers.sendSuccess(res, {
-    orders: formattedOrders,
-    pagination: paginationMeta
-  }, 'Order queue retrieved successfully');
-});
+};
 
 // Claim an order
-exports.claimOrder = ControllerHelpers.asyncWrapper(async (req, res) => {
-  const { orderId } = req.params;
-  const operatorId = req.user.id;
+exports.claimOrder = async (req, res) => {
+  try {
+    const { orderId } = req.params;
+    const operatorId = req.user.id;
 
-  const order = await Order.findById(orderId);
-  if (!order) {
-    return ControllerHelpers.sendError(res, 'Order not found', 404);
+    const order = await Order.findById(orderId);
+    if (!order) {
+      return res.status(404).json({ error: 'Order not found' });
+    }
+
+    if (order.assignedOperator) {
+      return res.status(400).json({ error: 'Order already assigned' });
+    }
+
+    // Check operator availability
+    const operator = await Operator.findById(operatorId);
+    const activeOrdersCount = await Order.countDocuments({
+      assignedOperator: operatorId,
+      orderProcessingStatus: { $in: ['assigned', 'washing', 'drying', 'folding'] }
+    });
+
+    if (activeOrdersCount >= 3) {
+      return res.status(400).json({ error: 'Maximum concurrent orders reached' });
+    }
+
+    // Assign order
+    order.assignedOperator = operatorId;
+    order.orderProcessingStatus = 'assigned';
+    order.processingStarted = new Date();
+    await order.save();
+
+    // Update operator stats
+    operator.updatedAt = new Date();
+    await operator.save();
+
+    await logAuditEvent(AuditEvents.ORDER_STATUS_CHANGED, {
+      operatorId,
+      orderId,
+      orderNumber: order.orderNumber,
+      action: 'order_claimed',
+      newStatus: 'assigned'
+    }, req);
+
+    res.json({
+      message: 'Order claimed successfully',
+      order: await order.populate('customer', 'firstName lastName email phone')
+    });
+  } catch (error) {
+    logger.error('Error claiming order:', error);
+    res.status(500).json({ error: 'Failed to claim order' });
   }
-
-  if (order.assignedOperator) {
-    return ControllerHelpers.sendError(res, 'Order already assigned', 400);
-  }
-
-  // Check operator availability
-  const operator = await Operator.findById(operatorId);
-  const activeOrdersCount = await Order.countDocuments({
-    assignedOperator: operatorId,
-    orderProcessingStatus: { $in: ['assigned', 'washing', 'drying', 'folding'] }
-  });
-
-  if (activeOrdersCount >= 3) {
-    return ControllerHelpers.sendError(res, 'Maximum concurrent orders reached', 400);
-  }
-
-  // Assign order
-  order.assignedOperator = operatorId;
-  order.orderProcessingStatus = 'assigned';
-  order.processingStarted = new Date();
-  await order.save();
-
-  // Update operator stats
-  operator.updatedAt = new Date();
-  await operator.save();
-
-  await logAuditEvent(AuditEvents.ORDER_STATUS_CHANGED, {
-    operatorId,
-    orderId,
-    orderNumber: order.orderNumber,
-    action: 'order_claimed',
-    newStatus: 'assigned'
-  }, req);
-
-  // Populate and format the order for response
-  const populatedOrder = await order.populate('customer', 'firstName lastName email phone');
-  
-  const responseOrder = {
-    ...populatedOrder.toObject(),
-    customer: populatedOrder.customer ? {
-      ...populatedOrder.customer.toObject(),
-      name: Formatters.fullName(populatedOrder.customer.firstName, populatedOrder.customer.lastName),
-      phone: Formatters.phone(populatedOrder.customer.phone)
-    } : null,
-    processingStarted: Formatters.datetime(order.processingStarted)
-  };
-
-  ControllerHelpers.sendSuccess(res, {
-    order: responseOrder
-  }, 'Order claimed successfully');
-});
+};
 
 // Update order status
 exports.updateOrderStatus = async (req, res) => {
