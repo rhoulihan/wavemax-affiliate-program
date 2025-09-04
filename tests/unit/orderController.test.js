@@ -4,6 +4,7 @@ const Customer = require('../../server/models/Customer');
 const Affiliate = require('../../server/models/Affiliate');
 const SystemConfig = require('../../server/models/SystemConfig');
 const emailService = require('../../server/utils/emailService');
+const { expectSuccessResponse, expectErrorResponse } = require('../helpers/responseHelpers');
 
 // Mock dependencies
 jest.mock('../../server/models/Order');
@@ -101,16 +102,16 @@ describe('Order Controller', () => {
       expect(Customer.findOne).toHaveBeenCalledWith({ customerId: 'CUST123' });
       expect(Affiliate.findOne).toHaveBeenCalledWith({ affiliateId: 'AFF123' });
       expect(res.status).toHaveBeenCalledWith(201);
-      expect(res.json).toHaveBeenCalledWith({
-        success: true,
-        orderId: 'ORD123456',
-        estimatedTotal: 49.46,
-        bagCreditApplied: 0,
-        wdfCreditApplied: 0,
-        addOns: undefined,
-        addOnTotal: undefined,
-        message: 'Pickup scheduled successfully!'
-      });
+      expect(res.json).toHaveBeenCalledWith(
+        expectSuccessResponse({
+          orderId: 'ORD123456',
+          estimatedTotal: 49.46,
+          bagCreditApplied: 0,
+          wdfCreditApplied: 0,
+          addOns: undefined,
+          addOnTotal: undefined
+        }, 'Pickup scheduled successfully!')
+      );
     });
 
     it('should handle email sending failures gracefully', async () => {
@@ -162,16 +163,16 @@ describe('Order Controller', () => {
       await orderController.createOrder(req, res);
 
       expect(res.status).toHaveBeenCalledWith(201);
-      expect(res.json).toHaveBeenCalledWith({
-        success: true,
-        orderId: 'ORD123456',
-        estimatedTotal: 49.46,
-        bagCreditApplied: 0,
-        wdfCreditApplied: 0,
-        addOns: undefined,
-        addOnTotal: undefined,
-        message: 'Pickup scheduled successfully!'
-      });
+      expect(res.json).toHaveBeenCalledWith(
+        expectSuccessResponse({
+          orderId: 'ORD123456',
+          estimatedTotal: 49.46,
+          bagCreditApplied: 0,
+          wdfCreditApplied: 0,
+          addOns: undefined,
+          addOnTotal: undefined
+        }, 'Pickup scheduled successfully!')
+      );
     });
 
     it('should return error for invalid customer', async () => {
@@ -186,10 +187,9 @@ describe('Order Controller', () => {
       await orderController.createOrder(req, res);
 
       expect(res.status).toHaveBeenCalledWith(400);
-      expect(res.json).toHaveBeenCalledWith({
-        success: false,
-        message: 'Invalid customer ID'
-      });
+      expect(res.json).toHaveBeenCalledWith(
+        expectErrorResponse('Invalid customer ID')
+      );
     });
 
     it('should return error for invalid affiliate', async () => {
@@ -207,10 +207,9 @@ describe('Order Controller', () => {
       await orderController.createOrder(req, res);
 
       expect(res.status).toHaveBeenCalledWith(400);
-      expect(res.json).toHaveBeenCalledWith({
-        success: false,
-        message: 'Invalid affiliate ID'
-      });
+      expect(res.json).toHaveBeenCalledWith(
+        expectErrorResponse('Invalid affiliate ID')
+      );
     });
 
     it('should enforce authorization', async () => {
@@ -226,10 +225,9 @@ describe('Order Controller', () => {
       await orderController.createOrder(req, res);
 
       expect(res.status).toHaveBeenCalledWith(403);
-      expect(res.json).toHaveBeenCalledWith({
-        success: false,
-        message: 'Unauthorized'
-      });
+      expect(res.json).toHaveBeenCalledWith(
+        expectErrorResponse('Unauthorized')
+      );
     });
   });
 
@@ -273,20 +271,21 @@ describe('Order Controller', () => {
 
       expect(Order.findOne).toHaveBeenCalledWith({ orderId: 'ORD123' });
       expect(res.status).toHaveBeenCalledWith(200);
-      expect(res.json).toHaveBeenCalledWith({
-        success: true,
-        order: expect.objectContaining({
-          orderId: 'ORD123',
-          customer: expect.objectContaining({
-            name: 'Jane Smith',
-            email: 'jane@example.com'
-          }),
-          affiliate: expect.objectContaining({
-            name: 'John Doe',
-            email: 'john@example.com'
+      expect(res.json).toHaveBeenCalledWith(
+        expectSuccessResponse({
+          order: expect.objectContaining({
+            orderId: 'ORD123',
+            customer: expect.objectContaining({
+              name: 'Jane Smith',
+              email: 'jane@example.com'
+            }),
+            affiliate: expect.objectContaining({
+              name: 'John Doe',
+              email: 'john@example.com'
+            })
           })
         })
-      });
+      );
     });
 
     it('should return 404 for non-existent order', async () => {
@@ -298,10 +297,9 @@ describe('Order Controller', () => {
       await orderController.getOrderDetails(req, res);
 
       expect(res.status).toHaveBeenCalledWith(404);
-      expect(res.json).toHaveBeenCalledWith({
-        success: false,
-        message: 'Order not found'
-      });
+      expect(res.json).toHaveBeenCalledWith(
+        expectErrorResponse('Order not found')
+      );
     });
 
     it('should enforce authorization for customers', async () => {
@@ -319,10 +317,9 @@ describe('Order Controller', () => {
       await orderController.getOrderDetails(req, res);
 
       expect(res.status).toHaveBeenCalledWith(403);
-      expect(res.json).toHaveBeenCalledWith({
-        success: false,
-        message: 'Unauthorized'
-      });
+      expect(res.json).toHaveBeenCalledWith(
+        expectErrorResponse('Unauthorized')
+      );
     });
   });
 
@@ -355,8 +352,7 @@ describe('Order Controller', () => {
       expect(emailService.sendOrderStatusUpdateEmail).toHaveBeenCalled();
       expect(res.status).toHaveBeenCalledWith(200);
       expect(res.json).toHaveBeenCalledWith(
-        expect.objectContaining({
-          success: true,
+        expectSuccessResponse({
           status: 'processing'
         })
       );
@@ -400,10 +396,9 @@ describe('Order Controller', () => {
       await orderController.updateOrderStatus(req, res);
 
       expect(res.status).toHaveBeenCalledWith(400);
-      expect(res.json).toHaveBeenCalledWith({
-        success: false,
-        message: 'Invalid status transition from complete to pending'
-      });
+      expect(res.json).toHaveBeenCalledWith(
+        expectErrorResponse('Invalid status transition from complete to pending')
+      );
     });
 
     it('should send commission email when complete', async () => {
@@ -466,10 +461,9 @@ describe('Order Controller', () => {
       expect(emailService.sendOrderCancellationEmail).toHaveBeenCalled();
       expect(emailService.sendAffiliateOrderCancellationEmail).toHaveBeenCalled();
       expect(res.status).toHaveBeenCalledWith(200);
-      expect(res.json).toHaveBeenCalledWith({
-        success: true,
-        message: 'Order cancelled successfully'
-      });
+      expect(res.json).toHaveBeenCalledWith(
+        expectSuccessResponse(null, 'Order cancelled successfully')
+      );
     });
 
     it('should prevent cancelling non-cancellable orders', async () => {
@@ -486,10 +480,9 @@ describe('Order Controller', () => {
       await orderController.cancelOrder(req, res);
 
       expect(res.status).toHaveBeenCalledWith(400);
-      expect(res.json).toHaveBeenCalledWith({
-        success: false,
-        message: 'Orders in processing status cannot be cancelled. Only pending orders can be cancelled.'
-      });
+      expect(res.json).toHaveBeenCalledWith(
+        expectErrorResponse('Orders in processing status cannot be cancelled. Only pending orders can be cancelled.')
+      );
     });
   });
 });
