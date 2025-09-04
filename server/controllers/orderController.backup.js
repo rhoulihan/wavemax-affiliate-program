@@ -10,11 +10,6 @@ const emailService = require('../utils/emailService');
 const jwt = require('jsonwebtoken');
 const { escapeRegex } = require('../utils/securityUtils');
 
-// Utility modules for consistent error handling and responses
-const ControllerHelpers = require('../utils/controllerHelpers');
-const AuthorizationHelpers = require('../middleware/authorizationHelpers');
-const Formatters = require('../utils/formatters');
-
 // ============================================================================
 // Helper Functions
 // ============================================================================
@@ -54,120 +49,139 @@ async function calculateDeliveryFee(numberOfBags, affiliate = null) {
 /**
  * Check if customer has active orders
  */
-exports.checkActiveOrders = ControllerHelpers.asyncWrapper(async (req, res) => {
-  // Get customer ID from authenticated user
-  const customerId = req.user.customerId;
-  
-  if (!customerId) {
-    return ControllerHelpers.sendError(res, 'Customer ID not found in session', 400);
+exports.checkActiveOrders = async (req, res) => {
+  try {
+    // Get customer ID from authenticated user
+    const customerId = req.user.customerId;
+    
+    if (!customerId) {
+      return res.status(400).json({
+        success: false,
+        message: 'Customer ID not found in session'
+      });
+    }
+
+    // Check for active orders
+    const activeOrder = await Order.findOne({
+      customerId: customerId,
+      status: { $in: ['pending', 'processing', 'processed'] }
+    }).select('orderId status createdAt pickupDate pickupTime');
+
+    if (activeOrder) {
+      return res.json({
+        success: true,
+        hasActiveOrder: true,
+        activeOrder: {
+          orderId: activeOrder.orderId,
+          status: activeOrder.status,
+          createdAt: activeOrder.createdAt,
+          pickupDate: activeOrder.pickupDate,
+          pickupTime: activeOrder.pickupTime
+        }
+      });
+    }
+
+    res.json({
+      success: true,
+      hasActiveOrder: false
+    });
+  } catch (error) {
+    console.error('Error checking active orders:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to check active orders'
+    });
   }
-
-  // Check for active orders
-  const activeOrder = await Order.findOne({
-    customerId: customerId,
-    status: { $in: ['pending', 'processing', 'processed'] }
-  }).select('orderId status createdAt pickupDate pickupTime');
-
-  if (activeOrder) {
-    return ControllerHelpers.sendSuccess(res, {
-      hasActiveOrder: true,
-      activeOrder: {
-        orderId: activeOrder.orderId,
-        status: Formatters.status(activeOrder.status, 'order'),
-        createdAt: Formatters.datetime(activeOrder.createdAt),
-        pickupDate: Formatters.date(activeOrder.pickupDate),
-        pickupTime: activeOrder.pickupTime
-      }
-    }, 'Active order found');
-  }
-
-  ControllerHelpers.sendSuccess(res, {
-    hasActiveOrder: false
-  }, 'No active orders found');
-});
+};
 
 /**
  * Create a new order
  */
-exports.createOrder = ControllerHelpers.asyncWrapper(async (req, res) => {
-  // Check for validation errors first
-  const { validationResult } = require('express-validator');
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    console.log('Validation errors:', errors.array());
-    return ControllerHelpers.sendError(res, 'Validation failed', 400, errors.array());
-  }
+exports.createOrder = async (req, res) => {
+  try {
+    // Check for validation errors first
+    const { validationResult } = require('express-validator');
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      console.log('Validation errors:', errors.array());
+      return res.status(400).json({
+        success: false,
+        message: 'Validation failed',
+        errors: errors.array()
+      });
+    }
 
-  console.log('Creating order with data:', JSON.stringify(req.body, null, 2));
+    console.log('Creating order with data:', JSON.stringify(req.body, null, 2));
 
-  // Validate required fields using ControllerHelpers
-  const requiredFields = ['customerId', 'affiliateId', 'pickupDate', 'pickupTime'];
-  const fieldErrors = ControllerHelpers.validateRequiredFields(req.body, requiredFields);
-  
-  if (fieldErrors) {
-    return ControllerHelpers.sendError(res, 'Missing required fields', 400, fieldErrors);
-  }
+    const {
+      customerId,
+      affiliateId,
+      pickupDate,
+      pickupTime,
+      specialPickupInstructions,
+      estimatedWeight,
+      numberOfBags,
+      addOns
+    } = req.body;
 
-  const {
-    customerId,
-    affiliateId,
-    pickupDate,
-    pickupTime,
-    specialPickupInstructions,
-    estimatedWeight,
-    numberOfBags,
-    addOns
-  } = req.body;
+    console.log('AddOns received:', addOns);
+    console.log('AddOns type:', typeof addOns);
+    console.log('AddOns stringified:', JSON.stringify(addOns));
 
-  console.log('AddOns received:', addOns);
+    // Verify customer exists
+    console.log('Looking for customer with ID:', customerId);
+    const customer = await Customer.findOne({ customerId });
 
-  // Verify customer exists
-  console.log('Looking for customer with ID:', customerId);
-  const customer = await Customer.findOne({ customerId });
+    if (!customer) {
+      console.log('Customer not found with ID:', customerId);
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid customer ID'
+      });
+    }
+    console.log('Found customer:', customer.firstName, customer.lastName);
 
-  if (!customer) {
-    console.log('Customer not found with ID:', customerId);
-    return ControllerHelpers.sendError(res, 'Invalid customer ID', 400);
-  }
-  console.log('Found customer:', customer.firstName, customer.lastName);
+    // Check if customer already has an active order
+    const activeOrder = await Order.findOne({
+      customerId: customerId,
+      status: { $in: ['pending', 'processing', 'processed'] }
+    });
 
-  // Check if customer already has an active order
-  const activeOrder = await Order.findOne({
-    customerId: customerId,
-    status: { $in: ['pending', 'processing', 'processed'] }
-  });
-
-  if (activeOrder) {
-    console.log('Customer already has an active order:', activeOrder.orderId);
-    return ControllerHelpers.sendError(res, 
-      'You already have an active order. Please wait for it to be completed before placing a new order.', 
-      400, 
-      {
+    if (activeOrder) {
+      console.log('Customer already has an active order:', activeOrder.orderId);
+      return res.status(400).json({
+        success: false,
+        message: 'You already have an active order. Please wait for it to be completed before placing a new order.',
         activeOrderId: activeOrder.orderId,
         activeOrderStatus: activeOrder.status
-      }
-    );
-  }
+      });
+    }
 
-  // Verify affiliate exists
-  console.log('Looking for affiliate with ID:', affiliateId);
-  const affiliate = await Affiliate.findOne({ affiliateId });
+    // Verify affiliate exists
+    console.log('Looking for affiliate with ID:', affiliateId);
+    const affiliate = await Affiliate.findOne({ affiliateId });
 
-  if (!affiliate) {
-    console.log('Affiliate not found with ID:', affiliateId);
-    return ControllerHelpers.sendError(res, 'Invalid affiliate ID', 400);
-  }
-  console.log('Found affiliate:', affiliate.firstName, affiliate.lastName);
+    if (!affiliate) {
+      console.log('Affiliate not found with ID:', affiliateId);
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid affiliate ID'
+      });
+    }
+    console.log('Found affiliate:', affiliate.firstName, affiliate.lastName);
 
-  // Check authorization using AuthorizationHelpers
-  const isAuthorized =
-    AuthorizationHelpers.isAdmin(req.user) ||
-    req.user.customerId === customerId ||
-    (req.user.role === 'affiliate' && req.user.affiliateId === affiliateId);
+    // Check authorization (admin, affiliate, or customer self)
+    const isAuthorized =
+      req.user.role === 'admin' ||
+      req.user.customerId === customerId ||
+      (req.user.role === 'affiliate' && req.user.affiliateId === affiliateId);
 
-  if (!isAuthorized) {
-    return ControllerHelpers.sendError(res, 'Unauthorized', 403);
-  }
+    if (!isAuthorized) {
+      return res.status(403).json({
+        success: false,
+        message: 'Unauthorized'
+      });
+    }
 
     // Calculate delivery fee based on number of bags
     const bagCount = parseInt(numberOfBags) || 1; // Default to 1 bag if not specified
@@ -269,15 +283,24 @@ exports.createOrder = ControllerHelpers.asyncWrapper(async (req, res) => {
       // Continue with the response even if emails fail
     }
 
-    ControllerHelpers.sendSuccess(res, {
+    res.status(201).json({
+      success: true,
       orderId: newOrder.orderId,
-      estimatedTotal: Formatters.currency(newOrder.estimatedTotal),
-      bagCreditApplied: Formatters.currency(newOrder.bagCreditApplied),
-      wdfCreditApplied: Formatters.currency(newOrder.wdfCreditApplied),
+      estimatedTotal: newOrder.estimatedTotal,
+      bagCreditApplied: newOrder.bagCreditApplied,
+      wdfCreditApplied: newOrder.wdfCreditApplied,
       addOns: savedOrder ? savedOrder.addOns : newOrder.addOns,
-      addOnTotal: Formatters.currency(savedOrder ? savedOrder.addOnTotal : newOrder.addOnTotal)
-    }, 'Pickup scheduled successfully!', 201);
-});
+      addOnTotal: savedOrder ? savedOrder.addOnTotal : newOrder.addOnTotal,
+      message: 'Pickup scheduled successfully!'
+    });
+  } catch (error) {
+    console.error('Order creation error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'An error occurred while scheduling the pickup'
+    });
+  }
+};
 
 /**
  * Get bags for an order (for label printing)
@@ -285,82 +308,102 @@ exports.createOrder = ControllerHelpers.asyncWrapper(async (req, res) => {
 /**
  * Get order details
  */
-exports.getOrderDetails = ControllerHelpers.asyncWrapper(async (req, res) => {
-  const { orderId } = req.params;
+exports.getOrderDetails = async (req, res) => {
+  try {
+    const { orderId } = req.params;
 
-  // Find order
-  const order = await Order.findOne({ orderId });
+    // Find order
+    const order = await Order.findOne({ orderId });
 
-  if (!order) {
-    return ControllerHelpers.sendError(res, 'Order not found', 404);
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        message: 'Order not found'
+      });
+    }
+
+    // Check authorization (admin, associated affiliate, or customer)
+    const isAuthorized =
+      req.user.role === 'admin' ||
+      (req.user.role === 'affiliate' && req.user.affiliateId === order.affiliateId) ||
+      (req.user.role === 'customer' && req.user.customerId === order.customerId);
+
+    if (!isAuthorized) {
+      return res.status(403).json({
+        success: false,
+        message: 'Unauthorized'
+      });
+    }
+
+    // Get customer details
+    const customer = await Customer.findOne({ customerId: order.customerId });
+
+    // Get affiliate details
+    const affiliate = await Affiliate.findOne({ affiliateId: order.affiliateId });
+
+    res.status(200).json({
+      success: true,
+      order: {
+        orderId: order.orderId,
+        customerId: order.customerId,
+        customer: customer ? {
+          name: `${customer.firstName} ${customer.lastName}`,
+          phone: customer.phone,
+          email: customer.email,
+          address: `${customer.address}, ${customer.city}, ${customer.state} ${customer.zipCode}`,
+          bagCredit: customer.bagCredit,
+          bagCreditApplied: customer.bagCreditApplied,
+          wdfCredit: customer.wdfCredit
+        } : null,
+        affiliateId: order.affiliateId,
+        affiliate: affiliate ? {
+          name: `${affiliate.firstName} ${affiliate.lastName}`,
+          phone: affiliate.phone,
+          email: affiliate.email,
+          minimumDeliveryFee: affiliate.minimumDeliveryFee,
+          perBagDeliveryFee: affiliate.perBagDeliveryFee
+        } : null,
+        pickupDate: order.pickupDate,
+        pickupTime: order.pickupTime,
+        specialPickupInstructions: order.specialPickupInstructions,
+        estimatedWeight: order.estimatedWeight,
+        numberOfBags: order.numberOfBags,
+        serviceNotes: order.serviceNotes,
+        deliveryDate: order.deliveryDate,
+        deliveryTime: order.deliveryTime,
+        specialDeliveryInstructions: order.specialDeliveryInstructions,
+        status: order.status,
+        baseRate: order.baseRate,
+        deliveryFee: order.feeBreakdown?.totalFee || 0,
+        feeBreakdown: order.feeBreakdown,
+        bagCreditApplied: order.bagCreditApplied || 0,
+        actualWeight: order.actualWeight,
+        washInstructions: order.washInstructions,
+        estimatedTotal: order.estimatedTotal,
+        actualTotal: order.actualTotal,
+        addOns: order.addOns,
+        addOnTotal: order.addOnTotal,
+        wdfCreditApplied: order.wdfCreditApplied,
+        wdfCreditGenerated: order.wdfCreditGenerated,
+        weightDifference: order.weightDifference,
+        affiliateCommission: order.affiliateCommission,
+        paymentStatus: order.paymentStatus,
+        createdAt: order.createdAt,
+        pickedUpAt: order.pickedUpAt,
+        processedAt: order.processedAt,
+        readyForDeliveryAt: order.readyForDeliveryAt,
+        deliveredAt: order.deliveredAt,
+        cancelledAt: order.cancelledAt
+      }
+    });
+  } catch (error) {
+    console.error('Get order details error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'An error occurred while retrieving order details'
+    });
   }
-
-  // Check authorization using AuthorizationHelpers
-  if (!AuthorizationHelpers.canAccessOrder(req.user, order)) {
-    return ControllerHelpers.sendError(res, 'Unauthorized', 403);
-  }
-
-  // Get customer details
-  const customer = await Customer.findOne({ customerId: order.customerId });
-
-  // Get affiliate details
-  const affiliate = await Affiliate.findOne({ affiliateId: order.affiliateId });
-
-  const orderData = {
-    orderId: order.orderId,
-    customerId: order.customerId,
-    customer: customer ? {
-      name: Formatters.fullName(customer.firstName, customer.lastName),
-      phone: Formatters.phone(customer.phone),
-      email: customer.email,
-      address: Formatters.address(customer),
-      bagCredit: Formatters.currency(customer.bagCredit),
-      bagCreditApplied: customer.bagCreditApplied,
-      wdfCredit: Formatters.currency(customer.wdfCredit)
-    } : null,
-    affiliateId: order.affiliateId,
-    affiliate: affiliate ? {
-      name: Formatters.fullName(affiliate.firstName, affiliate.lastName),
-      phone: Formatters.phone(affiliate.phone),
-      email: affiliate.email,
-      minimumDeliveryFee: Formatters.currency(affiliate.minimumDeliveryFee),
-      perBagDeliveryFee: Formatters.currency(affiliate.perBagDeliveryFee)
-    } : null,
-    pickupDate: Formatters.date(order.pickupDate),
-    pickupTime: order.pickupTime,
-    specialPickupInstructions: order.specialPickupInstructions,
-    estimatedWeight: Formatters.weight(order.estimatedWeight),
-    numberOfBags: order.numberOfBags,
-    serviceNotes: order.serviceNotes,
-    deliveryDate: Formatters.date(order.deliveryDate),
-    deliveryTime: order.deliveryTime,
-    specialDeliveryInstructions: order.specialDeliveryInstructions,
-    status: Formatters.status(order.status, 'order'),
-    baseRate: Formatters.currency(order.baseRate),
-    deliveryFee: Formatters.currency(order.feeBreakdown?.totalFee || 0),
-    feeBreakdown: order.feeBreakdown,
-    bagCreditApplied: Formatters.currency(order.bagCreditApplied || 0),
-    actualWeight: Formatters.weight(order.actualWeight),
-    washInstructions: order.washInstructions,
-    estimatedTotal: Formatters.currency(order.estimatedTotal),
-    actualTotal: Formatters.currency(order.actualTotal),
-    addOns: order.addOns,
-    addOnTotal: Formatters.currency(order.addOnTotal),
-    wdfCreditApplied: Formatters.currency(order.wdfCreditApplied),
-    wdfCreditGenerated: Formatters.currency(order.wdfCreditGenerated),
-    weightDifference: Formatters.weight(order.weightDifference),
-    affiliateCommission: Formatters.currency(order.affiliateCommission),
-    paymentStatus: Formatters.status(order.paymentStatus, 'payment'),
-    createdAt: Formatters.datetime(order.createdAt),
-    pickedUpAt: Formatters.datetime(order.pickedUpAt),
-    processedAt: Formatters.datetime(order.processedAt),
-    readyForDeliveryAt: Formatters.datetime(order.readyForDeliveryAt),
-    deliveredAt: Formatters.datetime(order.deliveredAt),
-    cancelledAt: Formatters.datetime(order.cancelledAt)
-  };
-
-  ControllerHelpers.sendSuccess(res, { order: orderData }, 'Order details retrieved successfully');
-});
+};
 
 /**
  * Update order status
@@ -494,40 +537,51 @@ exports.updateOrderStatus = async (req, res) => {
 /**
  * Cancel order
  */
-exports.cancelOrder = ControllerHelpers.asyncWrapper(async (req, res) => {
-  const { orderId } = req.params;
-
-  // Find order
-  const order = await Order.findOne({ orderId });
-
-  if (!order) {
-    return ControllerHelpers.sendError(res, 'Order not found', 404);
-  }
-
-  // Check if order can be cancelled - only pending orders can be cancelled
-  if (order.status !== 'pending') {
-    return ControllerHelpers.sendError(res, 
-      `Orders in ${order.status} status cannot be cancelled. Only pending orders can be cancelled.`, 
-      400
-    );
-  }
-
-  // Check authorization using AuthorizationHelpers
-  if (!AuthorizationHelpers.canAccessOrder(req.user, order)) {
-    return ControllerHelpers.sendError(res, 'Unauthorized', 403);
-  }
-
-  // Update order status
-  order.status = 'cancelled';
-  order.cancelledAt = new Date();
-  await order.save();
-
-  // Find customer and affiliate for email notifications
-  const customer = await Customer.findOne({ customerId: order.customerId });
-  const affiliate = await Affiliate.findOne({ affiliateId: order.affiliateId });
-
-  // Send cancellation emails (don't let email failures stop the cancellation)
+exports.cancelOrder = async (req, res) => {
   try {
+    const { orderId } = req.params;
+
+    // Find order
+    const order = await Order.findOne({ orderId });
+
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        message: 'Order not found'
+      });
+    }
+
+    // Check if order can be cancelled - only pending orders can be cancelled
+    if (order.status !== 'pending') {
+      return res.status(400).json({
+        success: false,
+        message: `Orders in ${order.status} status cannot be cancelled. Only pending orders can be cancelled.`
+      });
+    }
+
+    // Check authorization (admin, associated affiliate, or customer)
+    const isAuthorized =
+      req.user.role === 'admin' ||
+      (req.user.role === 'affiliate' && req.user.affiliateId === order.affiliateId) ||
+      (req.user.role === 'customer' && req.user.customerId === order.customerId);
+
+    if (!isAuthorized) {
+      return res.status(403).json({
+        success: false,
+        message: 'Unauthorized'
+      });
+    }
+
+    // Update order status
+    order.status = 'cancelled';
+    order.cancelledAt = new Date();
+    await order.save();
+
+    // Find customer and affiliate
+    const customer = await Customer.findOne({ customerId: order.customerId });
+    const affiliate = await Affiliate.findOne({ affiliateId: order.affiliateId });
+
+    // Send cancellation emails
     if (customer) {
       await emailService.sendOrderCancellationEmail(customer, order);
     }
@@ -535,17 +589,19 @@ exports.cancelOrder = ControllerHelpers.asyncWrapper(async (req, res) => {
     if (affiliate) {
       await emailService.sendAffiliateOrderCancellationEmail(affiliate, order, customer);
     }
-  } catch (emailError) {
-    console.error('Failed to send cancellation emails:', emailError);
-    // Continue with success response even if emails fail
-  }
 
-  ControllerHelpers.sendSuccess(res, {
-    orderId: order.orderId,
-    status: Formatters.status(order.status, 'order'),
-    cancelledAt: Formatters.datetime(order.cancelledAt)
-  }, 'Order cancelled successfully');
-});
+    res.status(200).json({
+      success: true,
+      message: 'Order cancelled successfully'
+    });
+  } catch (error) {
+    console.error('Cancel order error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'An error occurred while cancelling the order'
+    });
+  }
+};
 
 /**
  * Bulk update order status
@@ -980,94 +1036,114 @@ exports.updatePaymentStatus = async (req, res) => {
 /**
  * Search orders
  */
-exports.searchOrders = ControllerHelpers.asyncWrapper(async (req, res) => {
-  const { search, affiliateId, startDate, endDate, status } = req.query;
-  
-  // Parse pagination parameters
-  const pagination = ControllerHelpers.parsePagination(req.query);
+exports.searchOrders = async (req, res) => {
+  try {
+    const { search, affiliateId, startDate, endDate, status } = req.query;
+    const { page = 1, limit = 10 } = req.pagination || req.query;
 
-  // Build query filters
-  const allowedFields = {
-    'status': 'status',
-    'affiliateId': 'affiliateId',
-    'startDate': 'createdAt',
-    'endDate': 'createdAt'
-  };
-  
-  const query = ControllerHelpers.buildQuery({ status, affiliateId }, allowedFields);
+    // Build query
+    const query = {};
 
-  // Date range filter
-  if (startDate || endDate) {
-    query.createdAt = {};
-    if (startDate) query.createdAt.$gte = new Date(startDate);
-    if (endDate) query.createdAt.$lte = new Date(endDate);
+    // Date range filter
+    if (startDate || endDate) {
+      query.createdAt = {};
+      if (startDate) query.createdAt.$gte = new Date(startDate);
+      if (endDate) query.createdAt.$lte = new Date(endDate);
+    }
+
+    // Status filter
+    if (status) {
+      query.status = status;
+    }
+
+    // Affiliate filter
+    if (affiliateId) {
+      query.affiliateId = affiliateId;
+    }
+
+    // Check authorization
+    if (req.user.role === 'affiliate') {
+      // Affiliates can only search their own orders
+      query.affiliateId = req.user.affiliateId;
+    } else if (req.user.role !== 'admin' && req.user.role !== 'administrator') {
+      return res.status(403).json({
+        success: false,
+        message: 'Unauthorized'
+      });
+    }
+
+    // Search filter - search in customer names
+    let orders;
+    if (search) {
+      // First find customers matching the search term
+      const escapedSearch = escapeRegex(search);
+      const customers = await Customer.find({
+        $or: [
+          { firstName: { $regex: escapedSearch, $options: 'i' } },
+          { lastName: { $regex: escapedSearch, $options: 'i' } },
+          { email: { $regex: escapedSearch, $options: 'i' } }
+        ]
+      }).select('customerId');
+
+      const customerIds = customers.map(c => c.customerId);
+      query.customerId = { $in: customerIds };
+    }
+
+    // Get total count
+    const totalResults = await Order.countDocuments(query);
+
+    // Get paginated results
+    orders = await Order.find(query)
+      .sort({ createdAt: -1 })
+      .skip((page - 1) * limit)
+      .limit(parseInt(limit));
+
+    // Get customer data
+    const customerIds = [...new Set(orders.map(order => order.customerId))];
+    const customers = await Customer.find({ customerId: { $in: customerIds } });
+    const customerMap = {};
+    customers.forEach(customer => {
+      customerMap[customer.customerId] = customer;
+    });
+
+    res.status(200).json({
+      success: true,
+      orders: orders.map(order => {
+        const customer = customerMap[order.customerId];
+        return {
+          orderId: order.orderId,
+          customer: customer ? {
+            customerId: customer.customerId,
+            name: `${customer.firstName} ${customer.lastName}`,
+            email: customer.email
+          } : null,
+          affiliateId: order.affiliateId,
+          status: order.status,
+          estimatedWeight: order.estimatedWeight,
+          actualWeight: order.actualWeight,
+          estimatedTotal: order.estimatedTotal,
+          actualTotal: order.actualTotal,
+          createdAt: order.createdAt,
+          wdfCreditApplied: order.wdfCreditApplied,
+          wdfCreditGenerated: order.wdfCreditGenerated,
+          weightDifference: order.weightDifference
+        };
+      }),
+      totalResults,
+      pagination: {
+        page: parseInt(page),
+        limit: parseInt(limit),
+        pages: Math.ceil(totalResults / limit)
+      }
+    });
+  } catch (error) {
+    console.error('Search orders error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'An error occurred while searching orders'
+    });
   }
-
-  // Check authorization and apply role-based filters
-  if (req.user.role === 'affiliate') {
-    query.affiliateId = req.user.affiliateId;
-  } else if (!AuthorizationHelpers.isAdmin(req.user)) {
-    return ControllerHelpers.sendError(res, 'Unauthorized', 403);
-  }
-
-  // Search filter - search in customer names
-  if (search) {
-    const escapedSearch = escapeRegex(search);
-    const customers = await Customer.find({
-      $or: [
-        { firstName: { $regex: escapedSearch, $options: 'i' } },
-        { lastName: { $regex: escapedSearch, $options: 'i' } },
-        { email: { $regex: escapedSearch, $options: 'i' } }
-      ]
-    }).select('customerId');
-
-    const customerIds = customers.map(c => c.customerId);
-    query.customerId = { $in: customerIds };
-  }
-
-  // Get total count for pagination
-  const totalResults = await Order.countDocuments(query);
-
-  // Get paginated results
-  const orders = await Order.find(query)
-    .sort({ createdAt: -1 })
-    .skip(pagination.skip)
-    .limit(pagination.limit);
-
-  // Get customer data
-  const customerIds = [...new Set(orders.map(order => order.customerId))];
-  const customers = await Customer.find({ customerId: { $in: customerIds } });
-  const customerMap = {};
-  customers.forEach(customer => {
-    customerMap[customer.customerId] = customer;
-  });
-
-  const ordersData = orders.map(order => {
-    const customer = customerMap[order.customerId];
-    return {
-      orderId: order.orderId,
-      customer: customer ? {
-        customerId: customer.customerId,
-        name: Formatters.fullName(customer.firstName, customer.lastName),
-        email: customer.email
-      } : null,
-      affiliateId: order.affiliateId,
-      status: Formatters.status(order.status, 'order'),
-      estimatedWeight: Formatters.weight(order.estimatedWeight),
-      actualWeight: Formatters.weight(order.actualWeight),
-      estimatedTotal: Formatters.currency(order.estimatedTotal),
-      actualTotal: Formatters.currency(order.actualTotal),
-      createdAt: Formatters.datetime(order.createdAt),
-      wdfCreditApplied: Formatters.currency(order.wdfCreditApplied),
-      wdfCreditGenerated: Formatters.currency(order.wdfCreditGenerated),
-      weightDifference: Formatters.weight(order.weightDifference)
-    };
-  });
-
-  const paginationMeta = ControllerHelpers.calculatePagination(totalResults, pagination.page, pagination.limit);
-
-  ControllerHelpers.sendPaginated(res, ordersData, paginationMeta, 'orders');
-});
+};
 
 /**
  * Get order statistics
