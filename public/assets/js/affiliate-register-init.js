@@ -2234,6 +2234,82 @@
   }
   */
 
+    // Set up account setup next button
+    function setupAccountSetupNavigation() {
+      const accountSetupNextButton = document.getElementById('accountSetupNextButton');
+      if (accountSetupNextButton) {
+        accountSetupNextButton.addEventListener('click', function() {
+          console.log('[Navigation] Account setup next button clicked');
+          
+          // Validate username and password fields
+          const usernameField = document.getElementById('username');
+          const passwordField = document.getElementById('password');
+          const confirmPasswordField = document.getElementById('confirmPassword');
+          
+          // Check if username is filled
+          if (!usernameField || !usernameField.value.trim()) {
+            window.ErrorHandler.showError('Please enter a username');
+            usernameField.focus();
+            return;
+          }
+          
+          // Check if username has validation errors
+          if (usernameField.classList.contains('border-red-500')) {
+            const usernameHelp = usernameField.parentElement.querySelector('.username-validation-message');
+            const errorMessage = usernameHelp?.textContent || 'Please fix the username validation error';
+            window.ErrorHandler.showError(errorMessage);
+            usernameField.focus();
+            return;
+          }
+          
+          // Check if password is filled
+          if (!passwordField || !passwordField.value) {
+            window.ErrorHandler.showError('Please enter a password');
+            passwordField.focus();
+            return;
+          }
+          
+          // Check if passwords match
+          if (!confirmPasswordField || passwordField.value !== confirmPasswordField.value) {
+            window.ErrorHandler.showError('Passwords do not match');
+            confirmPasswordField.focus();
+            return;
+          }
+          
+          // Validate password strength
+          const passwordValidation = validatePasswordStrength(
+            passwordField.value,
+            usernameField.value,
+            document.getElementById('email')?.value || ''
+          );
+          
+          if (!passwordValidation.isValid) {
+            window.ErrorHandler.showError('Please ensure your password meets all requirements');
+            passwordField.focus();
+            return;
+          }
+          
+          // All validations passed - hide account setup section
+          const accountSetupSection = document.getElementById('accountSetupSection');
+          if (accountSetupSection) {
+            accountSetupSection.style.display = 'none';
+            console.log('✅ Hidden account setup section after completion');
+            
+            // Mark that user has completed account setup
+            window.accountSetupCompleted = true;
+            
+            // Scroll to personal info section
+            const personalInfoSection = document.getElementById('personalInfoSection');
+            if (personalInfoSection) {
+              setTimeout(() => {
+                personalInfoSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+              }, 100);
+            }
+          }
+        });
+      }
+    }
+
     // Set up address validation button
     function setupAddressValidation() {
       const validateButton = document.getElementById('validateAddress');
@@ -2616,7 +2692,8 @@
       window.validateAndSetAddress = validateAndSetAddress;
     }
 
-    // Set up address validation immediately - don't wait for map
+    // Set up navigation buttons
+    setupAccountSetupNavigation();
     setupAddressValidation();
 
     // Add click handler directly to submit button as a fallback
