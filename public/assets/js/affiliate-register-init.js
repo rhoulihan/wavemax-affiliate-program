@@ -938,6 +938,150 @@
       });
     }
 
+    // Add email validation function
+    async function validateEmail() {
+      const email = emailField?.value?.trim();
+      if (!email) return;
+
+      // Find or create help text element
+      let emailHelp = emailField.parentElement.querySelector('.email-validation-message');
+      if (!emailHelp) {
+        emailHelp = document.createElement('p');
+        emailHelp.className = 'email-validation-message text-xs mt-1';
+        emailField.parentElement.appendChild(emailHelp);
+      }
+
+      // Basic email format validation
+      const emailRegex = /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/;
+      if (!emailRegex.test(email)) {
+        emailField.classList.remove('border-green-500');
+        emailField.classList.add('border-red-500');
+        emailHelp.textContent = '❌ Invalid email format';
+        emailHelp.classList.remove('text-green-600');
+        emailHelp.classList.add('text-red-600');
+        return;
+      }
+
+      // Check email availability
+      try {
+        const response = await csrfFetch('/api/v1/auth/check-email', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ email })
+        });
+
+        const result = await response.json();
+
+        if (result.available) {
+          emailField.classList.remove('border-red-500');
+          emailField.classList.add('border-green-500');
+          emailHelp.textContent = '✓ Email available';
+          emailHelp.classList.remove('text-red-600');
+          emailHelp.classList.add('text-green-600');
+        } else {
+          emailField.classList.remove('border-green-500');
+          emailField.classList.add('border-red-500');
+          emailHelp.textContent = '❌ Email already registered';
+          emailHelp.classList.remove('text-green-600');
+          emailHelp.classList.add('text-red-600');
+        }
+      } catch (error) {
+        console.error('Error checking email:', error);
+        // Don't show error to user, just reset state
+        emailField.classList.remove('border-red-500', 'border-green-500');
+        emailHelp.textContent = '';
+      }
+    }
+
+    // Add username validation function
+    async function validateUsername() {
+      const username = usernameField?.value?.trim();
+      if (!username) return;
+
+      // Find or create help text element
+      let usernameHelp = usernameField.parentElement.querySelector('.username-validation-message');
+      if (!usernameHelp) {
+        usernameHelp = document.createElement('p');
+        usernameHelp.className = 'username-validation-message text-xs mt-1';
+        usernameField.parentElement.appendChild(usernameHelp);
+      }
+
+      // Check username availability
+      try {
+        const response = await csrfFetch('/api/v1/auth/check-username', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ username })
+        });
+
+        const result = await response.json();
+
+        if (result.available) {
+          usernameField.classList.remove('border-red-500');
+          usernameField.classList.add('border-green-500');
+          usernameHelp.textContent = '✓ Username available';
+          usernameHelp.classList.remove('text-red-600');
+          usernameHelp.classList.add('text-green-600');
+        } else {
+          usernameField.classList.remove('border-green-500');
+          usernameField.classList.add('border-red-500');
+          usernameHelp.textContent = '❌ Username already taken';
+          usernameHelp.classList.remove('text-green-600');
+          usernameHelp.classList.add('text-red-600');
+        }
+      } catch (error) {
+        console.error('Error checking username:', error);
+        // Don't show error to user, just reset state
+        usernameField.classList.remove('border-red-500', 'border-green-500');
+        usernameHelp.textContent = '';
+      }
+    }
+
+    // Add email validation event listeners
+    if (emailField) {
+      // Validate on blur (when user leaves the field)
+      emailField.addEventListener('blur', validateEmail);
+      
+      // Clear validation on input change
+      emailField.addEventListener('input', function() {
+        const emailHelp = this.parentElement.querySelector('.email-validation-message');
+        if (emailHelp && emailHelp.textContent.includes('❌')) {
+          this.classList.remove('border-red-500', 'border-green-500');
+          emailHelp.textContent = '';
+          emailHelp.classList.remove('text-red-600', 'text-green-600');
+        }
+        // Also update password requirements if password field has value
+        if (passwordField?.value) {
+          updatePasswordRequirements(
+            passwordField.value,
+            usernameField?.value || '',
+            this.value
+          );
+        }
+      });
+    }
+
+    // Add username validation event listeners
+    if (usernameField) {
+      // Validate on blur (when user leaves the field)
+      usernameField.addEventListener('blur', validateUsername);
+      
+      // Clear validation message on input but keep the original input handler
+      const originalInputHandler = usernameField.oninput;
+      usernameField.addEventListener('input', function() {
+        const usernameHelp = this.parentElement.querySelector('.username-validation-message');
+        if (usernameHelp && usernameHelp.textContent.includes('❌')) {
+          this.classList.remove('border-red-500', 'border-green-500');
+          usernameHelp.textContent = '';
+          usernameHelp.classList.remove('text-red-600', 'text-green-600');
+        }
+      });
+    }
+
     if (emailField) {
       emailField.addEventListener('input', function() {
         if (passwordField?.value) {
@@ -1051,6 +1195,34 @@
             if (formSpinner) formSpinner.hide();
             isSubmitting = false; // Reset flag
             return;
+          }
+
+          // Check for email validation errors
+          const emailField = document.getElementById('email');
+          if (emailField && emailField.classList.contains('border-red-500')) {
+            const emailHelp = emailField.parentElement.querySelector('.email-validation-message');
+            const errorMessage = emailHelp?.textContent || 'Please fix the email validation error';
+            window.ErrorHandler.showError(errorMessage);
+            // Hide spinner
+            if (formSpinner) formSpinner.hide();
+            isSubmitting = false; // Reset flag
+            emailField.focus();
+            return;
+          }
+
+          // Check for username validation errors (only for traditional registration)
+          if (!isSocialRegistration) {
+            const usernameField = document.getElementById('username');
+            if (usernameField && usernameField.classList.contains('border-red-500')) {
+              const usernameHelp = usernameField.parentElement.querySelector('.username-validation-message');
+              const errorMessage = usernameHelp?.textContent || 'Please fix the username validation error';
+              window.ErrorHandler.showError(errorMessage);
+              // Hide spinner
+              if (formSpinner) formSpinner.hide();
+              isSubmitting = false; // Reset flag
+              usernameField.focus();
+              return;
+            }
           }
 
           // Additional validation for payment method

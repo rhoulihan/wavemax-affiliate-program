@@ -52,14 +52,29 @@ exports.registerAffiliate = async (req, res) => {
     } = req.body;
 
     // Check if email or username already exists
-    const existingAffiliate = await Affiliate.findOne({
-      $or: [{ email }, { username }]
-    });
+    const existingEmail = await Affiliate.findOne({ email });
+    const existingUsername = await Affiliate.findOne({ username });
 
-    if (existingAffiliate) {
+    if (existingEmail && existingUsername) {
       return res.status(400).json({
         success: false,
-        message: 'Email or username already in use'
+        message: 'Both email and username are already in use',
+        errors: {
+          email: 'Email already registered',
+          username: 'Username already taken'
+        }
+      });
+    } else if (existingEmail) {
+      return res.status(400).json({
+        success: false,
+        message: 'Email already registered',
+        field: 'email'
+      });
+    } else if (existingUsername) {
+      return res.status(400).json({
+        success: false,
+        message: 'Username already taken',
+        field: 'username'
       });
     }
 
