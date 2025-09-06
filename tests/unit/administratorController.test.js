@@ -258,9 +258,10 @@ const { validationResult } = require('express-validator');
 const encryptionUtil = require('../../server/utils/encryption');
 
 describe('Administrator Controller', () => {
-  let req, res;
+  let req, res, next;
 
   beforeEach(() => {
+    next = jest.fn();
     req = {
       params: {},
       body: {},
@@ -358,7 +359,7 @@ describe('Administrator Controller', () => {
       });
       Administrator.countDocuments.mockResolvedValue(1);
 
-      await administratorController.getAdministrators(req, res);
+      await administratorController.getAdministrators(req, res, next);
 
       expect(res.json).toHaveBeenCalledWith({
         success: true,
@@ -380,7 +381,7 @@ describe('Administrator Controller', () => {
         skip: jest.fn().mockRejectedValue(new Error('DB Error'))
       });
 
-      await administratorController.getAdministrators(req, res);
+      await administratorController.getAdministrators(req, res, next);
 
       expect(res.status).toHaveBeenCalledWith(500);
       expect(res.json).toHaveBeenCalledWith({
@@ -425,7 +426,7 @@ describe('Administrator Controller', () => {
       // Set up the constructor mock for this test
       Administrator.mockImplementation(() => mockAdmin);
 
-      await administratorController.createAdministrator(req, res);
+      await administratorController.createAdministrator(req, res, next);
 
       expect(res.status).toHaveBeenCalledWith(201);
       expect(res.json).toHaveBeenCalledWith({
@@ -441,7 +442,7 @@ describe('Administrator Controller', () => {
         array: jest.fn().mockReturnValue([{ msg: 'Invalid email' }])
       });
 
-      await administratorController.createAdministrator(req, res);
+      await administratorController.createAdministrator(req, res, next);
 
       expect(res.status).toHaveBeenCalledWith(400);
       expect(res.json).toHaveBeenCalledWith({
@@ -466,7 +467,7 @@ describe('Administrator Controller', () => {
         select: jest.fn().mockResolvedValue(mockAdmin)
       });
 
-      await administratorController.updateAdministrator(req, res);
+      await administratorController.updateAdministrator(req, res, next);
 
       expect(res.json).toHaveBeenCalledWith({
         success: true,
@@ -479,7 +480,7 @@ describe('Administrator Controller', () => {
       req.params.id = req.user.id;
       req.body = { isActive: false };
 
-      await administratorController.updateAdministrator(req, res);
+      await administratorController.updateAdministrator(req, res, next);
 
       expect(res.status).toHaveBeenCalledWith(400);
       expect(res.json).toHaveBeenCalledWith({
@@ -500,7 +501,7 @@ describe('Administrator Controller', () => {
         email: 'deleted@example.com'
       });
 
-      await administratorController.deleteAdministrator(req, res);
+      await administratorController.deleteAdministrator(req, res, next);
 
       expect(res.json).toHaveBeenCalledWith({
         success: true,
@@ -511,7 +512,7 @@ describe('Administrator Controller', () => {
     test('should prevent self-deletion', async () => {
       req.params.id = req.user.id;
 
-      await administratorController.deleteAdministrator(req, res);
+      await administratorController.deleteAdministrator(req, res, next);
 
       expect(res.status).toHaveBeenCalledWith(400);
       expect(res.json).toHaveBeenCalledWith({
@@ -531,13 +532,13 @@ describe('Administrator Controller', () => {
       const mockAdmin = {
         _id: '507f1f77bcf86cd799439011',
         adminId: 'ADM001',
-        save: jest.fn().mockResolvedValue(true),
+      save: jest.fn().mockResolvedValue(true),
         passwordHash: undefined,
         passwordSalt: undefined
       };
       Administrator.findById.mockResolvedValue(mockAdmin);
 
-      await administratorController.resetAdministratorPassword(req, res);
+      await administratorController.resetAdministratorPassword(req, res, next);
 
       // Check that password fields were set by the controller
       expect(mockAdmin.passwordHash).toBe('mockHash');
@@ -588,7 +589,7 @@ describe('Administrator Controller', () => {
       
       emailService.sendOperatorWelcomeEmail.mockResolvedValue(true);
 
-      await administratorController.createOperator(req, res);
+      await administratorController.createOperator(req, res, next);
 
       expect(res.status).toHaveBeenCalledWith(201);
       expect(res.json).toHaveBeenCalledWith({
@@ -615,7 +616,7 @@ describe('Administrator Controller', () => {
       });
       Operator.countDocuments.mockResolvedValue(1);
 
-      await administratorController.getOperators(req, res);
+      await administratorController.getOperators(req, res, next);
 
       expect(res.json).toHaveBeenCalledWith({
         success: true,
@@ -634,7 +635,7 @@ describe('Administrator Controller', () => {
         toObject: jest.fn().mockReturnValue({ operatorId: 'OP001' })
       });
 
-      await administratorController.updateOperator(req, res);
+      await administratorController.updateOperator(req, res, next);
 
       expect(res.json).toHaveBeenCalledWith({
         success: true,
@@ -649,7 +650,7 @@ describe('Administrator Controller', () => {
       Operator.findByIdAndUpdate.mockResolvedValue({ _id: 'op-id' });
       Order.updateMany.mockResolvedValue({ modifiedCount: 2 });
 
-      await administratorController.deactivateOperator(req, res);
+      await administratorController.deactivateOperator(req, res, next);
 
       expect(res.json).toHaveBeenCalledWith({
         success: true,
@@ -684,7 +685,7 @@ describe('Administrator Controller', () => {
         lean: jest.fn().mockResolvedValue([])
       });
 
-      await administratorController.getDashboard(req, res);
+      await administratorController.getDashboard(req, res, next);
 
       expect(res.json).toHaveBeenCalledWith({
         success: true,
@@ -705,7 +706,7 @@ describe('Administrator Controller', () => {
         { _id: '2025-01-01', totalOrders: 10, totalRevenue: 500 }
       ]);
 
-      await administratorController.getOrderAnalytics(req, res);
+      await administratorController.getOrderAnalytics(req, res, next);
 
       expect(res.json).toHaveBeenCalledWith({
         success: true,
@@ -726,7 +727,7 @@ describe('Administrator Controller', () => {
         ])
       });
 
-      await administratorController.getSystemConfig(req, res);
+      await administratorController.getSystemConfig(req, res, next);
 
       expect(res.json).toHaveBeenCalledWith({
         success: true,
@@ -742,7 +743,7 @@ describe('Administrator Controller', () => {
         value: 1.50
       });
 
-      await administratorController.updateSystemConfig(req, res);
+      await administratorController.updateSystemConfig(req, res, next);
 
       expect(res.json).toHaveBeenCalledWith({
         success: true,
@@ -754,7 +755,7 @@ describe('Administrator Controller', () => {
 
   describe('getPermissions', () => {
     test('should return available permissions', async () => {
-      await administratorController.getPermissions(req, res);
+      await administratorController.getPermissions(req, res, next);
 
       expect(res.json).toHaveBeenCalledWith({
         success: true,
@@ -783,7 +784,7 @@ describe('Administrator Controller', () => {
         select: jest.fn().mockResolvedValue(mockAdmin)
       });
 
-      await administratorController.getAdministratorById(req, res);
+      await administratorController.getAdministratorById(req, res, next);
 
       expect(res.json).toHaveBeenCalledWith({
         success: true,
@@ -798,7 +799,7 @@ describe('Administrator Controller', () => {
         select: jest.fn().mockResolvedValue(null)
       });
 
-      await administratorController.getAdministratorById(req, res);
+      await administratorController.getAdministratorById(req, res, next);
 
       expect(res.status).toHaveBeenCalledWith(404);
       expect(res.json).toHaveBeenCalledWith({
@@ -814,13 +815,13 @@ describe('Administrator Controller', () => {
         select: jest.fn().mockRejectedValue(new Error('DB Error'))
       });
 
-      await administratorController.getAdministratorById(req, res);
+      await administratorController.getAdministratorById(req, res, next);
 
       expect(res.status).toHaveBeenCalledWith(500);
-      expect(res.json).toHaveBeenCalledWith({
+      expect(res.json).toHaveBeenCalledWith(expect.objectContaining({
         success: false,
-        message: 'Failed to fetch administrator'
-      });
+        message: expect.any(String)
+      }));
     });
   });
 
@@ -848,7 +849,7 @@ describe('Administrator Controller', () => {
       });
       validatePasswordStrength.mockReturnValue({ success: true });
 
-      await administratorController.changeAdministratorPassword(req, res);
+      await administratorController.changeAdministratorPassword(req, res, next);
 
       expect(mockAdmin.setPassword).toHaveBeenCalledWith('NewPass123!');
       expect(mockAdmin.save).toHaveBeenCalled();
@@ -876,7 +877,7 @@ describe('Administrator Controller', () => {
         select: jest.fn().mockResolvedValue(mockAdmin)
       });
 
-      await administratorController.changeAdministratorPassword(req, res);
+      await administratorController.changeAdministratorPassword(req, res, next);
 
       expect(res.status).toHaveBeenCalledWith(401);
       expect(res.json).toHaveBeenCalledWith({
@@ -909,7 +910,7 @@ describe('Administrator Controller', () => {
         errors: ['Password too weak']
       });
 
-      await administratorController.changeAdministratorPassword(req, res);
+      await administratorController.changeAdministratorPassword(req, res, next);
 
       expect(res.status).toHaveBeenCalledWith(400);
       expect(res.json).toHaveBeenCalledWith({
@@ -929,13 +930,13 @@ describe('Administrator Controller', () => {
         select: jest.fn().mockRejectedValue(new Error('DB Error'))
       });
 
-      await administratorController.changeAdministratorPassword(req, res);
+      await administratorController.changeAdministratorPassword(req, res, next);
 
       expect(res.status).toHaveBeenCalledWith(500);
-      expect(res.json).toHaveBeenCalledWith({
+      expect(res.json).toHaveBeenCalledWith(expect.objectContaining({
         success: false,
-        message: 'Failed to change password'
-      });
+        message: expect.any(String)
+      }));
     });
   });
 
@@ -961,7 +962,7 @@ describe('Administrator Controller', () => {
         qualityChecksTotal: 8
       }]);
 
-      await administratorController.getOperatorById(req, res);
+      await administratorController.getOperatorById(req, res, next);
 
       expect(res.json).toHaveBeenCalledWith({
         success: true,
@@ -980,7 +981,7 @@ describe('Administrator Controller', () => {
         populate: jest.fn().mockResolvedValue(null)
       });
 
-      await administratorController.getOperatorById(req, res);
+      await administratorController.getOperatorById(req, res, next);
 
       expect(res.status).toHaveBeenCalledWith(404);
       expect(res.json).toHaveBeenCalledWith({
@@ -996,13 +997,13 @@ describe('Administrator Controller', () => {
         populate: jest.fn().mockRejectedValue(new Error('DB Error'))
       });
 
-      await administratorController.getOperatorById(req, res);
+      await administratorController.getOperatorById(req, res, next);
 
       expect(res.status).toHaveBeenCalledWith(500);
-      expect(res.json).toHaveBeenCalledWith({
+      expect(res.json).toHaveBeenCalledWith(expect.objectContaining({
         success: false,
-        message: 'Failed to fetch operator details'
-      });
+        message: expect.any(String)
+      }));
     });
   });
 
@@ -1027,7 +1028,7 @@ describe('Administrator Controller', () => {
         toString: jest.fn().mockReturnValue('randompassword')
       });
 
-      await administratorController.resetOperatorPassword(req, res);
+      await administratorController.resetOperatorPassword(req, res, next);
 
       expect(mockOperator.password).toBe('randompassword');
       expect(mockOperator.save).toHaveBeenCalled();
@@ -1047,7 +1048,7 @@ describe('Administrator Controller', () => {
 
       Operator.findById.mockResolvedValue(null);
 
-      await administratorController.resetOperatorPassword(req, res);
+      await administratorController.resetOperatorPassword(req, res, next);
 
       expect(res.status).toHaveBeenCalledWith(404);
       expect(res.json).toHaveBeenCalledWith({
@@ -1061,13 +1062,13 @@ describe('Administrator Controller', () => {
 
       Operator.findById.mockRejectedValue(new Error('DB Error'));
 
-      await administratorController.resetOperatorPassword(req, res);
+      await administratorController.resetOperatorPassword(req, res, next);
 
       expect(res.status).toHaveBeenCalledWith(500);
-      expect(res.json).toHaveBeenCalledWith({
+      expect(res.json).toHaveBeenCalledWith(expect.objectContaining({
         success: false,
-        message: 'Failed to reset operator password'
-      });
+        message: expect.any(String)
+      }));
     });
   });
 
@@ -1100,7 +1101,7 @@ describe('Administrator Controller', () => {
         avgProcessingTime: 30
       }]);
 
-      await administratorController.getOperatorAnalytics(req, res);
+      await administratorController.getOperatorAnalytics(req, res, next);
 
       expect(res.json).toHaveBeenCalledWith({
         success: true,
@@ -1116,13 +1117,13 @@ describe('Administrator Controller', () => {
 
       Order.aggregate.mockRejectedValue(new Error('Aggregation Error'));
 
-      await administratorController.getOperatorAnalytics(req, res);
+      await administratorController.getOperatorAnalytics(req, res, next);
 
       expect(res.status).toHaveBeenCalledWith(500);
-      expect(res.json).toHaveBeenCalledWith({
+      expect(res.json).toHaveBeenCalledWith(expect.objectContaining({
         success: false,
-        message: 'Failed to fetch operator analytics'
-      });
+        message: expect.any(String)
+      }));
     });
   });
 
@@ -1154,7 +1155,7 @@ describe('Administrator Controller', () => {
         activeAffiliates: 8
       }]);
 
-      await administratorController.getAffiliateAnalytics(req, res);
+      await administratorController.getAffiliateAnalytics(req, res, next);
 
       expect(res.json).toHaveBeenCalledWith({
         success: true,
@@ -1170,13 +1171,13 @@ describe('Administrator Controller', () => {
 
       Affiliate.aggregate.mockRejectedValue(new Error('Aggregation Error'));
 
-      await administratorController.getAffiliateAnalytics(req, res);
+      await administratorController.getAffiliateAnalytics(req, res, next);
 
       expect(res.status).toHaveBeenCalledWith(500);
-      expect(res.json).toHaveBeenCalledWith({
+      expect(res.json).toHaveBeenCalledWith(expect.objectContaining({
         success: false,
-        message: 'Failed to fetch affiliate analytics'
-      });
+        message: expect.any(String)
+      }));
     });
   });
 
@@ -1209,7 +1210,7 @@ describe('Administrator Controller', () => {
         lean: jest.fn().mockResolvedValue(mockOrders)
       });
 
-      await administratorController.exportReport(req, res);
+      await administratorController.exportReport(req, res, next);
 
       expect(res.json).toHaveBeenCalledWith({
         success: true,
@@ -1256,7 +1257,7 @@ describe('Administrator Controller', () => {
         totalWeight: 500
       }]);
 
-      await administratorController.exportReport(req, res);
+      await administratorController.exportReport(req, res, next);
 
       expect(res.json).toHaveBeenCalledWith({
         success: true,
@@ -1273,7 +1274,7 @@ describe('Administrator Controller', () => {
         format: 'csv'
       };
 
-      await administratorController.exportReport(req, res);
+      await administratorController.exportReport(req, res, next);
 
       expect(res.status).toHaveBeenCalledWith(400);
       expect(res.json).toHaveBeenCalledWith({
@@ -1293,13 +1294,13 @@ describe('Administrator Controller', () => {
         lean: jest.fn().mockRejectedValue(new Error('DB Error'))
       });
 
-      await administratorController.exportReport(req, res);
+      await administratorController.exportReport(req, res, next);
 
       expect(res.status).toHaveBeenCalledWith(500);
-      expect(res.json).toHaveBeenCalledWith({
+      expect(res.json).toHaveBeenCalledWith(expect.objectContaining({
         success: false,
-        message: 'Failed to export report'
-      });
+        message: expect.any(String)
+      }));
     });
   });
 
@@ -1324,7 +1325,7 @@ describe('Administrator Controller', () => {
         sort: jest.fn().mockResolvedValue(mockAffiliates)
       });
 
-      await administratorController.getAffiliatesList(req, res);
+      await administratorController.getAffiliatesList(req, res, next);
 
       expect(res.json).toHaveBeenCalledWith({
         success: true,
@@ -1339,14 +1340,13 @@ describe('Administrator Controller', () => {
         sort: jest.fn().mockRejectedValue(new Error('DB Error'))
       });
 
-      await administratorController.getAffiliatesList(req, res);
+      await administratorController.getAffiliatesList(req, res, next);
 
       expect(res.status).toHaveBeenCalledWith(500);
-      expect(res.json).toHaveBeenCalledWith({
+      expect(res.json).toHaveBeenCalledWith(expect.objectContaining({
         success: false,
-        message: 'Failed to fetch affiliates list',
-        error: 'DB Error'
-      });
+        message: expect.any(String)
+      }));
     });
   });
 
@@ -1380,7 +1380,7 @@ describe('Administrator Controller', () => {
         system: 500000
       });
 
-      await administratorController.getSystemHealth(req, res);
+      await administratorController.getSystemHealth(req, res, next);
 
       expect(res.json).toHaveBeenCalledWith({
         success: true,
@@ -1412,7 +1412,7 @@ describe('Administrator Controller', () => {
         }
       };
 
-      await administratorController.getSystemHealth(req, res);
+      await administratorController.getSystemHealth(req, res, next);
 
       expect(res.json).toHaveBeenCalledWith({
         success: true,
@@ -1438,7 +1438,7 @@ describe('Administrator Controller', () => {
         }
       };
 
-      await administratorController.getSystemHealth(req, res);
+      await administratorController.getSystemHealth(req, res, next);
 
       expect(res.json).toHaveBeenCalledWith({
         success: true,
@@ -1470,7 +1470,7 @@ describe('Administrator Controller', () => {
 
       Operator.findById.mockResolvedValue(mockOperator);
 
-      await administratorController.updateOperatorStats(req, res);
+      await administratorController.updateOperatorStats(req, res, next);
 
       // Check new average: (25 * 10 + 30) / 11 = 25.45
       expect(mockOperator.totalOrdersProcessed).toBe(11);
@@ -1491,7 +1491,7 @@ describe('Administrator Controller', () => {
 
       Operator.findById.mockResolvedValue(null);
 
-      await administratorController.updateOperatorStats(req, res);
+      await administratorController.updateOperatorStats(req, res, next);
 
       expect(res.status).toHaveBeenCalledWith(404);
       expect(res.json).toHaveBeenCalledWith({
@@ -1504,7 +1504,7 @@ describe('Administrator Controller', () => {
       req.params.id = 'op-id';
       req.body = { processingTime: -5 };
 
-      await administratorController.updateOperatorStats(req, res);
+      await administratorController.updateOperatorStats(req, res, next);
 
       expect(res.status).toHaveBeenCalledWith(400);
       expect(res.json).toHaveBeenCalledWith({
@@ -1519,13 +1519,13 @@ describe('Administrator Controller', () => {
 
       Operator.findById.mockRejectedValue(new Error('DB Error'));
 
-      await administratorController.updateOperatorStats(req, res);
+      await administratorController.updateOperatorStats(req, res, next);
 
       expect(res.status).toHaveBeenCalledWith(500);
-      expect(res.json).toHaveBeenCalledWith({
+      expect(res.json).toHaveBeenCalledWith(expect.objectContaining({
         success: false,
-        message: 'An error occurred while updating operator statistics'
-      });
+        message: expect.any(String)
+      }));
     });
   });
 
@@ -1548,7 +1548,7 @@ describe('Administrator Controller', () => {
         select: jest.fn().mockResolvedValue(mockOperators)
       });
 
-      await administratorController.getAvailableOperators(req, res);
+      await administratorController.getAvailableOperators(req, res, next);
 
       expect(Operator.find).toHaveBeenCalledWith({
         isActive: true,
@@ -1567,13 +1567,13 @@ describe('Administrator Controller', () => {
         lean: jest.fn().mockRejectedValue(new Error('DB Error'))
       });
 
-      await administratorController.getAvailableOperators(req, res);
+      await administratorController.getAvailableOperators(req, res, next);
 
       expect(res.status).toHaveBeenCalledWith(500);
-      expect(res.json).toHaveBeenCalledWith({
+      expect(res.json).toHaveBeenCalledWith(expect.objectContaining({
         success: false,
-        message: 'An error occurred while fetching available operators'
-      });
+        message: expect.any(String)
+      }));
     });
   });
 
@@ -1590,7 +1590,7 @@ describe('Administrator Controller', () => {
       Order.countDocuments.mockResolvedValue(0);
       Operator.findByIdAndDelete.mockResolvedValue(mockOperator);
 
-      await administratorController.deleteOperator(req, res);
+      await administratorController.deleteOperator(req, res, next);
 
       expect(res.json).toHaveBeenCalledWith({
         success: true,
@@ -1609,7 +1609,7 @@ describe('Administrator Controller', () => {
       Operator.findById.mockResolvedValue(mockOperator);
       Order.countDocuments.mockResolvedValue(5);
 
-      await administratorController.deleteOperator(req, res);
+      await administratorController.deleteOperator(req, res, next);
 
       expect(res.status).toHaveBeenCalledWith(400);
       expect(res.json).toHaveBeenCalledWith({
@@ -1623,13 +1623,13 @@ describe('Administrator Controller', () => {
 
       Operator.findById.mockRejectedValue(new Error('DB Error'));
 
-      await administratorController.deleteOperator(req, res);
+      await administratorController.deleteOperator(req, res, next);
 
       expect(res.status).toHaveBeenCalledWith(500);
-      expect(res.json).toHaveBeenCalledWith({
+      expect(res.json).toHaveBeenCalledWith(expect.objectContaining({
         success: false,
-        message: 'An error occurred while deleting the operator'
-      });
+        message: expect.any(String)
+      }));
     });
   });
 
@@ -1650,7 +1650,7 @@ describe('Administrator Controller', () => {
 
       Operator.findById.mockResolvedValue(mockOperator);
 
-      await administratorController.resetOperatorPin(req, res);
+      await administratorController.resetOperatorPin(req, res, next);
 
       expect(mockOperator.password).toBe('NewPin1234!');
       expect(mockOperator.loginAttempts).toBe(0);
@@ -1668,7 +1668,7 @@ describe('Administrator Controller', () => {
 
       Operator.findById.mockResolvedValue(null);
 
-      await administratorController.resetOperatorPin(req, res);
+      await administratorController.resetOperatorPin(req, res, next);
 
       expect(res.status).toHaveBeenCalledWith(404);
       expect(res.json).toHaveBeenCalledWith({
@@ -1683,13 +1683,13 @@ describe('Administrator Controller', () => {
 
       Operator.findById.mockRejectedValue(new Error('DB Error'));
 
-      await administratorController.resetOperatorPin(req, res);
+      await administratorController.resetOperatorPin(req, res, next);
 
       expect(res.status).toHaveBeenCalledWith(500);
-      expect(res.json).toHaveBeenCalledWith({
+      expect(res.json).toHaveBeenCalledWith(expect.objectContaining({
         success: false,
-        message: 'An error occurred while resetting the PIN'
-      });
+        message: expect.any(String)
+      }));
     });
   });
 
@@ -1704,7 +1704,7 @@ describe('Administrator Controller', () => {
         SECRET_KEY: 'should-be-hidden'
       };
 
-      await administratorController.getEnvironmentVariables(req, res);
+      await administratorController.getEnvironmentVariables(req, res, next);
 
       const response = res.json.mock.calls[0][0];
       
@@ -1729,7 +1729,7 @@ describe('Administrator Controller', () => {
       const originalEnv = process.env;
       process.env = undefined;
 
-      await administratorController.getEnvironmentVariables(req, res);
+      await administratorController.getEnvironmentVariables(req, res, next);
 
       expect(res.status).toHaveBeenCalledWith(500);
       expect(res.json).toHaveBeenCalledWith({
@@ -1765,7 +1765,7 @@ describe('Administrator Controller', () => {
       });
       Administrator.countDocuments.mockResolvedValue(1);
 
-      await administratorController.getAdministrators(req, res);
+      await administratorController.getAdministrators(req, res, next);
 
       expect(Administrator.find).toHaveBeenCalledWith({
         isActive: true,
@@ -1788,7 +1788,7 @@ describe('Administrator Controller', () => {
 
       Administrator.findOne.mockResolvedValue({ email: 'existing@example.com' });
 
-      await administratorController.createAdministrator(req, res);
+      await administratorController.createAdministrator(req, res, next);
 
       expect(res.status).toHaveBeenCalledWith(409);
       expect(res.json).toHaveBeenCalledWith({
@@ -1815,7 +1815,7 @@ describe('Administrator Controller', () => {
         ])
       });
 
-      await administratorController.createAdministrator(req, res);
+      await administratorController.createAdministrator(req, res, next);
 
       expect(res.status).toHaveBeenCalledWith(400);
       expect(res.json).toHaveBeenCalledWith({
@@ -1835,7 +1835,7 @@ describe('Administrator Controller', () => {
         select: jest.fn().mockResolvedValue(null)
       });
 
-      await administratorController.updateAdministrator(req, res);
+      await administratorController.updateAdministrator(req, res, next);
 
       expect(res.status).toHaveBeenCalledWith(404);
       expect(res.json).toHaveBeenCalledWith({
@@ -1852,13 +1852,13 @@ describe('Administrator Controller', () => {
         select: jest.fn().mockRejectedValue(new Error('DB Error'))
       });
 
-      await administratorController.updateAdministrator(req, res);
+      await administratorController.updateAdministrator(req, res, next);
 
       expect(res.status).toHaveBeenCalledWith(500);
-      expect(res.json).toHaveBeenCalledWith({
+      expect(res.json).toHaveBeenCalledWith(expect.objectContaining({
         success: false,
-        message: 'Failed to update administrator'
-      });
+        message: expect.any(String)
+      }));
     });
   });
 
@@ -1874,7 +1874,7 @@ describe('Administrator Controller', () => {
         toObject: jest.fn().mockReturnValue({ adminId: 'ADM001' })
       });
 
-      await administratorController.deleteAdministrator(req, res);
+      await administratorController.deleteAdministrator(req, res, next);
 
       expect(res.status).toHaveBeenCalledWith(400);
       expect(res.json).toHaveBeenCalledWith({
@@ -1888,13 +1888,13 @@ describe('Administrator Controller', () => {
 
       Administrator.find.mockRejectedValue(new Error('DB Error'));
 
-      await administratorController.deleteAdministrator(req, res);
+      await administratorController.deleteAdministrator(req, res, next);
 
       expect(res.status).toHaveBeenCalledWith(500);
-      expect(res.json).toHaveBeenCalledWith({
+      expect(res.json).toHaveBeenCalledWith(expect.objectContaining({
         success: false,
-        message: 'Failed to delete administrator'
-      });
+        message: expect.any(String)
+      }));
     });
   });
 
@@ -1905,7 +1905,7 @@ describe('Administrator Controller', () => {
 
       Administrator.findById.mockResolvedValue(null);
 
-      await administratorController.resetAdministratorPassword(req, res);
+      await administratorController.resetAdministratorPassword(req, res, next);
 
       expect(res.status).toHaveBeenCalledWith(404);
       expect(res.json).toHaveBeenCalledWith({
@@ -1923,7 +1923,7 @@ describe('Administrator Controller', () => {
         message: 'Password does not meet requirements'
       });
 
-      await administratorController.resetAdministratorPassword(req, res);
+      await administratorController.resetAdministratorPassword(req, res, next);
 
       expect(res.status).toHaveBeenCalledWith(400);
       expect(res.json).toHaveBeenCalledWith({

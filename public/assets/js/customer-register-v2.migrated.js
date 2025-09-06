@@ -115,7 +115,7 @@
         try {
             // Get CSRF token
             if (!csrfToken) {
-                const csrfResponse = await fetch('/csrf-token');
+                const csrfResponse = await fetch('/api/csrf-token');
                 const csrfData = await csrfResponse.json();
                 csrfToken = csrfData.csrfToken;
             }
@@ -261,7 +261,7 @@
         try {
             // Get CSRF if needed
             if (!csrfToken) {
-                const csrfResponse = await fetch('/csrf-token');
+                const csrfResponse = await fetch('/api/csrf-token');
                 const csrfData = await csrfResponse.json();
                 csrfToken = csrfData.csrfToken;
             }

@@ -38,6 +38,7 @@ describe('OAuth Callback Functions - Simple', () => {
   
   describe('handleSocialCallback', () => {
     it('should delegate to customer handler for customer requests', async () => {
+      const next = jest.fn();
       mockReq.query.state = 'customer_12345';
       
       // Save the original function
@@ -55,6 +56,7 @@ describe('OAuth Callback Functions - Simple', () => {
     });
     
     it('should handle failed authentication with popup', async () => {
+      const next = jest.fn();
       mockReq.query.state = 'oauth_session_123';
       mockReq.user = null;
       
@@ -105,6 +107,7 @@ describe('OAuth Callback Functions - Simple', () => {
   
   describe('handleCustomerSocialCallback', () => {
     it('should handle missing user', async () => {
+      const next = jest.fn();
       mockReq.user = null;
       mockReq.query.state = 'customer_error';
       
@@ -120,6 +123,7 @@ describe('OAuth Callback Functions - Simple', () => {
     });
     
     it('should store session data for popup requests', async () => {
+      const next = jest.fn();
       mockReq.user = null;
       mockReq.query.state = 'customer_oauth_123';
       
@@ -143,6 +147,7 @@ describe('OAuth Callback Functions - Simple', () => {
   
   describe('State Parameter Parsing', () => {
     it('should extract sessionId from oauth_ prefixed state', async () => {
+      const next = jest.fn();
       mockReq.query.state = 'oauth_test_session_456';
       mockReq.user = null;
       
@@ -157,6 +162,7 @@ describe('OAuth Callback Functions - Simple', () => {
     });
     
     it('should handle missing state parameter', async () => {
+      const next = jest.fn();
       mockReq.query.state = undefined;
       mockReq.user = null;
       
@@ -168,6 +174,7 @@ describe('OAuth Callback Functions - Simple', () => {
     });
     
     it('should detect popup from referer header', async () => {
+      const next = jest.fn();
       mockReq.headers.referer = 'https://accounts.google.com/signin/oauth';
       mockReq.user = null;
       

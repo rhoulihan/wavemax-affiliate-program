@@ -21,7 +21,7 @@ describe('Field Filter WDF Credit Support', () => {
       bagCreditApplied: false,
       passwordSalt: 'secret',
       passwordHash: 'secret'
-    };
+    , save: jest.fn().mockResolvedValue(true)};
 
     it('should include WDF credit fields for customer viewing own profile', () => {
       const filtered = getFilteredData('customer', mockCustomer, 'customer', { isSelf: true });
@@ -101,7 +101,7 @@ describe('Field Filter WDF Credit Support', () => {
       weightDifference: 5,
       specialPickupInstructions: 'Ring doorbell',
       paymentStatus: 'completed'
-    };
+    , save: jest.fn().mockResolvedValue(true)};
 
     it('should include WDF fields for customer viewing own order', () => {
       const filtered = getFilteredData('order', mockOrder, 'customer');

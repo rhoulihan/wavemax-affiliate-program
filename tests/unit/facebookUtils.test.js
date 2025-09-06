@@ -155,7 +155,7 @@ describe('Facebook Utils', () => {
           }
         },
         registrationMethod: 'facebook',
-        save: jest.fn().mockResolvedValue(true)
+      save: jest.fn().mockResolvedValue(true)
       };
     });
 
@@ -214,8 +214,8 @@ describe('Facebook Utils', () => {
   describe('findUsersByFacebookId', () => {
     it('should find both affiliate and customer', async () => {
       const facebookId = 'fb123';
-      const mockAffiliate = { _id: 'aff123', name: 'Affiliate' };
-      const mockCustomer = { _id: 'cust123', name: 'Customer' };
+      const mockAffiliate = { _id: 'aff123', name: 'Affiliate' , save: jest.fn().mockResolvedValue(true)};
+      const mockCustomer = { _id: 'cust123', name: 'Customer' , save: jest.fn().mockResolvedValue(true)};
       
       Affiliate.findOne.mockResolvedValue(mockAffiliate);
       Customer.findOne.mockResolvedValue(mockCustomer);
@@ -237,7 +237,7 @@ describe('Facebook Utils', () => {
 
     it('should handle when only affiliate exists', async () => {
       const facebookId = 'fb456';
-      const mockAffiliate = { _id: 'aff456' };
+      const mockAffiliate = { _id: 'aff456' , save: jest.fn().mockResolvedValue(true)};
       
       Affiliate.findOne.mockResolvedValue(mockAffiliate);
       Customer.findOne.mockResolvedValue(null);

@@ -198,9 +198,59 @@ function cleanupCurrentPage() {
 
 // Function to process HTML and remove inline styles for CSP compliance
 function processHtmlForCSP(html) {
-    // For now, just return the HTML as-is
-    // In the future, we could parse and move inline styles to a style element with nonce
-    return html;
+    // Extract inline styles and move them to a style element with nonce
+    let processedHtml = html;
+    const inlineStyles = [];
+    let styleCounter = 0;
+    
+    // Match elements with style attributes
+    processedHtml = processedHtml.replace(/style\s*=\s*["']([^"']+)["']/gi, (match, styles) => {
+        const className = `csp-style-${Date.now()}-${styleCounter++}`;
+        inlineStyles.push(`.${className} { ${styles} }`);
+        return `class="${className}"`;
+    });
+    
+    // If we found inline styles, create a style element for them
+    if (inlineStyles.length > 0) {
+        // Get nonce from current document
+        let nonce = null;
+        
+        // Try from window.CSP_NONCE first
+        if (window.CSP_NONCE && window.CSP_NONCE.trim()) {
+            nonce = window.CSP_NONCE;
+        }
+        
+        // Try from any existing element with nonce
+        if (!nonce) {
+            const elementsWithNonce = document.querySelectorAll('[nonce]');
+            for (const element of elementsWithNonce) {
+                const elementNonce = element.getAttribute('nonce');
+                if (elementNonce) {
+                    nonce = elementNonce;
+                    break;
+                }
+            }
+        }
+        
+        // Try from meta tag
+        if (!nonce) {
+            const nonceMeta = document.querySelector('meta[name="csp-nonce"]');
+            if (nonceMeta) {
+                nonce = nonceMeta.getAttribute('content');
+            }
+        }
+        
+        // Create and append style element
+        const styleElement = document.createElement('style');
+        styleElement.setAttribute('data-csp-extracted', 'true');
+        if (nonce) {
+            styleElement.setAttribute('nonce', nonce);
+        }
+        styleElement.textContent = inlineStyles.join('\n');
+        document.head.appendChild(styleElement);
+    }
+    
+    return processedHtml;
 }
 
 // Height tracking variables
@@ -444,96 +494,43 @@ async function loadPage(route) {
                     return;
                 }
                 
-                const styleElement = document.createElement('style');
-                styleElement.setAttribute('data-route', route);
+                // Skip adding style elements that would violate CSP
+                // Instead, we'll handle styles differently for dynamic content
+                console.log('[embed-app-v2] Skipping style element to avoid CSP violation');
                 
-                // Get nonce from current document (embed-app-v2.html)
+                // Option 1: Try to get the actual nonce from the parent document
                 let nonce = null;
                 
-                // First try to extract nonce from CSP header in error messages
-                // This is a workaround for when the server doesn't properly inject nonce
-                const errorElements = document.querySelectorAll('script[src]');
-                for (const elem of errorElements) {
-                    try {
-                        // Force a CSP error to extract the nonce
-                        const testElem = document.createElement('script');
-                        testElem.textContent = '// test';
-                        document.head.appendChild(testElem);
-                        document.head.removeChild(testElem);
-                    } catch (e) {
-                        // Check if error message contains nonce
-                        const nonceMatch = e.message?.match(/nonce-([a-zA-Z0-9+/=]+)/);
-                        if (nonceMatch) {
-                            nonce = nonceMatch[1];
-                            console.log('Extracted nonce from CSP error:', nonce);
-                            break;
-                        }
-                    }
+                // The most reliable way - get nonce from existing scripts
+                const scriptsWithNonce = document.querySelectorAll('script[nonce]');
+                if (scriptsWithNonce.length > 0) {
+                    nonce = scriptsWithNonce[0].nonce || scriptsWithNonce[0].getAttribute('nonce');
                 }
                 
-                // Try from any script element with nonce in current document
-                if (!nonce) {
-                    const scripts = document.querySelectorAll('script[nonce]');
-                    for (const script of scripts) {
-                        const scriptNonce = script.getAttribute('nonce');
-                        if (scriptNonce) {
-                            nonce = scriptNonce;
-                            break;
-                        }
-                    }
-                }
-                
-                // If not found, try from style or link elements
-                if (!nonce) {
-                    const elementsWithNonce = document.querySelectorAll('[nonce]');
-                    for (const element of elementsWithNonce) {
-                        const elementNonce = element.getAttribute('nonce');
-                        if (elementNonce) {
-                            nonce = elementNonce;
-                            break;
-                        }
-                    }
-                }
-                
-                // If still not found, try from window.CSP_NONCE
-                if (!nonce && window.CSP_NONCE && window.CSP_NONCE.trim()) {
+                // Try from window.CSP_NONCE
+                if (!nonce && window.CSP_NONCE) {
                     nonce = window.CSP_NONCE;
                 }
                 
-                // Try from current document's meta tag
+                // Try from meta tag
                 if (!nonce) {
-                    const currentNonceMeta = document.querySelector('meta[name="csp-nonce"]');
-                    if (currentNonceMeta) {
-                        const currentNonce = currentNonceMeta.getAttribute('content');
-                        if (currentNonce && currentNonce.trim()) {
-                            nonce = currentNonce;
-                        }
+                    const nonceMeta = document.querySelector('meta[name="csp-nonce"]');
+                    if (nonceMeta) {
+                        nonce = nonceMeta.getAttribute('content');
                     }
                 }
                 
-                // As last resort, try to get it from the CSP header in the console error
-                if (!nonce) {
-                    // Look for the nonce in recent console errors
-                    const cspHeader = document.querySelector('meta[http-equiv="Content-Security-Policy"]');
-                    if (cspHeader) {
-                        const content = cspHeader.getAttribute('content');
-                        const nonceMatch = content?.match(/nonce-([a-zA-Z0-9+/=]+)/);
-                        if (nonceMatch) {
-                            nonce = nonceMatch[1];
-                        }
-                    }
+                // If we have a valid nonce and style content, add it
+                if (nonce && styleContent) {
+                    const styleElement = document.createElement('style');
+                    styleElement.setAttribute('data-route', route);
+                    styleElement.nonce = nonce;  // Use property instead of setAttribute
+                    styleElement.textContent = styleContent;
+                    document.head.appendChild(styleElement);
+                } else if (styleContent) {
+                    // If no nonce available, skip adding styles to avoid CSP violation
+                    console.warn('[embed-app-v2] Cannot add styles without nonce, skipping to avoid CSP violation');
                 }
-                
-                if (nonce) {
-                    styleElement.setAttribute('nonce', nonce);
-                } else {
-                    console.warn('No nonce found - CSP might block this style');
-                }
-                
-                // Set content after nonce
-                styleElement.textContent = styleContent;
-                
-                document.head.appendChild(styleElement);
             });
             
             html = bodyContent;

@@ -5,6 +5,8 @@ const Affiliate = require('../../server/models/Affiliate');
 const SystemConfig = require('../../server/models/SystemConfig');
 const emailService = require('../../server/utils/emailService');
 const { expectSuccessResponse, expectErrorResponse } = require('../helpers/responseHelpers');
+const { extractHandler } = require('../helpers/testUtils');
+const { createFindOneMock, createFindMock, createMockDocument, createAggregateMock } = require('../helpers/mockHelpers');
 
 // Mock dependencies
 jest.mock('../../server/models/Order');
@@ -12,9 +14,22 @@ jest.mock('../../server/models/Customer');
 jest.mock('../../server/models/Affiliate');
 jest.mock('../../server/models/SystemConfig');
 jest.mock('../../server/utils/emailService');
+jest.mock('../../server/utils/controllerHelpers', () => ({
+  asyncWrapper: (fn) => fn,
+  sendSuccess: (res, data, message, statusCode = 200) => {
+    return res.status(statusCode || 200).json({ success: true, message: message || 'Success', ...data });
+  },
+  sendError: (res, message, statusCode = 400, details) => {
+    return res.status(statusCode).json({ success: false, message, ...(details && { ...details }) });
+  },
+  validateRequiredFields: (body, fields) => {
+    const missing = fields.filter(field => !body[field]);
+    return missing.length > 0 ? { missingFields: missing } : null;
+  }
+}));
 
 describe('Order Controller', () => {
-  let req, res;
+  let req, res, next;
 
   beforeEach(() => {
     req = {
@@ -26,6 +41,7 @@ describe('Order Controller', () => {
       status: jest.fn().mockReturnThis(),
       json: jest.fn()
     };
+    next = jest.fn();
     jest.clearAllMocks();
     
     // Mock SystemConfig
@@ -89,6 +105,8 @@ describe('Order Controller', () => {
 
       Customer.findOne.mockResolvedValue(mockCustomer);
       Affiliate.findOne.mockResolvedValue(mockAffiliate);
+      Order.findOne = jest.fn().mockResolvedValue(null); // No active order
+      Order.mockImplementation(() => mockOrder);
       Order.prototype.save = jest.fn().mockImplementation(function() {
         Object.assign(this, mockOrder);
         return Promise.resolve(this);
@@ -105,11 +123,11 @@ describe('Order Controller', () => {
       expect(res.json).toHaveBeenCalledWith(
         expectSuccessResponse({
           orderId: 'ORD123456',
-          estimatedTotal: 49.46,
-          bagCreditApplied: 0,
-          wdfCreditApplied: 0,
+          estimatedTotal: '$49.46',
+          bagCreditApplied: '$0.00',
+          wdfCreditApplied: '$0.00',
           addOns: undefined,
-          addOnTotal: undefined
+          addOnTotal: '$0.00'
         }, 'Pickup scheduled successfully!')
       );
     });
@@ -152,6 +170,8 @@ describe('Order Controller', () => {
 
       Customer.findOne.mockResolvedValue(mockCustomer);
       Affiliate.findOne.mockResolvedValue(mockAffiliate);
+      Order.findOne = jest.fn().mockResolvedValue(null); // No active order
+      Order.mockImplementation(() => mockOrder);
       Order.prototype.save = jest.fn().mockImplementation(function() {
         Object.assign(this, mockOrder);
         return Promise.resolve(this);
@@ -166,11 +186,11 @@ describe('Order Controller', () => {
       expect(res.json).toHaveBeenCalledWith(
         expectSuccessResponse({
           orderId: 'ORD123456',
-          estimatedTotal: 49.46,
-          bagCreditApplied: 0,
-          wdfCreditApplied: 0,
+          estimatedTotal: '$49.46',
+          bagCreditApplied: '$0.00',
+          wdfCreditApplied: '$0.00',
           addOns: undefined,
-          addOnTotal: undefined
+          addOnTotal: '$0.00'
         }, 'Pickup scheduled successfully!')
       );
     });
@@ -178,7 +198,9 @@ describe('Order Controller', () => {
     it('should return error for invalid customer', async () => {
       req.body = {
         customerId: 'INVALID',
-        affiliateId: 'AFF123'
+        affiliateId: 'AFF123',
+        pickupDate: '2025-05-25',
+        pickupTime: 'morning'
       };
       req.user = { role: 'admin' };
 
@@ -197,11 +219,14 @@ describe('Order Controller', () => {
 
       req.body = {
         customerId: 'CUST123',
-        affiliateId: 'INVALID'
+        affiliateId: 'INVALID',
+        pickupDate: '2025-05-25',
+        pickupTime: 'morning'
       };
       req.user = { role: 'admin' };
 
       Customer.findOne.mockResolvedValue(mockCustomer);
+      Order.findOne = jest.fn().mockResolvedValue(null); // No active order
       Affiliate.findOne.mockResolvedValue(null);
 
       await orderController.createOrder(req, res);
@@ -215,11 +240,14 @@ describe('Order Controller', () => {
     it('should enforce authorization', async () => {
       req.body = {
         customerId: 'CUST456',
-        affiliateId: 'AFF123'
+        affiliateId: 'AFF123',
+        pickupDate: '2025-05-25',
+        pickupTime: 'morning'
       };
       req.user = { role: 'customer', customerId: 'CUST123' };
 
       Customer.findOne.mockResolvedValue({ customerId: 'CUST456' });
+      Order.findOne = jest.fn().mockResolvedValue(null); // No active order  
       Affiliate.findOne.mockResolvedValue({ affiliateId: 'AFF123' });
 
       await orderController.createOrder(req, res);
@@ -284,7 +312,7 @@ describe('Order Controller', () => {
               email: 'john@example.com'
             })
           })
-        })
+        }, 'Order details retrieved successfully')
       );
     });
 
@@ -353,8 +381,12 @@ describe('Order Controller', () => {
       expect(res.status).toHaveBeenCalledWith(200);
       expect(res.json).toHaveBeenCalledWith(
         expectSuccessResponse({
-          status: 'processing'
-        })
+          orderId: 'ORD123',
+          status: 'processing',
+          actualWeight: undefined,
+          actualTotal: undefined,
+          affiliateCommission: undefined
+        }, 'Order status updated successfully!')
       );
     });
 
@@ -462,7 +494,11 @@ describe('Order Controller', () => {
       expect(emailService.sendAffiliateOrderCancellationEmail).toHaveBeenCalled();
       expect(res.status).toHaveBeenCalledWith(200);
       expect(res.json).toHaveBeenCalledWith(
-        expectSuccessResponse(null, 'Order cancelled successfully')
+        expectSuccessResponse({
+          orderId: 'ORD123',
+          status: 'Cancelled',
+          cancelledAt: expect.any(String)
+        }, 'Order cancelled successfully')
       );
     });
 

@@ -271,6 +271,7 @@ describe('Social Auth Routes - Full Coverage', () => {
 
   describe('Social Registration Completion', () => {
     it('should complete affiliate social registration', async () => {
+      const next = jest.fn();
       const authController = require('../../server/controllers/authController');
       
       const response = await request(app)

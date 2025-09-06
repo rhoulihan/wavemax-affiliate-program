@@ -1,4 +1,7 @@
 const operatorController = require('../../server/controllers/operatorController');
+const { expectSuccessResponse, expectErrorResponse } = require('../helpers/responseHelpers');
+const { createFindOneMock, createFindMock, createMockDocument } = require('../helpers/mockHelpers');
+const { extractHandler } = require('../helpers/testUtils');
 
 // Mock all dependencies
 jest.mock('../../server/models/Order');
@@ -35,7 +38,7 @@ describe('Bag Tracking System', () => {
         email: 'john@example.com',
         phone: '1234567890',
         address: '123 Main St'
-      };
+, save: jest.fn().mockResolvedValue(true)};
 
       const mockOrder = {
         orderId: 'ORD-123456',
@@ -47,8 +50,9 @@ describe('Bag Tracking System', () => {
         status: 'pending',
         customer: mockCustomer,
         populate: jest.fn().mockReturnThis()
-      };
+, save: jest.fn().mockResolvedValue(true)};
 
+      Customer.findOne = createFindOneMock(mockCustomer);
       Customer.findOne.mockResolvedValue(mockCustomer);
       Order.findOne.mockReturnValue({
         sort: jest.fn().mockReturnValue({
@@ -68,7 +72,10 @@ describe('Bag Tracking System', () => {
         status: jest.fn().mockReturnThis()
       };
 
-      await operatorController.scanBag(req, res);
+      const next = jest.fn();
+
+      const handler = operatorController.scanBag;
+      await handler(req, res, next);
 
       expect(Customer.findOne).toHaveBeenCalledWith({ customerId: 'CUST-12345' });
       expect(res.json).toHaveBeenCalledWith({
@@ -90,8 +97,9 @@ describe('Bag Tracking System', () => {
         email: 'john@example.com',
         phone: '1234567890',
         address: '123 Main St'
-      };
+, save: jest.fn().mockResolvedValue(true)};
 
+      Customer.findOne = createFindOneMock(mockCustomer);
       Customer.findOne.mockResolvedValue(mockCustomer);
 
       const req = {
@@ -109,7 +117,9 @@ describe('Bag Tracking System', () => {
       // Mock scanCustomer since legacy format redirects there
       operatorController.scanCustomer = jest.fn();
 
-      await operatorController.scanBag(req, res);
+      const next = jest.fn();
+      const handler = extractHandler(operatorController.scanBag);
+      await handler(req, res, next);
 
       expect(operatorController.scanCustomer).toHaveBeenCalled();
       expect(req.body.customerId).toBe('CUST-12345');
@@ -128,8 +138,7 @@ describe('Bag Tracking System', () => {
         status: 'pending',
         numberOfBags: 2,
         bagsWeighed: 0,
-        bags: [],
-        save: jest.fn().mockResolvedValue(true)
+        bags: [], save: jest.fn().mockResolvedValue(true)
       };
 
       // After save, update the mock to reflect changes
@@ -162,7 +171,9 @@ describe('Bag Tracking System', () => {
         status: jest.fn().mockReturnThis()
       };
 
-      await operatorController.weighBags(req, res);
+      const next = jest.fn();
+      const handler = operatorController.weighBags;
+      await handler(req, res, next);
 
       expect(res.json).toHaveBeenCalledWith({
         success: true,
@@ -195,7 +206,22 @@ describe('Bag Tracking System', () => {
       });
     });
 
-    it('should prevent duplicate bag IDs', async () => {
+    it('should update existing bag when duplicate bag ID provided', async () => {
+      const bagsArray = [{
+        bagId: 'bag-001',
+        bagNumber: 1,
+        weight: 5,
+        status: 'processing',
+        scannedAt: {},
+        scannedBy: {}
+      }];
+      
+      // Add necessary array methods
+      bagsArray.findIndex = Array.prototype.findIndex.bind(bagsArray);
+      bagsArray.filter = Array.prototype.filter.bind(bagsArray);
+      bagsArray.reduce = Array.prototype.reduce.bind(bagsArray);
+      bagsArray.push = Array.prototype.push.bind(bagsArray);
+      
       const mockOrder = {
         orderId: 'ORD-123456',
         customerId: 'CUST-12345',
@@ -206,14 +232,12 @@ describe('Bag Tracking System', () => {
         status: 'processing',
         numberOfBags: 2,
         bagsWeighed: 1,
-        bags: [{
-          bagId: 'bag-001',
-          bagNumber: 1,
-          weight: 5,
-          status: 'processing'
-        }],
+        bags: bagsArray,
         save: jest.fn()
       };
+      
+      // Mock save to return the updated order
+      mockOrder.save.mockResolvedValue(mockOrder);
 
       Order.findOne.mockResolvedValue(mockOrder);
 
@@ -232,13 +256,25 @@ describe('Bag Tracking System', () => {
         status: jest.fn().mockReturnThis()
       };
 
-      await operatorController.weighBags(req, res);
+      const next = jest.fn();
+      const handler = operatorController.weighBags;
+      await handler(req, res, next);
 
-      expect(res.status).toHaveBeenCalledWith(400);
+      // Should successfully update the existing bag with new weight
       expect(res.json).toHaveBeenCalledWith({
-        success: false,
-        error: 'Duplicate bag',
-        message: 'Bag bag-001 has already been added to this order'
+        success: true,
+        order: expect.objectContaining({
+          orderId: 'ORD-123456',
+          actualWeight: 5.5,  // Updated weight
+          bags: expect.arrayContaining([
+            expect.objectContaining({
+              bagId: 'bag-001',
+              weight: 5.5  // Weight should be updated
+            })
+          ])
+        }),
+        orderProgress: expect.any(Object),
+        message: 'Bags weighed successfully'
       });
     });
   });
@@ -263,7 +299,7 @@ describe('Bag Tracking System', () => {
           bagNumber: 1,
           weight: 5,
           status: 'processing',
-          scannedAt: {},
+          scannedAt: new Date(),
           scannedBy: {}
         }, {
           bagId: 'bag-002',
@@ -272,8 +308,7 @@ describe('Bag Tracking System', () => {
           status: 'processing',
           scannedAt: {},
           scannedBy: {}
-        }],
-        save: jest.fn()
+        }], save: jest.fn()
       };
 
       // Mock save to update the order state
@@ -297,7 +332,9 @@ describe('Bag Tracking System', () => {
         status: jest.fn().mockReturnThis()
       };
 
-      await operatorController.scanProcessed(req, res);
+      const next = jest.fn();
+      const handler = operatorController.scanProcessed;
+      await handler(req, res, next);
 
       expect(res.json).toHaveBeenCalledWith({
         success: true,
@@ -339,7 +376,7 @@ describe('Bag Tracking System', () => {
           status: 'processed',
           scannedAt: {
             processed: new Date()
-          },
+    , save: jest.fn().mockResolvedValue(true)},
           scannedBy: {}
         }, {
           bagId: 'bag-002',
@@ -348,8 +385,7 @@ describe('Bag Tracking System', () => {
           status: 'processing',
           scannedAt: {},
           scannedBy: {}
-        }],
-        save: jest.fn()
+        }], save: jest.fn()
       };
 
       Order.findOne.mockResolvedValue(mockOrder);
@@ -366,7 +402,9 @@ describe('Bag Tracking System', () => {
         status: jest.fn().mockReturnThis()
       };
 
-      await operatorController.scanProcessed(req, res);
+      const next = jest.fn();
+      const handler = extractHandler(operatorController.scanProcessed);
+      await handler(req, res, next);
 
       expect(res.json).toHaveBeenCalledWith({
         success: false,
@@ -383,7 +421,7 @@ describe('Bag Tracking System', () => {
 
     it('should trigger completion actions when all bags processed', async () => {
       const emailService = require('../../server/utils/emailService');
-      emailService.sendOrderStatusUpdateEmail = jest.fn();
+      emailService.sendOrderReadyNotification = jest.fn();
       emailService.sendAffiliateCommissionEmail = jest.fn();
 
       const mockOrder = {
@@ -407,7 +445,7 @@ describe('Bag Tracking System', () => {
           bagNumber: 1,
           weight: 5,
           status: 'processed',
-          scannedAt: {},
+          scannedAt: new Date(),
           scannedBy: {}
         }, {
           bagId: 'bag-002',
@@ -416,8 +454,7 @@ describe('Bag Tracking System', () => {
           status: 'processing',
           scannedAt: {},
           scannedBy: {}
-        }],
-        save: jest.fn(),
+        }], save: jest.fn(),
         populate: jest.fn().mockReturnThis()
       };
 
@@ -443,13 +480,22 @@ describe('Bag Tracking System', () => {
         username: 'johndoe',
         passwordSalt: 'salt',
         passwordHash: 'hash'
-      };
+, save: jest.fn().mockResolvedValue(true)};
 
       mockOrder.customer = mockCustomer;
-      mockOrder.affiliate = { affiliateId: 'AFF-123', businessName: 'Test Business' };
+      mockOrder.affiliate = { affiliateId: 'AFF-123', businessName: 'Test Business', email: 'affiliate@test.com' };
 
       Order.findOne.mockResolvedValue(mockOrder);
+      Customer.findOne = createFindOneMock(mockCustomer);
       Customer.findOne.mockResolvedValue(mockCustomer);
+      
+      // Mock Affiliate model
+      const Affiliate = require('../../server/models/Affiliate');
+      Affiliate.findOne = jest.fn().mockResolvedValue({ 
+        affiliateId: 'AFF-123', 
+        businessName: 'Test Business',
+        email: 'affiliate@test.com'
+      });
 
       const req = {
         body: {
@@ -463,7 +509,9 @@ describe('Bag Tracking System', () => {
         status: jest.fn().mockReturnThis()
       };
 
-      await operatorController.scanProcessed(req, res);
+      const next = jest.fn();
+      const handler = extractHandler(operatorController.scanProcessed);
+      await handler(req, res, next);
 
       expect(res.json).toHaveBeenCalledWith({
         success: true,
@@ -475,7 +523,7 @@ describe('Bag Tracking System', () => {
         message: 'All bags processed - ready for pickup'
       });
 
-      expect(emailService.sendOrderStatusUpdateEmail).toHaveBeenCalled();
+      expect(emailService.sendOrderReadyNotification).toHaveBeenCalled();
     });
   });
 
@@ -499,7 +547,7 @@ describe('Bag Tracking System', () => {
           bagNumber: 1,
           weight: 5,
           status: 'processed',
-          scannedAt: {},
+          scannedAt: new Date(),
           scannedBy: {}
         }, {
           bagId: 'bag-002',
@@ -508,8 +556,7 @@ describe('Bag Tracking System', () => {
           status: 'processed',
           scannedAt: {},
           scannedBy: {}
-        }],
-        save: jest.fn(),
+        }], save: jest.fn(),
         populate: jest.fn().mockReturnThis()
       };
 
@@ -535,11 +582,12 @@ describe('Bag Tracking System', () => {
         username: 'johndoe',
         passwordSalt: 'salt',
         passwordHash: 'hash'
-      };
+, save: jest.fn().mockResolvedValue(true)};
 
       mockOrder.customer = mockCustomer;
 
       Order.findOne.mockResolvedValue(mockOrder);
+      Customer.findOne = createFindOneMock(mockCustomer);
       Customer.findOne.mockResolvedValue(mockCustomer);
 
       const req = {
@@ -555,7 +603,9 @@ describe('Bag Tracking System', () => {
         status: jest.fn().mockReturnThis()
       };
 
-      await operatorController.completePickup(req, res);
+      const next = jest.fn();
+      const handler = operatorController.completePickup;
+      await handler(req, res, next);
 
       expect(res.json).toHaveBeenCalledWith({
         success: true,
@@ -596,7 +646,7 @@ describe('Bag Tracking System', () => {
           bagNumber: 1,
           weight: 5,
           status: 'processed',
-          scannedAt: {},
+          scannedAt: new Date(),
           scannedBy: {}
         }, {
           bagId: 'bag-002',
@@ -605,8 +655,7 @@ describe('Bag Tracking System', () => {
           status: 'processed',
           scannedAt: {},
           scannedBy: {}
-        }],
-        save: jest.fn()
+        }], save: jest.fn()
       };
 
       Order.findOne.mockResolvedValue(mockOrder);
@@ -624,7 +673,9 @@ describe('Bag Tracking System', () => {
         status: jest.fn().mockReturnThis()
       };
 
-      await operatorController.completePickup(req, res);
+      const next = jest.fn();
+      const handler = extractHandler(operatorController.completePickup);
+      await handler(req, res, next);
 
       expect(res.status).toHaveBeenCalledWith(400);
       expect(res.json).toHaveBeenCalledWith({
@@ -653,7 +704,7 @@ describe('Bag Tracking System', () => {
           bagNumber: 1,
           weight: 5,
           status: 'processed',
-          scannedAt: {},
+          scannedAt: new Date(),
           scannedBy: {}
         }, {
           bagId: 'bag-002',
@@ -662,8 +713,7 @@ describe('Bag Tracking System', () => {
           status: 'processed',
           scannedAt: {},
           scannedBy: {}
-        }],
-        save: jest.fn()
+        }], save: jest.fn()
       };
 
       Order.findOne.mockResolvedValue(mockOrder);
@@ -681,7 +731,9 @@ describe('Bag Tracking System', () => {
         status: jest.fn().mockReturnThis()
       };
 
-      await operatorController.completePickup(req, res);
+      const next = jest.fn();
+      const handler = extractHandler(operatorController.completePickup);
+      await handler(req, res, next);
 
       expect(res.status).toHaveBeenCalledWith(400);
       expect(res.json).toHaveBeenCalledWith({

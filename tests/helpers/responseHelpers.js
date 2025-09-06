@@ -8,15 +8,13 @@
  * @param {string} [message] - Optional message
  * @returns {Object} Expected response object
  */
-function expectSuccessResponse(data, message) {
+function expectSuccessResponse(data, message = 'Success') {
+  // ControllerHelpers.sendSuccess spreads the data object
   const response = {
     success: true,
-    data
+    message,
+    ...(data || {})
   };
-  
-  if (message) {
-    response.message = message;
-  }
   
   return response;
 }
@@ -30,7 +28,7 @@ function expectSuccessResponse(data, message) {
 function expectErrorResponse(message, details) {
   const response = {
     success: false,
-    error: message
+    message: message
   };
   
   if (details) {

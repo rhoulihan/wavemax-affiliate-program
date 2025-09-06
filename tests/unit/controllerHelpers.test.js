@@ -14,6 +14,7 @@ describe('ControllerHelpers', () => {
 
   describe('asyncWrapper', () => {
     it('should handle successful async functions', async () => {
+      const next = jest.fn();
       const asyncFn = jest.fn().mockResolvedValue();
       const wrapped = ControllerHelpers.asyncWrapper(asyncFn);
 
@@ -24,6 +25,7 @@ describe('ControllerHelpers', () => {
     });
 
     it('should catch and pass errors to next', async () => {
+      const next = jest.fn();
       const error = new Error('Test error');
       const asyncFn = jest.fn().mockRejectedValue(error);
       const wrapped = ControllerHelpers.asyncWrapper(asyncFn);
@@ -35,6 +37,7 @@ describe('ControllerHelpers', () => {
     });
 
     it('should handle synchronous functions that return', async () => {
+      const next = jest.fn();
       const syncFn = jest.fn(() => 'result');
       const wrapped = ControllerHelpers.asyncWrapper(syncFn);
 

@@ -435,7 +435,7 @@ class PaymentEmailScanner {
       for (const email of emails) {
         const payment = await this.parsePaymentEmail(email);
         
-        if (payment && payment.orderId.toString() === orderId.toString()) {
+        if (payment && payment.orderId === order.orderId) {
           const verified = await this.verifyAndUpdateOrder(payment);
           
           if (verified) {

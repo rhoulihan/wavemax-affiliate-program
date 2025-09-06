@@ -213,6 +213,8 @@ describe('Email Service - Uncovered Functions', () => {
       
       // Re-require email service with failing transporter
       const emailServiceWithError = require('../../server/utils/emailService');
+const { expectSuccessResponse, expectErrorResponse } = require('../helpers/responseHelpers');
+const { createFindOneMock, createFindMock, createMockDocument, createAggregateMock } = require('../helpers/mockHelpers');
       
       const alertData = {
         serviceName: 'Database',
@@ -286,8 +288,8 @@ describe('Email Service - Uncovered Functions', () => {
       expect(mockTransporter.sendMail).toHaveBeenCalledWith(
         expect.objectContaining({
           to: 'customer@test.com',
-          subject: expect.stringContaining('Your Laundry'),
-          html: expect.stringContaining('Your Laundry')
+          subject: expect.stringContaining('Your Fresh Laundry'),
+          html: expect.stringContaining('Your freshly cleaned laundry')
         })
       );
     });

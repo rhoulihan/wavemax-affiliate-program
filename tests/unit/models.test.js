@@ -4,6 +4,8 @@ const Customer = require('../../server/models/Customer');
 const Order = require('../../server/models/Order');
 const Transaction = require('../../server/models/Transaction');
 const RefreshToken = require('../../server/models/RefreshToken');
+const { expectSuccessResponse, expectErrorResponse } = require('../helpers/responseHelpers');
+const { createFindOneMock, createFindMock, createMockDocument, createAggregateMock } = require('../helpers/mockHelpers');
 
 describe('Model Tests', () => {
 
@@ -228,7 +230,7 @@ describe('Model Tests', () => {
       const saved = await order.save();
 
       expect(saved._id).toBeDefined();
-      expect(saved.orderId).toMatch(/^ORD\d{6}$/);
+      expect(saved.orderId).toMatch(/^ORD-[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/);
       expect(saved.status).toBe('pending'); // Default status
       expect(saved.baseRate).toBe(1.25);
       expect(saved.paymentStatus).toBe('pending');

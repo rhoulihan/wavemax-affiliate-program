@@ -118,7 +118,7 @@ describe('General Payment Callback Routes', () => {
           customerId: 'CUST123',
           estimatedTotal: 100,
           paymentStatus: 'pending',
-          save: jest.fn().mockResolvedValue(true)
+      save: jest.fn().mockResolvedValue(true)
         };
 
         mockPayment = {
@@ -419,6 +419,7 @@ describe('General Payment Callback Routes', () => {
 
     describe('General error handling', () => {
       it('should handle general callback errors', async () => {
+      const next = jest.fn();
         // Force an error in the main handler
         const res = await request(app)
           .get('/payment/general-callback')
@@ -436,7 +437,7 @@ describe('General Payment Callback Routes', () => {
         const mockCustomer = {
           _id: 'customer456',
           customerId: 'CUST456',
-          save: jest.fn().mockResolvedValue(true)
+      save: jest.fn().mockResolvedValue(true)
         };
         Customer.mockImplementation(() => mockCustomer);
 
