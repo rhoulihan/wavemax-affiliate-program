@@ -193,7 +193,7 @@ describe('Field Filter Utility', () => {
       deliveryFee: 5.99,
       paymentMethod: 'venmo',
       venmoHandle: '@johndoe'
-    };
+    , save: jest.fn().mockResolvedValue(true)};
 
     it('should filter data based on admin role', () => {
       const result = getFilteredData('affiliate', mockAffiliate, 'admin');
@@ -222,7 +222,7 @@ describe('Field Filter Utility', () => {
         email: 'jane@example.com',
         phone: '987-654-3210',
         lastFourDigits: '1234'
-      };
+      , save: jest.fn().mockResolvedValue(true)};
 
       const resultSelf = getFilteredData('customer', mockCustomer, 'customer', { isSelf: true });
       const resultOther = getFilteredData('customer', mockCustomer, 'customer', { isSelf: false });
@@ -262,7 +262,7 @@ describe('Field Filter Utility', () => {
         status: 'processing',
         actualWeight: 10,
         affiliateCommission: 5.00
-      };
+      , save: jest.fn().mockResolvedValue(true)};
 
       // Affiliate should see commission
       const affiliateView = getFilteredData('order', mockOrder, 'affiliate');

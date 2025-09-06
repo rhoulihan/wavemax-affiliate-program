@@ -139,54 +139,73 @@
     }
 
     if (customerData) {
-      // Display customer information
-      document.getElementById('customerId').textContent = customerData.customerId;
-      document.getElementById('customerName').textContent =
-                `${customerData.firstName} ${customerData.lastName}`;
-      document.getElementById('customerEmail').textContent = customerData.email;
-      document.getElementById('transactionId').textContent = customerData.transactionId || '-';
+      // Display customer information with null checks
+      const customerIdEl = document.getElementById('customerId');
+      if (customerIdEl) customerIdEl.textContent = customerData.customerId;
+      
+      const customerNameEl = document.getElementById('customerName');
+      if (customerNameEl) customerNameEl.textContent = `${customerData.firstName} ${customerData.lastName}`;
+      
+      const customerEmailEl = document.getElementById('customerEmail');
+      if (customerEmailEl) customerEmailEl.textContent = customerData.email;
+      
+      const transactionIdEl = document.getElementById('transactionId');
+      if (transactionIdEl) transactionIdEl.textContent = customerData.transactionId || '-';
 
-      // Display bags purchased (check both field names for compatibility)
-      const bagCount = customerData.numberOfBags || customerData.bagsPurchased || 1;
-      document.getElementById('bagsPurchased').textContent = bagCount;
-
-      // Fetch bag fee from system config to calculate credit
-      const baseUrl = window.EMBED_CONFIG?.baseUrl || 'https://wavemax.promo';
-      fetch(`${baseUrl}/api/v1/system/config/public`, {
-        credentials: 'include'
-      })
-        .then(response => response.json())
-        .then(configs => {
-          const bagFeeConfig = configs.find(c => c.key === 'laundry_bag_fee');
-          if (bagFeeConfig && bagFeeConfig.currentValue) {
-            const bagFee = bagFeeConfig.currentValue;
-            const totalCredit = bagFee * bagCount;
-            document.getElementById('bagCreditAmount').textContent = `$${totalCredit.toFixed(2)}`;
-          }
+      // V2 registrations don't have bag purchases - skip bag-related elements
+      const bagsPurchasedEl = document.getElementById('bagsPurchased');
+      if (bagsPurchasedEl) {
+        const bagCount = customerData.numberOfBags || customerData.bagsPurchased || 1;
+        bagsPurchasedEl.textContent = bagCount;
+        
+        // Fetch bag fee from system config to calculate credit (only for v1)
+        const baseUrl = window.EMBED_CONFIG?.baseUrl || 'https://wavemax.promo';
+        fetch(`${baseUrl}/api/v1/system/config/public`, {
+          credentials: 'include'
         })
-        .catch(error => {
-          console.error('Error fetching bag fee:', error);
-          // Keep default $10.00 if fetch fails
-        });
+          .then(response => response.json())
+          .then(configs => {
+            const bagFeeConfig = configs.find(c => c.key === 'laundry_bag_fee');
+            if (bagFeeConfig && bagFeeConfig.currentValue) {
+              const bagFee = bagFeeConfig.currentValue;
+              const totalCredit = bagFee * bagCount;
+              const bagCreditEl = document.getElementById('bagCreditAmount');
+              if (bagCreditEl) bagCreditEl.textContent = `$${totalCredit.toFixed(2)}`;
+            }
+          })
+          .catch(error => {
+            console.error('Error fetching bag fee:', error);
+            // Keep default $10.00 if fetch fails
+          });
+      }
 
       // Load affiliate information if available
       if (customerData.affiliateInfo) {
         // Use stored affiliate info from registration
         console.log('Using stored affiliate info:', customerData.affiliateInfo);
         const affiliate = customerData.affiliateInfo;
-        document.getElementById('affiliateName').textContent =
-                    `${affiliate.firstName} ${affiliate.lastName} (${affiliate.businessName})`;
-        document.getElementById('serviceArea').textContent =
-                    `${affiliate.city}, ${affiliate.state}`;
+        
+        const affiliateNameEl = document.getElementById('affiliateName');
+        if (affiliateNameEl) {
+          affiliateNameEl.textContent = `${affiliate.firstName} ${affiliate.lastName} (${affiliate.businessName})`;
+        }
+        
+        const serviceAreaEl = document.getElementById('serviceArea');
+        if (serviceAreaEl) {
+          serviceAreaEl.textContent = `${affiliate.city}, ${affiliate.state}`;
+        }
 
         // Calculate delivery fee based on the affiliate's fee structure
-        let deliveryFeeText = '';
-        if (affiliate.minimumDeliveryFee !== null && affiliate.perBagDeliveryFee !== null) {
-          deliveryFeeText = `$${affiliate.minimumDeliveryFee.toFixed(2)} minimum, then $${affiliate.perBagDeliveryFee.toFixed(2)} per bag`;
-        } else {
-          deliveryFeeText = 'Contact provider for pricing';
+        const deliveryFeeEl = document.getElementById('deliveryFee');
+        if (deliveryFeeEl) {
+          let deliveryFeeText = '';
+          if (affiliate.minimumDeliveryFee !== null && affiliate.perBagDeliveryFee !== null) {
+            deliveryFeeText = `$${affiliate.minimumDeliveryFee.toFixed(2)} minimum, then $${affiliate.perBagDeliveryFee.toFixed(2)} per bag`;
+          } else {
+            deliveryFeeText = 'Contact provider for pricing';
+          }
+          deliveryFeeEl.textContent = deliveryFeeText;
         }
-        document.getElementById('deliveryFee').textContent = deliveryFeeText;
       } else if (customerData.affiliateId) {
         // Fallback to API call if no stored info
         loadAffiliateInfo(customerData.affiliateId);

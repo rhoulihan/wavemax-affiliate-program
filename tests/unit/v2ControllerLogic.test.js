@@ -7,10 +7,26 @@ const Affiliate = require('../../server/models/Affiliate');
 const SystemConfig = require('../../server/models/SystemConfig');
 const paymentLinkService = require('../../server/services/paymentLinkService');
 const emailService = require('../../server/utils/emailService');
+const { extractHandler } = require('../helpers/testUtils');
+const { expectSuccessResponse, expectErrorResponse } = require('../helpers/responseHelpers');
+const { createFindOneMock, createFindMock, createMockDocument, createAggregateMock } = require('../helpers/mockHelpers');
 
 // Mock external services
 jest.mock('../../server/services/paymentLinkService');
 jest.mock('../../server/utils/emailService');
+jest.mock('../../server/utils/controllerHelpers', () => ({
+  asyncWrapper: (fn) => fn,
+  sendSuccess: (res, data, message, statusCode = 200) => {
+    return res.status(statusCode || 200).json({ success: true, message: message || 'Success', ...data });
+  },
+  sendError: (res, message, statusCode = 400, details) => {
+    return res.status(statusCode).json({ success: false, message, ...(details && { ...details }) });
+  },
+  validateRequiredFields: (body, fields) => {
+    const missing = fields.filter(field => !body[field]);
+    return missing.length > 0 ? { missingFields: missing } : null;
+  }
+}));
 
 describe('V2 Controller Logic', () => {
   let testAffiliate;
@@ -88,10 +104,13 @@ describe('V2 Controller Logic', () => {
         json: jest.fn()
       };
       
-      emailService.sendWelcomeEmail = jest.fn().mockResolvedValue(true);
+      const next = jest.fn();
+      
+      emailService.sendCustomerWelcomeEmail = jest.fn().mockResolvedValue(true);
       emailService.sendNewCustomerNotification = jest.fn().mockResolvedValue(true);
       
-      await customerController.registerCustomer(req, res);
+      const handler = customerController.registerCustomer;
+      await handler(req, res, next);
       
       expect(res.status).toHaveBeenCalledWith(201);
       const responseData = res.json.mock.calls[0][0];
@@ -134,10 +153,13 @@ describe('V2 Controller Logic', () => {
         json: jest.fn()
       };
       
-      emailService.sendWelcomeEmail = jest.fn().mockResolvedValue(true);
+      const next = jest.fn();
+      
+      emailService.sendCustomerWelcomeEmail = jest.fn().mockResolvedValue(true);
       emailService.sendNewCustomerNotification = jest.fn().mockResolvedValue(true);
       
-      await customerController.registerCustomer(req, res);
+      const handler = extractHandler(customerController.registerCustomer);
+      await handler(req, res, next);
       
       // Should limit customer's initial bags to max free bags (2)
       const customer = await Customer.findOne({ email: 'jane@test.com' });
@@ -183,10 +205,13 @@ describe('V2 Controller Logic', () => {
         json: jest.fn()
       };
       
-      emailService.sendWelcomeEmail = jest.fn().mockResolvedValue(true);
+      const next = jest.fn();
+      
+      emailService.sendCustomerWelcomeEmail = jest.fn().mockResolvedValue(true);
       emailService.sendNewCustomerNotification = jest.fn().mockResolvedValue(true);
       
-      await customerController.registerCustomer(req, res);
+      const handler = extractHandler(customerController.registerCustomer);
+      await handler(req, res, next);
       
       // Verify V1 registration
       const customer = await Customer.findOne({ email: 'bob@test.com' });
@@ -275,7 +300,10 @@ describe('V2 Controller Logic', () => {
         json: jest.fn()
       };
       
-      await orderController.updateOrderStatus(req, res);
+      const next = jest.fn();
+      
+      const handler = orderController.updateOrderStatus;
+      await handler(req, res, next);
       
       // Verify payment links were generated
       expect(paymentLinkService.generatePaymentLinks).toHaveBeenCalledWith(
@@ -346,7 +374,10 @@ describe('V2 Controller Logic', () => {
         json: jest.fn()
       };
       
-      await orderController.updateOrderStatus(req, res);
+      const next = jest.fn();
+      
+      const handler = extractHandler(orderController.updateOrderStatus);
+      await handler(req, res, next);
       
       // Should not generate payment links for V1
       expect(paymentLinkService.generatePaymentLinks).not.toHaveBeenCalled();
@@ -379,7 +410,10 @@ describe('V2 Controller Logic', () => {
         json: jest.fn()
       };
       
-      await orderController.confirmPayment(req, res);
+      const next = jest.fn();
+      
+      const handler = orderController.confirmPayment;
+      await handler(req, res, next);
       
       // Verify order was updated
       const updatedOrder = await Order.findById(testOrder._id);
@@ -419,7 +453,10 @@ describe('V2 Controller Logic', () => {
         json: jest.fn()
       };
       
-      await orderController.verifyPaymentManually(req, res);
+      const next = jest.fn();
+      
+      const handler = orderController.verifyPaymentManually;
+      await handler(req, res, next);
       
       // Verify payment was marked as verified
       const updatedOrder = await Order.findById(testOrder._id);
@@ -465,7 +502,10 @@ describe('V2 Controller Logic', () => {
         json: jest.fn()
       };
       
-      await orderController.updateOrderStatus(req, res);
+      const next = jest.fn();
+      
+      const handler = extractHandler(orderController.updateOrderStatus);
+      await handler(req, res, next);
       
       // Should NOT send pickup notification (payment not verified)
       expect(emailService.sendPickupReadyNotification).not.toHaveBeenCalled();
@@ -476,7 +516,7 @@ describe('V2 Controller Logic', () => {
       
       // Update status again
       req.body.status = 'complete';
-      await orderController.updateOrderStatus(req, res);
+      await handler(req, res, next);
       
       // Pickup notification is not yet implemented (commented out in controller)
       // expect(emailService.sendPickupReadyNotification).toHaveBeenCalled();
@@ -532,10 +572,13 @@ describe('V2 Controller Logic', () => {
         json: jest.fn()
       };
       
+      const next = jest.fn();
+      
       emailService.sendOrderConfirmation = jest.fn().mockResolvedValue(true);
       emailService.sendNewOrderNotification = jest.fn().mockResolvedValue(true);
       
-      await orderController.createOrder(req, res);
+      const handler = orderController.createOrder;
+      await handler(req, res, next);
       
       expect(res.status).toHaveBeenCalledWith(201);
       const responseData = res.json.mock.calls[0][0];
@@ -587,7 +630,10 @@ describe('V2 Controller Logic', () => {
         json: jest.fn()
       };
       
-      await orderController.createOrder(req, res);
+      const next = jest.fn();
+      
+      const handler = extractHandler(orderController.createOrder);
+      await handler(req, res, next);
       
       // Should be rejected
       expect(res.status).toHaveBeenCalledWith(400);
@@ -629,10 +675,13 @@ describe('V2 Controller Logic', () => {
         json: jest.fn()
       };
       
-      emailService.sendWelcomeEmail = jest.fn().mockResolvedValue(true);
+      const next = jest.fn();
+      
+      emailService.sendCustomerWelcomeEmail = jest.fn().mockResolvedValue(true);
       emailService.sendNewCustomerNotification = jest.fn().mockResolvedValue(true);
       
-      await customerController.registerCustomer(req, res);
+      const handler = extractHandler(customerController.registerCustomer);
+      await handler(req, res, next);
       
       // Should default to V1
       const customer = await Customer.findOne({ email: 'edge@test.com' });
@@ -699,7 +748,10 @@ describe('V2 Controller Logic', () => {
         json: jest.fn()
       };
       
-      await orderController.updateOrderStatus(req, res);
+      const next = jest.fn();
+      
+      const handler = extractHandler(orderController.updateOrderStatus);
+      await handler(req, res, next);
       
       // When payment link generation fails, the controller returns an error
       expect(res.status).toHaveBeenCalledWith(500);

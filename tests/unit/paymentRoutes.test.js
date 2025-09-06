@@ -158,6 +158,7 @@ describe('Payment Routes', () => {
 
   describe('Dynamic Callback Routes', () => {
     it('should handle GET callback routes', async () => {
+      const next = jest.fn();
       const response = await request(app)
         .get('/api/v1/payments/callback/handler-1');
 
@@ -167,6 +168,7 @@ describe('Payment Routes', () => {
     });
 
     it('should handle POST callback routes', async () => {
+      const next = jest.fn();
       const response = await request(app)
         .post('/api/v1/payments/callback/handler-2')
         .send({ data: 'test' });
@@ -177,6 +179,7 @@ describe('Payment Routes', () => {
     });
 
     it('should handle multiple callback paths', async () => {
+      const next = jest.fn();
       // Test handler-3 GET
       const response1 = await request(app)
         .get('/api/v1/payments/callback/handler-3');
@@ -196,6 +199,7 @@ describe('Payment Routes', () => {
 
   describe('Error Handling', () => {
     it('should handle controller errors gracefully', async () => {
+      const next = jest.fn();
       mockController.getConfig.mockImplementationOnce((req, res) => {
         res.status(500).json({ error: 'Internal server error' });
       });
@@ -226,6 +230,7 @@ describe('Payment Routes', () => {
 
   describe('Request Validation', () => {
     it('should pass through request headers', async () => {
+      const next = jest.fn();
       await request(app)
         .get('/api/v1/payments/config')
         .set('Authorization', 'Bearer test-token')
@@ -238,6 +243,7 @@ describe('Payment Routes', () => {
     });
 
     it('should handle empty request bodies', async () => {
+      const next = jest.fn();
       const response = await request(app)
         .post('/api/v1/payments/create-token')
         .send({});

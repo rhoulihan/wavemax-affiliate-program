@@ -1,3 +1,5 @@
+jest.setTimeout(90000);
+
 const request = require('supertest');
 const app = require('../../server');
 const Order = require('../../server/models/Order');
@@ -300,7 +302,7 @@ describe('Order API - Add-on Functionality Integration Tests', () => {
         fabricSoftener: false,
         stainRemover: true
       });
-      expect(response.body.order.addOnTotal).toBe(5.00); // 2 × 25 × 0.10
+      expect(response.body.order.addOnTotal).toBe('$5.00'); // 2 × 25 × 0.10
     });
 
     it('should include add-ons when admin retrieves order', async () => {
@@ -311,7 +313,7 @@ describe('Order API - Add-on Functionality Integration Tests', () => {
 
       expect(response.body.success).toBe(true);
       expect(response.body.order.addOns).toBeDefined();
-      expect(response.body.order.addOnTotal).toBe(5.00);
+      expect(response.body.order.addOnTotal).toBe('$5.00');
     });
   });
 

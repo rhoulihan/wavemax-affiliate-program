@@ -5,6 +5,8 @@ const Affiliate = require('../../server/models/Affiliate');
 const SystemConfig = require('../../server/models/SystemConfig');
 const paymentEmailScanner = require('../../server/services/paymentEmailScanner');
 const paymentLinkService = require('../../server/services/paymentLinkService');
+const { expectSuccessResponse, expectErrorResponse } = require('../helpers/responseHelpers');
+const { createFindOneMock, createFindMock, createMockDocument, createAggregateMock } = require('../helpers/mockHelpers');
 
 // Mock dependencies
 jest.mock('../../server/services/paymentEmailScanner');
@@ -212,8 +214,7 @@ describe('PaymentVerificationJob', () => {
         shortOrderId: 'ABC12345'
       });
 
-      // Populate the customer for the test
-      testOrder.customerId = testCustomer;
+      // Keep the customerId as is (string ID) for the Customer.findOne to work
       await paymentVerificationJob.sendPaymentReminder(testOrder);
 
       expect(paymentLinkService.generatePaymentLinks).toHaveBeenCalledWith(
@@ -232,10 +233,8 @@ describe('PaymentVerificationJob', () => {
         shortOrderId: 'ABC12345'
       });
 
-      // Populate the customer for the test
-      testOrder.customerId = testCustomer;
-      
-      const consoleSpy = jest.spyOn(console, 'log');
+      // Keep the customerId as is (string ID) for the Customer.findOne to work
+      const consoleSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
       await paymentVerificationJob.sendPaymentReminder(testOrder);
 
       expect(consoleSpy).toHaveBeenCalledWith(

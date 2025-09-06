@@ -3,6 +3,8 @@ const operatorController = require('../../server/controllers/operatorController'
 const Customer = require('../../server/models/Customer');
 const { logAuditEvent } = require('../../server/utils/auditLogger');
 const { expectSuccessResponse, expectErrorResponse } = require('../helpers/responseHelpers');
+const { extractHandler } = require('../helpers/testUtils');
+const { createFindOneMock, createFindMock, createMockDocument, createAggregateMock } = require('../helpers/mockHelpers');
 
 jest.mock('../../server/models/Customer');
 jest.mock('../../server/utils/auditLogger');
@@ -14,7 +16,7 @@ jest.mock('../../server/utils/logger', () => ({
 }));
 
 describe('Operator Controller - Bag Label Printing', () => {
-  let req, res;
+  let req, res, next;
 
   beforeEach(() => {
     req = {
@@ -33,37 +35,46 @@ describe('Operator Controller - Bag Label Printing', () => {
       json: jest.fn(),
       status: jest.fn().mockReturnThis()
     };
+    next = jest.fn();
     jest.clearAllMocks();
   });
 
   describe('getNewCustomersCount', () => {
     it('should return count of customers without bag labels', async () => {
+      const next = jest.fn();
       Customer.countDocuments.mockResolvedValue(5);
 
-      await operatorController.getNewCustomersCount(req, res);
+      const handler = operatorController.getNewCustomersCount;
+      await handler(req, res, next);
 
       expect(Customer.countDocuments).toHaveBeenCalledWith({
         bagLabelsGenerated: false
       });
-      expect(res.json).toHaveBeenCalledWith(
-        expectSuccessResponse({ count: 5 })
-      );
+      expect(res.json).toHaveBeenCalledWith({
+        success: true,
+        count: 5
+      });
     });
 
     it('should return zero when no new customers', async () => {
+      const next = jest.fn();
       Customer.countDocuments.mockResolvedValue(0);
 
-      await operatorController.getNewCustomersCount(req, res);
+      const handler = extractHandler(operatorController.getNewCustomersCount);
+      await handler(req, res, next);
 
-      expect(res.json).toHaveBeenCalledWith(
-        expectSuccessResponse({ count: 0 })
-      );
+      expect(res.json).toHaveBeenCalledWith({
+        success: true,
+        count: 0
+      });
     });
 
     it('should handle database error', async () => {
+      const next = jest.fn();
       Customer.countDocuments.mockRejectedValue(new Error('Database error'));
 
-      await operatorController.getNewCustomersCount(req, res);
+      const handler = extractHandler(operatorController.getNewCustomersCount);
+      await handler(req, res, next);
 
       // Note: The actual controller uses console.error, not logger.error
       expect(res.status).toHaveBeenCalledWith(500);
@@ -99,7 +110,8 @@ describe('Operator Controller - Bag Label Printing', () => {
       });
       Customer.updateMany.mockResolvedValue({ modifiedCount: 2 });
 
-      await operatorController.printNewCustomerLabels(req, res);
+      const handler = operatorController.printNewCustomerLabels;
+      await handler(req, res, next);
 
       expect(Customer.find).toHaveBeenCalledWith({
         bagLabelsGenerated: false
@@ -160,11 +172,13 @@ describe('Operator Controller - Bag Label Printing', () => {
     });
 
     it('should handle no new customers', async () => {
+      const next = jest.fn();
       Customer.find.mockReturnValue({
         select: jest.fn().mockResolvedValue([])
       });
 
-      await operatorController.printNewCustomerLabels(req, res);
+      const handler = extractHandler(operatorController.printNewCustomerLabels);
+      await handler(req, res, next);
 
       expect(Customer.updateMany).not.toHaveBeenCalled();
       
@@ -193,7 +207,8 @@ describe('Operator Controller - Bag Label Printing', () => {
       });
       Customer.updateMany.mockResolvedValue({ modifiedCount: 1 });
 
-      await operatorController.printNewCustomerLabels(req, res);
+      const handler = extractHandler(operatorController.printNewCustomerLabels);
+      await handler(req, res, next);
 
       // Should NOT update the customer immediately
       expect(Customer.updateMany).not.toHaveBeenCalled();
@@ -216,11 +231,13 @@ describe('Operator Controller - Bag Label Printing', () => {
     });
 
     it('should handle database error during find', async () => {
+      const next = jest.fn();
       Customer.find.mockReturnValue({
         select: jest.fn().mockRejectedValue(new Error('Database error'))
       });
 
-      await operatorController.printNewCustomerLabels(req, res);
+      const handler = extractHandler(operatorController.printNewCustomerLabels);
+      await handler(req, res, next);
 
       const logger = require('../../server/utils/logger');
       expect(logger.error).toHaveBeenCalledWith('Print new customer labels error:', expect.any(Error));
@@ -257,7 +274,8 @@ describe('Operator Controller - Bag Label Printing', () => {
       });
       Customer.updateMany.mockResolvedValue({ modifiedCount: 2 });
 
-      await operatorController.printNewCustomerLabels(req, res);
+      const handler = extractHandler(operatorController.printNewCustomerLabels);
+      await handler(req, res, next);
 
       expect(res.json).toHaveBeenCalledWith(
         expectSuccessResponse({
@@ -295,7 +313,8 @@ describe('Operator Controller - Bag Label Printing', () => {
       });
       Customer.updateMany.mockResolvedValue({ modifiedCount: 1 });
 
-      await operatorController.printNewCustomerLabels(req, res);
+      const handler = extractHandler(operatorController.printNewCustomerLabels);
+      await handler(req, res, next);
 
       const response = res.json.mock.calls[0][0];
       expect(response.labelData).toHaveLength(5);
@@ -328,7 +347,8 @@ describe('Operator Controller - Bag Label Printing', () => {
       });
       Customer.updateMany.mockResolvedValue({ modifiedCount: 1 });
 
-      await operatorController.printNewCustomerLabels(req, res);
+      const handler = extractHandler(operatorController.printNewCustomerLabels);
+      await handler(req, res, next);
 
       expect(res.json).toHaveBeenCalledWith(
         expectSuccessResponse({

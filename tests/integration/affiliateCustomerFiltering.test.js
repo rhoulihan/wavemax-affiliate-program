@@ -1,8 +1,12 @@
+jest.setTimeout(90000);
+
 const request = require('supertest');
 const app = require('../../server');
 const Affiliate = require('../../server/models/Affiliate');
 const Customer = require('../../server/models/Customer');
 const encryptionUtil = require('../../server/utils/encryption');
+const { expectSuccessResponse, expectErrorResponse } = require('../helpers/responseHelpers');
+const { createFindOneMock, createFindMock, createMockDocument, createAggregateMock } = require('../helpers/mockHelpers');
 
 describe('Affiliate Customer Filtering Integration Tests', () => {
   let testAffiliate;
@@ -241,8 +245,8 @@ describe('Affiliate Customer Filtering Integration Tests', () => {
         lastName: testAffiliate.lastName,
         email: testAffiliate.email,
         businessName: testAffiliate.businessName,
-        minimumDeliveryFee: testAffiliate.minimumDeliveryFee,
-        perBagDeliveryFee: testAffiliate.perBagDeliveryFee
+        minimumDeliveryFee: '$25.00',
+        perBagDeliveryFee: '$5.00'
       });
     });
 

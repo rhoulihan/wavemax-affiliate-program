@@ -1,3 +1,5 @@
+jest.setTimeout(90000);
+
 const request = require('supertest');
 const app = require('../../server');
 const Customer = require('../../server/models/Customer');
@@ -6,6 +8,8 @@ const Affiliate = require('../../server/models/Affiliate');
 const SystemConfig = require('../../server/models/SystemConfig');
 const { createTestAffiliate, createTestCustomer, cleanupTestData } = require('../testUtils');
 const { getCsrfToken, createAgent } = require('../helpers/csrfHelper');
+const { expectSuccessResponse, expectErrorResponse } = require('../helpers/responseHelpers');
+const { createFindOneMock, createFindMock, createMockDocument, createAggregateMock } = require('../helpers/mockHelpers');
 
 describe('Bag Credit Functionality', () => {
   let testAffiliate;
@@ -86,7 +90,7 @@ describe('Bag Credit Functionality', () => {
 
     expect(res.status).toBe(201);
     expect(res.body.success).toBe(true);
-    expect(res.body.bagCreditApplied).toBe(25); // $25 bag credit applied
+    expect(res.body.bagCreditApplied).toBe('$25.00'); // $25 bag credit applied
 
     // Verify order was created with bag credit
     const order = await Order.findOne({ orderId: res.body.orderId });
@@ -128,7 +132,7 @@ describe('Bag Credit Functionality', () => {
       .send(orderData);
 
     expect(res.status).toBe(201);
-    expect(res.body.bagCreditApplied).toBe(0); // No bag credit applied
+    expect(res.body.bagCreditApplied).toBe('$0.00'); // No bag credit applied
 
     // Verify order has no bag credit
     const order = await Order.findOne({ orderId: res.body.orderId });

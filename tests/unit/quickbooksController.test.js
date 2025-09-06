@@ -19,7 +19,7 @@ jest.mock('../../server/models/SystemConfig');
 jest.mock('csv-writer');
 
 describe('QuickBooks Controller', () => {
-  let req, res;
+  let req, res, next;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -36,6 +36,7 @@ describe('QuickBooks Controller', () => {
       send: jest.fn(),
       setHeader: jest.fn()
     };
+    next = jest.fn();
   });
 
   describe('exportVendors', () => {
@@ -181,6 +182,7 @@ describe('QuickBooks Controller', () => {
     });
 
     it('should return 404 when no verified vendors found', async () => {
+      const next = jest.fn();
       Affiliate.find.mockReturnValue({
         select: jest.fn().mockResolvedValue([])
       });
@@ -394,6 +396,7 @@ describe('QuickBooks Controller', () => {
     });
 
     it('should return 400 when dates are missing', async () => {
+      const next = jest.fn();
       req.query = { format: 'json' };
 
       await quickbooksController.exportPaymentSummary(req, res);
@@ -479,7 +482,7 @@ describe('QuickBooks Controller', () => {
         status: 'verified',
         quickbooksData: {
           displayName: 'John Doe LLC'
-        }
+        , save: jest.fn().mockResolvedValue(true)}
       }
     };
 
@@ -563,6 +566,7 @@ describe('QuickBooks Controller', () => {
     });
 
     it('should return 400 when required parameters are missing', async () => {
+      const next = jest.fn();
       req.query = { startDate: '2025-01-01' };
 
       await quickbooksController.exportCommissionDetail(req, res);

@@ -20,7 +20,7 @@ jest.mock('../../server/utils/encryption');
 jest.mock('../../server/utils/auditLogger');
 
 describe('Administrator Controller - Uncovered Functions', () => {
-  let req, res;
+  let req, res, next;
 
   beforeEach(() => {
     req = {
@@ -33,6 +33,7 @@ describe('Administrator Controller - Uncovered Functions', () => {
       status: jest.fn().mockReturnThis(),
       json: jest.fn()
     };
+    next = jest.fn();
     jest.clearAllMocks();
   });
 
@@ -67,7 +68,7 @@ describe('Administrator Controller - Uncovered Functions', () => {
       
       Administrator.mockImplementation(() => mockAdmin);
 
-      await administratorController.createAdministrator(req, res);
+      await administratorController.createAdministrator(req, res, next);
 
       expect(res.status).toHaveBeenCalledWith(400);
       expect(res.json).toHaveBeenCalledWith({
@@ -106,7 +107,7 @@ describe('Administrator Controller - Uncovered Functions', () => {
       
       Administrator.mockImplementation(() => mockAdmin);
 
-      await administratorController.createAdministrator(req, res);
+      await administratorController.createAdministrator(req, res, next);
 
       expect(res.status).toHaveBeenCalledWith(409);
       expect(res.json).toHaveBeenCalledWith({
@@ -134,7 +135,7 @@ describe('Administrator Controller - Uncovered Functions', () => {
       Administrator.find.mockResolvedValue([]); // No other admins with 'all' permissions
       Administrator.findById.mockResolvedValue(adminToDelete);
 
-      await administratorController.deleteAdministrator(req, res);
+      await administratorController.deleteAdministrator(req, res, next);
 
       expect(res.status).toHaveBeenCalledWith(400);
       expect(res.json).toHaveBeenCalledWith({
@@ -206,7 +207,7 @@ describe('Administrator Controller - Uncovered Functions', () => {
         })
       });
 
-      await administratorController.getDashboard(req, res);
+      await administratorController.getDashboard(req, res, next);
 
       expect(res.json).toHaveBeenCalledWith({
         success: true,
@@ -246,7 +247,7 @@ describe('Administrator Controller - Uncovered Functions', () => {
         .mockResolvedValueOnce(mockAnalytics)  // First call for timeline
         .mockResolvedValueOnce([]);  // Second call for processingTimeDistribution
 
-      await administratorController.getOrderAnalytics(req, res);
+      await administratorController.getOrderAnalytics(req, res, next);
 
       expect(Order.aggregate).toHaveBeenCalledWith(
         expect.arrayContaining([
@@ -294,7 +295,7 @@ describe('Administrator Controller - Uncovered Functions', () => {
       
       Order.find.mockReturnValue(mockPopulate);
 
-      await administratorController.exportReport(req, res);
+      await administratorController.exportReport(req, res, next);
 
       expect(res.json).toHaveBeenCalledWith({
         success: true,
@@ -310,11 +311,12 @@ describe('Administrator Controller - Uncovered Functions', () => {
     });
 
     it('should handle invalid report type', async () => {
+      const next = jest.fn();
       req.query = {
         reportType: 'invalid_type'
       };
 
-      await administratorController.exportReport(req, res);
+      await administratorController.exportReport(req, res, next);
 
       expect(res.status).toHaveBeenCalledWith(400);
       expect(res.json).toHaveBeenCalledWith({
@@ -350,7 +352,7 @@ describe('Administrator Controller - Uncovered Functions', () => {
         })
       });
 
-      await administratorController.getAffiliatesList(req, res);
+      await administratorController.getAffiliatesList(req, res, next);
 
       expect(Affiliate.find).toHaveBeenCalledWith(
         expect.objectContaining({

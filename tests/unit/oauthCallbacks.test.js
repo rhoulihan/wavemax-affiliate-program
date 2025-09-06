@@ -56,6 +56,7 @@ describe('OAuth Callback Functions', () => {
   
   describe('handleSocialCallback', () => {
     it('should handle customer OAuth request by delegating to customer handler', async () => {
+      const next = jest.fn();
       mockReq.query.state = 'customer_12345';
       
       // Mock the handleCustomerSocialCallback
@@ -68,6 +69,7 @@ describe('OAuth Callback Functions', () => {
     });
     
     it('should handle popup request with no user (auth failed)', async () => {
+      const next = jest.fn();
       mockReq.query.state = 'oauth_session_123';
       mockReq.user = null;
       
@@ -201,7 +203,7 @@ describe('OAuth Callback Functions', () => {
         firstName: 'Jane',
         lastName: 'Doe',
         businessName: 'Jane\'s Business'
-      };
+      , save: jest.fn().mockResolvedValue(true)};
       
       mockReq.user = {
         email: 'affiliate@example.com',
@@ -239,7 +241,7 @@ describe('OAuth Callback Functions', () => {
         lastName: 'Customer',
         email: 'customer@example.com',
         affiliateId: 'AFF001'
-      };
+      , save: jest.fn().mockResolvedValue(true)};
       
       mockReq.user = {
         _id: 'cust123',
@@ -315,6 +317,7 @@ describe('OAuth Callback Functions', () => {
     });
     
     it('should handle errors during customer OAuth callback', async () => {
+      const next = jest.fn();
       mockReq.user = null;
       mockReq.query.state = 'customer_error';
       
@@ -328,6 +331,7 @@ describe('OAuth Callback Functions', () => {
   
   describe('OAuth State Parameter Handling', () => {
     it('should correctly parse sessionId from state parameter', async () => {
+      const next = jest.fn();
       mockReq.query.state = 'oauth_session_12345';
       mockReq.user = null;
       
@@ -342,6 +346,7 @@ describe('OAuth Callback Functions', () => {
     });
     
     it('should handle state parameter without oauth_ prefix', async () => {
+      const next = jest.fn();
       mockReq.query.state = 'popup=true';
       mockReq.user = null;
       
@@ -356,6 +361,7 @@ describe('OAuth Callback Functions', () => {
     });
     
     it('should detect popup from referer headers', async () => {
+      const next = jest.fn();
       mockReq.headers.referer = 'https://accounts.google.com/oauth/authorize';
       mockReq.user = null;
       

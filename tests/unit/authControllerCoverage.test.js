@@ -26,8 +26,18 @@ jest.mock('../../server/utils/auditLogger');
 jest.mock('jsonwebtoken');
 jest.mock('crypto');
 
+// Helper function to extract handler from wrapped middleware
+const extractHandler = (middleware) => {
+  // If the middleware is already a function, return it
+  if (typeof middleware === 'function') {
+    return middleware;
+  }
+  // If it's wrapped, extract the handler
+  return middleware;
+};
+
 describe('Auth Controller - Additional Coverage Tests Fixed', () => {
-  let req, res;
+  let req, res, next;
 
   beforeEach(() => {
     // Mock OAuthSession.createSession to prevent database calls
@@ -69,6 +79,7 @@ describe('Auth Controller - Additional Coverage Tests Fixed', () => {
         cspNonce: 'test-nonce'
       }
     };
+    next = jest.fn();
 
     // Default mocks
     crypto.randomBytes.mockReturnValue({ toString: jest.fn().mockReturnValue('mock-token') });
@@ -125,7 +136,8 @@ describe('Auth Controller - Additional Coverage Tests Fixed', () => {
         state: 'customer_oauth_test-session-id'
       };
 
-      await authController.handleCustomerSocialCallback(req, res);
+      const handler = extractHandler(authController.handleCustomerSocialCallback);
+      await handler(req, res, next);
 
       expect(res.send).toHaveBeenCalledWith(
         expect.stringContaining('social-auth-account-conflict')
@@ -150,7 +162,8 @@ describe('Auth Controller - Additional Coverage Tests Fixed', () => {
       jwt.sign.mockReturnValue('token');
       RefreshToken.prototype.save = jest.fn();
 
-      await authController.handleCustomerSocialCallback(req, res);
+      const handler = extractHandler(authController.handleCustomerSocialCallback);
+      await handler(req, res, next);
 
       expect(res.send).toHaveBeenCalledWith(
         expect.stringContaining('social-auth-login')
@@ -175,7 +188,8 @@ describe('Auth Controller - Additional Coverage Tests Fixed', () => {
 
       Administrator.findOne.mockResolvedValue(mockAdmin);
 
-      await authController.resetPassword(req, res);
+      const handler = extractHandler(authController.resetPassword);
+      await handler(req, res, next);
 
       expect(Administrator.findOne).toHaveBeenCalledWith({
         resetToken: 'hashed-token',
@@ -207,7 +221,8 @@ describe('Auth Controller - Additional Coverage Tests Fixed', () => {
 
       Operator.findOne.mockResolvedValue(mockOperator);
 
-      await authController.resetPassword(req, res);
+      const handler = extractHandler(authController.resetPassword);
+      await handler(req, res, next);
 
       // Operators cannot reset passwords
       expect(res.status).toHaveBeenCalledWith(400);

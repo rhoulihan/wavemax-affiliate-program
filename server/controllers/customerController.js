@@ -97,6 +97,22 @@ exports.registerCustomer = ControllerHelpers.asyncWrapper(async (req, res) => {
     passwordHash = hash;
   }
 
+  // Check payment version for V2 system
+  const paymentVersion = await SystemConfig.getValue('payment_version', 'v1');
+  const isV2Registration = paymentVersion === 'v2';
+  
+  // Determine registration version and initial bags
+  let registrationVersion = 'v1';
+  let initialBagsRequested = numberOfBags || 1;
+  
+  if (isV2Registration) {
+    // V2 Registration: No payment, free bags
+    registrationVersion = 'v2';
+    const freeInitialBags = await SystemConfig.getValue('free_initial_bags', 2);
+    initialBagsRequested = Math.min(numberOfBags || 1, freeInitialBags);
+    console.log(`V2 registration: ${initialBagsRequested} free bags, no payment required`);
+  }
+
   // Create new customer with formatted data
   const newCustomer = new Customer({
     customerId: `CUST-${uuidv4()}`,
@@ -115,7 +131,10 @@ exports.registerCustomer = ControllerHelpers.asyncWrapper(async (req, res) => {
     passwordSalt,
     passwordHash,
     languagePreference: languagePreference || 'en',
-    numberOfBags: numberOfBags || 1,
+    numberOfBags: initialBagsRequested,
+    registrationVersion: registrationVersion,
+    initialBagsRequested: isV2Registration ? initialBagsRequested : undefined,
+    bagCredit: isV2Registration ? 0 : (numberOfBags || 1) * 10, // V1 uses credit system
     registrationMethod: socialToken ? 'oauth' : 'traditional'
   });
 
@@ -144,18 +163,35 @@ exports.registerCustomer = ControllerHelpers.asyncWrapper(async (req, res) => {
     { expiresIn: '24h' }
   );
 
-  // Send welcome email with proper error handling
+  // Prepare bag info for emails (V2 doesn't have bag purchases)
+  const bagInfo = {
+    numberOfBags: 0,  // V2 doesn't require bag purchases
+    totalCredit: 0,   // V2 has no upfront payment
+    bagFee: 0         // V2 has no bag fees
+  };
+
+  // Send welcome email to customer with proper error handling
   try {
-    await emailService.sendWelcomeEmail(
-      email,
-      {
-        firstName: Formatters.name(firstName),
-        affiliateName: affiliate.businessName
-      }
+    await emailService.sendCustomerWelcomeEmail(
+      newCustomer,  // Pass the full customer object
+      affiliate,    // Pass the full affiliate object
+      bagInfo      // Pass bag information
     );
   } catch (emailError) {
     console.error('Failed to send welcome email:', emailError);
     // Don't fail registration if email fails
+  }
+
+  // Send new customer notification to affiliate
+  try {
+    await emailService.sendAffiliateNewCustomerEmail(
+      affiliate,    // Pass the full affiliate object
+      newCustomer,  // Pass the full customer object
+      bagInfo      // Pass bag information
+    );
+  } catch (emailError) {
+    console.error('Failed to send affiliate notification:', emailError);
+    // Don't fail registration if notification fails
   }
 
   // Send success response
@@ -349,7 +385,7 @@ exports.getCustomerDashboardStats = [
             totalWeight: { $sum: '$actualWeight' },
             completedOrders: {
               $sum: {
-                $cond: [{ $eq: ['$status', 'completed'] }, 1, 0]
+                $cond: [{ $eq: ['$status', 'complete'] }, 1, 0]
               }
             }
           }
@@ -373,8 +409,8 @@ exports.getCustomerDashboardStats = [
         email: customer.email,
         phone: Formatters.phone(customer.phone),
         address: Formatters.address(customer),
-        wdfCredits: customer.wdfCredits || 0,
-        formattedCredits: Formatters.currency(customer.wdfCredits || 0),
+        wdfCredits: customer.wdfCredit || 0,
+        formattedCredits: Formatters.currency(customer.wdfCredit || 0),
         numberOfBags: customer.numberOfBags,
         memberSince: Formatters.date(customer.createdAt, 'medium'),
         memberDuration: Formatters.relativeTime(customer.createdAt)

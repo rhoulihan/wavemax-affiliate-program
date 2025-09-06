@@ -133,11 +133,65 @@
                     return false;
                 }
 
-                // Validate service area
+                // Validate service area with spinner
                 if (window.validateServiceArea && typeof window.validateServiceArea === 'function') {
-                    const inServiceArea = await window.validateServiceArea();
-                    if (!inServiceArea) {
-                        return false; // validateServiceArea shows its own modal
+                    // Show spinner before validation
+                    let spinner = null;
+                    if (window.SwirlSpinnerUtils && window.SwirlSpinnerUtils.showGlobal) {
+                        const message = (window.i18n?.t && window.i18n.t('spinner.validatingAddress')) || 'Validating address...';
+                        spinner = window.SwirlSpinnerUtils.showGlobal({
+                            message: message,
+                            size: 'large'
+                        });
+                        console.log('[V2 Navigation] Showing global spinner for address validation');
+                    } else if (window.SwirlSpinner) {
+                        // Fallback to creating spinner with overlay
+                        const container = document.createElement('div');
+                        container.className = 'swirl-spinner-global';
+                        document.body.appendChild(container);
+                        
+                        spinner = new window.SwirlSpinner({
+                            container: container,
+                            message: (window.i18n?.t && window.i18n.t('spinner.validatingAddress')) || 'Validating address...',
+                            size: 'large',
+                            overlay: true
+                        });
+                        spinner.show();
+                        
+                        // Store container for cleanup
+                        spinner._container = container;
+                        console.log('[V2 Navigation] Created overlay spinner for address validation');
+                    } else {
+                        console.warn('[V2 Navigation] SwirlSpinner not available');
+                    }
+                    
+                    try {
+                        const inServiceArea = await window.validateServiceArea();
+                        
+                        // Hide spinner
+                        if (spinner && spinner.hide) {
+                            spinner.hide();
+                            // Clean up container if we created it
+                            if (spinner._container && spinner._container.parentNode) {
+                                spinner._container.parentNode.removeChild(spinner._container);
+                            }
+                            console.log('[V2 Navigation] Hiding spinner after validation');
+                        }
+                        
+                        if (!inServiceArea) {
+                            return false; // validateServiceArea shows its own modal
+                        }
+                    } catch (error) {
+                        // Hide spinner on error
+                        if (spinner && spinner.hide) {
+                            spinner.hide();
+                            // Clean up container if we created it
+                            if (spinner._container && spinner._container.parentNode) {
+                                spinner._container.parentNode.removeChild(spinner._container);
+                            }
+                        }
+                        console.error('Service area validation error:', error);
+                        return false;
                     }
                 }
 
