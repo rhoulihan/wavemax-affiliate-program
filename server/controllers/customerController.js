@@ -71,12 +71,30 @@ exports.registerCustomer = ControllerHelpers.asyncWrapper(async (req, res) => {
   }
 
   // Check if email or username already exists
-  const existingCustomer = await Customer.findOne({
-    $or: [{ email }, { username }]
-  });
+  const existingEmail = await Customer.findOne({ email });
+  const existingUsername = await Customer.findOne({ username });
 
-  if (existingCustomer) {
-    return ControllerHelpers.sendError(res, 'Email or username already in use', 400);
+  if (existingEmail && existingUsername) {
+    return res.status(400).json({
+      success: false,
+      message: 'Both email and username are already in use',
+      errors: {
+        email: 'Email already registered',
+        username: 'Username already taken'
+      }
+    });
+  } else if (existingEmail) {
+    return res.status(400).json({
+      success: false,
+      message: 'Email already registered',
+      field: 'email'
+    });
+  } else if (existingUsername) {
+    return res.status(400).json({
+      success: false,
+      message: 'Username already taken',
+      field: 'username'
+    });
   }
 
   // For OAuth registrations, generate a username from email if not provided
