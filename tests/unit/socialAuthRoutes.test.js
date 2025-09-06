@@ -532,6 +532,7 @@ describe('Social Auth Routes - Simple Tests', () => {
 
   describe('Error Handling', () => {
     it('should handle errors gracefully', async () => {
+      const next = jest.fn();
       // Simulate an error by triggering the error handler
       app.get('/api/auth/error-test', (req, res, next) => {
         next(new Error('Test error'));

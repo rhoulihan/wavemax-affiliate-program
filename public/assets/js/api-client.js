@@ -23,7 +23,7 @@
       if (this.csrfToken) return this.csrfToken;
       
       try {
-        const response = await fetch('/csrf-token');
+        const response = await fetch('/api/csrf-token');
         const data = await response.json();
         this.csrfToken = data.csrfToken;
         return this.csrfToken;

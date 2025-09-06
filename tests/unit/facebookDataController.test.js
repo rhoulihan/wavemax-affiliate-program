@@ -141,13 +141,13 @@ describe('Facebook Data Controller', () => {
         issued_at: 1234567890
       });
       
-      const mockCustomer = { _id: 'customer-id' };
+      const mockCustomer = { _id: 'customer-id' , save: jest.fn().mockResolvedValue(true)};
       findUsersByFacebookId.mockResolvedValue({ affiliate: null, customer: mockCustomer });
       
       const mockDeletionRequest = {
         _id: 'deletion-request-id',
         facebookUserId: 'fb-123',
-        save: jest.fn(),
+      save: jest.fn(),
         markAsProcessing: jest.fn(),
         markAsCompleted: jest.fn()
       };
@@ -195,8 +195,8 @@ describe('Facebook Data Controller', () => {
         issued_at: 1234567890
       });
       
-      const mockAffiliate = { _id: 'affiliate-id' };
-      const mockCustomer = { _id: 'customer-id' };
+      const mockAffiliate = { _id: 'affiliate-id' , save: jest.fn().mockResolvedValue(true)};
+      const mockCustomer = { _id: 'customer-id' , save: jest.fn().mockResolvedValue(true)};
       findUsersByFacebookId.mockResolvedValue({ 
         affiliate: mockAffiliate, 
         customer: mockCustomer 
@@ -205,7 +205,7 @@ describe('Facebook Data Controller', () => {
       const mockDeletionRequest = {
         _id: 'deletion-request-id',
         facebookUserId: 'fb-123',
-        save: jest.fn(),
+      save: jest.fn(),
         markAsProcessing: jest.fn(),
         markAsCompleted: jest.fn()
       };
@@ -352,13 +352,13 @@ describe('Facebook Data Controller', () => {
         issued_at: 1234567890
       });
       
-      const mockAffiliate = { _id: 'affiliate-id' };
+      const mockAffiliate = { _id: 'affiliate-id' , save: jest.fn().mockResolvedValue(true)};
       findUsersByFacebookId.mockResolvedValue({ affiliate: mockAffiliate, customer: null });
       
       const mockDeletionRequest = {
         _id: 'deletion-request-id',
         facebookUserId: 'fb-123',
-        save: jest.fn(),
+      save: jest.fn(),
         markAsProcessing: jest.fn(),
         markAsFailed: jest.fn()
       };
@@ -386,13 +386,13 @@ describe('Facebook Data Controller', () => {
         issued_at: 1234567890
       });
       
-      const mockCustomer = { _id: 'customer-id' };
+      const mockCustomer = { _id: 'customer-id' , save: jest.fn().mockResolvedValue(true)};
       findUsersByFacebookId.mockResolvedValue({ affiliate: null, customer: mockCustomer });
       
       const mockDeletionRequest = {
         _id: 'deletion-request-id',
         facebookUserId: 'fb-123',
-        save: jest.fn(),
+      save: jest.fn(),
         markAsProcessing: jest.fn(),
         markAsFailed: jest.fn()
       };

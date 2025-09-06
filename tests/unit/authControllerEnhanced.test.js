@@ -16,8 +16,18 @@ jest.mock('../../server/models/RefreshToken');
 jest.mock('jsonwebtoken');
 jest.mock('../../server/middleware/sanitization');
 
+// Helper function to extract handler from wrapped middleware
+const extractHandler = (middleware) => {
+  // If the middleware is already a function, return it
+  if (typeof middleware === 'function') {
+    return middleware;
+  }
+  // If it's wrapped, extract the handler
+  return middleware;
+};
+
 describe('Enhanced Auth Controller - OAuth Methods', () => {
-  let req, res;
+  let req, res, next;
 
   beforeEach(() => {
     req = {
@@ -33,6 +43,7 @@ describe('Enhanced Auth Controller - OAuth Methods', () => {
       redirect: jest.fn(),
       send: jest.fn()
     };
+    next = jest.fn();
 
     // Reset all mocks
     jest.clearAllMocks();
@@ -73,7 +84,8 @@ describe('Enhanced Auth Controller - OAuth Methods', () => {
         sessionId: 'oauth_test-session-id'
       });
 
-      await authController.handleSocialCallback(req, res);
+      const handler = extractHandler(authController.handleSocialCallback);
+      await handler(req, res, next);
 
       expect(OAuthSession.createSession).toHaveBeenCalledWith('oauth_test-session-id', expect.objectContaining({
         provider: 'google',
@@ -92,7 +104,8 @@ describe('Enhanced Auth Controller - OAuth Methods', () => {
       const originalHandleCustomerSocialCallback = authController.handleCustomerSocialCallback;
       authController.handleCustomerSocialCallback = jest.fn().mockResolvedValue();
 
-      await authController.handleSocialCallback(req, res);
+      const handler = extractHandler(authController.handleSocialCallback);
+      await handler(req, res, next);
 
       expect(authController.handleCustomerSocialCallback).toHaveBeenCalledWith(req, res);
 
@@ -105,7 +118,8 @@ describe('Enhanced Auth Controller - OAuth Methods', () => {
       req.query = {}; // Ensure no popup or state parameters
       req.headers = {}; // Ensure no referer headers
 
-      await authController.handleSocialCallback(req, res);
+      const handler = extractHandler(authController.handleSocialCallback);
+      await handler(req, res, next);
 
       // When user is null and not a popup, it redirects to registration page with error
       expect(res.redirect).toHaveBeenCalledWith('/affiliate-register-embed.html?error=social_auth_failed');
@@ -128,7 +142,8 @@ describe('Enhanced Auth Controller - OAuth Methods', () => {
       OAuthSession.createSession = jest.fn().mockRejectedValue(new Error('Database error'));
       jwt.sign = jest.fn().mockReturnValue('mock-token');
 
-      await authController.handleSocialCallback(req, res);
+      const handler = extractHandler(authController.handleSocialCallback);
+      await handler(req, res, next);
 
       // Should still redirect despite database error (error is logged but doesn't stop execution)
       expect(res.redirect).toHaveBeenCalled();
@@ -153,7 +168,8 @@ describe('Enhanced Auth Controller - OAuth Methods', () => {
       OAuthSession.createSession = jest.fn().mockResolvedValue({});
       jwt.sign = jest.fn().mockReturnValue('mock-social-token');
 
-      await authController.handleSocialCallback(req, res);
+      const handler = extractHandler(authController.handleSocialCallback);
+      await handler(req, res, next);
 
       expect(OAuthSession.createSession).toHaveBeenCalledWith('oauth_test-session-id',
         expect.objectContaining({
@@ -182,7 +198,8 @@ describe('Enhanced Auth Controller - OAuth Methods', () => {
       OAuthSession.createSession = jest.fn().mockResolvedValue({});
       jwt.sign = jest.fn().mockReturnValue('mock-customer-social-token');
 
-      await authController.handleCustomerSocialCallback(req, res);
+      const handler = extractHandler(authController.handleCustomerSocialCallback);
+      await handler(req, res, next);
 
       expect(OAuthSession.createSession).toHaveBeenCalledWith('oauth_test',
         expect.objectContaining({
@@ -237,7 +254,8 @@ describe('Enhanced Auth Controller - OAuth Methods', () => {
 
       Affiliate.mockImplementation(() => mockAffiliate);
 
-      await authController.completeSocialRegistration(req, res);
+      const handler = extractHandler(authController.completeSocialRegistration);
+      await handler(req, res, next);
 
       expect(jwt.verify).toHaveBeenCalledWith('valid-jwt-token', process.env.JWT_SECRET);
       expect(sanitizeInput).toHaveBeenCalled();
@@ -262,7 +280,8 @@ describe('Enhanced Auth Controller - OAuth Methods', () => {
         lastName: 'Doe'
       });
 
-      await authController.completeSocialRegistration(req, res);
+      const handler = extractHandler(authController.completeSocialRegistration);
+      await handler(req, res, next);
 
       expect(res.status).toHaveBeenCalledWith(400);
       expect(res.json).toHaveBeenCalledWith({
@@ -276,7 +295,8 @@ describe('Enhanced Auth Controller - OAuth Methods', () => {
         .mockResolvedValueOnce(null) // Username uniqueness check (line 1170)
         .mockResolvedValueOnce({ email: 'test@example.com' }); // Email/username conflict check (line 1180)
 
-      await authController.completeSocialRegistration(req, res);
+      const handler = extractHandler(authController.completeSocialRegistration);
+      await handler(req, res, next);
 
       expect(res.status).toHaveBeenCalledWith(409);
       expect(res.json).toHaveBeenCalledWith({
@@ -291,7 +311,8 @@ describe('Enhanced Auth Controller - OAuth Methods', () => {
         .mockResolvedValueOnce(null) // Email/username conflict check (line 1180)
         .mockResolvedValueOnce({ affiliateId: 'AFF123456' }); // Social account conflict check (line 1193)
 
-      await authController.completeSocialRegistration(req, res);
+      const handler = extractHandler(authController.completeSocialRegistration);
+      await handler(req, res, next);
 
       expect(res.status).toHaveBeenCalledWith(400);
       expect(res.json).toHaveBeenCalledWith({
@@ -327,7 +348,8 @@ describe('Enhanced Auth Controller - OAuth Methods', () => {
         return mockAffiliate;
       });
 
-      await authController.completeSocialRegistration(req, res);
+      const handler = extractHandler(authController.completeSocialRegistration);
+      await handler(req, res, next);
 
       expect(mockAffiliate.save).toHaveBeenCalled();
     });
@@ -337,7 +359,8 @@ describe('Enhanced Auth Controller - OAuth Methods', () => {
         throw new Error('Invalid token');
       });
 
-      await authController.completeSocialRegistration(req, res);
+      const handler = extractHandler(authController.completeSocialRegistration);
+      await handler(req, res, next);
 
       expect(res.status).toHaveBeenCalledWith(400);
       expect(res.json).toHaveBeenCalledWith({
@@ -385,7 +408,8 @@ describe('Enhanced Auth Controller - OAuth Methods', () => {
 
       Customer.mockImplementation(() => mockCustomer);
 
-      await authController.completeSocialCustomerRegistration(req, res);
+      const handler = extractHandler(authController.completeSocialCustomerRegistration);
+      await handler(req, res, next);
 
       expect(jwt.verify).toHaveBeenCalledWith('valid-customer-jwt-token', process.env.JWT_SECRET);
       expect(sanitizeInput).toHaveBeenCalled();
@@ -396,7 +420,8 @@ describe('Enhanced Auth Controller - OAuth Methods', () => {
     test('should validate affiliate existence', async () => {
       Affiliate.findOne = jest.fn().mockResolvedValue(null);
 
-      await authController.completeSocialCustomerRegistration(req, res);
+      const handler = extractHandler(authController.completeSocialCustomerRegistration);
+      await handler(req, res, next);
 
       expect(res.status).toHaveBeenCalledWith(400);
       expect(res.json).toHaveBeenCalledWith({
@@ -422,7 +447,8 @@ describe('Enhanced Auth Controller - OAuth Methods', () => {
         lastName: 'Customer'
       });
 
-      await authController.completeSocialCustomerRegistration(req, res);
+      const handler = extractHandler(authController.completeSocialCustomerRegistration);
+      await handler(req, res, next);
 
       expect(res.status).toHaveBeenCalledWith(400);
       expect(res.json).toHaveBeenCalledWith({
@@ -465,7 +491,8 @@ describe('Enhanced Auth Controller - OAuth Methods', () => {
 
       OAuthSession.consumeSession = jest.fn().mockResolvedValue(mockSessionData);
 
-      await authController.pollOAuthSession(req, res);
+      const handler = extractHandler(authController.pollOAuthSession);
+      await handler(req, res, next);
 
       expect(OAuthSession.consumeSession).toHaveBeenCalledWith('test-session-123');
       expect(res.json).toHaveBeenCalledWith({
@@ -491,7 +518,8 @@ describe('Enhanced Auth Controller - OAuth Methods', () => {
 
       OAuthSession.consumeSession = jest.fn().mockResolvedValue(mockSessionData);
 
-      await authController.pollOAuthSession(req, res);
+      const handler = extractHandler(authController.pollOAuthSession);
+      await handler(req, res, next);
 
       expect(OAuthSession.consumeSession).toHaveBeenCalledWith('test-session-123');
       expect(res.json).toHaveBeenCalledWith({
@@ -508,7 +536,8 @@ describe('Enhanced Auth Controller - OAuth Methods', () => {
 
       OAuthSession.consumeSession = jest.fn().mockResolvedValue(mockSessionData);
 
-      await authController.pollOAuthSession(req, res);
+      const handler = extractHandler(authController.pollOAuthSession);
+      await handler(req, res, next);
 
       expect(OAuthSession.consumeSession).toHaveBeenCalledWith('test-session-123');
       expect(res.json).toHaveBeenCalledWith({
@@ -534,7 +563,8 @@ describe('Enhanced Auth Controller - OAuth Methods', () => {
 
       OAuthSession.consumeSession = jest.fn().mockResolvedValue(mockSessionData);
 
-      await authController.pollOAuthSession(req, res);
+      const handler = extractHandler(authController.pollOAuthSession);
+      await handler(req, res, next);
 
       expect(OAuthSession.consumeSession).toHaveBeenCalledWith('test-session-123');
       expect(res.json).toHaveBeenCalledWith({
@@ -558,7 +588,8 @@ describe('Enhanced Auth Controller - OAuth Methods', () => {
 
       OAuthSession.consumeSession = jest.fn().mockResolvedValue(mockSessionData);
 
-      await authController.pollOAuthSession(req, res);
+      const handler = extractHandler(authController.pollOAuthSession);
+      await handler(req, res, next);
 
       expect(OAuthSession.consumeSession).toHaveBeenCalledWith('test-session-123');
       expect(res.json).toHaveBeenCalledWith({
@@ -570,7 +601,8 @@ describe('Enhanced Auth Controller - OAuth Methods', () => {
     test('should return pending status when session not ready', async () => {
       OAuthSession.consumeSession = jest.fn().mockResolvedValue(null);
 
-      await authController.pollOAuthSession(req, res);
+      const handler = extractHandler(authController.pollOAuthSession);
+      await handler(req, res, next);
 
       expect(res.status).toHaveBeenCalledWith(404);
       expect(res.json).toHaveBeenCalledWith({
@@ -582,7 +614,8 @@ describe('Enhanced Auth Controller - OAuth Methods', () => {
     test('should handle database errors gracefully', async () => {
       OAuthSession.consumeSession = jest.fn().mockRejectedValue(new Error('Database error'));
 
-      await authController.pollOAuthSession(req, res);
+      const handler = extractHandler(authController.pollOAuthSession);
+      await handler(req, res, next);
 
       expect(res.status).toHaveBeenCalledWith(500);
       expect(res.json).toHaveBeenCalledWith({
@@ -604,7 +637,8 @@ describe('Enhanced Auth Controller - OAuth Methods', () => {
         throw new Error('jwt malformed');
       });
 
-      await authController.completeSocialRegistration(req, res);
+      const handler = extractHandler(authController.completeSocialRegistration);
+      await handler(req, res, next);
 
       expect(res.status).toHaveBeenCalledWith(400);
       expect(res.json).toHaveBeenCalledWith({
@@ -630,7 +664,8 @@ describe('Enhanced Auth Controller - OAuth Methods', () => {
 
       Affiliate.findOne = jest.fn().mockRejectedValue(new Error('Database connection failed'));
 
-      await authController.completeSocialRegistration(req, res);
+      const handler = extractHandler(authController.completeSocialRegistration);
+      await handler(req, res, next);
 
       expect(res.status).toHaveBeenCalledWith(400);
       expect(res.json).toHaveBeenCalledWith({
@@ -653,7 +688,8 @@ describe('Enhanced Auth Controller - OAuth Methods', () => {
 
       sanitizeInput.mockImplementation(data => data);
 
-      await authController.completeSocialRegistration(req, res);
+      const handler = extractHandler(authController.completeSocialRegistration);
+      await handler(req, res, next);
 
       expect(res.status).toHaveBeenCalledWith(400);
       expect(res.json).toHaveBeenCalledWith({

@@ -28,8 +28,18 @@ const { logAuditEvent, logLoginAttempt } = require('../../server/utils/auditLogg
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 
+// Helper function to extract handler from wrapped middleware
+const extractHandler = (middleware) => {
+  // If the middleware is already a function, return it
+  if (typeof middleware === 'function') {
+    return middleware;
+  }
+  // If it's wrapped, extract the handler
+  return middleware;
+};
+
 describe('Auth Controller - Additional Coverage', () => {
-  let req, res;
+  let req, res, next;
 
   beforeEach(() => {
     req = {
@@ -52,6 +62,7 @@ describe('Auth Controller - Additional Coverage', () => {
       cookie: jest.fn(),
       send: jest.fn()
     };
+    next = jest.fn();
     jest.clearAllMocks();
     
     // Setup RefreshToken mock
@@ -84,7 +95,8 @@ describe('Auth Controller - Additional Coverage', () => {
       Administrator.findOne.mockResolvedValue(null);
       Operator.findOne.mockResolvedValue(null);
 
-      await authController.checkEmail(req, res);
+      const handler = extractHandler(authController.checkEmail);
+      await handler(req, res, next);
 
       expect(res.json).toHaveBeenCalledWith({
         success: true,
@@ -100,7 +112,8 @@ describe('Auth Controller - Additional Coverage', () => {
       Administrator.findOne.mockResolvedValue(null);
       Operator.findOne.mockResolvedValue(null);
 
-      await authController.checkEmail(req, res);
+      const handler = extractHandler(authController.checkEmail);
+      await handler(req, res, next);
 
       expect(res.json).toHaveBeenCalledWith({
         success: true,
@@ -116,7 +129,8 @@ describe('Auth Controller - Additional Coverage', () => {
       Administrator.findOne.mockResolvedValue(null);
       Operator.findOne.mockResolvedValue(null);
 
-      await authController.checkEmail(req, res);
+      const handler = extractHandler(authController.checkEmail);
+      await handler(req, res, next);
 
       expect(res.json).toHaveBeenCalledWith({
         success: true,
@@ -125,11 +139,13 @@ describe('Auth Controller - Additional Coverage', () => {
     });
 
     it('should handle errors', async () => {
+      const next = jest.fn();
       req.body.email = 'test@example.com';
       
       Affiliate.findOne.mockRejectedValue(new Error('Database error'));
 
-      await authController.checkEmail(req, res);
+      const handler = extractHandler(authController.checkEmail);
+      await handler(req, res, next);
 
       expect(res.status).toHaveBeenCalledWith(500);
       expect(res.json).toHaveBeenCalledWith({
@@ -139,9 +155,11 @@ describe('Auth Controller - Additional Coverage', () => {
     });
 
     it('should return error for missing email', async () => {
+      const next = jest.fn();
       req.body.email = '';
 
-      await authController.checkEmail(req, res);
+      const handler = extractHandler(authController.checkEmail);
+      await handler(req, res, next);
 
       expect(res.status).toHaveBeenCalledWith(400);
       expect(res.json).toHaveBeenCalledWith({
@@ -159,7 +177,8 @@ describe('Auth Controller - Additional Coverage', () => {
       Administrator.findOne.mockResolvedValue(null);
       Operator.findOne.mockResolvedValue(null);
 
-      await authController.checkUsername(req, res);
+      const handler = extractHandler(authController.checkUsername);
+      await handler(req, res, next);
 
       expect(res.json).toHaveBeenCalledWith({
         success: true,
@@ -168,11 +187,13 @@ describe('Auth Controller - Additional Coverage', () => {
     });
 
     it('should return not available when username exists', async () => {
+      const next = jest.fn();
       req.body.username = 'existinguser';
       
       Affiliate.findOne.mockResolvedValue({ username: 'existinguser' });
 
-      await authController.checkUsername(req, res);
+      const handler = extractHandler(authController.checkUsername);
+      await handler(req, res, next);
 
       expect(res.json).toHaveBeenCalledWith({
         success: true,
@@ -181,11 +202,13 @@ describe('Auth Controller - Additional Coverage', () => {
     });
 
     it('should handle errors', async () => {
+      const next = jest.fn();
       req.body.username = 'testuser';
       
       Affiliate.findOne.mockRejectedValue(new Error('Database error'));
 
-      await authController.checkUsername(req, res);
+      const handler = extractHandler(authController.checkUsername);
+      await handler(req, res, next);
 
       expect(res.status).toHaveBeenCalledWith(500);
       expect(res.json).toHaveBeenCalledWith({
@@ -195,9 +218,11 @@ describe('Auth Controller - Additional Coverage', () => {
     });
 
     it('should return error for missing username', async () => {
+      const next = jest.fn();
       req.body.username = '';
 
-      await authController.checkUsername(req, res);
+      const handler = extractHandler(authController.checkUsername);
+      await handler(req, res, next);
 
       expect(res.status).toHaveBeenCalledWith(400);
       expect(res.json).toHaveBeenCalledWith({
@@ -238,7 +263,8 @@ describe('Auth Controller - Additional Coverage', () => {
       Operator.findOne.mockResolvedValue(mockOperator);
       jwt.sign.mockReturnValue('mock-token');
 
-      await authController.operatorAutoLogin(req, res);
+      const handler = extractHandler(authController.operatorAutoLogin);
+      await handler(req, res, next);
 
       expect(res.json).toHaveBeenCalledWith({
         success: true,
@@ -264,10 +290,12 @@ describe('Auth Controller - Additional Coverage', () => {
     });
 
     it('should fail from invalid IP', async () => {
+      const next = jest.fn();
       // Change IP to non-store IP
       req.ip = '192.168.1.1';
       
-      await authController.operatorAutoLogin(req, res);
+      const handler = extractHandler(authController.operatorAutoLogin);
+      await handler(req, res, next);
 
       expect(res.status).toHaveBeenCalledWith(403);
       expect(res.json).toHaveBeenCalledWith({
@@ -277,9 +305,11 @@ describe('Auth Controller - Additional Coverage', () => {
     });
 
     it('should handle missing default operator', async () => {
+      const next = jest.fn();
       Operator.findOne.mockResolvedValue(null);
       
-      await authController.operatorAutoLogin(req, res);
+      const handler = extractHandler(authController.operatorAutoLogin);
+      await handler(req, res, next);
 
       expect(res.status).toHaveBeenCalledWith(404);
       expect(res.json).toHaveBeenCalledWith({
@@ -289,6 +319,7 @@ describe('Auth Controller - Additional Coverage', () => {
     });
 
     it('should handle inactive operator', async () => {
+      const next = jest.fn();
       const mockOperator = {
         _id: 'op123',
         operatorId: 'OP001',
@@ -297,7 +328,8 @@ describe('Auth Controller - Additional Coverage', () => {
       
       Operator.findOne.mockResolvedValue(mockOperator);
 
-      await authController.operatorAutoLogin(req, res);
+      const handler = extractHandler(authController.operatorAutoLogin);
+      await handler(req, res, next);
 
       expect(res.status).toHaveBeenCalledWith(403);
       expect(res.json).toHaveBeenCalledWith({
@@ -333,7 +365,8 @@ describe('Auth Controller - Additional Coverage', () => {
       
       jwt.sign.mockReturnValue('mock-token');
 
-      await authController.handleSocialCallback(req, res);
+      const handler = extractHandler(authController.handleSocialCallback);
+      await handler(req, res, next);
 
       expect(res.redirect).toHaveBeenCalledWith(expect.stringMatching(/^\/affiliate-dashboard-embed\.html\?token=mock-token&refreshToken=[a-f0-9]{80}$/));
       expect(logLoginAttempt).toHaveBeenCalledWith(
@@ -361,7 +394,8 @@ describe('Auth Controller - Additional Coverage', () => {
       // Mock JWT sign to return a social token
       jwt.sign.mockReturnValue('social-token-123');
 
-      await authController.handleSocialCallback(req, res);
+      const handler = extractHandler(authController.handleSocialCallback);
+      await handler(req, res, next);
 
       // For new users, it creates a regular auth token and redirects to registration
       expect(jwt.sign).toHaveBeenCalled();
@@ -372,12 +406,14 @@ describe('Auth Controller - Additional Coverage', () => {
     });
 
     it('should handle errors', async () => {
+      const next = jest.fn();
       req.query.state = 'affiliate';
       
       // Set req.user to simulate an error during auth
       req.user = null; // No user authenticated
       
-      await authController.handleSocialCallback(req, res);
+      const handler = extractHandler(authController.handleSocialCallback);
+      await handler(req, res, next);
 
       expect(res.redirect).toHaveBeenCalledWith(
         expect.stringContaining('/affiliate-register-embed.html?error=social_auth_failed')
@@ -417,7 +453,8 @@ describe('Auth Controller - Additional Coverage', () => {
       
       jwt.sign.mockReturnValue('mock-token');
 
-      await authController.handleCustomerSocialCallback(req, res);
+      const handler = extractHandler(authController.handleCustomerSocialCallback);
+      await handler(req, res, next);
 
       // For existing customers, it sends HTML response with postMessage
       expect(res.send).toHaveBeenCalledWith(
@@ -448,7 +485,8 @@ describe('Auth Controller - Additional Coverage', () => {
       // Mock session creation
       OAuthSession.createSession = jest.fn().mockResolvedValue({});
 
-      await authController.handleCustomerSocialCallback(req, res);
+      const handler = extractHandler(authController.handleCustomerSocialCallback);
+      await handler(req, res, next);
 
       // For new customers, it sends HTML with social-auth-success message
       expect(res.send).toHaveBeenCalledWith(
@@ -509,7 +547,7 @@ describe('Auth Controller - Additional Coverage', () => {
         lastName: 'Doe',
         username: 'johndoe',
         registrationMethod: 'google',
-        save: jest.fn().mockResolvedValue({
+      save: jest.fn().mockResolvedValue({
           _id: 'aff123',
           affiliateId: 'AFF001',
           email: 'john@example.com',
@@ -527,7 +565,8 @@ describe('Auth Controller - Additional Coverage', () => {
       // Mock email service
       emailService.sendAffiliateWelcomeEmail = jest.fn().mockResolvedValue(true);
 
-      await authController.completeSocialRegistration(req, res);
+      const handler = extractHandler(authController.completeSocialRegistration);
+      await handler(req, res, next);
 
       expect(res.json).toHaveBeenCalledWith({
         success: true,
@@ -577,7 +616,8 @@ describe('Auth Controller - Additional Coverage', () => {
         .mockResolvedValueOnce(null) // Username generation check - johndoe is available
         .mockResolvedValueOnce({ email: 'existing@example.com' }); // Email exists check
 
-      await authController.completeSocialRegistration(req, res);
+      const handler = extractHandler(authController.completeSocialRegistration);
+      await handler(req, res, next);
 
       expect(res.status).toHaveBeenCalledWith(409);
       expect(res.json).toHaveBeenCalledWith({
@@ -587,6 +627,7 @@ describe('Auth Controller - Additional Coverage', () => {
     });
 
     it('should handle invalid token', async () => {
+      const next = jest.fn();
       req.body = {
         socialToken: 'invalid-token'
       };
@@ -595,7 +636,8 @@ describe('Auth Controller - Additional Coverage', () => {
         throw new Error('Invalid token');
       });
 
-      await authController.completeSocialRegistration(req, res);
+      const handler = extractHandler(authController.completeSocialRegistration);
+      await handler(req, res, next);
 
       expect(res.status).toHaveBeenCalledWith(400);
       expect(res.json).toHaveBeenCalledWith({
@@ -620,7 +662,8 @@ describe('Auth Controller - Additional Coverage', () => {
         username: 'testuser'
       };
 
-      await authController.completeSocialRegistration(req, res);
+      const handler = extractHandler(authController.completeSocialRegistration);
+      await handler(req, res, next);
 
       expect(res.status).toHaveBeenCalledWith(400);
       expect(res.json).toHaveBeenCalledWith({
@@ -663,7 +706,7 @@ describe('Auth Controller - Additional Coverage', () => {
       const mockAffiliate = {
         _id: 'aff123',
         affiliateId: 'AFF001'
-      };
+      , save: jest.fn().mockResolvedValue(true)};
 
       Affiliate.findOne.mockResolvedValue(mockAffiliate);
       Customer.findOne.mockResolvedValue(null);
@@ -676,7 +719,7 @@ describe('Auth Controller - Additional Coverage', () => {
         lastName: 'Doe',
         affiliateId: 'aff123',
         registrationMethod: 'google',
-        save: jest.fn().mockResolvedValue({
+      save: jest.fn().mockResolvedValue({
           _id: 'cust123',
           customerId: 'CUST001',
           email: 'jane@example.com',
@@ -691,7 +734,8 @@ describe('Auth Controller - Additional Coverage', () => {
       Customer.mockImplementation(() => mockCustomer);
       jwt.sign.mockReturnValue('mock-token');
 
-      await authController.completeSocialCustomerRegistration(req, res);
+      const handler = extractHandler(authController.completeSocialCustomerRegistration);
+      await handler(req, res, next);
 
       expect(res.json).toHaveBeenCalledWith({
         success: true,
@@ -735,7 +779,8 @@ describe('Auth Controller - Additional Coverage', () => {
 
       Affiliate.findOne.mockResolvedValue(null);
 
-      await authController.completeSocialCustomerRegistration(req, res);
+      const handler = extractHandler(authController.completeSocialCustomerRegistration);
+      await handler(req, res, next);
 
       // The actual response might be different - let's check what was called
       expect(res.status).toHaveBeenCalledWith(400);
@@ -766,7 +811,8 @@ describe('Auth Controller - Additional Coverage', () => {
 
       OAuthSession.consumeSession.mockResolvedValue(mockSession);
 
-      await authController.pollOAuthSession(req, res);
+      const handler = extractHandler(authController.pollOAuthSession);
+      await handler(req, res, next);
 
       expect(res.json).toHaveBeenCalledWith({
         success: true,
@@ -784,7 +830,8 @@ describe('Auth Controller - Additional Coverage', () => {
 
       OAuthSession.consumeSession.mockResolvedValue(mockSession);
 
-      await authController.pollOAuthSession(req, res);
+      const handler = extractHandler(authController.pollOAuthSession);
+      await handler(req, res, next);
 
       expect(res.json).toHaveBeenCalledWith({
         success: true,
@@ -793,11 +840,13 @@ describe('Auth Controller - Additional Coverage', () => {
     });
 
     it('should handle session not found', async () => {
+      const next = jest.fn();
       req.params.sessionId = 'invalid';
 
       OAuthSession.consumeSession.mockResolvedValue(null);
 
-      await authController.pollOAuthSession(req, res);
+      const handler = extractHandler(authController.pollOAuthSession);
+      await handler(req, res, next);
 
       expect(res.status).toHaveBeenCalledWith(404);
       expect(res.json).toHaveBeenCalledWith({
@@ -807,11 +856,13 @@ describe('Auth Controller - Additional Coverage', () => {
     });
 
     it('should handle errors', async () => {
+      const next = jest.fn();
       req.params.sessionId = 'session123';
 
       OAuthSession.consumeSession.mockRejectedValue(new Error('Database error'));
 
-      await authController.pollOAuthSession(req, res);
+      const handler = extractHandler(authController.pollOAuthSession);
+      await handler(req, res, next);
 
       expect(res.status).toHaveBeenCalledWith(500);
       expect(res.json).toHaveBeenCalledWith({

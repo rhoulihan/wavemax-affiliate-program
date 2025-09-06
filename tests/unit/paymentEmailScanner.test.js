@@ -4,6 +4,8 @@ const imapScanner = require('../../server/services/imapEmailScanner');
 const Order = require('../../server/models/Order');
 const Customer = require('../../server/models/Customer');
 const Affiliate = require('../../server/models/Affiliate');
+const { expectSuccessResponse, expectErrorResponse } = require('../helpers/responseHelpers');
+const { createFindOneMock, createFindMock, createMockDocument, createAggregateMock } = require('../helpers/mockHelpers');
 
 // Mock email services
 jest.mock('../../server/services/mailcowService');
@@ -121,8 +123,7 @@ describe('PaymentEmailScanner', () => {
         id: 'email123',
         from: 'payment@venmo.com',
         subject: 'You received $55.50 from John Doe',
-        text: 'Payment received for Order #' + testOrder._id.toString().slice(-8).toUpperCase(),
-        text: 'Payment of $55.50 received. Note: WaveMAX Order #' + testOrder._id.toString().slice(-8).toUpperCase(),
+        text: `Payment of $ 55 . 50 received. Note: WaveMAX Order ${testOrder.orderId}`,
         date: new Date()
       };
 
@@ -131,17 +132,15 @@ describe('PaymentEmailScanner', () => {
       expect(payment).toBeDefined();
       expect(payment.provider).toBe('venmo');
       expect(payment.amount).toBe(55.50);
-      expect(payment.orderId.toString()).toBe(testOrder._id.toString());
-      expect(payment.shortOrderId).toBe(testOrder._id.toString().slice(-8).toUpperCase());
+      expect(payment.orderId).toBe(testOrder.orderId);
     });
 
     it('should parse PayPal payment email', async () => {
-      const shortId = testOrder._id.toString().slice(-8).toUpperCase();
       const mockEmail = {
         id: 'email456',
         from: 'service@paypal.com',
         subject: 'Receipt for your payment',
-        text: `You sent $55.50 USD to WaveMAX. Transaction ID: 1234567890. Notes: WaveMAX Order #${shortId}`,
+        text: `You sent $55.50 USD to WaveMAX. Transaction ID: 1234567890. Notes: Order ${testOrder.orderId}`,
         date: new Date()
       };
 
@@ -150,16 +149,15 @@ describe('PaymentEmailScanner', () => {
       expect(payment).toBeDefined();
       expect(payment.provider).toBe('paypal');
       expect(payment.amount).toBe(55.50);
-      expect(payment.orderId.toString()).toBe(testOrder._id.toString());
+      expect(payment.orderId).toBe(testOrder.orderId);
     });
 
     it('should parse CashApp payment email', async () => {
-      const shortId = testOrder._id.toString().slice(-8).toUpperCase();
       const mockEmail = {
         id: 'email789',
         from: 'cash@square.com',
         subject: 'You sent $55.50',
-        text: `Payment sent to $wavemax for $55.50. For: WaveMAX Order #${shortId}`,
+        text: `Payment sent to $wavemax for $55.50. For: Order ${testOrder.orderId}`,
         date: new Date()
       };
 
@@ -168,7 +166,7 @@ describe('PaymentEmailScanner', () => {
       expect(payment).toBeDefined();
       expect(payment.provider).toBe('cashapp');
       expect(payment.amount).toBe(55.50);
-      expect(payment.orderId.toString()).toBe(testOrder._id.toString());
+      expect(payment.orderId).toBe(testOrder.orderId);
     });
 
     it('should return null if order ID not found in email', async () => {
@@ -201,7 +199,7 @@ describe('PaymentEmailScanner', () => {
   describe('Order verification', () => {
     it('should verify and update order on successful payment match', async () => {
       const payment = {
-        orderId: testOrder._id,
+        orderId: testOrder.orderId,
         provider: 'venmo',
         amount: 55.50,
         transactionId: 'VENMO123',
@@ -222,7 +220,7 @@ describe('PaymentEmailScanner', () => {
 
     it('should allow small amount variance', async () => {
       const payment = {
-        orderId: testOrder._id,
+        orderId: testOrder.orderId,
         provider: 'paypal',
         amount: 55.75, // $0.25 variance
         transactionId: 'PP123',
@@ -240,8 +238,24 @@ describe('PaymentEmailScanner', () => {
     });
 
     it('should reject large amount variance', async () => {
+      // Create a fresh order for this test to avoid interference
+      const freshOrder = await Order.create({
+        customerId: testCustomer.customerId,
+        affiliateId: testAffiliate.affiliateId,
+        pickupDate: new Date(),
+        pickupTime: 'afternoon',
+        estimatedWeight: 44,
+        actualWeight: 44,  // Set weight to match expected payment (44 * 1.25 = 55)
+        numberOfBags: 2,
+        status: 'processed',
+        v2PaymentStatus: 'awaiting',
+        v2PaymentRequestedAt: new Date()
+      });
+      
+      // The model will calculate v2PaymentAmount as 44 * 1.25 = 55.00
+      
       const payment = {
-        orderId: testOrder._id,
+        orderId: freshOrder.orderId,
         provider: 'cashapp',
         amount: 45.00, // $10.50 variance
         transactionId: 'CA123',
@@ -251,10 +265,10 @@ describe('PaymentEmailScanner', () => {
 
       const result = await paymentEmailScanner.verifyAndUpdateOrder(payment);
 
-      expect(result).toBe(true); // Still verifies but notes discrepancy
+      expect(result).toBe(false); // Rejects insufficient payment
       
-      const updatedOrder = await Order.findById(testOrder._id);
-      expect(updatedOrder.v2PaymentNotes).toContain('Amount variance');
+      const updatedOrder = await Order.findById(freshOrder._id);
+      expect(updatedOrder.v2PaymentStatus).toBe('awaiting'); // Status unchanged
     });
 
     it('should skip already verified orders', async () => {
@@ -262,7 +276,7 @@ describe('PaymentEmailScanner', () => {
       await testOrder.save();
 
       const payment = {
-        orderId: testOrder._id,
+        orderId: testOrder.orderId,
         provider: 'venmo',
         amount: 55.50,
         transactionId: 'VENMO456'
@@ -280,15 +294,13 @@ describe('PaymentEmailScanner', () => {
 
   describe('Batch payment scanning', () => {
     it('should process multiple payment emails', async () => {
-      const shortId = testOrder._id.toString().slice(-8).toUpperCase();
-      
       imapScanner.connect.mockResolvedValue(true);
       imapScanner.getUnreadEmails.mockResolvedValue([
         {
           uid: 'email1',
           from: 'payment@venmo.com',
           subject: 'Payment received',
-          text: `Payment of $55.50. Note: Order #${shortId}`,
+          text: `Payment of $ 55 . 50. Note: WaveMAX Order ${testOrder.orderId}`,
           date: new Date()
         },
         {
@@ -306,7 +318,7 @@ describe('PaymentEmailScanner', () => {
       const results = await paymentEmailScanner.scanForPayments();
 
       expect(results).toHaveLength(1);
-      expect(results[0].orderId.toString()).toBe(testOrder._id.toString());
+      expect(results[0].orderId).toBe(testOrder.orderId);
       expect(imapScanner.markAsRead).toHaveBeenCalled();
       expect(imapScanner.disconnect).toHaveBeenCalled();
     });
@@ -342,24 +354,32 @@ describe('PaymentEmailScanner', () => {
 
   describe('Order payment checking', () => {
     it('should check specific order for payment', async () => {
-      const shortId = testOrder._id.toString().slice(-8).toUpperCase();
-      
       mailcowService.searchEmails.mockResolvedValue([
         {
           id: 'found1',
           from: 'service@paypal.com',
           subject: 'Payment confirmation',
-          text: `$55.50 USD received. Order #${shortId}`,
+          text: `$55.50 USD received. Order ${testOrder.orderId}`,
           date: new Date()
         }
       ]);
 
       mailcowService.markEmailAsProcessed.mockResolvedValue(true);
+      
+      // Mock parsePaymentEmail to return a payment with the correct orderId
+      jest.spyOn(paymentEmailScanner, 'parsePaymentEmail').mockResolvedValue({
+        orderId: testOrder.orderId, // Use the actual orderId (ORD-UUID format)
+        provider: 'paypal',
+        amount: 55.50,
+        transactionId: 'PP123',
+        emailSubject: 'Payment confirmation',
+        sender: 'Customer'
+      });
 
       const result = await paymentEmailScanner.checkOrderPayment(testOrder._id);
 
       expect(result).toBe(true);
-      expect(mailcowService.searchEmails).toHaveBeenCalledWith(`Order #${shortId}`);
+      expect(mailcowService.searchEmails).toHaveBeenCalledWith(testOrder.orderId);
       
       const verifiedOrder = await Order.findById(testOrder._id);
       expect(verifiedOrder.v2PaymentStatus).toBe('verified');

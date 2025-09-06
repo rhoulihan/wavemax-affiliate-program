@@ -10,6 +10,9 @@ const encryptionUtil = require('../../server/utils/encryption');
 const { getCsrfToken, createAgent } = require('../helpers/csrfHelper');
 const { getStrongPassword } = require('../helpers/testPasswords');
 
+// Set timeout for integration tests
+jest.setTimeout(90000);
+
 describe('Authentication Integration Tests', () => {
   let agent;
   let csrfToken;

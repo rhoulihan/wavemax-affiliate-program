@@ -1,3 +1,5 @@
+jest.setTimeout(90000);
+
 const app = require('../../server');
 const Affiliate = require('../../server/models/Affiliate');
 const Customer = require('../../server/models/Customer');
@@ -189,10 +191,12 @@ describe('Affiliate API', () => {
     expect(res.body.customers).toHaveLength(2);
     expect(res.body).toHaveProperty('pagination');
     expect(res.body.pagination).toMatchObject({
-      total: 2,
-      pages: 1,
-      currentPage: 1,
-      perPage: 10
+      totalItems: 2,
+      totalPages: 1,
+      page: 1,
+      limit: 10,
+      hasNext: false,
+      hasPrev: false
     });
   });
 

@@ -120,6 +120,14 @@ const fillTemplate = (template, data) => {
 // Send email
 const sendEmail = async (to, subject, html) => {
   try {
+    // Debug logging
+    console.log('[sendEmail] Sending email to:', to);
+    
+    // Validate recipient
+    if (!to) {
+      throw new Error('No recipient email address provided');
+    }
+    
     const transporter = createTransport();
 
     // Simplified from address for Mailcow SMTP
@@ -340,6 +348,28 @@ exports.sendAffiliateWelcomeEmail = async (affiliate) => {
  */
 exports.sendAffiliateNewCustomerEmail = async (affiliate, customer, bagInfo = {}) => {
   try {
+    // Debug logging
+    console.log('[sendAffiliateNewCustomerEmail] Affiliate:', affiliate ? { 
+      email: affiliate.email, 
+      affiliateId: affiliate.affiliateId, 
+      businessName: affiliate.businessName 
+    } : 'undefined');
+    console.log('[sendAffiliateNewCustomerEmail] Customer:', customer ? { 
+      email: customer.email, 
+      firstName: customer.firstName, 
+      customerId: customer.customerId 
+    } : 'undefined');
+    
+    // Validate inputs
+    if (!affiliate || !customer) {
+      console.error('Missing affiliate or customer data for new customer notification');
+      return;
+    }
+    
+    if (!affiliate.email) {
+      console.error('Affiliate email is missing or undefined');
+      return;
+    }
     const language = affiliate.languagePreference || 'en';
     const template = await loadTemplate('affiliate-new-customer', language);
 
@@ -347,12 +377,15 @@ exports.sendAffiliateNewCustomerEmail = async (affiliate, customer, bagInfo = {}
     const totalCredit = bagInfo.totalCredit || 0;
     const isFreeRegistration = numberOfBags === 1 && totalCredit === 0;
 
+    // Build the greeting with the actual business name
+    const businessName = affiliate.businessName || `${affiliate.firstName} ${affiliate.lastName}`;
+    
     // Get translations for the email content
     const translations = {
       en: {
         EMAIL_TITLE: 'New Customer Registration',
         EMAIL_HEADER: 'New Customer Registration!',
-        GREETING: 'Congratulations, [BUSINESS_NAME]!',
+        GREETING: `Congratulations, ${businessName}!`,
         NEW_CUSTOMER_MESSAGE: 'Great news! A new customer has just registered through your affiliate link.',
         ACTION_REQUIRED_LABEL: 'Action Required',
         ACTION_REQUIRED_MESSAGE: `Please deliver ${numberOfBags} laundry bag(s) to your new customer within 48 hours.`,
@@ -377,7 +410,7 @@ exports.sendAffiliateNewCustomerEmail = async (affiliate, customer, bagInfo = {}
       es: {
         EMAIL_TITLE: 'Nuevo Registro de Cliente',
         EMAIL_HEADER: '¡Nuevo Registro de Cliente!',
-        GREETING: '¡Felicitaciones, [BUSINESS_NAME]!',
+        GREETING: `¡Felicitaciones, ${businessName}!`,
         NEW_CUSTOMER_MESSAGE: '¡Excelentes noticias! Un nuevo cliente acaba de registrarse a través de su enlace de afiliado.',
         ACTION_REQUIRED_LABEL: 'Acción Requerida',
         ACTION_REQUIRED_MESSAGE: `Por favor entregue ${numberOfBags} bolsa(s) de lavandería a su nuevo cliente dentro de 48 horas.`,
@@ -501,12 +534,15 @@ exports.sendAffiliateNewOrderEmail = async (affiliate, customer, order) => {
     const language = affiliate.languagePreference || 'en';
     const template = await loadTemplate('affiliate-new-order', language);
 
+    // Build the greeting with fallback
+    const affiliateName = affiliate.firstName || affiliate.businessName || 'Partner';
+
     // Get translations for the email content
     const translations = {
       en: {
         EMAIL_TITLE: 'New Laundry Pickup Order',
         EMAIL_HEADER: 'New Laundry Pickup Order',
-        GREETING: `Hello ${affiliate.firstName},`,
+        GREETING: `Hello ${affiliateName},`,
         NEW_ORDER_MESSAGE: 'You have a new laundry pickup order to process!',
         ORDER_DETAILS_TITLE: 'Order Details',
         ORDER_ID_LABEL: 'Order ID',
@@ -527,7 +563,7 @@ exports.sendAffiliateNewOrderEmail = async (affiliate, customer, order) => {
       es: {
         EMAIL_TITLE: 'Nuevo Pedido de Recogida de Lavandería',
         EMAIL_HEADER: 'Nuevo Pedido de Recogida de Lavandería',
-        GREETING: `Hola ${affiliate.firstName},`,
+        GREETING: `Hola ${affiliateName},`,
         NEW_ORDER_MESSAGE: '¡Tiene un nuevo pedido de recogida de lavandería para procesar!',
         ORDER_DETAILS_TITLE: 'Detalles del Pedido',
         ORDER_ID_LABEL: 'ID del Pedido',
@@ -548,7 +584,7 @@ exports.sendAffiliateNewOrderEmail = async (affiliate, customer, order) => {
       pt: {
         EMAIL_TITLE: 'Novo Pedido de Coleta de Lavanderia',
         EMAIL_HEADER: 'Novo Pedido de Coleta de Lavanderia',
-        GREETING: `Olá ${affiliate.firstName},`,
+        GREETING: `Olá ${affiliateName},`,
         NEW_ORDER_MESSAGE: 'Você tem um novo pedido de coleta de lavanderia para processar!',
         ORDER_DETAILS_TITLE: 'Detalhes do Pedido',
         ORDER_ID_LABEL: 'ID do Pedido',
@@ -569,7 +605,7 @@ exports.sendAffiliateNewOrderEmail = async (affiliate, customer, order) => {
       de: {
         EMAIL_TITLE: 'Neue Wäscheabhol-Bestellung',
         EMAIL_HEADER: 'Neue Wäscheabhol-Bestellung',
-        GREETING: `Hallo ${affiliate.firstName},`,
+        GREETING: `Hallo ${affiliateName},`,
         NEW_ORDER_MESSAGE: 'Sie haben eine neue Wäscheabhol-Bestellung zu bearbeiten!',
         ORDER_DETAILS_TITLE: 'Bestelldetails',
         ORDER_ID_LABEL: 'Bestell-ID',
@@ -890,9 +926,25 @@ exports.sendAffiliatePasswordResetEmail = async (affiliate, resetUrl) => {
  */
 exports.sendCustomerWelcomeEmail = async (customer, affiliate, bagInfo = {}) => {
   try {
+    // Debug logging
+    console.log('[sendCustomerWelcomeEmail] Customer:', customer ? { 
+      email: customer.email, 
+      firstName: customer.firstName, 
+      customerId: customer.customerId 
+    } : 'undefined');
+    console.log('[sendCustomerWelcomeEmail] Affiliate:', affiliate ? { 
+      affiliateId: affiliate.affiliateId, 
+      businessName: affiliate.businessName 
+    } : 'undefined');
+    
     // Validate inputs
     if (!customer || !affiliate) {
       console.error('Missing customer or affiliate data for welcome email');
+      return;
+    }
+    
+    if (!customer.email) {
+      console.error('Customer email is missing or undefined');
       return;
     }
 
@@ -905,12 +957,13 @@ exports.sendCustomerWelcomeEmail = async (customer, affiliate, bagInfo = {}) => 
       'Your WaveMAX Partner';
 
     // Extract bag information with defaults
-    const numberOfBags = bagInfo.numberOfBags || 1;
-    const bagFee = bagInfo.bagFee || 10.00;
-    const totalCredit = bagInfo.totalCredit || (numberOfBags * bagFee);
+    const numberOfBags = bagInfo.numberOfBags || 0;
+    const bagFee = bagInfo.bagFee || 0;
+    const totalCredit = bagInfo.totalCredit || 0;
     
-    // Check if this was a free registration (single bag with no credit)
-    const isFreeRegistration = numberOfBags === 1 && totalCredit === 0;
+    // V2 registrations don't have bag credits
+    const isV2Registration = totalCredit === 0;
+    const isFreeRegistration = false; // V2 doesn't have free bags
 
     // Get translations for the email content
     const translations = {
@@ -922,18 +975,22 @@ exports.sendCustomerWelcomeEmail = async (customer, affiliate, bagInfo = {}) => 
         YOUR_INFO_TITLE: 'Your Account Information',
         CUSTOMER_ID_LABEL: 'Customer ID',
         SERVICE_PROVIDER_LABEL: 'Your Service Provider',
-        BAG_INFO_TITLE: isFreeRegistration ? 'Your FREE Laundry Bag' : 'Your Laundry Bag Credit',
-        BAG_INFO_MESSAGE: isFreeRegistration ? 
-          'Great news! Your first laundry bag is FREE! It will be delivered to you by your service provider.' :
-          'We\'ve credited your account with prepaid laundry bags. These bags will be delivered to you by your service provider.',
+        BAG_INFO_TITLE: isV2Registration ? 'How Our Service Works' : (isFreeRegistration ? 'Your FREE Laundry Bag' : 'Your Laundry Bag Credit'),
+        BAG_INFO_MESSAGE: isV2Registration ? 
+          'Schedule your laundry pickup online. After we pick up and weigh your laundry, you\'ll receive an invoice. Pay conveniently via Venmo, PayPal, or CashApp.' :
+          (isFreeRegistration ? 
+            'Great news! Your first laundry bag is FREE! It will be delivered to you by your service provider.' :
+            'We\'ve credited your account with prepaid laundry bags. These bags will be delivered to you by your service provider.'),
         BAG_CREDIT_TITLE: 'Account Credit Details',
         BAGS_PURCHASED_LABEL: isFreeRegistration ? 'Bags Received' : 'Bags Purchased',
         COST_PER_BAG_LABEL: 'Cost per Bag',
         TOTAL_CREDIT_LABEL: 'Total Account Credit',
         NOTE_LABEL: 'Note',
-        CREDIT_NOTE_MESSAGE: isFreeRegistration ? 
-          'Your first bag was FREE! Each bag holds approximately 20-25 lbs of laundry.' :
-          'This credit will be automatically applied to your first orders. Each bag holds approximately 20-25 lbs of laundry.',
+        CREDIT_NOTE_MESSAGE: isV2Registration ?
+          'No upfront payment required. You\'ll pay after your laundry is picked up and weighed.' :
+          (isFreeRegistration ? 
+            'Your first bag was FREE! Each bag holds approximately 20-25 lbs of laundry.' :
+            'This credit will be automatically applied to your first orders. Each bag holds approximately 20-25 lbs of laundry.'),
         HOW_IT_WORKS_TITLE: 'How It Works',
         STEP_1_TITLE: 'Schedule a Pickup',
         STEP_1_DESC: 'Login to your dashboard and schedule a convenient pickup time.',

@@ -3,14 +3,62 @@ const {
   searchOrders
 } = require('../../server/controllers/orderController');
 const Order = require('../../server/models/Order');
+const { extractHandler } = require('../helpers/testUtils');
+const { expectSuccessResponse, expectErrorResponse } = require('../helpers/responseHelpers');
+const { createFindOneMock, createFindMock, createMockDocument, createAggregateMock } = require('../helpers/mockHelpers');
 
 // Mock dependencies
 jest.mock('../../server/models/Order');
 jest.mock('../../server/models/Customer');
+jest.mock('../../server/utils/controllerHelpers', () => ({
+  asyncWrapper: (fn) => fn,
+  sendSuccess: (res, data, message, statusCode = 200) => {
+    return res.status(statusCode || 200).json({ success: true, message: message || 'Success', ...data });
+  },
+  sendError: (res, message, statusCode = 400, details) => {
+    return res.status(statusCode).json({ success: false, message, ...(details && { ...details }) });
+  },
+  validateRequiredFields: (body, fields) => {
+    const missing = fields.filter(field => !body[field]);
+    return missing.length > 0 ? { missingFields: missing } : null;
+  },
+  parsePagination: (query, defaults = {}) => {
+    const page = parseInt(query.page) || 1;
+    const limit = parseInt(query.limit) || defaults.limit || 10;
+    return {
+      page,
+      limit,
+      skip: (page - 1) * limit
+    };
+  },
+  calculatePagination: (total, page, limit) => ({
+    total,
+    page,
+    pages: Math.ceil(total / limit)
+  }),
+  buildQuery: (params, allowedFields) => {
+    const query = {};
+    Object.keys(params).forEach(key => {
+      if (params[key] && allowedFields[key]) {
+        query[key] = params[key];
+      }
+    });
+    return query;
+  },
+  sendPaginated: (res, items, pagination, message, extra = {}) => {
+    return res.status(200).json({
+      success: true,
+      message: message || 'Success',
+      data: items,
+      pagination,
+      ...extra
+    });
+  }
+}));
 const Customer = require('../../server/models/Customer');
 
 describe('Order Controller - Uncovered Functions', () => {
-  let req, res;
+  let req, res, next;
 
   beforeEach(() => {
     req = {
@@ -26,6 +74,7 @@ describe('Order Controller - Uncovered Functions', () => {
       send: jest.fn(),
       end: jest.fn()
     };
+    next = jest.fn();
     jest.clearAllMocks();
     jest.resetModules();
     Order.countDocuments = jest.fn();
@@ -164,12 +213,13 @@ describe('Order Controller - Uncovered Functions', () => {
         ]
       });
 
-      expect(res.json).toHaveBeenCalledWith({
-        success: true,
-        orders: expect.any(Array),
-        totalResults: 1,
-        pagination: expect.any(Object)
-      });
+      expect(res.json).toHaveBeenCalledWith(
+        expect.objectContaining({
+          success: true,
+          data: expect.any(Array),
+          pagination: expect.any(Object)
+        })
+      );
     });
 
     it('should search orders without search term', async () => {
@@ -221,12 +271,13 @@ describe('Order Controller - Uncovered Functions', () => {
 
       await searchOrders(req, res);
 
-      expect(res.json).toHaveBeenCalledWith({
-        success: true,
-        orders: [],
-        totalResults: 0,
-        pagination: expect.any(Object)
-      });
+      expect(res.json).toHaveBeenCalledWith(
+        expect.objectContaining({
+          success: true,
+          data: [],
+          pagination: expect.any(Object)
+        })
+      );
     });
 
     it('should handle search errors', async () => {
@@ -237,13 +288,9 @@ describe('Order Controller - Uncovered Functions', () => {
         select: jest.fn().mockRejectedValue(new Error('Search failed'))
       });
 
-      await searchOrders(req, res);
-
-      expect(res.status).toHaveBeenCalledWith(500);
-      expect(res.json).toHaveBeenCalledWith({
-        success: false,
-        message: 'An error occurred while searching orders'
-      });
+      // The real asyncWrapper would catch this error
+      // Our mock just returns the fn, so the error will be thrown
+      await expect(searchOrders(req, res)).rejects.toThrow('Search failed');
     });
   });
 });

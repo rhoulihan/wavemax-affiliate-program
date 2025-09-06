@@ -244,16 +244,52 @@
             data.paymentVersion = 'v2';
             data.initialBagsRequested = parseInt(data.numberOfBags || '1');
             
+            // Show spinner
+            let spinner = null;
+            if (window.SwirlSpinnerUtils && window.SwirlSpinnerUtils.showGlobal) {
+                const message = (window.i18n?.t && window.i18n.t('spinner.processingRegistration')) || 'Processing your registration...';
+                spinner = window.SwirlSpinnerUtils.showGlobal({
+                    message: message,
+                    size: 'large'
+                });
+                console.log('[V2 Registration] Showing global spinner for registration');
+            } else if (window.SwirlSpinner) {
+                // Fallback to creating spinner with overlay
+                const container = document.createElement('div');
+                container.className = 'swirl-spinner-global';
+                document.body.appendChild(container);
+                
+                spinner = new window.SwirlSpinner({
+                    container: container,
+                    message: (window.i18n?.t && window.i18n.t('spinner.processingRegistration')) || 'Processing your registration...',
+                    size: 'large',
+                    overlay: true
+                });
+                spinner.show();
+                
+                // Store container for cleanup
+                spinner._container = container;
+                console.log('[V2 Registration] Created overlay spinner for registration');
+            }
+            
             try {
                 console.log('[V2 Registration] Sending registration data:', data);
                 
                 const result = await ApiClient.post('/api/customers/register', data, {
-                    showLoading: true,
-                    loadingMessage: window.i18n?.translate('spinner.processingRegistration') || 'Processing your registration...',
+                    showLoading: false,  // We're handling the spinner manually
                     showError: false
                 });
                 
                 console.log('[V2 Registration] Server response:', result);
+                
+                // Hide spinner
+                if (spinner && spinner.hide) {
+                    spinner.hide();
+                    // Clean up container if we created it
+                    if (spinner._container && spinner._container.parentNode) {
+                        spinner._container.parentNode.removeChild(spinner._container);
+                    }
+                }
                 
                 if (result.success) {
                     // Store customer data
@@ -270,10 +306,10 @@
                         localStorage.setItem('currentCustomer', JSON.stringify(customerData));
                     }
                     
-                    // Redirect to customer login page
-                    const redirectUrl = '/embed-app-v2.html?route=/customer-login';
-                    // Add registered=true to show a success message
-                    window.location.href = redirectUrl + '&registered=true';
+                    // Redirect to customer success page
+                    const redirectUrl = '/embed-app-v2.html?route=/customer-success';
+                    // Add welcome=true and customer ID to show welcome message
+                    window.location.href = redirectUrl + `&welcome=true&id=${result.customerId}`;
                 } else {
                     // Show error
                     if (window.ModalSystem) {
@@ -289,6 +325,15 @@
                 }
             } catch (error) {
                 console.error('[V2 Registration] Registration error:', error);
+                
+                // Hide spinner on error
+                if (spinner && spinner.hide) {
+                    spinner.hide();
+                    // Clean up container if we created it
+                    if (spinner._container && spinner._container.parentNode) {
+                        spinner._container.parentNode.removeChild(spinner._container);
+                    }
+                }
                 
                 if (window.ModalSystem) {
                     window.ModalSystem.error('An error occurred during registration. Please try again.', 'Registration Error');
@@ -645,8 +690,7 @@
             const result = await ApiClient.post('/api/v1/service-area/validate',
                 { address, city, state, zipCode },
                 {
-                    showLoading: true,
-                    loadingMessage: window.i18n?.translate('spinner.validatingAddress') || 'Validating address...',
+                    showLoading: false,  // Don't show spinner here, navigation handles it
                     showError: false
                 }
             );

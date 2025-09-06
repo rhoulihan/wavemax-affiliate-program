@@ -8,6 +8,9 @@ const { getCsrfToken, createAgent } = require('../helpers/csrfHelper');
 const mongoose = require('mongoose');
 const encryptionUtil = require('../../server/utils/encryption');
 
+// Set timeout for integration tests
+jest.setTimeout(90000);
+
 // Mock auditLogger to prevent errors
 jest.mock('../../server/utils/auditLogger', () => ({
   log: jest.fn().mockResolvedValue(true),

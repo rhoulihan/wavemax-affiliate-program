@@ -479,7 +479,7 @@ describe('Administrator Controller - Enhanced Coverage', () => {
           adminId: 'ADM001',
           email: 'admin@example.com',
           firstName: 'John',
-          save: jest.fn().mockResolvedValue(true)
+      save: jest.fn().mockResolvedValue(true)
         };
 
         Administrator.findById.mockResolvedValue(mockAdmin);
@@ -505,7 +505,7 @@ describe('Administrator Controller - Enhanced Coverage', () => {
 
         const mockAdmin = {
           _id: '507f1f77bcf86cd799439011',
-          save: jest.fn().mockResolvedValue(true)
+      save: jest.fn().mockResolvedValue(true)
         };
 
         Administrator.findById.mockResolvedValue(mockAdmin);
@@ -592,7 +592,7 @@ describe('Administrator Controller - Enhanced Coverage', () => {
           operatorId: 'OP001',
           email: 'operator@example.com',
           firstName: 'Op',
-          save: jest.fn().mockResolvedValue(true)
+      save: jest.fn().mockResolvedValue(true)
         };
 
         Operator.findById.mockResolvedValue(mockOperator);
@@ -625,7 +625,7 @@ describe('Administrator Controller - Enhanced Coverage', () => {
           operatorId: 'OP001',
           email: 'operator@example.com',
           firstName: 'Op',
-          save: jest.fn().mockResolvedValue(true)
+      save: jest.fn().mockResolvedValue(true)
         };
 
         Operator.findById.mockResolvedValue(mockOperator);
@@ -1025,7 +1025,7 @@ describe('Administrator Controller - Enhanced Coverage', () => {
           _id: 'op123',
           phone: '+0987654321',
           firstName: 'John',
-          save: jest.fn().mockImplementation(function() {
+      save: jest.fn().mockImplementation(function() {
             return Promise.resolve({
               ...this,
               toObject: jest.fn().mockReturnValue({

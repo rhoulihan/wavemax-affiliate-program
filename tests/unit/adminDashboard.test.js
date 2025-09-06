@@ -213,6 +213,7 @@ describe('Admin Dashboard Functions', () => {
     });
     
     it('should handle errors in dashboard data fetching', async () => {
+      const next = jest.fn();
       Order.aggregate.mockRejectedValue(new Error('Database error'));
       
       await administratorController.getDashboard(mockReq, mockRes);
@@ -273,6 +274,7 @@ describe('Admin Dashboard Functions', () => {
     });
     
     it('should handle errors', async () => {
+      const next = jest.fn();
       Order.aggregate.mockRejectedValue(new Error('Database error'));
       
       await administratorController.getOrderAnalytics(mockReq, mockRes);
@@ -335,6 +337,7 @@ describe('Admin Dashboard Functions', () => {
     });
     
     it('should handle errors', async () => {
+      const next = jest.fn();
       Operator.aggregate.mockRejectedValue(new Error('Database error'));
       
       await administratorController.getOperatorAnalytics(mockReq, mockRes);
@@ -390,6 +393,7 @@ describe('Admin Dashboard Functions', () => {
     });
     
     it('should handle errors', async () => {
+      const next = jest.fn();
       Affiliate.aggregate.mockRejectedValue(new Error('Database error'));
       
       await administratorController.getAffiliateAnalytics(mockReq, mockRes);
@@ -480,6 +484,7 @@ describe('Admin Dashboard Functions', () => {
     });
     
     it('should handle invalid report type', async () => {
+      const next = jest.fn();
       mockReq.query = {
         reportType: 'invalid'
       };
@@ -560,6 +565,7 @@ describe('Admin Dashboard Functions', () => {
     });
     
     it('should handle errors in affiliates list', async () => {
+      const next = jest.fn();
       Affiliate.find.mockImplementation(() => {
         throw new Error('Database error');
       });

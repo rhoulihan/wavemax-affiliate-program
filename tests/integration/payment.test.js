@@ -203,6 +203,7 @@ describe('Payment Integration Tests', () => {
 
   describe('Payment Callback Tests', () => {
     it('should return 503 when all callback handlers are locked', async () => {
+      const next = jest.fn();
       // Create 10 payment tokens to lock all callback handlers
       const tokenPromises = [];
       

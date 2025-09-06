@@ -147,6 +147,7 @@ describe('Payment Routes - Isolated', () => {
 
   describe('Error Handling', () => {
     it('should handle controller errors gracefully', async () => {
+      const next = jest.fn();
       mockController.getConfig.mockImplementationOnce((req, res) => {
         res.status(500).json({ error: 'Internal server error' });
       });

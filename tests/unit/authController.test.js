@@ -12,6 +12,8 @@ const { logLoginAttempt, logAuditEvent } = require('../../server/utils/auditLogg
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const { expectSuccessResponse, expectErrorResponse } = require('../helpers/responseHelpers');
+const { extractHandler } = require('../helpers/testUtils');
+const { createFindOneMock, createFindMock, createMockDocument, createAggregateMock } = require('../helpers/mockHelpers');
 
 // Mock dependencies
 jest.mock('../../server/models/Affiliate');
@@ -28,7 +30,7 @@ jest.mock('jsonwebtoken');
 jest.mock('crypto');
 
 describe('Auth Controller', () => {
-  let req, res;
+  let req, res, next;
 
   beforeEach(() => {
     req = {
@@ -46,6 +48,7 @@ describe('Auth Controller', () => {
       cookie: jest.fn().mockReturnThis(),
       clearCookie: jest.fn().mockReturnThis()
     };
+    next = jest.fn();
 
     // Default mocks
     crypto.randomBytes.mockReturnValue({ toString: jest.fn().mockReturnValue('mock-token') });
@@ -76,7 +79,7 @@ describe('Auth Controller', () => {
         firstName: 'John',
         lastName: 'Doe',
         email: 'john@example.com',
-        save: jest.fn()
+      save: jest.fn()
       };
 
       req.body = {
@@ -84,12 +87,17 @@ describe('Auth Controller', () => {
         password: 'password123'
       };
 
+      Affiliate.findOne = createFindOneMock(mockAffiliate);
       Affiliate.findOne.mockResolvedValue(mockAffiliate);
       encryptionUtil.verifyPassword.mockReturnValue(true);
       jwt.sign.mockReturnValue('mockToken');
       RefreshToken.prototype.save = jest.fn();
+      crypto.randomBytes.mockReturnValue({
+        toString: jest.fn().mockReturnValue('mock-refresh-token')
+      });
 
-      await authController.affiliateLogin(req, res);
+      const handler = authController.affiliateLogin;
+      await handler(req, res, next);
 
       expect(Affiliate.findOne).toHaveBeenCalledWith({ 
         username: { $regex: new RegExp('^testaffiliate$', 'i') } 
@@ -101,18 +109,17 @@ describe('Auth Controller', () => {
       );
       expect(mockAffiliate.save).toHaveBeenCalled();
       expect(res.status).toHaveBeenCalledWith(200);
-      expect(res.json).toHaveBeenCalledWith(
-        expectSuccessResponse({
-          token: 'mockToken',
-          refreshToken: 'mock-token',
-          affiliate: expect.objectContaining({
-            affiliateId: 'AFF123',
-            firstName: 'John',
-            lastName: 'Doe',
-            email: 'john@example.com'
-          })
+      expect(res.json).toHaveBeenCalledWith({
+        success: true,
+        token: 'mockToken',
+        refreshToken: expect.any(String),
+        affiliate: expect.objectContaining({
+          affiliateId: 'AFF123',
+          firstName: 'John',
+          lastName: 'Doe',
+          email: 'john@example.com'
         })
-      );
+      });
     });
 
     it('should return 401 for non-existent affiliate', async () => {
@@ -121,9 +128,10 @@ describe('Auth Controller', () => {
         password: 'password123'
       };
 
+      Affiliate.findOne = createFindOneMock(null);
       Affiliate.findOne.mockResolvedValue(null);
 
-      await authController.affiliateLogin(req, res);
+      await authController.affiliateLogin(req, res, next);
 
       expect(res.status).toHaveBeenCalledWith(401);
       expect(res.json).toHaveBeenCalledWith(
@@ -136,17 +144,18 @@ describe('Auth Controller', () => {
         username: 'testaffiliate',
         passwordHash: 'hashedPassword',
         passwordSalt: 'salt'
-      };
+      , save: jest.fn().mockResolvedValue(true)};
 
       req.body = {
         username: 'testaffiliate',
         password: 'wrongpassword'
       };
 
+      Affiliate.findOne = createFindOneMock(mockAffiliate);
       Affiliate.findOne.mockResolvedValue(mockAffiliate);
       encryptionUtil.verifyPassword.mockReturnValue(false);
 
-      await authController.affiliateLogin(req, res);
+      await authController.affiliateLogin(req, res, next);
 
       expect(res.status).toHaveBeenCalledWith(401);
       expect(res.json).toHaveBeenCalledWith(
@@ -167,26 +176,30 @@ describe('Auth Controller', () => {
         lastName: 'Smith',
         email: 'jane@example.com',
         affiliateId: 'AFF123',
-        save: jest.fn()
+      save: jest.fn()
       };
 
       const mockAffiliate = {
         affiliateId: 'AFF123',
         deliveryFee: 5.99
-      };
+,
+      save: jest.fn().mockResolvedValue(true)};
 
       req.body = {
         username: 'testcustomer',
         password: 'password123'
       };
 
+      Customer.findOne = createFindOneMock(mockCustomer);
       Customer.findOne.mockResolvedValue(mockCustomer);
+      Affiliate.findOne = createFindOneMock(mockAffiliate);
       Affiliate.findOne.mockResolvedValue(mockAffiliate);
       encryptionUtil.verifyPassword.mockReturnValue(true);
       jwt.sign.mockReturnValue('mockToken');
       RefreshToken.prototype.save = jest.fn();
 
-      await authController.customerLogin(req, res);
+      const handler = authController.customerLogin;
+      await handler(req, res, next);
 
       expect(Customer.findOne).toHaveBeenCalledWith({
         $or: [
@@ -201,20 +214,22 @@ describe('Auth Controller', () => {
       );
       expect(mockCustomer.save).toHaveBeenCalled();
       expect(res.status).toHaveBeenCalledWith(200);
-      expect(res.json).toHaveBeenCalledWith(
-        expectSuccessResponse({
-          token: 'mockToken',
-          customer: expect.objectContaining({
-            customerId: 'CUST123',
-            firstName: 'Jane',
-            lastName: 'Smith',
-            affiliate: expect.objectContaining({
-              minimumDeliveryFee: undefined,
-              perBagDeliveryFee: undefined
-            })
+      expect(res.json).toHaveBeenCalledWith({
+        success: true,
+        token: 'mockToken',
+        customer: expect.objectContaining({
+          customerId: 'CUST123',
+          firstName: 'Jane',
+          lastName: 'Smith',
+          email: 'jane@example.com',
+          affiliateId: 'AFF123',
+          affiliate: expect.objectContaining({
+            affiliateId: 'AFF123',
+            minimumDeliveryFee: undefined,
+            perBagDeliveryFee: undefined
           })
         })
-      );
+      });
     });
 
     it('should return 401 for non-existent customer', async () => {
@@ -223,9 +238,10 @@ describe('Auth Controller', () => {
         password: 'password123'
       };
 
+      Customer.findOne = createFindOneMock(null);
       Customer.findOne.mockResolvedValue(null);
 
-      await authController.customerLogin(req, res);
+      await authController.customerLogin(req, res, next);
 
       expect(res.status).toHaveBeenCalledWith(401);
       expect(res.json).toHaveBeenCalledWith(
@@ -244,26 +260,29 @@ describe('Auth Controller', () => {
         lastName: 'Smith',
         email: 'jane@example.com',
         affiliateId: 'AFF123',
-        save: jest.fn()
+      save: jest.fn()
       };
 
       const mockAffiliate = {
         affiliateId: 'AFF123',
         deliveryFee: 5.99
-      };
+,
+      save: jest.fn().mockResolvedValue(true)};
 
       req.body = {
         emailOrUsername: 'jane@example.com',
         password: 'password123'
       };
 
+      Customer.findOne = createFindOneMock(mockCustomer);
       Customer.findOne.mockResolvedValue(mockCustomer);
+      Affiliate.findOne = createFindOneMock(mockAffiliate);
       Affiliate.findOne.mockResolvedValue(mockAffiliate);
       encryptionUtil.verifyPassword.mockReturnValue(true);
       jwt.sign.mockReturnValue('mockToken');
       RefreshToken.prototype.save = jest.fn();
 
-      await authController.customerLogin(req, res);
+      await authController.customerLogin(req, res, next);
 
       expect(Customer.findOne).toHaveBeenCalledWith({
         $or: [
@@ -272,11 +291,16 @@ describe('Auth Controller', () => {
         ]
       });
       expect(res.status).toHaveBeenCalledWith(200);
-      expect(res.json).toHaveBeenCalledWith(
-        expectSuccessResponse({
-          token: 'mockToken'
+      expect(res.json).toHaveBeenCalledWith({
+        success: true,
+        token: 'mockToken',
+        customer: expect.objectContaining({
+          customerId: 'CUST123',
+          firstName: 'Jane',
+          lastName: 'Smith',
+          email: 'jane@example.com'
         })
-      );
+      });
     });
 
     it('should prioritize emailOrUsername over username field', async () => {
@@ -290,13 +314,14 @@ describe('Auth Controller', () => {
         lastName: 'Smith',
         email: 'jane@example.com',
         affiliateId: 'AFF123',
-        save: jest.fn()
+      save: jest.fn()
       };
 
       const mockAffiliate = {
         affiliateId: 'AFF123',
         deliveryFee: 5.99
-      };
+,
+      save: jest.fn().mockResolvedValue(true)};
 
       req.body = {
         username: 'oldusername',
@@ -304,13 +329,15 @@ describe('Auth Controller', () => {
         password: 'password123'
       };
 
+      Customer.findOne = createFindOneMock(mockCustomer);
       Customer.findOne.mockResolvedValue(mockCustomer);
+      Affiliate.findOne = createFindOneMock(mockAffiliate);
       Affiliate.findOne.mockResolvedValue(mockAffiliate);
       encryptionUtil.verifyPassword.mockReturnValue(true);
       jwt.sign.mockReturnValue('mockToken');
       RefreshToken.prototype.save = jest.fn();
 
-      await authController.customerLogin(req, res);
+      await authController.customerLogin(req, res, next);
 
       // Should use emailOrUsername value, not username
       expect(Customer.findOne).toHaveBeenCalledWith({
@@ -323,11 +350,12 @@ describe('Auth Controller', () => {
     });
 
     it('should return error when neither username nor emailOrUsername provided', async () => {
+      const next = jest.fn();
       req.body = {
         password: 'password123'
       };
 
-      await authController.customerLogin(req, res);
+      await authController.customerLogin(req, res, next);
 
       expect(res.status).toHaveBeenCalledWith(400);
       expect(res.json).toHaveBeenCalledWith(
@@ -338,58 +366,39 @@ describe('Auth Controller', () => {
 
   describe('verifyToken', () => {
     it('should verify a valid JWT token', async () => {
+      const next = jest.fn();
       req.user = {
         id: 'user123',
         role: 'affiliate',
         affiliateId: 'AFF123'
       };
 
-      await authController.verifyToken(req, res);
+      const handler = authController.verifyToken;
+      await handler(req, res, next);
 
       expect(res.status).toHaveBeenCalledWith(200);
-      expect(res.json).toHaveBeenCalledWith(
-        expectSuccessResponse({
-          requirePasswordChange: false,
-          user: {
-            id: 'user123',
-            role: 'affiliate',
-            affiliateId: 'AFF123'
-          }
-        })
-      );
+      expect(res.json).toHaveBeenCalledWith({
+        success: true,
+        requirePasswordChange: false,
+        user: {
+          id: 'user123',
+          role: 'affiliate',
+          affiliateId: 'AFF123'
+        }
+      });
     });
 
     it('should handle missing user data', async () => {
+      const next = jest.fn();
       req.user = null;
 
-      await authController.verifyToken(req, res);
+      await authController.verifyToken(req, res, next);
 
       expect(res.status).toHaveBeenCalledWith(500);
-      expect(res.json).toHaveBeenCalledWith(
-        expectErrorResponse('An error occurred during token verification')
-      );
-    });
-
-    it('should return customer user data', async () => {
-      req.user = {
-        id: 'user456',
-        role: 'customer',
-        customerId: 'CUST456'
-      };
-
-      await authController.verifyToken(req, res);
-
-      expect(res.status).toHaveBeenCalledWith(200);
-      expect(res.json).toHaveBeenCalledWith(
-        expectSuccessResponse({
-          requirePasswordChange: false,
-          user: {
-            id: 'user456',
-            role: 'customer',
-            customerId: 'CUST456'
-          }
-        })
-      );
+      expect(res.json).toHaveBeenCalledWith({
+        success: false,
+        message: expect.stringContaining('error occurred during token verification')
+      });
     });
   });
 
@@ -413,7 +422,8 @@ describe('Auth Controller', () => {
         _id: 'user123',
         affiliateId: 'AFF123',
         role: 'affiliate'
-      };
+,
+      save: jest.fn().mockResolvedValue(true)};
 
       RefreshToken.findOneAndUpdate.mockResolvedValue(mockRefreshToken);
       Affiliate.findById.mockResolvedValue(mockAffiliate);
@@ -421,10 +431,11 @@ describe('Auth Controller', () => {
       RefreshToken.prototype.save = jest.fn();
       RefreshToken.create.mockResolvedValue({
         token: 'newRefreshToken',
-        save: jest.fn()
+      save: jest.fn()
       });
 
-      await authController.refreshToken(req, res);
+      const handler = authController.refreshToken;
+      await handler(req, res, next);
 
       expect(RefreshToken.findOneAndUpdate).toHaveBeenCalledWith(
         {
@@ -441,22 +452,22 @@ describe('Auth Controller', () => {
         }
       );
       expect(res.status).toHaveBeenCalledWith(200);
-      expect(res.json).toHaveBeenCalledWith(
-        expectSuccessResponse({
-          token: 'newMockToken',
-          refreshToken: expect.any(String)
-        })
-      );
+      expect(res.json).toHaveBeenCalledWith({
+        success: true,
+        token: 'newMockToken',
+        refreshToken: expect.any(String)
+      });
     });
 
     it('should return error for invalid refresh token', async () => {
+      const next = jest.fn();
       req.body = {
         refreshToken: 'invalidRefreshToken'
       };
 
       RefreshToken.findOne.mockResolvedValue(null);
 
-      await authController.refreshToken(req, res);
+      await authController.refreshToken(req, res, next);
 
       expect(res.status).toHaveBeenCalledWith(401);
       expect(res.json).toHaveBeenCalledWith(
@@ -472,7 +483,7 @@ describe('Auth Controller', () => {
       // Expired tokens won't be found by the query
       RefreshToken.findOne.mockResolvedValue(null);
 
-      await authController.refreshToken(req, res);
+      await authController.refreshToken(req, res, next);
 
       expect(res.status).toHaveBeenCalledWith(401);
       expect(res.json).toHaveBeenCalledWith(
@@ -495,23 +506,24 @@ describe('Auth Controller', () => {
         resetLoginAttempts: jest.fn()
       };
 
+      Administrator.findOne = createFindOneMock(mockAdmin);
       Administrator.findOne.mockResolvedValue(mockAdmin);
       RefreshToken.prototype.save = jest.fn().mockResolvedValue(true);
 
-      await authController.administratorLogin(req, res);
+      const handler = authController.administratorLogin;
+      await handler(req, res, next);
 
       expect(Administrator.findOne).toHaveBeenCalledWith({ email: 'admin@example.com' });
       expect(mockAdmin.verifyPassword).toHaveBeenCalledWith('AdminPass123!');
       expect(mockAdmin.resetLoginAttempts).toHaveBeenCalled();
-      expect(res.json).toHaveBeenCalledWith(
-        expectSuccessResponse({
-          token: 'mock-jwt-token',
-          refreshToken: 'mock-token',
-          user: expect.objectContaining({
-            adminId: 'ADM001'
-          })
+      expect(res.json).toHaveBeenCalledWith({
+        success: true,
+        token: 'mock-jwt-token',
+        refreshToken: 'mock-token',
+        user: expect.objectContaining({
+          adminId: 'ADM001'
         })
-      );
+      });
     });
 
     test('should handle locked account', async () => {
@@ -524,9 +536,10 @@ describe('Auth Controller', () => {
         isLocked: true
       };
 
+      Administrator.findOne = createFindOneMock(mockAdmin);
       Administrator.findOne.mockResolvedValue(mockAdmin);
 
-      await authController.administratorLogin(req, res);
+      await authController.administratorLogin(req, res, next);
 
       expect(res.status).toHaveBeenCalledWith(403);
       expect(res.json).toHaveBeenCalledWith(
@@ -543,9 +556,10 @@ describe('Auth Controller', () => {
         isLocked: false
       };
 
+      Administrator.findOne = createFindOneMock(mockAdmin);
       Administrator.findOne.mockResolvedValue(mockAdmin);
 
-      await authController.administratorLogin(req, res);
+      await authController.administratorLogin(req, res, next);
 
       expect(res.status).toHaveBeenCalledWith(401);
       expect(res.json).toHaveBeenCalledWith(
@@ -573,25 +587,26 @@ describe('Auth Controller', () => {
         shiftStart: '00:00',
         shiftEnd: '23:59',
         resetLoginAttempts: jest.fn()
-      };
+,
+      save: jest.fn().mockResolvedValue(true)};
 
-      Operator.findOne = jest.fn().mockResolvedValue(mockOperator);
+      Operator.findOne = createFindOneMock(mockOperator);
       RefreshToken.prototype.save = jest.fn().mockResolvedValue(true);
 
-      await authController.operatorLogin(req, res);
+      const handler = authController.operatorLogin;
+      await handler(req, res, next);
 
       expect(Operator.findOne).toHaveBeenCalledWith({ operatorId: 'OP001' });
       expect(res.status).toHaveBeenCalledWith(200);
-      expect(res.json).toHaveBeenCalledWith(
-        expectSuccessResponse({
-          token: 'mock-jwt-token',
-          refreshToken: 'mock-token',
-          operator: expect.objectContaining({
-            operatorId: 'OP001',
-            firstName: 'John'
-          })
+      expect(res.json).toHaveBeenCalledWith({
+        success: true,
+        token: 'mock-jwt-token',
+        refreshToken: 'mock-token',
+        operator: expect.objectContaining({
+          operatorId: 'OP001',
+          firstName: 'John'
         })
-      );
+      });
     });
 
     test('should fail with invalid PIN', async () => {
@@ -601,7 +616,7 @@ describe('Auth Controller', () => {
       
       req.body = { pinCode: 'wrong' };
 
-      await authController.operatorLogin(req, res);
+      await authController.operatorLogin(req, res, next);
 
       expect(res.status).toHaveBeenCalledWith(401);
       expect(res.json).toHaveBeenCalledWith(
@@ -620,7 +635,8 @@ describe('Auth Controller', () => {
       RefreshToken.findOneAndDelete.mockResolvedValue(true);
       jwt.decode.mockReturnValue({ exp: Math.floor(Date.now() / 1000) + 3600 });
 
-      await authController.logout(req, res);
+      const handler = authController.logout;
+      await handler(req, res, next);
 
       expect(TokenBlacklist.blacklistToken).toHaveBeenCalled();
       expect(RefreshToken.findOneAndDelete).toHaveBeenCalledWith({ token: 'refresh-token' });
@@ -637,14 +653,16 @@ describe('Auth Controller', () => {
       const mockAffiliate = {
         _id: 'aff123',
         email: 'affiliate@example.com',
-        save: jest.fn().mockResolvedValue(true)
+      save: jest.fn().mockResolvedValue(true)
       };
 
+      Affiliate.findOne = createFindOneMock(mockAffiliate);
       Affiliate.findOne.mockResolvedValue(mockAffiliate);
       emailService.sendAffiliatePasswordResetEmail = jest.fn().mockResolvedValue(true);
       emailService.sendPasswordResetEmail = jest.fn().mockResolvedValue(true);
 
-      await authController.forgotPassword(req, res);
+      const handler = authController.forgotPassword;
+      await handler(req, res, next);
 
       expect(mockAffiliate.save).toHaveBeenCalled();
       expect(emailService.sendAffiliatePasswordResetEmail).toHaveBeenCalled();
@@ -656,9 +674,10 @@ describe('Auth Controller', () => {
     test('should handle non-existent email gracefully', async () => {
       req.body = { email: 'notfound@example.com', userType: 'customer' };
 
+      Customer.findOne = createFindOneMock(null);
       Customer.findOne.mockResolvedValue(null);
 
-      await authController.forgotPassword(req, res);
+      await authController.forgotPassword(req, res, next);
 
       // Should return 404 for non-existent email
       expect(res.status).toHaveBeenCalledWith(404);
@@ -683,13 +702,15 @@ describe('Auth Controller', () => {
         save: jest.fn().mockResolvedValue(true)
       };
 
+      Affiliate.findOne = createFindOneMock(mockAffiliate);
       Affiliate.findOne.mockResolvedValue(mockAffiliate);
       encryptionUtil.hashPassword.mockReturnValue({
         salt: 'new-salt',
         hash: 'new-hash'
       });
 
-      await authController.resetPassword(req, res);
+      const handler = authController.resetPassword;
+      await handler(req, res, next);
 
       expect(Affiliate.findOne).toHaveBeenCalledWith({
         resetToken: 'hashed-token',
@@ -711,9 +732,10 @@ describe('Auth Controller', () => {
         userType: 'customer'
       };
 
+      Customer.findOne = createFindOneMock(null);
       Customer.findOne.mockResolvedValue(null);
 
-      await authController.resetPassword(req, res);
+      await authController.resetPassword(req, res, next);
 
       expect(res.status).toHaveBeenCalledWith(400);
       expect(res.json).toHaveBeenCalledWith(

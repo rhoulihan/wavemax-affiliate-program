@@ -253,7 +253,7 @@ describe('Passport Configuration Tests', () => {
       });
 
       test('should handle existing affiliate conflict', async () => {
-        const mockAffiliate = { affiliateId: 'AFF000001', email: 'test@example.com' };
+        const mockAffiliate = { affiliateId: 'AFF000001', email: 'test@example.com' , save: jest.fn().mockResolvedValue(true)};
 
         Customer.findOne.mockResolvedValue(null);
         Affiliate.findOne.mockResolvedValue(mockAffiliate);
@@ -301,7 +301,7 @@ describe('Passport Configuration Tests', () => {
         const mockAffiliate = {
           _id: 'affiliate123',
           affiliateId: 'AFF000001',
-          socialAccounts: { google: { id: 'google123' } }
+          socialAccounts: { google: { id: 'google123' , save: jest.fn().mockResolvedValue(true)} }
         };
 
         Affiliate.findOne.mockResolvedValue(mockAffiliate);
@@ -324,7 +324,7 @@ describe('Passport Configuration Tests', () => {
       });
 
       test('should handle customer conflict', async () => {
-        const mockCustomer = { customerId: 'CUST000001', email: 'affiliate@example.com' };
+        const mockCustomer = { customerId: 'CUST000001', email: 'affiliate@example.com' , save: jest.fn().mockResolvedValue(true)};
 
         Affiliate.findOne.mockResolvedValue(null);
         Customer.findOne.mockResolvedValue(mockCustomer);
@@ -344,7 +344,8 @@ describe('Passport Configuration Tests', () => {
         const mockAffiliate = {
           _id: 'affiliate123',
           affiliateId: 'AFF000001',
-          socialAccounts: {}
+          socialAccounts: {},
+          save: jest.fn().mockResolvedValue(true)
         };
 
         const updatedAffiliate = {
@@ -439,7 +440,7 @@ describe('Passport Configuration Tests', () => {
     test('should handle existing affiliate', async () => {
       const mockAffiliate = {
         _id: 'affiliate123',
-        socialAccounts: { facebook: { id: 'fb123' } }
+        socialAccounts: { facebook: { id: 'fb123' , save: jest.fn().mockResolvedValue(true)} }
       };
 
       Affiliate.findOne.mockResolvedValue(mockAffiliate);
@@ -487,7 +488,8 @@ describe('Passport Configuration Tests', () => {
     test('should link Facebook account to existing affiliate', async () => {
       const mockAffiliate = {
         _id: 'affiliate123',
-        socialAccounts: {}
+        socialAccounts: {},
+        save: jest.fn().mockResolvedValue(true)
       };
 
       const updatedAffiliate = {
@@ -577,7 +579,7 @@ describe('Passport Configuration Tests', () => {
     test('should handle existing affiliate', async () => {
       const mockAffiliate = {
         _id: 'affiliate123',
-        socialAccounts: { linkedin: { id: 'li123' } }
+        socialAccounts: { linkedin: { id: 'li123' , save: jest.fn().mockResolvedValue(true)} }
       };
 
       Affiliate.findOne.mockResolvedValue(mockAffiliate);
@@ -598,7 +600,8 @@ describe('Passport Configuration Tests', () => {
     test('should link LinkedIn account to existing affiliate', async () => {
       const mockAffiliate = {
         _id: 'affiliate123',
-        socialAccounts: {}
+        socialAccounts: {},
+        save: jest.fn().mockResolvedValue(true)
       };
 
       const updatedAffiliate = {
@@ -727,7 +730,7 @@ describe('Passport Configuration Tests', () => {
     });
 
     test('should deserialize user', async () => {
-      const mockAffiliate = { _id: 'user123', affiliateId: 'AFF001' };
+      const mockAffiliate = { _id: 'user123', affiliateId: 'AFF001' , save: jest.fn().mockResolvedValue(true)};
       Affiliate.findById.mockResolvedValue(mockAffiliate);
 
       const done = jest.fn();

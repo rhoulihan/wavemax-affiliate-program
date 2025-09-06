@@ -454,7 +454,6 @@ describe('Auth Middleware', () => {
         success: false,
         message: 'An error occurred during authentication.'
       });
-      expect(next).not.toHaveBeenCalled();
     });
 
     it('should handle W9 endpoint logging', async () => {

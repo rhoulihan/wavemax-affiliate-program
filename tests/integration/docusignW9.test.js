@@ -1,8 +1,12 @@
+jest.setTimeout(90000);
+
 const request = require('supertest');
 const app = require('../../server');
 const Affiliate = require('../../server/models/Affiliate');
 const DocuSignToken = require('../../server/models/DocuSignToken');
 const docusignService = require('../../server/services/docusignService');
+const { expectSuccessResponse, expectErrorResponse } = require('../helpers/responseHelpers');
+const { createFindOneMock, createFindMock, createMockDocument, createAggregateMock } = require('../helpers/mockHelpers');
 
 // Mock DocuSign service to avoid external API calls
 jest.mock('../../server/services/docusignService');

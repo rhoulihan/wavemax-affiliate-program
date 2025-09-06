@@ -6,6 +6,11 @@ const Customer = require('../../server/models/Customer');
 const Operator = require('../../server/models/Operator');
 const Affiliate = require('../../server/models/Affiliate');
 const jwt = require('jsonwebtoken');
+const { expectSuccessResponse, expectErrorResponse } = require('../helpers/responseHelpers');
+const { createFindOneMock, createFindMock, createMockDocument, createAggregateMock } = require('../helpers/mockHelpers');
+
+// Set timeout for integration tests
+jest.setTimeout(90000);
 
 describe.skip('WDF Credit System Integration Tests (DEPRECATED - Feature being removed)', () => {
   let testCustomer;

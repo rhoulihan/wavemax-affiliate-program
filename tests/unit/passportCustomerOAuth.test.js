@@ -100,7 +100,7 @@ describe('Passport Customer OAuth Flow', () => {
         customerId: 'CUST001',
         email: 'customer@example.com',
         socialAccounts: {
-          facebook: { id: 'fb123' }
+          facebook: { id: 'fb123' , save: jest.fn().mockResolvedValue(true)}
         }
       };
 
@@ -142,7 +142,7 @@ describe('Passport Customer OAuth Flow', () => {
         _id: 'customer456',
         customerId: 'CUST002',
         email: 'existing@example.com'
-      };
+      , save: jest.fn().mockResolvedValue(true)};
 
       // First findOne returns null (no Facebook ID match)
       Customer.findOne.mockResolvedValueOnce(null);
@@ -193,7 +193,7 @@ describe('Passport Customer OAuth Flow', () => {
         affiliateId: 'AFF001',
         email: 'affiliate@example.com',
         socialAccounts: {
-          facebook: { id: 'fb789' }
+          facebook: { id: 'fb789' , save: jest.fn().mockResolvedValue(true)}
         }
       };
 
@@ -338,7 +338,7 @@ describe('Passport Customer OAuth Flow', () => {
         customerId: 'CUST003',
         email: 'customer@example.com',
         socialAccounts: {
-          facebook: { id: 'fb333' }
+          facebook: { id: 'fb333' , save: jest.fn().mockResolvedValue(true)}
         }
       };
 

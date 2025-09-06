@@ -11,7 +11,7 @@ jest.mock('../../server/services/callbackPoolManager');
 jest.mock('../../server/utils/logger');
 
 describe('Payment Controller', () => {
-  let req, res;
+  let req, res, next;
 
   beforeEach(() => {
     req = {
@@ -28,6 +28,7 @@ describe('Payment Controller', () => {
       json: jest.fn(),
       redirect: jest.fn()
     };
+    next = jest.fn();
     jest.clearAllMocks();
   });
 
@@ -59,6 +60,7 @@ describe('Payment Controller', () => {
     });
 
     it('should return error when Paygistix is not configured', async () => {
+      const next = jest.fn();
       paygistixConfig.isConfigured.mockReturnValue(false);
 
       await paymentController.getConfig(req, res);
@@ -89,6 +91,7 @@ describe('Payment Controller', () => {
 
   describe('logSubmission', () => {
     it('should log payment submission successfully', async () => {
+      const next = jest.fn();
       req.body = {
         formId: 'form-123',
         timestamp: '2024-01-01T12:00:00Z',
@@ -111,6 +114,7 @@ describe('Payment Controller', () => {
     });
 
     it('should handle logging errors', async () => {
+      const next = jest.fn();
       logger.info.mockImplementation(() => {
         throw new Error('Logging error');
       });
@@ -236,6 +240,7 @@ describe('Payment Controller', () => {
     });
 
     it('should handle token not found', async () => {
+      const next = jest.fn();
       req.params = { token: 'nonexistent-token' };
       PaymentToken.findOne.mockResolvedValue(null);
 
@@ -273,7 +278,7 @@ describe('Payment Controller', () => {
         callbackPath: '/api/v1/payments/callback/form-1',
         customerId: 'customer-123',
         assignedFormId: 'form-1',
-        save: jest.fn()
+      save: jest.fn()
       };
 
       PaymentToken.findOne.mockResolvedValue(mockPaymentToken);
@@ -302,7 +307,7 @@ describe('Payment Controller', () => {
       const mockPaymentToken = {
         token: 'test-token-123',
         status: 'success',
-        save: jest.fn()
+      save: jest.fn()
       };
 
       PaymentToken.findOne.mockResolvedValue(mockPaymentToken);
@@ -319,6 +324,7 @@ describe('Payment Controller', () => {
     });
 
     it('should handle token not found', async () => {
+      const next = jest.fn();
       req.params = { token: 'nonexistent-token' };
       PaymentToken.findOne.mockResolvedValue(null);
 
@@ -344,7 +350,7 @@ describe('Payment Controller', () => {
       const mockPaymentToken = {
         token: 'test-token-123',
         callbackPath: '/api/v1/payments/callback/form-1',
-        save: jest.fn()
+      save: jest.fn()
       };
 
       PaymentToken.findOne.mockResolvedValue(mockPaymentToken);
@@ -378,7 +384,7 @@ describe('Payment Controller', () => {
       const mockPaymentToken = {
         token: 'test-token-123',
         callbackPath: '/api/v1/payments/callback/form-1',
-        save: jest.fn()
+      save: jest.fn()
       };
 
       PaymentToken.findOne.mockResolvedValue(mockPaymentToken);
@@ -403,7 +409,7 @@ describe('Payment Controller', () => {
         token: 'test-token-123',
         status: 'pending',
         callbackPath: '/api/v1/payments/callback/form-1',
-        save: jest.fn()
+      save: jest.fn()
       };
 
       PaymentToken.findOne.mockResolvedValue(mockPaymentToken);
@@ -434,6 +440,7 @@ describe('Payment Controller', () => {
     });
 
     it('should handle callback processing errors', async () => {
+      const next = jest.fn();
       PaymentToken.findOne.mockRejectedValue(new Error('DB error'));
 
       await paymentController.handleFormCallback(req, res, '/api/v1/payments/callback/form-1');
@@ -450,7 +457,7 @@ describe('Payment Controller', () => {
 
       const mockPaymentToken = {
         token: 'test-token-123',
-        save: jest.fn()
+      save: jest.fn()
       };
 
       await paymentController.processCallbackResult(req, res, mockPaymentToken);
@@ -471,7 +478,7 @@ describe('Payment Controller', () => {
 
       const mockPaymentToken = {
         token: 'test-token-123',
-        save: jest.fn()
+      save: jest.fn()
       };
 
       await paymentController.processCallbackResult(req, res, mockPaymentToken);
@@ -486,7 +493,7 @@ describe('Payment Controller', () => {
 
       const mockPaymentToken = {
         token: 'test-token-123',
-        save: jest.fn()
+      save: jest.fn()
       };
 
       await paymentController.processCallbackResult(req, res, mockPaymentToken);
@@ -501,7 +508,7 @@ describe('Payment Controller', () => {
 
       const mockPaymentToken = {
         token: 'test-token-123',
-        save: jest.fn()
+      save: jest.fn()
       };
 
       await paymentController.processCallbackResult(req, res, mockPaymentToken);

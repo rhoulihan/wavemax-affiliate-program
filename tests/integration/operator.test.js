@@ -7,6 +7,9 @@ const { getCsrfToken, createAgent } = require('../helpers/csrfHelper');
 const mongoose = require('mongoose');
 const encryptionUtil = require('../../server/utils/encryption');
 
+// Set timeout for integration tests
+jest.setTimeout(90000);
+
 describe('Operator Integration Tests', () => {
   let agent;
   let adminAgent;

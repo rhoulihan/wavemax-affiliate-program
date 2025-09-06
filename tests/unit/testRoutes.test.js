@@ -5,6 +5,8 @@ const testRoutes = require('../../server/routes/testRoutes');
 const Customer = require('../../server/models/Customer');
 const Order = require('../../server/models/Order');
 const Affiliate = require('../../server/models/Affiliate');
+const { expectSuccessResponse, expectErrorResponse } = require('../helpers/responseHelpers');
+const { createFindOneMock, createFindMock, createMockDocument, createAggregateMock } = require('../helpers/mockHelpers');
 
 // Create Express app for testing
 const app = express();
@@ -25,6 +27,7 @@ describe('Test Routes', () => {
   describe('testOnlyMiddleware', () => {
     it('should allow access in test environment', async () => {
       process.env.NODE_ENV = 'test';
+      Customer.findOne = createFindOneMock(null);
       Customer.findOne.mockResolvedValue(null);
       
       const response = await request(app)
@@ -49,6 +52,7 @@ describe('Test Routes', () => {
     it('should allow access in production with ENABLE_TEST_ROUTES', async () => {
       process.env.NODE_ENV = 'production';
       process.env.ENABLE_TEST_ROUTES = 'true';
+      Customer.findOne = createFindOneMock(null);
       Customer.findOne.mockResolvedValue(null);
       
       const response = await request(app)
@@ -68,20 +72,28 @@ describe('Test Routes', () => {
         _id: 'customerId',
         email: 'spam-me@wavemax.promo',
         firstName: 'Test',
-        lastName: 'Customer'
+        lastName: 'Customer',
+        save: jest.fn().mockResolvedValue(true)
       };
       
+      Customer.findOne = createFindOneMock(mockCustomer);
       Customer.findOne.mockResolvedValue(mockCustomer);
       
       const response = await request(app)
         .get('/api/test/customer');
       
       expect(response.status).toBe(200);
-      expect(response.body).toEqual(mockCustomer);
+      expect(response.body).toEqual({
+        _id: 'customerId',
+        email: 'spam-me@wavemax.promo',
+        firstName: 'Test',
+        lastName: 'Customer'
+      });
       expect(Customer.findOne).toHaveBeenCalledWith({ email: 'spam-me@wavemax.promo' });
     });
 
     it('should return 404 when test customer not found', async () => {
+      Customer.findOne = createFindOneMock(null);
       Customer.findOne.mockResolvedValue(null);
       
       const response = await request(app)
@@ -108,9 +120,11 @@ describe('Test Routes', () => {
         _id: 'customerId',
         email: 'test.customer@wavemax.test',
         firstName: 'Test',
-        lastName: 'Customer'
+        lastName: 'Customer',
+        save: jest.fn().mockResolvedValue(true)
       };
       
+      Customer.findOne = createFindOneMock(mockCustomer);
       Customer.findOne.mockResolvedValue(mockCustomer);
       
       const response = await request(app)
@@ -118,11 +132,17 @@ describe('Test Routes', () => {
         .send({});
       
       expect(response.status).toBe(200);
-      expect(response.body).toEqual(mockCustomer);
+      expect(response.body).toEqual({
+        _id: 'customerId',
+        email: 'test.customer@wavemax.test',
+        firstName: 'Test',
+        lastName: 'Customer'
+      });
       expect(Customer.prototype.save).not.toHaveBeenCalled();
     });
 
     it('should create new customer and affiliate if not exists', async () => {
+      Customer.findOne = createFindOneMock(null);
       Customer.findOne.mockResolvedValue(null);
       Affiliate.findOne.mockResolvedValue(null);
       
@@ -155,11 +175,13 @@ describe('Test Routes', () => {
     });
 
     it('should use existing affiliate if already exists', async () => {
+      Customer.findOne = createFindOneMock(null);
       Customer.findOne.mockResolvedValue(null);
       
       const mockAffiliate = {
         _id: 'affiliateId',
-        affiliateId: 'AFF123'
+        affiliateId: 'AFF123',
+        save: jest.fn().mockResolvedValue(true)
       };
       
       Affiliate.findOne.mockResolvedValue(mockAffiliate);
@@ -167,7 +189,7 @@ describe('Test Routes', () => {
       const mockCustomer = {
         _id: 'customerId',
         email: 'test.customer@wavemax.test',
-        save: jest.fn().mockResolvedValue(true)
+      save: jest.fn().mockResolvedValue(true)
       };
       
       Customer.mockImplementation(() => mockCustomer);
@@ -199,7 +221,8 @@ describe('Test Routes', () => {
         _id: new mongoose.Types.ObjectId(),
         customerId: 'CUST123',
         affiliateId: 'AFF123'
-      };
+,
+      save: jest.fn().mockResolvedValue(true)};
       
       Customer.findById.mockResolvedValue(mockCustomer);
       
@@ -223,10 +246,12 @@ describe('Test Routes', () => {
       const mockCustomer = {
         _id: 'customerId',
         customerId: 'CUST123',
-        affiliateId: 'AFF123'
+        affiliateId: 'AFF123',
+        save: jest.fn().mockResolvedValue(true)
       };
       
       Customer.findById.mockResolvedValue(null);
+      Customer.findOne = createFindOneMock(mockCustomer);
       Customer.findOne.mockResolvedValue(mockCustomer);
       
       const mockOrder = {
@@ -249,9 +274,11 @@ describe('Test Routes', () => {
       const mockCustomer = {
         _id: 'customerId',
         customerId: 'CUST123',
-        affiliateId: 'AFF123'
+        affiliateId: 'AFF123',
+        save: jest.fn().mockResolvedValue(true)
       };
       
+      Customer.findOne = createFindOneMock(mockCustomer);
       Customer.findOne.mockResolvedValue(mockCustomer);
       Order.deleteMany.mockResolvedValue({ deletedCount: 2 });
       
@@ -269,12 +296,13 @@ describe('Test Routes', () => {
       expect(response.status).toBe(200);
       expect(Order.deleteMany).toHaveBeenCalledWith({
         customerId: 'CUST123',
-        orderId: { $regex: /^TEST-/ }
+        isTestOrder: true
       });
     });
 
     it('should return 400 when customer not found', async () => {
       Customer.findById.mockResolvedValue(null);
+      Customer.findOne = createFindOneMock(null);
       Customer.findOne.mockResolvedValue(null);
       
       const response = await request(app)
@@ -309,7 +337,7 @@ describe('Test Routes', () => {
       
       expect(response.status).toBe(200);
       expect(response.body).toEqual({ message: 'Test data cleaned up successfully' });
-      expect(Order.deleteMany).toHaveBeenCalledWith({ orderId: { $regex: /^TEST-/ } });
+      expect(Order.deleteMany).toHaveBeenCalledWith({ isTestOrder: true });
       expect(Customer.deleteMany).toHaveBeenCalledWith({ 
         email: { $in: ['spam-me@wavemax.promo', 'test.customer@wavemax.test', 'test.affiliate@wavemax.test'] } 
       });
