@@ -170,6 +170,12 @@
         callbackUrl = displayedUrl;
       }
     }
+    
+    // If still no callback URL, generate a default one for V2 payments
+    if (!callbackUrl) {
+      callbackUrl = '/api/v2/payment/callback/1';
+    }
+    
     console.log('Callback URL retrieved:', callbackUrl);
 
     const paymentToken = document.getElementById('paymentToken').value;
