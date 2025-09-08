@@ -87,11 +87,16 @@ class CallbackPoolManager {
     });
 
     // Return form config with the assigned callback URL
+    // Get the formActionUrl and merchantId from Paygistix config
+    const paygistixConfig = require('../config/paygistix.config');
+    
     return {
       formId: this.formId,
       formHash: this.formHash,
       callbackPath: callback.callbackPath,
-      callbackUrl: callbackUrl
+      callbackUrl: callbackUrl,
+      formActionUrl: paygistixConfig.getFormActionUrl(),
+      merchantId: paygistixConfig.getMerchantId()
     };
   }
 

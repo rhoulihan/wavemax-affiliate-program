@@ -21,6 +21,13 @@
     function handleLogout() {
         localStorage.removeItem('affiliateToken');
         localStorage.removeItem('currentAffiliate');
+        localStorage.removeItem('currentRoute');
+        
+        // Clear session manager data
+        if (window.SessionManager) {
+            window.SessionManager.clearAuth('affiliate');
+        }
+        
         sendMessageToParent('logout', { userType: 'affiliate' });
         navigateParent('affiliate-login');
     }

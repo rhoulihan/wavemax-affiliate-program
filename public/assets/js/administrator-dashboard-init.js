@@ -2990,27 +2990,8 @@
     }
   };
 
-  window.confirmLogout = function() {
-    // Clear admin session
-    localStorage.removeItem('adminToken');
-    localStorage.removeItem('adminRefreshToken');
-    localStorage.removeItem('adminData');
-    
-    // Clear session if SessionManager is available
-    if (window.SessionManager) {
-      window.SessionManager.logout('administrator');
-    }
-    
-    // Redirect to login
-    if (window.parent !== window) {
-      window.parent.postMessage({
-        type: 'navigate',
-        data: { page: '/administrator-login' }
-      }, '*');
-    } else {
-      window.location.href = '/embed-app-v2.html?route=/administrator-login';
-    }
-  };
+  // This duplicate function has been removed - using the correct one above
+  // The correct confirmLogout function is defined earlier in the file
 
   // Add event listeners for modal buttons
   document.addEventListener('DOMContentLoaded', function() {

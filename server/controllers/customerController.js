@@ -678,4 +678,432 @@ exports.getCustomersForAdmin = [
   })
 ];
 
+// ============================================================================
+// V2 Payment Integration
+// ============================================================================
+
+const paymentController = require('./paymentController');
+const logger = require('../utils/logger');
+
+/**
+ * Build consolidated line items for Paygistix payment form
+ * Uses WDF codes with add-on variants as expected by Paygistix
+ * @param {Object} order - The V2 order document
+ * @returns {Array} Consolidated line items for Paygistix
+ */
+function buildPaygistixLineItems(order) {
+  const items = [];
+  
+  // Use actual weight from order (either from bags or actualWeight field)
+  let totalWeight = order.actualWeight || 0;
+  if (!totalWeight && order.bags && order.bags.length > 0) {
+    totalWeight = order.bags.reduce((sum, bag) => sum + (bag.weight || 0), 0);
+  }
+  
+  // Calculate laundry service cost using the order's baseRate from SystemConfig
+  const laundryServiceCost = totalWeight * (order.baseRate || 0);
+  
+  // Count active add-ons and use the order's calculated addOnTotal
+  let addOnCount = 0;
+  if (order.addOns) {
+    if (order.addOns.premiumDetergent) addOnCount++;
+    if (order.addOns.fabricSoftener) addOnCount++;
+    if (order.addOns.stainRemover) addOnCount++;
+  }
+  const addOnTotal = order.addOnTotal || 0;
+  
+  // For WDF services, we need to calculate the per-pound rate for Paygistix
+  // The form expects WDF items to be priced per pound with quantity being the weight
+  if (totalWeight > 0 && (laundryServiceCost > 0 || addOnTotal > 0)) {
+    // Calculate the effective per-pound rate including add-ons
+    const effectiveRate = (laundryServiceCost + addOnTotal) / totalWeight;
+    
+    // WDF for no add-ons, WDF1 for 1 add-on, WDF2 for 2, WDF3 for 3+
+    let wdfCode = 'WDF';
+    if (addOnCount > 0) {
+      wdfCode = `WDF${Math.min(addOnCount, 3)}`;
+    }
+    
+    // The Paygistix form expects: price = per-pound rate, quantity = weight in pounds
+    items.push({
+      code: wdfCode,
+      description: 'Wash Dry Fold Service',
+      price: effectiveRate,
+      quantity: Math.round(totalWeight) // Round weight to nearest pound for Paygistix
+    });
+  }
+  
+  // Delivery fees - MDF or PBF with specific price codes
+  if (order.feeBreakdown) {
+    if (order.feeBreakdown.minimumApplied && order.feeBreakdown.minimumFee > 0) {
+      // Map the minimum fee to the correct MDF code
+      const mdfFee = order.feeBreakdown.minimumFee;
+      let mdfCode = 'MDF10'; // Default
+      
+      // Map to specific MDF codes based on price
+      if (mdfFee === 10) mdfCode = 'MDF10';
+      else if (mdfFee === 15) mdfCode = 'MDF15';
+      else if (mdfFee === 20) mdfCode = 'MDF20';
+      else if (mdfFee === 25) mdfCode = 'MDF25';
+      else if (mdfFee === 30) mdfCode = 'MDF30';
+      else if (mdfFee === 35) mdfCode = 'MDF35';
+      else if (mdfFee === 40) mdfCode = 'MDF40';
+      else if (mdfFee === 45) mdfCode = 'MDF45';
+      else if (mdfFee === 50) mdfCode = 'MDF50';
+      else {
+        // Find the closest MDF code
+        const mdfOptions = [10, 15, 20, 25, 30, 35, 40, 45, 50];
+        const closest = mdfOptions.reduce((prev, curr) => 
+          Math.abs(curr - mdfFee) < Math.abs(prev - mdfFee) ? curr : prev
+        );
+        mdfCode = `MDF${closest}`;
+      }
+      
+      items.push({
+        code: mdfCode,
+        description: 'Minimum Delivery Fee',
+        price: mdfFee,
+        quantity: 1
+      });
+    } else if (order.feeBreakdown.perBagFee > 0 && order.feeBreakdown.numberOfBags > 0) {
+      // Map the per bag fee to the correct PBF code
+      const pbfFee = order.feeBreakdown.perBagFee;
+      let pbfCode = 'PBF5'; // Default
+      
+      // Map to specific PBF codes based on price
+      if (pbfFee === 5) pbfCode = 'PBF5';
+      else if (pbfFee === 10) pbfCode = 'PBF10';
+      else if (pbfFee === 15) pbfCode = 'PBF15';
+      else if (pbfFee === 20) pbfCode = 'PBF20';
+      else if (pbfFee === 25) pbfCode = 'PBF25';
+      else {
+        // Find the closest PBF code
+        const pbfOptions = [5, 10, 15, 20, 25];
+        const closest = pbfOptions.reduce((prev, curr) => 
+          Math.abs(curr - pbfFee) < Math.abs(prev - pbfFee) ? curr : prev
+        );
+        pbfCode = `PBF${closest}`;
+      }
+      
+      items.push({
+        code: pbfCode,
+        description: 'Per Bag Fee',
+        price: pbfFee,
+        quantity: order.feeBreakdown.numberOfBags
+      });
+    }
+  }
+  
+  // Credits reduce the total but aren't sent as line items to Paygistix
+  // The total amount will be adjusted when calculating
+  
+  console.log('[V2 Payment] Generated Paygistix line items:', JSON.stringify(items, null, 2));
+  
+  return items;
+}
+
+/**
+ * Build detailed line items from V2 order for customer display
+ * @param {Object} order - The V2 order document
+ * @returns {Array} Detailed line items for display
+ */
+function buildLineItemsFromOrder(order) {
+  const items = [];
+  
+  // Use actual weight from order (either from bags or actualWeight field)
+  let totalWeight = order.actualWeight || 0;
+  if (!totalWeight && order.bags && order.bags.length > 0) {
+    totalWeight = order.bags.reduce((sum, bag) => sum + (bag.weight || 0), 0);
+  }
+  
+  // Main laundry service using the order's baseRate from SystemConfig
+  const laundryServiceCost = totalWeight * (order.baseRate || 0);
+  
+  if (laundryServiceCost > 0) {
+    items.push({
+      code: 'LAUNDRY',
+      description: `Laundry Service (${totalWeight} lbs @ $${(order.baseRate || 0).toFixed(2)}/lb)`,
+      price: laundryServiceCost,
+      quantity: 1
+    });
+  }
+  
+  // Add-ons as separate line items - calculate individual add-on prices
+  // The Order model uses $0.10 per pound per add-on
+  const addOnPricePerLb = 0.10; // This matches the Order model calculation
+  if (order.addOns && totalWeight > 0) {
+    const addOnPrice = totalWeight * addOnPricePerLb;
+    
+    if (order.addOns.premiumDetergent) {
+      items.push({
+        code: 'ADDON_PD',
+        description: `Premium Detergent (${totalWeight} lbs @ $${addOnPricePerLb.toFixed(2)}/lb)`,
+        price: addOnPrice,
+        quantity: 1
+      });
+    }
+    if (order.addOns.fabricSoftener) {
+      items.push({
+        code: 'ADDON_FS',
+        description: `Fabric Softener (${totalWeight} lbs @ $${addOnPricePerLb.toFixed(2)}/lb)`,
+        price: addOnPrice,
+        quantity: 1
+      });
+    }
+    if (order.addOns.stainRemover) {
+      items.push({
+        code: 'ADDON_SR',
+        description: `Stain Remover (${totalWeight} lbs @ $${addOnPricePerLb.toFixed(2)}/lb)`,
+        price: addOnPrice,
+        quantity: 1
+      });
+    }
+  }
+  
+  // Delivery fees
+  if (order.feeBreakdown) {
+    // Either minimum fee or per bag fee is charged, not both
+    if (order.feeBreakdown.minimumApplied && order.feeBreakdown.minimumFee > 0) {
+      items.push({
+        code: 'MDF',
+        description: 'Minimum Delivery Fee',
+        price: order.feeBreakdown.minimumFee,
+        quantity: 1
+      });
+    } else if (order.feeBreakdown.perBagFee > 0 && order.feeBreakdown.numberOfBags > 0) {
+      items.push({
+        code: 'PBF',
+        description: `Per Bag Fee (${order.feeBreakdown.numberOfBags} bags)`,
+        price: order.feeBreakdown.perBagFee,
+        quantity: order.feeBreakdown.numberOfBags
+      });
+    }
+  }
+  
+  // Apply any credits
+  if (order.wdfCreditApplied && order.wdfCreditApplied > 0) {
+    items.push({
+      code: 'CREDIT',
+      description: 'WDF Credit Applied',
+      price: -order.wdfCreditApplied,
+      quantity: 1
+    });
+  }
+  
+  if (order.bagCreditApplied && order.bagCreditApplied > 0) {
+    items.push({
+      code: 'BAGCREDIT',
+      description: 'Bag Credit Applied',
+      price: -order.bagCreditApplied,
+      quantity: 1
+    });
+  }
+  
+  return items;
+}
+
+/**
+ * Initiate V2 payment for an order
+ * POST /api/v2/customers/initiate-payment
+ */
+exports.initiateV2Payment = ControllerHelpers.asyncWrapper(async (req, res) => {
+  const { orderId } = req.body;
+  const customerObjectId = req.user.id;
+  
+  // Get the customer's customerId (CUST-xxx format)
+  const customer = await Customer.findById(customerObjectId);
+  if (!customer) {
+    return ControllerHelpers.sendError(res, 'Customer not found', 404);
+  }
+  
+  const customerId = customer.customerId;
+  
+  console.log('[V2 Payment] Initiating payment for order:', orderId, 'Customer:', customerId);
+  
+  // Validate order exists and belongs to customer
+  const order = await Order.findOne({ 
+    orderId: orderId,
+    customerId: customerId,
+    v2PaymentStatus: { $in: ['pending', 'awaiting'] }
+  });
+  
+  if (!order) {
+    // Debug: Check if order exists without payment status filter
+    const orderDebug = await Order.findOne({ orderId: orderId });
+    if (orderDebug) {
+      console.log('[V2 Payment] Order found but not eligible. customerId:', orderDebug.customerId, 'v2PaymentStatus:', orderDebug.v2PaymentStatus);
+      console.log('[V2 Payment] Expected customerId:', customerId);
+    } else {
+      console.log('[V2 Payment] Order not found with orderId:', orderId);
+    }
+    return ControllerHelpers.sendError(res, 'Order not found or already paid', 404);
+  }
+  
+  // Build line items - detailed for display, consolidated for Paygistix
+  const displayLineItems = buildLineItemsFromOrder(order);
+  const paygistixLineItems = buildPaygistixLineItems(order);
+  
+  // Calculate total amount from display items (includes credits)
+  const totalAmount = displayLineItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+  
+  // Prepare payment data for Paygistix with consolidated WDF codes
+  const paymentData = {
+    customerData: {
+      customerId: customer.customerId,
+      email: customer.email,
+      firstName: customer.firstName,
+      lastName: customer.lastName,
+      phone: customer.phone,
+      orderId: order.orderId
+    },
+    paymentData: {
+      amount: totalAmount,
+      items: paygistixLineItems, // Use consolidated items for Paygistix
+      orderId: order.orderId
+    }
+  };
+  
+  // Create payment token using existing V1 infrastructure
+  const tokenReq = {
+    body: paymentData
+  };
+  
+  const tokenRes = {
+    json: (data) => {
+      // Return payment configuration to frontend
+      // The PaymentToken collection handles all status tracking
+      res.json({
+        success: data.success,
+        token: data.token,
+        formConfig: data.formConfig,
+        amount: totalAmount,
+        lineItems: displayLineItems, // Send detailed items for display
+        paygistixItems: paygistixLineItems, // Send Paygistix-formatted items for form submission
+        message: data.message || 'Payment initiated successfully'
+      });
+    },
+    status: (code) => ({
+      json: (data) => res.status(code).json(data)
+    })
+  };
+  
+  // Use existing payment token creation
+  // This creates a record in PaymentToken collection with all necessary data
+  await paymentController.createPaymentToken(tokenReq, tokenRes);
+});
+
+/**
+ * Update V2 order after successful payment
+ * This is called internally after payment callback
+ */
+exports.updateV2OrderPayment = async (paymentToken) => {
+  try {
+    // Extract order ID from customerData stored in PaymentToken
+    const orderId = paymentToken.customerData?.orderId;
+    
+    if (!orderId) {
+      logger.warn('No order ID found in payment token customerData:', paymentToken.token);
+      return false;
+    }
+    
+    // Find order by ID
+    const order = await Order.findById(orderId);
+    
+    if (!order) {
+      logger.warn('No V2 order found for order ID:', orderId);
+      return false;
+    }
+    
+    // Update order based on payment status
+    if (paymentToken.status === 'success') {
+      // Update V2 payment fields
+      order.v2PaymentStatus = 'verified';
+      order.v2PaymentMethod = 'credit_card';
+      order.transactionId = paymentToken.transactionId;
+      order.paymentDate = new Date();
+      
+      // Also update legacy payment fields for compatibility
+      order.paymentStatus = 'completed';
+      order.isPaid = true;
+      order.paymentReference = paymentToken.transactionId;
+      
+      logger.info('V2 order payment verified:', {
+        orderId: order._id,
+        transactionId: paymentToken.transactionId
+      });
+    } else if (paymentToken.status === 'failed') {
+      order.v2PaymentStatus = 'failed';
+      order.paymentError = paymentToken.errorMessage;
+      order.paymentStatus = 'failed';
+      
+      logger.error('V2 order payment failed:', {
+        orderId: order._id,
+        error: paymentToken.errorMessage
+      });
+    } else if (paymentToken.status === 'cancelled') {
+      order.v2PaymentStatus = 'pending';
+      order.paymentStatus = 'pending';
+      
+      logger.info('V2 order payment cancelled:', {
+        orderId: order._id
+      });
+    }
+    
+    await order.save();
+    return true;
+  } catch (error) {
+    logger.error('Error updating V2 order payment:', error);
+    return false;
+  }
+};
+
+/**
+ * Get V2 payment status for an order
+ * GET /api/v2/customers/payment-status/:orderId
+ */
+exports.getV2PaymentStatus = ControllerHelpers.asyncWrapper(async (req, res) => {
+  const { orderId } = req.params;
+  const customerId = req.user.id;
+  
+  // Get order with payment status
+  const order = await Order.findOne({ 
+    _id: orderId,
+    customerId: customerId 
+  }).select('v2PaymentStatus paymentStatus transactionId paymentError paymentDate');
+  
+  if (!order) {
+    return ControllerHelpers.sendError(res, 'Order not found', 404);
+  }
+  
+  // Also check if there's an active payment token for real-time status
+  const PaymentToken = require('../models/PaymentToken');
+  const activeToken = await PaymentToken.findOne({
+    'customerData.orderId': orderId,
+    status: { $in: ['pending', 'processing'] }
+  }).sort('-createdAt');
+  
+  // If there's an active payment token, return its status
+  if (activeToken) {
+    res.json({
+      success: true,
+      paymentStatus: activeToken.status,
+      token: activeToken.token,
+      transactionId: activeToken.transactionId,
+      paymentDate: activeToken.updatedAt,
+      error: activeToken.errorMessage,
+      isActive: true
+    });
+  } else {
+    // Return order's stored payment status
+    res.json({
+      success: true,
+      paymentStatus: order.v2PaymentStatus || order.paymentStatus,
+      transactionId: order.transactionId,
+      paymentDate: order.paymentDate,
+      error: order.paymentError,
+      isActive: false
+    });
+  }
+});
+
 module.exports = exports;

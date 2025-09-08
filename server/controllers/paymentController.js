@@ -333,6 +333,12 @@ class PaymentController {
       isSuccess: isSuccess
     });
 
+    // Check if this is a V2 order payment and update accordingly
+    if (paymentToken.customerData && paymentToken.customerData.orderId) {
+      const customerController = require('./customerController');
+      await customerController.updateV2OrderPayment(paymentToken);
+    }
+
     // Redirect to callback handler with all parameters
     const queryString = new URLSearchParams({
       ...req.query,

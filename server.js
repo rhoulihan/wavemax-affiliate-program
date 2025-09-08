@@ -561,6 +561,12 @@ app.get('/monitoring/status', (req, res) => {
 // Mount versioned API
 app.use('/api/v1', apiV1Router);
 
+// V2 API Routes
+const apiV2Router = express.Router();
+const v2CustomerRoutes = require('./server/routes/v2CustomerRoutes');
+apiV2Router.use('/customers', v2CustomerRoutes);
+app.use('/api/v2', apiV2Router);
+
 // Legacy support - redirect unversioned API calls to v1
 app.use('/api', (req, res, next) => {
   if (!req.path.match(/^\/v\d+\//)) {
