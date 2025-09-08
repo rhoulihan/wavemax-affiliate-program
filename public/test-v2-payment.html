@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>V2 Payment Test</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+</head>
+<body>
+    <div class="container mt-5">
+        <h1>V2 Payment Test Page</h1>
+        <hr>
+        
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5>Test Payment Initiation</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>This page tests the V2 payment flow for customer orders.</p>
+                        
+                        <div class="form-group">
+                            <label for="orderId">Order ID:</label>
+                            <input type="text" class="form-control" id="orderId" 
+                                   placeholder="Enter order ID (e.g., 507f1f77bcf86cd799439011)">
+                        </div>
+                        
+                        <button type="button" class="btn btn-primary" onclick="testPayment()">
+                            <i class="fas fa-credit-card"></i> Initiate Payment
+                        </button>
+                        
+                        <button type="button" class="btn btn-info ml-2" onclick="checkStatus()">
+                            <i class="fas fa-sync"></i> Check Status
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="card mt-3">
+                    <div class="card-header">
+                        <h5>Test Scenarios</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>To test the payment flow:</p>
+                        <ol>
+                            <li>Create a V2 order with pending payment status</li>
+                            <li>Enter the order ID above</li>
+                            <li>Click "Initiate Payment" to start the flow</li>
+                            <li>Complete the Paygistix form in the modal</li>
+                            <li>Check the payment status</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5>Response Log</h5>
+                    </div>
+                    <div class="card-body">
+                        <pre id="responseLog" style="max-height: 400px; overflow-y: auto;">
+Waiting for test...
+                        </pre>
+                    </div>
+                </div>
+                
+                <div class="card mt-3">
+                    <div class="card-header">
+                        <h5>Payment Status</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="statusDisplay">
+                            <p class="text-muted">No payment initiated yet</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Include V2 Payment Modal Script -->
+    <script src="/assets/js/v2-payment-modal.js"></script>
+    
+    <script>
+        let currentToken = null;
+        
+        function log(message, data = null) {
+            const logEl = document.getElementById('responseLog');
+            const timestamp = new Date().toLocaleTimeString();
+            let logEntry = `[${timestamp}] ${message}\n`;
+            if (data) {
+                logEntry += JSON.stringify(data, null, 2) + '\n';
+            }
+            logEntry += '\n---\n\n';
+            logEl.textContent = logEntry + logEl.textContent;
+        }
+        
+        async function testPayment() {
+            const orderId = document.getElementById('orderId').value;
+            if (!orderId) {
+                alert('Please enter an order ID');
+                return;
+            }
+            
+            log('Initiating payment for order: ' + orderId);
+            
+            try {
+                // Use the V2 payment modal
+                await v2Payment.initiatePayment(orderId);
+                
+                // Store the token for status checking
+                currentToken = v2Payment.paymentToken;
+                log('Payment initiated successfully', {
+                    token: currentToken,
+                    formConfig: v2Payment.formConfig
+                });
+                
+            } catch (error) {
+                log('Error initiating payment', { error: error.message });
+                alert('Error: ' + error.message);
+            }
+        }
+        
+        async function checkStatus() {
+            const orderId = document.getElementById('orderId').value;
+            if (!orderId) {
+                alert('Please enter an order ID');
+                return;
+            }
+            
+            log('Checking payment status for order: ' + orderId);
+            
+            try {
+                const response = await fetch(`/api/v2/customers/payment-status/${orderId}`, {
+                    headers: {
+                        'Authorization': 'Bearer ' + localStorage.getItem('authToken')
+                    }
+                });
+                
+                const data = await response.json();
+                log('Payment status response', data);
+                
+                // Update status display
+                const statusDiv = document.getElementById('statusDisplay');
+                if (data.success) {
+                    let statusClass = 'secondary';
+                    let statusIcon = 'clock';
+                    
+                    switch(data.paymentStatus) {
+                        case 'verified':
+                            statusClass = 'success';
+                            statusIcon = 'check-circle';
+                            break;
+                        case 'failed':
+                            statusClass = 'danger';
+                            statusIcon = 'times-circle';
+                            break;
+                        case 'awaiting':
+                            statusClass = 'warning';
+                            statusIcon = 'hourglass-half';
+                            break;
+                        case 'pending':
+                            statusClass = 'info';
+                            statusIcon = 'clock';
+                            break;
+                    }
+                    
+                    statusDiv.innerHTML = `
+                        <div class="alert alert-${statusClass}">
+                            <i class="fas fa-${statusIcon}"></i>
+                            <strong>Status:</strong> ${data.paymentStatus}
+                            ${data.transactionId ? `<br><strong>Transaction ID:</strong> ${data.transactionId}` : ''}
+                            ${data.paymentDate ? `<br><strong>Payment Date:</strong> ${new Date(data.paymentDate).toLocaleString()}` : ''}
+                            ${data.error ? `<br><strong>Error:</strong> ${data.error}` : ''}
+                        </div>
+                    `;
+                } else {
+                    statusDiv.innerHTML = `
+                        <div class="alert alert-danger">
+                            <i class="fas fa-exclamation-triangle"></i> ${data.message || 'Failed to get status'}
+                        </div>
+                    `;
+                }
+                
+            } catch (error) {
+                log('Error checking status', { error: error.message });
+                alert('Error: ' + error.message);
+            }
+        }
+        
+        // Check if we have an auth token
+        if (!localStorage.getItem('authToken')) {
+            document.getElementById('responseLog').textContent = 
+                'Note: No auth token found. You may need to login first to test authenticated endpoints.\n\n' +
+                'For testing without auth, you can use the payment token endpoints directly.';
+        }
+    </script>
+</body>
+</html>

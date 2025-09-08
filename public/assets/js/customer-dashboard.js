@@ -8,10 +8,8 @@
   }
   window.customerDashboardLoaded = true;
 
-  // Load CSRF utilities
-  if (!window.CsrfUtils) {
-    console.error('CSRF utilities not loaded. Please include csrf-utils.js before this script.');
-  }
+  // CSRF utilities will be checked when needed
+  // They may not be available immediately due to script loading order
 
   // Global variables
   let customerData = null;
@@ -257,24 +255,93 @@ async function loadOrders() {
                         <tbody>
             `;
 
+      // Track if there are any unpaid orders
+      let hasUnpaidOrder = false;
+      let firstUnpaidOrderId = null;
+
       result.orders.forEach(order => {
+        // Debug: Log the order structure
+        console.log('Order object:', order);
+        
         const date = new Date(order.createdAt).toLocaleDateString();
         const statusColor = order.status === 'completed' ? 'text-green-600' :
           order.status === 'cancelled' ? 'text-red-600' :
             'text-blue-600';
+        
+        // Get the actual order ID - could be _id, id, or orderId
+        const actualOrderId = order._id || order.id || order.orderId;
+        
+        // Check if this is a V2 order that needs payment
+        const needsPayment = (order.v2PaymentStatus === 'pending' || order.v2PaymentStatus === 'awaiting') && 
+                           order.status === 'processing';
+        
+        if (needsPayment && !firstUnpaidOrderId) {
+          hasUnpaidOrder = true;
+          firstUnpaidOrderId = actualOrderId;
+          console.log('Found unpaid order with ID:', actualOrderId);
+        }
 
         ordersHtml += `
                     <tr class="border-b hover:bg-gray-50">
                         <td class="p-2">${order.orderId}</td>
                         <td class="p-2">${date}</td>
-                        <td class="p-2 ${statusColor} font-semibold">${order.status}</td>
-                        <td class="p-2">$${(order.totalAmount || 0).toFixed(2)}</td>
+                        <td class="p-2">
+                          <span class="${statusColor} font-semibold">${order.status}</span>
+                          ${needsPayment ? '<br><span class="text-orange-600 text-sm">Payment Pending</span>' : ''}
+                        </td>
+                        <td class="p-2">
+                          $${(order.totalAmount || 0).toFixed(2)}
+                          ${needsPayment ? `
+                            <button data-order-id="${actualOrderId}" 
+                                    class="pay-now-btn ml-2 bg-green-600 text-white px-3 py-1 rounded text-sm hover:bg-green-700">
+                              Pay Now
+                            </button>
+                          ` : ''}
+                        </td>
                     </tr>
                 `;
       });
 
       ordersHtml += '</tbody></table></div>';
       contentArea.innerHTML = ordersHtml;
+      
+      // Add event listeners to Pay Now buttons using event delegation
+      const payNowButtons = contentArea.querySelectorAll('.pay-now-btn');
+      payNowButtons.forEach(button => {
+        button.addEventListener('click', function() {
+          const orderId = this.getAttribute('data-order-id');
+          console.log('Pay Now clicked for order:', orderId);
+          initiatePaymentForOrder(orderId);
+        });
+      });
+      
+      // Auto-show payment modal if there's an unpaid order
+      if (hasUnpaidOrder && firstUnpaidOrderId) {
+        console.log('Found unpaid order, will show payment modal for order:', firstUnpaidOrderId);
+        
+        // Check if v2Payment is available
+        if (window.v2Payment) {
+          console.log('v2Payment is available, initiating payment');
+          setTimeout(() => {
+            window.v2Payment.initiatePayment(firstUnpaidOrderId);
+          }, 1000); // Give time for everything to load
+        } else {
+          console.error('v2Payment not available yet, waiting...');
+          // Wait for v2Payment to be available
+          let checkCount = 0;
+          const checkInterval = setInterval(() => {
+            checkCount++;
+            if (window.v2Payment) {
+              console.log('v2Payment now available, initiating payment');
+              clearInterval(checkInterval);
+              window.v2Payment.initiatePayment(firstUnpaidOrderId);
+            } else if (checkCount > 10) {
+              console.error('v2Payment still not available after 5 seconds');
+              clearInterval(checkInterval);
+            }
+          }, 500);
+        }
+      }
     } else {
       contentArea.innerHTML = `
                 <h3 class="text-xl font-bold mb-4">My Orders</h3>
@@ -575,6 +642,20 @@ function showOrders() {
   loadOrders();
 }
 
+// Function to initiate payment for a specific order
+function initiatePaymentForOrder(orderId) {
+  if (window.v2Payment) {
+    console.log('Initiating payment for order:', orderId);
+    window.v2Payment.initiatePayment(orderId);
+  } else {
+    console.error('V2 Payment modal not loaded');
+    alert('Payment system is not available. Please refresh the page and try again.');
+  }
+}
+
+// Make function available globally for onclick handlers
+window.initiatePaymentForOrder = initiatePaymentForOrder;
+
 // Show profile (alias for loadProfile)
 function showProfile() {
   loadProfile();
@@ -640,11 +721,6 @@ async function deleteAllData() {
 window.initializeDashboard = initializeDashboard;
 window.handleLogout = handleLogout;
 
-// Auto-initialize when DOM is ready
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', initializeDashboard);
-} else {
-  initializeDashboard();
-}
+// Auto-initialize is already handled above, no need to duplicate
 
 })();

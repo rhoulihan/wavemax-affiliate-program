@@ -6,6 +6,8 @@
     <meta http-equiv="Content-Security-Policy" content="default-src 'self' https:; script-src 'self' https: 'nonce-{{CSP_NONCE}}'; style-src 'self' https: 'unsafe-inline'; img-src 'self' https: data:; font-src 'self' https: data:; connect-src 'self' https:; frame-src 'self' https:;">
     <title>Customer Dashboard - WaveMAX Laundry</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <!-- Bootstrap for payment modal -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="/assets/css/customer-dashboard.css">
     <link rel="stylesheet" href="/assets/css/swirl-spinner.css">
     <!-- Awesomplete for autocomplete -->
@@ -87,6 +89,7 @@
     </div>
 
     <!-- Scripts -->
+    <script src="/assets/js/csrf-utils.js"></script>
     <script src="/assets/js/i18n.js"></script>
     <script src="/assets/js/customer-dashboard.js"></script>
 </body>
