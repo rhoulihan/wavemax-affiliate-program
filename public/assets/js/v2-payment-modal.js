@@ -457,14 +457,7 @@ class V2PaymentModal {
             <!-- Pass line items as JSON -->
             <input type="hidden" name="items" value="${encodeURIComponent(JSON.stringify(this.lineItems))}">
           </form>
-          <script>
-            // Auto-submit the form
-            document.addEventListener('DOMContentLoaded', function() {
-              setTimeout(function() {
-                document.getElementById('testPaymentForm').submit();
-              }, 100);
-            });
-          </script>
+          <script src="/assets/js/payment-redirect.js"></script>
         </body>
         </html>
       `;
