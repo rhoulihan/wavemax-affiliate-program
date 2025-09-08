@@ -480,8 +480,8 @@ class V2PaymentModal {
    */
   checkWindowClosed() {
     let paymentCompleted = false;
-    let windowNavigated = false;
     const windowOpenedAt = Date.now();
+    const minCheckTime = 5000; // Wait at least 5 seconds before checking
     
     // Mark payment as completed when we handle it
     this.paymentCompletedCallback = () => {
@@ -495,31 +495,39 @@ class V2PaymentModal {
         return;
       }
       
-      // Wait 3 seconds before checking to allow window to navigate
-      if (!windowNavigated && Date.now() - windowOpenedAt > 3000) {
-        windowNavigated = true;
+      // Don't check too early - give window time to navigate and process
+      const timeElapsed = Date.now() - windowOpenedAt;
+      if (timeElapsed < minCheckTime) {
+        return;
       }
       
-      // Only check window status after navigation time
-      if (windowNavigated && this.paymentWindow && this.paymentWindow.closed) {
-        clearInterval(checkInterval);
-        
-        // Stop status polling if running
-        if (this.statusCheckInterval) {
-          clearInterval(this.statusCheckInterval);
-          this.statusCheckInterval = null;
+      // Try to check if window is closed
+      try {
+        // For cross-origin windows, this might throw or always return false
+        // For test payment forms on same origin, it should work
+        if (this.paymentWindow && this.paymentWindow.closed === true) {
+          clearInterval(checkInterval);
+          
+          // Stop status polling if running
+          if (this.statusCheckInterval) {
+            clearInterval(this.statusCheckInterval);
+            this.statusCheckInterval = null;
+          }
+          
+          // Only hide spinner and show order summary if payment wasn't completed
+          const orderSummary = document.getElementById('orderSummaryView');
+          const processingView = document.getElementById('paymentProcessingView');
+          const paymentButtons = document.getElementById('paymentButtons');
+          
+          if (orderSummary) orderSummary.classList.remove('d-none');
+          if (processingView) processingView.classList.add('d-none');
+          if (paymentButtons) paymentButtons.classList.remove('d-none');
+          
+          console.log('[V2 Payment] Payment window closed by user after', timeElapsed, 'ms');
         }
-        
-        // Only hide spinner and show order summary if payment wasn't completed
-        const orderSummary = document.getElementById('orderSummaryView');
-        const processingView = document.getElementById('paymentProcessingView');
-        const paymentButtons = document.getElementById('paymentButtons');
-        
-        if (orderSummary) orderSummary.classList.remove('d-none');
-        if (processingView) processingView.classList.add('d-none');
-        if (paymentButtons) paymentButtons.classList.remove('d-none');
-        
-        console.log('[V2 Payment] Payment window closed by user');
+      } catch (e) {
+        // Can't access window.closed (cross-origin), keep polling for status
+        // The payment status polling will handle completion
       }
     }, 1000);
     
