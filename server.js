@@ -246,7 +246,8 @@ app.use((req, res, next) => {
       "'self'",
       'https://cdnjs.cloudflare.com',
       'https://cdn.jsdelivr.net',
-      'https://fonts.googleapis.com'
+      'https://fonts.googleapis.com',
+      'https://stackpath.bootstrapcdn.com'
     ],
     'img-src': ["'self'", 'data:', 'https://www.wavemax.promo', 'https://*.tile.openstreetmap.org', 'https://tile.openstreetmap.org', 'https://cdnjs.cloudflare.com', 'https://flagcdn.com'],
     'connect-src': ["'self'", 'https://wavemax.promo', 'https://router.project-osrm.org', 'https://graphhopper.com', 'https://api.openrouteservice.org', 'https://valhalla1.openstreetmap.de', 'https://nominatim.openstreetmap.org'],
