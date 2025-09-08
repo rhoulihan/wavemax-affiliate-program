@@ -1014,27 +1014,57 @@ exports.updateV2OrderPayment = async (paymentToken) => {
       return false;
     }
     
+    // Extract payment details from Paygistix response
+    const paygistixResponse = paymentToken.paygistixResponse || {};
+    
     // Update order based on payment status
     if (paymentToken.status === 'success') {
+      // Extract card details from response
+      const cardType = paygistixResponse.CardType || paygistixResponse.cardType || '';
+      const last4 = paygistixResponse.Last4 || paygistixResponse.last4 || '';
+      const authCode = paygistixResponse.AuthCode || paygistixResponse.authCode || '';
+      const amount = paygistixResponse.Amount || paygistixResponse.amount || order.estimatedTotal;
+      
       // Update V2 payment fields
       order.v2PaymentStatus = 'verified';
-      order.v2PaymentMethod = 'credit_card';
+      order.v2PaymentMethod = cardType ? `${cardType} ****${last4}` : 'credit_card';
+      order.v2PaymentAmount = parseFloat(amount) || order.estimatedTotal;
       order.transactionId = paymentToken.transactionId;
       order.paymentDate = new Date();
+      
+      // Store additional payment details
+      if (!order.paymentDetails) {
+        order.paymentDetails = {};
+      }
+      order.paymentDetails.cardType = cardType;
+      order.paymentDetails.last4 = last4;
+      order.paymentDetails.authCode = authCode;
+      order.paymentDetails.pnRef = paygistixResponse.PNRef || paygistixResponse.pnRef || '';
       
       // Also update legacy payment fields for compatibility
       order.paymentStatus = 'completed';
       order.isPaid = true;
       order.paymentReference = paymentToken.transactionId;
+      order.paidAmount = parseFloat(amount) || order.estimatedTotal;
       
       logger.info('V2 order payment verified:', {
         orderId: order._id,
-        transactionId: paymentToken.transactionId
+        transactionId: paymentToken.transactionId,
+        amount: order.v2PaymentAmount,
+        cardType: cardType,
+        last4: last4
       });
     } else if (paymentToken.status === 'failed') {
       order.v2PaymentStatus = 'failed';
-      order.paymentError = paymentToken.errorMessage;
+      order.paymentError = paymentToken.errorMessage || paygistixResponse.Message || 'Payment declined';
       order.paymentStatus = 'failed';
+      
+      // Store failure details
+      if (!order.paymentDetails) {
+        order.paymentDetails = {};
+      }
+      order.paymentDetails.failureReason = paygistixResponse.Message || paygistixResponse.message || paymentToken.errorMessage;
+      order.paymentDetails.failureCode = paygistixResponse.Result || paygistixResponse.result || '';
       
       logger.error('V2 order payment failed:', {
         orderId: order._id,
