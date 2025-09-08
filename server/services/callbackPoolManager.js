@@ -96,7 +96,8 @@ class CallbackPoolManager {
       callbackPath: callback.callbackPath,
       callbackUrl: callbackUrl,
       formActionUrl: paygistixConfig.getFormActionUrl(),
-      merchantId: paygistixConfig.getMerchantId()
+      merchantId: paygistixConfig.getMerchantId(),
+      testModeEnabled: process.env.ENABLE_TEST_PAYMENT_FORM === 'true'
     };
   }
 

@@ -290,10 +290,18 @@ class V2PaymentModal {
         formId: this.formConfig.formId,
         formHash: this.formConfig.formHash,
         formActionUrl: this.formConfig.formActionUrl,
-        callbackUrl: this.formConfig.callbackUrl
+        callbackUrl: this.formConfig.callbackUrl,
+        testModeEnabled: this.formConfig.testModeEnabled
       });
       
-      // Build the form HTML with all required fields
+      // Check if test mode is enabled
+      if (this.formConfig.testModeEnabled) {
+        console.log('[V2 Payment] Test mode enabled, using test payment form');
+        this.submitTestPaymentForm(paymentWindow);
+        return;
+      }
+      
+      // Build the form HTML with all required fields for production
       const formHtml = `
         <!DOCTYPE html>
         <html>
@@ -393,6 +401,85 @@ class V2PaymentModal {
     });
 
     return fieldsHtml;
+  }
+  
+  /**
+   * Submit test payment form in the popup window
+   */
+  submitTestPaymentForm(paymentWindow) {
+    try {
+      console.log('[V2 Payment] Submitting test payment form');
+      
+      // Calculate total amount from line items
+      let totalAmount = 0;
+      if (this.lineItems && this.lineItems.length > 0) {
+        this.lineItems.forEach(item => {
+          totalAmount += (item.price * item.quantity);
+        });
+      }
+      
+      // Add message listener for test payment completion
+      const messageHandler = (event) => {
+        if (event.data && event.data.type === 'test-payment-complete') {
+          console.log('[V2 Payment] Received test payment completion:', event.data);
+          
+          // Remove the listener
+          window.removeEventListener('message', messageHandler);
+          
+          // The test form will redirect to the callback URL which will handle the payment
+          // We just need to start polling for the payment status
+          this.startStatusPolling();
+        }
+      };
+      
+      window.addEventListener('message', messageHandler);
+      
+      // Build test form HTML
+      const formHtml = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>Test Payment Form</title>
+          <link rel="stylesheet" href="/assets/css/payment-redirect.css">
+        </head>
+        <body class="payment-redirect">
+          <div class="loading">
+            <div class="spinner"></div>
+            <p>Redirecting to test payment form...</p>
+          </div>
+          <form id="testPaymentForm" action="/test-payment" method="GET">
+            <!-- Pass necessary data to test form -->
+            <input type="hidden" name="paymentToken" value="${this.paymentToken}">
+            <input type="hidden" name="amount" value="${totalAmount.toFixed(2)}">
+            <input type="hidden" name="callbackUrl" value="${encodeURIComponent(this.formConfig.callbackUrl)}">
+            <input type="hidden" name="orderId" value="${this.displayLineItems?.[0]?.orderId || ''}">
+            
+            <!-- Pass line items as JSON -->
+            <input type="hidden" name="items" value="${encodeURIComponent(JSON.stringify(this.lineItems))}">
+          </form>
+          <script>
+            // Auto-submit the form
+            document.addEventListener('DOMContentLoaded', function() {
+              setTimeout(function() {
+                document.getElementById('testPaymentForm').submit();
+              }, 100);
+            });
+          </script>
+        </body>
+        </html>
+      `;
+      
+      // Write the form HTML to the popup window
+      paymentWindow.document.write(formHtml);
+      paymentWindow.document.close();
+      
+    } catch (error) {
+      console.error('Error submitting test payment form:', error);
+      if (paymentWindow && !paymentWindow.closed) {
+        paymentWindow.close();
+      }
+      this.showError('Failed to open test payment form. Please try again.');
+    }
   }
   
   /**

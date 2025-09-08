@@ -3,199 +3,234 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>V2 Payment Test</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <title>Test V2 Payment System</title>
+    <link rel="stylesheet" href="/assets/css/bootstrap.min.css">
+    <style>
+        body {
+            padding: 40px;
+            background-color: #f8f9fa;
+        }
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .test-card {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .btn-group-custom {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .status-indicator {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 5px;
+        }
+        .status-enabled {
+            background-color: #28a745;
+        }
+        .status-disabled {
+            background-color: #dc3545;
+        }
+        .code-block {
+            background: #f4f4f4;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: monospace;
+            margin-top: 10px;
+        }
+    </style>
 </head>
 <body>
-    <div class="container mt-5">
-        <h1>V2 Payment Test Page</h1>
-        <hr>
+    <div class="test-container">
+        <h1 class="mb-4">V2 Payment System Test</h1>
         
-        <div class="row">
-            <div class="col-md-6">
-                <div class="card">
-                    <div class="card-header">
-                        <h5>Test Payment Initiation</h5>
-                    </div>
-                    <div class="card-body">
-                        <p>This page tests the V2 payment flow for customer orders.</p>
-                        
-                        <div class="form-group">
-                            <label for="orderId">Order ID:</label>
-                            <input type="text" class="form-control" id="orderId" 
-                                   placeholder="Enter order ID (e.g., 507f1f77bcf86cd799439011)">
-                        </div>
-                        
-                        <button type="button" class="btn btn-primary" onclick="testPayment()">
-                            <i class="fas fa-credit-card"></i> Initiate Payment
-                        </button>
-                        
-                        <button type="button" class="btn btn-info ml-2" onclick="checkStatus()">
-                            <i class="fas fa-sync"></i> Check Status
-                        </button>
-                    </div>
-                </div>
-                
-                <div class="card mt-3">
-                    <div class="card-header">
-                        <h5>Test Scenarios</h5>
-                    </div>
-                    <div class="card-body">
-                        <p>To test the payment flow:</p>
-                        <ol>
-                            <li>Create a V2 order with pending payment status</li>
-                            <li>Enter the order ID above</li>
-                            <li>Click "Initiate Payment" to start the flow</li>
-                            <li>Complete the Paygistix form in the modal</li>
-                            <li>Check the payment status</li>
-                        </ol>
-                    </div>
-                </div>
+        <!-- Status Card -->
+        <div class="test-card">
+            <h3>System Status</h3>
+            <div id="statusInfo">
+                <p>Checking system configuration...</p>
             </div>
-            
-            <div class="col-md-6">
-                <div class="card">
-                    <div class="card-header">
-                        <h5>Response Log</h5>
-                    </div>
-                    <div class="card-body">
-                        <pre id="responseLog" style="max-height: 400px; overflow-y: auto;">
-Waiting for test...
-                        </pre>
-                    </div>
-                </div>
-                
-                <div class="card mt-3">
-                    <div class="card-header">
-                        <h5>Payment Status</h5>
-                    </div>
-                    <div class="card-body">
-                        <div id="statusDisplay">
-                            <p class="text-muted">No payment initiated yet</p>
-                        </div>
-                    </div>
-                </div>
+        </div>
+        
+        <!-- Test Actions -->
+        <div class="test-card">
+            <h3>Test Actions</h3>
+            <div class="btn-group-custom">
+                <button class="btn btn-primary" onclick="testCreateOrder()">
+                    Create Test Order
+                </button>
+                <button class="btn btn-success" onclick="testPayment()">
+                    Test Payment Modal
+                </button>
+                <button class="btn btn-warning" onclick="testDirectPayment()">
+                    Direct Test Payment
+                </button>
+                <button class="btn btn-info" onclick="checkCallbackPool()">
+                    Check Callback Pool
+                </button>
+            </div>
+        </div>
+        
+        <!-- Output -->
+        <div class="test-card">
+            <h3>Output</h3>
+            <div id="output" class="code-block">
+                Ready for testing...
             </div>
         </div>
     </div>
     
-    <!-- Include V2 Payment Modal Script -->
+    <!-- Include V2 Payment Modal -->
     <script src="/assets/js/v2-payment-modal.js"></script>
     
     <script>
-        let currentToken = null;
-        
-        function log(message, data = null) {
-            const logEl = document.getElementById('responseLog');
-            const timestamp = new Date().toLocaleTimeString();
-            let logEntry = `[${timestamp}] ${message}\n`;
-            if (data) {
-                logEntry += JSON.stringify(data, null, 2) + '\n';
-            }
-            logEntry += '\n---\n\n';
-            logEl.textContent = logEntry + logEl.textContent;
-        }
-        
-        async function testPayment() {
-            const orderId = document.getElementById('orderId').value;
-            if (!orderId) {
-                alert('Please enter an order ID');
-                return;
-            }
-            
-            log('Initiating payment for order: ' + orderId);
-            
-            try {
-                // Use the V2 payment modal
-                await v2Payment.initiatePayment(orderId);
-                
-                // Store the token for status checking
-                currentToken = v2Payment.paymentToken;
-                log('Payment initiated successfully', {
-                    token: currentToken,
-                    formConfig: v2Payment.formConfig
-                });
-                
-            } catch (error) {
-                log('Error initiating payment', { error: error.message });
-                alert('Error: ' + error.message);
-            }
-        }
-        
+        // Check system status on load
         async function checkStatus() {
-            const orderId = document.getElementById('orderId').value;
-            if (!orderId) {
-                alert('Please enter an order ID');
-                return;
-            }
-            
-            log('Checking payment status for order: ' + orderId);
-            
             try {
-                const response = await fetch(`/api/v2/customers/payment-status/${orderId}`, {
-                    headers: {
-                        'Authorization': 'Bearer ' + localStorage.getItem('authToken')
-                    }
-                });
-                
+                const response = await fetch('/api/v1/environment');
                 const data = await response.json();
-                log('Payment status response', data);
                 
-                // Update status display
-                const statusDiv = document.getElementById('statusDisplay');
-                if (data.success) {
-                    let statusClass = 'secondary';
-                    let statusIcon = 'clock';
-                    
-                    switch(data.paymentStatus) {
-                        case 'verified':
-                            statusClass = 'success';
-                            statusIcon = 'check-circle';
-                            break;
-                        case 'failed':
-                            statusClass = 'danger';
-                            statusIcon = 'times-circle';
-                            break;
-                        case 'awaiting':
-                            statusClass = 'warning';
-                            statusIcon = 'hourglass-half';
-                            break;
-                        case 'pending':
-                            statusClass = 'info';
-                            statusIcon = 'clock';
-                            break;
-                    }
-                    
-                    statusDiv.innerHTML = `
-                        <div class="alert alert-${statusClass}">
-                            <i class="fas fa-${statusIcon}"></i>
-                            <strong>Status:</strong> ${data.paymentStatus}
-                            ${data.transactionId ? `<br><strong>Transaction ID:</strong> ${data.transactionId}` : ''}
-                            ${data.paymentDate ? `<br><strong>Payment Date:</strong> ${new Date(data.paymentDate).toLocaleString()}` : ''}
-                            ${data.error ? `<br><strong>Error:</strong> ${data.error}` : ''}
-                        </div>
-                    `;
-                } else {
-                    statusDiv.innerHTML = `
-                        <div class="alert alert-danger">
-                            <i class="fas fa-exclamation-triangle"></i> ${data.message || 'Failed to get status'}
+                const testEnabled = data.ENABLE_TEST_PAYMENT_FORM === 'true';
+                const statusHtml = `
+                    <p>
+                        <span class="status-indicator ${testEnabled ? 'status-enabled' : 'status-disabled'}"></span>
+                        Test Payment Form: <strong>${testEnabled ? 'ENABLED' : 'DISABLED'}</strong>
+                    </p>
+                    <p>Environment: ${data.NODE_ENV}</p>
+                    <p>Base URL: ${data.BASE_URL || window.location.origin}</p>
+                `;
+                
+                document.getElementById('statusInfo').innerHTML = statusHtml;
+                
+                if (!testEnabled) {
+                    document.getElementById('statusInfo').innerHTML += `
+                        <div class="alert alert-warning mt-3">
+                            Test payment form is disabled. Set ENABLE_TEST_PAYMENT_FORM=true in .env to enable.
                         </div>
                     `;
                 }
-                
             } catch (error) {
-                log('Error checking status', { error: error.message });
-                alert('Error: ' + error.message);
+                document.getElementById('statusInfo').innerHTML = `
+                    <div class="alert alert-danger">
+                        Failed to check system status: ${error.message}
+                    </div>
+                `;
             }
         }
         
-        // Check if we have an auth token
-        if (!localStorage.getItem('authToken')) {
-            document.getElementById('responseLog').textContent = 
-                'Note: No auth token found. You may need to login first to test authenticated endpoints.\n\n' +
-                'For testing without auth, you can use the payment token endpoints directly.';
+        // Create a test order
+        async function testCreateOrder() {
+            updateOutput('Creating test order...');
+            
+            try {
+                // Create a test customer order
+                const testOrder = {
+                    customerId: 'TEST_CUSTOMER_' + Date.now(),
+                    items: [
+                        { code: 'MDF10', description: 'Monthly Delivery Fee', quantity: 1, price: 1000 },
+                        { code: 'PBF5', description: 'Pay Per Bag Fee', quantity: 3, price: 500 }
+                    ],
+                    total: 2500
+                };
+                
+                updateOutput('Test order created:\n' + JSON.stringify(testOrder, null, 2));
+                
+                // Store for payment test
+                window.testOrder = testOrder;
+                
+                updateOutput('Test order ready. Click "Test Payment Modal" to process payment.');
+                
+            } catch (error) {
+                updateOutput('Error creating test order: ' + error.message, 'error');
+            }
         }
+        
+        // Test payment modal
+        async function testPayment() {
+            if (!window.testOrder) {
+                updateOutput('Please create a test order first.', 'warning');
+                return;
+            }
+            
+            updateOutput('Opening V2 payment modal...');
+            
+            try {
+                // Trigger V2 payment
+                v2Payment.initiate(
+                    window.testOrder.customerId,
+                    window.testOrder.items,
+                    window.testOrder.items // Display items same as line items for test
+                );
+                
+                updateOutput('Payment modal opened. Complete the test payment in the popup window.');
+                
+            } catch (error) {
+                updateOutput('Error opening payment modal: ' + error.message, 'error');
+            }
+        }
+        
+        // Direct test payment
+        function testDirectPayment() {
+            const paymentToken = 'TEST_' + Date.now();
+            const amount = 25.00;
+            
+            const params = new URLSearchParams({
+                paymentToken: paymentToken,
+                amount: amount,
+                callbackUrl: '/api/v2/payment/callback/1',
+                items: JSON.stringify([
+                    { code: 'MDF10', description: 'Monthly Fee', quantity: 1, price: 1000 },
+                    { code: 'PBF5', description: 'Bag Fee', quantity: 3, price: 500 }
+                ])
+            });
+            
+            const url = '/test-payment?' + params.toString();
+            
+            updateOutput('Opening test payment form directly:\n' + url);
+            
+            window.open(url, 'TestPayment', 'width=800,height=600');
+        }
+        
+        // Check callback pool status
+        async function checkCallbackPool() {
+            updateOutput('Checking callback pool status...');
+            
+            try {
+                const response = await fetch('/api/v2/callback-pool/status');
+                const data = await response.json();
+                
+                updateOutput('Callback Pool Status:\n' + JSON.stringify(data, null, 2));
+                
+            } catch (error) {
+                updateOutput('Error checking callback pool: ' + error.message, 'error');
+            }
+        }
+        
+        // Update output display
+        function updateOutput(message, type = 'info') {
+            const output = document.getElementById('output');
+            const timestamp = new Date().toLocaleTimeString();
+            
+            const colorMap = {
+                'info': '#333',
+                'success': '#28a745',
+                'warning': '#ffc107',
+                'error': '#dc3545'
+            };
+            
+            output.innerHTML = `<span style="color: ${colorMap[type]}">[${timestamp}] ${message}</span>`;
+        }
+        
+        // Initialize on load
+        checkStatus();
     </script>
 </body>
 </html>
