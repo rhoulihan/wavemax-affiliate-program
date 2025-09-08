@@ -191,16 +191,25 @@ async function loadDashboardData() {
       if (statsResult.success && statsResult.dashboard && statsResult.dashboard.statistics) {
         const stats = statsResult.dashboard.statistics;
         console.log('Active orders count:', stats.activeOrders);
-        document.getElementById('activeOrders').textContent = stats.activeOrders || 0;
+        // Show Yes/No for active orders instead of a number
+        const hasActiveOrder = stats.activeOrders > 0;
+        const activeOrderElement = document.getElementById('activeOrders');
+        if (activeOrderElement) {
+          activeOrderElement.innerHTML = hasActiveOrder 
+            ? '<span class="text-success font-weight-bold">Yes</span>' 
+            : '<span class="text-muted">No</span>';
+        }
         document.getElementById('completedOrders').textContent = stats.completedOrders || 0;
         document.getElementById('totalSpent').textContent = `$${(stats.totalSpent || 0).toFixed(2)}`;
 
-        // Display bag credit
-        if (statsResult.dashboard.bagCredit) {
-          const bagCredit = statsResult.dashboard.bagCredit;
-          const bagCreditAmount = bagCredit.amount || 0;
-          document.getElementById('bagCredits').textContent = `$${bagCreditAmount.toFixed(2)}`;
-          console.log('Bag credit displayed:', bagCreditAmount);
+        // Remove bag credit display - no longer used
+        const bagCreditElement = document.getElementById('bagCredits');
+        if (bagCreditElement) {
+          // Hide the entire bag credit card
+          const bagCreditCard = bagCreditElement.closest('.stat-card');
+          if (bagCreditCard) {
+            bagCreditCard.style.display = 'none';
+          }
         }
       }
     } else {
@@ -213,10 +222,20 @@ async function loadDashboardData() {
   } catch (error) {
     console.error('Error loading dashboard data:', error);
     // Use default values on error
-    document.getElementById('activeOrders').textContent = '0';
+    const activeOrderElement = document.getElementById('activeOrders');
+    if (activeOrderElement) {
+      activeOrderElement.innerHTML = '<span class="text-muted">No</span>';
+    }
     document.getElementById('completedOrders').textContent = '0';
     document.getElementById('totalSpent').textContent = '$0.00';
-    document.getElementById('bagCredits').textContent = '$0.00';
+    // Hide bag credit card on error
+    const bagCreditElement = document.getElementById('bagCredits');
+    if (bagCreditElement) {
+      const bagCreditCard = bagCreditElement.closest('.stat-card');
+      if (bagCreditCard) {
+        bagCreditCard.style.display = 'none';
+      }
+    }
   }
 }
 
