@@ -479,11 +479,38 @@ class V2PaymentModal {
    * Check if payment window was closed
    */
   checkWindowClosed() {
+    let paymentCompleted = false;
+    let windowNavigated = false;
+    const windowOpenedAt = Date.now();
+    
+    // Mark payment as completed when we handle it
+    this.paymentCompletedCallback = () => {
+      paymentCompleted = true;
+    };
+    
     const checkInterval = setInterval(() => {
-      if (this.paymentWindow && this.paymentWindow.closed) {
+      // Stop checking if payment was completed
+      if (paymentCompleted) {
+        clearInterval(checkInterval);
+        return;
+      }
+      
+      // Wait 3 seconds before checking to allow window to navigate
+      if (!windowNavigated && Date.now() - windowOpenedAt > 3000) {
+        windowNavigated = true;
+      }
+      
+      // Only check window status after navigation time
+      if (windowNavigated && this.paymentWindow && this.paymentWindow.closed) {
         clearInterval(checkInterval);
         
-        // If no payment was completed, show the order summary again
+        // Stop status polling if running
+        if (this.statusCheckInterval) {
+          clearInterval(this.statusCheckInterval);
+          this.statusCheckInterval = null;
+        }
+        
+        // Only hide spinner and show order summary if payment wasn't completed
         const orderSummary = document.getElementById('orderSummaryView');
         const processingView = document.getElementById('paymentProcessingView');
         const paymentButtons = document.getElementById('paymentButtons');
@@ -491,8 +518,13 @@ class V2PaymentModal {
         if (orderSummary) orderSummary.classList.remove('d-none');
         if (processingView) processingView.classList.add('d-none');
         if (paymentButtons) paymentButtons.classList.remove('d-none');
+        
+        console.log('[V2 Payment] Payment window closed by user');
       }
     }, 1000);
+    
+    // Store the interval so we can clear it later
+    this.windowCheckInterval = checkInterval;
   }
   
   /**
@@ -531,6 +563,17 @@ class V2PaymentModal {
    * Handle payment completion
    */
   handlePaymentComplete(data) {
+    // Mark payment as completed for window check
+    if (this.paymentCompletedCallback) {
+      this.paymentCompletedCallback();
+    }
+    
+    // Clear window check interval
+    if (this.windowCheckInterval) {
+      clearInterval(this.windowCheckInterval);
+      this.windowCheckInterval = null;
+    }
+    
     // Close payment window if still open
     if (this.paymentWindow && !this.paymentWindow.closed) {
       this.paymentWindow.close();
@@ -659,6 +702,12 @@ class V2PaymentModal {
     if (this.statusCheckInterval) {
       clearInterval(this.statusCheckInterval);
       this.statusCheckInterval = null;
+    }
+    
+    // Stop window checking
+    if (this.windowCheckInterval) {
+      clearInterval(this.windowCheckInterval);
+      this.windowCheckInterval = null;
     }
   }
   
