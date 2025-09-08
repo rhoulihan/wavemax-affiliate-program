@@ -149,12 +149,16 @@ const orderSchema = new mongoose.Schema({
   },
   v2PaymentMethod: {
     type: String,
-    enum: ['venmo', 'paypal', 'cashapp', 'multiple', 'pending', 'credit_card'],
     default: 'pending'
   },
   v2PaymentAmount: {
     type: Number,
     default: 0
+  },
+  paidAmount: Number, // Actual amount paid (for partial payments)
+  paymentDetails: {
+    type: mongoose.Schema.Types.Mixed, // Store card details, auth codes, etc.
+    default: {}
   },
   v2PaymentRequestedAt: Date,
   v2PaymentConfirmedAt: Date, // When customer clicked "already paid"
