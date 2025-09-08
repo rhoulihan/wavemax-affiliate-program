@@ -954,7 +954,8 @@ exports.initiateV2Payment = ControllerHelpers.asyncWrapper(async (req, res) => {
       firstName: customer.firstName,
       lastName: customer.lastName,
       phone: customer.phone,
-      orderId: order.orderId
+      orderId: order._id.toString(), // Store MongoDB ObjectId as string
+      orderNumber: order.orderId // Store the display order ID separately
     },
     paymentData: {
       amount: totalAmount,
