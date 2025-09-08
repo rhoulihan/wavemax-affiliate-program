@@ -1002,6 +1002,12 @@ exports.updateV2OrderPayment = async (paymentToken) => {
     // Extract order ID from customerData stored in PaymentToken
     const orderId = paymentToken.customerData?.orderId;
     
+    logger.info('[V2 Payment Update] Starting order update:', {
+      paymentToken: paymentToken.token,
+      orderId: orderId,
+      status: paymentToken.status
+    });
+    
     if (!orderId) {
       logger.warn('No order ID found in payment token customerData:', paymentToken.token);
       return false;
@@ -1045,10 +1051,13 @@ exports.updateV2OrderPayment = async (paymentToken) => {
       order.paymentDate = new Date();
       order.transactionId = paymentToken.transactionId;
       
-      logger.info('V2 order payment verified:', {
+      logger.info('[V2 Payment Update] Order payment verified and updated:', {
         orderId: order._id,
+        orderNumber: order.orderId,
         transactionId: paymentToken.transactionId,
         amount: order.v2PaymentAmount,
+        v2PaymentStatus: order.v2PaymentStatus,
+        v2PaymentMethod: order.v2PaymentMethod,
         cardType: cardType,
         last4: last4
       });
