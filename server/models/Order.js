@@ -139,6 +139,9 @@ const orderSchema = new mongoose.Schema({
   processingTimeMinutes: Number, // Auto-calculated
   
   // V2 Payment System Fields
+  transactionId: String, // Transaction ID from successful payment
+  wdfAmount: Number, // Weekly delivery fee amount
+  mdfAmount: Number, // Minimum delivery fee amount
   v2PaymentStatus: {
     type: String,
     enum: ['pending', 'awaiting', 'confirming', 'verified', 'failed'],
@@ -146,7 +149,7 @@ const orderSchema = new mongoose.Schema({
   },
   v2PaymentMethod: {
     type: String,
-    enum: ['venmo', 'paypal', 'cashapp', 'multiple', 'pending'],
+    enum: ['venmo', 'paypal', 'cashapp', 'multiple', 'pending', 'credit_card'],
     default: 'pending'
   },
   v2PaymentAmount: {

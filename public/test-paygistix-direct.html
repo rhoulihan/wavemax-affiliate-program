@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Paygistix Direct Form</title>
+</head>
+<body>
+    <h1>Test Paygistix Direct Form Submission</h1>
+    <p>This is the exact form from Paygistix with test values filled in.</p>
+    
+    <!-- BEGIN PAYMENT FORM CODE -->
+    <form action="https://safepay.paymentlogistics.net/transaction.asp" method="post">
+    <style type="text/css">
+      .pxPrice {text-align:right;}
+      .pxQty {width:60px;text-align:right;}
+    </style>
+    <table id=pxForm name=pxForm>
+      <thead>
+        <th>Code</th><th>Item</th><th>Price</th><th>Qty</th>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="pxCode">
+             MDF10<input type="hidden" name="pxCode1" value="MDF10" />
+          </td>
+          <td class="pxDescription">
+             Minimum Delivery Fee<input type="hidden" name="pxDescription1" value="Minimum Delivery Fee" />
+          </td>
+          <td class="pxPrice">
+              $10.00<input type="hidden" name="pxPrice1" id="pxPrice1" value="10.00" />
+          </td>
+          <td>
+              <input type="text" class="pxQty" name="pxQty1" id="pxQty1" value="1" onblur="javascript:formatQty(this);" maxlength="3"/>
+          </td>
+        </tr>
+        <tr>
+          <td class="pxCode">
+             MDF15<input type="hidden" name="pxCode2" value="MDF15" />
+          </td>
+          <td class="pxDescription">
+             Minimum Delivery Fee<input type="hidden" name="pxDescription2" value="Minimum Delivery Fee" />
+          </td>
+          <td class="pxPrice">
+              $15.00<input type="hidden" name="pxPrice2" id="pxPrice2" value="15.00" />
+          </td>
+          <td>
+              <input type="text" class="pxQty" name="pxQty2" id="pxQty2" value="0" onblur="javascript:formatQty(this);" maxlength="3"/>
+          </td>
+        </tr>
+        <tr>
+          <td class="pxCode">
+             PBF5<input type="hidden" name="pxCode10" value="PBF5" />
+          </td>
+          <td class="pxDescription">
+             Per Bag Fee<input type="hidden" name="pxDescription10" value="Per Bag Fee" />
+          </td>
+          <td class="pxPrice">
+              $5.00<input type="hidden" name="pxPrice10" id="pxPrice10" value="5.00" />
+          </td>
+          <td>
+              <input type="text" class="pxQty" name="pxQty10" id="pxQty10" value="2" onblur="javascript:formatQty(this);" maxlength="3"/>
+          </td>
+        </tr>
+      </tbody>
+      <tfoot>
+        <tr>
+          <td colspan=4 align=right>
+             <span id="pxTotal"><b>Total $20.00<b/> </span><input type="submit" id="pxSubmit" value="Pay Now" />
+          </td>
+        </tr>
+      </tfoot>
+    </table>
+    <input type="hidden" name="txnType" value="FORM" />
+    <input type="hidden" name="merchantID" value="wmaxaustWEB" />
+    <input type="hidden" name="formID" value="55810301384" />
+    <input type="hidden" name="hash" value="d94a62458f81836031a94b97df5143cb" />
+    <input type="hidden" name="ReturnURL" value="https://wavemax.promo/api/v1/payments/callback/handler-3" />
+    </form>
+    <script src="https://safepay.paymentlogistics.net/form.js" type="text/javascript">
+    </script>
+    <!-- END PAYMENT FORM CODE -->
+    
+    <hr>
+    <p>This form should submit successfully if the hash is correct.</p>
+</body>
+</html>

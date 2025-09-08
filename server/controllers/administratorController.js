@@ -2349,13 +2349,7 @@ exports.getEnvironmentVariables = async (req, res) => {
       'DOCUSIGN_WEBHOOK_SECRET',
       'DOCUSIGN_W9_TEMPLATE_ID',
       
-      // Payment - Paygistix
-      'PAYGISTIX_MERCHANT_ID',
-      'PAYGISTIX_FORM_ID',
-      'PAYGISTIX_FORM_HASH',
-      'PAYGISTIX_FORM_ACTION_URL',
-      'PAYGISTIX_RETURN_URL',
-      'PAYGISTIX_ENVIRONMENT',
+      // Payment - Paygistix (deprecated - now in paygistix-forms.json)
       
       // AWS (Optional)
       'AWS_S3_BUCKET',
@@ -2425,6 +2419,22 @@ exports.getEnvironmentVariables = async (req, res) => {
       }
     }
 
+    // Add Paygistix configuration from JSON file
+    let paygistixConfig = {};
+    try {
+      const paygistixForms = require('../config/paygistix-forms.json');
+      paygistixConfig = {
+        'PAYGISTIX_MERCHANT_ID (from JSON)': paygistixForms.merchantId || 'Not configured',
+        'PAYGISTIX_FORM_ID (from JSON)': paygistixForms.form?.formId || 'Not configured',
+        'PAYGISTIX_FORM_HASH (from JSON)': isSuperAdmin ? (paygistixForms.form?.formHash || 'Not configured') : '••••••••',
+        'PAYGISTIX_CONFIG_SOURCE': 'paygistix-forms.json'
+      };
+    } catch (error) {
+      paygistixConfig = {
+        'PAYGISTIX_CONFIG_ERROR': 'Failed to load paygistix-forms.json'
+      };
+    }
+
     // Log access for audit
     await logAuditEvent(
       AuditEvents.ADMIN_VIEW_ENV_VARS,
@@ -2438,7 +2448,7 @@ exports.getEnvironmentVariables = async (req, res) => {
 
     res.json({
       success: true,
-      variables,
+      variables: { ...variables, ...paygistixConfig },
       sensitiveValues: isSuperAdmin ? sensitiveValues : {},
       isSuperAdmin
     });

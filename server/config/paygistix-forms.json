@@ -1,8 +1,10 @@
 {
+  "merchantId": "wmaxaustWEB",
   "form": {
-    "formId": "55015901455",
-    "formHash": "c701523a33721cdbe999f7a4406a0a98"
+    "formId": "55810301384",
+    "formHash": "d94a62458f81836031a94b97df5143cb"
   },
+  "formActionUrl": "https://safepay.paymentlogistics.net/transaction.asp",
   "callbackPaths": [
     "/api/v1/payments/callback/handler-1",
     "/api/v1/payments/callback/handler-2",
