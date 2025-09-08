@@ -168,6 +168,11 @@ class V2PaymentModal {
                 <h5 class="mt-4">Processing Payment</h5>
                 <p class="text-muted">Please complete the payment in the popup window</p>
                 <p class="text-sm text-secondary">If the popup window doesn't appear, please check your browser's popup blocker settings.</p>
+                <div id="testModeCancelButton" class="d-none mt-3">
+                  <button type="button" class="btn btn-warning" onclick="v2Payment.cancelTestPayment()">
+                    Cancel Test Payment
+                  </button>
+                </div>
               </div>
               
               <!-- Payment status (hidden initially) -->
@@ -264,10 +269,16 @@ class V2PaymentModal {
     const orderSummary = document.getElementById('orderSummaryView');
     const processingView = document.getElementById('paymentProcessingView');
     const paymentButtons = document.getElementById('paymentButtons');
+    const testCancelButton = document.getElementById('testModeCancelButton');
     
     if (orderSummary) orderSummary.classList.add('d-none');
     if (processingView) processingView.classList.remove('d-none');
     if (paymentButtons) paymentButtons.classList.add('d-none');
+    
+    // Show cancel button if in test mode
+    if (this.formConfig?.testModeEnabled && testCancelButton) {
+      testCancelButton.classList.remove('d-none');
+    }
     
     // Store payment window reference
     this.paymentWindow = paymentWindow;
@@ -481,7 +492,11 @@ class V2PaymentModal {
   checkWindowClosed() {
     let paymentCompleted = false;
     const windowOpenedAt = Date.now();
-    const minCheckTime = 5000; // Wait at least 5 seconds before checking
+    const isTestMode = this.formConfig?.testModeEnabled === true;
+    
+    // For test mode, we need to wait longer and use different detection
+    // because the window navigates from about:blank to /test-payment
+    const minCheckTime = isTestMode ? 10000 : 5000; // Test mode needs more time
     
     // Mark payment as completed when we handle it
     this.paymentCompletedCallback = () => {
@@ -503,27 +518,32 @@ class V2PaymentModal {
       
       // Try to check if window is closed
       try {
-        // For cross-origin windows, this might throw or always return false
-        // For test payment forms on same origin, it should work
-        if (this.paymentWindow && this.paymentWindow.closed === true) {
-          clearInterval(checkInterval);
-          
-          // Stop status polling if running
-          if (this.statusCheckInterval) {
-            clearInterval(this.statusCheckInterval);
-            this.statusCheckInterval = null;
+        // For test mode, the window might appear closed after navigation
+        // So we rely more on the payment status polling and user action
+        if (isTestMode) {
+          // For test form, only consider it closed if we can't access it at all
+          // or if enough time has passed and it's truly closed
+          if (this.paymentWindow) {
+            try {
+              // Try to access a property - if window is truly closed, this will throw
+              const windowLocation = this.paymentWindow.location.href;
+              // If we can access it, window is still open (even if closed property says otherwise)
+            } catch (accessError) {
+              // Can't access window properties - it's either closed or navigated away
+              // For test mode, we'll rely on status polling unless we're sure it's closed
+              if (this.paymentWindow.closed === true && timeElapsed > 15000) {
+                // Window is definitely closed after 15 seconds
+                clearInterval(checkInterval);
+                this.handleWindowClosed();
+              }
+            }
           }
-          
-          // Only hide spinner and show order summary if payment wasn't completed
-          const orderSummary = document.getElementById('orderSummaryView');
-          const processingView = document.getElementById('paymentProcessingView');
-          const paymentButtons = document.getElementById('paymentButtons');
-          
-          if (orderSummary) orderSummary.classList.remove('d-none');
-          if (processingView) processingView.classList.add('d-none');
-          if (paymentButtons) paymentButtons.classList.remove('d-none');
-          
-          console.log('[V2 Payment] Payment window closed by user after', timeElapsed, 'ms');
+        } else {
+          // Production mode - normal check
+          if (this.paymentWindow && this.paymentWindow.closed === true) {
+            clearInterval(checkInterval);
+            this.handleWindowClosed();
+          }
         }
       } catch (e) {
         // Can't access window.closed (cross-origin), keep polling for status
@@ -533,6 +553,28 @@ class V2PaymentModal {
     
     // Store the interval so we can clear it later
     this.windowCheckInterval = checkInterval;
+  }
+  
+  /**
+   * Handle when payment window is closed
+   */
+  handleWindowClosed() {
+    // Stop status polling if running
+    if (this.statusCheckInterval) {
+      clearInterval(this.statusCheckInterval);
+      this.statusCheckInterval = null;
+    }
+    
+    // Only hide spinner and show order summary if payment wasn't completed
+    const orderSummary = document.getElementById('orderSummaryView');
+    const processingView = document.getElementById('paymentProcessingView');
+    const paymentButtons = document.getElementById('paymentButtons');
+    
+    if (orderSummary) orderSummary.classList.remove('d-none');
+    if (processingView) processingView.classList.add('d-none');
+    if (paymentButtons) paymentButtons.classList.remove('d-none');
+    
+    console.log('[V2 Payment] Payment window closed by user');
   }
   
   /**
@@ -568,6 +610,45 @@ class V2PaymentModal {
   }
   
   /**
+   * Cancel test payment
+   */
+  cancelTestPayment() {
+    console.log('[V2 Payment] Test payment cancelled by user');
+    
+    // Mark as completed to stop checking
+    if (this.paymentCompletedCallback) {
+      this.paymentCompletedCallback();
+    }
+    
+    // Clear intervals
+    if (this.windowCheckInterval) {
+      clearInterval(this.windowCheckInterval);
+      this.windowCheckInterval = null;
+    }
+    if (this.statusCheckInterval) {
+      clearInterval(this.statusCheckInterval);
+      this.statusCheckInterval = null;
+    }
+    
+    // Close payment window if open
+    if (this.paymentWindow && !this.paymentWindow.closed) {
+      this.paymentWindow.close();
+      this.paymentWindow = null;
+    }
+    
+    // Show order summary again
+    const orderSummary = document.getElementById('orderSummaryView');
+    const processingView = document.getElementById('paymentProcessingView');
+    const paymentButtons = document.getElementById('paymentButtons');
+    const testCancelButton = document.getElementById('testModeCancelButton');
+    
+    if (orderSummary) orderSummary.classList.remove('d-none');
+    if (processingView) processingView.classList.add('d-none');
+    if (paymentButtons) paymentButtons.classList.remove('d-none');
+    if (testCancelButton) testCancelButton.classList.add('d-none');
+  }
+  
+  /**
    * Handle payment completion
    */
   handlePaymentComplete(data) {
@@ -590,12 +671,14 @@ class V2PaymentModal {
     const statusDiv = document.getElementById('paymentStatus');
     const statusMessage = document.getElementById('statusMessage');
     const processingView = document.getElementById('paymentProcessingView');
+    const testCancelButton = document.getElementById('testModeCancelButton');
     const alert = statusDiv.querySelector('.alert');
     
     if (!statusDiv) return;
     
-    // Hide processing view, show status
+    // Hide processing view and test cancel button, show status
     if (processingView) processingView.classList.add('d-none');
+    if (testCancelButton) testCancelButton.classList.add('d-none');
     statusDiv.classList.remove('d-none');
     
     if (data.status === 'success') {
