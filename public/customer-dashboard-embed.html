@@ -42,24 +42,22 @@
             </div>
         </div>
 
-        <!-- Stats Grid -->
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-            <div class="bg-white rounded-lg shadow-md p-6">
-                <h3 class="text-lg font-semibold text-gray-600 mb-2" data-i18n="customer.dashboard.activeOrders">Active Orders</h3>
-                <p class="text-3xl font-bold text-blue-600" id="activeOrders">0</p>
-            </div>
-            <div class="bg-white rounded-lg shadow-md p-6">
-                <h3 class="text-lg font-semibold text-gray-600 mb-2">Completed Orders</h3>
-                <p class="text-3xl font-bold text-green-600" id="completedOrders">0</p>
-            </div>
-            <div class="bg-white rounded-lg shadow-md p-6">
-                <h3 class="text-lg font-semibold text-gray-600 mb-2">Total Spent</h3>
-                <p class="text-3xl font-bold text-purple-600" id="totalSpent">$0.00</p>
-            </div>
-            <div class="bg-white rounded-lg shadow-md p-6">
-                <h3 class="text-lg font-semibold text-gray-600 mb-2">Bag Credits</h3>
-                <p class="text-3xl font-bold text-orange-600" id="bagCredits">$0.00</p>
-                <p class="text-xs text-gray-500 mt-1">Applied on next order</p>
+        <!-- Stats Grid - Now 3 columns centered -->
+        <div class="flex justify-center mb-8">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl w-full">
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h3 class="text-lg font-semibold text-gray-600 mb-2" data-i18n="customer.dashboard.activeOrder">Active Order</h3>
+                    <p class="text-3xl font-bold text-blue-600" id="activeOrders">0</p>
+                </div>
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h3 class="text-lg font-semibold text-gray-600 mb-2">Completed Orders</h3>
+                    <p class="text-3xl font-bold text-green-600" id="completedOrders">0</p>
+                </div>
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h3 class="text-lg font-semibold text-gray-600 mb-2">Total Spent</h3>
+                    <p class="text-3xl font-bold text-purple-600" id="totalSpent">$0.00</p>
+                </div>
+                <!-- Bag Credits card removed -->
             </div>
         </div>
 
@@ -91,6 +89,6 @@
     <!-- Scripts -->
     <script src="/assets/js/csrf-utils.js"></script>
     <script src="/assets/js/i18n.js"></script>
-    <script src="/assets/js/customer-dashboard.js"></script>
+    <script src="/assets/js/customer-dashboard.js?v=20250108-5"></script>
 </body>
 </html>
