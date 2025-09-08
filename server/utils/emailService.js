@@ -90,6 +90,23 @@ const loadTemplate = async (templateName, language = 'en') => {
   }
 };
 
+// Get logo attachment for emails
+const getLogoAttachment = () => {
+  const logoPath = path.join(__dirname, '../assets/images/wavemax-logo.png');
+  
+  // Check if logo file exists
+  if (fs.existsSync(logoPath)) {
+    return {
+      filename: 'wavemax-logo.png',
+      path: logoPath,
+      cid: 'wavemaxlogo' // Content ID for embedding in HTML
+    };
+  }
+  
+  // Return null if logo doesn't exist yet
+  return null;
+};
+
 // Fill template with data
 const fillTemplate = (template, data) => {
   // Add BASE_URL to all template data
@@ -117,8 +134,8 @@ const fillTemplate = (template, data) => {
   });
 };
 
-// Send email
-const sendEmail = async (to, subject, html) => {
+// Send email with optional attachments
+const sendEmail = async (to, subject, html, attachments = null) => {
   try {
     // Debug logging
     console.log('[sendEmail] Sending email to:', to);
@@ -133,12 +150,19 @@ const sendEmail = async (to, subject, html) => {
     // Simplified from address for Mailcow SMTP
     const from = `"WaveMAX Laundry" <${process.env.EMAIL_FROM || process.env.EMAIL_USER || 'noreply@wavemax.promo'}>`;
 
-    const info = await transporter.sendMail({
+    const mailOptions = {
       from,
       to,
       subject,
       html
-    });
+    };
+
+    // Add attachments if provided
+    if (attachments) {
+      mailOptions.attachments = attachments;
+    }
+
+    const info = await transporter.sendMail(mailOptions);
 
     console.log(`Email sent: ${info.messageId}`);
     return info;
@@ -333,10 +357,18 @@ exports.sendAffiliateWelcomeEmail = async (affiliate) => {
     };
     const subject = subjects[language] || subjects.en;
 
+    // Get logo attachment
+    const attachments = [];
+    const logo = getLogoAttachment();
+    if (logo) {
+      attachments.push(logo);
+    }
+
     await sendEmail(
       affiliate.email,
       subject,
-      html
+      html,
+      attachments.length > 0 ? attachments : null
     );
   } catch (error) {
     console.error('Error sending affiliate welcome email:', error);
@@ -1178,10 +1210,18 @@ exports.sendCustomerWelcomeEmail = async (customer, affiliate, bagInfo = {}) => 
     };
     const subject = subjects[language] || subjects.en;
 
+    // Get logo attachment
+    const attachments = [];
+    const logo = getLogoAttachment();
+    if (logo) {
+      attachments.push(logo);
+    }
+
     await sendEmail(
       customer.email,
       subject,
-      html
+      html,
+      attachments.length > 0 ? attachments : null
     );
 
     console.log('Customer welcome email sent successfully to:', customer.email);

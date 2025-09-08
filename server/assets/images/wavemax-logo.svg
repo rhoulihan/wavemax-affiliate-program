@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="180" height="60" viewBox="0 0 180 60" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="180" height="60" fill="#1e3a8a"/>
+  
+  <!-- WaveMAX Text -->
+  <text x="90" y="35" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="white" text-anchor="middle">
+    WaveMAX
+  </text>
+  
+  <!-- Tagline -->
+  <text x="90" y="50" font-family="Arial, sans-serif" font-size="10" fill="white" text-anchor="middle">
+    LAUNDRY SERVICES
+  </text>
+</svg>
