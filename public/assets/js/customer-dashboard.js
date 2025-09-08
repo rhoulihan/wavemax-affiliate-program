@@ -188,29 +188,27 @@ async function loadDashboardData() {
     if (statsResponse.ok) {
       const statsResult = await statsResponse.json();
       console.log('Dashboard stats response:', statsResult);
-      if (statsResult.success && statsResult.dashboard && statsResult.dashboard.statistics) {
-        const stats = statsResult.dashboard.statistics;
+      // Check both possible response structures
+      const stats = (statsResult.dashboard && statsResult.dashboard.statistics) 
+                    ? statsResult.dashboard.statistics 
+                    : statsResult.statistics;
+      
+      if (statsResult.success && stats) {
         console.log('Active orders count:', stats.activeOrders);
         // Show Yes/No for active orders instead of a number
         const hasActiveOrder = stats.activeOrders > 0;
         const activeOrderElement = document.getElementById('activeOrders');
+        console.log('Active order element found:', !!activeOrderElement);
+        console.log('Has active order:', hasActiveOrder);
         if (activeOrderElement) {
+          console.log('Updating activeOrders element to:', hasActiveOrder ? 'Yes' : 'No');
           activeOrderElement.innerHTML = hasActiveOrder 
-            ? '<span class="text-success font-weight-bold">Yes</span>' 
-            : '<span class="text-muted">No</span>';
+            ? '<span class="text-green-600 font-bold">Yes</span>' 
+            : '<span class="text-gray-500">No</span>';
+          console.log('ActiveOrders element after update:', activeOrderElement.innerHTML);
         }
         document.getElementById('completedOrders').textContent = stats.completedOrders || 0;
         document.getElementById('totalSpent').textContent = `$${(stats.totalSpent || 0).toFixed(2)}`;
-
-        // Remove bag credit display - no longer used
-        const bagCreditElement = document.getElementById('bagCredits');
-        if (bagCreditElement) {
-          // Hide the entire bag credit card
-          const bagCreditCard = bagCreditElement.closest('.stat-card');
-          if (bagCreditCard) {
-            bagCreditCard.style.display = 'none';
-          }
-        }
       }
     } else {
       console.error('Failed to fetch dashboard stats:', statsResponse.status, statsResponse.statusText);
@@ -224,18 +222,10 @@ async function loadDashboardData() {
     // Use default values on error
     const activeOrderElement = document.getElementById('activeOrders');
     if (activeOrderElement) {
-      activeOrderElement.innerHTML = '<span class="text-muted">No</span>';
+      activeOrderElement.innerHTML = '<span class="text-gray-500">No</span>';
     }
     document.getElementById('completedOrders').textContent = '0';
     document.getElementById('totalSpent').textContent = '$0.00';
-    // Hide bag credit card on error
-    const bagCreditElement = document.getElementById('bagCredits');
-    if (bagCreditElement) {
-      const bagCreditCard = bagCreditElement.closest('.stat-card');
-      if (bagCreditCard) {
-        bagCreditCard.style.display = 'none';
-      }
-    }
   }
 }
 
