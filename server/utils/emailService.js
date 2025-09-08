@@ -2391,6 +2391,7 @@ exports.sendV2PaymentRequest = async ({ customer, order, paymentAmount, paymentL
       hasAddOns: addOnsAmount > 0,
       hasDeliveryFee: deliveryFee > 0,
       // Payment links and QR codes
+      dashboardLink: `https://wavemax.promo/embed-app-v2.html?route=/customer-dashboard&affid=${order.affiliateId}`,
       venmoLink: paymentLinks.venmo,
       paypalLink: paymentLinks.paypal,
       cashappLink: paymentLinks.cashapp,
@@ -2466,6 +2467,7 @@ exports.sendV2PaymentReminder = async ({ customer, order, reminderNumber, paymen
       // Reminder specific
       reminderNumber: reminderNumber || 1,
       paymentRequestedTime: new Date(order.v2PaymentRequestedAt).toLocaleString(),
+      dashboardLink: `https://wavemax.promo/embed-app-v2.html?route=/customer-dashboard&affid=${order.affiliateId}`,
       venmoLink: paymentLinks?.venmo || order.v2PaymentLinks?.venmo || '#',
       paypalLink: paymentLinks?.paypal || order.v2PaymentLinks?.paypal || '#',
       cashappLink: paymentLinks?.cashapp || order.v2PaymentLinks?.cashapp || '#',
