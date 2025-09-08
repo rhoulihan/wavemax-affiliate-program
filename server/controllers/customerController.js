@@ -1027,25 +1027,22 @@ exports.updateV2OrderPayment = async (paymentToken) => {
       
       // Update V2 payment fields
       order.v2PaymentStatus = 'verified';
-      order.v2PaymentMethod = cardType ? `${cardType} ****${last4}` : 'credit_card';
+      order.v2PaymentMethod = 'credit_card';
       order.v2PaymentAmount = parseFloat(amount) || order.estimatedTotal;
-      order.transactionId = paymentToken.transactionId;
-      order.paymentDate = new Date();
+      order.v2PaymentTransactionId = paymentToken.transactionId;
+      order.v2PaymentVerifiedAt = new Date();
       
-      // Store additional payment details
-      if (!order.paymentDetails) {
-        order.paymentDetails = {};
-      }
-      order.paymentDetails.cardType = cardType;
-      order.paymentDetails.last4 = last4;
-      order.paymentDetails.authCode = authCode;
-      order.paymentDetails.pnRef = paygistixResponse.PNRef || paygistixResponse.pnRef || '';
+      // Store card details in notes field for reference
+      const cardDetails = cardType && last4 ? `${cardType} ending in ${last4}` : 'Credit Card';
+      const authDetails = authCode ? ` (Auth: ${authCode})` : '';
+      order.v2PaymentNotes = `Payment via ${cardDetails}${authDetails}`;
       
       // Also update legacy payment fields for compatibility
       order.paymentStatus = 'completed';
       order.isPaid = true;
       order.paymentReference = paymentToken.transactionId;
-      order.paidAmount = parseFloat(amount) || order.estimatedTotal;
+      order.paymentDate = new Date();
+      order.transactionId = paymentToken.transactionId;
       
       logger.info('V2 order payment verified:', {
         orderId: order._id,
@@ -1059,12 +1056,10 @@ exports.updateV2OrderPayment = async (paymentToken) => {
       order.paymentError = paymentToken.errorMessage || paygistixResponse.Message || 'Payment declined';
       order.paymentStatus = 'failed';
       
-      // Store failure details
-      if (!order.paymentDetails) {
-        order.paymentDetails = {};
-      }
-      order.paymentDetails.failureReason = paygistixResponse.Message || paygistixResponse.message || paymentToken.errorMessage;
-      order.paymentDetails.failureCode = paygistixResponse.Result || paygistixResponse.result || '';
+      // Store failure details in notes
+      const failureCode = paygistixResponse.Result || paygistixResponse.result || '';
+      const failureMsg = paygistixResponse.Message || paygistixResponse.message || paymentToken.errorMessage;
+      order.v2PaymentNotes = `Payment failed: ${failureMsg}${failureCode ? ` (Code: ${failureCode})` : ''}`;
       
       logger.error('V2 order payment failed:', {
         orderId: order._id,
@@ -1073,6 +1068,7 @@ exports.updateV2OrderPayment = async (paymentToken) => {
     } else if (paymentToken.status === 'cancelled') {
       order.v2PaymentStatus = 'pending';
       order.paymentStatus = 'pending';
+      order.v2PaymentNotes = 'Payment cancelled by user';
       
       logger.info('V2 order payment cancelled:', {
         orderId: order._id
