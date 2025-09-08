@@ -334,6 +334,25 @@
                 <h2 class="section-title">Choose Your Payment Method</h2>
                 
                 <div class="payment-options">
+                    <!-- Credit Card (Dashboard) -->
+                    <div class="payment-option" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none;">
+                        <div class="payment-option-header">
+                            <div class="payment-info">
+                                <div class="payment-icon" style="background: white; color: #667eea;">💳</div>
+                                <div>
+                                    <div class="payment-name" style="color: white;">Credit Card</div>
+                                    <div class="payment-handle" style="color: rgba(255,255,255,0.9);">Secure online payment</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="payment-action">
+                            <a href="{{dashboardLink}}" class="btn" style="background: white; color: #667eea; font-weight: bold;">Pay with Credit Card</a>
+                        </div>
+                        <p style="text-align: center; color: rgba(255,255,255,0.9); font-size: 12px; margin-top: 10px;">
+                            Log in to your dashboard to pay securely with your credit card
+                        </p>
+                    </div>
+                    
                     <!-- Venmo -->
                     <div class="payment-option">
                         <div class="payment-option-header">
@@ -348,40 +367,6 @@
                         </div>
                         <div class="payment-action">
                             <a href="{{venmoLink}}" class="btn btn-venmo">Pay with Venmo</a>
-                        </div>
-                    </div>
-                    
-                    <!-- PayPal -->
-                    <div class="payment-option">
-                        <div class="payment-option-header">
-                            <div class="payment-info">
-                                <div class="payment-icon paypal-icon">P</div>
-                                <div>
-                                    <div class="payment-name">PayPal</div>
-                                    <div class="payment-handle">paypal.me/WaveMAXLaundry</div>
-                                </div>
-                            </div>
-                            <img src="{{paypalQR}}" alt="PayPal QR Code" class="payment-qr">
-                        </div>
-                        <div class="payment-action">
-                            <a href="{{paypalLink}}" class="btn btn-paypal">Pay with PayPal</a>
-                        </div>
-                    </div>
-                    
-                    <!-- CashApp -->
-                    <div class="payment-option">
-                        <div class="payment-option-header">
-                            <div class="payment-info">
-                                <div class="payment-icon cashapp-icon">$</div>
-                                <div>
-                                    <div class="payment-name">Cash App</div>
-                                    <div class="payment-handle">$WaveMAXLaundry</div>
-                                </div>
-                            </div>
-                            <img src="{{cashappQR}}" alt="Cash App QR Code" class="payment-qr">
-                        </div>
-                        <div class="payment-action">
-                            <a href="{{cashappLink}}" class="btn btn-cashapp">Pay with Cash App</a>
                         </div>
                     </div>
                 </div>
