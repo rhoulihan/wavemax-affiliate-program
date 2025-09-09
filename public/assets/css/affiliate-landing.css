@@ -8,9 +8,33 @@
     z-index: 1000;
 }
 
+/* Hero section button styling */
+.hero-section .btn-lg {
+    padding: 12px 30px;
+    font-size: 1.1rem;
+    font-weight: 500;
+    border-radius: 8px;
+    min-width: 120px;
+}
+
+.hero-section .text-center {
+    margin-top: 2rem;
+}
+
 @media (max-width: 768px) {
     #language-switcher-container {
         top: 10px;
         right: 10px;
+    }
+    
+    .hero-section .btn-lg {
+        padding: 10px 24px;
+        font-size: 1rem;
+        display: inline-block;
+        margin-bottom: 10px;
+    }
+    
+    .hero-section .text-center .me-3 {
+        margin-right: 0.5rem !important;
     }
 }
