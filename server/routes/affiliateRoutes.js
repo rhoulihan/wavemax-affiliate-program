@@ -32,6 +32,22 @@ router.post('/register', registrationLimiter, [
 ], handleValidationErrors, affiliateController.registerAffiliate);
 
 /**
+ * @route   POST /api/affiliates/beta-request
+ * @desc    Submit a beta program request
+ * @access  Public
+ */
+router.post('/beta-request', registrationLimiter, [
+  body('firstName').notEmpty().withMessage('First name is required'),
+  body('lastName').notEmpty().withMessage('Last name is required'),
+  body('email').isEmail().withMessage('Valid email is required'),
+  body('phone').notEmpty().withMessage('Phone number is required'),
+  body('address').notEmpty().withMessage('Address is required'),
+  body('city').notEmpty().withMessage('City is required'),
+  body('state').notEmpty().isLength({ min: 2, max: 2 }).withMessage('State is required'),
+  body('zipCode').notEmpty().matches(/^\d{5}$/).withMessage('Valid ZIP code is required')
+], handleValidationErrors, affiliateController.submitBetaRequest);
+
+/**
  * @route   GET /api/affiliates/public/:affiliateCode
  * @desc    Get public affiliate information (for customer registration)
  * @access  Public

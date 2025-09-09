@@ -4,6 +4,7 @@ const Affiliate = require('../models/Affiliate');
 const Customer = require('../models/Customer');
 const Order = require('../models/Order');
 const Transaction = require('../models/Transaction');
+const BetaRequest = require('../models/BetaRequest');
 const encryptionUtil = require('../utils/encryption');
 const emailService = require('../utils/emailService');
 const { validationResult } = require('express-validator');
@@ -13,6 +14,73 @@ const { escapeRegex } = require('../utils/securityUtils');
 const ControllerHelpers = require('../utils/controllerHelpers');
 const AuthorizationHelpers = require('../middleware/authorizationHelpers');
 const Formatters = require('../utils/formatters');
+
+/**
+ * Submit a beta program request
+ */
+exports.submitBetaRequest = async (req, res) => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({
+        success: false,
+        errors: errors.array()
+      });
+    }
+
+    const {
+      firstName,
+      lastName,
+      email,
+      phone,
+      businessName,
+      address,
+      city,
+      state,
+      zipCode,
+      message
+    } = req.body;
+
+    // Check if a request already exists for this email
+    const existingRequest = await BetaRequest.findByEmail(email);
+    if (existingRequest && existingRequest.status === 'pending') {
+      return res.status(400).json({
+        success: false,
+        message: 'A beta request for this email is already pending.'
+      });
+    }
+
+    // Create new beta request
+    const betaRequest = new BetaRequest({
+      firstName,
+      lastName,
+      email,
+      phone,
+      businessName,
+      address,
+      city,
+      state,
+      zipCode,
+      message
+    });
+
+    await betaRequest.save();
+
+    // Send email notification to admin
+    await emailService.sendBetaRequestNotification(betaRequest);
+
+    res.json({
+      success: true,
+      message: 'Your beta request has been submitted successfully. We will contact you soon.'
+    });
+  } catch (error) {
+    console.error('Error submitting beta request:', error);
+    res.status(500).json({
+      success: false,
+      message: 'An error occurred while submitting your request. Please try again.'
+    });
+  }
+};
 
 /**
  * Register a new affiliate
