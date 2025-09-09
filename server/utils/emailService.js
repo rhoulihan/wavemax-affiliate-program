@@ -2805,6 +2805,175 @@ exports.sendAdminNotification = async function(options) {
   }
 };
 
+/**
+ * Send beta request notification to admin
+ */
+exports.sendBetaRequestNotification = async (betaRequest) => {
+  try {
+    const adminEmail = process.env.ADMIN_EMAIL || 'admin@wavemax.com';
+    
+    const subject = 'New Affiliate Beta Request Received';
+    
+    const html = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <style>
+          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+          .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+          .header { background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); color: white; padding: 20px; text-align: center; border-radius: 8px 8px 0 0; }
+          .content { background: white; padding: 30px; border: 1px solid #e0e0e0; border-radius: 0 0 8px 8px; }
+          .info-box { background: #f8f9fa; padding: 15px; border-left: 4px solid #1e3a8a; margin: 20px 0; }
+          .field { margin: 10px 0; }
+          .label { font-weight: bold; color: #666; }
+          .value { color: #333; margin-left: 10px; }
+          .message-box { background: #fff3cd; padding: 15px; border-radius: 4px; margin: 20px 0; }
+          .footer { text-align: center; padding: 20px; color: #666; font-size: 12px; }
+          .button { display: inline-block; background: #1e3a8a; color: white !important; padding: 12px 24px; text-decoration: none; border-radius: 4px; margin-top: 20px; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <h1>New Beta Request</h1>
+          </div>
+          <div class="content">
+            <p>A new affiliate has requested to join the beta program:</p>
+            
+            <div class="info-box">
+              <h3>Contact Information</h3>
+              <div class="field">
+                <span class="label">Name:</span>
+                <span class="value">${betaRequest.firstName} ${betaRequest.lastName}</span>
+              </div>
+              <div class="field">
+                <span class="label">Email:</span>
+                <span class="value">${betaRequest.email}</span>
+              </div>
+              <div class="field">
+                <span class="label">Phone:</span>
+                <span class="value">${betaRequest.phone}</span>
+              </div>
+              ${betaRequest.businessName ? `
+              <div class="field">
+                <span class="label">Business Name:</span>
+                <span class="value">${betaRequest.businessName}</span>
+              </div>
+              ` : ''}
+            </div>
+            
+            <div class="info-box">
+              <h3>Address</h3>
+              <div class="field">
+                <span class="value">${betaRequest.address}<br>
+                ${betaRequest.city}, ${betaRequest.state} ${betaRequest.zipCode}</span>
+              </div>
+            </div>
+            
+            ${betaRequest.message ? `
+            <div class="message-box">
+              <h3>Their Message</h3>
+              <p>${betaRequest.message}</p>
+            </div>
+            ` : ''}
+            
+            <p>Submitted on: ${new Date(betaRequest.createdAt).toLocaleString()}</p>
+            
+            <center>
+              <a href="https://wavemax.promo/embed-app-v2.html?route=/administrator-dashboard&section=beta-requests" class="button">
+                View in Admin Dashboard
+              </a>
+            </center>
+          </div>
+          <div class="footer">
+            <p>This is an automated notification from the WaveMAX Affiliate Program</p>
+          </div>
+        </div>
+      </body>
+      </html>
+    `;
+    
+    await sendEmail(adminEmail, subject, html);
+    console.log('Beta request notification sent to admin:', adminEmail);
+  } catch (error) {
+    console.error('Error sending beta request notification:', error);
+    // Don't throw - we don't want to fail the request if email fails
+  }
+};
+
+/**
+ * Send beta invitation email
+ */
+exports.sendBetaInvitationEmail = async (betaRequest, registrationUrl) => {
+  try {
+    const subject = 'Welcome to WaveMAX Affiliate Beta Program!';
+    
+    const html = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <style>
+          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+          .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+          .header { background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); color: white; padding: 30px; text-align: center; border-radius: 8px 8px 0 0; }
+          .content { background: white; padding: 30px; border: 1px solid #e0e0e0; border-radius: 0 0 8px 8px; }
+          .button { display: inline-block; background: #1e3a8a; color: white !important; padding: 14px 28px; text-decoration: none; border-radius: 4px; margin: 20px 0; font-size: 16px; }
+          .highlight { background: #f0f7ff; padding: 20px; border-radius: 4px; margin: 20px 0; }
+          .footer { text-align: center; padding: 20px; color: #666; font-size: 12px; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <h1>🎉 You're Approved for Beta!</h1>
+          </div>
+          <div class="content">
+            <p>Dear ${betaRequest.firstName},</p>
+            
+            <p>Congratulations! You've been selected to join the WaveMAX Affiliate Beta Program. We're excited to have you as one of our founding partners.</p>
+            
+            <div class="highlight">
+              <h3>What's Next?</h3>
+              <p>Click the button below to complete your affiliate registration. This exclusive link is just for you and will expire in 7 days.</p>
+              
+              <center>
+                <a href="${registrationUrl}" class="button">Complete Your Registration</a>
+              </center>
+            </div>
+            
+            <h3>Beta Program Benefits:</h3>
+            <ul>
+              <li>Be among the first affiliates in your area</li>
+              <li>10% commission on all customer orders</li>
+              <li>Set your own delivery fees</li>
+              <li>Full dashboard access to track earnings</li>
+              <li>Direct support from our team</li>
+            </ul>
+            
+            <p>If you have any questions, feel free to reply to this email. We're here to help you succeed!</p>
+            
+            <p>Welcome to the team!</p>
+            
+            <p>Best regards,<br>
+            The WaveMAX Team</p>
+          </div>
+          <div class="footer">
+            <p>This invitation link is unique to you. Please do not share it with others.</p>
+            <p>&copy; ${new Date().getFullYear()} WaveMAX Laundry. All rights reserved.</p>
+          </div>
+        </div>
+      </body>
+      </html>
+    `;
+    
+    await sendEmail(betaRequest.email, subject, html);
+    console.log('Beta invitation sent to:', betaRequest.email);
+  } catch (error) {
+    console.error('Error sending beta invitation:', error);
+    throw error;
+  }
+};
+
 // Export the sendEmail function for direct use
 exports.sendEmail = sendEmail;
 
