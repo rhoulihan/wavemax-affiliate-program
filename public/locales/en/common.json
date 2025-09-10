@@ -833,7 +833,8 @@
       "subtabs": {
         "overview": "Overview",
         "charts": "Charts",
-        "recentActivity": "Recent Activity"
+        "recentActivity": "Recent Activity",
+        "betaRequests": "Beta Requests"
       },
       "stats": {
         "activeOperators": "Active Operators",

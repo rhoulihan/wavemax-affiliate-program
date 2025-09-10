@@ -637,8 +637,8 @@ function initializePageScripts(route) {
     
     // Define page-specific scripts
     const pageScripts = {
-        '/': ['/assets/js/i18n.js', '/assets/js/language-switcher.js', 'https://wavemax.promo/assets/js/embed-navigation.js', 'https://wavemax.promo/assets/js/revenue-calculator.js', '/assets/js/embed-landing-init.js'],
-        '/landing': ['/assets/js/i18n.js', '/assets/js/language-switcher.js', 'https://wavemax.promo/assets/js/embed-navigation.js', 'https://wavemax.promo/assets/js/revenue-calculator.js', '/assets/js/embed-landing-init.js'],
+        '/': ['/assets/js/i18n.js', '/assets/js/language-switcher.js', 'https://wavemax.promo/assets/js/embed-navigation.js', 'https://wavemax.promo/assets/js/revenue-calculator.js', '/assets/js/embed-landing-init.js', '/assets/js/beta-request-modal.js'],
+        '/landing': ['/assets/js/i18n.js', '/assets/js/language-switcher.js', 'https://wavemax.promo/assets/js/embed-navigation.js', 'https://wavemax.promo/assets/js/revenue-calculator.js', '/assets/js/embed-landing-init.js', '/assets/js/beta-request-modal.js'],
         '/terms-of-service': ['/assets/js/terms-and-conditions.js'],
         '/terms-and-conditions': ['/assets/js/terms-and-conditions.js'],
         '/payment-success': ['/assets/js/payment-success.js'],
