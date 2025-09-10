@@ -90,22 +90,8 @@ const loadTemplate = async (templateName, language = 'en') => {
   }
 };
 
-// Get logo attachment for emails
-const getLogoAttachment = () => {
-  const logoPath = path.join(__dirname, '../assets/images/wavemax-logo.png');
-  
-  // Check if logo file exists
-  if (fs.existsSync(logoPath)) {
-    return {
-      filename: 'wavemax-logo.png',
-      path: logoPath,
-      cid: 'wavemaxlogo' // Content ID for embedding in HTML
-    };
-  }
-  
-  // Return null if logo doesn't exist yet
-  return null;
-};
+// Logo is now served via URL instead of attachment
+// Logo URL: https://www.wavemaxlaundry.com/assets/WaveMax/images/logo-wavemax.png
 
 // Fill template with data
 const fillTemplate = (template, data) => {
@@ -134,8 +120,8 @@ const fillTemplate = (template, data) => {
   });
 };
 
-// Send email with optional attachments
-const sendEmail = async (to, subject, html, attachments = null) => {
+// Send email (attachments removed due to mail server policy)
+const sendEmail = async (to, subject, html) => {
   try {
     // Debug logging
     console.log('[sendEmail] Sending email to:', to);
@@ -157,10 +143,8 @@ const sendEmail = async (to, subject, html, attachments = null) => {
       html
     };
 
-    // Add attachments if provided
-    if (attachments) {
-      mailOptions.attachments = attachments;
-    }
+    // Note: Attachments removed - mail server policy blocks them
+    // All images now use direct URLs instead
 
     const info = await transporter.sendMail(mailOptions);
 
@@ -357,18 +341,11 @@ exports.sendAffiliateWelcomeEmail = async (affiliate) => {
     };
     const subject = subjects[language] || subjects.en;
 
-    // Get logo attachment
-    const attachments = [];
-    const logo = getLogoAttachment();
-    if (logo) {
-      attachments.push(logo);
-    }
-
+    // No attachments - using linked logo in HTML
     await sendEmail(
       affiliate.email,
       subject,
-      html,
-      attachments.length > 0 ? attachments : null
+      html
     );
   } catch (error) {
     console.error('Error sending affiliate welcome email:', error);
@@ -1210,18 +1187,11 @@ exports.sendCustomerWelcomeEmail = async (customer, affiliate, bagInfo = {}) => 
     };
     const subject = subjects[language] || subjects.en;
 
-    // Get logo attachment
-    const attachments = [];
-    const logo = getLogoAttachment();
-    if (logo) {
-      attachments.push(logo);
-    }
-
+    // No attachments - using linked logo in HTML
     await sendEmail(
       customer.email,
       subject,
-      html,
-      attachments.length > 0 ? attachments : null
+      html
     );
 
     console.log('Customer welcome email sent successfully to:', customer.email);
@@ -2970,6 +2940,83 @@ exports.sendBetaInvitationEmail = async (betaRequest, registrationUrl) => {
     console.log('Beta invitation sent to:', betaRequest.email);
   } catch (error) {
     console.error('Error sending beta invitation:', error);
+    throw error;
+  }
+};
+
+/**
+ * Send welcome email to beta request
+ */
+exports.sendBetaWelcomeEmail = async (betaRequest) => {
+  try {
+    const registrationUrl = 'https://www.wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program?route=/affiliate-register';
+    const subject = 'Welcome to WaveMAX Affiliate Program Beta!';
+    
+    const html = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <style>
+          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+          .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+          .header { background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); color: white; text-align: center; padding: 30px 20px; border-radius: 10px 10px 0 0; }
+          .logo { max-width: 200px; margin-bottom: 20px; }
+          .content { background: white; padding: 30px; border: 1px solid #e5e7eb; border-radius: 0 0 10px 10px; }
+          .button { display: inline-block; padding: 12px 30px; background: #3b82f6; color: white; text-decoration: none; border-radius: 5px; margin: 20px 0; }
+          .highlight { background: #f0f9ff; border-left: 4px solid #3b82f6; padding: 15px; margin: 20px 0; }
+          .footer { text-align: center; color: #6b7280; font-size: 12px; margin-top: 30px; padding-top: 20px; border-top: 1px solid #e5e7eb; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <img src="https://www.wavemaxlaundry.com/assets/WaveMax/images/logo-wavemax.png" alt="WaveMAX Laundry" class="logo">
+            <h1>Welcome to Our Beta Program!</h1>
+          </div>
+          <div class="content">
+            <p>Dear ${betaRequest.firstName},</p>
+            
+            <p>Thank you for your interest in becoming a WaveMAX affiliate! We're excited to welcome you to our exclusive beta program.</p>
+            
+            <div class="highlight">
+              <h3>Ready to Get Started?</h3>
+              <p>Click the button below to complete your affiliate registration and start earning:</p>
+              
+              <center>
+                <a href="${registrationUrl}" class="button">Complete Registration</a>
+              </center>
+            </div>
+            
+            <h3>What You Can Expect:</h3>
+            <ul>
+              <li><strong>10% Commission</strong> on all customer orders</li>
+              <li><strong>Set Your Own Delivery Fees</strong> to maximize earnings</li>
+              <li><strong>Real-time Dashboard</strong> to track your performance</li>
+              <li><strong>Direct Support</strong> from our team</li>
+              <li><strong>No Hidden Fees</strong> - keep what you earn</li>
+            </ul>
+            
+            <p>If you have any questions during registration or need assistance, please don't hesitate to reach out to us.</p>
+            
+            <p>We look forward to having you as part of the WaveMAX family!</p>
+            
+            <p>Best regards,<br>
+            The WaveMAX Team</p>
+          </div>
+          <div class="footer">
+            <p>&copy; ${new Date().getFullYear()} WaveMAX Laundry. All rights reserved.</p>
+            <p>This is an automated message. Please do not reply to this email.</p>
+          </div>
+        </div>
+      </body>
+      </html>
+    `;
+    
+    // Don't use attachments as they're blocked by the mail server policy
+    await sendEmail(betaRequest.email, subject, html);
+    console.log('Beta welcome email sent to:', betaRequest.email);
+  } catch (error) {
+    console.error('Error sending beta welcome email:', error);
     throw error;
   }
 };
