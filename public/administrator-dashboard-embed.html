@@ -39,6 +39,7 @@
                 <button class="sub-nav-tab active" data-subtab="overview" data-i18n="administrator.dashboard.subtabs.overview">Overview</button>
                 <button class="sub-nav-tab" data-subtab="charts" data-i18n="administrator.dashboard.subtabs.charts">Charts</button>
                 <button class="sub-nav-tab" data-subtab="recent-activity" data-i18n="administrator.dashboard.subtabs.recentActivity">Recent Activity</button>
+                <button class="sub-nav-tab" data-subtab="beta-requests" data-i18n="administrator.dashboard.subtabs.betaRequests">Beta Requests</button>
             </div>
             
             <!-- Overview Sub-tab -->
@@ -142,6 +143,22 @@
                     <div id="recentActivity">
                         <div class="loading">
                             <div class="spinner"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Beta Requests Sub-tab -->
+            <div class="sub-tab-content" id="beta-requests-subtab">
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">Beta Program Requests</h2>
+                        <button class="btn btn-primary" id="refreshBetaRequestsBtn">Refresh</button>
+                    </div>
+                    <div id="betaRequestsList">
+                        <div class="loading">
+                            <div class="spinner"></div>
+                            <p>Loading beta requests...</p>
                         </div>
                     </div>
                 </div>

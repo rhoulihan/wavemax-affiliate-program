@@ -8,6 +8,7 @@ const Affiliate = require('../models/Affiliate');
 const Customer = require('../models/Customer');
 const SystemConfig = require('../models/SystemConfig');
 const Transaction = require('../models/Transaction');
+const BetaRequest = require('../models/BetaRequest');
 const { fieldFilter } = require('../utils/fieldFilter');
 const emailService = require('../utils/emailService');
 const { logAuditEvent, AuditEvents } = require('../utils/auditLogger');
@@ -2518,6 +2519,100 @@ exports.resetRateLimits = async (req, res) => {
       success: false,
       message: 'Failed to reset rate limits',
       error: error.message
+    });
+  }
+};
+
+/**
+ * Get all beta requests
+ */
+exports.getBetaRequests = async (req, res) => {
+  try {
+    const betaRequests = await BetaRequest.find({})
+      .sort('-createdAt')
+      .lean();
+
+    res.json({
+      success: true,
+      betaRequests: betaRequests.map(request => ({
+        _id: request._id,
+        firstName: request.firstName,
+        lastName: request.lastName,
+        email: request.email,
+        phone: request.phone,
+        businessName: request.businessName,
+        address: request.address,
+        city: request.city,
+        state: request.state,
+        zipCode: request.zipCode,
+        message: request.message,
+        welcomeEmailSent: request.welcomeEmailSent,
+        welcomeEmailSentAt: request.welcomeEmailSentAt,
+        welcomeEmailSentBy: request.welcomeEmailSentBy,
+        createdAt: request.createdAt
+      }))
+    });
+  } catch (error) {
+    console.error('Error fetching beta requests:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch beta requests'
+    });
+  }
+};
+
+/**
+ * Send welcome email to beta request
+ */
+exports.sendBetaWelcomeEmail = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const betaRequest = await BetaRequest.findById(id);
+    if (!betaRequest) {
+      return res.status(404).json({
+        success: false,
+        message: 'Beta request not found'
+      });
+    }
+
+    if (betaRequest.welcomeEmailSent) {
+      return res.status(400).json({
+        success: false,
+        message: 'Welcome email has already been sent to this user'
+      });
+    }
+
+    // Send the welcome email
+    await emailService.sendBetaWelcomeEmail(betaRequest);
+
+    // Update the beta request record
+    betaRequest.welcomeEmailSent = true;
+    betaRequest.welcomeEmailSentAt = new Date();
+    betaRequest.welcomeEmailSentBy = req.user.email || req.user.adminId;
+    await betaRequest.save();
+
+    // Log the action
+    await logAuditEvent(
+      AuditEvents.ADMIN_SENT_BETA_WELCOME,
+      req.user,
+      {
+        betaRequestId: betaRequest._id,
+        recipientEmail: betaRequest.email,
+        recipientName: `${betaRequest.firstName} ${betaRequest.lastName}`
+      },
+      req
+    );
+
+    res.json({
+      success: true,
+      message: 'Welcome email sent successfully'
+    });
+  } catch (error) {
+    console.error('Error sending beta welcome email:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to send welcome email'
     });
   }
 };

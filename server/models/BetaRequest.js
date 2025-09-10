@@ -53,30 +53,15 @@ const betaRequestSchema = new mongoose.Schema({
         type: String,
         trim: true
     },
-    status: {
-        type: String,
-        enum: ['pending', 'approved', 'rejected', 'invited'],
-        default: 'pending'
+    welcomeEmailSent: {
+        type: Boolean,
+        default: false
     },
-    inviteSentAt: {
+    welcomeEmailSentAt: {
         type: Date
     },
-    invitationToken: {
-        type: String,
-        unique: true,
-        sparse: true
-    },
-    approvedBy: {
+    welcomeEmailSentBy: {
         type: String
-    },
-    approvedAt: {
-        type: Date
-    },
-    rejectedReason: {
-        type: String
-    },
-    rejectedAt: {
-        type: Date
     },
     notes: {
         type: String
@@ -97,23 +82,9 @@ betaRequestSchema.pre('save', function(next) {
     next();
 });
 
-// Generate invitation token
-betaRequestSchema.methods.generateInvitationToken = function() {
-    const crypto = require('crypto');
-    this.invitationToken = crypto.randomBytes(32).toString('hex');
-    return this.invitationToken;
-};
-
-// Check if request is expired (older than 30 days)
-betaRequestSchema.methods.isExpired = function() {
-    const thirtyDaysAgo = new Date();
-    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-    return this.createdAt < thirtyDaysAgo;
-};
-
-// Static method to find pending requests
-betaRequestSchema.statics.findPending = function() {
-    return this.find({ status: 'pending' }).sort('-createdAt');
+// Static method to find all requests
+betaRequestSchema.statics.findAllRequests = function() {
+    return this.find({}).sort('-createdAt');
 };
 
 // Static method to find by email

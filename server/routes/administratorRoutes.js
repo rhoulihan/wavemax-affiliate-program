@@ -105,6 +105,10 @@ router.post('/reset-rate-limits', checkAdminPermission(['system.manage']), async
   }
 });
 
+// Beta Request Management
+router.get('/beta-requests', administratorController.getBetaRequests);
+router.post('/beta-requests/:id/send-welcome', administratorController.sendBetaWelcomeEmail);
+
 // Administrator routes with :id parameter (MUST BE LAST)
 router.get('/:id', checkAdminPermission(['administrators.read']), administratorController.getAdministratorById);
 router.patch('/:id', checkAdminPermission(['administrators.update']), administratorController.updateAdministrator);

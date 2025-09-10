@@ -157,6 +157,11 @@
         
         // Save current sub-tab to localStorage
         localStorage.setItem('adminCurrentSubTab', targetSubTab);
+        
+        // Load beta requests when that tab is clicked
+        if (targetSubTab === 'beta-requests' && typeof loadBetaRequests === 'function') {
+          loadBetaRequests();
+        }
       });
     });
     
@@ -3060,6 +3065,159 @@
       });
     }
   });
+
+  // Notification helper function
+  function showNotification(message, type = 'info') {
+    // Create notification element
+    const notification = document.createElement('div');
+    notification.className = `notification-toast alert alert-${type === 'error' ? 'danger' : type} alert-dismissible fade show`;
+    
+    // Create close button
+    const closeBtn = document.createElement('button');
+    closeBtn.type = 'button';
+    closeBtn.className = 'btn-close';
+    closeBtn.setAttribute('aria-label', 'Close');
+    closeBtn.addEventListener('click', () => notification.remove());
+    
+    // Add message and button
+    const messageSpan = document.createElement('span');
+    messageSpan.textContent = message;
+    notification.appendChild(messageSpan);
+    notification.appendChild(closeBtn);
+    
+    // Add to body
+    document.body.appendChild(notification);
+    
+    // Auto-remove after 5 seconds
+    setTimeout(() => {
+      if (notification.parentElement) {
+        notification.remove();
+      }
+    }, 5000);
+  }
+
+  // Beta Requests Management Functions
+  async function loadBetaRequests() {
+    try {
+      const response = await adminFetch('/api/v1/administrators/beta-requests');
+      const data = await response.json();
+      
+      if (response.ok && data.success) {
+        renderBetaRequests(data.betaRequests);
+      } else {
+        document.getElementById('betaRequestsList').innerHTML = `
+          <div class="p-20 text-center text-muted">
+            Failed to load beta requests: ${data.message || 'Unknown error'}
+          </div>
+        `;
+      }
+    } catch (error) {
+      console.error('Error loading beta requests:', error);
+      document.getElementById('betaRequestsList').innerHTML = `
+        <div class="p-20 text-center text-muted">
+          Error loading beta requests. Please try again.
+        </div>
+      `;
+    }
+  }
+
+  function renderBetaRequests(requests) {
+    const container = document.getElementById('betaRequestsList');
+    
+    if (!requests || requests.length === 0) {
+      container.innerHTML = `
+        <div class="p-20 text-center text-muted">
+          No beta requests found.
+        </div>
+      `;
+      return;
+    }
+    
+    const html = `
+      <div class="table-responsive">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Phone</th>
+              <th>Location</th>
+              <th>Business</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${requests.map(request => `
+              <tr>
+                <td>${new Date(request.createdAt).toLocaleDateString()}</td>
+                <td>${request.firstName} ${request.lastName}</td>
+                <td>${request.email}</td>
+                <td>${request.phone}</td>
+                <td>${request.city}, ${request.state} ${request.zipCode}</td>
+                <td>${request.businessName || '-'}</td>
+                <td>
+                  ${request.welcomeEmailSent 
+                    ? `<span class="badge badge-success">Welcome Sent</span>` 
+                    : `<span class="badge badge-warning">Pending</span>`}
+                </td>
+                <td>
+                  ${!request.welcomeEmailSent 
+                    ? `<button class="btn btn-sm btn-primary" data-request-id="${request._id}" data-action="send-welcome">
+                        Send Welcome
+                      </button>` 
+                    : `<span class="text-muted text-sm">Sent ${new Date(request.welcomeEmailSentAt).toLocaleDateString()}</span>`}
+                </td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      </div>
+    `;
+    
+    container.innerHTML = html;
+  }
+
+  async function sendBetaWelcomeEmail(requestId) {
+    if (!confirm('Send welcome email to this beta request?')) {
+      return;
+    }
+    
+    try {
+      const response = await adminFetch(`/api/v1/administrators/beta-requests/${requestId}/send-welcome`, {
+        method: 'POST'
+      });
+      
+      const data = await response.json();
+      
+      if (response.ok && data.success) {
+        showNotification('Welcome email sent successfully!', 'success');
+        loadBetaRequests(); // Reload the list
+      } else {
+        showNotification(data.message || 'Failed to send welcome email', 'error');
+      }
+    } catch (error) {
+      console.error('Error sending welcome email:', error);
+      showNotification('Error sending welcome email', 'error');
+    }
+  }
+
+  // Add event delegation for beta request actions
+  document.addEventListener('click', function(e) {
+    // Handle Send Welcome button clicks
+    if (e.target.dataset.action === 'send-welcome') {
+      const requestId = e.target.dataset.requestId;
+      sendBetaWelcomeEmail(requestId);
+    }
+    
+    // Handle Refresh button click
+    if (e.target.id === 'refreshBetaRequestsBtn') {
+      loadBetaRequests();
+    }
+  });
+
+  window.sendBetaWelcomeEmail = sendBetaWelcomeEmail;
 
   // Initialize the dashboard by loading the default tab
   // Check URL for tab parameter first, then localStorage, then default
