@@ -2668,6 +2668,16 @@ exports.sendBetaReminderEmail = async (req, res) => {
         message: 'Welcome email must be sent before sending reminders'
       });
     }
+    
+    // Check if 72 hours have passed since welcome email was sent
+    const hoursSinceWelcome = (Date.now() - new Date(betaRequest.welcomeEmailSentAt).getTime()) / (1000 * 60 * 60);
+    if (hoursSinceWelcome < 72) {
+      const hoursRemaining = Math.ceil(72 - hoursSinceWelcome);
+      return res.status(400).json({
+        success: false,
+        message: `Please wait ${hoursRemaining} more hour${hoursRemaining !== 1 ? 's' : ''} before sending a reminder (72-hour minimum between emails)`
+      });
+    }
 
     // Check if affiliate already exists
     const affiliate = await Affiliate.findOne({ email: betaRequest.email.toLowerCase() });

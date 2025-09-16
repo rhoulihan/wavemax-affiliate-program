@@ -1047,4 +1047,21 @@ input:focus, select:focus {
     font-size: 0.875rem;
     display: inline-block;
 }
+
+/* Disabled button state */
+.btn-secondary[disabled], 
+.btn-secondary:disabled {
+    background-color: #e9ecef;
+    border-color: #dee2e6;
+    color: #6c757d;
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.btn-secondary[disabled]:hover,
+.btn-secondary:disabled:hover {
+    background-color: #e9ecef;
+    border-color: #dee2e6;
+    color: #6c757d;
+}
 .docusign-status { display: inline-flex; align-items: center; gap: 8px; }
