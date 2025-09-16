@@ -250,7 +250,7 @@ app.use((req, res, next) => {
       'https://stackpath.bootstrapcdn.com'
     ],
     'img-src': ["'self'", 'data:', 'https://www.wavemax.promo', 'https://*.tile.openstreetmap.org', 'https://tile.openstreetmap.org', 'https://cdnjs.cloudflare.com', 'https://flagcdn.com'],
-    'connect-src': ["'self'", 'https://wavemax.promo', 'https://router.project-osrm.org', 'https://graphhopper.com', 'https://api.openrouteservice.org', 'https://valhalla1.openstreetmap.de', 'https://nominatim.openstreetmap.org'],
+    'connect-src': ["'self'", 'https://wavemax.promo', 'https://cdn.jsdelivr.net', 'https://router.project-osrm.org', 'https://graphhopper.com', 'https://api.openrouteservice.org', 'https://valhalla1.openstreetmap.de', 'https://nominatim.openstreetmap.org'],
     'font-src': ["'self'", 'https://cdnjs.cloudflare.com', 'https://cdn.jsdelivr.net', 'https://fonts.gstatic.com'],
     'object-src': ["'none'"],
     'media-src': ["'self'"],

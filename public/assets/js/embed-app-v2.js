@@ -887,6 +887,14 @@ window.addEventListener('message', (event) => {
             // Apply mobile-specific classes if needed
             if (viewportInfo.isMobile) {
                 document.body.classList.add('is-mobile');
+                // Request chrome hiding on mobile
+                console.log('Mobile detected, requesting chrome hide');
+                window.parent.postMessage({ type: 'hide-chrome' }, '*');
+            } else if (viewportInfo.isTablet) {
+                document.body.classList.add('is-tablet');
+                // Also hide chrome on tablets for better experience
+                console.log('Tablet detected, requesting chrome hide');
+                window.parent.postMessage({ type: 'hide-chrome' }, '*');
             }
             break;
             

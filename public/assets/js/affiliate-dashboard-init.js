@@ -501,7 +501,7 @@ function initializePricingPreview(affiliateData) {
   console.log('Pricing preview initialized (delayed):', !!window.settingsPricingPreview);
 
   // Set initial values
-  const minimumFee = parseFloat(affiliateData.minimumDeliveryFee) || 25;
+  const minimumFee = parseFloat(affiliateData.minimumDeliveryFee) || 20;
   const perBagFee = parseFloat(affiliateData.perBagDeliveryFee) || 10;
 
   // Update inputs
@@ -658,7 +658,7 @@ async function loadAffiliateData(affiliateId) {
         console.log('Pricing preview initialized:', !!window.settingsPricingPreview);
 
         // Set initial values
-        const minimumFee = parseFloat(data.minimumDeliveryFee) || 25;
+        const minimumFee = parseFloat(data.minimumDeliveryFee) || 20;
         const perBagFee = parseFloat(data.perBagDeliveryFee) || 10;
 
         // Update inputs
@@ -1105,12 +1105,12 @@ async function loadSettingsData(affiliateId) {
         
         // Set select dropdown values
         if (minimumDeliveryFeeField) {
-          const mdfValue = String(data.minimumDeliveryFee || 25);
+          const mdfValue = String(data.minimumDeliveryFee || 20);
           // Ensure the value exists in the dropdown options
           if (minimumDeliveryFeeField.querySelector(`option[value="${mdfValue}"]`)) {
             minimumDeliveryFeeField.value = mdfValue;
           } else {
-            minimumDeliveryFeeField.value = '25'; // Default to $25
+            minimumDeliveryFeeField.value = '20'; // Default to $20
           }
         }
         

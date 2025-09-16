@@ -119,6 +119,21 @@ exports.registerAffiliate = async (req, res) => {
       languagePreference
     } = req.body;
 
+    // Beta validation: Check if email is associated with an invited beta user
+    const BetaRequest = require('../models/BetaRequest');
+    const betaRequest = await BetaRequest.findOne({ 
+      email: email.toLowerCase(),
+      welcomeEmailSent: true 
+    });
+
+    if (!betaRequest) {
+      return res.status(403).json({
+        success: false,
+        message: 'We are currently in closed beta. Please check back in a few days or contact us if you believe you should have access.',
+        isBetaRestriction: true
+      });
+    }
+
     // Check if email or username already exists
     const existingEmail = await Affiliate.findOne({ email });
     const existingUsername = await Affiliate.findOne({ username });
@@ -163,7 +178,7 @@ exports.registerAffiliate = async (req, res) => {
       serviceLatitude,
       serviceLongitude,
       serviceRadius,
-      minimumDeliveryFee: parseFloat(minimumDeliveryFee) || 25,
+      minimumDeliveryFee: parseFloat(minimumDeliveryFee) || 20,
       perBagDeliveryFee: parseFloat(perBagDeliveryFee) || 5,
       username,
       passwordSalt: salt,

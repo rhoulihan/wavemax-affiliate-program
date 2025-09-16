@@ -71,6 +71,7 @@
       "loginSuccess": "¡Inicio de sesión exitoso!",
       "logoutSuccess": "Has cerrado sesión exitosamente.",
       "registrationSuccess": "¡Registro exitoso!",
+    "betaRestriction": "Actualmente estamos en beta cerrada. Por favor, vuelva a intentarlo en unos días o contáctenos si cree que debería tener acceso.",
       "registrationFailed": "Error en el registro. Por favor intenta nuevamente.",
       "passwordResetSuccess": "¡Restablecimiento de contraseña exitoso!",
       "passwordResetFailed": "Error al restablecer la contraseña. Por favor intenta nuevamente.",
@@ -283,6 +284,7 @@
     },
     "cta": {
       "title": "¿Listo para empezar a ganar?",
+      "customerTitle": "¿Listo para ropa limpia y fresca?",
       "description": "Únete a nuestro programa de afiliados y comienza a ganar comisiones ofreciendo servicios de lavandería a tus clientes.",
       "createAccount": "Crear Cuenta de Afiliado",
       "login": "Acceso de Afiliado",

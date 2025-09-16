@@ -4,6 +4,40 @@ All notable changes to the WaveMAX Laundry Affiliate Program will be documented 
 
 ## [Unreleased]
 
+## [1.2.0] - 2025-01-16
+
+### Added
+- Beta program system for limited affiliate launch
+  - Beta request modal with email/name collection
+  - Admin dashboard management for beta requests
+  - Welcome email system for approved beta users
+  - Registration validation against beta-approved emails
+- Two-step registration process with progressive disclosure
+  - OAuth/credentials collection first, then personal details
+  - Improved user experience with back button navigation
+- Mobile chrome auto-hide on initial page load
+  - Automatic detection of mobile/tablet viewport
+  - Parent page element hiding without resize events
+- Tablet kiosk optimizations for operator scan
+  - Wide modal layout for bag weight entry
+  - Grid layout for weight inputs
+  - Top-positioned modal to avoid keyboard overlap
+
+### Changed
+- Default minimum delivery fee reduced from $25 to $20
+- W9 form messaging updated to mention DocuSign for earnings over $600
+- Payment reminder emails now include "Login to pay" button
+- CSP connect-src updated to include cdn.jsdelivr.net for Bootstrap source maps
+- Affiliate landing page testimonials section hidden (fake testimonials removed)
+- Customer landing page CTA buttons changed to "Sign Up Today" and "Login"
+
+### Fixed
+- Beta request modal z-index issues in iframe context
+- JavaScript error from duplicate socialAuthSection variable declaration
+- Rate limiting MongoDB collection name (rate_limits vs ratelimits)
+- Mobile viewport detection on narrow window initial load
+- Operator scan modal positioning on tablets with on-screen keyboards
+
 ## [1.1.0] - 2025-01-16
 
 ### Added

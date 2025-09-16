@@ -81,6 +81,7 @@
       "signingIn": "Signing in...",
       "logoutSuccess": "You have been logged out successfully.",
       "registrationSuccess": "Registration successful!",
+    "betaRestriction": "We are currently in closed beta. Please check back in a few days or contact us if you believe you should have access.",
       "registrationFailed": "Registration failed. Please try again.",
       "passwordResetSuccess": "Password reset successful!",
       "passwordResetFailed": "Password reset failed. Please try again.",
@@ -293,6 +294,7 @@
     },
     "cta": {
       "title": "Ready to start earning?",
+      "customerTitle": "Ready for Fresh, Clean Laundry?",
       "description": "Join our affiliate program and start earning commissions by offering laundry services to your customers.",
       "createAccount": "Create Affiliate Account",
       "login": "Affiliate Login",
