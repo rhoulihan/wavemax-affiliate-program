@@ -3110,13 +3110,15 @@
             const affiliateData = await affiliateResponse.json();
             return {
               ...request,
-              hasAffiliate: affiliateData.exists || false
+              hasAffiliate: affiliateData.exists || false,
+              affiliateRegisteredAt: affiliateData.registeredAt || null
             };
           } catch (error) {
             console.error(`Error checking affiliate for ${request.email}:`, error);
             return {
               ...request,
-              hasAffiliate: false
+              hasAffiliate: false,
+              affiliateRegisteredAt: null
             };
           }
         }));
@@ -3178,12 +3180,18 @@
                 <td>${request.businessName || '-'}</td>
                 <td>
                   ${request.welcomeEmailSent 
-                    ? `<span class="badge badge-success">Welcome Sent</span>` 
+                    ? `<div>
+                        <span class="badge badge-success">✓ Sent</span>
+                        <div class="text-muted text-xs mt-1">${new Date(request.welcomeEmailSentAt).toLocaleString()}</div>
+                      </div>` 
                     : `<span class="badge badge-warning">Pending</span>`}
                 </td>
                 <td>
                   ${request.hasAffiliate 
-                    ? `<span class="badge badge-success">Registered</span>` 
+                    ? `<div>
+                        <span class="badge badge-success">✓ Registered</span>
+                        <div class="text-muted text-xs mt-1">${new Date(request.affiliateRegisteredAt).toLocaleString()}</div>
+                      </div>` 
                     : `<span class="badge badge-secondary">Not Registered</span>`}
                 </td>
                 <td>

@@ -1005,4 +1005,46 @@ input:focus, select:focus {
 .alert { padding: 15px; border-radius: 4px; }
 .alert-warning { background: #fff3cd; border: 1px solid #ffeeba; color: #856404; }
 .docusign-auth-section { }
+
+/* Beta Request Timestamp Styles */
+.text-xs {
+    font-size: 0.75rem;
+    line-height: 1rem;
+}
+
+.text-muted {
+    color: #6c757d;
+}
+
+.mt-1 {
+    margin-top: 0.25rem;
+}
+
+/* Enhance badge styles for better status visibility */
+.badge-success {
+    background-color: #28a745;
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.875rem;
+    display: inline-block;
+}
+
+.badge-warning {
+    background-color: #ffc107;
+    color: #212529;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.875rem;
+    display: inline-block;
+}
+
+.badge-secondary {
+    background-color: #6c757d;
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.875rem;
+    display: inline-block;
+}
 .docusign-status { display: inline-flex; align-items: center; gap: 8px; }
