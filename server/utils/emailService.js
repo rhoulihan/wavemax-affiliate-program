@@ -3023,6 +3023,108 @@ exports.sendBetaWelcomeEmail = async (betaRequest) => {
   }
 };
 
+/**
+ * Send reminder email to beta request user who hasn't registered
+ */
+exports.sendBetaReminderEmail = async (betaRequest) => {
+  try {
+    const registrationUrl = 'https://www.wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program?route=/affiliate-register';
+    const subject = 'Don\'t Miss Out - Your WaveMAX Affiliate Opportunity Awaits!';
+    
+    const html = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <style>
+          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+          .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+          .header { background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); color: white; text-align: center; padding: 30px 20px; border-radius: 10px 10px 0 0; }
+          .logo { max-width: 200px; margin-bottom: 20px; }
+          .content { background: white; padding: 30px; border: 1px solid #e5e7eb; border-radius: 0 0 10px 10px; }
+          .button { display: inline-block; padding: 14px 35px; background: #3b82f6; color: white; text-decoration: none; border-radius: 5px; margin: 20px 0; font-weight: bold; }
+          .highlight { background: #f0f9ff; border-left: 4px solid #3b82f6; padding: 15px; margin: 20px 0; }
+          .benefit-box { background: #fef3c7; border: 1px solid #fbbf24; border-radius: 8px; padding: 20px; margin: 20px 0; }
+          .check-mark { color: #10b981; font-weight: bold; }
+          .footer { text-align: center; color: #6b7280; font-size: 12px; margin-top: 30px; padding-top: 20px; border-top: 1px solid #e5e7eb; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <img src="https://www.wavemaxlaundry.com/assets/WaveMax/images/logo-wavemax.png" alt="WaveMAX Laundry" class="logo">
+            <h1>Your Business Opportunity is Still Waiting!</h1>
+          </div>
+          <div class="content">
+            <p>Hi ${betaRequest.firstName},</p>
+            
+            <p>We noticed you haven't completed your WaveMAX Affiliate registration yet. Don't let this incredible opportunity pass you by!</p>
+            
+            <div class="benefit-box">
+              <h3 style="color: #dc2626; margin-top: 0;">🚀 No Barriers to Entry!</h3>
+              <p style="margin: 10px 0;"><span class="check-mark">✓</span> <strong>NO upfront costs</strong></p>
+              <p style="margin: 10px 0;"><span class="check-mark">✓</span> <strong>NO subscription fees</strong></p>
+              <p style="margin: 10px 0;"><span class="check-mark">✓</span> <strong>NO premium charges</strong></p>
+              <p style="margin-bottom: 0;">Just pure opportunity to build YOUR business!</p>
+            </div>
+            
+            <h3>Build a REAL Business, Not Just a Side Gig</h3>
+            <p>Unlike driving for Uber or Lyft where you're just another contractor, as a WaveMAX Affiliate you're building YOUR own business. The fees that would normally go to gig economy platforms go directly to YOU!</p>
+            
+            <div class="highlight">
+              <h3>Market to Multiple Revenue Streams:</h3>
+              <ul style="margin: 10px 0;">
+                <li><strong>Hotels & Hospitality</strong> - Become their go-to laundry service</li>
+                <li><strong>Apartment Managers</strong> - Service entire communities</li>
+                <li><strong>Senior Service Centers</strong> - Help those who need it most</li>
+                <li><strong>Private Individuals</strong> - Build your personal client base</li>
+              </ul>
+            </div>
+            
+            <p><strong>The income opportunity is literally as large as you can make it!</strong> Some of our top affiliates are earning $5,000+ per month simply by picking up and delivering laundry. This is a real opportunity to build sustainable, recurring income.</p>
+            
+            <h3>Why WaveMAX?</h3>
+            <ul>
+              <li>Professional laundry processing handled for you</li>
+              <li>Real-time tracking and customer management tools</li>
+              <li>10% commission on every order</li>
+              <li>Set your own delivery fees (keep 100%!)</li>
+              <li>Full training and support provided</li>
+            </ul>
+            
+            <center>
+              <a href="${registrationUrl}" class="button">Complete Your Registration Now →</a>
+            </center>
+            
+            <p style="text-align: center; color: #6b7280; font-style: italic;">
+              Don't let someone else claim your territory. Secure your spot today!
+            </p>
+            
+            <p>Questions? We're here to help! Simply reply to this email or complete your registration and we'll guide you every step of the way.</p>
+            
+            <p>Best regards,<br>
+            The WaveMAX Team</p>
+            
+            <p style="font-size: 14px; color: #6b7280; margin-top: 20px;">
+              P.S. - Remember, there's absolutely no financial risk. You only pay for the laundry processing after you've collected payment from your customers. It's that simple!
+            </p>
+          </div>
+          <div class="footer">
+            <p>&copy; ${new Date().getFullYear()} WaveMAX Laundry. All rights reserved.</p>
+            <p>You received this email because you expressed interest in the WaveMAX Affiliate Program.</p>
+          </div>
+        </div>
+      </body>
+      </html>
+    `;
+    
+    await sendEmail(betaRequest.email, subject, html);
+    console.log('Beta reminder email sent to:', betaRequest.email);
+  } catch (error) {
+    console.error('Error sending beta reminder email:', error);
+    throw error;
+  }
+};
+
 // Export the sendEmail function for direct use
 exports.sendEmail = sendEmail;
 
