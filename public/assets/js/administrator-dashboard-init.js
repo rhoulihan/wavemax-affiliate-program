@@ -3233,21 +3233,27 @@
                     : request.hasAffiliate
                       ? `<span class="text-success text-sm">✓ Complete</span>`
                       : (() => {
-                          const canSend = canSendReminder(request.welcomeEmailSentAt);
-                          const hoursUntil = getHoursUntilReminder(request.welcomeEmailSentAt);
+                          // Use last reminder timestamp if available, otherwise use welcome email timestamp
+                          const lastEmailSentAt = request.lastReminderEmailSentAt || request.welcomeEmailSentAt;
+                          const canSend = canSendReminder(lastEmailSentAt);
+                          const hoursUntil = getHoursUntilReminder(lastEmailSentAt);
                           const formattedTime = formatTimeRemaining(hoursUntil);
+                          const reminderCount = request.reminderEmailCount || 0;
                           const tooltipText = canSend 
-                            ? "Send reminder about the opportunity" 
-                            : `Reminder can be sent in ${formattedTime}`;
+                            ? `Send reminder about the opportunity${reminderCount > 0 ? ` (Reminder #${reminderCount + 1})` : ''}` 
+                            : `Next reminder can be sent in ${formattedTime}`;
                           
                           if (canSend) {
-                            return `<button 
-                              class="btn btn-sm btn-warning" 
-                              data-request-id="${request._id}" 
-                              data-action="send-reminder" 
-                              title="${tooltipText}">
-                                Send Reminder
-                              </button>`;
+                            return `<div>
+                              <button 
+                                class="btn btn-sm btn-warning" 
+                                data-request-id="${request._id}" 
+                                data-action="send-reminder" 
+                                title="${tooltipText}">
+                                  Send Reminder
+                                </button>
+                              ${reminderCount > 0 ? `<div class="text-muted text-xs mt-1">${reminderCount} reminder${reminderCount !== 1 ? 's' : ''} sent</div>` : ''}
+                            </div>`;
                           } else {
                             return `<div>
                               <button 
@@ -3259,6 +3265,7 @@
                                   Send Reminder
                                 </button>
                               <div class="text-muted text-xs mt-1">Available in ${formattedTime}</div>
+                              ${reminderCount > 0 ? `<div class="text-muted text-xs">${reminderCount} reminder${reminderCount !== 1 ? 's' : ''} sent</div>` : ''}
                             </div>`;
                           }
                         })()
@@ -3312,6 +3319,7 @@
       
       if (response.ok && data.success) {
         showNotification('Reminder email sent successfully!', 'success');
+        loadBetaRequests(); // Reload the list to update the button state
       } else {
         showNotification(data.message || 'Failed to send reminder email', 'error');
       }

@@ -63,6 +63,17 @@ const betaRequestSchema = new mongoose.Schema({
     welcomeEmailSentBy: {
         type: String
     },
+    lastReminderEmailSentAt: {
+        type: Date
+    },
+    reminderEmailCount: {
+        type: Number,
+        default: 0
+    },
+    reminderEmailHistory: [{
+        sentAt: Date,
+        sentBy: String
+    }],
     notes: {
         type: String
     },

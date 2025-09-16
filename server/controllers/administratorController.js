@@ -2549,6 +2549,8 @@ exports.getBetaRequests = async (req, res) => {
         welcomeEmailSent: request.welcomeEmailSent,
         welcomeEmailSentAt: request.welcomeEmailSentAt,
         welcomeEmailSentBy: request.welcomeEmailSentBy,
+        lastReminderEmailSentAt: request.lastReminderEmailSentAt,
+        reminderEmailCount: request.reminderEmailCount || 0,
         createdAt: request.createdAt
       }))
     });
@@ -2669,13 +2671,14 @@ exports.sendBetaReminderEmail = async (req, res) => {
       });
     }
     
-    // Check if 72 hours have passed since welcome email was sent
-    const hoursSinceWelcome = (Date.now() - new Date(betaRequest.welcomeEmailSentAt).getTime()) / (1000 * 60 * 60);
-    if (hoursSinceWelcome < 72) {
-      const hoursRemaining = Math.ceil(72 - hoursSinceWelcome);
+    // Check if 72 hours have passed since last email (welcome or reminder)
+    const lastEmailSentAt = betaRequest.lastReminderEmailSentAt || betaRequest.welcomeEmailSentAt;
+    const hoursSinceLastEmail = (Date.now() - new Date(lastEmailSentAt).getTime()) / (1000 * 60 * 60);
+    if (hoursSinceLastEmail < 72) {
+      const hoursRemaining = Math.ceil(72 - hoursSinceLastEmail);
       return res.status(400).json({
         success: false,
-        message: `Please wait ${hoursRemaining} more hour${hoursRemaining !== 1 ? 's' : ''} before sending a reminder (72-hour minimum between emails)`
+        message: `Please wait ${hoursRemaining} more hour${hoursRemaining !== 1 ? 's' : ''} before sending another reminder (72-hour minimum between emails)`
       });
     }
 
@@ -2691,6 +2694,15 @@ exports.sendBetaReminderEmail = async (req, res) => {
     // Send the reminder email
     await emailService.sendBetaReminderEmail(betaRequest);
 
+    // Update the beta request record with reminder info
+    betaRequest.lastReminderEmailSentAt = new Date();
+    betaRequest.reminderEmailCount = (betaRequest.reminderEmailCount || 0) + 1;
+    betaRequest.reminderEmailHistory.push({
+      sentAt: new Date(),
+      sentBy: req.user.email || req.user.adminId
+    });
+    await betaRequest.save();
+
     // Log the action
     await logAuditEvent(
       AuditEvents.ADMIN_SENT_BETA_REMINDER,
@@ -2698,7 +2710,8 @@ exports.sendBetaReminderEmail = async (req, res) => {
       {
         betaRequestId: betaRequest._id,
         recipientEmail: betaRequest.email,
-        recipientName: `${betaRequest.firstName} ${betaRequest.lastName}`
+        recipientName: `${betaRequest.firstName} ${betaRequest.lastName}`,
+        reminderCount: betaRequest.reminderEmailCount
       },
       req
     );
