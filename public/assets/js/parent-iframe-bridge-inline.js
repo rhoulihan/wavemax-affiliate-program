@@ -847,33 +847,65 @@
         
         console.log('[Parent-Iframe Bridge] Hidden', hiddenCount, 'elements');
         
-        // Inject a style tag to ensure everything stays hidden
-        const hideStyle = document.createElement('style');
-        hideStyle.id = 'operator-hide-chrome-styles';
-        hideStyle.innerHTML = `
-            [data-operator-hidden="true"] {
-                display: none !important;
-            }
-            [data-permanently-hidden="true"] {
-                display: none !important;
-            }
-            body.operator-mode > *:not(script):not(style):not(:has(#wavemax-iframe)) {
-                display: none !important;
-            }
-            body.operator-mode .wrapper,
-            body.operator-mode .navbar,
-            body.operator-mode .topbar,
-            body.operator-mode .middlebar,
-            body.operator-mode .footer,
-            body.operator-mode .page-header,
-            body.operator-mode nav,
-            body.operator-mode header,
-            body.operator-mode footer {
-                display: none !important;
-            }
-        `;
-        document.head.appendChild(hideStyle);
+        // Inject a style tag to ensure everything stays hidden (only if not already present)
+        if (!document.getElementById('operator-hide-chrome-styles')) {
+            const hideStyle = document.createElement('style');
+            hideStyle.id = 'operator-hide-chrome-styles';
+            hideStyle.innerHTML = `
+                [data-operator-hidden="true"] {
+                    display: none !important;
+                }
+                [data-permanently-hidden="true"] {
+                    display: none !important;
+                }
+                body.operator-mode > *:not(script):not(style):not(:has(#wavemax-iframe)) {
+                    display: none !important;
+                }
+                body.operator-mode .wrapper,
+                body.operator-mode .navbar,
+                body.operator-mode .topbar,
+                body.operator-mode .middlebar,
+                body.operator-mode .footer,
+                body.operator-mode .page-header,
+                body.operator-mode nav,
+                body.operator-mode header,
+                body.operator-mode footer {
+                    display: none !important;
+                }
+                /* CRITICAL FIX: Allow scrolling when chrome is hidden */
+                html.has-operator-mode,
+                body.operator-mode {
+                    overflow-y: auto !important;
+                    overflow-x: hidden !important;
+                    height: auto !important;
+                    min-height: 100vh !important;
+                    position: relative !important;
+                }
+                
+                /* Ensure HTML element also allows scrolling */
+                html:has(body.operator-mode) {
+                    overflow-y: auto !important;
+                    overflow-x: hidden !important;
+                    height: auto !important;
+                }
+                
+                /* Ensure iframe container can grow */
+                body.operator-mode #wavemax-iframe {
+                    min-height: 100vh !important;
+                    height: auto !important;
+                    overflow: visible !important;
+                }
+                
+                /* Ensure content wrapper allows scrolling */
+                body.operator-mode .content-wrapper {
+                    overflow: visible !important;
+                    height: auto !important;
+                }
+            `;
+            document.head.appendChild(hideStyle);
+        }
         document.body.classList.add('operator-mode');
+        document.documentElement.classList.add('has-operator-mode');
 
         // Adjust iframe container to full viewport
         if (iframe) {
@@ -903,13 +935,15 @@
                 currentElement = currentElement.parentElement;
             }
             
-            // Make iframe full viewport
+            // Make iframe full viewport but allow it to grow with content
+            iframe.style.height = 'auto';  // Let height be auto so content determines it
             iframe.style.minHeight = '100vh';
             iframe.style.width = '100%';
             iframe.style.maxWidth = '100%';
             iframe.style.margin = '0';
             iframe.style.padding = '0';
             iframe.style.border = 'none';
+            iframe.style.display = 'block';
         }
         
         // Also set body to remove any padding/margin
@@ -921,12 +955,29 @@
             marginTop: document.body.style.marginTop || '',
             marginBottom: document.body.style.marginBottom || '',
             marginLeft: document.body.style.marginLeft || '',
-            marginRight: document.body.style.marginRight || ''
+            marginRight: document.body.style.marginRight || '',
+            overflow: document.body.style.overflow || '',
+            overflowY: document.body.style.overflowY || '',
+            overflowX: document.body.style.overflowX || '',
+            height: document.body.style.height || '',
+            minHeight: document.body.style.minHeight || ''
         }));
         
         document.body.style.padding = '0';
         document.body.style.margin = '0';
-        document.body.style.overflow = 'hidden'; // Prevent scrolling on parent
+        // CRITICAL: Allow vertical scrolling while hiding horizontal overflow
+        document.body.style.setProperty('overflow-y', 'visible', 'important');  // Use visible to allow natural flow
+        document.body.style.setProperty('overflow-x', 'hidden', 'important');
+        document.body.style.setProperty('height', 'auto', 'important');
+        document.body.style.setProperty('min-height', '100vh', 'important');
+        
+        // Also ensure HTML element allows scrolling
+        document.documentElement.style.setProperty('overflow-y', 'auto', 'important');
+        document.documentElement.style.setProperty('overflow-x', 'hidden', 'important');
+        document.documentElement.style.setProperty('height', 'auto', 'important');
+        
+        console.log('[Parent-Iframe Bridge] Body overflow-y after setting:', window.getComputedStyle(document.body).overflowY);
+        console.log('[Parent-Iframe Bridge] HTML overflow-y after setting:', window.getComputedStyle(document.documentElement).overflowY);
 
         chromeHidden = true;
 
@@ -982,8 +1033,14 @@
         
         console.log('[Parent-Iframe Bridge] Restored', restoredCount, 'elements, skipped', skippedCount, 'permanently hidden');
         
-        // Remove the operator mode class and style tag
+        // Remove the operator mode classes and style tag
         document.body.classList.remove('operator-mode');
+        document.documentElement.classList.remove('has-operator-mode');
+        
+        // Restore HTML element styles
+        document.documentElement.style.overflowY = '';
+        document.documentElement.style.height = '';
+        
         const hideStyle = document.getElementById('operator-hide-chrome-styles');
         if (hideStyle) {
             hideStyle.remove();
@@ -1032,13 +1089,26 @@
                 document.body.style.marginBottom = styles.marginBottom;
                 document.body.style.marginLeft = styles.marginLeft;
                 document.body.style.marginRight = styles.marginRight;
+                // Restore overflow settings
+                document.body.style.overflow = styles.overflow || '';
+                document.body.style.overflowY = styles.overflowY || '';
+                document.body.style.overflowX = styles.overflowX || '';
+                document.body.style.height = styles.height || '';
+                document.body.style.minHeight = styles.minHeight || '';
                 document.body.removeAttribute('data-operator-original-body-style');
             } catch (e) {
                 console.error('[Parent-Iframe Bridge] Error restoring body styles:', e);
+                // Fallback to defaults
+                document.body.style.overflow = '';
+                document.body.style.height = '';
+                document.body.style.minHeight = '';
             }
+        } else {
+            // Fallback if no original style stored
+            document.body.style.overflow = '';
+            document.body.style.height = '';
+            document.body.style.minHeight = '';
         }
-        
-        document.body.style.overflow = ''; // Restore scrolling
 
         chromeHidden = false;
 
@@ -1056,7 +1126,15 @@
     function resizeIframe(height) {
         if (!iframe) return;
         
-        // Don't add padding here - the iframe already includes padding
+        // CRITICAL: When chrome is hidden on mobile/tablet, DON'T set any height
+        // Let the content flow naturally for scrolling to work
+        if (chromeHidden && (isMobile || isTablet)) {
+            console.log('[Parent-Iframe Bridge] Chrome hidden on mobile/tablet - NOT setting iframe height to allow natural scrolling');
+            // Don't set height at all - let it be auto as set in hideChrome()
+            return;
+        }
+        
+        // Normal desktop mode or chrome visible - set specific height
         const newHeight = parseInt(height);
         
         // Only update if height actually changed (with 5px tolerance)
@@ -1066,11 +1144,6 @@
             iframe.style.height = newHeight + 'px';
         } else {
             console.log('[Parent-Iframe Bridge] Ignoring resize - height unchanged');
-        }
-        
-        // If in mobile mode with hidden chrome, ensure minimum viewport height
-        if (chromeHidden && (isMobile || isTablet)) {
-            iframe.style.minHeight = '100vh';
         }
     }
 
