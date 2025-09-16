@@ -3155,7 +3155,7 @@ exports.sendBetaReminderEmail = async (betaRequest) => {
             The WaveMAX Team</p>
             
             <p style="font-size: 14px; color: #6b7280; margin-top: 20px;">
-              P.S. - Remember, there's absolutely no financial risk. You only pay for the laundry processing after you've collected payment from your customers. It's that simple!
+              P.S. - Remember, there's absolutely no financial risk. WaveMAX provides everything you need to be successful.
             </p>
           </div>
           <div class="footer">
