@@ -2635,7 +2635,8 @@ exports.checkAffiliateExists = async (req, res) => {
     
     res.json({
       success: true,
-      exists: !!affiliate
+      exists: !!affiliate,
+      registeredAt: affiliate?.createdAt || null
     });
   } catch (error) {
     console.error('Error checking affiliate existence:', error);
