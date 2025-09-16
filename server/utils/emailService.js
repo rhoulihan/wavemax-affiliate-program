@@ -3043,124 +3043,69 @@ exports.sendBetaReminderEmail = async (betaRequest) => {
           .content { background: white; padding: 30px; border: 1px solid #e5e7eb; border-radius: 0 0 10px 10px; }
           .button { display: inline-block; padding: 14px 35px; background: #3b82f6; color: white; text-decoration: none; border-radius: 5px; margin: 20px 0; font-weight: bold; }
           .highlight { background: #f0f9ff; border-left: 4px solid #3b82f6; padding: 15px; margin: 20px 0; }
-          .benefit-box { background: #fef3c7; border: 1px solid #fbbf24; border-radius: 8px; padding: 20px; margin: 20px 0; }
+          .benefit-box { background: #fef3c7; border: 1px solid #fbbf24; border-radius: 8px; padding: 15px; margin: 20px 0; }
           .check-mark { color: #10b981; font-weight: bold; }
-          .footer { text-align: center; color: #6b7280; font-size: 12px; margin-top: 30px; padding-top: 20px; border-top: 1px solid #e5e7eb; }
+          .calc-box { background: #e8f5e9; border: 2px solid #4caf50; border-radius: 8px; padding: 15px; margin: 20px 0; }
+          .footer { text-align: center; color: #6b7280; font-size: 12px; margin-top: 20px; padding-top: 15px; border-top: 1px solid #e5e7eb; }
         </style>
       </head>
       <body>
         <div class="container">
           <div class="header">
             <img src="https://www.wavemaxlaundry.com/assets/WaveMax/images/logo-wavemax.png" alt="WaveMAX Laundry" class="logo">
-            <h1>Your Business Opportunity is Still Waiting!</h1>
+            <h1>Your Business Opportunity Awaits!</h1>
           </div>
           <div class="content">
             <p>Hi ${betaRequest.firstName},</p>
             
-            <p>We noticed you haven't completed your WaveMAX Affiliate registration yet. Don't let this incredible opportunity pass you by!</p>
+            <p>Don't let this incredible opportunity pass you by!</p>
             
             <div class="benefit-box">
-              <h3 style="color: #dc2626; margin-top: 0;">🚀 No Barriers to Entry!</h3>
-              <p style="margin: 10px 0;"><span class="check-mark">✓</span> <strong>NO upfront costs</strong></p>
-              <p style="margin: 10px 0;"><span class="check-mark">✓</span> <strong>NO subscription fees</strong></p>
-              <p style="margin: 10px 0;"><span class="check-mark">✓</span> <strong>NO premium charges</strong></p>
-              <p style="margin-bottom: 0;">Just pure opportunity to build YOUR business!</p>
+              <strong>🚀 Start Your Business Today - Zero Barriers!</strong><br>
+              ✓ NO upfront costs | ✓ NO subscription fees | ✓ NO premium charges
             </div>
             
-            <h3>Build a REAL Business, Not Just a Side Gig</h3>
-            <p>Unlike driving for Uber or Lyft where you're just another contractor, as a WaveMAX Affiliate you're building YOUR own business. The fees that would normally go to gig economy platforms go directly to YOU!</p>
+            <p><strong>Build YOUR Business:</strong> Unlike gig economy apps, the fees go directly to YOU!</p>
             
-            <div class="highlight">
-              <h3>Market to Multiple Revenue Streams:</h3>
-              <ul style="margin: 10px 0;">
-                <li><strong>Hotels & Hospitality</strong> - Become their go-to laundry service</li>
-                <li><strong>Apartment Managers</strong> - Service entire communities</li>
-                <li><strong>Senior Service Centers</strong> - Help those who need it most</li>
-                <li><strong>Private Individuals</strong> - Build your personal client base</li>
-              </ul>
+            <div class="highlight" style="padding: 10px;">
+              <strong>Your Markets:</strong> Hotels • Apartments • Senior Centers • Individuals
             </div>
             
-            <p><strong>The income opportunity is literally as large as you can make it!</strong> As a WaveMAX Affiliate you could earn as much as $5K per month or even more. The more customers you find, the more commissions and delivery fees you will earn. This is a real opportunity to build sustainable, recurring income.</p>
-            
-            <div style="background: #e8f5e9; border: 2px solid #4caf50; border-radius: 8px; padding: 20px; margin: 20px 0;">
-              <h3 style="color: #2e7d32; margin-top: 0;">📊 Income Calculator: Path to $5,000/Month</h3>
-              <p style="font-weight: bold; color: #1b5e20;">Here's how achievable $5K per month really is:</p>
-              
-              <table style="width: 100%; background: white; border-collapse: collapse; border-radius: 4px; overflow: hidden;">
-                <tr style="background: #4caf50; color: white;">
-                  <th style="padding: 10px; text-align: left;">Weekly Service Details</th>
-                  <th style="padding: 10px; text-align: right;">Per Customer</th>
-                </tr>
-                <tr>
-                  <td style="padding: 10px; border-bottom: 1px solid #e0e0e0;">Average order (30 lbs @ $1.25/lb)</td>
-                  <td style="padding: 10px; border-bottom: 1px solid #e0e0e0; text-align: right;">$37.50</td>
-                </tr>
-                <tr>
-                  <td style="padding: 10px; border-bottom: 1px solid #e0e0e0;">Your 10% commission</td>
-                  <td style="padding: 10px; border-bottom: 1px solid #e0e0e0; text-align: right; color: #4caf50; font-weight: bold;">$3.75</td>
-                </tr>
-                <tr>
-                  <td style="padding: 10px; border-bottom: 1px solid #e0e0e0;">Your delivery fee (100% yours!)</td>
-                  <td style="padding: 10px; border-bottom: 1px solid #e0e0e0; text-align: right; color: #4caf50; font-weight: bold;">$20.00</td>
-                </tr>
-                <tr style="background: #f5f5f5;">
-                  <td style="padding: 10px; font-weight: bold;">Weekly earnings per customer</td>
-                  <td style="padding: 10px; text-align: right; font-weight: bold; color: #2e7d32;">$23.75</td>
-                </tr>
-              </table>
-              
-              <table style="width: 100%; background: white; border-collapse: collapse; border-radius: 4px; overflow: hidden; margin-top: 15px;">
-                <tr style="background: #ff9800; color: white;">
-                  <th colspan="2" style="padding: 10px; text-align: center;">Monthly Earnings Breakdown</th>
-                </tr>
-                <tr>
-                  <td style="padding: 10px; border-bottom: 1px solid #e0e0e0;">Per customer per month (4.3 weeks)</td>
-                  <td style="padding: 10px; border-bottom: 1px solid #e0e0e0; text-align: right; font-weight: bold;">$102.13</td>
-                </tr>
-                <tr style="background: #fff3e0;">
-                  <td style="padding: 10px; font-weight: bold; color: #e65100;">Customers needed for $5,000/month:</td>
-                  <td style="padding: 10px; text-align: right; font-weight: bold; font-size: 1.2em; color: #e65100;">49 customers</td>
-                </tr>
-              </table>
-              
-              <p style="margin-top: 15px; padding: 10px; background: #fffde7; border-left: 4px solid #ffc107; margin-bottom: 0;">
-                <strong>💡 Think about it:</strong> Just 49 weekly customers = $5,000/month<br>
-                • That's less than 2 new customers per business day for a month<br>
-                • One apartment complex could have 20+ customers<br>
-                • One senior center could provide 15+ customers<br>
-                • The earning potential is unlimited - 100 customers = $10,000+/month!
-              </p>
+            <div class="calc-box">
+              <strong style="color: #2e7d32;">📊 Your Path to $5,000/Month:</strong><br><br>
+              <strong>Per Customer Weekly:</strong><br>
+              • 30 lbs @ $1.25/lb = $37.50<br>
+              • Your commission (10%) = $3.75<br>
+              • Your delivery fee = $20.00<br>
+              <strong style="color: #2e7d32;">= $23.75 weekly per customer</strong><br><br>
+              <strong style="color: #e65100;">Just 49 weekly customers = $5,000/month!</strong><br>
+              <span style="font-size: 0.9em;">• One apartment complex: 20+ customers<br>
+              • One senior center: 15+ customers</span>
             </div>
             
-            <h3>Why WaveMAX?</h3>
-            <ul>
-              <li>Professional laundry processing handled for you</li>
-              <li>Real-time tracking and customer management tools</li>
-              <li>10% commission on every order</li>
-              <li>Set your own delivery fees (keep 100%!)</li>
-              <li>Full training and support provided</li>
-            </ul>
+            <strong>WaveMAX Provides:</strong>
+            • Professional laundry processing<br>
+            • Real-time tracking tools<br>
+            • 10% commission + 100% of delivery fees<br>
+            • Full training and support<br><br>
             
             <center>
-              <a href="${registrationUrl}" class="button">Complete Your Registration Now →</a>
+              <a href="${registrationUrl}" class="button">Complete Registration Now →</a>
             </center>
             
-            <p style="text-align: center; color: #6b7280; font-style: italic;">
-              Don't let someone else claim your territory. Secure your spot today!
+            <p style="text-align: center; color: #6b7280;">
+              <em>Don't let someone else claim your territory!</em>
             </p>
-            
-            <p>Questions? We're here to help! Simply reply to this email or complete your registration and we'll guide you every step of the way.</p>
             
             <p>Best regards,<br>
             The WaveMAX Team</p>
             
-            <p style="font-size: 14px; color: #6b7280; margin-top: 20px;">
-              P.S. - Remember, there's absolutely no financial risk. WaveMAX provides everything you need to be successful.
+            <p style="font-size: 13px; color: #6b7280;">
+              P.S. - No financial risk. WaveMAX provides everything you need to be successful.
             </p>
           </div>
           <div class="footer">
             <p>&copy; ${new Date().getFullYear()} WaveMAX Laundry. All rights reserved.</p>
-            <p>You received this email because you expressed interest in the WaveMAX Affiliate Program.</p>
           </div>
         </div>
       </body>
