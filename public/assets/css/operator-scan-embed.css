@@ -283,6 +283,20 @@ body {
     animation: slideUp 0.3s;
 }
 
+/* Special styling for weight input modal on tablets/kiosks */
+.weight-input-modal-active .modal-content {
+    max-width: 95%;
+    width: 95%;
+    margin: 0;
+    max-height: 45vh;
+    position: fixed;
+    top: 5px;
+    left: 2.5%;
+    right: 2.5%;
+    transform: none;
+    animation: none;
+}
+
 .modal-header {
     background: #1e3a8a;
     color: white;
@@ -383,6 +397,36 @@ body {
 .bag-weight-input input:focus {
     outline: none;
     border-color: #3b82f6;
+}
+
+/* Special layout for weight inputs in modal on tablets */
+.weight-input-modal-active .weight-input-section {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 15px;
+    padding: 15px;
+    background: #f8f9fa;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.weight-input-modal-active .bag-weight-input {
+    margin-bottom: 0;
+}
+
+.weight-input-modal-active .modal-body {
+    padding: 15px;
+}
+
+.weight-input-modal-active .info-grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.weight-input-modal-active .scan-progress-section {
+    margin: 10px 0;
+    padding: 10px;
 }
 
 .action-buttons {
@@ -550,6 +594,27 @@ body {
     
     .scan-prompt h2 {
         font-size: 24px;
+    }
+}
+
+/* Tablet specific styles for weight input modal */
+@media (min-width: 768px) and (max-width: 1024px) {
+    .weight-input-modal-active .modal-content {
+        max-width: 98%;
+        width: 98%;
+        top: 2px;
+        left: 1%;
+        right: 1%;
+        max-height: 48vh;
+    }
+    
+    .weight-input-modal-active .weight-input-section {
+        grid-template-columns: repeat(3, 1fr);
+    }
+    
+    .weight-input-modal-active .bag-weight-input input {
+        font-size: 18px;
+        padding: 12px;
     }
 }
 

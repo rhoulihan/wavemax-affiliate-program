@@ -188,7 +188,7 @@
             
             if (deliveryFee === undefined && orderData.affiliate) {
                 // Calculate based on affiliate settings
-                const minimumFee = orderData.affiliate.minimumDeliveryFee || 25;
+                const minimumFee = orderData.affiliate.minimumDeliveryFee || 20;
                 const perBagFee = orderData.affiliate.perBagDeliveryFee || 10;
                 const numberOfBags = orderData.numberOfBags || 1;
                 

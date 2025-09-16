@@ -693,15 +693,38 @@
         }
       }
 
-      // Hide account setup section immediately for OAuth users
+      // Hide account setup section and OAuth panel for OAuth users
       const accountSetupSection = document.getElementById('accountSetupSection');
+      // socialAuthSection already declared above, no need to redeclare
+      
       if (accountSetupSection) {
-        accountSetupSection.classList.add('hidden');
+        accountSetupSection.classList.add('form-section-hidden');
         console.log('✅ Hidden account setup section for OAuth user');
+      }
+      
+      // Hide OAuth panel after successful OAuth
+      if (socialAuthSection) {
+        socialAuthSection.classList.add('form-section-hidden');
+        console.log('✅ Hidden OAuth panel after OAuth success');
+      }
+      
+      // Show personal and business info sections
+      const personalInfoSection = document.getElementById('personalInfoSection');
+      const businessInfoSection = document.getElementById('businessInfoSection');
+      
+      if (personalInfoSection) {
+        personalInfoSection.classList.remove('form-section-hidden');
+        console.log('✅ Showing personal info section for OAuth user');
+      }
+      
+      if (businessInfoSection) {
+        businessInfoSection.classList.remove('form-section-hidden');
+        console.log('✅ Showing business info section for OAuth user');
       }
 
       // Note: Account setup section will remain hidden for OAuth users
       window.isOAuthUser = true;
+      window.accountSetupCompleted = true;
 
       // Remove required attributes from username/password fields for OAuth users
       const usernameField = document.getElementById('username');
@@ -1149,6 +1172,17 @@
           console.warn('[Form Submit] Already submitting, ignoring duplicate submission');
           return;
         }
+        
+        // Check if account setup was completed (unless OAuth user)
+        if (!window.isOAuthUser && !window.accountSetupCompleted) {
+          window.ErrorHandler.showError('Please complete the account setup first');
+          const accountSetupSection = document.getElementById('accountSetupSection');
+          if (accountSetupSection) {
+            accountSetupSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }
+          return;
+        }
+        
         isSubmitting = true;
 
         // Show spinner on entire page container
@@ -1381,6 +1415,27 @@
 
             try {
               const errorData = JSON.parse(errorText);
+              
+              // Check for beta restriction
+              if (errorData.isBetaRestriction) {
+                // Hide spinner
+                if (formSpinner) {
+                  formSpinner.hide();
+                  formSpinner = null;
+                }
+                
+                // Show beta restriction message
+                if (window.ErrorHandler && window.ErrorHandler.showError) {
+                  window.ErrorHandler.showError(errorData.message || 'We are currently in closed beta. Please check back in a few days.');
+                } else {
+                  alert(errorData.message || 'We are currently in closed beta. Please check back in a few days.');
+                }
+                
+                // Clear the form to prevent resubmission
+                form.reset();
+                return; // Exit early, don't continue with normal error handling
+              }
+              
               if (errorData.errors && Array.isArray(errorData.errors)) {
                 console.error('Validation errors:');
                 errorData.errors.forEach(err => {
@@ -1693,7 +1748,7 @@
 
     // Delivery fee calculator update
     function updateFeeCalculator() {
-      const minimumFee = parseFloat(document.getElementById('minimumDeliveryFee')?.value) || 25;
+      const minimumFee = parseFloat(document.getElementById('minimumDeliveryFee')?.value) || 20;
       const perBagFee = parseFloat(document.getElementById('perBagDeliveryFee')?.value) || 10;
 
       // Constants for commission calculation
@@ -2237,6 +2292,45 @@
     // Set up account setup next button
     function setupAccountSetupNavigation() {
       const accountSetupNextButton = document.getElementById('accountSetupNextButton');
+      const personalInfoBackButton = document.getElementById('personalInfoBackButton');
+      
+      // Handle back button click
+      if (personalInfoBackButton) {
+        personalInfoBackButton.addEventListener('click', function() {
+          console.log('[Navigation] Back to account setup clicked');
+          
+          // Show account setup and OAuth panel
+          const accountSetupSection = document.getElementById('accountSetupSection');
+          const socialAuthSection = document.getElementById('socialAuthSection');
+          
+          if (accountSetupSection) {
+            accountSetupSection.classList.remove('form-section-hidden');
+          }
+          
+          if (socialAuthSection && !window.isOAuthUser) {
+            socialAuthSection.classList.remove('form-section-hidden');
+          }
+          
+          // Hide personal and business info sections
+          const personalInfoSection = document.getElementById('personalInfoSection');
+          const businessInfoSection = document.getElementById('businessInfoSection');
+          
+          if (personalInfoSection) {
+            personalInfoSection.classList.add('form-section-hidden');
+          }
+          
+          if (businessInfoSection) {
+            businessInfoSection.classList.add('form-section-hidden');
+          }
+          
+          // Reset the flag
+          window.accountSetupCompleted = false;
+          
+          // Scroll to top
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+      }
+      
       if (accountSetupNextButton) {
         accountSetupNextButton.addEventListener('click', function() {
           console.log('[Navigation] Account setup next button clicked');
@@ -2289,22 +2383,43 @@
             return;
           }
           
-          // All validations passed - hide account setup section
+          // All validations passed - hide account setup section and OAuth panel
           const accountSetupSection = document.getElementById('accountSetupSection');
+          const socialAuthSection = document.getElementById('socialAuthSection');
+          
           if (accountSetupSection) {
-            accountSetupSection.style.display = 'none';
+            accountSetupSection.classList.add('form-section-hidden');
             console.log('✅ Hidden account setup section after completion');
-            
-            // Mark that user has completed account setup
-            window.accountSetupCompleted = true;
-            
-            // Scroll to personal info section
-            const personalInfoSection = document.getElementById('personalInfoSection');
-            if (personalInfoSection) {
-              setTimeout(() => {
-                personalInfoSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-              }, 100);
-            }
+          }
+          
+          // Hide OAuth panel
+          if (socialAuthSection) {
+            socialAuthSection.classList.add('form-section-hidden');
+            console.log('✅ Hidden OAuth panel after account setup');
+          }
+          
+          // Show personal and business info sections
+          const personalInfoSection = document.getElementById('personalInfoSection');
+          const businessInfoSection = document.getElementById('businessInfoSection');
+          
+          if (personalInfoSection) {
+            personalInfoSection.classList.remove('form-section-hidden');
+            console.log('✅ Showing personal info section');
+          }
+          
+          if (businessInfoSection) {
+            businessInfoSection.classList.remove('form-section-hidden');
+            console.log('✅ Showing business info section');
+          }
+          
+          // Mark that user has completed account setup
+          window.accountSetupCompleted = true;
+          
+          // Scroll to personal info section
+          if (personalInfoSection) {
+            setTimeout(() => {
+              personalInfoSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 100);
           }
         });
       }

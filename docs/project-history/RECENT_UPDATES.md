@@ -1,5 +1,45 @@
 # Recent Major Updates
 
+## Beta Program & Registration Enhancements (January 2025)
+
+### Beta Program System
+- **Limited Beta Launch**: Implemented invite-only beta program for affiliate registrations
+  - Beta request modal with email/name collection
+  - Admin dashboard section for managing beta requests
+  - Manual welcome email sending from admin dashboard
+  - Registration validation checks for beta-approved emails
+  
+### Registration Form Improvements
+- **Two-Step Registration Process**: Progressive disclosure design
+  - Step 1: OAuth authentication or username/password creation
+  - Step 2: Personal and business information (shown after Step 1)
+  - Improved user experience with reduced cognitive load
+  - Back button navigation between steps
+  
+### Payment System Updates
+- **Customer Login Links**: Added "Login to pay" buttons in payment reminder emails
+  - Direct link to customer login with affiliate ID preservation
+  - Improved payment collection flow
+  
+### Mobile & Tablet Optimizations
+- **Operator Scan Modal Redesign**: Optimized for tablet kiosks
+  - Wide modal layout (90-98% width) positioned at screen top
+  - Grid layout for weight inputs to maximize horizontal space
+  - Prevents on-screen keyboard from covering input fields
+  
+- **Mobile Chrome Auto-Hide**: Automatic parent page element hiding
+  - Detects mobile/tablet viewport on initial page load
+  - Automatically hides header, footer, and other chrome elements
+  - Fixes issue where chrome was visible on narrow window initial load
+
+### Security & Performance
+- **CSP Enhancements**: Added cdn.jsdelivr.net to connect-src for Bootstrap source maps
+- **Rate Limiting**: Improved collection management with proper MongoDB collection names
+
+### Configuration Updates
+- **Default Delivery Fee**: Changed from $25 to $20 minimum
+- **W9 Form Messaging**: Updated to mention DocuSign process for earnings over $600
+
 ## Location-Based Service Area Restrictions (January 2025)
 - **Service Area Configuration**: Implemented configurable service radius restrictions
   - Default configuration: 50-mile radius from Austin, TX
