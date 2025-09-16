@@ -3103,7 +3103,25 @@
       const data = await response.json();
       
       if (response.ok && data.success) {
-        renderBetaRequests(data.betaRequests);
+        // Check affiliate status for each request
+        const requestsWithStatus = await Promise.all(data.betaRequests.map(async (request) => {
+          try {
+            const affiliateResponse = await adminFetch(`/api/v1/administrators/check-affiliate-exists?email=${encodeURIComponent(request.email)}`);
+            const affiliateData = await affiliateResponse.json();
+            return {
+              ...request,
+              hasAffiliate: affiliateData.exists || false
+            };
+          } catch (error) {
+            console.error(`Error checking affiliate for ${request.email}:`, error);
+            return {
+              ...request,
+              hasAffiliate: false
+            };
+          }
+        }));
+        
+        renderBetaRequests(requestsWithStatus);
       } else {
         document.getElementById('betaRequestsList').innerHTML = `
           <div class="p-20 text-center text-muted">
@@ -3144,7 +3162,8 @@
               <th>Phone</th>
               <th>Location</th>
               <th>Business</th>
-              <th>Status</th>
+              <th>Welcome Status</th>
+              <th>Affiliate Status</th>
               <th>Actions</th>
             </tr>
           </thead>
@@ -3163,11 +3182,20 @@
                     : `<span class="badge badge-warning">Pending</span>`}
                 </td>
                 <td>
+                  ${request.hasAffiliate 
+                    ? `<span class="badge badge-success">Registered</span>` 
+                    : `<span class="badge badge-secondary">Not Registered</span>`}
+                </td>
+                <td>
                   ${!request.welcomeEmailSent 
                     ? `<button class="btn btn-sm btn-primary" data-request-id="${request._id}" data-action="send-welcome">
                         Send Welcome
                       </button>` 
-                    : `<span class="text-muted text-sm">Sent ${new Date(request.welcomeEmailSentAt).toLocaleDateString()}</span>`}
+                    : request.hasAffiliate
+                      ? `<span class="text-success text-sm">✓ Complete</span>`
+                      : `<button class="btn btn-sm btn-warning" data-request-id="${request._id}" data-action="send-reminder" title="Send reminder about the opportunity">
+                          Send Reminder
+                        </button>`}
                 </td>
               </tr>
             `).join('')}
@@ -3202,6 +3230,29 @@
       showNotification('Error sending welcome email', 'error');
     }
   }
+  
+  async function sendBetaReminderEmail(requestId) {
+    if (!confirm('Send reminder email about the affiliate opportunity?')) {
+      return;
+    }
+    
+    try {
+      const response = await adminFetch(`/api/v1/administrators/beta-requests/${requestId}/send-reminder`, {
+        method: 'POST'
+      });
+      
+      const data = await response.json();
+      
+      if (response.ok && data.success) {
+        showNotification('Reminder email sent successfully!', 'success');
+      } else {
+        showNotification(data.message || 'Failed to send reminder email', 'error');
+      }
+    } catch (error) {
+      console.error('Error sending reminder email:', error);
+      showNotification('Error sending reminder email', 'error');
+    }
+  }
 
   // Add event delegation for beta request actions
   document.addEventListener('click', function(e) {
@@ -3211,6 +3262,12 @@
       sendBetaWelcomeEmail(requestId);
     }
     
+    // Handle Send Reminder button clicks
+    if (e.target.dataset.action === 'send-reminder') {
+      const requestId = e.target.dataset.requestId;
+      sendBetaReminderEmail(requestId);
+    }
+    
     // Handle Refresh button click
     if (e.target.id === 'refreshBetaRequestsBtn') {
       loadBetaRequests();
@@ -3218,6 +3275,7 @@
   });
 
   window.sendBetaWelcomeEmail = sendBetaWelcomeEmail;
+  window.sendBetaReminderEmail = sendBetaReminderEmail;
 
   // Initialize the dashboard by loading the default tab
   // Check URL for tab parameter first, then localStorage, then default

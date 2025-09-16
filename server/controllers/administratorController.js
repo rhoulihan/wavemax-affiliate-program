@@ -2616,3 +2616,91 @@ exports.sendBetaWelcomeEmail = async (req, res) => {
     });
   }
 };
+
+/**
+ * Check if an affiliate exists for a given email
+ */
+exports.checkAffiliateExists = async (req, res) => {
+  try {
+    const { email } = req.query;
+    
+    if (!email) {
+      return res.status(400).json({
+        success: false,
+        message: 'Email is required'
+      });
+    }
+
+    const affiliate = await Affiliate.findOne({ email: email.toLowerCase() });
+    
+    res.json({
+      success: true,
+      exists: !!affiliate
+    });
+  } catch (error) {
+    console.error('Error checking affiliate existence:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to check affiliate existence'
+    });
+  }
+};
+
+/**
+ * Send reminder email to beta request user who hasn't registered
+ */
+exports.sendBetaReminderEmail = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const betaRequest = await BetaRequest.findById(id);
+    if (!betaRequest) {
+      return res.status(404).json({
+        success: false,
+        message: 'Beta request not found'
+      });
+    }
+
+    if (!betaRequest.welcomeEmailSent) {
+      return res.status(400).json({
+        success: false,
+        message: 'Welcome email must be sent before sending reminders'
+      });
+    }
+
+    // Check if affiliate already exists
+    const affiliate = await Affiliate.findOne({ email: betaRequest.email.toLowerCase() });
+    if (affiliate) {
+      return res.status(400).json({
+        success: false,
+        message: 'User has already registered as an affiliate'
+      });
+    }
+
+    // Send the reminder email
+    await emailService.sendBetaReminderEmail(betaRequest);
+
+    // Log the action
+    await logAuditEvent(
+      AuditEvents.ADMIN_SENT_BETA_REMINDER,
+      req.user,
+      {
+        betaRequestId: betaRequest._id,
+        recipientEmail: betaRequest.email,
+        recipientName: `${betaRequest.firstName} ${betaRequest.lastName}`
+      },
+      req
+    );
+
+    res.json({
+      success: true,
+      message: 'Reminder email sent successfully'
+    });
+  } catch (error) {
+    console.error('Error sending beta reminder email:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to send reminder email'
+    });
+  }
+};
