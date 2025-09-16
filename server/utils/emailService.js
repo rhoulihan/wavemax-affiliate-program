@@ -3080,7 +3080,57 @@ exports.sendBetaReminderEmail = async (betaRequest) => {
               </ul>
             </div>
             
-            <p><strong>The income opportunity is literally as large as you can make it!</strong> Some of our top affiliates are earning $5,000+ per month simply by picking up and delivering laundry. This is a real opportunity to build sustainable, recurring income.</p>
+            <p><strong>The income opportunity is literally as large as you can make it!</strong> As a WaveMAX Affiliate you could earn as much as $5K per month or even more. The more customers you find, the more commissions and delivery fees you will earn. This is a real opportunity to build sustainable, recurring income.</p>
+            
+            <div style="background: #e8f5e9; border: 2px solid #4caf50; border-radius: 8px; padding: 20px; margin: 20px 0;">
+              <h3 style="color: #2e7d32; margin-top: 0;">📊 Income Calculator: Path to $5,000/Month</h3>
+              <p style="font-weight: bold; color: #1b5e20;">Here's how achievable $5K per month really is:</p>
+              
+              <table style="width: 100%; background: white; border-collapse: collapse; border-radius: 4px; overflow: hidden;">
+                <tr style="background: #4caf50; color: white;">
+                  <th style="padding: 10px; text-align: left;">Weekly Service Details</th>
+                  <th style="padding: 10px; text-align: right;">Per Customer</th>
+                </tr>
+                <tr>
+                  <td style="padding: 10px; border-bottom: 1px solid #e0e0e0;">Average order (30 lbs @ $1.25/lb)</td>
+                  <td style="padding: 10px; border-bottom: 1px solid #e0e0e0; text-align: right;">$37.50</td>
+                </tr>
+                <tr>
+                  <td style="padding: 10px; border-bottom: 1px solid #e0e0e0;">Your 10% commission</td>
+                  <td style="padding: 10px; border-bottom: 1px solid #e0e0e0; text-align: right; color: #4caf50; font-weight: bold;">$3.75</td>
+                </tr>
+                <tr>
+                  <td style="padding: 10px; border-bottom: 1px solid #e0e0e0;">Your delivery fee (100% yours!)</td>
+                  <td style="padding: 10px; border-bottom: 1px solid #e0e0e0; text-align: right; color: #4caf50; font-weight: bold;">$20.00</td>
+                </tr>
+                <tr style="background: #f5f5f5;">
+                  <td style="padding: 10px; font-weight: bold;">Weekly earnings per customer</td>
+                  <td style="padding: 10px; text-align: right; font-weight: bold; color: #2e7d32;">$23.75</td>
+                </tr>
+              </table>
+              
+              <table style="width: 100%; background: white; border-collapse: collapse; border-radius: 4px; overflow: hidden; margin-top: 15px;">
+                <tr style="background: #ff9800; color: white;">
+                  <th colspan="2" style="padding: 10px; text-align: center;">Monthly Earnings Breakdown</th>
+                </tr>
+                <tr>
+                  <td style="padding: 10px; border-bottom: 1px solid #e0e0e0;">Per customer per month (4.3 weeks)</td>
+                  <td style="padding: 10px; border-bottom: 1px solid #e0e0e0; text-align: right; font-weight: bold;">$102.13</td>
+                </tr>
+                <tr style="background: #fff3e0;">
+                  <td style="padding: 10px; font-weight: bold; color: #e65100;">Customers needed for $5,000/month:</td>
+                  <td style="padding: 10px; text-align: right; font-weight: bold; font-size: 1.2em; color: #e65100;">49 customers</td>
+                </tr>
+              </table>
+              
+              <p style="margin-top: 15px; padding: 10px; background: #fffde7; border-left: 4px solid #ffc107; margin-bottom: 0;">
+                <strong>💡 Think about it:</strong> Just 49 weekly customers = $5,000/month<br>
+                • That's less than 2 new customers per business day for a month<br>
+                • One apartment complex could have 20+ customers<br>
+                • One senior center could provide 15+ customers<br>
+                • The earning potential is unlimited - 100 customers = $10,000+/month!
+              </p>
+            </div>
             
             <h3>Why WaveMAX?</h3>
             <ul>
