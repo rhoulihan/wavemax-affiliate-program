@@ -1184,7 +1184,7 @@
         
         // Show modal using CSS classes only
         console.log('Setting modal to visible');
-        orderModal.classList.add('active');
+        orderModal.classList.add('weight-input-modal-active', 'active');
         toggleActionBar(false); // Hide action bar when modal opens
         
         // Keep scanner focused if not all bags are scanned

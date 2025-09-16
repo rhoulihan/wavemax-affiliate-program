@@ -71,6 +71,7 @@
       "loginSuccess": "Anmeldung erfolgreich!",
       "logoutSuccess": "Sie wurden erfolgreich abgemeldet.",
       "registrationSuccess": "Registrierung erfolgreich!",
+    "betaRestriction": "Wir befinden uns derzeit in der geschlossenen Beta-Phase. Bitte versuchen Sie es in ein paar Tagen erneut oder kontaktieren Sie uns, wenn Sie glauben, dass Sie Zugang haben sollten.",
       "registrationFailed": "Registrierung fehlgeschlagen. Bitte versuchen Sie es erneut.",
       "passwordResetSuccess": "Passwort erfolgreich zurückgesetzt!",
       "passwordResetFailed": "Passwort-Zurücksetzung fehlgeschlagen. Bitte versuchen Sie es erneut.",
@@ -290,6 +291,7 @@
     },
     "cta": {
       "title": "Bereit, Geld zu verdienen?",
+      "customerTitle": "Bereit für frische, saubere Wäsche?",
       "description": "Treten Sie unserem Partnerprogramm bei und verdienen Sie Provisionen, indem Sie Ihren Kunden Wäscheservice anbieten.",
       "createAccount": "Partnerkonto erstellen",
       "login": "Partner-Login",

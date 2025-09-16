@@ -138,9 +138,17 @@
                     </div>
                 </div>
 
-                <!-- Personal Information -->
-                <div id="personalInfoSection">
-                    <h3 class="text-xl font-bold mb-4" data-i18n="affiliate.register.personalInfo">Personal Information</h3>
+                <!-- Personal Information (Initially Hidden) -->
+                <div id="personalInfoSection" class="form-section-hidden">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-xl font-bold" data-i18n="affiliate.register.personalInfo">Personal Information</h3>
+                        <button type="button" id="personalInfoBackButton" class="text-blue-600 hover:text-blue-800 text-sm flex items-center">
+                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                            </svg>
+                            <span data-i18n="common.buttons.back">Back to Account Setup</span>
+                        </button>
+                    </div>
                     <div class="grid md:grid-cols-2 gap-4">
                         <div>
                             <label for="firstName" class="block text-gray-700 mb-2" data-i18n="affiliate.register.firstName">First Name *</label>
@@ -164,8 +172,8 @@
                     </div>
                 </div>
                 
-                <!-- Business Information -->
-                <div id="businessInfoSection">
+                <!-- Business Information (Initially Hidden) -->
+                <div id="businessInfoSection" class="form-section-hidden">
                     <h3 class="text-xl font-bold mb-4" data-i18n="affiliate.register.businessInfo">Business Information</h3>
                     <div class="grid md:grid-cols-2 gap-4">
                         <div class="md:col-span-2">
@@ -256,8 +264,8 @@
                                             <option value="">Select minimum fee</option>
                                             <option value="10">$10.00</option>
                                             <option value="15">$15.00</option>
-                                            <option value="20">$20.00</option>
-                                            <option value="25" selected>$25.00</option>
+                                            <option value="20" selected>$20.00</option>
+                                            <option value="25">$25.00</option>
                                             <option value="30">$30.00</option>
                                             <option value="35">$35.00</option>
                                             <option value="40">$40.00</option>

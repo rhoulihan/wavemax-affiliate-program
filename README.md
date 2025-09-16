@@ -44,6 +44,10 @@ The WaveMAX Affiliate Program enables individuals to register as affiliates, onb
 - **Enhanced OAuth Integration**: Streamlined registration and login with Google, Facebook, and LinkedIn
 - **Venmo Payment Processing**: Automatic detection and processing of Venmo payments via email scanning
 - **Smart Payment Reminders**: Automated reminder system for post-weigh payment collection
+- **Beta Program System**: Limited beta launch with email-based request system and admin dashboard management
+- **Two-Step Registration**: Progressive disclosure registration form with OAuth/credentials first, then personal details
+- **Tablet Kiosk Optimizations**: Wide modal layouts for bag weight entry optimized for tablet keyboards
+- **Mobile Chrome Auto-Hide**: Automatic hiding of parent page elements on mobile/tablet viewport detection
 
 ## Documentation
 

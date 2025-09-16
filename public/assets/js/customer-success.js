@@ -32,7 +32,7 @@ function initializeSuccessPage() {
             email: customer.email,
             affiliateId: customer.affiliateId,
             affiliateName: customer.affiliate ? customer.affiliate.name : 'WaveMAX Affiliate Partner',
-            minimumDeliveryFee: customer.affiliate ? customer.affiliate.minimumDeliveryFee : '25.00',
+            minimumDeliveryFee: customer.affiliate ? customer.affiliate.minimumDeliveryFee : '20.00',
             perBagDeliveryFee: customer.affiliate ? customer.affiliate.perBagDeliveryFee : '5.00',
             bagsPurchased: customer.bagsPurchased || '1'
           });
