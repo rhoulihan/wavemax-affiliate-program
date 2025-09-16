@@ -3153,6 +3153,37 @@
       return;
     }
     
+    // Helper function to check if 72 hours have passed since a date
+    function canSendReminder(sentDate) {
+      if (!sentDate) return false;
+      const sentTime = new Date(sentDate).getTime();
+      const currentTime = new Date().getTime();
+      const hoursPassed = (currentTime - sentTime) / (1000 * 60 * 60);
+      return hoursPassed >= 72;
+    }
+    
+    // Helper function to get hours until reminder can be sent
+    function getHoursUntilReminder(sentDate) {
+      if (!sentDate) return 0;
+      const sentTime = new Date(sentDate).getTime();
+      const currentTime = new Date().getTime();
+      const hoursPassed = (currentTime - sentTime) / (1000 * 60 * 60);
+      const hoursRemaining = 72 - hoursPassed;
+      return Math.max(0, Math.ceil(hoursRemaining));
+    }
+    
+    // Helper function to format time remaining
+    function formatTimeRemaining(hours) {
+      if (hours <= 0) return 'now';
+      if (hours < 24) return `${hours} hour${hours !== 1 ? 's' : ''}`;
+      const days = Math.floor(hours / 24);
+      const remainingHours = hours % 24;
+      if (remainingHours === 0) {
+        return `${days} day${days !== 1 ? 's' : ''}`;
+      }
+      return `${days} day${days !== 1 ? 's' : ''}, ${remainingHours} hour${remainingHours !== 1 ? 's' : ''}`;
+    }
+    
     const html = `
       <div class="table-responsive">
         <table class="table">
@@ -3201,9 +3232,37 @@
                       </button>` 
                     : request.hasAffiliate
                       ? `<span class="text-success text-sm">✓ Complete</span>`
-                      : `<button class="btn btn-sm btn-warning" data-request-id="${request._id}" data-action="send-reminder" title="Send reminder about the opportunity">
-                          Send Reminder
-                        </button>`}
+                      : (() => {
+                          const canSend = canSendReminder(request.welcomeEmailSentAt);
+                          const hoursUntil = getHoursUntilReminder(request.welcomeEmailSentAt);
+                          const formattedTime = formatTimeRemaining(hoursUntil);
+                          const tooltipText = canSend 
+                            ? "Send reminder about the opportunity" 
+                            : `Reminder can be sent in ${formattedTime}`;
+                          
+                          if (canSend) {
+                            return `<button 
+                              class="btn btn-sm btn-warning" 
+                              data-request-id="${request._id}" 
+                              data-action="send-reminder" 
+                              title="${tooltipText}">
+                                Send Reminder
+                              </button>`;
+                          } else {
+                            return `<div>
+                              <button 
+                                class="btn btn-sm btn-secondary" 
+                                data-request-id="${request._id}" 
+                                data-action="send-reminder" 
+                                title="${tooltipText}"
+                                disabled>
+                                  Send Reminder
+                                </button>
+                              <div class="text-muted text-xs mt-1">Available in ${formattedTime}</div>
+                            </div>`;
+                          }
+                        })()
+                  }
                 </td>
               </tr>
             `).join('')}
