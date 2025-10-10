@@ -107,6 +107,9 @@ async function displayCustomerInfo() {
     if (testOrder) {
         document.getElementById('orderId').textContent = testOrder.orderId || testOrder._id;
         document.getElementById('bagCount').textContent = testBags.length;
+
+        // Update stage display
+        updateStageDisplay();
     }
 
     // Update bag cards
@@ -214,8 +217,14 @@ async function createV2TestOrder(numberOfBags = 1) {
         
         // Display the order and bag information
         await displayCustomerInfo();
-        
+
         showStatus(`V2 test order created successfully! Order ID: ${testOrder.orderId || testOrder._id} with ${testBags.length} bag${testBags.length > 1 ? 's' : ''}`, 'success');
+
+        // Enable the advance stage button for new orders
+        const advanceBtn = document.getElementById('advanceOrderStageBtn');
+        if (advanceBtn) {
+            advanceBtn.disabled = false;
+        }
     } catch (error) {
         console.error('Error creating V2 test order:', error);
         showStatus('Error creating V2 test order: ' + error.message, 'danger');
@@ -227,6 +236,163 @@ function showStatus(message, type = 'info') {
     statusDiv.className = `alert alert-${type}`;
     statusDiv.textContent = message;
     statusDiv.classList.remove('d-none');
+}
+
+function updateStageDisplay() {
+    const currentStageEl = document.getElementById('currentStage');
+    const nextStageEl = document.getElementById('nextStage');
+    const advanceBtn = document.getElementById('advanceOrderStageBtn');
+
+    if (!testOrder) {
+        currentStageEl.textContent = 'No Order';
+        currentStageEl.className = 'badge bg-secondary';
+        nextStageEl.textContent = 'N/A';
+        nextStageEl.className = 'badge bg-secondary';
+        advanceBtn.disabled = true;
+        return;
+    }
+
+    // Define stage progression
+    const stageProgression = {
+        'pending': { next: 'processing', action: 'Weigh Bags (Drop-off)' },
+        'processing': { next: 'processed', action: 'Mark as Washed/Dried' },
+        'processed': { next: 'complete', action: 'Customer Pickup' },
+        'complete': { next: null, action: 'Order Complete' }
+    };
+
+    const currentStage = testOrder.status || 'pending';
+    const stageInfo = stageProgression[currentStage];
+
+    // Update current stage display
+    currentStageEl.textContent = currentStage.charAt(0).toUpperCase() + currentStage.slice(1);
+    currentStageEl.className = `badge bg-${
+        currentStage === 'complete' ? 'success' :
+        currentStage === 'processed' ? 'info' :
+        currentStage === 'processing' ? 'warning' : 'secondary'
+    }`;
+
+    // Update next stage display
+    if (stageInfo.next) {
+        nextStageEl.textContent = stageInfo.action;
+        nextStageEl.className = 'badge bg-primary';
+        advanceBtn.disabled = false;
+        advanceBtn.innerHTML = `<i class="fas fa-forward"></i> ${stageInfo.action} (Test Mode)`;
+    } else {
+        nextStageEl.textContent = 'Order Complete';
+        nextStageEl.className = 'badge bg-success';
+        advanceBtn.disabled = true;
+        advanceBtn.innerHTML = '<i class="fas fa-check"></i> Order Complete';
+    }
+}
+
+async function advanceOrderStage() {
+    if (!testOrder) {
+        showStatus('No order available to advance', 'warning');
+        return;
+    }
+
+    const advanceBtn = document.getElementById('advanceOrderStageBtn');
+    advanceBtn.disabled = true;
+
+    try {
+        // Define stage transitions
+        const currentStage = testOrder.status || 'pending';
+        let nextStage = '';
+        let actionData = {};
+
+        switch (currentStage) {
+            case 'pending':
+                // Simulate weighing bags (drop-off)
+                nextStage = 'processing';
+                actionData = {
+                    action: 'weigh',
+                    weights: testBags.map(() => 30), // Use 30 pounds as specified
+                    actualWeight: testBags.length * 30
+                };
+                showStatus('Simulating bag weigh-in at drop-off (30 lbs per bag)...', 'info');
+                break;
+
+            case 'processing':
+                // Simulate marking as processed (after washing/drying)
+                nextStage = 'processed';
+                actionData = {
+                    action: 'process',
+                    processedBags: testBags.map(b => b.bagId)
+                };
+                showStatus('Simulating bags marked as washed and dried...', 'info');
+                break;
+
+            case 'processed':
+                // Simulate customer pickup
+                nextStage = 'complete';
+                actionData = {
+                    action: 'pickup',
+                    pickedUpBags: testBags.map(b => b.bagId)
+                };
+                showStatus('Simulating customer pickup...', 'info');
+                break;
+
+            case 'complete':
+                showStatus('Order is already complete', 'success');
+                advanceBtn.disabled = true;
+                return;
+
+            default:
+                showStatus('Unknown order status', 'danger');
+                advanceBtn.disabled = false;
+                return;
+        }
+
+        // Prepare request headers
+        const headers = {
+            'Content-Type': 'application/json'
+        };
+
+        // Add CSRF token if available
+        if (window.CsrfUtils && window.CsrfUtils.getToken) {
+            headers['X-CSRF-Token'] = window.CsrfUtils.getToken();
+        }
+
+        // Send request to advance the order stage
+        const response = await fetch('/api/v1/test/order/advance-stage', {
+            method: 'POST',
+            headers: headers,
+            body: JSON.stringify({
+                orderId: testOrder._id || testOrder.orderId,
+                currentStage: currentStage,
+                nextStage: nextStage,
+                ...actionData
+            })
+        });
+
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.message || `Failed to advance order to ${nextStage}`);
+        }
+
+        const updatedOrder = await response.json();
+        testOrder = updatedOrder;
+
+        // Update displays
+        await displayCustomerInfo();
+        updateStageDisplay();
+
+        // Check if we can enable Venmo payment button
+        if (testOrder.actualWeight && testOrder.actualWeight > 0) {
+            enableVenmoTestButton();
+        }
+
+        showStatus(`Order advanced to: ${nextStage.toUpperCase()}`, 'success');
+
+    } catch (error) {
+        console.error('Error advancing order stage:', error);
+        showStatus('Error advancing order stage: ' + error.message, 'danger');
+    } finally {
+        // Re-enable button if not complete
+        if (testOrder && testOrder.status !== 'complete') {
+            advanceBtn.disabled = false;
+        }
+    }
 }
 
 async function printAllBagCards() {
@@ -772,6 +938,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('printAllCardsBtn').addEventListener('click', printAllBagCards);
     document.getElementById('testVenmoPaymentBtn').addEventListener('click', openVenmoPaymentModal);
     document.getElementById('sendVenmoEmail').addEventListener('click', sendVenmoTestEmail);
+    document.getElementById('advanceOrderStageBtn').addEventListener('click', advanceOrderStage);
     
     // Set up periodic order status check
     setInterval(checkOrderWeighed, 5000);
