@@ -645,29 +645,66 @@ exports.getCustomersForAdmin = [
       createdBefore: 'createdAt'
     });
 
-    // Get customers with pagination
+    // Get customers with pagination (without populate)
     const [customers, totalCustomers] = await Promise.all([
       Customer.find(query)
         .select('-passwordHash -passwordSalt -encryptedPaymentInfo')
-        .populate('affiliateId', 'businessName')
         .sort(sortBy)
         .skip(skip)
         .limit(limit),
       Customer.countDocuments(query)
     ]);
 
-    // Format customers for response
+    // Get unique affiliate IDs and customer IDs
+    const affiliateIds = [...new Set(customers.map(c => c.affiliateId).filter(Boolean))];
+    const customerIds = customers.map(c => c.customerId);
+
+    // Fetch affiliates
+    const Affiliate = require('../models/Affiliate');
+    const affiliates = await Affiliate.find({ affiliateId: { $in: affiliateIds } })
+      .select('affiliateId businessName');
+
+    // Get order counts for each customer
+    const Order = require('../models/Order');
+    const orderCounts = await Order.aggregate([
+      { $match: { customerId: { $in: customerIds } } },
+      { $group: { _id: '$customerId', count: { $sum: 1 } } }
+    ]);
+
+    // Create lookup maps
+    const affiliateMap = {};
+    affiliates.forEach(aff => {
+      affiliateMap[aff.affiliateId] = aff.businessName;
+    });
+
+    const orderCountMap = {};
+    orderCounts.forEach(oc => {
+      orderCountMap[oc._id] = oc.count;
+    });
+
+    // Format customers for response - include raw fields for frontend
     const formattedCustomers = customers.map(customer => ({
+      _id: customer._id,
       customerId: customer.customerId,
+      firstName: customer.firstName,
+      lastName: customer.lastName,
       fullName: Formatters.fullName(customer.firstName, customer.lastName),
       email: customer.email,
-      phone: Formatters.phone(customer.phone),
-      address: Formatters.address(customer, 'short'),
+      phone: customer.phone,
+      address: customer.address,
+      city: customer.city,
+      state: customer.state,
+      zipCode: customer.zipCode,
+      formattedAddress: Formatters.address(customer, 'short'),
       affiliateId: customer.affiliateId,
-      affiliateName: customer.affiliateId?.businessName || 'N/A',
-      wdfCredits: Formatters.currency(customer.wdfCredits || 0),
+      affiliateName: affiliateMap[customer.affiliateId] || 'N/A',
+      wdfCredits: customer.wdfCredits || 0,
+      formattedWdfCredits: Formatters.currency(customer.wdfCredits || 0),
       registrationDate: Formatters.date(customer.createdAt),
-      lastActive: customer.lastLogin ? Formatters.relativeTime(customer.lastLogin) : 'Never'
+      createdAt: customer.createdAt,
+      lastActive: customer.lastLogin ? Formatters.relativeTime(customer.lastLogin) : 'Never',
+      orderCount: orderCountMap[customer.customerId] || 0,
+      numberOfBags: customer.numberOfBags || 1
     }));
 
     // Calculate pagination

@@ -21,6 +21,15 @@
             <p class="mb-1"><strong>Customer ID:</strong> <span id="customerId">Loading...</span></p>
             <p class="mb-1"><strong>Order ID:</strong> <span id="orderId">No order created</span></p>
             <p class="mb-1"><strong>Bags:</strong> <span id="bagCount">0</span></p>
+            <p class="mb-1 text-muted"><small><strong>Test Credentials:</strong> Username: <code>testuser</code> | Password: <code>TestPass!</code></small></p>
+            <div class="mt-2">
+                <a href="/customer-login-embed.html" class="btn btn-sm btn-outline-primary" target="_blank">
+                    <i class="fas fa-sign-in-alt"></i> Customer Login Page
+                </a>
+                <a href="/embed-app-v2.html?route=/customer-login" class="btn btn-sm btn-outline-secondary ms-2" target="_blank">
+                    <i class="fas fa-sign-in-alt"></i> Customer Login (Embedded)
+                </a>
+            </div>
         </div>
 
         <div class="row mb-4">
@@ -43,6 +52,17 @@
                 <button class="btn btn-warning w-100 mb-2" id="testVenmoPaymentBtn" disabled>
                     <i class="fas fa-dollar-sign"></i> Test Venmo Payment
                 </button>
+            </div>
+        </div>
+        <div class="row mb-4">
+            <div class="col-md-12">
+                <button class="btn btn-info w-100" id="advanceOrderStageBtn" disabled>
+                    <i class="fas fa-forward"></i> Advance Order Stage (Test Mode)
+                </button>
+                <small class="text-muted d-block text-center mt-1">
+                    Current Stage: <span id="currentStage" class="badge bg-secondary">No Order</span>
+                    → Next: <span id="nextStage" class="badge bg-primary">N/A</span>
+                </small>
             </div>
         </div>
         <div class="row">
