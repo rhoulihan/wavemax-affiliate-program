@@ -6,6 +6,16 @@
     return window.i18n && window.i18n.t ? window.i18n.t(key) : fallback;
   }
 
+  // Safe style manipulation helper
+  function setElementDisplay(element, show) {
+    if (!element) return;
+    if (show) {
+      element.classList.remove('d-none');
+    } else {
+      element.classList.add('d-none');
+    }
+  }
+
   // Generate UUID v4
   function generateUUID() {
     return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
@@ -645,13 +655,22 @@
       if (search) params.append('search', search);
       if (affiliateFilter !== 'all') params.append('affiliateId', affiliateFilter);
       if (statusFilter !== 'all') params.append('status', statusFilter);
-      
-      const response = await adminFetch(`/api/v1/customers/admin/list?${params.toString()}`);
+
+      // Only add query string if there are params
+      const queryString = params.toString();
+      const url = queryString ? `/api/v1/customers/admin/list?${queryString}` : '/api/v1/customers/admin/list';
+      const response = await adminFetch(url);
       const data = await response.json();
-      
+
+      console.log('Customers API response:', {
+        ok: response.ok,
+        status: response.status,
+        data: data
+      });
+
       if (response.ok && data.success) {
         renderCustomersList(data.customers);
-        
+
         // Load affiliates for filter if not already loaded
         if (document.getElementById('customerAffiliateFilter').options.length === 1) {
           await loadAffiliatesForFilter();
@@ -1082,18 +1101,18 @@
         
         if (data.count > 0) {
           if (printNewLabelsBtn) {
-            printNewLabelsBtn.style.display = 'inline-flex';
+            printNewLabelsBtn.classList.remove('d-none');
           }
           if (newCustomerBadge) {
             newCustomerBadge.textContent = data.count;
-            newCustomerBadge.style.display = 'inline-block';
+            newCustomerBadge.classList.remove('d-none');
           }
         } else {
           if (printNewLabelsBtn) {
-            printNewLabelsBtn.style.display = 'none';
+            printNewLabelsBtn.classList.add('d-none');
           }
           if (newCustomerBadge) {
-            newCustomerBadge.style.display = 'none';
+            newCustomerBadge.classList.add('d-none');
           }
         }
       }
