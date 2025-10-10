@@ -5,6 +5,8 @@ const Customer = require('../models/Customer');
 const Order = require('../models/Order');
 const { generateQRCode } = require('../utils/qrCodeGenerator');
 const encryptionUtil = require('../utils/encryption');
+const QRCode = require('qrcode');
+const logger = require('../utils/logger');
 
 // Middleware to ensure test routes are only available in development
 const testOnlyMiddleware = (req, res, next) => {
@@ -15,6 +17,46 @@ const testOnlyMiddleware = (req, res, next) => {
 };
 
 router.use(testOnlyMiddleware);
+
+// Helper function to generate payment URLs and QR codes
+async function generatePaymentURLs(order, paymentAmount) {
+  const amount = paymentAmount ? paymentAmount.toFixed(2) : order.v2PaymentAmount.toFixed(2);
+  const orderNote = `WaveMAX Order ${order.orderId}`;
+
+  // Generate payment URLs for each service
+  const links = {
+    venmo: `https://venmo.com/wavemaxatx?txn=pay&amount=${amount}&note=${encodeURIComponent(orderNote)}`,
+    paypal: `https://www.paypal.me/WaveMAXLaundry/${amount}?locale.x=en_US&country.x=US`,
+    cashapp: `https://cash.app/$WaveMAXLaundry/${amount}?note=${encodeURIComponent(orderNote)}`
+  };
+
+  // Use the same URL for QR codes as the button
+  const qrUrls = {
+    venmo: links.venmo,
+    paypal: links.paypal,
+    cashapp: links.cashapp
+  };
+
+  const qrCodes = {};
+  for (const [service, url] of Object.entries(qrUrls)) {
+    try {
+      // Generate QR code as base64 string
+      qrCodes[service] = await QRCode.toDataURL(url, {
+        width: 300,
+        margin: 1,
+        color: {
+          dark: '#000000',
+          light: '#FFFFFF'
+        }
+      });
+    } catch (error) {
+      logger.error(`Failed to generate QR code for ${service}:`, error);
+      qrCodes[service] = null;
+    }
+  }
+
+  return { links, qrCodes };
+}
 
 // Get or create test customer
 router.get('/customer', async (req, res) => {
@@ -348,6 +390,43 @@ router.post('/order/advance-stage', async (req, res) => {
 
                 order.status = 'processing';
                 order.receivedAt = new Date();
+
+                // Save order first to calculate v2PaymentAmount
+                await order.save();
+
+                // V2 Payment Flow: Send payment request email after weighing
+                if (order.isV2Order && order.bagsWeighed === order.numberOfBags) {
+                    const Customer = require('../models/Customer');
+                    const customer = await Customer.findOne({ customerId: order.customerId });
+
+                    if (customer) {
+                        const QRCode = require('qrcode');
+                        const paymentAmount = order.v2PaymentAmount || order.actualTotal ||
+                                            (order.actualWeight * (order.baseRate || 1.25) + (order.addOnTotal || 0));
+
+                        // Generate payment URLs and QR codes
+                        const paymentURLs = await generatePaymentURLs(order, paymentAmount);
+
+                        // Save payment data to order
+                        order.v2PaymentAmount = paymentAmount;
+                        order.v2PaymentLinks = paymentURLs.links;
+                        order.v2PaymentQRCodes = paymentURLs.qrCodes;
+                        order.v2PaymentRequestSentAt = new Date();
+                        await order.save();
+
+                        // Send payment request email
+                        const emailService = require('../utils/emailService');
+                        await emailService.sendV2PaymentRequest({
+                            customer,
+                            order,
+                            paymentAmount: paymentAmount,
+                            paymentLinks: paymentURLs.links,
+                            qrCodes: paymentURLs.qrCodes
+                        });
+
+                        console.log(`V2 Payment request sent for test order ${order.orderId}, amount: $${paymentAmount}`);
+                    }
+                }
                 break;
 
             case 'process':
