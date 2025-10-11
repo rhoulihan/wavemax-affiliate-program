@@ -696,6 +696,7 @@
       "title": "Panel de Cliente",
       "welcome": "¡Bienvenido de vuelta, {{name}}!",
       "schedulePickup": "Programar Recogida",
+      "activeOrder": "Pedido Activo",
       "activeOrders": "Pedidos Activos",
       "orderHistory": "Historial de Pedidos",
       "accountSettings": "Configuración de Cuenta",

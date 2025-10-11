@@ -703,6 +703,7 @@
       "title": "Kunden-Dashboard",
       "welcome": "Willkommen zurück, {{name}}!",
       "schedulePickup": "Abholung planen",
+      "activeOrder": "Aktive Bestellung",
       "activeOrders": "Aktive Bestellungen",
       "orderHistory": "Bestellverlauf",
       "accountSettings": "Kontoeinstellungen",
