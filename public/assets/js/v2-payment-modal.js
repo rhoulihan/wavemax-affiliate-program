@@ -81,13 +81,7 @@ class V2PaymentModal {
               <h5 class="modal-title">Processing Payment</h5>
             </div>
             <div class="modal-body text-center py-5">
-              <div class="swirl-spinner-container">
-                <div class="swirl-spinner">
-                  <div class="swirl-spinner-circle"></div>
-                  <div class="swirl-spinner-circle swirl-spinner-circle-2"></div>
-                  <div class="swirl-spinner-circle swirl-spinner-circle-3"></div>
-                </div>
-              </div>
+              <div id="loadingSpinnerContainer"></div>
               <p class="mt-4">Initializing secure payment form...</p>
             </div>
           </div>
@@ -101,6 +95,16 @@ class V2PaymentModal {
     // Add modal to page
     document.body.insertAdjacentHTML('beforeend', modalHtml);
     this.modal = document.getElementById('v2PaymentModal');
+
+    // Add spinner using SwirlSpinner class
+    if (window.SwirlSpinner) {
+      const spinnerContainer = document.getElementById('loadingSpinnerContainer');
+      const spinner = new window.SwirlSpinner({
+        size: 'default',
+        speed: 'normal'
+      });
+      spinner.show(spinnerContainer);
+    }
   }
   
   /**
@@ -162,13 +166,7 @@ class V2PaymentModal {
               
               <!-- Payment processing view (hidden initially) -->
               <div id="paymentProcessingView" class="d-none text-center">
-                <div class="swirl-spinner-container">
-                  <div class="swirl-spinner">
-                    <div class="swirl-spinner-circle"></div>
-                    <div class="swirl-spinner-circle swirl-spinner-circle-2"></div>
-                    <div class="swirl-spinner-circle swirl-spinner-circle-3"></div>
-                  </div>
-                </div>
+                <div id="processingSpinnerContainer"></div>
                 <h5 class="mt-4">Processing Payment</h5>
                 <p class="text-muted">Please complete the payment in the popup window</p>
                 <p class="text-sm text-secondary">If the popup window doesn't appear, please check your browser's popup blocker settings.</p>
@@ -274,11 +272,23 @@ class V2PaymentModal {
     const processingView = document.getElementById('paymentProcessingView');
     const paymentButtons = document.getElementById('paymentButtons');
     const testCancelButton = document.getElementById('testModeCancelButton');
-    
+
     if (orderSummary) orderSummary.classList.add('d-none');
     if (processingView) processingView.classList.remove('d-none');
     if (paymentButtons) paymentButtons.classList.add('d-none');
-    
+
+    // Add spinner to processing view using SwirlSpinner class
+    if (window.SwirlSpinner) {
+      const processingSpinnerContainer = document.getElementById('processingSpinnerContainer');
+      if (processingSpinnerContainer && !processingSpinnerContainer.querySelector('.swirl-spinner')) {
+        const spinner = new window.SwirlSpinner({
+          size: 'default',
+          speed: 'normal'
+        });
+        spinner.show(processingSpinnerContainer);
+      }
+    }
+
     // Show cancel button if in test mode
     if (this.formConfig?.testModeEnabled && testCancelButton) {
       testCancelButton.classList.remove('d-none');
@@ -327,12 +337,16 @@ class V2PaymentModal {
         </head>
         <body class="payment-redirect">
           <div class="loading">
-            <div class="swirl-spinner-container">
-              <div class="swirl-spinner">
-                <div class="swirl-spinner-circle"></div>
-                <div class="swirl-spinner-circle swirl-spinner-circle-2"></div>
-                <div class="swirl-spinner-circle swirl-spinner-circle-3"></div>
-              </div>
+            <div class="swirl-spinner">
+              <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                <ellipse cx="50" cy="50" rx="48" ry="35" fill="#2563eb" opacity="0.9"/>
+                <ellipse cx="50" cy="50" rx="40" ry="28" fill="#3b82f6"/>
+                <path d="M 35 50 Q 50 35, 65 50 Q 60 60, 50 62 Q 40 60, 35 50 Z" fill="#1e40af" opacity="0.6"/>
+                <circle class="swirl-dot1" cx="30" cy="45" r="4" fill="white"/>
+                <circle class="swirl-dot2" cx="70" cy="45" r="4" fill="white"/>
+                <circle class="swirl-dot3" cx="30" cy="55" r="3" fill="white"/>
+                <circle class="swirl-dot4" cx="70" cy="55" r="3" fill="white"/>
+              </svg>
             </div>
             <p>Redirecting to payment processor...</p>
           </div>
@@ -467,12 +481,16 @@ class V2PaymentModal {
         </head>
         <body class="payment-redirect">
           <div class="loading">
-            <div class="swirl-spinner-container">
-              <div class="swirl-spinner">
-                <div class="swirl-spinner-circle"></div>
-                <div class="swirl-spinner-circle swirl-spinner-circle-2"></div>
-                <div class="swirl-spinner-circle swirl-spinner-circle-3"></div>
-              </div>
+            <div class="swirl-spinner">
+              <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                <ellipse cx="50" cy="50" rx="48" ry="35" fill="#2563eb" opacity="0.9"/>
+                <ellipse cx="50" cy="50" rx="40" ry="28" fill="#3b82f6"/>
+                <path d="M 35 50 Q 50 35, 65 50 Q 60 60, 50 62 Q 40 60, 35 50 Z" fill="#1e40af" opacity="0.6"/>
+                <circle class="swirl-dot1" cx="30" cy="45" r="4" fill="white"/>
+                <circle class="swirl-dot2" cx="70" cy="45" r="4" fill="white"/>
+                <circle class="swirl-dot3" cx="30" cy="55" r="3" fill="white"/>
+                <circle class="swirl-dot4" cx="70" cy="55" r="3" fill="white"/>
+              </svg>
             </div>
             <p>Redirecting to test payment form...</p>
           </div>
