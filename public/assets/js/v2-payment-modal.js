@@ -278,16 +278,25 @@ class V2PaymentModal {
     if (paymentButtons) paymentButtons.classList.add('d-none');
 
     // Add spinner to processing view using SwirlSpinner class
-    if (window.SwirlSpinner) {
-      const processingSpinnerContainer = document.getElementById('processingSpinnerContainer');
-      if (processingSpinnerContainer && !processingSpinnerContainer.querySelector('.swirl-spinner')) {
-        const spinner = new window.SwirlSpinner({
-          size: 'default',
-          speed: 'normal'
-        });
-        spinner.show(processingSpinnerContainer);
+    setTimeout(() => {
+      if (window.SwirlSpinner) {
+        const processingSpinnerContainer = document.getElementById('processingSpinnerContainer');
+        console.log('[V2Payment] Processing spinner container:', processingSpinnerContainer);
+        if (processingSpinnerContainer && !processingSpinnerContainer.querySelector('.swirl-spinner')) {
+          console.log('[V2Payment] Creating SwirlSpinner for processing view');
+          const spinner = new window.SwirlSpinner({
+            size: 'default',
+            speed: 'normal'
+          });
+          spinner.show(processingSpinnerContainer);
+          console.log('[V2Payment] SwirlSpinner shown');
+        } else {
+          console.log('[V2Payment] Spinner already exists or container not found');
+        }
+      } else {
+        console.warn('[V2Payment] SwirlSpinner class not available');
       }
-    }
+    }, 100);
 
     // Show cancel button if in test mode
     if (this.formConfig?.testModeEnabled && testCancelButton) {
