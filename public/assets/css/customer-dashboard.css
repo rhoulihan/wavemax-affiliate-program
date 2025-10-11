@@ -75,3 +75,23 @@ body {
 #deleteDataSection {
     display: none;
 }
+
+/* V2 Payment Modal Styles */
+.modal-backdrop-dark {
+    background-color: rgba(0, 0, 0, 0.5);
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1040;
+}
+
+#v2PaymentModal {
+    z-index: 1050;
+}
+
+/* Ensure swirl spinner is visible in modal */
+#v2PaymentModal .swirl-spinner-container {
+    margin: 0 auto;
+}
