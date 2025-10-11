@@ -117,13 +117,17 @@ body {
 }
 
 /* Ensure swirl spinner is visible in modal */
-#v2PaymentModal .swirl-spinner-container {
+#v2PaymentModal .swirl-spinner-container,
+#v2PaymentModal #loadingSpinnerContainer,
+#v2PaymentModal #processingSpinnerContainer {
     margin: 2rem auto;
     display: flex;
     justify-content: center;
     align-items: center;
+    min-height: 100px;
 }
 
 #v2PaymentModal .swirl-spinner {
     position: relative;
+    display: inline-block;
 }
