@@ -732,6 +732,7 @@
       "title": "Customer Dashboard",
       "welcome": "Welcome back, {{name}}!",
       "schedulePickup": "Schedule Pickup",
+      "activeOrder": "Active Order",
       "activeOrders": "Active Orders",
       "orderHistory": "Order History",
       "accountSettings": "Account Settings",

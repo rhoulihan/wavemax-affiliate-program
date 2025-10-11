@@ -703,6 +703,7 @@
       "title": "Painel do Cliente",
       "welcome": "Bem-vindo de volta, {{name}}!",
       "schedulePickup": "Agendar Coleta",
+      "activeOrder": "Pedido Ativo",
       "activeOrders": "Pedidos Ativos",
       "orderHistory": "Histórico de Pedidos",
       "accountSettings": "Configurações da Conta",
