@@ -101,9 +101,10 @@ class V2PaymentModal {
       const spinnerContainer = document.getElementById('loadingSpinnerContainer');
       const spinner = new window.SwirlSpinner({
         size: 'default',
-        speed: 'normal'
+        speed: 'normal',
+        container: spinnerContainer
       });
-      spinner.show(spinnerContainer);
+      spinner.show();
     }
   }
   
@@ -286,9 +287,10 @@ class V2PaymentModal {
           console.log('[V2Payment] Creating SwirlSpinner for processing view');
           const spinner = new window.SwirlSpinner({
             size: 'default',
-            speed: 'normal'
+            speed: 'normal',
+            container: processingSpinnerContainer
           });
-          spinner.show(processingSpinnerContainer);
+          spinner.show();
           console.log('[V2Payment] SwirlSpinner shown');
         } else {
           console.log('[V2Payment] Spinner already exists or container not found');
@@ -342,21 +344,9 @@ class V2PaymentModal {
         <head>
           <title>Processing Payment...</title>
           <link rel="stylesheet" href="/assets/css/payment-redirect.css">
-          <link rel="stylesheet" href="/assets/css/swirl-spinner.css">
         </head>
         <body class="payment-redirect">
           <div class="loading">
-            <div class="swirl-spinner">
-              <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-                <ellipse cx="50" cy="50" rx="48" ry="35" fill="#2563eb" opacity="0.9"/>
-                <ellipse cx="50" cy="50" rx="40" ry="28" fill="#3b82f6"/>
-                <path d="M 35 50 Q 50 35, 65 50 Q 60 60, 50 62 Q 40 60, 35 50 Z" fill="#1e40af" opacity="0.6"/>
-                <circle class="swirl-dot1" cx="30" cy="45" r="4" fill="white"/>
-                <circle class="swirl-dot2" cx="70" cy="45" r="4" fill="white"/>
-                <circle class="swirl-dot3" cx="30" cy="55" r="3" fill="white"/>
-                <circle class="swirl-dot4" cx="70" cy="55" r="3" fill="white"/>
-              </svg>
-            </div>
             <p>Redirecting to payment processor...</p>
           </div>
           <form id="paygistixForm" action="${this.formConfig.formActionUrl}" method="POST">
@@ -486,21 +476,9 @@ class V2PaymentModal {
         <head>
           <title>Test Payment Form</title>
           <link rel="stylesheet" href="/assets/css/payment-redirect.css">
-          <link rel="stylesheet" href="/assets/css/swirl-spinner.css">
         </head>
         <body class="payment-redirect">
           <div class="loading">
-            <div class="swirl-spinner">
-              <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-                <ellipse cx="50" cy="50" rx="48" ry="35" fill="#2563eb" opacity="0.9"/>
-                <ellipse cx="50" cy="50" rx="40" ry="28" fill="#3b82f6"/>
-                <path d="M 35 50 Q 50 35, 65 50 Q 60 60, 50 62 Q 40 60, 35 50 Z" fill="#1e40af" opacity="0.6"/>
-                <circle class="swirl-dot1" cx="30" cy="45" r="4" fill="white"/>
-                <circle class="swirl-dot2" cx="70" cy="45" r="4" fill="white"/>
-                <circle class="swirl-dot3" cx="30" cy="55" r="3" fill="white"/>
-                <circle class="swirl-dot4" cx="70" cy="55" r="3" fill="white"/>
-              </svg>
-            </div>
             <p>Redirecting to test payment form...</p>
           </div>
           <form id="testPaymentForm" action="/test-payment" method="GET">
