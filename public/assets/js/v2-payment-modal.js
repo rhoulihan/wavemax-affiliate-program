@@ -80,20 +80,24 @@ class V2PaymentModal {
             <div class="modal-header">
               <h5 class="modal-title">Processing Payment</h5>
             </div>
-            <div class="modal-body text-center">
-              <div class="spinner-border text-primary" role="status">
-                <span class="sr-only">Loading...</span>
+            <div class="modal-body text-center py-5">
+              <div class="swirl-spinner-container">
+                <div class="swirl-spinner">
+                  <div class="swirl-spinner-circle"></div>
+                  <div class="swirl-spinner-circle swirl-spinner-circle-2"></div>
+                  <div class="swirl-spinner-circle swirl-spinner-circle-3"></div>
+                </div>
               </div>
-              <p class="mt-3">Initializing secure payment form...</p>
+              <p class="mt-4">Initializing secure payment form...</p>
             </div>
           </div>
         </div>
       </div>
     `;
-    
+
     // Remove existing modal if any
     this.closeModal();
-    
+
     // Add modal to page
     document.body.insertAdjacentHTML('beforeend', modalHtml);
     this.modal = document.getElementById('v2PaymentModal');
@@ -319,10 +323,17 @@ class V2PaymentModal {
         <head>
           <title>Processing Payment...</title>
           <link rel="stylesheet" href="/assets/css/payment-redirect.css">
+          <link rel="stylesheet" href="/assets/css/swirl-spinner.css">
         </head>
         <body class="payment-redirect">
           <div class="loading">
-            <div class="spinner"></div>
+            <div class="swirl-spinner-container">
+              <div class="swirl-spinner">
+                <div class="swirl-spinner-circle"></div>
+                <div class="swirl-spinner-circle swirl-spinner-circle-2"></div>
+                <div class="swirl-spinner-circle swirl-spinner-circle-3"></div>
+              </div>
+            </div>
             <p>Redirecting to payment processor...</p>
           </div>
           <form id="paygistixForm" action="${this.formConfig.formActionUrl}" method="POST">
@@ -452,10 +463,17 @@ class V2PaymentModal {
         <head>
           <title>Test Payment Form</title>
           <link rel="stylesheet" href="/assets/css/payment-redirect.css">
+          <link rel="stylesheet" href="/assets/css/swirl-spinner.css">
         </head>
         <body class="payment-redirect">
           <div class="loading">
-            <div class="spinner"></div>
+            <div class="swirl-spinner-container">
+              <div class="swirl-spinner">
+                <div class="swirl-spinner-circle"></div>
+                <div class="swirl-spinner-circle swirl-spinner-circle-2"></div>
+                <div class="swirl-spinner-circle swirl-spinner-circle-3"></div>
+              </div>
+            </div>
             <p>Redirecting to test payment form...</p>
           </div>
           <form id="testPaymentForm" action="/test-payment" method="GET">
