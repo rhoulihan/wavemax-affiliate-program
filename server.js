@@ -627,6 +627,10 @@ app.get('/privacy-policy', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'privacy-policy.html'));
 });
 
+app.get('/refund-policy', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'refund-policy.html'));
+});
+
 // Franchisee landing page route
 app.get('/franchisee-landing', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'franchisee-landing.html'));

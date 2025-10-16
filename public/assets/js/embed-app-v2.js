@@ -84,6 +84,7 @@ const EMBED_PAGES = {
     '/terms-of-service': '/terms-and-conditions-embed.html',
     '/terms-and-conditions': '/terms-and-conditions-embed.html',
     '/privacy-policy': '/privacy-policy.html',
+    '/refund-policy': '/refund-policy.html',
     '/payment-success': '/payment-success-embed.html',
     '/payment-error': '/payment-error-embed.html',
     '/operator-scan': '/operator-scan-embed.html',
@@ -146,7 +147,12 @@ function getRouteFromUrl() {
             console.log('No route in URL, no auth, using default route');
         }
     }
-    
+
+    // Ensure route starts with a leading slash
+    if (route && !route.startsWith('/')) {
+        route = '/' + route;
+    }
+
     console.log('Final route:', route);
     return route;
 }
