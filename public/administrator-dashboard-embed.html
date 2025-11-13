@@ -429,6 +429,51 @@
         </div>
     </div>
 
+    <!-- Marketing Links Modal -->
+    <div class="modal hidden" id="marketingLinksModal">
+        <div class="modal-content max-width-600">
+            <div class="modal-header">
+                <h3 data-i18n="administrator.dashboard.affiliates.marketingLinksTitle">Marketing Links</h3>
+                <button class="modal-close" id="closeMarketingLinksModal">&times;</button>
+            </div>
+            <div class="modal-body padding-30">
+                <p class="margin-bottom-20" data-i18n="administrator.dashboard.affiliates.marketingLinksDesc">
+                    Share these links with your affiliate to promote customer registration.
+                </p>
+
+                <div class="form-group margin-bottom-20">
+                    <label class="font-weight-600 margin-bottom-10" data-i18n="administrator.dashboard.affiliates.landingPageLink">
+                        Affiliate Landing Page
+                    </label>
+                    <div class="input-group">
+                        <input type="text" id="landingPageLink" class="form-control" readonly>
+                        <button class="btn btn-primary" id="copyLandingPageBtn" data-i18n="common.buttons.copy">Copy</button>
+                    </div>
+                    <small class="text-muted" data-i18n="administrator.dashboard.affiliates.landingPageDesc">
+                        Marketing page with revenue calculator and customer registration
+                    </small>
+                </div>
+
+                <div class="form-group margin-bottom-20">
+                    <label class="font-weight-600 margin-bottom-10" data-i18n="administrator.dashboard.affiliates.customerRegisterLink">
+                        Customer Registration Page
+                    </label>
+                    <div class="input-group">
+                        <input type="text" id="customerRegisterLink" class="form-control" readonly>
+                        <button class="btn btn-primary" id="copyCustomerRegisterBtn" data-i18n="common.buttons.copy">Copy</button>
+                    </div>
+                    <small class="text-muted" data-i18n="administrator.dashboard.affiliates.customerRegisterDesc">
+                        Direct link to customer registration for this affiliate
+                    </small>
+                </div>
+
+                <div class="form-actions justify-content-center margin-top-30">
+                    <button type="button" class="btn btn-secondary" id="closeMarketingLinksBtn" data-i18n="common.buttons.close">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Logout Confirmation Modal -->
     <div class="modal hidden" id="logoutModal">
         <div class="modal-content max-width-400">
