@@ -1706,14 +1706,17 @@
       const data = await response.json();
 
       console.log('Affiliates API response:', data);
-      
+
       if (response.ok && data.success) {
         // Check different possible data structures
-        const affiliatesData = data.topAffiliates || 
-                               (data.analytics && data.analytics.affiliates) || 
-                               data.affiliates || 
+        const affiliatesData = data.topAffiliates ||
+                               (data.analytics && data.analytics.affiliates) ||
+                               data.affiliates ||
                                data;
         renderAffiliatesList(affiliatesData);
+
+        // Setup marketing links modal handlers after rendering affiliates
+        setupMarketingLinksModalHandlers();
       } else {
         console.error('Affiliates API error:', data);
         document.getElementById('affiliatesList').innerHTML = `
@@ -1752,6 +1755,7 @@
                         <th>${t('administrator.dashboard.affiliates.revenue')}</th>
                         <th>${t('administrator.dashboard.affiliates.commission')}</th>
                         <th>${t('administrator.dashboard.affiliates.w9Status')}</th>
+                        <th>${t('administrator.dashboard.affiliates.actions')}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -1764,7 +1768,7 @@
                         const totalRevenue = metrics.totalRevenue || 0;
                         const totalCommission = metrics.totalCommission || 0;
                         const w9Status = aff.w9Status || 'not_submitted';
-                        
+
                         // Determine W9 status display
                         let w9StatusDisplay = '';
                         if (w9Status === 'pending_review') {
@@ -1779,9 +1783,9 @@
                             // Show Send W9 button for affiliates with >$600 revenue and no W9
                             w9StatusDisplay = `
                                 <span class="status-badge inactive">Not Submitted</span>
-                                <button class="btn btn-sm btn-primary mt-1 send-w9-btn" 
-                                        data-affiliate-id="${aff.affiliateId}" 
-                                        data-email="${aff.email}" 
+                                <button class="btn btn-sm btn-primary mt-1 send-w9-btn"
+                                        data-affiliate-id="${aff.affiliateId}"
+                                        data-email="${aff.email}"
                                         data-name="${name}">
                                     Send W9
                                 </button>
@@ -1789,7 +1793,7 @@
                         } else {
                             w9StatusDisplay = '<span class="status-badge inactive">Not Required</span>';
                         }
-                        
+
                         return `
                         <tr>
                             <td>${aff.affiliateId}</td>
@@ -1799,6 +1803,14 @@
                             <td>$${totalRevenue.toFixed(2)}</td>
                             <td>$${totalCommission.toFixed(2)}</td>
                             <td>${w9StatusDisplay}</td>
+                            <td>
+                                <button class="btn btn-sm btn-secondary show-links-btn"
+                                        data-affiliate-id="${aff.affiliateId}"
+                                        data-affiliate-name="${name}"
+                                        title="${t('administrator.dashboard.affiliates.showLinks', 'Show Marketing Links')}">
+                                    ${t('administrator.dashboard.affiliates.links', 'Links')}
+                                </button>
+                            </td>
                         </tr>
                     `}).join('')}
                 </tbody>
@@ -1815,10 +1827,10 @@
         if (e.target.classList.contains('send-w9-btn')) {
           e.preventDefault();
           e.stopPropagation();
-          
+
           // Prevent double-clicks
           if (e.target.disabled) return;
-          
+
           const affiliateId = e.target.getAttribute('data-affiliate-id');
           const email = e.target.getAttribute('data-email');
           const name = e.target.getAttribute('data-name');
@@ -1826,6 +1838,151 @@
         }
       });
     }
+
+    // Add event listener for marketing links buttons using event delegation
+    if (!affiliatesContainer.hasAttribute('data-links-handler')) {
+      affiliatesContainer.setAttribute('data-links-handler', 'true');
+      affiliatesContainer.addEventListener('click', (e) => {
+        // Check if the clicked element or its parent has the show-links-btn class
+        const button = e.target.closest('.show-links-btn');
+        if (button) {
+          e.preventDefault();
+          e.stopPropagation();
+
+          const affiliateId = button.getAttribute('data-affiliate-id');
+          const affiliateName = button.getAttribute('data-affiliate-name');
+          showMarketingLinksModal(affiliateId, affiliateName);
+        }
+      });
+    }
+  }
+
+  // Marketing Links Modal functionality
+  function showMarketingLinksModal(affiliateId, affiliateName) {
+    const modal = document.getElementById('marketingLinksModal');
+
+    // Use the parent site URL for marketing links
+    const baseUrl = 'https://www.wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program';
+
+    // Build the marketing links using the correct route and parameter names
+    const landingPageUrl = `${baseUrl}?route=/affiliate-landing&code=${affiliateId}`;
+    const customerRegisterUrl = `${baseUrl}?route=/customer-register&affid=${affiliateId}`;
+
+    // Update modal title with affiliate name
+    const modalTitle = modal.querySelector('.modal-header h3');
+    const t = window.i18n ? window.i18n.t.bind(window.i18n) : (key) => key;
+    if (modalTitle) {
+      modalTitle.setAttribute('data-i18n', 'administrator.dashboard.affiliates.marketingLinksTitle');
+      modalTitle.textContent = `${t('administrator.dashboard.affiliates.marketingLinksTitle', 'Marketing Links')} - ${affiliateName}`;
+    }
+
+    // Populate the modal inputs
+    document.getElementById('landingPageLink').value = landingPageUrl;
+    document.getElementById('customerRegisterLink').value = customerRegisterUrl;
+
+    // Show the modal
+    modal.classList.remove('hidden');
+    modal.style.display = 'flex';
+  }
+
+  function setupMarketingLinksModalHandlers() {
+    const modal = document.getElementById('marketingLinksModal');
+    if (!modal) {
+      return;
+    }
+
+    // Prevent duplicate setup
+    if (modal.hasAttribute('data-handlers-initialized')) {
+      return;
+    }
+
+    const closeBtn = document.getElementById('closeMarketingLinksModal');
+    const closeModalBtn = document.getElementById('closeMarketingLinksBtn');
+    const copyLandingPageBtn = document.getElementById('copyLandingPageBtn');
+    const copyCustomerRegisterBtn = document.getElementById('copyCustomerRegisterBtn');
+
+    // Close modal handlers
+    const closeModal = () => {
+      modal.classList.add('hidden');
+      modal.style.display = 'none';
+    };
+
+    if (closeBtn) {
+      closeBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        closeModal();
+      });
+    }
+
+    if (closeModalBtn) {
+      closeModalBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        closeModal();
+      });
+    }
+
+    // Close when clicking outside the modal
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) {
+        closeModal();
+      }
+    });
+
+    // Copy button handlers
+    if (copyLandingPageBtn) {
+      copyLandingPageBtn.addEventListener('click', async () => {
+        const input = document.getElementById('landingPageLink');
+        const t = window.i18n ? window.i18n.t.bind(window.i18n) : (key) => key;
+
+        try {
+          await navigator.clipboard.writeText(input.value);
+          const originalText = copyLandingPageBtn.textContent;
+          copyLandingPageBtn.textContent = t('common.buttons.copied', 'Copied!');
+          setTimeout(() => {
+            copyLandingPageBtn.textContent = originalText;
+          }, 2000);
+        } catch (err) {
+          // Fallback for older browsers
+          input.select();
+          document.execCommand('copy');
+          const originalText = copyLandingPageBtn.textContent;
+          copyLandingPageBtn.textContent = t('common.buttons.copied', 'Copied!');
+          setTimeout(() => {
+            copyLandingPageBtn.textContent = originalText;
+          }, 2000);
+        }
+      });
+    }
+
+    if (copyCustomerRegisterBtn) {
+      copyCustomerRegisterBtn.addEventListener('click', async () => {
+        const input = document.getElementById('customerRegisterLink');
+        const t = window.i18n ? window.i18n.t.bind(window.i18n) : (key) => key;
+
+        try {
+          await navigator.clipboard.writeText(input.value);
+          const originalText = copyCustomerRegisterBtn.textContent;
+          copyCustomerRegisterBtn.textContent = t('common.buttons.copied', 'Copied!');
+          setTimeout(() => {
+            copyCustomerRegisterBtn.textContent = originalText;
+          }, 2000);
+        } catch (err) {
+          // Fallback for older browsers
+          input.select();
+          document.execCommand('copy');
+          const originalText = copyCustomerRegisterBtn.textContent;
+          copyCustomerRegisterBtn.textContent = t('common.buttons.copied', 'Copied!');
+          setTimeout(() => {
+            copyCustomerRegisterBtn.textContent = originalText;
+          }, 2000);
+        }
+      });
+    }
+
+    // Mark modal as initialized
+    modal.setAttribute('data-handlers-initialized', 'true');
   }
 
 
