@@ -1307,15 +1307,16 @@ exports.scanProcessed = async (req, res) => {
       order.status = 'processed';
       
       // V2 Payment Flow: Check payment status before sending notifications
-      if (order.v2PaymentStatus === 'verified' || order.v2PaymentStatus === 'paid') {
+      // Payment is considered received if status is NOT 'pending' (i.e., payment has been initiated)
+      if (order.v2PaymentStatus !== 'pending') {
         // Payment received - send ready for pickup notification to affiliate ONLY
         const emailService = require('../utils/emailService');
-        
+
         // Notify affiliate that order is ready for pickup (NOT commission email)
         if (order.affiliateId) {
           const Affiliate = require('../models/Affiliate');
           const affiliate = await Affiliate.findOne({ affiliateId: order.affiliateId });
-          
+
           if (affiliate && affiliate.email) {
             // Send ready for pickup notification (not commission email)
             await emailService.sendOrderReadyNotification(affiliate.email, {
@@ -1472,7 +1473,7 @@ exports.completePickup = async (req, res) => {
   try {
     const { bagIds, orderId } = req.body;
     const operatorId = req.user.id;
-    
+
     console.log('completePickup called with:', { bagIds, orderId, operatorId });
 
     const order = await Order.findOne({ orderId });
@@ -1483,6 +1484,30 @@ exports.completePickup = async (req, res) => {
         error: 'Order not found'
       });
     }
+
+    // CRITICAL SECURITY: Verify payment before allowing pickup
+    // V2 orders: Block only when v2PaymentStatus is 'pending' (payment not initiated)
+    // Regular orders: Require paymentStatus='paid' or isPaid=true
+    const isV2Blocked = order.isV2Order && order.v2PaymentStatus === 'pending';
+    const isRegularPaid = !order.isV2Order && (order.paymentStatus === 'paid' || order.isPaid === true);
+
+    if (isV2Blocked || (!order.isV2Order && !isRegularPaid)) {
+      console.log('PAYMENT VERIFICATION FAILED - BLOCKING PICKUP');
+      console.log('Order:', orderId);
+      console.log('Is V2 Order:', order.isV2Order);
+      console.log('V2 Payment Status:', order.v2PaymentStatus);
+      console.log('V2 Blocked (pending):', isV2Blocked);
+      console.log('Payment Status:', order.paymentStatus);
+      console.log('Is Paid:', order.isPaid);
+
+      return res.status(403).json({
+        success: false,
+        error: 'Payment required',
+        message: 'This order cannot be released until payment is received and verified.'
+      });
+    }
+
+    console.log('Payment verified - proceeding with pickup');
 
     // Verify all bags are accounted for
     if (bagIds.length !== order.bags.length) {
@@ -1626,6 +1651,30 @@ exports.confirmPickup = async (req, res) => {
         error: 'Order not found'
       });
     }
+
+    // CRITICAL SECURITY: Verify payment before allowing pickup
+    // V2 orders: Block only when v2PaymentStatus is 'pending' (payment not initiated)
+    // Regular orders: Require paymentStatus='paid' or isPaid=true
+    const isV2Blocked = order.isV2Order && order.v2PaymentStatus === 'pending';
+    const isRegularPaid = !order.isV2Order && (order.paymentStatus === 'paid' || order.isPaid === true);
+
+    if (isV2Blocked || (!order.isV2Order && !isRegularPaid)) {
+      console.log('PAYMENT VERIFICATION FAILED - BLOCKING PICKUP (Legacy endpoint)');
+      console.log('Order:', orderId);
+      console.log('Is V2 Order:', order.isV2Order);
+      console.log('V2 Payment Status:', order.v2PaymentStatus);
+      console.log('V2 Blocked (pending):', isV2Blocked);
+      console.log('Payment Status:', order.paymentStatus);
+      console.log('Is Paid:', order.isPaid);
+
+      return res.status(403).json({
+        success: false,
+        error: 'Payment required',
+        message: 'This order cannot be released until payment is received and verified.'
+      });
+    }
+
+    console.log('Payment verified - proceeding with pickup (Legacy endpoint)');
 
     // Update bags picked up count
     const bagsToPickup = numberOfBags || 1; // Default to 1 if not specified
