@@ -103,7 +103,19 @@ const EMBED_PAGES = {
     '/order-confirmation': '/order-confirmation-embed.html',
     '/customer-dashboard': '/customer-dashboard-embed.html',
     '/affiliate-success': '/affiliate-success-embed.html',
-    '/affiliate-landing': '/affiliate-landing-embed.html'
+    '/affiliate-landing': '/affiliate-landing-embed.html',
+    // Website pages (content-only for iframe embedding)
+    '/home': '/site-page-content-only.html',
+    '/self-serve-laundry': '/self-serve-laundry-embed.html',
+    '/wash-dry-fold': '/site-page-content-only.html',
+    '/commercial': '/site-page-content-only.html',
+    '/about-us': '/site-page-content-only.html',
+    '/testimonials': '/site-page-content-only.html',
+    '/locations': '/site-page-content-only.html',
+    '/contact': '/site-page-content-only.html',
+    '/employment': '/site-page-content-only.html',
+    '/blog': '/site-page-content-only.html',
+    '/affiliate-program': '/affiliate-landing-embed.html'
     // Add more pages here as they are migrated to CSP compliance
 };
 
@@ -653,7 +665,7 @@ function initializePageScripts(route) {
         '/operator-scan': ['/assets/js/embed-config.js', '/assets/js/i18n.js', '/assets/js/language-switcher.js', '/assets/js/modal-utils.js', '/assets/js/errorHandler.js', '/assets/js/csrf-utils.js', '/assets/js/api-client.js', '/assets/js/qrcode.min.js', '/assets/js/jspdf.min.js', '/assets/js/label-print-utils.js', '/assets/js/thermal-print-utils.js', '/assets/js/operator-scan-init.js'],
         '/affiliate-login': ['/assets/js/i18n.js', '/assets/js/language-switcher.js', '/assets/js/modal-utils.js', '/assets/js/csrf-utils.js', '/assets/js/swirl-spinner.js', '/assets/js/api-client.js', '/assets/js/affiliate-login.js'],
         '/affiliate-register': ['/assets/js/embed-config.js', '/assets/js/i18n.js', '/assets/js/language-switcher.js', '/assets/js/modal-utils.js', '/assets/js/errorHandler.js', '/assets/js/csrf-utils.js', '/assets/js/swirl-spinner.js', '/assets/js/api-client.js', '/assets/js/address-validation-component.js', '/assets/js/service-area-component.js', '/assets/js/form-validation.js', '/assets/js/pricing-preview-component.js', 'https://cdnjs.cloudflare.com/ajax/libs/awesomplete/1.1.5/awesomplete.min.js', '/assets/js/service-area-autocomplete.js', '/assets/js/affiliate-register-init.js', '/assets/js/affiliate-register-page-init.js'],
-        '/affiliate-dashboard': ['/assets/js/i18n.js', '/assets/js/language-switcher.js', 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js', '/assets/js/address-validation-component.js', '/assets/js/service-area-component.js', '/assets/js/pricing-preview-component.js', 'https://cdnjs.cloudflare.com/ajax/libs/awesomplete/1.1.5/awesomplete.min.js', '/assets/js/service-area-autocomplete.js', '/assets/js/csrf-utils.js', '/assets/js/api-client.js', '/assets/js/affiliate-dashboard-init.js', '/assets/js/affiliate-dashboard-embed.js', '/assets/js/affiliate-dashboard-i18n.js'],
+        '/affiliate-dashboard': ['/assets/js/i18n.js', '/assets/js/language-switcher.js', 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js', '/assets/js/address-validation-component.js', '/assets/js/service-area-component.js', '/assets/js/pricing-preview-component.js', 'https://cdnjs.cloudflare.com/ajax/libs/awesomplete/1.1.5/awesomplete.min.js', '/assets/js/service-area-autocomplete.js', '/assets/js/csrf-utils.js', '/assets/js/api-client.js', '/assets/js/affiliate-dashboard-init.js', '/assets/js/affiliate-dashboard-embed.js', '/assets/js/affiliate-schedule.js', '/assets/js/affiliate-dashboard-i18n.js'],
         '/customer-login': ['/assets/js/embed-config.js', '/assets/js/i18n.js', '/assets/js/language-switcher.js', '/assets/js/modal-utils.js', '/assets/js/csrf-utils.js', '/assets/js/swirl-spinner.js', '/assets/js/api-client.js', '/assets/js/customer-login-init.js'],
         '/customer-register': ['/assets/js/i18n.js', '/assets/js/language-switcher.js', '/assets/js/embed-config.js', '/assets/js/modal-utils.js', '/assets/js/errorHandler.js', '/assets/js/csrf-utils.js', '/assets/js/swirl-spinner.js', '/assets/js/api-client.js', '/assets/js/address-validation-component.js', '/assets/js/paygistix-payment-form-v2.js', 'https://cdnjs.cloudflare.com/ajax/libs/awesomplete/1.1.5/awesomplete.min.js', '/assets/js/service-area-autocomplete.js', '/assets/js/customer-register.js', '/assets/js/customer-register-paygistix.js', '/assets/js/customer-register-navigation.js', '/assets/js/customer-register-debug.js'],
         '/customer-register-v2': ['/assets/js/i18n.js', '/assets/js/language-switcher.js', '/assets/js/csrf-utils.js', '/assets/js/modal-utils.js', '/assets/js/swirl-spinner.js', '/assets/js/api-client.js', '/assets/js/address-validation-component.js', 'https://cdnjs.cloudflare.com/ajax/libs/awesomplete/1.1.5/awesomplete.min.js', '/assets/js/service-area-autocomplete.js', '/assets/js/customer-register-v2.js', '/assets/js/customer-register-v2-navigation.js'],
@@ -667,9 +679,25 @@ function initializePageScripts(route) {
         '/order-confirmation': ['/assets/js/i18n.js', '/assets/js/language-switcher.js', '/assets/js/order-confirmation-init.js'],
         '/customer-dashboard': ['/assets/js/i18n.js', '/assets/js/language-switcher.js', '/assets/js/modal-utils.js', '/assets/js/csrf-utils.js', '/assets/js/swirl-spinner.js', '/assets/js/api-client.js', '/assets/js/address-validation-component.js', 'https://cdnjs.cloudflare.com/ajax/libs/awesomplete/1.1.5/awesomplete.min.js', '/assets/js/service-area-autocomplete.js', '/assets/js/v2-payment-modal.js', '/assets/js/customer-dashboard.js?v=20250108-5'],
         '/affiliate-success': ['/assets/js/i18n.js', '/assets/js/language-switcher.js', '/assets/js/modal-utils.js', '/assets/js/affiliate-success-init.js'],
-        '/affiliate-landing': ['/assets/js/i18n.js', '/assets/js/language-switcher.js', '/assets/js/api-client.js', '/assets/js/affiliate-landing-init.js']
+        '/affiliate-landing': ['/assets/js/i18n.js', '/assets/js/language-switcher.js', '/assets/js/api-client.js', '/assets/js/affiliate-landing-init.js'],
+        // Site pages
+        '/home': ['/assets/js/site-page-loader.js'],
+        // '/self-serve-laundry' uses standalone HTML file (/self-serve-laundry-embed.html) with its own scripts and styles
+        '/wash-dry-fold': ['/assets/js/site-page-loader.js'],
+        '/commercial': ['/assets/js/site-page-loader.js'],
+        '/about-us': ['/assets/js/site-page-loader.js'],
+        '/testimonials': ['/assets/js/site-page-loader.js'],
+        '/locations': ['/assets/js/site-page-loader.js'],
+        '/contact': ['/assets/js/site-page-loader.js'],
+        '/employment': ['/assets/js/site-page-loader.js'],
+        '/blog': ['/assets/js/site-page-loader.js']
     };
-    
+
+    // Define page-specific stylesheets
+    const pageStyles = {
+        // '/self-serve-laundry' uses standalone HTML file with its own styles
+    };
+
     // Load scripts for the current route (use base route without query params)
     let baseRoute = route.split('?')[0];
     
@@ -686,6 +714,12 @@ function initializePageScripts(route) {
     const scripts = pageScripts[baseRoute] || [];
     if (scripts.length > 0) {
         loadPageScripts(scripts);
+    }
+
+    // Load stylesheets for the current route
+    const styles = pageStyles[baseRoute] || [];
+    if (styles.length > 0) {
+        loadPageStyles(styles);
     }
 }
 
@@ -763,6 +797,39 @@ function loadPageScripts(scripts) {
     }
     
     loadNextScript();
+}
+
+// Load stylesheets for the current page
+function loadPageStyles(styles) {
+    styles.forEach(stylePath => {
+        // Check if stylesheet is already loaded
+        const existingLink = document.querySelector(`link[href*="${stylePath}"]`);
+        if (existingLink) {
+            console.log('Stylesheet already loaded:', stylePath);
+            return;
+        }
+
+        const link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.type = 'text/css';
+
+        // Check if it's an external URL
+        if (stylePath.startsWith('http://') || stylePath.startsWith('https://')) {
+            link.href = stylePath;
+        } else {
+            link.href = BASE_URL + stylePath + '?v=' + Date.now();
+        }
+
+        link.setAttribute('data-page-style', 'true');
+        link.onload = function() {
+            console.log('Loaded stylesheet:', stylePath);
+        };
+        link.onerror = function() {
+            console.error('Failed to load stylesheet:', stylePath);
+        };
+
+        document.head.appendChild(link);
+    });
 }
 
 // Handle navigation
