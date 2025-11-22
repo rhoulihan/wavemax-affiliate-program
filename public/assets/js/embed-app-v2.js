@@ -682,7 +682,11 @@ function initializePageScripts(route) {
         '/affiliate-landing': ['/assets/js/i18n.js', '/assets/js/language-switcher.js', '/assets/js/api-client.js', '/assets/js/affiliate-landing-init.js'],
         // Site pages
         '/home': ['/assets/js/site-page-loader.js'],
-        // '/self-serve-laundry' uses standalone HTML file (/self-serve-laundry-embed.html) with its own scripts and styles
+        '/self-serve-laundry': [
+            'https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js',
+            'https://www.local-marketing-reports.com/assets/external/reviews/widgets.js',
+            '/assets/js/self-serve-laundry-modern.js'
+        ],
         '/wash-dry-fold': ['/assets/js/site-page-loader.js'],
         '/commercial': ['/assets/js/site-page-loader.js'],
         '/about-us': ['/assets/js/site-page-loader.js'],
