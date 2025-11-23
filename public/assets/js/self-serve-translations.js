@@ -26,7 +26,7 @@ window.SelfServeTranslations = {
         },
         features: {
             title: "The MAX Advantage: CLEANER. FASTER. SAFER.",
-            subtitle: "WaveMAX Laundry in Austin, TX has friendly staff, the best equipment in the region, and is clean and comfortable! Our fully-attended self-service laundromat is different than any other you have encountered. We are a family-owned and operated laundromat passionate about providing the best customer service!",
+            subtitle: '<a href="https://www.wavemaxlaundry.com/austin-tx/"><strong>WaveMAX Laundry in Austin, TX</strong></a> has friendly staff, the best equipment in the region, and is clean and comfortable! Our fully-attended self-service laundromat is different than any other you have encountered. We are a family-owned and operated laundromat passionate about providing the best customer service!',
             fastMachines: {
                 title: "Lightning Fast 450G Machines",
                 description: "Get in and out in half the time! \"Laundry day\" becomes \"laundry hour\" with our state-of-the-art 450G Electrolux washers and dryers."
@@ -63,7 +63,7 @@ window.SelfServeTranslations = {
         },
         sanitization: {
             title: "WaveMAX Sanitization Technology",
-            tagline: "CLEANER. FASTER. SAFER.",
+            tagline: 'CLEANER. <span class="green">FASTER.</span> SAFER.',
             benefits: {
                 title: "Benefits of the LUX UV Sanitization System",
                 subtitle: "Our advanced Omni LUX UV water purification system provides unmatched cleanliness and fabric care",
@@ -156,7 +156,7 @@ window.SelfServeTranslations = {
         },
         features: {
             title: "La Ventaja MAX: MÁS LIMPIO. MÁS RÁPIDO. MÁS SEGURO.",
-            subtitle: "WaveMAX Laundry en Austin, TX tiene personal amigable, el mejor equipo de la región, ¡y es limpio y cómodo! Nuestra lavandería autoservicio con personal completo es diferente a cualquier otra que hayas encontrado. ¡Somos una lavandería familiar y operada apasionada por brindar el mejor servicio al cliente!",
+            subtitle: '<a href="https://www.wavemaxlaundry.com/austin-tx/"><strong>WaveMAX Laundry en Austin, TX</strong></a> tiene personal amigable, el mejor equipo de la región, ¡y es limpio y cómodo! Nuestra lavandería autoservicio con personal completo es diferente a cualquier otra que hayas encontrado. ¡Somos una lavandería familiar y operada apasionada por brindar el mejor servicio al cliente!',
             fastMachines: {
                 title: "Máquinas Ultrarrápidas 450G",
                 description: "¡Entre y salga en la mitad del tiempo! El \"día de lavandería\" se convierte en \"hora de lavandería\" con nuestras lavadoras y secadoras Electrolux 450G de última generación."
@@ -193,7 +193,7 @@ window.SelfServeTranslations = {
         },
         sanitization: {
             title: "Tecnología de Sanitización WaveMAX",
-            tagline: "MÁS LIMPIO. MÁS RÁPIDO. MÁS SEGURO.",
+            tagline: 'MÁS LIMPIO. <span class="green">MÁS RÁPIDO.</span> MÁS SEGURO.',
             benefits: {
                 title: "Beneficios del Sistema de Sanitización LUX UV",
                 subtitle: "Nuestro avanzado sistema de purificación de agua Omni LUX UV proporciona una limpieza y cuidado de telas incomparables",
@@ -286,7 +286,7 @@ window.SelfServeTranslations = {
         },
         features: {
             title: "A Vantagem MAX: MAIS LIMPO. MAIS RÁPIDO. MAIS SEGURO.",
-            subtitle: "WaveMAX Laundry em Austin, TX tem funcionários simpáticos, o melhor equipamento da região e é limpo e confortável! Nossa lavanderia self-service totalmente atendida é diferente de qualquer outra que você já encontrou. Somos uma lavanderia familiar e operada apaixonada por fornecer o melhor atendimento ao cliente!",
+            subtitle: '<a href="https://www.wavemaxlaundry.com/austin-tx/"><strong>WaveMAX Laundry em Austin, TX</strong></a> tem funcionários simpáticos, o melhor equipamento da região e é limpo e confortável! Nossa lavanderia self-service totalmente atendida é diferente de qualquer outra que você já encontrou. Somos uma lavanderia familiar e operada apaixonada por fornecer o melhor atendimento ao cliente!',
             fastMachines: {
                 title: "Máquinas Ultrarrápidas 450G",
                 description: "Entre e saia na metade do tempo! \"Dia de lavanderia\" se torna \"hora de lavanderia\" com nossas lavadoras e secadoras Electrolux 450G de última geração."
@@ -323,7 +323,7 @@ window.SelfServeTranslations = {
         },
         sanitization: {
             title: "Tecnologia de Sanitização WaveMAX",
-            tagline: "MAIS LIMPO. MAIS RÁPIDO. MAIS SEGURO.",
+            tagline: 'MAIS LIMPO. <span class="green">MAIS RÁPIDO.</span> MAIS SEGURO.',
             benefits: {
                 title: "Benefícios do Sistema de Sanitização LUX UV",
                 subtitle: "Nosso avançado sistema de purificação de água Omni LUX UV fornece limpeza e cuidado de tecidos incomparáveis",
@@ -416,7 +416,7 @@ window.SelfServeTranslations = {
         },
         features: {
             title: "Der MAX-Vorteil: SAUBERER. SCHNELLER. SICHERER.",
-            subtitle: "WaveMAX Laundry in Austin, TX hat freundliches Personal, die beste Ausrüstung in der Region und ist sauber und komfortabel! Unser vollständig betreuter Selbstbedienungs-Waschsalon ist anders als jeder andere, den Sie getroffen haben. Wir sind ein familiengeführter Waschsalon, der leidenschaftlich den besten Kundenservice bietet!",
+            subtitle: '<a href="https://www.wavemaxlaundry.com/austin-tx/"><strong>WaveMAX Laundry in Austin, TX</strong></a> hat freundliches Personal, die beste Ausrüstung in der Region und ist sauber und komfortabel! Unser vollständig betreuter Selbstbedienungs-Waschsalon ist anders als jeder andere, den Sie getroffen haben. Wir sind ein familiengeführter Waschsalon, der leidenschaftlich den besten Kundenservice bietet!',
             fastMachines: {
                 title: "Blitzschnelle 450G-Maschinen",
                 description: "Rein und raus in der Hälfte der Zeit! \"Waschtag\" wird zur \"Waschstunde\" mit unseren modernsten 450G Electrolux Waschmaschinen und Trocknern."
@@ -453,7 +453,7 @@ window.SelfServeTranslations = {
         },
         sanitization: {
             title: "WaveMAX Desinfektionstechnologie",
-            tagline: "SAUBERER. SCHNELLER. SICHERER.",
+            tagline: 'SAUBERER. <span class="green">SCHNELLER.</span> SICHERER.',
             benefits: {
                 title: "Vorteile des LUX UV Desinfektionssystems",
                 subtitle: "Unser fortschrittliches Omni LUX UV-Wasserreinigungssystem bietet unübertroffene Sauberkeit und Stoffpflege",

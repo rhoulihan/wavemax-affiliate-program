@@ -200,7 +200,12 @@
             const translation = getTranslation(key);
 
             if (translation) {
-                element.textContent = translation;
+                // Check if element has data-i18n-html attribute to preserve HTML
+                if (element.hasAttribute('data-i18n-html')) {
+                    element.innerHTML = translation;
+                } else {
+                    element.textContent = translation;
+                }
             }
         });
 
