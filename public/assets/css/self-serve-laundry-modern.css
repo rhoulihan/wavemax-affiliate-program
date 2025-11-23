@@ -474,3 +474,7 @@ body {
 #testimonials-fallback {
     display: none;
 }
+
+#testimonials-fallback.show {
+    display: block;
+}
