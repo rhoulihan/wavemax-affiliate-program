@@ -4,6 +4,30 @@
 
     console.log('[Self-Serve] Page loading...');
 
+    // Initialize iframe bridge V2
+    if (typeof IframeBridge !== 'undefined') {
+        console.log('[Self-Serve] Initializing Iframe Bridge V2...');
+
+        // Load translations
+        if (typeof SelfServeTranslations !== 'undefined') {
+            IframeBridge.loadTranslations(SelfServeTranslations);
+            console.log('[Self-Serve] Translations loaded');
+        }
+
+        // Initialize the bridge with page identifier
+        IframeBridge.init({
+            pageIdentifier: 'self-serve-laundry',
+            parentOrigin: 'https://www.wavemaxlaundry.com',
+            allowedOrigins: ['https://www.wavemaxlaundry.com', 'https://wavemaxlaundry.com'],
+            enableTranslation: true,
+            enableAutoResize: true
+        });
+
+        console.log('[Self-Serve] Iframe Bridge V2 initialized');
+    } else {
+        console.warn('[Self-Serve] Iframe Bridge V2 not loaded');
+    }
+
     // Initialize AOS
     if (typeof AOS !== 'undefined') {
         AOS.init({
@@ -17,22 +41,93 @@
     }
 
     // Initialize Bootstrap tabs explicitly
-    document.addEventListener('DOMContentLoaded', function() {
-        console.log('[Self-Serve] DOM ready, initializing tabs...');
+    function initializeTabs() {
+        console.log('[Self-Serve] Initializing tabs...');
 
         var triggerTabList = [].slice.call(document.querySelectorAll('button[data-bs-toggle="tab"]'));
+
+        // Set up click handlers for each tab button
         triggerTabList.forEach(function(triggerEl) {
-            new bootstrap.Tab(triggerEl);
+            var tabInstance = new bootstrap.Tab(triggerEl);
+
+            // Add click handler
+            triggerEl.addEventListener('click', function(e) {
+                e.preventDefault();
+                tabInstance.show();
+                console.log('[Self-Serve] Tab clicked:', triggerEl.id);
+            });
+
             console.log('[Self-Serve] Tab initialized:', triggerEl.id);
         });
 
-        // Ensure first tab content is visible
-        var firstTab = document.querySelector('#features');
-        if (firstTab) {
-            firstTab.classList.add('show', 'active');
-            console.log('[Self-Serve] First tab activated');
+        // Explicitly show the first tab using Bootstrap API
+        var firstTabButton = document.querySelector('#features-tab');
+        if (firstTabButton) {
+            var firstTabInstance = bootstrap.Tab.getInstance(firstTabButton) || new bootstrap.Tab(firstTabButton);
+            firstTabInstance.show();
+            console.log('[Self-Serve] First tab shown via Bootstrap API');
         }
-    });
+
+        // Diagnostic: Check if tab content exists and is visible
+        setTimeout(function() {
+            var featuresPaneViaId = document.querySelector('#features');
+            var allTabPanes = document.querySelectorAll('.tab-pane');
+
+            console.log('[Self-Serve] Diagnostic - Tab panes found:', allTabPanes.length);
+            console.log('[Self-Serve] Diagnostic - Features pane exists:', !!featuresPaneViaId);
+
+            if (featuresPaneViaId) {
+                var computedStyle = window.getComputedStyle(featuresPaneViaId);
+                console.log('[Self-Serve] Features pane classes:', featuresPaneViaId.className);
+                console.log('[Self-Serve] Features pane display:', computedStyle.display);
+                console.log('[Self-Serve] Features pane opacity:', computedStyle.opacity);
+                console.log('[Self-Serve] Features pane visibility:', computedStyle.visibility);
+                console.log('[Self-Serve] Features pane innerHTML length:', featuresPaneViaId.innerHTML.length);
+            }
+
+            allTabPanes.forEach(function(pane, index) {
+                console.log('[Self-Serve] Tab pane', index, ':', pane.id, 'classes:', pane.className);
+            });
+
+            // Check container and positioning
+            var appContainer = document.querySelector('#app-container');
+            if (appContainer) {
+                var containerStyle = window.getComputedStyle(appContainer);
+                console.log('[Self-Serve] App container height:', containerStyle.height);
+                console.log('[Self-Serve] App container overflow:', containerStyle.overflow);
+                console.log('[Self-Serve] App container position:', containerStyle.position);
+            }
+
+            // Check if hero section exists (should be before tabs)
+            var heroSection = document.querySelector('.hero-section');
+            console.log('[Self-Serve] Hero section exists:', !!heroSection);
+
+            // Check tab container
+            var tabContent = document.querySelector('.tab-content');
+            if (tabContent) {
+                var tabContentStyle = window.getComputedStyle(tabContent);
+                console.log('[Self-Serve] Tab content display:', tabContentStyle.display);
+                console.log('[Self-Serve] Tab content height:', tabContentStyle.height);
+            }
+
+            // Log first visible element's text to confirm rendering
+            if (featuresPaneViaId) {
+                var firstH2 = featuresPaneViaId.querySelector('h2');
+                if (firstH2) {
+                    console.log('[Self-Serve] First h2 text:', firstH2.textContent.substring(0, 50));
+                }
+            }
+        }, 200);
+    }
+
+    // Try to initialize immediately if Bootstrap is available, otherwise wait
+    if (typeof bootstrap !== 'undefined') {
+        // Wait a bit for the HTML to be fully inserted
+        setTimeout(initializeTabs, 100);
+    } else {
+        // Bootstrap not loaded yet, wait for DOMContentLoaded
+        document.addEventListener('DOMContentLoaded', initializeTabs);
+    }
 
     // Load testimonials - using curated Austin reviews
     function loadTestimonials() {

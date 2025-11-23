@@ -683,7 +683,10 @@ function initializePageScripts(route) {
         // Site pages
         '/home': ['/assets/js/site-page-loader.js'],
         '/self-serve-laundry': [
+            'https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js',
             'https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js',
+            '/assets/js/iframe-bridge-v2.js',
+            '/assets/js/self-serve-translations.js',
             '/assets/js/self-serve-laundry-modern.js'
         ],
         '/wash-dry-fold': ['/assets/js/site-page-loader.js'],
@@ -698,7 +701,13 @@ function initializePageScripts(route) {
 
     // Define page-specific stylesheets
     const pageStyles = {
-        // '/self-serve-laundry' uses standalone HTML file with its own styles
+        '/self-serve-laundry': [
+            'https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css',
+            'https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css',
+            'https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap',
+            'https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css',
+            '/assets/css/self-serve-laundry-modern.css?v=20250123b'
+        ]
     };
 
     // Load scripts for the current route (use base route without query params)

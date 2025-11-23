@@ -1,8 +1,8 @@
 /* Self-Serve Laundry Modern Design */
 
 :root {
-    --primary-color: #8fbe00;
-    --primary-dark: #6d9100;
+    --primary-color: #0066cc;
+    --primary-dark: #004c99;
     --secondary-color: #0066cc;
     --secondary-light: #4d94ff;
     --text-dark: #1a1a1a;
@@ -11,6 +11,7 @@
     --bg-white: #ffffff;
     --shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
     --shadow-hover: 0 8px 30px rgba(0, 0, 0, 0.12);
+    --hero-badge-color: #8fbe00;
 }
 
 * {
@@ -86,7 +87,7 @@ body {
 
 .hero-badge i {
     font-size: 1.5rem;
-    color: var(--primary-color);
+    color: var(--hero-badge-color);
 }
 
 /* Stats Section */
@@ -128,6 +129,10 @@ body {
     z-index: 10;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
     margin-bottom: 2rem;
+}
+
+.tab-content {
+    display: block !important;
 }
 
 .nav-tabs {
