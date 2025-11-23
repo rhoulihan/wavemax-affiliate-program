@@ -34,38 +34,93 @@
         }
     });
 
-    // Initialize testimonials widget with multiple attempts
-    var testimonialsAttempts = 0;
-    var maxAttempts = 5;
+    // Load testimonials from JSON API
+    function loadTestimonials() {
+        console.log('[Self-Serve] Loading testimonials from JSON API');
 
-    function tryInitTestimonials() {
-        testimonialsAttempts++;
-        console.log('[Self-Serve] Attempt', testimonialsAttempts, 'to initialize testimonials');
-
-        if (window.LocalMarketingTestimonials && typeof window.LocalMarketingTestimonials.init === 'function') {
-            try {
-                window.LocalMarketingTestimonials.init();
-                console.log('[Self-Serve] Testimonials widget initialized successfully');
-                return true;
-            } catch (e) {
-                console.error('[Self-Serve] Error initializing testimonials:', e);
-            }
-        } else if (testimonialsAttempts < maxAttempts) {
-            // Try again
-            setTimeout(tryInitTestimonials, 1000);
-        } else {
-            console.warn('[Self-Serve] Testimonials widget not available after', maxAttempts, 'attempts');
-            // Show fallback content
-            var fallback = document.getElementById('testimonials-fallback');
-            if (fallback) {
-                fallback.style.display = 'block';
-            }
+        var testimonialsElement = document.querySelector('[data-testimonials-type="local-marketing-testimonials"]');
+        if (!testimonialsElement) {
+            console.warn('[Self-Serve] Testimonials element not found');
+            return;
         }
-        return false;
+
+        var testimonialsUrl = testimonialsElement.getAttribute('data-testimonials-url');
+        if (!testimonialsUrl) {
+            console.warn('[Self-Serve] Testimonials URL not found');
+            showTestimonialsFallback();
+            return;
+        }
+
+        // Fetch testimonials data
+        fetch(testimonialsUrl)
+            .then(function(response) {
+                if (!response.ok) {
+                    throw new Error('HTTP error ' + response.status);
+                }
+                return response.json();
+            })
+            .then(function(data) {
+                if (data && data.issuccess && data.results && data.results.length > 0) {
+                    console.log('[Self-Serve] Testimonials loaded:', data.results.length, 'reviews');
+                    renderTestimonials(data.results);
+                } else {
+                    console.warn('[Self-Serve] No testimonials data found');
+                    showTestimonialsFallback();
+                }
+            })
+            .catch(function(error) {
+                console.error('[Self-Serve] Error loading testimonials:', error);
+                showTestimonialsFallback();
+            });
     }
 
-    // Start trying to load testimonials
-    setTimeout(tryInitTestimonials, 500);
+    function renderTestimonials(reviews) {
+        var testimonialsElement = document.querySelector('[data-testimonials-type="local-marketing-testimonials"]');
+        if (!testimonialsElement) return;
+
+        var html = '<div class="row">';
+
+        // Show first 6 reviews
+        var reviewsToShow = reviews.slice(0, 6);
+        reviewsToShow.forEach(function(review) {
+            var truncatedBody = review.reviewBody.length > 150
+                ? review.reviewBody.substring(0, 147) + '...'
+                : review.reviewBody;
+
+            var authorName = review.author;
+
+            var rating = isNaN(review.ratingValue) ? '' : review.ratingValue + '.0';
+            var stars = '';
+            if (!isNaN(review.ratingValue)) {
+                var ratingNum = parseInt(review.ratingValue);
+                stars = '<span class="text-warning">' + '★'.repeat(ratingNum) + '</span>';
+            }
+
+            html += '<div class="col-md-4 mb-4">';
+            html += '<div class="card h-100 border-0 shadow-sm">';
+            html += '<div class="card-body">';
+            html += '<p class="card-text">"' + truncatedBody + '"</p>';
+            html += '<div class="d-flex justify-content-between align-items-center mt-3">';
+            html += '<div><strong>' + authorName + '</strong></div>';
+            html += '<div>' + stars + '</div>';
+            html += '</div>';
+            html += '</div></div></div>';
+        });
+
+        html += '</div>';
+
+        testimonialsElement.innerHTML = html;
+    }
+
+    function showTestimonialsFallback() {
+        var fallback = document.getElementById('testimonials-fallback');
+        if (fallback) {
+            fallback.classList.add('show');
+        }
+    }
+
+    // Start loading testimonials
+    setTimeout(loadTestimonials, 500);
 
     // Update parent iframe height
     function updateParentHeight() {
