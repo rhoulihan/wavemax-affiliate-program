@@ -463,3 +463,14 @@ body {
     font-size: 1.1rem;
     margin-bottom: 2rem;
 }
+
+/* CTA section subtitle */
+.cta-section h5 {
+    margin-bottom: 2rem;
+    font-weight: 600;
+}
+
+/* Testimonials fallback */
+#testimonials-fallback {
+    display: none;
+}
