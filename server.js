@@ -242,7 +242,8 @@ app.use((req, res, next) => {
       'https://cdnjs.cloudflare.com',
       'https://cdn.jsdelivr.net',
       'https://safepay.paymentlogistics.net',
-      'https://code.jquery.com'
+      'https://code.jquery.com',
+      'https://www.local-marketing-reports.com'
     ],
     'style-src': [
       "'self'",
