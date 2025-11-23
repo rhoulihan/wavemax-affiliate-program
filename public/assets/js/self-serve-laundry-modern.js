@@ -78,10 +78,44 @@
         var testimonialsElement = document.querySelector('[data-testimonials-type="local-marketing-testimonials"]');
         if (!testimonialsElement) return;
 
+        // Filter reviews to only show Austin, TX location
+        var austinKeywords = ['austin', 'texas', 'rundberg'];
+        var austinReviews = reviews.filter(function(review) {
+            var bodyLower = review.reviewBody.toLowerCase();
+            // Include if mentions Austin/Texas keywords, or exclude if mentions other cities
+            var mentionsAustin = austinKeywords.some(function(keyword) {
+                return bodyLower.includes(keyword);
+            });
+            var mentionsOtherCity = bodyLower.includes('maple heights') ||
+                                    bodyLower.includes('cleveland') ||
+                                    bodyLower.includes('southgate') ||
+                                    bodyLower.includes(', oh') ||
+                                    bodyLower.includes('ohio');
+
+            // If it mentions other cities, exclude it
+            if (mentionsOtherCity) return false;
+
+            // If it mentions Austin keywords, include it
+            if (mentionsAustin) return true;
+
+            // For neutral reviews (no location mentioned), include them
+            // They could be from Austin
+            return true;
+        });
+
+        console.log('[Self-Serve] Filtered to', austinReviews.length, 'Austin reviews from', reviews.length, 'total');
+
         var html = '<div class="row">';
 
-        // Show first 6 reviews
-        var reviewsToShow = reviews.slice(0, 6);
+        // Show first 6 Austin reviews
+        var reviewsToShow = austinReviews.slice(0, 6);
+
+        if (reviewsToShow.length === 0) {
+            // No Austin reviews found, show fallback
+            showTestimonialsFallback();
+            return;
+        }
+
         reviewsToShow.forEach(function(review) {
             var truncatedBody = review.reviewBody.length > 150
                 ? review.reviewBody.substring(0, 147) + '...'
