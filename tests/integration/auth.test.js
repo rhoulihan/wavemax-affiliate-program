@@ -1202,4 +1202,60 @@ describe('Authentication Integration Tests', () => {
       });
     });
   });
+
+  describe('GET /api/v1/auth/test-oauth-callback', () => {
+    it('should return successful test message', async () => {
+      const response = await agent
+        .get('/api/v1/auth/test-oauth-callback');
+
+      expect(response.status).toBe(200);
+      expect(response.text).toBe('OAuth callback test successful');
+    });
+  });
+
+  describe('OAuth Configuration Error Handling', () => {
+    it('should return 404 when Google OAuth is not configured', async () => {
+      const originalGoogleId = process.env.GOOGLE_CLIENT_ID;
+      const originalGoogleSecret = process.env.GOOGLE_CLIENT_SECRET;
+
+      // Temporarily unset Google OAuth credentials
+      delete process.env.GOOGLE_CLIENT_ID;
+      delete process.env.GOOGLE_CLIENT_SECRET;
+
+      const response = await agent
+        .get('/api/v1/auth/google');
+
+      expect(response.status).toBe(404);
+      expect(response.body).toMatchObject({
+        success: false,
+        message: 'Google OAuth is not configured'
+      });
+
+      // Restore environment variables
+      if (originalGoogleId) process.env.GOOGLE_CLIENT_ID = originalGoogleId;
+      if (originalGoogleSecret) process.env.GOOGLE_CLIENT_SECRET = originalGoogleSecret;
+    });
+
+    it('should return 404 when Facebook OAuth is not configured', async () => {
+      const originalFacebookId = process.env.FACEBOOK_APP_ID;
+      const originalFacebookSecret = process.env.FACEBOOK_APP_SECRET;
+
+      // Temporarily unset Facebook OAuth credentials
+      delete process.env.FACEBOOK_APP_ID;
+      delete process.env.FACEBOOK_APP_SECRET;
+
+      const response = await agent
+        .get('/api/v1/auth/facebook');
+
+      expect(response.status).toBe(404);
+      expect(response.body).toMatchObject({
+        success: false,
+        message: 'Facebook OAuth is not configured'
+      });
+
+      // Restore environment variables
+      if (originalFacebookId) process.env.FACEBOOK_APP_ID = originalFacebookId;
+      if (originalFacebookSecret) process.env.FACEBOOK_APP_SECRET = originalFacebookSecret;
+    });
+  });
 });

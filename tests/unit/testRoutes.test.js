@@ -121,24 +121,29 @@ describe('Test Routes', () => {
         email: 'test.customer@wavemax.test',
         firstName: 'Test',
         lastName: 'Customer',
+        username: 'testuser',
+        passwordSalt: '053006d409478489684709794546f604',
+        passwordHash: '329faa1f67bfa85af7481e230f8455b497e3fbf27557af91de5e550822bfd267d56ef7c852114cb783f551fb489ff40afd8173a1bf4aba293acafab25b1cf00d',
         save: jest.fn().mockResolvedValue(true)
       };
-      
+
       Customer.findOne = createFindOneMock(mockCustomer);
       Customer.findOne.mockResolvedValue(mockCustomer);
-      
+
       const response = await request(app)
         .post('/api/test/customer')
         .send({});
-      
+
       expect(response.status).toBe(200);
-      expect(response.body).toEqual({
+      expect(response.body).toMatchObject({
         _id: 'customerId',
         email: 'test.customer@wavemax.test',
         firstName: 'Test',
-        lastName: 'Customer'
+        lastName: 'Customer',
+        username: 'testuser'
       });
-      expect(Customer.prototype.save).not.toHaveBeenCalled();
+      // Save should be called to update password
+      expect(mockCustomer.save).toHaveBeenCalled();
     });
 
     it('should create new customer and affiliate if not exists', async () => {
@@ -325,30 +330,342 @@ describe('Test Routes', () => {
     });
   });
 
+  describe('GET /api/test/order/:orderId', () => {
+    it('should return order by orderId', async () => {
+      const mockOrder = {
+        _id: 'mongoId123',
+        orderId: 'ORD-123',
+        customerId: 'CUST-123',
+        status: 'pending'
+      };
+
+      Order.findOne = createFindOneMock(mockOrder);
+      Order.findOne.mockResolvedValue(mockOrder);
+
+      const response = await request(app)
+        .get('/api/test/order/ORD-123');
+
+      expect(response.status).toBe(200);
+      expect(response.body).toEqual(mockOrder);
+      expect(Order.findOne).toHaveBeenCalledWith({
+        $or: [
+          { _id: 'ORD-123' },
+          { orderId: 'ORD-123' }
+        ]
+      });
+    });
+
+    it('should return 404 when order not found', async () => {
+      Order.findOne = createFindOneMock(null);
+      Order.findOne.mockResolvedValue(null);
+
+      const response = await request(app)
+        .get('/api/test/order/INVALID-ID');
+
+      expect(response.status).toBe(404);
+      expect(response.body).toEqual({ error: 'Order not found' });
+    });
+
+    it('should handle database errors', async () => {
+      Order.findOne.mockRejectedValue(new Error('Database error'));
+
+      const response = await request(app)
+        .get('/api/test/order/ORD-123');
+
+      expect(response.status).toBe(500);
+      expect(response.body).toEqual({ error: 'Failed to fetch test order' });
+    });
+  });
+
+  describe('POST /api/test/send-payment-email', () => {
+    let emailService;
+
+    beforeEach(() => {
+      // Mock emailService
+      emailService = require('../../server/utils/emailService');
+      emailService.sendEmail = jest.fn().mockResolvedValue(true);
+    });
+
+    it('should send payment email successfully', async () => {
+      const emailData = {
+        to: 'test@example.com',
+        subject: 'Payment Request',
+        html: '<p>Please pay $50.00</p>',
+        orderId: 'ORD-123'
+      };
+
+      const response = await request(app)
+        .post('/api/test/send-payment-email')
+        .send(emailData);
+
+      expect(response.status).toBe(200);
+      expect(response.body).toEqual({
+        success: true,
+        message: 'Test payment email sent successfully',
+        orderId: 'ORD-123'
+      });
+      expect(emailService.sendEmail).toHaveBeenCalledWith(
+        'test@example.com',
+        'Payment Request',
+        '<p>Please pay $50.00</p>'
+      );
+    });
+
+    it('should return 400 when missing required fields', async () => {
+      const response = await request(app)
+        .post('/api/test/send-payment-email')
+        .send({ to: 'test@example.com' }); // Missing subject and html
+
+      expect(response.status).toBe(400);
+      expect(response.body).toEqual({ error: 'Missing required fields: to, subject, html' });
+    });
+
+    it('should handle email sending errors', async () => {
+      emailService.sendEmail.mockRejectedValue(new Error('SMTP error'));
+
+      const response = await request(app)
+        .post('/api/test/send-payment-email')
+        .send({
+          to: 'test@example.com',
+          subject: 'Test',
+          html: '<p>Test</p>'
+        });
+
+      expect(response.status).toBe(500);
+      expect(response.body.error).toContain('Failed to send test payment email');
+    });
+  });
+
+  describe('POST /api/test/order/advance-stage', () => {
+    let emailService;
+
+    beforeEach(() => {
+      // Mock emailService
+      emailService = require('../../server/utils/emailService');
+      emailService.sendV2PaymentRequest = jest.fn().mockResolvedValue(true);
+    });
+
+    it('should advance order to processing stage (weigh action)', async () => {
+      const mockOrder = {
+        _id: 'mongoId123',
+        orderId: 'ORD-123',
+        customerId: 'CUST-123',
+        numberOfBags: 2,
+        bags: [],
+        status: 'pending',
+        isV2Order: true,
+        baseRate: 1.25,
+        save: jest.fn().mockResolvedValue(true)
+      };
+
+      Order.findOne = createFindOneMock(mockOrder);
+      Order.findOne.mockResolvedValue(mockOrder);
+
+      const response = await request(app)
+        .post('/api/test/order/advance-stage')
+        .send({
+          orderId: 'ORD-123',
+          currentStage: 'pending',
+          nextStage: 'processing',
+          action: 'weigh',
+          weights: [15, 20],
+          actualWeight: 35
+        });
+
+      expect(response.status).toBe(200);
+      expect(mockOrder.status).toBe('processing');
+      expect(mockOrder.bags).toHaveLength(2);
+      expect(mockOrder.save).toHaveBeenCalled();
+    });
+
+    it('should send V2 payment request email when weighing all bags', async () => {
+      const mockCustomer = {
+        _id: 'customerId123',
+        customerId: 'CUST-123',
+        email: 'test@example.com',
+        firstName: 'Test',
+        lastName: 'Customer'
+      };
+
+      const mockOrder = {
+        _id: 'mongoId123',
+        orderId: 'ORD-123',
+        customerId: 'CUST-123',
+        numberOfBags: 2,
+        bags: [],
+        bagsWeighed: 0,
+        status: 'pending',
+        isV2Order: true,
+        baseRate: 1.25,
+        actualWeight: 0,
+        feeBreakdown: { totalFee: 10 },
+        addOns: { fabricSoftener: true },
+        save: jest.fn().mockResolvedValue(true)
+      };
+
+      // Mock the save function to update bagsWeighed
+      mockOrder.save.mockImplementation(async function() {
+        this.bagsWeighed = this.numberOfBags;
+        this.v2PaymentAmount = 45.50;
+        return true;
+      }.bind(mockOrder));
+
+      Order.findOne = createFindOneMock(mockOrder);
+      Order.findOne.mockResolvedValue(mockOrder);
+      Customer.findOne = createFindOneMock(mockCustomer);
+      Customer.findOne.mockResolvedValue(mockCustomer);
+
+      const response = await request(app)
+        .post('/api/test/order/advance-stage')
+        .send({
+          orderId: 'ORD-123',
+          action: 'weigh',
+          weights: [15, 20],
+          actualWeight: 35
+        });
+
+      expect(response.status).toBe(200);
+      expect(mockOrder.status).toBe('processing');
+      expect(emailService.sendV2PaymentRequest).toHaveBeenCalled();
+      expect(mockOrder.v2PaymentLinks).toBeDefined();
+      expect(mockOrder.v2PaymentQRCodes).toBeDefined();
+    });
+
+    it('should advance order to processed stage (process action)', async () => {
+      const mockOrder = {
+        _id: 'mongoId123',
+        orderId: 'ORD-123',
+        numberOfBags: 2,
+        bags: [
+          { bagId: 'BAG-1', status: 'processing', scannedAt: {} },
+          { bagId: 'BAG-2', status: 'processing', scannedAt: {} }
+        ],
+        status: 'processing',
+        save: jest.fn().mockResolvedValue(true)
+      };
+
+      Order.findOne = createFindOneMock(mockOrder);
+      Order.findOne.mockResolvedValue(mockOrder);
+
+      const response = await request(app)
+        .post('/api/test/order/advance-stage')
+        .send({
+          orderId: 'ORD-123',
+          action: 'process'
+        });
+
+      expect(response.status).toBe(200);
+      expect(mockOrder.status).toBe('processed');
+      expect(mockOrder.bags[0].status).toBe('processed');
+      expect(mockOrder.save).toHaveBeenCalled();
+    });
+
+    it('should advance order to complete stage (pickup action)', async () => {
+      const mockOrder = {
+        _id: 'mongoId123',
+        orderId: 'ORD-123',
+        numberOfBags: 2,
+        bags: [
+          { bagId: 'BAG-1', status: 'processed', scannedAt: {} },
+          { bagId: 'BAG-2', status: 'processed', scannedAt: {} }
+        ],
+        status: 'processed',
+        isV2Order: true,
+        save: jest.fn().mockResolvedValue(true)
+      };
+
+      Order.findOne = createFindOneMock(mockOrder);
+      Order.findOne.mockResolvedValue(mockOrder);
+
+      const response = await request(app)
+        .post('/api/test/order/advance-stage')
+        .send({
+          orderId: 'ORD-123',
+          action: 'pickup'
+        });
+
+      expect(response.status).toBe(200);
+      expect(mockOrder.status).toBe('complete');
+      expect(mockOrder.v2PaymentStatus).toBe('verified');
+      expect(mockOrder.bags[0].status).toBe('completed');
+      expect(mockOrder.save).toHaveBeenCalled();
+    });
+
+    it('should return 404 when order not found', async () => {
+      Order.findOne = createFindOneMock(null);
+      Order.findOne.mockResolvedValue(null);
+
+      const response = await request(app)
+        .post('/api/test/order/advance-stage')
+        .send({
+          orderId: 'INVALID-ID',
+          action: 'weigh'
+        });
+
+      expect(response.status).toBe(404);
+      expect(response.body).toEqual({ error: 'Order not found' });
+    });
+
+    it('should return 400 for invalid action', async () => {
+      const mockOrder = {
+        _id: 'mongoId123',
+        orderId: 'ORD-123',
+        save: jest.fn().mockResolvedValue(true)
+      };
+
+      Order.findOne = createFindOneMock(mockOrder);
+      Order.findOne.mockResolvedValue(mockOrder);
+
+      const response = await request(app)
+        .post('/api/test/order/advance-stage')
+        .send({
+          orderId: 'ORD-123',
+          action: 'invalid-action'
+        });
+
+      expect(response.status).toBe(400);
+      expect(response.body).toEqual({ error: 'Invalid action' });
+    });
+
+    it('should handle database errors', async () => {
+      Order.findOne.mockRejectedValue(new Error('Database error'));
+
+      const response = await request(app)
+        .post('/api/test/order/advance-stage')
+        .send({
+          orderId: 'ORD-123',
+          action: 'weigh'
+        });
+
+      expect(response.status).toBe(500);
+      expect(response.body.error).toContain('Failed to advance order stage');
+    });
+  });
+
   describe('DELETE /api/test/cleanup', () => {
     it('should delete all test data', async () => {
       Customer.find.mockResolvedValue([]);
       Order.deleteMany.mockResolvedValue({ deletedCount: 5 });
       Customer.deleteMany.mockResolvedValue({ deletedCount: 1 });
       Affiliate.deleteMany.mockResolvedValue({ deletedCount: 1 });
-      
+
       const response = await request(app)
         .delete('/api/test/cleanup');
-      
+
       expect(response.status).toBe(200);
       expect(response.body).toEqual({ message: 'Test data cleaned up successfully' });
       expect(Order.deleteMany).toHaveBeenCalledWith({ isTestOrder: true });
-      expect(Customer.deleteMany).toHaveBeenCalledWith({ 
-        email: { $in: ['spam-me@wavemax.promo', 'test.customer@wavemax.test', 'test.affiliate@wavemax.test'] } 
+      expect(Customer.deleteMany).toHaveBeenCalledWith({
+        email: { $in: ['spam-me@wavemax.promo', 'test.customer@wavemax.test', 'test.affiliate@wavemax.test'] }
       });
     });
 
     it('should handle database errors during cleanup', async () => {
       Order.deleteMany.mockRejectedValue(new Error('Database error'));
-      
+
       const response = await request(app)
         .delete('/api/test/cleanup');
-      
+
       expect(response.status).toBe(500);
       expect(response.body).toEqual({ error: 'Failed to cleanup test data' });
     });

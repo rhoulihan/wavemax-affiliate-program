@@ -271,8 +271,25 @@
         spinner.hide();
       }
 
+      // Try to extract detailed error message
+      let errorMessage = 'An error occurred while creating your account. Please contact support.';
+
+      // Check if error has response data with validation errors
+      if (error.errors && Array.isArray(error.errors)) {
+        const errorMessages = error.errors.map(err => {
+          const field = err.param || err.path || 'Unknown field';
+          return `${field}: ${err.msg}`;
+        });
+
+        errorMessage = errorMessages.length === 1
+          ? errorMessages[0]
+          : `Please fix the following errors:\n• ${errorMessages.join('\n• ')}`;
+      } else if (error.message && error.message !== 'An error occurred') {
+        errorMessage = error.message;
+      }
+
       if (window.modalAlert) {
-        window.modalAlert('An error occurred while creating your account. Please contact support.', 'Error');
+        window.modalAlert(errorMessage, 'Error');
       }
     }
   }

@@ -124,6 +124,12 @@ describe('Affiliate Controller', () => {
 
   describe('registerAffiliate', () => {
     it('should successfully register a new affiliate', async () => {
+      const BetaRequest = require('../../server/models/BetaRequest');
+      BetaRequest.findOne = jest.fn().mockResolvedValue({
+        email: 'john@example.com',
+        welcomeEmailSent: true
+      });
+
       const mockAffiliate = createMockDocument({
         affiliateId: 'AFF123456'
       });
@@ -152,8 +158,11 @@ describe('Affiliate Controller', () => {
         array: jest.fn().mockReturnValue([])
       });
 
-      Affiliate.findOne = createFindOneMock(null);
-      Affiliate.findOne.mockResolvedValue(null);
+      // Mock separate email and username checks (new implementation)
+      Affiliate.findOne = jest.fn()
+        .mockResolvedValueOnce(null)  // First call for email check
+        .mockResolvedValueOnce(null); // Second call for username check
+
       encryptionUtil.hashPassword.mockReturnValue({
         hash: 'hashedPassword',
         salt: 'salt'
@@ -167,9 +176,9 @@ describe('Affiliate Controller', () => {
       const handler = affiliateController.registerAffiliate;
       await handler(req, res, next);
 
-      expect(Affiliate.findOne).toHaveBeenCalledWith({
-        $or: [{ email: 'john@example.com' }, { username: 'johndoe' }]
-      });
+      // Check that email and username were checked separately
+      expect(Affiliate.findOne).toHaveBeenCalledWith({ email: 'john@example.com' });
+      expect(Affiliate.findOne).toHaveBeenCalledWith({ username: 'johndoe' });
       expect(encryptionUtil.hashPassword).toHaveBeenCalledWith('password123');
       expect(res.status).toHaveBeenCalledWith(201);
       expect(res.json).toHaveBeenCalledWith({
@@ -195,6 +204,12 @@ describe('Affiliate Controller', () => {
     });
 
     it('should handle duplicate email or username', async () => {
+      const BetaRequest = require('../../server/models/BetaRequest');
+      BetaRequest.findOne = jest.fn().mockResolvedValue({
+        email: 'existing@example.com',
+        welcomeEmailSent: true
+      });
+
       req.body = {
         email: 'existing@example.com',
         username: 'existing',
@@ -210,18 +225,31 @@ describe('Affiliate Controller', () => {
         salt: 'salt'
       });
 
-      Affiliate.findOne = jest.fn().mockResolvedValue({ email: 'existing@example.com' });
+      // Both email and username exist - mock both findOne calls
+      Affiliate.findOne = jest.fn()
+        .mockResolvedValueOnce({ email: 'existing@example.com' })  // email check
+        .mockResolvedValueOnce({ username: 'existing' }); // username check
 
       await affiliateController.registerAffiliate(req, res, next);
 
       expect(res.status).toHaveBeenCalledWith(400);
       expect(res.json).toHaveBeenCalledWith({
         success: false,
-        message: 'Email or username already in use'
+        message: 'Both email and username are already in use',
+        errors: {
+          email: 'Email already registered',
+          username: 'Username already taken'
+        }
       });
     });
 
     it('should handle email service failure gracefully', async () => {
+      const BetaRequest = require('../../server/models/BetaRequest');
+      BetaRequest.findOne = jest.fn().mockResolvedValue({
+        email: 'john@example.com',
+        welcomeEmailSent: true
+      });
+
       const mockAffiliate = createMockDocument({
         affiliateId: 'AFF123456'
       });
@@ -242,8 +270,9 @@ describe('Affiliate Controller', () => {
         isEmpty: jest.fn().mockReturnValue(true)
       });
 
-      Affiliate.findOne = createFindOneMock(null);
-      Affiliate.findOne.mockResolvedValue(null);
+      Affiliate.findOne = jest.fn()
+        .mockResolvedValueOnce(null)  // email check
+        .mockResolvedValueOnce(null); // username check
       encryptionUtil.hashPassword.mockReturnValue({
         hash: 'hashedPassword',
         salt: 'salt'
@@ -265,6 +294,9 @@ describe('Affiliate Controller', () => {
     });
 
     it('should handle database errors', async () => {
+      const BetaRequest = require('../../server/models/BetaRequest');
+      BetaRequest.findOne = jest.fn().mockRejectedValue(new Error('Database error'));
+
       req.body = {
         email: 'test@example.com',
         username: 'testuser',
@@ -279,8 +311,6 @@ describe('Affiliate Controller', () => {
         hash: 'hashedPassword',
         salt: 'salt'
       });
-
-      Affiliate.findOne = jest.fn().mockRejectedValue(new Error('Database error'));
 
       await affiliateController.registerAffiliate(req, res, next);
 

@@ -2,6 +2,9 @@
 (function() {
     'use strict';
 
+    // Store affiliate availability data
+    let affiliateAvailability = null;
+
     // Get current time in CDT timezone
     function getCurrentCDT() {
         const now = new Date();
@@ -90,7 +93,82 @@
         // Window end must be more than 24 hours in the future
         return hoursDiff > 24;
     }
-    
+
+    // Fetch affiliate availability from API
+    async function fetchAffiliateAvailability(affiliateId) {
+        if (!affiliateId) {
+            console.log('[Schedule V2 Embed] No affiliate ID, skipping availability fetch');
+            return null;
+        }
+
+        try {
+            console.log('[Schedule V2 Embed] Fetching availability for affiliate:', affiliateId);
+
+            // Calculate date range (today + 30 days)
+            const startDate = new Date();
+            const endDate = new Date();
+            endDate.setDate(endDate.getDate() + 30);
+
+            const startDateStr = startDate.toISOString().split('T')[0];
+            const endDateStr = endDate.toISOString().split('T')[0];
+
+            const url = `/api/v1/affiliates/${affiliateId}/available-slots?startDate=${startDateStr}&endDate=${endDateStr}`;
+            const response = await fetch(url);
+
+            if (!response.ok) {
+                console.warn('[Schedule V2 Embed] Failed to fetch availability:', response.status);
+                return null;
+            }
+
+            const data = await response.json();
+            console.log('[Schedule V2 Embed] Availability data received:', data);
+
+            if (data.success && data.availableDates) {
+                return data.availableDates;
+            }
+            return null;
+        } catch (error) {
+            console.warn('[Schedule V2 Embed] Error fetching availability:', error);
+            return null;
+        }
+    }
+
+    // Check if a date and time slot is available according to affiliate schedule
+    function isAffiliateAvailable(dateString, timeSlot) {
+        if (!affiliateAvailability) {
+            // If no availability data, assume all slots are available (backward compatibility)
+            return true;
+        }
+
+        const dateEntry = affiliateAvailability.find(entry => {
+            const entryDate = new Date(entry.date).toISOString().split('T')[0];
+            return entryDate === dateString;
+        });
+
+        if (!dateEntry) {
+            // Date not in available range
+            return false;
+        }
+
+        // Check if the specific time slot is available
+        return dateEntry.availableSlots && dateEntry.availableSlots[timeSlot] === true;
+    }
+
+    // Get all available dates from affiliate schedule
+    function getAvailableDatesFromSchedule() {
+        if (!affiliateAvailability) {
+            return null; // No restriction
+        }
+
+        return affiliateAvailability
+            .filter(entry => {
+                // Check if at least one slot is available
+                const slots = entry.availableSlots;
+                return slots && (slots.morning || slots.afternoon || slots.evening);
+            })
+            .map(entry => new Date(entry.date).toISOString().split('T')[0]);
+    }
+
     // Setup date picker with proper restrictions
     function setupDatePicker() {
         const pickupDateInput = document.getElementById('pickupDate');
@@ -123,28 +201,41 @@
     function updateTimeSlotAvailability() {
         const pickupDateInput = document.getElementById('pickupDate');
         if (!pickupDateInput || !pickupDateInput.value) return;
-        
+
         const selectedDate = pickupDateInput.value;
         const timeSlots = document.querySelectorAll('.time-slot');
-        
+
         console.log('[Schedule V2 Embed] Validating time slots for date:', selectedDate);
-        
+
         timeSlots.forEach(slot => {
             const timeValue = slot.dataset.timeValue;
-            const isValid = isPickupWindowValid(selectedDate, timeValue);
+            const is24HourValid = isPickupWindowValid(selectedDate, timeValue);
+            const isAffiliateSlotAvailable = isAffiliateAvailable(selectedDate, timeValue);
+            const isValid = is24HourValid && isAffiliateSlotAvailable;
             const radioInput = slot.querySelector('input[type="radio"]');
-            
+
             const slotTimes = {
                 'morning': '8 AM - 12 PM',
                 'afternoon': '12 PM - 4 PM',
                 'evening': '4 PM - 8 PM'
             };
-            console.log(`[Schedule V2 Embed] ${timeValue} (${slotTimes[timeValue]}): ${isValid ? 'AVAILABLE' : 'UNAVAILABLE (within 24 hrs)'}`);
-            
+
+            let unavailableReason = '';
+            if (!is24HourValid) {
+                unavailableReason = 'within 24 hrs';
+            } else if (!isAffiliateSlotAvailable) {
+                unavailableReason = 'affiliate unavailable';
+            }
+
+            console.log(`[Schedule V2 Embed] ${timeValue} (${slotTimes[timeValue]}): ${isValid ? 'AVAILABLE' : `UNAVAILABLE (${unavailableReason})`}`);
+
             if (isValid) {
                 slot.classList.remove('disabled', 'opacity-50', 'cursor-not-allowed');
                 slot.classList.add('cursor-pointer');
                 if (radioInput) radioInput.disabled = false;
+                // Remove any unavailability indicator
+                const indicator = slot.querySelector('.unavailable-indicator');
+                if (indicator) indicator.remove();
             } else {
                 slot.classList.add('disabled', 'opacity-50', 'cursor-not-allowed');
                 slot.classList.remove('cursor-pointer', 'selected');
@@ -152,9 +243,16 @@
                     radioInput.disabled = true;
                     radioInput.checked = false;
                 }
+                // Add visual indicator if not already present
+                if (!slot.querySelector('.unavailable-indicator') && !isAffiliateSlotAvailable && is24HourValid) {
+                    const indicator = document.createElement('span');
+                    indicator.className = 'unavailable-indicator text-xs text-red-500 block mt-1';
+                    indicator.textContent = 'Not available';
+                    slot.appendChild(indicator);
+                }
             }
         });
-        
+
         // Auto-select first available time slot if none selected
         const selectedSlot = document.querySelector('.time-slot input[type="radio"]:checked');
         if (!selectedSlot) {
@@ -583,26 +681,33 @@
     async function loadAffiliateInfo(affiliateId) {
         try {
             console.log('[Schedule V2 Embed] Loading affiliate info for ID:', affiliateId);
-            
+
             if (!affiliateId) {
                 console.warn('[Schedule V2 Embed] No affiliate ID provided');
                 return;
             }
-            
+
             const data = await ApiClient.get(`/api/affiliates/${affiliateId}/public`, {
                 showError: false
             });
-            
+
             console.log('[Schedule V2 Embed] API response:', data);
             if (data && data.affiliate) {
                 // Update affiliate name in the subtitle
                 const affiliateNameEl = document.getElementById('affiliateName');
                 if (affiliateNameEl) {
-                    const name = data.affiliate.businessName || 
+                    const name = data.affiliate.businessName ||
                                 `${data.affiliate.firstName} ${data.affiliate.lastName}`;
                     affiliateNameEl.textContent = name;
                     console.log('[Schedule V2 Embed] Affiliate name set to:', name);
                 }
+            }
+
+            // Fetch affiliate availability schedule
+            affiliateAvailability = await fetchAffiliateAvailability(affiliateId);
+            if (affiliateAvailability) {
+                console.log('[Schedule V2 Embed] Availability loaded, updating time slots');
+                updateTimeSlotAvailability();
             }
         } catch (error) {
             console.warn('[Schedule V2 Embed] Failed to load affiliate info:', error);
