@@ -24,6 +24,7 @@
 
     let currentLanguage = 'en';
     let parentReady = false;
+    let seoConfig = null;
 
     // Global actions - These run for ALL pages
     const globalActions = {
@@ -45,6 +46,17 @@
             const savedLanguage = localStorage.getItem('selectedLanguage') || 'en';
             if (savedLanguage !== 'en') {
                 setLanguage(savedLanguage);
+            }
+        },
+
+        // Action 3: Send SEO data to parent
+        sendSEOData: function() {
+            if (seoConfig) {
+                console.log('[Iframe Bridge V2] Sending SEO data to parent');
+                sendToParent({
+                    type: 'seo-data',
+                    data: seoConfig
+                });
             }
         }
     };
@@ -267,6 +279,18 @@
         }
     }
 
+    function loadSEOConfig(seoData) {
+        if (seoData) {
+            seoConfig = seoData;
+            console.log('[Iframe Bridge V2] SEO config loaded');
+
+            // If parent is already ready, send SEO data immediately
+            if (parentReady) {
+                globalActions.sendSEOData();
+            }
+        }
+    }
+
     // Auto-resize functionality
     function setupAutoResize() {
         // Initial height
@@ -315,6 +339,7 @@
         translatePage: translatePage,
         updateHeight: updateHeight,
         loadTranslations: loadTranslations,
+        loadSEOConfig: loadSEOConfig,
 
         // Register page-specific action
         registerPageAction: function(pageId, actionName, actionFn) {

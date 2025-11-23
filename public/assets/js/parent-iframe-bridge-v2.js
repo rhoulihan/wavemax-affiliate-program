@@ -233,6 +233,12 @@
                 }
                 break;
 
+            case 'seo-data':
+                if (data) {
+                    applySEOOptimizations(data);
+                }
+                break;
+
             default:
                 console.log('[Parent Bridge V2] Unknown message type:', type);
         }
@@ -313,6 +319,117 @@
             lastIframeHeight = newHeight;
             iframe.style.height = newHeight + 'px';
         }
+    }
+
+    // SEO Optimizations - Apply route-specific SEO data
+    function applySEOOptimizations(seoData) {
+        console.log('[Parent Bridge V2] Applying SEO optimizations');
+
+        // 1. Update or create basic meta tags
+        if (seoData.meta) {
+            updateMetaTag('description', seoData.meta.description);
+            updateMetaTag('keywords', seoData.meta.keywords);
+            updateMetaTag('author', seoData.meta.author);
+
+            // Update page title
+            if (seoData.meta.title) {
+                document.title = seoData.meta.title;
+            }
+
+            // Update canonical URL
+            if (seoData.meta.canonicalUrl) {
+                updateLink('canonical', seoData.meta.canonicalUrl);
+            }
+        }
+
+        // 2. Update Open Graph tags
+        if (seoData.openGraph) {
+            updateMetaProperty('og:title', seoData.openGraph.title);
+            updateMetaProperty('og:description', seoData.openGraph.description);
+            updateMetaProperty('og:type', seoData.openGraph.type);
+            updateMetaProperty('og:url', seoData.openGraph.url);
+            updateMetaProperty('og:image', seoData.openGraph.image);
+            updateMetaProperty('og:image:width', seoData.openGraph.imageWidth);
+            updateMetaProperty('og:image:height', seoData.openGraph.imageHeight);
+            updateMetaProperty('og:site_name', seoData.openGraph.siteName);
+            updateMetaProperty('og:locale', seoData.openGraph.locale);
+        }
+
+        // 3. Update Twitter Card tags
+        if (seoData.twitter) {
+            updateMetaTag('twitter:card', seoData.twitter.card);
+            updateMetaTag('twitter:site', seoData.twitter.site);
+            updateMetaTag('twitter:title', seoData.twitter.title);
+            updateMetaTag('twitter:description', seoData.twitter.description);
+            updateMetaTag('twitter:image', seoData.twitter.image);
+            updateMetaTag('twitter:image:alt', seoData.twitter.imageAlt);
+        }
+
+        // 4. Inject structured data (JSON-LD)
+        if (seoData.structuredData) {
+            // Remove any existing structured data
+            const existingScripts = document.querySelectorAll('script[type="application/ld+json"]');
+            existingScripts.forEach(script => {
+                if (script.getAttribute('data-injected-by-bridge')) {
+                    script.remove();
+                }
+            });
+
+            // Inject new structured data
+            Object.keys(seoData.structuredData).forEach(schemaType => {
+                const script = document.createElement('script');
+                script.type = 'application/ld+json';
+                script.setAttribute('data-injected-by-bridge', 'true');
+                script.setAttribute('data-schema-type', schemaType);
+                script.textContent = JSON.stringify(seoData.structuredData[schemaType]);
+                document.head.appendChild(script);
+                console.log('[Parent Bridge V2] Injected', schemaType, 'schema');
+            });
+        }
+
+        console.log('[Parent Bridge V2] SEO optimizations applied');
+    }
+
+    // Helper function to update or create meta tag by name
+    function updateMetaTag(name, content) {
+        if (!content) return;
+
+        let meta = document.querySelector(`meta[name="${name}"]`);
+        if (!meta) {
+            meta = document.createElement('meta');
+            meta.setAttribute('name', name);
+            meta.setAttribute('data-injected-by-bridge', 'true');
+            document.head.appendChild(meta);
+        }
+        meta.setAttribute('content', content);
+    }
+
+    // Helper function to update or create meta tag by property
+    function updateMetaProperty(property, content) {
+        if (!content) return;
+
+        let meta = document.querySelector(`meta[property="${property}"]`);
+        if (!meta) {
+            meta = document.createElement('meta');
+            meta.setAttribute('property', property);
+            meta.setAttribute('data-injected-by-bridge', 'true');
+            document.head.appendChild(meta);
+        }
+        meta.setAttribute('content', content);
+    }
+
+    // Helper function to update or create link tag
+    function updateLink(rel, href) {
+        if (!href) return;
+
+        let link = document.querySelector(`link[rel="${rel}"]`);
+        if (!link) {
+            link = document.createElement('link');
+            link.setAttribute('rel', rel);
+            link.setAttribute('data-injected-by-bridge', 'true');
+            document.head.appendChild(link);
+        }
+        link.setAttribute('href', href);
     }
 
     // Public API

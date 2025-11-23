@@ -687,6 +687,7 @@ function initializePageScripts(route) {
             'https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js',
             '/assets/js/iframe-bridge-v2.js',
             '/assets/js/self-serve-translations.js',
+            '/assets/js/seo-config-self-serve.js',
             '/assets/js/self-serve-laundry-modern.js'
         ],
         '/wash-dry-fold': ['/assets/js/site-page-loader.js'],
