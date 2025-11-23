@@ -272,6 +272,80 @@
         }
     };
 
+    // Create language selector
+    function createLanguageSelector() {
+        // Only create if not already exists
+        if (document.getElementById('wavemax-simple-language-selector')) {
+            return;
+        }
+
+        console.log('[Parent Bridge V2] Creating language selector');
+
+        const selector = document.createElement('select');
+        selector.id = 'wavemax-simple-language-selector';
+        selector.style.cssText = `
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            z-index: 9999;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background: white;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-size: 14px;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        `;
+
+        const languages = [
+            { code: 'en', name: 'English' },
+            { code: 'es', name: 'Español' },
+            { code: 'pt', name: 'Português' },
+            { code: 'de', name: 'Deutsch' }
+        ];
+
+        const currentLang = localStorage.getItem('wavemax-language') || 'en';
+
+        languages.forEach(lang => {
+            const option = document.createElement('option');
+            option.value = lang.code;
+            option.textContent = lang.name;
+            option.selected = lang.code === currentLang;
+            selector.appendChild(option);
+        });
+
+        selector.addEventListener('change', function(e) {
+            const langCode = e.target.value;
+            console.log('[Parent Bridge V2] Language changed to:', langCode);
+
+            // Save to localStorage
+            localStorage.setItem('wavemax-language', langCode);
+
+            // Send language change to iframe
+            sendLanguageChange(langCode);
+
+            // Dispatch custom event
+            window.dispatchEvent(new CustomEvent('languageChanged', {
+                detail: { language: langCode }
+            }));
+        });
+
+        document.body.appendChild(selector);
+    }
+
+    // Public API
+    window.WaveMaxBridgeV2 = {
+        sendToIframe: sendToIframe,
+        resizeIframe: resizeIframe,
+        getCurrentLanguage: () => localStorage.getItem('wavemax-language') || 'en',
+        setLanguage: (language) => {
+            localStorage.setItem('wavemax-language', language);
+            sendLanguageChange(language);
+        },
+        createLanguageSelector: createLanguageSelector
+    };
+
     // Initialize when DOM is ready
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', init);
@@ -284,6 +358,8 @@
         if (!iframe) {
             init();
         }
+        // Create language selector after page loads
+        createLanguageSelector();
     });
 
 })();
