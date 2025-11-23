@@ -984,12 +984,12 @@ exports.sendCustomerWelcomeEmail = async (customer, affiliate, bagInfo = {}) => 
         YOUR_INFO_TITLE: 'Your Account Information',
         CUSTOMER_ID_LABEL: 'Customer ID',
         SERVICE_PROVIDER_LABEL: 'Your Service Provider',
-        BAG_INFO_TITLE: isV2Registration ? 'How Our Service Works' : (isFreeRegistration ? 'Your FREE Laundry Bag' : 'Your Laundry Bag Credit'),
-        BAG_INFO_MESSAGE: isV2Registration ? 
+        BAG_INFO_TITLE: isV2Registration ? 'How Our Service Works' : (isFreeRegistration ? 'Your FREE Laundry Bag' : 'Your Laundry Bags'),
+        BAG_INFO_MESSAGE: isV2Registration ?
           'Schedule your laundry pickup online. After we pick up and weigh your laundry, you\'ll receive an invoice. Pay conveniently via Venmo, PayPal, or CashApp.' :
-          (isFreeRegistration ? 
+          (isFreeRegistration ?
             'Great news! Your first laundry bag is FREE! It will be delivered to you by your service provider.' :
-            'We\'ve credited your account with prepaid laundry bags. These bags will be delivered to you by your service provider.'),
+            'Your laundry bags are ready! Your service provider will bring them when you place your first order.'),
         BAG_CREDIT_TITLE: 'Account Credit Details',
         BAGS_PURCHASED_LABEL: isFreeRegistration ? 'Bags Received' : 'Bags Purchased',
         COST_PER_BAG_LABEL: 'Cost per Bag',
@@ -997,9 +997,9 @@ exports.sendCustomerWelcomeEmail = async (customer, affiliate, bagInfo = {}) => 
         NOTE_LABEL: 'Note',
         CREDIT_NOTE_MESSAGE: isV2Registration ?
           'No upfront payment required. You\'ll pay after your laundry is picked up and weighed.' :
-          (isFreeRegistration ? 
+          (isFreeRegistration ?
             'Your first bag was FREE! Each bag holds approximately 20-25 lbs of laundry.' :
-            'This credit will be automatically applied to your first orders. Each bag holds approximately 20-25 lbs of laundry.'),
+            'Your service provider will deliver your bags when you schedule your first pickup. Each bag holds approximately 20-25 lbs of laundry.'),
         HOW_IT_WORKS_TITLE: 'How It Works',
         STEP_1_TITLE: 'Schedule a Pickup',
         STEP_1_DESC: 'Login to your dashboard and schedule a convenient pickup time.',
@@ -1012,7 +1012,7 @@ exports.sendCustomerWelcomeEmail = async (customer, affiliate, bagInfo = {}) => 
         READY_TO_SCHEDULE_TITLE: 'Ready to Schedule Your First Pickup?',
         READY_TO_SCHEDULE_MESSAGE: 'Click the button below to access your dashboard and schedule your first pickup.',
         SCHEDULE_BUTTON: 'Schedule Pickup',
-        CREDIT_REMINDER: 'Remember: Your account has been credited for your prepaid bags!',
+        CREDIT_REMINDER: 'Remember: Your bags will be delivered with your first pickup!',
         QUESTIONS_TITLE: 'Questions?',
         QUESTIONS_MESSAGE: 'Your service provider is here to help! Feel free to reach out:',
         NAME_LABEL: 'Name',
@@ -1032,10 +1032,10 @@ exports.sendCustomerWelcomeEmail = async (customer, affiliate, bagInfo = {}) => 
         YOUR_INFO_TITLE: 'Información de Su Cuenta',
         CUSTOMER_ID_LABEL: 'ID de Cliente',
         SERVICE_PROVIDER_LABEL: 'Su Proveedor de Servicio',
-        BAG_INFO_TITLE: isFreeRegistration ? 'Su Bolsa de Lavandería GRATIS' : 'Su Crédito de Bolsas de Lavandería',
+        BAG_INFO_TITLE: isFreeRegistration ? 'Su Bolsa de Lavandería GRATIS' : 'Sus Bolsas de Lavandería',
         BAG_INFO_MESSAGE: isFreeRegistration ?
           '¡Excelentes noticias! ¡Su primera bolsa de lavandería es GRATIS! Será entregada por su proveedor de servicio.' :
-          'Hemos acreditado su cuenta con bolsas de lavandería prepagadas. Estas bolsas serán entregadas por su proveedor de servicio.',
+          '¡Sus bolsas de lavandería están listas! Su proveedor de servicio las traerá cuando haga su primer pedido.',
         BAG_CREDIT_TITLE: 'Detalles del Crédito de Cuenta',
         BAGS_PURCHASED_LABEL: isFreeRegistration ? 'Bolsas Recibidas' : 'Bolsas Compradas',
         COST_PER_BAG_LABEL: 'Costo por Bolsa',
@@ -1043,7 +1043,7 @@ exports.sendCustomerWelcomeEmail = async (customer, affiliate, bagInfo = {}) => 
         NOTE_LABEL: 'Nota',
         CREDIT_NOTE_MESSAGE: isFreeRegistration ?
           '¡Su primera bolsa fue GRATIS! Cada bolsa contiene aproximadamente 20-25 libras de ropa.' :
-          'Este crédito se aplicará automáticamente a sus primeros pedidos. Cada bolsa contiene aproximadamente 20-25 libras de ropa.',
+          'Su proveedor de servicio entregará sus bolsas cuando programe su primera recogida. Cada bolsa contiene aproximadamente 20-25 libras de ropa.',
         HOW_IT_WORKS_TITLE: 'Cómo Funciona',
         STEP_1_TITLE: 'Programe una Recogida',
         STEP_1_DESC: 'Inicie sesión en su panel y programe un horario conveniente de recogida.',
@@ -1056,7 +1056,7 @@ exports.sendCustomerWelcomeEmail = async (customer, affiliate, bagInfo = {}) => 
         READY_TO_SCHEDULE_TITLE: '¿Listo para Programar Su Primera Recogida?',
         READY_TO_SCHEDULE_MESSAGE: 'Haga clic en el botón a continuación para acceder a su panel y programar su primera recogida.',
         SCHEDULE_BUTTON: 'Programar Recogida',
-        CREDIT_REMINDER: '¡Recuerde: Su cuenta ha sido acreditada por sus bolsas prepagadas!',
+        CREDIT_REMINDER: '¡Recuerde: Sus bolsas serán entregadas con su primera recogida!',
         QUESTIONS_TITLE: '¿Preguntas?',
         QUESTIONS_MESSAGE: '¡Su proveedor de servicio está aquí para ayudar! No dude en contactar:',
         NAME_LABEL: 'Nombre',
@@ -1076,10 +1076,10 @@ exports.sendCustomerWelcomeEmail = async (customer, affiliate, bagInfo = {}) => 
         YOUR_INFO_TITLE: 'Informações da Sua Conta',
         CUSTOMER_ID_LABEL: 'ID do Cliente',
         SERVICE_PROVIDER_LABEL: 'Seu Provedor de Serviço',
-        BAG_INFO_TITLE: isFreeRegistration ? 'Sua Sacola de Lavanderia GRÁTIS' : 'Seu Crédito de Sacolas de Lavanderia',
+        BAG_INFO_TITLE: isFreeRegistration ? 'Sua Sacola de Lavanderia GRÁTIS' : 'Suas Sacolas de Lavanderia',
         BAG_INFO_MESSAGE: isFreeRegistration ?
           'Ótimas notícias! Sua primeira sacola de lavanderia é GRÁTIS! Ela será entregue pelo seu provedor de serviço.' :
-          'Creditamos sua conta com sacolas de lavanderia pré-pagas. Estas sacolas serão entregues pelo seu provedor de serviço.',
+          'Suas sacolas de lavanderia estão prontas! Seu provedor de serviço as trará quando você fizer seu primeiro pedido.',
         BAG_CREDIT_TITLE: 'Detalhes do Crédito da Conta',
         BAGS_PURCHASED_LABEL: isFreeRegistration ? 'Sacolas Recebidas' : 'Sacolas Compradas',
         COST_PER_BAG_LABEL: 'Custo por Sacola',
@@ -1087,7 +1087,7 @@ exports.sendCustomerWelcomeEmail = async (customer, affiliate, bagInfo = {}) => 
         NOTE_LABEL: 'Nota',
         CREDIT_NOTE_MESSAGE: isFreeRegistration ?
           'Sua primeira sacola foi GRÁTIS! Cada sacola comporta aproximadamente 20-25 libras de roupa.' :
-          'Este crédito será aplicado automaticamente aos seus primeiros pedidos. Cada sacola comporta aproximadamente 20-25 libras de roupa.',
+          'Seu provedor de serviço entregará suas sacolas quando você agendar sua primeira coleta. Cada sacola comporta aproximadamente 20-25 libras de roupa.',
         HOW_IT_WORKS_TITLE: 'Como Funciona',
         STEP_1_TITLE: 'Agende uma Coleta',
         STEP_1_DESC: 'Faça login no seu painel e agende um horário conveniente para coleta.',
@@ -1100,7 +1100,7 @@ exports.sendCustomerWelcomeEmail = async (customer, affiliate, bagInfo = {}) => 
         READY_TO_SCHEDULE_TITLE: 'Pronto para Agendar Sua Primeira Coleta?',
         READY_TO_SCHEDULE_MESSAGE: 'Clique no botão abaixo para acessar seu painel e agendar sua primeira coleta.',
         SCHEDULE_BUTTON: 'Agendar Coleta',
-        CREDIT_REMINDER: 'Lembre-se: Sua conta foi creditada pelas suas sacolas pré-pagas!',
+        CREDIT_REMINDER: 'Lembre-se: Suas sacolas serão entregues com sua primeira coleta!',
         QUESTIONS_TITLE: 'Dúvidas?',
         QUESTIONS_MESSAGE: 'Seu provedor de serviço está aqui para ajudar! Sinta-se à vontade para entrar em contato:',
         NAME_LABEL: 'Nome',
@@ -1120,10 +1120,10 @@ exports.sendCustomerWelcomeEmail = async (customer, affiliate, bagInfo = {}) => 
         YOUR_INFO_TITLE: 'Ihre Kontoinformationen',
         CUSTOMER_ID_LABEL: 'Kunden-ID',
         SERVICE_PROVIDER_LABEL: 'Ihr Dienstleister',
-        BAG_INFO_TITLE: isFreeRegistration ? 'Ihr KOSTENLOSER Wäschesack' : 'Ihr Wäschesack-Guthaben',
+        BAG_INFO_TITLE: isFreeRegistration ? 'Ihr KOSTENLOSER Wäschesack' : 'Ihre Wäschesäcke',
         BAG_INFO_MESSAGE: isFreeRegistration ?
           'Großartige Neuigkeiten! Ihr erster Wäschesack ist KOSTENLOS! Er wird von Ihrem Dienstleister geliefert.' :
-          'Wir haben Ihrem Konto vorausbezahlte Wäschesäcke gutgeschrieben. Diese Säcke werden von Ihrem Dienstleister geliefert.',
+          'Ihre Wäschesäcke sind bereit! Ihr Dienstleister wird sie bei Ihrer ersten Bestellung mitbringen.',
         BAG_CREDIT_TITLE: 'Kontoguthaben Details',
         BAGS_PURCHASED_LABEL: isFreeRegistration ? 'Erhaltene Säcke' : 'Gekaufte Säcke',
         COST_PER_BAG_LABEL: 'Kosten pro Sack',
@@ -1131,7 +1131,7 @@ exports.sendCustomerWelcomeEmail = async (customer, affiliate, bagInfo = {}) => 
         NOTE_LABEL: 'Hinweis',
         CREDIT_NOTE_MESSAGE: isFreeRegistration ?
           'Ihr erster Sack war KOSTENLOS! Jeder Sack fasst etwa 20-25 Pfund Wäsche.' :
-          'Dieses Guthaben wird automatisch auf Ihre ersten Bestellungen angewendet. Jeder Sack fasst etwa 20-25 Pfund Wäsche.',
+          'Ihr Dienstleister wird Ihre Säcke liefern, wenn Sie Ihre erste Abholung planen. Jeder Sack fasst etwa 20-25 Pfund Wäsche.',
         HOW_IT_WORKS_TITLE: 'So funktioniert es',
         STEP_1_TITLE: 'Abholung planen',
         STEP_1_DESC: 'Melden Sie sich in Ihrem Dashboard an und planen Sie eine passende Abholzeit.',
@@ -1144,7 +1144,7 @@ exports.sendCustomerWelcomeEmail = async (customer, affiliate, bagInfo = {}) => 
         READY_TO_SCHEDULE_TITLE: 'Bereit, Ihre erste Abholung zu planen?',
         READY_TO_SCHEDULE_MESSAGE: 'Klicken Sie auf den Button unten, um auf Ihr Dashboard zuzugreifen und Ihre erste Abholung zu planen.',
         SCHEDULE_BUTTON: 'Abholung planen',
-        CREDIT_REMINDER: 'Denken Sie daran: Ihrem Konto wurden Ihre vorausbezahlten Säcke gutgeschrieben!',
+        CREDIT_REMINDER: 'Denken Sie daran: Ihre Säcke werden mit Ihrer ersten Abholung geliefert!',
         QUESTIONS_TITLE: 'Fragen?',
         QUESTIONS_MESSAGE: 'Ihr Dienstleister ist hier, um zu helfen! Zögern Sie nicht, Kontakt aufzunehmen:',
         NAME_LABEL: 'Name',
@@ -1171,7 +1171,7 @@ exports.sendCustomerWelcomeEmail = async (customer, affiliate, bagInfo = {}) => 
       bag_fee: bagFee.toFixed(2),
       total_credit: totalCredit.toFixed(2),
       login_url: 'https://www.wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program?login=customer',
-      schedule_url: 'https://www.wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program?login=customer&pickup=true',
+      schedule_url: 'https://www.wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program?login=customer',
       current_year: new Date().getFullYear(),
       ...emailTranslations
     };
@@ -1198,6 +1198,166 @@ exports.sendCustomerWelcomeEmail = async (customer, affiliate, bagInfo = {}) => 
   } catch (error) {
     console.error('Error sending customer welcome email:', error);
     throw error; // Re-throw to let the controller handle it
+  }
+};
+
+/**
+ * Send bags ready notification email to customer
+ */
+exports.sendCustomerBagsReadyEmail = async (customer, affiliate, bagInfo = {}) => {
+  try {
+    // Validate inputs
+    if (!customer || !affiliate) {
+      console.error('Missing customer or affiliate data for bags ready email');
+      return;
+    }
+
+    if (!customer.email) {
+      console.error('Customer email is missing or undefined');
+      return;
+    }
+
+    const language = customer.languagePreference || 'en';
+    const template = await loadTemplate('customer-bags-ready', language);
+
+    // Build affiliate name with fallback
+    const affiliateName = affiliate.businessName ||
+      `${affiliate.firstName || ''} ${affiliate.lastName || ''}`.trim() ||
+      'Your WaveMAX Partner';
+
+    // Extract bag information with defaults
+    const numberOfBags = bagInfo.numberOfBags || 0;
+
+    // Get translations for the email content
+    const translations = {
+      en: {
+        EMAIL_TITLE: 'Your Laundry Bags Are Ready!',
+        EMAIL_HEADER: 'Your Bags Are Ready!',
+        GREETING: `Hi ${customer.firstName},`,
+        MAIN_MESSAGE: 'Great news! Your laundry bags have been prepared and are ready for you.',
+        BAGS_READY_TITLE: 'Your Bags Are Ready!',
+        BAGS_READY_MESSAGE: `Your service provider will deliver your ${numberOfBags > 0 ? numberOfBags + ' ' : ''}laundry bag${numberOfBags !== 1 ? 's' : ''} when you place your first order.`,
+        NEXT_STEPS_TITLE: 'What Happens Next?',
+        STEP_1: 'Schedule your first pickup using the button below',
+        STEP_2: 'Your service provider will bring your bags with your first pickup',
+        STEP_3: 'Start enjoying hassle-free laundry service!',
+        YOUR_PROVIDER_TITLE: 'Your Service Provider',
+        NAME_LABEL: 'Name',
+        PHONE_LABEL: 'Phone',
+        EMAIL_LABEL: 'Email',
+        PROVIDER_MESSAGE: 'Feel free to reach out if you have any questions about your bags or service!',
+        READY_TO_START_TITLE: 'Ready to Schedule Your First Pickup?',
+        READY_TO_START_MESSAGE: 'Click the button below to access your dashboard and schedule your first laundry pickup.',
+        SCHEDULE_BUTTON: 'Schedule Your First Pickup',
+        DASHBOARD_MESSAGE: 'Access your customer dashboard anytime to manage orders and track deliveries.',
+        DASHBOARD_BUTTON: 'Go to Dashboard',
+        FOOTER_SUPPORT: 'If you have any questions, please contact our support team.',
+        FOOTER_RIGHTS: 'All rights reserved.',
+        FOOTER_ADDRESS: '123 Main Street, Austin, TX 78701'
+      },
+      es: {
+        EMAIL_TITLE: '¡Sus Bolsas de Lavandería Están Listas!',
+        EMAIL_HEADER: '¡Sus Bolsas Están Listas!',
+        GREETING: `Hola ${customer.firstName},`,
+        MAIN_MESSAGE: '¡Excelentes noticias! Sus bolsas de lavandería han sido preparadas y están listas para usted.',
+        BAGS_READY_TITLE: '¡Sus Bolsas Están Listas!',
+        BAGS_READY_MESSAGE: `Su proveedor de servicio entregará su${numberOfBags > 0 ? 's ' + numberOfBags : 's'} bolsa${numberOfBags !== 1 ? 's' : ''} de lavandería cuando haga su primer pedido.`,
+        NEXT_STEPS_TITLE: '¿Qué Sucede Ahora?',
+        STEP_1: 'Programe su primera recogida usando el botón a continuación',
+        STEP_2: 'Su proveedor de servicio traerá sus bolsas con su primera recogida',
+        STEP_3: '¡Comience a disfrutar del servicio de lavandería sin complicaciones!',
+        YOUR_PROVIDER_TITLE: 'Su Proveedor de Servicio',
+        NAME_LABEL: 'Nombre',
+        PHONE_LABEL: 'Teléfono',
+        EMAIL_LABEL: 'Correo',
+        PROVIDER_MESSAGE: '¡No dude en contactar si tiene preguntas sobre sus bolsas o el servicio!',
+        READY_TO_START_TITLE: '¿Listo para Programar Su Primera Recogida?',
+        READY_TO_START_MESSAGE: 'Haga clic en el botón a continuación para acceder a su panel y programar su primera recogida de lavandería.',
+        SCHEDULE_BUTTON: 'Programe Su Primera Recogida',
+        DASHBOARD_MESSAGE: 'Acceda a su panel de cliente en cualquier momento para gestionar pedidos y rastrear entregas.',
+        DASHBOARD_BUTTON: 'Ir al Panel',
+        FOOTER_SUPPORT: 'Si tiene alguna pregunta, contacte a nuestro equipo de soporte.',
+        FOOTER_RIGHTS: 'Todos los derechos reservados.',
+        FOOTER_ADDRESS: '123 Main Street, Austin, TX 78701'
+      },
+      pt: {
+        EMAIL_TITLE: 'Suas Sacolas de Lavanderia Estão Prontas!',
+        EMAIL_HEADER: 'Suas Sacolas Estão Prontas!',
+        GREETING: `Olá ${customer.firstName},`,
+        MAIN_MESSAGE: 'Ótimas notícias! Suas sacolas de lavanderia foram preparadas e estão prontas para você.',
+        BAGS_READY_TITLE: 'Suas Sacolas Estão Prontas!',
+        BAGS_READY_MESSAGE: `Seu provedor de serviço entregará sua${numberOfBags > 0 ? 's ' + numberOfBags : 's'} sacola${numberOfBags !== 1 ? 's' : ''} de lavanderia quando você fizer seu primeiro pedido.`,
+        NEXT_STEPS_TITLE: 'O Que Acontece Agora?',
+        STEP_1: 'Agende sua primeira coleta usando o botão abaixo',
+        STEP_2: 'Seu provedor de serviço trará suas sacolas com sua primeira coleta',
+        STEP_3: 'Comece a desfrutar do serviço de lavanderia sem complicações!',
+        YOUR_PROVIDER_TITLE: 'Seu Provedor de Serviço',
+        NAME_LABEL: 'Nome',
+        PHONE_LABEL: 'Telefone',
+        EMAIL_LABEL: 'E-mail',
+        PROVIDER_MESSAGE: 'Sinta-se à vontade para entrar em contato se tiver dúvidas sobre suas sacolas ou serviço!',
+        READY_TO_START_TITLE: 'Pronto para Agendar Sua Primeira Coleta?',
+        READY_TO_START_MESSAGE: 'Clique no botão abaixo para acessar seu painel e agendar sua primeira coleta de lavanderia.',
+        SCHEDULE_BUTTON: 'Agende Sua Primeira Coleta',
+        DASHBOARD_MESSAGE: 'Acesse seu painel de cliente a qualquer momento para gerenciar pedidos e rastrear entregas.',
+        DASHBOARD_BUTTON: 'Ir para o Painel',
+        FOOTER_SUPPORT: 'Se você tiver alguma dúvida, entre em contato com nossa equipe de suporte.',
+        FOOTER_RIGHTS: 'Todos os direitos reservados.',
+        FOOTER_ADDRESS: '123 Main Street, Austin, TX 78701'
+      },
+      de: {
+        EMAIL_TITLE: 'Ihre Wäschesäcke Sind Bereit!',
+        EMAIL_HEADER: 'Ihre Säcke Sind Bereit!',
+        GREETING: `Hallo ${customer.firstName},`,
+        MAIN_MESSAGE: 'Großartige Neuigkeiten! Ihre Wäschesäcke wurden vorbereitet und sind für Sie bereit.',
+        BAGS_READY_TITLE: 'Ihre Säcke Sind Bereit!',
+        BAGS_READY_MESSAGE: `Ihr Dienstleister wird Ihre ${numberOfBags > 0 ? numberOfBags + ' ' : ''}Wäschesack${numberOfBags !== 1 ? 'säcke' : ''} bei Ihrer ersten Bestellung mitbringen.`,
+        NEXT_STEPS_TITLE: 'Was Passiert Als Nächstes?',
+        STEP_1: 'Planen Sie Ihre erste Abholung mit dem Button unten',
+        STEP_2: 'Ihr Dienstleister bringt Ihre Säcke bei Ihrer ersten Abholung mit',
+        STEP_3: 'Beginnen Sie, den problemlosen Wäscheservice zu genießen!',
+        YOUR_PROVIDER_TITLE: 'Ihr Dienstleister',
+        NAME_LABEL: 'Name',
+        PHONE_LABEL: 'Telefon',
+        EMAIL_LABEL: 'E-Mail',
+        PROVIDER_MESSAGE: 'Zögern Sie nicht, Kontakt aufzunehmen, wenn Sie Fragen zu Ihren Säcken oder dem Service haben!',
+        READY_TO_START_TITLE: 'Bereit, Ihre Erste Abholung zu Planen?',
+        READY_TO_START_MESSAGE: 'Klicken Sie auf den Button unten, um auf Ihr Dashboard zuzugreifen und Ihre erste Wäscheabholung zu planen.',
+        SCHEDULE_BUTTON: 'Planen Sie Ihre Erste Abholung',
+        DASHBOARD_MESSAGE: 'Greifen Sie jederzeit auf Ihr Kunden-Dashboard zu, um Bestellungen zu verwalten und Lieferungen zu verfolgen.',
+        DASHBOARD_BUTTON: 'Zum Dashboard',
+        FOOTER_SUPPORT: 'Bei Fragen wenden Sie sich bitte an unser Support-Team.',
+        FOOTER_RIGHTS: 'Alle Rechte vorbehalten.',
+        FOOTER_ADDRESS: '123 Main Street, Austin, TX 78701'
+      }
+    };
+
+    const scheduleUrl = `${process.env.APP_BASE_URL || 'https://wavemax.promo'}/customer/schedule-pickup`;
+    const loginUrl = `${process.env.APP_BASE_URL || 'https://wavemax.promo'}/customer/login`;
+
+    const data = {
+      ...translations[language],
+      CUSTOMER_ID: customer.customerId,
+      AFFILIATE_NAME: affiliateName,
+      AFFILIATE_PHONE: affiliate.phone || 'Not provided',
+      AFFILIATE_EMAIL: affiliate.email || 'Not provided',
+      SCHEDULE_URL: scheduleUrl,
+      LOGIN_URL: loginUrl,
+      CURRENT_YEAR: new Date().getFullYear()
+    };
+
+    const html = fillTemplate(template, data);
+
+    await sendEmail(
+      customer.email,
+      `${translations[language].EMAIL_TITLE}`,
+      html
+    );
+
+    console.log('Customer bags ready email sent successfully to:', customer.email);
+  } catch (error) {
+    console.error('Error sending customer bags ready email:', error);
+    throw error;
   }
 };
 
@@ -2461,11 +2621,18 @@ exports.sendV2PaymentReminder = async ({ customer, order, reminderNumber, paymen
     const addOnsAmount = order.addOnTotal || 0;
     const deliveryFee = order.feeBreakdown?.totalFee || 0;
     const totalAmount = paymentAmount || order.v2PaymentAmount || order.actualTotal || (wdfAmount + addOnsAmount + deliveryFee);
-    
+
+    // Calculate time-based values
+    const paymentRequestedAt = order.v2PaymentRequestedAt ? new Date(order.v2PaymentRequestedAt) : new Date();
+    const now = new Date();
+    const hoursElapsed = Math.floor((now - paymentRequestedAt) / (1000 * 60 * 60));
+    const paymentDeadlineHours = 24; // 24 hour payment window
+    const hoursRemaining = Math.max(0, paymentDeadlineHours - hoursElapsed);
+
     const emailData = {
       customerName: customer.name || `${customer.firstName} ${customer.lastName}`,
       orderId: order.orderId,
-      shortOrderId: order.orderId.replace('ORD', ''),
+      shortOrderId: order.orderId.replace('ORD-', '').replace('ORD', ''),
       amount: totalAmount.toFixed(2),
       actualWeight: order.actualWeight,
       // Breakdown amounts
@@ -2477,7 +2644,10 @@ exports.sendV2PaymentReminder = async ({ customer, order, reminderNumber, paymen
       hasDeliveryFee: deliveryFee > 0,
       // Reminder specific
       reminderNumber: reminderNumber || 1,
-      paymentRequestedTime: new Date(order.v2PaymentRequestedAt).toLocaleString(),
+      paymentRequestedTime: paymentRequestedAt.toLocaleString(),
+      hoursElapsed: hoursElapsed,
+      hoursRemaining: hoursRemaining,
+      confirmationLink: `https://wavemax.promo/embed-app-v2.html?route=/customer-dashboard&affid=${order.affiliateId}&confirmPayment=${order.orderId}`,
       dashboardLink: `https://wavemax.promo/embed-app-v2.html?route=/customer-dashboard&affid=${order.affiliateId}`,
       customerLoginLink: `https://wavemax.promo/embed-app-v2.html?route=/customer-login&affid=${order.affiliateId}`,
       venmoLink: paymentLinks?.venmo || order.v2PaymentLinks?.venmo || '#',
@@ -2486,7 +2656,7 @@ exports.sendV2PaymentReminder = async ({ customer, order, reminderNumber, paymen
       venmoQR: qrCodes?.venmo || order.v2PaymentQRCodes?.venmo || '',
       paypalQR: qrCodes?.paypal || order.v2PaymentQRCodes?.paypal || '',
       cashappQR: qrCodes?.cashapp || order.v2PaymentQRCodes?.cashapp || '',
-      isUrgent: reminderNumber >= 2,
+      isUrgent: reminderNumber >= 2 || hoursRemaining <= 6,
       maxReminders: 3
     };
     

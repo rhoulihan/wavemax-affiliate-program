@@ -14,12 +14,34 @@ describe('Password Validation Integration Tests', () => {
   let agent;
   let csrfToken;
 
+  // Helper function to ensure beta request exists for affiliate registration
+  const ensureBetaRequest = async (email, firstName = 'Test', lastName = 'User') => {
+    const BetaRequest = require('../../server/models/BetaRequest');
+    await BetaRequest.findOneAndUpdate(
+      { email: email.toLowerCase() },
+      {
+        email: email.toLowerCase(),
+        firstName,
+        lastName,
+        phone: '+1234567890',
+        address: '123 Test St',
+        city: 'Austin',
+        state: 'TX',
+        zipCode: '78701',
+        welcomeEmailSent: true
+      },
+      { upsert: true, new: true }
+    );
+  };
+
   beforeEach(async () => {
     // Clean up test data
     await Affiliate.deleteMany({});
     await Customer.deleteMany({});
     await Administrator.deleteMany({});
     await Operator.deleteMany({});
+    const BetaRequest = require('../../server/models/BetaRequest');
+    await BetaRequest.deleteMany({});
 
     // Create agent and get CSRF token
     agent = createAgent(app);
@@ -92,10 +114,15 @@ describe('Password Validation Integration Tests', () => {
 
       for (let i = 0; i < strongPasswords.length; i++) {
         const strongPassword = strongPasswords[i];
+        const email = `test${i}@example.com`;
+
+        // Ensure beta request exists for this email (required in beta mode)
+        await ensureBetaRequest(email, 'Test', 'User');
+
         const registrationData = {
           firstName: 'Test',
           lastName: 'User',
-          email: `test${i}@example.com`,
+          email: email,
           username: `testuser${i}`,
           password: strongPassword,
           confirmPassword: strongPassword,
@@ -782,11 +809,15 @@ describe('Password Validation Integration Tests', () => {
 
     test('should accept passwords with mixed character distribution', async () => {
       const strongPassword = 'M1x3d&Ch@r$Distr1but10n!';
+      const email = 'mixed@example.com';
+
+      // Ensure beta request exists (required in beta mode)
+      await ensureBetaRequest(email, 'Mixed', 'Distribution');
 
       const registrationData = {
         firstName: 'Mixed',
         lastName: 'Distribution',
-        email: 'mixed@example.com',
+        email: email,
         username: 'mixeduser',
         password: strongPassword,
         confirmPassword: strongPassword,

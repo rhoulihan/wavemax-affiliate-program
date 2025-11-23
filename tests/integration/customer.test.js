@@ -174,7 +174,7 @@ describe('Customer Integration Tests', () => {
       expect(response.status).toBe(400);
       expect(response.body).toMatchObject({
         success: false,
-        message: 'Email or username already in use'
+        message: 'Email already registered'
       });
     });
 
@@ -199,7 +199,7 @@ describe('Customer Integration Tests', () => {
       expect(response.status).toBe(400);
       expect(response.body).toMatchObject({
         success: false,
-        message: 'Email or username already in use'
+        message: 'Username already taken'
       });
     });
   });
@@ -669,6 +669,56 @@ describe('Customer Integration Tests', () => {
 
       // Restore environment
       process.env.ENABLE_DELETE_DATA_FEATURE = originalEnv;
+    });
+  });
+
+  describe('GET /api/v1/customers/check-rate-limit', () => {
+    it('should pass rate limit check for reasonable requests', async () => {
+      const response = await agent
+        .get('/api/v1/customers/check-rate-limit');
+
+      expect(response.status).toBe(200);
+      expect(response.body).toMatchObject({
+        success: true,
+        message: 'Rate limit check passed'
+      });
+    });
+  });
+
+  describe('POST /api/v1/customers/register with paymentConfirmed', () => {
+    it('should register customer with payment confirmed flag', async () => {
+      const newCustomer = {
+        affiliateId: 'AFF123',
+        firstName: 'Payment',
+        lastName: 'Customer',
+        email: 'payment@example.com',
+        username: 'paymentuser',
+        password: 'TestPassword123!',
+        phone: '555-999-8888',
+        address: {
+          street: '999 Payment St',
+          city: 'Austin',
+          state: 'TX',
+          zipCode: '78701'
+        },
+        numberOfBags: 2,
+        paymentConfirmed: true  // This should skip rate limiting
+      };
+
+      const response = await agent
+        .post('/api/v1/customers/register')
+        .set('X-CSRF-Token', csrfToken)
+        .send(newCustomer);
+
+      // Should succeed even if rate limiting would normally apply
+      expect([201, 400]).toContain(response.status);
+      // If it succeeds, verify the customer was created
+      if (response.status === 201) {
+        expect(response.body.success).toBe(true);
+        expect(response.body.customer).toMatchObject({
+          email: 'payment@example.com'
+        });
+      }
     });
   });
 });

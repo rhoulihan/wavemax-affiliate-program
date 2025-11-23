@@ -21,6 +21,7 @@ const authRoutes = require('./server/routes/authRoutes');
 const socialAuthRoutes = require('./server/routes/socialAuthRoutes');
 const facebookDataRoutes = require('./server/routes/facebookDataRoutes');
 const affiliateRoutes = require('./server/routes/affiliateRoutes');
+const affiliateScheduleRoutes = require('./server/routes/affiliateScheduleRoutes');
 const customerRoutes = require('./server/routes/customerRoutes');
 const orderRoutes = require('./server/routes/orderRoutes');
 const administratorRoutes = require('./server/routes/administratorRoutes');
@@ -216,7 +217,8 @@ app.use((req, res, next) => {
     '/customer-login-embed.html',
     '/customer-dashboard-embed.html',
     '/forgot-password-embed.html',
-    '/reset-password-embed.html'
+    '/reset-password-embed.html',
+    '/site-page-content-only.html'
   ];
   
   // Apply strict CSP to documentation pages as well (but not examples)
@@ -249,7 +251,7 @@ app.use((req, res, next) => {
       'https://fonts.googleapis.com',
       'https://stackpath.bootstrapcdn.com'
     ],
-    'img-src': ["'self'", 'data:', 'https://www.wavemax.promo', 'https://*.tile.openstreetmap.org', 'https://tile.openstreetmap.org', 'https://cdnjs.cloudflare.com', 'https://flagcdn.com'],
+    'img-src': ["'self'", 'data:', 'https://www.wavemax.promo', 'https://*.tile.openstreetmap.org', 'https://tile.openstreetmap.org', 'https://cdnjs.cloudflare.com', 'https://flagcdn.com', 'https://secure.walibu.com', 'https://www.wavemaxlaundry.com'],
     'connect-src': ["'self'", 'https://wavemax.promo', 'https://cdn.jsdelivr.net', 'https://cdnjs.cloudflare.com', 'https://stackpath.bootstrapcdn.com', 'https://router.project-osrm.org', 'https://graphhopper.com', 'https://api.openrouteservice.org', 'https://valhalla1.openstreetmap.de', 'https://nominatim.openstreetmap.org'],
     'font-src': ["'self'", 'https://cdnjs.cloudflare.com', 'https://cdn.jsdelivr.net', 'https://fonts.gstatic.com'],
     'object-src': ["'none'"],
@@ -519,6 +521,7 @@ apiV1Router.use('/auth', authRoutes);
 apiV1Router.use('/auth', socialAuthRoutes);  // Social auth routes
 apiV1Router.use('/auth/facebook', facebookDataRoutes);  // Facebook data deletion routes
 apiV1Router.use('/affiliates', affiliateRoutes);
+apiV1Router.use('/affiliates', affiliateScheduleRoutes);  // Affiliate schedule management
 apiV1Router.use('/customers', customerRoutes);
 apiV1Router.use('/orders', orderRoutes);
 apiV1Router.use('/administrators', administratorRoutes);

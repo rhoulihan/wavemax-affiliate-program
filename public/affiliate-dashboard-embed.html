@@ -101,6 +101,7 @@
                 <button class="tab-btn px-6 py-3 font-bold border-b-2 border-blue-600 text-blue-600" data-tab="pickups" data-i18n="affiliate.dashboard.tabs.pickups">Pickups & Deliveries</button>
                 <button class="tab-btn px-6 py-3 font-bold border-b-2 border-transparent hover:text-blue-600" data-tab="customers" data-i18n="affiliate.dashboard.tabs.customers">Customers</button>
                 <button class="tab-btn px-6 py-3 font-bold border-b-2 border-transparent hover:text-blue-600" data-tab="earnings" data-i18n="affiliate.dashboard.tabs.earnings">Earnings</button>
+                <button class="tab-btn px-6 py-3 font-bold border-b-2 border-transparent hover:text-blue-600" data-tab="schedule" data-i18n="affiliate.dashboard.tabs.schedule">Schedule</button>
                 <button class="tab-btn px-6 py-3 font-bold border-b-2 border-transparent hover:text-blue-600" data-tab="settings" data-i18n="affiliate.dashboard.tabs.settings">Settings</button>
             </div>
         </div>
@@ -284,7 +285,66 @@
                 </div>
             </div>
         </div>
-        
+
+        <div class="tab-content" id="schedule-tab">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-xl font-bold" data-i18n="affiliate.dashboard.schedule.title">Manage Your Availability</h2>
+            </div>
+
+            <!-- Schedule Management -->
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <!-- Quick Actions -->
+                <div class="mb-4 flex flex-wrap gap-2">
+                    <button id="editWeeklyTemplateBtn" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition flex items-center">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                        </svg>
+                        <span data-i18n="affiliate.dashboard.schedule.editWeeklyTemplate">Edit Weekly Template</span>
+                    </button>
+                    <button id="addBlockDateBtn" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition flex items-center">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"></path>
+                        </svg>
+                        <span data-i18n="affiliate.dashboard.schedule.blockDate">Block Date</span>
+                    </button>
+                    <button id="scheduleSettingsBtn" class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition flex items-center">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                        </svg>
+                        <span data-i18n="affiliate.dashboard.schedule.bookingSettings">Booking Settings</span>
+                    </button>
+                </div>
+
+                <!-- Calendar View -->
+                <div id="scheduleCalendar" class="mb-4 schedule-calendar-container">
+                    <div class="text-center py-8 text-gray-500">
+                        <span data-i18n="affiliate.dashboard.schedule.legend">Loading calendar...</span>
+                    </div>
+                </div>
+
+                <!-- Legend -->
+                <div class="mt-4 flex flex-wrap gap-4 text-sm border-t pt-4">
+                    <div class="flex items-center">
+                        <span class="w-4 h-4 bg-green-500 rounded mr-2"></span>
+                        <span data-i18n="affiliate.dashboard.schedule.available">Available All Day</span>
+                    </div>
+                    <div class="flex items-center">
+                        <span class="w-4 h-4 bg-yellow-500 rounded mr-2"></span>
+                        <span data-i18n="affiliate.dashboard.schedule.partiallyAvailable">Partial Availability</span>
+                    </div>
+                    <div class="flex items-center">
+                        <span class="w-4 h-4 bg-red-500 rounded mr-2"></span>
+                        <span data-i18n="affiliate.dashboard.schedule.unavailable">Unavailable</span>
+                    </div>
+                    <div class="flex items-center">
+                        <span class="w-4 h-4 bg-blue-500 rounded mr-2"></span>
+                        <span data-i18n="affiliate.dashboard.schedule.override">Custom Hours</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div class="tab-content" id="settings-tab">
             <h2 class="text-xl font-bold mb-6" data-i18n="affiliate.dashboard.settings.title">Account Settings</h2>
             
@@ -459,6 +519,8 @@
     <script src="/assets/js/csrf-utils.js"></script>
     <!-- Embed communication script -->
     <script src="/assets/js/affiliate-dashboard-embed.js"></script>
+    <!-- Schedule management -->
+    <script src="/assets/js/affiliate-schedule.js"></script>
     <!-- i18n initialization -->
     <script src="/assets/js/affiliate-dashboard-i18n.js"></script>
 

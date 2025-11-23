@@ -41,13 +41,73 @@
                         return false;
                     }
 
-                    // Check password strength
-                    const strengthText = document.getElementById('passwordStrength')?.textContent || '';
-                    if (!strengthText.includes('Strong password')) {
+                    // Validate password against all requirements
+                    const passwordValue = password.value;
+                    const usernameValue = username.value.toLowerCase();
+                    const passwordErrors = [];
+
+                    // Check minimum length
+                    if (passwordValue.length < 8) {
+                        passwordErrors.push('Password must be at least 8 characters long');
+                    }
+
+                    // Check for uppercase letters
+                    if (!/[A-Z]/.test(passwordValue)) {
+                        passwordErrors.push('Password must contain at least one uppercase letter');
+                    }
+
+                    // Check for lowercase letters
+                    if (!/[a-z]/.test(passwordValue)) {
+                        passwordErrors.push('Password must contain at least one lowercase letter');
+                    }
+
+                    // Check for numbers
+                    if (!/\d/.test(passwordValue)) {
+                        passwordErrors.push('Password must contain at least one number');
+                    }
+
+                    // Check for special characters
+                    if (!/[!@#$%^&*()_+\-=\[\]{}|;:,.<>?]/.test(passwordValue)) {
+                        passwordErrors.push('Password must contain at least one special character');
+                    }
+
+                    // Check if password contains username
+                    if (usernameValue && passwordValue.toLowerCase().includes(usernameValue)) {
+                        passwordErrors.push('Password cannot contain your username');
+                    }
+
+                    // Check for sequential characters
+                    const hasSequential = (() => {
+                        const sequences = ['0123456789', 'abcdefghijklmnopqrstuvwxyz', 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'];
+                        for (const seq of sequences) {
+                            for (let i = 0; i <= seq.length - 3; i++) {
+                                if (passwordValue.includes(seq.substring(i, i + 3))) {
+                                    return true;
+                                }
+                            }
+                        }
+                        return false;
+                    })();
+
+                    if (hasSequential) {
+                        passwordErrors.push('Password cannot contain sequential characters (e.g., 123, abc)');
+                    }
+
+                    // Check for repeated characters (more than 2 in a row)
+                    if (/(.)\1{2,}/.test(passwordValue)) {
+                        passwordErrors.push('Password cannot have more than 2 consecutive identical characters');
+                    }
+
+                    // If there are any password errors, show them and stop
+                    if (passwordErrors.length > 0) {
+                        const errorMessage = passwordErrors.length === 1
+                            ? passwordErrors[0]
+                            : 'Please fix the following password issues:\n• ' + passwordErrors.join('\n• ');
+
                         if (window.ModalSystem) {
-                            window.ModalSystem.error('Please create a password that meets all requirements.', 'Weak Password');
+                            window.ModalSystem.error(errorMessage, 'Password Requirements Not Met');
                         } else {
-                            alert('Please create a password that meets all requirements.');
+                            alert(errorMessage);
                         }
                         password.focus();
                         return false;
@@ -370,19 +430,33 @@
         showStep(0);
 
         // Handle OAuth success - skip to step 2 if OAuth is used
+        console.log('[V2 Navigation] Registering oauthSuccess event listener');
         window.addEventListener('oauthSuccess', function() {
-            console.log('[V2 Navigation] OAuth success detected, skipping to Personal and Address step');
-            
+            console.log('[V2 Navigation] ========== oauthSuccess EVENT RECEIVED ==========');
+            console.log('[V2 Navigation] Current step:', currentStep);
+            console.log('[V2 Navigation] Skipping to Personal and Address step');
+
             // Hide account setup section for OAuth users
             const accountSetup = document.getElementById('accountSetupSection');
             if (accountSetup) {
+                console.log('[V2 Navigation] Hiding account setup section');
                 accountSetup.classList.remove('active');
                 accountSetup.classList.add('hidden');
             }
-            
+
             currentStep = 1; // Skip to Personal and Address
+            console.log('[V2 Navigation] Calling showStep(1)');
             showStep(currentStep);
+            console.log('[V2 Navigation] Navigation complete');
         });
+        console.log('[V2 Navigation] oauthSuccess event listener registered');
+
+        // Signal that navigation is ready for OAuth callback checking
+        window.customerRegistrationNavigationReady = true;
+        console.log('[V2 Navigation] Navigation ready, signaling OAuth callback can proceed');
+
+        // Dispatch ready event for OAuth callback to check
+        window.dispatchEvent(new CustomEvent('customerNavigationReady'));
     }
 
     // Check if DOM is ready

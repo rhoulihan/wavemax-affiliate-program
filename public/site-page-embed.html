@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title id="page-title">WaveMAX Laundry Austin</title>
+    <meta name="description" content="Professional laundry services in Austin, TX" id="page-description">
+
+    <!-- Tailwind CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+
+    <!-- Custom Styles -->
+    <link rel="stylesheet" href="/assets/css/wavemax-site.css">
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Navigation Styles */
+        .site-header {
+            background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+            color: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .site-nav a {
+            transition: all 0.3s ease;
+        }
+
+        .site-nav a:hover {
+            color: #fbbf24;
+        }
+
+        /* Hero Styles */
+        .hero-section {
+            background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+            color: white;
+            padding: 4rem 0;
+        }
+
+        /* Feature Cards */
+        .feature-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        }
+
+        /* CTA Buttons */
+        .cta-button {
+            background: #fbbf24;
+            color: #1f2937;
+            font-weight: 600;
+            padding: 0.75rem 2rem;
+            border-radius: 0.5rem;
+            transition: all 0.3s ease;
+            display: inline-block;
+            text-decoration: none;
+        }
+
+        .cta-button:hover {
+            background: #f59e0b;
+            transform: scale(1.05);
+            box-shadow: 0 5px 20px rgba(251, 191, 36, 0.4);
+        }
+
+        /* Business Info Bar */
+        .business-info-bar {
+            background: #f3f4f6;
+            border-bottom: 2px solid #e5e7eb;
+        }
+
+        /* Content Sections */
+        .content-section {
+            padding: 3rem 0;
+        }
+
+        /* Footer */
+        .site-footer {
+            background: #1f2937;
+            color: #9ca3af;
+        }
+    </style>
+</head>
+<body class="bg-white">
+    <!-- Top Business Info Bar -->
+    <div class="business-info-bar py-2 text-sm">
+        <div class="container mx-auto px-4 flex flex-wrap justify-between items-center">
+            <div class="flex items-center space-x-4">
+                <span id="business-address">📍 825 E Rundberg Ln f1, Austin, TX 78753</span>
+                <span id="business-hours">🕐 7:00 AM - 10:00 PM Daily</span>
+            </div>
+            <div class="flex items-center space-x-4">
+                <a href="tel:7373894063" class="hover:text-blue-600" id="business-phone">📞 (737) 389-4063</a>
+                <span>⭐ <span id="business-rating">5.0</span> (<span id="review-count">22</span> reviews)</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Header Navigation -->
+    <header class="site-header py-4">
+        <div class="container mx-auto px-4">
+            <nav class="site-nav flex justify-between items-center">
+                <div class="text-2xl font-bold">
+                    <a href="/" class="text-white hover:text-yellow-400">WaveMAX Laundry</a>
+                </div>
+                <div class="hidden md:flex space-x-6">
+                    <a href="/embed-app-v2.html?route=/home" class="text-white hover:text-yellow-400">Home</a>
+                    <a href="/embed-app-v2.html?route=/self-serve-laundry" class="text-white hover:text-yellow-400">Self-Serve</a>
+                    <a href="/embed-app-v2.html?route=/wash-dry-fold" class="text-white hover:text-yellow-400">Wash-Dry-Fold</a>
+                    <a href="/embed-app-v2.html?route=/commercial" class="text-white hover:text-yellow-400">Commercial</a>
+                    <a href="/embed-app-v2.html?route=/about-us" class="text-white hover:text-yellow-400">About Us</a>
+                    <a href="/embed-app-v2.html?route=/testimonials" class="text-white hover:text-yellow-400">Testimonials</a>
+                    <a href="/embed-app-v2.html?route=/affiliate-program" class="cta-button">Sign Up for Pickup</a>
+                </div>
+                <button id="mobile-menu-button" class="md:hidden text-white">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                    </svg>
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero-section" id="hero-section">
+        <div class="container mx-auto px-4 text-center">
+            <h1 class="text-4xl md:text-5xl font-bold mb-4" id="hero-heading">Loading...</h1>
+            <p class="text-xl md:text-2xl mb-8" id="hero-subheading"></p>
+            <a href="#" class="cta-button" id="hero-cta">Get Started</a>
+        </div>
+    </section>
+
+    <!-- Main Content Area -->
+    <main id="page-content" class="container mx-auto px-4">
+        <!-- Content will be dynamically loaded here -->
+        <div class="text-center py-12">
+            <p class="text-gray-600">Loading content...</p>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="site-footer py-12 mt-16">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div>
+                    <h3 class="text-white font-bold text-lg mb-4">WaveMAX Laundry</h3>
+                    <p class="text-sm">Austin's cleanest and fastest laundromat with hospital-grade sanitization.</p>
+                </div>
+                <div>
+                    <h4 class="text-white font-semibold mb-4">Services</h4>
+                    <ul class="space-y-2 text-sm">
+                        <li><a href="/embed-app-v2.html?route=/self-serve-laundry" class="hover:text-white">Self-Serve Laundry</a></li>
+                        <li><a href="/embed-app-v2.html?route=/wash-dry-fold" class="hover:text-white">Wash-Dry-Fold</a></li>
+                        <li><a href="/embed-app-v2.html?route=/commercial" class="hover:text-white">Commercial Services</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-white font-semibold mb-4">Company</h4>
+                    <ul class="space-y-2 text-sm">
+                        <li><a href="/embed-app-v2.html?route=/about-us" class="hover:text-white">About Us</a></li>
+                        <li><a href="/embed-app-v2.html?route=/testimonials" class="hover:text-white">Testimonials</a></li>
+                        <li><a href="/embed-app-v2.html?route=/contact" class="hover:text-white">Contact</a></li>
+                        <li><a href="/embed-app-v2.html?route=/employment" class="hover:text-white">Careers</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-white font-semibold mb-4">Contact</h4>
+                    <ul class="space-y-2 text-sm">
+                        <li>825 E Rundberg Ln f1</li>
+                        <li>Austin, TX 78753</li>
+                        <li><a href="tel:7373894063" class="hover:text-white">(737) 389-4063</a></li>
+                        <li>7:00 AM - 10:00 PM Daily</li>
+                    </ul>
+                    <div class="flex space-x-4 mt-4">
+                        <a href="https://facebook.com/wavemaxaustin" target="_blank" class="hover:text-white">
+                            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+                        </a>
+                        <a href="https://instagram.com/wavemaxaustin" target="_blank" class="hover:text-white">
+                            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="border-t border-gray-700 mt-8 pt-8 text-center text-sm">
+                <p>&copy; 2024 WaveMAX Laundry Austin. All rights reserved.</p>
+                <div class="mt-2 space-x-4">
+                    <a href="/privacy-policy" class="hover:text-white">Privacy Policy</a>
+                    <a href="/austin-tx/terms-of-service" class="hover:text-white">Terms of Service</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Page Content Loader Script -->
+    <script src="/assets/js/site-page-loader.js"></script>
+</body>
+</html>

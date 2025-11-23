@@ -159,6 +159,31 @@ exports.createOrder = ControllerHelpers.asyncWrapper(async (req, res) => {
   }
   console.log('Found affiliate:', affiliate.firstName, affiliate.lastName);
 
+  // Validate affiliate availability for the requested pickup slot
+  if (affiliate.availabilitySchedule && affiliate.isAvailable) {
+    const pickupDateObj = new Date(pickupDate);
+    const isAvailable = affiliate.isAvailable(pickupDateObj, pickupTime);
+
+    if (!isAvailable) {
+      console.log(`Affiliate ${affiliateId} is not available for ${pickupDate} during ${pickupTime}`);
+      const formattedDate = pickupDateObj.toLocaleDateString('en-US', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      });
+      return res.status(400).json({
+        success: false,
+        message: 'Selected pickup time is not available',
+        error: {
+          code: 'TIMESLOT_UNAVAILABLE',
+          details: `The affiliate is not available for pickups on ${formattedDate} during the ${pickupTime} time slot. Please select a different date or time.`
+        }
+      });
+    }
+    console.log(`Availability check passed: ${pickupDate} ${pickupTime}`);
+  }
+
   // Check authorization using AuthorizationHelpers
   const isAuthorized =
     AuthorizationHelpers.isAdmin(req.user) ||

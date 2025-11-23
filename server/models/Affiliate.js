@@ -178,6 +178,105 @@ const affiliateSchema = new mongoose.Schema({
     docusignStatus: String,
     docusignInitiatedAt: Date,
     docusignCompletedAt: Date
+  },
+  // Availability schedule for pickup management
+  availabilitySchedule: {
+    // Default weekly template
+    weeklyTemplate: {
+      monday: {
+        enabled: { type: Boolean, default: true },
+        timeSlots: {
+          morning: { type: Boolean, default: true },
+          afternoon: { type: Boolean, default: true },
+          evening: { type: Boolean, default: true }
+        }
+      },
+      tuesday: {
+        enabled: { type: Boolean, default: true },
+        timeSlots: {
+          morning: { type: Boolean, default: true },
+          afternoon: { type: Boolean, default: true },
+          evening: { type: Boolean, default: true }
+        }
+      },
+      wednesday: {
+        enabled: { type: Boolean, default: true },
+        timeSlots: {
+          morning: { type: Boolean, default: true },
+          afternoon: { type: Boolean, default: true },
+          evening: { type: Boolean, default: true }
+        }
+      },
+      thursday: {
+        enabled: { type: Boolean, default: true },
+        timeSlots: {
+          morning: { type: Boolean, default: true },
+          afternoon: { type: Boolean, default: true },
+          evening: { type: Boolean, default: true }
+        }
+      },
+      friday: {
+        enabled: { type: Boolean, default: true },
+        timeSlots: {
+          morning: { type: Boolean, default: true },
+          afternoon: { type: Boolean, default: true },
+          evening: { type: Boolean, default: true }
+        }
+      },
+      saturday: {
+        enabled: { type: Boolean, default: true },
+        timeSlots: {
+          morning: { type: Boolean, default: true },
+          afternoon: { type: Boolean, default: true },
+          evening: { type: Boolean, default: true }
+        }
+      },
+      sunday: {
+        enabled: { type: Boolean, default: false },
+        timeSlots: {
+          morning: { type: Boolean, default: false },
+          afternoon: { type: Boolean, default: false },
+          evening: { type: Boolean, default: false }
+        }
+      }
+    },
+    // Date-specific overrides and exceptions
+    dateExceptions: [{
+      date: { type: Date, required: true },
+      type: {
+        type: String,
+        enum: ['block', 'override'],
+        required: true
+      },
+      // For type='block': entire day blocked
+      // For type='override': custom availability
+      timeSlots: {
+        morning: { type: Boolean, default: false },
+        afternoon: { type: Boolean, default: false },
+        evening: { type: Boolean, default: false }
+      },
+      reason: String, // Optional note (e.g., "Holiday", "Vacation")
+      createdAt: { type: Date, default: Date.now }
+    }],
+    // Settings
+    scheduleSettings: {
+      advanceBookingDays: {
+        type: Number,
+        default: 1,
+        min: 0,
+        max: 30
+      }, // How many days in advance customers must book
+      maxBookingDays: {
+        type: Number,
+        default: 30,
+        min: 1,
+        max: 90
+      }, // How far in advance customers can book
+      timezone: {
+        type: String,
+        default: 'America/Chicago'
+      }
+    }
   }
 }, {
   timestamps: true,
@@ -247,6 +346,119 @@ affiliateSchema.pre('save', function(next) {
   }
   next();
 });
+
+// Helper: Get day of week key from date
+affiliateSchema.methods.getDayOfWeekKey = function(date) {
+  const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+  return days[date.getDay()];
+};
+
+/**
+ * Check if affiliate is available for a specific date and time
+ * @param {Date} date - The pickup date
+ * @param {String} timeSlot - 'morning', 'afternoon', or 'evening'
+ * @returns {Boolean}
+ */
+affiliateSchema.methods.isAvailable = function(date, timeSlot) {
+  const dayOfWeek = this.getDayOfWeekKey(date);
+
+  // Check date-specific exceptions first
+  const exception = this.availabilitySchedule.dateExceptions.find(
+    ex => ex.date.toDateString() === date.toDateString()
+  );
+
+  if (exception) {
+    if (exception.type === 'block') {
+      return false; // Entire day blocked
+    }
+    // Override - use exception's time slots
+    return exception.timeSlots[timeSlot] === true;
+  }
+
+  // Fall back to weekly template
+  const dayTemplate = this.availabilitySchedule.weeklyTemplate[dayOfWeek];
+  return dayTemplate.enabled && dayTemplate.timeSlots[timeSlot] === true;
+};
+
+/**
+ * Get available time slots for a specific date
+ * @param {Date} date - The date to check
+ * @returns {Array} - Array of available time slot strings
+ */
+affiliateSchema.methods.getAvailableTimeSlots = function(date) {
+  const slots = [];
+  const timeSlotOptions = ['morning', 'afternoon', 'evening'];
+
+  for (const slot of timeSlotOptions) {
+    if (this.isAvailable(date, slot)) {
+      slots.push(slot);
+    }
+  }
+
+  return slots;
+};
+
+/**
+ * Get all available dates in a date range
+ * @param {Date} startDate
+ * @param {Date} endDate
+ * @returns {Array} - Array of available date objects with time slots
+ */
+affiliateSchema.methods.getAvailableDates = function(startDate, endDate) {
+  const availableDates = [];
+  const currentDate = new Date(startDate);
+
+  while (currentDate <= endDate) {
+    const timeSlots = this.getAvailableTimeSlots(currentDate);
+
+    if (timeSlots.length > 0) {
+      availableDates.push({
+        date: new Date(currentDate),
+        timeSlots: timeSlots,
+        allDay: timeSlots.length === 3
+      });
+    }
+
+    currentDate.setDate(currentDate.getDate() + 1);
+  }
+
+  return availableDates;
+};
+
+/**
+ * Validate schedule change doesn't conflict with existing orders
+ * @param {Date} date
+ * @param {String} timeSlot
+ * @returns {Object} { valid: Boolean, conflicts: Array }
+ */
+affiliateSchema.methods.validateScheduleChange = async function(date, timeSlot) {
+  const Order = require('./Order');
+
+  // Create date range for the entire day
+  const startOfDay = new Date(date);
+  startOfDay.setHours(0, 0, 0, 0);
+
+  const endOfDay = new Date(date);
+  endOfDay.setHours(23, 59, 59, 999);
+
+  const conflicts = await Order.find({
+    affiliateId: this.affiliateId,
+    pickupDate: {
+      $gte: startOfDay,
+      $lt: endOfDay
+    },
+    pickupTime: timeSlot,
+    status: { $in: ['pending', 'processing', 'processed'] }
+  });
+
+  return {
+    valid: conflicts.length === 0,
+    conflicts: conflicts
+  };
+};
+
+// Create index for date exceptions for faster queries
+affiliateSchema.index({ 'availabilitySchedule.dateExceptions.date': 1 });
 
 // Create model
 const Affiliate = mongoose.model('Affiliate', affiliateSchema);

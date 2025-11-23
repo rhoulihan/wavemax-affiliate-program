@@ -65,5 +65,153 @@ body {
 #w9NotificationModal.show {
     display: flex;
 }
-</content>
-</invoke>
+
+/* Schedule Calendar Styles */
+.schedule-calendar-container {
+    min-height: 500px;
+}
+
+.schedule-calendar {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 2px;
+    background-color: #e5e7eb;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.schedule-calendar-header {
+    background-color: #f3f4f6;
+    padding: 10px;
+    text-align: center;
+    font-weight: 600;
+    color: #374151;
+}
+
+.schedule-calendar-day {
+    background-color: white;
+    min-height: 80px;
+    padding: 8px;
+    position: relative;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.schedule-calendar-day:hover {
+    background-color: #f9fafb;
+}
+
+.schedule-calendar-day.other-month {
+    background-color: #f9fafb;
+    color: #9ca3af;
+}
+
+.schedule-calendar-day-number {
+    font-size: 0.875rem;
+    font-weight: 500;
+    margin-bottom: 4px;
+}
+
+.schedule-calendar-slots {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.schedule-slot {
+    font-size: 0.625rem;
+    padding: 2px 4px;
+    border-radius: 3px;
+    text-align: center;
+}
+
+.schedule-slot.available {
+    background-color: #dcfce7;
+    color: #166534;
+}
+
+.schedule-slot.unavailable {
+    background-color: #fee2e2;
+    color: #991b1b;
+}
+
+.schedule-calendar-day.has-exception {
+    border: 2px solid #3b82f6;
+}
+
+.schedule-calendar-day.blocked {
+    background-color: #fef2f2;
+}
+
+.schedule-modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+}
+
+.schedule-modal.show {
+    display: flex;
+}
+
+.schedule-modal-backdrop {
+    position: absolute;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+.schedule-modal-content {
+    position: relative;
+    background-color: white;
+    border-radius: 8px;
+    padding: 24px;
+    max-width: 600px;
+    width: 90%;
+    margin: auto;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.schedule-modal-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin-bottom: 16px;
+}
+
+.schedule-day-config {
+    display: grid;
+    grid-template-columns: 120px 1fr;
+    gap: 12px;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.schedule-day-config:last-child {
+    border-bottom: none;
+}
+
+.schedule-day-label {
+    font-weight: 500;
+}
+
+.schedule-time-slots {
+    display: flex;
+    gap: 8px;
+}
+
+.schedule-time-slot-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.schedule-time-slot-checkbox input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+}
+
+.schedule-time-slot-checkbox label {
+    font-size: 0.875rem;
+}
