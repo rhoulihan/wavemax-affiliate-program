@@ -285,16 +285,19 @@ body {
 
 /* Special styling for weight input modal on tablets/kiosks */
 .weight-input-modal-active .modal-content {
-    max-width: 95%;
-    width: 95%;
+    max-width: 98%;
+    width: 98%;
     margin: 0;
-    max-height: 45vh;
+    max-height: 85vh;
+    height: 85vh;
     position: fixed;
-    top: 5px;
-    left: 2.5%;
-    right: 2.5%;
+    top: 10px;
+    left: 1%;
+    right: 1%;
     transform: none;
     animation: none;
+    display: flex;
+    flex-direction: column;
 }
 
 .modal-header {
@@ -323,6 +326,15 @@ body {
 
 .modal-body {
     padding: 30px;
+}
+
+/* Optimize modal body for weight input modal */
+.weight-input-modal-active .modal-body {
+    padding: 15px;
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
 }
 
 .order-info {
@@ -751,4 +763,284 @@ body.android-kiosk::-webkit-scrollbar {
 body.android-kiosk {
     -ms-overflow-style: none;
     scrollbar-width: none;
+}
+
+/* Two-Column Modal Layout */
+.two-column-layout {
+    display: flex;
+    gap: 15px;
+    flex: 1;
+    margin-bottom: 15px;
+    overflow: hidden;
+}
+
+.left-column {
+    flex: 0 0 45%;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.right-column {
+    flex: 0 0 55%;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+}
+
+.right-column h4 {
+    color: #2c3e50;
+    margin-bottom: 10px;
+    font-size: 16px;
+}
+
+/* Order Info Section */
+.order-info-section {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.order-info-section h4 {
+    color: #1e3a8a;
+    margin-bottom: 10px;
+    font-size: 16px;
+    border-bottom: 2px solid #1e3a8a;
+    padding-bottom: 6px;
+}
+
+.info-list {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    margin-bottom: 10px;
+}
+
+.info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 5px 10px;
+    background: #f8f9fa;
+    border-radius: 4px;
+}
+
+.info-row .info-label {
+    font-size: 11px;
+    color: #666;
+    font-weight: 500;
+    flex: 0 0 100px;
+}
+
+.info-row .info-value {
+    font-size: 12px;
+    color: #2c3e50;
+    font-weight: 600;
+    text-align: right;
+    word-break: break-word;
+}
+
+/* Improved Weight Input Layout */
+.right-column .weight-input-section {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+    background: transparent;
+    padding: 0;
+    margin-bottom: 10px;
+}
+
+.right-column .bag-weight-input {
+    display: grid;
+    grid-template-columns: 55px 1fr 35px;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 8px;
+    background: #f8f9fa;
+    border-radius: 6px;
+    margin-bottom: 0;
+}
+
+.right-column .bag-weight-input label {
+    font-size: 12px;
+    font-weight: 600;
+    color: #2c3e50;
+    flex: none;
+}
+
+.right-column .bag-weight-input input {
+    padding: 8px 10px;
+    border: 2px solid #bdc3c7;
+    border-radius: 4px;
+    font-size: 16px;
+    font-weight: 500;
+    text-align: right;
+}
+
+.right-column .bag-weight-input input:focus {
+    outline: none;
+    border-color: #3b82f6;
+    background: white;
+}
+
+.weight-unit {
+    font-size: 11px;
+    color: #7f8c8d;
+    font-weight: 500;
+}
+
+/* Add-ons Alert */
+.add-ons-alert {
+    background: #fff3cd;
+    border: 2px solid #ffc107;
+    border-radius: 6px;
+    padding: 8px 10px;
+    margin: 10px 0;
+}
+
+.add-ons-alert h5 {
+    color: #856404;
+    font-size: 12px;
+    margin: 0 0 5px 0;
+}
+
+.add-ons-list {
+    font-size: 11px;
+    color: #856404;
+    line-height: 1.4;
+}
+
+/* Add-ons Confirmation */
+.add-ons-confirmation {
+    background: #e8f5e9;
+    border: 2px solid #4caf50;
+    border-radius: 6px;
+    padding: 8px 10px;
+    margin-top: 10px;
+}
+
+.add-ons-confirmation label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    margin: 0;
+}
+
+.add-ons-confirmation input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+}
+
+.add-ons-confirmation .confirmation-text {
+    font-size: 12px;
+    color: #2e7d32;
+    font-weight: 500;
+}
+
+/* Scan Reminder */
+.scan-reminder {
+    background: #e3f2fd;
+    border: 2px solid #2196f3;
+    border-radius: 10px;
+    padding: 20px;
+    text-align: center;
+}
+
+.scan-reminder-icon {
+    font-size: 36px;
+    margin-bottom: 10px;
+}
+
+.scan-reminder h4 {
+    color: #1976d2;
+    margin-bottom: 8px;
+    font-size: 16px;
+}
+
+.scan-reminder p {
+    color: #1565c0;
+    margin: 4px 0;
+    font-size: 13px;
+}
+
+.scan-reminder .scan-count {
+    font-size: 16px;
+    font-weight: 700;
+    color: #0d47a1;
+    margin-top: 10px;
+}
+
+/* Scan Progress Section */
+.scan-progress-section {
+    margin-top: 10px;
+    padding: 10px;
+    background: #f8fafc;
+    border-radius: 6px;
+}
+
+.scan-progress-section h5 {
+    font-size: 12px;
+    color: #2c3e50;
+    margin: 0 0 8px 0;
+}
+
+.scan-progress p {
+    margin: 4px 0;
+    font-size: 11px;
+}
+
+.status-warning {
+    color: #f59e0b;
+    font-weight: 500;
+}
+
+.status-success {
+    color: #10b981;
+    font-weight: 600;
+}
+
+.progress {
+    height: 16px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 900px) {
+    .two-column-layout {
+        flex-direction: column;
+    }
+
+    .left-column,
+    .right-column {
+        flex: none;
+        width: 100%;
+    }
+}
+
+/* Tablet optimizations for two-column layout */
+@media (min-width: 768px) and (max-width: 1024px) {
+    .weight-input-modal-active .modal-content {
+        max-width: 98%;
+        width: 98%;
+        max-height: 85vh;
+        height: 85vh;
+    }
+
+    .two-column-layout {
+        gap: 12px;
+    }
+
+    .right-column .bag-weight-input input {
+        font-size: 18px;
+        padding: 10px;
+    }
+}
+
+/* Action buttons styling for modal */
+.weight-input-modal-active .action-buttons {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid #e5e7eb;
 }

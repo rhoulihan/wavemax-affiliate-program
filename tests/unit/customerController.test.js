@@ -217,7 +217,10 @@ describe('Customer Controller', () => {
       mockCustomer.save.mockResolvedValue(mockCustomer);
 
       Affiliate.findOne = jest.fn().mockResolvedValue(mockAffiliate);
-      Customer.findOne = jest.fn().mockResolvedValue(null);
+      // Mock separate email and username checks (new implementation)
+      Customer.findOne = jest.fn()
+        .mockResolvedValueOnce(null)  // First call for email check
+        .mockResolvedValueOnce(null); // Second call for username check
       encryptionUtil.generateUniqueCustomerId.mockResolvedValue('CUST123456');
       encryptionUtil.hashPassword.mockReturnValue({
         hash: 'hashedPassword',
@@ -247,9 +250,9 @@ describe('Customer Controller', () => {
       }
 
       expect(Affiliate.findOne).toHaveBeenCalledWith({ affiliateId: 'AFF123' });
-      expect(Customer.findOne).toHaveBeenCalledWith({
-        $or: [{ email: 'jane@example.com' }, { username: 'janesmith' }]
-      });
+      // Check that email and username were checked separately
+      expect(Customer.findOne).toHaveBeenCalledWith({ email: 'jane@example.com' });
+      expect(Customer.findOne).toHaveBeenCalledWith({ username: 'janesmith' });
       expect(res.status).toHaveBeenCalledWith(201);
       expect(res.json).toHaveBeenCalledWith(
         expectSuccessResponse(
@@ -280,7 +283,7 @@ describe('Customer Controller', () => {
     });
 
     it('should return error for duplicate email', async () => {
-      const mockAffiliate = { 
+      const mockAffiliate = {
         affiliateId: 'AFF123',
         save: jest.fn().mockResolvedValue(true)
       };
@@ -294,15 +297,22 @@ describe('Customer Controller', () => {
 
       Affiliate.findOne = createFindOneMock(mockAffiliate);
       Affiliate.findOne.mockResolvedValue(mockAffiliate);
-      Customer.findOne = createFindOneMock(existingCustomer);
-      Customer.findOne = createFindOneMock(existingCustomer);
+      // Both email and username exist - mock both findOne calls
+      Customer.findOne = jest.fn()
+        .mockResolvedValueOnce(existingCustomer) // email check returns existing
+        .mockResolvedValueOnce({ username: 'newusername' }); // username check also returns existing
 
       await customerController.registerCustomer(req, res, next);
 
       expect(res.status).toHaveBeenCalledWith(400);
-      expect(res.json).toHaveBeenCalledWith(
-        expectErrorResponse('Email or username already in use')
-      );
+      expect(res.json).toHaveBeenCalledWith({
+        success: false,
+        message: 'Both email and username are already in use',
+        errors: {
+          email: 'Email already registered',
+          username: 'Username already taken'
+        }
+      });
     });
   });
 

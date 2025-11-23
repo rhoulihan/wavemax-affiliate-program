@@ -1415,7 +1415,7 @@
 
             try {
               const errorData = JSON.parse(errorText);
-              
+
               // Check for beta restriction
               if (errorData.isBetaRestriction) {
                 // Hide spinner
@@ -1423,27 +1423,73 @@
                   formSpinner.hide();
                   formSpinner = null;
                 }
-                
+
                 // Show beta restriction message
                 if (window.ErrorHandler && window.ErrorHandler.showError) {
                   window.ErrorHandler.showError(errorData.message || 'We are currently in closed beta. Please check back in a few days.');
                 } else {
                   alert(errorData.message || 'We are currently in closed beta. Please check back in a few days.');
                 }
-                
+
                 // Clear the form to prevent resubmission
                 form.reset();
+                isSubmitting = false;
                 return; // Exit early, don't continue with normal error handling
               }
-              
+
+              // Handle validation errors
               if (errorData.errors && Array.isArray(errorData.errors)) {
                 console.error('Validation errors:');
                 errorData.errors.forEach(err => {
                   console.error(`- ${err.param || err.path}: ${err.msg}`);
                 });
+
+                // Format and show validation errors to user
+                const errorMessages = errorData.errors.map(err => {
+                  const field = err.param || err.path || 'Unknown field';
+                  return `${field}: ${err.msg}`;
+                });
+
+                const errorMessage = errorMessages.length === 1
+                  ? errorMessages[0]
+                  : `Please fix the following errors:\n• ${errorMessages.join('\n• ')}`;
+
+                // Hide spinner
+                if (formSpinner) {
+                  formSpinner.hide();
+                  formSpinner = null;
+                }
+
+                // Show errors to user
+                if (window.ErrorHandler && window.ErrorHandler.showError) {
+                  window.ErrorHandler.showError(errorMessage);
+                } else {
+                  alert(errorMessage);
+                }
+
+                isSubmitting = false;
+                return; // Exit early
+              }
+
+              // Show generic error message from server if available
+              if (errorData.message) {
+                if (formSpinner) {
+                  formSpinner.hide();
+                  formSpinner = null;
+                }
+
+                if (window.ErrorHandler && window.ErrorHandler.showError) {
+                  window.ErrorHandler.showError(errorData.message);
+                } else {
+                  alert(errorData.message);
+                }
+
+                isSubmitting = false;
+                return;
               }
             } catch (e) {
-            // Not JSON error
+              // Not JSON error - will fall through to handleFetchError below
+              console.error('Error parsing error response:', e);
             }
           }
 

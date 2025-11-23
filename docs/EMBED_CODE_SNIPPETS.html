@@ -1,0 +1,306 @@
+<!--
+  WaveMAX Laundry - Iframe Embed Code Snippets
+
+  These snippets should be inserted into the main content area of wavemaxlaundry.com pages,
+  between the header and footer, similar to how the affiliate program is currently embedded.
+
+  Instructions:
+  1. Copy the snippet for the page you want to embed
+  2. Paste it into the main content area of the corresponding wavemaxlaundry.com page
+  3. The parent-iframe-bridge.js script should be loaded once in the page header or footer
+-->
+
+<!-- ========================================
+     PARENT-IFRAME BRIDGE SCRIPT
+     Include this ONCE in the page (header or footer)
+     ======================================== -->
+<script src="https://wavemax.promo/docs/parent-iframe-bridge.js"></script>
+
+<!-- OR use inline version: -->
+<script>
+(function(){var config={allowedOrigins:['https://wavemax.promo','https://affiliate.wavemax.promo'],defaultHeight:800,minHeight:400,debug:false};var iframe=null;var currentHeight=config.defaultHeight;function init(){iframe=document.getElementById('wavemax-iframe')||document.getElementById('wavemax-content-iframe')||document.querySelector('iframe[src*="wavemax.promo"]');if(!iframe){console.error('[WaveMAX Bridge] No iframe found');return;}setupIframeSource();iframe.style.height=config.defaultHeight+'px';window.addEventListener('message',handleMessage,false);iframe.addEventListener('load',function(){sendToIframe('viewport-info',getViewportInfo());});var resizeTimeout;window.addEventListener('resize',function(){clearTimeout(resizeTimeout);resizeTimeout=setTimeout(function(){sendToIframe('viewport-info',getViewportInfo());},250);});}
+function setupIframeSource(){var currentSrc=iframe.getAttribute('src');if(currentSrc&&currentSrc.trim()!==''){return;}var route=iframe.getAttribute('data-route')||'/home';var baseUrl=iframe.getAttribute('data-base-url')||'https://wavemax.promo/embed-app-v2.html';var urlParams=new URLSearchParams(window.location.search);var iframeSrc=baseUrl;urlParams.set('route',route);if(urlParams.toString()){iframeSrc+='?'+urlParams.toString();}iframe.src=iframeSrc;}
+function handleMessage(event){if(!isOriginAllowed(event.origin)){return;}if(!event.data||!event.data.type){return;}switch(event.data.type){case 'resize':handleResize(event.data.data);break;case 'navigate':handleNavigate(event.data.data);break;case 'scroll-to-top':window.scrollTo({top:0,behavior:'smooth'});break;}}
+function handleResize(data){if(!data||!data.height){return;}var newHeight=parseInt(data.height,10);if(newHeight<config.minHeight){newHeight=config.minHeight;}if(Math.abs(newHeight-currentHeight)>5){currentHeight=newHeight;iframe.style.height=newHeight+'px';}}
+function handleNavigate(data){if(!data||!data.url){return;}if(data.newTab){window.open(data.url,'_blank');}else{window.location.href=data.url;}}
+function sendToIframe(type,data){if(!iframe||!iframe.contentWindow){return;}var message={type:type,data:data||{}};config.allowedOrigins.forEach(function(origin){iframe.contentWindow.postMessage(message,origin);});}
+function getViewportInfo(){var width=window.innerWidth;var deviceType='desktop';if(width<768){deviceType='mobile';}else if(width<1024){deviceType='tablet';}return{width:width,height:window.innerHeight,deviceType:deviceType,scrollY:window.scrollY};}
+function isOriginAllowed(origin){return config.allowedOrigins.some(function(allowed){return origin===allowed||origin.endsWith(allowed.replace('https://',''));});}
+if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',init);}else{init();}})();
+</script>
+
+
+<!-- ========================================
+     HOME PAGE
+     /austin-tx/
+     ======================================== -->
+<div id="wavemax-content-container" style="width: 100%; min-height: 600px;">
+    <iframe
+        width="100%"
+        height="800"
+        style="border: none;"
+        id="wavemax-iframe"
+        data-route="/home"
+        frameborder="0">
+    </iframe>
+</div>
+
+
+<!-- ========================================
+     SELF-SERVE LAUNDRY
+     /austin-tx/self-serve-laundry/
+     ======================================== -->
+<div id="wavemax-content-container" style="width: 100%; min-height: 600px;">
+    <iframe
+        width="100%"
+        height="800"
+        style="border: none;"
+        id="wavemax-iframe"
+        data-route="/self-serve-laundry"
+        frameborder="0">
+    </iframe>
+</div>
+
+
+<!-- ========================================
+     WASH-DRY-FOLD
+     /austin-tx/wash-dry-fold/
+     ======================================== -->
+<div id="wavemax-content-container" style="width: 100%; min-height: 600px;">
+    <iframe
+        width="100%"
+        height="800"
+        style="border: none;"
+        id="wavemax-iframe"
+        data-route="/wash-dry-fold"
+        frameborder="0">
+    </iframe>
+</div>
+
+
+<!-- ========================================
+     COMMERCIAL LAUNDRY
+     /austin-tx/commercial/
+     ======================================== -->
+<div id="wavemax-content-container" style="width: 100%; min-height: 600px;">
+    <iframe
+        width="100%"
+        height="800"
+        style="border: none;"
+        id="wavemax-iframe"
+        data-route="/commercial"
+        frameborder="0">
+    </iframe>
+</div>
+
+
+<!-- ========================================
+     ABOUT US
+     /austin-tx/about-us/
+     ======================================== -->
+<div id="wavemax-content-container" style="width: 100%; min-height: 600px;">
+    <iframe
+        width="100%"
+        height="800"
+        style="border: none;"
+        id="wavemax-iframe"
+        data-route="/about-us"
+        frameborder="0">
+    </iframe>
+</div>
+
+
+<!-- ========================================
+     TESTIMONIALS
+     /austin-tx/testimonials/
+     ======================================== -->
+<div id="wavemax-content-container" style="width: 100%; min-height: 600px;">
+    <iframe
+        width="100%"
+        height="800"
+        style="border: none;"
+        id="wavemax-iframe"
+        data-route="/testimonials"
+        frameborder="0">
+    </iframe>
+</div>
+
+
+<!-- ========================================
+     LOCATIONS
+     /austin-tx/locations/
+     ======================================== -->
+<div id="wavemax-content-container" style="width: 100%; min-height: 600px;">
+    <iframe
+        width="100%"
+        height="800"
+        style="border: none;"
+        id="wavemax-iframe"
+        data-route="/locations"
+        frameborder="0">
+    </iframe>
+</div>
+
+
+<!-- ========================================
+     CONTACT
+     /austin-tx/contact/
+     ======================================== -->
+<div id="wavemax-content-container" style="width: 100%; min-height: 600px;">
+    <iframe
+        width="100%"
+        height="800"
+        style="border: none;"
+        id="wavemax-iframe"
+        data-route="/contact"
+        frameborder="0">
+    </iframe>
+</div>
+
+
+<!-- ========================================
+     EMPLOYMENT / CAREERS
+     /austin-tx/employment/
+     ======================================== -->
+<div id="wavemax-content-container" style="width: 100%; min-height: 600px;">
+    <iframe
+        width="100%"
+        height="800"
+        style="border: none;"
+        id="wavemax-iframe"
+        data-route="/employment"
+        frameborder="0">
+    </iframe>
+</div>
+
+
+<!-- ========================================
+     BLOG
+     /austin-tx/blog/
+     ======================================== -->
+<div id="wavemax-content-container" style="width: 100%; min-height: 600px;">
+    <iframe
+        width="100%"
+        height="800"
+        style="border: none;"
+        id="wavemax-iframe"
+        data-route="/blog"
+        frameborder="0">
+    </iframe>
+</div>
+
+
+<!-- ========================================
+     COMMERCIAL SERVICE PAGES
+     ======================================== -->
+
+<!-- Colleges & Schools -->
+<div id="wavemax-content-container" style="width: 100%; min-height: 600px;">
+    <iframe
+        width="100%"
+        height="800"
+        style="border: none;"
+        id="wavemax-iframe"
+        data-route="/commercial/colleges-schools"
+        frameborder="0">
+    </iframe>
+</div>
+
+<!-- Medical Offices -->
+<div id="wavemax-content-container" style="width: 100%; min-height: 600px;">
+    <iframe
+        width="100%"
+        height="800"
+        style="border: none;"
+        id="wavemax-iframe"
+        data-route="/commercial/medical-offices"
+        frameborder="0">
+    </iframe>
+</div>
+
+<!-- Health Clubs -->
+<div id="wavemax-content-container" style="width: 100%; min-height: 600px;">
+    <iframe
+        width="100%"
+        height="800"
+        style="border: none;"
+        id="wavemax-iframe"
+        data-route="/commercial/health-clubs"
+        frameborder="0">
+    </iframe>
+</div>
+
+<!-- Country Clubs -->
+<div id="wavemax-content-container" style="width: 100%; min-height: 600px;">
+    <iframe
+        width="100%"
+        height="800"
+        style="border: none;"
+        id="wavemax-iframe"
+        data-route="/commercial/country-clubs"
+        frameborder="0">
+    </iframe>
+</div>
+
+<!-- Airbnb Rentals -->
+<div id="wavemax-content-container" style="width: 100%; min-height: 600px;">
+    <iframe
+        width="100%"
+        height="800"
+        style="border: none;"
+        id="wavemax-iframe"
+        data-route="/commercial/airbnb-rentals"
+        frameborder="0">
+    </iframe>
+</div>
+
+<!-- Salons & Spas -->
+<div id="wavemax-content-container" style="width: 100%; min-height: 600px;">
+    <iframe
+        width="100%"
+        height="800"
+        style="border: none;"
+        id="wavemax-iframe"
+        data-route="/commercial/salons-spas"
+        frameborder="0">
+    </iframe>
+</div>
+
+
+<!-- ========================================
+     NOTES
+     ======================================== -->
+<!--
+  Integration Notes:
+
+  1. The bridge script should be included ONCE per page (in header or footer)
+  2. Each page content area gets ONE iframe with the appropriate data-route
+  3. The iframe will auto-resize based on content height
+  4. URL parameters from the parent page are automatically passed to the iframe
+  5. The iframe source is set dynamically by the bridge script
+
+  Customization:
+
+  - Change data-route to load different content
+  - Adjust min-height in container style for initial display
+  - Set data-base-url attribute to use a different embed app URL
+
+  Example with custom base URL:
+  <iframe
+      id="wavemax-iframe"
+      data-route="/home"
+      data-base-url="https://custom.domain.com/embed-app-v2.html"
+      width="100%"
+      height="800"
+      style="border: none;"
+      frameborder="0">
+  </iframe>
+
+  Testing:
+
+  1. Test on staging first: Update data-base-url to point to staging server
+  2. Verify auto-resize works correctly
+  3. Test on mobile, tablet, and desktop viewports
+  4. Verify all links work correctly
+  5. Check browser console for any errors
+-->

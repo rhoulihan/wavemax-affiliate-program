@@ -60,12 +60,16 @@
       // Handle non-2xx responses
       if (!response.ok) {
         const error = new Error(
-          data.message || 
-          data.error || 
+          data.message ||
+          data.error ||
           `Request failed with status ${response.status}`
         );
         error.status = response.status;
         error.data = data;
+        // Attach validation errors array if present
+        if (data.errors && Array.isArray(data.errors)) {
+          error.errors = data.errors;
+        }
         throw error;
       }
 
@@ -74,6 +78,10 @@
         const error = new Error(data.message || 'Request failed');
         error.status = response.status;
         error.data = data;
+        // Attach validation errors array if present
+        if (data.errors && Array.isArray(data.errors)) {
+          error.errors = data.errors;
+        }
         throw error;
       }
 

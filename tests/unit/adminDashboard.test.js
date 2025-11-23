@@ -3,12 +3,18 @@ process.env.NODE_ENV = 'test';
 
 // Mock all dependencies first
 jest.mock('mongoose', () => {
-  const Schema = function() {};
+  const Schema = function() {
+    this.statics = {};
+  };
+  Schema.prototype.pre = jest.fn();
+  Schema.prototype.post = jest.fn();
+  Schema.prototype.virtual = jest.fn().mockReturnThis();
+  Schema.prototype.index = jest.fn();
   Schema.Types = {
     Mixed: 'Mixed',
     ObjectId: 'ObjectId'
   };
-  
+
   return {
     Schema,
     Types: {

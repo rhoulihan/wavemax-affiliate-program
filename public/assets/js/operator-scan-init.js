@@ -648,24 +648,41 @@
         // Global keyboard hiding for Fully Kiosk
         if (typeof fully !== 'undefined' && fully.hideKeyboard) {
             console.log('Setting up Fully Kiosk keyboard handlers');
-            
-            // Hide keyboard on any focus event
+
+            // Hide keyboard on focus events, but ONLY for the scanner input
+            // DO NOT hide for modal inputs where operators need to enter data
             document.addEventListener('focusin', function(e) {
                 if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+                    // Check if this is a weight input or modal input - if so, allow keyboard
+                    if (e.target.classList.contains('weight-input') ||
+                        e.target.closest('.modal.active') ||
+                        e.target.closest('.operator-modal.active')) {
+                        // This is a modal input, allow keyboard
+                        console.log('Allowing keyboard for modal input');
+                        return;
+                    }
+
+                    // Hide keyboard for scanner input only
                     setTimeout(() => {
                         fully.hideKeyboard();
                     }, 100);
                 }
             });
-            
-            // Also hide on window resize (keyboard appearing often triggers resize)
+
+            // Also hide on window resize ONLY if no modal is active
             window.addEventListener('resize', function() {
-                fully.hideKeyboard();
+                const hasActiveModal = document.querySelector('.modal.active, .operator-modal.active');
+                if (!hasActiveModal) {
+                    fully.hideKeyboard();
+                }
             });
-            
-            // Periodic keyboard hide to ensure it stays hidden
+
+            // Periodic keyboard hide to ensure it stays hidden, but skip if modal is active
             setInterval(() => {
-                fully.hideKeyboard();
+                const hasActiveModal = document.querySelector('.modal.active, .operator-modal.active');
+                if (!hasActiveModal) {
+                    fully.hideKeyboard();
+                }
             }, 5000);
         }
     }
@@ -1074,65 +1091,97 @@
         // Check if order has add-ons
         const hasAddOns = order.addOns && (order.addOns.premiumDetergent || order.addOns.fabricSoftener || order.addOns.stainRemover);
 
+        // Two-column layout: Left = Order Info, Right = Weight Inputs
         let html = `
-            <div class="order-info">
-                <h4>Order ${order.orderId}</h4>
-                <div class="info-grid">
-                    <div class="info-item">
-                        <div class="info-label">Customer</div>
-                        <div class="info-value">${order.customerName || 'N/A'}</div>
-                    </div>
-                    <div class="info-item">
-                        <div class="info-label">Affiliate</div>
-                        <div class="info-value">${order.affiliateName || 'N/A'}</div>
-                    </div>
-                    <div class="info-item">
-                        <div class="info-label">Total Bags</div>
-                        <div class="info-value">${order.numberOfBags}</div>
-                    </div>
-                    <div class="info-item">
-                        <div class="info-label">Bags Weighed</div>
-                        <div class="info-value" id="bagsWeighedValue">${order.bagsWeighed || 0}</div>
-                    </div>
-                </div>
-                ${hasAddOns ? `
-                    <div class="add-ons-alert">
-                        <h5>⚠️ Add-ons Required</h5>
-                        <div class="add-ons-list">
-                            ${[
-                                order.addOns.premiumDetergent && '✓ Premium Detergent',
-                                order.addOns.fabricSoftener && '✓ Fabric Softener',
-                                order.addOns.stainRemover && '✓ Stain Remover'
-                            ].filter(Boolean).join('<br>')}
+            <div class="two-column-layout">
+                <div class="left-column">
+                    <div class="order-info-section">
+                        <h4>Order ${order.orderId}</h4>
+                        <div class="info-list">
+                            <div class="info-row">
+                                <span class="info-label">Customer:</span>
+                                <span class="info-value">${order.customerName || 'N/A'}</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">Affiliate:</span>
+                                <span class="info-value">${order.affiliateName || 'N/A'}</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">Phone:</span>
+                                <span class="info-value">${order.customerPhone || 'N/A'}</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">Email:</span>
+                                <span class="info-value">${order.customerEmail || 'N/A'}</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">Total Bags:</span>
+                                <span class="info-value">${order.numberOfBags}</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">Bags Scanned:</span>
+                                <span class="info-value">${scannedCount}</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">Bags Weighed:</span>
+                                <span class="info-value" id="bagsWeighedValue">${order.bagsWeighed || 0}</span>
+                            </div>
+                            ${order.serviceType ? `
+                            <div class="info-row">
+                                <span class="info-label">Service Type:</span>
+                                <span class="info-value">${order.serviceType}</span>
+                            </div>
+                            ` : ''}
+                            ${order.scheduledDate ? `
+                            <div class="info-row">
+                                <span class="info-label">Scheduled:</span>
+                                <span class="info-value">${new Date(order.scheduledDate).toLocaleDateString()}</span>
+                            </div>
+                            ` : ''}
                         </div>
-                    </div>
-                ` : ''}
-            </div>
 
-            <div class="scan-progress-section">
-                <h5>Scan all bags before entering weights</h5>
-                <div class="scan-progress">
-                    <p class="text-info"><strong>Bags scanned: ${scannedCount} of ${order.numberOfBags}</strong></p>
-                    <div class="progress mb-3">
-                        <div class="progress-bar" role="progressbar" 
-                             id="scanProgressBar"
-                             aria-valuenow="${scannedCount}" 
-                             aria-valuemin="0" 
-                             aria-valuemax="${order.numberOfBags}">
+                        ${hasAddOns ? `
+                            <div class="add-ons-alert">
+                                <h5>⚠️ Add-ons Required</h5>
+                                <div class="add-ons-list">
+                                    ${[
+                                        order.addOns.premiumDetergent && '✓ Premium Detergent',
+                                        order.addOns.fabricSoftener && '✓ Fabric Softener',
+                                        order.addOns.stainRemover && '✓ Stain Remover'
+                                    ].filter(Boolean).join('<br>')}
+                                </div>
+                            </div>
+                        ` : ''}
+
+                        <div class="scan-progress-section">
+                            <h5>Scan Progress</h5>
+                            <div class="scan-progress">
+                                <p><strong>${scannedCount} of ${order.numberOfBags} bags scanned</strong></p>
+                                <div class="progress">
+                                    <div class="progress-bar" role="progressbar"
+                                         id="scanProgressBar"
+                                         aria-valuenow="${scannedCount}"
+                                         aria-valuemin="0"
+                                         aria-valuemax="${order.numberOfBags}">
+                                    </div>
+                                </div>
+                                ${!allBagsScanned ?
+                                    '<p class="status-warning">⚠️ Scan all bags to continue</p>' :
+                                    '<p class="status-success">✓ All bags scanned!</p>'}
+                            </div>
                         </div>
                     </div>
-                    ${!allBagsScanned ? 
-                        '<p class="text-warning">Please scan all bags to continue.</p>' : 
-                        '<p class="text-success"><strong>All bags scanned! Now enter weights.</strong></p>'}
                 </div>
-            </div>
+
+                <div class="right-column">
         `;
 
         // Only show weight inputs if all bags are scanned
         if (allBagsScanned) {
             modalTitle.textContent = 'Enter Bag Weights';
+            html += '<h4>Weight Entry</h4>';
             html += '<div class="weight-input-section">';
-            
+
             // Create weight inputs for each bag in the order
             const bags = order.bags || [];
             bags.forEach((bag, index) => {
@@ -1141,38 +1190,54 @@
                 const sanitizedBagId = bag.bagId.replace(/-/g, '_');
                 html += `
                     <div class="bag-weight-input">
-                        <label>Bag ${bagNumber} (${bag.bagId.substring(0, 8)}...):</label>
-                        <input type="number" 
-                               id="bagWeight_${sanitizedBagId}" 
+                        <label for="bagWeight_${sanitizedBagId}">Bag ${bagNumber}</label>
+                        <input type="number"
+                               id="bagWeight_${sanitizedBagId}"
                                class="weight-input"
                                data-bag-id="${bag.bagId}"
                                data-bag-number="${bagNumber}"
-                               step="0.1" 
-                               min="0.1" 
-                               placeholder="Weight in lbs">
+                               step="0.1"
+                               min="0.1"
+                               placeholder="0.0 lbs"
+                               autocomplete="off">
+                        <span class="weight-unit">lbs</span>
                     </div>
                 `;
             });
-            
+
             html += '</div>';
-            
+
             // Add add-on confirmation checkbox if order has add-ons
             if (hasAddOns) {
                 html += `
                     <div class="add-ons-confirmation">
                         <label>
                             <input type="checkbox" id="addOnsConfirmed">
-                            <span class="confirmation-text">I confirm all add-ons have been applied to this order</span>
+                            <span class="confirmation-text">✓ All add-ons applied</span>
                         </label>
                     </div>
                 `;
             }
+        } else {
+            // Show message to scan remaining bags
+            html += `
+                <div class="scan-reminder">
+                    <div class="scan-reminder-icon">📦</div>
+                    <h4>Continue Scanning</h4>
+                    <p>Please scan all ${order.numberOfBags} bags before entering weights.</p>
+                    <p class="scan-count">${scannedCount} of ${order.numberOfBags} scanned</p>
+                </div>
+            `;
         }
 
+        // Close right column and two-column layout
         html += `
+                </div>
+            </div>
+
             <div class="action-buttons">
                 <button class="btn btn-secondary" id="cancelWeightModalBtn">Cancel</button>
-                <button class="btn btn-primary" 
+                <button class="btn btn-primary"
                         id="submitWeightsBtn"
                         ${!allBagsScanned ? 'disabled' : ''}>
                     Mark as In Progress
@@ -1593,13 +1658,25 @@
         console.log('Scanned bag ID:', scannedBagId);
         console.log('Order type:', order.orderType);
         console.log('V2 Payment Status:', order.v2PaymentStatus);
-        
-        // Check if this is a V2 order that hasn't been paid
-        if (order.isV2Order && order.v2PaymentStatus !== 'verified' && order.v2PaymentStatus !== 'paid') {
-            console.log('V2 order not paid - showing payment required modal');
+        console.log('Payment Status:', order.paymentStatus);
+        console.log('Is Paid:', order.isPaid);
+
+        // CRITICAL: Check payment status for ALL orders before allowing pickup
+        // V2 orders use v2PaymentStatus, regular orders use paymentStatus/isPaid
+        const isV2Paid = order.isV2Order && (order.v2PaymentStatus === 'verified' || order.v2PaymentStatus === 'paid');
+        const isRegularPaid = !order.isV2Order && (order.paymentStatus === 'paid' || order.isPaid === true);
+
+        if (!isV2Paid && !isRegularPaid) {
+            console.log('ORDER NOT PAID - BLOCKING PICKUP');
+            console.log('Is V2 Order:', order.isV2Order);
+            console.log('V2 Payment Status:', order.v2PaymentStatus);
+            console.log('Regular Payment Status:', order.paymentStatus);
+            console.log('Is Paid:', order.isPaid);
             showPaymentRequiredModal(order);
             return;
         }
+
+        console.log('Payment verified - allowing pickup');
         
         // Check if we're already tracking this order
         if (currentOrder && currentOrder.orderId === order.orderId && currentOrder.scannedBagsForPickup) {
@@ -1630,12 +1707,13 @@
         showPickupModal(order);
     }
 
-    // Show payment required modal for V2 orders
+    // Show payment required modal for all unpaid orders
     function showPaymentRequiredModal(order) {
         console.log('=== SHOW PAYMENT REQUIRED MODAL ===');
         modalTitle.textContent = 'Payment Required';
-        
-        const amountDue = order.v2PaymentAmount || order.actualTotal || 0;
+
+        // Get amount due from either V2 payment amount or actual total
+        const amountDue = order.v2PaymentAmount || order.actualTotal || order.totalAmount || 0;
         
         modalBody.innerHTML = `
             <div class="payment-required-container">

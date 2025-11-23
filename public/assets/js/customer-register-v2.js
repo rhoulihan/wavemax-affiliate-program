@@ -298,14 +298,15 @@
                     }
                     // Backend returns customerData, not customer
                     if (result.customerData) {
-                        // Add the customerId to the customer data object
+                        // Add the customerId and affiliate info to the customer data object
                         const customerData = {
                             ...result.customerData,
-                            customerId: result.customerId
+                            customerId: result.customerId,
+                            affiliateInfo: result.affiliateData // Include affiliate data for success page
                         };
                         localStorage.setItem('currentCustomer', JSON.stringify(customerData));
                     }
-                    
+
                     // Redirect to customer success page
                     const redirectUrl = '/embed-app-v2.html?route=/customer-success';
                     // Add welcome=true and customer ID to show welcome message
@@ -325,7 +326,7 @@
                 }
             } catch (error) {
                 console.error('[V2 Registration] Registration error:', error);
-                
+
                 // Hide spinner on error
                 if (spinner && spinner.hide) {
                     spinner.hide();
@@ -334,13 +335,30 @@
                         spinner._container.parentNode.removeChild(spinner._container);
                     }
                 }
-                
-                if (window.ModalSystem) {
-                    window.ModalSystem.error('An error occurred during registration. Please try again.', 'Registration Error');
-                } else {
-                    alert('An error occurred during registration. Please try again.');
+
+                // Try to extract detailed error message
+                let errorMessage = 'An error occurred during registration. Please try again.';
+
+                // Check if error has response data with validation errors
+                if (error.errors && Array.isArray(error.errors)) {
+                    const errorMessages = error.errors.map(err => {
+                        const field = err.param || err.path || 'Unknown field';
+                        return `${field}: ${err.msg}`;
+                    });
+
+                    errorMessage = errorMessages.length === 1
+                        ? errorMessages[0]
+                        : `Please fix the following errors:\n• ${errorMessages.join('\n• ')}`;
+                } else if (error.message && error.message !== 'An error occurred') {
+                    errorMessage = error.message;
                 }
-                
+
+                if (window.ModalSystem) {
+                    window.ModalSystem.error(errorMessage, 'Registration Error');
+                } else {
+                    alert(errorMessage);
+                }
+
                 // Re-enable form
                 if (submitBtn) {
                     submitBtn.disabled = false;
@@ -393,23 +411,42 @@
 
     // OAuth Social Auth Handling
     function setupOAuthHandlers() {
+        console.log('[V2 Registration] ========== setupOAuthHandlers CALLED ==========');
         const googleRegister = document.getElementById('googleRegister');
         const facebookRegister = document.getElementById('facebookRegister');
+        console.log('[V2 Registration] Google register button:', googleRegister);
+        console.log('[V2 Registration] Facebook register button:', facebookRegister);
 
         if (googleRegister) {
             googleRegister.addEventListener('click', function() {
+                console.log('[V2 Registration] Google button clicked');
                 handleSocialAuth('google');
             });
         }
 
         if (facebookRegister) {
             facebookRegister.addEventListener('click', function() {
+                console.log('[V2 Registration] Facebook button clicked');
                 handleSocialAuth('facebook');
             });
         }
 
-        // Check if we're returning from OAuth
-        checkOAuthCallback();
+        // Wait for navigation to be ready before checking OAuth callback
+        // This ensures the oauthSuccess event listener is registered
+        console.log('[V2 Registration] Checking if navigation is ready...');
+        console.log('[V2 Registration] customerRegistrationNavigationReady:', window.customerRegistrationNavigationReady);
+
+        if (window.customerRegistrationNavigationReady) {
+            console.log('[V2 Registration] Navigation already ready, checking OAuth callback immediately');
+            checkOAuthCallback();
+        } else {
+            console.log('[V2 Registration] Navigation not ready yet, waiting for customerNavigationReady event...');
+            window.addEventListener('customerNavigationReady', function() {
+                console.log('[V2 Registration] ========== customerNavigationReady EVENT RECEIVED ==========');
+                checkOAuthCallback();
+            });
+        }
+        console.log('[V2 Registration] setupOAuthHandlers complete');
     }
 
     function handleSocialAuth(provider) {
@@ -441,47 +478,57 @@
 
         // Database polling approach for OAuth result
         let pollCount = 0;
-        const maxPolls = 120; // 6 minutes max (120 * 3 seconds)
+        const maxPolls = 20; // 60 seconds max (20 * 3 seconds)
         let authResultReceived = false;
 
         console.log('[V2 Registration] Starting database polling for OAuth result...');
+        console.log('[V2 Registration] Will poll endpoint: /api/v1/auth/oauth/result/' + sessionId);
+        console.log('[V2 Registration] Timeout after', maxPolls * 3, 'seconds');
 
         const pollForResult = setInterval(async () => {
             pollCount++;
+            console.log('[V2 Registration] Poll attempt', pollCount, '/', maxPolls);
 
-            // Check if popup is still open
-            if (popup && popup.closed && !authResultReceived) {
-                console.log('[V2 Registration] Popup was closed by user');
-                clearInterval(pollForResult);
-                return;
-            }
-
+            // Timeout after 60 seconds
             if (pollCount > maxPolls) {
-                console.log('[V2 Registration] OAuth polling timeout');
+                console.log('[V2 Registration] OAuth polling timeout after', pollCount * 3, 'seconds');
                 clearInterval(pollForResult);
                 if (window.ModalSystem) {
                     window.ModalSystem.error('Authentication timeout. Please try again.', 'Timeout');
                 } else {
                     alert('Authentication timeout. Please try again.');
                 }
-                if (popup && !popup.closed) {
-                    popup.close();
+                // Try to close popup if it's still open
+                try {
+                    if (popup && !popup.closed) {
+                        popup.close();
+                    }
+                } catch (e) {
+                    console.log('[V2 Registration] Could not close popup:', e);
                 }
                 return;
             }
 
             try {
+                console.log('[V2 Registration] Polling for result:', sessionId);
                 const result = await ApiClient.get(`/api/v1/auth/oauth/result/${sessionId}`, {
                     showError: false
                 });
+                console.log('[V2 Registration] Poll response:', result);
                 
                 if (result.completed) {
                     authResultReceived = true;
                     clearInterval(pollForResult);
                     console.log('[V2 Registration] OAuth result received:', result);
 
-                    if (popup && !popup.closed) {
-                        popup.close();
+                    // Try to close popup if it's still open
+                    try {
+                        if (popup && !popup.closed) {
+                            console.log('[V2 Registration] Closing popup window');
+                            popup.close();
+                        }
+                    } catch (e) {
+                        console.log('[V2 Registration] Could not close popup:', e);
                     }
 
                     if (result.success) {
@@ -502,6 +549,9 @@
     }
 
     function handleOAuthSuccess(userData, provider) {
+        console.log('[V2 Registration] ========== handleOAuthSuccess CALLED ==========');
+        console.log('[V2 Registration] Provider:', provider);
+        console.log('[V2 Registration] User data:', userData);
         console.log('[V2 Registration] OAuth successful, pre-filling form with user data');
 
         // Update social auth section to show connected status
@@ -589,14 +639,26 @@
         }
 
         // Dispatch OAuth success event for navigation
+        console.log('[V2 Registration] ========== DISPATCHING oauthSuccess EVENT ==========');
+        console.log('[V2 Registration] Window object:', window);
+        console.log('[V2 Registration] customerRegistrationNavigationReady:', window.customerRegistrationNavigationReady);
         window.dispatchEvent(new CustomEvent('oauthSuccess'));
+        console.log('[V2 Registration] oauthSuccess event dispatched');
     }
 
     function checkOAuthCallback() {
+        console.log('[V2 Registration] ========== checkOAuthCallback CALLED ==========');
         const urlParams = new URLSearchParams(window.location.search);
+        console.log('[V2 Registration] Current URL:', window.location.href);
+        console.log('[V2 Registration] URL params:', Object.fromEntries(urlParams.entries()));
+
         const socialToken = urlParams.get('socialToken');
         const provider = urlParams.get('provider');
         const error = urlParams.get('error');
+
+        console.log('[V2 Registration] socialToken:', socialToken);
+        console.log('[V2 Registration] provider:', provider);
+        console.log('[V2 Registration] error:', error);
 
         if (error) {
             let errorMessage = 'Social authentication failed. Please try again.';

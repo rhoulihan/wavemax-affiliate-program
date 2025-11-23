@@ -58,6 +58,21 @@ describe('Affiliate API', () => {
   });
 
   test('should register a new affiliate', async () => {
+    // Create beta request for the new affiliate (required for beta mode)
+    // This ensures test works in both beta and regular mode
+    const BetaRequest = require('../../server/models/BetaRequest');
+    await BetaRequest.create({
+      email: 'new@example.com',
+      firstName: 'New',
+      lastName: 'Affiliate',
+      phone: '555-5678',
+      address: '456 Test St',
+      city: 'Austin',
+      state: 'TX',
+      zipCode: '78701',
+      welcomeEmailSent: true
+    });
+
     const res = await agent
       .post('/api/v1/affiliates/register')
       .set('X-CSRF-Token', csrfToken)

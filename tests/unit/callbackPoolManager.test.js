@@ -125,7 +125,10 @@ describe('CallbackPoolManager', () => {
         formId: 'test-form-id',
         formHash: 'test-form-hash',
         callbackPath: '/api/v1/payments/callback/form-1',
-        callbackUrl: 'https://test.example.com/api/v1/payments/callback/form-1'
+        callbackUrl: 'https://test.example.com/api/v1/payments/callback/form-1',
+        formActionUrl: 'https://safepay.paymentlogistics.net/transaction.asp',
+        merchantId: 'wmaxaustWEB',
+        testModeEnabled: false
       });
       expect(logger.info).toHaveBeenCalledWith(
         'Acquired callback handler for payment token test-token-123:',

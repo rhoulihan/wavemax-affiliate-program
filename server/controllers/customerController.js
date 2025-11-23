@@ -56,7 +56,8 @@ exports.registerCustomer = ControllerHelpers.asyncWrapper(async (req, res) => {
     numberOfBags,
     languagePreference,
     paymentConfirmed,
-    socialToken
+    socialToken,
+    socialProvider
   } = req.body;
 
   // Log if this is a post-payment registration
@@ -153,7 +154,7 @@ exports.registerCustomer = ControllerHelpers.asyncWrapper(async (req, res) => {
     registrationVersion: registrationVersion,
     initialBagsRequested: isV2Registration ? initialBagsRequested : undefined,
     bagCredit: isV2Registration ? 0 : (numberOfBags || 1) * 10, // V1 uses credit system
-    registrationMethod: socialToken ? 'oauth' : 'traditional'
+    registrationMethod: socialToken ? (socialProvider || 'social') : 'traditional'
   });
 
   // Encrypt payment info if provided
@@ -212,12 +213,33 @@ exports.registerCustomer = ControllerHelpers.asyncWrapper(async (req, res) => {
     // Don't fail registration if notification fails
   }
 
-  // Send success response
+  // Send success response with customer and affiliate data
   return ControllerHelpers.sendSuccess(
     res,
     {
       customerId: newCustomer.customerId,
-      token
+      token,
+      customerData: {
+        firstName: newCustomer.firstName,
+        lastName: newCustomer.lastName,
+        email: newCustomer.email,
+        phone: newCustomer.phone,
+        address: newCustomer.address,
+        city: newCustomer.city,
+        state: newCustomer.state,
+        zipCode: newCustomer.zipCode,
+        affiliateId: newCustomer.affiliateId,
+        numberOfBags: newCustomer.numberOfBags,
+        registrationVersion: newCustomer.registrationVersion
+      },
+      affiliateData: {
+        businessName: affiliate.businessName,
+        firstName: affiliate.firstName,
+        lastName: affiliate.lastName,
+        email: affiliate.email,
+        phone: affiliate.phone,
+        serviceArea: affiliate.serviceArea
+      }
     },
     'Customer registration successful',
     201

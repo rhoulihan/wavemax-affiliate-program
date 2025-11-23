@@ -2041,7 +2041,11 @@ exports.handleCustomerSocialCallback = async (req, res) => {
       const message = {
         type: 'social-auth-success',
         socialToken: socialToken,
-        provider: user.provider
+        provider: user.provider,
+        // Include user data for form pre-population
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName
       };
 
       // Store in database if sessionId is provided

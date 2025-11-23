@@ -279,4 +279,44 @@ router.post('/customer/social/register', [
   // These fields will be auto-generated if not provided
 ], authController.completeSocialCustomerRegistration);
 
+/**
+ * @route   GET /api/auth/oauth/result/:sessionId
+ * @desc    Poll for OAuth authentication result (database polling approach)
+ * @access  Public
+ */
+router.get('/oauth/result/:sessionId', async (req, res) => {
+  try {
+    const { sessionId } = req.params;
+
+    console.log('[OAuth Result Poll] Checking for session:', sessionId);
+
+    // Get the OAuthSession model
+    const OAuthSession = require('../models/OAuthSession');
+
+    // Consume session (retrieve and delete in one operation)
+    const session = await OAuthSession.consumeSession(sessionId);
+
+    if (session) {
+      console.log('[OAuth Result Poll] Session found and consumed:', session);
+
+      return res.json({
+        completed: true,
+        success: true,
+        data: session
+      });
+    } else {
+      // Session not found or not completed yet
+      return res.json({
+        completed: false
+      });
+    }
+  } catch (error) {
+    console.error('[OAuth Result Poll] Error:', error);
+    return res.status(500).json({
+      completed: false,
+      error: 'Internal server error'
+    });
+  }
+});
+
 module.exports = router;
