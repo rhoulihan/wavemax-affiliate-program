@@ -153,6 +153,36 @@
                 mapLink.href = 'https://www.wavemaxlaundry.com/austin-tx/contact/';
                 mapLink.target = '_self'; // Navigate in same window instead of new tab
             }
+        },
+
+        // Action 4: Initialize Google Analytics
+        initializeGoogleAnalytics: function() {
+            // Check if gtag is already loaded
+            if (window.gtag) {
+                console.log('[Parent Bridge V2] Google Analytics already initialized');
+                return;
+            }
+
+            console.log('[Parent Bridge V2] Initializing Google Analytics');
+
+            // Create and append the gtag.js script
+            const gtagScript = document.createElement('script');
+            gtagScript.async = true;
+            gtagScript.src = 'https://www.googletagmanager.com/gtag/js?id=AW-16900975513';
+            document.head.appendChild(gtagScript);
+
+            // Initialize dataLayer and gtag function
+            window.dataLayer = window.dataLayer || [];
+            function gtag() {
+                window.dataLayer.push(arguments);
+            }
+            window.gtag = gtag;
+
+            // Configure Google Analytics
+            gtag('js', new Date());
+            gtag('config', 'AW-16900975513');
+
+            console.log('[Parent Bridge V2] Google Analytics initialized with ID: AW-16900975513');
         }
     };
 
