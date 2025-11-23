@@ -57,12 +57,22 @@
             if (pageHeader) {
                 console.log('[Parent Bridge V2] Hiding page header');
                 pageHeader.style.setProperty('display', 'none', 'important');
+                pageHeader.style.setProperty('visibility', 'hidden', 'important');
+                pageHeader.style.setProperty('height', '0', 'important');
+                pageHeader.style.setProperty('margin', '0', 'important');
+                pageHeader.style.setProperty('padding', '0', 'important');
+                pageHeader.style.setProperty('overflow', 'hidden', 'important');
                 pageHeader.setAttribute('data-permanently-hidden', 'true');
 
                 // Keep it hidden with mutation observer
                 const observer = new MutationObserver(() => {
                     if (pageHeader.style.display !== 'none') {
                         pageHeader.style.setProperty('display', 'none', 'important');
+                        pageHeader.style.setProperty('visibility', 'hidden', 'important');
+                        pageHeader.style.setProperty('height', '0', 'important');
+                        pageHeader.style.setProperty('margin', '0', 'important');
+                        pageHeader.style.setProperty('padding', '0', 'important');
+                        pageHeader.style.setProperty('overflow', 'hidden', 'important');
                     }
                 });
 
@@ -101,6 +111,10 @@
                 section.page-header.page-header-modern.bg-color-light-scale-1.page-header-sm {
                     display: none !important;
                     visibility: hidden !important;
+                    height: 0 !important;
+                    margin: 0 !important;
+                    padding: 0 !important;
+                    overflow: hidden !important;
                 }
 
                 /* Iframe styling */
