@@ -143,6 +143,12 @@
 
         html += '</div>';
 
+        // Add "Read All Reviews" button
+        html += '<div class="text-center mt-4">';
+        html += '<a href="https://www.google.com/search?q=wavemax+austin&oq=wavemax+austin&gs_lcrp=EgZjaHJvbWUqBggAEEUYOzIGCAAQRRg7MgYIARBFGEEyBggCEEUYPDIGCAMQRRg80gEIMzQ1OWowajSoAgCwAgE&sourceid=chrome&ie=UTF-8#lrd=0x8644c99106394b39:0x4a834b8b52f43b4e,1,,,," target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-lg">';
+        html += '<i class="bi bi-google me-2"></i>Read All Our Austin Reviews';
+        html += '</a></div>';
+
         testimonialsElement.innerHTML = html;
     }
 
