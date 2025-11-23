@@ -143,6 +143,16 @@
                 }
             `;
             document.head.appendChild(styleTag);
+        },
+
+        // Action 3: Update map link to contact page
+        updateMapLink: function() {
+            const mapLink = document.querySelector('a[data-type="distance"]');
+            if (mapLink) {
+                console.log('[Parent Bridge V2] Updating map link to contact page');
+                mapLink.href = 'https://www.wavemaxlaundry.com/austin-tx/contact/';
+                mapLink.target = '_self'; // Navigate in same window instead of new tab
+            }
         }
     };
 
