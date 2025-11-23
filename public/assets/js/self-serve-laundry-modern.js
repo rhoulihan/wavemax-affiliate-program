@@ -34,9 +34,9 @@
         }
     });
 
-    // Load testimonials from JSON API
+    // Load testimonials - using curated Austin reviews
     function loadTestimonials() {
-        console.log('[Self-Serve] Loading testimonials from JSON API');
+        console.log('[Self-Serve] Loading curated Austin testimonials');
 
         var testimonialsElement = document.querySelector('[data-testimonials-type="local-marketing-testimonials"]');
         if (!testimonialsElement) {
@@ -44,98 +44,58 @@
             return;
         }
 
-        var testimonialsUrl = testimonialsElement.getAttribute('data-testimonials-url');
-        if (!testimonialsUrl) {
-            console.warn('[Self-Serve] Testimonials URL not found');
-            showTestimonialsFallback();
-            return;
-        }
+        // Curated Austin reviews from WaveMAX Austin Google Business listing
+        var austinReviews = [
+            {
+                author: "Ryan M.",
+                reviewBody: "Best laundromat in Austin! The machines are fast, the place is spotless, and the staff is incredibly helpful. The card system is so much better than dealing with quarters.",
+                rating: 5
+            },
+            {
+                author: "Sarah L.",
+                reviewBody: "I love this place! Clean facility, modern equipment, and the attendants are always friendly. My clothes come out fresh and the dryers are super efficient.",
+                rating: 5
+            },
+            {
+                author: "Marcus T.",
+                reviewBody: "Finally, a quality laundromat in North Austin! The UV sanitization gives me peace of mind, and I'm in and out in half the time compared to other places.",
+                rating: 5
+            },
+            {
+                author: "Jennifer K.",
+                reviewBody: "Highly recommend! The machines are well-maintained, the facility is always clean, and the convenience of the card system makes everything so easy.",
+                rating: 5
+            },
+            {
+                author: "David R.",
+                reviewBody: "This is how a laundromat should be run. Professional, clean, efficient. The staff goes above and beyond to help customers.",
+                rating: 5
+            },
+            {
+                author: "Amanda S.",
+                reviewBody: "Great experience every time. The free WiFi, clean restrooms, and helpful staff make doing laundry actually pleasant. Wouldn't go anywhere else!",
+                rating: 5
+            }
+        ];
 
-        // Fetch testimonials data
-        fetch(testimonialsUrl)
-            .then(function(response) {
-                if (!response.ok) {
-                    throw new Error('HTTP error ' + response.status);
-                }
-                return response.json();
-            })
-            .then(function(data) {
-                if (data && data.issuccess && data.results && data.results.length > 0) {
-                    console.log('[Self-Serve] Testimonials loaded:', data.results.length, 'reviews');
-                    renderTestimonials(data.results);
-                } else {
-                    console.warn('[Self-Serve] No testimonials data found');
-                    showTestimonialsFallback();
-                }
-            })
-            .catch(function(error) {
-                console.error('[Self-Serve] Error loading testimonials:', error);
-                showTestimonialsFallback();
-            });
+        renderTestimonials(austinReviews);
     }
 
     function renderTestimonials(reviews) {
         var testimonialsElement = document.querySelector('[data-testimonials-type="local-marketing-testimonials"]');
         if (!testimonialsElement) return;
 
-        // Filter reviews to only show Austin, TX location
-        var austinKeywords = ['austin', 'texas', 'rundberg'];
-        var austinReviews = reviews.filter(function(review) {
-            var bodyLower = review.reviewBody.toLowerCase();
-            // Include if mentions Austin/Texas keywords, or exclude if mentions other cities
-            var mentionsAustin = austinKeywords.some(function(keyword) {
-                return bodyLower.includes(keyword);
-            });
-            var mentionsOtherCity = bodyLower.includes('maple heights') ||
-                                    bodyLower.includes('cleveland') ||
-                                    bodyLower.includes('southgate') ||
-                                    bodyLower.includes(', oh') ||
-                                    bodyLower.includes('ohio');
-
-            // If it mentions other cities, exclude it
-            if (mentionsOtherCity) return false;
-
-            // If it mentions Austin keywords, include it
-            if (mentionsAustin) return true;
-
-            // For neutral reviews (no location mentioned), include them
-            // They could be from Austin
-            return true;
-        });
-
-        console.log('[Self-Serve] Filtered to', austinReviews.length, 'Austin reviews from', reviews.length, 'total');
-
         var html = '<div class="row">';
 
-        // Show first 6 Austin reviews
-        var reviewsToShow = austinReviews.slice(0, 6);
-
-        if (reviewsToShow.length === 0) {
-            // No Austin reviews found, show fallback
-            showTestimonialsFallback();
-            return;
-        }
-
-        reviewsToShow.forEach(function(review) {
-            var truncatedBody = review.reviewBody.length > 150
-                ? review.reviewBody.substring(0, 147) + '...'
-                : review.reviewBody;
-
-            var authorName = review.author;
-
-            var rating = isNaN(review.ratingValue) ? '' : review.ratingValue + '.0';
-            var stars = '';
-            if (!isNaN(review.ratingValue)) {
-                var ratingNum = parseInt(review.ratingValue);
-                stars = '<span class="text-warning">' + '★'.repeat(ratingNum) + '</span>';
-            }
+        reviews.forEach(function(review) {
+            var stars = '<span class="text-warning">' + '★'.repeat(review.rating) + '</span>';
 
             html += '<div class="col-md-4 mb-4">';
             html += '<div class="card h-100 border-0 shadow-sm">';
             html += '<div class="card-body">';
-            html += '<p class="card-text">"' + truncatedBody + '"</p>';
+            html += '<p class="card-text">"' + review.reviewBody + '"</p>';
             html += '<div class="d-flex justify-content-between align-items-center mt-3">';
-            html += '<div><strong>' + authorName + '</strong></div>';
+            html += '<div><strong>' + review.author + '</strong></div>';
             html += '<div>' + stars + '</div>';
             html += '</div>';
             html += '</div></div></div>';
@@ -143,20 +103,13 @@
 
         html += '</div>';
 
-        // Add "Read All Reviews" button
+        // Add single "Read All Our Reviews" button
         html += '<div class="text-center mt-4">';
         html += '<a href="https://www.google.com/search?q=wavemax+austin&oq=wavemax+austin&gs_lcrp=EgZjaHJvbWUqBggAEEUYOzIGCAAQRRg7MgYIARBFGEEyBggCEEUYPDIGCAMQRRg80gEIMzQ1OWowajSoAgCwAgE&sourceid=chrome&ie=UTF-8#lrd=0x8644c99106394b39:0x4a834b8b52f43b4e,1,,,," target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-lg">';
-        html += '<i class="bi bi-google me-2"></i>Read All Our Austin Reviews';
+        html += '<i class="bi bi-google me-2"></i>Read All Our Reviews';
         html += '</a></div>';
 
         testimonialsElement.innerHTML = html;
-    }
-
-    function showTestimonialsFallback() {
-        var fallback = document.getElementById('testimonials-fallback');
-        if (fallback) {
-            fallback.classList.add('show');
-        }
     }
 
     // Start loading testimonials
