@@ -178,18 +178,25 @@ app.use(helmet({
 // Add custom security headers not covered by helmet
 app.use((req, res, next) => {
   // Permissions Policy (previously Feature Policy)
-  res.setHeader('Permissions-Policy', 
+  res.setHeader('Permissions-Policy',
     'geolocation=(), microphone=(), camera=(), payment=(), usb=(), magnetometer=(), accelerometer=(), gyroscope=()'
   );
-  
+
   // X-Permitted-Cross-Domain-Policies
   res.setHeader('X-Permitted-Cross-Domain-Policies', 'none');
-  
+
   // Clear-Site-Data header for logout endpoints
   if (req.path.includes('/logout')) {
     res.setHeader('Clear-Site-Data', '"cache", "cookies", "storage"');
   }
-  
+
+  // Override CORS and resource policy for parent bridge script
+  if (req.path === '/assets/js/parent-iframe-bridge-v2.js') {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
+    res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+  }
+
   next();
 });
 
