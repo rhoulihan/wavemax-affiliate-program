@@ -684,7 +684,6 @@ function initializePageScripts(route) {
         '/home': ['/assets/js/site-page-loader.js'],
         '/self-serve-laundry': [
             'https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js',
-            'https://www.local-marketing-reports.com/assets/external/reviews/widgets.js',
             '/assets/js/self-serve-laundry-modern.js'
         ],
         '/wash-dry-fold': ['/assets/js/site-page-loader.js'],
