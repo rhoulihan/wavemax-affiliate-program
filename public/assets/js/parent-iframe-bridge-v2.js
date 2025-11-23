@@ -272,66 +272,143 @@
         }
     };
 
-    // Create language selector
-    function createLanguageSelector() {
-        // Only create if not already exists
-        if (document.getElementById('wavemax-simple-language-selector')) {
-            return;
-        }
+    // Setup language selector integration with existing dropdown
+    function setupLanguageSelector() {
+        console.log('[Parent Bridge V2] Setting up language selector integration');
 
-        console.log('[Parent Bridge V2] Creating language selector');
+        // Wait for the page's language selector to be ready
+        setTimeout(() => {
+            // Find the dropdown list
+            const dropdownList = document.querySelector('.dropdown-cs');
 
-        const selector = document.createElement('select');
-        selector.id = 'wavemax-simple-language-selector';
-        selector.style.cssText = `
-            position: fixed;
-            top: 10px;
-            right: 10px;
-            z-index: 9999;
-            padding: 8px 12px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            background: white;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            font-size: 14px;
-            cursor: pointer;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        `;
+            if (dropdownList) {
+                console.log('[Parent Bridge V2] Found Google Translate dropdown:', dropdownList);
 
-        const languages = [
-            { code: 'en', name: 'English' },
-            { code: 'es', name: 'Español' },
-            { code: 'pt', name: 'Português' },
-            { code: 'de', name: 'Deutsch' }
-        ];
+                // Fix dropdown positioning and ensure it's not cut off
+                dropdownList.style.cssText += `
+                    position: absolute !important;
+                    z-index: 9999 !important;
+                    min-width: 120px !important;
+                    overflow: visible !important;
+                `;
 
-        const currentLang = localStorage.getItem('wavemax-language') || 'en';
+                // Standardize size for all existing flag images
+                const existingImages = dropdownList.querySelectorAll('img');
+                existingImages.forEach(img => {
+                    img.style.width = '24px';
+                    img.style.height = 'auto';
+                    img.style.display = 'inline-block';
+                    img.style.verticalAlign = 'middle';
+                });
 
-        languages.forEach(lang => {
-            const option = document.createElement('option');
-            option.value = lang.code;
-            option.textContent = lang.name;
-            option.selected = lang.code === currentLang;
-            selector.appendChild(option);
-        });
+                // Check existing language options
+                const existingItems = dropdownList.querySelectorAll('li');
+                const hasPortuguese = Array.from(existingItems).some(item => {
+                    const onclick = item.querySelector('img')?.getAttribute('onclick') || '';
+                    return onclick.includes('|pt');
+                });
+                const hasGerman = Array.from(existingItems).some(item => {
+                    const onclick = item.querySelector('img')?.getAttribute('onclick') || '';
+                    return onclick.includes('|de');
+                });
 
-        selector.addEventListener('change', function(e) {
-            const langCode = e.target.value;
-            console.log('[Parent Bridge V2] Language changed to:', langCode);
+                // Add Portuguese if not present
+                if (!hasPortuguese) {
+                    const ptItem = document.createElement('li');
+                    const ptImg = document.createElement('img');
 
-            // Save to localStorage
-            localStorage.setItem('wavemax-language', langCode);
+                    const brazilFlagSources = [
+                        '/assets/WaveMax/images/brazil.png',
+                        'https://flagcdn.com/24x18/br.png',
+                        'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 14"%3E%3Crect width="20" height="14" fill="%23009b3a"/%3E%3Cpath d="M10 2L2 7l8 5 8-5z" fill="%23fedf00"/%3E%3Ccircle cx="10" cy="7" r="2.5" fill="%23002776"/%3E%3C/svg%3E'
+                    ];
 
-            // Send language change to iframe
-            sendLanguageChange(langCode);
+                    ptImg.src = brazilFlagSources[0];
 
-            // Dispatch custom event
-            window.dispatchEvent(new CustomEvent('languageChanged', {
-                detail: { language: langCode }
-            }));
-        });
+                    let sourceIndex = 0;
+                    ptImg.onerror = function() {
+                        sourceIndex++;
+                        if (sourceIndex < brazilFlagSources.length) {
+                            this.src = brazilFlagSources[sourceIndex];
+                        }
+                    };
 
-        document.body.appendChild(selector);
+                    ptImg.alt = 'Portuguese';
+                    ptImg.setAttribute('onclick', "doGTranslate('en|pt');FixBodyTop();return false;");
+                    ptImg.style.cursor = 'pointer';
+                    ptImg.style.width = '24px';
+                    ptImg.style.height = 'auto';
+                    ptItem.appendChild(ptImg);
+                    dropdownList.appendChild(ptItem);
+                    console.log('[Parent Bridge V2] Added Portuguese option');
+                }
+
+                // Add German if not present
+                if (!hasGerman) {
+                    const deItem = document.createElement('li');
+                    const deImg = document.createElement('img');
+
+                    const germanFlagSources = [
+                        '/assets/WaveMax/images/germany.png',
+                        'https://flagcdn.com/24x18/de.png',
+                        'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 14"%3E%3Crect width="20" height="4.67" fill="%23000"/%3E%3Crect y="4.67" width="20" height="4.67" fill="%23d00"/%3E%3Crect y="9.33" width="20" height="4.67" fill="%23ffce00"/%3E%3C/svg%3E'
+                    ];
+
+                    deImg.src = germanFlagSources[0];
+
+                    let sourceIndex = 0;
+                    deImg.onerror = function() {
+                        sourceIndex++;
+                        if (sourceIndex < germanFlagSources.length) {
+                            this.src = germanFlagSources[sourceIndex];
+                        }
+                    };
+
+                    deImg.alt = 'German';
+                    deImg.setAttribute('onclick', "doGTranslate('en|de');FixBodyTop();return false;");
+                    deImg.style.cursor = 'pointer';
+                    deImg.style.width = '24px';
+                    deImg.style.height = 'auto';
+                    deItem.appendChild(deImg);
+                    dropdownList.appendChild(deItem);
+                    console.log('[Parent Bridge V2] Added German option');
+                }
+
+                // Hook into the doGTranslate function to capture language changes
+                const originalDoGTranslate = window.doGTranslate;
+                if (originalDoGTranslate) {
+                    window.doGTranslate = function(pair) {
+                        // Call the original function
+                        originalDoGTranslate(pair);
+
+                        // Extract the target language from the pair (e.g., 'en|es' -> 'es')
+                        const targetLang = pair.split('|')[1];
+                        if (targetLang) {
+                            console.log('[Parent Bridge V2] Google Translate language changed to:', targetLang);
+
+                            // Save to localStorage
+                            localStorage.setItem('wavemax-language', targetLang);
+
+                            // Send language change to iframe
+                            sendLanguageChange(targetLang);
+
+                            // Dispatch custom event
+                            window.dispatchEvent(new CustomEvent('languageChanged', {
+                                detail: { language: targetLang }
+                            }));
+                        }
+                    };
+                    console.log('[Parent Bridge V2] Successfully hooked into doGTranslate');
+                }
+            } else {
+                console.log('[Parent Bridge V2] Google Translate dropdown not found, will try again');
+
+                // Try again in case it loads later
+                setTimeout(() => {
+                    setupLanguageSelector();
+                }, 2000);
+            }
+        }, 500);
     }
 
     // Public API
@@ -343,7 +420,7 @@
             localStorage.setItem('wavemax-language', language);
             sendLanguageChange(language);
         },
-        createLanguageSelector: createLanguageSelector
+        setupLanguageSelector: setupLanguageSelector
     };
 
     // Initialize when DOM is ready
@@ -358,8 +435,8 @@
         if (!iframe) {
             init();
         }
-        // Create language selector after page loads
-        createLanguageSelector();
+        // Setup language selector integration after page loads
+        setupLanguageSelector();
     });
 
 })();
