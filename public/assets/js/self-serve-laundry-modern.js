@@ -14,6 +14,12 @@
             console.log('[Self-Serve] Translations loaded');
         }
 
+        // Load SEO configuration
+        if (typeof SelfServeSEOConfig !== 'undefined') {
+            IframeBridge.loadSEOConfig(SelfServeSEOConfig);
+            console.log('[Self-Serve] SEO config loaded');
+        }
+
         // Initialize the bridge with page identifier
         IframeBridge.init({
             pageIdentifier: 'self-serve-laundry',
