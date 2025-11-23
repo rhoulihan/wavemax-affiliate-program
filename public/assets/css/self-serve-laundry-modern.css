@@ -469,12 +469,3 @@ body {
     margin-bottom: 2rem;
     font-weight: 600;
 }
-
-/* Testimonials fallback */
-#testimonials-fallback {
-    display: none;
-}
-
-#testimonials-fallback.show {
-    display: block;
-}
