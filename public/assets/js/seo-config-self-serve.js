@@ -5,8 +5,8 @@ window.SelfServeSEOConfig = {
     // Page title and meta tags
     meta: {
         title: "Self-Service Laundry Austin TX | WaveMAX Laundromat",
-        description: "Austin's premier self-service laundry with 450G machines, UV sanitization & touchless payment. Open 24/7. Fast, clean, affordable laundry service in Austin, TX.",
-        keywords: "self-service laundry Austin, laundromat Austin TX, wash and fold Austin, 24 hour laundromat Austin, UV sanitization laundry, 450G washers Austin",
+        description: "Austin's premier self-service laundry with 450G machines, UV sanitization & touchless payment. Open 7AM-10PM daily. Fast, clean, affordable laundry service in Austin, TX.",
+        keywords: "self-service laundry Austin, laundromat Austin TX, wash and fold Austin, laundromat near me Austin, UV sanitization laundry, 450G washers Austin",
         author: "WaveMAX Laundry",
         canonicalUrl: "https://www.wavemaxlaundry.com/austin-tx/self-serve-laundry/"
     },
@@ -14,7 +14,7 @@ window.SelfServeSEOConfig = {
     // Open Graph tags for social sharing
     openGraph: {
         title: "Self-Service Laundry Austin TX | WaveMAX - 450G Machines & UV Sanitization",
-        description: "Austin's premier self-service laundromat with state-of-the-art 450G washers, UV sanitization, and touchless payment. Open 24/7. Fast, clean, affordable laundry in Austin, TX.",
+        description: "Austin's premier self-service laundromat with state-of-the-art 450G washers, UV sanitization, and touchless payment. Open 7AM-10PM daily. Fast, clean, affordable laundry in Austin, TX.",
         type: "business.business",
         url: "https://www.wavemaxlaundry.com/austin-tx/self-serve-laundry/",
         image: "https://www.wavemaxlaundry.com/Upload/UploadedImages/WaveMAX/sua1.jpg",
@@ -29,7 +29,7 @@ window.SelfServeSEOConfig = {
         card: "summary_large_image",
         site: "@wavemaxlaundry",
         title: "Self-Service Laundry Austin TX | WaveMAX - 450G Machines & UV Sanitization",
-        description: "Austin's premier self-service laundromat with state-of-the-art 450G washers, UV sanitization, and touchless payment. Open 24/7.",
+        description: "Austin's premier self-service laundromat with state-of-the-art 450G washers, UV sanitization, and touchless payment. Open 7AM-10PM daily.",
         image: "https://www.wavemaxlaundry.com/Upload/UploadedImages/WaveMAX/sua1.jpg",
         imageAlt: "Modern laundromat interior with high-capacity washers and dryers"
     },
@@ -46,7 +46,7 @@ window.SelfServeSEOConfig = {
                 "https://www.wavemaxlaundry.com/Upload/UploadedImages/WaveMAX/sua2.jpg",
                 "https://www.wavemaxlaundry.com/Upload/UploadedImages/WaveMAX/sua3.jpg"
             ],
-            "description": "Austin's premier self-service laundromat featuring 450G capacity washers and dryers with UV sanitization technology. Open 24/7 with touchless payment, free WiFi, and wash-dry-fold services.",
+            "description": "Austin's premier self-service laundromat featuring 450G capacity washers and dryers with UV sanitization technology. Open 7AM-10PM daily, 365 days a year with touchless payment, free WiFi, and wash-dry-fold services.",
             "url": "https://www.wavemaxlaundry.com/austin-tx/",
             "telephone": "+15122530953",
             "priceRange": "$$",
@@ -75,7 +75,7 @@ window.SelfServeSEOConfig = {
                         "Saturday",
                         "Sunday"
                     ],
-                    "opens": "06:00",
+                    "opens": "07:00",
                     "closes": "22:00"
                 }
             ],
