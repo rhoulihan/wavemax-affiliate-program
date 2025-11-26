@@ -1074,7 +1074,6 @@
 
         let html = `
             <div class="order-info">
-                <h4>Order ${order.orderId}</h4>
                 <div class="info-grid">
                     <div class="info-item">
                         <div class="info-label">Customer</div>
@@ -1262,16 +1261,12 @@
                 progressBar.style.width = percentage + '%';
                 progressBar.textContent = Math.round(percentage) + '%';
             }
-            
-            // Focus on first input if all bags are scanned
+
+            // Don't auto-focus inputs - let operator read the order details first
             if (allBagsScanned) {
                 const bags = order.bags || [];
                 if (bags.length > 0) {
-                    const sanitizedBagId = bags[0].bagId.replace(/-/g, '_');
-                    const firstInput = document.getElementById(`bagWeight_${sanitizedBagId}`);
-                    if (firstInput) {
-                        firstInput.focus();
-                    }
+                    // Removed auto-focus to allow operator to review order details
                 }
             }
         }, 100);
