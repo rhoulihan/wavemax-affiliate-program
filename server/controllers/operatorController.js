@@ -704,45 +704,10 @@ exports.scanCustomer = async (req, res) => {
     }
     
     // Normalize the customer ID format (handle case differences)
-    // Remove any leading non-alphanumeric characters or whitespace
-    cleanCustomerId = cleanCustomerId.trim();
-
-    // Handle malformed IDs: CCUST, C-CUST, etc. - extract the proper format
-    // First, remove all prefixes and try to extract just the UUID-like portion
-    // Remove multiple C's, CUST variations, and clean up hyphens
-    let uuidPortion = cleanCustomerId
-      .replace(/^[cC]+/g, '')           // Remove leading C's
-      .replace(/^[uU][sS][tT]-?/i, '')  // Remove UST or ust
-      .replace(/^-+/, '')                // Remove leading hyphens
-      .replace(/--+/g, '-')              // Replace multiple hyphens with single
-      .toLowerCase();
-
-    console.log(`Extracted UUID portion: ${uuidPortion}`);
-
-    // Try to find a valid UUID pattern (even if partial)
-    const uuidPattern = /([a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12})/i;
-    const uuidMatch = uuidPortion.match(uuidPattern);
-
-    if (uuidMatch) {
-      // Found a complete UUID, reconstruct as CUST-{uuid}
-      cleanCustomerId = 'CUST-' + uuidMatch[1].toLowerCase();
-      console.log(`Reconstructed customer ID from complete UUID: ${cleanCustomerId}`);
-    } else {
-      // No complete UUID found, try to find partial UUID-like pattern
-      // Look for hex characters with hyphens (at least 20 chars)
-      const partialUuidPattern = /([a-f0-9-]{20,})/i;
-      const partialMatch = uuidPortion.match(partialUuidPattern);
-
-      if (partialMatch) {
-        cleanCustomerId = 'CUST-' + partialMatch[1].toLowerCase();
-        console.log(`Reconstructed customer ID from partial UUID: ${cleanCustomerId}`);
-      } else {
-        // Last resort: just use what we have
-        cleanCustomerId = 'CUST-' + uuidPortion;
-        console.log(`Using cleaned customer ID: ${cleanCustomerId}`);
-      }
-    }
-
+    // Convert to uppercase CUST and lowercase UUID
+    cleanCustomerId = cleanCustomerId.replace(/^cust-/i, 'CUST-').toLowerCase();
+    cleanCustomerId = cleanCustomerId.replace(/^cust-/, 'CUST-'); // Ensure CUST is uppercase
+    
     console.log(`Normalized customer ID: ${cleanCustomerId}`);
 
     // Find customer (case-insensitive search as fallback)
@@ -1044,8 +1009,6 @@ exports.weighBags = async (req, res) => {
     const { bags, orderId } = req.body;
     const operatorId = req.user.id;
 
-    logger.info(`weighBags called for order ${orderId}. Bags count: ${bags ? bags.length : 0}. Operator: ${operatorId}`);
-
     const order = await Order.findOne({ orderId });
     if (!order) {
       return res.status(404).json({ 
@@ -1100,36 +1063,22 @@ exports.weighBags = async (req, res) => {
     
     // Update bag counts
     order.bagsWeighed = order.bags.filter(b => b.weight > 0).length;
-
-    logger.info(`About to save order ${order.orderId}. BagsWeighed: ${order.bagsWeighed}, TotalBags: ${order.numberOfBags}`);
-
+    
     // Save order first to calculate v2PaymentAmount
-    try {
-      await order.save();
-      logger.info(`Order ${order.orderId} saved successfully`);
-    } catch (saveError) {
-      logger.error(`Error saving order ${order.orderId}:`, saveError);
-      throw saveError;
-    }
-
+    await order.save();
+    
     // V2 Payment Flow: Send payment request if all bags are weighed
     if (order.bagsWeighed === order.numberOfBags) {
-      logger.info(`All bags weighed for order ${order.orderId}. Initiating V2 payment request. BagsWeighed: ${order.bagsWeighed}, TotalBags: ${order.numberOfBags}`);
-
       // Calculate weight difference for reference
       order.weightDifference = order.actualWeight - order.estimatedWeight;
-
+      
       // Get customer for payment request
       const customer = await Customer.findOne({ customerId: order.customerId });
-
-      if (!customer) {
-        logger.warn(`Customer not found for order ${order.orderId}, customerId: ${order.customerId}. Cannot send payment request.`);
-      }
       if (customer) {
         // Use actualTotal if v2PaymentAmount is not set
-        const paymentAmount = order.v2PaymentAmount || order.actualTotal ||
+        const paymentAmount = order.v2PaymentAmount || order.actualTotal || 
                             (order.actualWeight * (order.baseRate || 1.25) + (order.addOnTotal || 0));
-
+        
         // Generate payment URLs and QR codes with correct amount
         const paymentURLs = await generatePaymentURLs({...order.toObject(), v2PaymentAmount: paymentAmount});
         order.v2PaymentLinks = paymentURLs.links;
@@ -1137,30 +1086,22 @@ exports.weighBags = async (req, res) => {
         order.v2PaymentStatus = 'awaiting';
         order.v2PaymentRequestedAt = new Date();
         order.v2PaymentAmount = paymentAmount; // Ensure it's set
-
+        
         // Save again with payment info
         await order.save();
-
-        // Send payment request email - wrapped in try-catch to not block success response
-        try {
-          await emailService.sendV2PaymentRequest({
-            customer,
-            order,
-            paymentAmount: paymentAmount,
-            paymentLinks: paymentURLs.links,
-            qrCodes: paymentURLs.qrCodes
-          });
-
-          logger.info(`V2 Payment request sent for order ${order.orderId}, amount: $${paymentAmount}`);
-        } catch (emailError) {
-          // Log the error but don't fail the whole operation
-          logger.error(`Failed to send payment request email for order ${order.orderId}:`, emailError);
-          // Order is still saved with payment info, email can be resent manually if needed
-        }
+        
+        // Send payment request email
+        await emailService.sendV2PaymentRequest({
+          customer,
+          order,
+          paymentAmount: paymentAmount,
+          paymentLinks: paymentURLs.links,
+          qrCodes: paymentURLs.qrCodes
+        });
+        
+        logger.info(`V2 Payment request sent for order ${order.orderId}, amount: $${paymentAmount}`);
       }
     }
-
-    logger.info(`About to log audit event for order ${orderId}`);
 
     await logAuditEvent(AuditEvents.ORDER_STATUS_CHANGED, {
       operatorId,
@@ -1170,8 +1111,6 @@ exports.weighBags = async (req, res) => {
       numberOfBags: order.bags.length,
       newBags: bags.length
     }, req);
-
-    logger.info(`Audit event logged. About to send response for order ${orderId}`);
 
     // Return updated order with bag progress
     res.json({
@@ -1368,16 +1307,15 @@ exports.scanProcessed = async (req, res) => {
       order.status = 'processed';
       
       // V2 Payment Flow: Check payment status before sending notifications
-      // Payment is considered received if status is NOT 'pending' (i.e., payment has been initiated)
-      if (order.v2PaymentStatus !== 'pending') {
+      if (order.v2PaymentStatus === 'verified' || order.v2PaymentStatus === 'paid') {
         // Payment received - send ready for pickup notification to affiliate ONLY
         const emailService = require('../utils/emailService');
-
+        
         // Notify affiliate that order is ready for pickup (NOT commission email)
         if (order.affiliateId) {
           const Affiliate = require('../models/Affiliate');
           const affiliate = await Affiliate.findOne({ affiliateId: order.affiliateId });
-
+          
           if (affiliate && affiliate.email) {
             // Send ready for pickup notification (not commission email)
             await emailService.sendOrderReadyNotification(affiliate.email, {
@@ -1534,7 +1472,7 @@ exports.completePickup = async (req, res) => {
   try {
     const { bagIds, orderId } = req.body;
     const operatorId = req.user.id;
-
+    
     console.log('completePickup called with:', { bagIds, orderId, operatorId });
 
     const order = await Order.findOne({ orderId });
@@ -1545,30 +1483,6 @@ exports.completePickup = async (req, res) => {
         error: 'Order not found'
       });
     }
-
-    // CRITICAL SECURITY: Verify payment before allowing pickup
-    // V2 orders: Block only when v2PaymentStatus is 'pending' (payment not initiated)
-    // Regular orders: Require paymentStatus='paid' or isPaid=true
-    const isV2Blocked = order.isV2Order && order.v2PaymentStatus === 'pending';
-    const isRegularPaid = !order.isV2Order && (order.paymentStatus === 'paid' || order.isPaid === true);
-
-    if (isV2Blocked || (!order.isV2Order && !isRegularPaid)) {
-      console.log('PAYMENT VERIFICATION FAILED - BLOCKING PICKUP');
-      console.log('Order:', orderId);
-      console.log('Is V2 Order:', order.isV2Order);
-      console.log('V2 Payment Status:', order.v2PaymentStatus);
-      console.log('V2 Blocked (pending):', isV2Blocked);
-      console.log('Payment Status:', order.paymentStatus);
-      console.log('Is Paid:', order.isPaid);
-
-      return res.status(403).json({
-        success: false,
-        error: 'Payment required',
-        message: 'This order cannot be released until payment is received and verified.'
-      });
-    }
-
-    console.log('Payment verified - proceeding with pickup');
 
     // Verify all bags are accounted for
     if (bagIds.length !== order.bags.length) {
@@ -1712,30 +1626,6 @@ exports.confirmPickup = async (req, res) => {
         error: 'Order not found'
       });
     }
-
-    // CRITICAL SECURITY: Verify payment before allowing pickup
-    // V2 orders: Block only when v2PaymentStatus is 'pending' (payment not initiated)
-    // Regular orders: Require paymentStatus='paid' or isPaid=true
-    const isV2Blocked = order.isV2Order && order.v2PaymentStatus === 'pending';
-    const isRegularPaid = !order.isV2Order && (order.paymentStatus === 'paid' || order.isPaid === true);
-
-    if (isV2Blocked || (!order.isV2Order && !isRegularPaid)) {
-      console.log('PAYMENT VERIFICATION FAILED - BLOCKING PICKUP (Legacy endpoint)');
-      console.log('Order:', orderId);
-      console.log('Is V2 Order:', order.isV2Order);
-      console.log('V2 Payment Status:', order.v2PaymentStatus);
-      console.log('V2 Blocked (pending):', isV2Blocked);
-      console.log('Payment Status:', order.paymentStatus);
-      console.log('Is Paid:', order.isPaid);
-
-      return res.status(403).json({
-        success: false,
-        error: 'Payment required',
-        message: 'This order cannot be released until payment is received and verified.'
-      });
-    }
-
-    console.log('Payment verified - proceeding with pickup (Legacy endpoint)');
 
     // Update bags picked up count
     const bagsToPickup = numberOfBags || 1; // Default to 1 if not specified
