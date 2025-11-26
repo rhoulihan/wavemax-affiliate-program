@@ -645,27 +645,25 @@
         // Update stats every 30 seconds
         statsInterval = setInterval(loadStats, 30000);
         
-        // Global keyboard hiding for Fully Kiosk
+        // Keyboard hiding for Fully Kiosk (only for scanner input)
         if (typeof fully !== 'undefined' && fully.hideKeyboard) {
             console.log('Setting up Fully Kiosk keyboard handlers');
-            
-            // Hide keyboard on any focus event
+
+            // Hide keyboard only for the scanner input field
             document.addEventListener('focusin', function(e) {
-                if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+                // Only hide keyboard for the scanner input, not for weight inputs or other fields
+                if (e.target.id === 'scanInput') {
                     setTimeout(() => {
                         fully.hideKeyboard();
                     }, 100);
                 }
             });
-            
-            // Also hide on window resize (keyboard appearing often triggers resize)
-            window.addEventListener('resize', function() {
-                fully.hideKeyboard();
-            });
-            
-            // Periodic keyboard hide to ensure it stays hidden
+
+            // Periodic keyboard hide only if scanner input is focused
             setInterval(() => {
-                fully.hideKeyboard();
+                if (document.activeElement && document.activeElement.id === 'scanInput') {
+                    fully.hideKeyboard();
+                }
             }, 5000);
         }
     }
