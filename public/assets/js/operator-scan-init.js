@@ -11,7 +11,6 @@
 
     // State
     let currentOrder = null;
-    let scanBuffer = '';
     let scanTimeout = null;
     let confirmationTimeout = null;
     let operatorData = null;
@@ -807,9 +806,29 @@
         scanInput.addEventListener('input', handleScanInput);
         scanInput.addEventListener('blur', handleScannerBlur);
         
-        // Add keypress listener for debugging
+        // Add keypress listener for Enter key (barcode scanners often send Enter at the end)
         scanInput.addEventListener('keypress', function(e) {
             console.log('Keypress detected:', e.key, 'KeyCode:', e.keyCode);
+
+            // If Enter key is pressed, immediately process the scan
+            if (e.key === 'Enter' || e.keyCode === 13) {
+                console.log('Enter key detected - processing scan immediately');
+                e.preventDefault();
+
+                // Clear any pending timeout
+                if (scanTimeout) {
+                    clearTimeout(scanTimeout);
+                    scanTimeout = null;
+                }
+
+                // Process the complete input value immediately
+                const scannedValue = scanInput.value.trim();
+                if (scannedValue.length > 0) {
+                    console.log('Processing scan on Enter:', scannedValue);
+                    processScan(scannedValue);
+                    scanInput.value = '';
+                }
+            }
         });
         
         // Add paste listener for barcode scanners that paste
@@ -867,31 +886,28 @@
 
     // Handle scanner input
     function handleScanInput(e) {
+        // Don't process character by character - let the scanner fill the input field
+        // and process when Enter is pressed or after a short delay
         const value = e.target.value;
-        
+
         console.log('=== SCAN INPUT DETECTED ===');
         console.log('Input value:', value);
-        console.log('Buffer before:', scanBuffer);
-        console.log('Modal active:', orderModal.classList.contains('active'));
-        console.log('Current order:', currentOrder ? currentOrder.orderId : 'none');
-        
+        console.log('Input value length:', value.length);
+
         // Clear any existing timeout
         if (scanTimeout) {
             clearTimeout(scanTimeout);
         }
 
-        // Add to buffer
-        scanBuffer += value;
-        scanInput.value = '';
-        
-        console.log('Buffer after:', scanBuffer);
-
-        // Process after a short delay (scanner sends data quickly)
+        // Only process if we have a complete scan (scanner sends Enter, or wait for completion)
+        // Set a short timeout to check if more input is coming
         scanTimeout = setTimeout(function() {
-            if (scanBuffer.length > 0) {
-                console.log('Processing buffered scan:', scanBuffer);
-                processScan(scanBuffer.trim());
-                scanBuffer = '';
+            const finalValue = scanInput.value.trim();
+            if (finalValue.length > 0) {
+                console.log('Processing complete scan:', finalValue);
+                console.log('Final value length:', finalValue.length);
+                processScan(finalValue);
+                scanInput.value = '';
             }
         }, 100);
     }

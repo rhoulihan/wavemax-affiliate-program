@@ -107,7 +107,7 @@ const EMBED_PAGES = {
     // Website pages (content-only for iframe embedding)
     '/home': '/site-page-content-only.html',
     '/self-serve-laundry': '/self-serve-laundry-embed.html',
-    '/wash-dry-fold': '/site-page-content-only.html',
+    '/wash-dry-fold': '/wash-dry-fold-embed.html',
     '/commercial': '/site-page-content-only.html',
     '/about-us': '/site-page-content-only.html',
     '/testimonials': '/site-page-content-only.html',
@@ -690,7 +690,14 @@ function initializePageScripts(route) {
             '/assets/js/seo-config-self-serve.js',
             '/assets/js/self-serve-laundry-modern.js'
         ],
-        '/wash-dry-fold': ['/assets/js/site-page-loader.js'],
+        '/wash-dry-fold': [
+            'https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js',
+            'https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js',
+            '/assets/js/iframe-bridge-v2.js',
+            '/assets/js/wash-dry-fold-translations.js',
+            '/assets/js/seo-config-wash-dry-fold.js',
+            '/assets/js/wash-dry-fold-modern.js'
+        ],
         '/commercial': ['/assets/js/site-page-loader.js'],
         '/about-us': ['/assets/js/site-page-loader.js'],
         '/testimonials': ['/assets/js/site-page-loader.js'],
@@ -708,6 +715,13 @@ function initializePageScripts(route) {
             'https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap',
             'https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css',
             '/assets/css/self-serve-laundry-modern.css?v=20250123b'
+        ],
+        '/wash-dry-fold': [
+            'https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css',
+            'https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css',
+            'https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap',
+            'https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css',
+            '/assets/css/wash-dry-fold-modern.css'
         ]
     };
 

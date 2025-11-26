@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wash-Dry-Fold Laundry Service Austin | WaveMAX</title>
+    <meta name="description" content="Austin's premier wash-dry-fold service with hospital-grade UV sanitization. $1.20/lb, 24-hour turnaround, and professional care. Save 62 hours per year!">
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- AOS (Animate On Scroll) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css">
+
+    <!-- Wash-Dry-Fold Styles -->
+    <link rel="stylesheet" href="/assets/css/wash-dry-fold-modern.css">
+</head>
+<body>
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="hero-content">
+            <div class="container">
+                <div class="row align-items-center">
+                    <div class="col-lg-7" data-aos="fade-right">
+                        <h1 class="hero-title" data-i18n="hero.title">Give Yourself 62 Hours Back Every Year</h1>
+                        <p class="hero-subtitle" data-i18n="hero.subtitle">Drop off your laundry and we'll wash, dry, and fold it with professional care and hospital-grade UV sanitization. Pick up in 24 hours—all for just $1.20 per pound.</p>
+
+                        <div class="hero-badges">
+                            <div class="hero-badge">
+                                <i class="bi bi-clock-history"></i>
+                                <span data-i18n="hero.badges.turnaround">24-Hour Turnaround</span>
+                            </div>
+                            <div class="hero-badge">
+                                <i class="bi bi-shield-fill-check"></i>
+                                <span data-i18n="hero.badges.uvSanitized">99.999% Sanitized</span>
+                            </div>
+                            <div class="hero-badge">
+                                <i class="bi bi-currency-dollar"></i>
+                                <span data-i18n="hero.badges.pricing">$1.20/lb</span>
+                            </div>
+                        </div>
+
+                        <div class="hero-cta">
+                            <a href="https://www.wavemaxlaundry.com/austin-tx/contact/" class="btn btn-primary btn-lg">
+                                <i class="bi bi-geo-alt me-2"></i><span data-i18n="hero.cta">Visit Us Today</span>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="col-lg-5" data-aos="fade-left">
+                        <div class="image-gallery">
+                            <div class="gallery-item">
+                                <img src="https://images.unsplash.com/photo-1582735689369-4fe89db7114c?w=800&auto=format&fit=crop" alt="Freshly folded laundry">
+                            </div>
+                            <div class="gallery-item">
+                                <img src="https://images.unsplash.com/photo-1545173168-9f1947eebb7f?w=800&auto=format&fit=crop" alt="Professional laundry care">
+                            </div>
+                            <div class="gallery-item">
+                                <img src="https://images.unsplash.com/photo-1610557892470-55d9e80c0bce?w=800&auto=format&fit=crop" alt="Clean folded clothes">
+                            </div>
+                            <div class="gallery-item">
+                                <img src="https://images.unsplash.com/photo-1517677208171-0bc6725a3e60?w=800&auto=format&fit=crop" alt="Laundry delivery service">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section class="stats-section">
+        <div class="container">
+            <div class="row">
+                <div class="col-6 col-md-3">
+                    <div class="stat-card" data-aos="fade-up" data-aos-delay="100">
+                        <div class="stat-number">62</div>
+                        <div class="stat-label" data-i18n="stats.hoursSaved">Hours Saved/Year</div>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="stat-card" data-aos="fade-up" data-aos-delay="200">
+                        <div class="stat-number">24</div>
+                        <div class="stat-label" data-i18n="stats.turnaround">Hour Turnaround</div>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="stat-card" data-aos="fade-up" data-aos-delay="300">
+                        <div class="stat-number">99.999%</div>
+                        <div class="stat-label" data-i18n="stats.sanitization">Sanitization Rate</div>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="stat-card" data-aos="fade-up" data-aos-delay="400">
+                        <div class="stat-number">$1.20</div>
+                        <div class="stat-label" data-i18n="stats.pricing">Per Pound</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Content with Tabs -->
+    <div class="container my-5">
+        <div class="content-tabs">
+            <ul class="nav nav-tabs" id="contentTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="how-it-works-tab" data-bs-toggle="tab" data-bs-target="#how-it-works" type="button" role="tab">
+                        <i class="bi bi-list-check me-2"></i><span data-i18n="tabs.howItWorks">How It Works</span>
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="sanitization-tab" data-bs-toggle="tab" data-bs-target="#sanitization" type="button" role="tab">
+                        <i class="bi bi-shield-check me-2"></i><span data-i18n="tabs.sanitization">UV Sanitization</span>
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="pricing-tab" data-bs-toggle="tab" data-bs-target="#pricing" type="button" role="tab">
+                        <i class="bi bi-tag me-2"></i><span data-i18n="tabs.pricing">Pricing & FAQ</span>
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="benefits-tab" data-bs-toggle="tab" data-bs-target="#benefits" type="button" role="tab">
+                        <i class="bi bi-stars me-2"></i><span data-i18n="tabs.benefits">Why Choose Us</span>
+                    </button>
+                </li>
+            </ul>
+        </div>
+
+        <div class="tab-content" id="contentTabsContent">
+            <!-- How It Works Tab -->
+            <div class="tab-pane fade show active" id="how-it-works" role="tabpanel">
+                <div class="content-section" data-aos="fade-up">
+                    <h2 class="section-title" data-i18n="howItWorks.title">Simple, Convenient, Professional</h2>
+                    <p class="section-subtitle" data-i18n="howItWorks.subtitle">Our streamlined process makes laundry effortless. Drop off, relax, and pick up clean clothes in 24 hours—we handle everything with professional care.</p>
+
+                    <div class="process-steps mt-5">
+                        <div class="row">
+                            <div class="col-md-3 mb-4">
+                                <div class="process-card" data-aos="fade-up" data-aos-delay="100">
+                                    <div class="process-number">1</div>
+                                    <div class="process-icon">
+                                        <i class="bi bi-bag-check"></i>
+                                    </div>
+                                    <h3 class="process-title" data-i18n="howItWorks.step1.title">Drop Off</h3>
+                                    <p class="process-description" data-i18n="howItWorks.step1.description">Bring your laundry to our location during business hours (7AM-10PM, 365 days a year). Quick 2-minute drop-off—no sorting or prep work required.</p>
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-4">
+                                <div class="process-card" data-aos="fade-up" data-aos-delay="200">
+                                    <div class="process-number">2</div>
+                                    <div class="process-icon">
+                                        <i class="bi bi-clipboard-check"></i>
+                                    </div>
+                                    <h3 class="process-title" data-i18n="howItWorks.step2.title">We Weigh & Tag</h3>
+                                    <p class="process-description" data-i18n="howItWorks.step2.description">We weigh your laundry, tag it with your name, and give you a receipt. You'll know exactly what to expect when you return.</p>
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-4">
+                                <div class="process-card" data-aos="fade-up" data-aos-delay="300">
+                                    <div class="process-number">3</div>
+                                    <div class="process-icon">
+                                        <i class="bi bi-water"></i>
+                                    </div>
+                                    <h3 class="process-title" data-i18n="howItWorks.step3.title">Professional Care</h3>
+                                    <p class="process-description" data-i18n="howItWorks.step3.description">We wash with hospital-grade UV sanitization, dry to perfection, and fold with retail-quality precision. Your clothes are never mixed with others.</p>
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-4">
+                                <div class="process-card" data-aos="fade-up" data-aos-delay="400">
+                                    <div class="process-number">4</div>
+                                    <div class="process-icon">
+                                        <i class="bi bi-box2-heart"></i>
+                                    </div>
+                                    <h3 class="process-title" data-i18n="howItWorks.step4.title">Pick Up in 24 Hours</h3>
+                                    <p class="process-description" data-i18n="howItWorks.step4.description">Return within 24 hours to pick up your fresh, clean, perfectly folded laundry. Guaranteed turnaround time with every order.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="value-comparison mt-5" data-aos="fade-up">
+                        <h3 class="section-title" data-i18n="howItWorks.value.title">The Real Cost of DIY Laundry</h3>
+                        <div class="row g-4">
+                            <div class="col-md-6">
+                                <div class="comparison-card diy-cost">
+                                    <h4 data-i18n="howItWorks.value.diy.title">Doing It Yourself (20lb load)</h4>
+                                    <ul>
+                                        <li data-i18n="howItWorks.value.diy.time">Your time (3-5 hours): $45-$75</li>
+                                        <li data-i18n="howItWorks.value.diy.utilities">Water & electricity: $2-$3</li>
+                                        <li data-i18n="howItWorks.value.diy.supplies">Detergent & supplies: $1-$2</li>
+                                        <li data-i18n="howItWorks.value.diy.wear">Appliance wear & tear: $1-$2</li>
+                                    </ul>
+                                    <div class="total"><strong data-i18n="howItWorks.value.diy.total">Total Cost: $49-$82</strong></div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="comparison-card our-service">
+                                    <h4 data-i18n="howItWorks.value.our.title">WaveMAX Service (20lb load)</h4>
+                                    <ul>
+                                        <li data-i18n="howItWorks.value.our.time">Your time saved: 3-5 hours for life!</li>
+                                        <li data-i18n="howItWorks.value.our.uv">Hospital-grade UV sanitization: Included</li>
+                                        <li data-i18n="howItWorks.value.our.folding">Professional folding: Included</li>
+                                        <li data-i18n="howItWorks.value.our.convenience">No waiting—drop off and go!</li>
+                                    </ul>
+                                    <div class="total highlight"><strong data-i18n="howItWorks.value.our.total">Total Cost: Just $24</strong></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- UV Sanitization Tab -->
+            <div class="tab-pane fade" id="sanitization" role="tabpanel">
+                <div class="content-section" data-aos="fade-up">
+                    <div class="sanitization-hero">
+                        <h2 data-i18n="sanitization.title">Hospital-Grade UV Sanitization Technology</h2>
+                        <p class="tagline">CLEANER. <span class="green">SAFER.</span> BETTER.</p>
+                    </div>
+
+                    <div class="technology-intro mt-4" data-aos="fade-up">
+                        <p class="lead" data-i18n="sanitization.intro">We're the only laundry service in Austin using the same UV sanitization technology trusted by hospitals and healthcare facilities. This advanced system provides 99.999% pathogen elimination—all without harsh chemicals.</p>
+                    </div>
+
+                    <div class="row mt-5">
+                        <div class="col-md-6" data-aos="fade-right">
+                            <div class="tech-card">
+                                <h3 data-i18n="sanitization.how.title">How It Works</h3>
+                                <div class="tech-process">
+                                    <div class="tech-step">
+                                        <i class="bi bi-lightning-charge"></i>
+                                        <div>
+                                            <h4 data-i18n="sanitization.how.step1.title">UV Light Generation</h4>
+                                            <p data-i18n="sanitization.how.step1.description">Our patented LUX™ UV system converts room air into powerful oxidizing agents in a sealed stainless steel chamber.</p>
+                                        </div>
+                                    </div>
+                                    <div class="tech-step">
+                                        <i class="bi bi-droplet"></i>
+                                        <div>
+                                            <h4 data-i18n="sanitization.how.step2.title">Deep Penetration</h4>
+                                            <p data-i18n="sanitization.how.step2.description">Creates hydroxyl radicals, ozone, and peroxide that open fabric fibers at the molecular level for deeper cleaning.</p>
+                                        </div>
+                                    </div>
+                                    <div class="tech-step">
+                                        <i class="bi bi-shield-check"></i>
+                                        <div>
+                                            <h4 data-i18n="sanitization.how.step3.title">Pathogen Elimination</h4>
+                                            <p data-i18n="sanitization.how.step3.description">Destroys 99.999% of bacteria, viruses, and allergens—including COVID-19, MRSA, E. coli, and C. diff.</p>
+                                        </div>
+                                    </div>
+                                    <div class="tech-step">
+                                        <i class="bi bi-check-circle"></i>
+                                        <div>
+                                            <h4 data-i18n="sanitization.how.step4.title">Safe Dissipation</h4>
+                                            <p data-i18n="sanitization.how.step4.description">Oxidizers naturally return to pure oxygen within 7 minutes. No chemical residue remains on your clothes.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6" data-aos="fade-left">
+                            <div class="comparison-table">
+                                <h3 data-i18n="sanitization.comparison.title">UV vs. Traditional Methods</h3>
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th></th>
+                                            <th data-i18n="sanitization.comparison.uv">UV Sanitization</th>
+                                            <th data-i18n="sanitization.comparison.bleach">Hot Water + Bleach</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td data-i18n="sanitization.comparison.effectiveness">Pathogen Kill Rate</td>
+                                            <td class="highlight">99.999%</td>
+                                            <td>95-98%</td>
+                                        </tr>
+                                        <tr>
+                                            <td data-i18n="sanitization.comparison.chemicals">Chemical Residue</td>
+                                            <td class="highlight">None</td>
+                                            <td>Yes</td>
+                                        </tr>
+                                        <tr>
+                                            <td data-i18n="sanitization.comparison.fabrics">Safe for All Fabrics</td>
+                                            <td class="highlight">✓</td>
+                                            <td>✗</td>
+                                        </tr>
+                                        <tr>
+                                            <td data-i18n="sanitization.comparison.energy">Energy Usage</td>
+                                            <td class="highlight">85% Less</td>
+                                            <td>High</td>
+                                        </tr>
+                                        <tr>
+                                            <td data-i18n="sanitization.comparison.environment">Environmental Impact</td>
+                                            <td class="highlight">Minimal</td>
+                                            <td>Significant</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h3 class="section-title mt-5" data-i18n="sanitization.benefits.title">Why UV Sanitization Matters</h3>
+                    <div class="benefits-grid">
+                        <div class="benefit-item" data-aos="fade-up" data-aos-delay="100">
+                            <i class="bi bi-heart-pulse"></i>
+                            <div>
+                                <h4 data-i18n="sanitization.benefits.health.title">Family Health & Safety</h4>
+                                <p data-i18n="sanitization.benefits.health.description">Perfect for families with babies, young children, or anyone with sensitive skin. No harsh chemical exposure.</p>
+                            </div>
+                        </div>
+                        <div class="benefit-item" data-aos="fade-up" data-aos-delay="150">
+                            <i class="bi bi-stars"></i>
+                            <div>
+                                <h4 data-i18n="sanitization.benefits.quality.title">Superior Quality</h4>
+                                <p data-i18n="sanitization.benefits.quality.description">Brighter whites, more vibrant colors, softer fabrics, and better odor removal than traditional washing.</p>
+                            </div>
+                        </div>
+                        <div class="benefit-item" data-aos="fade-up" data-aos-delay="200">
+                            <i class="bi bi-clock-history"></i>
+                            <div>
+                                <h4 data-i18n="sanitization.benefits.longevity.title">Clothes Last Longer</h4>
+                                <p data-i18n="sanitization.benefits.longevity.description">Gentle cleaning process extends clothing life by 20% compared to harsh chemical treatments.</p>
+                            </div>
+                        </div>
+                        <div class="benefit-item" data-aos="fade-up" data-aos-delay="250">
+                            <i class="bi bi-tree"></i>
+                            <div>
+                                <h4 data-i18n="sanitization.benefits.environment.title">Eco-Friendly</h4>
+                                <p data-i18n="sanitization.benefits.environment.description">Saves 100,000+ gallons of water annually and reduces energy consumption by 85%.</p>
+                            </div>
+                        </div>
+                        <div class="benefit-item" data-aos="fade-up" data-aos-delay="300">
+                            <i class="bi bi-droplet-half"></i>
+                            <div>
+                                <h4 data-i18n="sanitization.benefits.allergies.title">Allergy Relief</h4>
+                                <p data-i18n="sanitization.benefits.allergies.description">Eliminates allergens, dust mites, and bacteria that trigger asthma and allergies.</p>
+                            </div>
+                        </div>
+                        <div class="benefit-item" data-aos="fade-up" data-aos-delay="350">
+                            <i class="bi bi-virus"></i>
+                            <div>
+                                <h4 data-i18n="sanitization.benefits.germs.title">Hospital-Grade Protection</h4>
+                                <p data-i18n="sanitization.benefits.germs.description">Kills COVID-19, MRSA, E. coli, C. diff, and other pathogens that resist traditional cleaning.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pricing & FAQ Tab -->
+            <div class="tab-pane fade" id="pricing" role="tabpanel">
+                <div class="content-section" data-aos="fade-up">
+                    <h2 class="section-title" data-i18n="pricing.title">Simple, Transparent Pricing</h2>
+                    <p class="section-subtitle" data-i18n="pricing.subtitle">No hidden fees. No surprises. Just professional laundry service at an honest price.</p>
+
+                    <div class="pricing-card-main" data-aos="fade-up" data-aos-delay="100">
+                        <div class="pricing-header">
+                            <div class="price-large">
+                                <span class="currency">$</span>1.20<span class="unit">/lb</span>
+                            </div>
+                            <p class="pricing-tagline" data-i18n="pricing.tagline">Professional Wash-Dry-Fold Service</p>
+                        </div>
+                        <div class="pricing-features">
+                            <div class="feature-item">
+                                <i class="bi bi-check-circle-fill"></i>
+                                <span data-i18n="pricing.features.uv">Hospital-grade UV sanitization</span>
+                            </div>
+                            <div class="feature-item">
+                                <i class="bi bi-check-circle-fill"></i>
+                                <span data-i18n="pricing.features.turnaround">24-hour guaranteed turnaround</span>
+                            </div>
+                            <div class="feature-item">
+                                <i class="bi bi-check-circle-fill"></i>
+                                <span data-i18n="pricing.features.detergent">Premium detergents & supplies included</span>
+                            </div>
+                            <div class="feature-item">
+                                <i class="bi bi-check-circle-fill"></i>
+                                <span data-i18n="pricing.features.folding">Professional folding & hanging</span>
+                            </div>
+                            <div class="feature-item">
+                                <i class="bi bi-check-circle-fill"></i>
+                                <span data-i18n="pricing.features.individual">Individual washing (never mixed)</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="pricing-examples mt-4">
+                        <h3 data-i18n="pricing.examples.title">Typical Load Sizes</h3>
+                        <div class="row g-4">
+                            <div class="col-md-4">
+                                <div class="example-card" data-aos="fade-up" data-aos-delay="100">
+                                    <div class="example-size" data-i18n="pricing.examples.small.size">Small Load</div>
+                                    <div class="example-weight">10-15 lbs</div>
+                                    <div class="example-cost">$12-$18</div>
+                                    <p class="example-description" data-i18n="pricing.examples.small.description">1-2 people, 1 week of clothes</p>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="example-card" data-aos="fade-up" data-aos-delay="200">
+                                    <div class="example-size" data-i18n="pricing.examples.medium.size">Medium Load</div>
+                                    <div class="example-weight">20-25 lbs</div>
+                                    <div class="example-cost">$24-$30</div>
+                                    <p class="example-description" data-i18n="pricing.examples.medium.description">Family of 3-4, 1 week of clothes</p>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="example-card" data-aos="fade-up" data-aos-delay="300">
+                                    <div class="example-size" data-i18n="pricing.examples.large.size">Large Load</div>
+                                    <div class="example-weight">30-40 lbs</div>
+                                    <div class="example-cost">$36-$48</div>
+                                    <p class="example-description" data-i18n="pricing.examples.large.description">Large family or 2 weeks of laundry</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="faq-section mt-5">
+                        <h2 class="section-title" data-i18n="faq.title">Frequently Asked Questions</h2>
+
+                        <div class="accordion" id="faqAccordion">
+                            <div class="accordion-item" data-aos="fade-up">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#faq1" data-i18n="faq.q1.question">
+                                        How much does the service cost?
+                                    </button>
+                                </h2>
+                                <div id="faq1" class="accordion-collapse collapse show" data-bs-parent="#faqAccordion">
+                                    <div class="accordion-body" data-i18n="faq.q1.answer">
+                                        Our wash-dry-fold service costs $1.20 per pound with a $20 minimum order (approximately 17 lbs). Pickup and delivery, UV sanitization, professional folding, and all supplies are included in this price—no hidden fees.
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="accordion-item" data-aos="fade-up">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq2" data-i18n="faq.q2.question">
+                                        What's the turnaround time?
+                                    </button>
+                                </h2>
+                                <div id="faq2" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                                    <div class="accordion-body" data-i18n="faq.q2.answer">
+                                        We guarantee 24-hour turnaround from pickup to delivery. Drop off or schedule pickup during our business hours (7AM-10PM), and we'll have your laundry back to you within 24 hours, fresh and perfectly folded.
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="accordion-item" data-aos="fade-up">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq3" data-i18n="faq.q3.question">
+                                        Are my clothes washed separately?
+                                    </button>
+                                </h2>
+                                <div id="faq3" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                                    <div class="accordion-body" data-i18n="faq.q3.answer">
+                                        Absolutely! Your laundry is NEVER mixed with other customers' clothes. We wash each customer's order individually to ensure the highest quality care and maintain hygiene standards.
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="accordion-item" data-aos="fade-up">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq4" data-i18n="faq.q4.question">
+                                        What detergents do you use?
+                                    </button>
+                                </h2>
+                                <div id="faq4" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                                    <div class="accordion-body" data-i18n="faq.q4.answer">
+                                        We use premium brands like Tide, OxiClean, Downy, and Spray 'n Wash. We also offer organic and hypoallergenic alternatives for customers with sensitive skin or environmental preferences. Just let us know your preference!
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="accordion-item" data-aos="fade-up">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq5" data-i18n="faq.q5.question">
+                                        Do you handle delicate items?
+                                    </button>
+                                </h2>
+                                <div id="faq5" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                                    <div class="accordion-body" data-i18n="faq.q5.answer">
+                                        Yes! We provide special care for delicate fabrics, dresses, collared shirts, and dress pants. These items receive professional attention including proper hanging to minimize wrinkles. Let us know if you have special care instructions.
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="accordion-item" data-aos="fade-up">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq6" data-i18n="faq.q6.question">
+                                        What areas do you serve?
+                                    </button>
+                                </h2>
+                                <div id="faq6" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                                    <div class="accordion-body" data-i18n="faq.q6.answer">
+                                        We serve all of Austin including North Austin, South Austin, Downtown, East Austin, West Austin, as well as Round Rock and Pflugerville. Visit us at 825 E Rundberg Ln f1, Austin, TX 78753.
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="accordion-item" data-aos="fade-up">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq7" data-i18n="faq.q7.question">
+                                        Is UV sanitization safe for all fabrics?
+                                    </button>
+                                </h2>
+                                <div id="faq7" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                                    <div class="accordion-body" data-i18n="faq.q7.answer">
+                                        Yes! UV sanitization is safe for all fabric types, unlike bleach which can damage delicates and colors. The process leaves no chemical residue and is gentle on fabrics while being tough on germs.
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="accordion-item" data-aos="fade-up">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq8" data-i18n="faq.q8.question">
+                                        What payment methods do you accept?
+                                    </button>
+                                </h2>
+                                <div id="faq8" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                                    <div class="accordion-body" data-i18n="faq.q8.answer">
+                                        We accept all major credit cards, debit cards, and cash. Payment is easy and secure, and you don't need to worry about carrying quarters or exact change!
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Why Choose Us Tab -->
+            <div class="tab-pane fade" id="benefits" role="tabpanel">
+                <div class="content-section" data-aos="fade-up">
+                    <h2 class="section-title" data-i18n="benefits.title">Why Austin Chooses WaveMAX</h2>
+                    <p class="section-subtitle" data-i18n="benefits.subtitle">More than just laundry service—we're your partner in reclaiming your time and maintaining your family's health.</p>
+
+                    <div class="row g-4 mt-4">
+                        <div class="col-md-4">
+                            <div class="benefit-card" data-aos="fade-up" data-aos-delay="100">
+                                <div class="benefit-icon">
+                                    <i class="bi bi-award"></i>
+                                </div>
+                                <h3 data-i18n="benefits.cards.onlyUV.title">Only UV-Sanitized in Austin</h3>
+                                <p data-i18n="benefits.cards.onlyUV.description">We're the only laundry service in Austin using hospital-grade UV sanitization. The same technology trusted by healthcare facilities for 99.999% pathogen elimination.</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="benefit-card" data-aos="fade-up" data-aos-delay="200">
+                                <div class="benefit-icon">
+                                    <i class="bi bi-cash-coin"></i>
+                                </div>
+                                <h3 data-i18n="benefits.cards.value.title">Premium Quality, Better Price</h3>
+                                <p data-i18n="benefits.cards.value.description">At $1.20/lb, we're 30% less expensive than typical Austin delivery services, yet we offer advanced UV technology and superior care that others can't match.</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="benefit-card" data-aos="fade-up" data-aos-delay="300">
+                                <div class="benefit-icon">
+                                    <i class="bi bi-stopwatch"></i>
+                                </div>
+                                <h3 data-i18n="benefits.cards.time.title">Give Yourself Time Back</h3>
+                                <p data-i18n="benefits.cards.time.description">Save 62 hours every year. That's more than a full work week you can spend with family, pursuing hobbies, or just relaxing instead of doing laundry.</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="benefit-card" data-aos="fade-up" data-aos-delay="400">
+                                <div class="benefit-icon">
+                                    <i class="bi bi-shield-fill-check"></i>
+                                </div>
+                                <h3 data-i18n="benefits.cards.safety.title">Family-Safe, Chemical-Free</h3>
+                                <p data-i18n="benefits.cards.safety.description">No harsh chemicals, bleach, or toxic residue. Perfect for babies, children, and anyone with sensitive skin or allergies. Just pure, clean clothes.</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="benefit-card" data-aos="fade-up" data-aos-delay="500">
+                                <div class="benefit-icon">
+                                    <i class="bi bi-tree-fill"></i>
+                                </div>
+                                <h3 data-i18n="benefits.cards.eco.title">Environmentally Responsible</h3>
+                                <p data-i18n="benefits.cards.eco.description">Our UV technology saves 100,000+ gallons of water annually and uses 85% less energy than traditional washing. Better for the planet, better for Austin.</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="benefit-card" data-aos="fade-up" data-aos-delay="600">
+                                <div class="benefit-icon">
+                                    <i class="bi bi-patch-check"></i>
+                                </div>
+                                <h3 data-i18n="benefits.cards.guarantee.title">100% Satisfaction Guaranteed</h3>
+                                <p data-i18n="benefits.cards.guarantee.description">Not happy with your order? We'll re-wash it for free or refund your money. Your satisfaction is our top priority, and we stand behind our work.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="guarantee-section mt-5" data-aos="fade-up">
+                        <h3 class="section-title" data-i18n="benefits.promises.title">Our Promises to You</h3>
+                        <div class="promises-grid">
+                            <div class="promise-item">
+                                <i class="bi bi-check-circle-fill"></i>
+                                <span data-i18n="benefits.promises.item1">Individual washing—your clothes are never mixed with others</span>
+                            </div>
+                            <div class="promise-item">
+                                <i class="bi bi-check-circle-fill"></i>
+                                <span data-i18n="benefits.promises.item2">24-hour guaranteed turnaround or 20% off your order</span>
+                            </div>
+                            <div class="promise-item">
+                                <i class="bi bi-check-circle-fill"></i>
+                                <span data-i18n="benefits.promises.item3">Professional staff trained in fabric care and stain removal</span>
+                            </div>
+                            <div class="promise-item">
+                                <i class="bi bi-check-circle-fill"></i>
+                                <span data-i18n="benefits.promises.item4">Transparent pricing with no hidden fees or surprises</span>
+                            </div>
+                            <div class="promise-item">
+                                <i class="bi bi-check-circle-fill"></i>
+                                <span data-i18n="benefits.promises.item5">Special care instructions honored for every order</span>
+                            </div>
+                            <div class="promise-item">
+                                <i class="bi bi-check-circle-fill"></i>
+                                <span data-i18n="benefits.promises.item6">Responsive customer service during all business hours</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CTA Section -->
+    <section class="cta-section">
+        <div class="container text-center">
+            <h2 data-i18n="cta.title">Ready to Get Your Time Back?</h2>
+            <p class="lead" data-i18n="cta.subtitle">Join hundreds of Austin residents who've discovered the WaveMAX difference.</p>
+            <div class="cta-buttons">
+                <a href="https://www.wavemaxlaundry.com/austin-tx/contact/" class="btn btn-primary btn-lg">
+                    <i class="bi bi-geo-alt me-2"></i><span data-i18n="cta.schedule">Visit Us Today</span>
+                </a>
+                <a href="tel:+15122530953" class="btn btn-outline-light btn-lg">
+                    <i class="bi bi-telephone me-2"></i><span data-i18n="cta.call">Call Us: (512) 253-0953</span>
+                </a>
+            </div>
+            <p class="cta-location mt-4">
+                <i class="bi bi-geo-alt me-2"></i>
+                <span data-i18n="cta.location">825 E Rundberg Ln f1, Austin, TX 78753 | Open 7AM-10PM, 365 Days a Year</span>
+            </p>
+        </div>
+    </section>
+
+    <!-- Scripts loaded by embed-app-v2.js pageScripts configuration -->
+</body>
+</html>
