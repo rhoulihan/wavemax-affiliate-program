@@ -113,7 +113,7 @@ class PaymentVerificationJob {
         v2PaymentStatus: 'awaiting',
         status: { $in: ['processing', 'processed'] }, // Order has been weighed
         v2PaymentCheckAttempts: { $lt: this.maxAttempts }
-      }).populate('customerId').populate('affiliateId');
+      });
       
       if (pendingOrders.length === 0) {
         return;
@@ -139,7 +139,7 @@ class PaymentVerificationJob {
   async processOrder(order) {
     try {
       // Check if customer is V2
-      const customer = order.customerId;
+      const customer = await Customer.findOne({ customerId: order.customerId });
       if (!customer || customer.registrationVersion !== 'v2') {
         return; // Skip non-V2 customers
       }
