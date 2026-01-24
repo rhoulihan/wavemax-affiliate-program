@@ -1089,17 +1089,21 @@ exports.weighBags = async (req, res) => {
         
         // Save again with payment info
         await order.save();
-        
-        // Send payment request email
-        await emailService.sendV2PaymentRequest({
-          customer,
-          order,
-          paymentAmount: paymentAmount,
-          paymentLinks: paymentURLs.links,
-          qrCodes: paymentURLs.qrCodes
-        });
-        
-        logger.info(`V2 Payment request sent for order ${order.orderId}, amount: $${paymentAmount}`);
+
+        // Send payment request email (non-blocking - don't let email errors stop the response)
+        try {
+          await emailService.sendV2PaymentRequest({
+            customer,
+            order,
+            paymentAmount: paymentAmount,
+            paymentLinks: paymentURLs.links,
+            qrCodes: paymentURLs.qrCodes
+          });
+          logger.info(`V2 Payment request sent for order ${order.orderId}, amount: $${paymentAmount}`);
+        } catch (emailError) {
+          logger.error(`Failed to send payment request email for order ${order.orderId}:`, emailError);
+          // Order is still saved with payment info, email can be resent manually if needed
+        }
       }
     }
 

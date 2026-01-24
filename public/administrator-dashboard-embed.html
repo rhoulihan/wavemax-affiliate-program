@@ -246,6 +246,9 @@
             <div class="card">
                 <div class="card-header">
                     <h2 class="card-title" data-i18n="administrator.dashboard.affiliates.title">Affiliate Performance</h2>
+                    <button class="btn btn-primary" id="openMarketingEmailModalBtn">
+                        <i class="fas fa-envelope"></i> Send Marketing Email
+                    </button>
                 </div>
                 <div id="affiliatesList">
                     <div class="loading">
@@ -575,6 +578,68 @@
     
     <script src="/assets/js/administrator-dashboard-init.js?v=20250623" nonce="{{nonce}}"></script>
     <script src="/assets/js/administrator-dashboard-i18n.js" nonce="{{nonce}}"></script>
+
+    <!-- Send Marketing Email Modal -->
+    <div id="marketingEmailModal" class="modal hidden">
+        <div class="modal-content max-width-600">
+            <div class="modal-header">
+                <h3><i class="fas fa-envelope"></i> Send Marketing Email</h3>
+                <button class="modal-close" id="closeMarketingEmailModal">&times;</button>
+            </div>
+            <form id="marketingEmailForm">
+                <div class="modal-body padding-30">
+                    <div class="form-group margin-bottom-20">
+                        <label class="font-weight-600 margin-bottom-10" for="marketingEmailName">
+                            Recipient Name <span class="text-danger">*</span>
+                        </label>
+                        <input
+                            type="text"
+                            id="marketingEmailName"
+                            name="recipientName"
+                            class="form-control"
+                            required
+                            placeholder="e.g., John Smith"
+                        />
+                        <small class="text-muted">Business contact name</small>
+                    </div>
+
+                    <div class="form-group margin-bottom-20">
+                        <label class="font-weight-600 margin-bottom-10" for="marketingEmailAddress">
+                            Email Address <span class="text-danger">*</span>
+                        </label>
+                        <input
+                            type="email"
+                            id="marketingEmailAddress"
+                            name="recipientEmail"
+                            class="form-control"
+                            required
+                            placeholder="e.g., john@business.com"
+                        />
+                        <small class="text-muted">Recipient's email address</small>
+                    </div>
+
+                    <div class="form-group margin-bottom-20">
+                        <label class="font-weight-600 margin-bottom-10" for="marketingEmailTemplate">
+                            Email Template <span class="text-danger">*</span>
+                        </label>
+                        <select id="marketingEmailTemplate" name="templateType" class="form-control" required>
+                            <option value="">-- Select Template --</option>
+                        </select>
+                        <small class="text-muted">Choose the marketing email type to send</small>
+                    </div>
+
+                    <div id="marketingEmailAlert" class="alert hidden"></div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" id="cancelMarketingEmailBtn">Cancel</button>
+                    <button type="submit" class="btn btn-primary" id="sendMarketingEmailBtn">
+                        <i class="fas fa-paper-plane"></i> Send Email
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
 
 </body>
 </html>

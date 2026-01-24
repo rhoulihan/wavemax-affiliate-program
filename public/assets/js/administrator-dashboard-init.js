@@ -3232,13 +3232,36 @@
   // Initialize i18n and language switcher (moved from inline script)
   document.addEventListener('DOMContentLoaded', async function() {
     await window.i18n.init({ debugMode: false });
-    
+
     // Only create language switcher if container exists
     if (document.getElementById('language-switcher-container')) {
       window.LanguageSwitcher.createSwitcher('language-switcher-container', {
         style: 'dropdown',
         showLabel: false
       });
+    }
+
+    // Set up marketing email modal event listeners
+    const openMarketingEmailBtn = document.getElementById('openMarketingEmailModalBtn');
+    console.log('Marketing email button:', openMarketingEmailBtn);
+    if (openMarketingEmailBtn) {
+      console.log('Adding click listener to marketing email button');
+      openMarketingEmailBtn.addEventListener('click', openMarketingEmailModal);
+    }
+
+    const closeMarketingEmailModalBtn = document.getElementById('closeMarketingEmailModal');
+    if (closeMarketingEmailModalBtn) {
+      closeMarketingEmailModalBtn.addEventListener('click', closeMarketingEmailModal);
+    }
+
+    const cancelMarketingEmailBtn = document.getElementById('cancelMarketingEmailBtn');
+    if (cancelMarketingEmailBtn) {
+      cancelMarketingEmailBtn.addEventListener('click', closeMarketingEmailModal);
+    }
+
+    const marketingEmailForm = document.getElementById('marketingEmailForm');
+    if (marketingEmailForm) {
+      marketingEmailForm.addEventListener('submit', sendMarketingEmail);
     }
   });
 
@@ -3527,6 +3550,118 @@
 
   window.sendBetaWelcomeEmail = sendBetaWelcomeEmail;
   window.sendBetaReminderEmail = sendBetaReminderEmail;
+
+  // ========================================
+  // Marketing Email Modal Functions
+  // ========================================
+  let marketingEmailTemplates = [];
+
+  async function loadMarketingEmailTemplates() {
+    try {
+      const response = await adminFetch('/api/v1/administrators/marketing/templates');
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        marketingEmailTemplates = data.templates;
+
+        // Populate the template dropdown
+        const select = document.getElementById('marketingEmailTemplate');
+        select.innerHTML = '<option value="">-- Select Template --</option>';
+
+        data.templates.forEach(template => {
+          const option = document.createElement('option');
+          option.value = template.id;
+          option.textContent = template.name;
+          option.title = template.description;
+          select.appendChild(option);
+        });
+      }
+    } catch (error) {
+      console.error('Error loading marketing email templates:', error);
+    }
+  }
+
+  function openMarketingEmailModal() {
+    console.log('openMarketingEmailModal called');
+    const modal = document.getElementById('marketingEmailModal');
+    console.log('Modal element:', modal);
+    modal.classList.remove('hidden');
+
+    // Load templates if not already loaded
+    if (marketingEmailTemplates.length === 0) {
+      loadMarketingEmailTemplates();
+    }
+
+    // Reset form
+    document.getElementById('marketingEmailForm').reset();
+    document.getElementById('marketingEmailAlert').classList.add('hidden');
+  }
+
+  function closeMarketingEmailModal() {
+    const modal = document.getElementById('marketingEmailModal');
+    modal.classList.add('hidden');
+  }
+
+  async function sendMarketingEmail(e) {
+    e.preventDefault();
+
+    const form = e.target;
+    const submitBtn = document.getElementById('sendMarketingEmailBtn');
+    const alertDiv = document.getElementById('marketingEmailAlert');
+
+    // Get form data
+    const formData = {
+      recipientName: form.recipientName.value.trim(),
+      recipientEmail: form.recipientEmail.value.trim(),
+      templateType: form.templateType.value
+    };
+
+    // Disable submit button
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
+
+    try {
+      const response = await adminFetch('/api/v1/administrators/marketing/send', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(formData)
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        // Show success message
+        alertDiv.className = 'alert alert-success';
+        alertDiv.textContent = `Email sent successfully to ${data.recipient}!`;
+        alertDiv.classList.remove('hidden');
+
+        // Reset form
+        form.reset();
+
+        // Close modal after 2 seconds
+        setTimeout(() => {
+          closeMarketingEmailModal();
+          showNotification('Marketing email sent successfully!', 'success');
+        }, 2000);
+      } else {
+        // Show error message
+        alertDiv.className = 'alert alert-danger';
+        alertDiv.textContent = data.error || 'Failed to send email. Please try again.';
+        alertDiv.classList.remove('hidden');
+      }
+    } catch (error) {
+      console.error('Error sending marketing email:', error);
+      alertDiv.className = 'alert alert-danger';
+      alertDiv.textContent = 'Error sending email. Please try again.';
+      alertDiv.classList.remove('hidden');
+    } finally {
+      // Re-enable submit button
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Send Email';
+    }
+  }
 
   // Initialize the dashboard by loading the default tab
   // Check URL for tab parameter first, then localStorage, then default
