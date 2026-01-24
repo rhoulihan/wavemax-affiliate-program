@@ -26,7 +26,7 @@ const createTransport = () => {
   }
   
   // Use SMTP transport for Mailcow
-  return nodemailer.createTransport({
+  const transportConfig = {
     host: process.env.EMAIL_HOST || 'localhost',
     port: parseInt(process.env.EMAIL_PORT) || 587,
     secure: process.env.EMAIL_PORT === '465',
@@ -38,7 +38,14 @@ const createTransport = () => {
     tls: {
       rejectUnauthorized: process.env.NODE_ENV === 'production'
     }
-  });
+  };
+
+  // If using IP address, specify the servername for TLS cert verification
+  if (process.env.EMAIL_HOST && /^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(process.env.EMAIL_HOST)) {
+    transportConfig.tls.servername = 'mail.wavemax.promo'; // Use the cert's domain name for verification
+  }
+
+  return nodemailer.createTransport(transportConfig);
 };
 
 // Load email template
@@ -986,7 +993,7 @@ exports.sendCustomerWelcomeEmail = async (customer, affiliate, bagInfo = {}) => 
         SERVICE_PROVIDER_LABEL: 'Your Service Provider',
         BAG_INFO_TITLE: isV2Registration ? 'How Our Service Works' : (isFreeRegistration ? 'Your FREE Laundry Bag' : 'Your Laundry Bags'),
         BAG_INFO_MESSAGE: isV2Registration ?
-          'Schedule your laundry pickup online. After we pick up and weigh your laundry, you\'ll receive an invoice. Pay conveniently via Venmo, PayPal, or CashApp.' :
+          'Schedule your laundry pickup online. After we pick up and weigh your laundry, you\'ll receive an invoice. Pay conveniently via credit card, Venmo, PayPal, or CashApp.' :
           (isFreeRegistration ?
             'Great news! Your first laundry bag is FREE! It will be delivered to you by your service provider.' :
             'Your laundry bags are ready! Your service provider will bring them when you place your first order.'),
@@ -1004,7 +1011,7 @@ exports.sendCustomerWelcomeEmail = async (customer, affiliate, bagInfo = {}) => 
         STEP_1_TITLE: 'Schedule a Pickup',
         STEP_1_DESC: 'Login to your dashboard and schedule a convenient pickup time.',
         STEP_2_TITLE: 'Prepare Your Laundry',
-        STEP_2_DESC: 'Place your laundry in the provided bags. Your service provider will pick them up.',
+        STEP_2_DESC: 'Your requested laundry bags will be provided with your first order.',
         STEP_3_TITLE: 'We Do the Rest',
         STEP_3_DESC: 'Your laundry is professionally washed, dried, and folded at our facility.',
         STEP_4_TITLE: 'Delivery to Your Door',
@@ -1032,23 +1039,27 @@ exports.sendCustomerWelcomeEmail = async (customer, affiliate, bagInfo = {}) => 
         YOUR_INFO_TITLE: 'Información de Su Cuenta',
         CUSTOMER_ID_LABEL: 'ID de Cliente',
         SERVICE_PROVIDER_LABEL: 'Su Proveedor de Servicio',
-        BAG_INFO_TITLE: isFreeRegistration ? 'Su Bolsa de Lavandería GRATIS' : 'Sus Bolsas de Lavandería',
-        BAG_INFO_MESSAGE: isFreeRegistration ?
-          '¡Excelentes noticias! ¡Su primera bolsa de lavandería es GRATIS! Será entregada por su proveedor de servicio.' :
-          '¡Sus bolsas de lavandería están listas! Su proveedor de servicio las traerá cuando haga su primer pedido.',
+        BAG_INFO_TITLE: isV2Registration ? 'Cómo Funciona Nuestro Servicio' : (isFreeRegistration ? 'Su Bolsa de Lavandería GRATIS' : 'Sus Bolsas de Lavandería'),
+        BAG_INFO_MESSAGE: isV2Registration ?
+          'Programe la recogida de su ropa en línea. Después de recoger y pesar su ropa, recibirá una factura. Pague cómodamente con tarjeta de crédito, Venmo, PayPal o CashApp.' :
+          (isFreeRegistration ?
+            '¡Excelentes noticias! ¡Su primera bolsa de lavandería es GRATIS! Será entregada por su proveedor de servicio.' :
+            '¡Sus bolsas de lavandería están listas! Su proveedor de servicio las traerá cuando haga su primer pedido.'),
         BAG_CREDIT_TITLE: 'Detalles del Crédito de Cuenta',
         BAGS_PURCHASED_LABEL: isFreeRegistration ? 'Bolsas Recibidas' : 'Bolsas Compradas',
         COST_PER_BAG_LABEL: 'Costo por Bolsa',
         TOTAL_CREDIT_LABEL: 'Crédito Total de Cuenta',
         NOTE_LABEL: 'Nota',
-        CREDIT_NOTE_MESSAGE: isFreeRegistration ?
-          '¡Su primera bolsa fue GRATIS! Cada bolsa contiene aproximadamente 20-25 libras de ropa.' :
-          'Su proveedor de servicio entregará sus bolsas cuando programe su primera recogida. Cada bolsa contiene aproximadamente 20-25 libras de ropa.',
+        CREDIT_NOTE_MESSAGE: isV2Registration ?
+          'No se requiere pago por adelantado. Pagará después de que su ropa sea recogida y pesada.' :
+          (isFreeRegistration ?
+            '¡Su primera bolsa fue GRATIS! Cada bolsa contiene aproximadamente 20-25 libras de ropa.' :
+            'Su proveedor de servicio entregará sus bolsas cuando programe su primera recogida. Cada bolsa contiene aproximadamente 20-25 libras de ropa.'),
         HOW_IT_WORKS_TITLE: 'Cómo Funciona',
         STEP_1_TITLE: 'Programe una Recogida',
         STEP_1_DESC: 'Inicie sesión en su panel y programe un horario conveniente de recogida.',
         STEP_2_TITLE: 'Prepare Su Ropa',
-        STEP_2_DESC: 'Coloque su ropa en las bolsas proporcionadas. Su proveedor de servicio las recogerá.',
+        STEP_2_DESC: 'Sus bolsas de lavandería solicitadas se proporcionarán con su primer pedido.',
         STEP_3_TITLE: 'Nosotros Hacemos el Resto',
         STEP_3_DESC: 'Su ropa es lavada, secada y doblada profesionalmente en nuestras instalaciones.',
         STEP_4_TITLE: 'Entrega a Su Puerta',
@@ -1076,23 +1087,27 @@ exports.sendCustomerWelcomeEmail = async (customer, affiliate, bagInfo = {}) => 
         YOUR_INFO_TITLE: 'Informações da Sua Conta',
         CUSTOMER_ID_LABEL: 'ID do Cliente',
         SERVICE_PROVIDER_LABEL: 'Seu Provedor de Serviço',
-        BAG_INFO_TITLE: isFreeRegistration ? 'Sua Sacola de Lavanderia GRÁTIS' : 'Suas Sacolas de Lavanderia',
-        BAG_INFO_MESSAGE: isFreeRegistration ?
-          'Ótimas notícias! Sua primeira sacola de lavanderia é GRÁTIS! Ela será entregue pelo seu provedor de serviço.' :
-          'Suas sacolas de lavanderia estão prontas! Seu provedor de serviço as trará quando você fizer seu primeiro pedido.',
+        BAG_INFO_TITLE: isV2Registration ? 'Como Funciona Nosso Serviço' : (isFreeRegistration ? 'Sua Sacola de Lavanderia GRÁTIS' : 'Suas Sacolas de Lavanderia'),
+        BAG_INFO_MESSAGE: isV2Registration ?
+          'Agende a coleta de suas roupas online. Depois de coletarmos e pesarmos suas roupas, você receberá uma fatura. Pague convenientemente via cartão de crédito, Venmo, PayPal ou CashApp.' :
+          (isFreeRegistration ?
+            'Ótimas notícias! Sua primeira sacola de lavanderia é GRÁTIS! Ela será entregue pelo seu provedor de serviço.' :
+            'Suas sacolas de lavanderia estão prontas! Seu provedor de serviço as trará quando você fizer seu primeiro pedido.'),
         BAG_CREDIT_TITLE: 'Detalhes do Crédito da Conta',
         BAGS_PURCHASED_LABEL: isFreeRegistration ? 'Sacolas Recebidas' : 'Sacolas Compradas',
         COST_PER_BAG_LABEL: 'Custo por Sacola',
         TOTAL_CREDIT_LABEL: 'Crédito Total da Conta',
         NOTE_LABEL: 'Nota',
-        CREDIT_NOTE_MESSAGE: isFreeRegistration ?
-          'Sua primeira sacola foi GRÁTIS! Cada sacola comporta aproximadamente 20-25 libras de roupa.' :
-          'Seu provedor de serviço entregará suas sacolas quando você agendar sua primeira coleta. Cada sacola comporta aproximadamente 20-25 libras de roupa.',
+        CREDIT_NOTE_MESSAGE: isV2Registration ?
+          'Não é necessário pagamento antecipado. Você pagará depois que suas roupas forem coletadas e pesadas.' :
+          (isFreeRegistration ?
+            'Sua primeira sacola foi GRÁTIS! Cada sacola comporta aproximadamente 20-25 libras de roupa.' :
+            'Seu provedor de serviço entregará suas sacolas quando você agendar sua primeira coleta. Cada sacola comporta aproximadamente 20-25 libras de roupa.'),
         HOW_IT_WORKS_TITLE: 'Como Funciona',
         STEP_1_TITLE: 'Agende uma Coleta',
         STEP_1_DESC: 'Faça login no seu painel e agende um horário conveniente para coleta.',
         STEP_2_TITLE: 'Prepare Sua Roupa',
-        STEP_2_DESC: 'Coloque sua roupa nas sacolas fornecidas. Seu provedor de serviço as coletará.',
+        STEP_2_DESC: 'Suas sacolas de lavanderia solicitadas serão fornecidas com seu primeiro pedido.',
         STEP_3_TITLE: 'Nós Fazemos o Resto',
         STEP_3_DESC: 'Sua roupa é lavada, seca e dobrada profissionalmente em nossas instalações.',
         STEP_4_TITLE: 'Entrega em Sua Porta',
@@ -1120,23 +1135,27 @@ exports.sendCustomerWelcomeEmail = async (customer, affiliate, bagInfo = {}) => 
         YOUR_INFO_TITLE: 'Ihre Kontoinformationen',
         CUSTOMER_ID_LABEL: 'Kunden-ID',
         SERVICE_PROVIDER_LABEL: 'Ihr Dienstleister',
-        BAG_INFO_TITLE: isFreeRegistration ? 'Ihr KOSTENLOSER Wäschesack' : 'Ihre Wäschesäcke',
-        BAG_INFO_MESSAGE: isFreeRegistration ?
-          'Großartige Neuigkeiten! Ihr erster Wäschesack ist KOSTENLOS! Er wird von Ihrem Dienstleister geliefert.' :
-          'Ihre Wäschesäcke sind bereit! Ihr Dienstleister wird sie bei Ihrer ersten Bestellung mitbringen.',
+        BAG_INFO_TITLE: isV2Registration ? 'So Funktioniert Unser Service' : (isFreeRegistration ? 'Ihr KOSTENLOSER Wäschesack' : 'Ihre Wäschesäcke'),
+        BAG_INFO_MESSAGE: isV2Registration ?
+          'Planen Sie Ihre Wäscheabholung online. Nachdem wir Ihre Wäsche abgeholt und gewogen haben, erhalten Sie eine Rechnung. Bezahlen Sie bequem per Kreditkarte, Venmo, PayPal oder CashApp.' :
+          (isFreeRegistration ?
+            'Großartige Neuigkeiten! Ihr erster Wäschesack ist KOSTENLOS! Er wird von Ihrem Dienstleister geliefert.' :
+            'Ihre Wäschesäcke sind bereit! Ihr Dienstleister wird sie bei Ihrer ersten Bestellung mitbringen.'),
         BAG_CREDIT_TITLE: 'Kontoguthaben Details',
         BAGS_PURCHASED_LABEL: isFreeRegistration ? 'Erhaltene Säcke' : 'Gekaufte Säcke',
         COST_PER_BAG_LABEL: 'Kosten pro Sack',
         TOTAL_CREDIT_LABEL: 'Gesamtguthaben',
         NOTE_LABEL: 'Hinweis',
-        CREDIT_NOTE_MESSAGE: isFreeRegistration ?
-          'Ihr erster Sack war KOSTENLOS! Jeder Sack fasst etwa 20-25 Pfund Wäsche.' :
-          'Ihr Dienstleister wird Ihre Säcke liefern, wenn Sie Ihre erste Abholung planen. Jeder Sack fasst etwa 20-25 Pfund Wäsche.',
+        CREDIT_NOTE_MESSAGE: isV2Registration ?
+          'Keine Vorauszahlung erforderlich. Sie bezahlen, nachdem Ihre Wäsche abgeholt und gewogen wurde.' :
+          (isFreeRegistration ?
+            'Ihr erster Sack war KOSTENLOS! Jeder Sack fasst etwa 20-25 Pfund Wäsche.' :
+            'Ihr Dienstleister wird Ihre Säcke liefern, wenn Sie Ihre erste Abholung planen. Jeder Sack fasst etwa 20-25 Pfund Wäsche.'),
         HOW_IT_WORKS_TITLE: 'So funktioniert es',
         STEP_1_TITLE: 'Abholung planen',
         STEP_1_DESC: 'Melden Sie sich in Ihrem Dashboard an und planen Sie eine passende Abholzeit.',
         STEP_2_TITLE: 'Wäsche vorbereiten',
-        STEP_2_DESC: 'Legen Sie Ihre Wäsche in die bereitgestellten Säcke. Ihr Dienstleister holt sie ab.',
+        STEP_2_DESC: 'Ihre angeforderten Wäschesäcke werden mit Ihrer ersten Bestellung geliefert.',
         STEP_3_TITLE: 'Wir erledigen den Rest',
         STEP_3_DESC: 'Ihre Wäsche wird professionell in unserer Einrichtung gewaschen, getrocknet und gefaltet.',
         STEP_4_TITLE: 'Lieferung an Ihre Tür',
@@ -3341,6 +3360,64 @@ exports.sendBetaReminderEmail = async (betaRequest) => {
     console.log('Beta reminder email sent to:', betaRequest.email);
   } catch (error) {
     console.error('Error sending beta reminder email:', error);
+    throw error;
+  }
+};
+
+/**
+ * Send marketing email
+ * @param {string} recipientEmail - Recipient's email address
+ * @param {string} recipientName - Recipient's name
+ * @param {string} templateType - Type of marketing email (e.g., 'healthcare-catering-outreach')
+ */
+exports.sendMarketingEmail = async (recipientEmail, recipientName, templateType = 'healthcare-catering-outreach') => {
+  try {
+    console.log(`[sendMarketingEmail] Sending ${templateType} email to:`, recipientEmail);
+
+    if (!recipientEmail) {
+      throw new Error('Recipient email address is required');
+    }
+
+    if (!recipientName) {
+      throw new Error('Recipient name is required');
+    }
+
+    // Load the marketing email template
+    const templatePath = path.join(__dirname, '../templates/emails/marketing', `${templateType}.html`);
+    let template;
+
+    try {
+      template = await fs.promises.readFile(templatePath, 'utf8');
+    } catch (error) {
+      console.error(`Error loading marketing template ${templateType}:`, error);
+      throw new Error(`Marketing template '${templateType}' not found`);
+    }
+
+    // Fill in template variables
+    const data = {
+      recipientName: recipientName
+    };
+
+    const html = fillTemplate(template, data);
+
+    // Subject line based on template type
+    const subjects = {
+      'healthcare-catering-outreach': 'Hospital-Quality Laundry Service for Your Business - WaveMAX Laundry'
+    };
+
+    const subject = subjects[templateType] || 'WaveMAX Laundry Services';
+
+    // Send the email
+    await sendEmail(recipientEmail, subject, html);
+
+    console.log(`Marketing email (${templateType}) sent successfully to:`, recipientEmail);
+    return {
+      success: true,
+      recipient: recipientEmail,
+      templateType: templateType
+    };
+  } catch (error) {
+    console.error('Error sending marketing email:', error);
     throw error;
   }
 };
