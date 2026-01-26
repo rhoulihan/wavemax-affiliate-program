@@ -222,7 +222,7 @@ describe('Affiliate API', () => {
       orderId: 'ORD001',
       customerId: 'CUST001',
       affiliateId: testAffiliate.affiliateId,
-      pickupDate: new Date('2025-05-25'),
+      pickupDate: new Date('2025-05-26'),
       pickupTime: 'morning',
 
       status: 'complete',

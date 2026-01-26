@@ -277,6 +277,11 @@ const affiliateSchema = new mongoose.Schema({
         default: 'America/Chicago'
       }
     }
+  },
+  // Immediate Pickup ("Pickup Now!") feature control
+  allowImmediatePickup: {
+    type: Boolean,
+    default: true
   }
 }, {
   timestamps: true,
@@ -360,11 +365,17 @@ affiliateSchema.methods.getDayOfWeekKey = function(date) {
  * @returns {Boolean}
  */
 affiliateSchema.methods.isAvailable = function(date, timeSlot) {
+  // If no availability schedule configured, default to available
+  if (!this.availabilitySchedule || !this.availabilitySchedule.weeklyTemplate) {
+    return true;
+  }
+
   const dayOfWeek = this.getDayOfWeekKey(date);
 
-  // Check date-specific exceptions first
-  const exception = this.availabilitySchedule.dateExceptions.find(
-    ex => ex.date.toDateString() === date.toDateString()
+  // Check date-specific exceptions first (default to empty array if not set)
+  const dateExceptions = this.availabilitySchedule.dateExceptions || [];
+  const exception = dateExceptions.find(
+    ex => ex.date && ex.date.toDateString() === date.toDateString()
   );
 
   if (exception) {
@@ -372,12 +383,15 @@ affiliateSchema.methods.isAvailable = function(date, timeSlot) {
       return false; // Entire day blocked
     }
     // Override - use exception's time slots
-    return exception.timeSlots[timeSlot] === true;
+    return exception.timeSlots && exception.timeSlots[timeSlot] === true;
   }
 
   // Fall back to weekly template
   const dayTemplate = this.availabilitySchedule.weeklyTemplate[dayOfWeek];
-  return dayTemplate.enabled && dayTemplate.timeSlots[timeSlot] === true;
+  if (!dayTemplate) {
+    return true; // If day template not configured, default to available
+  }
+  return dayTemplate.enabled && dayTemplate.timeSlots && dayTemplate.timeSlots[timeSlot] === true;
 };
 
 /**

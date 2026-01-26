@@ -92,7 +92,7 @@ describe('V2 Controller Logic', () => {
           username: `johndoe${Date.now()}`,
           password: 'securepass123',
           affiliateId: testAffiliate.affiliateId,
-          pickupDate: new Date(Date.now() + 86400000).toISOString(),
+          pickupDate: '2026-01-27',
           pickupTime: 'morning',
           numberOfBags: 2,
           estimatedWeight: 25
@@ -141,7 +141,7 @@ describe('V2 Controller Logic', () => {
           username: `janesmith${Date.now()}`,
           password: 'testpass123',
           affiliateId: testAffiliate.affiliateId,
-          pickupDate: new Date(Date.now() + 86400000).toISOString(),
+          pickupDate: '2026-01-27',
           pickupTime: 'afternoon',
           numberOfBags: 5, // Requesting more than allowed
           estimatedWeight: 50
@@ -189,7 +189,7 @@ describe('V2 Controller Logic', () => {
           username: `bobwilson${Date.now()}`,
           password: 'testpass123',
           affiliateId: testAffiliate.affiliateId,
-          pickupDate: new Date(Date.now() + 86400000).toISOString(),
+          pickupDate: '2026-01-27',
           pickupTime: 'evening',
           numberOfBags: 2,
           estimatedWeight: 30,
@@ -551,7 +551,7 @@ describe('V2 Controller Logic', () => {
         body: {
           customerId: testCustomer.customerId,
           affiliateId: testAffiliate.affiliateId,
-          pickupDate: new Date(Date.now() + 86400000).toISOString(),
+          pickupDate: '2026-01-27',
           pickupTime: 'morning',
           numberOfBags: 3,
           estimatedWeight: 35,
@@ -663,7 +663,7 @@ describe('V2 Controller Logic', () => {
           username: `edge${Date.now()}`,
           password: 'testpass123',
           affiliateId: testAffiliate.affiliateId,
-          pickupDate: new Date(Date.now() + 86400000).toISOString(),
+          pickupDate: '2026-01-27',
           pickupTime: 'morning',
           numberOfBags: 1,
           estimatedWeight: 10

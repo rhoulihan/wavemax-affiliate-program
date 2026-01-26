@@ -218,7 +218,7 @@ describe('Model Tests', () => {
       const orderData = {
         customerId: 'CUST123',
         affiliateId: 'AFF123',
-        pickupDate: new Date('2025-05-25'),
+        pickupDate: new Date('2025-05-26'),
         pickupTime: 'morning',
 
         estimatedWeight: 30,

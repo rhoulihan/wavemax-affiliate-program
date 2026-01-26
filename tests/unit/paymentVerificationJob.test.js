@@ -146,8 +146,7 @@ describe('PaymentVerificationJob', () => {
       paymentEmailScanner.scanForPayments.mockResolvedValue([]);
       paymentEmailScanner.checkOrderPayment.mockResolvedValue(false);
 
-      // Populate the customer for the test
-      testOrder.customerId = testCustomer;
+      // Process the order (customerId is already set correctly from beforeEach)
       await paymentVerificationJob.processOrder(testOrder);
 
       const updatedOrder = await Order.findById(testOrder._id);
@@ -161,8 +160,7 @@ describe('PaymentVerificationJob', () => {
 
       paymentEmailScanner.checkOrderPayment.mockResolvedValue(false);
 
-      // Populate the customer for the test
-      testOrder.customerId = testCustomer;
+      // Process the order (customerId is already set correctly from beforeEach)
       await paymentVerificationJob.processOrder(testOrder);
 
       const updatedOrder = await Order.findById(testOrder._id);

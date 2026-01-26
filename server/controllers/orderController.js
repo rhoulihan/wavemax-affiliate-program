@@ -475,13 +475,19 @@ exports.updateOrderStatus = async (req, res) => {
         order.v2PaymentRequestedAt = new Date();
         
         console.log(`Generated V2 payment links for order ${order.orderId} - Amount: $${amount}`);
-        
-        // Send payment request email (will be implemented in emailService)
+
+        // Send payment request email to customer
         try {
-          // await emailService.sendV2PaymentRequest(order, customer);
-          console.log(`V2 payment request would be sent to ${customer.email} for order ${order.orderId}`);
+          await emailService.sendV2PaymentRequest({
+            customer,
+            order,
+            paymentAmount: parseFloat(amount),
+            paymentLinks: links,
+            qrCodes
+          });
+          console.log(`V2 payment request email sent to ${customer.email} for order ${order.orderId}`);
         } catch (emailError) {
-          console.error('Error sending payment request:', emailError);
+          console.error('Error sending payment request email:', emailError);
         }
       }
     }
@@ -1361,5 +1367,381 @@ function checkStatusTransition(currentStatus, newStatus) {
 
   return validTransitions[currentStatus]?.includes(newStatus) || false;
 }
+
+// ============================================================================
+// Immediate Pickup ("Pickup Now!") Feature
+// ============================================================================
+
+/**
+ * Operating hours constants for immediate pickup (CDT timezone)
+ */
+const IMMEDIATE_PICKUP_HOURS = {
+  START: 7,  // 7 AM
+  END: 19,   // 7 PM
+  AFTER_5PM: 17, // 5 PM threshold for next-day deadline
+  DEADLINE_HOURS: 4, // 4 hour pickup window
+  NEXT_MORNING: 9 // 9 AM next day deadline for after-5-PM orders
+};
+
+/**
+ * Get the current hour in CDT timezone (0-23)
+ */
+function getCDTHour(date = new Date()) {
+  return parseInt(date.toLocaleString('en-US', {
+    timeZone: 'America/Chicago',
+    hour: '2-digit',
+    hour12: false
+  }));
+}
+
+/**
+ * Get current time - returns actual UTC Date object
+ * Exported for testability - allows mocking in tests
+ */
+function getCurrentCDTTime() {
+  return new Date();
+}
+// Export for testing purposes
+exports._getCurrentCDTTime = getCurrentCDTTime;
+
+/**
+ * Determine pickup time slot based on CDT hour
+ */
+function getPickupTimeSlot(cdtHour) {
+  if (cdtHour >= 7 && cdtHour < 12) return 'morning';
+  if (cdtHour >= 12 && cdtHour < 16) return 'afternoon';
+  if (cdtHour >= 16 && cdtHour <= 19) return 'evening';
+  return 'morning'; // Default
+}
+
+/**
+ * Calculate pickup deadline based on order time
+ * Uses CDT hour for business logic, but returns proper UTC date
+ */
+function calculatePickupDeadline(orderTime) {
+  const cdtHour = getCDTHour(orderTime);
+  const deadline = new Date(orderTime);
+
+  if (cdtHour >= IMMEDIATE_PICKUP_HOURS.AFTER_5PM) {
+    // After 5 PM CDT: next day 9 AM CDT
+    // Calculate offset to get to 9 AM CDT tomorrow
+    const cdtOffset = -6; // CDT is UTC-6 (or -5 during DST, but we simplify)
+    deadline.setUTCDate(deadline.getUTCDate() + 1);
+    deadline.setUTCHours(IMMEDIATE_PICKUP_HOURS.NEXT_MORNING - cdtOffset, 0, 0, 0);
+  } else {
+    // Before 5 PM CDT: 4 hours from order time
+    deadline.setTime(deadline.getTime() + IMMEDIATE_PICKUP_HOURS.DEADLINE_HOURS * 60 * 60 * 1000);
+  }
+
+  return deadline;
+}
+
+/**
+ * Calculate pickup date (today or tomorrow for after-5-PM orders)
+ */
+function calculatePickupDate(orderTime) {
+  const cdtHour = getCDTHour(orderTime);
+  const pickupDate = new Date(orderTime);
+
+  if (cdtHour >= IMMEDIATE_PICKUP_HOURS.AFTER_5PM) {
+    // After 5 PM CDT: pickup is tomorrow
+    pickupDate.setDate(pickupDate.getDate() + 1);
+  }
+
+  // Set to midnight for consistent date comparison
+  pickupDate.setHours(0, 0, 0, 0);
+  return pickupDate;
+}
+
+/**
+ * Check if current time is within operating hours (CDT)
+ */
+function isWithinOperatingHours(time) {
+  const cdtHour = getCDTHour(time);
+  return cdtHour >= IMMEDIATE_PICKUP_HOURS.START && cdtHour <= IMMEDIATE_PICKUP_HOURS.END;
+}
+
+/**
+ * Calculate next available time for immediate pickup
+ */
+function calculateNextAvailableTime(time) {
+  const cdtHour = getCDTHour(time);
+  const nextAvailable = new Date(time);
+  const cdtOffset = -6; // CDT is UTC-6
+
+  if (cdtHour < IMMEDIATE_PICKUP_HOURS.START) {
+    // Before opening: today at 7 AM CDT
+    nextAvailable.setUTCHours(IMMEDIATE_PICKUP_HOURS.START - cdtOffset, 0, 0, 0);
+  } else if (cdtHour > IMMEDIATE_PICKUP_HOURS.END) {
+    // After closing: tomorrow at 7 AM CDT
+    nextAvailable.setUTCDate(nextAvailable.getUTCDate() + 1);
+    nextAvailable.setUTCHours(IMMEDIATE_PICKUP_HOURS.START - cdtOffset, 0, 0, 0);
+  }
+
+  return nextAvailable;
+}
+
+/**
+ * Check immediate pickup availability
+ * GET /api/orders/immediate/availability
+ */
+exports.checkImmediateAvailability = ControllerHelpers.asyncWrapper(async (req, res) => {
+  const { affiliateId } = req.query;
+  const customerId = req.user.customerId;
+
+  if (!affiliateId) {
+    return ControllerHelpers.sendError(res, 'Affiliate ID is required', 400);
+  }
+
+  const cdtTime = exports._getCurrentCDTTime();
+
+  // Check operating hours
+  if (!isWithinOperatingHours(cdtTime)) {
+    return ControllerHelpers.sendSuccess(res, {
+      available: false,
+      reason: 'Immediate pickup is not available outside operating hours (7 AM - 7 PM CDT)',
+      nextAvailableTime: calculateNextAvailableTime(cdtTime).toISOString()
+    });
+  }
+
+  // Check affiliate settings
+  const affiliate = await Affiliate.findOne({ affiliateId });
+  if (!affiliate) {
+    return ControllerHelpers.sendError(res, 'Affiliate not found', 404);
+  }
+
+  if (!affiliate.allowImmediatePickup) {
+    return ControllerHelpers.sendSuccess(res, {
+      available: false,
+      reason: 'Your service provider does not currently accept immediate pickup requests'
+    });
+  }
+
+  // Check for active orders
+  const activeOrder = await Order.findOne({
+    customerId: customerId,
+    status: { $in: ['pending', 'processing', 'processed'] }
+  });
+
+  if (activeOrder) {
+    return ControllerHelpers.sendSuccess(res, {
+      available: false,
+      reason: 'You already have an active order. Please wait for it to complete before requesting another pickup.',
+      activeOrderId: activeOrder.orderId
+    });
+  }
+
+  // All checks passed
+  ControllerHelpers.sendSuccess(res, {
+    available: true,
+    currentTime: cdtTime.toISOString(),
+    operatingHours: '7 AM - 7 PM CDT'
+  });
+});
+
+/**
+ * Create immediate pickup order
+ * POST /api/orders/immediate
+ */
+exports.createImmediateOrder = ControllerHelpers.asyncWrapper(async (req, res) => {
+  const {
+    customerId,
+    affiliateId,
+    numberOfBags,
+    specialPickupInstructions,
+    addOns
+  } = req.body;
+
+  // Validate required fields
+  const requiredFields = ['customerId', 'affiliateId', 'numberOfBags'];
+  const fieldErrors = ControllerHelpers.validateRequiredFields(req.body, requiredFields);
+
+  if (fieldErrors) {
+    return ControllerHelpers.sendError(res, 'Missing required fields', 400, fieldErrors);
+  }
+
+  const cdtTime = exports._getCurrentCDTTime();
+
+  // Check operating hours
+  if (!isWithinOperatingHours(cdtTime)) {
+    return ControllerHelpers.sendError(res,
+      'Immediate pickup is not available outside operating hours (7 AM - 7 PM CDT)',
+      400,
+      { code: 'OUTSIDE_OPERATING_HOURS' }
+    );
+  }
+
+  // Verify customer exists
+  const customer = await Customer.findOne({ customerId });
+  if (!customer) {
+    return ControllerHelpers.sendError(res, 'Customer not found', 404);
+  }
+
+  // Verify affiliate exists and has feature enabled
+  const affiliate = await Affiliate.findOne({ affiliateId });
+  if (!affiliate) {
+    return ControllerHelpers.sendError(res, 'Affiliate not found', 404);
+  }
+
+  if (!affiliate.allowImmediatePickup) {
+    return ControllerHelpers.sendError(res,
+      'Your service provider does not currently accept immediate pickup requests',
+      400,
+      { code: 'AFFILIATE_DISABLED' }
+    );
+  }
+
+  // Check authorization
+  const isAuthorized =
+    AuthorizationHelpers.isAdmin(req.user) ||
+    req.user.customerId === customerId;
+
+  if (!isAuthorized) {
+    return ControllerHelpers.sendError(res, 'Unauthorized', 403);
+  }
+
+  // Check for active orders
+  const activeOrder = await Order.findOne({
+    customerId: customerId,
+    status: { $in: ['pending', 'processing', 'processed'] }
+  });
+
+  if (activeOrder) {
+    return ControllerHelpers.sendError(res,
+      'You already have an active order. Please wait for it to complete before placing a new order.',
+      400,
+      { code: 'ACTIVE_ORDER_EXISTS', activeOrderId: activeOrder.orderId }
+    );
+  }
+
+  // Calculate pickup details - cdtTime is now a UTC Date, use getCDTHour for business logic
+  const orderTime = new Date(cdtTime.getTime()); // Copy to avoid mutation
+  const pickupDeadline = calculatePickupDeadline(cdtTime);
+  const pickupDate = calculatePickupDate(cdtTime);
+  const pickupTime = getPickupTimeSlot(getCDTHour(cdtTime));
+
+  // Calculate delivery fee
+  const bagCount = parseInt(numberOfBags) || 1;
+  const feeCalculation = await calculateDeliveryFee(bagCount, affiliate);
+
+  // Check if this is customer's first order by counting existing orders
+  const existingOrderCount = await Order.countDocuments({ customerId });
+  const isFirstOrder = existingOrderCount === 0;
+
+  // If first order and customer selected more bags than registered, update their bag count
+  if (isFirstOrder && bagCount > (customer.initialBagsRequested || 1)) {
+    const newBagCount = Math.min(bagCount, 2); // Cap at 2 bags
+    await Customer.findByIdAndUpdate(customer._id, {
+      initialBagsRequested: newBagCount
+    });
+    customer.initialBagsRequested = newBagCount;
+  }
+
+  // Apply bag credit for first orders
+  let bagCreditToApply = 0;
+  if (!customer.bagCreditApplied && customer.bagCredit && customer.bagCredit > 0) {
+    bagCreditToApply = customer.bagCredit;
+  }
+
+  // Apply WDF credit if available
+  let wdfCreditToApply = 0;
+  if (customer.wdfCredit && customer.wdfCredit !== 0) {
+    wdfCreditToApply = customer.wdfCredit;
+  }
+
+  // Check if customer is V2
+  const isV2Customer = customer.registrationVersion === 'v2';
+
+  // Create order data - default estimated weight based on bag count (avg 20 lbs per bag)
+  const defaultEstimatedWeight = bagCount * 20;
+  const orderData = {
+    customerId,
+    affiliateId,
+    pickupDate,
+    pickupTime,
+    specialPickupInstructions: specialPickupInstructions || customer.deliveryInstructions,
+    estimatedWeight: defaultEstimatedWeight,
+    numberOfBags: bagCount,
+    feeBreakdown: {
+      numberOfBags: feeCalculation.numberOfBags,
+      minimumFee: feeCalculation.minimumFee,
+      perBagFee: feeCalculation.perBagFee,
+      totalFee: feeCalculation.totalFee,
+      minimumApplied: feeCalculation.minimumApplied
+    },
+    bagCreditApplied: bagCreditToApply,
+    wdfCreditApplied: wdfCreditToApply,
+    addOns: addOns || {
+      premiumDetergent: false,
+      fabricSoftener: false,
+      stainRemover: false
+    },
+    status: 'pending',
+    // Immediate pickup specific fields
+    isImmediatePickup: true,
+    pickupDeadline,
+    immediatePickupRequestedAt: orderTime
+  };
+
+  // Add V2 payment fields if customer is V2
+  if (isV2Customer) {
+    orderData.v2PaymentStatus = 'pending';
+    orderData.v2PaymentMethod = 'pending';
+    orderData.v2PaymentAmount = 0;
+  }
+
+  // Create and save order
+  const newOrder = new Order(orderData);
+  await newOrder.save();
+
+  // Update customer's credits if applied
+  if (bagCreditToApply > 0) {
+    customer.bagCredit = 0;
+    customer.bagCreditApplied = true;
+    await customer.save();
+  }
+
+  if (wdfCreditToApply !== 0) {
+    customer.wdfCredit = 0;
+    customer.wdfCreditUpdatedAt = new Date();
+    await customer.save();
+  }
+
+  // Update customer isActive if first order
+  if (!customer.isActive) {
+    customer.isActive = true;
+    await customer.save();
+  }
+
+  // Send notification emails
+  try {
+    // Send urgent email to affiliate
+    await emailService.sendAffiliateUrgentPickupEmail(affiliate, customer, newOrder);
+    // Send confirmation to customer
+    await emailService.sendCustomerOrderConfirmationEmail(customer, newOrder, affiliate);
+  } catch (emailError) {
+    console.error('Failed to send immediate pickup notification emails:', emailError);
+    // Continue even if emails fail
+  }
+
+  // Prepare response
+  const response = {
+    orderId: newOrder.orderId,
+    pickupDeadline: newOrder.pickupDeadline.toISOString(),
+    pickupDate: Formatters.date(newOrder.pickupDate),
+    pickupTime: newOrder.pickupTime,
+    estimatedTotal: Formatters.currency(newOrder.estimatedTotal),
+    isFirstOrder,
+    bagCreditApplied: Formatters.currency(newOrder.bagCreditApplied),
+    wdfCreditApplied: Formatters.currency(newOrder.wdfCreditApplied)
+  };
+
+  // Add first order note if applicable
+  if (isFirstOrder) {
+    response.firstOrderNote = 'Please leave your laundry in tall kitchen bags. It will be returned in WaveMAX laundry bags.';
+  }
+
+  ControllerHelpers.sendSuccess(res, response, 'Immediate pickup scheduled successfully!', 201);
+});
 
 module.exports = exports;

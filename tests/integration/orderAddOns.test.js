@@ -97,7 +97,7 @@ describe('Order API - Add-on Functionality Integration Tests', () => {
       const orderData = {
         customerId: 'CUST_ADDON_001',
         affiliateId: 'AFF_ADDON_001',
-        pickupDate: new Date(Date.now() + 86400000).toISOString(),
+        pickupDate: '2026-01-27',
         pickupTime: 'morning',
         specialPickupInstructions: 'Test with premium detergent',
         estimatedWeight: 20,
@@ -110,7 +110,7 @@ describe('Order API - Add-on Functionality Integration Tests', () => {
       };
 
       const response = await request(app)
-        .post('/api/orders')
+        .post('/api/v1/orders')
         .set('Authorization', `Bearer ${customerToken}`)
         .send(orderData)
         .expect(201);
@@ -130,7 +130,7 @@ describe('Order API - Add-on Functionality Integration Tests', () => {
       const orderData = {
         customerId: 'CUST_ADDON_001',
         affiliateId: 'AFF_ADDON_001',
-        pickupDate: new Date(Date.now() + 86400000).toISOString(),
+        pickupDate: '2026-01-27',
         pickupTime: 'afternoon',
         specialPickupInstructions: 'All add-ons please',
         estimatedWeight: 30,
@@ -143,7 +143,7 @@ describe('Order API - Add-on Functionality Integration Tests', () => {
       };
 
       const response = await request(app)
-        .post('/api/orders')
+        .post('/api/v1/orders')
         .set('Authorization', `Bearer ${customerToken}`)
         .send(orderData)
         .expect(201);
@@ -161,7 +161,7 @@ describe('Order API - Add-on Functionality Integration Tests', () => {
       const orderData = {
         customerId: 'CUST_ADDON_001',
         affiliateId: 'AFF_ADDON_001',
-        pickupDate: new Date(Date.now() + 86400000).toISOString(),
+        pickupDate: '2026-01-27',
         pickupTime: 'evening',
         specialPickupInstructions: 'No add-ons',
         estimatedWeight: 25,
@@ -170,7 +170,7 @@ describe('Order API - Add-on Functionality Integration Tests', () => {
       };
 
       const response = await request(app)
-        .post('/api/orders')
+        .post('/api/v1/orders')
         .set('Authorization', `Bearer ${customerToken}`)
         .send(orderData)
         .expect(201);
@@ -188,7 +188,7 @@ describe('Order API - Add-on Functionality Integration Tests', () => {
       const orderData = {
         customerId: 'CUST_ADDON_001',
         affiliateId: 'AFF_ADDON_001',
-        pickupDate: new Date(Date.now() + 86400000).toISOString(),
+        pickupDate: '2026-01-27',
         pickupTime: 'morning',
         specialPickupInstructions: 'Test total calculation',
         estimatedWeight: 40,
@@ -201,7 +201,7 @@ describe('Order API - Add-on Functionality Integration Tests', () => {
       };
 
       const response = await request(app)
-        .post('/api/orders')
+        .post('/api/v1/orders')
         .set('Authorization', `Bearer ${customerToken}`)
         .send(orderData)
         .expect(201);
@@ -222,7 +222,7 @@ describe('Order API - Add-on Functionality Integration Tests', () => {
       const orderData = {
         customerId: 'CUST_ADDON_001',
         affiliateId: 'AFF_ADDON_001',
-        pickupDate: new Date(Date.now() + 86400000).toISOString(),
+        pickupDate: '2026-01-27',
         pickupTime: 'morning',
         specialPickupInstructions: 'Commission test',
         estimatedWeight: 50,
@@ -235,7 +235,7 @@ describe('Order API - Add-on Functionality Integration Tests', () => {
       };
 
       const response = await request(app)
-        .post('/api/orders')
+        .post('/api/v1/orders')
         .set('Authorization', `Bearer ${customerToken}`)
         .send(orderData)
         .expect(201);
@@ -270,7 +270,7 @@ describe('Order API - Add-on Functionality Integration Tests', () => {
       const order = await Order.create({
         customerId: 'CUST_ADDON_001',
         affiliateId: 'AFF_ADDON_001',
-        pickupDate: new Date(Date.now() + 86400000),
+        pickupDate: '2026-01-27',
         pickupTime: 'morning',
         estimatedWeight: 25,
         numberOfBags: 2,
@@ -326,7 +326,7 @@ describe('Order API - Add-on Functionality Integration Tests', () => {
       const orderData = {
         customerId: 'CUST_ADDON_001',
         affiliateId: 'AFF_ADDON_001',
-        pickupDate: new Date(Date.now() + 86400000).toISOString(),
+        pickupDate: '2026-01-27',
         pickupTime: 'morning',
         specialPickupInstructions: 'Test with credit',
         estimatedWeight: 30,
@@ -339,7 +339,7 @@ describe('Order API - Add-on Functionality Integration Tests', () => {
       };
 
       const response = await request(app)
-        .post('/api/orders')
+        .post('/api/v1/orders')
         .set('Authorization', `Bearer ${customerToken}`)
         .send(orderData)
         .expect(201);

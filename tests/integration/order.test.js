@@ -103,7 +103,7 @@ describe('Order Integration Tests', () => {
         .send({
           customerId: 'CUST123',
           affiliateId: 'AFF123',
-          pickupDate: '2025-05-25',
+          pickupDate: '2025-05-26',
           pickupTime: 'morning',
           specialPickupInstructions: 'Ring doorbell',
           estimatedWeight: 30,
@@ -135,7 +135,7 @@ describe('Order Integration Tests', () => {
         .send({
           customerId: 'CUST123',
           affiliateId: 'AFF123',
-          pickupDate: '2025-05-25',
+          pickupDate: '2025-05-26',
           pickupTime: 'morning',
           estimatedWeight: 15,
           numberOfBags: 1});
@@ -152,7 +152,7 @@ describe('Order Integration Tests', () => {
         .send({
           customerId: 'INVALID',
           affiliateId: 'AFF123',
-          pickupDate: '2025-05-25',
+          pickupDate: '2025-05-26',
           pickupTime: 'morning',
           estimatedWeight: 30,
           numberOfBags: 2});
@@ -172,7 +172,7 @@ describe('Order Integration Tests', () => {
         .send({
           customerId: 'CUST123',
           affiliateId: 'INVALID',
-          pickupDate: '2025-05-25',
+          pickupDate: '2025-05-26',
           pickupTime: 'morning',
           estimatedWeight: 30,
           numberOfBags: 2});
@@ -211,7 +211,7 @@ describe('Order Integration Tests', () => {
         .send({
           customerId: 'CUST999',
           affiliateId: 'AFF123',
-          pickupDate: '2025-05-25',
+          pickupDate: '2025-05-26',
           pickupTime: 'morning',
           estimatedWeight: 30,
           numberOfBags: 2});
@@ -246,7 +246,7 @@ describe('Order Integration Tests', () => {
         orderId: 'ORD123456',
         customerId: 'CUST123',
         affiliateId: 'AFF123',
-        pickupDate: new Date('2025-05-25'),
+        pickupDate: new Date('2025-05-26'),
         pickupTime: 'morning',
 
         status: 'processing',
@@ -329,7 +329,7 @@ describe('Order Integration Tests', () => {
         orderId: 'ORD123456',
         customerId: 'CUST123',
         affiliateId: 'AFF123',
-        pickupDate: new Date('2025-05-25'),
+        pickupDate: new Date('2025-05-26'),
         pickupTime: 'morning',
 
         status: 'pending',
@@ -454,7 +454,7 @@ describe('Order Integration Tests', () => {
         orderId: 'ORD123456',
         customerId: 'CUST123',
         affiliateId: 'AFF123',
-        pickupDate: new Date('2025-05-25'),
+        pickupDate: new Date('2025-05-26'),
         pickupTime: 'morning',
 
         status: 'pending',
@@ -547,7 +547,7 @@ describe('Order Integration Tests', () => {
           orderId: 'ORD001',
           customerId: 'CUST123',
           affiliateId: 'AFF123',
-          pickupDate: new Date('2025-05-25'),
+          pickupDate: new Date('2025-05-26'),
           pickupTime: 'morning',
 
           status: 'pending',
@@ -562,7 +562,7 @@ describe('Order Integration Tests', () => {
           orderId: 'ORD002',
           customerId: 'CUST123',
           affiliateId: 'AFF123',
-          pickupDate: new Date('2025-05-25'),
+          pickupDate: new Date('2025-05-26'),
           pickupTime: 'morning',
 
           status: 'pending',
@@ -779,7 +779,7 @@ describe('Order Integration Tests', () => {
         orderId: 'ORD123456',
         customerId: 'CUST123',
         affiliateId: 'AFF123',
-        pickupDate: new Date('2025-05-25'),
+        pickupDate: new Date('2025-05-26'),
         pickupTime: 'morning',
 
         status: 'complete',
@@ -948,7 +948,7 @@ describe('Order Integration Tests', () => {
           orderId: 'ORD003',
           customerId: 'CUST001',
           affiliateId: 'AFF123',
-          pickupDate: new Date('2025-05-25'),
+          pickupDate: new Date('2025-05-26'),
           pickupTime: 'evening',
 
           status: 'pending',
@@ -1079,7 +1079,7 @@ describe('Order Integration Tests', () => {
         .send({
           customerId: 'CUST123',
           affiliateId: 'AFF123',
-          pickupDate: '2025-05-25',
+          pickupDate: '2025-05-26',
           pickupTime: 'morning',
           estimatedWeight: 30,
           numberOfBags: 2});
@@ -1191,7 +1191,7 @@ describe('Order Integration Tests', () => {
           .send({
             customerId: customer.customerId,
             affiliateId: 'AFF123',
-            pickupDate: '2025-05-25',
+            pickupDate: '2025-05-26',
             pickupTime: 'morning',
             estimatedWeight: 30,
             numberOfBags: 2

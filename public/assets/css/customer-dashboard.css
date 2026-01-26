@@ -1,8 +1,13 @@
 /* Customer Dashboard Styles */
-body {
+html, body {
     margin: 0;
     padding: 0;
     background: transparent;
+    min-height: 100%;
+}
+
+body {
+    position: relative;
 }
 
 .wavemax-blue {
@@ -130,4 +135,127 @@ body {
 #v2PaymentModal .swirl-spinner {
     position: relative;
     display: inline-block;
+}
+
+/* Pickup Now! Feature Styles */
+.pickup-now-btn {
+    background-color: #ea580c;
+    transition: all 0.3s ease;
+}
+
+.pickup-now-btn:hover {
+    background-color: #c2410c;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(234, 88, 12, 0.4);
+}
+
+.pickup-now-subtitle {
+    opacity: 0.9;
+}
+
+/* Pickup Now Modal - Uses Bootstrap modal pattern */
+#pickupNowModal {
+    z-index: 9999 !important;
+}
+
+/* Ensure modal header has orange background */
+#pickupNowModal .modal-header {
+    background-color: #ea580c;
+    color: white;
+}
+
+#pickupNowModal .modal-header .close {
+    color: white;
+    opacity: 1;
+}
+
+#pickupNowModal .modal-header .close:hover {
+    color: #f0f0f0;
+}
+
+#pickupNowModal .info-banner {
+    background-color: #eff6ff;
+    border: 1px solid #bfdbfe;
+    border-radius: 0.5rem;
+    padding: 1rem;
+    margin-bottom: 1rem;
+}
+
+#pickupNowModal .first-order-note {
+    background-color: #fef3c7;
+    border: 1px solid #fcd34d;
+    border-radius: 0.5rem;
+    padding: 1rem;
+    margin-bottom: 1rem;
+}
+
+#pickupNowModal .estimated-pickup-box {
+    background-color: #f9fafb;
+    border-radius: 0.5rem;
+    padding: 1rem;
+}
+
+#pickupNowModal .form-label {
+    display: block;
+    color: #374151;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+#pickupNowModal .form-input,
+#pickupNowModal .form-select,
+#pickupNowModal .form-textarea {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #d1d5db;
+    border-radius: 0.5rem;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    box-sizing: border-box;
+}
+
+#pickupNowModal .form-input:focus,
+#pickupNowModal .form-select:focus,
+#pickupNowModal .form-textarea:focus {
+    outline: none;
+    border-color: #ea580c;
+    box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.1);
+}
+
+#pickupNowModal .checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+}
+
+#pickupNowModal .checkbox-label input[type="checkbox"] {
+    width: 1rem;
+    height: 1rem;
+    accent-color: #ea580c;
+}
+
+/* Confirm button hover state */
+#pickupNowModal .btn-warning:hover {
+    background-color: #c2410c !important;
+    border-color: #c2410c !important;
+}
+
+#pickupNowModal .error-message {
+    background-color: #fef2f2;
+    border: 1px solid #fecaca;
+    color: #b91c1c;
+    padding: 0.75rem;
+    border-radius: 0.5rem;
+}
+
+/* Responsive adjustments for small screens */
+/* Responsive adjustments for small screens */
+@media (max-width: 480px) {
+    #pickupNowModal .modal-dialog {
+        margin: 0.5rem;
+        max-width: calc(100% - 1rem);
+    }
+    #pickupNowModal .modal-body {
+        padding: 1rem;
+    }
 }

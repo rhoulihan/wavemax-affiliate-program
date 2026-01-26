@@ -255,13 +255,12 @@ describe('Customer Controller', () => {
       expect(Customer.findOne).toHaveBeenCalledWith({ username: 'janesmith' });
       expect(res.status).toHaveBeenCalledWith(201);
       expect(res.json).toHaveBeenCalledWith(
-        expectSuccessResponse(
-          {
-            customerId: 'CUST-123456',
-            token: 'mock-jwt-token'
-          },
-          'Customer registration successful'
-        )
+        expect.objectContaining({
+          success: true,
+          message: 'Customer registration successful',
+          customerId: 'CUST-123456',
+          token: 'mock-jwt-token'
+        })
       );
     });
 

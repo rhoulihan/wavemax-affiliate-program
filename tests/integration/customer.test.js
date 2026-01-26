@@ -326,7 +326,7 @@ describe('Customer Integration Tests', () => {
           orderId: 'ORD001',
           customerId: 'CUST123',
           affiliateId: 'AFF123',
-          pickupDate: new Date('2025-05-25'),
+          pickupDate: new Date('2025-05-26'),
           pickupTime: 'morning',
 
           status: 'complete',

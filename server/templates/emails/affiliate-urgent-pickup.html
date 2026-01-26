@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>[EMAIL_TITLE]</title>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .urgent-banner { background-color: #dc2626; color: #ffffff !important; padding: 10px; text-align: center; font-weight: bold; font-size: 14px; border-radius: 5px 5px 0 0; }
+        .header { background-color: #ea580c; color: #ffffff !important; padding: 20px; text-align: center; }
+        .header h1 { margin: 0; font-size: 24px; }
+        .deadline-banner { background-color: #fef3c7; border: 2px solid #f59e0b; padding: 15px; text-align: center; margin: 0; }
+        .deadline-banner strong { color: #b45309; font-size: 18px; }
+        .content { background-color: #f9f9f9; padding: 20px; border: 1px solid #ddd; }
+        .order-details { background-color: #ffffff !important; padding: 15px; margin: 15px 0; border-radius: 5px; border: 1px solid #e0e0e0; }
+        .footer { background-color: #f5f5f5; padding: 15px; text-align: center; font-size: 12px; border-radius: 0 0 5px 5px; }
+        .button { display: inline-block; padding: 12px 30px; background-color: #ea580c !important; color: #ffffff !important; text-decoration: none !important; border-radius: 5px; margin: 15px 0; font-weight: bold; }
+        .detail-row { margin: 10px 0; }
+        .detail-label { font-weight: bold; color: #555; }
+        .map-link { color: #2563eb; text-decoration: underline; }
+        .first-order-note { background-color: #dbeafe; border: 1px solid #3b82f6; padding: 12px; border-radius: 5px; margin: 15px 0; }
+        .first-order-note strong { color: #1e40af; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="urgent-banner">
+            [URGENT_BANNER_TEXT]
+        </div>
+        <div class="header">
+            <h1>[EMAIL_HEADER]</h1>
+        </div>
+        <div class="deadline-banner">
+            <strong>[PICKUP_BY_LABEL] [PICKUP_DEADLINE]</strong>
+        </div>
+        <div class="content">
+            <p>[GREETING]</p>
+
+            <p>[URGENT_MESSAGE]</p>
+
+            <div class="order-details">
+                <h2 style="color: #ea580c; margin-bottom: 15px;">[ORDER_DETAILS_TITLE]</h2>
+                <div class="detail-row">
+                    <span class="detail-label">[ORDER_ID_LABEL]:</span> [ORDER_ID]
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">[CUSTOMER_LABEL]:</span> [CUSTOMER_NAME]
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">[PHONE_LABEL]:</span> <a href="tel:[CUSTOMER_PHONE_RAW]">[CUSTOMER_PHONE]</a>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">[ADDRESS_LABEL]:</span>
+                    <a href="[MAPS_URL]" class="map-link" target="_blank">[CUSTOMER_ADDRESS]</a>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">[PICKUP_DATE_LABEL]:</span> [PICKUP_DATE]
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">[PICKUP_TIME_LABEL]:</span> [PICKUP_TIME]
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">[ESTIMATED_WEIGHT_LABEL]:</span> [ESTIMATED_WEIGHT]
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">[NUMBER_OF_BAGS_LABEL]:</span> [NUMBER_OF_BAGS]
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">[SPECIAL_INSTRUCTIONS_LABEL]:</span> [SPECIAL_INSTRUCTIONS]
+                </div>
+            </div>
+
+            [FIRST_ORDER_NOTE_HTML]
+
+            <p style="text-align: center;">
+                <a href="[DASHBOARD_URL]" class="button" style="display: inline-block; background-color: #ea580c !important; color: #ffffff !important; padding: 12px 20px; text-decoration: none !important; border-radius: 4px; font-weight: bold; text-align: center;">[VIEW_ORDER_BUTTON]</a>
+            </p>
+
+            <p style="text-align: center;">
+                <a href="[MAPS_URL]" class="button" style="display: inline-block; background-color: #2563eb !important; color: #ffffff !important; padding: 12px 20px; text-decoration: none !important; border-radius: 4px; font-weight: bold; text-align: center;">[OPEN_MAPS_BUTTON]</a>
+            </p>
+
+            <p>[URGENT_REMINDER]</p>
+
+            <p>[CLOSING_MESSAGE]</p>
+        </div>
+        <div class="footer">
+            <p>&copy; [CURRENT_YEAR] CRHS Enterprises, LLC. [FOOTER_RIGHTS]</p>
+            <p>[FOOTER_AUTOMATED_MESSAGE]</p>
+        </div>
+    </div>
+</body>
+</html>

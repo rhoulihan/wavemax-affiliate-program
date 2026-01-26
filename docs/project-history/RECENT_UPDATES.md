@@ -1,5 +1,52 @@
 # Recent Major Updates
 
+## Immediate Pickup Feature & Bug Fixes (January 2026)
+
+### Immediate Pickup ("Pickup Now!")
+- **Same-Day Pickup Requests**: Customers can request immediate pickup from their dashboard
+  - 4-hour pickup window for requests before 5 PM CDT
+  - Automatic next-day 9 AM scheduling for after-hours requests (after 5 PM CDT)
+  - Operating hours enforcement: 7 AM - 7 PM CDT
+  - Affiliate must have `enableImmediatePickup` feature enabled
+
+- **Pickup Now Modal**: Bootstrap-based modal with full-width responsive design
+  - Number of bags selection (up to 2 for first orders)
+  - Add-on services selection (premium detergent, fabric softener, stain remover)
+  - Special pickup instructions field
+  - Real-time estimated pickup time calculation
+  - Acknowledgment checkbox for pickup terms
+
+- **First Order Enhancements**:
+  - Customers can select up to 2 bags on their first order regardless of registration
+  - Customer bag count automatically updated if they select more bags
+  - First order note displayed explaining bag usage
+
+- **Email Notifications**:
+  - Urgent pickup notification sent to affiliate when immediate pickup is requested
+  - V2 payment request email now properly sent when order moves to processing
+
+### Customer Dashboard Fixes
+- **Active Order Display**: Fixed to show "Yes" when orders are pending/processing/processed
+  - Previously showed "No" incorrectly for processing orders
+  - Now correctly counts all non-complete/non-cancelled orders
+
+### Timezone Handling Fixes
+- **CDT Time Calculation**: Fixed server-side timezone handling for pickup deadlines
+  - Properly extracts CDT hour from UTC dates for business logic
+  - Confirmation dialog now shows correct pickup time (4 hours from order)
+
+### Database Backup System
+- **Node.js Backup Scripts**: New backup system using Mongoose (mongodump not available on free tier)
+  - `scripts/backup-database.js` - Exports all collections to JSON
+  - `scripts/restore-database.js` - Restores from JSON backup
+  - Automatic retention of last 7 backups
+  - Daily cron job at 2 AM
+
+### Test Suite Fixes
+- **Date Fixes**: Updated test dates from Sundays to weekdays (availability schedule)
+- **API Endpoint Fixes**: Corrected `/api/orders` to `/api/v1/orders` in tests
+- **Null Safety**: Added null checks to Affiliate.isAvailable() method
+
 ## Beta Program & Registration Enhancements (January 2025)
 
 ### Beta Program System

@@ -49,6 +49,7 @@ The WaveMAX Affiliate Program enables individuals to register as affiliates, onb
 - **Tablet Kiosk Optimizations**: Wide modal layouts for bag weight entry optimized for tablet keyboards
 - **Mobile Chrome Auto-Hide**: Automatic hiding of parent page elements on mobile/tablet viewport detection
 - **Marketing Email System**: Professional outreach templates for healthcare, caregiving, and catering sectors with hospital-grade sanitation messaging
+- **Immediate Pickup ("Pickup Now!")**: Same-day pickup requests with 4-hour pickup window, operating hours enforcement (7 AM - 7 PM CDT), and automatic next-day scheduling for after-hours requests
 
 ## Documentation
 

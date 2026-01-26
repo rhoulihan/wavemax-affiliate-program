@@ -409,7 +409,7 @@ exports.getCustomerDashboardStats = [
     const { customerId } = req.params;
 
     // Parallel data fetching for performance
-    const [customer, recentOrders, stats, activeOrder] = await Promise.all([
+    const [customer, recentOrders, stats, activeOrder, activeOrdersCount] = await Promise.all([
       Customer.findOne({ customerId })
         .select('-passwordHash -passwordSalt -encryptedPaymentInfo'),
       Order.find({ customerId })
@@ -434,7 +434,12 @@ exports.getCustomerDashboardStats = [
       Order.findOne({
         customerId,
         status: { $in: ['pending', 'scheduled', 'processing', 'processed'] }
-      }).sort('-createdAt')
+      }).sort('-createdAt'),
+      // Count active orders (not complete or cancelled)
+      Order.countDocuments({
+        customerId,
+        status: { $in: ['pending', 'scheduled', 'processing', 'processed'] }
+      })
     ]);
 
     if (!customer) {
@@ -458,15 +463,16 @@ exports.getCustomerDashboardStats = [
       statistics: {
         totalOrders: stats[0]?.totalOrders || 0,
         completedOrders: stats[0]?.completedOrders || 0,
+        activeOrders: activeOrdersCount || 0,
         totalSpent: stats[0]?.totalSpent || 0,
         formattedSpent: Formatters.currency(stats[0]?.totalSpent || 0),
         totalWeight: stats[0]?.totalWeight || 0,
         formattedWeight: Formatters.weight(stats[0]?.totalWeight || 0),
-        averageOrderValue: stats[0]?.totalOrders > 0 
+        averageOrderValue: stats[0]?.totalOrders > 0
           ? (stats[0].totalSpent / stats[0].totalOrders)
           : 0,
         formattedAverageValue: Formatters.currency(
-          stats[0]?.totalOrders > 0 
+          stats[0]?.totalOrders > 0
             ? (stats[0].totalSpent / stats[0].totalOrders)
             : 0
         )
