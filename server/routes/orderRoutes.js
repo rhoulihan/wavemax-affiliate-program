@@ -15,6 +15,30 @@ const { body } = require('express-validator');
 router.get('/check-active', authenticate, orderController.checkActiveOrders);
 
 /**
+ * @route   GET /api/orders/immediate/availability
+ * @desc    Check if immediate pickup is available for customer
+ * @access  Private (customer)
+ */
+router.get('/immediate/availability', authenticate, orderController.checkImmediateAvailability);
+
+/**
+ * @route   POST /api/orders/immediate
+ * @desc    Create an immediate pickup order ("Pickup Now!" feature)
+ * @access  Private (customer)
+ */
+router.post('/immediate', [
+  body('customerId').notEmpty().withMessage('Customer ID is required'),
+  body('affiliateId').notEmpty().withMessage('Affiliate ID is required'),
+  body('numberOfBags').isInt({ min: 1 }).withMessage('Number of bags must be at least 1'),
+  body('estimatedWeight').isFloat({ min: 0.1 }).withMessage('Estimated weight must be a positive number'),
+  body('specialPickupInstructions').optional().isString(),
+  body('addOns').optional().isObject().withMessage('Add-ons must be an object'),
+  body('addOns.premiumDetergent').optional().isBoolean(),
+  body('addOns.fabricSoftener').optional().isBoolean(),
+  body('addOns.stainRemover').optional().isBoolean()
+], authenticate, orderController.createImmediateOrder);
+
+/**
  * @route   POST /api/orders
  * @desc    Create a new order
  * @access  Private (customer, affiliate, or admin)

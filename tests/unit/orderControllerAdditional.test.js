@@ -140,7 +140,7 @@ describe('Order Controller - Additional Coverage', () => {
       req.body = {
         customerId: 'CUST123',
         affiliateId: 'AFF123',
-        pickupDate: '2025-05-25',
+        pickupDate: '2025-05-26',
         pickupTime: 'morning',
         estimatedWeight: 20
       };
@@ -177,7 +177,7 @@ describe('Order Controller - Additional Coverage', () => {
         actualWeight: 22,
         estimatedTotal: 50,
         affiliateCommission: 10,
-        pickupDate: new Date('2025-05-25'),
+        pickupDate: new Date('2025-05-26'),
         deliveryDate: new Date('2025-05-27'),
         createdAt: new Date('2025-05-24')
       }];
@@ -212,7 +212,7 @@ describe('Order Controller - Additional Coverage', () => {
         estimatedTotal: 50,
         actualTotal: 55,
         affiliateCommission: 11,
-        pickupDate: new Date('2025-05-25'),
+        pickupDate: new Date('2025-05-26'),
         deliveryDate: new Date('2025-05-27'),
         createdAt: new Date('2025-05-24'),
         affiliateId: 'AFF123'

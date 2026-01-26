@@ -138,6 +138,11 @@ class PaymentVerificationJob {
    */
   async processOrder(order) {
     try {
+      // Skip already verified or failed orders
+      if (order.v2PaymentStatus === 'verified' || order.v2PaymentStatus === 'failed') {
+        return; // Order payment already resolved
+      }
+
       // Check if customer is V2
       const customer = await Customer.findOne({ customerId: order.customerId });
       if (!customer || customer.registrationVersion !== 'v2') {

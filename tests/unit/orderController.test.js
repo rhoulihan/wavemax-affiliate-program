@@ -94,7 +94,7 @@ describe('Order Controller', () => {
       req.body = {
         customerId: 'CUST123',
         affiliateId: 'AFF123',
-        pickupDate: '2025-05-25',
+        pickupDate: '2025-05-26',
         pickupTime: 'morning',
         specialPickupInstructions: 'Ring doorbell',
         estimatedWeight: 30,
@@ -162,7 +162,7 @@ describe('Order Controller', () => {
       req.body = {
         customerId: 'CUST123',
         affiliateId: 'AFF123',
-        pickupDate: '2025-05-25',
+        pickupDate: '2025-05-26',
         pickupTime: 'morning',
         estimatedWeight: 30,
         numberOfBags: 2};
@@ -199,7 +199,7 @@ describe('Order Controller', () => {
       req.body = {
         customerId: 'INVALID',
         affiliateId: 'AFF123',
-        pickupDate: '2025-05-25',
+        pickupDate: '2025-05-26',
         pickupTime: 'morning'
       };
       req.user = { role: 'admin' };
@@ -220,7 +220,7 @@ describe('Order Controller', () => {
       req.body = {
         customerId: 'CUST123',
         affiliateId: 'INVALID',
-        pickupDate: '2025-05-25',
+        pickupDate: '2025-05-26',
         pickupTime: 'morning'
       };
       req.user = { role: 'admin' };
@@ -241,7 +241,7 @@ describe('Order Controller', () => {
       req.body = {
         customerId: 'CUST456',
         affiliateId: 'AFF123',
-        pickupDate: '2025-05-25',
+        pickupDate: '2025-05-26',
         pickupTime: 'morning'
       };
       req.user = { role: 'customer', customerId: 'CUST123' };
@@ -266,7 +266,7 @@ describe('Order Controller', () => {
         customerId: 'CUST123',
         affiliateId: 'AFF123',
         status: 'processing',
-        pickupDate: '2025-05-25'};
+        pickupDate: '2025-05-26'};
 
       const mockCustomer = {
         customerId: 'CUST123',

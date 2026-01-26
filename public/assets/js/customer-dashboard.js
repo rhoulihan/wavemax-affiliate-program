@@ -134,7 +134,10 @@ async function initializeDashboard() {
 
     // Load dashboard data
     await loadDashboardData();
-    
+
+    // Check immediate pickup availability
+    await checkImmediatePickupAvailability();
+
     // Hide loading overlay once everything is loaded
     hideLoadingOverlay();
 
@@ -670,6 +673,326 @@ function showProfile() {
   loadProfile();
 }
 
+// ============================================================================
+// Immediate Pickup ("Pickup Now!") Feature
+// ============================================================================
+
+// Check immediate pickup availability and show/hide button
+async function checkImmediatePickupAvailability() {
+  const pickupNowContainer = document.getElementById('pickupNowContainer');
+  if (!pickupNowContainer) return;
+
+  try {
+    const token = localStorage.getItem('customerToken');
+    const affiliateId = customerData?.affiliateId;
+
+    if (!affiliateId) {
+      console.log('No affiliate ID found, hiding Pickup Now button');
+      pickupNowContainer.classList.add('hidden');
+      return;
+    }
+
+    const response = await fetch(`/api/orders/immediate/availability?affiliateId=${affiliateId}`, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+
+    if (!response.ok) {
+      console.error('Failed to check immediate pickup availability');
+      pickupNowContainer.classList.add('hidden');
+      return;
+    }
+
+    const result = await response.json();
+    console.log('Immediate pickup availability:', result);
+
+    if (result.success && result.available) {
+      pickupNowContainer.classList.remove('hidden');
+      setupPickupNowButton();
+    } else {
+      pickupNowContainer.classList.add('hidden');
+      if (result.reason) {
+        console.log('Immediate pickup not available:', result.reason);
+      }
+    }
+  } catch (error) {
+    console.error('Error checking immediate pickup availability:', error);
+    pickupNowContainer.classList.add('hidden');
+  }
+}
+
+// Setup Pickup Now button event listener
+function setupPickupNowButton() {
+  const pickupNowBtn = document.getElementById('pickupNowBtn');
+  if (pickupNowBtn && !pickupNowBtn.hasAttribute('data-listener-attached')) {
+    pickupNowBtn.addEventListener('click', openPickupNowModal);
+    pickupNowBtn.setAttribute('data-listener-attached', 'true');
+  }
+}
+
+// Open Pickup Now modal
+function openPickupNowModal() {
+  const modal = document.getElementById('pickupNowModal');
+  if (!modal) return;
+
+  // Reset form
+  const form = document.getElementById('pickupNowForm');
+  if (form) form.reset();
+
+  // Hide error message
+  const errorDiv = document.getElementById('immediatePickupError');
+  if (errorDiv) errorDiv.classList.add('hidden');
+
+  // Set max bags - allow up to 2 bags for first order, otherwise use customer's bag count
+  const bagsSelect = document.getElementById('immediatePickupBags');
+  if (bagsSelect && customerData) {
+    const isFirstOrder = !customerData.totalOrders || customerData.totalOrders === 0;
+    const maxBags = isFirstOrder ? 2 : (customerData.initialBagsRequested || 2);
+    bagsSelect.innerHTML = '';
+    for (let i = 1; i <= maxBags; i++) {
+      const option = document.createElement('option');
+      option.value = i;
+      option.textContent = `${i} Bag${i > 1 ? 's' : ''}`;
+      bagsSelect.appendChild(option);
+    }
+  }
+
+  // Pre-populate special instructions from delivery instructions
+  const instructionsField = document.getElementById('immediatePickupInstructions');
+  if (instructionsField && customerData?.deliveryInstructions) {
+    instructionsField.value = customerData.deliveryInstructions;
+  }
+
+  // Show/hide first order note
+  const firstOrderNote = document.getElementById('firstOrderNote');
+  if (firstOrderNote) {
+    const isFirstOrder = !customerData?.totalOrders || customerData.totalOrders === 0;
+    if (isFirstOrder) {
+      firstOrderNote.classList.remove('hidden');
+    } else {
+      firstOrderNote.classList.add('hidden');
+    }
+  }
+
+  // Calculate and display estimated pickup time
+  calculateEstimatedPickup();
+
+  // Show modal using Bootstrap pattern
+  modal.classList.add('show');
+  modal.style.display = 'block';
+
+  // Setup modal close handlers
+  setupPickupNowModalHandlers();
+}
+
+// Setup modal event handlers
+function setupPickupNowModalHandlers() {
+  const modal = document.getElementById('pickupNowModal');
+  const closeBtn = document.getElementById('closePickupNowModal');
+  const cancelBtn = document.getElementById('cancelPickupNowBtn');
+  const form = document.getElementById('pickupNowForm');
+
+  if (closeBtn && !closeBtn.hasAttribute('data-listener-attached')) {
+    closeBtn.addEventListener('click', closePickupNowModal);
+    closeBtn.setAttribute('data-listener-attached', 'true');
+  }
+
+  if (cancelBtn && !cancelBtn.hasAttribute('data-listener-attached')) {
+    cancelBtn.addEventListener('click', closePickupNowModal);
+    cancelBtn.setAttribute('data-listener-attached', 'true');
+  }
+
+  if (form && !form.hasAttribute('data-listener-attached')) {
+    form.addEventListener('submit', submitImmediatePickup);
+    form.setAttribute('data-listener-attached', 'true');
+  }
+
+  // Close on backdrop click
+  if (modal && !modal.hasAttribute('data-backdrop-listener')) {
+    modal.addEventListener('click', function(e) {
+      if (e.target === modal) {
+        closePickupNowModal();
+      }
+    });
+    modal.setAttribute('data-backdrop-listener', 'true');
+  }
+}
+
+// Close Pickup Now modal
+function closePickupNowModal() {
+  const modal = document.getElementById('pickupNowModal');
+  if (modal) {
+    modal.classList.remove('show');
+    modal.style.display = 'none';
+  }
+}
+
+// Calculate and display estimated pickup time
+function calculateEstimatedPickup() {
+  const timeDisplay = document.getElementById('estimatedPickupTime');
+  const deadlineDisplay = document.getElementById('pickupDeadlineDisplay');
+
+  if (!timeDisplay || !deadlineDisplay) return;
+
+  const now = new Date();
+  // Convert to CDT for display
+  const cdtOptions = { timeZone: 'America/Chicago', hour: '2-digit', minute: '2-digit', hour12: true };
+  const currentHour = parseInt(now.toLocaleString('en-US', { timeZone: 'America/Chicago', hour: '2-digit', hour12: false }));
+
+  // Determine time slot
+  let timeSlot;
+  if (currentHour >= 7 && currentHour < 12) {
+    timeSlot = 'Morning (8 AM - 12 PM)';
+  } else if (currentHour >= 12 && currentHour < 16) {
+    timeSlot = 'Afternoon (12 PM - 4 PM)';
+  } else if (currentHour >= 16 && currentHour <= 19) {
+    timeSlot = 'Evening (4 PM - 8 PM)';
+  } else {
+    timeSlot = 'Next available slot';
+  }
+
+  timeDisplay.textContent = `Today - ${timeSlot}`;
+
+  // Calculate deadline
+  let deadline;
+  if (currentHour >= 17) {
+    // After 5 PM: next day 9 AM
+    deadline = new Date(now);
+    deadline.setDate(deadline.getDate() + 1);
+    deadline.setHours(9, 0, 0, 0);
+    deadlineDisplay.textContent = `Pickup by: Tomorrow 9:00 AM CDT`;
+  } else {
+    // Before 5 PM: 4 hours from now
+    deadline = new Date(now.getTime() + 4 * 60 * 60 * 1000);
+    const deadlineTime = deadline.toLocaleString('en-US', {
+      timeZone: 'America/Chicago',
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true
+    });
+    deadlineDisplay.textContent = `Pickup by: Today ${deadlineTime} CDT`;
+  }
+}
+
+// Submit immediate pickup request
+async function submitImmediatePickup(e) {
+  e.preventDefault();
+
+  const errorDiv = document.getElementById('immediatePickupError');
+  const submitBtn = document.getElementById('submitPickupNowBtn');
+  const acknowledgeCheckbox = document.getElementById('immediatePickupAcknowledge');
+
+  // Validate acknowledgment
+  if (!acknowledgeCheckbox || !acknowledgeCheckbox.checked) {
+    if (errorDiv) {
+      errorDiv.textContent = 'Please acknowledge the pickup terms.';
+      errorDiv.classList.remove('hidden');
+    }
+    return;
+  }
+
+  // Disable submit button
+  if (submitBtn) {
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Processing...';
+  }
+
+  // Hide any previous errors
+  if (errorDiv) {
+    errorDiv.classList.add('hidden');
+  }
+
+  try {
+    const token = localStorage.getItem('customerToken');
+
+    // Gather form data
+    const requestData = {
+      customerId: customerData.customerId,
+      affiliateId: customerData.affiliateId,
+      numberOfBags: parseInt(document.getElementById('immediatePickupBags').value) || 1,
+      specialPickupInstructions: document.getElementById('immediatePickupInstructions').value.trim(),
+      addOns: {
+        premiumDetergent: document.getElementById('immediateAddOnDetergent')?.checked || false,
+        fabricSoftener: document.getElementById('immediateAddOnSoftener')?.checked || false,
+        stainRemover: document.getElementById('immediateAddOnStain')?.checked || false
+      }
+    };
+
+    // Use CSRF-enabled fetch if available
+    const authenticatedFetch = window.CsrfUtils ? window.CsrfUtils.createAuthenticatedFetch(() => token) : fetch;
+
+    const response = await authenticatedFetch('/api/orders/immediate', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      credentials: 'include',
+      body: JSON.stringify(requestData)
+    });
+
+    const result = await response.json();
+
+    if (response.ok && result.success) {
+      // Success!
+      handlePickupNowSuccess(result);
+    } else {
+      // Show error
+      if (errorDiv) {
+        errorDiv.textContent = result.error || result.message || 'Failed to submit pickup request. Please try again.';
+        errorDiv.classList.remove('hidden');
+      }
+    }
+  } catch (error) {
+    console.error('Error submitting immediate pickup:', error);
+    if (errorDiv) {
+      errorDiv.textContent = 'An error occurred. Please try again.';
+      errorDiv.classList.remove('hidden');
+    }
+  } finally {
+    // Re-enable submit button
+    if (submitBtn) {
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Confirm Pickup';
+    }
+  }
+}
+
+// Handle successful immediate pickup request
+function handlePickupNowSuccess(result) {
+  // Close modal
+  closePickupNowModal();
+
+  // Show success message
+  const pickupDeadline = result.pickupDeadline ? new Date(result.pickupDeadline).toLocaleString('en-US', {
+    timeZone: 'America/Chicago',
+    weekday: 'short',
+    month: 'short',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true
+  }) : 'within 4 hours';
+
+  let message = `Your immediate pickup has been scheduled!\n\nOrder ID: ${result.orderId}\nPickup by: ${pickupDeadline}`;
+
+  if (result.isFirstOrder && result.firstOrderNote) {
+    message += `\n\nNote: ${result.firstOrderNote}`;
+  }
+
+  alert(message);
+
+  // Refresh dashboard data
+  loadDashboardData();
+
+  // Hide pickup now button since they now have an active order
+  const pickupNowContainer = document.getElementById('pickupNowContainer');
+  if (pickupNowContainer) {
+    pickupNowContainer.classList.add('hidden');
+  }
+}
+
 // Check and show delete section if enabled
 async function checkAndShowDeleteSection() {
   try {
@@ -729,6 +1052,9 @@ async function deleteAllData() {
 // Expose necessary functions to window
 window.initializeDashboard = initializeDashboard;
 window.handleLogout = handleLogout;
+window.checkImmediatePickupAvailability = checkImmediatePickupAvailability;
+window.openPickupNowModal = openPickupNowModal;
+window.closePickupNowModal = closePickupNowModal;
 
 // Auto-initialize is already handled above, no need to duplicate
 

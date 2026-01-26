@@ -199,7 +199,7 @@
         const deliveryFeeEl = document.getElementById('deliveryFee');
         if (deliveryFeeEl) {
           let deliveryFeeText = '';
-          if (affiliate.minimumDeliveryFee !== null && affiliate.perBagDeliveryFee !== null) {
+          if (typeof affiliate.minimumDeliveryFee === 'number' && typeof affiliate.perBagDeliveryFee === 'number') {
             deliveryFeeText = `$${affiliate.minimumDeliveryFee.toFixed(2)} minimum, then $${affiliate.perBagDeliveryFee.toFixed(2)} per bag`;
           } else {
             deliveryFeeText = 'Contact provider for pricing';

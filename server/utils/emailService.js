@@ -681,6 +681,194 @@ exports.sendAffiliateNewOrderEmail = async (affiliate, customer, order) => {
 };
 
 /**
+ * Send urgent pickup notification to affiliate for immediate pickup orders
+ */
+exports.sendAffiliateUrgentPickupEmail = async (affiliate, customer, order) => {
+  try {
+    const language = affiliate.languagePreference || 'en';
+    const template = await loadTemplate('affiliate-urgent-pickup', language);
+
+    // Build the greeting with fallback
+    const affiliateName = affiliate.firstName || affiliate.businessName || 'Partner';
+
+    // Format the pickup deadline nicely
+    const deadline = new Date(order.pickupDeadline);
+    const deadlineFormatted = deadline.toLocaleString('en-US', {
+      weekday: 'short',
+      month: 'short',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit',
+      timeZoneName: 'short'
+    });
+
+    // Check if this is customer's first order
+    const isFirstOrder = !customer.totalOrders || customer.totalOrders === 0;
+
+    // Build Google Maps URL
+    const address = `${customer.address}, ${customer.city}, ${customer.state} ${customer.zipCode}`;
+    const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`;
+
+    // Get translations for the email content
+    const translations = {
+      en: {
+        EMAIL_TITLE: 'URGENT: Immediate Pickup Request',
+        EMAIL_HEADER: 'Immediate Pickup Request',
+        URGENT_BANNER_TEXT: 'URGENT - SAME-DAY PICKUP REQUIRED',
+        PICKUP_BY_LABEL: 'Pick up by:',
+        GREETING: `Hello ${affiliateName},`,
+        URGENT_MESSAGE: 'A customer has requested an immediate pickup. Please pick up this order as soon as possible!',
+        ORDER_DETAILS_TITLE: 'Pickup Details',
+        ORDER_ID_LABEL: 'Order ID',
+        CUSTOMER_LABEL: 'Customer',
+        PHONE_LABEL: 'Phone',
+        ADDRESS_LABEL: 'Pickup Address',
+        PICKUP_DATE_LABEL: 'Pickup Date',
+        PICKUP_TIME_LABEL: 'Time Window',
+        ESTIMATED_WEIGHT_LABEL: 'Estimated Weight',
+        NUMBER_OF_BAGS_LABEL: 'Number of Bags',
+        SPECIAL_INSTRUCTIONS_LABEL: 'Special Instructions',
+        VIEW_ORDER_BUTTON: 'View in Dashboard',
+        OPEN_MAPS_BUTTON: 'Open in Google Maps',
+        URGENT_REMINDER: 'This is a time-sensitive pickup request. Please ensure you arrive before the deadline shown above.',
+        FIRST_ORDER_NOTE: 'First Order Note: Customer will have laundry in tall kitchen bags. Please deliver WaveMAX laundry bags with the clean laundry.',
+        CLOSING_MESSAGE: 'Best regards,<br>The WaveMAX Laundry Team',
+        FOOTER_RIGHTS: 'All rights reserved.',
+        FOOTER_AUTOMATED_MESSAGE: 'This is an automated message. Please do not reply to this email.',
+        NONE: 'None'
+      },
+      es: {
+        EMAIL_TITLE: 'URGENTE: Solicitud de Recogida Inmediata',
+        EMAIL_HEADER: 'Solicitud de Recogida Inmediata',
+        URGENT_BANNER_TEXT: 'URGENTE - RECOGIDA EL MISMO DIA REQUERIDA',
+        PICKUP_BY_LABEL: 'Recoger antes de:',
+        GREETING: `Hola ${affiliateName},`,
+        URGENT_MESSAGE: 'Un cliente ha solicitado una recogida inmediata. Por favor recoja este pedido lo antes posible!',
+        ORDER_DETAILS_TITLE: 'Detalles de Recogida',
+        ORDER_ID_LABEL: 'ID del Pedido',
+        CUSTOMER_LABEL: 'Cliente',
+        PHONE_LABEL: 'Telefono',
+        ADDRESS_LABEL: 'Direccion de Recogida',
+        PICKUP_DATE_LABEL: 'Fecha de Recogida',
+        PICKUP_TIME_LABEL: 'Ventana de Tiempo',
+        ESTIMATED_WEIGHT_LABEL: 'Peso Estimado',
+        NUMBER_OF_BAGS_LABEL: 'Numero de Bolsas',
+        SPECIAL_INSTRUCTIONS_LABEL: 'Instrucciones Especiales',
+        VIEW_ORDER_BUTTON: 'Ver en el Panel',
+        OPEN_MAPS_BUTTON: 'Abrir en Google Maps',
+        URGENT_REMINDER: 'Esta es una solicitud de recogida urgente. Por favor asegurese de llegar antes de la fecha limite mostrada arriba.',
+        FIRST_ORDER_NOTE: 'Nota de Primer Pedido: El cliente tendra la ropa en bolsas de cocina. Por favor entregue bolsas de lavanderia WaveMAX con la ropa limpia.',
+        CLOSING_MESSAGE: 'Saludos cordiales,<br>El Equipo de WaveMAX Laundry',
+        FOOTER_RIGHTS: 'Todos los derechos reservados.',
+        FOOTER_AUTOMATED_MESSAGE: 'Este es un mensaje automatizado. Por favor no responda a este correo.',
+        NONE: 'Ninguna'
+      },
+      pt: {
+        EMAIL_TITLE: 'URGENTE: Solicitacao de Coleta Imediata',
+        EMAIL_HEADER: 'Solicitacao de Coleta Imediata',
+        URGENT_BANNER_TEXT: 'URGENTE - COLETA NO MESMO DIA NECESSARIA',
+        PICKUP_BY_LABEL: 'Coletar ate:',
+        GREETING: `Ola ${affiliateName},`,
+        URGENT_MESSAGE: 'Um cliente solicitou uma coleta imediata. Por favor colete este pedido o mais rapido possivel!',
+        ORDER_DETAILS_TITLE: 'Detalhes da Coleta',
+        ORDER_ID_LABEL: 'ID do Pedido',
+        CUSTOMER_LABEL: 'Cliente',
+        PHONE_LABEL: 'Telefone',
+        ADDRESS_LABEL: 'Endereco de Coleta',
+        PICKUP_DATE_LABEL: 'Data de Coleta',
+        PICKUP_TIME_LABEL: 'Janela de Tempo',
+        ESTIMATED_WEIGHT_LABEL: 'Peso Estimado',
+        NUMBER_OF_BAGS_LABEL: 'Numero de Sacolas',
+        SPECIAL_INSTRUCTIONS_LABEL: 'Instrucoes Especiais',
+        VIEW_ORDER_BUTTON: 'Ver no Painel',
+        OPEN_MAPS_BUTTON: 'Abrir no Google Maps',
+        URGENT_REMINDER: 'Esta e uma solicitacao de coleta urgente. Por favor, certifique-se de chegar antes do prazo mostrado acima.',
+        FIRST_ORDER_NOTE: 'Nota de Primeiro Pedido: O cliente tera a roupa em sacos de cozinha. Por favor entregue sacolas de lavanderia WaveMAX com a roupa limpa.',
+        CLOSING_MESSAGE: 'Atenciosamente,<br>A Equipe WaveMAX Laundry',
+        FOOTER_RIGHTS: 'Todos os direitos reservados.',
+        FOOTER_AUTOMATED_MESSAGE: 'Esta e uma mensagem automatizada. Por favor, nao responda a este e-mail.',
+        NONE: 'Nenhuma'
+      },
+      de: {
+        EMAIL_TITLE: 'DRINGEND: Sofortige Abholanfrage',
+        EMAIL_HEADER: 'Sofortige Abholanfrage',
+        URGENT_BANNER_TEXT: 'DRINGEND - ABHOLUNG AM SELBEN TAG ERFORDERLICH',
+        PICKUP_BY_LABEL: 'Abholen bis:',
+        GREETING: `Hallo ${affiliateName},`,
+        URGENT_MESSAGE: 'Ein Kunde hat eine sofortige Abholung angefordert. Bitte holen Sie diese Bestellung so schnell wie moglich ab!',
+        ORDER_DETAILS_TITLE: 'Abholdetails',
+        ORDER_ID_LABEL: 'Bestell-ID',
+        CUSTOMER_LABEL: 'Kunde',
+        PHONE_LABEL: 'Telefon',
+        ADDRESS_LABEL: 'Abholadresse',
+        PICKUP_DATE_LABEL: 'Abholdatum',
+        PICKUP_TIME_LABEL: 'Zeitfenster',
+        ESTIMATED_WEIGHT_LABEL: 'Geschatztes Gewicht',
+        NUMBER_OF_BAGS_LABEL: 'Anzahl der Sacke',
+        SPECIAL_INSTRUCTIONS_LABEL: 'Besondere Anweisungen',
+        VIEW_ORDER_BUTTON: 'Im Dashboard anzeigen',
+        OPEN_MAPS_BUTTON: 'In Google Maps offnen',
+        URGENT_REMINDER: 'Dies ist eine zeitkritische Abholanfrage. Bitte stellen Sie sicher, dass Sie vor der oben angezeigten Frist ankommen.',
+        FIRST_ORDER_NOTE: 'Erstbestellungs-Hinweis: Der Kunde hat die Wasche in Kuchenbeuteln. Bitte liefern Sie WaveMAX Waschesacke mit der sauberen Wasche.',
+        CLOSING_MESSAGE: 'Mit freundlichen Grussen,<br>Das WaveMAX Laundry Team',
+        FOOTER_RIGHTS: 'Alle Rechte vorbehalten.',
+        FOOTER_AUTOMATED_MESSAGE: 'Dies ist eine automatisierte Nachricht. Bitte antworten Sie nicht auf diese E-Mail.',
+        NONE: 'Keine'
+      }
+    };
+
+    const emailTranslations = translations[language] || translations.en;
+
+    // Build first order note HTML if applicable
+    const firstOrderNoteHtml = isFirstOrder
+      ? `<div class="first-order-note"><strong>${emailTranslations.FIRST_ORDER_NOTE}</strong></div>`
+      : '';
+
+    const data = {
+      affiliate_first_name: affiliate.firstName,
+      order_id: order.orderId,
+      customer_name: `${customer.firstName} ${customer.lastName}`,
+      customer_phone: customer.phone,
+      customer_phone_raw: customer.phone.replace(/[^0-9+]/g, ''),
+      customer_address: address,
+      maps_url: mapsUrl,
+      pickup_date: new Date(order.pickupDate).toLocaleDateString(),
+      pickup_time: formatTimeSlot(order.pickupTime),
+      pickup_deadline: deadlineFormatted,
+      estimated_weight: order.estimatedWeight ? `${order.estimatedWeight} lbs` : emailTranslations.NONE,
+      number_of_bags: order.numberOfBags || 1,
+      special_instructions: order.specialPickupInstructions || emailTranslations.NONE,
+      first_order_note_html: firstOrderNoteHtml,
+      dashboard_url: 'https://www.wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program?login=affiliate',
+      current_year: new Date().getFullYear(),
+      ...emailTranslations
+    };
+
+    const html = fillTemplate(template, data);
+
+    // Translate subject based on language
+    const subjects = {
+      en: `URGENT: Immediate Pickup Request - ${customer.firstName} ${customer.lastName}`,
+      es: `URGENTE: Solicitud de Recogida Inmediata - ${customer.firstName} ${customer.lastName}`,
+      pt: `URGENTE: Solicitacao de Coleta Imediata - ${customer.firstName} ${customer.lastName}`,
+      de: `DRINGEND: Sofortige Abholanfrage - ${customer.firstName} ${customer.lastName}`
+    };
+    const subject = subjects[language] || subjects.en;
+
+    await sendEmail(
+      affiliate.email,
+      subject,
+      html
+    );
+
+    console.log(`Urgent pickup email sent to affiliate ${affiliate.affiliateId} for order ${order.orderId}`);
+  } catch (error) {
+    console.error('Error sending urgent pickup notification email:', error);
+    throw error; // Re-throw to let caller handle
+  }
+};
+
+/**
  * Send commission notification to affiliate
  */
 exports.sendAffiliateCommissionEmail = async (affiliate, order, customer) => {

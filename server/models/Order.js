@@ -194,6 +194,11 @@ const orderSchema = new mongoose.Schema({
   
   // Test order flag for cleanup
   isTestOrder: { type: Boolean, default: false },
+
+  // Immediate Pickup ("Pickup Now!") fields
+  isImmediatePickup: { type: Boolean, default: false },
+  pickupDeadline: { type: Date }, // Calculated pickup deadline for immediate orders
+  immediatePickupRequestedAt: { type: Date }, // When "Pickup Now!" was clicked
   
   // Timestamps
   createdAt: { type: Date, default: Date.now }, // When order was created (pending state)

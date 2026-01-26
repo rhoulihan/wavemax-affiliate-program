@@ -64,6 +64,13 @@
         <!-- Quick Actions -->
         <div class="bg-white rounded-lg shadow-md p-6 mb-8">
             <h3 class="text-xl font-bold mb-4">Quick Actions</h3>
+            <!-- Pickup Now! prominent button -->
+            <div id="pickupNowContainer" class="mb-4 hidden">
+                <button id="pickupNowBtn" class="pickup-now-btn w-full bg-orange-600 text-white text-center py-4 px-4 rounded-lg hover:bg-orange-700 transition font-bold text-lg shadow-lg">
+                    &#9889; Pickup Now!
+                    <span class="pickup-now-subtitle block text-sm font-normal mt-1">Request immediate same-day pickup</span>
+                </button>
+            </div>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <a href="#" id="schedulePickupBtn" class="bg-blue-600 text-white text-center py-3 px-4 rounded-lg hover:bg-blue-700 transition">
                     Schedule Pickup
@@ -86,9 +93,110 @@
         </div>
     </div>
 
+    <!-- Pickup Now Modal -->
+    <div id="pickupNowModal" class="modal fade modal-backdrop-dark" style="display: none;">
+        <div class="modal-dialog modal-lg" style="margin: 1rem; max-width: calc(100% - 2rem);">
+            <div class="modal-content">
+                <!-- Modal Header -->
+                <div class="modal-header" style="background-color: #ea580c; color: white;">
+                    <h5 class="modal-title font-bold">Request Immediate Pickup</h5>
+                    <button type="button" class="close text-white" id="closePickupNowModal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+
+                <!-- Modal Body -->
+                <div class="modal-body">
+                    <!-- Info Banner -->
+                    <div class="info-banner">
+                        <h3 class="font-bold text-blue-800 mb-2">How Pickup Now! Works</h3>
+                        <ul class="text-sm text-blue-700 space-y-1">
+                            <li>&#8226; Leave your laundry at your door or designated location</li>
+                            <li>&#8226; OR be available when the driver arrives</li>
+                            <li>&#8226; Pickup within 4 hours (or by 9 AM tomorrow if after 5 PM)</li>
+                        </ul>
+                    </div>
+
+                    <!-- First Order Note (conditional) -->
+                    <div id="firstOrderNote" class="first-order-note hidden">
+                        <h3 class="font-bold text-yellow-800 mb-2">First Order Note</h3>
+                        <p class="text-sm text-yellow-700">Please leave your laundry in tall kitchen bags. It will be returned in WaveMAX laundry bags.</p>
+                    </div>
+
+                    <!-- Form -->
+                    <form id="pickupNowForm" class="space-y-4">
+                        <!-- Number of Bags -->
+                        <div>
+                            <label class="form-label">Number of Bags</label>
+                            <select id="immediatePickupBags" class="form-select">
+                                <option value="1">1 Bag</option>
+                                <option value="2">2 Bags</option>
+                                <option value="3">3 Bags</option>
+                            </select>
+                        </div>
+
+                        <!-- Add-on Services -->
+                        <div>
+                            <label class="form-label">Add-on Services (+$0.10/lb each)</label>
+                            <div class="space-y-2">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="immediateAddOnDetergent">
+                                    <span>Premium Detergent</span>
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="immediateAddOnSoftener">
+                                    <span>Fabric Softener</span>
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="immediateAddOnStain">
+                                    <span>Stain Remover</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Special Instructions -->
+                        <div>
+                            <label class="form-label">Special Pickup Instructions</label>
+                            <textarea id="immediatePickupInstructions" rows="2" class="form-textarea"
+                                      placeholder="Door location, gate code, etc."></textarea>
+                        </div>
+
+                        <!-- Estimated Pickup Time -->
+                        <div class="estimated-pickup-box">
+                            <h4 class="font-semibold text-gray-700 mb-2">Estimated Pickup</h4>
+                            <p id="estimatedPickupTime" class="text-lg font-bold text-orange-600">Calculating...</p>
+                            <p id="pickupDeadlineDisplay" class="text-sm text-gray-600 mt-1">Pickup by: Calculating...</p>
+                        </div>
+
+                        <!-- Acknowledgment -->
+                        <div class="border-t pt-4">
+                            <label class="checkbox-label items-start">
+                                <input type="checkbox" id="immediatePickupAcknowledge" class="mt-1" required>
+                                <span class="text-sm text-gray-700">I understand that my laundry should be ready for pickup within the next few hours, and I agree to leave it at my door or be available when the driver arrives.</span>
+                            </label>
+                        </div>
+
+                        <!-- Error Message -->
+                        <div id="immediatePickupError" class="error-message hidden"></div>
+                    </form>
+                </div>
+
+                <!-- Modal Footer -->
+                <div class="modal-footer">
+                    <button type="button" id="cancelPickupNowBtn" class="btn btn-secondary">
+                        Cancel
+                    </button>
+                    <button type="submit" form="pickupNowForm" id="submitPickupNowBtn" class="btn btn-warning text-white font-bold" style="background-color: #ea580c; border-color: #ea580c;">
+                        Confirm Pickup
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Scripts -->
     <script src="/assets/js/csrf-utils.js"></script>
     <script src="/assets/js/i18n.js"></script>
-    <script src="/assets/js/customer-dashboard.js?v=20250108-5"></script>
+    <script src="/assets/js/customer-dashboard.js?v=20250124-1"></script>
 </body>
 </html>

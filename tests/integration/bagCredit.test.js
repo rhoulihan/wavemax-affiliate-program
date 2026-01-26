@@ -71,7 +71,7 @@ describe('Bag Credit Functionality', () => {
     const orderData = {
       customerId: testCustomer.customerId,
       affiliateId: testAffiliate.affiliateId,
-      pickupDate: new Date(Date.now() + 86400000).toISOString(),
+      pickupDate: '2026-01-27',
       pickupTime: 'morning',
       estimatedWeight: 20,
       numberOfBags: 2,
@@ -119,7 +119,7 @@ describe('Bag Credit Functionality', () => {
     const orderData = {
       customerId: testCustomer.customerId,
       affiliateId: testAffiliate.affiliateId,
-      pickupDate: new Date(Date.now() + 172800000).toISOString(), // 2 days later
+      pickupDate: '2026-01-28', // 2 days later
       pickupTime: 'afternoon',
       estimatedWeight: 15,
       numberOfBags: 1
