@@ -221,37 +221,39 @@ Disposition:
 
 ## 4. Phase 2 — Backend: V1 Removal + Decomposition (2 weeks)
 
-**Goal:** V1 payment / registration code gone. No file over 800 lines. No circular dependencies. One concern per module.
+**Goal:** V1 upfront-payment workflow removed. Post-weigh payment (previously "V2") becomes the only workflow, with all V1/V2 versioning vocabulary dropped. Paygistix remains as the payment processor; its callback-pool mechanism is how it returns status for all payments. No file over 800 lines. No circular dependencies. One concern per module.
 
-### 4.1 V1 Removal — what goes
+### 4.1 V1 workflow removal — what goes
 
-Because there's no V1 production data to preserve, V1 support can be deleted outright:
+**Context:** "V1" was the *upfront-payment registration flow* (customer paid Paygistix at signup, got bag credit). "V2" is the *post-weigh payment flow* (customer registers for free, pays Paygistix — or Venmo/PayPal/CashApp — after bags are weighed). We are standardizing on the post-weigh workflow. **Paygistix itself, including the callback pool, stays** — it is the processor for all payments regardless of when capture happens.
 
-**Delete entirely:**
+Because there's no V1 production data to preserve, V1 workflow support can be deleted outright.
 
-_(V1 payment/registration list below, plus the DocuSign deprecation in §4.1.1.)_
+**Delete entirely (V1-only code):**
 
+- `public/paygistix-registration-payment.html` (V1 upfront-capture registration form)
+- `public/customer-register-embed.html` (V1 registration — replaced by the renamed v2 version)
+- `public/schedule-pickup-embed.html` (V1 — replaced by the renamed v2 version)
+- `public/assets/js/customer-register.js`, `customer-register-paygistix.js`, `customer-register-updated.js`, `customer-register-navigation.js` (V1 registration JS — V2 equivalents replace them)
+- `public/assets/js/test-payment-form.js` (already flagged in Phase 1 as dev page)
+- `Customer.registrationVersion` field (no more version branching; every customer is post-weigh)
+- `Customer.initialBagsRequested` tracking if it's specific to the V1 upfront-bag-purchase flow (verify first)
+- V1-only email templates (verify by grepping template references; any template never reached from a post-weigh path)
+- V1-specific tests (e.g. anything asserting upfront Paygistix capture at registration)
 
-- `server/services/paygistix/`
-- `server/services/callbackPoolManager.js`
-- `server/services/paymentLinkService.js` (V1 payment links)
+**Keep (all of it — Paygistix stays):**
+
+- `server/services/paygistix/` — payment processor integration
+- `server/services/callbackPoolManager.js` — how Paygistix returns status (used by all payments)
+- `server/services/paymentLinkService.js` — generates QR codes / payment links (used by post-weigh flow)
 - `server/config/paygistix.config.js`
-- `server/models/Payment.js` (V1 Paygistix ledger)
-- `server/models/PaymentToken.js` (V1 payment handshake)
-- `server/models/CallbackPool.js`
+- `server/models/Payment.js` — Paygistix payment ledger
+- `server/models/PaymentToken.js` — Paygistix handshake state
+- `server/models/CallbackPool.js` — callback URL slot tracking
 - `server/routes/paymentCallbackRoute.js`
 - `server/routes/generalPaymentCallback.js`
-- `server/controllers/paymentController.js` (after extracting V2 logic)
-- `server/templates/emails/` V1-only templates (any template referenced only by V1 flow)
-- `public/paygistix-registration-payment.html`
-- `public/customer-register-embed.html` (V1)
-- `public/schedule-pickup-embed.html` (V1)
-- `public/payment-success-embed.html`, `payment-error-embed.html`, `payment-callback-handler.html`
-- `public/assets/js/customer-register.js`, `customer-register-paygistix.js`, `customer-register-updated.js`, `customer-register-navigation.js`
-- `public/assets/js/paygistix-payment-form-v2.js`
-- `public/assets/js/payment-form.js`, `payment-service.js`, `payment-validation.js`, `payment-success.js`, `payment-error.js`, `payment-redirect.js`
-- `public/assets/js/test-payment-form.js` (already flagged in Phase 1)
-- `tests/` — any V1-Paygistix-specific test files
+- `server/controllers/paymentController.js` — keep as a domain module; split only if it exceeds the 500-line target after V1 cleanup
+- `server/services/paymentEmailScanner.js` — IMAP scanner for Venmo/PayPal confirmations (continues to complement Paygistix for those payment methods)
 
 **Rename (V2 → unversioned):**
 
@@ -269,10 +271,13 @@ _(V1 payment/registration list below, plus the DocuSign deprecation in §4.1.1.)
 
 **Keep (V1 cleanup leaves these untouched):**
 
-- V2 payment email scanner (IMAP-based): `server/services/paymentEmailScanner.js`
-- DocuSign, QuickBooks, OAuth, service area, address validation
+- Paygistix + callback pool (all of `server/services/paygistix/`, `callbackPoolManager.js`, `paymentLinkService.js`, `Payment`, `PaymentToken`, `CallbackPool` models, payment routes and controller)
+- Post-weigh payment email scanner (IMAP-based): `server/services/paymentEmailScanner.js`
+- QuickBooks, OAuth, service area, address validation
 
-**Drop the `v1` / `v2` vocabulary everywhere** — after this phase there's only one version.
+**Drop the `v1` / `v2` vocabulary everywhere** — after this phase there's only one payment workflow (post-weigh) so the versioning becomes dead weight.
+
+**On DocuSign:** DocuSign is being deprecated separately — see §4.1.1. That removal is independent of the V1 workflow cleanup above.
 
 ### 4.1.1 DocuSign deprecation + admin manual unlock
 
@@ -405,8 +410,10 @@ Merge `authorizationHelpers.js` (413) + `rbac.js` (316) into `middleware/authori
 - [ ] `emailService.js` deleted; replaced by `services/email/{transport,template-manager,dispatcher}.js`.
 - [ ] `madge --circular server/` returns 0 cycles.
 - [ ] `eslint` passes with `no-console` enforced under `server/`.
-- [ ] No reference to "paygistix", "v2Payment", or "paymentToken" in active code paths.
-- [ ] Test suite passes (tests for V1-only code deleted alongside the code).
+- [ ] No `v2Payment*` / `v2PaymentStatus` / `v2PaymentMethod` / `registrationVersion` references in active code (all version fields renamed to unversioned names).
+- [ ] No references to DocuSign (`docusign*`, `DOCUSIGN_*`) in active code — replaced by payment-lock mechanism.
+- [ ] Paygistix integration still works (smoke-test: callback, token, payment completion).
+- [ ] Test suite passes (tests for V1-only code + DocuSign deleted alongside the code).
 
 ---
 
@@ -472,12 +479,13 @@ Because there's no data to migrate, this is just code.
 
 ### 6.1 Target schemas
 
-- **`Order`**: remove all `v2*` prefixes (done in Phase 2 rename). Remove `bagWeights[]`. Remove V1 payment fields (`paymentDate`, `paymentReference`, `transactionId`, `isPaid`). Keep `bags[]`, `paymentStatus`, `paymentMethod`, etc.
-- **`Affiliate`**: `socialAccounts.{provider}.accessToken` and `refreshToken` now go through `encryption.js` on save. Same helper, same key; just add the encrypt/decrypt to the pre-save / getter path.
-- **`DocuSignToken`**: same — `accessToken` and `refreshToken` encrypted at rest.
-- **`SystemConfig`**: delete the `payment_version` key (no longer branching on version).
-- Delete models: `Payment`, `PaymentToken`, `CallbackPool`, `BetaRequest` (verify Beta is truly dormant first; if kept, move to its own module).
-- Keep: `Affiliate`, `Customer`, `Order`, `Operator`, `Administrator`, `SystemConfig`, `Transaction`, `PaymentExport`, `DocuSignToken`, `DataDeletionRequest`, `RefreshToken`, `TokenBlacklist`, `OAuthSession`.
+- **`Order`**: drop all `v2*` prefixes on payment fields (done in Phase 2 rename). Drop `bagWeights[]` (legacy, replaced by rich `bags[]`). Drop `Customer.registrationVersion` branching leftovers (e.g. any `isPaid`/`paymentStatus` fields tied to the V1 upfront capture at registration time, as distinct from the general Paygistix payment-status fields that remain). Keep: `bags[]`, `paymentStatus`, `paymentMethod`, `paymentAmount`, `paymentLinks`, `paymentQRCodes`, `paymentReminders`.
+- **`Affiliate`**: `socialAccounts.{provider}.accessToken` and `refreshToken` go through `encryption.js` on save. Same helper, same key; add encrypt/decrypt to the pre-save / getter path. Add the payment-lock fields from §4.1.1 (`paymentProcessingLocked`, `paymentLockedAt`, `paymentLockReason`, `paymentUnlockedAt`, `paymentUnlockedBy`, `paymentUnlockNotes`, `w9Status`, `w9OnFileAt`). Drop the DocuSign-specific `w9Information.docusign*` subfields.
+- **`SystemConfig`**: delete the `payment_version` key (no longer branching on version). Add `w9_earnings_threshold` (default $600) from §4.1.1.
+- **Delete models:** `DocuSignToken` (DocuSign removal — §4.1.1), `BetaRequest` (verify dormant first; if kept, move to its own module).
+- **Keep:** `Affiliate`, `Customer`, `Order`, `Operator`, `Administrator`, `SystemConfig`, `Transaction`, `Payment`, `PaymentToken`, `CallbackPool`, `PaymentExport`, `DataDeletionRequest`, `RefreshToken`, `TokenBlacklist`, `OAuthSession`.
+
+Paygistix infrastructure (`Payment`, `PaymentToken`, `CallbackPool`) stays — it's the payment processor for the post-weigh workflow, not V1-specific.
 
 ### 6.2 Pricing in the model
 
@@ -502,7 +510,7 @@ Since schema is being rebuilt, define indexes in the model file with `Schema.ind
 ### 6.5 Phase 4 acceptance
 
 - [ ] All listed schema fields removed / renamed / added.
-- [ ] Every third-party token (DocuSign, OAuth) encrypted at rest with AES-256-GCM.
+- [ ] OAuth provider tokens (`Affiliate.socialAccounts.*.accessToken`/`refreshToken`) encrypted at rest with AES-256-GCM.
 - [ ] `Order.pre('save')` has no inline pricing math — delegates to `pricing-service.js`.
 - [ ] `AuditEvent` collection exists; `auditLogger` writes to it.
 - [ ] Indexes defined in schema files, documented in `docs/architecture/DATA_MODEL.md`.
