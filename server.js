@@ -30,7 +30,6 @@ const w9Routes = require('./server/routes/w9Routes');
 const coverageRoutes = require('./server/routes/coverageRoutes');
 const monitoringRoutes = require('./server/routes/monitoringRoutes');
 const systemConfigRoutes = require('./server/routes/systemConfigRoutes');
-const routingRoutes = require('./server/routes/routingRoutes');
 const paymentRoutes = require('./server/routes/paymentRoutes');
 const quickbooksRoutes = require('./server/routes/quickbooksRoutes');
 const serviceAreaRoutes = require('./server/routes/serviceAreaRoutes');
@@ -214,7 +213,6 @@ app.use((req, res, next) => {
     '/affiliate-success-embed.html',
     '/affiliate-landing-embed.html',
     '/embed-landing.html',
-    '/franchisee-landing.html',
     '/embed-app-v2.html',
     '/operator-login-store.html',
     '/affiliate-register-embed.html',
@@ -462,9 +460,6 @@ if (process.env.SHOW_DOCS === 'true') {
 
 // Coverage routes are mounted earlier, before static files
 
-// Mount filmwalk routes
-app.use('/filmwalk', routingRoutes);
-
 // Apply CSRF protection with new configuration
 app.use(conditionalCsrf);
 
@@ -640,11 +635,6 @@ app.get('/privacy-policy', (req, res) => {
 
 app.get('/refund-policy', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'refund-policy.html'));
-});
-
-// Franchisee landing page route
-app.get('/franchisee-landing', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'franchisee-landing.html'));
 });
 
 // Block common WordPress scanning paths

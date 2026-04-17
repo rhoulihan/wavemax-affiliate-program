@@ -98,13 +98,13 @@ afterEach(async () => {
           await collections[key].deleteMany({});
         } catch (error) {
           // Ignore errors if collection doesn't exist or connection is closing
-          if (!error.message.includes('Client must be connected') && 
+          if (!error.message.includes('Client must be connected') &&
               !error.message.includes('ns not found')) {
             console.error(`Error cleaning collection ${key} in afterEach:`, error.message);
           }
         }
       }
-      
+
       // Also clear any indexes that might have been created
       for (const key in collections) {
         try {
@@ -119,5 +119,14 @@ afterEach(async () => {
     if (!error.message.includes('Client must be connected')) {
       console.error('Error in afterEach cleanup:', error);
     }
+  }
+});
+
+// Seed SystemConfig defaults before each test — controllers/services rely on them,
+// and the afterEach above wipes every collection.
+beforeEach(async () => {
+  if (mongoose.connection.readyState === 1 && mongoose.connection.db) {
+    const SystemConfig = require('../server/models/SystemConfig');
+    await SystemConfig.initializeDefaults();
   }
 });

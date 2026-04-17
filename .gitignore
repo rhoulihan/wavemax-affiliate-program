@@ -181,3 +181,22 @@ jest
 SESSION_SUMMARY.md
 SESSION_SUMMARY_*.md
 
+# Secrets — never commit
+keys/
+secure/
+*.pem
+*.key
+*.p12
+
+# Runtime state
+temp/
+
+# Coverage dumps
+coverage-test-run.txt
+*-test-run.txt
+coverage-analysis/
+
+# IDE
+.vscode/
+.idea/
+
