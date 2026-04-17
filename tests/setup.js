@@ -124,9 +124,17 @@ afterEach(async () => {
 
 // Seed SystemConfig defaults before each test — controllers/services rely on them,
 // and the afterEach above wipes every collection.
+//
+// We swallow errors because some unit-test suites mock `mongoose` at the module
+// level, which makes requiring SystemConfig (it reads mongoose.Schema.Types.Mixed
+// at load time) throw. Those tests don't need a seeded SystemConfig; the ones
+// that do have a real mongoose and succeed here.
 beforeEach(async () => {
-  if (mongoose.connection.readyState === 1 && mongoose.connection.db) {
+  if (mongoose.connection.readyState !== 1 || !mongoose.connection.db) return;
+  try {
     const SystemConfig = require('../server/models/SystemConfig');
     await SystemConfig.initializeDefaults();
+  } catch (err) {
+    // Intentionally ignored — see comment above.
   }
 });

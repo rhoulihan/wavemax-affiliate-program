@@ -440,15 +440,17 @@ See `REFACTORING_PLAN.md` §6 for the per-script keep/archive/delete table.
 
 ### 7.4 Appendix D — V1/V2 Coexistence Map
 
-| Surface | V1 artifact | V2 artifact | Retirement trigger |
+Clean-slate redeploy (see §0) means we delete V1 outright rather than retire it gradually. Paygistix itself is **not** being retired — it's the payment processor for the post-weigh workflow, and its callback pool is how status is returned for every payment. The split below is about which *workflow* (upfront vs post-weigh) uses Paygistix, not about Paygistix itself.
+
+| Surface | V1 upfront-capture | V2 post-weigh (target state) | Action |
 |---|---|---|---|
-| Customer registration page | `customer-register-embed.html` | `customer-register-v2-embed.html` | `SystemConfig.payment_version === 'v2'` stable in prod for 30d |
-| Schedule pickup page | `schedule-pickup-embed.html` | `schedule-pickup-v2-embed.html` | Same |
-| Customer model | `registrationVersion: 'v1'` | `registrationVersion: 'v2'` | No V1 customers created in 30d |
-| Order payment fields | `paymentStatus`, `isPaid`, etc. | `v2PaymentStatus`, `v2PaymentMethod`, etc. | All open V1 orders closed |
-| Payment gateway | Paygistix (upfront capture) | Email-scanned (Venmo/PayPal/CashApp) | V1 field retirement |
-| Email templates | `server/templates/emails/` | `server/templates/v2/` | V1 field retirement |
-| Route | `/api/v1/customers/register` | `/api/v2/customers/register` (via `v2CustomerRoutes`) | V1 field retirement |
+| Customer registration page | `customer-register-embed.html` | `customer-register-v2-embed.html` | Delete V1, rename V2 → unversioned |
+| Schedule pickup page | `schedule-pickup-embed.html` | `schedule-pickup-v2-embed.html` | Delete V1, rename V2 → unversioned |
+| Customer model | `registrationVersion: 'v1'` flag branch | `registrationVersion: 'v2'` flag branch | Delete the field; every customer is post-weigh |
+| Order payment fields | `paymentStatus`, `isPaid` set at registration | `v2PaymentStatus`, `v2PaymentMethod` set post-weigh | Drop V1-only `isPaid`-at-registration semantics; rename `v2*` fields to unversioned. Paygistix-status fields (`paymentStatus` in its general sense, `transactionId`) stay. |
+| Payment processor | Paygistix (called at registration) | Paygistix (called post-weigh) + Venmo/PayPal/CashApp (email-scan verification) | **Paygistix stays.** Just the timing of when it's called changes. |
+| Email templates | `server/templates/emails/` | `server/templates/v2/` | Audit; keep the union used by the post-weigh flow, delete the rest |
+| Route | `/api/v1/customers/register` | `/api/v2/customers/register` via `v2CustomerRoutes` | Merge into a single unversioned `/api/v1/customers/register`; drop `v2CustomerRoutes.js` |
 
 ### 7.5 Appendix E — Success Metrics
 
