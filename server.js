@@ -27,7 +27,6 @@ const orderRoutes = require('./server/routes/orderRoutes');
 const administratorRoutes = require('./server/routes/administratorRoutes');
 const operatorRoutes = require('./server/routes/operatorRoutes');
 const w9Routes = require('./server/routes/w9Routes');
-const coverageRoutes = require('./server/routes/coverageRoutes');
 const monitoringRoutes = require('./server/routes/monitoringRoutes');
 const systemConfigRoutes = require('./server/routes/systemConfigRoutes');
 const paymentRoutes = require('./server/routes/paymentRoutes');
@@ -231,10 +230,7 @@ app.use((req, res, next) => {
                              req.path.endsWith('.html') && 
                              !req.path.includes('/examples/');
   
-  // Apply strict CSP to coverage analysis pages
-  const isCoveragePage = req.path.startsWith('/coverage');
-  
-  const useStrictCSP = strictCSPPages.includes(req.path) || isDocumentationPage || isCoveragePage;
+  const useStrictCSP = strictCSPPages.includes(req.path) || isDocumentationPage;
   
   // All embed pages now use nonces since embed-app.html was converted to CSP-compliant redirect to embed-app-v2.html
   const skipNonce = false;
@@ -437,8 +433,6 @@ app.use(passport.session());
 const embedRoutes = require('./server/routes/embedRoutes');
 app.use('/', embedRoutes);
 
-// Mount coverage analysis reports BEFORE static files so they can handle CSP nonce injection
-app.use('/coverage-analysis', coverageRoutes);
 
 // Mount monitoring dashboard BEFORE static files for CSP nonce injection
 app.use('/monitoring', monitoringRoutes);

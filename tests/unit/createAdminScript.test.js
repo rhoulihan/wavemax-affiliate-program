@@ -8,7 +8,7 @@ const mongoose = require('mongoose');
 const { hashPassword } = require('../../server/utils/encryption');
 
 describe('Create Admin Script Tests', () => {
-  const scriptPath = path.join(__dirname, '../../scripts/create-admin-directly.js');
+  const scriptPath = path.join(__dirname, '../../scripts/admin/create-admin-directly.js');
 
   // Helper function to create admin data with hashed password
   const createAdminData = (adminData) => {
