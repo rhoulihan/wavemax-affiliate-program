@@ -30,59 +30,15 @@ router.get('/', async (req, res) => {
       customerData
     } = req.query;
 
-    // Determine the type of payment from the query parameter
-    const paymentType = type || 'order';
-
-    if (paymentType === 'registration') {
-      // Handle registration payment
-      return handleRegistrationPayment(req, res);
-    } else {
-      // Handle order payment
-      return handleOrderPayment(req, res);
-    }
+    // Post-weigh workflow: all callbacks are for orders (V1 upfront-registration
+    // payment was removed in the Phase 2 refactor).
+    return handleOrderPayment(req, res);
 
   } catch (error) {
     console.error('Payment callback error:', error);
     res.redirect('/payment-error?message=An error occurred processing your payment');
   }
 });
-
-/**
- * Handle registration payment callback
- */
-async function handleRegistrationPayment(req, res) {
-  try {
-    const {
-      status,
-      transactionId,
-      amount,
-      authCode,
-      responseCode,
-      responseMessage,
-      cardType,
-      maskedCard
-    } = req.query;
-
-    if (status === 'approved' || status === 'success') {
-      // For registration, we need to complete the customer creation
-      // The customer data should be in session or passed as encoded parameter
-
-      // Try to get registration data from session/cookie
-      // In a real implementation, you'd retrieve this from a secure session store
-      // For now, we'll redirect to success page with transaction info
-
-      res.redirect(`/embed-app-v2.html?route=/customer-success&transactionId=${transactionId}&paymentStatus=success`);
-
-    } else {
-      // Payment failed
-      res.redirect(`/embed-app-v2.html?route=/customer-register&error=payment_failed&message=${encodeURIComponent(responseMessage || 'Payment failed')}`);
-    }
-
-  } catch (error) {
-    console.error('Registration payment callback error:', error);
-    res.redirect('/embed-app-v2.html?route=/customer-register&error=processing_error');
-  }
-}
 
 /**
  * Handle order payment callback
@@ -221,84 +177,9 @@ async function handleOrderPayment(req, res) {
 router.post('/', async (req, res) => {
   try {
     console.log('Paygistix POST callback received:', req.body);
-
-    // Extract type from body
-    const paymentType = req.body.type || 'order';
-
-    if (paymentType === 'registration') {
-      // Handle registration payment
-
-      const {
-        status,
-        transactionId,
-        amount,
-        responseMessage
-      } = req.body;
-
-      if (status === 'approved' || status === 'success') {
-        // Check for pending registration data
-        const pendingRegistration = req.session?.pendingRegistration;
-
-        if (pendingRegistration) {
-          try {
-            // Create the customer
-            const customer = new Customer({
-              ...pendingRegistration,
-              paymentVerified: true,
-              paymentTransactionId: transactionId,
-              createdAt: new Date()
-            });
-
-            await customer.save();
-
-            // Clear pending registration
-            delete req.session.pendingRegistration;
-
-            // Log the registration
-            await auditLogger.log({
-              userId: customer.customerId,
-              userType: 'customer',
-              action: 'customer.registered',
-              resourceType: 'customer',
-              resourceId: customer._id,
-              details: {
-                paymentTransactionId: transactionId,
-                registrationType: 'paid'
-              }
-            });
-
-            res.status(200).json({
-              received: true,
-              success: true,
-              customerId: customer.customerId
-            });
-          } catch (error) {
-            console.error('Error creating customer after payment:', error);
-            res.status(500).json({
-              received: true,
-              success: false,
-              error: 'Failed to create customer account'
-            });
-          }
-        } else {
-          res.status(400).json({
-            received: true,
-            success: false,
-            error: 'No pending registration found'
-          });
-        }
-      } else {
-        res.status(200).json({
-          received: true,
-          success: false,
-          error: responseMessage || 'Payment failed'
-        });
-      }
-    } else {
-      // Handle order payment POST
-      res.status(200).json({ received: true });
-    }
-
+    // Post-weigh workflow: only order-payment callbacks. V1 registration-payment
+    // POST branch was removed in the Phase 2 refactor.
+    res.status(200).json({ received: true });
   } catch (error) {
     console.error('Payment POST callback error:', error);
     res.status(500).json({ error: 'Callback processing failed' });

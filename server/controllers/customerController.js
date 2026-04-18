@@ -116,21 +116,10 @@ exports.registerCustomer = ControllerHelpers.asyncWrapper(async (req, res) => {
     passwordHash = hash;
   }
 
-  // Check payment version for V2 system
-  const paymentVersion = await SystemConfig.getValue('payment_version', 'v1');
-  const isV2Registration = paymentVersion === 'v2';
-  
-  // Determine registration version and initial bags
-  let registrationVersion = 'v1';
-  let initialBagsRequested = numberOfBags || 1;
-  
-  if (isV2Registration) {
-    // V2 Registration: No payment, free bags
-    registrationVersion = 'v2';
-    const freeInitialBags = await SystemConfig.getValue('free_initial_bags', 2);
-    initialBagsRequested = Math.min(numberOfBags || 1, freeInitialBags);
-    console.log(`V2 registration: ${initialBagsRequested} free bags, no payment required`);
-  }
+  // Post-weigh workflow: customer registers for free and pays after bags are weighed.
+  // The requested bag count is capped at the free-initial-bags SystemConfig value.
+  const freeInitialBags = await SystemConfig.getValue('free_initial_bags', 2);
+  const initialBagsRequested = Math.min(numberOfBags || 1, freeInitialBags);
 
   // Create new customer with formatted data
   const newCustomer = new Customer({
@@ -151,9 +140,6 @@ exports.registerCustomer = ControllerHelpers.asyncWrapper(async (req, res) => {
     passwordHash,
     languagePreference: languagePreference || 'en',
     numberOfBags: initialBagsRequested,
-    registrationVersion: registrationVersion,
-    initialBagsRequested: isV2Registration ? initialBagsRequested : undefined,
-    bagCredit: isV2Registration ? 0 : (numberOfBags || 1) * 10, // V1 uses credit system
     registrationMethod: socialToken ? (socialProvider || 'social') : 'traditional'
   });
 
@@ -182,11 +168,11 @@ exports.registerCustomer = ControllerHelpers.asyncWrapper(async (req, res) => {
     { expiresIn: '24h' }
   );
 
-  // Prepare bag info for emails (V2 doesn't have bag purchases)
+  // Prepare bag info for emails (post-weigh workflow — no bag purchase at registration)
   const bagInfo = {
-    numberOfBags: 0,  // V2 doesn't require bag purchases
-    totalCredit: 0,   // V2 has no upfront payment
-    bagFee: 0         // V2 has no bag fees
+    numberOfBags: 0,
+    totalCredit: 0,
+    bagFee: 0
   };
 
   // Send welcome email to customer with proper error handling
@@ -229,8 +215,7 @@ exports.registerCustomer = ControllerHelpers.asyncWrapper(async (req, res) => {
         state: newCustomer.state,
         zipCode: newCustomer.zipCode,
         affiliateId: newCustomer.affiliateId,
-        numberOfBags: newCustomer.numberOfBags,
-        registrationVersion: newCustomer.registrationVersion
+        numberOfBags: newCustomer.numberOfBags
       },
       affiliateData: {
         businessName: affiliate.businessName,
@@ -951,15 +936,6 @@ function buildLineItemsFromOrder(order) {
       code: 'CREDIT',
       description: 'WDF Credit Applied',
       price: -order.wdfCreditApplied,
-      quantity: 1
-    });
-  }
-  
-  if (order.bagCreditApplied && order.bagCreditApplied > 0) {
-    items.push({
-      code: 'BAGCREDIT',
-      description: 'Bag Credit Applied',
-      price: -order.bagCreditApplied,
       quantity: 1
     });
   }

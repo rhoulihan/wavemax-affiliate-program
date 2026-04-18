@@ -198,13 +198,6 @@ exports.createOrder = ControllerHelpers.asyncWrapper(async (req, res) => {
     const bagCount = parseInt(numberOfBags) || 1; // Default to 1 bag if not specified
     const feeCalculation = await calculateDeliveryFee(bagCount, affiliate);
 
-    // Check if customer has bag credit to apply (only on first order)
-    let bagCreditToApply = 0;
-    if (!customer.bagCreditApplied && customer.bagCredit && customer.bagCredit > 0) {
-      bagCreditToApply = customer.bagCredit;
-      console.log(`Applying bag credit of $${bagCreditToApply} to first order for customer ${customerId}`);
-    }
-
     // Check if customer has WDF credit to apply
     let wdfCreditToApply = 0;
     if (customer.wdfCredit && customer.wdfCredit !== 0) {
@@ -212,10 +205,7 @@ exports.createOrder = ControllerHelpers.asyncWrapper(async (req, res) => {
       console.log(`Applying WDF credit of $${wdfCreditToApply} to order for customer ${customerId}`);
     }
 
-    // Check if customer is V2 for payment status initialization
-    const isV2Customer = customer.registrationVersion === 'v2';
-    
-    // Create new order
+    // Create new order — post-weigh payment workflow
     const orderData = {
       customerId,
       affiliateId,
@@ -231,44 +221,22 @@ exports.createOrder = ControllerHelpers.asyncWrapper(async (req, res) => {
         totalFee: feeCalculation.totalFee,
         minimumApplied: feeCalculation.minimumApplied
       },
-      bagCreditApplied: bagCreditToApply, // Store the bag credit applied to this order
       wdfCreditApplied: wdfCreditToApply, // Store the credit applied to this order
       addOns: addOns || {
         premiumDetergent: false,
         fabricSoftener: false,
         stainRemover: false
       },
-      status: 'pending'
+      status: 'pending',
+      // Post-weigh payment is collected after bags are weighed
+      v2PaymentStatus: 'pending',
+      v2PaymentMethod: 'pending',
+      v2PaymentAmount: 0
     };
-    
-    // Add V2 payment fields if customer is V2
-    if (isV2Customer) {
-      orderData.v2PaymentStatus = 'pending';
-      orderData.v2PaymentMethod = 'pending';
-      orderData.v2PaymentAmount = 0; // Will be calculated after weighing
-      console.log(`V2 customer order - payment will be collected after weighing`);
-    }
 
     console.log('Creating order with data:', JSON.stringify(orderData, null, 2));
     const newOrder = new Order(orderData);
-    console.log('Order instance before save:', JSON.stringify(newOrder.toObject(), null, 2));
-    
     await newOrder.save();
-    
-    // Re-fetch the order to ensure we have the latest data
-    const savedOrder = await Order.findById(newOrder._id);
-    console.log('Order fetched after save:', JSON.stringify(savedOrder.toObject(), null, 2));
-
-    console.log('Order saved with addOns:', newOrder.addOns);
-    console.log('Full order object:', JSON.stringify(newOrder.toObject(), null, 2));
-
-    // Reset customer's bag credit after applying it to the first order
-    if (bagCreditToApply > 0) {
-      customer.bagCredit = 0;
-      customer.bagCreditApplied = true;
-      await customer.save();
-      console.log(`Reset bag credit for customer ${customerId} after applying $${bagCreditToApply} to first order ${newOrder.orderId}`);
-    }
 
     // Reset customer's WDF credit after applying it to the order
     if (wdfCreditToApply !== 0) {
@@ -297,10 +265,9 @@ exports.createOrder = ControllerHelpers.asyncWrapper(async (req, res) => {
     ControllerHelpers.sendSuccess(res, {
       orderId: newOrder.orderId,
       estimatedTotal: Formatters.currency(newOrder.estimatedTotal),
-      bagCreditApplied: Formatters.currency(newOrder.bagCreditApplied),
       wdfCreditApplied: Formatters.currency(newOrder.wdfCreditApplied),
-      addOns: savedOrder ? savedOrder.addOns : newOrder.addOns,
-      addOnTotal: Formatters.currency(savedOrder ? savedOrder.addOnTotal : newOrder.addOnTotal)
+      addOns: newOrder.addOns,
+      addOnTotal: Formatters.currency(newOrder.addOnTotal)
     }, 'Pickup scheduled successfully!', 201);
 });
 
@@ -339,8 +306,6 @@ exports.getOrderDetails = ControllerHelpers.asyncWrapper(async (req, res) => {
       phone: Formatters.phone(customer.phone),
       email: customer.email,
       address: Formatters.address(customer),
-      bagCredit: Formatters.currency(customer.bagCredit),
-      bagCreditApplied: customer.bagCreditApplied,
       wdfCredit: Formatters.currency(customer.wdfCredit)
     } : null,
     affiliateId: order.affiliateId,
@@ -364,7 +329,6 @@ exports.getOrderDetails = ControllerHelpers.asyncWrapper(async (req, res) => {
     baseRate: Formatters.currency(order.baseRate),
     deliveryFee: Formatters.currency(order.feeBreakdown?.totalFee || 0),
     feeBreakdown: order.feeBreakdown,
-    bagCreditApplied: Formatters.currency(order.bagCreditApplied || 0),
     actualWeight: Formatters.weight(order.actualWeight),
     washInstructions: order.washInstructions,
     estimatedTotal: Formatters.currency(order.estimatedTotal),
@@ -454,8 +418,8 @@ exports.updateOrderStatus = async (req, res) => {
       order.actualWeight = parseFloat(actualWeight);
       
       
-      // Check if this is a V2 customer and generate payment request
-      if (customer && customer.registrationVersion === 'v2' && order.v2PaymentStatus === 'pending') {
+      // Generate post-weigh payment request if this order is still pending payment
+      if (customer && order.v2PaymentStatus === 'pending') {
         // Calculate total with actual weight
         const actualTotal = req.body.actualTotal || order.actualTotal || order.estimatedTotal;
         
@@ -1628,29 +1592,11 @@ exports.createImmediateOrder = ControllerHelpers.asyncWrapper(async (req, res) =
   const existingOrderCount = await Order.countDocuments({ customerId });
   const isFirstOrder = existingOrderCount === 0;
 
-  // If first order and customer selected more bags than registered, update their bag count
-  if (isFirstOrder && bagCount > (customer.initialBagsRequested || 1)) {
-    const newBagCount = Math.min(bagCount, 2); // Cap at 2 bags
-    await Customer.findByIdAndUpdate(customer._id, {
-      initialBagsRequested: newBagCount
-    });
-    customer.initialBagsRequested = newBagCount;
-  }
-
-  // Apply bag credit for first orders
-  let bagCreditToApply = 0;
-  if (!customer.bagCreditApplied && customer.bagCredit && customer.bagCredit > 0) {
-    bagCreditToApply = customer.bagCredit;
-  }
-
   // Apply WDF credit if available
   let wdfCreditToApply = 0;
   if (customer.wdfCredit && customer.wdfCredit !== 0) {
     wdfCreditToApply = customer.wdfCredit;
   }
-
-  // Check if customer is V2
-  const isV2Customer = customer.registrationVersion === 'v2';
 
   // Create order data - default estimated weight based on bag count (avg 20 lbs per bag)
   const defaultEstimatedWeight = bagCount * 20;
@@ -1669,7 +1615,6 @@ exports.createImmediateOrder = ControllerHelpers.asyncWrapper(async (req, res) =
       totalFee: feeCalculation.totalFee,
       minimumApplied: feeCalculation.minimumApplied
     },
-    bagCreditApplied: bagCreditToApply,
     wdfCreditApplied: wdfCreditToApply,
     addOns: addOns || {
       premiumDetergent: false,
@@ -1680,26 +1625,16 @@ exports.createImmediateOrder = ControllerHelpers.asyncWrapper(async (req, res) =
     // Immediate pickup specific fields
     isImmediatePickup: true,
     pickupDeadline,
-    immediatePickupRequestedAt: orderTime
+    immediatePickupRequestedAt: orderTime,
+    // Post-weigh payment
+    v2PaymentStatus: 'pending',
+    v2PaymentMethod: 'pending',
+    v2PaymentAmount: 0
   };
-
-  // Add V2 payment fields if customer is V2
-  if (isV2Customer) {
-    orderData.v2PaymentStatus = 'pending';
-    orderData.v2PaymentMethod = 'pending';
-    orderData.v2PaymentAmount = 0;
-  }
 
   // Create and save order
   const newOrder = new Order(orderData);
   await newOrder.save();
-
-  // Update customer's credits if applied
-  if (bagCreditToApply > 0) {
-    customer.bagCredit = 0;
-    customer.bagCreditApplied = true;
-    await customer.save();
-  }
 
   if (wdfCreditToApply !== 0) {
     customer.wdfCredit = 0;
@@ -1732,7 +1667,6 @@ exports.createImmediateOrder = ControllerHelpers.asyncWrapper(async (req, res) =
     pickupTime: newOrder.pickupTime,
     estimatedTotal: Formatters.currency(newOrder.estimatedTotal),
     isFirstOrder,
-    bagCreditApplied: Formatters.currency(newOrder.bagCreditApplied),
     wdfCreditApplied: Formatters.currency(newOrder.wdfCreditApplied)
   };
 

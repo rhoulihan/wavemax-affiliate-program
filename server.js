@@ -76,14 +76,10 @@ if (process.env.NODE_ENV !== 'test') {
         const SystemConfig = require('./server/models/SystemConfig');
         await SystemConfig.initializeDefaults();
         logger.info('System configuration defaults initialized');
-        
-        // Start payment verification job if V2 system is enabled
-        const paymentVersion = await SystemConfig.getValue('payment_version', 'v1');
-        if (paymentVersion === 'v2') {
-          const paymentVerificationJob = require('./server/jobs/paymentVerificationJob');
-          await paymentVerificationJob.start();
-          logger.info('Payment verification job started for V2 system');
-        }
+
+        const paymentVerificationJob = require('./server/jobs/paymentVerificationJob');
+        await paymentVerificationJob.start();
+        logger.info('Payment verification job started');
       } catch (error) {
         logger.error('Error initializing system config:', { error: error.message });
       }
@@ -561,12 +557,6 @@ app.get('/monitoring/status', (req, res) => {
 
 // Mount versioned API
 app.use('/api/v1', apiV1Router);
-
-// V2 API Routes
-const apiV2Router = express.Router();
-const v2CustomerRoutes = require('./server/routes/v2CustomerRoutes');
-apiV2Router.use('/customers', v2CustomerRoutes);
-app.use('/api/v2', apiV2Router);
 
 // Legacy support - redirect unversioned API calls to v1
 app.use('/api', (req, res, next) => {

@@ -112,22 +112,6 @@ describe('PaymentVerificationJob', () => {
       paymentVerificationJob.stop();
     });
 
-    it('should not start when V1 payment system is active', async () => {
-      await SystemConfig.updateOne(
-        { key: 'payment_version' },
-        { value: 'v1' }
-      );
-      
-      await paymentVerificationJob.start();
-      
-      expect(paymentVerificationJob.job).toBeNull();
-      
-      // Reset to V2
-      await SystemConfig.updateOne(
-        { key: 'payment_version' },
-        { value: 'v2' }
-      );
-    });
   });
 
   describe('Payment verification', () => {

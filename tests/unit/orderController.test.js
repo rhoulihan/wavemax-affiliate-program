@@ -77,14 +77,12 @@ describe('Order Controller', () => {
         orderId: 'ORD123456',
         estimatedTotal: 49.46,
         _id: 'mockOrderId',
-        bagCreditApplied: 0,
         wdfCreditApplied: 0,
         addOns: undefined,
         addOnTotal: undefined,
         toObject: jest.fn().mockReturnValue({
           orderId: 'ORD123456',
           estimatedTotal: 49.46,
-          bagCreditApplied: 0,
           wdfCreditApplied: 0
         }),
         save: jest.fn()
@@ -124,7 +122,6 @@ describe('Order Controller', () => {
         expectSuccessResponse({
           orderId: 'ORD123456',
           estimatedTotal: '$49.46',
-          bagCreditApplied: '$0.00',
           wdfCreditApplied: '$0.00',
           addOns: undefined,
           addOnTotal: '$0.00'
@@ -145,14 +142,12 @@ describe('Order Controller', () => {
         orderId: 'ORD123456',
         estimatedTotal: 49.46,
         _id: 'mockOrderId',
-        bagCreditApplied: 0,
         wdfCreditApplied: 0,
         addOns: undefined,
         addOnTotal: undefined,
         toObject: jest.fn().mockReturnValue({
           orderId: 'ORD123456',
           estimatedTotal: 49.46,
-          bagCreditApplied: 0,
           wdfCreditApplied: 0
         }),
         save: jest.fn()
@@ -187,7 +182,6 @@ describe('Order Controller', () => {
         expectSuccessResponse({
           orderId: 'ORD123456',
           estimatedTotal: '$49.46',
-          bagCreditApplied: '$0.00',
           wdfCreditApplied: '$0.00',
           addOns: undefined,
           addOnTotal: '$0.00'

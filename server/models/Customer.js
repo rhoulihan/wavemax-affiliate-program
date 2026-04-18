@@ -67,12 +67,10 @@ const customerSchema = new mongoose.Schema({
     enum: ['traditional', 'google', 'facebook', 'linkedin', 'social'],
     default: 'traditional'
   },
-  // Payment is now handled entirely by Paygistix
-  // No payment information is stored in our database
+  // Payment is handled by Paygistix after bags are weighed (post-weigh workflow).
+  // No payment information is stored in our database.
   // Bag information
   numberOfBags: { type: Number, default: 1 },
-  bagCredit: { type: Number, default: 0 }, // Credit to be applied on first order
-  bagCreditApplied: { type: Boolean, default: false }, // Track if credit has been used
   // WDF Credit tracking
   wdfCredit: { type: Number, default: 0 }, // Positive = credit, Negative = debit
   wdfCreditUpdatedAt: Date, // When the credit was last updated
@@ -92,20 +90,7 @@ const customerSchema = new mongoose.Schema({
     default: false
   },
   bagLabelsGeneratedAt: Date,
-  bagLabelsGeneratedBy: String, // operatorId who printed
-  
-  // V2 Payment System Fields
-  registrationVersion: {
-    type: String,
-    enum: ['v1', 'v2'],
-    default: 'v1'
-  },
-  initialBagsRequested: {
-    type: Number,
-    min: 1,
-    max: 2,
-    default: 1
-  }
+  bagLabelsGeneratedBy: String // operatorId who printed
 }, { timestamps: true });
 
 // No longer need encryption middleware as payment data is not stored
