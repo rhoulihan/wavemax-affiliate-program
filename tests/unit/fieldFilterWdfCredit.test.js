@@ -17,8 +17,6 @@ describe('Field Filter WDF Credit Support', () => {
       wdfCredit: 15.50,
       wdfCreditUpdatedAt: new Date('2024-01-15'),
       wdfCreditFromOrderId: 'ORD-123',
-      bagCredit: 20,
-      bagCreditApplied: false,
       passwordSalt: 'secret',
       passwordHash: 'secret'
     , save: jest.fn().mockResolvedValue(true)};
@@ -33,8 +31,7 @@ describe('Field Filter WDF Credit Support', () => {
       // Should also include other expected fields
       expect(filtered).toHaveProperty('customerId');
       expect(filtered).toHaveProperty('email');
-      expect(filtered).toHaveProperty('bagCredit');
-      
+
       // Should not include sensitive fields
       expect(filtered).not.toHaveProperty('passwordSalt');
       expect(filtered).not.toHaveProperty('passwordHash');

@@ -1164,10 +1164,12 @@ exports.sendCustomerWelcomeEmail = async (customer, affiliate, bagInfo = {}) => 
     const numberOfBags = bagInfo.numberOfBags || 0;
     const bagFee = bagInfo.bagFee || 0;
     const totalCredit = bagInfo.totalCredit || 0;
-    
-    // V2 registrations don't have bag credits
-    const isV2Registration = totalCredit === 0;
-    const isFreeRegistration = false; // V2 doesn't have free bags
+
+    // Post-weigh workflow: always true. V1-era "upfront bag credit" and "free first bag"
+    // code paths below are dead and will be collapsed when emailService.js is split in
+    // Phase 2 step 4. Left readable for now so the diff stays reviewable.
+    const isV2Registration = true;
+    const isFreeRegistration = false;
 
     // Get translations for the email content
     const translations = {

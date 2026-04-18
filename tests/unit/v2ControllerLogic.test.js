@@ -115,19 +115,12 @@ describe('V2 Controller Logic', () => {
       expect(res.status).toHaveBeenCalledWith(201);
       const responseData = res.json.mock.calls[0][0];
       
-      // Verify V2 registration
+      // Verify post-weigh registration caps bags at the free-initial-bags setting
       const customer = await Customer.findOne({ email: 'john@test.com' });
-      expect(customer.registrationVersion).toBe('v2');
-      expect(customer.initialBagsRequested).toBe(2);
-      expect(customer.bagCredit).toBeFalsy(); // No credit needed for V2
       expect(customer.numberOfBags).toBe(2);
     });
 
     it('should limit initial bags to configured maximum', async () => {
-      // Ensure V2 is set
-      const paymentConfig = await SystemConfig.findOne({ key: 'payment_version' });
-      console.log('Payment version in test:', paymentConfig?.value);
-      
       const req = {
         body: {
           firstName: 'Jane',
@@ -147,83 +140,24 @@ describe('V2 Controller Logic', () => {
           estimatedWeight: 50
         }
       };
-      
+
       const res = {
         status: jest.fn().mockReturnThis(),
         json: jest.fn()
       };
-      
+
       const next = jest.fn();
-      
+
       emailService.sendCustomerWelcomeEmail = jest.fn().mockResolvedValue(true);
       emailService.sendNewCustomerNotification = jest.fn().mockResolvedValue(true);
-      
+
       const handler = extractHandler(customerController.registerCustomer);
       await handler(req, res, next);
-      
-      // Should limit customer's initial bags to max free bags (2)
+
+      // Should limit customer's bag count to free_initial_bags (default 2)
       const customer = await Customer.findOne({ email: 'jane@test.com' });
       expect(customer).toBeDefined();
-      expect(customer.initialBagsRequested).toBe(2); // Limited from 5 to 2
       expect(customer.numberOfBags).toBe(2);
-      expect(customer.registrationVersion).toBe('v2');
-    });
-
-    it('should default to V1 registration when payment_version is v1', async () => {
-      // Switch to V1
-      await SystemConfig.updateOne(
-        { key: 'payment_version' },
-        { value: 'v1' }
-      );
-      
-      const req = {
-        body: {
-          firstName: 'Bob',
-          lastName: 'Wilson',
-          email: 'bob@test.com',
-          phone: '555-9999',
-          address: '789 Pine St',
-          city: 'Houston',
-          state: 'TX',
-          zipCode: '77001',
-          username: `bobwilson${Date.now()}`,
-          password: 'testpass123',
-          affiliateId: testAffiliate.affiliateId,
-          pickupDate: '2026-01-27',
-          pickupTime: 'evening',
-          numberOfBags: 2,
-          estimatedWeight: 30,
-          creditCard: {
-            token: 'tok_visa',
-            last4: '4242'
-          }
-        }
-      };
-      
-      const res = {
-        status: jest.fn().mockReturnThis(),
-        json: jest.fn()
-      };
-      
-      const next = jest.fn();
-      
-      emailService.sendCustomerWelcomeEmail = jest.fn().mockResolvedValue(true);
-      emailService.sendNewCustomerNotification = jest.fn().mockResolvedValue(true);
-      
-      const handler = extractHandler(customerController.registerCustomer);
-      await handler(req, res, next);
-      
-      // Verify V1 registration
-      const customer = await Customer.findOne({ email: 'bob@test.com' });
-      expect(customer.registrationVersion).toBe('v1');
-      // V1 customers don't use initialBagsRequested (defaults to 1 in schema)
-      expect(customer.bagCredit).toBe(20); // V1 uses credit system (2 bags * $10)
-      
-      // Reset to V2 for other tests
-      await SystemConfig.updateOne(
-        { key: 'payment_version' },
-        { value: 'v2' }
-      );
     });
   });
 
@@ -324,72 +258,6 @@ describe('V2 Controller Logic', () => {
       
       // Note: Email service is not yet implemented, so we skip this check
       // expect(emailService.sendV2PaymentRequest).toHaveBeenCalled();
-    });
-
-    it('should not generate payment links for V1 customers', async () => {
-      // Create V1 customer
-      const v1Customer = await Customer.create({
-        name: 'V1 Customer',
-        firstName: 'V1',
-        lastName: 'Customer',
-        email: 'v1@test.com',
-        phone: '555-3333',
-        address: '789 V1 St',
-        city: 'V1 City',
-        state: 'TX',
-        zipCode: '11111',
-        username: `v1customer${Date.now()}`,
-        passwordHash: crypto.randomBytes(32).toString('hex'),
-        passwordSalt: crypto.randomBytes(16).toString('hex'),
-        affiliateId: testAffiliate._id,
-        registrationVersion: 'v1',
-        bagCredit: 50
-      });
-      
-      const v1Order = await Order.create({
-        customerId: v1Customer.customerId,
-        affiliateId: testAffiliate.affiliateId,
-        pickupDate: new Date(),
-        pickupTime: 'afternoon',
-        estimatedWeight: 15,
-        numberOfBags: 1,
-        status: 'pending'
-      });
-      
-      const req = {
-        params: { orderId: v1Order._id.toString() },
-        body: {
-          status: 'processing',
-          actualWeight: 15,
-          actualTotal: 35.00
-        },
-        user: {
-          role: 'operator',
-          affiliateId: testAffiliate.affiliateId
-        }
-      };
-      
-      const res = {
-        status: jest.fn().mockReturnThis(),
-        json: jest.fn()
-      };
-      
-      const next = jest.fn();
-      
-      const handler = extractHandler(orderController.updateOrderStatus);
-      await handler(req, res, next);
-      
-      // Should not generate payment links for V1
-      expect(paymentLinkService.generatePaymentLinks).not.toHaveBeenCalled();
-      
-      const updatedOrder = await Order.findById(v1Order._id);
-      expect(updatedOrder.v2PaymentStatus).toBe('pending'); // Default value
-      // V1 customers should not have payment links populated
-      // The field might exist as an empty object but should not have any links
-      const links = updatedOrder.v2PaymentLinks || {};
-      expect(links.venmo).toBeUndefined();
-      expect(links.paypal).toBeUndefined();
-      expect(links.cashapp).toBeUndefined();
     });
 
     it('should handle payment confirmation from customer', async () => {
@@ -646,56 +514,6 @@ describe('V2 Controller Logic', () => {
   });
 
   describe('Edge Cases and Error Handling', () => {
-    it('should handle missing SystemConfig gracefully', async () => {
-      // Remove payment_version config
-      await SystemConfig.deleteOne({ key: 'payment_version' });
-      
-      const req = {
-        body: {
-          firstName: 'Edge',
-          lastName: 'Case',
-          email: 'edge@test.com',
-          phone: '555-6666',
-          address: '111 Edge St',
-          city: 'Edge City',
-          state: 'TX',
-          zipCode: '11111',
-          username: `edge${Date.now()}`,
-          password: 'testpass123',
-          affiliateId: testAffiliate.affiliateId,
-          pickupDate: '2026-01-27',
-          pickupTime: 'morning',
-          numberOfBags: 1,
-          estimatedWeight: 10
-        }
-      };
-      
-      const res = {
-        status: jest.fn().mockReturnThis(),
-        json: jest.fn()
-      };
-      
-      const next = jest.fn();
-      
-      emailService.sendCustomerWelcomeEmail = jest.fn().mockResolvedValue(true);
-      emailService.sendNewCustomerNotification = jest.fn().mockResolvedValue(true);
-      
-      const handler = extractHandler(customerController.registerCustomer);
-      await handler(req, res, next);
-      
-      // Should default to V1
-      const customer = await Customer.findOne({ email: 'edge@test.com' });
-      expect(customer.registrationVersion).toBe('v1');
-      
-      // Restore config
-      await SystemConfig.create({
-        key: 'payment_version',
-        value: 'v2',
-        dataType: 'string',
-        category: 'payment'
-      });
-    });
-
     it('should handle payment link generation failure gracefully', async () => {
       const testCustomer = await Customer.create({
         name: 'Error Test',

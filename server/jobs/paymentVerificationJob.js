@@ -23,15 +23,6 @@ class PaymentVerificationJob {
    */
   async start() {
     try {
-      // Get configuration
-      const paymentVersion = await SystemConfig.getValue('payment_version', 'v1');
-      
-      // Only run if V2 payment system is enabled
-      if (paymentVersion !== 'v2') {
-        console.log('Payment verification job not started - V1 payment system active');
-        return;
-      }
-
       // Get check interval from config (in milliseconds, convert to minutes for cron)
       const intervalMs = await SystemConfig.getValue('payment_check_interval', 300000);
       this.checkInterval = Math.max(1, Math.round(intervalMs / 60000)); // Convert to minutes, minimum 1
@@ -145,7 +136,7 @@ class PaymentVerificationJob {
 
       // Check if customer is V2
       const customer = await Customer.findOne({ customerId: order.customerId });
-      if (!customer || customer.registrationVersion !== 'v2') {
+      if (!customer) {
         return; // Skip non-V2 customers
       }
 

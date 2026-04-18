@@ -156,4 +156,24 @@ router.delete('/:customerId/delete-all-data', authenticate, authorize(['customer
  */
 router.get('/admin/list', authenticate, checkRole(['administrator']), customerController.getCustomersForAdmin);
 
+/**
+ * @route   POST /api/customers/initiate-payment
+ * @desc    Initiate post-weigh payment for an order
+ * @access  Customer only
+ */
+router.post('/initiate-payment',
+  authenticate,
+  checkRole(['customer']),
+  customerController.initiateV2Payment);
+
+/**
+ * @route   GET /api/customers/payment-status/:orderId
+ * @desc    Check post-weigh payment status for an order
+ * @access  Customer only
+ */
+router.get('/payment-status/:orderId',
+  authenticate,
+  checkRole(['customer']),
+  customerController.getV2PaymentStatus);
+
 module.exports = router;
