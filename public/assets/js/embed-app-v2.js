@@ -6,10 +6,6 @@ const BASE_URL = window.location.protocol + '//' + window.location.host;
 let viewportInfo = null;
 let chromeHidden = false;
 
-// Cache for payment version
-let cachedPaymentVersion = null;
-let paymentVersionFetchPromise = null;
-
 // Helper function to check if any user is authenticated
 function isAnyUserAuthenticated() {
     // First check if SessionManager exists and has the method we need
@@ -38,43 +34,6 @@ function getAuthenticatedUserType() {
     
     const userTypes = ['administrator', 'affiliate', 'customer', 'operator'];
     return userTypes.find(type => window.SessionManager.isAuthenticated(type)) || null;
-}
-
-// Function to fetch payment version from server
-async function getPaymentVersion() {
-    // Return cached value if available
-    if (cachedPaymentVersion) {
-        return cachedPaymentVersion;
-    }
-    
-    // If already fetching, wait for that promise
-    if (paymentVersionFetchPromise) {
-        return paymentVersionFetchPromise;
-    }
-    
-    // Start fetching
-    paymentVersionFetchPromise = fetch(`${BASE_URL}/api/v1/system/config/public`, {
-        credentials: 'include'
-    })
-    .then(response => response.json())
-    .then(data => {
-        // Find payment_version in the public config array
-        const paymentConfig = data.find(config => config.key === 'payment_version');
-        const paymentVersion = paymentConfig ? paymentConfig.currentValue : 'v1';
-        cachedPaymentVersion = paymentVersion;
-        console.log('[Embed-App-V2] Payment version fetched:', paymentVersion);
-        return paymentVersion;
-    })
-    .catch(error => {
-        console.error('[Embed-App-V2] Error fetching payment version, defaulting to v1:', error);
-        cachedPaymentVersion = 'v1';
-        return 'v1';
-    })
-    .finally(() => {
-        paymentVersionFetchPromise = null;
-    });
-    
-    return paymentVersionFetchPromise;
 }
 
 // Define pages that have been migrated to CSP-compliant version
@@ -385,39 +344,8 @@ async function loadPage(route) {
     
     // Extract base route without query parameters for page mapping
     const baseRoute = route.split('?')[0];
-    let pagePath = EMBED_PAGES[baseRoute] || EMBED_PAGES['/'];
-    
-    // Special handling for customer registration and schedule pickup based on payment version
-    if (baseRoute === '/customer-register' || baseRoute === '/schedule-pickup') {
-        try {
-            const paymentVersion = await getPaymentVersion();
-            if (paymentVersion === 'v2') {
-                if (baseRoute === '/customer-register') {
-                    pagePath = '/customer-register-v2-embed.html';
-                    console.log('[Embed-App-V2] Using V2 customer registration form');
-                } else if (baseRoute === '/schedule-pickup') {
-                    pagePath = '/schedule-pickup-v2-embed.html';
-                    console.log('[Embed-App-V2] Using V2 schedule pickup form');
-                }
-            } else {
-                if (baseRoute === '/customer-register') {
-                    pagePath = '/customer-register-embed.html';
-                    console.log('[Embed-App-V2] Using V1 customer registration form');
-                } else if (baseRoute === '/schedule-pickup') {
-                    pagePath = '/schedule-pickup-embed.html';
-                    console.log('[Embed-App-V2] Using V1 schedule pickup form');
-                }
-            }
-        } catch (error) {
-            console.error('[Embed-App-V2] Error determining payment version, using V1 forms:', error);
-            if (baseRoute === '/customer-register') {
-                pagePath = '/customer-register-embed.html';
-            } else if (baseRoute === '/schedule-pickup') {
-                pagePath = '/schedule-pickup-embed.html';
-            }
-        }
-    }
-    
+    const pagePath = EMBED_PAGES[baseRoute] || EMBED_PAGES['/'];
+
     console.log('Base route:', baseRoute, 'Page path:', pagePath);
     
     try {
@@ -667,15 +595,13 @@ function initializePageScripts(route) {
         '/affiliate-register': ['/assets/js/embed-config.js', '/assets/js/i18n.js', '/assets/js/language-switcher.js', '/assets/js/modal-utils.js', '/assets/js/errorHandler.js', '/assets/js/csrf-utils.js', '/assets/js/swirl-spinner.js', '/assets/js/api-client.js', '/assets/js/address-validation-component.js', '/assets/js/service-area-component.js', '/assets/js/form-validation.js', '/assets/js/pricing-preview-component.js', 'https://cdnjs.cloudflare.com/ajax/libs/awesomplete/1.1.5/awesomplete.min.js', '/assets/js/service-area-autocomplete.js', '/assets/js/affiliate-register-init.js', '/assets/js/affiliate-register-page-init.js'],
         '/affiliate-dashboard': ['/assets/js/i18n.js', '/assets/js/language-switcher.js', 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js', '/assets/js/address-validation-component.js', '/assets/js/service-area-component.js', '/assets/js/pricing-preview-component.js', 'https://cdnjs.cloudflare.com/ajax/libs/awesomplete/1.1.5/awesomplete.min.js', '/assets/js/service-area-autocomplete.js', '/assets/js/csrf-utils.js', '/assets/js/api-client.js', '/assets/js/affiliate-dashboard-init.js', '/assets/js/affiliate-dashboard-embed.js', '/assets/js/affiliate-schedule.js', '/assets/js/affiliate-dashboard-i18n.js'],
         '/customer-login': ['/assets/js/embed-config.js', '/assets/js/i18n.js', '/assets/js/language-switcher.js', '/assets/js/modal-utils.js', '/assets/js/csrf-utils.js', '/assets/js/swirl-spinner.js', '/assets/js/api-client.js', '/assets/js/customer-login-init.js'],
-        '/customer-register': ['/assets/js/i18n.js', '/assets/js/language-switcher.js', '/assets/js/embed-config.js', '/assets/js/modal-utils.js', '/assets/js/errorHandler.js', '/assets/js/csrf-utils.js', '/assets/js/swirl-spinner.js', '/assets/js/api-client.js', '/assets/js/address-validation-component.js', '/assets/js/paygistix-payment-form-v2.js', 'https://cdnjs.cloudflare.com/ajax/libs/awesomplete/1.1.5/awesomplete.min.js', '/assets/js/service-area-autocomplete.js', '/assets/js/customer-register.js', '/assets/js/customer-register-paygistix.js', '/assets/js/customer-register-navigation.js', '/assets/js/customer-register-debug.js'],
-        '/customer-register-v2': ['/assets/js/i18n.js', '/assets/js/language-switcher.js', '/assets/js/csrf-utils.js', '/assets/js/modal-utils.js', '/assets/js/swirl-spinner.js', '/assets/js/api-client.js', '/assets/js/address-validation-component.js', 'https://cdnjs.cloudflare.com/ajax/libs/awesomplete/1.1.5/awesomplete.min.js', '/assets/js/service-area-autocomplete.js', '/assets/js/customer-register-v2.js', '/assets/js/customer-register-v2-navigation.js'],
+        '/customer-register': ['/assets/js/i18n.js', '/assets/js/language-switcher.js', '/assets/js/csrf-utils.js', '/assets/js/modal-utils.js', '/assets/js/swirl-spinner.js', '/assets/js/api-client.js', '/assets/js/address-validation-component.js', 'https://cdnjs.cloudflare.com/ajax/libs/awesomplete/1.1.5/awesomplete.min.js', '/assets/js/service-area-autocomplete.js', '/assets/js/customer-register.js', '/assets/js/customer-register-navigation.js'],
         '/customer-success': ['/assets/js/i18n.js', '/assets/js/language-switcher.js', '/assets/js/customer-success-embed.js'],
         '/forgot-password': ['/assets/js/embed-config.js', '/assets/js/i18n.js', '/assets/js/language-switcher.js', '/assets/js/modal-utils.js', '/assets/js/csrf-utils.js', '/assets/js/swirl-spinner.js', '/assets/js/api-client.js', '/assets/js/forgot-password-init.js'],
         '/reset-password': ['/assets/js/embed-config.js', '/assets/js/i18n.js', '/assets/js/language-switcher.js', '/assets/js/modal-utils.js', '/assets/js/csrf-utils.js', '/assets/js/swirl-spinner.js', '/assets/js/api-client.js', '/assets/js/reset-password-init.js'],
         '/administrator-login': ['/assets/js/i18n.js', '/assets/js/language-switcher.js', '/assets/js/csrf-utils.js', '/assets/js/api-client.js', '/assets/js/administrator-login-init.js'],
         '/administrator-dashboard': ['https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js', '/assets/js/i18n.js', '/assets/js/language-switcher.js', '/assets/js/modal-utils.js', '/assets/js/errorHandler.js', '/assets/js/csrf-utils.js', '/assets/js/api-client.js', '/assets/js/password-validator-component.js', '/assets/js/qrcode.min.js', 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js', '/assets/js/label-print-utils.js', '/assets/js/administrator-dashboard-init.js?v=marketing-modal-fix', '/assets/js/admin-operator-fix.js', '/assets/js/administrator-dashboard-i18n.js'],
-        '/schedule-pickup': ['/assets/js/i18n.js', '/assets/js/language-switcher.js', '/assets/js/embed-config.js', '/assets/js/modal-utils.js', '/assets/js/errorHandler.js', '/assets/js/csrf-utils.js', '/assets/js/swirl-spinner.js', '/assets/js/api-client.js', '/assets/js/paygistix-payment-form-v2.js', '/assets/js/schedule-pickup.js', '/assets/js/schedule-pickup-navigation.js', '/assets/js/schedule-pickup-embed.js'],
-        '/schedule-pickup-v2': ['/assets/js/i18n.js', '/assets/js/language-switcher.js', '/assets/js/csrf-utils.js', '/assets/js/modal-utils.js', '/assets/js/swirl-spinner.js', '/assets/js/api-client.js', '/assets/js/schedule-pickup-v2-embed.js'],
+        '/schedule-pickup': ['/assets/js/i18n.js', '/assets/js/language-switcher.js', '/assets/js/csrf-utils.js', '/assets/js/modal-utils.js', '/assets/js/swirl-spinner.js', '/assets/js/api-client.js', '/assets/js/schedule-pickup-embed.js'],
         '/order-confirmation': ['/assets/js/i18n.js', '/assets/js/language-switcher.js', '/assets/js/order-confirmation-init.js'],
         '/customer-dashboard': ['/assets/js/i18n.js', '/assets/js/language-switcher.js', '/assets/js/modal-utils.js', '/assets/js/csrf-utils.js', '/assets/js/swirl-spinner.js', '/assets/js/api-client.js', '/assets/js/address-validation-component.js', 'https://cdnjs.cloudflare.com/ajax/libs/awesomplete/1.1.5/awesomplete.min.js', '/assets/js/service-area-autocomplete.js', '/assets/js/v2-payment-modal.js', '/assets/js/customer-dashboard.js?v=20250108-5'],
         '/affiliate-success': ['/assets/js/i18n.js', '/assets/js/language-switcher.js', '/assets/js/modal-utils.js', '/assets/js/affiliate-success-init.js'],
@@ -726,18 +652,7 @@ function initializePageScripts(route) {
     };
 
     // Load scripts for the current route (use base route without query params)
-    let baseRoute = route.split('?')[0];
-    
-    // Special handling for V2 forms - use V2 script mappings
-    if (baseRoute === '/customer-register' && cachedPaymentVersion === 'v2') {
-        console.log('[Embed-App-V2] Using V2 scripts for customer registration');
-        baseRoute = '/customer-register-v2';
-    }
-    if (baseRoute === '/schedule-pickup' && cachedPaymentVersion === 'v2') {
-        console.log('[Embed-App-V2] Using V2 scripts for schedule pickup');
-        baseRoute = '/schedule-pickup-v2';
-    }
-    
+    const baseRoute = route.split('?')[0];
     const scripts = pageScripts[baseRoute] || [];
     if (scripts.length > 0) {
         loadPageScripts(scripts);

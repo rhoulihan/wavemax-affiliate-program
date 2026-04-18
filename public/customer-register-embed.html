@@ -8,11 +8,9 @@
     <link rel="stylesheet" href="/assets/css/language-switcher.css">
     <link href="/assets/css/customer-register.css" rel="stylesheet">
     <link href="/assets/css/modal-utils.css" rel="stylesheet">
-    <link href="/assets/css/paygistix-payment-form.css" rel="stylesheet">
+    <link href="/assets/css/swirl-spinner.css" rel="stylesheet">
     <!-- Awesomplete for autocomplete -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/awesomplete/1.1.5/awesomplete.min.css">
-    <!-- jQuery required for Paygistix payment form -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
 </head>
 <body class="bg-white font-sans">
     <!-- Language Switcher -->
@@ -22,25 +20,24 @@
     <div class="embed-container">
         <div class="max-w-3xl mx-auto bg-white rounded-lg shadow-md overflow-hidden registration-container">
             <div class="wavemax-blue text-white p-6">
-                <h2 class="text-2xl font-bold" data-i18n="customer.register.title">Customer Registration</h2>
-                <p class="mt-2" id="affiliateIntro" data-i18n="customer.register.subtitle">Sign up for premium laundry pickup and delivery service.</p>
+                <h2 class="text-2xl font-bold">
+                    <span data-i18n="customer.register.title">Customer Registration</span>
+                    <span class="v2-badge" data-i18n="customer.register.v2.noPaymentRequired">No Payment Required</span>
+                </h2>
+                <p class="mt-2" id="affiliateIntro" data-i18n="customer.register.v2.subtitle">Sign up for premium laundry pickup and delivery service - pay after we weigh your laundry!</p>
             </div>
             
             <form id="customerRegistrationForm" method="POST" action="#" class="p-6 space-y-6">
-                <!-- Hidden Affiliate ID field -->
+                <!-- Hidden fields -->
                 <input type="hidden" id="affiliateId" name="affiliateId">
-
-                <!-- CSRF token will be added dynamically by csrf-utils.js -->
-                
-                <!-- Hidden language preference field -->
                 <input type="hidden" id="languagePreference" name="languagePreference" value="en">
+                <input type="hidden" id="registrationVersion" name="registrationVersion" value="v2">
                 
-                <!-- Social Registration (Top of Form) -->
-                <div id="socialAuthSection">
-                    <h3 class="text-xl font-bold mb-4" data-i18n="customer.register.quickRegistration">Quick Registration with Social Media</h3>
+                <!-- Step 1: Social Registration and Account Setup -->
+                <div id="socialAuthSection" class="registration-section active">
                     <div class="bg-gradient-to-r from-blue-50 to-indigo-50 p-6 rounded-lg border border-blue-200">
-                        <p class="text-gray-700 mb-4 text-center" data-i18n="customer.register.socialSignupText">Sign up quickly using your social media account - we'll automatically fill in your information!</p>
-                        <div class="grid md:grid-cols-3 gap-3">
+                        <p class="text-gray-700 mb-4 text-center" data-i18n="customer.register.v2.socialSignupText">Sign up quickly using your social media account</p>
+                        <div class="grid md:grid-cols-2 gap-3">
                             <button type="button" id="googleRegister" class="flex items-center justify-center px-4 py-3 border-2 border-gray-300 rounded-lg bg-white hover:bg-gray-50 hover:border-blue-400 transition-all duration-200 shadow-sm hover:shadow-md">
                                 <svg class="w-5 h-5 mr-2" viewBox="0 0 24 24">
                                     <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -73,7 +70,7 @@
                 </div>
                 
                 <!-- Account Setup (Hidden when OAuth is used) -->
-                <div id="accountSetupSection">
+                <div id="accountSetupSection" class="registration-section active">
                     <h3 class="text-xl font-bold mb-4" data-i18n="customer.register.accountSetup">Account Setup</h3>
                     <div class="grid md:grid-cols-2 gap-6">
                         <!-- Left Column: Username and Password Fields -->
@@ -131,7 +128,7 @@
                     </div>
                 </div>
                 
-                <!-- Personal Information -->
+                <!-- Step 2: Personal Information and Address -->
                 <div id="personalInfoSection" class="registration-section">
                     <h3 class="text-xl font-bold mb-4" data-i18n="customer.register.personalInfo">Personal Information</h3>
                     <div class="grid md:grid-cols-2 gap-4">
@@ -173,146 +170,124 @@
                         
                         <div>
                             <label for="state" class="block text-gray-700 mb-2" data-i18n="customer.register.state">State *</label>
-                            <input type="text" id="state" name="state" required class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <select id="state" name="state" required class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <option value="">Select State</option>
+                                <option value="TX">Texas</option>
+                                <!-- Add more states as needed -->
+                            </select>
                         </div>
                         
                         <div>
                             <label for="zipCode" class="block text-gray-700 mb-2" data-i18n="customer.register.zipCode">ZIP Code *</label>
-                            <input type="text" id="zipCode" name="zipCode" required class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <input type="text" id="zipCode" name="zipCode" required pattern="[0-9]{5}" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
                         </div>
                     </div>
+                    
+                    <!-- Address validation component will be inserted here -->
+                    <div id="addressValidationComponent"></div>
                 </div>
                 
-                <!-- Laundry Bags -->
-                <div id="laundryBagsSection" class="registration-section">
-                    <h3 class="text-xl font-bold mb-4" data-i18n="customer.register.laundryBags">Laundry Bags</h3>
-                    <div class="bg-yellow-50 border border-yellow-200 p-4 rounded-lg mb-4">
-                        <p class="text-sm text-gray-700 mb-2">
-                            <strong data-i18n="customer.register.important">Important:</strong> <span data-i18n="customer.register.bagRequirement">A one-time bag fee of <span id="bagFeeDisplay">$10.00</span> per bag is required for registration.</span>
-                        </p>
-                        <ul class="list-disc list-inside text-sm text-gray-700 space-y-1">
-                            <li data-i18n="customer.register.bagCharged">Charged when you register</li>
-                            <li data-i18n="customer.register.bagDelivered">Bags will be delivered by your affiliate</li>
-                        </ul>
-                    </div>
+                <!-- Step 3: Free Bag Selection and How It Works -->
+                <div id="serviceSummarySection" class="registration-section">
+                    <!-- Free Bag Selection -->
                     <div>
-                        <label for="numberOfBags" class="block text-gray-700 mb-2" data-i18n="customer.register.numberOfBags">Number of Bags Needed *</label>
-                        <select id="numberOfBags" name="numberOfBags" required class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                            <option value="" data-i18n="customer.register.selectBags">Select number of bags</option>
-                            <option value="1">1 bag - $10.00</option>
-                            <option value="2">2 bags - $20.00</option>
-                            <option value="3">3 bags - $30.00</option>
-                            <option value="4">4 bags - $40.00</option>
-                            <option value="5">5 bags - $50.00</option>
-                        </select>
-                        <p class="text-sm text-gray-600 mt-1" data-i18n="customer.register.bagRecommendation">Most households need 2-3 bags for regular laundry service.</p>
-                    </div>
-                    <div class="mt-4">
-                        <div class="bg-blue-50 border border-blue-200 p-3 rounded">
-                            <p class="text-sm font-bold text-blue-800"><span data-i18n="customer.register.totalBagFee">Total Bag Fee:</span> <span id="totalBagFee">$0.00</span></p>
-                            <p class="text-xs text-blue-600 mt-1" data-i18n="customer.register.bagNote">This fee covers the cost of your laundry bags.</p>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Service Preferences -->
-                <div id="servicePreferencesSection" class="registration-section">
-                    <h3 class="text-xl font-bold mb-4" data-i18n="customer.register.servicePreferences">Service Preferences</h3>
-                    <div class="grid md:grid-cols-2 gap-4">
-                        <div class="md:col-span-2">
-                            <label for="specialInstructions" class="block text-gray-700 mb-2" data-i18n="customer.register.specialInstructions">Special Instructions for Laundry (Optional)</label>
-                            <textarea id="specialInstructions" name="specialInstructions" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" rows="2" placeholder="Allergies, special detergent requests, etc." data-i18n-placeholder="customer.register.specialInstructionsPlaceholder"></textarea>
+                        <h3 class="text-xl font-bold mb-4" data-i18n="customer.register.v2.selectBags">Select Your Free Laundry Bags</h3>
+                        <p class="text-gray-600 mb-4" data-i18n="customer.register.v2.selectBagsDescription">Choose how many bags you need to get started. Each bag holds 20-25 lbs of laundry.</p>
+                        
+                        <div class="bag-selector">
+                            <div class="bag-option selected" data-bags="1">
+                                <div class="bag-icon">🛍️</div>
+                                <div class="bag-label" data-i18n="customer.register.v2.oneBag">1 Bag</div>
+                                <div class="bag-description" data-i18n="customer.register.v2.oneBagDesc">Perfect for individuals and couples</div>
+                            </div>
+                            
+                            <div class="bag-option" data-bags="2">
+                                <div class="bag-icon">🛍️🛍️</div>
+                                <div class="bag-label" data-i18n="customer.register.v2.twoBags">2 Bags</div>
+                                <div class="bag-description" data-i18n="customer.register.v2.twoBagsDesc">Great for larger families</div>
+                            </div>
                         </div>
                         
-                        <div class="md:col-span-2">
-                            <label for="affiliateSpecialInstructions" class="block text-gray-700 mb-2" data-i18n="customer.register.affiliateSpecialInstructions">Special Instructions for Affiliate (Optional)</label>
-                            <textarea id="affiliateSpecialInstructions" name="affiliateSpecialInstructions" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" rows="2" placeholder="Pickup/delivery preferences, gate codes, preferred times, etc." data-i18n-placeholder="customer.register.affiliateSpecialInstructionsPlaceholder"></textarea>
-                        </div>
+                        <input type="hidden" id="numberOfBags" name="numberOfBags" value="1">
                     </div>
-                </div>
-                
-                <!-- Hidden context for payment form -->
-                <input type="hidden" id="PAYCONTEXT" value="REGISTRATION" />
-                <input type="hidden" id="AFFILIATEID" value="" />
-                
-                <!-- Service and Pricing Summary -->
-                <div id="serviceSummarySection" class="border-t pt-6 registration-section">
-                    <h3 class="text-xl font-bold mb-4" data-i18n="customer.register.serviceSummary">Service Summary</h3>
-                    <div class="bg-gray-50 p-4 rounded-lg">
-                        <div class="mb-2">
-                            <span class="font-bold" data-i18n="customer.register.deliveryFeeLabel">Delivery Fee:</span>
-                            <span id="deliveryFee">$0.00</span>
-                            <span id="deliveryFeeStructure" class="text-sm text-gray-600"></span>
-                        </div>
-                        <div>
-                            <span class="font-bold" data-i18n="customer.register.wdfServiceLabel">Wash, Dry, Fold Service:</span>
-                            <span id="wdfRateDisplay">Loading...</span>
-                        </div>
-                        <div class="mt-2 bag-fee-hidden" id="bagFeeSummary">
-                            <span class="font-bold" data-i18n="customer.register.laundryBagsLabel">Laundry Bags:</span>
-                            <span id="bagFeeSummaryAmount">$0.00</span> <span data-i18n="customer.register.creditedOnFirstOrder">(credited on first order)</span>
-                        </div>
-                        <p class="text-sm text-gray-500 mt-2" data-i18n="customer.register.finalCostNote">Final cost will depend on the weight of your laundry.</p>
-                    </div>
-                </div>
-                
-                <!-- Service Agreement -->
-                <div id="serviceAgreementSection" class="registration-section">
-                    <h3 class="text-xl font-bold mb-4" data-i18n="customer.register.serviceAgreement">Service Agreement</h3>
-                    <div class="bg-gray-50 p-4 rounded-lg">
-                        <div class="flex items-start space-x-2">
-                            <input type="checkbox" id="termsAgreement" name="termsAgreement" required class="mt-1 h-4 w-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500">
-                            <label for="termsAgreement" class="text-sm text-gray-700 flex-1">
-                                <span data-i18n="customer.register.termsAgree">I agree to the</span> <a href="#" data-navigate="/terms-of-service" class="text-blue-600 hover:underline">Terms of Service</a> and <a href="#" data-navigate="/privacy-policy" class="text-blue-600 hover:underline">Privacy Policy</a> *
-                            </label>
+                    
+                    <!-- How It Works -->
+                    <div class="bg-blue-50 p-6 rounded-lg mt-6">
+                        <h3 class="text-lg font-bold mb-3" data-i18n="customer.register.v2.howItWorks">How Our V2 Payment System Works</h3>
+                        <div class="space-y-2 text-sm text-gray-700">
+                            <div class="flex items-start">
+                                <span class="text-blue-600 mr-2">✓</span>
+                                <span data-i18n="customer.register.v2.step1">Sign up now with no credit card required</span>
+                            </div>
+                            <div class="flex items-start">
+                                <span class="text-blue-600 mr-2">✓</span>
+                                <span data-i18n="customer.register.v2.step2">Receive your free laundry bags</span>
+                            </div>
+                            <div class="flex items-start">
+                                <span class="text-blue-600 mr-2">✓</span>
+                                <span data-i18n="customer.register.v2.step3">Schedule your first pickup</span>
+                            </div>
+                            <div class="flex items-start">
+                                <span class="text-blue-600 mr-2">✓</span>
+                                <span data-i18n="customer.register.v2.step4">We weigh your laundry and send you payment links</span>
+                            </div>
+                            <div class="flex items-start">
+                                <span class="text-blue-600 mr-2">✓</span>
+                                <span data-i18n="customer.register.v2.step5">Pay conveniently via Credit Card or Venmo</span>
+                            </div>
+                            <div class="flex items-start">
+                                <span class="text-blue-600 mr-2">✓</span>
+                                <span data-i18n="customer.register.v2.step6">Receive your fresh, clean laundry!</span>
+                            </div>
                         </div>
                     </div>
                 </div>
                 
                 <!-- Navigation Section -->
-                <div id="navigationSection" class="border-t pt-6">
-                    <div class="flex justify-between items-center">
-                        <button type="button" id="backButton" class="px-6 py-3 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition back-button-hidden">
-                            <span data-i18n="customer.register.back">← Back</span>
-                        </button>
-                        <div class="flex-1"></div>
+                <div id="navigationSection" class="flex justify-between items-center pt-4 border-t">
+                    <button type="button" id="backButton" class="px-6 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition button-hidden">
+                        <span data-i18n="customer.register.back">← Back</span>
+                    </button>
+                    
+                    <div class="ml-auto flex gap-3">
                         <button type="button" id="advanceButton" class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
                             <span data-i18n="customer.register.next">Next →</span>
+                        </button>
+                        
+                        <button type="submit" id="submitBtn" class="px-8 py-3 bg-green-600 text-white rounded-lg font-bold hover:bg-green-700 transition button-hidden">
+                            <span data-i18n="customer.register.v2.submitButton">Sign Up for Free - No Payment Required</span>
                         </button>
                     </div>
                 </div>
                 
-                <!-- Submit handled by Paygistix Pay Now button -->
-            </form>
-            
-            <!-- Payment Form Container (outside of customer form to prevent nested form submission) -->
-            <div id="paymentFormContainer" class="mt-6 payment-form-hidden">
-                <!-- Paygistix payment form will be loaded here -->
-                <div class="text-center py-4">
-                    <span class="text-gray-600" data-i18n="customer.register.loadingPayment">Loading payment form...</span>
+                <!-- Terms and Privacy -->
+                <div class="text-center text-xs text-gray-600">
+                    <span data-i18n="customer.register.terms">By registering, you agree to our</span>
+                    <a href="/terms-and-conditions.html" class="text-blue-600 hover:underline" data-i18n="customer.register.termsLink">Terms of Service</a>
+                    <span data-i18n="customer.register.and">and</span>
+                    <a href="/privacy-policy.html" class="text-blue-600 hover:underline" data-i18n="customer.register.privacyLink">Privacy Policy</a>
                 </div>
-            </div>
+            </form>
         </div>
     </div>
-
-        <!-- i18n Scripts -->
+    
+    <!-- Loading Spinner -->
+    <div id="loadingSpinner" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+        <div class="bg-white p-8 rounded-lg shadow-xl">
+            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+            <p class="mt-4 text-gray-700" data-i18n="customer.register.processing">Processing your registration...</p>
+        </div>
+    </div>
+    
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/awesomplete/1.1.5/awesomplete.min.js"></script>
     <script src="/assets/js/i18n.js"></script>
     <script src="/assets/js/language-switcher.js"></script>
-    
-    <!-- Embed Configuration -->
-    <script src="/assets/js/embed-config.js"></script>
-    
-    <!-- Form and Payment Scripts -->
-    <script src="/assets/js/modal-utils.js"></script>
-    <script src="/assets/js/errorHandler.js"></script>
     <script src="/assets/js/csrf-utils.js"></script>
+    <script src="/assets/js/modal-utils.js"></script>
     <script src="/assets/js/swirl-spinner.js"></script>
-    <script src="/assets/js/paygistix-payment-form-v2.js"></script>
+    <script src="/assets/js/address-validation-component.js"></script>
     <script src="/assets/js/customer-register.js"></script>
-    <script src="/assets/js/customer-register-paygistix.js"></script>
-    <!-- Load navigation last to ensure DOM is ready -->
     <script src="/assets/js/customer-register-navigation.js"></script>
-    <script src="/assets/js/customer-register-debug.js"></script>
-
 </body>
 </html>
