@@ -90,14 +90,14 @@ describe('V2 Payment System Model Updates', () => {
       });
 
       // Check V2 payment defaults
-      expect(order.v2PaymentStatus).toBe('pending');
-      expect(order.v2PaymentMethod).toBe('pending');
-      expect(order.v2PaymentAmount).toBe(0);
-      expect(order.v2PaymentCheckAttempts).toBe(0);
-      expect(order.v2PaymentLinks).toEqual({});
-      expect(order.v2PaymentQRCodes).toEqual({});
-      expect(order.v2PaymentRequestedAt).toBeUndefined();
-      expect(order.v2PaymentVerifiedAt).toBeUndefined();
+      expect(order.paymentStatus).toBe('pending');
+      expect(order.paymentMethod).toBe('pending');
+      expect(order.paymentAmount).toBe(0);
+      expect(order.paymentCheckAttempts).toBe(0);
+      expect(order.paymentLinks).toEqual({});
+      expect(order.paymentQRCodes).toEqual({});
+      expect(order.paymentRequestedAt).toBeUndefined();
+      expect(order.paymentVerifiedAt).toBeUndefined();
     });
 
     it('should update V2 payment status correctly', async () => {
@@ -108,26 +108,26 @@ describe('V2 Payment System Model Updates', () => {
         pickupTime: 'afternoon',
         estimatedWeight: 25,
         numberOfBags: 2,
-        v2PaymentStatus: 'awaiting',
-        v2PaymentAmount: 45.50,
-        v2PaymentRequestedAt: new Date()
+        paymentStatus: 'awaiting',
+        paymentAmount: 45.50,
+        paymentRequestedAt: new Date()
       });
 
-      expect(order.v2PaymentStatus).toBe('awaiting');
-      expect(order.v2PaymentAmount).toBe(45.50);
-      expect(order.v2PaymentRequestedAt).toBeInstanceOf(Date);
+      expect(order.paymentStatus).toBe('awaiting');
+      expect(order.paymentAmount).toBe(45.50);
+      expect(order.paymentRequestedAt).toBeInstanceOf(Date);
 
       // Update to verified
-      order.v2PaymentStatus = 'verified';
-      order.v2PaymentMethod = 'venmo';
-      order.v2PaymentVerifiedAt = new Date();
-      order.v2PaymentTransactionId = 'VENMO123456';
+      order.paymentStatus = 'verified';
+      order.paymentMethod = 'venmo';
+      order.paymentVerifiedAt = new Date();
+      order.paymentTransactionId = 'VENMO123456';
       await order.save();
 
       const updatedOrder = await Order.findById(order._id);
-      expect(updatedOrder.v2PaymentStatus).toBe('verified');
-      expect(updatedOrder.v2PaymentMethod).toBe('venmo');
-      expect(updatedOrder.v2PaymentTransactionId).toBe('VENMO123456');
+      expect(updatedOrder.paymentStatus).toBe('verified');
+      expect(updatedOrder.paymentMethod).toBe('venmo');
+      expect(updatedOrder.paymentTransactionId).toBe('VENMO123456');
     });
 
     it('should store payment links and QR codes', async () => {
@@ -150,17 +150,17 @@ describe('V2 Payment System Model Updates', () => {
         pickupTime: 'afternoon',
         estimatedWeight: 30,
         numberOfBags: 2,
-        v2PaymentLinks: paymentLinks,
-        v2PaymentQRCodes: qrCodes
+        paymentLinks: paymentLinks,
+        paymentQRCodes: qrCodes
       });
 
-      expect(order.v2PaymentLinks.venmo).toBe(paymentLinks.venmo);
-      expect(order.v2PaymentLinks.paypal).toBe(paymentLinks.paypal);
-      expect(order.v2PaymentLinks.cashapp).toBe(paymentLinks.cashapp);
+      expect(order.paymentLinks.venmo).toBe(paymentLinks.venmo);
+      expect(order.paymentLinks.paypal).toBe(paymentLinks.paypal);
+      expect(order.paymentLinks.cashapp).toBe(paymentLinks.cashapp);
 
-      expect(order.v2PaymentQRCodes.venmo).toBe(qrCodes.venmo);
-      expect(order.v2PaymentQRCodes.paypal).toBe(qrCodes.paypal);
-      expect(order.v2PaymentQRCodes.cashapp).toBe(qrCodes.cashapp);
+      expect(order.paymentQRCodes.venmo).toBe(qrCodes.venmo);
+      expect(order.paymentQRCodes.paypal).toBe(qrCodes.paypal);
+      expect(order.paymentQRCodes.cashapp).toBe(qrCodes.cashapp);
     });
 
     it('should track payment check attempts', async () => {
@@ -171,21 +171,21 @@ describe('V2 Payment System Model Updates', () => {
         pickupTime: 'evening',
         estimatedWeight: 15,
         numberOfBags: 1,
-        v2PaymentStatus: 'awaiting',
-        v2PaymentCheckAttempts: 5,
-        v2LastPaymentCheck: new Date()
+        paymentStatus: 'awaiting',
+        paymentCheckAttempts: 5,
+        lastPaymentCheck: new Date()
       });
 
-      expect(order.v2PaymentCheckAttempts).toBe(5);
-      expect(order.v2LastPaymentCheck).toBeInstanceOf(Date);
+      expect(order.paymentCheckAttempts).toBe(5);
+      expect(order.lastPaymentCheck).toBeInstanceOf(Date);
 
       // Increment attempts
-      order.v2PaymentCheckAttempts += 1;
-      order.v2LastPaymentCheck = new Date();
+      order.paymentCheckAttempts += 1;
+      order.lastPaymentCheck = new Date();
       await order.save();
 
       const updatedOrder = await Order.findById(order._id);
-      expect(updatedOrder.v2PaymentCheckAttempts).toBe(6);
+      expect(updatedOrder.paymentCheckAttempts).toBe(6);
     });
 
     it('should validate V2 payment status enum', async () => {
@@ -196,7 +196,7 @@ describe('V2 Payment System Model Updates', () => {
         pickupTime: '8:00 PM - 10:00 PM',
         estimatedWeight: 20,
         numberOfBags: 2,
-        v2PaymentStatus: 'invalid_status' // Invalid enum value
+        paymentStatus: 'invalid_status' // Invalid enum value
       });
 
       await expect(order.save()).rejects.toThrow(/validation failed/);
@@ -210,7 +210,7 @@ describe('V2 Payment System Model Updates', () => {
         pickupTime: 'evening',
         estimatedWeight: 18,
         numberOfBags: 2,
-        v2PaymentMethod: 'bitcoin' // Invalid enum value
+        paymentMethod: 'bitcoin' // Invalid enum value
       });
 
       await expect(order.save()).rejects.toThrow(/validation failed/);
@@ -224,10 +224,10 @@ describe('V2 Payment System Model Updates', () => {
         pickupTime: 'morning',
         estimatedWeight: 22,
         numberOfBags: 2,
-        v2PaymentNotes: 'Payment verified via email confirmation from Venmo'
+        paymentNotes: 'Payment verified via email confirmation from Venmo'
       });
 
-      expect(order.v2PaymentNotes).toBe('Payment verified via email confirmation from Venmo');
+      expect(order.paymentNotes).toBe('Payment verified via email confirmation from Venmo');
     });
   });
 

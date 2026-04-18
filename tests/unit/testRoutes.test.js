@@ -506,7 +506,7 @@ describe('Test Routes', () => {
       // Mock the save function to update bagsWeighed
       mockOrder.save.mockImplementation(async function() {
         this.bagsWeighed = this.numberOfBags;
-        this.v2PaymentAmount = 45.50;
+        this.paymentAmount = 45.50;
         return true;
       }.bind(mockOrder));
 
@@ -527,8 +527,8 @@ describe('Test Routes', () => {
       expect(response.status).toBe(200);
       expect(mockOrder.status).toBe('processing');
       expect(emailService.sendV2PaymentRequest).toHaveBeenCalled();
-      expect(mockOrder.v2PaymentLinks).toBeDefined();
-      expect(mockOrder.v2PaymentQRCodes).toBeDefined();
+      expect(mockOrder.paymentLinks).toBeDefined();
+      expect(mockOrder.paymentQRCodes).toBeDefined();
     });
 
     it('should advance order to processed stage (process action)', async () => {
@@ -586,7 +586,7 @@ describe('Test Routes', () => {
 
       expect(response.status).toBe(200);
       expect(mockOrder.status).toBe('complete');
-      expect(mockOrder.v2PaymentStatus).toBe('verified');
+      expect(mockOrder.paymentStatus).toBe('verified');
       expect(mockOrder.bags[0].status).toBe('completed');
       expect(mockOrder.save).toHaveBeenCalled();
     });

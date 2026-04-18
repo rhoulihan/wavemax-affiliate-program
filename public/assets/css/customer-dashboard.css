@@ -92,7 +92,7 @@ body {
     z-index: 1040;
 }
 
-#v2PaymentModal {
+#paymentModal {
     z-index: 1050;
     position: fixed;
     top: 0;
@@ -102,7 +102,7 @@ body {
     overflow-y: auto;
 }
 
-#v2PaymentModal .modal-dialog {
+#paymentModal .modal-dialog {
     position: relative;
     width: auto;
     max-width: 800px;
@@ -110,7 +110,7 @@ body {
     pointer-events: none;
 }
 
-#v2PaymentModal .modal-content {
+#paymentModal .modal-content {
     position: relative;
     display: flex;
     flex-direction: column;
@@ -122,9 +122,9 @@ body {
 }
 
 /* Ensure swirl spinner is visible in modal */
-#v2PaymentModal .swirl-spinner-container,
-#v2PaymentModal #loadingSpinnerContainer,
-#v2PaymentModal #processingSpinnerContainer {
+#paymentModal .swirl-spinner-container,
+#paymentModal #loadingSpinnerContainer,
+#paymentModal #processingSpinnerContainer {
     margin: 2rem auto;
     display: flex;
     justify-content: center;
@@ -132,7 +132,7 @@ body {
     min-height: 100px;
 }
 
-#v2PaymentModal .swirl-spinner {
+#paymentModal .swirl-spinner {
     position: relative;
     display: inline-block;
 }

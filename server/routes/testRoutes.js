@@ -20,7 +20,7 @@ router.use(testOnlyMiddleware);
 
 // Helper function to generate payment URLs and QR codes
 async function generatePaymentURLs(order, paymentAmount) {
-  const amount = paymentAmount ? paymentAmount.toFixed(2) : order.v2PaymentAmount.toFixed(2);
+  const amount = paymentAmount ? paymentAmount.toFixed(2) : order.paymentAmount.toFixed(2);
   const orderNote = `WaveMAX Order ${order.orderId}`;
 
   // Generate payment URLs for each service
@@ -259,7 +259,7 @@ router.post('/order', async (req, res) => {
         if (isV2Order) {
             orderData.isV2Order = true;
             orderData.orderType = 'v2';
-            orderData.v2PaymentStatus = 'pending';
+            orderData.paymentStatus = 'pending';
             orderData.paymentStatus = 'pending';
             // V2 orders don't have upfront payment, amount calculated after weighing
             orderData.estimatedTotal = 0;
@@ -391,7 +391,7 @@ router.post('/order/advance-stage', async (req, res) => {
                 order.status = 'processing';
                 order.receivedAt = new Date();
 
-                // Save order first to calculate v2PaymentAmount
+                // Save order first to calculate paymentAmount
                 await order.save();
 
                 // V2 Payment Flow: Send payment request email after weighing
@@ -401,17 +401,17 @@ router.post('/order/advance-stage', async (req, res) => {
 
                     if (customer) {
                         const QRCode = require('qrcode');
-                        const paymentAmount = order.v2PaymentAmount || order.actualTotal ||
+                        const paymentAmount = order.paymentAmount || order.actualTotal ||
                                             (order.actualWeight * (order.baseRate || 1.25) + (order.addOnTotal || 0));
 
                         // Generate payment URLs and QR codes
                         const paymentURLs = await generatePaymentURLs(order, paymentAmount);
 
                         // Save payment data to order
-                        order.v2PaymentAmount = paymentAmount;
-                        order.v2PaymentLinks = paymentURLs.links;
-                        order.v2PaymentQRCodes = paymentURLs.qrCodes;
-                        order.v2PaymentRequestSentAt = new Date();
+                        order.paymentAmount = paymentAmount;
+                        order.paymentLinks = paymentURLs.links;
+                        order.paymentQRCodes = paymentURLs.qrCodes;
+                        order.paymentRequestSentAt = new Date();
                         await order.save();
 
                         // Send payment request email
@@ -457,12 +457,8 @@ router.post('/order/advance-stage', async (req, res) => {
                 order.completedAt = new Date();
 
                 // Mark payment as completed for testing
-                if (order.isV2Order) {
-                    order.v2PaymentStatus = 'verified';
-                    order.v2PaymentMethod = 'test';
-                } else {
-                    order.paymentStatus = 'completed';
-                }
+                order.paymentStatus = 'verified';
+                order.paymentMethod = 'credit_card';
                 break;
 
             default:

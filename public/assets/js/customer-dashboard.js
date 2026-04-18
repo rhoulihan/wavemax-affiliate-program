@@ -284,7 +284,7 @@ async function loadOrders() {
         const actualOrderId = order._id || order.id || order.orderId;
         
         // Check if this is a V2 order that needs payment
-        const needsPayment = (order.v2PaymentStatus === 'pending' || order.v2PaymentStatus === 'awaiting') && 
+        const needsPayment = (order.paymentStatus === 'pending' || order.paymentStatus === 'awaiting') && 
                            order.status === 'processing';
         
         if (needsPayment && !firstUnpaidOrderId) {
@@ -331,24 +331,24 @@ async function loadOrders() {
       if (hasUnpaidOrder && firstUnpaidOrderId) {
         console.log('Found unpaid order, will show payment modal for order:', firstUnpaidOrderId);
         
-        // Check if v2Payment is available
-        if (window.v2Payment) {
-          console.log('v2Payment is available, initiating payment');
+        // Check if payment is available
+        if (window.payment) {
+          console.log('payment is available, initiating payment');
           setTimeout(() => {
-            window.v2Payment.initiatePayment(firstUnpaidOrderId);
+            window.payment.initiatePayment(firstUnpaidOrderId);
           }, 1000); // Give time for everything to load
         } else {
-          console.error('v2Payment not available yet, waiting...');
-          // Wait for v2Payment to be available
+          console.error('payment not available yet, waiting...');
+          // Wait for payment to be available
           let checkCount = 0;
           const checkInterval = setInterval(() => {
             checkCount++;
-            if (window.v2Payment) {
-              console.log('v2Payment now available, initiating payment');
+            if (window.payment) {
+              console.log('payment now available, initiating payment');
               clearInterval(checkInterval);
-              window.v2Payment.initiatePayment(firstUnpaidOrderId);
+              window.payment.initiatePayment(firstUnpaidOrderId);
             } else if (checkCount > 10) {
-              console.error('v2Payment still not available after 5 seconds');
+              console.error('payment still not available after 5 seconds');
               clearInterval(checkInterval);
             }
           }, 500);
@@ -656,9 +656,9 @@ function showOrders() {
 
 // Function to initiate payment for a specific order
 function initiatePaymentForOrder(orderId) {
-  if (window.v2Payment) {
+  if (window.payment) {
     console.log('Initiating payment for order:', orderId);
-    window.v2Payment.initiatePayment(orderId);
+    window.payment.initiatePayment(orderId);
   } else {
     console.error('V2 Payment modal not loaded');
     alert('Payment system is not available. Please refresh the page and try again.');

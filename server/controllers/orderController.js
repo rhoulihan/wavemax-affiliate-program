@@ -229,9 +229,9 @@ exports.createOrder = ControllerHelpers.asyncWrapper(async (req, res) => {
       },
       status: 'pending',
       // Post-weigh payment is collected after bags are weighed
-      v2PaymentStatus: 'pending',
-      v2PaymentMethod: 'pending',
-      v2PaymentAmount: 0
+      paymentStatus: 'pending',
+      paymentMethod: 'pending',
+      paymentAmount: 0
     };
 
     console.log('Creating order with data:', JSON.stringify(orderData, null, 2));
@@ -419,7 +419,7 @@ exports.updateOrderStatus = async (req, res) => {
       
       
       // Generate post-weigh payment request if this order is still pending payment
-      if (customer && order.v2PaymentStatus === 'pending') {
+      if (customer && order.paymentStatus === 'pending') {
         // Calculate total with actual weight
         const actualTotal = req.body.actualTotal || order.actualTotal || order.estimatedTotal;
         
@@ -432,11 +432,11 @@ exports.updateOrderStatus = async (req, res) => {
         );
         
         // Update order with payment information
-        order.v2PaymentStatus = 'awaiting';
-        order.v2PaymentAmount = parseFloat(amount);
-        order.v2PaymentLinks = links;
-        order.v2PaymentQRCodes = qrCodes;
-        order.v2PaymentRequestedAt = new Date();
+        order.paymentStatus = 'awaiting';
+        order.paymentAmount = parseFloat(amount);
+        order.paymentLinks = links;
+        order.paymentQRCodes = qrCodes;
+        order.paymentRequestedAt = new Date();
         
         console.log(`Generated V2 payment links for order ${order.orderId} - Amount: $${amount}`);
 
@@ -882,8 +882,8 @@ exports.updatePaymentStatus = async (req, res) => {
     const {
       paymentStatus,
       paymentMethod,
-      paymentReference,
-      paymentError,
+      paymentTransactionId,
+      paymentNotes,
       refundAmount,
       refundReason,
       refundReference
@@ -919,8 +919,8 @@ exports.updatePaymentStatus = async (req, res) => {
       });
     }
 
-    // Validate payment status
-    const validPaymentStatuses = ['pending', 'processing', 'completed', 'failed', 'refunded'];
+    // Validate payment status against the Order schema enum
+    const validPaymentStatuses = ['pending', 'awaiting', 'confirming', 'verified', 'failed'];
     if (!validPaymentStatuses.includes(paymentStatus)) {
       return res.status(400).json({
         success: false,
@@ -931,19 +931,18 @@ exports.updatePaymentStatus = async (req, res) => {
     // Update payment information
     order.paymentStatus = paymentStatus;
     if (paymentMethod) order.paymentMethod = paymentMethod;
-    if (paymentReference) order.paymentReference = paymentReference;
-    if (paymentError) order.paymentError = paymentError;
+    if (paymentTransactionId) order.paymentTransactionId = paymentTransactionId;
+    if (paymentNotes) order.paymentNotes = paymentNotes;
 
-    if (paymentStatus === 'completed') {
-      order.paymentDate = new Date();
+    if (paymentStatus === 'verified' && !order.paymentVerifiedAt) {
+      order.paymentVerifiedAt = new Date();
     }
 
-    if (paymentStatus === 'refunded') {
-      order.refundedAt = new Date();
-      if (refundAmount) order.refundAmount = refundAmount;
-      if (refundReason) order.refundReason = refundReason;
-      if (refundReference) order.refundReference = refundReference;
-    }
+    // Refund fields are tracked separately and can accompany any status update
+    if (refundAmount !== undefined) order.refundAmount = refundAmount;
+    if (refundReason) order.refundReason = refundReason;
+    if (refundReference) order.refundReference = refundReference;
+    if (refundAmount !== undefined) order.refundedAt = new Date();
 
     await order.save();
 
@@ -954,9 +953,9 @@ exports.updatePaymentStatus = async (req, res) => {
         orderId: order.orderId,
         paymentStatus: order.paymentStatus,
         paymentMethod: order.paymentMethod,
-        paymentReference: order.paymentReference,
-        paymentDate: order.paymentDate,
-        paymentError: order.paymentError,
+        paymentTransactionId: order.paymentTransactionId,
+        paymentVerifiedAt: order.paymentVerifiedAt,
+        paymentNotes: order.paymentNotes,
         refundAmount: order.refundAmount,
         refundReason: order.refundReason,
         refundReference: order.refundReference,
@@ -1165,7 +1164,7 @@ exports.confirmPayment = async (req, res) => {
     let order;
     if (orderId.length === 8) {
       // Short order ID
-      const orders = await Order.find({ v2PaymentStatus: 'awaiting' });
+      const orders = await Order.find({ paymentStatus: 'awaiting' });
       for (const o of orders) {
         const shortId = o._id.toString().slice(-8).toUpperCase();
         if (shortId === orderId.toUpperCase()) {
@@ -1187,7 +1186,7 @@ exports.confirmPayment = async (req, res) => {
     }
     
     // Check if payment is already verified - return 409 for duplicate
-    if (order.v2PaymentStatus === 'verified') {
+    if (order.paymentStatus === 'verified') {
       return res.status(409).json({
         success: false,
         message: 'Payment already verified',
@@ -1198,7 +1197,7 @@ exports.confirmPayment = async (req, res) => {
     
     // Validate payment amount if provided
     if (amount !== undefined) {
-      const expectedAmount = order.v2PaymentAmount || order.actualTotal || order.estimatedTotal;
+      const expectedAmount = order.paymentAmount || order.actualTotal || order.estimatedTotal;
       
       // Check if amount is way off (more than 100% difference)
       if (Math.abs(amount - expectedAmount) > expectedAmount) {
@@ -1219,10 +1218,10 @@ exports.confirmPayment = async (req, res) => {
     });
     
     // Update order with customer confirmation
-    order.v2PaymentStatus = 'confirming';
-    order.v2PaymentConfirmedAt = new Date();
-    order.v2PaymentNotes = `Customer confirmed payment via ${paymentMethod}. Details: ${paymentDetails || 'None provided'}. Awaiting manual verification.`;
-    order.v2PaymentMethod = paymentMethod || 'pending';
+    order.paymentStatus = 'confirming';
+    order.paymentConfirmedAt = new Date();
+    order.paymentNotes = `Customer confirmed payment via ${paymentMethod}. Details: ${paymentDetails || 'None provided'}. Awaiting manual verification.`;
+    order.paymentMethod = paymentMethod || 'pending';
     await order.save();
     
     // Immediately escalate to admin for manual verification
@@ -1281,10 +1280,10 @@ exports.verifyPaymentManually = async (req, res) => {
     }
     
     // Update payment status
-    order.v2PaymentStatus = 'verified';
-    order.v2PaymentVerifiedAt = new Date();
-    order.v2PaymentTransactionId = transactionId || `MANUAL-${Date.now()}`;
-    order.v2PaymentNotes = `Manually verified by admin${req.user.email ? ` (${req.user.email})` : ''}. ${notes || ''}`;
+    order.paymentStatus = 'verified';
+    order.paymentVerifiedAt = new Date();
+    order.paymentTransactionId = transactionId || `MANUAL-${Date.now()}`;
+    order.paymentNotes = `Manually verified by admin${req.user.email ? ` (${req.user.email})` : ''}. ${notes || ''}`;
     await order.save();
     
     // If order is ready, send pickup notification
@@ -1302,8 +1301,8 @@ exports.verifyPaymentManually = async (req, res) => {
       message: 'Payment verified successfully',
       order: {
         orderId: order.orderId,
-        v2PaymentStatus: order.v2PaymentStatus,
-        v2PaymentVerifiedAt: order.v2PaymentVerifiedAt
+        paymentStatus: order.paymentStatus,
+        paymentVerifiedAt: order.paymentVerifiedAt
       }
     });
     
@@ -1627,9 +1626,9 @@ exports.createImmediateOrder = ControllerHelpers.asyncWrapper(async (req, res) =
     pickupDeadline,
     immediatePickupRequestedAt: orderTime,
     // Post-weigh payment
-    v2PaymentStatus: 'pending',
-    v2PaymentMethod: 'pending',
-    v2PaymentAmount: 0
+    paymentStatus: 'pending',
+    paymentMethod: 'pending',
+    paymentAmount: 0
   };
 
   // Create and save order

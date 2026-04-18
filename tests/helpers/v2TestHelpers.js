@@ -127,15 +127,15 @@ async function createTestOrder(options = {}) {
     status: options.status || 'pending',
     
     // V2 Payment fields
-    v2PaymentStatus: options.v2PaymentStatus || 'pending',
-    v2PaymentAmount: options.v2PaymentAmount || null,
-    v2PaymentMethod: options.v2PaymentMethod || null,
-    v2PaymentRequestedAt: options.v2PaymentRequestedAt || null,
-    v2PaymentVerifiedAt: options.v2PaymentVerifiedAt || null,
-    v2PaymentLinks: options.v2PaymentLinks || null,
-    v2PaymentCheckAttempts: options.v2PaymentCheckAttempts || 0,
-    v2PaymentReminderCount: options.v2PaymentReminderCount || 0,
-    v2PaymentLastReminderAt: options.v2PaymentLastReminderAt || null,
+    paymentStatus: options.paymentStatus || 'pending',
+    paymentAmount: options.paymentAmount || null,
+    paymentMethod: options.paymentMethod || null,
+    paymentRequestedAt: options.paymentRequestedAt || null,
+    paymentVerifiedAt: options.paymentVerifiedAt || null,
+    paymentLinks: options.paymentLinks || null,
+    paymentCheckAttempts: options.paymentCheckAttempts || 0,
+    paymentReminderCount: options.paymentReminderCount || 0,
+    paymentLastReminderAt: options.paymentLastReminderAt || null,
     
     // Actual weight and processing
     actualWeight: options.actualWeight || null,
@@ -201,10 +201,10 @@ async function setupV2PaymentScenario(options = {}) {
     actualWeight: 10,
     actualTotal: 12.50,
     bagsWeighed: 2,
-    v2PaymentStatus: 'awaiting',
-    v2PaymentAmount: 12.50,
-    v2PaymentRequestedAt: new Date(),
-    v2PaymentLinks: {
+    paymentStatus: 'awaiting',
+    paymentAmount: 12.50,
+    paymentRequestedAt: new Date(),
+    paymentLinks: {
       venmo: 'venmo://paycharge?txn=pay&recipients=wavemax&amount=12.50',
       paypal: 'https://paypal.me/wavemax/12.50',
       cashapp: 'https://cash.app/$wavemax/12.50'
@@ -226,10 +226,10 @@ async function setupOrderForPaymentVerification(options = {}) {
   const { affiliate, customer, order } = await setupV2PaymentScenario(options);
   
   // Update order to have payment verified
-  order.v2PaymentStatus = 'verified';
-  order.v2PaymentVerifiedAt = new Date();
-  order.v2PaymentTransactionId = options.transactionId || 'TEST-TXN-001';
-  order.v2PaymentMethod = options.paymentMethod || 'venmo';
+  order.paymentStatus = 'verified';
+  order.paymentVerifiedAt = new Date();
+  order.paymentTransactionId = options.transactionId || 'TEST-TXN-001';
+  order.paymentMethod = options.paymentMethod || 'venmo';
   await order.save({ validateBeforeSave: false });
   
   return { affiliate, customer, order };

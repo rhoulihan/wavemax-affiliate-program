@@ -193,8 +193,8 @@ describe('V2 Controller Logic', () => {
         estimatedWeight: 20,
         numberOfBags: 2,
         status: 'pending',
-        v2PaymentStatus: 'pending',
-        v2PaymentMethod: 'pending'
+        paymentStatus: 'pending',
+        paymentMethod: 'pending'
       });
     });
 
@@ -248,22 +248,22 @@ describe('V2 Controller Logic', () => {
       
       // Verify order was updated
       const updatedOrder = await Order.findById(testOrder._id);
-      expect(updatedOrder.v2PaymentStatus).toBe('awaiting');
-      expect(updatedOrder.v2PaymentLinks).toBeDefined();
-      expect(updatedOrder.v2PaymentLinks.venmo).toContain('venmo://');
-      expect(updatedOrder.v2PaymentQRCodes).toBeDefined();
-      // v2PaymentAmount is recalculated by Order model: actualWeight * baseRate = 22 * 1.25 = 27.5
-      expect(updatedOrder.v2PaymentAmount).toBe(27.5);
-      expect(updatedOrder.v2PaymentRequestedAt).toBeDefined();
+      expect(updatedOrder.paymentStatus).toBe('awaiting');
+      expect(updatedOrder.paymentLinks).toBeDefined();
+      expect(updatedOrder.paymentLinks.venmo).toContain('venmo://');
+      expect(updatedOrder.paymentQRCodes).toBeDefined();
+      // paymentAmount is recalculated by Order model: actualWeight * baseRate = 22 * 1.25 = 27.5
+      expect(updatedOrder.paymentAmount).toBe(27.5);
+      expect(updatedOrder.paymentRequestedAt).toBeDefined();
       
       // Note: Email service is not yet implemented, so we skip this check
       // expect(emailService.sendV2PaymentRequest).toHaveBeenCalled();
     });
 
     it('should handle payment confirmation from customer', async () => {
-      testOrder.v2PaymentStatus = 'awaiting';
-      testOrder.v2PaymentAmount = 45.00;
-      testOrder.v2PaymentRequestedAt = new Date();
+      testOrder.paymentStatus = 'awaiting';
+      testOrder.paymentAmount = 45.00;
+      testOrder.paymentRequestedAt = new Date();
       await testOrder.save();
       
       const req = {
@@ -285,10 +285,10 @@ describe('V2 Controller Logic', () => {
       
       // Verify order was updated
       const updatedOrder = await Order.findById(testOrder._id);
-      expect(updatedOrder.v2PaymentStatus).toBe('confirming');
-      expect(updatedOrder.v2PaymentConfirmedAt).toBeDefined();
-      expect(updatedOrder.v2PaymentMethod).toBe('venmo');
-      expect(updatedOrder.v2PaymentNotes).toContain('Customer confirmed payment');
+      expect(updatedOrder.paymentStatus).toBe('confirming');
+      expect(updatedOrder.paymentConfirmedAt).toBeDefined();
+      expect(updatedOrder.paymentMethod).toBe('venmo');
+      expect(updatedOrder.paymentNotes).toContain('Customer confirmed payment');
       
       expect(res.json).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -300,8 +300,8 @@ describe('V2 Controller Logic', () => {
     });
 
     it('should allow admin to manually verify payment', async () => {
-      testOrder.v2PaymentStatus = 'awaiting';
-      testOrder.v2PaymentAmount = 55.00;
+      testOrder.paymentStatus = 'awaiting';
+      testOrder.paymentAmount = 55.00;
       await testOrder.save();
       
       const req = {
@@ -328,17 +328,17 @@ describe('V2 Controller Logic', () => {
       
       // Verify payment was marked as verified
       const updatedOrder = await Order.findById(testOrder._id);
-      expect(updatedOrder.v2PaymentStatus).toBe('verified');
-      expect(updatedOrder.v2PaymentVerifiedAt).toBeDefined();
-      expect(updatedOrder.v2PaymentTransactionId).toBe('MANUAL123');
-      expect(updatedOrder.v2PaymentNotes).toContain('Manually verified by admin');
-      expect(updatedOrder.v2PaymentNotes).toContain('Verified via phone call');
+      expect(updatedOrder.paymentStatus).toBe('verified');
+      expect(updatedOrder.paymentVerifiedAt).toBeDefined();
+      expect(updatedOrder.paymentTransactionId).toBe('MANUAL123');
+      expect(updatedOrder.paymentNotes).toContain('Manually verified by admin');
+      expect(updatedOrder.paymentNotes).toContain('Verified via phone call');
       
       expect(res.json).toHaveBeenCalledWith(
         expect.objectContaining({
           success: true,
           order: expect.objectContaining({
-            v2PaymentStatus: 'verified'
+            paymentStatus: 'verified'
           })
         })
       );
@@ -348,8 +348,8 @@ describe('V2 Controller Logic', () => {
       testOrder.status = 'processing';
       testOrder.actualWeight = 25;
       testOrder.actualTotal = 60.00;
-      testOrder.v2PaymentStatus = 'awaiting';
-      testOrder.v2PaymentAmount = 60.00;
+      testOrder.paymentStatus = 'awaiting';
+      testOrder.paymentAmount = 60.00;
       await testOrder.save();
       
       emailService.sendPickupReadyNotification = jest.fn();
@@ -379,7 +379,7 @@ describe('V2 Controller Logic', () => {
       expect(emailService.sendPickupReadyNotification).not.toHaveBeenCalled();
       
       // Now verify payment
-      testOrder.v2PaymentStatus = 'verified';
+      testOrder.paymentStatus = 'verified';
       await testOrder.save();
       
       // Update status again
@@ -453,15 +453,15 @@ describe('V2 Controller Logic', () => {
       
       // Verify V2 order fields
       const order = await Order.findOne({ customerId: testCustomer.customerId });
-      expect(order.v2PaymentStatus).toBe('pending');
-      expect(order.v2PaymentMethod).toBe('pending');
+      expect(order.paymentStatus).toBe('pending');
+      expect(order.paymentMethod).toBe('pending');
       expect(order.numberOfBags).toBe(3);
       expect(order.addOns.premiumDetergent).toBe(true);
       expect(order.addOns.stainRemover).toBe(true);
       
       // Should not have payment links yet (not weighed)
-      expect(order.v2PaymentLinks).toEqual({});
-      expect(order.v2PaymentAmount).toBe(0);
+      expect(order.paymentLinks).toEqual({});
+      expect(order.paymentAmount).toBe(0);
     });
 
     it('should prevent V2 customer from creating order if previous payment pending', async () => {
@@ -474,8 +474,8 @@ describe('V2 Controller Logic', () => {
         estimatedWeight: 20,
         numberOfBags: 2,
         status: 'processed',
-        v2PaymentStatus: 'awaiting',
-        v2PaymentAmount: 45.00
+        paymentStatus: 'awaiting',
+        paymentAmount: 45.00
       });
       
       const req = {
@@ -540,7 +540,7 @@ describe('V2 Controller Logic', () => {
         estimatedWeight: 15,
         numberOfBags: 1,
         status: 'pending',
-        v2PaymentStatus: 'pending'
+        paymentStatus: 'pending'
       });
       
       // Mock payment link service to fail
@@ -584,7 +584,7 @@ describe('V2 Controller Logic', () => {
       const updatedOrder = await Order.findById(testOrder._id);
       expect(updatedOrder.status).toBe('pending');
       expect(updatedOrder.actualWeight).toBeUndefined(); // Not updated due to error
-      expect(updatedOrder.v2PaymentStatus).toBe('pending'); // Not 'awaiting' due to error
+      expect(updatedOrder.paymentStatus).toBe('pending'); // Not 'awaiting' due to error
     });
   });
 });

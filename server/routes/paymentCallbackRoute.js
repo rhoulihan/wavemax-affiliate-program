@@ -67,8 +67,8 @@ router.get('/payment_callback', async (req, res) => {
       ]);
 
       // Update order payment status
-      order.paymentStatus = 'paid';
-      order.paidAt = new Date();
+      order.paymentStatus = 'verified';
+      order.paymentVerifiedAt = new Date();
       await order.save();
 
       // Get customer for email

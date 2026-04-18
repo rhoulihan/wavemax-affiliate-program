@@ -68,9 +68,9 @@ describe('PaymentEmailScanner', () => {
       actualWeight: 22,
       numberOfBags: 2,
       status: 'processed',
-      v2PaymentStatus: 'awaiting',
-      v2PaymentAmount: 55.50,
-      v2PaymentRequestedAt: new Date()
+      paymentStatus: 'awaiting',
+      paymentAmount: 55.50,
+      paymentRequestedAt: new Date()
     });
   });
 
@@ -212,10 +212,10 @@ describe('PaymentEmailScanner', () => {
       expect(result).toBe(true);
 
       const updatedOrder = await Order.findById(testOrder._id);
-      expect(updatedOrder.v2PaymentStatus).toBe('verified');
-      expect(updatedOrder.v2PaymentVerifiedAt).toBeDefined();
-      expect(updatedOrder.v2PaymentTransactionId).toBe('VENMO123');
-      expect(updatedOrder.v2PaymentMethod).toBe('venmo');
+      expect(updatedOrder.paymentStatus).toBe('verified');
+      expect(updatedOrder.paymentVerifiedAt).toBeDefined();
+      expect(updatedOrder.paymentTransactionId).toBe('VENMO123');
+      expect(updatedOrder.paymentMethod).toBe('venmo');
     });
 
     it('should allow small amount variance', async () => {
@@ -233,8 +233,8 @@ describe('PaymentEmailScanner', () => {
       expect(result).toBe(true);
       
       const updatedOrder = await Order.findById(testOrder._id);
-      expect(updatedOrder.v2PaymentStatus).toBe('verified');
-      expect(updatedOrder.v2PaymentNotes).toContain('Amount variance');
+      expect(updatedOrder.paymentStatus).toBe('verified');
+      expect(updatedOrder.paymentNotes).toContain('Amount variance');
     });
 
     it('should reject large amount variance', async () => {
@@ -248,11 +248,11 @@ describe('PaymentEmailScanner', () => {
         actualWeight: 44,  // Set weight to match expected payment (44 * 1.25 = 55)
         numberOfBags: 2,
         status: 'processed',
-        v2PaymentStatus: 'awaiting',
-        v2PaymentRequestedAt: new Date()
+        paymentStatus: 'awaiting',
+        paymentRequestedAt: new Date()
       });
       
-      // The model will calculate v2PaymentAmount as 44 * 1.25 = 55.00
+      // The model will calculate paymentAmount as 44 * 1.25 = 55.00
       
       const payment = {
         orderId: freshOrder.orderId,
@@ -268,11 +268,11 @@ describe('PaymentEmailScanner', () => {
       expect(result).toBe(false); // Rejects insufficient payment
       
       const updatedOrder = await Order.findById(freshOrder._id);
-      expect(updatedOrder.v2PaymentStatus).toBe('awaiting'); // Status unchanged
+      expect(updatedOrder.paymentStatus).toBe('awaiting'); // Status unchanged
     });
 
     it('should skip already verified orders', async () => {
-      testOrder.v2PaymentStatus = 'verified';
+      testOrder.paymentStatus = 'verified';
       await testOrder.save();
 
       const payment = {
@@ -288,7 +288,7 @@ describe('PaymentEmailScanner', () => {
       
       // Should not change transaction ID
       const unchangedOrder = await Order.findById(testOrder._id);
-      expect(unchangedOrder.v2PaymentTransactionId).not.toBe('VENMO456');
+      expect(unchangedOrder.paymentTransactionId).not.toBe('VENMO456');
     });
   });
 
@@ -382,7 +382,7 @@ describe('PaymentEmailScanner', () => {
       expect(mailcowService.searchEmails).toHaveBeenCalledWith(testOrder.orderId);
       
       const verifiedOrder = await Order.findById(testOrder._id);
-      expect(verifiedOrder.v2PaymentStatus).toBe('verified');
+      expect(verifiedOrder.paymentStatus).toBe('verified');
     });
 
     it('should return false if no payment found', async () => {
@@ -393,7 +393,7 @@ describe('PaymentEmailScanner', () => {
       expect(result).toBe(false);
       
       const unchangedOrder = await Order.findById(testOrder._id);
-      expect(unchangedOrder.v2PaymentStatus).toBe('awaiting');
+      expect(unchangedOrder.paymentStatus).toBe('awaiting');
     });
   });
 
@@ -408,9 +408,9 @@ describe('PaymentEmailScanner', () => {
         estimatedWeight: 15,
         numberOfBags: 1,
         status: 'processed',
-        v2PaymentStatus: 'awaiting',
-        v2PaymentAmount: 35.00,
-        v2PaymentRequestedAt: new Date()
+        paymentStatus: 'awaiting',
+        paymentAmount: 35.00,
+        paymentRequestedAt: new Date()
       });
 
       mailcowService.searchEmails.mockResolvedValue([]);

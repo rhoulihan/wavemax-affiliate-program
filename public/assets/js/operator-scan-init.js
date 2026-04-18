@@ -1585,10 +1585,10 @@
         console.log('=== HANDLE PICKUP SCAN ===');
         console.log('Scanned bag ID:', scannedBagId);
         console.log('Order type:', order.orderType);
-        console.log('V2 Payment Status:', order.v2PaymentStatus);
+        console.log('V2 Payment Status:', order.paymentStatus);
         
         // Check if this is a V2 order that hasn't been paid
-        if (order.isV2Order && order.v2PaymentStatus !== 'verified' && order.v2PaymentStatus !== 'paid') {
+        if (order.isV2Order && order.paymentStatus !== 'verified' && order.paymentStatus !== 'paid') {
             console.log('V2 order not paid - showing payment required modal');
             showPaymentRequiredModal(order);
             return;
@@ -1628,7 +1628,7 @@
         console.log('=== SHOW PAYMENT REQUIRED MODAL ===');
         modalTitle.textContent = 'Payment Required';
         
-        const amountDue = order.v2PaymentAmount || order.actualTotal || 0;
+        const amountDue = order.paymentAmount || order.actualTotal || 0;
         
         modalBody.innerHTML = `
             <div class="payment-required-container">
